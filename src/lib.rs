@@ -3,6 +3,7 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod paths;
 mod progression;
 use progression::Progress;
 
@@ -73,6 +74,8 @@ pub struct Village {
     pub mornings: u32,
     #[serde(default)]
     pub progress: Progress,
+    #[serde(default)]
+    pub paths: paths::Paths,
 }
 #[derive(Resource, Default)]
 struct Step(f32);
@@ -352,8 +355,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         let d = dx.hypot(dy);
         if d > 0.08 {
             let movement = (dt * 0.7).min(d);
+            let from = (r.x, r.y);
             r.x += dx / d * movement;
             r.y += dy / d * movement;
+            v.paths.walk(from, (r.x, r.y));
             r.energy = (r.energy - dt * 0.035).max(0.);
             continue;
         }
@@ -521,6 +526,7 @@ impl Game {
                 arrived: false,
                 mornings: 0,
                 progress: Progress::default(),
+                paths: paths::Paths::default(),
             })
             .add_systems(Update, simulate);
         for (id, (name, traits, favorite)) in [
@@ -775,7 +781,8 @@ impl Game {
         };
         let v = &save.village;
         let p = &v.progress;
-        if p.tracked >= 4
+        if !v.paths.valid()
+            || p.tracked >= 4
             || p.social_mask > 31
             || p.invited > 31
             || p.attended > 31
