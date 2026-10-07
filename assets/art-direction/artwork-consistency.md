@@ -10,7 +10,7 @@ Small utility structures need to read at a plausible size beside homes and resid
 
 ## Canonical assets
 
-The library contains 28 entries backed by 15 source images. Obsolete village and mango variants are removed; Git retains their history. Unused garden and cistern cells remain embedded in atlases needed by active assets, but have no library entry. Portraits and animated residents have different active uses.
+The library contains 28 entries backed by 16 source images. Obsolete village and mango variants are removed; Git retains their history. Unused garden and cistern cells remain embedded in atlases needed by active assets, but have no library entry. Portraits and animated residents have different active uses.
 
 | Structure | Source-cell width at zoom 1 |
 | --- | ---: |

@@ -1,5 +1,5 @@
 import { buildingArt, drawBuildingArt } from './building-art.js';
-import { flock, drawChicken, loadChickenArt } from "./chickens.js";
+import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
 import {

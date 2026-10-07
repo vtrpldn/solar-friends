@@ -1,10 +1,11 @@
 import { drawBuildingArt } from '../building-art.js';
-import { catalog } from './catalog.js';
-import { drawChicken } from '../chickens.js';
+import { catalog } from './catalog.js?v=painted-hens-1';
+import { drawChicken, loadChickenArt } from '../chickens.js?v=painted-hens-1';
 const $ = id => document.getElementById(id);
 const key = 'solar-friends-artwork-review-v1';
 let reviews = {}, selected = catalog[0], pins = [], playing = false, frame = 0;
 try { const data = JSON.parse(localStorage.getItem(key) || '{}'); if (data && typeof data === 'object' && !Array.isArray(data)) reviews = data; } catch { $('save-state').textContent = 'Saved review could not be read. Export new notes before leaving.'; }
+loadChickenArt().then(redraw).catch(() => { $('save-state').textContent = 'Chicken artwork could not load. Reload to retry.'; });
 const images = new Map();
 for (const sprite of catalog) if (sprite.file && !images.has(sprite.file)) {
   const img = new Image(); images.set(sprite.file, img); img.src = sprite.file;
@@ -28,7 +29,7 @@ function draw(canvas, sprite, bench = false) {
     ctx.moveTo(width/2-65,y);ctx.lineTo(width/2,y-32.5);ctx.lineTo(width/2+65,y);ctx.lineTo(width/2,y+32.5);ctx.closePath();ctx.stroke();
   }
   ctx.save();ctx.translate(width/2,y);if (bench && $('mirror').checked) ctx.scale(-1,1);
-  if (sprite.procedural) drawChicken(ctx,{x:0,y:0},w/26,{color:sprite.color,facing:1,peck:playing ? frame : 0});
+  if (sprite.chicken) drawChicken(ctx,{x:0,y:0},w/26,{variant:sprite.variant,facing:1,peck:bench ? frame : 0});
   else if (sprite.building) {
     drawBuildingArt(ctx, images.get(sprite.file), sprite, 0, 0, w / sprite.width);
   } else {
@@ -69,9 +70,9 @@ function renderBench() {
 }
 function loadReview() {
   $('selected-name').textContent=selected.name;$('status').value=review(selected).status;$('notes').value=review(selected).notes || '';
-  $('source').href=selected.file || '../chickens.js';
+  $('source').href=selected.file || '../chickens.js?v=painted-hens-1';
   $('source').textContent=selected.procedural?'Open canvas drawing source ↗':'Open source artwork ↗';
-  $('metadata').textContent=selected.procedural?'Procedural canvas sprite · shared with the game renderer':`${selected.file.replace('../','')} · ${selected.animation?'4 × 4 animation sheet':`cell ${selected.cell.join(', ')}`} · base width ${Math.round(selected.width)} px`;
+  $('metadata').textContent=selected.procedural?'Procedural canvas sprite · shared with the game renderer':`${selected.file.replace('../','')} · ${selected.chicken?'3 hens × 2 poses':selected.animation?'4 × 4 animation sheet':`cell ${selected.cell.join(', ')}`} · base width ${Math.round(selected.width)} px`;
 }
 function save() {
   reviews[selected.id]={status:$('status').value,notes:$('notes').value};
@@ -85,6 +86,6 @@ $('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause ani
 setInterval(()=>{if(playing&&!document.hidden){frame=(frame+1)%4;$('frame').value=frame;redraw();}},200);
 $('clear').onclick=()=>{pins=[];renderLibrary();renderBench();};
 $('status').onchange=save;$('notes').oninput=save;
-$('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),sprites:catalog.map(s=>({id:s.id,name:s.name,source:s.file || '../chickens.js',...review(s)}))},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='solar-friends-artwork-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),sprites:catalog.map(s=>({id:s.id,name:s.name,source:s.file || '../chickens.js?v=painted-hens-1',...review(s)}))},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='solar-friends-artwork-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(redraw).observe($('bench'));
 renderLibrary();renderBench();loadReview();
