@@ -362,22 +362,6 @@ function drawGrowingBed(b) {
   }
   ctx.restore();
 }
-function drawResourceLabel(p, label, fraction, color) {
-  const w = 104 * scale,
-    y = p.y + 19 * scale;
-  ctx.save();
-  ctx.fillStyle = "#fffbee";
-  ctx.fillRect(p.x - w / 2, y, w, 23 * scale);
-  ctx.font = `${10 * scale}px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#40503c";
-  ctx.fillText(label, p.x, y + 12 * scale);
-  ctx.fillStyle = "#dfdfcc";
-  ctx.fillRect(p.x - w / 2, y + 20 * scale, w, 3 * scale);
-  ctx.fillStyle = color;
-  ctx.fillRect(p.x - w / 2, y + 20 * scale, w * fraction, 3 * scale);
-  ctx.restore();
-}
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
@@ -393,30 +377,6 @@ function building(b) {
       b.kind === "garden" ? 119 : b.kind === "grove" ? 105 : 152,
       complete ? 1 : 0.4,
     );
-  if (complete && b.kind === "garden") {
-    const crop = b.crop;
-    const label = !crop.planted
-      ? "Ready to plant"
-      : crop.growth >= 180
-        ? "Ready to harvest"
-        : crop.moisture <= 0
-          ? "Needs water"
-          : `Growing ${Math.floor((crop.growth / 180) * 100)}%`;
-    drawResourceLabel(
-      p,
-      label,
-      crop.growth / 180,
-      crop.moisture <= 0 ? "#b87943" : "#72915a",
-    );
-  }
-  if (complete && b.kind === "well") {
-    drawResourceLabel(
-      p,
-      "Water storage",
-      Math.min(1, state.village.water / state.environment.water_capacity),
-      "#568d9e",
-    );
-  }
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
