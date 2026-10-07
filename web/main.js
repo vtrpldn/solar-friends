@@ -7,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=pantry-1";
+import init, { Game } from "./pkg/solar_friends.js?v=visits-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -33,6 +33,7 @@ const kinds = {
   workshop: ["Workshop", 48, "Craft tools for building and harvests"],
 };
 const tasks = {
+  visit: "Visiting a village building",
   arrive: "Arriving at our new home",
   idle: "Enjoying a quiet moment",
   sleep: "Sleeping until morning",
@@ -366,7 +367,7 @@ function drawGrowingBed(b) {
 }
 function buildingSprite(kind, x, y, alpha = 1) {
   if (kind === "well") cistern(x, y, alpha);
-  else sprite(kind, x, y, kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
+  else sprite(kind, x, y, kind === "square" ? 456 : kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
 }
 function placementValid(kind, x, y) {
   if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
@@ -374,8 +375,10 @@ function placementValid(kind, x, y) {
     return state.village.roads.some(([rx, ry]) => rx === x && ry === y) ||
       !state.village.buildings.some(b => b.x === x && b.y === y);
   }
-  return !(Math.abs(x - 10) < 1.5 && Math.abs(y - 13) < 1.5) &&
-    !state.village.buildings.some(b => Math.abs(b.x - x) < 2 && Math.abs(b.y - y) < 2) &&
+  const radius = kind === "square" ? 3 : 1;
+  return x - radius >= 0 && y - radius >= 0 && x + radius < MAP_SIZE && y + radius < MAP_SIZE && !riverBank(x + radius - 1, y) &&
+    !(Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) &&
+    !state.village.buildings.some(b => Math.abs(b.x - x) < radius + (b.kind === "square" ? 3 : 1) && Math.abs(b.y - y) < radius + (b.kind === "square" ? 3 : 1)) &&
     state.village.wood >= kinds[kind][1];
 }
 function building(b) {
@@ -393,7 +396,7 @@ function building(b) {
       [0.9, -0.9],
       [0.9, 0.9],
       [-0.9, 0.9],
-    ].map(([x, y]) => iso(b.x + x, b.y + y));
+    ].map(([x, y]) => iso(b.x + x * (b.kind === "square" ? 3 : 1), b.y + y * (b.kind === "square" ? 3 : 1)));
     const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
@@ -437,11 +440,12 @@ function resident(r) {
   }
   const py = p.y + bob;
   const sheet = animations[r.id];
+  const visitingKind = r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null;
   const row = moving
     ? 0
-    : ["build", "craft", "compost"].includes(r.task)
+    : ["build", "craft", "compost"].includes(r.task) || ["workshop", "compost", "kitchen", "garden", "coop"].includes(visitingKind)
       ? 1
-      : ["rest", "socialize", "eat", "sleep", "gathering"].includes(r.task)
+      : ["rest", "socialize", "eat", "sleep", "gathering"].includes(r.task) || ["home", "square"].includes(visitingKind)
         ? 3
         : 2;
   const fps = [8, 5, 1.5, 1][row];
@@ -567,6 +571,9 @@ function render() {
       valid ? "#f5f1b299" : "#cd745a88",
       valid ? "#fff8cf" : "#b75943",
     );
+    if (tool === "square") {
+      polygon([[-3,-3],[3,-3],[3,3],[-3,3]].map(([x,y]) => { const p = iso(t.x+x,t.y+y); return [p.x,p.y]; }), valid ? "#f5f1b244" : "#cd745a44", valid ? "#fff8cf" : "#b75943");
+    }
     if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
   }
   // Tiny birds drifting past the clearing.
@@ -823,6 +830,40 @@ function updateQuests() {
         ? "Next gathering tomorrow"
         : "Host a gathering";
 }
+const buildingPurposes = {
+  home: "Rest on the porch to recover energy.",
+  garden: "Plant, water, or harvest this bed when it is ready.",
+  kitchen: "Cook a pot with available ingredients and water.",
+  well: "Drink one water to recover energy and ease hunger.",
+  grove: "Gather two fruit for the pantry.",
+  coop: "Care for hens: improve connection and advance a fed batch by 30 daylight minutes.",
+  compost: "Turn two scraps into one compost.",
+  workshop: "Use eight timber to make twelve tool uses.",
+  square: "Meet neighbours: recover connection and energy. The square also hosts community gatherings.",
+};
+function updateBuildingPanel() {
+  const chooser = $("#building-choice");
+  const previous = chooser.value;
+  const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${b.progress < 100 ? " · building" : ""}</option>`).join("");
+  if (chooser.innerHTML !== markup) {
+    chooser.innerHTML = markup;
+    if ([...chooser.options].some(o => o.value === previous)) chooser.value = previous;
+  }
+  const b = state.village.buildings.find(b => b.id === Number(chooser.value));
+  $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
+  const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
+  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Construction must finish before visits." : visitors.length
+    ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
+    : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
+  for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100;
+}
+function inspectBuilding(id) {
+  showPanel("building-panel");
+  updateBuildingPanel();
+  $("#building-choice").value = String(id);
+  $("#building-response").textContent = "";
+  updateBuildingPanel();
+}
 function updateSupplies(v) {
   const s = v.supplies;
   const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
@@ -845,6 +886,7 @@ function updateSupplies(v) {
 function updateUI() {
   const v = state.village;
   updateSupplies(v);
+  updateBuildingPanel();
   for (const k of ["wood", "food", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
   $("#happiness").textContent =
@@ -1028,6 +1070,17 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  $("#building-neighbours").innerHTML = state.residents.map(r => `<button data-visitor="${r.id}">${escapeHtml(r.name)}</button>`).join("");
+  $("#building-choice").onchange = () => { $("#building-response").textContent = ""; updateBuildingPanel(); };
+  $("#building-neighbours").onclick = event => {
+    const button = event.target.closest("[data-visitor]");
+    if (!button) return;
+    $("#building-response").textContent = game.visit_building(Number(button.dataset.visitor), Number($("#building-choice").value));
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
+  };
+
   for (const id of ["feed-hens", "use-eggs"]) {
     $("#" + id).onchange = () => {
       game.set_food_preferences($("#feed-hens").checked, $("#use-eggs").checked);
@@ -1191,6 +1244,14 @@ function setup() {
         return Math.hypot(p.x - x, p.y - 14 * scale - y) < 22 * scale;
       });
       if (r) selectPerson(r.id);
+      else {
+        const cell = uniso(x, y);
+        const b = [...state.village.buildings].reverse().find(b => {
+          const radius = b.kind === "square" ? 3 : 1;
+          return Math.abs(b.x-cell.x) <= radius && Math.abs(b.y-cell.y) <= radius;
+        });
+        if (b) inspectBuilding(b.id);
+      }
     }
   });
   canvas.addEventListener("pointercancel", () => (drag = null));
@@ -1238,7 +1299,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=pantry-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=visits-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),

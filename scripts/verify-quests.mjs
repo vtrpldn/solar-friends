@@ -78,7 +78,7 @@ until(() => g.contribute_workshop_timber() === "ok", "contribute timber");
 until((s) => s.village.progress.completed[3], "hands");
 for (const [k, x, y] of [
   ["compost", 6, 16],
-  ["square", 8, 16],
+  ["square", 6, 21],
   ["workshop", 12, 16],
 ])
   build(k, x, y);
