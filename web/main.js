@@ -1,4 +1,9 @@
-import { project, unproject, TILE_HALF_WIDTH, TILE_HALF_HEIGHT } from "./projection.js";
+import {
+  project,
+  unproject,
+  TILE_HALF_WIDTH,
+  TILE_HALF_HEIGHT,
+} from "./projection.js";
 import init, { Game } from "./pkg/solar_friends.js";
 import { paintTerrain, GROUND_START, GROUND_SIZE } from "./terrain.js";
 const $ = (s) => document.querySelector(s);
@@ -26,7 +31,7 @@ const tasks = {
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const atlas = new Image();
-atlas.src = "art/village-atlas.png";
+atlas.src = "art/village-atlas-isometric.png";
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
@@ -39,7 +44,9 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
 let groundLayer,
   groundKey = null;
 const mango = new Image();
-mango.src = "art/mango-tree.png";
+mango.src = "art/mango-tree-isometric.png";
+const cisternArt = new Image();
+cisternArt.src = "art/cistern-isometric.png";
 let game,
   state,
   selected = null,
@@ -136,8 +143,12 @@ function resize() {
   canvas.height = height * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function iso(x, y) { return project(x, y, origin, scale); }
-function uniso(x, y) { return unproject(x, y, origin, scale); }
+function iso(x, y) {
+  return project(x, y, origin, scale);
+}
+function uniso(x, y) {
+  return unproject(x, y, origin, scale);
+}
 function polygon(points, fill, stroke) {
   ctx.beginPath();
   points.forEach((p, i) =>
@@ -190,7 +201,7 @@ function tree(x, y, s = 1) {
     24 * s * scale,
     9 * s * scale,
   );
-  ctx.drawImage(mango, p.x - w / 2, p.y - w * 0.89, w, w);
+  ctx.drawImage(mango, p.x - w / 2, p.y - w * 0.82, w, w);
 }
 function sprite(kind, x, y, size, alpha = 1) {
   const p = iso(x, y),
@@ -199,7 +210,10 @@ function sprite(kind, x, y, size, alpha = 1) {
   if (index === undefined || !atlas.complete || !atlas.naturalWidth) return;
   ctx.save();
   ctx.globalAlpha = alpha;
-  const w = size * scale;
+  const w = size * scale * 1.18;
+  const groundAnchor = { home: 0.7, kitchen: 0.7, garden: 0.59, grove: 0.74 }[
+    kind
+  ];
   ctx.drawImage(
     atlas,
     (index % 2) * cell,
@@ -207,7 +221,7 @@ function sprite(kind, x, y, size, alpha = 1) {
     cell,
     cell,
     p.x - w / 2,
-    p.y - w * 0.84,
+    p.y - w * groundAnchor,
     w,
     w,
   );
@@ -215,22 +229,11 @@ function sprite(kind, x, y, size, alpha = 1) {
 }
 function cistern(x, y, alpha = 1) {
   const p = iso(x, y),
-    cell = peopleArt.width / 3,
     w = 77 * scale;
-  contactShadow(p.x + 3 * scale, p.y + 2 * scale, 28 * scale, 12 * scale);
+  contactShadow(p.x, p.y + 2 * scale, 25 * scale, 12.5 * scale);
   ctx.save();
   ctx.globalAlpha = alpha;
-  ctx.drawImage(
-    peopleArt,
-    cell * 2,
-    cell,
-    cell,
-    cell,
-    p.x - w / 2,
-    p.y - w * 0.9,
-    w,
-    w,
-  );
+  ctx.drawImage(cisternArt, p.x - w / 2, p.y - w * 0.82, w, w);
   ctx.restore();
 }
 function building(b) {
@@ -249,13 +252,25 @@ function building(b) {
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
-    const corners = [[-0.9,-0.9], [0.9,-0.9], [0.9,0.9], [-0.9,0.9]]
-      .map(([x,y]) => iso(b.x + x, b.y + y));
+    const corners = [
+      [-0.9, -0.9],
+      [0.9, -0.9],
+      [0.9, 0.9],
+      [-0.9, 0.9],
+    ].map(([x, y]) => iso(b.x + x, b.y + y));
     const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
     for (let i = 0; i < corners.length; i++) {
-      const a = corners[i], next = corners[(i + 1) % corners.length];
+      const a = corners[i],
+        next = corners[(i + 1) % corners.length];
       line(a.x, a.y, a.x, a.y - scaffoldHeight, "#ae8757", 2.5 * s);
-      line(a.x, a.y - scaffoldHeight, next.x, next.y - scaffoldHeight, "#bd965f", 2.5 * s);
+      line(
+        a.x,
+        a.y - scaffoldHeight,
+        next.x,
+        next.y - scaffoldHeight,
+        "#bd965f",
+        2.5 * s,
+      );
     }
     ctx.fillStyle = "#fffcf0";
     ctx.fillRect(p.x - 27 * s, p.y + 9 * s, 54 * s, 5 * s);
@@ -838,6 +853,7 @@ try {
   await Promise.all([
     atlas.decode(),
     mango.decode(),
+    cisternArt.decode(),
     terrain.decode(),
     peopleArt.decode(),
     ...animations.map((image) => image.decode()),

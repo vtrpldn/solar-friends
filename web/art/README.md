@@ -29,3 +29,13 @@ Resident generation prompt: Transparent three-column, two-row atlas matching the
 `animations/{iara,bento,luz,caua,nina}.png` were generated with the built-in image tool using `residents-cistern.png` as the character reference. Each transparent 4×4 sheet contains four frames per row: walking, building with a wooden mallet, quiet idle poses, and sitting on a wooden stool. The fourth seated pose closes the eyes for outdoor sleep.
 
 Generation prompt: match the corresponding resident's face, clothing, palette, and painted Brazilian ecovila style. Use a uniform four-column, four-row grid, consistent foot baselines, transparent background, no labels, scenery, or glow. Walking alternates strides; building raises and swings a mallet; idle uses subtle breathing and head turns; sitting shifts between relaxed poses. Runtime selects rows by task and mirrors the sheet for travel direction.
+
+## Isometric alignment pass
+
+The active scenery files are `village-atlas-isometric.png`, `mango-tree-isometric.png`, and `cistern-isometric.png`. They were edited with the built-in image generation tool from the original sprites. Original files remain available as references. `web/projection.js` defines the scene's 2:1 orthographic ground axes, also used by placement and construction scaffolding. The renderer preserves square sprite proportions and anchors each object at its ground footprint rather than its lowest painted pixel.
+
+Atlas edit prompt: Preserve the four Brazilian painted subjects in the same 2×2 layout. Correct ground edges to parallel vectors (2,1) and (-2,1), upright verticals, no vanishing points, one shared elevated orthographic camera. Align foundations, eaves, roof ridges, furniture, and garden rows. Keep solar panels coplanar with roofs. Show upper banana leaf surfaces. Preserve warm upper-left lighting, transparent background, and no external shadows. A second layout-only pass reduced each object uniformly to provide transparent gutters inside every quadrant.
+
+Tree edit prompt: Change the front-facing mango illustration to an elevated orthographic view, looking down onto a rounded crown with rear branches occluded. Keep trunk upright, visible upper leaf surfaces, brown branching wood and golden fruit. A circular root patch projects to a 2:1 ellipse. Preserve the painted style and transparent background, with no scenery or glow.
+
+Cistern edit prompt: Isolate the original teal rainwater tank. Correct its top and bands to concentric 2:1 ellipses with vertical cylinder sides, and align the stone foundation with the ground axes. Preserve the brass tap, plants, warm painted materials, upper-left light, and true transparency.

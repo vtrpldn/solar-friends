@@ -471,7 +471,7 @@ canvas:active {
   height: 39px;
   width: 51px;
   margin: 0 auto 4px;
-  background-image: url("art/village-atlas.png");
+  background-image: url("art/village-atlas-isometric.png");
   background-size: 102px 102px;
   background-repeat: no-repeat;
   background-position: 0 0;
@@ -867,9 +867,9 @@ dialog .hint {
   cursor: inherit;
 }
 .build-tool[data-kind="well"] .tool-art {
-  background-image: url("art/residents-cistern.png");
-  background-size: 153px 102px;
-  background-position: -102px -55px;
+  background-image: url("art/cistern-isometric.png");
+  background-size: contain;
+  background-position: center;
 }
 .panel {
   background-color: #fff9eaf5;
