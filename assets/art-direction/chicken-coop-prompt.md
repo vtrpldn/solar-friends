@@ -1,0 +1,7 @@
+# Chicken coop artwork
+
+Generated with the built-in image generation tool using `web/art/workshop-isometric.png` and `web/art/village-atlas-isometric.png` as references. Saved as `web/art/coop-isometric.png` and reused for the map, construction preview, and toolbar.
+
+## Prompt
+
+Transform the workshop in reference 1 into a small chicken coop production sprite for the SAME Solar Friends game. Reference 2 is the existing village sprite atlas: match its warm painted materials, terracotta tile roof, cream plaster, turquoise accents, soft modeled shading, organic texture and elevated orthographic camera exactly. Output ONE isolated compact chicken coop on a square genuinely transparent canvas, NOT an atlas. Small raised wooden henhouse with cream limewashed panels, warm timber framing, orange curved terracotta roof tiles, a small turquoise shutter, dark hen doorway and short timber ramp pointing toward lower right; a modest side nesting box with a little straw, sparse tropical plants at base. Whole silhouette visible with generous transparent margins. Ground axes 2:1, vertical uprights, no perspective convergence. Footprint center horizontally at 76 percent canvas height, structure occupying roughly 80 percent canvas width. Upper-left warm light. Match reference detail density and hand-painted game sprite appearance, NOT flat vector, NOT line art, NOT low-poly. No chickens baked into sprite (animated separately), no people, no labels or text, no large ground tile, no background scenery, no external cast shadow. Preserve true transparency.

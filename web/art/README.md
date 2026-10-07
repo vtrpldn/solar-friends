@@ -59,4 +59,4 @@ Prompt: create only a simple square vegetable bed on transparency, warm painted 
 
 `compost-isometric.png`, `square-isometric.png`, and `workshop-isometric.png` are transparent sprites generated with the built-in image tool. The map, placement previews, toolbar, and journal reuse the same files. They follow the approved Brazilian palette and elevated orthographic camera. The [complete prompt set](../../assets/art-direction/quest-building-prompts.md) records each asset's subject and constraints. Starter buildings and the food forest reuse the existing artwork.
 
-The chicken coop (`coop-isometric.svg`) is a hand-authored vector illustration. Its three hens are drawn with Canvas 2D in `web/chickens.js`.
+The chicken coop (`coop-isometric.png`) is generated with the built-in image tool, using the workshop and village atlas as direct style references for painted materials, terracotta tiles, warm lighting, and isometric perspective. The generation prompt is recorded in `assets/art-direction/chicken-coop-prompt.md`. Its three hens are drawn with Canvas 2D in `web/chickens.js`.
