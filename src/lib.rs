@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 mod ecology;
 mod interactions;
 mod progression;
+mod situations;
 mod supplies;
 use progression::Progress;
 
@@ -93,6 +94,8 @@ pub struct Village {
     pub mornings: u32,
     #[serde(default)]
     pub progress: Progress,
+    #[serde(default)]
+    pub situations: situations::Situations,
 }
 #[derive(Resource, Default)]
 struct Step(f32);
@@ -306,6 +309,8 @@ fn choose(r: &mut Resident, v: &Village) {
             "gathering",
             "Sharing food and stories in our community square.",
         )
+    } else if situations::apply_agreement(r, v) {
+        return;
     } else if !work_time(v.minutes) {
         if r.social < 75. {
             (
@@ -322,8 +327,19 @@ fn choose(r: &mut Resident, v: &Village) {
         ("gather", "Foraging wild food to keep everyone fed.")
     } else if v.water < 24. && available(v, "water") {
         ("water", "Carrying river water back to our storage.")
-    } else if v.meals < 5 && available(v, "cook") && (r.favorite == "cook" || r.hunger > 55.) {
-        ("cook", "Preparing a pot of food for everyone.")
+    } else if v.meals < 5
+        && available(v, "cook")
+        && !situations::protected(v, r.id, "cook")
+        && (r.favorite == "cook" || r.hunger > 55. || situations::helping(v, r.id))
+    {
+        (
+            "cook",
+            if situations::helping(v, r.id) {
+                "Taking a kitchen shift so our neighbour can have time back."
+            } else {
+                "Preparing a pot of food for everyone."
+            },
+        )
     } else if available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && (r.favorite == "build" || r.id.is_multiple_of(2)) {
@@ -368,6 +384,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     v.minutes += dt * MINUTES_PER_SECOND;
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
+    situations::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
         v.mornings += 1;
         event(&mut v, "A new morning. The community is waking up.");
@@ -469,6 +486,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             "idle" | "eat" => r.energy = (r.energy + dt * 0.08).min(100.),
             _ => r.energy = (r.energy - dt * 0.11).max(0.),
         }
+        if matches!(r.task.as_str(), "rest" | "socialize" | "gathering") {
+            situations::recovered(&mut v, r.id, dt * MINUTES_PER_SECOND);
+        }
         if r.task == "gathering" && v.progress.gathering_until > v.minutes {
             v.progress.attended |= 1 << r.id;
         }
@@ -546,7 +566,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 "water" if v.water < ecology::capacity(&v) => {
                     v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
-                "cook" => supplies::cook(&mut v),
+                "cook" if supplies::can_cook(&v) => {
+                    supplies::cook(&mut v);
+                    situations::cooked(&mut v, r.id);
+                }
                 "compost" if v.progress.scraps >= 2 => {
                     v.progress.scraps -= 2;
                     v.progress.compost += 1;
@@ -584,8 +607,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
         }
         let comfort = if shelter(&v, r.id).is_some() { 8. } else { 0. };
-        r.happiness = (r.energy * 0.30 + (100. - r.hunger) * 0.35 + r.social * 0.25 + comfort)
-            .clamp(0., 100.);
+        r.happiness = (r.energy * 0.30 + (100. - r.hunger) * 0.35 + r.social * 0.25 + comfort
+            - situations::concern(&v, r.id))
+        .clamp(0., 100.);
     }
     if !v.arrived && people.iter().all(|r| r.task != "arrive") {
         v.arrived = true;
@@ -620,6 +644,7 @@ impl Game {
                 arrived: false,
                 mornings: 0,
                 progress: Progress::default(),
+                situations: situations::Situations::default(),
             })
             .add_systems(Update, simulate);
         for (id, (name, traits, favorite)) in [
@@ -724,6 +749,13 @@ impl Game {
                 r.name
             );
         }
+        if situations::protected(
+            &v,
+            resident,
+            if b.kind == "kitchen" { "cook" } else { "visit" },
+        ) {
+            return "We agreed to cover this work. Let our neighbour have their time back.".into();
+        }
         interactions::start(&mut r, &v, building, true);
         format!("{}: {}", r.name, r.reason)
     }
@@ -820,6 +852,9 @@ impl Game {
         ) {
             return "That request is not available.".into();
         }
+        if situations::protected(&v, id, task) {
+            return "We agreed to cover this work. Let our neighbour have their time back.".into();
+        }
         if !available(&v, task) {
             return match task {
                 "build" => "There are no construction projects yet.",
@@ -871,6 +906,22 @@ impl Game {
         };
         assign(&mut r, &v, task, reason, true);
         format!("{}: {}", r.name, reason)
+    }
+    pub fn respond_situation(&mut self, response: &str) -> String {
+        let result = situations::respond(
+            &mut self.app.world_mut().resource_mut::<Village>(),
+            response,
+        );
+        if result == "ok" {
+            let v = self.app.world().resource::<Village>().clone();
+            let mut query = self.app.world_mut().query::<&mut Resident>();
+            for mut r in query.iter_mut(self.app.world_mut()) {
+                if situations::protected(&v, r.id, &r.task) {
+                    r.remaining = 0.;
+                }
+            }
+        }
+        result
     }
     pub fn track_quest(&mut self, quest: usize) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -979,7 +1030,8 @@ impl Game {
             return false;
         }
         let p = &v.progress;
-        if p.tracked >= 4
+        if !situations::valid(v)
+            || p.tracked >= 4
             || p.social_mask > 31
             || p.invited > 31
             || p.attended > 31

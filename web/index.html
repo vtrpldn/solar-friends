@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#263e30" />
     <title>Solar Friends · Vila Aurora</title>
     <link rel="stylesheet" href="style.css?v=combined-hud-2" />
-    <link rel="stylesheet" href="hud.css?v=artwork-preview-1" />
+    <link rel="stylesheet" href="hud.css?v=situations-1" />
   </head>
   <body>
     <div id="loading">
@@ -150,6 +150,7 @@
         <button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Goals</button>
         <button data-panel="building-panel" aria-controls="building-panel" aria-expanded="false">Buildings</button>
         <button data-panel="supplies-panel" aria-controls="supplies-panel" aria-expanded="false">Supplies</button>
+        <button id="open-situations">Situations</button>
         <button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button>
       </nav>
       <div id="toast" role="status" hidden></div>
@@ -185,6 +186,11 @@
         <button data-speed="8" aria-label="8× simulation speed" aria-pressed="false">8×</button>
       </div>
     </footer>
+    <dialog id="situation-dialog" aria-labelledby="situation-title">
+      <button id="close-situation" class="dialog-close" aria-label="Close situation">×</button>
+      <div id="situation-content"></div>
+      <p class="hint">The village pauses while you listen. Close this page to let daily life unfold.</p>
+    </dialog>
     <dialog id="quest-dialog" aria-labelledby="journal-title">
       <button
         id="close-journal"
@@ -199,6 +205,7 @@
         Start with a place to belong. Then follow the dreams of the people who
         call it home. Earlier efforts always count.
       </p>
+      <button id="journal-situations" class="journal-button">Listen to village situations →</button>
       <p id="quest-total"></p>
       <div id="quest-list"></div>
       <p class="hint">

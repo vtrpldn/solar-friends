@@ -24,6 +24,7 @@ jobs:
       - run: node scripts/verify-artwork.mjs
       - run: node scripts/verify-resident-animation.mjs
       - run: node scripts/verify-quests.mjs
+      - run: node scripts/verify-situations.mjs
       - run: node scripts/verify-chickens.mjs
       - uses: actions/upload-artifact@v4
         with:

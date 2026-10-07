@@ -91,3 +91,22 @@ footer .season { position: static; display: flex; padding: 0; gap: 9px; backgrou
 .supplies p, .supplies label { font-size: 13px; line-height: 1.6; }
 .supplies small { display: block; margin-top: 16px; line-height: 1.5; }
 #pantry-outlook { padding: 10px; background: #e4ead6; border-radius: 8px; }
+
+/* Situations read like a neighbour's note beside the village journal. */
+#situation-dialog { width: min(640px, calc(100vw - 80px)); padding: 38px 42px 28px; }
+#situation-dialog h2 { font-size: 38px; margin: 8px 0; }
+#situation-dialog h3 { font-size: 16px; margin: 20px 0 10px; }
+#situation-dialog p { line-height: 1.6; }
+.situation-byline { color: #71775d; margin-top: 0; }
+#situation-dialog blockquote { margin: 24px 0; padding: 18px 22px; border-left: 3px solid #a5b16c; background: #e9ecd9; font: 21px/1.5 Georgia, serif; }
+#situation-dialog cite { display: block; margin-top: 10px; font: 12px/1.5 sans-serif; }
+.situation-feeling { color: #795d3b; font-size: 13px; }
+.situation-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.situation-choices button { text-align: left; background: #f0efdf; border: 1px solid #acb695; border-radius: 10px; padding: 18px; color: #34493a; }
+.situation-choices button:hover { background: #e1e7ca; }
+.situation-choices button:focus-visible { outline: 3px solid #697d40; outline-offset: 3px; }
+.situation-choices b, .situation-choices span { display: block; }
+.situation-choices span { font-size: 12px; line-height: 1.5; margin-top: 9px; }
+.situation-progress { padding: 1px 18px 10px; background: #f0efdf; border-radius: 10px; }
+.situation-progress p, .situation-memory { font-size: 13px; }
+.situation-quiet { padding: 24px; margin: 24px 0; border: 1px dashed #acb695; border-radius: 10px; font: 20px/1.5 Georgia, serif; }

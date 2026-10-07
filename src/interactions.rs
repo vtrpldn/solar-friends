@@ -60,7 +60,10 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             v.progress.social_mask |= 1 << r.id;
         }
         "garden" | "greenhouse" => ecology::tend(v, r),
-        "kitchen" => supplies::cook(v),
+        "kitchen" if supplies::can_cook(v) && !situations::protected(v, r.id, "cook") => {
+            supplies::cook(v);
+            situations::cooked(v, r.id);
+        }
         "well" if v.water >= 1. => {
             v.water -= 1.;
             r.energy = (r.energy + 10.).min(100.);
@@ -184,6 +187,7 @@ mod tests {
                 "kitchen" => {
                     assert_eq!(v.meals, 5);
                     assert_eq!(v.food, food - 3.);
+                    assert_eq!(v.situations.cooking[0][r.id], 1);
                 }
                 "well" => {
                     assert_eq!(v.water, water - 1.);

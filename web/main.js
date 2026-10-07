@@ -1,5 +1,6 @@
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
 import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
+import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
@@ -853,7 +854,18 @@ function updateSupplies(v) {
     : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs >= 60 ? "Egg storage is full." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
 }
+function updateSituations() {
+  const view = situationView(state.village, state.residents);
+  $("#open-situations").textContent = view.label;
+  replaceMarkup($("#situation-content"), view.markup);
+}
+function openSituations() {
+  $("#quest-dialog").close();
+  updateSituations();
+  $("#situation-dialog").showModal();
+}
 function updateUI() {
+  updateSituations();
   const v = state.village;
   updateSupplies(v);
   updateBuildingPanel();
@@ -1065,6 +1077,19 @@ function setup() {
       save();
     };
   }
+  $("#open-situations").onclick = openSituations;
+  $("#journal-situations").onclick = openSituations;
+  $("#close-situation").onclick = () => $("#situation-dialog").close();
+  $("#situation-content").onclick = (event) => {
+    const button = event.target.closest("[data-situation-response]");
+    if (!button) return;
+    const result = game.respond_situation(button.dataset.situationResponse);
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
+    toast(result === "ok" ? "The collective has agreed. Close the situation to give everyone time." : result);
+    $("#close-situation").focus();
+  };
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
       const isOpen = button.getAttribute("aria-expanded") === "true";
