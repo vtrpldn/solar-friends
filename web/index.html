@@ -153,6 +153,7 @@
         <button id="open-situations">Situations</button>
         <button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button>
       </nav>
+      <button id="save-warning" class="save-warning" hidden>Progress is not being saved · Open Settings to export your village</button>
       <div id="toast" role="status" hidden></div>
     </main>
     <footer>
@@ -245,6 +246,16 @@
         bottom. Escape cancels building. Your village autosaves locally; open
         Settings to save immediately or start a new village.
       </p>
+      <details class="dev-tools">
+        <summary>Debug &amp; development tools</summary>
+        <p>Previews use a separate village and never overwrite your progress.</p>
+        <nav aria-label="Development tools">
+          <a href="./artwork/" target="_blank" rel="noopener">Artwork studio <span>Inspect sprites, scale, and animation</span></a>
+          <a href="./?artwork-preview" target="_blank" rel="noopener">Village artwork preview <span>All buildings in one clearing</span></a>
+          <a href="./?resident-preview" target="_blank" rel="noopener">Resident animation preview <span>Inspect poses and movement</span></a>
+          <a href="./?night-preview" target="_blank" rel="noopener">Night preview <span>Inspect lighting and evening artwork</span></a>
+        </nav>
+      </details>
       <button id="start-playing" class="primary">
         Let's grow together <span>→</span>
       </button>
@@ -280,11 +291,20 @@
       <section class="settings-section" aria-label="Village save">
         <h3>Your village</h3>
         <div class="save-actions"><button id="save">Save village</button><button id="new-scenario">New village</button></div>
+        <div class="save-actions"><button id="export-save">Export village</button><button id="import-save">Import village</button><button id="export-recovery" hidden>Export original save</button></div>
+        <input type="file" id="import-file" accept=".json,application/json" hidden />
+        <p id="recovery-notice" role="status" hidden>Your previous save could not be read. Its original data has been preserved. Export the original save before clearing browser data.</p>
         <p id="save-status" role="status">Your village saves automatically on this device.</p>
       </section>
       <p class="hint" id="settings-status" role="status">
         Changes apply immediately and stay on this device.
       </p>
+    </dialog>
+    <dialog id="import-dialog" aria-labelledby="import-title">
+      <h2 id="import-title">Welcome back to your village</h2>
+      <p id="import-summary"></p>
+      <button id="cancel-import">Keep this village</button>
+      <button id="confirm-import" class="primary">Load village</button>
     </dialog>
     <dialog id="restart-dialog" aria-labelledby="restart-title">
       <span class="eyebrow">A FRESH BEGINNING</span>

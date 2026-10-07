@@ -4,6 +4,7 @@ import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
+import { VillageStorage } from "./village-storage.js";
 import {
   project,
   unproject,
@@ -115,7 +116,8 @@ let width = 0,
   toastTimer;
 let response = "",
   encouragable = false;
-const saveKey = "solar-friends-v2";
+const storage = new VillageStorage();
+let pendingImport = null;
 const escapeHtml = (s) =>
   String(s).replace(
     /[&<>"']/g,
@@ -174,11 +176,13 @@ function save(manual = false) {
     return;
   }
   try {
-    localStorage.setItem(saveKey, game.snapshot());
+    storage.write(game.snapshot());
+    $("#save-warning").hidden = true;
     $("#save-status").textContent = "Saved on this device";
     if (manual) toast("Your village is saved. Come back whenever you like.");
   } catch {
     $("#save-status").textContent = "Saving unavailable";
+    $("#save-warning").hidden = false;
     if (manual)
       toast(
         "This browser could not save. Keep this tab open to preserve your village.",
@@ -1164,12 +1168,64 @@ function setup() {
       }
     };
   $("#save").onclick = () => save(true);
+  function downloadVillage(raw, name) {
+    const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = name; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  $("#export-save").onclick = () => downloadVillage(game.snapshot(), "solar-friends-village.json");
+  $("#export-recovery").onclick = () => downloadVillage(storage.rejected, "solar-friends-recovery.json");
+  $("#import-save").onclick = () => $("#import-file").click();
+  $("#import-file").onchange = async (event) => {
+    const file = event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.size > 5_000_000) { toast("Choose a village save smaller than 5 MB."); return; }
+    const candidate = new Game();
+    try {
+      const raw = await file.text();
+      if (!candidate.restore(raw)) throw new Error("invalid");
+      pendingImport = candidate.snapshot();
+      $("#import-summary").textContent = `Load ${file.name}? Your current village will be backed up on this device.`;
+      $("#import-dialog").showModal();
+    } catch { toast("This file is not a valid village save. Your village is unchanged."); }
+    finally { candidate.free(); }
+  };
+  $("#cancel-import").onclick = () => { pendingImport = null; $("#import-dialog").close(); };
+  $("#confirm-import").onclick = () => {
+    if (!pendingImport) return;
+    try {
+      storage.backup(game.snapshot());
+      storage.write(pendingImport);
+    } catch {
+      $("#save-warning").hidden = false;
+      toast("Could not back up and save the import. Your current village is unchanged.");
+      $("#import-dialog").close();
+      return;
+    }
+    game.restore(pendingImport);
+    pendingImport = null;
+    residentAnimations.clear();
+    state = JSON.parse(game.snapshot());
+    selected = null; tool = null; closePanels();
+    $("#person").hidden = true; $("#placement").hidden = true;
+    $("#import-dialog").close(); $("#settings-dialog").close();
+    updateUI(); save(); toast("Your village is ready. Welcome back.");
+  };
+  for (const id of ["import-save", "new-scenario"]) $("#" + id).disabled = artworkPreview;
+  $("#save-warning").onclick = () => $("#settings-dialog").showModal();
   $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
   $("#cancel-restart").onclick = () => $("#restart-dialog").close();
   $("#confirm-restart").onclick = () => {
     try {
-      if (!artworkPreview) localStorage.setItem(`${saveKey}-backup`, game.snapshot());
-    } catch {}
+      if (!artworkPreview) storage.backup(game.snapshot());
+    } catch {
+      $("#restart-dialog").close();
+      $("#save-warning").hidden = false;
+      toast("Could not back up your village. Export it before starting again.");
+      return;
+    }
     game.free();
     game = new Game();
     residentAnimations.clear();
@@ -1324,11 +1380,16 @@ try {
       saved = JSON.stringify(fixture);
     }
   } else {
-    try { saved = localStorage.getItem(saveKey); } catch {}
+    try { saved = storage.read(); } catch {
+      $("#save-warning").hidden = false;
+    }
   }
   if (saved && !game.restore(saved)) {
     if (artworkPreview) throw new Error("The artwork preview fixture is invalid");
-    toast("Your old save could not be loaded. A fresh village is ready.");
+    try { storage.quarantine(saved); } catch { $("#save-warning").hidden = false; }
+    $("#recovery-notice").hidden = false;
+    $("#export-recovery").hidden = false;
+    toast("This save could not load. Your original data is preserved; export it in Settings.");
   }
   state = JSON.parse(game.snapshot());
   setup();
