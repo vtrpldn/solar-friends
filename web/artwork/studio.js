@@ -1,3 +1,4 @@
+import { drawBuildingArt } from '../building-art.js';
 import { catalog } from './catalog.js';
 import { drawChicken } from '../chickens.js';
 const $ = id => document.getElementById(id);
@@ -17,7 +18,7 @@ function draw(canvas, sprite, bench = false) {
   const ratio = window.devicePixelRatio || 1;
   canvas.width = width * ratio; canvas.height = height * ratio;
   const ctx = canvas.getContext('2d'); ctx.scale(ratio, ratio);
-  const mode = bench ? $('scale').value : 'fit';
+  const mode = bench ? $('scale').value : '0.65';
   let w = mode === 'fit' ? Math.min(width * .86, height * .84) : sprite.width * Number(mode === 'game' ? 1 : mode);
   const h = w * (sprite.aspect || 1), anchor = sprite.anchor ?? .76;
   const y = mode === 'fit' ? (height - h) / 2 + h * anchor : height * .77;
@@ -28,7 +29,9 @@ function draw(canvas, sprite, bench = false) {
   }
   ctx.save();ctx.translate(width/2,y);if (bench && $('mirror').checked) ctx.scale(-1,1);
   if (sprite.procedural) drawChicken(ctx,{x:0,y:0},w/26,{color:sprite.color,facing:1,peck:playing ? frame : 0});
-  else {
+  else if (sprite.building) {
+    drawBuildingArt(ctx, images.get(sprite.file), sprite, 0, 0, w / sprite.width);
+  } else {
     const img = images.get(sprite.file);
     if (!img?.complete || !img.naturalWidth) { ctx.restore();ctx.fillStyle='#9b4b37';ctx.font='12px sans-serif';ctx.fillText(img?.complete ? 'Artwork unavailable' : 'Loading…',10,25);return; }
     const cell = sprite.animation ? [(bench ? frame : 0)/4,Number($('action').value)/4,.25,.25] : sprite.cell;

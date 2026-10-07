@@ -1,3 +1,4 @@
+import { buildingArt, drawBuildingArt } from './building-art.js';
 import { flock, drawChicken } from "./chickens.js";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
@@ -55,17 +56,11 @@ const pastimes = {
   water: "Sitting and daydreaming",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
-const atlas = new Image();
-atlas.src = "art/village-atlas-isometric.png";
-const gardenArt = new Image();
-gardenArt.src = "art/garden-simple-isometric.png";
-const questArt = Object.fromEntries(
-  ["compost", "square", "workshop", "coop"].map((kind) => {
-    const image = new Image();
-    image.src = `art/${kind}-isometric.png${kind === "coop" ? "?v=3" : ""}`;
-    return [kind, image];
-  }),
-);
+const buildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+  const image = new Image();
+  image.src = `art/${art.file}`;
+  return [kind, image];
+}));
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
@@ -85,8 +80,6 @@ const forestSpecies = [
   { name: "Embaúba", width: 113 },
   { name: "Pau-brasil", width: 125 },
 ];
-const cisternArt = new Image();
-cisternArt.src = "art/cistern-isometric.png";
 let game,
   state,
   selected = null,
@@ -271,58 +264,14 @@ function tree(x, y, s = 1, species = 0) {
     w,
   );
 }
-function sprite(kind, x, y, size, alpha = 1) {
-  if (questArt[kind]) {
-    const p = iso(x, y),
-      w = size * scale;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(questArt[kind], p.x - w / 2, p.y - w * 0.76, w, w);
-    ctx.restore();
-    return;
-  }
-  if (kind === "garden") {
-    const p = iso(x, y),
-      w = size * scale * 1.18;
-    // Calibrate the painted bed's ~20:11 footprint to the map's 2:1 axes.
-    const h = w * (10 / 11);
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(gardenArt, p.x - w / 2, p.y - h * 0.52, w, h);
-    ctx.restore();
-    return;
-  }
-  const p = iso(x, y),
-    cell = atlas.width / 2;
-  const index = { home: 0, kitchen: 1, garden: 2, grove: 3 }[kind];
-  if (index === undefined || !atlas.complete || !atlas.naturalWidth) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  const w = size * scale * 1.18;
-  const groundAnchor = { home: 0.7, kitchen: 0.7, garden: 0.59, grove: 0.74 }[
-    kind
-  ];
-  ctx.drawImage(
-    atlas,
-    (index % 2) * cell,
-    Math.floor(index / 2) * cell,
-    cell,
-    cell,
-    p.x - w / 2,
-    p.y - w * groundAnchor,
-    w,
-    w,
-  );
-  ctx.restore();
+function sprite(kind, x, y, alpha = 1) {
+  const art = buildingArt[kind];
+  if (!art) return;
+  const p = iso(x, y);
+  drawBuildingArt(ctx, buildingImages[kind], art, p.x, p.y, scale, alpha);
 }
 function cistern(x, y, alpha = 1) {
-  const p = iso(x, y),
-    w = 77 * scale;
-  contactShadow(p.x, p.y + 2 * scale, 25 * scale, 12.5 * scale);
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.drawImage(cisternArt, p.x - w / 2, p.y - w * 0.82, w, w);
-  ctx.restore();
+  sprite('well', x, y, alpha);
 }
 function drawGrowingBed(b) {
   const corners = [
@@ -381,7 +330,8 @@ function drawResourceLabel(p, label, fraction, color) {
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
-  contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
+  const shadowWidth = buildingArt[b.kind].width * .27 * scale;
+  contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
   if (b.kind === "well") cistern(b.x, b.y, complete ? 1 : 0.45);
   else if (complete && b.kind === "garden" && b.crop.growth < 180)
     drawGrowingBed(b);
@@ -390,7 +340,6 @@ function building(b) {
       b.kind,
       b.x,
       b.y,
-      b.kind === "garden" ? 119 : b.kind === "grove" ? 105 : 152,
       complete ? 1 : 0.4,
     );
   if (complete && b.kind === "garden") {
@@ -612,7 +561,7 @@ function render() {
       valid ? "#fff8cf" : "#b75943",
     );
     if (tool === "well") cistern(t.x, t.y, 0.6);
-    else sprite(tool, t.x, t.y, tool === "garden" ? 119 : 152, 0.55);
+    else sprite(tool, t.x, t.y, 0.55);
   }
   // Tiny birds drifting past the clearing.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -1254,11 +1203,8 @@ function setup() {
 try {
   await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-coop-2" });
   await Promise.all([
-    atlas.decode(),
-    gardenArt.decode(),
-    ...Object.values(questArt).map((image) => image.decode()),
+    ...Object.values(buildingImages).map((image) => image.decode()),
     forestArt.decode(),
-    cisternArt.decode(),
     terrain.decode(),
     peopleArt.decode(),
     ...animations.map((image) => image.decode()),
