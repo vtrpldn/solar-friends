@@ -7,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=ecology-coop-2";
+import init, { Game } from "./pkg/solar_friends.js?v=manual-roads-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -15,12 +15,13 @@ import {
   MAP_SIZE,
   riverCenter,
   riverBank,
-} from "./terrain.js?v=river-28";
+} from "./terrain.js?v=manual-roads-1";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
+  road: ["Road", 0, "Click to add or remove a road tile"],
   home: ["Home", 32, "Three beds and a good night’s rest"],
   garden: ["Garden", 12, "Plant, water, grow, then harvest"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
@@ -499,11 +500,9 @@ function render() {
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
-  const key = state.village.buildings
-    .map((b) => `${b.id}:${b.kind}:${b.x}:${b.y}`)
-    .join("|");
+  const key = JSON.stringify(state.village.roads);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, state.village.buildings);
+    groundLayer = paintTerrain(terrain, state.village.roads);
     groundKey = key;
   }
   ctx.save();
@@ -532,7 +531,7 @@ function render() {
     line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
   }
   drawPlacementGrid();
-  // The communal paths remain visible beneath individually placed structures.
+  // Player roads remain visible beneath individually placed structures.
   const objects = [
     ...flora.map((f) => ({
       depth: f.x + f.y,
@@ -560,11 +559,13 @@ function render() {
         t.y >= 1 &&
         t.y <= MAP_SIZE - 2 &&
         !riverBank(t.x, t.y) &&
-        !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
-        !state.village.buildings.some(
-          (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
-        ) &&
-        state.village.wood >= kinds[tool][1];
+        (tool === "road"
+          ? state.village.roads.some(([x, y]) => x === t.x && y === t.y) ||
+            !state.village.buildings.some(b => b.x === t.x && b.y === t.y)
+          : !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
+            !state.village.buildings.some(
+              (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
+            ) && state.village.wood >= kinds[tool][1]);
     tile(
       t.x,
       t.y,
@@ -572,7 +573,7 @@ function render() {
       valid ? "#fff8cf" : "#b75943",
     );
     if (tool === "well") cistern(t.x, t.y, 0.6);
-    else sprite(tool, t.x, t.y, tool === "garden" ? 119 : 152, 0.55);
+    else if (tool !== "road") sprite(tool, t.x, t.y, tool === "garden" ? 119 : 152, 0.55);
   }
   // Tiny birds drifting past the clearing.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -938,7 +939,7 @@ function updateUI() {
       button.dataset.kind
     ];
     button.querySelector("small").textContent = unlocked
-      ? `⌁ ${kinds[button.dataset.kind][1]}`
+      ? button.dataset.kind === "road" ? "Free" : `⌁ ${kinds[button.dataset.kind][1]}`
       : "Quest reward";
     button.title = unlocked
       ? kinds[button.dataset.kind][2]
@@ -969,7 +970,7 @@ function setTool(kind) {
   tool = tool === kind ? null : kind;
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -1152,10 +1153,12 @@ function setup() {
     pointer = { x, y };
     if (tool) {
       const p = uniso(x, y),
-        result = game.place(tool, p.x, p.y);
+        result = tool === "road" ? game.toggle_road(p.x, p.y) : game.place(tool, p.x, p.y);
       if (result === "ok") {
-        toast(`${kinds[tool][0]} planned. Let's build it together.`);
-        setTool(null);
+        if (tool !== "road") {
+          toast(`${kinds[tool][0]} planned. Let's build it together.`);
+          setTool(null);
+        }
         state = JSON.parse(game.snapshot());
         save();
       } else toast(result);
@@ -1212,7 +1215,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-coop-2" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=manual-roads-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),

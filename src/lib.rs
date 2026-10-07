@@ -70,6 +70,8 @@ pub struct Village {
     pub meals: u32,
     pub meals_served: u32,
     pub buildings: Vec<Building>,
+    #[serde(default)]
+    pub roads: Vec<(i32, i32)>,
     pub events: Vec<String>,
     pub harvests: u32,
     pub arrived: bool,
@@ -550,6 +552,7 @@ impl Game {
                 meals: 0,
                 meals_served: 0,
                 buildings: vec![],
+                roads: vec![],
                 events: vec!["Five friends, one empty lot. Your new beginning starts here.".into()],
                 harvests: 0,
                 arrived: false,
@@ -614,6 +617,22 @@ impl Game {
             "residents": residents,
         })
         .to_string()
+    }
+    pub fn toggle_road(&mut self, x: i32, y: i32) -> String {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if let Some(index) = v.roads.iter().position(|tile| *tile == (x, y)) {
+            v.roads.remove(index);
+            return "ok".into();
+        }
+        if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) || river_bank(x, y)
+        {
+            return "Place roads inside the lot, away from the riverbank.".into();
+        }
+        if v.buildings.iter().any(|b| b.x == x && b.y == y) {
+            return "Choose a tile beside the building.".into();
+        }
+        v.roads.push((x, y));
+        "ok".into()
     }
     pub fn place(&mut self, kind: &str, x: i32, y: i32) -> String {
         let Some(price) = cost(kind) else {
@@ -820,6 +839,17 @@ impl Game {
             return false;
         };
         let v = &save.village;
+        let mut road_tiles = std::collections::HashSet::new();
+        if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
+            || v.roads.iter().any(|&(x, y)| {
+                !(1..=MAP_SIZE - 2).contains(&x)
+                    || !(1..=MAP_SIZE - 2).contains(&y)
+                    || river_bank(x, y)
+                    || !road_tiles.insert((x, y))
+            })
+        {
+            return false;
+        }
         let p = &v.progress;
         if p.tracked >= 4
             || p.social_mask > 31
@@ -906,6 +936,36 @@ impl Default for Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn player_roads_persist_toggle_and_validate() {
+        let mut g = Game::new();
+        assert_eq!(g.toggle_road(5, 5), "ok");
+        assert_eq!(g.toggle_road(6, 5), "ok");
+        assert_ne!(g.toggle_road(25, 5), "ok");
+        assert_ne!(g.toggle_road(0, 5), "ok");
+        assert_eq!(g.place("home", 8, 8), "ok");
+        assert_ne!(g.toggle_road(8, 8), "ok");
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
+        assert_eq!(
+            restored.app.world().resource::<Village>().roads,
+            vec![(5, 5), (6, 5)]
+        );
+        assert_eq!(restored.toggle_road(5, 5), "ok");
+        assert_eq!(
+            restored.app.world().resource::<Village>().roads,
+            vec![(6, 5)]
+        );
+        let mut old: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        old["village"].as_object_mut().unwrap().remove("roads");
+        assert!(restored.restore(&old.to_string()));
+        restored.tick(60.);
+        assert!(restored.app.world().resource::<Village>().roads.is_empty());
+        old["village"]["roads"] = serde_json::json!([[5, 5], [5, 5]]);
+        assert!(!restored.restore(&old.to_string()));
+        old["village"]["roads"] = serde_json::json!([[25, 5]]);
+        assert!(!restored.restore(&old.to_string()));
+    }
     #[test]
     fn idle_residents_spread_out_and_keep_individual_routines_after_reload() {
         let mut g = Game::new();

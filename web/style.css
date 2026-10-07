@@ -1432,3 +1432,7 @@ dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
 .build-tool[data-kind="coop"] .tool-art {
   background: url("art/coop-isometric.png?v=3") center / contain no-repeat;
 }
+
+.build-tool[data-kind="road"] .tool-art {
+  background: linear-gradient(145deg, transparent 30%, #bd9163 32%, #d0a779 65%, transparent 67%);
+}
