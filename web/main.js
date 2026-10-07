@@ -608,7 +608,9 @@ function selectPerson(id) {
     selected = null;
     $("#person").hidden = true;
     updateUI();
+    $(`[data-resident="${id}"]`).focus();
   };
+  $(".close-person") .focus();
   $(".requests").onclick = (e) => {
     const b = e.target.closest("[data-task]");
     if (b) request(b.dataset.task, false);
@@ -948,7 +950,10 @@ function setup() {
     b.onclick = () => {
       speed = +b.dataset.speed;
       for (const x of document.querySelectorAll("[data-speed]"))
-        x.classList.toggle("active", x === b);
+        {
+          x.classList.toggle("active", x === b);
+          x.setAttribute("aria-pressed", String(x === b));
+        }
     };
   $("#save").onclick = () => save(true);
   $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
@@ -1052,7 +1057,10 @@ function setup() {
       e.preventDefault();
       togglePause();
     }
-    if (e.code === "Escape" && tool) setTool(null);
+    if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
+      if (tool) setTool(null);
+      else if (selected !== null) $(".close-person").click();
+    }
   });
   window.addEventListener("resize", resize);
   window.addEventListener("pagehide", () => save());

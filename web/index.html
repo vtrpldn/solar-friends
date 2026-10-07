@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#263e30" />
     <title>Solar Friends · Vila Aurora</title>
-    <link rel="stylesheet" href="style.css?v=quests-1" />
+    <link rel="stylesheet" href="style.css?v=ui-2" />
   </head>
   <body>
     <div id="loading">
@@ -121,9 +121,9 @@
       >
       <div class="time-controls" aria-label="Time controls">
         <button id="pause" aria-label="Pause simulation">Ⅱ</button
-        ><button data-speed="1" class="active">1×</button
-        ><button data-speed="2">2×</button><button data-speed="4">4×</button
-        ><button data-speed="8">8×</button>
+        ><button data-speed="1" aria-label="1× simulation speed" aria-pressed="true" class="active">1×</button
+        ><button data-speed="2" aria-label="2× simulation speed" aria-pressed="false">2×</button><button data-speed="4" aria-label="4× simulation speed" aria-pressed="false">4×</button
+        ><button data-speed="8" aria-label="8× simulation speed" aria-pressed="false">8×</button>
       </div>
       <span class="footer-tip"
         >Drag to explore <i>·</i> Scroll to zoom <i>·</i> Space to pause</span
@@ -151,11 +151,11 @@
         paths progress together.
       </p>
     </dialog>
-    <dialog id="help-dialog">
+    <dialog id="help-dialog" aria-labelledby="help-title">
       <button id="close-help" class="dialog-close" aria-label="Close help">
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
-      <h2>Grow a place to belong.</h2>
+      <h2 id="help-title">Grow a place to belong.</h2>
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li>
@@ -218,9 +218,9 @@
         Changes apply immediately and stay on this device.
       </p>
     </dialog>
-    <dialog id="restart-dialog">
+    <dialog id="restart-dialog" aria-labelledby="restart-title">
       <span class="eyebrow">A FRESH BEGINNING</span>
-      <h2>Start the arrival again?</h2>
+      <h2 id="restart-title">Start the arrival again?</h2>
       <p>
         Your current village will be replaced by an empty lot and five arriving
         neighbours. A backup stays on this device.
