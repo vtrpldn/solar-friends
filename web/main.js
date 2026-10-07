@@ -385,7 +385,7 @@ function building(b) {
   const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
   contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
   if (complete && b.kind === "greenhouse") greenhouse(b);
-  else if (complete && b.kind === "garden") drawGrowingBed(b);
+  else if (complete && b.kind === "garden" && (!b.crop.planted || b.crop.growth < cropDuration(b.crop))) drawGrowingBed(b);
   else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
   if (!complete) {
     const s = scale;
