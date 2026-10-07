@@ -1,0 +1,21 @@
+name: Check game
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo test --locked
+      - run: cargo clippy --locked -- -D warnings
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - run: ./scripts/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: solar-friends-browser
+          path: web/
