@@ -199,6 +199,26 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
     })
     .unwrap_or((CAMP.0 + (id as f32 - 2.) * 0.45, CAMP.1 + 0.5))
 }
+// Each resident has a separate set of quiet spots, spaced three tiles apart.
+// Derive the choice from saved time so loading a village keeps the same routine.
+fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
+    let spots: Vec<_> = (0..49)
+        .filter(|index| index % 5 == id)
+        .map(|index| (4.5 + (index % 7) as f32 * 3., 5.5 + (index / 7) as f32 * 3.))
+        .filter(|&(x, y)| {
+            !river_bank(x as i32, y as i32)
+                && v.buildings.iter().all(|b| {
+                    (x - (b.x as f32 + 0.5)).abs() > 1.75 || (y - (b.y as f32 + 0.5)).abs() > 1.75
+                })
+        })
+        .collect();
+    if spots.is_empty() {
+        return None;
+    }
+    let visit = (v.minutes / (90. + id as f32 * 13.)).floor() as usize;
+    Some(spots[(visit + id) % spots.len()])
+}
+
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
     r.task = task.into();
     r.reason = reason.into();
@@ -209,7 +229,20 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
-    (r.target_x, r.target_y) = destination(v, task, r.id);
+    if task == "idle" {
+        r.reason = match r.favorite.as_str() {
+            "garden" => "Taking a quiet walk to look at the plants.",
+            "build" => "Sketching ideas for something we could build.",
+            "cook" => "Humming a tune and thinking up new recipes.",
+            "gather" => "Watching birds around the clearing.",
+            _ => "Finding a peaceful spot to sit and daydream.",
+        }
+        .into();
+        r.remaining = 16. + r.id as f32 * 3.;
+        (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((r.x, r.y));
+    } else {
+        (r.target_x, r.target_y) = destination(v, task, r.id);
+    }
 }
 fn choose(r: &mut Resident, v: &Village) {
     let meal_due = meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot);
