@@ -1436,3 +1436,8 @@ dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
 .build-tool[data-kind="road"] .tool-art {
   background: linear-gradient(145deg, transparent 30%, #bd9163 32%, #d0a779 65%, transparent 67%);
 }
+
+.build-tool[data-kind="greenhouse"] .tool-art { background: linear-gradient(30deg, #adcfaa88, #c4e5deaa); border: 3px solid #a58d64; border-radius: 16px 16px 0 0; }
+#crop-controls { border-block: 1px solid #cad1ba; padding-bottom: 14px; }
+#crop-controls label { display: block; margin: 12px 0 6px; }
+#next-crop { max-width: 100%; }

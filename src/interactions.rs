@@ -23,7 +23,7 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     (r.target_x, r.target_y) = approach(b, r.id);
     r.reason = match b.kind.as_str() {
         "home" => "Resting on the porch.",
-        "garden" => "Checking and tending this garden.",
+        "garden" | "greenhouse" => "Checking and tending this garden.",
         "kitchen" => "Preparing a pot in this kitchen.",
         "well" => "Taking a refreshing drink at the cistern.",
         "grove" => "Picking fruit in this food forest.",
@@ -59,7 +59,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             r.energy = (r.energy + 8.).min(100.);
             v.progress.social_mask |= 1 << r.id;
         }
-        "garden" => ecology::tend(v, r),
+        "garden" | "greenhouse" => ecology::tend(v, r),
         "kitchen" => supplies::cook(v),
         "well" if v.water >= 1. => {
             v.water -= 1.;
@@ -98,7 +98,16 @@ mod tests {
     #[test]
     fn every_building_supports_a_targeted_visit_only_after_arrival() {
         for kind in [
-            "home", "garden", "kitchen", "well", "grove", "coop", "compost", "workshop", "square",
+            "home",
+            "garden",
+            "greenhouse",
+            "kitchen",
+            "well",
+            "grove",
+            "coop",
+            "compost",
+            "workshop",
+            "square",
         ] {
             let mut g = Game::new();
             {
@@ -136,7 +145,16 @@ mod tests {
     #[test]
     fn visits_produce_building_specific_benefits_and_share_cooldowns() {
         for kind in [
-            "home", "garden", "kitchen", "well", "grove", "coop", "compost", "workshop", "square",
+            "home",
+            "garden",
+            "greenhouse",
+            "kitchen",
+            "well",
+            "grove",
+            "coop",
+            "compost",
+            "workshop",
+            "square",
         ] {
             let mut g = Game::new();
             {
@@ -162,7 +180,7 @@ mod tests {
             finish(&mut v, &mut r);
             match kind {
                 "home" => assert_eq!(r.energy, 58.),
-                "garden" => assert!(v.buildings[0].crop.planted),
+                "garden" | "greenhouse" => assert!(v.buildings[0].crop.planted),
                 "kitchen" => {
                     assert_eq!(v.meals, 5);
                     assert_eq!(v.food, food - 3.);

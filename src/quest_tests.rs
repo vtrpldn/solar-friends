@@ -128,6 +128,7 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
             planted: true,
             growth: 180.,
             moisture: 0.,
+            ..ecology::Crop::default()
         };
     }
     let food = g.app.world().resource::<Village>().food;
@@ -421,6 +422,7 @@ fn garden_workers_cannot_harvest_the_same_crop_twice_or_remote_plots() {
             planted: true,
             growth: 180.,
             moisture: 0.,
+            ..ecology::Crop::default()
         };
     }
     let mut q = g.app.world_mut().query::<&Resident>();
@@ -440,6 +442,7 @@ fn crop_saves_round_trip_migrate_and_reject_invalid_state() {
         planted: true,
         growth: 80.,
         moisture: 100.,
+        ..ecology::Crop::default()
     };
     let saved = g.snapshot();
     let mut restored = Game::new();

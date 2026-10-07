@@ -112,6 +112,15 @@
         <label for="building-choice">Choose a building</label>
         <select id="building-choice"></select>
         <p id="building-purpose"></p>
+        <section id="crop-controls" hidden>
+          <h3>Growing plan</h3>
+          <label for="next-crop">Next crop</label>
+          <select id="next-crop"><option value="lettuce">Lettuce · quick harvest</option><option value="beans">Beans · larger, drought-tolerant</option><option value="tomatoes">Tomatoes · three harvests</option></select>
+          <label><input id="replant-crop" type="checkbox" /> Replant after this crop finishes</label>
+          <p id="crop-status"></p>
+          <p id="nursery-status"></p>
+          <small>Changes apply to the next planting. Pausing replanting lets the current crop finish, including all three tomato harvests.</small>
+        </section>
         <p id="building-activity" role="status"></p>
         <h3>Ask a neighbour to visit</h3>
         <div id="building-neighbours" class="requests"></div>
@@ -280,6 +289,6 @@
       <button id="cancel-restart">Keep this village</button>
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
-    <script type="module" src="main.js?v=visits-1"></script>
+    <script type="module" src="main.js?v=farming-1"></script>
   </body>
 </html>

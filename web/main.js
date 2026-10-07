@@ -7,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=visits-1";
+import init, { Game } from "./pkg/solar_friends.js?v=farming-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -23,6 +23,7 @@ const canvas = $("#world"),
 const kinds = {
   road: ["Road", 0, "Click to add or remove a road tile"],
   home: ["Home", 32, "Three beds and a good night’s rest"],
+  greenhouse: ["Greenhouse", 60, "Retain moisture · raise seedlings · needs stored water"],
   garden: ["Garden", 12, "Plant, water, grow, then harvest"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
   well: ["Cistern", 18, "Catch rainfall · store 75 more water"],
@@ -327,6 +328,25 @@ function cistern(x, y, alpha = 1) {
   ctx.drawImage(cisternArt, p.x - w / 2, p.y - w * 0.82, w, w);
   ctx.restore();
 }
+const cropTypes = {
+  lettuce: { name: "Lettuce", minutes: 180, yield: 5, note: "Quick crop · one harvest" },
+  beans: { name: "Beans", minutes: 360, yield: 10, note: "Larger harvest · soil dries half as fast" },
+  tomatoes: { name: "Tomatoes", minutes: 300, yield: 6, note: "Three harvests · later harvests take 3 hours; compost maintains yield" },
+};
+function cropDuration(c) { return c.kind === "tomatoes" && c.harvests > 0 ? 180 : cropTypes[c.kind].minutes; }
+function greenhouse(b, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  drawGrowingBed(b);
+  const points = [[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,y]) => iso(b.x+x,b.y+y));
+  const tops = points.map(p => ({x:p.x,y:p.y-38*scale}));
+  const ridge = [iso(b.x,b.y-1),iso(b.x,b.y+1)].map(p=>({x:p.x,y:p.y-59*scale}));
+  for (const face of [[tops[0],ridge[0],ridge[1],tops[3]],[ridge[0],tops[1],tops[2],ridge[1]],[points[1],points[2],tops[2],tops[1]],[points[2],points[3],tops[3],ridge[1],tops[2]]])
+    polygon(face.map(p=>[p.x,p.y]),"#b8dfd04d","#9cac85");
+  points.forEach((p,i)=>line(p.x,p.y,tops[i].x,tops[i].y,"#92734f",3*scale));
+  line(ridge[0].x,ridge[0].y,ridge[1].x,ridge[1].y,"#92734f",3*scale);
+  for(let i=0;i<4;i++) line(tops[i].x,tops[i].y,tops[(i+1)%4].x,tops[(i+1)%4].y,"#b89b71",2*scale);
+  ctx.restore();
+}
 function drawGrowingBed(b) {
   const corners = [
     [-0.8, -0.8],
@@ -344,11 +364,13 @@ function drawGrowingBed(b) {
   ctx.lineWidth = 4 * scale;
   ctx.stroke();
   if (b.crop.planted) {
-    const growth = 2 + (b.crop.growth / 180) * 7;
+    const fraction = b.crop.growth / cropDuration(b.crop);
+    const growth = 2 + fraction * 7;
     for (let x = -0.5; x <= 0.5; x += 0.5) {
       for (let y = -0.5; y <= 0.5; y += 0.5) {
         const p = iso(b.x + x, b.y + y);
-        ctx.fillStyle = b.crop.moisture > 0 ? "#648447" : "#999052";
+        if (b.crop.kind !== "lettuce") line(p.x,p.y,p.x,p.y-18*scale,"#a78a5c",1.5*scale);
+        ctx.fillStyle = b.crop.moisture > 0 ? (b.crop.kind === "beans" ? "#477951" : "#648447") : "#999052";
         ctx.beginPath();
         ctx.ellipse(
           p.x,
@@ -360,13 +382,15 @@ function drawGrowingBed(b) {
           Math.PI * 2,
         );
         ctx.fill();
+        if (b.crop.kind === "tomatoes" && fraction > 0.6) ellipse(p.x+2*scale,p.y-6*scale,2.5*scale,2.5*scale,fraction >= 1 ? "#ce593b" : "#d5a757");
       }
     }
   }
   ctx.restore();
 }
 function buildingSprite(kind, x, y, alpha = 1) {
-  if (kind === "well") cistern(x, y, alpha);
+  if (kind === "greenhouse") greenhouse({x,y,crop:{planted:false,moisture:0}},alpha);
+  else if (kind === "well") cistern(x, y, alpha);
   else sprite(kind, x, y, kind === "square" ? 228 : kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
 }
 function placementValid(kind, x, y) {
@@ -385,8 +409,8 @@ function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
   contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
-  if (complete && b.kind === "garden" && b.crop.growth < 180)
-    drawGrowingBed(b);
+  if (complete && b.kind === "greenhouse") greenhouse(b);
+  else if (complete && b.kind === "garden") drawGrowingBed(b);
   else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
   if (!complete) {
     const s = scale;
@@ -443,7 +467,7 @@ function resident(r) {
   const visitingKind = r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null;
   const row = moving
     ? 0
-    : ["build", "craft", "compost"].includes(r.task) || ["workshop", "compost", "kitchen", "garden", "coop"].includes(visitingKind)
+    : ["build", "craft", "compost"].includes(r.task) || ["workshop", "compost", "kitchen", "garden", "greenhouse", "coop"].includes(visitingKind)
       ? 1
       : ["rest", "socialize", "eat", "sleep", "gathering"].includes(r.task) || ["home", "square"].includes(visitingKind)
         ? 3
@@ -833,6 +857,7 @@ function updateQuests() {
 const buildingPurposes = {
   home: "Rest on the porch to recover energy.",
   garden: "Plant, water, or harvest this bed when it is ready.",
+  greenhouse: "Grow crops under glass and raise seedlings for outdoor beds. Rain stays outside.",
   kitchen: "Cook a pot with available ingredients and water.",
   well: "Drink one water to recover energy and ease hunger.",
   grove: "Gather two fruit for the pantry.",
@@ -851,6 +876,17 @@ function updateBuildingPanel() {
   }
   const b = state.village.buildings.find(b => b.id === Number(chooser.value));
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
+  const farming = b && ["garden", "greenhouse"].includes(b.kind);
+  $("#crop-controls").hidden = !farming;
+  if (farming) {
+    const c = b.crop, spec = cropTypes[c.kind];
+    $("#next-crop").value = c.next_kind;
+    $("#replant-crop").checked = c.replant;
+    const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
+    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.progress.tool_uses > 0 ? 2 : 0);
+    $("#crop-status").textContent = `${spec.name}: ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · waiting for water" : ""}`}. Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food, depending on gardener. ${spec.note}.`;
+    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering costs 2 water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
+  }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
   $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Construction must finish before visits." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
@@ -911,7 +947,7 @@ function updateUI() {
               : "Evening · time to unwind";
   const env = state.environment;
   const gardens = v.buildings.filter(
-    (b) => b.kind === "garden" && b.progress >= 100,
+    (b) => ["garden", "greenhouse"].includes(b.kind) && b.progress >= 100,
   );
   const counts = { plant: 0, thirsty: 0, growing: 0, harvest: 0 };
   for (const b of gardens) {
@@ -919,7 +955,7 @@ function updateUI() {
     counts[
       !c.planted
         ? "plant"
-        : c.growth >= 180
+        : c.growth >= cropDuration(c)
           ? "harvest"
           : c.moisture <= 0
             ? "thirsty"
@@ -1070,6 +1106,11 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for (const id of ["next-crop", "replant-crop"]) $("#"+id).onchange = () => {
+    game.configure_crop(Number($("#building-choice").value), $("#next-crop").value, $("#replant-crop").checked);
+    state = JSON.parse(game.snapshot()); updateUI(); save();
+  };
+
   $("#building-neighbours").innerHTML = state.residents.map(r => `<button data-visitor="${r.id}">${escapeHtml(r.name)}</button>`).join("");
   $("#building-choice").onchange = () => { $("#building-response").textContent = ""; updateBuildingPanel(); };
   $("#building-neighbours").onclick = event => {
@@ -1299,7 +1340,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=visits-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=farming-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),

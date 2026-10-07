@@ -87,6 +87,8 @@ pub struct Village {
     pub roads: Vec<(i32, i32)>,
     pub events: Vec<String>,
     pub harvests: u32,
+    #[serde(default)]
+    pub seedlings: u32,
     pub arrived: bool,
     pub mornings: u32,
     #[serde(default)]
@@ -118,6 +120,7 @@ fn cost(kind: &str) -> Option<f32> {
     match kind {
         "home" => Some(32.),
         "garden" => Some(12.),
+        "greenhouse" => Some(60.),
         "kitchen" => Some(40.),
         "well" => Some(18.),
         "grove" => Some(14.),
@@ -613,6 +616,7 @@ impl Game {
                 roads: vec![],
                 events: vec!["Five friends, one empty lot. Your new beginning starts here.".into()],
                 harvests: 0,
+                seedlings: 0,
                 arrived: false,
                 mornings: 0,
                 progress: Progress::default(),
@@ -676,6 +680,24 @@ impl Game {
             "residents": residents,
         })
         .to_string()
+    }
+    pub fn configure_crop(&mut self, building: usize, kind: &str, replant: bool) -> bool {
+        if !ecology::crop_kind(kind) {
+            return false;
+        }
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        let Some(b) = v.buildings.get_mut(building) else {
+            return false;
+        };
+        if !ecology::farm(b) {
+            return false;
+        }
+        b.crop.next_kind = kind.into();
+        b.crop.replant = replant;
+        if !b.crop.planted {
+            b.crop.kind = kind.into();
+        }
+        true
     }
     pub fn visit_building(&mut self, resident: usize, building: usize) -> String {
         let v = self.app.world().resource::<Village>().clone();
@@ -970,7 +992,8 @@ impl Game {
         {
             return false;
         }
-        if v.version != 2
+        if v.seedlings > 12
+            || v.version != 2
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1003,11 +1026,7 @@ impl Game {
             !b.next_visit.is_finite()
                 || b.next_visit < 0.
                 || b.id != i
-                || !b.crop.growth.is_finite()
-                || !(0.0..=180.).contains(&b.crop.growth)
-                || !b.crop.moisture.is_finite()
-                || !(0.0..=240.).contains(&b.crop.moisture)
-                || (!b.crop.planted && (b.crop.growth != 0. || b.crop.moisture != 0.))
+                || !ecology::valid(b)
                 || b.contributors > 31
                 || cost(&b.kind).is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
