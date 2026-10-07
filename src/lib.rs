@@ -3,6 +3,7 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod ecology;
 mod progression;
 use progression::Progress;
 
@@ -55,6 +56,8 @@ pub struct Building {
     pub progress: f32,
     #[serde(default)]
     pub contributors: u8,
+    #[serde(default)]
+    pub crop: ecology::Crop,
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
@@ -147,9 +150,12 @@ fn work_time(minutes: f32) -> bool {
 fn available(v: &Village, task: &str) -> bool {
     match task {
         "build" => v.buildings.iter().any(|b| b.progress < 100.),
-        "garden" => ready(v, "garden") && v.water >= 2.,
+        "garden" => v
+            .buildings
+            .iter()
+            .any(|b| ecology::needs_tending(b, v.water)),
         "cook" => ready(v, "kitchen") && v.food >= 3. && v.water >= 1.,
-        "water" => ready(v, "well"),
+        "water" => v.water < ecology::capacity(v),
         "compost" => ready(v, "compost") && v.progress.scraps >= 2,
         "craft" => ready(v, "workshop") && v.wood >= 8. && v.progress.tool_uses <= 24,
         "eat" => v.food >= 1. || v.meals > 0,
@@ -158,6 +164,9 @@ fn available(v: &Village, task: &str) -> bool {
     }
 }
 fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
+    if task == "water" {
+        return (23., 14. + id as f32 * 0.3);
+    }
     if task == "sleep" || task == "rest" {
         return shelter(v, id)
             .map(|b| (b.x as f32 + 0.75, b.y as f32 + 0.75))
@@ -167,7 +176,9 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
         return (3. + id as f32 * 0.4, 14.);
     }
     let b = v.buildings.iter().find(|b| {
-        if task == "build" {
+        if task == "garden" {
+            ecology::needs_tending(b, v.water)
+        } else if task == "build" {
             b.progress < 100.
         } else {
             b.progress >= 100.
@@ -253,10 +264,10 @@ fn choose(r: &mut Resident, v: &Village) {
             )
         }
     } else if v.water < 24. && available(v, "water") {
-        ("water", "Our water reserve needs refilling.")
+        ("water", "Carrying river water back to our storage.")
     } else if v.meals < 5 && available(v, "cook") && (r.favorite == "cook" || r.hunger > 55.) {
         ("cook", "Preparing a pot of food for everyone.")
-    } else if v.food < 24. && available(v, "garden") {
+    } else if available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && (r.favorite == "build" || r.id.is_multiple_of(2)) {
         ("build", "Let's get our basic infrastructure ready.")
@@ -292,6 +303,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     }
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
         v.mornings += 1;
         event(&mut v, "A new morning. The community is waking up.");
@@ -435,20 +447,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                         v.progress.fruit = v.progress.fruit.saturating_add(2);
                     }
                 }
-                "garden" if v.water >= 2. => {
-                    v.water -= 2.;
-                    v.food += if r.favorite == "garden" { 8. } else { 5. };
-                    if v.progress.compost > 0 {
-                        v.progress.compost -= 1;
-                        v.food += 3.;
-                        v.progress.enriched_harvests += 1;
-                    }
-                    if progression::use_tool(&mut v) {
-                        v.food += 2.;
-                    }
-                    v.harvests += 1;
+                "garden" => ecology::tend(&mut v, &r),
+                "water" if v.water < ecology::capacity(&v) => {
+                    v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
-                "water" => v.water = (v.water + 14.).min(150.),
                 "cook" if v.food >= 3. && v.water >= 1. => {
                     v.food -= 3.;
                     v.water -= 1.;
@@ -609,6 +611,7 @@ impl Game {
             y,
             progress: 0.,
             contributors: 0,
+            crop: ecology::Crop::default(),
         });
         event(
             &mut v,
@@ -636,7 +639,9 @@ impl Game {
         if !available(&v, task) {
             return match task {
                 "build" => "There are no construction projects yet.",
-                "garden" => "We need a finished garden and at least two water.",
+                "garden" => {
+                    "Gardens need planting, two water when dry, or time to grow before harvest."
+                }
                 "cook" => "We need a kitchen, three food and one water first.",
                 "compost" => "We need a compost station and two kitchen scraps first.",
                 "craft" => {
@@ -819,6 +824,11 @@ impl Game {
         }
         if v.buildings.iter().enumerate().any(|(i, b)| {
             b.id != i
+                || !b.crop.growth.is_finite()
+                || !(0.0..=180.).contains(&b.crop.growth)
+                || !b.crop.moisture.is_finite()
+                || !(0.0..=240.).contains(&b.crop.moisture)
+                || (!b.crop.planted && (b.crop.growth != 0. || b.crop.moisture != 0.))
                 || b.contributors > 31
                 || cost(&b.kind).is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
