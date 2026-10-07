@@ -1,3 +1,4 @@
+import { quests, buildingUnlocked, questStatus } from "./quests.js?v=quests-1";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
   project,
@@ -5,7 +6,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js";
+import init, { Game } from "./pkg/solar_friends.js?v=quests-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -13,7 +14,7 @@ import {
   MAP_SIZE,
   riverCenter,
   riverBank,
-} from "./terrain.js";
+} from "./terrain.js?v=river-28";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const canvas = $("#world"),
@@ -23,7 +24,10 @@ const kinds = {
   garden: ["Garden", 12, "Food grown with care"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
   well: ["Cistern", 18, "Keep the community watered"],
-  grove: ["Food forest", 14, "Shade, fruit and a place to gather"],
+  grove: ["Food forest", 14, "Gather two fruit with every timber trip"],
+  compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
+  square: ["Square", 36, "Gatherings bring neighbours closer"],
+  workshop: ["Workshop", 48, "Craft tools for building and harvests"],
 };
 const tasks = {
   arrive: "Arriving at our new home",
@@ -37,12 +41,22 @@ const tasks = {
   cook: "Making a shared meal",
   water: "Refilling our water",
   socialize: "Finding some company",
+  compost: "Turning kitchen scraps",
+  craft: "Crafting useful tools",
+  gathering: "Sharing food and stories",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const atlas = new Image();
 atlas.src = "art/village-atlas-isometric.png";
 const gardenArt = new Image();
 gardenArt.src = "art/garden-simple-isometric.png";
+const questArt = Object.fromEntries(
+  ["compost", "square", "workshop"].map((kind) => {
+    const image = new Image();
+    image.src = `art/${kind}-isometric.png`;
+    return [kind, image];
+  }),
+);
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
@@ -249,6 +263,15 @@ function tree(x, y, s = 1, species = 0) {
   );
 }
 function sprite(kind, x, y, size, alpha = 1) {
+  if (questArt[kind]) {
+    const p = iso(x, y),
+      w = size * scale;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(questArt[kind], p.x - w / 2, p.y - w * 0.76, w, w);
+    ctx.restore();
+    return;
+  }
   if (kind === "garden") {
     const p = iso(x, y),
       w = size * scale * 1.18;
@@ -359,9 +382,9 @@ function resident(r) {
   const sheet = animations[r.id];
   const row = moving
     ? 0
-    : r.task === "build"
+    : ["build", "craft", "compost"].includes(r.task)
       ? 1
-      : ["rest", "socialize", "eat", "sleep"].includes(r.task)
+      : ["rest", "socialize", "eat", "sleep", "gathering"].includes(r.task)
         ? 3
         : 2;
   const fps = [8, 5, 1.5, 1][row];
@@ -574,11 +597,13 @@ function selectPerson(id) {
       ["cook", "Make a meal"],
       ["rest", "Take a rest"],
       ["socialize", "Spend time together"],
+      ["compost", "Turn scraps"],
+      ["craft", "Craft tools · 8 timber"],
     ]
       .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
       .join(
         "",
-      )}</div><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button>`;
+      )}</div><p class="friendship-note"></p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button>`;
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
@@ -597,6 +622,136 @@ function request(task, encourage) {
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
   updateUI();
+}
+function replaceMarkup(element, html) {
+  if (element._markup !== html) {
+    element.innerHTML = html;
+    element._markup = html;
+  }
+}
+function objectiveMarkup(objectives, completed = false) {
+  const current = completed ? -1 : objectives.findIndex((o) => !o.done);
+  return objectives
+    .map(
+      (o, i) =>
+        `<div class="objective ${completed || o.done ? "done" : ""} ${i === current ? "current" : ""}"><span>${completed || o.done ? "✓" : i + 1}</span><b>${o.label}</b><small>${completed ? o.target : o.value}/${o.target}</small></div>`,
+    )
+    .join("");
+}
+function openJournal() {
+  updateQuests();
+  $("#quest-dialog").showModal();
+}
+function updateQuests() {
+  const v = state.village,
+    p = v.progress;
+  const id = p.tracked,
+    quest = quests[id],
+    done = p.completed[id];
+  const objectives = quest.objectives(v),
+    next = objectives.find((o) => !o.done);
+  $("#tutorial-count").textContent = `${quest.theme} · QUEST ${id + 1} OF 4`;
+  $("#tutorial-title").textContent = quest.title;
+  $("#tutorial-copy").textContent = done
+    ? quest.after
+    : next?.hint || quest.story;
+  $("#quest-speaker").textContent = done
+    ? "✓ Quest complete"
+    : `A wish from ${quest.person}`;
+  $("#quest-reward").textContent =
+    `${done ? "Unlocked" : "Reward"}: ${quest.reward}`;
+  $("#quest-progress").value = done
+    ? objectives.length
+    : objectives.filter((o) => o.done).length;
+  $("#quest-progress").max = objectives.length;
+  $("#quest-progress").setAttribute(
+    "aria-label",
+    `${quest.title} objectives completed`,
+  );
+  replaceMarkup($("#objectives"), objectiveMarkup(objectives, done));
+  const kind = done ? quest.building : next?.build;
+  const count = kind
+    ? v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length
+    : 0;
+  const planned =
+    kind && v.buildings.some((b) => b.kind === kind && b.progress < 100);
+  const enough = kind && (kind === "home" ? count >= next?.target : count > 0);
+  const action = $("#tutorial-action");
+  action.hidden = (!kind || planned || enough) && !(!done && next?.action);
+  action.textContent = kind
+    ? `Plan ${kinds[kind][0].toLowerCase()} · ${kinds[kind][1]} timber`
+    : "";
+  if (!done && next?.action) {
+    action.textContent =
+      next.action === "supper"
+        ? "Host welcome supper · 5 meals"
+        : "Set aside 24 timber";
+    action.onclick = () => {
+      const result =
+        next.action === "supper"
+          ? game.host_gathering()
+          : game.contribute_workshop_timber();
+      toast(
+        result === "ok"
+          ? next.action === "supper"
+            ? "Welcome supper is starting at the kitchen."
+            : "The tool library timber is set aside."
+          : result,
+      );
+      state = JSON.parse(game.snapshot());
+      updateUI();
+      save();
+    };
+  } else action.onclick = () => setTool(kind);
+  $("#open-journal").textContent =
+    done && id === 0
+      ? "Choose our next quest →"
+      : `Village journal · ${p.completed.filter(Boolean).length}/4`;
+  $("#village-needs").textContent =
+    `${Math.min(5, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
+  $("#quest-total").textContent =
+    `${p.completed.filter(Boolean).length} of 4 shared dreams fulfilled`;
+  replaceMarkup(
+    $("#quest-list"),
+    quests
+      .map((q, i) => {
+        const status = questStatus(v, i),
+          locked = i > 0 && !p.completed[0];
+        return `<article class="quest-card ${p.completed[i] ? "complete" : ""} ${locked ? "locked" : ""}">
+      <div class="quest-card-art ${q.art}">${i ? `<img src="art/${q.art}-isometric.png" alt="${kinds[q.building][0]} quest reward">` : "<span>☀</span>"}</div>
+      <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
+      ${objectiveMarkup(q.objectives(v), p.completed[i])}
+      <p class="journal-reward"><b>${p.completed[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
+      ${p.completed[i] ? `<p class="quest-after">${q.after}</p>` : ""}
+      <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? "Complete A Shared Beginning first" : i === id ? "Following this quest" : p.completed[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
+      })
+      .join(""),
+  );
+  const has = (kind) =>
+    v.buildings.some((b) => b.kind === kind && b.progress >= 100);
+  $("#village-craft").hidden =
+    !has("compost") && !has("workshop") && !has("square") && !p.gathering_until;
+  $("#compost-stock").hidden = !has("compost");
+  $("#compost-stock").textContent =
+    `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched harvests`;
+  $("#tools-control").hidden = !has("workshop");
+  $("#tools-stock").textContent =
+    `${p.tool_uses} tool uses · ${p.tools_crafted} sets crafted`;
+  $("#use-tools").checked = p.use_tools;
+  $("#gathering-control").hidden = !has("square") && !p.gathering_until;
+  $("#gathering-status").textContent =
+    p.gathering_until > v.minutes
+      ? `Gathering in progress · ${Math.ceil(p.gathering_until - v.minutes)} minutes left`
+      : `${p.gatherings} gatherings shared · costs 5 prepared meals`;
+  $("#host-gathering").disabled =
+    p.gathering_until > v.minutes ||
+    p.gathering_day === Math.floor(v.minutes / 1440);
+  $("#host-gathering").textContent =
+    p.gathering_until > v.minutes
+      ? "Neighbours are gathering…"
+      : p.gathering_day === Math.floor(v.minutes / 1440)
+        ? "Next gathering tomorrow"
+        : "Host a gathering";
 }
 function updateUI() {
   const v = state.village;
@@ -623,85 +778,7 @@ function updateUI() {
               ? "Evening · dinner together"
               : "Evening · time to unwind";
   $("#latest-event").textContent = v.events[0];
-  const finished = (kind) =>
-    v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
-  const steps = [
-    [
-      "A shared beginning",
-      v.arrived,
-      "Five neighbours are making their way into the clearing. Start with water, then give everyone a roof.",
-      null,
-    ],
-    [
-      "Water comes first",
-      finished("well") > 0,
-      "Place a cistern in the clearing. Residents will build it, then refill the community’s water supply.",
-      "well",
-    ],
-    [
-      "A roof for the night",
-      finished("home") > 0,
-      "Build your first home. Each home has three beds; good sleep restores energy for tomorrow.",
-      "home",
-    ],
-    [
-      "Our first harvest",
-      v.harvests > 0,
-      "Plant a garden. It needs water and a neighbour to tend it before the first harvest arrives.",
-      "garden",
-    ],
-    [
-      "A table to share",
-      finished("kitchen") > 0 && v.meals_served > 0,
-      "Build a kitchen. Three food and one water make five meals. Neighbours sit down to eat at mealtimes.",
-      "kitchen",
-    ],
-    [
-      "Room for everyone",
-      finished("home") >= 2,
-      "Build a second home so all five neighbours can sleep indoors. Gather more timber if supplies run low.",
-      "home",
-    ],
-    [
-      "Our first morning",
-      v.mornings > 0,
-      "Let the village settle into the night. Residents head to bed around 21:30 and wake after 06:00.",
-      null,
-    ],
-  ];
-  const current = steps.findIndex((s) => !s[1]);
-  const step = steps[current] || [
-    "Putting down roots",
-    true,
-    "You have water, shelter, food and a daily rhythm. Keep growing Vila Aurora at your own pace.",
-    null,
-  ];
-  $("#tutorial-count").textContent =
-    current < 0
-      ? "A PLACE TO BELONG"
-      : `ARRIVAL · ${current + 1} OF ${steps.length}`;
-  $("#tutorial-title").textContent = step[0];
-  $("#tutorial-copy").textContent = step[2];
-  const action = $("#tutorial-action");
-  const planned =
-    step[3] && v.buildings.some((b) => b.kind === step[3] && b.progress < 100);
-  action.hidden =
-    !step[3] ||
-    planned ||
-    (step[3] === "garden" && finished("garden") > 0) ||
-    (step[3] === "kitchen" && finished("kitchen") > 0);
-  action.textContent = step[3]
-    ? `Plan ${kinds[step[3]][0].toLowerCase()} · ${kinds[step[3]][1]} timber`
-    : "";
-  action.onclick = () => setTool(step[3]);
-  $("#objectives").innerHTML = steps
-    .map(
-      ([label, done], i) =>
-        `<div class="objective ${done ? "done" : ""} ${i === current ? "current" : ""}"><span>${done ? "✓" : i + 1}</span>${label}</div>`,
-    )
-    .join("");
-  $("#village-needs").textContent =
-    `${Math.min(5, finished("home") * 3)}/5 beds · ${v.meals} prepared meals · ${v.map_size} × ${v.map_size} lot`;
+  updateQuests();
   for (const r of state.residents) {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
@@ -721,16 +798,54 @@ function updateUI() {
       el.querySelector("i").style.width = v + "%";
       el.querySelector(".value").textContent = Math.round(v);
     }
+    const friendships = state.village.progress.friendships;
+    const friends = state.residents.filter(
+      (other) => other.id !== r.id && friendships[r.id * 5 + other.id] > 0,
+    );
+    $(".friendship-note").textContent = friends.length
+      ? "Shared memories: " +
+        friends
+          .map((other) => `${other.name} (${friendships[r.id * 5 + other.id]})`)
+          .join(", ")
+      : "Friendships grow when neighbours attend gatherings together.";
+    for (const task of ["compost", "craft"]) {
+      $(`[data-task="${task}"]`).hidden = !state.village.buildings.some(
+        (b) =>
+          b.kind === (task === "craft" ? "workshop" : "compost") &&
+          b.progress >= 100,
+      );
+    }
     $(".response").hidden = !response;
     $(".response").textContent = response;
     $(".persuade").hidden = !encouragable;
   }
   for (const button of document.querySelectorAll(".build-tool")) {
+    const unlocked = buildingUnlocked(v, button.dataset.kind);
+    button.classList.toggle("locked", !unlocked);
+    const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[
+      button.dataset.kind
+    ];
+    button.querySelector("small").textContent = unlocked
+      ? `⌁ ${kinds[button.dataset.kind][1]}`
+      : "Quest reward";
+    button.title = unlocked
+      ? kinds[button.dataset.kind][2]
+      : `Complete ${quests[quest].title} to unlock`;
+    button.setAttribute(
+      "aria-label",
+      unlocked
+        ? `Build ${kinds[button.dataset.kind][0]}, ${kinds[button.dataset.kind][1]} timber`
+        : `View quest to unlock ${kinds[button.dataset.kind][0]}`,
+    );
     button.classList.toggle("active", button.dataset.kind === tool);
     button.setAttribute("aria-pressed", String(button.dataset.kind === tool));
   }
 }
 function setTool(kind) {
+  if (kind && !buildingUnlocked(state.village, kind)) {
+    openJournal();
+    return;
+  }
   tool = tool === kind ? null : kind;
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
@@ -798,6 +913,35 @@ function setup() {
   $("#tools").onclick = (e) => {
     const b = e.target.closest("[data-kind]");
     if (b) setTool(b.dataset.kind);
+  };
+  $("#open-journal").onclick = openJournal;
+  $("#close-journal").onclick = () => $("#quest-dialog").close();
+  $("#quest-list").onclick = (e) => {
+    const button = e.target.closest("[data-track]");
+    if (!button) return;
+    if (game.track_quest(Number(button.dataset.track))) {
+      state = JSON.parse(game.snapshot());
+      $("#quest-dialog").close();
+      updateUI();
+      save();
+    }
+  };
+  $("#host-gathering").onclick = () => {
+    const result = game.host_gathering();
+    toast(
+      result === "ok"
+        ? "The gathering has begun. Give neighbours time to reach the square."
+        : result,
+    );
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
+  };
+  $("#use-tools").onchange = (e) => {
+    game.set_tools_enabled(e.target.checked);
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
   };
   $("#pause").onclick = togglePause;
   for (const b of document.querySelectorAll("[data-speed]"))
@@ -922,10 +1066,11 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init();
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=quests-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),
+    ...Object.values(questArt).map((image) => image.decode()),
     forestArt.decode(),
     cisternArt.decode(),
     terrain.decode(),

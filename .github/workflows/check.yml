@@ -18,6 +18,10 @@ jobs:
       - run: cargo clippy --locked -- -D warnings
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
       - run: ./scripts/build.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-quests.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: solar-friends-browser
