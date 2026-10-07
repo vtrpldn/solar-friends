@@ -6,7 +6,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=quests-1";
+import init, { Game } from "./pkg/solar_friends.js?v=idle-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -44,6 +44,13 @@ const tasks = {
   compost: "Turning kitchen scraps",
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
+};
+const pastimes = {
+  garden: "Looking at the plants",
+  build: "Sketching building ideas",
+  cook: "Humming and dreaming up recipes",
+  gather: "Watching birds",
+  water: "Sitting and daydreaming",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const atlas = new Image();
@@ -782,7 +789,8 @@ function updateUI() {
   for (const r of state.residents) {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
-    el.querySelector("small").textContent = tasks[r.task] || r.task;
+    el.querySelector("small").textContent =
+      (r.task === "idle" ? pastimes[r.favorite] || tasks.idle : tasks[r.task]) || r.task;
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
@@ -1066,7 +1074,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=quests-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=idle-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),
