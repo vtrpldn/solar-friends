@@ -317,14 +317,14 @@ function resident(r) {
     ctx.beginPath();
     ctx.roundRect(
       p.x - tw / 2 - 8 * s,
-      py - 53 * s,
+      py - 64 * s,
       tw + 16 * s,
       18 * s,
       5 * s,
     );
     ctx.fill();
     ctx.fillStyle = "#354f38";
-    ctx.fillText(r.name, p.x, py - 40 * s);
+    ctx.fillText(r.name, p.x, py - 51 * s);
   } else if (!moving && r.task === "rest") {
     ctx.fillStyle = "#7e8b65";
     ctx.font = `${12 * s}px Georgia`;
