@@ -52,7 +52,7 @@ Click a building on the map or open **Buildings**, select a building, and ask a 
 
 Homes restore energy; gardens are tended; kitchens cook with available supplies; cistern drinks use one water to restore energy and ease hunger; food forests provide two fruit. Coop care improves connection and advances an already-fed egg batch by thirty daylight minutes. Compost stations convert two scraps to one compost; workshops consume eight timber for twelve tool uses. Production visits share a sixty-game-minute cooldown per building.
 
-The community square is three times wider and taller, with a larger placement footprint for new construction. Residents use separate meeting spots, recover connection and energy, and build mutual friendship when visiting together. Existing squares keep their saved locations. Gatherings remain available through People.
+The community square is 1.5 times its original width and height, with a larger placement footprint for new construction. Residents use separate meeting spots, recover connection and energy, and build mutual friendship when visiting together. Existing squares keep their saved locations. Gatherings remain available through People.
 
 ## Village supplies
 

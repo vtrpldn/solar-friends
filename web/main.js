@@ -367,7 +367,7 @@ function drawGrowingBed(b) {
 }
 function buildingSprite(kind, x, y, alpha = 1) {
   if (kind === "well") cistern(x, y, alpha);
-  else sprite(kind, x, y, kind === "square" ? 456 : kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
+  else sprite(kind, x, y, kind === "square" ? 228 : kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
 }
 function placementValid(kind, x, y) {
   if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
@@ -375,10 +375,10 @@ function placementValid(kind, x, y) {
     return state.village.roads.some(([rx, ry]) => rx === x && ry === y) ||
       !state.village.buildings.some(b => b.x === x && b.y === y);
   }
-  const radius = kind === "square" ? 3 : 1;
+  const radius = kind === "square" ? 2 : 1;
   return x - radius >= 0 && y - radius >= 0 && x + radius < MAP_SIZE && y + radius < MAP_SIZE && !riverBank(x + radius - 1, y) &&
     !(Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) &&
-    !state.village.buildings.some(b => Math.abs(b.x - x) < radius + (b.kind === "square" ? 3 : 1) && Math.abs(b.y - y) < radius + (b.kind === "square" ? 3 : 1)) &&
+    !state.village.buildings.some(b => Math.abs(b.x - x) < radius + (b.kind === "square" ? 2 : 1) && Math.abs(b.y - y) < radius + (b.kind === "square" ? 2 : 1)) &&
     state.village.wood >= kinds[kind][1];
 }
 function building(b) {
@@ -396,7 +396,7 @@ function building(b) {
       [0.9, -0.9],
       [0.9, 0.9],
       [-0.9, 0.9],
-    ].map(([x, y]) => iso(b.x + x * (b.kind === "square" ? 3 : 1), b.y + y * (b.kind === "square" ? 3 : 1)));
+    ].map(([x, y]) => iso(b.x + x * (b.kind === "square" ? 2 : 1), b.y + y * (b.kind === "square" ? 2 : 1)));
     const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
@@ -572,7 +572,7 @@ function render() {
       valid ? "#fff8cf" : "#b75943",
     );
     if (tool === "square") {
-      polygon([[-3,-3],[3,-3],[3,3],[-3,3]].map(([x,y]) => { const p = iso(t.x+x,t.y+y); return [p.x,p.y]; }), valid ? "#f5f1b244" : "#cd745a44", valid ? "#fff8cf" : "#b75943");
+      polygon([[-2,-2],[2,-2],[2,2],[-2,2]].map(([x,y]) => { const p = iso(t.x+x,t.y+y); return [p.x,p.y]; }), valid ? "#f5f1b244" : "#cd745a44", valid ? "#fff8cf" : "#b75943");
     }
     if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
   }
@@ -1247,7 +1247,7 @@ function setup() {
       else {
         const cell = uniso(x, y);
         const b = [...state.village.buildings].reverse().find(b => {
-          const radius = b.kind === "square" ? 3 : 1;
+          const radius = b.kind === "square" ? 2 : 1;
           return Math.abs(b.x-cell.x) <= radius && Math.abs(b.y-cell.y) <= radius;
         });
         if (b) inspectBuilding(b.id);

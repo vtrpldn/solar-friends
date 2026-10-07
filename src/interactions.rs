@@ -1,11 +1,11 @@
 //! Building visits finish only after residents reach the selected building.
 use super::*;
 pub fn radius(kind: &str) -> i32 {
-    if kind == "square" { 3 } else { 1 }
+    if kind == "square" { 2 } else { 1 }
 }
 pub fn approach(b: &Building, id: usize) -> (f32, f32) {
     if b.kind == "square" {
-        (b.x as f32 + (id as f32 - 2.) * 0.6, b.y as f32 + 1.5)
+        (b.x as f32 + (id as f32 - 2.) * 0.4, b.y as f32 + 1.0)
     } else {
         (b.x as f32 + 0.75, b.y as f32 + 0.75)
     }
@@ -204,10 +204,10 @@ mod tests {
             v.progress.completed = [true; 4];
             v.wood = 200.;
         }
-        assert_ne!(g.place("square", 2, 2), "ok");
+        assert_ne!(g.place("square", 1, 1), "ok");
         assert_eq!(g.place("square", 5, 5), "ok");
-        assert_ne!(g.place("home", 8, 5), "ok");
-        assert_eq!(g.place("home", 9, 5), "ok");
+        assert_ne!(g.place("home", 7, 5), "ok");
+        assert_eq!(g.place("home", 8, 5), "ok");
     }
     #[test]
     fn unavailable_buildings_and_tired_residents_refuse_visits() {
