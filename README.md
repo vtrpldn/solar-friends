@@ -11,6 +11,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Run locally](#run-locally)
 - [Play](#play)
 - [Village quests](#village-quests)
+- [Village situations](#village-situations)
 - [Implementation](#implementation)
 - [Prototype scope](#prototype-scope)
 
@@ -40,7 +41,7 @@ Open Settings (the gear button) to enable the placement grid. Tile guides appear
 
 Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls for speed. Escape cancels placement. Saves stay in this browser's local storage and happen every 15 seconds, after placement, and on leaving the tab. Save village writes immediately.
 
-A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five individual sprite sheets animate walking, building, idling, and sitting. These are game-scaled routines, not a detailed biological model.
+A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five base sprite sheets animate walking, building, and sitting; five additional sheets add looking around, stretching, waving, and relaxed standing. Eased frame and activity blends soften pose changes. These are game-scaled routines, not a detailed biological model.
 
 New village restarts the scenario after confirmation and retains one backup under `solar-friends-v2-backup`. Earlier prototype saves remain untouched under `solar-friends-v1`.
 
@@ -92,6 +93,20 @@ Tools add two timber or food per timber-gathering or gardening task, or make con
 
 Existing saves keep their buildings and arrival milestones. New activity counters start at zero when absent from an older save; the journal, unlocks, tools, and friendships persist in the same village save.
 
+## Village situations
+
+Open **Situations** in the bottom controls to hear concerns that emerge from daily life. Situations progress alongside every quest and can also be opened from the journal.
+
+The first situation, **More than the cook**, appears when one neighbour finishes at least six cooking tasks across two or more of the last three calendar days and carries at least 60% of the cooking. The resident can be anyone. A busy afternoon alone does not trigger it.
+
+The collective can share kitchen shifts or protect a day off. Sharing shifts takes the resident off cooking and gives them a break while other neighbours prioritize meals over their projects. A day off protects them from all work until recovery is complete. Requests cannot override either agreement. Food, water, sleep, and rest needs still apply to helpers.
+
+Recovery requires two other cooks (one for a day off), 72 game minutes of rest or company, and a full game day after the agreement. Choosing a response does not complete the situation. Without an agreement, actual help and recovery can also settle the concern after a day. More cooking by the affected resident reduces recovery by 36 minutes per batch. Sleep does not count as personal free time.
+
+An unresolved concern can lower that resident's wellbeing by up to 12 points. Rest and company ease it. Resolved situations remain visible for three game days, then make room for another concern. Cooking history resets on resolution. Situation history, agreements, and recovery persist in village saves; older saves begin with no recorded cooking.
+
+Run `node scripts/verify-situations.mjs` after building to trigger a concern from a fresh village and play both agreements through autonomous resolution and save/reload. An optional output directory stores earned checkpoints for browser playtesting.
+
 ## Implementation
 
 Rust owns simulation and validated saves. Bevy App and ECS schedule systems and store resident entities. `wasm-bindgen` exposes the game to the browser. Canvas 2D draws the isometric world; HTML provides the controls and resident details. This slice uses Bevy's simulation modules, not its GPU renderer.
@@ -114,8 +129,8 @@ Artwork was generated with OpenAI's built-in image generation tool using the use
 
 ## Artwork studio
 
-Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse all 18 artwork files as 36 individual sprite entries, including atlas cells, resident animations, archived references, and the game's procedural chickens.
+Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse 28 artwork files as 42 active sprite entries, including atlas cells, resident animations, and the game's painted chickens.
 
 Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
 
-Add new sprites and their crop/scale metadata to `web/artwork/catalog.js`. Run `node scripts/verify-artwork.mjs` to catch uncatalogued files, missing sources, duplicate IDs, and invalid crop bounds. Runtime sprite dimensions are recorded in the catalog; update them when the game renderer changes.
+Add building source crops, scales, anchors, and camera calibration to `web/building-art.js`; the game and studio share these values. Add other sprite entries to `web/artwork/catalog.js`. Run `node scripts/verify-artwork.mjs` to catch uncatalogued files, missing sources, duplicate IDs, and invalid crop bounds. See [artwork consistency](assets/art-direction/artwork-consistency.md) for scale values, generation prompts, and the limits of painted geometry.

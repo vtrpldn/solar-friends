@@ -4,6 +4,19 @@ description: Provenance and generation prompts for the Solar Friends prototype s
 
 # Village sprites
 
+## Resident motion and standing idles
+
+The five `animations/*-idle.png` sheets add four standing activities: looking around, stretching, waving, and hands-on-hips weight shifts. Each sheet has four columns and four rows, in that order. They were generated with the built-in image tool using the corresponding original resident sheet as the identity reference.
+
+The shared [resident animation renderer](../resident-animation.js) blends adjacent keyframes and eases activity changes over 180 milliseconds. An isolated additive blend preserves opacity; the original four walk keyframes remain the source. Gestures play once and settle into a neutral pose between activities. Idle selection is staggered by resident ID and saved village time. Walking retains its last facing when the resident stops. Meals, rest, and sleep keep seated poses; socializing and gatherings use standing gestures. Pause and open dialogs stop the visual clock, and high simulation speeds cap visual playback at 2×.
+
+The studio previews the same clips, with named standing-action controls. [Resident preview](http://127.0.0.1:4173/?resident-preview) starts paused with five idle residents; press Play to watch. It uses an isolated fixture and never writes the village save. Run `node scripts/verify-resident-animation.mjs` to check pose selection, interpolation weights, transitions, facing, pause behavior, and fixture restoration.
+
+Generation prompt (one call per resident):
+
+> Create an additional IDLE ANIMATION SPRITE SHEET for the SAME resident in the reference. Preserve exact face, skin tone, clothing, hair/headwear, footwear, painted style, elevated orthographic view and screen-right facing. Square transparent PNG, strict FOUR columns by FOUR rows, 16 full-body poses, one figure centered inside each equal square cell. Consistent size and foot baseline at 94% cell height, head height about 20% leaving space for raised arms, 12% side padding. NO cropped heads/limbs, no overlapping cells, no shadows or backdrop or labels. Each row is a coherent animation of the same action, four sequential poses, with grounded feet and small movement increments. Row 1: standing, calmly looking around (forward, turn head slightly left, look slightly up, return forward). Row 2: gentle shoulder/arm stretch (hands relaxed, hands lift to shoulder level, arms reaching upward, relax). Row 3: friendly one-hand wave (arm at side, hand raising, hand open greeting at shoulder height, hand returning). Row 4: relaxed hands-on-hips weight shift (arms relaxed, hands to hips, slight comfortable shift, return). All poses STANDING. No stools, chairs, tools, objects, scenery or text. Match identity absolutely. Warm softly painted Brazilian ecovila game character. True transparent background outside figures, broad clear gutters.
+
+
 Generated using OpenAI's built-in image generation tool with the approved Brazilian ecovila concept in `assets/art-direction/brazilian-ecovila-approved.png` as the reference. Both PNGs have transparent backgrounds. The browser draws the atlas quadrants directly, without modifying the original generated pixels.
 
 ## Village atlas prompt
@@ -32,7 +45,7 @@ Generation prompt: match the corresponding resident's face, clothing, palette, a
 
 ## Isometric alignment pass
 
-The active scenery files are `village-atlas-isometric.png`, `mango-tree-isometric.png`, and `cistern-isometric.png`. They were edited with the built-in image generation tool from the original sprites. Original files remain available as references. `web/projection.js` defines the scene's 2:1 orthographic ground axes, also used by placement and construction scaffolding. The renderer preserves square sprite proportions and anchors each object at its ground footprint rather than its lowest painted pixel.
+The active building atlas and tank are `village-atlas-isometric.png` and `cistern-isometric.png`. They were edited with the built-in image generation tool from the original sprites. Obsolete village and mango variants are retained only in Git history. `web/projection.js` defines the scene's 2:1 orthographic ground axes, also used by placement and construction scaffolding. The renderer uses shared scale, ground anchors, and camera calibration from `web/building-art.js`. See [artwork consistency](../../assets/art-direction/artwork-consistency.md) for the current sizes, replacement prompts, and limits of painted geometry.
 
 Atlas edit prompt: Preserve the four Brazilian painted subjects in the same 2×2 layout. Correct ground edges to parallel vectors (2,1) and (-2,1), upright verticals, no vanishing points, one shared elevated orthographic camera. Align foundations, eaves, roof ridges, furniture, and garden rows. Keep solar panels coplanar with roofs. Show upper banana leaf surfaces. Preserve warm upper-left lighting, transparent background, and no external shadows. A second layout-only pass reduced each object uniformly to provide transparent gutters inside every quadrant.
 
@@ -59,4 +72,34 @@ Prompt: create only a simple square vegetable bed on transparency, warm painted 
 
 `compost-isometric.png`, `square-isometric.png`, and `workshop-isometric.png` are transparent sprites generated with the built-in image tool. The map, placement previews, toolbar, and journal reuse the same files. They follow the approved Brazilian palette and elevated orthographic camera. The [complete prompt set](../../assets/art-direction/quest-building-prompts.md) records each asset's subject and constraints. Starter buildings and the food forest reuse the existing artwork.
 
-The chicken coop (`coop-isometric.png`) is generated with the built-in image tool, using the workshop and village atlas as direct style references for painted materials, terracotta tiles, warm lighting, and isometric perspective. The generation prompt is recorded in `assets/art-direction/chicken-coop-prompt.md`. Its three hens are drawn with Canvas 2D in `web/chickens.js`.
+The chicken coop (`coop-isometric.png`) is generated with the built-in image tool, using the workshop and village atlas as direct style references for painted materials, terracotta tiles, warm lighting, and isometric perspective. The generation prompt is recorded in `assets/art-direction/chicken-coop-prompt.md`. Its three hens use `chickens.png`, a transparent three-column/two-row painted atlas, rendered through `web/chickens.js`. Columns are cream, ochre, and brown hens; rows are standing and pecking. Per-pose foot anchors keep both poses grounded. The simulation clock controls pecking and daytime roaming.
+
+## Painted hens
+
+The built-in image-generation tool produced `chickens.png` using the coop and village atlas as style references. The game and studio share its crop selection and drawing code. Each 512-pixel cell renders at a 26-pixel source width, including transparent padding.
+
+Prompt: Create a production game animation sprite sheet of chickens matching the warm painted Brazilian ecovila style of the reference buildings. Only chickens, no buildings. Wide canvas 1536×1024, exactly three equal columns by two equal rows, each cell 512×512. One isolated hen per cell, transparent background and broad gutters. Columns: cream with buff shadows, ochre/rust, dark warm brown. Top row: standing. Bottom row: corresponding hen pecking. Face screen-right in the same elevated orthographic 2:1 camera, with visible back and side. Preserve body size and identity between poses. Small red comb and wattle, short golden beak, thin golden legs, simple tail and wing shapes. Soft painted feather masses, readable silhouettes at 16–22 screen pixels, upper-left lighting, earthy colors. No outlines, toy rendering, microtexture, chicks, eggs, straw, plants, nests, ground patches, cast shadows, text, grids, borders or scenery. Keep each bird inside its cell.
+
+Open [the in-game artwork preview](http://127.0.0.1:4173/?artwork-preview) to compare all nine building types and three hens. It starts paused, restores its own fixture, and skips village saves and restart backups. Return to the normal game using the banner link.
+
+## Night building variants
+
+Why: buildings need readable nighttime identities, with warm occupied interiors and cool outdoor surfaces. Seven sibling `*-night.png` files cover all nine building types through the same atlas crops, widths, anchors, and camera calibration as their day sprites. The game fades them in using its existing sunrise/sunset curve. The coop stays dark inside for roosting hens.
+
+Generated with the built-in image generation tool, editing each corresponding daytime PNG with transparency enabled. Original artwork is retained. Inspect all variants in the artwork studio or `/?night-preview`; the preview does not overwrite the saved village.
+
+Prompt used for each source:
+
+> Use case: lighting-weather. Edit target: the supplied transparent isometric game sprite. Create its nighttime lighting alternative. Preserve EXACT canvas layout, object positions, size, silhouette, padding, camera angle, geometry, all props and ground contact. Change lighting only: dim cool blue moonlight from upper left, readable deep blue shadows, subdued terracotta. No sky, background, text, moon, stars, people or new structures. Real transparent background. Keep painterly game style. For inhabited interiors only, gentle warm amber light from existing windows/openings; do not illuminate plants or storage bins internally.
+
+Per-source additions:
+
+- Village atlas: Keep the exact 2 by 2 atlas layout: home top left, kitchen top right, garden bottom left, banana grove bottom right. Warm home window slats and kitchen oven embers.
+- Garden, cistern, compost: Moonlight only; no lamps or glowing objects.
+- Square: Small warm lantern illumination under the pergola, restrained.
+- Workshop: Warm light on workbench from inside.
+- Coop: Coop interior stays dark for sleeping chickens; moonlight only.
+
+The selected compost revision used this corrective prompt:
+
+> Edit the supplied DAYTIME compost station into a NIGHT variant. Change lighting only: uniformly cool dim blue moonlight. NO orange or yellow light ANYWHERE. Compost and spaces between wooden boards are dark brown/blue, completely unlit. There is no fire, electricity, lamp, ember, bioluminescence or internal light in this object. Keep exact silhouette, layout, scale, padding, isometric camera, all props and canvas dimensions. Real transparent background. Painterly game sprite.

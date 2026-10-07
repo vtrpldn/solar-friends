@@ -1,4 +1,8 @@
-# Solar Friends
+# Project instructions
+
+- Commit completed work directly to `main` as soon as it is ready, in small incremental commits.
+- Pull requests are optional; create one only when explicitly requested or when review is needed.
+- Never merge a pull request without individual, explicit user approval.
 
 ## UI platform scope
 

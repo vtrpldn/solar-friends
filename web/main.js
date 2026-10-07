@@ -1,4 +1,7 @@
-import { flock, drawChicken } from "./chickens.js";
+import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
+import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
+import { situationView } from "./situations.js";
+import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
@@ -18,6 +21,10 @@ import {
 } from "./terrain.js?v=manual-roads-1";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
+const previewParams = new URLSearchParams(location.search);
+const residentPreview = previewParams.has("resident-preview");
+const nightPreview = previewParams.has("night-preview");
+const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -50,25 +57,17 @@ const tasks = {
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
 };
-const pastimes = {
-  garden: "Looking at the plants",
-  build: "Sketching building ideas",
-  cook: "Humming and dreaming up recipes",
-  gather: "Watching birds",
-  water: "Sitting and daydreaming",
-};
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
-const atlas = new Image();
-atlas.src = "art/village-atlas-isometric.png";
-const gardenArt = new Image();
-gardenArt.src = "art/garden-simple-isometric.png";
-const questArt = Object.fromEntries(
-  ["compost", "square", "workshop", "coop"].map((kind) => {
-    const image = new Image();
-    image.src = `art/${kind}-isometric.png${kind === "coop" ? "?v=3" : ""}`;
-    return [kind, image];
-  }),
-);
+const buildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+  const image = new Image();
+  image.src = `art/${art.file}`;
+  return [kind, image];
+}));
+const nightBuildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+  const image = new Image();
+  image.src = `art/${art.nightFile}`;
+  return [kind, image];
+}));
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
@@ -78,6 +77,12 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
   image.src = `art/animations/${name}.png`;
   return image;
 });
+const idleAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
+  const image = new Image(); image.src = `art/animations/${name}-idle.png`; return image;
+});
+const residentAnimations = new Map();
+const residentSurfaces = new Map();
+let animationDelta = 0;
 let groundLayer,
   groundKey = null;
 const forestArt = new Image();
@@ -88,8 +93,6 @@ const forestSpecies = [
   { name: "Embaúba", width: 113 },
   { name: "Pau-brasil", width: 125 },
 ];
-const cisternArt = new Image();
-cisternArt.src = "art/cistern-isometric.png";
 let game,
   state,
   selected = null,
@@ -165,6 +168,11 @@ function toast(message) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
 }
 function save(manual = false) {
+  if (artworkPreview) {
+    $("#save-status").textContent = "Artwork preview · your saved village is unchanged";
+    if (manual) toast("Preview only. Return to your village to save progress.");
+    return;
+  }
   try {
     localStorage.setItem(saveKey, game.snapshot());
     $("#save-status").textContent = "Saved on this device";
@@ -275,58 +283,24 @@ function tree(x, y, s = 1, species = 0) {
     w,
   );
 }
-function sprite(kind, x, y, size, alpha = 1) {
-  if (questArt[kind]) {
-    const p = iso(x, y),
-      w = size * scale;
+function sprite(kind, x, y, alpha = 1) {
+  const art = buildingArt[kind];
+  if (!art) return;
+  const p = iso(x, y);
+  const night = nightAmount(state.village.minutes);
+  // Compensate source-over opacity so construction and placement ghosts stay translucent.
+  const dayAlpha = night < 1 ? alpha * (1 - night) / (1 - alpha * night) : 0;
+  if (dayAlpha > 0) drawBuildingArt(ctx, buildingImages[kind], art, p.x, p.y, scale, dayAlpha);
+  if (night > 0) {
     ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(questArt[kind], p.x - w / 2, p.y - w * 0.76, w, w);
+    // The full-scene night tint follows this pass; keep painted window light readable.
+    ctx.filter = 'brightness(1.45)';
+    drawBuildingArt(ctx, nightBuildingImages[kind], art, p.x, p.y, scale, alpha * night);
     ctx.restore();
-    return;
   }
-  if (kind === "garden") {
-    const p = iso(x, y),
-      w = size * scale * 1.18;
-    // Calibrate the painted bed's ~20:11 footprint to the map's 2:1 axes.
-    const h = w * (10 / 11);
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(gardenArt, p.x - w / 2, p.y - h * 0.52, w, h);
-    ctx.restore();
-    return;
-  }
-  const p = iso(x, y),
-    cell = atlas.width / 2;
-  const index = { home: 0, kitchen: 1, garden: 2, grove: 3 }[kind];
-  if (index === undefined || !atlas.complete || !atlas.naturalWidth) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  const w = size * scale * 1.18;
-  const groundAnchor = { home: 0.7, kitchen: 0.7, garden: 0.59, grove: 0.74 }[
-    kind
-  ];
-  ctx.drawImage(
-    atlas,
-    (index % 2) * cell,
-    Math.floor(index / 2) * cell,
-    cell,
-    cell,
-    p.x - w / 2,
-    p.y - w * groundAnchor,
-    w,
-    w,
-  );
-  ctx.restore();
 }
 function cistern(x, y, alpha = 1) {
-  const p = iso(x, y),
-    w = 77 * scale;
-  contactShadow(p.x, p.y + 2 * scale, 25 * scale, 12.5 * scale);
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.drawImage(cisternArt, p.x - w / 2, p.y - w * 0.82, w, w);
-  ctx.restore();
+  sprite('well', x, y, alpha);
 }
 const cropTypes = {
   lettuce: { name: "Lettuce", minutes: 180, yield: 5, note: "Quick crop · one harvest" },
@@ -391,7 +365,7 @@ function drawGrowingBed(b) {
 function buildingSprite(kind, x, y, alpha = 1) {
   if (kind === "greenhouse") greenhouse({x,y,crop:{planted:false,moisture:0}},alpha);
   else if (kind === "well") cistern(x, y, alpha);
-  else sprite(kind, x, y, kind === "square" ? 228 : kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
+  else sprite(kind, x, y, alpha);
 }
 function placementValid(kind, x, y) {
   if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
@@ -408,7 +382,8 @@ function placementValid(kind, x, y) {
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
-  contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
+  const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
+  contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
   if (complete && b.kind === "greenhouse") greenhouse(b);
   else if (complete && b.kind === "garden") drawGrowingBed(b);
   else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
@@ -445,7 +420,6 @@ function resident(r) {
   const p = iso(r.x, r.y),
     s = scale;
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
-  const bob = 0;
   const indoors =
     !moving &&
     r.task === "sleep" &&
@@ -462,37 +436,15 @@ function resident(r) {
     ctx.lineWidth = 2;
     ctx.stroke();
   }
-  const py = p.y + bob;
-  const sheet = animations[r.id];
-  const visitingKind = r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null;
-  const row = moving
-    ? 0
-    : ["build", "craft", "compost"].includes(r.task) || ["workshop", "compost", "kitchen", "garden", "greenhouse", "coop"].includes(visitingKind)
-      ? 1
-      : ["rest", "socialize", "eat", "sleep", "gathering"].includes(r.task) || ["home", "square"].includes(visitingKind)
-        ? 3
-        : 2;
-  const fps = [8, 5, 1.5, 1][row];
-  const frame =
-    r.task === "sleep" && !moving ? 3 : Math.floor(time * fps + r.id) % 4;
-  const cellW = sheet.width / 4,
-    cellH = sheet.height / 4;
-  const w = 43 * s;
-  ctx.save();
-  ctx.translate(p.x, py);
-  if (r.target_x - r.target_y < r.x - r.y) ctx.scale(-1, 1);
-  ctx.drawImage(
-    sheet,
-    frame * cellW,
-    row * cellH,
-    cellW,
-    cellH,
-    -w / 2,
-    -w * 0.97,
-    w,
-    w,
-  );
-  ctx.restore();
+  const py = p.y;
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, visitingKind: r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null }, state.village.minutes, animationDelta);
+  residentAnimations.set(r.id, animation);
+  if (!residentSurfaces.has(r.id)) {
+    const surface = document.createElement('canvas'); surface.width = surface.height = 128;
+    residentSurfaces.set(r.id, surface);
+  }
+  drawResidentAnimation(ctx, residentSurfaces.get(r.id),
+    { base: animations[r.id], idle: idleAnimations[r.id] }, animation, p.x, py, 43 * s);
   if (isSelected) {
     ctx.font = `600 ${11 * s}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -617,7 +569,7 @@ function render() {
   const hour = (state.village.minutes % 1440) / 60;
   // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
-  const darkness = Math.max(0, Math.min(1, (0.18 - altitude) / 0.65));
+  const darkness = nightAmount(state.village.minutes);
   const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
   ctx.fillStyle = `rgba(237,150,84,${twilight})`;
   ctx.fillRect(0, 0, width, height);
@@ -628,23 +580,6 @@ function render() {
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
     )) {
       const p = iso(b.x, b.y);
-      const glow = ctx.createRadialGradient(
-        p.x,
-        p.y - 22 * scale,
-        0,
-        p.x,
-        p.y - 22 * scale,
-        60 * scale,
-      );
-      glow.addColorStop(0, `rgba(255,204,100,${darkness * 0.35})`);
-      glow.addColorStop(1, "rgba(255,204,100,0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(
-        p.x - 60 * scale,
-        p.y - 82 * scale,
-        120 * scale,
-        120 * scale,
-      );
       if (
         b.kind === "home" &&
         state.residents.some(
@@ -919,7 +854,18 @@ function updateSupplies(v) {
     : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs >= 60 ? "Egg storage is full." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
 }
+function updateSituations() {
+  const view = situationView(state.village, state.residents);
+  $("#open-situations").textContent = view.label;
+  replaceMarkup($("#situation-content"), view.markup);
+}
+function openSituations() {
+  $("#quest-dialog").close();
+  updateSituations();
+  $("#situation-dialog").showModal();
+}
 function updateUI() {
+  updateSituations();
   const v = state.village;
   updateSupplies(v);
   updateBuildingPanel();
@@ -987,12 +933,12 @@ function updateUI() {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
     el.querySelector("small").textContent =
-      (r.task === "idle" ? pastimes[r.favorite] || tasks.idle : tasks[r.task]) || r.task;
+      (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] : tasks[r.task]) || r.task;
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
     const r = state.residents.find((r) => r.id === selected);
-    $("#person .quote").textContent = "“" + r.reason + "”";
+    $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
       Fullness: 100 - r.hunger,
@@ -1082,6 +1028,7 @@ function frame(stamp) {
   last = stamp;
   const running =
     !paused && !document.hidden && !document.querySelector("dialog[open]");
+  animationDelta = running ? dt * Math.min(speed, 2) : 0;
   if (running) {
     time += dt * speed;
     let remaining = dt * speed;
@@ -1130,6 +1077,19 @@ function setup() {
       save();
     };
   }
+  $("#open-situations").onclick = openSituations;
+  $("#journal-situations").onclick = openSituations;
+  $("#close-situation").onclick = () => $("#situation-dialog").close();
+  $("#situation-content").onclick = (event) => {
+    const button = event.target.closest("[data-situation-response]");
+    if (!button) return;
+    const result = game.respond_situation(button.dataset.situationResponse);
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
+    toast(result === "ok" ? "The collective has agreed. Close the situation to give everyone time." : result);
+    $("#close-situation").focus();
+  };
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
       const isOpen = button.getAttribute("aria-expanded") === "true";
@@ -1209,10 +1169,11 @@ function setup() {
   $("#cancel-restart").onclick = () => $("#restart-dialog").close();
   $("#confirm-restart").onclick = () => {
     try {
-      localStorage.setItem(`${saveKey}-backup`, game.snapshot());
+      if (!artworkPreview) localStorage.setItem(`${saveKey}-backup`, game.snapshot());
     } catch {}
     game.free();
     game = new Game();
+    residentAnimations.clear();
     state = JSON.parse(game.snapshot());
     selected = null;
     tool = null;
@@ -1342,25 +1303,45 @@ function setup() {
 try {
   await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=farming-1" });
   await Promise.all([
-    atlas.decode(),
-    gardenArt.decode(),
-    ...Object.values(questArt).map((image) => image.decode()),
+    loadChickenArt(),
+    ...Object.values(buildingImages).map((image) => image.decode()),
+    ...Object.values(nightBuildingImages).map((image) => image.decode()),
     forestArt.decode(),
-    cisternArt.decode(),
     terrain.decode(),
     peopleArt.decode(),
     ...animations.map((image) => image.decode()),
+    ...idleAnimations.map((image) => image.decode()),
   ]);
   game = new Game();
   let saved;
-  try {
-    saved = localStorage.getItem(saveKey);
-  } catch {}
+  if (artworkPreview) {
+    const response = await fetch(residentPreview ? './artwork/resident-preview.json' : './artwork/village-preview.json');
+    if (!response.ok) throw new Error('Artwork preview could not load');
+    saved = await response.text();
+    if (nightPreview) {
+      const fixture = JSON.parse(saved);
+      for (const building of fixture.village.buildings) if (building.kind === 'garden') building.crop.growth = 180;
+      fixture.village.minutes = Math.floor(fixture.village.minutes / 1440) * 1440 + 21 * 60;
+      saved = JSON.stringify(fixture);
+    }
+  } else {
+    try { saved = localStorage.getItem(saveKey); } catch {}
+  }
   if (saved && !game.restore(saved)) {
+    if (artworkPreview) throw new Error("The artwork preview fixture is invalid");
     toast("Your old save could not be loaded. A fresh village is ready.");
   }
   state = JSON.parse(game.snapshot());
   setup();
+  if (artworkPreview) {
+    const notice = document.createElement('a');
+    notice.href = './';
+    notice.className = 'artwork-preview-notice';
+    notice.textContent = `${nightPreview ? 'Night artwork' : residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
+    document.body.append(notice);
+    togglePause();
+    save();
+  }
 } catch (error) {
   console.error(error);
   $("#load-status").textContent =
