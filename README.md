@@ -81,3 +81,11 @@ Run `cargo test --locked` for resource accounting, refusal, construction/harvest
 This is a small playable slice. Resident movement follows direct paths; collision-aware navigation, deeper relationship stories, skill progression, weather, budgets, and the full first-year scenario are future work. Each home provides three beds; residents without a bed sleep outdoors and recover more slowly. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
 
 Artwork was generated with OpenAI's built-in image generation tool using the user-approved Brazilian ecovila concept. The browser game uses separate sprites rather than displaying the concept as a background.
+
+## Artwork studio
+
+Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse all 18 artwork files as 36 individual sprite entries, including atlas cells, resident animations, archived references, and the game's procedural chickens.
+
+Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
+
+Add new sprites and their crop/scale metadata to `web/artwork/catalog.js`. Run `node scripts/verify-artwork.mjs` to catch uncatalogued files, missing sources, duplicate IDs, and invalid crop bounds. Runtime sprite dimensions are recorded in the catalog; update them when the game renderer changes.
