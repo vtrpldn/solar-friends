@@ -1,4 +1,5 @@
 import { buildingArt } from '../building-art.js?v=night-1';
+import { CHICKEN_WIDTH, chickenFrame } from '../chickens.js?v=painted-hens-1';
 // Cell coordinates are fractions of the original image; originals are never rewritten.
 export const catalog = [];
 function add(id, name, file, group, options = {}) {
@@ -13,6 +14,6 @@ for (const [kind, art] of Object.entries(buildingArt)) {
 ['Meadow','Red earth'].forEach((name,i) => add(`terrain-${i}`,name,'terrain-atlas.png','Terrain',{cell:[i/2,0,.5,1],anchor:.5}));
 ['Iara','Bento','Luz','Cauã','Nina'].forEach((name,i) => add(`portrait-${i}`,name,'residents-cistern.png','Portraits',{cell:[i%3/3,Math.floor(i/3)/2,1/3,.5],width:43,anchor:.97}));
 ['iara','bento','luz','caua','nina'].forEach((id,i) => add(id,['Iara','Bento','Luz','Cauã','Nina'][i],`animations/${id}.png`,'Animations',{animation:true,width:43,anchor:.97}));
-['Cream','Ochre','Brown'].forEach((name,i) => add(`hen-${i}`,`${name} chicken`,'chickens.png','Animals',{chicken:true,variant:i,cell:[i/3,0,1/3,.5],width:26,anchor:.93}));
+['Cream','Ochre','Brown'].forEach((name,i) => add(`hen-${i}`,`${name} chicken`,'chickens.png','Animals',{chicken:true,variant:i,cell:[i/3,0,1/3,.5],width:CHICKEN_WIDTH,anchor:chickenFrame({variant:i,peck:0}).anchor}));
 
 ['iara','bento','luz','caua','nina'].forEach((id,i) => add(`${id}-idle`,`${['Iara','Bento','Luz','Cauã','Nina'][i]} · standing idles`,`animations/${id}-idle.png`,'Animations',{animation:true,idleAnimation:true,width:43,anchor:.97}));

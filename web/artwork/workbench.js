@@ -1,4 +1,5 @@
 import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
+import { chickenFrame } from '../chickens.js?v=painted-hens-1';
 import { catalog } from './catalog.js?v=night-1';
 import { reviewPixels } from './pixel-checks.js';
 import { defaultRecipe } from './recipes.js';
@@ -52,11 +53,16 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   function paint(ctx, img, sprite, x, y, zoom = 1) {
     if (!img?.naturalWidth) return;
     if (sprite.building) return drawBuildingArt(ctx,img,sprite,x,y,zoom);
-    let cell = sprite.cell;
+    let cell = sprite.cell, anchor = sprite.anchor;
     if (sprite.animation) cell = [Number($('replacement-frame').value)/4,Number($('replacement-row').value)/4,.25,.25];
-    if (sprite.chicken) cell = [sprite.variant/3,Math.min(1,Number($('replacement-row').value))*.5,1/3,.5];
+    if (sprite.chicken) {
+      const pose = chickenFrame({variant:sprite.variant,peck:Number($('replacement-row').value) ? 3 : 0});
+      cell = [pose.column/3,pose.row*.5,1/3,.5];
+      // Preserve a proposed calibration offset while using the game's pose baseline.
+      anchor += pose.anchor - chickenFrame({variant:sprite.variant,peck:0}).anchor;
+    }
     const [cx,cy,cw,ch] = cell, size = sprite.width*zoom;
-    ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x-size/2,y-size*sprite.anchor,size,size);
+    ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x-size/2,y-size*anchor,size,size);
   }
   function scene() {
     const {ctx,w,h} = setup($('calibration-scene')), z = Number($('calibration-zoom').value), y = h*.73;
