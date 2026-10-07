@@ -483,7 +483,9 @@ canvas:active {
   background-position: -51px 0;
 }
 .build-tool[data-kind="garden"] .tool-art {
-  background-position: 0 -55px;
+  background-image: url("art/garden-simple-isometric.png");
+  background-size: contain;
+  background-position: center;
 }
 .build-tool[data-kind="grove"] .tool-art {
   background-position: -51px -55px;

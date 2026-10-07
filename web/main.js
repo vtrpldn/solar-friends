@@ -34,6 +34,8 @@ const tasks = {
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const atlas = new Image();
 atlas.src = "art/village-atlas-isometric.png";
+const gardenArt = new Image();
+gardenArt.src = "art/garden-simple-isometric.png";
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
@@ -240,6 +242,17 @@ function tree(x, y, s = 1, species = 0) {
   );
 }
 function sprite(kind, x, y, size, alpha = 1) {
+  if (kind === "garden") {
+    const p = iso(x, y),
+      w = size * scale * 1.18;
+    // Calibrate the painted bed's ~20:11 footprint to the map's 2:1 axes.
+    const h = w * (10 / 11);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(gardenArt, p.x - w / 2, p.y - h * 0.52, w, h);
+    ctx.restore();
+    return;
+  }
   const p = iso(x, y),
     cell = atlas.width / 2;
   const index = { home: 0, kitchen: 1, garden: 2, grove: 3 }[kind];
@@ -895,6 +908,7 @@ try {
   await init();
   await Promise.all([
     atlas.decode(),
+    gardenArt.decode(),
     forestArt.decode(),
     cisternArt.decode(),
     terrain.decode(),
