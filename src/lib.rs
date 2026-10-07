@@ -308,7 +308,14 @@ fn choose(r: &mut Resident, v: &Village) {
         && !situations::protected(v, r.id, "cook")
         && (r.favorite == "cook" || r.hunger > 55. || situations::helping(v, r.id))
     {
-        ("cook", "Preparing a pot of food for everyone.")
+        (
+            "cook",
+            if situations::helping(v, r.id) {
+                "Taking a kitchen shift so our neighbour can have time back."
+            } else {
+                "Preparing a pot of food for everyone."
+            },
+        )
     } else if available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && (r.favorite == "build" || r.id.is_multiple_of(2)) {

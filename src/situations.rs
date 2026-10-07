@@ -328,6 +328,65 @@ mod tests {
         assert_eq!(v.situations.resolved_count, 1);
     }
     #[test]
+    fn recovery_counts_time_at_rest_not_walking_or_sleeping() {
+        let mut g = Game::new();
+        g.app.insert_resource(concerned_village());
+        let mut query = g.app.world_mut().query::<&mut Resident>();
+        for mut r in query.iter_mut(g.app.world_mut()) {
+            r.task = "idle".into();
+            r.remaining = 90.;
+            if r.id == 2 {
+                r.task = "rest".into();
+                r.x = 5.;
+                r.y = 5.;
+                r.target_x = 10.;
+                r.target_y = 10.;
+            }
+        }
+        g.tick(0.25);
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .situations
+                .active
+                .as_ref()
+                .unwrap()
+                .recovery,
+            0.
+        );
+        let mut query = g.app.world_mut().query::<&mut Resident>();
+        for mut r in query.iter_mut(g.app.world_mut()).filter(|r| r.id == 2) {
+            r.x = r.target_x;
+            r.y = r.target_y;
+        }
+        g.tick(0.25);
+        let recovered = g
+            .app
+            .world()
+            .resource::<Village>()
+            .situations
+            .active
+            .as_ref()
+            .unwrap()
+            .recovery;
+        assert_eq!(recovered, 0.75);
+        g.app.world_mut().resource_mut::<Village>().minutes = 3. * 1440.;
+        g.tick(0.25);
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .situations
+                .active
+                .as_ref()
+                .unwrap()
+                .recovery,
+            recovered
+        );
+    }
+
+    #[test]
     fn saves_preserve_agreements_migrate_and_reject_bad_situations_atomically() {
         let mut g = Game::new();
         let mut v = concerned_village();
