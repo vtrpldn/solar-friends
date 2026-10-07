@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#263e30" />
+    <title>Solar Friends · Vila Aurora</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="loading">
+      <span class="sunmark">☀</span>
+      <h1>A little place to grow.</h1>
+      <p id="load-status">Preparing Vila Aurora…</p>
+    </div>
+    <header>
+      <a class="brand" href="./" aria-label="Solar Friends"
+        ><span class="sunmark">☀</span
+        ><span>SOLAR<br /><b>FRIENDS</b></span></a
+      >
+      <div class="village-title">
+        <span class="eyebrow">OUR LITTLE ECOVILA</span>
+        <h1>Vila Aurora <span>✦</span></h1>
+      </div>
+      <div class="resources" aria-label="Village resources">
+        <div title="Gather fallen timber to build">
+          <span>⌁</span><b id="wood">76</b><small>Timber</small>
+        </div>
+        <div title="Gardens produce food using water">
+          <span>♧</span><b id="food">42</b><small>Food</small>
+        </div>
+        <div title="Residents refill the cistern">
+          <span>◒</span><b id="water">65</b><small>Water</small>
+        </div>
+        <div title="Average resident wellbeing">
+          <span>♡</span><b id="happiness">75%</b><small>Wellbeing</small>
+        </div>
+      </div>
+      <button class="icon-button" id="settings" aria-label="Settings">
+        ⚙
+      </button>
+      <button class="icon-button" id="help" aria-label="How to play">?</button>
+    </header>
+    <main>
+      <canvas
+        id="world"
+        aria-label="Isometric ecovila. Select a building tool and click a clearing to build. Residents are also selectable from the community panel."
+      ></canvas>
+      <section class="season panel">
+        <span class="season-icon">☀</span>
+        <div>
+          <span class="eyebrow">MATA ATLÂNTICA</span
+          ><b id="date">Day 1 · 08:00</b
+          ><small>Warm season · clear skies</small>
+        </div>
+      </section>
+      <section class="chapter panel">
+        <span class="eyebrow" id="tutorial-count">ARRIVAL</span>
+        <h2 id="tutorial-title">A shared beginning</h2>
+        <p id="tutorial-copy"></p>
+        <button id="tutorial-action" class="primary" hidden></button>
+        <div id="objectives"></div>
+        <p id="village-needs"></p>
+      </section>
+      <aside class="community panel">
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">BETTER TOGETHER</span>
+            <h2>Our community</h2>
+          </div>
+          <span class="count">5</span>
+        </div>
+        <div id="residents"></div>
+        <div class="community-footer">
+          <span class="live-dot"></span> Everyone has their own rhythm.
+        </div>
+      </aside>
+      <section id="person" class="person panel" hidden></section>
+      <div class="world-controls">
+        <button id="zoom-out" aria-label="Zoom out">−</button
+        ><button id="center" aria-label="Center village">⌖</button
+        ><button id="zoom-in" aria-label="Zoom in">+</button>
+      </div>
+      <section class="village-note">
+        <span>✦</span>
+        <p id="latest-event">A little care goes a long way.</p>
+      </section>
+      <div id="placement" class="placement" hidden></div>
+      <nav class="build-bar panel" aria-label="Building tools">
+        <div class="build-label">
+          <span class="eyebrow">MAKE ROOM</span><b>Let's grow</b>
+        </div>
+        <div id="tools"></div>
+      </nav>
+      <div id="toast" role="status" hidden></div>
+    </main>
+    <footer>
+      <span
+        ><span class="live-dot"></span>
+        <span id="save-status">Your village, at your pace.</span></span
+      >
+      <div class="time-controls" aria-label="Time controls">
+        <button id="pause" aria-label="Pause simulation">Ⅱ</button
+        ><button data-speed="1" class="active">1×</button
+        ><button data-speed="2">2×</button><button data-speed="4">4×</button
+        ><button data-speed="8">8×</button>
+      </div>
+      <span class="footer-tip"
+        >Drag to explore <i>·</i> Scroll to zoom <i>·</i> Space to pause</span
+      ><button id="new-scenario">New tutorial</button
+      ><button id="save">Save village</button>
+    </footer>
+    <dialog id="help-dialog">
+      <button id="close-help" class="dialog-close" aria-label="Close help">
+        ×</button
+      ><span class="eyebrow">WELCOME TO VILA AURORA</span>
+      <h2>Grow a place to belong.</h2>
+      <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
+      <ol>
+        <li>
+          <b>Start with the essentials.</b> Follow the arrival guide: a cistern,
+          homes, a garden and a shared kitchen. Choose a building, then click
+          the clearing. Residents construct it during working hours.
+        </li>
+        <li>
+          <b>Get to know your neighbours.</b> Select a resident to see their
+          needs and request help. Explain why it matters if they hesitate;
+          exhausted people still need rest.
+        </li>
+        <li>
+          <b>Find your balance.</b> Gardens turn water into food. Gather timber
+          for buildings and refill water at the cistern. Residents choose work,
+          meals, rest and company for themselves. Each home has three beds.
+          Breakfast is at 06:30, lunch at noon, dinner at 18:00, and bedtime
+          around 21:30.
+        </li>
+      </ol>
+      <p class="hint">
+        A full day takes eight minutes at 1×. Pause and change speed at the
+        bottom. Escape cancels building. Your village autosaves locally; Save
+        village saves immediately.
+      </p>
+      <button id="start-playing" class="primary">
+        Let's grow together <span>→</span>
+      </button>
+    </dialog>
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <button
+        id="close-settings"
+        class="dialog-close"
+        aria-label="Close settings"
+      >
+        ×
+      </button>
+      <span class="eyebrow">MAKE YOURSELF AT HOME</span>
+      <h2 id="settings-title">Settings</h2>
+      <section class="settings-section" aria-labelledby="building-settings">
+        <h3 id="building-settings">Building &amp; placement</h3>
+        <label class="setting-row" for="placement-grid">
+          <span
+            ><b>Placement grid</b
+            ><small id="grid-description"
+              >Show tile guides while placing a building. The arrival clearing
+              stays reserved.</small
+            ></span
+          >
+          <input
+            type="checkbox"
+            role="switch"
+            id="placement-grid"
+            aria-describedby="grid-description"
+          />
+        </label>
+      </section>
+      <p class="hint" id="settings-status" role="status">
+        Changes apply immediately and stay on this device.
+      </p>
+    </dialog>
+    <dialog id="restart-dialog">
+      <span class="eyebrow">A FRESH BEGINNING</span>
+      <h2>Start the arrival again?</h2>
+      <p>
+        Your current village will be replaced by an empty lot and five arriving
+        neighbours. A backup stays on this device.
+      </p>
+      <button id="cancel-restart">Keep this village</button>
+      <button id="confirm-restart" class="primary">Start new tutorial</button>
+    </dialog>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,949 @@
+import { loadSettings, saveSettings } from "./settings.js";
+import {
+  project,
+  unproject,
+  TILE_HALF_WIDTH,
+  TILE_HALF_HEIGHT,
+} from "./projection.js";
+import init, { Game } from "./pkg/solar_friends.js";
+import {
+  paintTerrain,
+  GROUND_START,
+  GROUND_SIZE,
+  MAP_SIZE,
+  riverCenter,
+  riverBank,
+} from "./terrain.js";
+const $ = (s) => document.querySelector(s);
+const settings = loadSettings();
+const canvas = $("#world"),
+  ctx = canvas.getContext("2d");
+const kinds = {
+  home: ["Home", 32, "Three beds and a good night’s rest"],
+  garden: ["Garden", 12, "Food grown with care"],
+  kitchen: ["Kitchen", 40, "Meals taste better together"],
+  well: ["Cistern", 18, "Keep the community watered"],
+  grove: ["Food forest", 14, "Shade, fruit and a place to gather"],
+};
+const tasks = {
+  arrive: "Arriving at our new home",
+  idle: "Enjoying a quiet moment",
+  sleep: "Sleeping until morning",
+  eat: "Sitting down to eat",
+  rest: "Resting in the shade",
+  garden: "Tending the garden",
+  build: "Building together",
+  gather: "Gathering timber",
+  cook: "Making a shared meal",
+  water: "Refilling our water",
+  socialize: "Finding some company",
+};
+const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
+const atlas = new Image();
+atlas.src = "art/village-atlas-isometric.png";
+const gardenArt = new Image();
+gardenArt.src = "art/garden-simple-isometric.png";
+const terrain = new Image();
+terrain.src = "art/terrain-atlas.png";
+const peopleArt = new Image();
+peopleArt.src = "art/residents-cistern.png";
+const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
+  const image = new Image();
+  image.src = `art/animations/${name}.png`;
+  return image;
+});
+let groundLayer,
+  groundKey = null;
+const forestArt = new Image();
+forestArt.src = "art/mata-atlantica-atlas.png";
+const forestSpecies = [
+  { name: "Jequitibá-rosa", width: 145 },
+  { name: "Juçara", width: 112 },
+  { name: "Embaúba", width: 113 },
+  { name: "Pau-brasil", width: 125 },
+];
+const cisternArt = new Image();
+cisternArt.src = "art/cistern-isometric.png";
+let game,
+  state,
+  selected = null,
+  tool = null,
+  speed = 1,
+  paused = false,
+  zoom = 1,
+  pan = { x: 0, y: 0 };
+let width = 0,
+  height = 0,
+  scale = 1,
+  origin = { x: 0, y: 0 },
+  pointer = null,
+  drag = null,
+  last = 0,
+  uiElapsed = 0,
+  saveElapsed = 0,
+  time = 0,
+  lastTask = null,
+  toastTimer;
+let response = "",
+  encouragable = false;
+const saveKey = "solar-friends-v2";
+const escapeHtml = (s) =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+const hash = (x, y = 0) => {
+  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return n - Math.floor(n);
+};
+function avatar(id) {
+  return `<span class="avatar" style="background:${colors[id]}20"><canvas data-portrait="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
+}
+function paintPortraits() {
+  const cell = peopleArt.width / 3;
+  for (const portrait of document.querySelectorAll("[data-portrait]")) {
+    const id = Number(portrait.dataset.portrait);
+    portrait
+      .getContext("2d")
+      .drawImage(
+        peopleArt,
+        ((id % 3) + 0.28) * cell,
+        (Math.floor(id / 3) + 0.01) * cell,
+        cell * 0.56,
+        cell * 0.63,
+        0,
+        0,
+        96,
+        108,
+      );
+  }
+}
+function contactShadow(x, y, rx, ry, opacity = 0.2) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(rx, ry);
+  const shade = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
+  shade.addColorStop(0, `rgba(53,65,31,${opacity})`);
+  shade.addColorStop(1, "rgba(53,65,31,0)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
+}
+function toast(message) {
+  $("#toast").textContent = message;
+  $("#toast").hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
+}
+function save(manual = false) {
+  try {
+    localStorage.setItem(saveKey, game.snapshot());
+    $("#save-status").textContent = "Saved on this device";
+    if (manual) toast("Your village is saved. Come back whenever you like.");
+  } catch {
+    $("#save-status").textContent = "Saving unavailable";
+    if (manual)
+      toast(
+        "This browser could not save. Keep this tab open to preserve your village.",
+      );
+  }
+}
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  width = r.width;
+  height = r.height;
+  const dpr = Math.min(devicePixelRatio, 2);
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function iso(x, y) {
+  return project(x, y, origin, scale);
+}
+function uniso(x, y) {
+  return unproject(x, y, origin, scale);
+}
+function polygon(points, fill, stroke) {
+  ctx.beginPath();
+  points.forEach((p, i) =>
+    i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]),
+  );
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+function ellipse(x, y, rx, ry, color) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+function line(x, y, x2, y2, color, w = 1) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = w;
+  ctx.stroke();
+}
+function tile(x, y, fill, stroke) {
+  const p = iso(x, y),
+    a = TILE_HALF_WIDTH * scale,
+    b = TILE_HALF_HEIGHT * scale;
+  polygon(
+    [
+      [p.x, p.y - b],
+      [p.x + a, p.y],
+      [p.x, p.y + b],
+      [p.x - a, p.y],
+    ],
+    fill,
+    stroke,
+  );
+}
+function drawPlacementGrid() {
+  if (!settings.placementGrid || !tool) return;
+  ctx.save();
+  ctx.beginPath();
+  // Cell centers are integer coordinates, matching unproject's rounding.
+  for (let edge = 0.5; edge <= MAP_SIZE - 1.5; edge++) {
+    for (const [a, b] of [
+      [iso(edge, 0.5), iso(edge, MAP_SIZE - 1.5)],
+      [iso(0.5, edge), iso(MAP_SIZE - 1.5, edge)],
+    ]) {
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+    }
+  }
+  ctx.strokeStyle = "rgba(255, 250, 218, 0.65)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // The arrival spot remains reserved; the hover preview checks other limits.
+  for (let x = 9; x <= 11; x++)
+    for (let y = 12; y <= 14; y++) tile(x, y, "rgba(140, 81, 53, 0.15)");
+  ctx.restore();
+}
+function tree(x, y, s = 1, species = 0) {
+  const p = iso(x, y);
+  const w = forestSpecies[species].width * s * scale;
+  const cell = forestArt.width / 2;
+  contactShadow(p.x, p.y + 2 * scale, 23 * s * scale, 11.5 * s * scale, 0.16);
+  ctx.drawImage(
+    forestArt,
+    (species % 2) * cell,
+    Math.floor(species / 2) * cell,
+    cell,
+    cell,
+    p.x - w / 2,
+    p.y - w * 0.85,
+    w,
+    w,
+  );
+}
+function sprite(kind, x, y, size, alpha = 1) {
+  if (kind === "garden") {
+    const p = iso(x, y),
+      w = size * scale * 1.18;
+    // Calibrate the painted bed's ~20:11 footprint to the map's 2:1 axes.
+    const h = w * (10 / 11);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(gardenArt, p.x - w / 2, p.y - h * 0.52, w, h);
+    ctx.restore();
+    return;
+  }
+  const p = iso(x, y),
+    cell = atlas.width / 2;
+  const index = { home: 0, kitchen: 1, garden: 2, grove: 3 }[kind];
+  if (index === undefined || !atlas.complete || !atlas.naturalWidth) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const w = size * scale * 1.18;
+  const groundAnchor = { home: 0.7, kitchen: 0.7, garden: 0.59, grove: 0.74 }[
+    kind
+  ];
+  ctx.drawImage(
+    atlas,
+    (index % 2) * cell,
+    Math.floor(index / 2) * cell,
+    cell,
+    cell,
+    p.x - w / 2,
+    p.y - w * groundAnchor,
+    w,
+    w,
+  );
+  ctx.restore();
+}
+function cistern(x, y, alpha = 1) {
+  const p = iso(x, y),
+    w = 77 * scale;
+  contactShadow(p.x, p.y + 2 * scale, 25 * scale, 12.5 * scale);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(cisternArt, p.x - w / 2, p.y - w * 0.82, w, w);
+  ctx.restore();
+}
+function building(b) {
+  const p = iso(b.x, b.y),
+    complete = b.progress >= 100;
+  contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
+  if (b.kind === "well") cistern(b.x, b.y, complete ? 1 : 0.45);
+  else
+    sprite(
+      b.kind,
+      b.x,
+      b.y,
+      b.kind === "garden" ? 119 : b.kind === "grove" ? 105 : 152,
+      complete ? 1 : 0.4,
+    );
+  if (!complete) {
+    const s = scale;
+    // Upright posts and beams follow the same ground axes as the building.
+    const corners = [
+      [-0.9, -0.9],
+      [0.9, -0.9],
+      [0.9, 0.9],
+      [-0.9, 0.9],
+    ].map(([x, y]) => iso(b.x + x, b.y + y));
+    const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
+    for (let i = 0; i < corners.length; i++) {
+      const a = corners[i],
+        next = corners[(i + 1) % corners.length];
+      line(a.x, a.y, a.x, a.y - scaffoldHeight, "#ae8757", 2.5 * s);
+      line(
+        a.x,
+        a.y - scaffoldHeight,
+        next.x,
+        next.y - scaffoldHeight,
+        "#bd965f",
+        2.5 * s,
+      );
+    }
+    ctx.fillStyle = "#fffcf0";
+    ctx.fillRect(p.x - 27 * s, p.y + 9 * s, 54 * s, 5 * s);
+    ctx.fillStyle = "#7c9859";
+    ctx.fillRect(p.x - 27 * s, p.y + 9 * s, (54 * s * b.progress) / 100, 5 * s);
+  }
+}
+function resident(r) {
+  const p = iso(r.x, r.y),
+    s = scale;
+  const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
+  const bob = 0;
+  const indoors =
+    !moving &&
+    r.task === "sleep" &&
+    state.village.buildings.filter(
+      (b) => b.kind === "home" && b.progress >= 100,
+    )[Math.floor(r.id / 3)];
+  if (indoors) return;
+  const isSelected = selected === r.id;
+  contactShadow(p.x, p.y + 2 * s, 10 * s, 4 * s, 0.25);
+  if (isSelected) {
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y, 13 * s, 6 * s, 0, 0, 7);
+    ctx.strokeStyle = "#fff5cd";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  const py = p.y + bob;
+  const sheet = animations[r.id];
+  const row = moving
+    ? 0
+    : r.task === "build"
+      ? 1
+      : ["rest", "socialize", "eat", "sleep"].includes(r.task)
+        ? 3
+        : 2;
+  const fps = [8, 5, 1.5, 1][row];
+  const frame =
+    r.task === "sleep" && !moving ? 3 : Math.floor(time * fps + r.id) % 4;
+  const cellW = sheet.width / 4,
+    cellH = sheet.height / 4;
+  const w = 43 * s;
+  ctx.save();
+  ctx.translate(p.x, py);
+  if (r.target_x - r.target_y < r.x - r.y) ctx.scale(-1, 1);
+  ctx.drawImage(
+    sheet,
+    frame * cellW,
+    row * cellH,
+    cellW,
+    cellH,
+    -w / 2,
+    -w * 0.97,
+    w,
+    w,
+  );
+  ctx.restore();
+  if (isSelected) {
+    ctx.font = `600 ${11 * s}px 'DM Sans',sans-serif`;
+    ctx.textAlign = "center";
+    const tw = ctx.measureText(r.name).width;
+    ctx.fillStyle = "#fffcf2";
+    ctx.beginPath();
+    ctx.roundRect(
+      p.x - tw / 2 - 8 * s,
+      py - 64 * s,
+      tw + 16 * s,
+      18 * s,
+      5 * s,
+    );
+    ctx.fill();
+    ctx.fillStyle = "#354f38";
+    ctx.fillText(r.name, p.x, py - 51 * s);
+  } else if (!moving && ["rest", "sleep"].includes(r.task)) {
+    ctx.fillStyle = "#7e8b65";
+    ctx.font = `${12 * s}px Georgia`;
+    ctx.fillText("z", p.x + 8 * s, py - 30 * s);
+  }
+}
+const flora = [];
+for (let i = 0; i < 170; i++) {
+  let x = hash(i, 1) * 32 - 2,
+    y = hash(i, 2) * 32 - 2;
+  if (x > 1 && x < 27 && y > 1 && y < 27) continue;
+  if (Math.abs(x - riverCenter(y)) < 1.8) continue;
+  flora.push({
+    x,
+    y,
+    species: i % forestSpecies.length,
+    size: 0.65 + hash(i, 3) * 0.55,
+  });
+}
+function render() {
+  scale = Math.min(width / 1900, height / 1050) * zoom;
+  scale = Math.max(0.45, scale);
+  origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#dfe6c9";
+  ctx.fillRect(0, 0, width, height);
+  const key = state.village.buildings
+    .map((b) => `${b.id}:${b.kind}:${b.x}:${b.y}`)
+    .join("|");
+  if (groundKey !== key) {
+    groundLayer = paintTerrain(terrain, state.village.buildings);
+    groundKey = key;
+  }
+  ctx.save();
+  ctx.transform(
+    TILE_HALF_WIDTH * scale,
+    TILE_HALF_HEIGHT * scale,
+    -TILE_HALF_WIDTH * scale,
+    TILE_HALF_HEIGHT * scale,
+    origin.x,
+    origin.y,
+  );
+  ctx.drawImage(
+    groundLayer,
+    GROUND_START,
+    GROUND_START,
+    GROUND_SIZE,
+    GROUND_SIZE,
+  );
+  ctx.restore();
+  // Sparse currents move along the channel in world coordinates.
+  for (let i = 0; i < 32; i++) {
+    const y = ((i * 0.93 + time * 0.12) % 29) - 0.5;
+    const offset = Math.sin(i * 2.3) * 0.7;
+    const a = iso(riverCenter(y) + offset, y);
+    const b = iso(riverCenter(y + 0.35) + offset, y + 0.35);
+    line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
+  }
+  drawPlacementGrid();
+  // The communal paths remain visible beneath individually placed structures.
+  const objects = [
+    ...flora.map((f) => ({
+      depth: f.x + f.y,
+      draw: () => tree(f.x, f.y, f.size, f.species),
+    })),
+    ...state.village.buildings.map((b) => ({
+      depth: b.x + b.y,
+      draw: () => building(b),
+    })),
+    ...state.residents.map((r) => ({
+      depth: r.x + r.y + 0.6,
+      draw: () => resident(r),
+    })),
+  ];
+  objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
+  if (tool && pointer) {
+    const t = uniso(pointer.x, pointer.y),
+      valid =
+        t.x >= 1 &&
+        t.x <= MAP_SIZE - 2 &&
+        t.y >= 1 &&
+        t.y <= MAP_SIZE - 2 &&
+        !riverBank(t.x, t.y) &&
+        !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
+        !state.village.buildings.some(
+          (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
+        ) &&
+        state.village.wood >= kinds[tool][1];
+    tile(
+      t.x,
+      t.y,
+      valid ? "#f5f1b299" : "#cd745a88",
+      valid ? "#fff8cf" : "#b75943",
+    );
+    if (tool === "well") cistern(t.x, t.y, 0.6);
+    else sprite(tool, t.x, t.y, tool === "garden" ? 119 : 152, 0.55);
+  }
+  // Tiny birds drifting past the clearing.
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    for (let i = 0; i < 3; i++) {
+      const x = ((time * 13 + i * 130) % (width + 100)) - 50,
+        y = height * 0.2 + Math.sin(time * 0.25 + i) * 20;
+      ctx.beginPath();
+      ctx.moveTo(x - 5, y);
+      ctx.quadraticCurveTo(x - 2, y - 3 - Math.sin(time * 4), x, y);
+      ctx.quadraticCurveTo(x + 2, y - 3 - Math.sin(time * 4), x + 5, y);
+      ctx.strokeStyle = "#697b5380";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+  const hour = (state.village.minutes % 1440) / 60;
+  // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
+  const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
+  const darkness = Math.max(0, Math.min(1, (0.18 - altitude) / 0.65));
+  const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
+  ctx.fillStyle = `rgba(237,150,84,${twilight})`;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
+  ctx.fillRect(0, 0, width, height);
+  if (darkness > 0) {
+    for (const b of state.village.buildings.filter(
+      (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
+    )) {
+      const p = iso(b.x, b.y);
+      const glow = ctx.createRadialGradient(
+        p.x,
+        p.y - 22 * scale,
+        0,
+        p.x,
+        p.y - 22 * scale,
+        60 * scale,
+      );
+      glow.addColorStop(0, `rgba(255,204,100,${darkness * 0.35})`);
+      glow.addColorStop(1, "rgba(255,204,100,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(
+        p.x - 60 * scale,
+        p.y - 82 * scale,
+        120 * scale,
+        120 * scale,
+      );
+      if (
+        b.kind === "home" &&
+        state.residents.some(
+          (r) =>
+            r.task === "sleep" &&
+            Math.hypot(r.x - b.x - 0.75, r.y - b.y - 0.75) < 0.3,
+        )
+      ) {
+        ctx.fillStyle = "#fff1bf";
+        ctx.font = `${13 * scale}px Georgia`;
+        ctx.textAlign = "center";
+        ctx.fillText("z z", p.x, p.y - 87 * scale);
+      }
+    }
+  }
+}
+function selectPerson(id) {
+  selected = id;
+  response = "";
+  encouragable = false;
+  $("#person").hidden = false;
+  const r = state.residents.find((p) => p.id === id);
+  $("#person").innerHTML =
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="requests">${[
+      ["garden", "Tend garden"],
+      ["build", "Help build"],
+      ["gather", "Gather timber"],
+      ["water", "Refill water"],
+      ["cook", "Make a meal"],
+      ["rest", "Take a rest"],
+      ["socialize", "Spend time together"],
+    ]
+      .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
+      .join(
+        "",
+      )}</div><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button>`;
+  $(".close-person").onclick = () => {
+    selected = null;
+    $("#person").hidden = true;
+    updateUI();
+  };
+  $(".requests").onclick = (e) => {
+    const b = e.target.closest("[data-task]");
+    if (b) request(b.dataset.task, false);
+  };
+  $(".persuade").onclick = () => request(lastTask, true);
+  updateUI();
+}
+function request(task, encourage) {
+  lastTask = task;
+  response = game.request(selected, task, encourage);
+  encouragable = response.includes("talk about why");
+  state = JSON.parse(game.snapshot());
+  updateUI();
+}
+function updateUI() {
+  const v = state.village;
+  for (const k of ["wood", "food", "water"])
+    $("#" + k).textContent = Math.floor(v[k]);
+  $("#happiness").textContent =
+    Math.round(state.residents.reduce((s, r) => s + r.happiness, 0) / 5) + "%";
+  const mins = Math.floor(v.minutes) % 1440;
+  $("#date").textContent =
+    `Day ${Math.floor(v.minutes / 1440) + 1} · ${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+  const night = mins < 360 || mins >= 1140;
+  $(".season-icon").textContent = night ? "☾" : "☀";
+  $(".season small").textContent = night
+    ? "Warm season · quiet night"
+    : mins < 480
+      ? "Morning · breakfast & waking up"
+      : mins < 720
+        ? "Daylight · community work"
+        : mins < 840
+          ? "Midday · lunch & a little rest"
+          : mins < 1050
+            ? "Afternoon · community work"
+            : mins < 1200
+              ? "Evening · dinner together"
+              : "Evening · time to unwind";
+  $("#latest-event").textContent = v.events[0];
+  const finished = (kind) =>
+    v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
+  const steps = [
+    [
+      "A shared beginning",
+      v.arrived,
+      "Five neighbours are making their way into the clearing. Start with water, then give everyone a roof.",
+      null,
+    ],
+    [
+      "Water comes first",
+      finished("well") > 0,
+      "Place a cistern in the clearing. Residents will build it, then refill the community’s water supply.",
+      "well",
+    ],
+    [
+      "A roof for the night",
+      finished("home") > 0,
+      "Build your first home. Each home has three beds; good sleep restores energy for tomorrow.",
+      "home",
+    ],
+    [
+      "Our first harvest",
+      v.harvests > 0,
+      "Plant a garden. It needs water and a neighbour to tend it before the first harvest arrives.",
+      "garden",
+    ],
+    [
+      "A table to share",
+      finished("kitchen") > 0 && v.meals_served > 0,
+      "Build a kitchen. Three food and one water make five meals. Neighbours sit down to eat at mealtimes.",
+      "kitchen",
+    ],
+    [
+      "Room for everyone",
+      finished("home") >= 2,
+      "Build a second home so all five neighbours can sleep indoors. Gather more timber if supplies run low.",
+      "home",
+    ],
+    [
+      "Our first morning",
+      v.mornings > 0,
+      "Let the village settle into the night. Residents head to bed around 21:30 and wake after 06:00.",
+      null,
+    ],
+  ];
+  const current = steps.findIndex((s) => !s[1]);
+  const step = steps[current] || [
+    "Putting down roots",
+    true,
+    "You have water, shelter, food and a daily rhythm. Keep growing Vila Aurora at your own pace.",
+    null,
+  ];
+  $("#tutorial-count").textContent =
+    current < 0
+      ? "A PLACE TO BELONG"
+      : `ARRIVAL · ${current + 1} OF ${steps.length}`;
+  $("#tutorial-title").textContent = step[0];
+  $("#tutorial-copy").textContent = step[2];
+  const action = $("#tutorial-action");
+  const planned =
+    step[3] && v.buildings.some((b) => b.kind === step[3] && b.progress < 100);
+  action.hidden =
+    !step[3] ||
+    planned ||
+    (step[3] === "garden" && finished("garden") > 0) ||
+    (step[3] === "kitchen" && finished("kitchen") > 0);
+  action.textContent = step[3]
+    ? `Plan ${kinds[step[3]][0].toLowerCase()} · ${kinds[step[3]][1]} timber`
+    : "";
+  action.onclick = () => setTool(step[3]);
+  $("#objectives").innerHTML = steps
+    .map(
+      ([label, done], i) =>
+        `<div class="objective ${done ? "done" : ""} ${i === current ? "current" : ""}"><span>${done ? "✓" : i + 1}</span>${label}</div>`,
+    )
+    .join("");
+  $("#village-needs").textContent =
+    `${Math.min(5, finished("home") * 3)}/5 beds · ${v.meals} prepared meals · ${v.map_size} × ${v.map_size} lot`;
+  for (const r of state.residents) {
+    const el = $(`[data-resident="${r.id}"]`);
+    el.classList.toggle("selected", r.id === selected);
+    el.querySelector("small").textContent = tasks[r.task] || r.task;
+    el.querySelector(".energy-tiny i").style.width = r.energy + "%";
+  }
+  if (selected !== null) {
+    const r = state.residents.find((r) => r.id === selected);
+    $("#person .quote").textContent = "“" + r.reason + "”";
+    const stats = {
+      Energy: r.energy,
+      Fullness: 100 - r.hunger,
+      Connection: r.social,
+    };
+    for (const [n, v] of Object.entries(stats)) {
+      const el = $(`[data-stat="${n}"]`);
+      el.querySelector("i").style.width = v + "%";
+      el.querySelector(".value").textContent = Math.round(v);
+    }
+    $(".response").hidden = !response;
+    $(".response").textContent = response;
+    $(".persuade").hidden = !encouragable;
+  }
+  for (const button of document.querySelectorAll(".build-tool")) {
+    button.classList.toggle("active", button.dataset.kind === tool);
+    button.setAttribute("aria-pressed", String(button.dataset.kind === tool));
+  }
+}
+function setTool(kind) {
+  tool = tool === kind ? null : kind;
+  $("#placement").hidden = !tool;
+  $("#placement").textContent = tool
+    ? `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
+    : "";
+  canvas.style.cursor = tool ? "crosshair" : "grab";
+  updateUI();
+}
+function togglePause() {
+  paused = !paused;
+  $("#pause").textContent = paused ? "▶" : "Ⅱ";
+  $("#pause").setAttribute(
+    "aria-label",
+    paused ? "Resume simulation" : "Pause simulation",
+  );
+  $("#pause").classList.toggle("active", paused);
+}
+function frame(stamp) {
+  if (!last) last = stamp;
+  const dt = Math.min((stamp - last) / 1000, 0.1);
+  last = stamp;
+  const running =
+    !paused && !document.hidden && !document.querySelector("dialog[open]");
+  if (running) {
+    time += dt * speed;
+    let remaining = dt * speed;
+    while (remaining > 0) {
+      const step = Math.min(remaining, 0.1);
+      game.tick(step);
+      remaining -= step;
+    }
+  }
+  state = JSON.parse(game.snapshot());
+  render();
+  uiElapsed += dt;
+  saveElapsed += dt;
+  if (uiElapsed > 0.3) {
+    updateUI();
+    uiElapsed = 0;
+  }
+  if (saveElapsed > 15) {
+    save();
+    saveElapsed = 0;
+  }
+  requestAnimationFrame(frame);
+}
+function setup() {
+  $("#residents").innerHTML = state.residents
+    .map(
+      (r) =>
+        `<button class="resident" data-resident="${r.id}" aria-label="Meet ${escapeHtml(r.name)}">${avatar(r.id)}<span class="info"><b>${escapeHtml(r.name)}</b><small></small><span class="energy-tiny"><i></i></span></span><span class="arrow">›</span></button>`,
+    )
+    .join("");
+  paintPortraits();
+  $("#residents").onclick = (e) => {
+    const b = e.target.closest("[data-resident]");
+    if (b) selectPerson(+b.dataset.resident);
+  };
+  $("#tools").innerHTML = Object.entries(kinds)
+    .map(
+      ([kind, [name, cost, desc]]) =>
+        `<button class="build-tool" data-kind="${kind}" title="${desc}" aria-label="Build ${name}, ${cost} timber" aria-pressed="false"><span class="tool-art"></span><b>${name}</b><small>⌁ ${cost}</small></button>`,
+    )
+    .join("");
+  $("#tools").onclick = (e) => {
+    const b = e.target.closest("[data-kind]");
+    if (b) setTool(b.dataset.kind);
+  };
+  $("#pause").onclick = togglePause;
+  for (const b of document.querySelectorAll("[data-speed]"))
+    b.onclick = () => {
+      speed = +b.dataset.speed;
+      for (const x of document.querySelectorAll("[data-speed]"))
+        x.classList.toggle("active", x === b);
+    };
+  $("#save").onclick = () => save(true);
+  $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
+  $("#cancel-restart").onclick = () => $("#restart-dialog").close();
+  $("#confirm-restart").onclick = () => {
+    try {
+      localStorage.setItem(`${saveKey}-backup`, game.snapshot());
+    } catch {}
+    game.free();
+    game = new Game();
+    state = JSON.parse(game.snapshot());
+    selected = null;
+    tool = null;
+    pan = { x: 0, y: 0 };
+    zoom = 1;
+    time = 0;
+    $("#person").hidden = true;
+    $("#placement").hidden = true;
+    if (paused) togglePause();
+    $("#restart-dialog").close();
+    updateUI();
+    save();
+  };
+  $("#placement-grid").checked = settings.placementGrid;
+  $("#settings").onclick = () => $("#settings-dialog").showModal();
+  $("#close-settings").onclick = () => $("#settings-dialog").close();
+  $("#placement-grid").onchange = (event) => {
+    settings.placementGrid = event.target.checked;
+    $("#settings-status").textContent = saveSettings(settings)
+      ? "Saved on this device."
+      : "Applied for this session. Device storage is unavailable.";
+  };
+  $("#help").onclick = () => $("#help-dialog").showModal();
+  $("#close-help").onclick = $("#start-playing").onclick = () =>
+    $("#help-dialog").close();
+  $("#zoom-in").onclick = () => (zoom = Math.min(1.8, zoom + 0.15));
+  $("#zoom-out").onclick = () => (zoom = Math.max(0.6, zoom - 0.15));
+  $("#center").onclick = () => {
+    zoom = 1;
+    pan = { x: 0, y: 0 };
+  };
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false };
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    const r = canvas.getBoundingClientRect();
+    pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
+    if (drag && !tool) {
+      const dx = e.clientX - drag.x,
+        dy = e.clientY - drag.y;
+      if (Math.hypot(dx, dy) > 5) drag.moved = true;
+      if (drag.moved) pan = { x: drag.px + dx, y: drag.py + dy };
+    }
+  });
+  canvas.addEventListener("pointerup", (e) => {
+    const moved = drag?.moved;
+    drag = null;
+    if (moved) return;
+    const rect = canvas.getBoundingClientRect(),
+      x = e.clientX - rect.left,
+      y = e.clientY - rect.top;
+    pointer = { x, y };
+    if (tool) {
+      const p = uniso(x, y),
+        result = game.place(tool, p.x, p.y);
+      if (result === "ok") {
+        toast(`${kinds[tool][0]} planned. Let's build it together.`);
+        setTool(null);
+        state = JSON.parse(game.snapshot());
+        save();
+      } else toast(result);
+    } else {
+      const r = state.residents.find((r) => {
+        const p = iso(r.x, r.y);
+        return Math.hypot(p.x - x, p.y - 14 * scale - y) < 22 * scale;
+      });
+      if (r) selectPerson(r.id);
+    }
+  });
+  canvas.addEventListener("pointercancel", () => (drag = null));
+  canvas.addEventListener("pointerleave", () => {
+    if (!drag) pointer = null;
+  });
+  canvas.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      zoom = Math.max(0.6, Math.min(1.8, zoom - e.deltaY * 0.001));
+    },
+    { passive: false },
+  );
+  window.addEventListener("keydown", (e) => {
+    if (
+      e.code === "Space" &&
+      !["BUTTON", "INPUT", "SELECT", "TEXTAREA"].includes(
+        document.activeElement.tagName,
+      ) &&
+      !document.querySelector("dialog[open]")
+    ) {
+      e.preventDefault();
+      togglePause();
+    }
+    if (e.code === "Escape" && tool) setTool(null);
+  });
+  window.addEventListener("resize", resize);
+  window.addEventListener("pagehide", () => save());
+  document.addEventListener("visibilitychange", () => {
+    last = 0;
+    if (document.hidden) save();
+  });
+  resize();
+  updateUI();
+  $("#loading").hidden = true;
+  requestAnimationFrame(frame);
+}
+try {
+  await init();
+  await Promise.all([
+    atlas.decode(),
+    gardenArt.decode(),
+    forestArt.decode(),
+    cisternArt.decode(),
+    terrain.decode(),
+    peopleArt.decode(),
+    ...animations.map((image) => image.decode()),
+  ]);
+  game = new Game();
+  let saved;
+  try {
+    saved = localStorage.getItem(saveKey);
+  } catch {}
+  if (saved && !game.restore(saved)) {
+    toast("Your old save could not be loaded. A fresh village is ready.");
+  }
+  state = JSON.parse(game.snapshot());
+  setup();
+} catch (error) {
+  console.error(error);
+  $("#load-status").textContent =
+    "The village could not load. Please reload, or check that the WebAssembly build is being served.";
+}
