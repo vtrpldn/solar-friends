@@ -1,0 +1,12 @@
+#art-workbench{margin:0 0 30px;padding:24px;background:#e7ebdf;border:1px solid #bec8b6;border-radius:9px;scroll-margin-top:16px}
+.workbench-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.workbench-heading h2{font-size:30px}
+.workbench-tabs{display:flex;gap:8px;margin:20px 0}.workbench-tabs button[aria-pressed=true]{background:#365c49;color:#fff9eb}
+.workbench-layout{display:grid;grid-template-columns:minmax(360px,1.5fr) minmax(300px,1fr);gap:22px}
+#calibration-scene,#replacement-scene{width:100%;height:320px;display:block;background:#b2be94;border-radius:7px}
+#anchor-canvas{width:100%;height:340px;display:block;touch-action:none;cursor:ns-resize}
+.workbench-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.workbench-form input{width:100%}
+.workbench-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+#art-workbench pre{white-space:pre-wrap;max-height:260px;overflow:auto;font-size:12px;background:#fffaf0;padding:16px}
+#recipe-prompt{width:100%;min-height:190px}#recipe-references{display:flex;gap:12px;margin:15px 0}#recipe-references img{width:100px;height:95px;object-fit:contain;background:#d9dfcf;border-radius:5px}
+#recipe-history{max-height:160px;overflow:auto;font-size:12px;line-height:1.6}
+#art-workbench [hidden]{display:none}#workbench-status{min-height:20px}

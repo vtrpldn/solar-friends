@@ -1,10 +1,10 @@
 export const CHICKEN_WIDTH = 26;
 let chickenArt;
 let chickenReady;
-export function loadChickenArt() {
+export function loadChickenArt(source) {
   if (!chickenReady) {
     chickenArt = new Image();
-    chickenArt.src = new URL('./art/chickens.png', import.meta.url).href;
+    chickenArt.src = source || new URL('./art/chickens.png', import.meta.url).href;
     chickenReady = chickenArt.decode();
   }
   return chickenReady;

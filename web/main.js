@@ -1,3 +1,4 @@
+import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
@@ -29,7 +30,7 @@ const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
 const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
 const directScenario = previewParams.get('dev-scenario');
-let sandbox = null, sandboxName = '', devTools;
+let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -1377,6 +1378,8 @@ const devAPI = {
   isSandbox: () => !!sandbox,
   scenario: () => sandboxName || (artworkPreview ? 'Artwork preview' : 'Saved village'),
   async loadScenario(id) {
+    if (loadingScenario) throw new Error('A scenario is already loading.');
+    loadingScenario = true;
     const candidate = new Game();
     try {
       let raw;
@@ -1388,14 +1391,16 @@ const devAPI = {
         raw = JSON.stringify(makeScenario(id, fresh, JSON.parse(candidate.snapshot())));
       }
       if (!candidate.restore(raw)) throw new Error('Scenario failed simulation validation.');
-      if (!sandbox) sandbox = { game, paused, zoom, pan: { ...pan }, time };
-      else game.free();
-      game = candidate; sandboxName = id; game.dev_observe(true);
-      if (!paused) togglePause();
-      refreshDevScene(); devTools?.refresh();
     } catch (error) { candidate.free(); throw error; }
+    finally { loadingScenario = false; }
+    if (!sandbox) sandbox = { game, paused, zoom, pan: { ...pan }, time };
+    else game.free();
+    game = candidate; sandboxName = id; game.dev_observe(true);
+    if (!paused) togglePause();
+    refreshDevScene(); devTools?.refresh();
   },
   returnToVillage() {
+    if (loadingScenario) throw new Error('Wait for the scenario to finish loading.');
     if (!sandbox) return;
     game.free();
     ({ game, zoom, pan, time } = sandbox);
@@ -1427,8 +1432,22 @@ const devAPI = {
 };
 try {
   await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=devtools-1" });
+  let chickenSource;
+  if (artworkPreview && previewParams.has('art-draft')) {
+    const draft = readArtDraft(previewParams.get('art-draft'));
+    if (draft.config) {
+      const canonical = Object.values(buildingArt).find(art => art.name === draft.sprite.name.replace(' · night', ''));
+      if (canonical) Object.assign(canonical, { width: draft.config.width, anchor: draft.config.anchor, ...(draft.config.axes ? {axes:draft.config.axes} : {}) });
+    }
+    if (draft.candidate) {
+      const path = draft.sprite.file.replace('../', '');
+      const allImages = [...Object.values(buildingImages), ...Object.values(nightBuildingImages), forestArt, terrain, peopleArt, ...animations, ...idleAnimations];
+      for (const image of allImages) if (new URL(image.src).pathname.endsWith('/' + path)) image.src = draft.candidate;
+      if (path === 'art/chickens.png') chickenSource = draft.candidate;
+    }
+  }
   await Promise.all([
-    loadChickenArt(),
+    loadChickenArt(chickenSource),
     ...Object.values(buildingImages).map((image) => image.decode()),
     ...Object.values(nightBuildingImages).map((image) => image.decode()),
     forestArt.decode(),
@@ -1470,7 +1489,7 @@ try {
     const notice = document.createElement('a');
     notice.href = './';
     notice.className = 'artwork-preview-notice';
-    notice.textContent = `${nightPreview ? 'Night artwork' : residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
+    notice.textContent = `${previewParams.has('art-draft') ? 'ART DRAFT · ' : ''}${nightPreview ? 'Night artwork' : residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
     document.body.append(notice);
     togglePause();
     save();

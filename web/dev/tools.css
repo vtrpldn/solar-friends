@@ -20,3 +20,11 @@
 #dev-banner button{margin-left:12px;padding:5px 10px}
 .dev-link{display:block;padding:10px 0;border-bottom:1px solid #dddcca;text-decoration:none}.dev-link b{display:block}.dev-link span{font-size:12px}
 #dev-errors{max-height:180px;overflow:auto}
+#dev-dialog button:not(.dialog-close),#dev-button,#dev-banner button{border:1px solid #b7c1ae;border-radius:5px;background:#fffcf3;padding:9px 12px;font:600 12px 'Trebuchet MS',sans-serif;color:#2c4939;cursor:pointer;line-height:1.3}
+#dev-dialog button:not(.dialog-close):hover,#dev-button:hover{background:#e1e8d5;border-color:#6b8267}
+#dev-dialog button:disabled{opacity:.45;cursor:not-allowed}
+#dev-dialog .dev-tabs button[aria-pressed=true]{background:#345b48;color:#fff9ec;border-color:#345b48}
+#dev-dialog #dev-load{background:#345b48;color:#fff9ec;border-color:#345b48}
+#dev-dialog button:focus-visible,#dev-dialog select:focus-visible,#dev-dialog input:focus-visible,#dev-button:focus-visible{outline:3px solid #b66b45;outline-offset:3px}
+#dev-dialog input[type=number]{margin-right:8px}
+#dev-dialog .dev-tabs{position:sticky;top:-30px;background:#f6f1e5;z-index:1}

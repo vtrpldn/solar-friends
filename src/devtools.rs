@@ -16,6 +16,11 @@ pub(crate) struct Diagnostics {
     enabled: bool,
     history: VecDeque<Decision>,
 }
+impl Diagnostics {
+    pub(crate) fn clear_history(&mut self) {
+        self.history.clear();
+    }
+}
 pub(crate) fn record(v: Res<Village>, people: Query<&Resident>, mut log: ResMut<Diagnostics>) {
     if !log.enabled {
         return;

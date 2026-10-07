@@ -1117,6 +1117,10 @@ impl Game {
         save.village.map_size = MAP_SIZE;
         progression::update(&mut save.village);
         self.app.insert_resource(save.village);
+        self.app
+            .world_mut()
+            .resource_mut::<devtools::Diagnostics>()
+            .clear_history();
         true
     }
 }
