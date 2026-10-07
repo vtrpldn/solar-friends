@@ -582,7 +582,25 @@ function render() {
     }
   }
 }
+function closePanels() {
+  for (const button of document.querySelectorAll("[data-panel]")) {
+    $("#" + button.dataset.panel).hidden = true;
+    button.setAttribute("aria-expanded", "false");
+  }
+}
+function showPanel(id) {
+  closePanels();
+  selected = null;
+  $("#person").hidden = true;
+  if (tool) setTool(null);
+  $("#" + id).hidden = false;
+  $(`[data-panel="${id}"]`).setAttribute("aria-expanded", "true");
+  $("#" + id).querySelector("button").focus();
+  updateUI();
+}
 function selectPerson(id) {
+  closePanels();
+  if (tool) setTool(null);
   selected = id;
   response = "";
   encouragable = false;
@@ -608,6 +626,7 @@ function selectPerson(id) {
     selected = null;
     $("#person").hidden = true;
     updateUI();
+    showPanel("community-panel");
     $(`[data-resident="${id}"]`).focus();
   };
   $(".close-person").focus();
@@ -849,6 +868,13 @@ function setTool(kind) {
     openJournal();
     return;
   }
+  if (kind && $("#build-panel").hidden) {
+    closePanels();
+    $("#person").hidden = true;
+    selected = null;
+    $("#build-panel").hidden = false;
+    $('[data-panel="build-panel"]').setAttribute("aria-expanded", "true");
+  }
   tool = tool === kind ? null : kind;
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
@@ -896,6 +922,21 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for (const button of document.querySelectorAll("[data-panel]")) {
+    button.onclick = () => {
+      const isOpen = button.getAttribute("aria-expanded") === "true";
+      if (isOpen) { closePanels(); if (tool) setTool(null); }
+      else showPanel(button.dataset.panel);
+    };
+  }
+  for (const button of document.querySelectorAll("[data-close-panel]")) {
+    button.onclick = () => {
+      const id = button.closest("[id]").id;
+      closePanels();
+      if (tool) setTool(null);
+      $(`[data-panel="${id}"]`).focus();
+    };
+  }
   $("#residents").innerHTML = state.residents
     .map(
       (r) =>
@@ -971,6 +1012,7 @@ function setup() {
     zoom = 1;
     time = 0;
     $("#person").hidden = true;
+    closePanels();
     $("#placement").hidden = true;
     if (paused) togglePause();
     $("#restart-dialog").close();
@@ -1060,6 +1102,11 @@ function setup() {
     if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
       if (tool) setTool(null);
       else if (selected !== null) $(".close-person").click();
+      else {
+        const active = document.querySelector('[data-panel][aria-expanded="true"]');
+        closePanels();
+        active?.focus();
+      }
     }
   });
   window.addEventListener("resize", resize);

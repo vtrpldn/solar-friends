@@ -1,0 +1,85 @@
+/* A quiet city-builder HUD: the world stays visible until a tool is needed. */
+:root { --hud: #243d35ed; --hud-line: #ffffff24; --hud-text: #f4f3df; }
+main { position: fixed; inset: 0; height: 100dvh; }
+header { position: fixed; inset: 18px 20px auto; height: 44px; padding: 0; gap: 8px; background: none; border: 0; pointer-events: none; }
+header > * { pointer-events: auto; }
+.brand { gap: 8px; padding: 8px 14px; border: 0; border-radius: 10px; background: var(--hud); color: var(--hud-text); box-shadow: var(--shadow); }
+.brand .sunmark { font-size: 28px; }
+.brand span:last-child, .brand b { font-size: 9px; letter-spacing: 1.5px; }
+.village-title { display: none; }
+header #settings { margin-left: auto; }
+header .icon-button { width: 36px; height: 36px; color: var(--hud-text); background: var(--hud); border: 1px solid var(--hud-line); border-radius: 9px; }
+footer { position: fixed; z-index: 5; inset: auto 0 0; height: 48px; padding: 0 20px; gap: 24px; background: var(--hud); color: var(--hud-text); border-top: 1px solid var(--hud-line); backdrop-filter: blur(16px); }
+footer .season { position: static; display: flex; padding: 0; gap: 9px; background: none; border: 0; box-shadow: none; flex: none; }
+.season .eyebrow, .season small { display: none; }
+.season b { font-size: 12px; margin: 0; }
+.season-icon { font-size: 22px; }
+.resources { margin: 0 auto; gap: 26px; }
+.resources > div { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.resources span { font-size: 23px; color: #bdd49b; }
+.resources b { font-size: 13px; }
+.resources small { font-size: 10px; color: #d4ddc9; }
+.time-controls { gap: 3px; }
+.time-controls button { min-height: 32px; color: #d4ddc9; padding: 6px 9px; }
+.time-controls button.active { background: #a9c789; color: #20382a; }
+.hud-dock { position: absolute; z-index: 6; bottom: 64px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 5px; border: 1px solid var(--hud-line); border-radius: 13px; background: var(--hud); box-shadow: 0 6px 24px #152b3430; backdrop-filter: blur(16px); }
+.hud-dock button { display: flex; align-items: center; justify-content: center; gap: 9px; min-width: 100px; height: 44px; padding: 0 16px; border-radius: 8px; background: transparent; color: var(--hud-text); font-size: 12px; }
+.hud-dock button span { font-size: 23px; color: #bdd49b; line-height: 1; }
+.hud-dock button[aria-expanded="true"] { background: #a9c789; color: #20382a; }
+.hud-dock button[aria-expanded="true"] span { color: inherit; }
+.panel-close { position: absolute; right: 10px; top: 8px; width: 32px; height: 32px; border-radius: 7px; background: transparent; font-size: 22px; z-index: 1; }
+.chapter, .community, .person { top: auto; bottom: 132px; left: auto; right: 20px; width: 300px; max-height: calc(100dvh - 216px); background: var(--paper); z-index: 5; }
+.chapter, .person { padding: 22px; }
+.chapter > .eyebrow { display: block; padding-right: 25px; }
+.community .panel-heading { padding-right: 48px; }
+.chapter p, .chapter #tutorial-copy, .chapter #quest-reward { display: block; font-size: 12px; }
+.chapter #objectives { display: block; }
+.chapter #quest-speaker { display: none; }
+.chapter #village-needs { display: block; }
+.chapter h2 { font-size: 24px; }
+.objective { font-size: 11px; }
+.person .quote { margin: 12px 0; }
+.build-bar { bottom: 132px; width: max-content; max-width: calc(100% - 40px); padding: 14px 44px 12px 12px; gap: 12px; background: var(--paper); z-index: 5; }
+.build-label { display: none; }
+#tools { width: auto; padding: 3px; }
+.build-tool { width: 76px; min-height: 78px; }
+.placement { bottom: 250px; z-index: 6; max-width: calc(100% - 40px); white-space: normal; width: max-content; text-align: center; }
+.world-controls { left: auto; right: 20px; top: 76px; bottom: auto; flex-direction: column; gap: 5px; }
+.world-controls button { background: var(--hud); color: var(--hud-text); border: 1px solid var(--hud-line); width: 34px; height: 34px; }
+.village-note, .footer-tip { display: none; }
+#toast { top: 78px; max-width: min(440px, calc(100% - 110px)); }
+.save-actions { display: flex; gap: 10px; margin-bottom: 10px; }
+#save, #new-scenario { font-size: 12px; margin: 0; padding: 10px 14px; }
+#save-status { font-size: 11px; }
+@media (max-width: 760px) {
+  header { inset: 12px 12px auto; }
+  .brand span:last-child { display: block; }
+  footer { height: 80px; padding: 6px 12px; gap: 4px 12px; flex-wrap: wrap; justify-content: space-between; }
+  .resources { order: -1; width: 100%; justify-content: space-between; gap: 8px; margin: 0; }
+  .resources > div { display: flex; gap: 4px; }
+  .resources span { display: none; }
+  .resources b { font-size: 12px; }
+  .resources small { font-size: 9px; }
+  .season b { font-size: 10px; }
+  .season-icon { font-size: 18px; }
+  .time-controls button { min-height: 30px; padding: 5px 7px; }
+  .hud-dock { bottom: 92px; }
+  .hud-dock button { min-width: 88px; padding: 0 10px; height: 40px; gap: 6px; }
+  .chapter, .community, .person { bottom: 156px; right: 12px; width: min(320px, calc(100% - 24px)); max-height: calc(100dvh - 226px); }
+  .community .panel-heading h2 { font-size: 23px; }
+  .resident { padding: 10px 18px; gap: 10px; }
+  .resident b { font-size: 12px; }
+  .resident small { font-size: 11px; }
+  .avatar { width: 32px; height: 36px; }
+  .build-bar { bottom: 156px; width: calc(100% - 24px); max-width: none; padding: 10px 38px 10px 8px; }
+  #tools { width: 100%; }
+  .build-tool { width: 68px; }
+  .placement { bottom: 266px; font-size: 11px; }
+  .world-controls { right: 12px; top: 70px; }
+  #village-craft { margin: 10px; padding: 12px; font-size: 12px; }
+  #host-gathering { padding: 10px; font-size: 12px; }
+  #toast { top: 68px; }
+}
+@media (max-height: 500px) and (min-width: 761px) {
+  .chapter, .community, .person { bottom: 64px; max-height: calc(100dvh - 142px); }
+}
