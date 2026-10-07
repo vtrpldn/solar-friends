@@ -52,10 +52,12 @@
         </div>
       </section>
       <section class="chapter panel">
-        <span class="eyebrow">CHAPTER 01</span>
-        <h2>Putting down roots</h2>
-        <p>A good village starts with a little care.</p>
+        <span class="eyebrow" id="tutorial-count">ARRIVAL</span>
+        <h2 id="tutorial-title">A shared beginning</h2>
+        <p id="tutorial-copy"></p>
+        <button id="tutorial-action" class="primary" hidden></button>
         <div id="objectives"></div>
+        <p id="village-needs"></p>
       </section>
       <aside class="community panel">
         <div class="panel-heading">
@@ -97,10 +99,12 @@
       <div class="time-controls" aria-label="Time controls">
         <button id="pause" aria-label="Pause simulation">Ⅱ</button
         ><button data-speed="1" class="active">1×</button
-        ><button data-speed="2">2×</button><button data-speed="4">4×</button>
+        ><button data-speed="2">2×</button><button data-speed="4">4×</button
+        ><button data-speed="8">8×</button>
       </div>
       <span class="footer-tip"
         >Drag to explore <i>·</i> Scroll to zoom <i>·</i> Space to pause</span
+      ><button id="new-scenario">New tutorial</button
       ><button id="save">Save village</button>
     </footer>
     <dialog id="help-dialog">
@@ -111,8 +115,9 @@
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li>
-          <b>Plant the first seed.</b> Choose Garden below, then click an open
-          clearing. Residents will help construct it.
+          <b>Start with the essentials.</b> Follow the arrival guide: a cistern,
+          homes, a garden and a shared kitchen. Choose a building, then click
+          the clearing. Residents construct it during working hours.
         </li>
         <li>
           <b>Get to know your neighbours.</b> Select a resident to see their
@@ -122,16 +127,29 @@
         <li>
           <b>Find your balance.</b> Gardens turn water into food. Gather timber
           for buildings and refill water at the cistern. Residents choose work,
-          meals, rest and company for themselves.
+          meals, rest and company for themselves. Each home has three beds.
+          Breakfast is at 06:30, lunch at noon, dinner at 18:00, and bedtime
+          around 21:30.
         </li>
       </ol>
       <p class="hint">
-        Pause and change speed at the bottom. Escape cancels building. Your
-        village autosaves locally; Save village saves immediately.
+        A full day takes eight minutes at 1×. Pause and change speed at the
+        bottom. Escape cancels building. Your village autosaves locally; Save
+        village saves immediately.
       </p>
       <button id="start-playing" class="primary">
         Let's grow together <span>→</span>
       </button>
+    </dialog>
+    <dialog id="restart-dialog">
+      <span class="eyebrow">A FRESH BEGINNING</span>
+      <h2>Start the arrival again?</h2>
+      <p>
+        Your current village will be replaced by an empty lot and five arriving
+        neighbours. A backup stays on this device.
+      </p>
+      <button id="cancel-restart">Keep this village</button>
+      <button id="confirm-restart" class="primary">Start new tutorial</button>
     </dialog>
     <script type="module" src="main.js"></script>
   </body>

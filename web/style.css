@@ -878,3 +878,36 @@ dialog .hint {
     0 6px 24px #4c512416,
     inset 0 1px 0 #fffef7;
 }
+
+.chapter {
+  width: 260px;
+}
+.chapter #tutorial-copy {
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+#tutorial-action {
+  font-size: 12px;
+  padding: 10px 12px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.objective.current {
+  color: #344f34;
+  font-weight: 700;
+}
+#village-needs {
+  border-top: 1px solid #dedecb;
+  padding-top: 12px;
+  font-size: 10px;
+  margin-bottom: 0;
+}
+#restart-dialog {
+  max-width: 460px;
+}
+#cancel-restart {
+  padding: 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}

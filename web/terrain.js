@@ -1,8 +1,8 @@
 // Paint terrain once per village layout. Frames reuse this texture while panning
 // and zooming; the simulation's isometric coordinates stay unchanged.
 export const GROUND_START = -2.5;
-export const GROUND_SIZE = 18;
-const RESOLUTION = 1536;
+export const GROUND_SIZE = 24;
+const RESOLUTION = 2048;
 
 function surface() {
   const canvas = document.createElement("canvas");
@@ -37,7 +37,7 @@ export function paintTerrain(texture, buildings) {
   p.strokeStyle = p.fillStyle = "white";
   p.shadowColor = "white";
   p.shadowBlur = 12;
-  const hub = groundPoint(6.65, 7.15);
+  const hub = groundPoint(10, 13);
   p.beginPath();
   p.ellipse(hub[0], hub[1], 102, 80, -0.3, 0, Math.PI * 2);
   p.fill();
@@ -62,7 +62,7 @@ export function paintTerrain(texture, buildings) {
     p.ellipse(end[0], end[1], 45, 35, 0, 0, Math.PI * 2);
     p.fill();
   }
-  const entry = groundPoint(6.5, 13.6);
+  const entry = groundPoint(10, 19.5);
   p.lineWidth = 54;
   p.beginPath();
   p.moveTo(...hub);

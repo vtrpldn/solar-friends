@@ -161,6 +161,12 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
         }
     });
     b.map(|b| {
+        if task == "eat" || task == "socialize" {
+            return (
+                b.x as f32 + 0.75 + (id as f32 - 2.) * 0.35,
+                b.y as f32 + 1.4,
+            );
+        }
         (
             b.x as f32 + 0.75 + (id % 2) as f32 * 0.15,
             b.y as f32 + 0.75,
@@ -260,12 +266,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
         v.water = (v.water - dt * if sleeping { 0.002 } else { 0.009 }).max(0.);
-        if r.task != "arrive" {
-            if sleeping_time(v.minutes, r.id) && r.task != "sleep" {
-                choose(&mut r, &v);
-            } else if (r.task == "sleep" && !sleeping_time(v.minutes, r.id)) || r.remaining <= 0. {
-                choose(&mut r, &v);
-            }
+        if r.task != "arrive"
+            && (sleeping_time(v.minutes, r.id) != (r.task == "sleep") || r.remaining <= 0.)
+        {
+            choose(&mut r, &v);
         }
         let dx = r.target_x - r.x;
         let dy = r.target_y - r.y;
@@ -360,10 +364,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     } else {
                         false
                     };
-                    if fed {
-                        if let Some(slot) = meal_slot(v.minutes) {
-                            r.last_meal_slot = slot;
-                        }
+                    if fed && let Some(slot) = meal_slot(v.minutes) {
+                        r.last_meal_slot = slot;
                     }
                 }
                 _ => {}
@@ -713,12 +715,13 @@ mod tests {
         arrived(&mut g);
         let v = g.app.world().resource::<Village>().clone();
         let mut q = g.app.world_mut().query::<&mut Resident>();
-        let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
-        assign(&mut r, &v, "eat", "test", true);
-        r.x = 1.;
-        r.y = 1.;
-        r.hunger = 80.;
-        drop(r);
+        {
+            let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
+            assign(&mut r, &v, "eat", "test", true);
+            r.x = 1.;
+            r.y = 1.;
+            r.hunger = 80.;
+        }
         let food = g.app.world().resource::<Village>().food;
         g.tick(0.1);
         assert_eq!(g.app.world().resource::<Village>().food, food);

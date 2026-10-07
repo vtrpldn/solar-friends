@@ -4,13 +4,17 @@ const $ = (s) => document.querySelector(s);
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
-  home: ["Home", 32, "Room to rest and belong"],
+  home: ["Home", 32, "Three beds and a good night’s rest"],
   garden: ["Garden", 12, "Food grown with care"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
   well: ["Cistern", 18, "Keep the community watered"],
   grove: ["Food forest", 14, "Shade, fruit and a place to gather"],
 };
 const tasks = {
+  arrive: "Arriving at our new home",
+  idle: "Enjoying a quiet moment",
+  sleep: "Sleeping until morning",
+  eat: "Sitting down to eat",
   rest: "Resting in the shade",
   garden: "Tending the garden",
   build: "Building together",
@@ -26,8 +30,13 @@ const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
 peopleArt.src = "art/residents-cistern.png";
+const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
+  const image = new Image();
+  image.src = `art/animations/${name}.png`;
+  return image;
+});
 let groundLayer,
-  groundKey = "";
+  groundKey = null;
 const mango = new Image();
 mango.src = "art/mango-tree.png";
 let game,
@@ -52,7 +61,7 @@ let width = 0,
   toastTimer;
 let response = "",
   encouragable = false;
-const saveKey = "solar-friends-v1";
+const saveKey = "solar-friends-v2";
 const escapeHtml = (s) =>
   String(s).replace(
     /[&<>"']/g,
@@ -281,7 +290,14 @@ function resident(r) {
   const p = iso(r.x, r.y),
     s = scale;
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
-  const bob = moving ? Math.sin(time * 9 + r.id) * 1.4 * s : 0;
+  const bob = 0;
+  const indoors =
+    !moving &&
+    r.task === "sleep" &&
+    state.village.buildings.filter(
+      (b) => b.kind === "home" && b.progress >= 100,
+    )[Math.floor(r.id / 3)];
+  if (indoors) return;
   const isSelected = selected === r.id;
   contactShadow(p.x, p.y + 2 * s, 10 * s, 4 * s, 0.25);
   if (isSelected) {
@@ -292,19 +308,31 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y + bob;
-  const cell = peopleArt.width / 3;
-  const w = 44 * s;
+  const sheet = animations[r.id];
+  const row = moving
+    ? 0
+    : r.task === "build"
+      ? 1
+      : ["rest", "socialize", "eat", "sleep"].includes(r.task)
+        ? 3
+        : 2;
+  const fps = [8, 5, 1.5, 1][row];
+  const frame =
+    r.task === "sleep" && !moving ? 3 : Math.floor(time * fps + r.id) % 4;
+  const cellW = sheet.width / 4,
+    cellH = sheet.height / 4;
+  const w = 43 * s;
   ctx.save();
   ctx.translate(p.x, py);
   if (r.target_x - r.target_y < r.x - r.y) ctx.scale(-1, 1);
   ctx.drawImage(
-    peopleArt,
-    (r.id % 3) * cell,
-    Math.floor(r.id / 3) * cell,
-    cell,
-    cell,
+    sheet,
+    frame * cellW,
+    row * cellH,
+    cellW,
+    cellH,
     -w / 2,
-    -w * 0.94,
+    -w * 0.97,
     w,
     w,
   );
@@ -325,17 +353,17 @@ function resident(r) {
     ctx.fill();
     ctx.fillStyle = "#354f38";
     ctx.fillText(r.name, p.x, py - 51 * s);
-  } else if (!moving && r.task === "rest") {
+  } else if (!moving && ["rest", "sleep"].includes(r.task)) {
     ctx.fillStyle = "#7e8b65";
     ctx.font = `${12 * s}px Georgia`;
     ctx.fillText("z", p.x + 8 * s, py - 30 * s);
   }
 }
 const flora = [];
-for (let i = 0; i < 65; i++) {
-  let x = hash(i, 1) * 17 - 2,
-    y = hash(i, 2) * 17 - 2;
-  if (x > 1 && x < 12 && y > 1 && y < 12) continue;
+for (let i = 0; i < 110; i++) {
+  let x = hash(i, 1) * 24 - 2,
+    y = hash(i, 2) * 24 - 2;
+  if (x > 1 && x < 19 && y > 1 && y < 19) continue;
   flora.push({
     x,
     y,
@@ -344,9 +372,9 @@ for (let i = 0; i < 65; i++) {
   });
 }
 function render() {
-  scale = Math.min(width / 1100, height / 610) * zoom;
+  scale = Math.min(width / 1500, height / 800) * zoom;
   scale = Math.max(0.45, scale);
-  origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 220 * scale + pan.y };
+  origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 323 * scale + pan.y };
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
@@ -397,9 +425,10 @@ function render() {
     const t = uniso(pointer.x, pointer.y),
       valid =
         t.x >= 1 &&
-        t.x <= 12 &&
+        t.x <= 18 &&
         t.y >= 1 &&
-        t.y <= 12 &&
+        t.y <= 18 &&
+        !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
         !state.village.buildings.some(
           (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
         ) &&
@@ -428,10 +457,50 @@ function render() {
     }
   }
   const hour = (state.village.minutes % 1440) / 60;
-  const dusk = hour < 6 || hour > 19 ? 0.13 : hour > 17 ? 0.055 : 0;
-  if (dusk) {
-    ctx.fillStyle = `rgba(38,60,77,${dusk})`;
-    ctx.fillRect(0, 0, width, height);
+  // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
+  const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
+  const darkness = Math.max(0, Math.min(1, (0.18 - altitude) / 0.65));
+  const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
+  ctx.fillStyle = `rgba(237,150,84,${twilight})`;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
+  ctx.fillRect(0, 0, width, height);
+  if (darkness > 0) {
+    for (const b of state.village.buildings.filter(
+      (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
+    )) {
+      const p = iso(b.x, b.y);
+      const glow = ctx.createRadialGradient(
+        p.x,
+        p.y - 22 * scale,
+        0,
+        p.x,
+        p.y - 22 * scale,
+        60 * scale,
+      );
+      glow.addColorStop(0, `rgba(255,204,100,${darkness * 0.35})`);
+      glow.addColorStop(1, "rgba(255,204,100,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(
+        p.x - 60 * scale,
+        p.y - 82 * scale,
+        120 * scale,
+        120 * scale,
+      );
+      if (
+        b.kind === "home" &&
+        state.residents.some(
+          (r) =>
+            r.task === "sleep" &&
+            Math.hypot(r.x - b.x - 0.75, r.y - b.y - 0.75) < 0.3,
+        )
+      ) {
+        ctx.fillStyle = "#fff1bf";
+        ctx.font = `${13 * scale}px Georgia`;
+        ctx.textAlign = "center";
+        ctx.fillText("z z", p.x, p.y - 87 * scale);
+      }
+    }
   }
 }
 function selectPerson(id) {
@@ -486,25 +555,97 @@ function updateUI() {
   $(".season-icon").textContent = night ? "☾" : "☀";
   $(".season small").textContent = night
     ? "Warm season · quiet night"
-    : "Warm season · clear skies";
+    : mins < 480
+      ? "Morning · breakfast & waking up"
+      : mins < 720
+        ? "Daylight · community work"
+        : mins < 840
+          ? "Midday · lunch & a little rest"
+          : mins < 1050
+            ? "Afternoon · community work"
+            : mins < 1200
+              ? "Evening · dinner together"
+              : "Evening · time to unwind";
   $("#latest-event").textContent = v.events[0];
-  const objectives = [
+  const finished = (kind) =>
+    v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
+  const steps = [
     [
-      "Build our first garden",
-      v.buildings.some((b) => b.kind === "garden" && b.progress >= 100),
+      "A shared beginning",
+      v.arrived,
+      "Five neighbours are making their way into the clearing. Start with water, then give everyone a roof.",
+      null,
     ],
-    ["Bring in a first harvest", v.harvests > 0],
     [
-      "Grow a food forest",
-      v.buildings.some((b) => b.kind === "grove" && b.progress >= 100),
+      "Water comes first",
+      finished("well") > 0,
+      "Place a cistern in the clearing. Residents will build it, then refill the community’s water supply.",
+      "well",
+    ],
+    [
+      "A roof for the night",
+      finished("home") > 0,
+      "Build your first home. Each home has three beds; good sleep restores energy for tomorrow.",
+      "home",
+    ],
+    [
+      "Our first harvest",
+      v.harvests > 0,
+      "Plant a garden. It needs water and a neighbour to tend it before the first harvest arrives.",
+      "garden",
+    ],
+    [
+      "A table to share",
+      finished("kitchen") > 0 && v.meals_served > 0,
+      "Build a kitchen. Three food and one water make five meals. Neighbours sit down to eat at mealtimes.",
+      "kitchen",
+    ],
+    [
+      "Room for everyone",
+      finished("home") >= 2,
+      "Build a second home so all five neighbours can sleep indoors. Gather more timber if supplies run low.",
+      "home",
+    ],
+    [
+      "Our first morning",
+      v.mornings > 0,
+      "Let the village settle into the night. Residents head to bed around 21:30 and wake after 06:00.",
+      null,
     ],
   ];
-  $("#objectives").innerHTML = objectives
+  const current = steps.findIndex((s) => !s[1]);
+  const step = steps[current] || [
+    "Putting down roots",
+    true,
+    "You have water, shelter, food and a daily rhythm. Keep growing Vila Aurora at your own pace.",
+    null,
+  ];
+  $("#tutorial-count").textContent =
+    current < 0
+      ? "A PLACE TO BELONG"
+      : `ARRIVAL · ${current + 1} OF ${steps.length}`;
+  $("#tutorial-title").textContent = step[0];
+  $("#tutorial-copy").textContent = step[2];
+  const action = $("#tutorial-action");
+  const planned =
+    step[3] && v.buildings.some((b) => b.kind === step[3] && b.progress < 100);
+  action.hidden =
+    !step[3] ||
+    planned ||
+    (step[3] === "garden" && finished("garden") > 0) ||
+    (step[3] === "kitchen" && finished("kitchen") > 0);
+  action.textContent = step[3]
+    ? `Plan ${kinds[step[3]][0].toLowerCase()} · ${kinds[step[3]][1]} timber`
+    : "";
+  action.onclick = () => setTool(step[3]);
+  $("#objectives").innerHTML = steps
     .map(
-      ([label, done]) =>
-        `<div class="objective ${done ? "done" : ""}"><span>${done ? "✓" : ""}</span>${label}</div>`,
+      ([label, done], i) =>
+        `<div class="objective ${done ? "done" : ""} ${i === current ? "current" : ""}"><span>${done ? "✓" : i + 1}</span>${label}</div>`,
     )
     .join("");
+  $("#village-needs").textContent =
+    `${Math.min(5, finished("home") * 3)}/5 beds · ${v.meals} prepared meals · 20 × 20 lot`;
   for (const r of state.residents) {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
@@ -555,9 +696,10 @@ function frame(stamp) {
   if (!last) last = stamp;
   const dt = Math.min((stamp - last) / 1000, 0.1);
   last = stamp;
-  time += dt;
-  const running = !paused && !document.hidden && !$("#help-dialog").open;
+  const running =
+    !paused && !document.hidden && !document.querySelector("dialog[open]");
   if (running) {
+    time += dt * speed;
     let remaining = dt * speed;
     while (remaining > 0) {
       const step = Math.min(remaining, 0.1);
@@ -609,6 +751,27 @@ function setup() {
         x.classList.toggle("active", x === b);
     };
   $("#save").onclick = () => save(true);
+  $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
+  $("#cancel-restart").onclick = () => $("#restart-dialog").close();
+  $("#confirm-restart").onclick = () => {
+    try {
+      localStorage.setItem(`${saveKey}-backup`, game.snapshot());
+    } catch {}
+    game.free();
+    game = new Game();
+    state = JSON.parse(game.snapshot());
+    selected = null;
+    tool = null;
+    pan = { x: 0, y: 0 };
+    zoom = 1;
+    time = 0;
+    $("#person").hidden = true;
+    $("#placement").hidden = true;
+    if (paused) togglePause();
+    $("#restart-dialog").close();
+    updateUI();
+    save();
+  };
   $("#help").onclick = () => $("#help-dialog").showModal();
   $("#close-help").onclick = $("#start-playing").onclick = () =>
     $("#help-dialog").close();
@@ -700,6 +863,7 @@ try {
     mango.decode(),
     terrain.decode(),
     peopleArt.decode(),
+    ...animations.map((image) => image.decode()),
   ]);
   game = new Game();
   let saved;

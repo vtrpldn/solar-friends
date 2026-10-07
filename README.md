@@ -22,9 +22,13 @@ Open [the village](http://127.0.0.1:4173). The pinned Rust toolchain includes th
 
 Choose a building in the bottom toolbar and click a clearing. Residents construct it autonomously, or you can select a resident and ask for help. People can refuse based on their energy or hunger. Explaining the community need can overcome reluctance, but never exhaustion.
 
-Gardens use water to produce food. Residents gather fallen timber, refill water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The first chapter asks you to finish a garden, harvest, and grow a food forest.
+Gardens use water to produce food. Residents gather fallen timber, refill water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 20×20 lot (400 tiles, about twice the previous 196). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
 
 Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls for speed. Escape cancels placement. Saves stay in this browser's local storage and happen every 15 seconds, after placement, and on leaving the tab. Save village writes immediately.
+
+A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five individual sprite sheets animate walking, building, idling, and sitting. These are game-scaled routines, not a detailed biological model.
+
+New tutorial restarts the scenario after confirmation and retains one backup under `solar-friends-v2-backup`. Earlier prototype saves remain untouched under `solar-friends-v1`.
 
 ## Implementation
 
@@ -32,7 +36,7 @@ Rust owns simulation and validated saves. Bevy App and ECS schedule systems and 
 
 - `src/lib.rs`: simulation, requests, construction, saves, and tests.
 - `web/main.js`: canvas rendering, input, and browser persistence.
-- `web/style.css`: responsive interface.
+- `web/style.css`: desktop interface.
 - `web/art/`: generated transparent game sprites.
 - `assets/art-direction/`: approved concept and visual constraints.
 
@@ -40,6 +44,6 @@ Run `cargo test --locked` for resource accounting, refusal, construction/harvest
 
 ## Prototype scope
 
-This is a small playable slice. Resident movement follows direct paths; collision-aware navigation, relationship histories, skill progression, weather, budgets, and the full first-year scenario are future work. Homes and kitchens provide task destinations, with no housing capacity model yet. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
+This is a small playable slice. Resident movement follows direct paths; collision-aware navigation, relationship histories, skill progression, weather, budgets, and the full first-year scenario are future work. Each home provides three beds; residents without a bed sleep outdoors and recover more slowly. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
 
 Artwork was generated with OpenAI's built-in image generation tool using the user-approved Brazilian ecovila concept. The browser game uses separate sprites rather than displaying the concept as a background.
