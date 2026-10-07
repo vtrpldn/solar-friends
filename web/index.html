@@ -57,10 +57,20 @@
       <section class="chapter panel">
         <span class="eyebrow" id="tutorial-count">ARRIVAL</span>
         <h2 id="tutorial-title">A shared beginning</h2>
+        <p id="quest-speaker"></p>
+        <progress id="quest-progress" max="7" value="0"></progress>
         <p id="tutorial-copy"></p>
         <button id="tutorial-action" class="primary" hidden></button>
         <div id="objectives"></div>
+        <p id="quest-reward"></p>
+        <button id="open-journal" class="journal-button">Village journal</button>
         <p id="village-needs"></p>
+      </section>
+      <section id="village-craft" class="panel" hidden aria-label="Unlocked village activities">
+        <span class="eyebrow">OUR NEW POSSIBILITIES</span>
+        <p id="compost-stock" hidden></p>
+        <label id="tools-control" hidden><input id="use-tools" type="checkbox"> Use tools <small id="tools-stock"></small></label>
+        <div id="gathering-control" hidden><small id="gathering-status"></small><button id="host-gathering">Host a gathering</button></div>
       </section>
       <aside class="community panel">
         <div class="panel-heading">
@@ -107,9 +117,18 @@
       </div>
       <span class="footer-tip"
         >Drag to explore <i>·</i> Scroll to zoom <i>·</i> Space to pause</span
-      ><button id="new-scenario">New tutorial</button
+      ><button id="new-scenario">New village</button
       ><button id="save">Save village</button>
     </footer>
+    <dialog id="quest-dialog" aria-labelledby="journal-title">
+      <button id="close-journal" class="dialog-close" aria-label="Close village journal">×</button>
+      <span class="eyebrow">VILA AURORA · OUR SHARED STORY</span>
+      <h2 id="journal-title">Little steps. Lasting roots.</h2>
+      <p class="journal-intro">Start with a place to belong. Then follow the dreams of the people who call it home. Earlier efforts always count.</p>
+      <p id="quest-total"></p>
+      <div id="quest-list"></div>
+      <p class="hint">The village pauses while you read. Follow any available quest; all three paths progress together.</p>
+    </dialog>
     <dialog id="help-dialog">
       <button id="close-help" class="dialog-close" aria-label="Close help">
         ×</button
@@ -118,7 +137,7 @@
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li>
-          <b>Start with the essentials.</b> Follow the arrival guide: a cistern,
+          <b>Start with the essentials.</b> Follow A Shared Beginning in the village journal: a cistern,
           homes, a garden and a shared kitchen. Choose a building, then click
           the clearing. Residents construct it during working hours.
         </li>
@@ -184,7 +203,7 @@
         neighbours. A backup stays on this device.
       </p>
       <button id="cancel-restart">Keep this village</button>
-      <button id="confirm-restart" class="primary">Start new tutorial</button>
+      <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
     <script type="module" src="main.js?v=river-28"></script>
   </body>

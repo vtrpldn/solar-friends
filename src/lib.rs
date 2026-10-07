@@ -3,6 +3,9 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod progression;
+use progression::Progress;
+
 pub const MAP_SIZE: i32 = 28;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
@@ -18,6 +21,9 @@ const TASKS: &[&str] = &[
     "water",
     "gather",
     "socialize",
+    "compost",
+    "craft",
+    "gathering",
 ];
 
 #[derive(Component, Clone, Serialize, Deserialize)]
@@ -47,6 +53,8 @@ pub struct Building {
     pub x: i32,
     pub y: i32,
     pub progress: f32,
+    #[serde(default)]
+    pub contributors: u8,
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
@@ -63,6 +71,8 @@ pub struct Village {
     pub harvests: u32,
     pub arrived: bool,
     pub mornings: u32,
+    #[serde(default)]
+    pub progress: Progress,
 }
 #[derive(Resource, Default)]
 struct Step(f32);
@@ -93,6 +103,9 @@ fn cost(kind: &str) -> Option<f32> {
         "kitchen" => Some(40.),
         "well" => Some(18.),
         "grove" => Some(14.),
+        "compost" => Some(20.),
+        "square" => Some(36.),
+        "workshop" => Some(48.),
         _ => None,
     }
 }
@@ -136,6 +149,8 @@ fn available(v: &Village, task: &str) -> bool {
         "garden" => ready(v, "garden") && v.water >= 2.,
         "cook" => ready(v, "kitchen") && v.food >= 3. && v.water >= 1.,
         "water" => ready(v, "well"),
+        "compost" => ready(v, "compost") && v.progress.scraps >= 2,
+        "craft" => ready(v, "workshop") && v.wood >= 8. && v.progress.tool_uses <= 24,
         "eat" => v.food >= 1. || v.meals > 0,
         "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
         _ => false,
@@ -147,7 +162,7 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
             .map(|b| (b.x as f32 + 0.75, b.y as f32 + 0.75))
             .unwrap_or((CAMP.0 + (id as f32 - 2.) * 0.45, CAMP.1));
     }
-    if task == "gather" {
+    if task == "gather" && !ready(v, "grove") {
         return (3. + id as f32 * 0.4, 14.);
     }
     let b = v.buildings.iter().find(|b| {
@@ -158,14 +173,20 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
                 && b.kind
                     == match task {
                         "garden" => "garden",
-                        "cook" | "eat" | "socialize" => "kitchen",
+                        "cook" | "eat" => "kitchen",
+                        "socialize" if ready(v, "square") => "square",
+                        "socialize" => "kitchen",
+                        "gathering" if ready(v, "square") => "square",
+                        "gathering" => "kitchen",
+                        "compost" => "compost",
+                        "craft" => "workshop",
                         "water" => "well",
                         _ => "grove",
                     }
         }
     });
     b.map(|b| {
-        if task == "eat" || task == "socialize" {
+        if matches!(task, "eat" | "socialize" | "gathering") {
             return (
                 b.x as f32 + 0.75 + (id as f32 - 2.) * 0.35,
                 b.y as f32 + 1.4,
@@ -213,6 +234,11 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if r.energy < 28. {
         ("rest", "I need a break before I can help again.")
+    } else if v.progress.gathering_until > v.minutes && v.progress.invited & (1 << r.id) != 0 {
+        (
+            "gathering",
+            "Sharing food and stories in our community square.",
+        )
     } else if !work_time(v.minutes) {
         if r.social < 75. {
             (
@@ -233,8 +259,17 @@ fn choose(r: &mut Resident, v: &Village) {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && (r.favorite == "build" || r.id.is_multiple_of(2)) {
         ("build", "Let's get our basic infrastructure ready.")
+    } else if available(v, "compost") && v.progress.compost < 4 {
+        (
+            "compost",
+            "Turning kitchen scraps into nourishment for our soil.",
+        )
+    } else if ready(v, "grove") && v.progress.fruit < 6 {
+        ("gather", "Gathering the first fruit from our food forest.")
     } else if v.wood < 90. {
         ("gather", "Collecting fallen timber for our next building.")
+    } else if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
+        ("craft", "Making tools for our next shared project.")
     } else if r.favorite == "garden" && v.food < 60. && available(v, "garden") {
         ("garden", "I enjoy looking after the garden.")
     } else if r.favorite == "water" && v.water < 70. && available(v, "water") {
@@ -259,6 +294,43 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
         v.mornings += 1;
         event(&mut v, "A new morning. The community is waking up.");
+    }
+    if v.progress.gathering_until > 0. && v.minutes >= v.progress.gathering_until {
+        let attended = v.progress.attended;
+        if attended.count_ones() >= 3 {
+            v.progress.gatherings += 1;
+            v.progress.welcome_supper = true;
+            v.meals_served += attended.count_ones();
+            for mut r in &mut people {
+                if attended & (1 << r.id) != 0 {
+                    r.social = (r.social + 25.).min(100.);
+                    r.hunger = (r.hunger - 35.).max(0.);
+                    for other in 0..5 {
+                        if other != r.id && attended & (1 << other) != 0 {
+                            let bond = &mut v.progress.friendships[r.id * 5 + other];
+                            *bond = bond.saturating_add(1);
+                        }
+                    }
+                }
+            }
+            event(
+                &mut v,
+                "Food, stories and closer friendships. A gathering to remember.",
+            );
+        } else {
+            event(
+                &mut v,
+                "Too few neighbours made it to the square. Try gathering closer to home tomorrow.",
+            );
+        }
+        v.progress.gathering_until = 0.;
+        v.progress.invited = 0;
+        v.progress.attended = 0;
+        for mut r in &mut people {
+            if r.task == "gathering" {
+                r.remaining = 0.;
+            }
+        }
     }
     let builders: Vec<(f32, f32)> = people
         .iter()
@@ -301,14 +373,22 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 .min(100.);
             }
             "rest" => r.energy = (r.energy + dt * 0.65).min(100.),
-            "socialize" => {
+            "socialize" | "gathering" => {
                 r.social = (r.social + dt * 1.3).min(100.);
                 r.energy = (r.energy + dt * 0.12).min(100.);
             }
             "idle" | "eat" => r.energy = (r.energy + dt * 0.08).min(100.),
             _ => r.energy = (r.energy - dt * 0.11).max(0.),
         }
+        if r.task == "gathering" && v.progress.gathering_until > v.minutes {
+            v.progress.attended |= 1 << r.id;
+        }
         if r.task == "build" {
+            let tool_bonus = if v.progress.use_tools && v.progress.tool_uses > 0 {
+                1.25
+            } else {
+                1.
+            };
             let helpers = builders
                 .iter()
                 .filter(|(x, y)| (*x - r.target_x).abs() < 0.2 && (*y - r.target_y).abs() < 0.2)
@@ -318,17 +398,24 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     && (b.x as f32 + 0.75 - r.target_x).abs() < 0.2
                     && (b.y as f32 + 0.75 - r.target_y).abs() < 0.2
             }) {
+                b.contributors |= 1 << r.id;
                 b.progress = (b.progress
                     + dt * if r.favorite == "build" { 2.5 } else { 1.5 }
-                        * if helpers > 1 { 1.2 } else { 1. })
-                .min(100.);
+                        * if helpers > 1 { 1.2 } else { 1. }
+                        * tool_bonus)
+                    .min(100.);
                 if b.progress >= 100. {
+                    let shared = b.contributors.count_ones() >= 2;
                     let label = match b.kind.as_str() {
                         "home" => "home (three beds)",
                         "well" => "cistern",
                         k => k,
                     }
                     .to_string();
+                    if shared {
+                        v.progress.shared_builds += 1;
+                    }
+                    progression::use_tool(&mut v);
                     event(&mut v, format!("Our {label} is ready. Built together!"));
                 }
             } else {
@@ -338,14 +425,26 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.remaining <= 0. {
             match r.task.as_str() {
                 "gather" => {
-                    v.wood += if r.favorite == "gather" { 6. } else { 4. };
+                    let timber = if r.favorite == "gather" { 6 } else { 4 }
+                        + if progression::use_tool(&mut v) { 2 } else { 0 };
+                    v.wood += timber as f32;
+                    v.progress.timber = v.progress.timber.saturating_add(timber);
                     if ready(&v, "grove") {
                         v.food += 2.;
+                        v.progress.fruit = v.progress.fruit.saturating_add(2);
                     }
                 }
                 "garden" if v.water >= 2. => {
                     v.water -= 2.;
                     v.food += if r.favorite == "garden" { 8. } else { 5. };
+                    if v.progress.compost > 0 {
+                        v.progress.compost -= 1;
+                        v.food += 3.;
+                        v.progress.enriched_harvests += 1;
+                    }
+                    if progression::use_tool(&mut v) {
+                        v.food += 2.;
+                    }
                     v.harvests += 1;
                 }
                 "water" => v.water = (v.water + 14.).min(150.),
@@ -353,6 +452,19 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     v.food -= 3.;
                     v.water -= 1.;
                     v.meals += 5;
+                    v.progress.scraps = v.progress.scraps.saturating_add(1);
+                }
+                "compost" if v.progress.scraps >= 2 => {
+                    v.progress.scraps -= 2;
+                    v.progress.compost += 1;
+                }
+                "craft" if v.wood >= 8. && v.progress.tool_uses <= 24 => {
+                    v.wood -= 8.;
+                    v.progress.tool_uses += 12;
+                    v.progress.tools_crafted += 1;
+                }
+                "socialize" => {
+                    v.progress.social_mask |= 1 << r.id;
                 }
                 "eat" => {
                     let fed = if v.meals > 0 {
@@ -386,6 +498,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             "Everyone has arrived. Start with a cistern and a home.",
         );
     }
+    progression::update(&mut v);
 }
 #[wasm_bindgen]
 impl Game {
@@ -407,6 +520,7 @@ impl Game {
                 harvests: 0,
                 arrived: false,
                 mornings: 0,
+                progress: Progress::default(),
             })
             .add_systems(Update, simulate);
         for (id, (name, traits, favorite)) in [
@@ -463,6 +577,10 @@ impl Game {
             return "Unknown building.".into();
         };
         let mut v = self.app.world_mut().resource_mut::<Village>();
+        if !progression::unlocked(&v, kind) {
+            return "Complete the linked quest in the village journal to unlock this building."
+                .into();
+        }
         if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) {
             return "Choose a clearing inside the marked lot.".into();
         }
@@ -489,6 +607,7 @@ impl Game {
             x,
             y,
             progress: 0.,
+            contributors: 0,
         });
         event(
             &mut v,
@@ -500,7 +619,16 @@ impl Game {
         let v = self.app.world().resource::<Village>().clone();
         if !matches!(
             task,
-            "build" | "garden" | "cook" | "water" | "eat" | "gather" | "rest" | "socialize"
+            "build"
+                | "garden"
+                | "cook"
+                | "water"
+                | "eat"
+                | "gather"
+                | "rest"
+                | "socialize"
+                | "compost"
+                | "craft"
         ) {
             return "That request is not available.".into();
         }
@@ -509,6 +637,10 @@ impl Game {
                 "build" => "There are no construction projects yet.",
                 "garden" => "We need a finished garden and at least two water.",
                 "cook" => "We need a kitchen, three food and one water first.",
+                "compost" => "We need a compost station and two kitchen scraps first.",
+                "craft" => {
+                    "We need a workshop, eight timber and room for more tools (at most 36 uses)."
+                }
                 "eat" => "We need food or a prepared meal first.",
                 _ => "That task is not available yet.",
             }
@@ -550,11 +682,112 @@ impl Game {
         assign(&mut r, &v, task, reason, true);
         format!("{}: {}", r.name, reason)
     }
+    pub fn track_quest(&mut self, quest: usize) -> bool {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if quest >= 4 || (quest > 0 && !v.progress.completed[0]) {
+            return false;
+        }
+        v.progress.tracked = quest;
+        true
+    }
+    pub fn set_tools_enabled(&mut self, enabled: bool) {
+        self.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .use_tools = enabled;
+    }
+    pub fn contribute_workshop_timber(&mut self) -> String {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if !v.progress.completed[0] {
+            return "Finish A Shared Beginning first.".into();
+        }
+        if v.progress.workshop_timber {
+            return "The workshop timber is already set aside.".into();
+        }
+        if v.wood < 24. {
+            return "Gather 24 timber to set aside for our tool library.".into();
+        }
+        v.wood -= 24.;
+        v.progress.workshop_timber = true;
+        event(
+            &mut v,
+            "Timber set aside for our first tool library. Bento has a plan!",
+        );
+        progression::update(&mut v);
+        "ok".into()
+    }
+    pub fn host_gathering(&mut self) -> String {
+        let v = self.app.world().resource::<Village>();
+        if !ready(v, "square")
+            && !(v.progress.completed[0] && ready(v, "kitchen") && !v.progress.welcome_supper)
+        {
+            return "Build a community square first, or finish the introduction to host a welcome supper at the kitchen.".into();
+        }
+        let day = (v.minutes / 1440.).floor() as i32;
+        if v.progress.gathering_until > 0. || v.progress.gathering_day == day {
+            return "We can host one gathering each day. Come back tomorrow.".into();
+        }
+        if !(480.0..1080.).contains(&(v.minutes % 1440.)) {
+            return "Start a gathering between 08:00 and 18:00, with time before bed.".into();
+        }
+        if v.meals < 5 {
+            return "Set aside five prepared meals for the gathering.".into();
+        }
+        let mut invited: u8 = 0;
+        let mut q = self.app.world_mut().query::<&Resident>();
+        for r in q.iter(self.app.world()) {
+            if r.energy >= 25. && r.hunger <= 75. && r.task != "arrive" {
+                invited |= 1 << r.id;
+            }
+        }
+        if invited.count_ones() < 3 {
+            return "At least three neighbours need to be rested and fed.".into();
+        }
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        v.meals -= 5;
+        v.progress.gathering_day = day;
+        v.progress.gathering_until = v.minutes + 120.;
+        v.progress.invited = invited;
+        v.progress.attended = 0;
+        event(
+            &mut v,
+            "A gathering is starting! Neighbours are heading to our shared table.",
+        );
+        let v = v.clone();
+        let mut q = self.app.world_mut().query::<&mut Resident>();
+        for mut r in q.iter_mut(self.app.world_mut()) {
+            if invited & (1 << r.id) != 0 {
+                assign(
+                    &mut r,
+                    &v,
+                    "gathering",
+                    "Sharing food and stories at our shared table.",
+                    true,
+                );
+            }
+        }
+        "ok".into()
+    }
     pub fn restore(&mut self, data: &str) -> bool {
         let Ok(mut save) = serde_json::from_str::<Save>(data) else {
             return false;
         };
         let v = &save.village;
+        let p = &v.progress;
+        if p.tracked >= 4
+            || p.social_mask > 31
+            || p.invited > 31
+            || p.attended > 31
+            || p.tool_uses > 36
+            || p.gathering_day < -1
+            || !p.gathering_until.is_finite()
+            || p.gathering_until < 0.
+            || (p.gathering_until > 0.
+                && (p.gathering_until <= v.minutes || p.gathering_until > v.minutes + 120.))
+        {
+            return false;
+        }
         if v.version != 2
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
@@ -585,6 +818,7 @@ impl Game {
         }
         if v.buildings.iter().enumerate().any(|(i, b)| {
             b.id != i
+                || b.contributors > 31
                 || cost(&b.kind).is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
                 || !(1..=MAP_SIZE - 2).contains(&b.y)
@@ -607,6 +841,7 @@ impl Game {
             self.app.world_mut().spawn(r);
         }
         save.village.map_size = MAP_SIZE;
+        progression::update(&mut save.village);
         self.app.insert_resource(save.village);
         true
     }
@@ -809,3 +1044,6 @@ mod tests {
         assert_eq!(g.snapshot(), before);
     }
 }
+
+#[cfg(test)]
+mod quest_tests;
