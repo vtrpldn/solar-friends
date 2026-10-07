@@ -1335,3 +1335,33 @@ button:focus-visible {
     gap: 6px;
   }
 }
+
+.resource-cycle {
+  border-top: 1px solid #d7d7c2;
+  margin-top: 12px;
+  padding-top: 12px;
+  color: #53644a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.resource-cycle b {
+  display: block;
+  font-size: 12px;
+}
+.resource-cycle p {
+  margin: 5px 0;
+}
+.resource-cycle small {
+  display: block;
+  font-size: 11px;
+}
+.chapter .resource-cycle p {
+  display: block;
+  font-size: 12px;
+}
+
+@media (min-width: 761px) and (min-height: 851px) {
+  .chapter {
+    max-height: calc(100% - 370px);
+  }
+}
