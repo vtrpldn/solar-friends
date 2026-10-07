@@ -874,6 +874,7 @@ function setTool(kind) {
     selected = null;
     $("#build-panel").hidden = false;
     $('[data-panel="build-panel"]').setAttribute("aria-expanded", "true");
+    $(`[data-kind="${kind}"]`).focus();
   }
   tool = tool === kind ? null : kind;
   $("#placement").hidden = !tool;

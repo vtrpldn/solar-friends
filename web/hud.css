@@ -24,9 +24,9 @@ footer .season { position: static; display: flex; padding: 0; gap: 9px; backgrou
 .time-controls button.active { background: #a9c789; color: #20382a; }
 .hud-dock { position: absolute; z-index: 6; bottom: 64px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 5px; border: 1px solid var(--hud-line); border-radius: 13px; background: var(--hud); box-shadow: 0 6px 24px #152b3430; backdrop-filter: blur(16px); }
 .hud-dock button { display: flex; align-items: center; justify-content: center; gap: 9px; min-width: 100px; height: 44px; padding: 0 16px; border-radius: 8px; background: transparent; color: var(--hud-text); font-size: 12px; }
-.hud-dock button span { font-size: 23px; color: #bdd49b; line-height: 1; }
+.hud-dock button svg { width: 22px; height: 22px; flex: none; color: #bdd49b; line-height: 1; }
 .hud-dock button[aria-expanded="true"] { background: #a9c789; color: #20382a; }
-.hud-dock button[aria-expanded="true"] span { color: inherit; }
+.hud-dock button[aria-expanded="true"] svg { color: inherit; }
 .panel-close { position: absolute; right: 10px; top: 8px; width: 32px; height: 32px; border-radius: 7px; background: transparent; font-size: 22px; z-index: 1; }
 .chapter, .community, .person { top: auto; bottom: 132px; left: auto; right: 20px; width: 300px; max-height: calc(100dvh - 216px); background: var(--paper); z-index: 5; }
 .chapter, .person { padding: 22px; }
