@@ -6,7 +6,14 @@ import {
   TILE_HALF_HEIGHT,
 } from "./projection.js";
 import init, { Game } from "./pkg/solar_friends.js";
-import { paintTerrain, GROUND_START, GROUND_SIZE } from "./terrain.js";
+import {
+  paintTerrain,
+  GROUND_START,
+  GROUND_SIZE,
+  MAP_SIZE,
+  riverCenter,
+  riverBank,
+} from "./terrain.js";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const canvas = $("#world"),
@@ -207,10 +214,10 @@ function drawPlacementGrid() {
   ctx.save();
   ctx.beginPath();
   // Cell centers are integer coordinates, matching unproject's rounding.
-  for (let edge = 0.5; edge <= 18.5; edge++) {
+  for (let edge = 0.5; edge <= MAP_SIZE - 1.5; edge++) {
     for (const [a, b] of [
-      [iso(edge, 0.5), iso(edge, 18.5)],
-      [iso(0.5, edge), iso(18.5, edge)],
+      [iso(edge, 0.5), iso(edge, MAP_SIZE - 1.5)],
+      [iso(0.5, edge), iso(MAP_SIZE - 1.5, edge)],
     ]) {
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
@@ -401,10 +408,11 @@ function resident(r) {
   }
 }
 const flora = [];
-for (let i = 0; i < 110; i++) {
-  let x = hash(i, 1) * 24 - 2,
-    y = hash(i, 2) * 24 - 2;
-  if (x > 1 && x < 19 && y > 1 && y < 19) continue;
+for (let i = 0; i < 170; i++) {
+  let x = hash(i, 1) * 32 - 2,
+    y = hash(i, 2) * 32 - 2;
+  if (x > 1 && x < 27 && y > 1 && y < 27) continue;
+  if (Math.abs(x - riverCenter(y)) < 1.8) continue;
   flora.push({
     x,
     y,
@@ -413,9 +421,9 @@ for (let i = 0; i < 110; i++) {
   });
 }
 function render() {
-  scale = Math.min(width / 1500, height / 800) * zoom;
+  scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.45, scale);
-  origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 323 * scale + pan.y };
+  origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
@@ -443,6 +451,14 @@ function render() {
     GROUND_SIZE,
   );
   ctx.restore();
+  // Sparse currents move along the channel in world coordinates.
+  for (let i = 0; i < 32; i++) {
+    const y = ((i * 0.93 + time * 0.12) % 29) - 0.5;
+    const offset = Math.sin(i * 2.3) * 0.7;
+    const a = iso(riverCenter(y) + offset, y);
+    const b = iso(riverCenter(y + 0.35) + offset, y + 0.35);
+    line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
+  }
   drawPlacementGrid();
   // The communal paths remain visible beneath individually placed structures.
   const objects = [
@@ -464,9 +480,10 @@ function render() {
     const t = uniso(pointer.x, pointer.y),
       valid =
         t.x >= 1 &&
-        t.x <= 18 &&
+        t.x <= MAP_SIZE - 2 &&
         t.y >= 1 &&
-        t.y <= 18 &&
+        t.y <= MAP_SIZE - 2 &&
+        !riverBank(t.x, t.y) &&
         !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
         !state.village.buildings.some(
           (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
@@ -684,7 +701,7 @@ function updateUI() {
     )
     .join("");
   $("#village-needs").textContent =
-    `${Math.min(5, finished("home") * 3)}/5 beds · ${v.meals} prepared meals · 20 × 20 lot`;
+    `${Math.min(5, finished("home") * 3)}/5 beds · ${v.meals} prepared meals · ${v.map_size} × ${v.map_size} lot`;
   for (const r of state.residents) {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);

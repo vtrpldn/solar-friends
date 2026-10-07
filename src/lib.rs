@@ -3,7 +3,7 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub const MAP_SIZE: i32 = 20;
+pub const MAP_SIZE: i32 = 28;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -81,6 +81,10 @@ fn event(v: &mut Village, text: impl Into<String>) {
         v.events.insert(0, text);
         v.events.truncate(12);
     }
+}
+fn river_bank(x: i32, y: i32) -> bool {
+    // Keep footprints and resident approach points on the village side.
+    x as f32 >= 25.8 + (y as f32 * 0.32).sin() * 0.65 - 2.3
 }
 fn cost(kind: &str) -> Option<f32> {
     match kind {
@@ -462,6 +466,9 @@ impl Game {
         if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) {
             return "Choose a clearing inside the marked lot.".into();
         }
+        if river_bank(x, y) {
+            return "Keep the river and its banks clear. Choose a clearing farther inland.".into();
+        }
         if (x as f32 - CAMP.0).abs() < 1.5 && (y as f32 - CAMP.1).abs() < 1.5 {
             return "Keep the arrival clearing free for gathering and supplies.".into();
         }
@@ -544,14 +551,14 @@ impl Game {
         format!("{}: {}", r.name, reason)
     }
     pub fn restore(&mut self, data: &str) -> bool {
-        let Ok(save) = serde_json::from_str::<Save>(data) else {
+        let Ok(mut save) = serde_json::from_str::<Save>(data) else {
             return false;
         };
         let v = &save.village;
         if v.version != 2
-            || v.map_size != MAP_SIZE
+            || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
-            || v.buildings.len() > 324
+            || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
             || !v.minutes.is_finite()
             || v.minutes < 0.
             || [v.wood, v.food, v.water]
@@ -581,6 +588,7 @@ impl Game {
                 || cost(&b.kind).is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
                 || !(1..=MAP_SIZE - 2).contains(&b.y)
+                || river_bank(b.x, b.y)
                 || !b.progress.is_finite()
                 || !(0.0..=100.).contains(&b.progress)
         }) {
@@ -598,6 +606,7 @@ impl Game {
         for r in save.residents {
             self.app.world_mut().spawn(r);
         }
+        save.village.map_size = MAP_SIZE;
         self.app.insert_resource(save.village);
         true
     }
@@ -645,6 +654,30 @@ mod tests {
         assert_ne!(g.place("garden", 18, 18), "ok");
         assert_ne!(g.place("garden", 19, 19), "ok");
         assert_ne!(g.place("home", 10, 13), "ok");
+    }
+    #[test]
+    fn new_land_is_buildable_and_river_is_protected() {
+        let mut g = Game::new();
+        assert_eq!(g.place("garden", 21, 25), "ok");
+        let before = g.snapshot();
+        for y in 1..=26 {
+            assert_ne!(g.place("garden", 26, y), "ok");
+        }
+        assert_ne!(g.place("garden", 27, 25), "ok");
+        assert_eq!(g.snapshot(), before);
+    }
+    #[test]
+    fn previous_lot_saves_expand_without_losing_buildings() {
+        let mut g = Game::new();
+        assert_eq!(g.place("home", 8, 8), "ok");
+        let mut old: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        old["village"]["map_size"] = 20.into();
+        let mut restored = Game::new();
+        assert!(restored.restore(&old.to_string()));
+        let v = restored.app.world().resource::<Village>();
+        assert_eq!(v.map_size, 28);
+        assert_eq!(v.buildings.len(), 1);
+        assert_eq!(v.wood, 78.);
     }
     #[test]
     fn exhaustion_and_bedtime_cannot_be_persuaded() {
