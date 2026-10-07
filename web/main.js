@@ -250,9 +250,10 @@ function drawPlacementGrid() {
   ctx.strokeStyle = "rgba(255, 250, 218, 0.65)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  // The arrival spot remains reserved; the hover preview checks other limits.
-  for (let x = 9; x <= 11; x++)
-    for (let y = 12; y <= 14; y++) tile(x, y, "rgba(140, 81, 53, 0.15)");
+  // Shade unavailable cell centers using the same rules as the hover preview.
+  for (let x = 1; x <= MAP_SIZE - 2; x++)
+    for (let y = 1; y <= MAP_SIZE - 2; y++)
+      if (!placementValid(tool, x, y)) tile(x, y, "rgba(140, 81, 53, 0.2)");
   ctx.restore();
 }
 function tree(x, y, s = 1, species = 0) {
@@ -363,21 +364,27 @@ function drawGrowingBed(b) {
   }
   ctx.restore();
 }
+function buildingSprite(kind, x, y, alpha = 1) {
+  if (kind === "well") cistern(x, y, alpha);
+  else sprite(kind, x, y, kind === "garden" ? 119 : kind === "grove" ? 105 : 152, alpha);
+}
+function placementValid(kind, x, y) {
+  if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
+  if (kind === "road") {
+    return state.village.roads.some(([rx, ry]) => rx === x && ry === y) ||
+      !state.village.buildings.some(b => b.x === x && b.y === y);
+  }
+  return !(Math.abs(x - 10) < 1.5 && Math.abs(y - 13) < 1.5) &&
+    !state.village.buildings.some(b => Math.abs(b.x - x) < 2 && Math.abs(b.y - y) < 2) &&
+    state.village.wood >= kinds[kind][1];
+}
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
   contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
-  if (b.kind === "well") cistern(b.x, b.y, complete ? 1 : 0.45);
-  else if (complete && b.kind === "garden" && b.crop.growth < 180)
+  if (complete && b.kind === "garden" && b.crop.growth < 180)
     drawGrowingBed(b);
-  else
-    sprite(
-      b.kind,
-      b.x,
-      b.y,
-      b.kind === "garden" ? 119 : b.kind === "grove" ? 105 : 152,
-      complete ? 1 : 0.4,
-    );
+  else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
@@ -553,27 +560,14 @@ function render() {
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y),
-      valid =
-        t.x >= 1 &&
-        t.x <= MAP_SIZE - 2 &&
-        t.y >= 1 &&
-        t.y <= MAP_SIZE - 2 &&
-        !riverBank(t.x, t.y) &&
-        (tool === "road"
-          ? state.village.roads.some(([x, y]) => x === t.x && y === t.y) ||
-            !state.village.buildings.some(b => b.x === t.x && b.y === t.y)
-          : !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
-            !state.village.buildings.some(
-              (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
-            ) && state.village.wood >= kinds[tool][1]);
+      valid = placementValid(tool, t.x, t.y);
     tile(
       t.x,
       t.y,
       valid ? "#f5f1b299" : "#cd745a88",
       valid ? "#fff8cf" : "#b75943",
     );
-    if (tool === "well") cistern(t.x, t.y, 0.6);
-    else if (tool !== "road") sprite(tool, t.x, t.y, tool === "garden" ? 119 : 152, 0.55);
+    if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
   }
   // Tiny birds drifting past the clearing.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -1144,7 +1138,8 @@ function setup() {
     }
   });
   canvas.addEventListener("pointerup", (e) => {
-    const moved = drag?.moved;
+    if (!drag) return;
+    const moved = drag.moved;
     drag = null;
     if (moved) return;
     const rect = canvas.getBoundingClientRect(),
