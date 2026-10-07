@@ -1365,3 +1365,6 @@ button:focus-visible {
     max-height: calc(100% - 370px);
   }
 }
+.build-tool[data-kind="coop"] .tool-art {
+  background: url("art/coop-isometric.png?v=3") center / contain no-repeat;
+}

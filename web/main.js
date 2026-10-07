@@ -1,4 +1,5 @@
-import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-1";
+import { flock, drawChicken } from "./chickens.js";
+import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
   project,
@@ -6,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=ecology-1";
+import init, { Game } from "./pkg/solar_friends.js?v=ecology-coop-2";
 import {
   paintTerrain,
   GROUND_START,
@@ -27,6 +28,7 @@ const kinds = {
   grove: ["Food forest", 14, "Gather two fruit with every timber trip"],
   compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
   square: ["Square", 36, "Gatherings bring neighbours closer"],
+  coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
   workshop: ["Workshop", 48, "Craft tools for building and harvests"],
 };
 const tasks = {
@@ -45,15 +47,22 @@ const tasks = {
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
 };
+const pastimes = {
+  garden: "Looking at the plants",
+  build: "Sketching building ideas",
+  cook: "Humming and dreaming up recipes",
+  gather: "Watching birds",
+  water: "Sitting and daydreaming",
+};
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const atlas = new Image();
 atlas.src = "art/village-atlas-isometric.png";
 const gardenArt = new Image();
 gardenArt.src = "art/garden-simple-isometric.png";
 const questArt = Object.fromEntries(
-  ["compost", "square", "workshop"].map((kind) => {
+  ["compost", "square", "workshop", "coop"].map((kind) => {
     const image = new Image();
-    image.src = `art/${kind}-isometric.png`;
+    image.src = `art/${kind}-isometric.png${kind === "coop" ? "?v=3" : ""}`;
     return [kind, image];
   }),
 );
@@ -573,6 +582,10 @@ function render() {
       depth: b.x + b.y,
       draw: () => building(b),
     })),
+    ...flock(state.village).map((hen) => ({
+      depth: hen.x + hen.y + 0.1,
+      draw: () => drawChicken(ctx, iso(hen.x, hen.y), scale, hen),
+    })),
     ...state.residents.map((r) => ({
       depth: r.x + r.y + 0.6,
       draw: () => resident(r),
@@ -898,7 +911,8 @@ function updateUI() {
   for (const r of state.residents) {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
-    el.querySelector("small").textContent = tasks[r.task] || r.task;
+    el.querySelector("small").textContent =
+      (r.task === "idle" ? pastimes[r.favorite] || tasks.idle : tasks[r.task]) || r.task;
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
@@ -1182,7 +1196,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-coop-2" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),
