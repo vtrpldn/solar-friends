@@ -9,7 +9,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=ecology-coop-2";
+import init, { Game } from "./pkg/solar_friends.js?v=farming-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -17,7 +17,7 @@ import {
   MAP_SIZE,
   riverCenter,
   riverBank,
-} from "./terrain.js?v=river-28";
+} from "./terrain.js?v=manual-roads-1";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const previewParams = new URLSearchParams(location.search);
@@ -27,7 +27,9 @@ const artworkPreview = nightPreview || residentPreview || previewParams.has("art
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
+  road: ["Road", 0, "Click to add or remove a road tile"],
   home: ["Home", 32, "Three beds and a good night’s rest"],
+  greenhouse: ["Greenhouse", 60, "Retain moisture · raise seedlings · needs stored water"],
   garden: ["Garden", 12, "Plant, water, grow, then harvest"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
   well: ["Cistern", 18, "Catch rainfall · store 75 more water"],
@@ -38,6 +40,7 @@ const kinds = {
   workshop: ["Workshop", 48, "Craft tools for building and harvests"],
 };
 const tasks = {
+  visit: "Visiting a village building",
   arrive: "Arriving at our new home",
   idle: "Enjoying a quiet moment",
   sleep: "Sleeping until morning",
@@ -256,9 +259,10 @@ function drawPlacementGrid() {
   ctx.strokeStyle = "rgba(255, 250, 218, 0.65)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  // The arrival spot remains reserved; the hover preview checks other limits.
-  for (let x = 9; x <= 11; x++)
-    for (let y = 12; y <= 14; y++) tile(x, y, "rgba(140, 81, 53, 0.15)");
+  // Shade unavailable cell centers using the same rules as the hover preview.
+  for (let x = 1; x <= MAP_SIZE - 2; x++)
+    for (let y = 1; y <= MAP_SIZE - 2; y++)
+      if (!placementValid(tool, x, y)) tile(x, y, "rgba(140, 81, 53, 0.2)");
   ctx.restore();
 }
 function tree(x, y, s = 1, species = 0) {
@@ -297,6 +301,25 @@ function sprite(kind, x, y, alpha = 1) {
 function cistern(x, y, alpha = 1) {
   sprite('well', x, y, alpha);
 }
+const cropTypes = {
+  lettuce: { name: "Lettuce", minutes: 180, yield: 5, note: "Quick crop · one harvest" },
+  beans: { name: "Beans", minutes: 360, yield: 10, note: "Larger harvest · soil dries half as fast" },
+  tomatoes: { name: "Tomatoes", minutes: 300, yield: 6, note: "Three harvests · later harvests take 3 hours; compost maintains yield" },
+};
+function cropDuration(c) { return c.kind === "tomatoes" && c.harvests > 0 ? 180 : cropTypes[c.kind].minutes; }
+function greenhouse(b, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  drawGrowingBed(b);
+  const points = [[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,y]) => iso(b.x+x,b.y+y));
+  const tops = points.map(p => ({x:p.x,y:p.y-38*scale}));
+  const ridge = [iso(b.x,b.y-1),iso(b.x,b.y+1)].map(p=>({x:p.x,y:p.y-59*scale}));
+  for (const face of [[tops[0],ridge[0],ridge[1],tops[3]],[ridge[0],tops[1],tops[2],ridge[1]],[points[1],points[2],tops[2],tops[1]],[points[2],points[3],tops[3],ridge[1],tops[2]]])
+    polygon(face.map(p=>[p.x,p.y]),"#b8dfd04d","#9cac85");
+  points.forEach((p,i)=>line(p.x,p.y,tops[i].x,tops[i].y,"#92734f",3*scale));
+  line(ridge[0].x,ridge[0].y,ridge[1].x,ridge[1].y,"#92734f",3*scale);
+  for(let i=0;i<4;i++) line(tops[i].x,tops[i].y,tops[(i+1)%4].x,tops[(i+1)%4].y,"#b89b71",2*scale);
+  ctx.restore();
+}
 function drawGrowingBed(b) {
   const corners = [
     [-0.8, -0.8],
@@ -314,11 +337,13 @@ function drawGrowingBed(b) {
   ctx.lineWidth = 4 * scale;
   ctx.stroke();
   if (b.crop.planted) {
-    const growth = 2 + (b.crop.growth / 180) * 7;
+    const fraction = b.crop.growth / cropDuration(b.crop);
+    const growth = 2 + fraction * 7;
     for (let x = -0.5; x <= 0.5; x += 0.5) {
       for (let y = -0.5; y <= 0.5; y += 0.5) {
         const p = iso(b.x + x, b.y + y);
-        ctx.fillStyle = b.crop.moisture > 0 ? "#648447" : "#999052";
+        if (b.crop.kind !== "lettuce") line(p.x,p.y,p.x,p.y-18*scale,"#a78a5c",1.5*scale);
+        ctx.fillStyle = b.crop.moisture > 0 ? (b.crop.kind === "beans" ? "#477951" : "#648447") : "#999052";
         ctx.beginPath();
         ctx.ellipse(
           p.x,
@@ -330,66 +355,37 @@ function drawGrowingBed(b) {
           Math.PI * 2,
         );
         ctx.fill();
+        if (b.crop.kind === "tomatoes" && fraction > 0.6) ellipse(p.x+2*scale,p.y-6*scale,2.5*scale,2.5*scale,fraction >= 1 ? "#ce593b" : "#d5a757");
       }
     }
   }
   ctx.restore();
 }
-function drawResourceLabel(p, label, fraction, color) {
-  const w = 104 * scale,
-    y = p.y + 19 * scale;
-  ctx.save();
-  ctx.fillStyle = "#fffbee";
-  ctx.fillRect(p.x - w / 2, y, w, 23 * scale);
-  ctx.font = `${10 * scale}px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#40503c";
-  ctx.fillText(label, p.x, y + 12 * scale);
-  ctx.fillStyle = "#dfdfcc";
-  ctx.fillRect(p.x - w / 2, y + 20 * scale, w, 3 * scale);
-  ctx.fillStyle = color;
-  ctx.fillRect(p.x - w / 2, y + 20 * scale, w * fraction, 3 * scale);
-  ctx.restore();
+function buildingSprite(kind, x, y, alpha = 1) {
+  if (kind === "greenhouse") greenhouse({x,y,crop:{planted:false,moisture:0}},alpha);
+  else if (kind === "well") cistern(x, y, alpha);
+  else sprite(kind, x, y, alpha);
+}
+function placementValid(kind, x, y) {
+  if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
+  if (kind === "road") {
+    return state.village.roads.some(([rx, ry]) => rx === x && ry === y) ||
+      !state.village.buildings.some(b => b.x === x && b.y === y);
+  }
+  const radius = kind === "square" ? 2 : 1;
+  return x - radius >= 0 && y - radius >= 0 && x + radius < MAP_SIZE && y + radius < MAP_SIZE && !riverBank(x + radius - 1, y) &&
+    !(Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) &&
+    !state.village.buildings.some(b => Math.abs(b.x - x) < radius + (b.kind === "square" ? 2 : 1) && Math.abs(b.y - y) < radius + (b.kind === "square" ? 2 : 1)) &&
+    state.village.wood >= kinds[kind][1];
 }
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
-  const shadowWidth = buildingArt[b.kind].width * .27 * scale;
+  const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
   contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
-  if (b.kind === "well") cistern(b.x, b.y, complete ? 1 : 0.45);
-  else if (complete && b.kind === "garden" && b.crop.growth < 180)
-    drawGrowingBed(b);
-  else
-    sprite(
-      b.kind,
-      b.x,
-      b.y,
-      complete ? 1 : 0.4,
-    );
-  if (complete && b.kind === "garden") {
-    const crop = b.crop;
-    const label = !crop.planted
-      ? "Ready to plant"
-      : crop.growth >= 180
-        ? "Ready to harvest"
-        : crop.moisture <= 0
-          ? "Needs water"
-          : `Growing ${Math.floor((crop.growth / 180) * 100)}%`;
-    drawResourceLabel(
-      p,
-      label,
-      crop.growth / 180,
-      crop.moisture <= 0 ? "#b87943" : "#72915a",
-    );
-  }
-  if (complete && b.kind === "well") {
-    drawResourceLabel(
-      p,
-      "Water storage",
-      Math.min(1, state.village.water / state.environment.water_capacity),
-      "#568d9e",
-    );
-  }
+  if (complete && b.kind === "greenhouse") greenhouse(b);
+  else if (complete && b.kind === "garden") drawGrowingBed(b);
+  else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
@@ -398,7 +394,7 @@ function building(b) {
       [0.9, -0.9],
       [0.9, 0.9],
       [-0.9, 0.9],
-    ].map(([x, y]) => iso(b.x + x, b.y + y));
+    ].map(([x, y]) => iso(b.x + x * (b.kind === "square" ? 2 : 1), b.y + y * (b.kind === "square" ? 2 : 1)));
     const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
@@ -440,7 +436,7 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), r, state.village.minutes, animationDelta);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, visitingKind: r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null }, state.village.minutes, animationDelta);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
@@ -490,11 +486,9 @@ function render() {
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
-  const key = state.village.buildings
-    .map((b) => `${b.id}:${b.kind}:${b.x}:${b.y}`)
-    .join("|");
+  const key = JSON.stringify(state.village.roads);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, state.village.buildings);
+    groundLayer = paintTerrain(terrain, state.village.roads);
     groundKey = key;
   }
   ctx.save();
@@ -523,7 +517,7 @@ function render() {
     line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
   }
   drawPlacementGrid();
-  // The communal paths remain visible beneath individually placed structures.
+  // Player roads remain visible beneath individually placed structures.
   const objects = [
     ...flora.map((f) => ({
       depth: f.x + f.y,
@@ -545,25 +539,17 @@ function render() {
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y),
-      valid =
-        t.x >= 1 &&
-        t.x <= MAP_SIZE - 2 &&
-        t.y >= 1 &&
-        t.y <= MAP_SIZE - 2 &&
-        !riverBank(t.x, t.y) &&
-        !(Math.abs(t.x - 10) < 1.5 && Math.abs(t.y - 13) < 1.5) &&
-        !state.village.buildings.some(
-          (b) => Math.abs(b.x - t.x) < 2 && Math.abs(b.y - t.y) < 2,
-        ) &&
-        state.village.wood >= kinds[tool][1];
+      valid = placementValid(tool, t.x, t.y);
     tile(
       t.x,
       t.y,
       valid ? "#f5f1b299" : "#cd745a88",
       valid ? "#fff8cf" : "#b75943",
     );
-    if (tool === "well") cistern(t.x, t.y, 0.6);
-    else sprite(tool, t.x, t.y, 0.55);
+    if (tool === "square") {
+      polygon([[-2,-2],[2,-2],[2,2],[-2,2]].map(([x,y]) => { const p = iso(t.x+x,t.y+y); return [p.x,p.y]; }), valid ? "#f5f1b244" : "#cd745a44", valid ? "#fff8cf" : "#b75943");
+    }
+    if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
   }
   // Tiny birds drifting past the clearing.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -802,8 +788,75 @@ function updateQuests() {
         ? "Next gathering tomorrow"
         : "Host a gathering";
 }
+const buildingPurposes = {
+  home: "Rest on the porch to recover energy.",
+  garden: "Plant, water, or harvest this bed when it is ready.",
+  greenhouse: "Grow crops under glass and raise seedlings for outdoor beds. Rain stays outside.",
+  kitchen: "Cook a pot with available ingredients and water.",
+  well: "Drink one water to recover energy and ease hunger.",
+  grove: "Gather two fruit for the pantry.",
+  coop: "Care for hens: improve connection and advance a fed batch by 30 daylight minutes.",
+  compost: "Turn two scraps into one compost.",
+  workshop: "Use eight timber to make twelve tool uses.",
+  square: "Meet neighbours: recover connection and energy. The square also hosts community gatherings.",
+};
+function updateBuildingPanel() {
+  const chooser = $("#building-choice");
+  const previous = chooser.value;
+  const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${b.progress < 100 ? " · building" : ""}</option>`).join("");
+  if (chooser.innerHTML !== markup) {
+    chooser.innerHTML = markup;
+    if ([...chooser.options].some(o => o.value === previous)) chooser.value = previous;
+  }
+  const b = state.village.buildings.find(b => b.id === Number(chooser.value));
+  $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
+  const farming = b && ["garden", "greenhouse"].includes(b.kind);
+  $("#crop-controls").hidden = !farming;
+  if (farming) {
+    const c = b.crop, spec = cropTypes[c.kind];
+    $("#next-crop").value = c.next_kind;
+    $("#replant-crop").checked = c.replant;
+    const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
+    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.progress.tool_uses > 0 ? 2 : 0);
+    $("#crop-status").textContent = `${spec.name}: ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · waiting for water" : ""}`}. Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food, depending on gardener. ${spec.note}.`;
+    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering costs 2 water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
+  }
+  const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
+  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Construction must finish before visits." : visitors.length
+    ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
+    : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
+  for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100;
+}
+function inspectBuilding(id) {
+  showPanel("building-panel");
+  updateBuildingPanel();
+  $("#building-choice").value = String(id);
+  $("#building-response").textContent = "";
+  updateBuildingPanel();
+}
+function updateSupplies(v) {
+  const s = v.supplies;
+  const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
+  const fed = coops.filter(b => b.poultry.remaining > 0);
+  const days = (v.food + v.meals) / 15;
+  $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
+  $("#pantry-outlook").textContent = `${days < 1 ? "Pantry running low. " : ""}About ${days.toFixed(1)} days of food at 15 portions/day, before cooking gains, hen feed, or new harvests.`;
+  $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
+  $("#use-eggs").checked = s.use_eggs;
+  $("#feed-hens").checked = s.feed_hens;
+  $("#kitchen-status").textContent = !v.buildings.some(b => b.kind === "kitchen" && b.progress >= 100)
+    ? "Build a kitchen to stretch your harvest into meals."
+    : v.water < 1 ? "Cooking needs water. Residents can collect it from the river."
+    : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
+    : s.use_eggs && s.eggs >= 2 ? "Next pot: egg meals. Residents cook when meals are running low." : "Next pot: simple meals. Residents cook when meals are running low.";
+  $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
+    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs >= 60 ? "Egg storage is full." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
+  $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
+}
 function updateUI() {
   const v = state.village;
+  updateSupplies(v);
+  updateBuildingPanel();
   for (const k of ["wood", "food", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
   $("#happiness").textContent =
@@ -828,7 +881,7 @@ function updateUI() {
               : "Evening · time to unwind";
   const env = state.environment;
   const gardens = v.buildings.filter(
-    (b) => b.kind === "garden" && b.progress >= 100,
+    (b) => ["garden", "greenhouse"].includes(b.kind) && b.progress >= 100,
   );
   const counts = { plant: 0, thirsty: 0, growing: 0, harvest: 0 };
   for (const b of gardens) {
@@ -836,7 +889,7 @@ function updateUI() {
     counts[
       !c.planted
         ? "plant"
-        : c.growth >= 180
+        : c.growth >= cropDuration(c)
           ? "harvest"
           : c.moisture <= 0
             ? "thirsty"
@@ -912,7 +965,7 @@ function updateUI() {
       button.dataset.kind
     ];
     button.querySelector("small").textContent = unlocked
-      ? `⌁ ${kinds[button.dataset.kind][1]}`
+      ? button.dataset.kind === "road" ? "Free" : `⌁ ${kinds[button.dataset.kind][1]}`
       : "Quest reward";
     button.title = unlocked
       ? kinds[button.dataset.kind][2]
@@ -943,7 +996,7 @@ function setTool(kind) {
   tool = tool === kind ? null : kind;
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -988,6 +1041,30 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for (const id of ["next-crop", "replant-crop"]) $("#"+id).onchange = () => {
+    game.configure_crop(Number($("#building-choice").value), $("#next-crop").value, $("#replant-crop").checked);
+    state = JSON.parse(game.snapshot()); updateUI(); save();
+  };
+
+  $("#building-neighbours").innerHTML = state.residents.map(r => `<button data-visitor="${r.id}">${escapeHtml(r.name)}</button>`).join("");
+  $("#building-choice").onchange = () => { $("#building-response").textContent = ""; updateBuildingPanel(); };
+  $("#building-neighbours").onclick = event => {
+    const button = event.target.closest("[data-visitor]");
+    if (!button) return;
+    $("#building-response").textContent = game.visit_building(Number(button.dataset.visitor), Number($("#building-choice").value));
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
+  };
+
+  for (const id of ["feed-hens", "use-eggs"]) {
+    $("#" + id).onchange = () => {
+      game.set_food_preferences($("#feed-hens").checked, $("#use-eggs").checked);
+      state = JSON.parse(game.snapshot());
+      updateUI();
+      save();
+    };
+  }
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
       const isOpen = button.getAttribute("aria-expanded") === "true";
@@ -1119,7 +1196,8 @@ function setup() {
     }
   });
   canvas.addEventListener("pointerup", (e) => {
-    const moved = drag?.moved;
+    if (!drag) return;
+    const moved = drag.moved;
     drag = null;
     if (moved) return;
     const rect = canvas.getBoundingClientRect(),
@@ -1128,10 +1206,12 @@ function setup() {
     pointer = { x, y };
     if (tool) {
       const p = uniso(x, y),
-        result = game.place(tool, p.x, p.y);
+        result = tool === "road" ? game.toggle_road(p.x, p.y) : game.place(tool, p.x, p.y);
       if (result === "ok") {
-        toast(`${kinds[tool][0]} planned. Let's build it together.`);
-        setTool(null);
+        if (tool !== "road") {
+          toast(`${kinds[tool][0]} planned. Let's build it together.`);
+          setTool(null);
+        }
         state = JSON.parse(game.snapshot());
         save();
       } else toast(result);
@@ -1141,6 +1221,14 @@ function setup() {
         return Math.hypot(p.x - x, p.y - 14 * scale - y) < 22 * scale;
       });
       if (r) selectPerson(r.id);
+      else {
+        const cell = uniso(x, y);
+        const b = [...state.village.buildings].reverse().find(b => {
+          const radius = b.kind === "square" ? 2 : 1;
+          return Math.abs(b.x-cell.x) <= radius && Math.abs(b.y-cell.y) <= radius;
+        });
+        if (b) inspectBuilding(b.id);
+      }
     }
   });
   canvas.addEventListener("pointercancel", () => (drag = null));
@@ -1188,7 +1276,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-coop-2" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=farming-1" });
   await Promise.all([
     loadChickenArt(),
     ...Object.values(buildingImages).map((image) => image.decode()),

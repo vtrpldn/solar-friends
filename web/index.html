@@ -85,6 +85,48 @@
           </div>
         </section>
       </aside>
+      <aside id="supplies-panel" class="supplies panel" hidden aria-label="Village supplies">
+        <button class="panel-close" data-close-panel aria-label="Close supplies">×</button>
+        <span class="eyebrow">ENOUGH FOR EVERYONE</span>
+        <h2>Village pantry</h2>
+        <p id="pantry-stock"></p>
+        <p id="pantry-outlook" role="status"></p>
+        <h3>Today so far</h3>
+        <p id="pantry-flow"></p>
+        <h3>Kitchen</h3>
+        <label><input id="use-eggs" type="checkbox" /> Cook with eggs when available</label>
+        <p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p>
+        <p id="kitchen-status"></p>
+        <h3>Chicken coops</h3>
+        <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
+        <p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Eggs store up to 60; full storage pauses new feeding.</p>
+        <p id="coop-status"></p>
+        <h3>Water &amp; weather</h3>
+        <p id="pantry-weather"></p>
+        <small>Ingredients include garden vegetables and gathered fruit. Residents forage wild food when the pantry runs low. Hungry hens wait safely; crops wait for water.</small>
+      </aside>
+      <aside id="building-panel" class="supplies panel" hidden aria-label="Building interactions">
+        <button class="panel-close" data-close-panel aria-label="Close buildings">×</button>
+        <span class="eyebrow">LIFE IN THE VILLAGE</span>
+        <h2>Buildings</h2>
+        <label for="building-choice">Choose a building</label>
+        <select id="building-choice"></select>
+        <p id="building-purpose"></p>
+        <section id="crop-controls" hidden>
+          <h3>Growing plan</h3>
+          <label for="next-crop">Next crop</label>
+          <select id="next-crop"><option value="lettuce">Lettuce · quick harvest</option><option value="beans">Beans · larger, drought-tolerant</option><option value="tomatoes">Tomatoes · three harvests</option></select>
+          <label><input id="replant-crop" type="checkbox" /> Replant after this crop finishes</label>
+          <p id="crop-status"></p>
+          <p id="nursery-status"></p>
+          <small>Changes apply to the next planting. Pausing replanting lets the current crop finish, including all three tomato harvests.</small>
+        </section>
+        <p id="building-activity" role="status"></p>
+        <h3>Ask a neighbour to visit</h3>
+        <div id="building-neighbours" class="requests"></div>
+        <p id="building-response" role="status"></p>
+        <p>Residents also visit during their free time. Work needs its usual supplies; tired or hungry neighbours need care first.</p>
+      </aside>
       <section id="person" class="person panel" hidden></section>
       <div class="world-controls">
         <button id="zoom-out" aria-label="Zoom out">−</button
@@ -106,6 +148,8 @@
       <nav class="hud-dock" aria-label="Village controls">
         <button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button>
         <button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Goals</button>
+        <button data-panel="building-panel" aria-controls="building-panel" aria-expanded="false">Buildings</button>
+        <button data-panel="supplies-panel" aria-controls="supplies-panel" aria-expanded="false">Supplies</button>
         <button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button>
       </nav>
       <div id="toast" role="status" hidden></div>
@@ -245,6 +289,6 @@
       <button id="cancel-restart">Keep this village</button>
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
-    <script type="module" src="main.js?v=night-1"></script>
+    <script type="module" src="main.js?v=consolidated-1"></script>
   </body>
 </html>

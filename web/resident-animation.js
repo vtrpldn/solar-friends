@@ -20,6 +20,10 @@ export function residentActivity(r, minutes) {
   if (r.task === 'sleep') return 'sleep';
   if (['rest', 'eat'].includes(r.task)) return 'sit';
   if (['build', 'craft', 'compost'].includes(r.task)) return 'work';
+  if (r.task === 'visit') {
+    if (['workshop', 'compost', 'kitchen', 'garden', 'greenhouse', 'coop'].includes(r.visitingKind)) return 'work';
+    if (['home', 'square'].includes(r.visitingKind)) return 'sit';
+  }
   const slot = Math.floor((minutes + r.id * 29) / 24);
   if (['socialize', 'gathering'].includes(r.task)) return slot % 3 === 0 ? 'wave' : 'relax';
   if (r.task === 'idle') return ['look', 'relax', 'look', 'stretch', 'look', 'relax', 'wave', 'look'][slot % 8];

@@ -128,6 +128,7 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
             planted: true,
             growth: 180.,
             moisture: 0.,
+            ..ecology::Crop::default()
         };
     }
     let food = g.app.world().resource::<Village>().food;
@@ -318,7 +319,7 @@ fn tools_accelerate_building_and_spend_one_use_on_completion() {
 fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
     let mut g = setup();
     unlock(&mut g);
-    ready_building(&mut g, "square", 2, 2);
+    ready_building(&mut g, "square", 3, 3);
     g.app.world_mut().resource_mut::<Village>().meals = 5;
     assert_eq!(g.host_gathering(), "ok");
     let mut q = g.app.world_mut().query::<&mut Resident>();
@@ -421,6 +422,7 @@ fn garden_workers_cannot_harvest_the_same_crop_twice_or_remote_plots() {
             planted: true,
             growth: 180.,
             moisture: 0.,
+            ..ecology::Crop::default()
         };
     }
     let mut q = g.app.world_mut().query::<&Resident>();
@@ -440,6 +442,7 @@ fn crop_saves_round_trip_migrate_and_reject_invalid_state() {
         planted: true,
         growth: 80.,
         moisture: 100.,
+        ..ecology::Crop::default()
     };
     let saved = g.snapshot();
     let mut restored = Game::new();

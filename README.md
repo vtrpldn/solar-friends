@@ -30,9 +30,9 @@ Open [the village](http://127.0.0.1:4173). The pinned Rust toolchain includes th
 
 Choose a building in the bottom toolbar and click a clearing. Residents construct it autonomously, or you can select a resident and ask for help. People can refuse based on their energy or hunger. Explaining the community need can overcome reluctance, but never exhaustion.
 
-Chicken coops cost 24 timber and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Hens are decorative and do not produce food.
+Chicken coops cost 24 timber and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes three ingredients, while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Egg storage holds 60; full storage pauses new feeding.
 
-Gardens need planting, watering, three game hours of growth in moist soil, and harvesting. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents gather fallen timber, carry river water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 28×28 lot (784 tiles, roughly twice the previous 400). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
+Gardens need planting, watering, moist growth, and harvesting. Lettuce takes three game hours; beans take six; tomatoes take five before the first of three harvests. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents gather fallen timber, carry river water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 28×28 lot (784 tiles, roughly twice the previous 400). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
 
 Arrival barrels store 40 water. Each completed cistern adds 75 capacity and catches rain. Afternoon rain runs from 14:00 to 17:00 on two days out of every three; every third day stays dry. Rain also waters planted gardens. Residents can collect 18 water per river trip even before a cistern exists. The resource panel shows capacity, weather, and garden needs; beds show crop stages and cisterns show the shared storage level. Older saves keep their supplies and start existing gardens as empty beds.
 
@@ -45,6 +45,36 @@ A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinn
 New village restarts the scenario after confirmation and retains one backup under `solar-friends-v2-backup`. Earlier prototype saves remain untouched under `solar-friends-v1`.
 
 Existing 20×20 saves expand in place. A meandering river runs along the eastern edge, with animated currents, shallow banks, and stones. Construction is blocked along the riverbank so buildings and their approach points remain on the village side.
+
+## Farming
+
+Select a garden or greenhouse in **Buildings** to choose its next crop, pause replanting, and inspect growth, soil moisture, and expected yield. Crop changes wait until the current cycle ends; paused replanting still allows watering and harvesting existing plants. Existing gardens migrate to lettuce with their growth intact.
+
+| Crop | Moist growth | Base food | Tradeoff |
+| --- | --- | --- | --- |
+| Lettuce | 3 hours | 5 | Quick single harvest |
+| Beans | 6 hours | 10 | Soil dries half as fast |
+| Tomatoes | 5 hours, then 3 hours between harvests | 6 per harvest | Three harvests; later harvests yield 4 without compost |
+
+Iara adds three food to a harvest. Available compost adds three food and prevents the tomato penalty; available tools add two. Harvests share the pantry ingredient stock. Dry crops pause without dying. Beds visibly show seedlings, growth, and mature plants; tomatoes develop colored fruit.
+
+A **greenhouse** costs 60 timber and supports the same crops and resident interactions. Each two-water watering lasts eight hours instead of four, and rain does not reach its soil. While a planted greenhouse is moist, its nursery produces one seedling every eight game hours, up to twelve stored. Outdoor beds automatically use one seedling for a 25% growth head start when planted. Greenhouse planting does not consume seedlings.
+
+## Building interactions
+
+Click a building on the map or open **Buildings**, select a building, and ask a named neighbour to visit. They walk there before using it. Residents also choose completed buildings during free time. Visits respect bedtime, hunger, and energy needs, and their target survives saving and reloading.
+
+Homes restore energy; gardens are tended; kitchens cook with available supplies; cistern drinks use one water to restore energy and ease hunger; food forests provide two fruit. Coop care improves connection and advances an already-fed egg batch by thirty daylight minutes. Compost stations convert two scraps to one compost; workshops consume eight timber for twelve tool uses. Production visits share a sixty-game-minute cooldown per building.
+
+The community square is 1.5 times its original width and height, with a larger placement footprint for new construction. Residents use separate meeting spots, recover connection and energy, and build mutual friendship when visiting together. Existing squares keep their saved locations. Gatherings remain available through People.
+
+## Village supplies
+
+Open **Supplies** for ingredients, eggs, prepared meals, today's production and use, and the weather outlook. Gardens and foraging share the ingredient stock. The pantry estimates food days at fifteen portions per day for five residents; cooking gains, hen feed, future harvests, and extra hunger are excluded from that estimate.
+
+Kitchens make five meals from three ingredients and one water. With egg cooking enabled and eggs available, they make seven meals from two ingredients, two eggs, and one water. Simple meals remain the fallback. Both recipes produce compost scraps. Turn egg cooking or automatic hen feeding off in Supplies to conserve resources. Already-fed coops finish their current batch.
+
+When ingredients and meals run low, residents prioritize gathering wild food even without a food forest. Water remains available from the river. Shortages pause hen production and crop growth without killing hens or crops. Existing saves start with no eggs and retain their ingredients, buildings, and village progress.
 
 ## Village quests
 

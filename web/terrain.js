@@ -75,7 +75,7 @@ function groundPoint(x, y) {
   return [(x - GROUND_START) * unit, (y - GROUND_START) * unit];
 }
 
-export function paintTerrain(texture, buildings) {
+export function paintTerrain(texture, roads = []) {
   const ground = surface();
   const g = ground.getContext("2d");
   const half = texture.width / 2;
@@ -98,43 +98,11 @@ export function paintTerrain(texture, buildings) {
   p.strokeStyle = p.fillStyle = "white";
   p.shadowColor = "white";
   p.shadowBlur = 12;
-  const hub = groundPoint(10, 13);
-  p.beginPath();
-  p.ellipse(hub[0], hub[1], 102, 80, -0.3, 0, Math.PI * 2);
-  p.fill();
-  // Worn paths connect the same entrances residents walk towards. Slightly
-  // curved edges keep the square placement grid out of the visual language.
-  for (const building of buildings) {
-    const end = groundPoint(building.x + 0.75, building.y + 0.75);
-    const bend = Math.sin(building.id * 2.4) * 42;
-    p.lineWidth =
-      building.kind === "garden" || building.kind === "grove" ? 48 : 65;
-    p.beginPath();
-    p.moveTo(...hub);
-    p.bezierCurveTo(
-      hub[0] + (end[0] - hub[0]) * 0.4 + bend,
-      hub[1] + (end[1] - hub[1]) * 0.35,
-      end[0] - bend * 0.3,
-      end[1],
-      ...end,
-    );
-    p.stroke();
-    p.beginPath();
-    p.ellipse(end[0], end[1], 45, 35, 0, 0, Math.PI * 2);
-    p.fill();
+  const unit = RESOLUTION / GROUND_SIZE;
+  for (const [x, y] of roads) {
+    const [px, py] = groundPoint(x, y);
+    p.fillRect(px - unit / 2, py - unit / 2, unit, unit);
   }
-  const entry = groundPoint(10, 19.5);
-  p.lineWidth = 54;
-  p.beginPath();
-  p.moveTo(...hub);
-  p.bezierCurveTo(
-    hub[0] - 30,
-    hub[1] + 180,
-    entry[0] + 35,
-    entry[1] - 140,
-    ...entry,
-  );
-  p.stroke();
   p.shadowBlur = 0;
   p.globalCompositeOperation = "source-in";
   p.drawImage(

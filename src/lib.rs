@@ -4,13 +4,16 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 mod ecology;
+mod interactions;
 mod progression;
+mod supplies;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
+    "visit",
     "arrive",
     "idle",
     "sleep",
@@ -46,6 +49,8 @@ pub struct Resident {
     pub remaining: f32,
     pub requested: bool,
     pub last_meal_slot: i32,
+    #[serde(default)]
+    pub visit_building: Option<usize>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Building {
@@ -57,7 +62,13 @@ pub struct Building {
     #[serde(default)]
     pub contributors: u8,
     #[serde(default)]
+    pub next_visit: f32,
+    #[serde(default)]
+    pub visits: u32,
+    #[serde(default)]
     pub crop: ecology::Crop,
+    #[serde(default)]
+    pub poultry: supplies::Poultry,
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
@@ -66,12 +77,18 @@ pub struct Village {
     pub minutes: f32,
     pub wood: f32,
     pub food: f32,
+    #[serde(default)]
+    pub supplies: supplies::Supplies,
     pub water: f32,
     pub meals: u32,
     pub meals_served: u32,
     pub buildings: Vec<Building>,
+    #[serde(default)]
+    pub roads: Vec<(i32, i32)>,
     pub events: Vec<String>,
     pub harvests: u32,
+    #[serde(default)]
+    pub seedlings: u32,
     pub arrived: bool,
     pub mornings: u32,
     #[serde(default)]
@@ -103,6 +120,7 @@ fn cost(kind: &str) -> Option<f32> {
     match kind {
         "home" => Some(32.),
         "garden" => Some(12.),
+        "greenhouse" => Some(60.),
         "kitchen" => Some(40.),
         "well" => Some(18.),
         "grove" => Some(14.),
@@ -154,7 +172,7 @@ fn available(v: &Village, task: &str) -> bool {
             .buildings
             .iter()
             .any(|b| ecology::needs_tending(b, v.water)),
-        "cook" => ready(v, "kitchen") && v.food >= 3. && v.water >= 1.,
+        "cook" => ready(v, "kitchen") && supplies::can_cook(v),
         "water" => v.water < ecology::capacity(v),
         "compost" => ready(v, "compost") && v.progress.scraps >= 2,
         "craft" => ready(v, "workshop") && v.wood >= 8. && v.progress.tool_uses <= 24,
@@ -198,6 +216,9 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
         }
     });
     b.map(|b| {
+        if b.kind == "square" && matches!(task, "socialize" | "gathering") {
+            return interactions::approach(b, id);
+        }
         if matches!(task, "eat" | "socialize" | "gathering") {
             return (
                 b.x as f32 + 0.75 + (id as f32 - 2.) * 0.35,
@@ -232,6 +253,7 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
 }
 
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
+    r.visit_building = None;
     r.task = task.into();
     r.reason = reason.into();
     r.requested = requested;
@@ -296,6 +318,8 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Taking a quiet moment before the next part of the day.",
             )
         }
+    } else if v.food < 6. && v.meals < 5 {
+        ("gather", "Foraging wild food to keep everyone fed.")
     } else if v.water < 24. && available(v, "water") {
         ("water", "Carrying river water back to our storage.")
     } else if v.meals < 5 && available(v, "cook") && (r.favorite == "cook" || r.hunger > 55.) {
@@ -325,6 +349,14 @@ fn choose(r: &mut Resident, v: &Village) {
             "Our immediate needs are met. Enjoying the clearing.",
         )
     };
+    if task == "idle" {
+        let buildings: Vec<_> = v.buildings.iter().filter(|b| b.progress >= 100.).collect();
+        if !buildings.is_empty() {
+            let index = ((v.minutes / 60.) as usize + r.id) % buildings.len();
+            interactions::start(r, v, buildings[index].id, false);
+            return;
+        }
+    }
     assign(r, v, task, reason, false);
 }
 fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resident>) {
@@ -334,6 +366,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     }
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
         v.mornings += 1;
@@ -376,6 +409,18 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
         }
     }
+    let square_visitors: Vec<(usize, usize)> = people
+        .iter()
+        .filter_map(|r| {
+            let b = v.buildings.iter().find(|b| {
+                b.kind == "square"
+                    && b.progress >= 100.
+                    && (r.x - b.x as f32).abs() <= 2.
+                    && (r.y - b.y as f32).abs() <= 2.
+            })?;
+            Some((r.id, b.id))
+        })
+        .collect();
     let builders: Vec<(f32, f32)> = people
         .iter()
         .filter(|r| r.task == "build" && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08)
@@ -468,6 +513,21 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         }
         if r.remaining <= 0. {
             match r.task.as_str() {
+                "visit" => {
+                    interactions::finish(&mut v, &mut r);
+                    if let Some(id) = r.visit_building
+                        && v.buildings[id].kind == "square"
+                    {
+                        for &(other, building) in &square_visitors {
+                            if other != r.id && building == id {
+                                let bond = &mut v.progress.friendships[r.id * 5 + other];
+                                *bond = bond.saturating_add(1);
+                                let reverse = &mut v.progress.friendships[other * 5 + r.id];
+                                *reverse = reverse.saturating_add(1);
+                            }
+                        }
+                    }
+                }
                 "gather" => {
                     let timber = if r.favorite == "gather" { 6 } else { 4 }
                         + if progression::use_tool(&mut v) { 2 } else { 0 };
@@ -475,19 +535,18 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     v.progress.timber = v.progress.timber.saturating_add(timber);
                     if ready(&v, "grove") {
                         v.food += 2.;
+                        v.supplies.gathered += 2.;
                         v.progress.fruit = v.progress.fruit.saturating_add(2);
+                    } else if v.food < 6. {
+                        v.food += 2.;
+                        v.supplies.gathered += 2.;
                     }
                 }
                 "garden" => ecology::tend(&mut v, &r),
                 "water" if v.water < ecology::capacity(&v) => {
                     v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
-                "cook" if v.food >= 3. && v.water >= 1. => {
-                    v.food -= 3.;
-                    v.water -= 1.;
-                    v.meals += 5;
-                    v.progress.scraps = v.progress.scraps.saturating_add(1);
-                }
+                "cook" => supplies::cook(&mut v),
                 "compost" if v.progress.scraps >= 2 => {
                     v.progress.scraps -= 2;
                     v.progress.compost += 1;
@@ -504,11 +563,14 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     let fed = if v.meals > 0 {
                         v.meals -= 1;
                         v.meals_served += 1;
+                        v.supplies.portions_eaten += 1;
                         r.hunger = (r.hunger - 65.).max(0.);
                         r.social = (r.social + 8.).min(100.);
                         true
                     } else if v.food >= 1. {
                         v.food -= 1.;
+                        v.supplies.used += 1.;
+                        v.supplies.portions_eaten += 1;
                         r.hunger = (r.hunger - 45.).max(0.);
                         true
                     } else {
@@ -546,12 +608,15 @@ impl Game {
                 minutes: 480.,
                 wood: 110.,
                 food: 36.,
+                supplies: supplies::Supplies::default(),
                 water: 32.,
                 meals: 0,
                 meals_served: 0,
                 buildings: vec![],
+                roads: vec![],
                 events: vec!["Five friends, one empty lot. Your new beginning starts here.".into()],
                 harvests: 0,
+                seedlings: 0,
                 arrived: false,
                 mornings: 0,
                 progress: Progress::default(),
@@ -585,6 +650,7 @@ impl Game {
                 remaining: 0.,
                 requested: false,
                 last_meal_slot: -1,
+                visit_building: None,
             });
         }
         Self { app }
@@ -615,6 +681,73 @@ impl Game {
         })
         .to_string()
     }
+    pub fn configure_crop(&mut self, building: usize, kind: &str, replant: bool) -> bool {
+        if !ecology::crop_kind(kind) {
+            return false;
+        }
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        let Some(b) = v.buildings.get_mut(building) else {
+            return false;
+        };
+        if !ecology::farm(b) {
+            return false;
+        }
+        b.crop.next_kind = kind.into();
+        b.crop.replant = replant;
+        if !b.crop.planted {
+            b.crop.kind = kind.into();
+        }
+        true
+    }
+    pub fn visit_building(&mut self, resident: usize, building: usize) -> String {
+        let v = self.app.world().resource::<Village>().clone();
+        let Some(b) = v.buildings.get(building) else {
+            return "Building not found.".into();
+        };
+        if b.progress < 100. {
+            return "Finish construction before using this building.".into();
+        }
+        let mut query = self.app.world_mut().query::<&mut Resident>();
+        let Some(mut r) = query
+            .iter_mut(self.app.world_mut())
+            .find(|r| r.id == resident)
+        else {
+            return "Resident not found.".into();
+        };
+        if r.task == "arrive"
+            || sleeping_time(v.minutes, resident)
+            || r.energy < 25.
+            || r.hunger > 75.
+        {
+            return format!(
+                "{} needs to finish arriving, eat or rest before visiting.",
+                r.name
+            );
+        }
+        interactions::start(&mut r, &v, building, true);
+        format!("{}: {}", r.name, r.reason)
+    }
+    pub fn set_food_preferences(&mut self, feed_hens: bool, use_eggs: bool) {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        v.supplies.feed_hens = feed_hens;
+        v.supplies.use_eggs = use_eggs;
+    }
+    pub fn toggle_road(&mut self, x: i32, y: i32) -> String {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if let Some(index) = v.roads.iter().position(|tile| *tile == (x, y)) {
+            v.roads.remove(index);
+            return "ok".into();
+        }
+        if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) || river_bank(x, y)
+        {
+            return "Place roads inside the lot, away from the riverbank.".into();
+        }
+        if v.buildings.iter().any(|b| b.x == x && b.y == y) {
+            return "Choose a tile beside the building.".into();
+        }
+        v.roads.push((x, y));
+        "ok".into()
+    }
     pub fn place(&mut self, kind: &str, x: i32, y: i32) -> String {
         let Some(price) = cost(kind) else {
             return "Unknown building.".into();
@@ -627,16 +760,24 @@ impl Game {
         if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) {
             return "Choose a clearing inside the marked lot.".into();
         }
-        if river_bank(x, y) {
+        let radius = interactions::radius(kind);
+        if x - radius < 0
+            || y - radius < 0
+            || x + radius >= MAP_SIZE
+            || y + radius >= MAP_SIZE
+            || river_bank(x + radius - 1, y)
+        {
             return "Keep the river and its banks clear. Choose a clearing farther inland.".into();
         }
-        if (x as f32 - CAMP.0).abs() < 1.5 && (y as f32 - CAMP.1).abs() < 1.5 {
+        if (x as f32 - CAMP.0).abs() < radius as f32 + 0.5
+            && (y as f32 - CAMP.1).abs() < radius as f32 + 0.5
+        {
             return "Keep the arrival clearing free for gathering and supplies.".into();
         }
-        if v.buildings
-            .iter()
-            .any(|b| (b.x - x).abs() < 2 && (b.y - y).abs() < 2)
-        {
+        if v.buildings.iter().any(|b| {
+            (b.x - x).abs() < interactions::radius(&b.kind) + radius
+                && (b.y - y).abs() < interactions::radius(&b.kind) + radius
+        }) {
             return "Leave a little room between buildings.".into();
         }
         if v.wood < price {
@@ -651,7 +792,10 @@ impl Game {
             y,
             progress: 0.,
             contributors: 0,
+            next_visit: 0.,
+            visits: 0,
             crop: ecology::Crop::default(),
+            poultry: supplies::Poultry::default(),
         });
         event(
             &mut v,
@@ -820,6 +964,20 @@ impl Game {
             return false;
         };
         let v = &save.village;
+        let mut road_tiles = std::collections::HashSet::new();
+        if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
+            || v.roads.iter().any(|&(x, y)| {
+                !(1..=MAP_SIZE - 2).contains(&x)
+                    || !(1..=MAP_SIZE - 2).contains(&y)
+                    || river_bank(x, y)
+                    || !road_tiles.insert((x, y))
+            })
+        {
+            return false;
+        }
+        if !supplies::valid(v) {
+            return false;
+        }
         let p = &v.progress;
         if p.tracked >= 4
             || p.social_mask > 31
@@ -834,7 +992,8 @@ impl Game {
         {
             return false;
         }
-        if v.version != 2
+        if v.seedlings > 12
+            || v.version != 2
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -858,17 +1017,16 @@ impl Game {
                     .any(|n| !n.is_finite() || !(0.0..=MAP_SIZE as f32).contains(n))
                 || !r.remaining.is_finite()
                 || !(0.0..=100.).contains(&r.remaining)
+                || r.visit_building.is_some_and(|id| id >= v.buildings.len())
                 || !TASKS.contains(&r.task.as_str())
         }) {
             return false;
         }
         if v.buildings.iter().enumerate().any(|(i, b)| {
-            b.id != i
-                || !b.crop.growth.is_finite()
-                || !(0.0..=180.).contains(&b.crop.growth)
-                || !b.crop.moisture.is_finite()
-                || !(0.0..=240.).contains(&b.crop.moisture)
-                || (!b.crop.planted && (b.crop.growth != 0. || b.crop.moisture != 0.))
+            !b.next_visit.is_finite()
+                || b.next_visit < 0.
+                || b.id != i
+                || !ecology::valid(b)
                 || b.contributors > 31
                 || cost(&b.kind).is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
@@ -906,6 +1064,36 @@ impl Default for Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn player_roads_persist_toggle_and_validate() {
+        let mut g = Game::new();
+        assert_eq!(g.toggle_road(5, 5), "ok");
+        assert_eq!(g.toggle_road(6, 5), "ok");
+        assert_ne!(g.toggle_road(25, 5), "ok");
+        assert_ne!(g.toggle_road(0, 5), "ok");
+        assert_eq!(g.place("home", 8, 8), "ok");
+        assert_ne!(g.toggle_road(8, 8), "ok");
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
+        assert_eq!(
+            restored.app.world().resource::<Village>().roads,
+            vec![(5, 5), (6, 5)]
+        );
+        assert_eq!(restored.toggle_road(5, 5), "ok");
+        assert_eq!(
+            restored.app.world().resource::<Village>().roads,
+            vec![(6, 5)]
+        );
+        let mut old: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        old["village"].as_object_mut().unwrap().remove("roads");
+        assert!(restored.restore(&old.to_string()));
+        restored.tick(60.);
+        assert!(restored.app.world().resource::<Village>().roads.is_empty());
+        old["village"]["roads"] = serde_json::json!([[5, 5], [5, 5]]);
+        assert!(!restored.restore(&old.to_string()));
+        old["village"]["roads"] = serde_json::json!([[25, 5]]);
+        assert!(!restored.restore(&old.to_string()));
+    }
     #[test]
     fn idle_residents_spread_out_and_keep_individual_routines_after_reload() {
         let mut g = Game::new();
@@ -968,7 +1156,10 @@ mod tests {
                 y: y.floor() as i32,
                 progress: if id % 2 == 0 { 100. } else { 0. },
                 contributors: 0,
+                next_visit: 0.,
+                visits: 0,
                 crop: ecology::Crop::default(),
+                poultry: supplies::Poultry::default(),
             });
         }
         for minutes in (0..2880).step_by(30) {
