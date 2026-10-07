@@ -6,7 +6,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=quests-1";
+import init, { Game } from "./pkg/solar_friends.js?v=desire-paths-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -14,7 +14,7 @@ import {
   MAP_SIZE,
   riverCenter,
   riverBank,
-} from "./terrain.js?v=river-28";
+} from "./terrain.js?v=desire-paths-1";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const canvas = $("#world"),
@@ -67,7 +67,8 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
   return image;
 });
 let groundLayer,
-  groundKey = null;
+  groundKey = null,
+  groundPaintTime = 0;
 const forestArt = new Image();
 forestArt.src = "art/mata-atlantica-atlas.png";
 const forestSpecies = [
@@ -450,12 +451,12 @@ function render() {
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
-  const key = state.village.buildings
-    .map((b) => `${b.id}:${b.kind}:${b.x}:${b.y}`)
-    .join("|");
-  if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, state.village.buildings);
+  const key = state.village.paths.revision;
+  // Repaint at most once per two simulated seconds while paths develop.
+  if (groundKey === null || (groundKey !== key && time - groundPaintTime >= 2)) {
+    groundLayer = paintTerrain(terrain, state.village.paths.wear);
     groundKey = key;
+    groundPaintTime = time;
   }
   ctx.save();
   ctx.transform(
@@ -965,6 +966,7 @@ function setup() {
     pan = { x: 0, y: 0 };
     zoom = 1;
     time = 0;
+    groundKey = null;
     $("#person").hidden = true;
     $("#placement").hidden = true;
     if (paused) togglePause();
