@@ -1,3 +1,6 @@
 /target/
 /web/pkg/
 .DS_Store
+/node_modules/
+/artifacts/
+/web/dev-report/

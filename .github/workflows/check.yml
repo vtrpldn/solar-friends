@@ -13,19 +13,19 @@ jobs:
       - name: Install pinned Rust toolchain
         run: rustup show
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt --check
-      - run: cargo test --locked
-      - run: cargo clippy --locked -- -D warnings
       - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
-      - run: ./scripts/build.sh
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node scripts/verify-artwork.mjs
-      - run: node scripts/verify-resident-animation.mjs
-      - run: node scripts/verify-quests.mjs
-      - run: node scripts/verify-situations.mjs
-      - run: node scripts/verify-chickens.mjs
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run dev:check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: development-check
+          path: artifacts/dev-check/
       - uses: actions/upload-artifact@v4
         with:
           name: solar-friends-browser
