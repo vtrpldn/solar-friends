@@ -36,6 +36,7 @@
           <span>♡</span><b id="happiness">75%</b><small>Wellbeing</small>
         </div>
       </div>
+      <button class="icon-button" id="settings" aria-label="Settings">⚙</button>
       <button class="icon-button" id="help" aria-label="How to play">?</button>
     </header>
     <main>
@@ -140,6 +141,19 @@
       <button id="start-playing" class="primary">
         Let's grow together <span>→</span>
       </button>
+    </dialog>
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <button id="close-settings" class="dialog-close" aria-label="Close settings">×</button>
+      <span class="eyebrow">MAKE YOURSELF AT HOME</span>
+      <h2 id="settings-title">Settings</h2>
+      <section class="settings-section" aria-labelledby="building-settings">
+        <h3 id="building-settings">Building &amp; placement</h3>
+        <label class="setting-row" for="placement-grid">
+          <span><b>Placement grid</b><small id="grid-description">Show tile guides while placing a building. The arrival clearing stays reserved.</small></span>
+          <input type="checkbox" role="switch" id="placement-grid" aria-describedby="grid-description" />
+        </label>
+      </section>
+      <p class="hint" id="settings-status" role="status">Changes apply immediately and stay on this device.</p>
     </dialog>
     <dialog id="restart-dialog">
       <span class="eyebrow">A FRESH BEGINNING</span>

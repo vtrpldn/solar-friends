@@ -1,3 +1,4 @@
+import { loadSettings, saveSettings } from "./settings.js";
 import {
   project,
   unproject,
@@ -7,6 +8,7 @@ import {
 import init, { Game } from "./pkg/solar_friends.js";
 import { paintTerrain, GROUND_START, GROUND_SIZE } from "./terrain.js";
 const $ = (s) => document.querySelector(s);
+const settings = loadSettings();
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -191,6 +193,27 @@ function tile(x, y, fill, stroke) {
     fill,
     stroke,
   );
+}
+function drawPlacementGrid() {
+  if (!settings.placementGrid || !tool) return;
+  ctx.save();
+  ctx.beginPath();
+  // Cell centers are integer coordinates, matching unproject's rounding.
+  for (let edge = 0.5; edge <= 18.5; edge++) {
+    for (const [a, b] of [
+      [iso(edge, 0.5), iso(edge, 18.5)],
+      [iso(0.5, edge), iso(18.5, edge)],
+    ]) {
+      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+    }
+  }
+  ctx.strokeStyle = "rgba(255, 250, 218, 0.65)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // The arrival spot remains reserved; the hover preview checks other limits.
+  for (let x = 9; x <= 11; x++) for (let y = 12; y <= 14; y++)
+    tile(x, y, "rgba(140, 81, 53, 0.15)");
+  ctx.restore();
 }
 function tree(x, y, s = 1) {
   const p = iso(x, y);
@@ -394,6 +417,7 @@ function render() {
     GROUND_SIZE,
   );
   ctx.restore();
+  drawPlacementGrid();
   // The communal paths remain visible beneath individually placed structures.
   const objects = [
     ...flora.map((f) => ({
@@ -764,6 +788,14 @@ function setup() {
     updateUI();
     save();
   };
+  $("#placement-grid").checked = settings.placementGrid;
+  $("#settings").onclick = () => $("#settings-dialog").showModal();
+  $("#close-settings").onclick = () => $("#settings-dialog").close();
+  $("#placement-grid").onchange = (event) => {
+    settings.placementGrid = event.target.checked;
+    $("#settings-status").textContent = saveSettings(settings)
+      ? "Saved on this device." : "Applied for this session. Device storage is unavailable.";
+  };
   $("#help").onclick = () => $("#help-dialog").showModal();
   $("#close-help").onclick = $("#start-playing").onclick = () =>
     $("#help-dialog").close();
@@ -830,7 +862,7 @@ function setup() {
       !["BUTTON", "INPUT", "SELECT", "TEXTAREA"].includes(
         document.activeElement.tagName,
       ) &&
-      !$("#help-dialog").open
+      !document.querySelector("dialog[open]")
     ) {
       e.preventDefault();
       togglePause();
