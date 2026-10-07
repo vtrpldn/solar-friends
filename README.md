@@ -12,6 +12,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Play](#play)
 - [Village quests](#village-quests)
 - [Village situations](#village-situations)
+- [Development tools](#development-tools)
 - [Implementation](#implementation)
 - [Prototype scope](#prototype-scope)
 
@@ -106,6 +107,49 @@ Recovery requires two other cooks (one for a day off), 72 game minutes of rest o
 An unresolved concern can lower that resident's wellbeing by up to 12 points. Rest and company ease it. Resolved situations remain visible for three game days, then make room for another concern. Cooking history resets on resolution. Situation history, agreements, and recovery persist in village saves; older saves begin with no recorded cooking.
 
 Run `node scripts/verify-situations.mjs` after building to trigger a concern from a fresh village and play both agreements through autonomous resolution and save/reload. An optional output directory stores earned checkpoints for browser playtesting.
+
+## Development tools
+
+Open **Dev Tools** in the game header. The desktop workbench contains simulation tools, artwork links, captures, and the local check report.
+
+### Why
+
+Repeatable scenarios and shared rendering controls shorten gameplay debugging and make artwork changes easier to compare at the scale players see.
+
+### Simulation workbench
+
+Load a fresh arrival, established village, hungry village, mature harvest, overworked cook, full coop, night scene, or a copy of the current village. These are staged fixtures: subsequent time steps run the real simulation. The cook fixture seeds history and raises its concern on the first tick.
+
+The sandbox holds the original game in memory and disables village autosaves, imports, and restarts. **Return to village** restores that game; reloading returns to the last saved village. Export a scenario before leaving if it should be kept. A quarter-second tick advances 0.75 game minutes. Longer advances use the same bounded ticks, up to one game day per action.
+
+Resident diagnostics show the current task and destination, the real chooser's prediction on a copy, request eligibility and refusals, and the latest 150 activity changes across all residents while observation is enabled. An ongoing task can finish before the predicted decision applies. These observations are excluded from village saves.
+
+### Artwork workbench
+
+The **Artwork** tab opens the existing studio with three additional tools:
+
+- **Calibrate** adjusts width, vertical ground anchor, and building camera slopes. Drag the anchor marker or use the numeric fields. Compare against a home and Iara with game-scale and lighting controls; export configuration for a source change. Building drafts can open in the real village renderer.
+- **Review replacement** accepts a complete PNG source image, including all cells when replacing an atlas. Compare at game size, overlay silhouettes, inspect pixel differences, and open the candidate in a separate game preview. Alpha checks flag dimension changes, empty or clipped cells, tight gutters, silhouette changes, and animation baseline spread. Pixel measurements are sampled at 256 pixels per cell; pose changes and artistic quality require visual review.
+- **Recipe card** collects current reference images, a working generation brief, original prompt records, and local revision notes. Saved revisions include the prompt, calibration, and image hash. Export recipes to keep with the source artwork. The tool prepares generation input; it does not generate images itself.
+
+Draft images and calibration proposals apply only to preview URLs containing `art-draft`. They never replace production files. Local storage can fill with large images; the studio reports a failed preview instead of silently losing the proposal. Recipe notes remain in this browser until exported. Original prompt records are generated from repository documents by `node scripts/sync-art-prompts.mjs`; the development check detects stale copies.
+
+### Repeatable checks and captures
+
+Install the browser test dependency once:
+
+```sh
+npm ci
+npx playwright install chromium
+```
+
+Run `npm run dev:check` to check Rust formatting, tests and lint, rebuild WebAssembly, check JavaScript syntax, run the verification scripts, and exercise the desktop tools in Chromium. It produces logs, screenshots, browser errors, a source/build fingerprint, and a machine-readable report in `artifacts/dev-check/`. **Dev Tools → Checks & captures → Open latest local report** opens the copy at `web/dev-report/`. Both locations are ignored by Git. A failed check exits nonzero and records its failure; later checks may not have run.
+
+`npm run dev:browser` runs only browser checks against the existing build. `npm run dev:serve` serves the game on loopback port 4173; set `PORT` to use another port. Reports stay local and can contain a diagnostic village snapshot. CI uses fresh browser storage.
+
+**Fix camera & pause** prepares comparable canvas captures. **Export diagnostic report** includes the current state, resident diagnostics, and errors observed after Dev Tools initialized. Browser checks also capture the complete interface at desktop sizes.
+
+The browser exposes `window.solarDev` for development automation: `loadScenario(id)`, `advance(gameMinutes)`, `snapshot()`, `inspect()`, `fixedView()`, and `returnToVillage()`. Advancing requires a sandbox. The UI calls this same interface.
 
 ## Implementation
 

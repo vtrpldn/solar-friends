@@ -1,3 +1,4 @@
+import { installWorkbench } from './workbench.js';
 import { sampleResidentClip, drawResidentAnimation } from '../resident-animation.js?v=2';
 import { drawBuildingArt } from '../building-art.js?v=night-1';
 import { catalog } from './catalog.js?v=night-1';
@@ -10,6 +11,7 @@ loadChickenArt().then(redraw).catch(() => { $('save-state').textContent = 'Chick
 const surfaces = new WeakMap();
 let animationSeconds = 0, previousStamp = 0;
 const images = new Map();
+let workbench;
 for (const sprite of catalog) if (sprite.file && !images.has(sprite.file)) {
   const img = new Image(); images.set(sprite.file, img); img.src = sprite.file;
   img.onload = redraw;
@@ -63,7 +65,7 @@ function renderLibrary() {
     const pick=document.createElement('button');pick.className='pick';pick.setAttribute('aria-pressed',String(s.id===selected.id));pick.append(makeCanvas(s));
     const name=document.createElement('strong');name.textContent=s.name;pick.append(name);
     const meta=document.createElement('small');meta.textContent=`${s.group} · ${s.usage} · ${review(s).status}`;pick.append(meta);
-    pick.onclick=()=>{selected=s;playbackStarted=false;renderLibrary();loadReview();renderBench();};
+    pick.onclick=()=>{selected=s;workbench?.select(s);playbackStarted=false;renderLibrary();loadReview();renderBench();};
     const pin=document.createElement('button');pin.className='pin';pin.textContent=pins.includes(s.id)?'Unpin':'Pin to compare';pin.setAttribute('aria-pressed',String(pins.includes(s.id)));
     pin.onclick=()=>{if(pins.includes(s.id)) pins=pins.filter(id=>id!==s.id);else if(pins.length<3) pins.push(s.id);else { $('save-state').textContent='Up to three comparison pins. Unpin one to add another.';return;}renderLibrary();renderBench();};
     card.append(pick,pin);$('cards').append(card);
@@ -113,3 +115,5 @@ $('status').onchange=save;$('notes').oninput=save;
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),sprites:catalog.map(s=>({id:s.id,name:s.name,source:s.file || '../chickens.js?v=painted-hens-1',...review(s)}))},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='solar-friends-artwork-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(redraw).observe($('bench'));
 renderLibrary();loadReview();renderBench();
+
+workbench = installWorkbench({ getSelected: () => selected, images, onSelect: sprite => { selected = sprite; renderLibrary(); loadReview(); renderBench(); } });

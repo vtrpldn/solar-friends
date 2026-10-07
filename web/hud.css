@@ -110,3 +110,16 @@ footer .season { position: static; display: flex; padding: 0; gap: 9px; backgrou
 .situation-progress { padding: 1px 18px 10px; background: #f0efdf; border-radius: 10px; }
 .situation-progress p, .situation-memory { font-size: 13px; }
 .situation-quiet { padding: 24px; margin: 24px 0; border: 1px dashed #acb695; border-radius: 10px; font: 20px/1.5 Georgia, serif; }
+
+/* Quiet, persistent feedback; details stay available without filling the scene. */
+.save-warning { position: fixed; z-index: 12; top: 76px; left: 20px; max-width: 340px; padding: 12px 16px; text-align: left; border: 1px solid #b96a45; background: #fff0d9; color: #743e25; border-radius: 10px; }
+.save-actions { flex-wrap: wrap; }
+.save-actions button { padding: 10px 14px; border-radius: 7px; background: #e9eddd; }
+#recovery-notice { color: #743e25; background: #fff0d9; padding: 12px; border-radius: 8px; }
+.dev-tools { margin: 22px 0; padding: 16px 0; border-block: 1px solid var(--line); }
+.dev-tools summary, details summary { cursor: pointer; font-weight: 600; }
+.dev-tools nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dev-tools a { padding: 12px; border-radius: 8px; background: #edf0e1; color: var(--ink); text-decoration: none; font-weight: 600; }
+.dev-tools a:hover { background: #dfe7cd; }
+.dev-tools a span { display: block; margin-top: 5px; font-size: 11px; font-weight: 400; color: var(--muted); }
+[hidden] { display: none !important; }

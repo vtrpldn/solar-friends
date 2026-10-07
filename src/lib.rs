@@ -3,6 +3,7 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod devtools;
 mod ecology;
 mod interactions;
 mod progression;
@@ -375,6 +376,72 @@ fn choose(r: &mut Resident, v: &Village) {
     }
     assign(r, v, task, reason, false);
 }
+fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Option<String> {
+    let id = r.id;
+    if !matches!(
+        task,
+        "build"
+            | "garden"
+            | "cook"
+            | "water"
+            | "eat"
+            | "gather"
+            | "rest"
+            | "socialize"
+            | "compost"
+            | "craft"
+    ) {
+        return Some("That request is not available.".into());
+    }
+    if situations::protected(v, id, task) {
+        return Some(
+            "We agreed to cover this work. Let our neighbour have their time back.".into(),
+        );
+    }
+    if !available(v, task) {
+        return Some(
+            match task {
+                "build" => "There are no construction projects yet.",
+                "garden" => {
+                    "Gardens need planting, two water when dry, or time to grow before harvest."
+                }
+                "cook" => "We need a kitchen, three food and one water first.",
+                "compost" => "We need a compost station and two kitchen scraps first.",
+                "craft" => {
+                    "We need a workshop, eight timber and room for more tools (at most 36 uses)."
+                }
+                "eat" => "We need food or a prepared meal first.",
+                _ => "That task is not available yet.",
+            }
+            .into(),
+        );
+    }
+    if r.task == "arrive" {
+        return Some(format!("{}: Let me reach the clearing first.", r.name));
+    }
+    if sleeping_time(v.minutes, id) && task != "rest" {
+        return Some(format!(
+            "{}: It is bedtime. Let's pick this up in the morning.",
+            r.name
+        ));
+    }
+    if !matches!(task, "rest" | "eat") && r.energy < 25. {
+        return Some(format!(
+            "{}: I need to rest first. Ask me when I have more energy.",
+            r.name
+        ));
+    }
+    if !matches!(task, "rest" | "eat" | "cook") && r.hunger > 75. {
+        return Some(format!("{}: I need a meal before I can help.", r.name));
+    }
+    if task != r.favorite && !matches!(task, "rest" | "eat") && r.energy < 55. && !encourage {
+        return Some(format!(
+            "{}: I'd rather save my energy. Could we talk about why it matters?",
+            r.name
+        ));
+    }
+    None
+}
 fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resident>) {
     let dt = step.0;
     if dt <= 0. {
@@ -646,7 +713,8 @@ impl Game {
                 progress: Progress::default(),
                 situations: situations::Situations::default(),
             })
-            .add_systems(Update, simulate);
+            .insert_resource(devtools::Diagnostics::default())
+            .add_systems(Update, (simulate, devtools::record).chain());
         for (id, (name, traits, favorite)) in [
             ("Iara", "Patient · gardener", "garden"),
             ("Bento", "Practical · builder", "build"),
@@ -837,67 +905,12 @@ impl Game {
     }
     pub fn request(&mut self, id: usize, task: &str, encourage: bool) -> String {
         let v = self.app.world().resource::<Village>().clone();
-        if !matches!(
-            task,
-            "build"
-                | "garden"
-                | "cook"
-                | "water"
-                | "eat"
-                | "gather"
-                | "rest"
-                | "socialize"
-                | "compost"
-                | "craft"
-        ) {
-            return "That request is not available.".into();
-        }
-        if situations::protected(&v, id, task) {
-            return "We agreed to cover this work. Let our neighbour have their time back.".into();
-        }
-        if !available(&v, task) {
-            return match task {
-                "build" => "There are no construction projects yet.",
-                "garden" => {
-                    "Gardens need planting, two water when dry, or time to grow before harvest."
-                }
-                "cook" => "We need a kitchen, three food and one water first.",
-                "compost" => "We need a compost station and two kitchen scraps first.",
-                "craft" => {
-                    "We need a workshop, eight timber and room for more tools (at most 36 uses)."
-                }
-                "eat" => "We need food or a prepared meal first.",
-                _ => "That task is not available yet.",
-            }
-            .into();
-        }
         let mut query = self.app.world_mut().query::<&mut Resident>();
         let Some(mut r) = query.iter_mut(self.app.world_mut()).find(|r| r.id == id) else {
             return "Resident not found.".into();
         };
-        if r.task == "arrive" {
-            return format!("{}: Let me reach the clearing first.", r.name);
-        }
-        if sleeping_time(v.minutes, id) && task != "rest" {
-            return format!(
-                "{}: It is bedtime. Let's pick this up in the morning.",
-                r.name
-            );
-        }
-        if !matches!(task, "rest" | "eat") && r.energy < 25. {
-            return format!(
-                "{}: I need to rest first. Ask me when I have more energy.",
-                r.name
-            );
-        }
-        if !matches!(task, "rest" | "eat" | "cook") && r.hunger > 75. {
-            return format!("{}: I need a meal before I can help.", r.name);
-        }
-        if task != r.favorite && !matches!(task, "rest" | "eat") && r.energy < 55. && !encourage {
-            return format!(
-                "{}: I'd rather save my energy. Could we talk about why it matters?",
-                r.name
-            );
+        if let Some(reason) = request_blocker(&v, &r, task, encourage) {
+            return reason;
         }
         let reason = if encourage {
             "You explained why this matters. I'll lend a hand."
@@ -1104,6 +1117,10 @@ impl Game {
         save.village.map_size = MAP_SIZE;
         progression::update(&mut save.village);
         self.app.insert_resource(save.village);
+        self.app
+            .world_mut()
+            .resource_mut::<devtools::Diagnostics>()
+            .clear_history();
         true
     }
 }
