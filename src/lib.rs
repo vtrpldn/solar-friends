@@ -5,6 +5,7 @@ use wasm_bindgen::prelude::*;
 
 mod ecology;
 mod progression;
+mod supplies;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
@@ -58,6 +59,8 @@ pub struct Building {
     pub contributors: u8,
     #[serde(default)]
     pub crop: ecology::Crop,
+    #[serde(default)]
+    pub poultry: supplies::Poultry,
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
@@ -66,6 +69,8 @@ pub struct Village {
     pub minutes: f32,
     pub wood: f32,
     pub food: f32,
+    #[serde(default)]
+    pub supplies: supplies::Supplies,
     pub water: f32,
     pub meals: u32,
     pub meals_served: u32,
@@ -156,7 +161,7 @@ fn available(v: &Village, task: &str) -> bool {
             .buildings
             .iter()
             .any(|b| ecology::needs_tending(b, v.water)),
-        "cook" => ready(v, "kitchen") && v.food >= 3. && v.water >= 1.,
+        "cook" => ready(v, "kitchen") && supplies::can_cook(v),
         "water" => v.water < ecology::capacity(v),
         "compost" => ready(v, "compost") && v.progress.scraps >= 2,
         "craft" => ready(v, "workshop") && v.wood >= 8. && v.progress.tool_uses <= 24,
@@ -298,6 +303,8 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Taking a quiet moment before the next part of the day.",
             )
         }
+    } else if v.food < 6. && v.meals < 5 {
+        ("gather", "Foraging wild food to keep everyone fed.")
     } else if v.water < 24. && available(v, "water") {
         ("water", "Carrying river water back to our storage.")
     } else if v.meals < 5 && available(v, "cook") && (r.favorite == "cook" || r.hunger > 55.) {
@@ -336,6 +343,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     }
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
         v.mornings += 1;
@@ -477,19 +485,18 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     v.progress.timber = v.progress.timber.saturating_add(timber);
                     if ready(&v, "grove") {
                         v.food += 2.;
+                        v.supplies.gathered += 2.;
                         v.progress.fruit = v.progress.fruit.saturating_add(2);
+                    } else if v.food < 6. {
+                        v.food += 2.;
+                        v.supplies.gathered += 2.;
                     }
                 }
                 "garden" => ecology::tend(&mut v, &r),
                 "water" if v.water < ecology::capacity(&v) => {
                     v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
-                "cook" if v.food >= 3. && v.water >= 1. => {
-                    v.food -= 3.;
-                    v.water -= 1.;
-                    v.meals += 5;
-                    v.progress.scraps = v.progress.scraps.saturating_add(1);
-                }
+                "cook" => supplies::cook(&mut v),
                 "compost" if v.progress.scraps >= 2 => {
                     v.progress.scraps -= 2;
                     v.progress.compost += 1;
@@ -506,11 +513,14 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     let fed = if v.meals > 0 {
                         v.meals -= 1;
                         v.meals_served += 1;
+                        v.supplies.portions_eaten += 1;
                         r.hunger = (r.hunger - 65.).max(0.);
                         r.social = (r.social + 8.).min(100.);
                         true
                     } else if v.food >= 1. {
                         v.food -= 1.;
+                        v.supplies.used += 1.;
+                        v.supplies.portions_eaten += 1;
                         r.hunger = (r.hunger - 45.).max(0.);
                         true
                     } else {
@@ -548,6 +558,7 @@ impl Game {
                 minutes: 480.,
                 wood: 110.,
                 food: 36.,
+                supplies: supplies::Supplies::default(),
                 water: 32.,
                 meals: 0,
                 meals_served: 0,
@@ -618,6 +629,11 @@ impl Game {
         })
         .to_string()
     }
+    pub fn set_food_preferences(&mut self, feed_hens: bool, use_eggs: bool) {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        v.supplies.feed_hens = feed_hens;
+        v.supplies.use_eggs = use_eggs;
+    }
     pub fn toggle_road(&mut self, x: i32, y: i32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if let Some(index) = v.roads.iter().position(|tile| *tile == (x, y)) {
@@ -671,6 +687,7 @@ impl Game {
             progress: 0.,
             contributors: 0,
             crop: ecology::Crop::default(),
+            poultry: supplies::Poultry::default(),
         });
         event(
             &mut v,
@@ -848,6 +865,9 @@ impl Game {
                     || !road_tiles.insert((x, y))
             })
         {
+            return false;
+        }
+        if !supplies::valid(v) {
             return false;
         }
         let p = &v.progress;
@@ -1029,6 +1049,7 @@ mod tests {
                 progress: if id % 2 == 0 { 100. } else { 0. },
                 contributors: 0,
                 crop: ecology::Crop::default(),
+                poultry: supplies::Poultry::default(),
             });
         }
         for minutes in (0..2880).step_by(30) {

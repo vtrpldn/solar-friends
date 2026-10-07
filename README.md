@@ -30,7 +30,7 @@ Open [the village](http://127.0.0.1:4173). The pinned Rust toolchain includes th
 
 Choose a building in the bottom toolbar and click a clearing. Residents construct it autonomously, or you can select a resident and ask for help. People can refuse based on their energy or hunger. Explaining the community need can overcome reluctance, but never exhaustion.
 
-Chicken coops cost 24 timber and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Hens are decorative and do not produce food.
+Chicken coops cost 24 timber and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes three ingredients, while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Egg storage holds 60; full storage pauses new feeding.
 
 Gardens need planting, watering, three game hours of growth in moist soil, and harvesting. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents gather fallen timber, carry river water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 28×28 lot (784 tiles, roughly twice the previous 400). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
 
@@ -45,6 +45,14 @@ A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinn
 New village restarts the scenario after confirmation and retains one backup under `solar-friends-v2-backup`. Earlier prototype saves remain untouched under `solar-friends-v1`.
 
 Existing 20×20 saves expand in place. A meandering river runs along the eastern edge, with animated currents, shallow banks, and stones. Construction is blocked along the riverbank so buildings and their approach points remain on the village side.
+
+## Village supplies
+
+Open **Supplies** for ingredients, eggs, prepared meals, today's production and use, and the weather outlook. Gardens and foraging share the ingredient stock. The pantry estimates food days at fifteen portions per day for five residents; cooking gains, hen feed, future harvests, and extra hunger are excluded from that estimate.
+
+Kitchens make five meals from three ingredients and one water. With egg cooking enabled and eggs available, they make seven meals from two ingredients, two eggs, and one water. Simple meals remain the fallback. Both recipes produce compost scraps. Turn egg cooking or automatic hen feeding off in Supplies to conserve resources. Already-fed coops finish their current batch.
+
+When ingredients and meals run low, residents prioritize gathering wild food even without a food forest. Water remains available from the river. Shortages pause hen production and crop growth without killing hens or crops. Existing saves start with no eggs and retain their ingredients, buildings, and village progress.
 
 ## Village quests
 

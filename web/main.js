@@ -7,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=manual-roads-1";
+import init, { Game } from "./pkg/solar_friends.js?v=pantry-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -823,8 +823,28 @@ function updateQuests() {
         ? "Next gathering tomorrow"
         : "Host a gathering";
 }
+function updateSupplies(v) {
+  const s = v.supplies;
+  const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
+  const fed = coops.filter(b => b.poultry.remaining > 0);
+  const days = (v.food + v.meals) / 15;
+  $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
+  $("#pantry-outlook").textContent = `${days < 1 ? "Pantry running low. " : ""}About ${days.toFixed(1)} days of food at 15 portions/day, before cooking gains, hen feed, or new harvests.`;
+  $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
+  $("#use-eggs").checked = s.use_eggs;
+  $("#feed-hens").checked = s.feed_hens;
+  $("#kitchen-status").textContent = !v.buildings.some(b => b.kind === "kitchen" && b.progress >= 100)
+    ? "Build a kitchen to stretch your harvest into meals."
+    : v.water < 1 ? "Cooking needs water. Residents can collect it from the river."
+    : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
+    : s.use_eggs && s.eggs >= 2 ? "Next pot: egg meals. Residents cook when meals are running low." : "Next pot: simple meals. Residents cook when meals are running low.";
+  $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
+    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs >= 60 ? "Egg storage is full." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
+  $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
+}
 function updateUI() {
   const v = state.village;
+  updateSupplies(v);
   for (const k of ["wood", "food", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
   $("#happiness").textContent =
@@ -1008,6 +1028,14 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for (const id of ["feed-hens", "use-eggs"]) {
+    $("#" + id).onchange = () => {
+      game.set_food_preferences($("#feed-hens").checked, $("#use-eggs").checked);
+      state = JSON.parse(game.snapshot());
+      updateUI();
+      save();
+    };
+  }
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
       const isOpen = button.getAttribute("aria-expanded") === "true";
@@ -1210,7 +1238,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=manual-roads-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=pantry-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),

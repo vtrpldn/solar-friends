@@ -68,6 +68,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
         crop.growth = 0.;
     } else if crop.growth >= 180. {
         *crop = Crop::default();
+        let before = v.food;
         v.food += if r.favorite == "garden" { 8. } else { 5. };
         if v.progress.compost > 0 {
             v.progress.compost -= 1;
@@ -77,6 +78,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
         if progression::use_tool(v) {
             v.food += 2.;
         }
+        v.supplies.gathered += v.food - before;
         v.harvests += 1;
     } else if v.water >= 2. {
         v.water -= 2.;
