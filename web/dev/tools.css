@@ -1,0 +1,22 @@
+#dev-dialog{width:min(1100px,94vw);max-width:1100px;padding:30px;max-height:88vh;color:#283f34;background:#f6f1e5}
+#dev-dialog h2{font:normal 34px Georgia,serif;margin:8px 0 12px}
+.dev-tabs{display:flex;gap:8px;border-bottom:1px solid #c6cabb;padding:14px 0;margin-bottom:20px}
+.dev-tabs button[aria-pressed=true]{background:#345b48;color:#fff9ec}
+.dev-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.dev-card{padding:20px;border:1px solid #c8cbb9;border-radius:8px;background:#fffcf4}
+.dev-card h3{margin-top:0;font:normal 23px Georgia,serif}
+.dev-card label{display:block;margin:12px 0 6px}
+.dev-card select,.dev-card input{max-width:100%;padding:8px;background:#fffdf5;color:inherit;border:1px solid #b7bfac;border-radius:4px}
+.dev-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.dev-card p,.dev-card li{font-size:13px;line-height:1.6}
+.dev-card a{color:#386b51}.dev-card pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#e9ecdf;padding:12px;font-size:12px}
+#dev-mode{padding:10px 14px;background:#e5ead9;border-left:3px solid #9c593c;font-size:13px}
+#dev-inspection{max-height:46vh;overflow:auto}
+#dev-inspection table{width:100%;border-collapse:collapse;font-size:12px}
+#dev-inspection th,#dev-inspection td{text-align:left;border-bottom:1px solid #d9dece;padding:7px}
+#dev-history{padding-left:18px;max-height:250px;overflow:auto}
+#dev-button{font-size:12px;padding:9px 14px;white-space:nowrap}
+#dev-banner{position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:15;background:#2f5343;color:#fff9ec;border:1px solid #b4c2a2;border-radius:6px;padding:10px 18px;font:13px 'Trebuchet MS',sans-serif}
+#dev-banner button{margin-left:12px;padding:5px 10px}
+.dev-link{display:block;padding:10px 0;border-bottom:1px solid #dddcca;text-decoration:none}.dev-link b{display:block}.dev-link span{font-size:12px}
+#dev-errors{max-height:180px;overflow:auto}

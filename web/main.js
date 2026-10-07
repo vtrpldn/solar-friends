@@ -1,3 +1,5 @@
+import { installDevTools } from './dev/tools.js';
+import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
 import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
@@ -11,7 +13,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=farming-1";
+import init, { Game } from "./pkg/solar_friends.js?v=devtools-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -26,6 +28,8 @@ const previewParams = new URLSearchParams(location.search);
 const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
 const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
+const directScenario = previewParams.get('dev-scenario');
+let sandbox = null, sandboxName = '', devTools;
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -170,8 +174,8 @@ function toast(message) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
 }
 function save(manual = false) {
-  if (artworkPreview) {
-    $("#save-status").textContent = "Artwork preview · your saved village is unchanged";
+  if (artworkPreview || sandbox || directScenario) {
+    $("#save-status").textContent = "Development preview · your saved village is unchanged";
     if (manual) toast("Preview only. Return to your village to save progress.");
     return;
   }
@@ -1194,6 +1198,7 @@ function setup() {
   };
   $("#cancel-import").onclick = () => { pendingImport = null; $("#import-dialog").close(); };
   $("#confirm-import").onclick = () => {
+    if (sandbox || artworkPreview || directScenario) return;
     if (!pendingImport) return;
     try {
       storage.backup(game.snapshot());
@@ -1218,6 +1223,7 @@ function setup() {
   $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
   $("#cancel-restart").onclick = () => $("#restart-dialog").close();
   $("#confirm-restart").onclick = () => {
+    if (sandbox || artworkPreview || directScenario) return;
     try {
       if (!artworkPreview) storage.backup(game.snapshot());
     } catch {
@@ -1355,8 +1361,72 @@ function setup() {
   $("#loading").hidden = true;
   requestAnimationFrame(frame);
 }
+// Both the workbench and automated checks use this interface. Mutations require
+// a sandbox; the original Game object stays untouched until it is restored.
+function refreshDevScene() {
+  residentAnimations.clear(); groundKey = null; time = 0; animationDelta = 0;
+  state = JSON.parse(game.snapshot()); selected = null; tool = null;
+  closePanels(); $("#person").hidden = true; $("#placement").hidden = true;
+  for (const id of ['import-save', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
+  updateUI(); render();
+}
+const devAPI = {
+  snapshot: () => JSON.parse(game.snapshot()),
+  inspect: () => JSON.parse(game.dev_inspect()),
+  observe: () => game.dev_observe(true),
+  isSandbox: () => !!sandbox,
+  scenario: () => sandboxName || (artworkPreview ? 'Artwork preview' : 'Saved village'),
+  async loadScenario(id) {
+    const candidate = new Game();
+    try {
+      let raw;
+      if (id === 'copy') raw = game.snapshot();
+      else {
+        const fresh = JSON.parse(candidate.snapshot());
+        const response = await fetch('./artwork/village-preview.json');
+        if (!response.ok || !candidate.restore(await response.text())) throw new Error('Could not load the village fixture.');
+        raw = JSON.stringify(makeScenario(id, fresh, JSON.parse(candidate.snapshot())));
+      }
+      if (!candidate.restore(raw)) throw new Error('Scenario failed simulation validation.');
+      if (!sandbox) sandbox = { game, paused, zoom, pan: { ...pan }, time };
+      else game.free();
+      game = candidate; sandboxName = id; game.dev_observe(true);
+      if (!paused) togglePause();
+      refreshDevScene(); devTools?.refresh();
+    } catch (error) { candidate.free(); throw error; }
+  },
+  returnToVillage() {
+    if (!sandbox) return;
+    game.free();
+    ({ game, zoom, pan, time } = sandbox);
+    const wasPaused = sandbox.paused;
+    sandbox = null; sandboxName = '';
+    if (paused !== wasPaused) togglePause();
+    refreshDevScene(); devTools?.refresh();
+    if (directScenario) location.assign('./');
+  },
+  advance(minutes) {
+    if (!sandbox) throw new Error('Load a sandbox before advancing time.');
+    if (!paused) togglePause();
+    advanceGame(game, minutes); state = JSON.parse(game.snapshot()); updateUI(); render();
+    return devAPI.snapshot();
+  },
+  run() { if (!sandbox) throw new Error('Load a sandbox first.'); if (paused) togglePause(); },
+  fixedView() { if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
+  locate(id) {
+    const r = state.residents.find(r => r.id === id);
+    if (!r) return;
+    const point = project(r.x, r.y, origin, scale);
+    pan.x += width / 2 - point.x; pan.y += height / 2 - point.y;
+    render();
+  },
+  capture() {
+    devAPI.fixedView();
+    const a = document.createElement('a'); a.download = 'solar-friends-scene.png'; a.href = canvas.toDataURL('image/png'); a.click();
+  },
+};
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=farming-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=devtools-1" });
   await Promise.all([
     loadChickenArt(),
     ...Object.values(buildingImages).map((image) => image.decode()),
@@ -1379,7 +1449,7 @@ try {
       fixture.village.minutes = Math.floor(fixture.village.minutes / 1440) * 1440 + 21 * 60;
       saved = JSON.stringify(fixture);
     }
-  } else {
+  } else if (!directScenario) {
     try { saved = storage.read(); } catch {
       $("#save-warning").hidden = false;
     }
@@ -1393,6 +1463,9 @@ try {
   }
   state = JSON.parse(game.snapshot());
   setup();
+  devTools = installDevTools(devAPI);
+  window.solarDev = Object.freeze(devAPI);
+  if (directScenario) { await devAPI.loadScenario(directScenario); devTools.open(); }
   if (artworkPreview) {
     const notice = document.createElement('a');
     notice.href = './';
