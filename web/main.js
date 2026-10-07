@@ -13,7 +13,7 @@ import {
   MAP_SIZE,
   riverCenter,
   riverBank,
-} from "./terrain.js";
+} from "./terrain.js?v=river-28";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const canvas = $("#world"),
@@ -922,7 +922,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init();
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=river-28" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),
