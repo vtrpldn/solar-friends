@@ -1,0 +1,79 @@
+// Visual state only: saved simulation time chooses idle activities; animation
+// seconds advance only while the simulation runs. No village/save mutations.
+export const residentClips = {
+  walk: { sheet: 'base', row: 0, fps: 8, frames: [0, 1, 2, 3], loop: true },
+  work: { sheet: 'base', row: 1, fps: 5, frames: [0, 1, 2, 3], loop: true },
+  sit: { sheet: 'base', row: 3, fps: .8, frames: [0, 1, 2, 1], loop: true },
+  breathe: { sheet: 'base', row: 2, fps: .8, frames: [0, 1, 2, 3], loop: true },
+  sleep: { sheet: 'base', row: 3, fps: 0, frames: [3] },
+  look: { sheet: 'idle', row: 0, fps: .8, frames: [0, 1, 2, 3], loop: true },
+  stretch: { sheet: 'idle', row: 1, fps: 1.6, frames: [0, 1, 2, 2, 3, 0] },
+  wave: { sheet: 'idle', row: 2, fps: 2, frames: [0, 2, 2, 3, 0] },
+  relax: { sheet: 'idle', row: 3, fps: 1, frames: [0, 1, 2, 2, 3, 0] },
+};
+export const idleLabels = {
+  look: 'Looking around the village', stretch: 'Taking a stretch',
+  wave: 'Waving hello', relax: 'Enjoying a quiet moment', walk: 'Taking a quiet walk',
+};
+export function residentActivity(r, minutes) {
+  if (Math.hypot(r.target_x - r.x, r.target_y - r.y) > .1) return 'walk';
+  if (r.task === 'sleep') return 'sleep';
+  if (['rest', 'eat'].includes(r.task)) return 'sit';
+  if (['build', 'craft', 'compost'].includes(r.task)) return 'work';
+  const slot = Math.floor((minutes + r.id * 29) / 24);
+  if (['socialize', 'gathering'].includes(r.task)) return slot % 3 === 0 ? 'wave' : 'relax';
+  if (r.task === 'idle') return ['look', 'relax', 'look', 'stretch', 'look', 'relax', 'wave', 'look'][slot % 8];
+  return 'look';
+}
+const ease = t => t * t * (3 - 2 * t);
+export function sampleResidentClip(mode, seconds) {
+  const clip = residentClips[mode];
+  const position = Math.max(0, seconds * clip.fps);
+  const index = clip.loop ? Math.floor(position) % clip.frames.length : Math.min(Math.floor(position), clip.frames.length - 1);
+  const next = clip.loop ? (index + 1) % clip.frames.length : Math.min(index + 1, clip.frames.length - 1);
+  // Keep readable key poses, then ease through the final part of each frame.
+  const blend = ease(Math.max(0, ((position % 1) - .55) / .45));
+  return [
+    { sheet: clip.sheet, row: clip.row, frame: clip.frames[index], weight: 1 - blend },
+    { sheet: clip.sheet, row: clip.row, frame: clip.frames[next], weight: blend },
+  ].filter(frame => frame.weight > 0);
+}
+export function advanceResidentAnimation(previous, r, minutes, delta) {
+  const mode = residentActivity(r, minutes);
+  const changed = previous && mode !== previous.mode;
+  const phase = changed ? 0 : (previous?.phase ?? r.id * .19) + delta;
+  let facing = previous?.facing ?? (r.target_x - r.target_y < r.x - r.y ? -1 : 1);
+  if (previous && mode === 'walk') {
+    const dx = (r.x - previous.x) - (r.y - previous.y);
+    if (Math.abs(dx) > .00001) facing = dx < 0 ? -1 : 1;
+  }
+  const transition = changed ? 0 : Math.min(.18, (previous?.transition ?? .18) + delta);
+  const from = changed ? sampleResidentClip(previous.mode, previous.phase) : previous?.from;
+  const mix = ease(transition / .18);
+  const layers = sampleResidentClip(mode, phase).map(frame => ({ ...frame, weight: frame.weight * mix }));
+  if (from && mix < 1) layers.push(...from.map(frame => ({ ...frame, weight: frame.weight * (1 - mix) })));
+  return { mode, phase, facing, transition, from: mix < 1 ? from : undefined, layers,
+    x: r.x, y: r.y, breath: mode === 'walk' || mode === 'work' || mode === 'sleep' ? 1 : 1 + Math.sin(phase * 1.8 + r.id) * .006 };
+}
+
+// Additive premultiplied blending on an isolated surface keeps overlapping
+// opaque pixels opaque instead of making the whole resident flash translucent.
+export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, width) {
+  const buffer = surface.getContext('2d');
+  buffer.clearRect(0, 0, surface.width, surface.height);
+  buffer.globalCompositeOperation = 'lighter';
+  for (const pose of animation.layers) {
+    if (pose.weight <= 0) continue;
+    const sheet = sheets[pose.sheet];
+    buffer.globalAlpha = pose.weight;
+    buffer.drawImage(sheet, pose.frame * sheet.naturalWidth / 4, pose.row * sheet.naturalHeight / 4,
+      sheet.naturalWidth / 4, sheet.naturalHeight / 4, 0, 0, surface.width, surface.height);
+  }
+  buffer.globalAlpha = 1;
+  buffer.globalCompositeOperation = 'source-over';
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(animation.facing, animation.breath);
+  ctx.drawImage(surface, -width / 2, -width * .97, width, width);
+  ctx.restore();
+}

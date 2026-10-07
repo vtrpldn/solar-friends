@@ -1,3 +1,4 @@
+import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js';
 import { buildingArt, drawBuildingArt } from './building-art.js';
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
@@ -19,7 +20,9 @@ import {
 } from "./terrain.js?v=river-28";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
-const artworkPreview = new URLSearchParams(location.search).has("artwork-preview");
+const previewParams = new URLSearchParams(location.search);
+const residentPreview = previewParams.has("resident-preview");
+const artworkPreview = residentPreview || previewParams.has("artwork-preview");
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -49,13 +52,6 @@ const tasks = {
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
 };
-const pastimes = {
-  garden: "Looking at the plants",
-  build: "Sketching building ideas",
-  cook: "Humming and dreaming up recipes",
-  gather: "Watching birds",
-  water: "Sitting and daydreaming",
-};
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const buildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
   const image = new Image();
@@ -71,6 +67,12 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
   image.src = `art/animations/${name}.png`;
   return image;
 });
+const idleAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
+  const image = new Image(); image.src = `art/animations/${name}-idle.png`; return image;
+});
+const residentAnimations = new Map();
+const residentSurfaces = new Map();
+let animationDelta = 0;
 let groundLayer,
   groundKey = null;
 const forestArt = new Image();
@@ -405,7 +407,6 @@ function resident(r) {
   const p = iso(r.x, r.y),
     s = scale;
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
-  const bob = 0;
   const indoors =
     !moving &&
     r.task === "sleep" &&
@@ -422,36 +423,15 @@ function resident(r) {
     ctx.lineWidth = 2;
     ctx.stroke();
   }
-  const py = p.y + bob;
-  const sheet = animations[r.id];
-  const row = moving
-    ? 0
-    : ["build", "craft", "compost"].includes(r.task)
-      ? 1
-      : ["rest", "socialize", "eat", "sleep", "gathering"].includes(r.task)
-        ? 3
-        : 2;
-  const fps = [8, 5, 1.5, 1][row];
-  const frame =
-    r.task === "sleep" && !moving ? 3 : Math.floor(time * fps + r.id) % 4;
-  const cellW = sheet.width / 4,
-    cellH = sheet.height / 4;
-  const w = 43 * s;
-  ctx.save();
-  ctx.translate(p.x, py);
-  if (r.target_x - r.target_y < r.x - r.y) ctx.scale(-1, 1);
-  ctx.drawImage(
-    sheet,
-    frame * cellW,
-    row * cellH,
-    cellW,
-    cellH,
-    -w / 2,
-    -w * 0.97,
-    w,
-    w,
-  );
-  ctx.restore();
+  const py = p.y;
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), r, state.village.minutes, animationDelta);
+  residentAnimations.set(r.id, animation);
+  if (!residentSurfaces.has(r.id)) {
+    const surface = document.createElement('canvas'); surface.width = surface.height = 128;
+    residentSurfaces.set(r.id, surface);
+  }
+  drawResidentAnimation(ctx, residentSurfaces.get(r.id),
+    { base: animations[r.id], idle: idleAnimations[r.id] }, animation, p.x, py, 43 * s);
   if (isSelected) {
     ctx.font = `600 ${11 * s}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -889,12 +869,12 @@ function updateUI() {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
     el.querySelector("small").textContent =
-      (r.task === "idle" ? pastimes[r.favorite] || tasks.idle : tasks[r.task]) || r.task;
+      (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] : tasks[r.task]) || r.task;
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
     const r = state.residents.find((r) => r.id === selected);
-    $("#person .quote").textContent = "“" + r.reason + "”";
+    $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
       Fullness: 100 - r.hunger,
@@ -984,6 +964,7 @@ function frame(stamp) {
   last = stamp;
   const running =
     !paused && !document.hidden && !document.querySelector("dialog[open]");
+  animationDelta = running ? dt * Math.min(speed, 2) : 0;
   if (running) {
     time += dt * speed;
     let remaining = dt * speed;
@@ -1091,6 +1072,7 @@ function setup() {
     } catch {}
     game.free();
     game = new Game();
+    residentAnimations.clear();
     state = JSON.parse(game.snapshot());
     selected = null;
     tool = null;
@@ -1215,17 +1197,19 @@ try {
     terrain.decode(),
     peopleArt.decode(),
     ...animations.map((image) => image.decode()),
+    ...idleAnimations.map((image) => image.decode()),
   ]);
   game = new Game();
   let saved;
   if (artworkPreview) {
-    const response = await fetch('./artwork/village-preview.json');
+    const response = await fetch(residentPreview ? './artwork/resident-preview.json' : './artwork/village-preview.json');
     if (!response.ok) throw new Error('Artwork preview could not load');
     saved = await response.text();
   } else {
     try { saved = localStorage.getItem(saveKey); } catch {}
   }
   if (saved && !game.restore(saved)) {
+    if (artworkPreview) throw new Error("The artwork preview fixture is invalid");
     toast("Your old save could not be loaded. A fresh village is ready.");
   }
   state = JSON.parse(game.snapshot());
@@ -1234,7 +1218,7 @@ try {
     const notice = document.createElement('a');
     notice.href = './';
     notice.className = 'artwork-preview-notice';
-    notice.textContent = 'Artwork preview · Return to your village ↗';
+    notice.textContent = `${residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
     document.body.append(notice);
     togglePause();
     save();

@@ -13,3 +13,5 @@ for (const [kind, art] of Object.entries(buildingArt)) {
 ['Iara','Bento','Luz','Cauã','Nina'].forEach((name,i) => add(`portrait-${i}`,name,'residents-cistern.png','Portraits',{cell:[i%3/3,Math.floor(i/3)/2,1/3,.5],width:43,anchor:.97}));
 ['iara','bento','luz','caua','nina'].forEach((id,i) => add(id,['Iara','Bento','Luz','Cauã','Nina'][i],`animations/${id}.png`,'Animations',{animation:true,width:43,anchor:.97}));
 ['Cream','Ochre','Brown'].forEach((name,i) => add(`hen-${i}`,`${name} chicken`,'chickens.png','Animals',{chicken:true,variant:i,cell:[i/3,0,1/3,.5],width:26,anchor:.93}));
+
+['iara','bento','luz','caua','nina'].forEach((id,i) => add(`${id}-idle`,`${['Iara','Bento','Luz','Cauã','Nina'][i]} · standing idles`,`animations/${id}-idle.png`,'Animations',{animation:true,idleAnimation:true,width:43,anchor:.97}));
