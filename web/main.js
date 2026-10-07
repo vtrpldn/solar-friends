@@ -1,4 +1,4 @@
-import { quests, buildingUnlocked, questStatus } from "./quests.js";
+import { quests, buildingUnlocked, questStatus } from "./quests.js?v=quests-1";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
   project,
@@ -6,7 +6,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js";
+import init, { Game } from "./pkg/solar_friends.js?v=quests-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -1066,7 +1066,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=river-28" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=quests-1" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),
