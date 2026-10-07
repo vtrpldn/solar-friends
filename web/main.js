@@ -1,4 +1,4 @@
-import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js';
+import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
 import { buildingArt, drawBuildingArt } from './building-art.js';
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";

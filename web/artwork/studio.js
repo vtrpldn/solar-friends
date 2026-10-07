@@ -1,10 +1,10 @@
-import { sampleResidentClip, drawResidentAnimation } from '../resident-animation.js';
+import { sampleResidentClip, drawResidentAnimation } from '../resident-animation.js?v=2';
 import { drawBuildingArt } from '../building-art.js';
 import { catalog } from './catalog.js?v=resident-motion-1';
 import { drawChicken, loadChickenArt } from '../chickens.js?v=painted-hens-1';
 const $ = id => document.getElementById(id);
 const key = 'solar-friends-artwork-review-v1';
-let reviews = {}, selected = catalog[0], pins = [], playing = false, frame = 0;
+let reviews = {}, selected = catalog[0], pins = [], playing = false, playbackStarted = false, frame = 0;
 try { const data = JSON.parse(localStorage.getItem(key) || '{}'); if (data && typeof data === 'object' && !Array.isArray(data)) reviews = data; } catch { $('save-state').textContent = 'Saved review could not be read. Export new notes before leaving.'; }
 loadChickenArt().then(redraw).catch(() => { $('save-state').textContent = 'Chicken artwork could not load. Reload to retry.'; });
 const surfaces = new WeakMap();
@@ -38,7 +38,7 @@ function draw(canvas, sprite, bench = false) {
   } else {
     const img = images.get(sprite.file);
     if (!img?.complete || !img.naturalWidth) { ctx.restore();ctx.fillStyle='#9b4b37';ctx.font='12px sans-serif';ctx.fillText(img?.complete ? 'Artwork unavailable' : 'Loading…',10,25);return; }
-    if (sprite.animation && bench && playing) {
+    if (sprite.animation && bench && playbackStarted) {
       const mode = (sprite.idleAnimation ? ['look','stretch','wave','relax'] : ['walk','work','breathe','sit'])[Number($('action').value)];
       const layers = sampleResidentClip(mode, animationSeconds % 8);
       let surface = surfaces.get(canvas);
@@ -63,7 +63,7 @@ function renderLibrary() {
     const pick=document.createElement('button');pick.className='pick';pick.setAttribute('aria-pressed',String(s.id===selected.id));pick.append(makeCanvas(s));
     const name=document.createElement('strong');name.textContent=s.name;pick.append(name);
     const meta=document.createElement('small');meta.textContent=`${s.group} · ${s.usage} · ${review(s).status}`;pick.append(meta);
-    pick.onclick=()=>{selected=s;renderLibrary();loadReview();renderBench();};
+    pick.onclick=()=>{selected=s;playbackStarted=false;renderLibrary();loadReview();renderBench();};
     const pin=document.createElement('button');pin.className='pin';pin.textContent=pins.includes(s.id)?'Unpin':'Pin to compare';pin.setAttribute('aria-pressed',String(pins.includes(s.id)));
     pin.onclick=()=>{if(pins.includes(s.id)) pins=pins.filter(id=>id!==s.id);else if(pins.length<3) pins.push(s.id);else { $('save-state').textContent='Up to three comparison pins. Unpin one to add another.';return;}renderLibrary();renderBench();};
     card.append(pick,pin);$('cards').append(card);
@@ -99,8 +99,8 @@ function save() {
 }
 for(const id of ['search','group','usage','review-filter']) $(id).addEventListener('input',renderLibrary);
 for(const id of ['surface','scale','guides','action','mirror']) $(id).addEventListener('change',()=>{animationSeconds=0;renderBench();});
-$('frame').oninput=()=>{playing=false;$('play').textContent='Play animation';$('play').setAttribute('aria-pressed','false');frame=Number($('frame').value);redraw();};
-$('play').onclick=()=>{playing=!playing;if(playing)animationSeconds=0;$('play').textContent=playing?'Pause animation':'Play animation';$('play').setAttribute('aria-pressed',String(playing));};
+$('frame').oninput=()=>{playing=false;playbackStarted=false;$('play').textContent='Play animation';$('play').setAttribute('aria-pressed','false');frame=Number($('frame').value);redraw();};
+$('play').onclick=()=>{playing=!playing;if(playing){animationSeconds=0;playbackStarted=true;}$('play').textContent=playing?'Pause animation':'Play animation';$('play').setAttribute('aria-pressed',String(playing));};
 function animate(stamp) {
   const delta = previousStamp ? Math.min((stamp - previousStamp) / 1000, .1) : 0;
   previousStamp = stamp;

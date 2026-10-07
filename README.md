@@ -40,7 +40,7 @@ Open Settings (the gear button) to enable the placement grid. Tile guides appear
 
 Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls for speed. Escape cancels placement. Saves stay in this browser's local storage and happen every 15 seconds, after placement, and on leaving the tab. Save village writes immediately.
 
-A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five individual sprite sheets animate walking, building, idling, and sitting. These are game-scaled routines, not a detailed biological model.
+A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five base sprite sheets animate walking, building, and sitting; five additional sheets add looking around, stretching, waving, and relaxed standing. Eased frame and activity blends soften pose changes. These are game-scaled routines, not a detailed biological model.
 
 New village restarts the scenario after confirmation and retains one backup under `solar-friends-v2-backup`. Earlier prototype saves remain untouched under `solar-friends-v1`.
 
@@ -84,7 +84,7 @@ Artwork was generated with OpenAI's built-in image generation tool using the use
 
 ## Artwork studio
 
-Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse 16 artwork files as 28 active sprite entries, including atlas cells, resident animations, and the game's painted chickens.
+Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse 21 artwork files as 33 active sprite entries, including atlas cells, resident animations, and the game's painted chickens.
 
 Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
 

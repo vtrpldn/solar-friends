@@ -7,9 +7,9 @@ export const residentClips = {
   breathe: { sheet: 'base', row: 2, fps: .8, frames: [0, 1, 2, 3], loop: true },
   sleep: { sheet: 'base', row: 3, fps: 0, frames: [3] },
   look: { sheet: 'idle', row: 0, fps: .8, frames: [0, 1, 2, 3], loop: true },
-  stretch: { sheet: 'idle', row: 1, fps: 1.6, frames: [0, 1, 2, 2, 3, 0] },
+  stretch: { sheet: 'idle', row: 1, fps: 1.6, frames: [0, 1, 2, 2, 1, 0] },
   wave: { sheet: 'idle', row: 2, fps: 2, frames: [0, 2, 2, 3, 0] },
-  relax: { sheet: 'idle', row: 3, fps: 1, frames: [0, 1, 2, 2, 3, 0] },
+  relax: { sheet: 'idle', row: 3, fps: 1, frames: [0, 1, 2, 2, 1, 0] },
 };
 export const idleLabels = {
   look: 'Looking around the village', stretch: 'Taking a stretch',
@@ -32,7 +32,8 @@ export function sampleResidentClip(mode, seconds) {
   const index = clip.loop ? Math.floor(position) % clip.frames.length : Math.min(Math.floor(position), clip.frames.length - 1);
   const next = clip.loop ? (index + 1) % clip.frames.length : Math.min(index + 1, clip.frames.length - 1);
   // Keep readable key poses, then ease through the final part of each frame.
-  const blend = ease(Math.max(0, ((position % 1) - .55) / .45));
+  const window = Math.min(.45, clip.fps * .09);
+  const blend = window ? ease(Math.max(0, ((position % 1) - (1 - window)) / window)) : 0;
   return [
     { sheet: clip.sheet, row: clip.row, frame: clip.frames[index], weight: 1 - blend },
     { sheet: clip.sheet, row: clip.row, frame: clip.frames[next], weight: blend },

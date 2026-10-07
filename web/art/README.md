@@ -4,6 +4,19 @@ description: Provenance and generation prompts for the Solar Friends prototype s
 
 # Village sprites
 
+## Resident motion and standing idles
+
+The five `animations/*-idle.png` sheets add four standing activities: looking around, stretching, waving, and hands-on-hips weight shifts. Each sheet has four columns and four rows, in that order. They were generated with the built-in image tool using the corresponding original resident sheet as the identity reference.
+
+The shared [resident animation renderer](../resident-animation.js) blends adjacent keyframes and eases activity changes over 180 milliseconds. An isolated additive blend preserves opacity; the original four walk keyframes remain the source. Gestures play once and settle into a neutral pose between activities. Idle selection is staggered by resident ID and saved village time. Walking retains its last facing when the resident stops. Meals, rest, and sleep keep seated poses; socializing and gatherings use standing gestures. Pause and open dialogs stop the visual clock, and high simulation speeds cap visual playback at 2×.
+
+The studio previews the same clips, with named standing-action controls. [Resident preview](http://127.0.0.1:4173/?resident-preview) starts paused with five idle residents; press Play to watch. It uses an isolated fixture and never writes the village save. Run `node scripts/verify-resident-animation.mjs` to check pose selection, interpolation weights, transitions, facing, pause behavior, and fixture restoration.
+
+Generation prompt (one call per resident):
+
+> Create an additional IDLE ANIMATION SPRITE SHEET for the SAME resident in the reference. Preserve exact face, skin tone, clothing, hair/headwear, footwear, painted style, elevated orthographic view and screen-right facing. Square transparent PNG, strict FOUR columns by FOUR rows, 16 full-body poses, one figure centered inside each equal square cell. Consistent size and foot baseline at 94% cell height, head height about 20% leaving space for raised arms, 12% side padding. NO cropped heads/limbs, no overlapping cells, no shadows or backdrop or labels. Each row is a coherent animation of the same action, four sequential poses, with grounded feet and small movement increments. Row 1: standing, calmly looking around (forward, turn head slightly left, look slightly up, return forward). Row 2: gentle shoulder/arm stretch (hands relaxed, hands lift to shoulder level, arms reaching upward, relax). Row 3: friendly one-hand wave (arm at side, hand raising, hand open greeting at shoulder height, hand returning). Row 4: relaxed hands-on-hips weight shift (arms relaxed, hands to hips, slight comfortable shift, return). All poses STANDING. No stools, chairs, tools, objects, scenery or text. Match identity absolutely. Warm softly painted Brazilian ecovila game character. True transparent background outside figures, broad clear gutters.
+
+
 Generated using OpenAI's built-in image generation tool with the approved Brazilian ecovila concept in `assets/art-direction/brazilian-ecovila-approved.png` as the reference. Both PNGs have transparent backgrounds. The browser draws the atlas quadrants directly, without modifying the original generated pixels.
 
 ## Village atlas prompt
