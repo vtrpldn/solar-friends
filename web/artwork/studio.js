@@ -1,6 +1,6 @@
 import { sampleResidentClip, drawResidentAnimation } from '../resident-animation.js?v=2';
-import { drawBuildingArt } from '../building-art.js';
-import { catalog } from './catalog.js?v=resident-motion-1';
+import { drawBuildingArt } from '../building-art.js?v=night-1';
+import { catalog } from './catalog.js?v=night-1';
 import { drawChicken, loadChickenArt } from '../chickens.js?v=painted-hens-1';
 const $ = id => document.getElementById(id);
 const key = 'solar-friends-artwork-review-v1';

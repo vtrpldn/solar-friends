@@ -81,3 +81,25 @@ The built-in image-generation tool produced `chickens.png` using the coop and vi
 Prompt: Create a production game animation sprite sheet of chickens matching the warm painted Brazilian ecovila style of the reference buildings. Only chickens, no buildings. Wide canvas 1536×1024, exactly three equal columns by two equal rows, each cell 512×512. One isolated hen per cell, transparent background and broad gutters. Columns: cream with buff shadows, ochre/rust, dark warm brown. Top row: standing. Bottom row: corresponding hen pecking. Face screen-right in the same elevated orthographic 2:1 camera, with visible back and side. Preserve body size and identity between poses. Small red comb and wattle, short golden beak, thin golden legs, simple tail and wing shapes. Soft painted feather masses, readable silhouettes at 16–22 screen pixels, upper-left lighting, earthy colors. No outlines, toy rendering, microtexture, chicks, eggs, straw, plants, nests, ground patches, cast shadows, text, grids, borders or scenery. Keep each bird inside its cell.
 
 Open [the in-game artwork preview](http://127.0.0.1:4173/?artwork-preview) to compare all nine building types and three hens. It starts paused, restores its own fixture, and skips village saves and restart backups. Return to the normal game using the banner link.
+
+## Night building variants
+
+Why: buildings need readable nighttime identities, with warm occupied interiors and cool outdoor surfaces. Seven sibling `*-night.png` files cover all nine building types through the same atlas crops, widths, anchors, and camera calibration as their day sprites. The game fades them in using its existing sunrise/sunset curve. The coop stays dark inside for roosting hens.
+
+Generated with the built-in image generation tool, editing each corresponding daytime PNG with transparency enabled. Original artwork is retained. Inspect all variants in the artwork studio or `/?night-preview`; the preview does not overwrite the saved village.
+
+Prompt used for each source:
+
+> Use case: lighting-weather. Edit target: the supplied transparent isometric game sprite. Create its nighttime lighting alternative. Preserve EXACT canvas layout, object positions, size, silhouette, padding, camera angle, geometry, all props and ground contact. Change lighting only: dim cool blue moonlight from upper left, readable deep blue shadows, subdued terracotta. No sky, background, text, moon, stars, people or new structures. Real transparent background. Keep painterly game style. For inhabited interiors only, gentle warm amber light from existing windows/openings; do not illuminate plants or storage bins internally.
+
+Per-source additions:
+
+- Village atlas: Keep the exact 2 by 2 atlas layout: home top left, kitchen top right, garden bottom left, banana grove bottom right. Warm home window slats and kitchen oven embers.
+- Garden, cistern, compost: Moonlight only; no lamps or glowing objects.
+- Square: Small warm lantern illumination under the pergola, restrained.
+- Workshop: Warm light on workbench from inside.
+- Coop: Coop interior stays dark for sleeping chickens; moonlight only.
+
+The selected compost revision used this corrective prompt:
+
+> Edit the supplied DAYTIME compost station into a NIGHT variant. Change lighting only: uniformly cool dim blue moonlight. NO orange or yellow light ANYWHERE. Compost and spaces between wooden boards are dark brown/blue, completely unlit. There is no fire, electricity, lamp, ember, bioluminescence or internal light in this object. Keep exact silhouette, layout, scale, padding, isometric camera, all props and canvas dimensions. Real transparent background. Painterly game sprite.

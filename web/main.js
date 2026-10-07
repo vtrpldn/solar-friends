@@ -1,5 +1,5 @@
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
-import { buildingArt, drawBuildingArt } from './building-art.js';
+import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
@@ -22,7 +22,8 @@ const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const previewParams = new URLSearchParams(location.search);
 const residentPreview = previewParams.has("resident-preview");
-const artworkPreview = residentPreview || previewParams.has("artwork-preview");
+const nightPreview = previewParams.has("night-preview");
+const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -56,6 +57,11 @@ const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const buildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
   const image = new Image();
   image.src = `art/${art.file}`;
+  return [kind, image];
+}));
+const nightBuildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+  const image = new Image();
+  image.src = `art/${art.nightFile}`;
   return [kind, image];
 }));
 const terrain = new Image();
@@ -276,7 +282,17 @@ function sprite(kind, x, y, alpha = 1) {
   const art = buildingArt[kind];
   if (!art) return;
   const p = iso(x, y);
-  drawBuildingArt(ctx, buildingImages[kind], art, p.x, p.y, scale, alpha);
+  const night = nightAmount(state.village.minutes);
+  // Compensate source-over opacity so construction and placement ghosts stay translucent.
+  const dayAlpha = night < 1 ? alpha * (1 - night) / (1 - alpha * night) : 0;
+  if (dayAlpha > 0) drawBuildingArt(ctx, buildingImages[kind], art, p.x, p.y, scale, dayAlpha);
+  if (night > 0) {
+    ctx.save();
+    // The full-scene night tint follows this pass; keep painted window light readable.
+    ctx.filter = 'brightness(1.45)';
+    drawBuildingArt(ctx, nightBuildingImages[kind], art, p.x, p.y, scale, alpha * night);
+    ctx.restore();
+  }
 }
 function cistern(x, y, alpha = 1) {
   sprite('well', x, y, alpha);
@@ -566,7 +582,7 @@ function render() {
   const hour = (state.village.minutes % 1440) / 60;
   // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
-  const darkness = Math.max(0, Math.min(1, (0.18 - altitude) / 0.65));
+  const darkness = nightAmount(state.village.minutes);
   const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
   ctx.fillStyle = `rgba(237,150,84,${twilight})`;
   ctx.fillRect(0, 0, width, height);
@@ -577,23 +593,6 @@ function render() {
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
     )) {
       const p = iso(b.x, b.y);
-      const glow = ctx.createRadialGradient(
-        p.x,
-        p.y - 22 * scale,
-        0,
-        p.x,
-        p.y - 22 * scale,
-        60 * scale,
-      );
-      glow.addColorStop(0, `rgba(255,204,100,${darkness * 0.35})`);
-      glow.addColorStop(1, "rgba(255,204,100,0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(
-        p.x - 60 * scale,
-        p.y - 82 * scale,
-        120 * scale,
-        120 * scale,
-      );
       if (
         b.kind === "home" &&
         state.residents.some(
@@ -1193,6 +1192,7 @@ try {
   await Promise.all([
     loadChickenArt(),
     ...Object.values(buildingImages).map((image) => image.decode()),
+    ...Object.values(nightBuildingImages).map((image) => image.decode()),
     forestArt.decode(),
     terrain.decode(),
     peopleArt.decode(),
@@ -1205,6 +1205,12 @@ try {
     const response = await fetch(residentPreview ? './artwork/resident-preview.json' : './artwork/village-preview.json');
     if (!response.ok) throw new Error('Artwork preview could not load');
     saved = await response.text();
+    if (nightPreview) {
+      const fixture = JSON.parse(saved);
+      for (const building of fixture.village.buildings) if (building.kind === 'garden') building.crop.growth = 180;
+      fixture.village.minutes = Math.floor(fixture.village.minutes / 1440) * 1440 + 21 * 60;
+      saved = JSON.stringify(fixture);
+    }
   } else {
     try { saved = localStorage.getItem(saveKey); } catch {}
   }
@@ -1218,7 +1224,7 @@ try {
     const notice = document.createElement('a');
     notice.href = './';
     notice.className = 'artwork-preview-notice';
-    notice.textContent = `${residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
+    notice.textContent = `${nightPreview ? 'Night artwork' : residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
     document.body.append(notice);
     togglePause();
     save();

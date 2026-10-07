@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { catalog } from '../web/artwork/catalog.js';
-import { buildingArt, cameraCalibration, drawBuildingArt } from '../web/building-art.js';
+import { buildingArt, cameraCalibration, drawBuildingArt, nightAmount } from '../web/building-art.js';
 const art = new URL('../web/art/', import.meta.url);
 const files = readdirSync(art, { recursive: true }).filter(file => /\.(png|svg)$/.test(file));
 assert.equal(new Set(catalog.map(sprite => sprite.id)).size, catalog.length, 'Sprite IDs must be unique');
@@ -26,6 +26,13 @@ for (const sprite of Object.values(buildingArt)) {
   assert(entry, `Missing building: ${sprite.name}`);
   assert.equal(entry.width, sprite.width, `Studio scale drift: ${sprite.name}`);
   assert.equal(entry.anchor, sprite.anchor, `Studio anchor drift: ${sprite.name}`);
+  const night = catalog.find(item => item.name === `${sprite.name} · night`);
+  assert(night, `Missing night variant: ${sprite.name}`);
+  assert.equal(night.file, `../art/${sprite.nightFile}`);
+  for (const key of ['width', 'anchor', 'cell', 'axes']) assert.deepEqual(night[key], entry[key], `Night geometry drift: ${sprite.name}/${key}`);
+  const bytes = readFileSync(new URL(sprite.nightFile, art));
+  assert.equal(bytes.readUInt32BE(16), bytes.readUInt32BE(20), 'Night sprite canvas must stay square');
+  assert.equal(bytes[25], 6, 'Night sprites need RGBA transparency');
   const { vertical, shear } = cameraCalibration(sprite);
   if (sprite.axes) {
     for (const [i, direction] of sprite.axes.entries()) {
@@ -48,3 +55,11 @@ assert.deepEqual(calls[2].slice(0, 5), ['drawImage', 640, 0, 640, 640]);
 assert.equal(calls[2][7], buildingArt.kitchen.width * 2);
 assert.equal(ctx.globalAlpha, .4);
 console.log(`Artwork coverage: ${files.length} source files, ${catalog.length} sprite entries.`);
+
+assert.equal(nightAmount(12 * 60), 0);
+assert.equal(nightAmount(0), 1);
+assert.equal(nightAmount(21 * 60), 1);
+assert.equal(nightAmount(1440), nightAmount(0));
+assert(nightAmount(18 * 60) > 0 && nightAmount(18 * 60) < 1);
+assert(Math.abs(nightAmount(18 * 60 - .001) - nightAmount(18 * 60 + .001)) < .001);
+console.log('PASS: nine night variants, shared geometry, alpha, and continuous day/night timing');

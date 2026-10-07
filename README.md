@@ -84,7 +84,7 @@ Artwork was generated with OpenAI's built-in image generation tool using the use
 
 ## Artwork studio
 
-Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse 21 artwork files as 33 active sprite entries, including atlas cells, resident animations, and the game's painted chickens.
+Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse 28 artwork files as 42 active sprite entries, including atlas cells, resident animations, and the game's painted chickens.
 
 Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
 
