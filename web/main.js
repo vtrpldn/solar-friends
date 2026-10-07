@@ -7,6 +7,8 @@ import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
+import { placementReason, milestones } from "./polish.js";
+import { VillageAudio } from "./village-audio.js";
 import { VillageStorage } from "./village-storage.js";
 import {
   project,
@@ -25,6 +27,11 @@ import {
 } from "./terrain.js?v=manual-roads-1";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
+const sound = new VillageAudio(settings);
+let cameraTarget = null, previousVillage = null, celebrationTimer;
+const milestoneQueue = [];
+let showingMilestone = false;
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const previewParams = new URLSearchParams(location.search);
 const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
@@ -105,7 +112,7 @@ let game,
   tool = null,
   speed = 1,
   paused = false,
-  zoom = 1,
+  zoom = 1.3,
   pan = { x: 0, y: 0 };
 let width = 0,
   height = 0,
@@ -377,17 +384,46 @@ function buildingSprite(kind, x, y, alpha = 1) {
   else sprite(kind, x, y, alpha);
 }
 function placementValid(kind, x, y) {
-  if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
-  if (kind === "road") {
-    return state.village.roads.some(([rx, ry]) => rx === x && ry === y) ||
-      !state.village.buildings.some(b => b.x === x && b.y === y);
-  }
-  const radius = kind === "square" ? 2 : 1;
-  return x - radius >= 0 && y - radius >= 0 && x + radius < MAP_SIZE && y + radius < MAP_SIZE && !riverBank(x + radius - 1, y) &&
-    !(Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) &&
-    !state.village.buildings.some(b => Math.abs(b.x - x) < radius + (b.kind === "square" ? 2 : 1) && Math.abs(b.y - y) < radius + (b.kind === "square" ? 2 : 1)) &&
-    state.village.wood >= kinds[kind][1];
+  return !placementReason(state.village, kind, x, y, kinds[kind][1]);
 }
+function activityLabel(r) {
+  if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
+  if (r.task === "visit") {
+    const b = state.village.buildings.find(b => b.id === r.visit_building);
+    if (b) return `${Math.hypot(r.target_x-r.x, r.target_y-r.y) > 0.1 ? "Walking to" : "Visiting"} the ${kinds[b.kind][0].toLowerCase()}`;
+  }
+  return tasks[r.task] || r.task;
+}
+function residentAt(x, y) {
+  return [...state.residents].reverse().find(r => {
+    const indoors = r.task === "sleep" && Math.hypot(r.target_x-r.x, r.target_y-r.y) <= 0.1 && state.village.buildings.filter(b => b.kind === "home" && b.progress >= 100)[Math.floor(r.id / 3)];
+    const p = iso(r.x, r.y);
+    return !indoors && Math.hypot(p.x-x, p.y-14*scale-y) < Math.max(16, 22*scale);
+  });
+}
+function announceMilestones() {
+  const found = milestones(previousVillage, state.village);
+  previousVillage = state.village;
+  for (const event of found) {
+    const text = event.kind === "building" ? `${kinds[event.building][0]} ready · A new place for village life.`
+      : event.kind === "harvest" ? "Harvest gathered · Fresh food for everyone."
+      : event.kind === "quest" ? `${quests[event.quest].title} complete · Unlocked ${quests[event.quest].reward}`
+      : "A new friendship · Shared time is bringing neighbours closer.";
+    if (!milestoneQueue.includes(text)) milestoneQueue.push(text);
+  }
+  if (!showingMilestone && milestoneQueue.length) {
+    showingMilestone = true;
+    $("#milestone").textContent = milestoneQueue.shift(); $("#milestone").hidden = false;
+    sound.celebrate();
+    celebrationTimer = setTimeout(() => { $("#milestone").hidden = true; showingMilestone = false; }, 5500);
+  }
+}
+function resetPolish() {
+  previousVillage = state.village; milestoneQueue.length = 0;
+  clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
+  cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; zoom = 1.3;
+}
+
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
@@ -454,7 +490,7 @@ function resident(r) {
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
     { base: animations[r.id], idle: idleAnimations[r.id] }, animation, p.x, py, 43 * s);
   if (isSelected) {
-    ctx.font = `600 ${11 * s}px 'DM Sans',sans-serif`;
+    ctx.font = `600 ${Math.max(11, 11 * s)}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
     const tw = ctx.measureText(r.name).width;
     ctx.fillStyle = "#fffcf2";
@@ -489,6 +525,12 @@ for (let i = 0; i < 170; i++) {
   });
 }
 function render() {
+  if (cameraTarget) {
+    const blend = reducedMotion.matches ? 1 : 1 - Math.exp(-cameraTarget.dt * 9);
+    pan.x += (cameraTarget.x - pan.x) * blend;
+    pan.y += (cameraTarget.y - pan.y) * blend;
+    if (Math.hypot(cameraTarget.x - pan.x, cameraTarget.y - pan.y) < 0.5) cameraTarget = null;
+  }
   scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.45, scale);
   origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
@@ -547,19 +589,25 @@ function render() {
   ];
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
   if (tool && pointer) {
-    const t = uniso(pointer.x, pointer.y),
-      valid = placementValid(tool, t.x, t.y);
-    tile(
-      t.x,
-      t.y,
-      valid ? "#f5f1b299" : "#cd745a88",
-      valid ? "#fff8cf" : "#b75943",
-    );
-    if (tool === "square") {
-      polygon([[-2,-2],[2,-2],[2,2],[-2,2]].map(([x,y]) => { const p = iso(t.x+x,t.y+y); return [p.x,p.y]; }), valid ? "#f5f1b244" : "#cd745a44", valid ? "#fff8cf" : "#b75943");
-    }
+    const t = uniso(pointer.x, pointer.y);
+    const reason = placementReason(state.village, tool, t.x, t.y, kinds[tool][1]);
+    const radius = tool === "road" ? 0.5 : tool === "square" ? 2 : 1;
+    polygon([[-radius,-radius],[radius,-radius],[radius,radius],[-radius,radius]].map(([x,y]) => {
+      const p = iso(t.x+x,t.y+y); return [p.x,p.y];
+    }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
     if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
+    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber`} · Drag to pan · Esc to cancel`;
+    $("#placement").classList.toggle("invalid", Boolean(reason));
   }
+  const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
+  const hint = $("#resident-hint");
+  hint.hidden = !hovered;
+  if (hovered) {
+    hint.textContent = `${hovered.name} · ${activityLabel(hovered)}`;
+    hint.style.left = `${Math.max(16, Math.min(width - 300, pointer.x + 18))}px`;
+    hint.style.top = `${Math.max(100, Math.min(height - 150, pointer.y - 48))}px`;
+  }
+  canvas.style.cursor = drag?.moved ? "grabbing" : tool ? "crosshair" : hovered ? "pointer" : "grab";
   // Tiny birds drifting past the clearing.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
     for (let i = 0; i < 3; i++) {
@@ -628,6 +676,8 @@ function selectPerson(id) {
   encouragable = false;
   $("#person").hidden = false;
   const r = state.residents.find((p) => p.id === id);
+  const p = iso(r.x, r.y);
+  cameraTarget = { x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
     `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="requests">${[
       ["garden", "Tend garden"],
@@ -694,6 +744,16 @@ function updateQuests() {
     done = p.completed[id];
   const objectives = quest.objectives(v),
     next = objectives.find((o) => !o.done);
+  const completedCount = done ? objectives.length : objectives.filter(o => o.done).length;
+  $("#goal-label").textContent = done ? "A shared dream fulfilled" : quest.title;
+  $("#goal-next").textContent = done ? "Choose what we grow next →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
+  $("#goal-meter").value = completedCount; $("#goal-meter").max = objectives.length;
+  $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
+  $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
+  $("#goal-shortcut").onclick = () => done ? openJournal() : showPanel("goals-panel");
+  $("#goal-action").hidden = done || !next?.build;
+  $("#goal-action").textContent = next?.build ? `Plan ${kinds[next.build][0].toLowerCase()}` : "";
+  $("#goal-action").onclick = () => setTool(next.build);
   $("#tutorial-count").textContent = `${quest.theme} · QUEST ${id + 1} OF 4`;
   $("#tutorial-title").textContent = quest.title;
   $("#tutorial-copy").textContent = done
@@ -720,6 +780,7 @@ function updateQuests() {
   const planned =
     kind && v.buildings.some((b) => b.kind === kind && b.progress < 100);
   const enough = kind && (kind === "home" ? count >= next?.target : count > 0);
+  $("#goal-action").hidden = done || !kind || planned || enough;
   const action = $("#tutorial-action");
   action.hidden = (!kind || planned || enough) && !(!done && next?.action);
   action.textContent = kind
@@ -827,7 +888,8 @@ function updateBuildingPanel() {
     $("#replant-crop").checked = c.replant;
     const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
     const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.progress.tool_uses > 0 ? 2 : 0);
-    $("#crop-status").textContent = `${spec.name}: ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · waiting for water" : ""}`}. Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food, depending on gardener. ${spec.note}.`;
+    $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food.`;
+    $("#crop-details").textContent = `Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Harvest size depends on the gardener. ${spec.note}.`;
     $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering costs 2 water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
@@ -864,7 +926,7 @@ function updateSupplies(v) {
 }
 function updateSituations() {
   const view = situationView(state.village, state.residents);
-  $("#open-situations").textContent = view.label;
+  $("#situations-label").textContent = view.label;
   replaceMarkup($("#situation-content"), view.markup);
 }
 function openSituations() {
@@ -941,7 +1003,7 @@ function updateUI() {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
     el.querySelector("small").textContent =
-      (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] : tasks[r.task]) || r.task;
+      activityLabel(r);
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
@@ -1013,7 +1075,9 @@ function setTool(kind) {
     $('[data-panel="build-panel"]').setAttribute("aria-expanded", "true");
     $(`[data-kind="${kind}"]`).focus();
   }
+  cameraTarget = null;
   tool = tool === kind ? null : kind;
+  $("#placement").classList.remove("invalid");
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
     ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
@@ -1037,6 +1101,8 @@ function frame(stamp) {
   const running =
     !paused && !document.hidden && !document.querySelector("dialog[open]");
   animationDelta = running ? dt * Math.min(speed, 2) : 0;
+  if (cameraTarget) cameraTarget.dt = dt;
+  sound.update(running, state.environment.raining, state.village.minutes, state.residents.some(r => r.task === "build" && Math.hypot(r.x-r.target_x, r.y-r.target_y) < 0.2));
   if (running) {
     time += dt * speed;
     let remaining = dt * speed;
@@ -1052,6 +1118,7 @@ function frame(stamp) {
   saveElapsed += dt;
   if (uiElapsed > 0.3) {
     updateUI();
+    if (running) announceMilestones();
     uiElapsed = 0;
   }
   if (saveElapsed > 15) {
@@ -1061,6 +1128,17 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  previousVillage = state.village;
+  for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
+  for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
+    const input = $("#" + id); input.value = Math.round(settings[key] * 100);
+    $("#" + id + "-value").textContent = `${input.value}%`;
+    input.oninput = () => {
+      settings[key] = Number(input.value) / 100;
+      $("#" + id + "-value").textContent = `${input.value}%`;
+      $("#settings-status").textContent = saveSettings(settings) ? "Saved on this device." : "Applied for this session. Device storage is unavailable.";
+    };
+  }
   for (const id of ["next-crop", "replant-crop"]) $("#"+id).onchange = () => {
     game.configure_crop(Number($("#building-choice").value), $("#next-crop").value, $("#replant-crop").checked);
     state = JSON.parse(game.snapshot()); updateUI(); save();
@@ -1182,6 +1260,18 @@ function setup() {
   $("#export-save").onclick = () => downloadVillage(game.snapshot(), "solar-friends-village.json");
   $("#export-recovery").onclick = () => downloadVillage(storage.rejected, "solar-friends-recovery.json");
   $("#import-save").onclick = () => $("#import-file").click();
+  $("#restore-backup").onclick = () => {
+    const candidate = new Game();
+    try {
+      const raw = storage.readBackup();
+      if (raw === null) { toast("No backup yet. Imports and new villages create one automatically."); return; }
+      if (!candidate.restore(raw)) { toast("This backup could not be read. Your current village is unchanged."); return; }
+      pendingImport = candidate.snapshot();
+      $("#import-summary").textContent = "Restore the previous village? Your current village will take its place in the backup.";
+      $("#import-dialog").showModal();
+    } catch { toast("Device storage is unavailable. Import an exported village instead."); }
+    finally { candidate.free(); }
+  };
   $("#import-file").onchange = async (event) => {
     const file = event.target.files[0];
     event.target.value = "";
@@ -1200,7 +1290,7 @@ function setup() {
   $("#cancel-import").onclick = () => { pendingImport = null; $("#import-dialog").close(); };
   $("#confirm-import").onclick = () => {
     if (sandbox || artworkPreview || directScenario) return;
-    if (!pendingImport) return;
+    if (!pendingImport || sandbox || artworkPreview || directScenario) return;
     try {
       storage.backup(game.snapshot());
       storage.write(pendingImport);
@@ -1217,10 +1307,10 @@ function setup() {
     selected = null; tool = null; closePanels();
     $("#person").hidden = true; $("#placement").hidden = true;
     $("#import-dialog").close(); $("#settings-dialog").close();
-    updateUI(); save(); toast("Your village is ready. Welcome back.");
+    resetPolish(); updateUI(); save(); toast("Your village is ready. Welcome back.");
   };
-  for (const id of ["import-save", "new-scenario"]) $("#" + id).disabled = artworkPreview;
-  $("#save-warning").onclick = () => $("#settings-dialog").showModal();
+  for (const id of ["import-save", "restore-backup", "new-scenario"]) $("#" + id).disabled = artworkPreview || !!directScenario;
+  $("#save-warning").onclick = () => $("#settings").click();
   $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
   $("#cancel-restart").onclick = () => $("#restart-dialog").close();
   $("#confirm-restart").onclick = () => {
@@ -1247,11 +1337,16 @@ function setup() {
     $("#placement").hidden = true;
     if (paused) togglePause();
     $("#restart-dialog").close();
+    resetPolish();
     updateUI();
     save();
   };
   $("#placement-grid").checked = settings.placementGrid;
-  $("#settings").onclick = () => $("#settings-dialog").showModal();
+  $("#settings").onclick = () => {
+    try { storage.readRecovery(); } catch { /* A download already held in memory remains available. */ }
+    $("#export-recovery").hidden = storage.rejected === null;
+    $("#settings-dialog").showModal();
+  };
   $("#close-settings").onclick = () => $("#settings-dialog").close();
   $("#placement-grid").onchange = (event) => {
     settings.placementGrid = event.target.checked;
@@ -1265,7 +1360,8 @@ function setup() {
   $("#zoom-in").onclick = () => (zoom = Math.min(1.8, zoom + 0.15));
   $("#zoom-out").onclick = () => (zoom = Math.max(0.6, zoom - 0.15));
   $("#center").onclick = () => {
-    zoom = 1;
+    cameraTarget = null;
+    zoom = 1.3;
     pan = { x: 0, y: 0 };
   };
   canvas.addEventListener("pointerdown", (e) => {
@@ -1275,7 +1371,8 @@ function setup() {
   canvas.addEventListener("pointermove", (e) => {
     const r = canvas.getBoundingClientRect();
     pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
-    if (drag && !tool) {
+    if (drag) {
+      cameraTarget = null;
       const dx = e.clientX - drag.x,
         dy = e.clientY - drag.y;
       if (Math.hypot(dx, dy) > 5) drag.moved = true;
@@ -1303,10 +1400,7 @@ function setup() {
         save();
       } else toast(result);
     } else {
-      const r = state.residents.find((r) => {
-        const p = iso(r.x, r.y);
-        return Math.hypot(p.x - x, p.y - 14 * scale - y) < 22 * scale;
-      });
+      const r = residentAt(x, y);
       if (r) selectPerson(r.id);
       else {
         const cell = uniso(x, y);
@@ -1355,7 +1449,7 @@ function setup() {
   window.addEventListener("pagehide", () => save());
   document.addEventListener("visibilitychange", () => {
     last = 0;
-    if (document.hidden) save();
+    if (document.hidden) { save(); sound.update(false, false, 0, false); }
   });
   resize();
   updateUI();
@@ -1367,8 +1461,10 @@ function setup() {
 function refreshDevScene() {
   residentAnimations.clear(); groundKey = null; time = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null;
+  previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
+  clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   closePanels(); $("#person").hidden = true; $("#placement").hidden = true;
-  for (const id of ['import-save', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
+  for (const id of ['import-save', 'restore-backup', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
   updateUI(); render();
 }
 const devAPI = {
@@ -1417,10 +1513,11 @@ const devAPI = {
     return devAPI.snapshot();
   },
   run() { if (!sandbox) throw new Error('Load a sandbox first.'); if (paused) togglePause(); },
-  fixedView() { if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
+  fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
   locate(id) {
     const r = state.residents.find(r => r.id === id);
     if (!r) return;
+    cameraTarget = null;
     const point = project(r.x, r.y, origin, scale);
     pan.x += width / 2 - point.x; pan.y += height / 2 - point.y;
     render();
@@ -1473,7 +1570,7 @@ try {
       $("#save-warning").hidden = false;
     }
   }
-  if (saved && !game.restore(saved)) {
+  if (saved !== null && saved !== undefined && !game.restore(saved)) {
     if (artworkPreview) throw new Error("The artwork preview fixture is invalid");
     try { storage.quarantine(saved); } catch { $("#save-warning").hidden = false; }
     $("#recovery-notice").hidden = false;

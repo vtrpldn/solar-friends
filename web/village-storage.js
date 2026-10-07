@@ -29,4 +29,15 @@ export class VillageStorage {
     if (this.blocked) throw new Error("Original save has not been backed up.");
     this.storage().setItem(`${SAVE_KEY}-backup`, raw);
   }
+  readBackup() {
+    return this.storage().getItem(`${SAVE_KEY}-backup`);
+  }
+  readRecovery() {
+    if (this.rejected !== null) return this.rejected;
+    const storage = this.storage();
+    const keys = Array.from({ length: storage.length }, (_, i) => storage.key(i))
+      .filter(key => key?.startsWith(`${SAVE_KEY}-recovery-`)).sort();
+    this.rejected = keys.length ? storage.getItem(keys.at(-1)) : null;
+    return this.rejected;
+  }
 }

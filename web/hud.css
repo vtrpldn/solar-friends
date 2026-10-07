@@ -123,3 +123,26 @@ footer .season { position: static; display: flex; padding: 0; gap: 9px; backgrou
 .dev-tools a:hover { background: #dfe7cd; }
 .dev-tools a span { display: block; margin-top: 5px; font-size: 11px; font-weight: 400; color: var(--muted); }
 [hidden] { display: none !important; }
+.goal-tracker { position: absolute; z-index: 4; top: 82px; left: 20px; width: 280px; padding: 15px 17px; background: #fffcf1ee; border: 1px solid #536b3920; border-radius: 12px; box-shadow: 0 4px 24px #263b2410; }
+#goal-shortcut { display: block; width: 100%; padding: 0; background: none; text-align: left; }
+#goal-label { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+#goal-next { display: block; margin-top: 7px; font-size: 13px; line-height: 1.5; }
+#goal-meter { display: block; width: 100%; height: 4px; margin: 10px 0 0; accent-color: #7b945c; }
+#goal-action { margin: 11px 0 0; padding: 7px 11px; background: #e3ead5; border-radius: 6px; font-size: 11px; }
+#resident-hint { position: absolute; z-index: 7; pointer-events: none; max-width: 280px; padding: 9px 13px; background: var(--paper); color: var(--ink); border-radius: 8px; font-size: 12px; box-shadow: 0 4px 20px #20382a30; }
+#milestone { position: absolute; z-index: 7; left: 50%; top: 80px; transform: translateX(-50%); max-width: 410px; padding: 15px 22px; border: 1px solid #9fac70; border-radius: 12px; background: #f5f2d9f5; box-shadow: 0 6px 24px #263b241c; text-align: center; font: 17px/1.5 "Fraunces", Georgia, serif; animation: milestone-arrive 350ms ease-out; pointer-events: none; }
+@keyframes milestone-arrive { from { opacity: 0; translate: 0 -8px; } to { opacity: 1; translate: 0 0; } }
+.placement.invalid { background: #fff0d9; color: #813d28; border: 1px solid #bc7755; }
+.save-warning { top: 232px; }
+.volume-control { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 16px 0; }
+.volume-control input { grid-column: 1 / -1; width: 100%; accent-color: #698852; }
+.volume-control output { color: var(--muted); font-size: 12px; }
+.supplies details { margin: 12px 0; padding: 10px 0; border-top: 1px solid var(--line); font-size: 12px; }
+.supplies details p { color: var(--muted); font-size: 12px; }
+#pantry-stock { font-weight: 600; font-size: 15px; }
+#building-activity, #crop-status { background: #e9eddd; padding: 12px; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { #milestone { animation: none; } }
+#goal-meter { appearance: none; border: 0; border-radius: 3px; overflow: hidden; background: #e5e6d7; }
+#goal-meter::-webkit-progress-bar { background: #e5e6d7; }
+#goal-meter::-webkit-progress-value { background: #7b945c; border-radius: 3px; }
+#goal-meter::-moz-progress-bar { background: #7b945c; }
