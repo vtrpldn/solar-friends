@@ -1,4 +1,5 @@
 import init, { Game } from "./pkg/solar_friends.js";
+import { paintTerrain, GROUND_START, GROUND_SIZE } from "./terrain.js";
 const $ = (s) => document.querySelector(s);
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
@@ -19,9 +20,14 @@ const tasks = {
   socialize: "Finding some company",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
-const skins = ["#ac734d", "#8a5539", "#cf976a", "#a26c48", "#754832"];
 const atlas = new Image();
 atlas.src = "art/village-atlas.png";
+const terrain = new Image();
+terrain.src = "art/terrain-atlas.png";
+const peopleArt = new Image();
+peopleArt.src = "art/residents-cistern.png";
+let groundLayer,
+  groundKey = "";
 const mango = new Image();
 mango.src = "art/mango-tree.png";
 let game,
@@ -60,7 +66,37 @@ const hash = (x, y = 0) => {
   return n - Math.floor(n);
 };
 function avatar(id) {
-  return `<span class="avatar" style="background:${colors[id]}30"><svg viewBox="0 0 35 39" aria-hidden="true"><path d="M3 40Q4 25 17 26Q31 25 33 40" fill="${colors[id]}"/><ellipse cx="17" cy="17" rx="9" ry="11" fill="${skins[id]}"/><path d="M7 17Q3 4 17 4Q30 3 28 20L24 11Q15 15 9 10L9 22Z" fill="#403829"/><circle cx="14" cy="18" r=".8" fill="#302f24"/><circle cx="21" cy="18" r=".8" fill="#302f24"/><path d="M15 23q3 2 5-1" fill="none" stroke="#6e4634" stroke-width="1"/></svg></span>`;
+  return `<span class="avatar" style="background:${colors[id]}20"><canvas data-portrait="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
+}
+function paintPortraits() {
+  const cell = peopleArt.width / 3;
+  for (const portrait of document.querySelectorAll("[data-portrait]")) {
+    const id = Number(portrait.dataset.portrait);
+    portrait
+      .getContext("2d")
+      .drawImage(
+        peopleArt,
+        ((id % 3) + 0.28) * cell,
+        (Math.floor(id / 3) + 0.01) * cell,
+        cell * 0.56,
+        cell * 0.63,
+        0,
+        0,
+        96,
+        108,
+      );
+  }
+}
+function contactShadow(x, y, rx, ry, opacity = 0.2) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(rx, ry);
+  const shade = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
+  shade.addColorStop(0, `rgba(53,65,31,${opacity})`);
+  shade.addColorStop(1, "rgba(53,65,31,0)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
 }
 function toast(message) {
   $("#toast").textContent = message;
@@ -147,12 +183,11 @@ function tile(x, y, fill, stroke) {
 function tree(x, y, s = 1) {
   const p = iso(x, y);
   const w = 112 * s * scale;
-  ellipse(
+  contactShadow(
     p.x + 9 * scale,
     p.y + 3 * scale,
     24 * s * scale,
     9 * s * scale,
-    "#3e593728",
   );
   ctx.drawImage(mango, p.x - w / 2, p.y - w * 0.89, w, w);
 }
@@ -179,43 +214,28 @@ function sprite(kind, x, y, size, alpha = 1) {
 }
 function cistern(x, y, alpha = 1) {
   const p = iso(x, y),
-    s = scale;
+    cell = peopleArt.width / 3,
+    w = 77 * scale;
+  contactShadow(p.x + 3 * scale, p.y + 2 * scale, 28 * scale, 12 * scale);
   ctx.save();
   ctx.globalAlpha = alpha;
-  ellipse(p.x + 6 * s, p.y + 5 * s, 23 * s, 10 * s, "#3d5b3522");
-  polygon(
-    [
-      [p.x - 18 * s, p.y - 31 * s],
-      [p.x + 18 * s, p.y - 31 * s],
-      [p.x + 18 * s, p.y],
-      [p.x - 18 * s, p.y],
-    ],
-    "#579594",
+  ctx.drawImage(
+    peopleArt,
+    cell * 2,
+    cell,
+    cell,
+    cell,
+    p.x - w / 2,
+    p.y - w * 0.9,
+    w,
+    w,
   );
-  ellipse(p.x, p.y, 18 * s, 8 * s, "#478181");
-  ellipse(p.x, p.y - 31 * s, 18 * s, 8 * s, "#82b1a3");
-  ellipse(p.x, p.y - 32 * s, 12 * s, 4 * s, "#45837f");
-  line(
-    p.x - 15 * s,
-    p.y - 13 * s,
-    p.x + 16 * s,
-    p.y - 13 * s,
-    "#72a79e",
-    2 * s,
-  );
-  line(p.x + 18 * s, p.y - 8 * s, p.x + 25 * s, p.y - 8 * s, "#d5b77a", 3 * s);
   ctx.restore();
 }
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
-  ellipse(
-    p.x + 9 * scale,
-    p.y + 4 * scale,
-    50 * scale,
-    17 * scale,
-    "#4b57331c",
-  );
+  contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
   if (b.kind === "well") cistern(b.x, b.y, complete ? 1 : 0.45);
   else
     sprite(
@@ -263,7 +283,7 @@ function resident(r) {
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
   const bob = moving ? Math.sin(time * 9 + r.id) * 1.4 * s : 0;
   const isSelected = selected === r.id;
-  ellipse(p.x, p.y + 2 * s, 9 * s, 4 * s, "#3e4d3033");
+  contactShadow(p.x, p.y + 2 * s, 10 * s, 4 * s, 0.25);
   if (isSelected) {
     ctx.beginPath();
     ctx.ellipse(p.x, p.y, 13 * s, 6 * s, 0, 0, 7);
@@ -272,46 +292,23 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y + bob;
-  line(
-    p.x - 2 * s,
-    py - 7 * s,
-    p.x - 3 * s + (moving ? Math.sin(time * 9) * 2 * s : 0),
-    p.y,
-    "#584c3c",
-    3 * s,
+  const cell = peopleArt.width / 3;
+  const w = 44 * s;
+  ctx.save();
+  ctx.translate(p.x, py);
+  if (r.target_x - r.target_y < r.x - r.y) ctx.scale(-1, 1);
+  ctx.drawImage(
+    peopleArt,
+    (r.id % 3) * cell,
+    Math.floor(r.id / 3) * cell,
+    cell,
+    cell,
+    -w / 2,
+    -w * 0.94,
+    w,
+    w,
   );
-  line(
-    p.x + 2 * s,
-    py - 7 * s,
-    p.x + 3 * s - (moving ? Math.sin(time * 9) * 2 * s : 0),
-    p.y,
-    "#584c3c",
-    3 * s,
-  );
-  polygon(
-    [
-      [p.x - 5 * s, py - 19 * s],
-      [p.x + 5 * s, py - 19 * s],
-      [p.x + 6 * s, py - 7 * s],
-      [p.x - 6 * s, py - 7 * s],
-    ],
-    colors[r.id],
-  );
-  line(p.x - 5 * s, py - 17 * s, p.x - 7 * s, py - 9 * s, skins[r.id], 2.5 * s);
-  line(
-    p.x + 5 * s,
-    py - 17 * s,
-    p.x + 7 * s,
-    py - 10 * s,
-    skins[r.id],
-    2.5 * s,
-  );
-  ellipse(p.x, py - 24 * s, 5 * s, 6 * s, skins[r.id]);
-  ellipse(p.x, py - 28 * s, 5.5 * s, 3 * s, "#473b2d");
-  if (r.id === 0 || r.id === 3) {
-    ellipse(p.x, py - 29 * s, 8 * s, 2.5 * s, "#dabb77");
-    ellipse(p.x, py - 31 * s, 4 * s, 2.5 * s, "#dabb77");
-  }
+  ctx.restore();
   if (isSelected) {
     ctx.font = `600 ${11 * s}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -353,45 +350,30 @@ function render() {
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
-  const p0 = iso(-0.5, -0.5),
-    p1 = iso(13.5, -0.5),
-    p2 = iso(13.5, 13.5),
-    p3 = iso(-0.5, 13.5);
-  polygon(
-    [
-      [p0.x, p0.y],
-      [p1.x, p1.y],
-      [p2.x, p2.y + 12 * scale],
-      [p3.x, p3.y],
-    ],
-    "#b6c38e",
+  const key = state.village.buildings
+    .map((b) => `${b.id}:${b.kind}:${b.x}:${b.y}`)
+    .join("|");
+  if (groundKey !== key) {
+    groundLayer = paintTerrain(terrain, state.village.buildings);
+    groundKey = key;
+  }
+  ctx.save();
+  ctx.transform(
+    34 * scale,
+    17 * scale,
+    -34 * scale,
+    17 * scale,
+    origin.x,
+    origin.y,
   );
-  for (let y = 0; y < 14; y++)
-    for (let x = 0; x < 14; x++) {
-      const path =
-        (Math.abs(x - 6) < 1.2 && y > 2 && y < 12) ||
-        (Math.abs(y - 7) < 1 && x > 2 && x < 12);
-      const c = path
-        ? ["#d8ba83", "#ddbf88", "#dcbc86"]
-        : ["#c7d296", "#c8d397", "#c9d498", "#c6d195"];
-      tile(x, y, c[Math.floor(hash(x, y) * c.length)]);
-      const p = iso(x, y);
-      if (!path) {
-        for (let j = 0; j < 4; j++) {
-          const px = p.x + (hash(x * 7 + j, y) * 42 - 21) * scale,
-            py = p.y + (hash(x, y * 7 + j) * 17 - 8) * scale;
-          line(px, py, px - 1 * scale, py - 3 * scale, "#9fb57270", 1 * scale);
-        }
-      } else {
-        ellipse(
-          p.x + 8 * scale,
-          p.y + 3 * scale,
-          1.6 * scale,
-          0.8 * scale,
-          "#bb9c6880",
-        );
-      }
-    }
+  ctx.drawImage(
+    groundLayer,
+    GROUND_START,
+    GROUND_START,
+    GROUND_SIZE,
+    GROUND_SIZE,
+  );
+  ctx.restore();
   // The communal paths remain visible beneath individually placed structures.
   const objects = [
     ...flora.map((f) => ({
@@ -604,6 +586,7 @@ function setup() {
         `<button class="resident" data-resident="${r.id}" aria-label="Meet ${escapeHtml(r.name)}">${avatar(r.id)}<span class="info"><b>${escapeHtml(r.name)}</b><small></small><span class="energy-tiny"><i></i></span></span><span class="arrow">›</span></button>`,
     )
     .join("");
+  paintPortraits();
   $("#residents").onclick = (e) => {
     const b = e.target.closest("[data-resident]");
     if (b) selectPerson(+b.dataset.resident);
@@ -611,7 +594,7 @@ function setup() {
   $("#tools").innerHTML = Object.entries(kinds)
     .map(
       ([kind, [name, cost, desc]]) =>
-        `<button class="build-tool" data-kind="${kind}" title="${desc}" aria-label="Build ${name}, ${cost} timber" aria-pressed="false"><span class="tool-art">${kind === "well" ? "◒" : ""}</span><b>${name}</b><small>⌁ ${cost}</small></button>`,
+        `<button class="build-tool" data-kind="${kind}" title="${desc}" aria-label="Build ${name}, ${cost} timber" aria-pressed="false"><span class="tool-art"></span><b>${name}</b><small>⌁ ${cost}</small></button>`,
     )
     .join("");
   $("#tools").onclick = (e) => {
@@ -712,7 +695,12 @@ function setup() {
 }
 try {
   await init();
-  await Promise.all([atlas.decode(), mango.decode()]);
+  await Promise.all([
+    atlas.decode(),
+    mango.decode(),
+    terrain.decode(),
+    peopleArt.decode(),
+  ]);
   game = new Game();
   let saved;
   try {
