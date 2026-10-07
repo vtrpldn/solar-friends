@@ -83,3 +83,5 @@ footer .season { position: static; display: flex; padding: 0; gap: 9px; backgrou
 @media (max-height: 500px) and (min-width: 761px) {
   .chapter, .community, .person { bottom: 64px; max-height: calc(100dvh - 142px); }
 }
+
+.artwork-preview-notice { position: fixed; z-index: 30; top: 18px; left: 50%; transform: translateX(-50%); padding: 12px 18px; border-radius: 8px; background: #fff7df; color: #273e35; font-size: 13px; box-shadow: 0 2px 12px #263e3020; }

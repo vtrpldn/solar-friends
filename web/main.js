@@ -1,5 +1,5 @@
 import { buildingArt, drawBuildingArt } from './building-art.js';
-import { flock, drawChicken } from "./chickens.js";
+import { flock, drawChicken, loadChickenArt } from "./chickens.js";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
@@ -19,6 +19,7 @@ import {
 } from "./terrain.js?v=river-28";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
+const artworkPreview = new URLSearchParams(location.search).has("artwork-preview");
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
@@ -155,6 +156,11 @@ function toast(message) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
 }
 function save(manual = false) {
+  if (artworkPreview) {
+    $("#save-status").textContent = "Artwork preview · your saved village is unchanged";
+    if (manual) toast("Preview only. Return to your village to save progress.");
+    return;
+  }
   try {
     localStorage.setItem(saveKey, game.snapshot());
     $("#save-status").textContent = "Saved on this device";
@@ -1081,7 +1087,7 @@ function setup() {
   $("#cancel-restart").onclick = () => $("#restart-dialog").close();
   $("#confirm-restart").onclick = () => {
     try {
-      localStorage.setItem(`${saveKey}-backup`, game.snapshot());
+      if (!artworkPreview) localStorage.setItem(`${saveKey}-backup`, game.snapshot());
     } catch {}
     game.free();
     game = new Game();
@@ -1203,6 +1209,7 @@ function setup() {
 try {
   await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-coop-2" });
   await Promise.all([
+    loadChickenArt(),
     ...Object.values(buildingImages).map((image) => image.decode()),
     forestArt.decode(),
     terrain.decode(),
@@ -1211,14 +1218,27 @@ try {
   ]);
   game = new Game();
   let saved;
-  try {
-    saved = localStorage.getItem(saveKey);
-  } catch {}
+  if (artworkPreview) {
+    const response = await fetch('./artwork/village-preview.json');
+    if (!response.ok) throw new Error('Artwork preview could not load');
+    saved = await response.text();
+  } else {
+    try { saved = localStorage.getItem(saveKey); } catch {}
+  }
   if (saved && !game.restore(saved)) {
     toast("Your old save could not be loaded. A fresh village is ready.");
   }
   state = JSON.parse(game.snapshot());
   setup();
+  if (artworkPreview) {
+    const notice = document.createElement('a');
+    notice.href = './';
+    notice.className = 'artwork-preview-notice';
+    notice.textContent = 'Artwork preview · Return to your village ↗';
+    document.body.append(notice);
+    togglePause();
+    save();
+  }
 } catch (error) {
   console.error(error);
   $("#load-status").textContent =
