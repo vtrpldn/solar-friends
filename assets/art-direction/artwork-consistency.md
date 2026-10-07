@@ -8,6 +8,8 @@ description: Canonical sprite sizes, camera calibration, and prompts for the art
 
 Small utility structures need to read at a plausible size beside homes and residents. The game, placement ghosts, and artwork studio use [building-art.js](../../web/building-art.js) for source crops, widths, ground anchors, and camera calibration. Library thumbnails use one common scale; the focus bench defaults to game scale.
 
+See the [full gameplay and sprite audit](consistency-audit-2026-10-08.md) for per-entry verdicts and unresolved defects.
+
 ## Canonical assets
 
 The library contains 42 entries backed by 28 source images. Obsolete village and mango variants are removed; Git retains their history. Unused garden and cistern cells remain embedded in atlases needed by active assets, but have no library entry. Portraits and animated residents have different active uses.
