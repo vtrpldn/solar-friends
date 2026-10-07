@@ -211,6 +211,26 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
     })
     .unwrap_or((CAMP.0 + (id as f32 - 2.) * 0.45, CAMP.1 + 0.5))
 }
+// Each resident has a separate set of quiet spots, spaced three tiles apart.
+// Derive the choice from saved time so loading a village keeps the same routine.
+fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
+    let spots: Vec<_> = (0..49)
+        .filter(|index| index % 5 == id)
+        .map(|index| (4.5 + (index % 7) as f32 * 3., 5.5 + (index / 7) as f32 * 3.))
+        .filter(|&(x, y)| {
+            !river_bank(x as i32, y as i32)
+                && v.buildings.iter().all(|b| {
+                    (x - (b.x as f32 + 0.5)).abs() > 1.75 || (y - (b.y as f32 + 0.5)).abs() > 1.75
+                })
+        })
+        .collect();
+    if spots.is_empty() {
+        return None;
+    }
+    let visit = (v.minutes / (90. + id as f32 * 13.)).floor() as usize;
+    Some(spots[(visit + id) % spots.len()])
+}
+
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
     r.task = task.into();
     r.reason = reason.into();
@@ -221,7 +241,20 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
-    (r.target_x, r.target_y) = destination(v, task, r.id);
+    if task == "idle" {
+        r.reason = match r.favorite.as_str() {
+            "garden" => "Taking a quiet walk to look at the plants.",
+            "build" => "Sketching ideas for something we could build.",
+            "cook" => "Humming a tune and thinking up new recipes.",
+            "gather" => "Watching birds around the clearing.",
+            _ => "Finding a peaceful spot to sit and daydream.",
+        }
+        .into();
+        r.remaining = 16. + r.id as f32 * 3.;
+        (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((r.x, r.y));
+    } else {
+        (r.target_x, r.target_y) = destination(v, task, r.id);
+    }
 }
 fn choose(r: &mut Resident, v: &Village) {
     let meal_due = meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot);
@@ -873,6 +906,83 @@ impl Default for Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn idle_residents_spread_out_and_keep_individual_routines_after_reload() {
+        let mut g = Game::new();
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.minutes = 900.;
+            v.water = 100.;
+            v.food = 100.;
+        }
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        for mut r in q.iter_mut(g.app.world_mut()) {
+            r.task = "idle".into();
+            r.remaining = 0.;
+            r.social = 100.;
+            r.hunger = 0.;
+        }
+        g.tick(0.25);
+        let initial: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
+        for _ in 0..240 {
+            g.tick(0.25);
+            restored.tick(0.25);
+        }
+        assert_eq!(g.snapshot(), restored.snapshot());
+        let later: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        for residents in [&initial.residents, &later.residents] {
+            for (i, r) in residents.iter().enumerate() {
+                assert_eq!(r.task, "idle");
+                for other in &residents[i + 1..] {
+                    assert!((r.target_x - other.target_x).hypot(r.target_y - other.target_y) >= 3.);
+                    assert_ne!(r.reason, other.reason);
+                }
+            }
+        }
+        for (i, r) in later.residents.iter().enumerate() {
+            for other in &later.residents[i + 1..] {
+                assert!((r.x - other.x).hypot(r.y - other.y) >= 2.);
+            }
+        }
+        assert!(
+            initial
+                .residents
+                .iter()
+                .zip(&later.residents)
+                .any(|(a, b)| { (a.target_x, a.target_y) != (b.target_x, b.target_y) })
+        );
+    }
+
+    #[test]
+    fn idle_spots_avoid_construction_and_do_not_default_to_a_grove() {
+        let g = Game::new();
+        let mut v = g.app.world().resource::<Village>().clone();
+        for id in 0..5 {
+            let (x, y) = idle_destination(&v, id).unwrap();
+            v.buildings.push(Building {
+                id,
+                kind: "grove".into(),
+                x: x.floor() as i32,
+                y: y.floor() as i32,
+                progress: if id % 2 == 0 { 100. } else { 0. },
+                contributors: 0,
+                crop: ecology::Crop::default(),
+            });
+        }
+        for minutes in (0..2880).step_by(30) {
+            v.minutes = minutes as f32;
+            for id in 0..5 {
+                let (x, y) = idle_destination(&v, id).unwrap();
+                assert!(!river_bank(x as i32, y as i32));
+                assert!(v.buildings.iter().all(|b| {
+                    (x - (b.x as f32 + 0.5)).abs() > 1.75 || (y - (b.y as f32 + 0.5)).abs() > 1.75
+                }));
+            }
+        }
+    }
+
     fn advance(g: &mut Game, seconds: f32) {
         for _ in 0..(seconds / 0.2) as usize {
             g.tick(0.2);

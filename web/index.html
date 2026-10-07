@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#263e30" />
     <title>Solar Friends · Vila Aurora</title>
-    <link rel="stylesheet" href="style.css?v=quests-1" />
+    <link rel="stylesheet" href="style.css?v=combined-hud-2" />
+    <link rel="stylesheet" href="hud.css?v=1" />
   </head>
   <body>
     <div id="loading">
@@ -22,24 +23,7 @@
         <span class="eyebrow">OUR LITTLE ECOVILA</span>
         <h1>Vila Aurora <span>✦</span></h1>
       </div>
-      <div class="resources" aria-label="Village resources">
-        <div title="Gather fallen timber to build">
-          <span>⌁</span><b id="wood">76</b><small>Timber</small>
-        </div>
-        <div title="Plant, water, and grow crops before harvesting">
-          <span>♧</span><b id="food">42</b><small>Food</small>
-        </div>
-        <div title="Rain fills cisterns; residents collect river water">
-          <span>◒</span><b id="water">65</b
-          ><small id="water-capacity">Water / 40</small>
-        </div>
-        <div title="Average resident wellbeing">
-          <span>♡</span><b id="happiness">75%</b><small>Wellbeing</small>
-        </div>
-      </div>
-      <button class="icon-button" id="settings" aria-label="Settings">
-        ⚙
-      </button>
+      <button class="icon-button" id="settings" aria-label="Settings">⚙</button>
       <button class="icon-button" id="help" aria-label="How to play">?</button>
     </header>
     <main>
@@ -47,15 +31,8 @@
         id="world"
         aria-label="Isometric ecovila. Select a building tool and click a clearing to build. Residents are also selectable from the community panel."
       ></canvas>
-      <section class="season panel">
-        <span class="season-icon">☀</span>
-        <div>
-          <span class="eyebrow">MATA ATLÂNTICA</span
-          ><b id="date">Day 1 · 08:00</b
-          ><small>Warm season · clear skies</small>
-        </div>
-      </section>
-      <section class="chapter panel">
+      <section class="chapter panel" id="goals-panel" hidden aria-label="Village goals">
+        <button class="panel-close" data-close-panel aria-label="Close goals">×</button>
         <span class="eyebrow" id="tutorial-count">ARRIVAL</span>
         <h2 id="tutorial-title">A shared beginning</h2>
         <p id="quest-speaker"></p>
@@ -77,7 +54,8 @@
         </button>
         <p id="village-needs"></p>
       </section>
-      <aside class="community panel">
+      <aside class="community panel" id="community-panel" hidden aria-label="Community">
+        <button class="panel-close" data-close-panel aria-label="Close community">×</button>
         <div class="panel-heading">
           <div>
             <span class="eyebrow">BETTER TOGETHER</span>
@@ -118,29 +96,50 @@
         <p id="latest-event">A little care goes a long way.</p>
       </section>
       <div id="placement" class="placement" hidden></div>
-      <nav class="build-bar panel" aria-label="Building tools">
+      <nav class="build-bar panel" id="build-panel" hidden aria-label="Building tools">
+        <button class="panel-close" data-close-panel aria-label="Close building tools">×</button>
         <div class="build-label">
           <span class="eyebrow">MAKE ROOM</span><b>Let's grow</b>
         </div>
         <div id="tools"></div>
       </nav>
+      <nav class="hud-dock" aria-label="Village controls">
+        <button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button>
+        <button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Goals</button>
+        <button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button>
+      </nav>
       <div id="toast" role="status" hidden></div>
     </main>
     <footer>
-      <span
-        ><span class="live-dot"></span>
-        <span id="save-status">Your village, at your pace.</span></span
-      >
-      <div class="time-controls" aria-label="Time controls">
-        <button id="pause" aria-label="Pause simulation">Ⅱ</button
-        ><button data-speed="1" class="active">1×</button
-        ><button data-speed="2">2×</button><button data-speed="4">4×</button
-        ><button data-speed="8">8×</button>
+      <section class="season panel">
+        <span class="season-icon">☀</span>
+        <div>
+          <span class="eyebrow">MATA ATLÂNTICA</span
+          ><b id="date">Day 1 · 08:00</b
+          ><small>Warm season · clear skies</small>
+        </div>
+      </section>
+      <div class="resources" aria-label="Village resources">
+        <div title="Gather fallen timber to build">
+          <span>⌁</span><b id="wood">76</b><small>Timber</small>
+        </div>
+        <div title="Plant, water, and grow crops before harvesting">
+          <span>♧</span><b id="food">42</b><small>Food</small>
+        </div>
+        <div title="Rain fills cisterns; residents collect river water">
+          <span>◒</span><b id="water">65</b><small id="water-capacity">Water / 40</small>
+        </div>
+        <div title="Average resident wellbeing">
+          <span>♡</span><b id="happiness">75%</b><small>Wellbeing</small>
+        </div>
       </div>
-      <span class="footer-tip"
-        >Drag to explore <i>·</i> Scroll to zoom <i>·</i> Space to pause</span
-      ><button id="new-scenario">New village</button
-      ><button id="save">Save village</button>
+      <div class="time-controls" aria-label="Time controls">
+        <button id="pause" aria-label="Pause simulation">Ⅱ</button>
+        <button data-speed="1" class="active" aria-label="1× simulation speed" aria-pressed="true">1×</button>
+        <button data-speed="2" aria-label="2× simulation speed" aria-pressed="false">2×</button>
+        <button data-speed="4" aria-label="4× simulation speed" aria-pressed="false">4×</button>
+        <button data-speed="8" aria-label="8× simulation speed" aria-pressed="false">8×</button>
+      </div>
     </footer>
     <dialog id="quest-dialog" aria-labelledby="journal-title">
       <button
@@ -163,21 +162,21 @@
         paths progress together.
       </p>
     </dialog>
-    <dialog id="help-dialog">
+    <dialog id="help-dialog" aria-labelledby="help-title">
       <button id="close-help" class="dialog-close" aria-label="Close help">
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
-      <h2>Grow a place to belong.</h2>
+      <h2 id="help-title">Grow a place to belong.</h2>
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li>
-          <b>Start with the essentials.</b> Follow A Shared Beginning in the
+          <b>Start with the essentials.</b> Open Goals and follow A Shared Beginning in the
           village journal: a cistern, homes, a garden and a shared kitchen.
           Choose a building, then click the clearing. Residents construct it
           during working hours.
         </li>
         <li>
-          <b>Get to know your neighbours.</b> Select a resident to see their
+          <b>Get to know your neighbours.</b> Open People or select a resident to see their
           needs and request help. Explain why it matters if they hesitate;
           exhausted people still need rest.
         </li>
@@ -192,8 +191,8 @@
       </ol>
       <p class="hint">
         A full day takes eight minutes at 1×. Pause and change speed at the
-        bottom. Escape cancels building. Your village autosaves locally; Save
-        village saves immediately.
+        bottom. Escape cancels building. Your village autosaves locally; open
+        Settings to save immediately or start a new village.
       </p>
       <button id="start-playing" class="primary">
         Let's grow together <span>→</span>
@@ -227,13 +226,18 @@
           />
         </label>
       </section>
+      <section class="settings-section" aria-label="Village save">
+        <h3>Your village</h3>
+        <div class="save-actions"><button id="save">Save village</button><button id="new-scenario">New village</button></div>
+        <p id="save-status" role="status">Your village saves automatically on this device.</p>
+      </section>
       <p class="hint" id="settings-status" role="status">
         Changes apply immediately and stay on this device.
       </p>
     </dialog>
-    <dialog id="restart-dialog">
+    <dialog id="restart-dialog" aria-labelledby="restart-title">
       <span class="eyebrow">A FRESH BEGINNING</span>
-      <h2>Start the arrival again?</h2>
+      <h2 id="restart-title">Start the arrival again?</h2>
       <p>
         Your current village will be replaced by an empty lot and five arriving
         neighbours. A backup stays on this device.
@@ -241,6 +245,6 @@
       <button id="cancel-restart">Keep this village</button>
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
-    <script type="module" src="main.js?v=ecology-1"></script>
+    <script type="module" src="main.js?v=combined-hud-2"></script>
   </body>
 </html>

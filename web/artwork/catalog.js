@@ -6,7 +6,7 @@ function add(id, name, file, group, options = {}) {
 for (const [file, usage] of [['village-atlas-isometric.png', 'Active'], ['village-atlas.png', 'Reference']]) {
   ['Home', 'Kitchen', 'Garden (atlas)', 'Banana grove'].forEach((name, i) => add(`${file}-${i}`, name, file, 'Buildings', { usage: i === 2 ? 'Reference' : usage, cell: [i % 2 / 2, Math.floor(i / 2) / 2, .5, .5], width: (i === 3 ? 105 : 152) * 1.18, anchor: [.7,.7,.59,.74][i] }));
 }
-for (const [id, name, width, anchor, aspect] of [['garden-simple','Garden',119*1.18,.52,10/11],['cistern','Cistern',77,.82,1],['compost','Compost station',152,.76,1],['square','Community square',152,.76,1],['workshop','Workshop',152,.76,1],['coop','Chicken coop',152,.76,1]]) add(id,name,`${id}-isometric.${id === 'coop' ? 'svg' : 'png'}`,'Buildings',{width,anchor,aspect});
+for (const [id, name, width, anchor, aspect] of [['garden-simple','Garden',119*1.18,.52,10/11],['cistern','Cistern',77,.82,1],['compost','Compost station',152,.76,1],['square','Community square',152,.76,1],['workshop','Workshop',152,.76,1],['coop','Chicken coop',152,.76,1]]) add(id,name,`${id}-isometric.png`,'Buildings',{width,anchor,aspect});
 ['Jequitibá-rosa','Juçara','Embaúba','Pau-brasil'].forEach((name,i) => add(`forest-${i}`,name,'mata-atlantica-atlas.png','Vegetation',{cell:[i%2/2,Math.floor(i/2)/2,.5,.5],width:[145,112,113,125][i],anchor:.85}));
 for (const file of ['mango-tree.png','mango-tree-isometric.png']) add(file,'Mango tree',file,'Vegetation',{usage:'Reference',anchor:.85});
 ['Meadow','Red earth'].forEach((name,i) => add(`terrain-${i}`,name,'terrain-atlas.png','Terrain',{cell:[i/2,0,.5,1],anchor:.5}));
