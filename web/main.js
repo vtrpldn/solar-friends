@@ -1,3 +1,4 @@
+import { situationView } from "./situations.js";
 import { buildingArt, drawBuildingArt } from './building-art.js';
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
@@ -823,7 +824,18 @@ function updateQuests() {
         ? "Next gathering tomorrow"
         : "Host a gathering";
 }
+function updateSituations() {
+  const view = situationView(state.village, state.residents);
+  $("#open-situations").textContent = view.label;
+  replaceMarkup($("#situation-content"), view.markup);
+}
+function openSituations() {
+  $("#quest-dialog").close();
+  updateSituations();
+  $("#situation-dialog").showModal();
+}
 function updateUI() {
+  updateSituations();
   const v = state.village;
   for (const k of ["wood", "food", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
@@ -1008,6 +1020,19 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  $("#open-situations").onclick = openSituations;
+  $("#journal-situations").onclick = openSituations;
+  $("#close-situation").onclick = () => $("#situation-dialog").close();
+  $("#situation-content").onclick = (event) => {
+    const button = event.target.closest("[data-situation-response]");
+    if (!button) return;
+    const result = game.respond_situation(button.dataset.situationResponse);
+    state = JSON.parse(game.snapshot());
+    updateUI();
+    save();
+    toast(result === "ok" ? "The collective has agreed. Close the situation to give everyone time." : result);
+    $("#close-situation").focus();
+  };
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
       const isOpen = button.getAttribute("aria-expanded") === "true";
