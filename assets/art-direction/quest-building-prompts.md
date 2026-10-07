@@ -1,3 +1,7 @@
+---
+description: Generation prompts and saved sprites for the first four village quests.
+---
+
 # Quest building artwork
 
 Generated with the built-in image generation tool on 2026-10-07. The three transparent sprites are saved under `web/art/` and follow the approved Brazilian ecovila direction. Existing food-forest and starter-building artwork is reused.

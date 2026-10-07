@@ -985,77 +985,353 @@ dialog .hint {
 }
 
 /* The village journal borrows the warm paper and painted materials of the world. */
-.chapter { max-height: calc(100% - 280px); overflow-y: auto; }
-#quest-speaker { font-style: italic; margin: 5px 0 10px; }
-#quest-progress { width: 100%; height: 5px; accent-color: #708954; border: 0; border-radius: 4px; }
-#quest-progress::-webkit-progress-bar { background: #e6e6d3; border-radius: 4px; }
-#quest-progress::-webkit-progress-value { background: #718c54; border-radius: 4px; }
-.objective { gap: 7px; margin-top: 10px; }
-.objective b { font-weight: inherit; flex: 1; }
-.objective small { font-size: 10px; color: #68765b; }
-.objective span { color: #6e795c; }
-.objective.done span { color: white; }
-#quest-reward { border-top: 1px solid #dedecb; padding-top: 10px; color: #6b7546; font-weight: 600; }
-.journal-button, #host-gathering, .quest-card button { border: 1px solid #bdc6a7; border-radius: 7px; background: #edf0df; color: #3b573c; padding: 10px 12px; font: 600 12px "DM Sans", sans-serif; cursor: pointer; }
-.journal-button { width: 100%; }
-button:focus-visible { outline: 3px solid #9e702e; outline-offset: 3px; }
-.build-bar { max-width: calc(100% - 32px); }
-#tools { overflow-x: auto; }
-.build-tool { flex-shrink: 0; }
-.build-tool.locked .tool-art { filter: grayscale(1); opacity: .4; }
-.build-tool.locked small { color: #917956; font-size: 8px; }
-.build-tool[data-kind="compost"] .tool-art { background: url("art/compost-isometric.png") center / contain no-repeat; }
-.build-tool[data-kind="square"] .tool-art { background: url("art/square-isometric.png") center / contain no-repeat; }
-.build-tool[data-kind="workshop"] .tool-art { background: url("art/workshop-isometric.png") center / contain no-repeat; }
-#quest-dialog { width: min(940px, 94vw); max-width: 940px; padding: 36px; background: #fff9ec; }
-#journal-title { font-size: clamp(25px, 3vw, 38px); margin: 10px 0; }
-.journal-intro { max-width: 620px; }
-#quest-total { color: #687d4e; font-size: 12px; border-bottom: 1px solid #ddd9c3; padding-bottom: 18px; }
-#quest-list { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.quest-card { border: 1px solid #dcdcc6; border-radius: 12px; overflow: hidden; background: #fffdf5; }
-.quest-card-art { height: 125px; background: radial-gradient(ellipse at bottom, #d9dfbd, #f3f0df 75%); display: grid; place-items: center; }
-.quest-card-art img { height: 140px; width: 170px; object-fit: contain; }
-.quest-card-art.grove { background: linear-gradient(130deg, #cdd7af, #f2e4ba); color: #a88734; font-size: 80px; }
-.quest-card-content { padding: 20px; }
-.quest-card h3 { font: 25px "Lora", Georgia, serif; margin: 8px 0; }
-.quest-card p { font-size: 12px; line-height: 1.6; }
-.quest-story { min-height: 58px; color: #667258; }
-.quest-card .eyebrow { font-size: 9px; }
-.quest-card.complete { border-color: #9bab7d; }
-.quest-card.locked .quest-card-art { filter: saturate(.35); }
-.journal-reward { padding-top: 14px; border-top: 1px solid #e4e2ce; color: #4f6b3f; }
-.journal-reward b { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; }
-.quest-card button { width: 100%; }
-.quest-card button:disabled { cursor: default; color: #858776; background: #eeeee5; }
-#village-craft { position: absolute; right: 26px; top: 425px; width: 252px; padding: 15px; font-size: 11px; }
-#village-craft p { line-height: 1.6; }
-#tools-control { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-#tools-control small { display: block; width: 100%; color: #6c775c; margin: 6px 0; }
-#gathering-status { display: block; line-height: 1.6; margin: 8px 0; }
-#host-gathering { width: 100%; }
-#host-gathering:disabled { opacity: .65; cursor: default; }
-.friendship-note { font-size: 11px; color: #657254; line-height: 1.5; }
-[hidden] { display: none !important; }
-@media (max-width: 1000px) {
-  #village-craft { right: 12px; width: 200px; top: 340px; }
+.chapter {
+  max-height: calc(100% - 280px);
+  overflow-y: auto;
+}
+#quest-speaker {
+  font-style: italic;
+  margin: 5px 0 10px;
+}
+#quest-progress {
+  width: 100%;
+  height: 5px;
+  accent-color: #708954;
+  border: 0;
+  border-radius: 4px;
+}
+#quest-progress::-webkit-progress-bar {
+  background: #e6e6d3;
+  border-radius: 4px;
+}
+#quest-progress::-webkit-progress-value {
+  background: #718c54;
+  border-radius: 4px;
+}
+.objective {
+  gap: 7px;
+  margin-top: 10px;
+}
+.objective b {
+  font-weight: inherit;
+  flex: 1;
+}
+.objective small {
+  font-size: 10px;
+  color: #68765b;
+}
+.objective span {
+  color: #6e795c;
+}
+.objective.done span {
+  color: white;
+}
+#quest-reward {
+  border-top: 1px solid #dedecb;
+  padding-top: 10px;
+  color: #6b7546;
+  font-weight: 600;
+}
+.journal-button,
+#host-gathering,
+.quest-card button {
+  border: 1px solid #bdc6a7;
+  border-radius: 7px;
+  background: #edf0df;
+  color: #3b573c;
+  padding: 10px 12px;
+  font:
+    600 12px "DM Sans",
+    sans-serif;
+  cursor: pointer;
+}
+.journal-button {
+  width: 100%;
+}
+button:focus-visible {
+  outline: 3px solid #9e702e;
+  outline-offset: 3px;
+}
+.build-bar {
+  max-width: calc(100% - 32px);
+}
+#tools {
+  overflow-x: auto;
+}
+.build-tool {
+  flex-shrink: 0;
+}
+.build-tool.locked .tool-art {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+.build-tool.locked small {
+  color: #917956;
+  font-size: 8px;
+}
+.build-tool[data-kind="compost"] .tool-art {
+  background: url("art/compost-isometric.png") center / contain no-repeat;
+}
+.build-tool[data-kind="square"] .tool-art {
+  background: url("art/square-isometric.png") center / contain no-repeat;
+}
+.build-tool[data-kind="workshop"] .tool-art {
+  background: url("art/workshop-isometric.png") center / contain no-repeat;
+}
+#quest-dialog {
+  width: min(940px, 94vw);
+  max-width: 940px;
+  padding: 36px;
+  background: #fff9ec;
+}
+#journal-title {
+  font-size: clamp(25px, 3vw, 38px);
+  margin: 10px 0;
+}
+.journal-intro {
+  max-width: 620px;
+}
+#quest-total {
+  color: #687d4e;
+  font-size: 12px;
+  border-bottom: 1px solid #ddd9c3;
+  padding-bottom: 18px;
+}
+#quest-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.quest-card {
+  border: 1px solid #dcdcc6;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fffdf5;
+}
+.quest-card-art {
+  height: 125px;
+  background: radial-gradient(ellipse at bottom, #d9dfbd, #f3f0df 75%);
+  display: grid;
+  place-items: center;
+}
+.quest-card-art img {
+  height: 140px;
+  width: 170px;
+  object-fit: contain;
+}
+.quest-card-art.grove {
+  background: linear-gradient(130deg, #cdd7af, #f2e4ba);
+  color: #a88734;
+  font-size: 80px;
+}
+.quest-card-content {
+  padding: 20px;
+}
+.quest-card h3 {
+  font:
+    25px "Fraunces",
+    Georgia,
+    serif;
+  margin: 8px 0;
+}
+.quest-card p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.quest-story {
+  min-height: 58px;
+  color: #667258;
+}
+.quest-card .eyebrow {
+  font-size: 9px;
+}
+.quest-card.complete {
+  border-color: #9bab7d;
+}
+.quest-card.locked .quest-card-art {
+  filter: saturate(0.35);
+}
+.journal-reward {
+  padding-top: 14px;
+  border-top: 1px solid #e4e2ce;
+  color: #4f6b3f;
+}
+.journal-reward b {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.quest-card button {
+  width: 100%;
+}
+.quest-card button:disabled {
+  cursor: default;
+  color: #858776;
+  background: #eeeee5;
+}
+#village-craft {
+  margin: 10px;
+  padding: 12px;
+  box-shadow: none;
+  background: #eff0df;
+  font-size: 11px;
+}
+#village-craft p {
+  line-height: 1.6;
+}
+#tools-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+#tools-control small {
+  display: block;
+  width: 100%;
+  color: #6c775c;
+  margin: 6px 0;
+}
+#gathering-status {
+  display: block;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+#host-gathering {
+  width: 100%;
+}
+#host-gathering:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.friendship-note {
+  font-size: 11px;
+  color: #657254;
+  line-height: 1.5;
+}
+[hidden] {
+  display: none !important;
 }
 @media (max-width: 760px) {
-  .chapter { width: 190px; max-height: calc(100% - 210px); }
-  .chapter #tutorial-copy, .chapter #quest-reward { display: block; font-size: 10px; }
-  .chapter #objectives { display: none; }
-  #quest-speaker, #village-needs { display: none; }
-  #village-craft { top: auto; bottom: 110px; right: 10px; width: 180px; max-height: 150px; overflow: auto; padding: 10px; }
-  #quest-dialog { padding: 24px 18px; }
-  #quest-list { grid-template-columns: 1fr; }
-  .quest-card-art { height: 100px; }
-  .quest-card-art img { height: 115px; }
-  .quest-story { min-height: 0; }
+  .chapter {
+    width: 190px;
+    max-height: calc(100% - 210px);
+  }
+  .chapter #tutorial-copy,
+  .chapter #quest-reward {
+    display: block;
+    font-size: 10px;
+  }
+  .chapter #objectives {
+    display: none;
+  }
+  #quest-speaker,
+  #village-needs {
+    display: none;
+  }
+  #quest-dialog {
+    padding: 24px 18px;
+  }
+  #quest-list {
+    grid-template-columns: 1fr;
+  }
+  .quest-card-art {
+    height: 100px;
+  }
+  .quest-card-art img {
+    height: 115px;
+  }
+  .quest-story {
+    min-height: 0;
+  }
 }
 @media (max-width: 480px) {
-  .chapter { width: 165px; padding: 10px; }
-  .chapter h2 { font-size: 16px; }
-  #village-craft { width: 150px; }
+  .chapter {
+    width: 165px;
+    padding: 10px;
+  }
+  .chapter h2 {
+    font-size: 16px;
+  }
 }
-@media (max-height: 740px) and (min-width: 761px) {
-  #village-craft { top: auto; bottom: 118px; max-height: 145px; overflow: auto; }
+
+/* Keep activities in the community's scrollable column at every viewport. */
+.community {
+  max-height: calc(100% - 150px);
+  overflow-y: auto;
+}
+@media (max-height: 850px) {
+  .village-note {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .community {
+    width: 130px;
+    max-height: calc(100% - 135px);
+  }
+  .community .panel-heading h2 {
+    font-size: 15px;
+  }
+  .chapter {
+    width: min(190px, calc(100vw - 170px));
+  }
+  #village-craft {
+    margin: 5px;
+    padding: 8px;
+    font-size: 10px;
+  }
+  #village-craft .eyebrow {
+    letter-spacing: 1px;
+    font-size: 8px;
+  }
+  #host-gathering {
+    font-size: 10px;
+    padding: 8px 4px;
+  }
+  .resident {
+    padding: 7px;
+  }
+  .resident small {
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 480px) {
+  header {
+    gap: 9px;
+    padding: 0 10px;
+  }
+  .resources {
+    gap: 9px;
+  }
+  .resources > div {
+    min-width: 30px;
+  }
+  .resources b {
+    font-size: 13px;
+  }
+  footer > span:first-child {
+    display: none;
+  }
+  footer {
+    gap: 5px;
+    padding: 0 8px;
+  }
+  #new-scenario {
+    margin-left: auto;
+  }
+}
+@media (max-width: 360px) {
+  .brand span:last-child {
+    display: none;
+  }
+  .brand {
+    padding-right: 8px;
+  }
+  header {
+    gap: 7px;
+  }
+  .resources {
+    gap: 6px;
+  }
 }

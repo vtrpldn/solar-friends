@@ -50,11 +50,13 @@ const atlas = new Image();
 atlas.src = "art/village-atlas-isometric.png";
 const gardenArt = new Image();
 gardenArt.src = "art/garden-simple-isometric.png";
-const questArt = Object.fromEntries(["compost", "square", "workshop"].map(kind => {
-  const image = new Image();
-  image.src = `art/${kind}-isometric.png`;
-  return [kind, image];
-}));
+const questArt = Object.fromEntries(
+  ["compost", "square", "workshop"].map((kind) => {
+    const image = new Image();
+    image.src = `art/${kind}-isometric.png`;
+    return [kind, image];
+  }),
+);
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const peopleArt = new Image();
@@ -262,7 +264,8 @@ function tree(x, y, s = 1, species = 0) {
 }
 function sprite(kind, x, y, size, alpha = 1) {
   if (questArt[kind]) {
-    const p = iso(x, y), w = size * scale;
+    const p = iso(x, y),
+      w = size * scale;
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.drawImage(questArt[kind], p.x - w / 2, p.y - w * 0.76, w, w);
@@ -621,72 +624,134 @@ function request(task, encourage) {
   updateUI();
 }
 function replaceMarkup(element, html) {
-  if (element._markup !== html) { element.innerHTML = html; element._markup = html; }
+  if (element._markup !== html) {
+    element.innerHTML = html;
+    element._markup = html;
+  }
 }
 function objectiveMarkup(objectives, completed = false) {
-  const current = completed ? -1 : objectives.findIndex(o => !o.done);
-  return objectives.map((o, i) => `<div class="objective ${completed || o.done ? "done" : ""} ${i === current ? "current" : ""}"><span>${completed || o.done ? "✓" : i + 1}</span><b>${o.label}</b><small>${completed ? o.target : o.value}/${o.target}</small></div>`).join("");
+  const current = completed ? -1 : objectives.findIndex((o) => !o.done);
+  return objectives
+    .map(
+      (o, i) =>
+        `<div class="objective ${completed || o.done ? "done" : ""} ${i === current ? "current" : ""}"><span>${completed || o.done ? "✓" : i + 1}</span><b>${o.label}</b><small>${completed ? o.target : o.value}/${o.target}</small></div>`,
+    )
+    .join("");
 }
 function openJournal() {
   updateQuests();
   $("#quest-dialog").showModal();
 }
 function updateQuests() {
-  const v = state.village, p = v.progress;
-  const id = p.tracked, quest = quests[id], done = p.completed[id];
-  const objectives = quest.objectives(v), next = objectives.find(o => !o.done);
+  const v = state.village,
+    p = v.progress;
+  const id = p.tracked,
+    quest = quests[id],
+    done = p.completed[id];
+  const objectives = quest.objectives(v),
+    next = objectives.find((o) => !o.done);
   $("#tutorial-count").textContent = `${quest.theme} · QUEST ${id + 1} OF 4`;
   $("#tutorial-title").textContent = quest.title;
-  $("#tutorial-copy").textContent = done ? quest.after : next?.hint || quest.story;
-  $("#quest-speaker").textContent = done ? "✓ Quest complete" : `A wish from ${quest.person}`;
-  $("#quest-reward").textContent = `${done ? "Unlocked" : "Reward"}: ${quest.reward}`;
-  $("#quest-progress").value = done ? objectives.length : objectives.filter(o => o.done).length;
+  $("#tutorial-copy").textContent = done
+    ? quest.after
+    : next?.hint || quest.story;
+  $("#quest-speaker").textContent = done
+    ? "✓ Quest complete"
+    : `A wish from ${quest.person}`;
+  $("#quest-reward").textContent =
+    `${done ? "Unlocked" : "Reward"}: ${quest.reward}`;
+  $("#quest-progress").value = done
+    ? objectives.length
+    : objectives.filter((o) => o.done).length;
   $("#quest-progress").max = objectives.length;
-  $("#quest-progress").setAttribute("aria-label", `${quest.title} objectives completed`);
+  $("#quest-progress").setAttribute(
+    "aria-label",
+    `${quest.title} objectives completed`,
+  );
   replaceMarkup($("#objectives"), objectiveMarkup(objectives, done));
   const kind = done ? quest.building : next?.build;
-  const count = kind ? v.buildings.filter(b => b.kind === kind && b.progress >= 100).length : 0;
-  const planned = kind && v.buildings.some(b => b.kind === kind && b.progress < 100);
+  const count = kind
+    ? v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length
+    : 0;
+  const planned =
+    kind && v.buildings.some((b) => b.kind === kind && b.progress < 100);
   const enough = kind && (kind === "home" ? count >= next?.target : count > 0);
   const action = $("#tutorial-action");
   action.hidden = (!kind || planned || enough) && !(!done && next?.action);
-  action.textContent = kind ? `Plan ${kinds[kind][0].toLowerCase()} · ${kinds[kind][1]} timber` : "";
+  action.textContent = kind
+    ? `Plan ${kinds[kind][0].toLowerCase()} · ${kinds[kind][1]} timber`
+    : "";
   if (!done && next?.action) {
-    action.textContent = next.action === "supper" ? "Host welcome supper · 5 meals" : "Set aside 24 timber";
+    action.textContent =
+      next.action === "supper"
+        ? "Host welcome supper · 5 meals"
+        : "Set aside 24 timber";
     action.onclick = () => {
-      const result = next.action === "supper" ? game.host_gathering() : game.contribute_workshop_timber();
-      toast(result === "ok" ? next.action === "supper" ? "Welcome supper is starting at the kitchen." : "The tool library timber is set aside." : result);
+      const result =
+        next.action === "supper"
+          ? game.host_gathering()
+          : game.contribute_workshop_timber();
+      toast(
+        result === "ok"
+          ? next.action === "supper"
+            ? "Welcome supper is starting at the kitchen."
+            : "The tool library timber is set aside."
+          : result,
+      );
       state = JSON.parse(game.snapshot());
       updateUI();
       save();
     };
   } else action.onclick = () => setTool(kind);
-  $("#open-journal").textContent = done && id === 0 ? "Choose our next quest →" : `Village journal · ${p.completed.filter(Boolean).length}/4`;
-  $("#village-needs").textContent = `${Math.min(5, v.buildings.filter(b => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
-  $("#quest-total").textContent = `${p.completed.filter(Boolean).length} of 4 shared dreams fulfilled`;
-  replaceMarkup($("#quest-list"), quests.map((q, i) => {
-    const status = questStatus(v, i), locked = i > 0 && !p.completed[0];
-    return `<article class="quest-card ${p.completed[i] ? "complete" : ""} ${locked ? "locked" : ""}">
+  $("#open-journal").textContent =
+    done && id === 0
+      ? "Choose our next quest →"
+      : `Village journal · ${p.completed.filter(Boolean).length}/4`;
+  $("#village-needs").textContent =
+    `${Math.min(5, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
+  $("#quest-total").textContent =
+    `${p.completed.filter(Boolean).length} of 4 shared dreams fulfilled`;
+  replaceMarkup(
+    $("#quest-list"),
+    quests
+      .map((q, i) => {
+        const status = questStatus(v, i),
+          locked = i > 0 && !p.completed[0];
+        return `<article class="quest-card ${p.completed[i] ? "complete" : ""} ${locked ? "locked" : ""}">
       <div class="quest-card-art ${q.art}">${i ? `<img src="art/${q.art}-isometric.png" alt="${kinds[q.building][0]} quest reward">` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
       ${objectiveMarkup(q.objectives(v), p.completed[i])}
       <p class="journal-reward"><b>${p.completed[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
       ${p.completed[i] ? `<p class="quest-after">${q.after}</p>` : ""}
       <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? "Complete A Shared Beginning first" : i === id ? "Following this quest" : p.completed[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
-  }).join(""));
-  const has = kind => v.buildings.some(b => b.kind === kind && b.progress >= 100);
-  $("#village-craft").hidden = !has("compost") && !has("workshop") && !has("square") && !p.gathering_until;
+      })
+      .join(""),
+  );
+  const has = (kind) =>
+    v.buildings.some((b) => b.kind === kind && b.progress >= 100);
+  $("#village-craft").hidden =
+    !has("compost") && !has("workshop") && !has("square") && !p.gathering_until;
   $("#compost-stock").hidden = !has("compost");
-  $("#compost-stock").textContent = `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched harvests`;
+  $("#compost-stock").textContent =
+    `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched harvests`;
   $("#tools-control").hidden = !has("workshop");
-  $("#tools-stock").textContent = `${p.tool_uses} tool uses · ${p.tools_crafted} sets crafted`;
+  $("#tools-stock").textContent =
+    `${p.tool_uses} tool uses · ${p.tools_crafted} sets crafted`;
   $("#use-tools").checked = p.use_tools;
   $("#gathering-control").hidden = !has("square") && !p.gathering_until;
-  $("#gathering-status").textContent = p.gathering_until > v.minutes
-    ? `Gathering in progress · ${Math.ceil(p.gathering_until - v.minutes)} minutes left`
-    : `${p.gatherings} gatherings shared · costs 5 prepared meals`;
-  $("#host-gathering").disabled = p.gathering_until > v.minutes || p.gathering_day === Math.floor(v.minutes / 1440);
-  $("#host-gathering").textContent = p.gathering_until > v.minutes ? "Neighbours are gathering…" : p.gathering_day === Math.floor(v.minutes / 1440) ? "Next gathering tomorrow" : "Host a gathering";
+  $("#gathering-status").textContent =
+    p.gathering_until > v.minutes
+      ? `Gathering in progress · ${Math.ceil(p.gathering_until - v.minutes)} minutes left`
+      : `${p.gatherings} gatherings shared · costs 5 prepared meals`;
+  $("#host-gathering").disabled =
+    p.gathering_until > v.minutes ||
+    p.gathering_day === Math.floor(v.minutes / 1440);
+  $("#host-gathering").textContent =
+    p.gathering_until > v.minutes
+      ? "Neighbours are gathering…"
+      : p.gathering_day === Math.floor(v.minutes / 1440)
+        ? "Next gathering tomorrow"
+        : "Host a gathering";
 }
 function updateUI() {
   const v = state.village;
@@ -734,12 +799,21 @@ function updateUI() {
       el.querySelector(".value").textContent = Math.round(v);
     }
     const friendships = state.village.progress.friendships;
-    const friends = state.residents.filter(other => other.id !== r.id && friendships[r.id * 5 + other.id] > 0);
+    const friends = state.residents.filter(
+      (other) => other.id !== r.id && friendships[r.id * 5 + other.id] > 0,
+    );
     $(".friendship-note").textContent = friends.length
-      ? "Shared memories: " + friends.map(other => `${other.name} (${friendships[r.id * 5 + other.id]})`).join(", ")
+      ? "Shared memories: " +
+        friends
+          .map((other) => `${other.name} (${friendships[r.id * 5 + other.id]})`)
+          .join(", ")
       : "Friendships grow when neighbours attend gatherings together.";
     for (const task of ["compost", "craft"]) {
-      $(`[data-task="${task}"]`).hidden = !state.village.buildings.some(b => b.kind === (task === "craft" ? "workshop" : "compost") && b.progress >= 100);
+      $(`[data-task="${task}"]`).hidden = !state.village.buildings.some(
+        (b) =>
+          b.kind === (task === "craft" ? "workshop" : "compost") &&
+          b.progress >= 100,
+      );
     }
     $(".response").hidden = !response;
     $(".response").textContent = response;
@@ -748,10 +822,21 @@ function updateUI() {
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
     button.classList.toggle("locked", !unlocked);
-    button.setAttribute("aria-disabled", String(!unlocked));
-    const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[button.dataset.kind];
-    button.querySelector("small").textContent = unlocked ? `⌁ ${kinds[button.dataset.kind][1]}` : "Quest reward";
-    button.title = unlocked ? kinds[button.dataset.kind][2] : `Complete ${quests[quest].title} to unlock`;
+    const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[
+      button.dataset.kind
+    ];
+    button.querySelector("small").textContent = unlocked
+      ? `⌁ ${kinds[button.dataset.kind][1]}`
+      : "Quest reward";
+    button.title = unlocked
+      ? kinds[button.dataset.kind][2]
+      : `Complete ${quests[quest].title} to unlock`;
+    button.setAttribute(
+      "aria-label",
+      unlocked
+        ? `Build ${kinds[button.dataset.kind][0]}, ${kinds[button.dataset.kind][1]} timber`
+        : `View quest to unlock ${kinds[button.dataset.kind][0]}`,
+    );
     button.classList.toggle("active", button.dataset.kind === tool);
     button.setAttribute("aria-pressed", String(button.dataset.kind === tool));
   }
@@ -831,7 +916,7 @@ function setup() {
   };
   $("#open-journal").onclick = openJournal;
   $("#close-journal").onclick = () => $("#quest-dialog").close();
-  $("#quest-list").onclick = e => {
+  $("#quest-list").onclick = (e) => {
     const button = e.target.closest("[data-track]");
     if (!button) return;
     if (game.track_quest(Number(button.dataset.track))) {
@@ -843,12 +928,16 @@ function setup() {
   };
   $("#host-gathering").onclick = () => {
     const result = game.host_gathering();
-    toast(result === "ok" ? "The gathering has begun. Give neighbours time to reach the square." : result);
+    toast(
+      result === "ok"
+        ? "The gathering has begun. Give neighbours time to reach the square."
+        : result,
+    );
     state = JSON.parse(game.snapshot());
     updateUI();
     save();
   };
-  $("#use-tools").onchange = e => {
+  $("#use-tools").onchange = (e) => {
     game.set_tools_enabled(e.target.checked);
     state = JSON.parse(game.snapshot());
     updateUI();
@@ -981,7 +1070,7 @@ try {
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),
-    ...Object.values(questArt).map(image => image.decode()),
+    ...Object.values(questArt).map((image) => image.decode()),
     forestArt.decode(),
     cisternArt.decode(),
     terrain.decode(),

@@ -53,3 +53,8 @@ Species context: [WWF Brasil’s Mata Atlântica overview](https://www.wwf.org.b
 `garden-simple-isometric.png` is the active garden artwork for the map, placement preview, and toolbar. Generated with the built-in image tool using the village atlas as a style reference. It removes fences, tall posts, trellises, fruit detail and the decorative grass border, leaving a low timber bed, open red soil, and a few broad leafy plants. Rendering calibrates the painted footprint's approximate 20:11 diagonals to the map's 2:1 ground axes and anchors it at the bed center.
 
 Prompt: create only a simple square vegetable bed on transparency, warm painted Brazilian ecovila colors, low plain timber edging, three sparse planting rows and generous open soil. No fences, posts, tomatoes, trellises, flowers or tools. Ground corner targets on a 1000-pixel canvas: left (100,550), back (500,350), right (900,550), front (500,750), parallel lines, no convergence. Broad leaf shapes readable at game scale, restrained texture, upper-left light and no external shadow.
+
+
+## Quest reward buildings
+
+`compost-isometric.png`, `square-isometric.png`, and `workshop-isometric.png` are transparent sprites generated with the built-in image tool. The map, placement previews, toolbar, and journal reuse the same files. They follow the approved Brazilian palette and elevated orthographic camera. The [complete prompt set](../../assets/art-direction/quest-building-prompts.md) records each asset's subject and constraints. Starter buildings and the food forest reuse the existing artwork.

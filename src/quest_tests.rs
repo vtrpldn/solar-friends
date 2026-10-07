@@ -273,3 +273,53 @@ fn a_running_gathering_survives_save_and_reload() {
         1
     );
 }
+
+#[test]
+fn tools_accelerate_building_and_spend_one_use_on_completion() {
+    let mut g = setup();
+    assert_eq!(g.place("home", 8, 8), "ok");
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .progress
+        .tool_uses = 12;
+    let v = g.app.world().resource::<Village>().clone();
+    let mut q = g.app.world_mut().query::<&mut Resident>();
+    let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 1).unwrap();
+    assign(&mut r, &v, "build", "test", true);
+    r.x = r.target_x;
+    r.y = r.target_y;
+    let mut without = Game::new();
+    assert!(without.restore(&g.snapshot()));
+    without.set_tools_enabled(false);
+    g.tick(0.2);
+    without.tick(0.2);
+    let normal = without.app.world().resource::<Village>().buildings[0].progress;
+    assert_eq!(
+        g.app.world().resource::<Village>().buildings[0].progress,
+        normal * 1.25
+    );
+    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
+    g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 99.9;
+    g.tick(0.2);
+    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
+}
+
+#[test]
+fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
+    let mut g = setup();
+    unlock(&mut g);
+    ready_building(&mut g, "square", 2, 2);
+    g.app.world_mut().resource_mut::<Village>().meals = 5;
+    assert_eq!(g.host_gathering(), "ok");
+    let mut q = g.app.world_mut().query::<&mut Resident>();
+    for mut r in q.iter_mut(g.app.world_mut()) {
+        r.x = 27.;
+        r.y = 27.;
+    }
+    advance(&mut g, 41.);
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(v.progress.gatherings, 0);
+    assert!(!v.progress.welcome_supper);
+    assert_eq!(v.progress.friendships, [0; 25]);
+}
