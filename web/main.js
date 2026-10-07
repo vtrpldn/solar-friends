@@ -610,7 +610,7 @@ function selectPerson(id) {
     updateUI();
     $(`[data-resident="${id}"]`).focus();
   };
-  $(".close-person") .focus();
+  $(".close-person").focus();
   $(".requests").onclick = (e) => {
     const b = e.target.closest("[data-task]");
     if (b) request(b.dataset.task, false);
@@ -624,6 +624,7 @@ function request(task, encourage) {
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
   updateUI();
+  $(encouragable ? ".persuade" : ".response").scrollIntoView({ block: "nearest" });
 }
 function replaceMarkup(element, html) {
   if (element._markup !== html) {
@@ -735,7 +736,7 @@ function updateQuests() {
     !has("compost") && !has("workshop") && !has("square") && !p.gathering_until;
   $("#compost-stock").hidden = !has("compost");
   $("#compost-stock").textContent =
-    `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched harvests`;
+    `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched ${p.enriched_harvests === 1 ? "harvest" : "harvests"}`;
   $("#tools-control").hidden = !has("workshop");
   $("#tools-stock").textContent =
     `${p.tool_uses} tool uses · ${p.tools_crafted} sets crafted`;
@@ -744,7 +745,7 @@ function updateQuests() {
   $("#gathering-status").textContent =
     p.gathering_until > v.minutes
       ? `Gathering in progress · ${Math.ceil(p.gathering_until - v.minutes)} minutes left`
-      : `${p.gatherings} gatherings shared · costs 5 prepared meals`;
+      : `${p.gatherings} ${p.gatherings === 1 ? "gathering" : "gatherings"} shared · costs 5 prepared meals`;
   $("#host-gathering").disabled =
     p.gathering_until > v.minutes ||
     p.gathering_day === Math.floor(v.minutes / 1440);
@@ -949,11 +950,10 @@ function setup() {
   for (const b of document.querySelectorAll("[data-speed]"))
     b.onclick = () => {
       speed = +b.dataset.speed;
-      for (const x of document.querySelectorAll("[data-speed]"))
-        {
-          x.classList.toggle("active", x === b);
-          x.setAttribute("aria-pressed", String(x === b));
-        }
+      for (const x of document.querySelectorAll("[data-speed]")) {
+        x.classList.toggle("active", x === b);
+        x.setAttribute("aria-pressed", String(x === b));
+      }
     };
   $("#save").onclick = () => save(true);
   $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
