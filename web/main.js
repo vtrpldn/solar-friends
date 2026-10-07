@@ -55,7 +55,7 @@ gardenArt.src = "art/garden-simple-isometric.png";
 const questArt = Object.fromEntries(
   ["compost", "square", "workshop", "coop"].map((kind) => {
     const image = new Image();
-    image.src = `art/${kind}-isometric.png`;
+    image.src = `art/${kind}-isometric.png${kind === "coop" ? "?v=3" : ""}`;
     return [kind, image];
   }),
 );
