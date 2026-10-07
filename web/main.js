@@ -1,3 +1,4 @@
+import { flock, drawChicken } from "./chickens.js";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=quests-1";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
@@ -6,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=idle-1";
+import init, { Game } from "./pkg/solar_friends.js?v=coop-idle-1";
 import {
   paintTerrain,
   GROUND_START,
@@ -27,6 +28,7 @@ const kinds = {
   grove: ["Food forest", 14, "Gather two fruit with every timber trip"],
   compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
   square: ["Square", 36, "Gatherings bring neighbours closer"],
+  coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
   workshop: ["Workshop", 48, "Craft tools for building and harvests"],
 };
 const tasks = {
@@ -58,9 +60,9 @@ atlas.src = "art/village-atlas-isometric.png";
 const gardenArt = new Image();
 gardenArt.src = "art/garden-simple-isometric.png";
 const questArt = Object.fromEntries(
-  ["compost", "square", "workshop"].map((kind) => {
+  ["compost", "square", "workshop", "coop"].map((kind) => {
     const image = new Image();
-    image.src = `art/${kind}-isometric.png`;
+    image.src = `art/${kind}-isometric.png${kind === "coop" ? "?v=3" : ""}`;
     return [kind, image];
   }),
 );
@@ -499,6 +501,10 @@ function render() {
     ...state.village.buildings.map((b) => ({
       depth: b.x + b.y,
       draw: () => building(b),
+    })),
+    ...flock(state.village).map((hen) => ({
+      depth: hen.x + hen.y + 0.1,
+      draw: () => drawChicken(ctx, iso(hen.x, hen.y), scale, hen),
     })),
     ...state.residents.map((r) => ({
       depth: r.x + r.y + 0.6,
