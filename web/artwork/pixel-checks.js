@@ -1,4 +1,6 @@
 // Pixel checks use alpha, never colour similarity as proof of artistic quality.
+import { preparedFrames, animationFrameOptions } from '../sprite-frames.js';
+import { cropFrameOptions } from '../crop-art.js';
 export function measureAlpha(data, width, height) {
   let left = width, top = height, right = -1, bottom = -1, opaque = 0, edge = 0;
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
@@ -27,13 +29,16 @@ export function imageCell(image, cell, size = 256) {
 }
 export function reviewPixels(original, candidate, sprite) {
   const cells = sprite.animation ? Array.from({length:16}, (_,i) => [i%4/4,Math.floor(i/4)/4,.25,.25]) : sprite.chicken ? [[sprite.variant/3,0,1/3,.5],[sprite.variant/3,.5,1/3,.5]] : [sprite.cell];
+  const prepared = image => sprite.portrait ? [preparedFrames(image,{referenceRow:2})[8]] : sprite.animation ? preparedFrames(image,animationFrameOptions(sprite)) : sprite.crop ? [preparedFrames(image,cropFrameOptions)[sprite.frame]] : null;
+  const originalFrames=prepared(original),candidateFrames=prepared(candidate);
   const frames = cells.map((cell, i) => {
-    const a = imageCell(original, cell), b = imageCell(candidate, cell);
+    const a = originalFrames ? originalFrames[i].getContext('2d').getImageData(0,0,256,256).data : imageCell(original, cell);
+    const b = candidateFrames ? candidateFrames[i].getContext('2d').getImageData(0,0,256,256).data : imageCell(candidate, cell);
     return { frame:i, original:measureAlpha(a,256,256), candidate:measureAlpha(b,256,256), silhouetteOverlap:compareAlpha(a,b) };
   });
   const bottoms = frames.map(f => f.candidate.bounds?.[3]).filter(n => n !== undefined);
   return { originalSize:[original.naturalWidth,original.naturalHeight], candidateSize:[candidate.naturalWidth,candidate.naturalHeight],
     sameDimensions:original.naturalWidth===candidate.naturalWidth && original.naturalHeight===candidate.naturalHeight,
     frames, baselineSpread:bottoms.length ? Math.max(...bottoms)-Math.min(...bottoms) : 0,
-    note:'Bounds sampled at 256 pixels per cell, alpha ≥32. Pose changes can legitimately alter bounds; flags require visual review.' };
+    note:'Bounds sampled at 256 pixels, alpha ≥32. Animated residents and crops use the same isolated, registered poses as gameplay. Pose changes can legitimately alter bounds; flags require visual review.' };
 }

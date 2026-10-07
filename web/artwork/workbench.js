@@ -1,5 +1,7 @@
 import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
 import { chickenFrame } from '../chickens.js?v=painted-hens-1';
+import { drawPreparedFrame, animationFrameOptions } from '../sprite-frames.js';
+import { cropFrameOptions } from '../crop-art.js';
 import { catalog } from './catalog.js?v=night-1';
 import { reviewPixels } from './pixel-checks.js';
 import { defaultRecipe } from './recipes.js';
@@ -11,7 +13,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   const section = document.createElement('section'); section.id = 'art-workbench';
   section.innerHTML = `<div class="workbench-heading"><div><span class="eyebrow">ART DIRECTION / PRACTICAL TOOLS</span><h2 id="workbench-name"></h2></div><label>Working sprite<select id="workbench-sprite"></select></label></div>
     <nav class="workbench-tabs" aria-label="Artwork tools"><button data-art-tab="calibration" aria-pressed="true">Calibrate</button><button data-art-tab="replacement" aria-pressed="false">Review replacement</button><button data-art-tab="recipe" aria-pressed="false">Recipe card</button></nav>
-    <section data-art-page="calibration"><div class="workbench-layout"><div><canvas id="calibration-scene" aria-label="Game scale comparison with home and resident"></canvas><p class="hint">At game scale beside a home and Iara. The diamond shows the map’s 2:1 ground axes.</p><div class="controls"><label>Scene zoom<select id="calibration-zoom"><option value="1">Game scale × 1</option><option value="2">Game scale × 2</option></select></label><label>Lighting<input id="calibration-light" type="range" min="0" max="1" step="0.05" value="0"></label></div><canvas id="anchor-canvas" class="checker" aria-label="Drag the red ground marker vertically to calibrate the anchor" tabindex="0"></canvas><p class="hint">Drag the red ground marker up or down. Use the numeric field or arrow keys for precise changes. This view shows the untransformed source cell.</p></div>
+    <section data-art-page="calibration"><div class="workbench-layout"><div><canvas id="calibration-scene" aria-label="Game scale comparison with home and resident"></canvas><p class="hint">At game scale beside a home and Iara. The diamond shows the map’s 2:1 ground axes.</p><div class="controls"><label>Scene zoom<select id="calibration-zoom"><option value="1">Game scale × 1</option><option value="2">Game scale × 2</option></select></label><label>Lighting<input id="calibration-light" type="range" min="0" max="1" step="0.05" value="0"></label></div><canvas id="anchor-canvas" class="checker" aria-label="Drag the red ground marker vertically to calibrate the anchor" tabindex="0"></canvas><p class="hint">Drag the red ground marker up or down. Use the numeric field or arrow keys for precise changes. Characters and crops use the same isolated, aligned poses as the game.</p></div>
     <div><div class="workbench-form"><label>Cell width in game pixels<input id="cal-width" type="number" min="8" max="400" step="0.1"></label><label>Ground anchor (0–1)<input id="cal-anchor" type="number" min="0" max="1" step="0.005"></label><label>Right ground slope<input id="cal-right" type="number" min="0.1" max="2" step="0.01"></label><label>Left ground slope<input id="cal-left" type="number" min="-2" max="-0.1" step="0.01"></label></div><p class="hint">Camera calibration applies to building sprites. Non-building widths and anchors export as a proposal for their renderer.</p><div class="workbench-actions"><button id="cal-reset">Reset calibration</button><button id="cal-export">Export configuration</button><button id="cal-preview">Preview draft in game ↗</button></div><pre id="cal-config"></pre><p>Draft settings never change production artwork. Export them for a reviewed code change.</p></div></div></section>
     <section data-art-page="replacement" hidden><div class="workbench-layout"><div><canvas id="replacement-scene" aria-label="Original and replacement at game scale"></canvas><div class="controls"><label>Scale<select id="replacement-zoom"><option value="1">Game scale × 1</option><option value="2">Game scale × 2</option></select></label><label>Night blend<input id="replacement-light" type="range" min="0" max="1" step="0.05" value="0"></label><label>Comparison<select id="replacement-mode"><option value="side">Side by side</option><option value="overlay">Silhouette overlay</option><option value="difference">Pixel difference</option></select></label><label>Activity<select id="replacement-row"><option value="0">Row 1</option><option value="1">Row 2</option><option value="2">Row 3</option><option value="3">Row 4</option></select></label><label>Frame<input id="replacement-frame" type="range" min="0" max="3" value="0"></label></div><p class="hint">Original on the left; candidate on the right. Overlays share the exact crop and anchor. Use the full source sheet for atlas replacements.</p></div><div><label>Candidate PNG<input id="replacement-file" type="file" accept="image/png"></label><div class="workbench-actions"><button id="replacement-preview">Preview candidate in game ↗</button><button id="replacement-export">Export pixel report</button><button id="replacement-clear">Discard candidate</button></div><pre id="replacement-report">Choose a PNG to check dimensions, silhouette changes, atlas edges, padding and animation baselines.</pre><p>Automated flags locate changes. Check palette, painted style, identity, camera and lighting visually before approving.</p></div></div></section>
     <section data-art-page="recipe" hidden><div class="workbench-layout"><div><p id="recipe-rules"></p><div id="recipe-references"></div><label>Working generation brief<textarea id="recipe-prompt"></textarea></label><p class="hint">Use these reference images with the brief. This tool prepares a recipe; it does not call an image generator.</p><div class="workbench-actions"><button id="recipe-export">Export recipe & brief</button><button id="recipe-reset">Restore suggested brief</button></div></div><div><h3>Revision history</h3><label>What changed?<input id="recipe-note" placeholder="Describe the revision and review outcome"></label><div class="workbench-actions"><button id="recipe-save">Save recipe revision</button></div><ol id="recipe-history"></ol><p class="hint">Recipe revisions stay in this browser. Export to keep them with the source artwork. Image bytes are identified by SHA-256; source versions live in Git.</p><details><summary>Original prompt records</summary><pre id="recipe-original"></pre></details></div></div></section><p id="workbench-status" role="status"></p>`;
@@ -34,6 +36,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     $('replacement-file').value = '';
     $('replacement-report').textContent = 'Choose a PNG to check dimensions, silhouette changes, atlas edges, padding and animation baselines.';
     $('cal-preview').disabled = !sprite.building;
+    $('replacement-preview').disabled = sprite.usage === 'Reference';
     $('cal-right').disabled = $('cal-left').disabled = !sprite.building;
     $('replacement-light').disabled = !sprite.building || sprite.name.includes('night');
     $('replacement-light').value = '0';
@@ -53,8 +56,10 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   function paint(ctx, img, sprite, x, y, zoom = 1) {
     if (!img?.naturalWidth) return;
     if (sprite.building) return drawBuildingArt(ctx,img,sprite,x,y,zoom);
+    if (sprite.portrait) return drawPreparedFrame(ctx,img,8,x,y,sprite.width*zoom,{referenceRow:2});
+    if (sprite.animation) return drawPreparedFrame(ctx,img,Number($('replacement-row').value)*4+Number($('replacement-frame').value),x,y,sprite.width*zoom,animationFrameOptions(sprite));
+    if (sprite.crop) return drawPreparedFrame(ctx,img,sprite.frame,x,y,sprite.width*zoom,cropFrameOptions);
     let cell = sprite.cell, anchor = sprite.anchor;
-    if (sprite.animation) cell = [Number($('replacement-frame').value)/4,Number($('replacement-row').value)/4,.25,.25];
     if (sprite.chicken) {
       const pose = chickenFrame({variant:sprite.variant,peck:Number($('replacement-row').value) ? 3 : 0});
       cell = [pose.column/3,pose.row*.5,1/3,.5];
@@ -82,7 +87,12 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   }
   function anchor() {
     const {ctx,w,h} = setup($('anchor-canvas')), img=images.get(selected.file), size=280, x=(w-size)/2, y=20;
-    if (img?.naturalWidth) { const [cx,cy,cw,ch]=selected.animation?[0,0,.25,.25]:selected.cell; ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x,y,size,size); }
+    if (img?.naturalWidth) {
+      if(selected.portrait) drawPreparedFrame(ctx,img,8,x+size/2,y+size*selected.anchor,size,{referenceRow:2});
+      else if(selected.animation) drawPreparedFrame(ctx,img,0,x+size/2,y+size*selected.anchor,size,animationFrameOptions(selected));
+      else if(selected.crop) drawPreparedFrame(ctx,img,selected.frame,x+size/2,y+size*selected.anchor,size,cropFrameOptions);
+      else {const [cx,cy,cw,ch]=selected.cell;ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x,y,size,size);}
+    }
     const ground=y+size*draft.anchor; ctx.strokeStyle='#b65236';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+size,ground);ctx.stroke();ctx.beginPath();ctx.arc(w/2,ground,7,0,Math.PI*2);ctx.fillStyle='#b65236';ctx.fill();
   }
   function replacement() {
@@ -141,7 +151,8 @@ export function installWorkbench({ getSelected, images, onSelect }) {
       const img=new Image();img.src=data;await img.decode();if(token!==loadToken)return;
       if(img.naturalWidth>8192||img.naturalHeight>8192)throw new Error('PNG dimensions must be at most 8192 pixels.');
       const original=images.get(selected.file);await original.decode();if(token!==loadToken)return;
-      candidate=img;candidateData=data;report=reviewPixels(original,candidate,selected);
+      const reviewed=reviewPixels(original,img,selected);
+      candidate=img;candidateData=data;report=reviewed;
       const overlap=Math.min(...report.frames.map(f=>f.silhouetteOverlap));
       $('replacement-report').textContent=[report.sameDimensions?'✓ Canvas dimensions match':'⚠ Canvas dimensions changed',`Lowest silhouette overlap: ${(overlap*100).toFixed(1)}%`,...report.frames.filter(f=>f.candidate.empty||f.candidate.edgePixels||Math.min(...(f.candidate.padding||[0]))<.03).map(f=>`⚠ Cell ${f.frame+1}: ${f.candidate.empty?'empty':f.candidate.edgePixels?'paint reaches crop edge':'less than 3% gutter'}`),`Baseline spread: ${report.baselineSpread}px / 256px sample`,report.note].join('\n');redraw();
     } catch(error){if(token===loadToken)$('replacement-report').textContent=error.message;}

@@ -9,6 +9,7 @@ export const buildingArt = {
   kitchen: { name: 'Kitchen', file: atlas, cell: [.5, 0, .5, .5], width: 179.36, anchor: .70, axes: [.58, -.58] },
   grove: { name: 'Banana grove', file: atlas, cell: [.5, .5, .5, .5], width: 123.9, anchor: .74 },
   garden: { name: 'Garden', file: 'garden-simple-isometric.png', width: 140.42, anchor: .52, axes: [.55, -.55] },
+  greenhouse: { name: 'Greenhouse', file: 'greenhouse-isometric.png', width: 188, anchor: .66, axes: [.55, -.50] },
   well: { name: 'Cistern', file: 'cistern-isometric.png', width: 77, anchor: .82, axes: [.55, -.55] },
   compost: { name: 'Compost station', file: 'compost-isometric.png', width: 78, anchor: .75, axes: [.60, -.60] },
   square: { name: 'Community square', file: 'square-isometric.png', width: 172, anchor: .73, axes: [.50, -.50] },

@@ -62,4 +62,4 @@ assert.equal(nightAmount(21 * 60), 1);
 assert.equal(nightAmount(1440), nightAmount(0));
 assert(nightAmount(18 * 60) > 0 && nightAmount(18 * 60) < 1);
 assert(Math.abs(nightAmount(18 * 60 - .001) - nightAmount(18 * 60 + .001)) < .001);
-console.log('PASS: nine night variants, shared geometry, alpha, and continuous day/night timing');
+console.log('PASS: ten night variants, shared geometry, alpha, and continuous day/night timing');

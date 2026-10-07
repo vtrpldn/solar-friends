@@ -2,7 +2,9 @@ import { installWorkbench } from './workbench.js';
 import { sampleResidentClip, drawResidentAnimation } from '../resident-animation.js?v=2';
 import { drawBuildingArt } from '../building-art.js?v=night-1';
 import { catalog } from './catalog.js?v=night-1';
-import { drawChicken, loadChickenArt } from '../chickens.js?v=painted-hens-1';
+import { CHICKEN_WIDTH, drawChicken, loadChickenArt } from '../chickens.js?v=painted-hens-1';
+import { drawPreparedFrame, animationFrameOptions } from '../sprite-frames.js';
+import { cropFrameOptions } from '../crop-art.js';
 const $ = id => document.getElementById(id);
 const key = 'solar-friends-artwork-review-v1';
 let reviews = {}, selected = catalog[0], pins = [], playing = false, playbackStarted = false, frame = 0;
@@ -34,22 +36,24 @@ function draw(canvas, sprite, bench = false) {
     ctx.moveTo(width/2-65,y);ctx.lineTo(width/2,y-32.5);ctx.lineTo(width/2+65,y);ctx.lineTo(width/2,y+32.5);ctx.closePath();ctx.stroke();
   }
   ctx.save();ctx.translate(width/2,y);if (bench && $('mirror').checked) ctx.scale(-1,1);
-  if (sprite.chicken) drawChicken(ctx,{x:0,y:0},w/26,{variant:sprite.variant,facing:1,peck:bench ? frame : 0});
+  if (sprite.chicken) drawChicken(ctx,{x:0,y:0},w/CHICKEN_WIDTH,{variant:sprite.variant,facing:1,peck:bench ? frame : 0});
   else if (sprite.building) {
     drawBuildingArt(ctx, images.get(sprite.file), sprite, 0, 0, w / sprite.width);
   } else {
     const img = images.get(sprite.file);
     if (!img?.complete || !img.naturalWidth) { ctx.restore();ctx.fillStyle='#9b4b37';ctx.font='12px sans-serif';ctx.fillText(img?.complete ? 'Artwork unavailable' : 'Loading…',10,25);return; }
     if (sprite.animation && bench && playbackStarted) {
-      const mode = (sprite.idleAnimation ? ['look','stretch','wave','relax'] : ['walk','work','breathe','sit'])[Number($('action').value)];
+      const mode = (sprite.activityAnimation ? ['cook','water','tend','feed'] : sprite.idleAnimation ? ['look','stretch','wave','relax'] : ['walk','work','breathe','sit'])[Number($('action').value)];
       const layers = sampleResidentClip(mode, animationSeconds % 8);
       let surface = surfaces.get(canvas);
       if (!surface) { surface = document.createElement('canvas'); surface.width = surface.height = 256; surfaces.set(canvas, surface); }
-      drawResidentAnimation(ctx, surface, {base:img,idle:img}, {layers,facing:1,breath:1}, 0, 0, w);
+      drawResidentAnimation(ctx, surface, {base:img,idle:img,activities:img}, {layers,facing:1,breath:1}, 0, 0, w);
       ctx.restore(); return;
     }
-    const cell = sprite.animation ? [(bench ? frame : 0)/4,Number($('action').value)/4,.25,.25] : sprite.cell;
-    ctx.drawImage(img,cell[0]*img.naturalWidth,cell[1]*img.naturalHeight,cell[2]*img.naturalWidth,cell[3]*img.naturalHeight,-w/2,-h*anchor,w,h);
+    if (sprite.portrait) drawPreparedFrame(ctx,img,8,0,0,w,{referenceRow:2});
+    else if (sprite.animation) drawPreparedFrame(ctx,img,Number($('action').value)*4+(bench ? frame : 0),0,0,w,animationFrameOptions(sprite));
+    else if (sprite.crop) drawPreparedFrame(ctx,img,sprite.frame,0,0,w,cropFrameOptions);
+    else { const cell=sprite.cell;ctx.drawImage(img,cell[0]*img.naturalWidth,cell[1]*img.naturalHeight,cell[2]*img.naturalWidth,cell[3]*img.naturalHeight,-w/2,-h*anchor,w,h); }
   }
   ctx.restore();
 }
@@ -82,10 +86,10 @@ function renderBench() {
   redraw();
 }
 function loadReview() {
-  const bank = selected.idleAnimation ? 'standing' : 'base';
+  const bank = selected.activityAnimation ? 'activities' : selected.idleAnimation ? 'standing' : 'base';
   if ($('action').dataset.bank !== bank) {
     $('action').dataset.bank = bank;
-    const labels = selected.idleAnimation ? ['Look around','Stretch','Wave','Hands on hips'] : ['Walk','Build','Idle','Sit / sleep'];
+    const labels = selected.activityAnimation ? ['Cook','Water','Tend / gather','Feed hens'] : selected.idleAnimation ? ['Look around','Stretch','Wave','Hands on hips'] : ['Walk','Build','Idle','Sit / sleep'];
     $('action').replaceChildren(...labels.map((label,i) => new Option(label, String(i))));
     animationSeconds = 0;
   }

@@ -2,6 +2,8 @@ import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
+import { RESIDENT_WIDTH, preparedFrames } from './sprite-frames.js';
+import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
 import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
@@ -83,8 +85,6 @@ const nightBuildingImages = Object.fromEntries(Object.entries(buildingArt).map((
 }));
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
-const peopleArt = new Image();
-peopleArt.src = "art/residents-cistern.png";
 const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
   const image = new Image();
   image.src = `art/animations/${name}.png`;
@@ -92,6 +92,9 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
 });
 const idleAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
   const image = new Image(); image.src = `art/animations/${name}-idle.png`; return image;
+});
+const activityAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
+  const image = new Image(); image.src = `art/animations/${name}-activities.png`; return image;
 });
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
@@ -146,22 +149,9 @@ function avatar(id) {
   return `<span class="avatar" style="background:${colors[id]}20"><canvas data-portrait="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
 }
 function paintPortraits() {
-  const cell = peopleArt.width / 3;
-  for (const portrait of document.querySelectorAll("[data-portrait]")) {
-    const id = Number(portrait.dataset.portrait);
-    portrait
-      .getContext("2d")
-      .drawImage(
-        peopleArt,
-        ((id % 3) + 0.28) * cell,
-        (Math.floor(id / 3) + 0.01) * cell,
-        cell * 0.56,
-        cell * 0.63,
-        0,
-        0,
-        96,
-        108,
-      );
+  for (const portrait of document.querySelectorAll('[data-portrait]')) {
+    const frame=preparedFrames(animations[Number(portrait.dataset.portrait)],{referenceRow:2})?.[8];
+    if(frame) portrait.getContext('2d').drawImage(frame,64,12,128,152,0,0,96,108);
   }
 }
 function contactShadow(x, y, rx, ry, opacity = 0.2) {
@@ -318,69 +308,8 @@ function sprite(kind, x, y, alpha = 1) {
 function cistern(x, y, alpha = 1) {
   sprite('well', x, y, alpha);
 }
-const cropTypes = {
-  lettuce: { name: "Lettuce", minutes: 180, yield: 5, note: "Quick crop · one harvest" },
-  beans: { name: "Beans", minutes: 360, yield: 10, note: "Larger harvest · soil dries half as fast" },
-  tomatoes: { name: "Tomatoes", minutes: 300, yield: 6, note: "Three harvests · later harvests take 3 hours; compost maintains yield" },
-};
-function cropDuration(c) { return c.kind === "tomatoes" && c.harvests > 0 ? 180 : cropTypes[c.kind].minutes; }
-function greenhouse(b, alpha = 1) {
-  ctx.save(); ctx.globalAlpha = alpha;
-  drawGrowingBed(b);
-  const points = [[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,y]) => iso(b.x+x,b.y+y));
-  const tops = points.map(p => ({x:p.x,y:p.y-38*scale}));
-  const ridge = [iso(b.x,b.y-1),iso(b.x,b.y+1)].map(p=>({x:p.x,y:p.y-59*scale}));
-  for (const face of [[tops[0],ridge[0],ridge[1],tops[3]],[ridge[0],tops[1],tops[2],ridge[1]],[points[1],points[2],tops[2],tops[1]],[points[2],points[3],tops[3],ridge[1],tops[2]]])
-    polygon(face.map(p=>[p.x,p.y]),"#b8dfd04d","#9cac85");
-  points.forEach((p,i)=>line(p.x,p.y,tops[i].x,tops[i].y,"#92734f",3*scale));
-  line(ridge[0].x,ridge[0].y,ridge[1].x,ridge[1].y,"#92734f",3*scale);
-  for(let i=0;i<4;i++) line(tops[i].x,tops[i].y,tops[(i+1)%4].x,tops[(i+1)%4].y,"#b89b71",2*scale);
-  ctx.restore();
-}
-function drawGrowingBed(b) {
-  const corners = [
-    [-0.8, -0.8],
-    [0.8, -0.8],
-    [0.8, 0.8],
-    [-0.8, 0.8],
-  ].map(([x, y]) => iso(b.x + x, b.y + y));
-  ctx.save();
-  ctx.beginPath();
-  corners.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-  ctx.closePath();
-  ctx.fillStyle = b.crop.moisture > 0 ? "#805a40" : "#b18a60";
-  ctx.fill();
-  ctx.strokeStyle = "#c6a273";
-  ctx.lineWidth = 4 * scale;
-  ctx.stroke();
-  if (b.crop.planted) {
-    const fraction = b.crop.growth / cropDuration(b.crop);
-    const growth = 2 + fraction * 7;
-    for (let x = -0.5; x <= 0.5; x += 0.5) {
-      for (let y = -0.5; y <= 0.5; y += 0.5) {
-        const p = iso(b.x + x, b.y + y);
-        if (b.crop.kind !== "lettuce") line(p.x,p.y,p.x,p.y-18*scale,"#a78a5c",1.5*scale);
-        ctx.fillStyle = b.crop.moisture > 0 ? (b.crop.kind === "beans" ? "#477951" : "#648447") : "#999052";
-        ctx.beginPath();
-        ctx.ellipse(
-          p.x,
-          p.y - (growth * scale) / 2,
-          growth * scale,
-          (growth * scale) / 2,
-          -0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        if (b.crop.kind === "tomatoes" && fraction > 0.6) ellipse(p.x+2*scale,p.y-6*scale,2.5*scale,2.5*scale,fraction >= 1 ? "#ce593b" : "#d5a757");
-      }
-    }
-  }
-  ctx.restore();
-}
 function buildingSprite(kind, x, y, alpha = 1) {
-  if (kind === "greenhouse") greenhouse({x,y,crop:{planted:false,moisture:0}},alpha);
-  else if (kind === "well") cistern(x, y, alpha);
+  if (kind === "well") cistern(x, y, alpha);
   else sprite(kind, x, y, alpha);
 }
 function placementValid(kind, x, y) {
@@ -429,8 +358,8 @@ function building(b) {
     complete = b.progress >= 100;
   const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
   contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
-  if (complete && b.kind === "greenhouse") greenhouse(b);
-  else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
+  buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
+  if (complete && ['garden','greenhouse'].includes(b.kind)) drawCrops(ctx,b,p.x,p.y,scale,nightAmount(state.village.minutes));
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
@@ -481,14 +410,14 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, visitingKind: r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null }, state.village.minutes, animationDelta);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
     residentSurfaces.set(r.id, surface);
   }
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
-    { base: animations[r.id], idle: idleAnimations[r.id] }, animation, p.x, py, 43 * s);
+    { base: animations[r.id], idle: idleAnimations[r.id], activities: activityAnimations[r.id] }, animation, p.x, py, RESIDENT_WIDTH * s);
   if (isSelected) {
     ctx.font = `600 ${Math.max(11, 11 * s)}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -1463,6 +1392,7 @@ function refreshDevScene() {
   state = JSON.parse(game.snapshot()); selected = null; tool = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
+  clearTimeout(toastTimer); $("#toast").hidden = true;
   closePanels(); $("#person").hidden = true; $("#placement").hidden = true;
   for (const id of ['import-save', 'restore-backup', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
   updateUI(); render();
@@ -1529,7 +1459,7 @@ const devAPI = {
 };
 try {
   await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=devtools-1" });
-  let chickenSource;
+  let chickenSource, cropSource;
   if (artworkPreview && previewParams.has('art-draft')) {
     const draft = readArtDraft(previewParams.get('art-draft'));
     if (draft.config) {
@@ -1538,9 +1468,10 @@ try {
     }
     if (draft.candidate) {
       const path = draft.sprite.file.replace('../', '');
-      const allImages = [...Object.values(buildingImages), ...Object.values(nightBuildingImages), forestArt, terrain, peopleArt, ...animations, ...idleAnimations];
+      const allImages = [...Object.values(buildingImages), ...Object.values(nightBuildingImages), forestArt, terrain, ...animations, ...idleAnimations, ...activityAnimations];
       for (const image of allImages) if (new URL(image.src).pathname.endsWith('/' + path)) image.src = draft.candidate;
       if (path === 'art/chickens.png') chickenSource = draft.candidate;
+      if (path === 'art/crops.png') cropSource = draft.candidate;
     }
   }
   await Promise.all([
@@ -1549,10 +1480,13 @@ try {
     ...Object.values(nightBuildingImages).map((image) => image.decode()),
     forestArt.decode(),
     terrain.decode(),
-    peopleArt.decode(),
     ...animations.map((image) => image.decode()),
     ...idleAnimations.map((image) => image.decode()),
+    ...activityAnimations.map((image) => image.decode()),
+    loadCropArt(cropSource),
   ]);
+  for (const image of animations) preparedFrames(image,{referenceRow:2});
+  for (const image of [...idleAnimations,...activityAnimations]) preparedFrames(image);
   game = new Game();
   let saved;
   if (artworkPreview) {

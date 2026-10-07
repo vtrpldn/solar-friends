@@ -1,4 +1,4 @@
-export const CHICKEN_WIDTH = 26;
+export const CHICKEN_WIDTH = 20;
 let chickenArt;
 let chickenReady;
 export function loadChickenArt(source) {

@@ -1,0 +1,108 @@
+{
+  "tool": "Built-in image_gen",
+  "date": "2026-10-08",
+  "transparentBackground": true,
+  "prompts": [
+    {
+      "assets": [
+        "web/art/greenhouse-isometric.png"
+      ],
+      "kind": "generate",
+      "references": [
+        "web/art/village-atlas-isometric.png"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: transparent sprite for the Solar Friends isometric game. Input image is STYLE REFERENCE ONLY, not an edit target. Generate ONE small Brazilian ecovila greenhouse, replacing the game's flat procedural greenhouse with the same warm painted craft as the reference buildings. Timber frame, muted teal-green translucent glass, a low terracotta-brick perimeter curb, small open entrance on the front-facing side. An EMPTY soil growing bed inside, absolutely NO plants so game-rendered crop sprites can be composited over the soil. The interior soil must remain clearly visible through transparent front glass. No extra props or decorative plants. Elevated orthographic 2:1 game projection: ground edges slopes +0.5 and -0.5, upright vertical posts; diamond footprint, no perspective convergence. Square canvas, greenhouse entire silhouette centered with at least 10 percent transparent padding. Frontmost ground corner at about (50%,83%) and footprint center at (50%,66%). Roof top around 15%. Soft painterly texture, simple readable shapes at a final ~155px cell width; warm upper-left sunlight, restrained highlights, same cream/earthy brown/teal palette. No cast shadow outside footprint, no text, no grid, no residents. Actual transparent background."
+    },
+    {
+      "assets": [
+        "web/art/garden-simple-isometric.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/garden-simple-isometric.png (before replacement)"
+      ],
+      "prompt": "Use case: precise-object-edit. Edit this exact garden sprite. Remove ALL seven plants and their shadows. Fill those small areas with the same rich softly painted brown soil texture. Keep the wooden rim, exact diamond ground geometry, exact position, scale, perspective, lighting, transparent padding and transparent canvas completely unchanged. This is the empty garden bed for a game; independent crop sprites will be drawn onto the soil. No plants, tools, objects, text, labels or external shadow. True transparent background."
+    },
+    {
+      "assets": [
+        "web/art/crops.png"
+      ],
+      "kind": "generate",
+      "references": [
+        "web/art/village-atlas-isometric.png"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: crop sprite atlas for the isometric Solar Friends game. Reference image STYLE only. Generate a square transparent image with exactly 3 equal columns and 3 equal rows, nine distinct isolated plants. Column1 lettuce, column2 climbing beans on a small single wooden stake, column3 tomato bush on a small single wooden stake. Row1 tiny young seedling of that crop, row2 half-grown plant, row3 mature harvestable plant (full lettuce rosette, hanging bean pods, several ripe red tomatoes). Each plant centered at x = 1/6, 1/2, 5/6 of image in its column. Each plant root baseline exactly 86 percent down its own cell. IMPORTANT minimum 15 percent fully transparent padding inside every cell on every side; no paint crossing cell boundaries. Keep apparent species scale natural: mature lettuce short and broad, bean/tomato plants taller. Painted warm leafy greens with soft shading matching reference, elevated orthographic 2:1 game view, upper-left sunlight. Plants only, no soil patch, no pots, no beds, no cast shadows, no grid lines or labels or text. True transparent background."
+    },
+    {
+      "assets": [
+        "web/art/animations/iara-activities.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/animations/iara.png"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: FOUR BY FOUR transparent activity animation atlas, 16 sprites of the SAME resident. Input is the character identity and painted style reference. Preserve Iara exactly: straw hat, dark curly tied-back hair, warm brown skin, yellow shirt, sage trousers, brown work boots, friendly face and original body proportions. Replace activities with these rows: row1 standing stirring a small cooking pot held at waist height; row2 standing tipping a teal watering can forward; row3 kneeling and tending soil with a small hand trowel; row4 standing gently scattering chicken feed from a small basket held at waist. Four subtle successive poses per row, facing screen-right in three-quarter elevated game view. EVERY row same head and body scale: kneeling is shorter, do not enlarge to fill cell. Feet/knee ground baseline at 88% of each cell; character torso center at cell horizontal midpoint. IMPORTANT give each sprite 12% transparent margin on every cell edge, whole hats, tools, feet included, no adjacent overlaps. Square image, exactly four equally spaced columns and rows; plain genuine transparent background, NO ground patches or detached food/water particles, no scenery, no shadows outside feet, no text, no grid. Upper-left warm light, same soft painted ecovila style; NO hammers."
+    },
+    {
+      "assets": [
+        "web/art/animations/bento-activities.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/animations/bento.png"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: FOUR BY FOUR transparent activity animation atlas, 16 sprites of the SAME resident. Input is the character identity and painted style reference. Preserve Bento exactly: short dark curly hair, brown skin, teal blue collared short sleeve shirt, cream trousers, brown boots, no hat, friendly face and original body proportions. Replace activities with these rows: row1 standing stirring a small cooking pot held at waist height; row2 standing tipping a teal watering can forward; row3 kneeling and tending soil with a small hand trowel; row4 standing gently scattering chicken feed from a small basket held at waist. Four subtle successive poses per row, facing screen-right in three-quarter elevated game view. EVERY row same head and body scale: kneeling is shorter, do not enlarge to fill cell. Feet/knee ground baseline at 88% of each cell; character torso center at cell horizontal midpoint. IMPORTANT give each sprite 12% transparent margin on every cell edge, whole hats, tools, feet included, no adjacent overlaps. Square image, exactly four equally spaced columns and rows; plain genuine transparent background, NO ground patches or detached food/water particles, no scenery, no shadows outside feet, no text, no grid. Upper-left warm light, same soft painted ecovila style; NO hammers."
+    },
+    {
+      "assets": [
+        "web/art/animations/luz-activities.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/animations/luz.png"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: FOUR BY FOUR transparent activity animation atlas, 16 sprites of the SAME resident. Input is the character identity and painted style reference. Preserve Luz exactly: orange headscarf, dark curly hair tied back, brown skin, coral orange shirt, cream cooking apron, charcoal trousers, brown shoes, friendly face and original body proportions. Replace activities with these rows: row1 standing stirring a small cooking pot held at waist height; row2 standing tipping a teal watering can forward; row3 kneeling and tending soil with a small hand trowel; row4 standing gently scattering chicken feed from a small basket held at waist. Four subtle successive poses per row, facing screen-right in three-quarter elevated game view. EVERY row same head and body scale: kneeling is shorter, do not enlarge to fill cell. Feet/knee ground baseline at 88% of each cell; character torso center at cell horizontal midpoint. IMPORTANT give each sprite 12% transparent margin on every cell edge, whole hats, tools, feet included, no adjacent overlaps. Square image, exactly four equally spaced columns and rows; plain genuine transparent background, NO ground patches or detached food/water particles, no scenery, no shadows outside feet, no text, no grid. Upper-left warm light, same soft painted ecovila style; NO hammers."
+    },
+    {
+      "assets": [
+        "web/art/animations/caua-activities.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/animations/caua.png"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: FOUR BY FOUR transparent activity animation atlas, 16 sprites of the SAME resident. Input is the character identity and painted style reference. Preserve Cauã exactly: straw hat, short dark hair, brown skin, green collared shirt, brown shorts, dark sandals, friendly face and original body proportions. Replace activities with these rows: row1 standing stirring a small cooking pot held at waist height; row2 standing tipping a teal watering can forward; row3 kneeling and tending soil with a small hand trowel; row4 standing gently scattering chicken feed from a small basket held at waist. Four subtle successive poses per row, facing screen-right in three-quarter elevated game view. EVERY row same head and body scale: kneeling is shorter, do not enlarge to fill cell. Feet/knee ground baseline at 88% of each cell; character torso center at cell horizontal midpoint. IMPORTANT give each sprite 12% transparent margin on every cell edge, whole hats, tools, feet included, no adjacent overlaps. Square image, exactly four equally spaced columns and rows; plain genuine transparent background, NO ground patches or detached food/water particles, no scenery, no shadows outside feet, no text, no grid. Upper-left warm light, same soft painted ecovila style; NO hammers."
+    },
+    {
+      "assets": [
+        "web/art/animations/nina-activities.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/animations/nina.png"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: FOUR BY FOUR transparent activity animation atlas, 16 sprites of the SAME resident. Input is the character identity and painted style reference. Preserve Nina exactly: long dark side braid, brown skin, lavender shirt, sage green cargo trousers, brown boots, no hat, friendly face and original body proportions. Replace activities with these rows: row1 standing stirring a small cooking pot held at waist height; row2 standing tipping a teal watering can forward; row3 kneeling and tending soil with a small hand trowel; row4 standing gently scattering chicken feed from a small basket held at waist. Four subtle successive poses per row, facing screen-right in three-quarter elevated game view. EVERY row same head and body scale: kneeling is shorter, do not enlarge to fill cell. Feet/knee ground baseline at 88% of each cell; character torso center at cell horizontal midpoint. IMPORTANT give each sprite 12% transparent margin on every cell edge, whole hats, tools, feet included, no adjacent overlaps. Square image, exactly four equally spaced columns and rows; plain genuine transparent background, NO ground patches or detached food/water particles, no scenery, no shadows outside feet, no text, no grid. Upper-left warm light, same soft painted ecovila style; NO hammers."
+    },
+    {
+      "assets": [
+        "web/art/garden-simple-isometric-night.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/garden-simple-isometric.png"
+      ],
+      "prompt": "Use case: lighting-weather. Make a NIGHT variant of this exact game sprite. Lighting-only edit: preserve EXACT geometry, silhouette, crop, padding, camera, all props and pixel positions. Cool muted blue upper-left moonlight, readable shadows, moderately darker than daytime. No lamps, no internal glow, no stars, no sky, no additional objects or plants. This structure has empty soil. Preserve true transparent background. The day/night variants must overlay without visible movement."
+    },
+    {
+      "assets": [
+        "web/art/greenhouse-isometric-night.png"
+      ],
+      "kind": "edit",
+      "references": [
+        "web/art/greenhouse-isometric.png"
+      ],
+      "prompt": "Use case: lighting-weather. Make a NIGHT variant of this exact game sprite. Lighting-only edit: preserve EXACT geometry, silhouette, crop, padding, camera, all props and pixel positions. Cool muted blue upper-left moonlight, readable shadows, moderately darker than daytime. No lamps, no internal glow, no stars, no sky, no additional objects or plants. This structure has empty soil. Preserve true transparent background. The day/night variants must overlay without visible movement."
+    }
+  ],
+  "note": "Prompt constraints are targets; runtime pose isolation and registration handle imperfect atlas spacing. The rejected portrait-background edit is not used. UI portraits instead reuse the in-game base poses."
+}

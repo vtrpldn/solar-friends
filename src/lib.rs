@@ -300,7 +300,7 @@ fn choose(r: &mut Resident, v: &Village) {
             if v.meals > 0 {
                 "Sitting down for a cooked meal."
             } else {
-                "Eating from our arrival supplies until the kitchen is ready."
+                "Eating available ingredients while we wait for a cooked meal."
             },
         )
     } else if r.energy < 28. {
