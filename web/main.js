@@ -1,3 +1,4 @@
+import { project, unproject, TILE_HALF_WIDTH, TILE_HALF_HEIGHT } from "./projection.js";
 import init, { Game } from "./pkg/solar_friends.js";
 import { paintTerrain, GROUND_START, GROUND_SIZE } from "./terrain.js";
 const $ = (s) => document.querySelector(s);
@@ -135,17 +136,8 @@ function resize() {
   canvas.height = height * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function iso(x, y) {
-  return {
-    x: origin.x + (x - y) * 34 * scale,
-    y: origin.y + (x + y) * 17 * scale,
-  };
-}
-function uniso(x, y) {
-  const a = (x - origin.x) / (34 * scale),
-    b = (y - origin.y) / (17 * scale);
-  return { x: Math.round((a + b) / 2), y: Math.round((b - a) / 2) };
-}
+function iso(x, y) { return project(x, y, origin, scale); }
+function uniso(x, y) { return unproject(x, y, origin, scale); }
 function polygon(points, fill, stroke) {
   ctx.beginPath();
   points.forEach((p, i) =>
@@ -176,8 +168,8 @@ function line(x, y, x2, y2, color, w = 1) {
 }
 function tile(x, y, fill, stroke) {
   const p = iso(x, y),
-    a = 34 * scale,
-    b = 17 * scale;
+    a = TILE_HALF_WIDTH * scale,
+    b = TILE_HALF_HEIGHT * scale;
   polygon(
     [
       [p.x, p.y - b],
@@ -256,30 +248,15 @@ function building(b) {
     );
   if (!complete) {
     const s = scale;
-    line(
-      p.x - 45 * s,
-      p.y - 2 * s,
-      p.x - 45 * s,
-      p.y - 70 * s,
-      "#ae8757",
-      3 * s,
-    );
-    line(
-      p.x + 43 * s,
-      p.y - 2 * s,
-      p.x + 43 * s,
-      p.y - 70 * s,
-      "#ae8757",
-      3 * s,
-    );
-    line(
-      p.x - 45 * s,
-      p.y - 65 * s,
-      p.x + 43 * s,
-      p.y - 65 * s,
-      "#bd965f",
-      3 * s,
-    );
+    // Upright posts and beams follow the same ground axes as the building.
+    const corners = [[-0.9,-0.9], [0.9,-0.9], [0.9,0.9], [-0.9,0.9]]
+      .map(([x,y]) => iso(b.x + x, b.y + y));
+    const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
+    for (let i = 0; i < corners.length; i++) {
+      const a = corners[i], next = corners[(i + 1) % corners.length];
+      line(a.x, a.y, a.x, a.y - scaffoldHeight, "#ae8757", 2.5 * s);
+      line(a.x, a.y - scaffoldHeight, next.x, next.y - scaffoldHeight, "#bd965f", 2.5 * s);
+    }
     ctx.fillStyle = "#fffcf0";
     ctx.fillRect(p.x - 27 * s, p.y + 9 * s, 54 * s, 5 * s);
     ctx.fillStyle = "#7c9859";
@@ -387,10 +364,10 @@ function render() {
   }
   ctx.save();
   ctx.transform(
-    34 * scale,
-    17 * scale,
-    -34 * scale,
-    17 * scale,
+    TILE_HALF_WIDTH * scale,
+    TILE_HALF_HEIGHT * scale,
+    -TILE_HALF_WIDTH * scale,
+    TILE_HALF_HEIGHT * scale,
     origin.x,
     origin.y,
   );
