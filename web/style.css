@@ -1335,3 +1335,7 @@ button:focus-visible {
     gap: 6px;
   }
 }
+
+.build-tool[data-kind="coop"] .tool-art {
+  background: url("art/coop-isometric.svg") center / contain no-repeat;
+}

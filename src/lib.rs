@@ -106,6 +106,7 @@ fn cost(kind: &str) -> Option<f32> {
         "compost" => Some(20.),
         "square" => Some(36.),
         "workshop" => Some(48.),
+        "coop" => Some(24.),
         _ => None,
     }
 }
