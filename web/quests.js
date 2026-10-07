@@ -32,7 +32,7 @@ export const quests = [
         "Build a cistern",
         count(v, "well"),
         1,
-        "Water comes first. Plan a cistern and neighbours will build it during working hours.",
+        "Cisterns catch afternoon rain and add 75 water storage. Neighbours can also carry water from the river.",
         "well",
       ),
       goal(
@@ -46,7 +46,7 @@ export const quests = [
         "Bring in our first harvest",
         v.harvests,
         1,
-        "Build a garden, then ask Iara to tend it. Every harvest needs two water.",
+        "Build a garden and ask Iara to tend it. Plant first, water for two water, then allow three game hours of moist growth before harvesting.",
         "garden",
       ),
       goal(

@@ -121,6 +121,15 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
     }
     assert_eq!(g.app.world().resource::<Village>().progress.scraps, 2);
     finish_task(&mut g, 4, "compost");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let garden = v.buildings.iter_mut().find(|b| b.kind == "garden").unwrap();
+        garden.crop = ecology::Crop {
+            planted: true,
+            growth: 180.,
+            moisture: 0.,
+        };
+    }
     let food = g.app.world().resource::<Village>().food;
     finish_task(&mut g, 0, "garden");
     let v = g.app.world().resource::<Village>();
@@ -322,4 +331,136 @@ fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
     assert_eq!(v.progress.gatherings, 0);
     assert!(!v.progress.welcome_supper);
     assert_eq!(v.progress.friendships, [0; 25]);
+}
+
+#[test]
+fn crops_require_planting_moisture_and_time_before_harvest() {
+    let mut g = setup();
+    ready_building(&mut g, "garden", 14, 10);
+    let food = g.app.world().resource::<Village>().food;
+    finish_task(&mut g, 0, "garden");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(v.buildings[0].crop.planted);
+        ecology::advance(&mut v, 180.);
+        assert_eq!(v.buildings[0].crop.growth, 0.);
+        assert_eq!(v.food, food);
+    }
+    let water = g.app.world().resource::<Village>().water;
+    finish_task(&mut g, 0, "garden");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(v.water < water - 2.);
+        ecology::advance(&mut v, 90.);
+        assert_eq!(v.buildings[0].crop.growth, 90.);
+        assert_eq!(v.harvests, 0);
+        ecology::advance(&mut v, 90.);
+    }
+    finish_task(&mut g, 0, "garden");
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(v.food, food + 8.);
+    assert_eq!(v.harvests, 1);
+    assert!(!v.buildings[0].crop.planted);
+}
+
+#[test]
+fn rain_needs_completed_storage_and_dry_days_pause_crops() {
+    let mut g = setup();
+    ready_building(&mut g, "garden", 14, 10);
+    let mut v = g.app.world().resource::<Village>().clone();
+    v.minutes = 900.;
+    v.water = 0.;
+    v.buildings[0].crop.planted = true;
+    ecology::advance(&mut v, 60.);
+    assert_eq!(v.water, 0.);
+    assert_eq!(v.buildings[0].crop.growth, 60.);
+    ready_building(&mut g, "well", 6, 10);
+    v.buildings
+        .push(g.app.world().resource::<Village>().buildings[1].clone());
+    ecology::advance(&mut v, 60.);
+    assert_eq!(v.water, 18.);
+    v.water = 114.;
+    ecology::advance(&mut v, 60.);
+    assert_eq!(v.water, 115.);
+    v.minutes = 2. * 1440. + 900.;
+    v.buildings[0].crop.growth = 0.;
+    v.buildings[0].crop.moisture = 10.;
+    ecology::advance(&mut v, 60.);
+    assert_eq!(v.buildings[0].crop.growth, 10.);
+    assert_eq!(v.water, 115.);
+    ecology::advance(&mut v, 60.);
+    assert_eq!(v.buildings[0].crop.growth, 10.);
+    for minute in [839., 1020., 2880. + 900.] {
+        assert!(!ecology::raining(minute));
+    }
+    assert!(ecology::raining(840.));
+}
+
+#[test]
+fn water_collection_works_before_cistern_and_only_after_arrival() {
+    let mut g = setup();
+    g.app.world_mut().resource_mut::<Village>().water = 0.;
+    assert!(g.request(4, "water", false).contains("Happy"));
+    g.tick(0.2);
+    assert_eq!(g.app.world().resource::<Village>().water, 0.);
+    finish_task(&mut g, 4, "water");
+    assert!((g.app.world().resource::<Village>().water - 18.).abs() < 0.02);
+    g.app.world_mut().resource_mut::<Village>().water = 39.;
+    finish_task(&mut g, 4, "water");
+    assert!((g.app.world().resource::<Village>().water - 40.).abs() < 0.02);
+}
+
+#[test]
+fn garden_workers_cannot_harvest_the_same_crop_twice_or_remote_plots() {
+    let mut g = setup();
+    ready_building(&mut g, "garden", 14, 10);
+    ready_building(&mut g, "garden", 18, 10);
+    let mut v = g.app.world().resource::<Village>().clone();
+    for b in &mut v.buildings {
+        b.crop = ecology::Crop {
+            planted: true,
+            growth: 180.,
+            moisture: 0.,
+        };
+    }
+    let mut q = g.app.world_mut().query::<&Resident>();
+    let mut r = q.iter(g.app.world()).next().unwrap().clone();
+    assign(&mut r, &v, "garden", "test", true);
+    ecology::tend(&mut v, &r);
+    ecology::tend(&mut v, &r);
+    assert_eq!(v.harvests, 1);
+    assert_eq!(v.buildings[1].crop.growth, 180.);
+}
+
+#[test]
+fn crop_saves_round_trip_migrate_and_reject_invalid_state() {
+    let mut g = setup();
+    ready_building(&mut g, "garden", 14, 10);
+    g.app.world_mut().resource_mut::<Village>().buildings[0].crop = ecology::Crop {
+        planted: true,
+        growth: 80.,
+        moisture: 100.,
+    };
+    let saved = g.snapshot();
+    let mut restored = Game::new();
+    assert!(restored.restore(&saved));
+    assert_eq!(restored.snapshot(), saved);
+    let mut legacy: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    legacy["village"]["buildings"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("crop");
+    assert!(restored.restore(&legacy.to_string()));
+    assert!(
+        !restored.app.world().resource::<Village>().buildings[0]
+            .crop
+            .planted
+    );
+    for (field, value) in [("growth", -1.), ("growth", 181.), ("moisture", 241.)] {
+        let mut invalid: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        invalid["village"]["buildings"][0]["crop"][field] = serde_json::json!(value);
+        let before = restored.snapshot();
+        assert!(!restored.restore(&invalid.to_string()));
+        assert_eq!(restored.snapshot(), before);
+    }
 }

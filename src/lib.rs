@@ -282,8 +282,6 @@ fn choose(r: &mut Resident, v: &Village) {
         ("gather", "Collecting fallen timber for our next building.")
     } else if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
         ("craft", "Making tools for our next shared project.")
-    } else if r.favorite == "garden" && v.food < 60. && available(v, "garden") {
-        ("garden", "I enjoy looking after the garden.")
     } else if r.favorite == "water" && v.water < 70. && available(v, "water") {
         ("water", "Making sure we have water for tomorrow.")
     } else if r.social < 55. {
@@ -566,14 +564,23 @@ impl Game {
     }
     pub fn snapshot(&mut self) -> String {
         let village = self.app.world().resource::<Village>().clone();
-        let residents = self
+        let residents: Vec<_> = self
             .app
             .world_mut()
             .query::<&Resident>()
             .iter(self.app.world())
             .cloned()
             .collect();
-        serde_json::to_string(&Save { village, residents }).unwrap()
+        serde_json::json!({
+            "environment": {
+                "raining": ecology::raining(village.minutes),
+                "water_capacity": ecology::capacity(&village),
+                "dry_day": (village.minutes / 1440.) as u32 % 3 == 2,
+            },
+            "village": village,
+            "residents": residents,
+        })
+        .to_string()
     }
     pub fn place(&mut self, kind: &str, x: i32, y: i32) -> String {
         let Some(price) = cost(kind) else {
