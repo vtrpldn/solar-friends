@@ -45,8 +45,14 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
 });
 let groundLayer,
   groundKey = null;
-const mango = new Image();
-mango.src = "art/mango-tree-isometric.png";
+const forestArt = new Image();
+forestArt.src = "art/mata-atlantica-atlas.png";
+const forestSpecies = [
+  { name: "Jequitibá-rosa", width: 145 },
+  { name: "Juçara", width: 112 },
+  { name: "Embaúba", width: 113 },
+  { name: "Pau-brasil", width: 125 },
+];
 const cisternArt = new Image();
 cisternArt.src = "art/cistern-isometric.png";
 let game,
@@ -204,27 +210,34 @@ function drawPlacementGrid() {
       [iso(edge, 0.5), iso(edge, 18.5)],
       [iso(0.5, edge), iso(18.5, edge)],
     ]) {
-      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
     }
   }
   ctx.strokeStyle = "rgba(255, 250, 218, 0.65)";
   ctx.lineWidth = 1;
   ctx.stroke();
   // The arrival spot remains reserved; the hover preview checks other limits.
-  for (let x = 9; x <= 11; x++) for (let y = 12; y <= 14; y++)
-    tile(x, y, "rgba(140, 81, 53, 0.15)");
+  for (let x = 9; x <= 11; x++)
+    for (let y = 12; y <= 14; y++) tile(x, y, "rgba(140, 81, 53, 0.15)");
   ctx.restore();
 }
-function tree(x, y, s = 1) {
+function tree(x, y, s = 1, species = 0) {
   const p = iso(x, y);
-  const w = 112 * s * scale;
-  contactShadow(
-    p.x + 9 * scale,
-    p.y + 3 * scale,
-    24 * s * scale,
-    9 * s * scale,
+  const w = forestSpecies[species].width * s * scale;
+  const cell = forestArt.width / 2;
+  contactShadow(p.x, p.y + 2 * scale, 23 * s * scale, 11.5 * s * scale, 0.16);
+  ctx.drawImage(
+    forestArt,
+    (species % 2) * cell,
+    Math.floor(species / 2) * cell,
+    cell,
+    cell,
+    p.x - w / 2,
+    p.y - w * 0.85,
+    w,
+    w,
   );
-  ctx.drawImage(mango, p.x - w / 2, p.y - w * 0.82, w, w);
 }
 function sprite(kind, x, y, size, alpha = 1) {
   const p = iso(x, y),
@@ -382,7 +395,7 @@ for (let i = 0; i < 110; i++) {
   flora.push({
     x,
     y,
-    type: i % 4 === 0 ? "banana" : "tree",
+    species: i % forestSpecies.length,
     size: 0.65 + hash(i, 3) * 0.55,
   });
 }
@@ -422,10 +435,7 @@ function render() {
   const objects = [
     ...flora.map((f) => ({
       depth: f.x + f.y,
-      draw: () =>
-        f.type === "banana"
-          ? sprite("grove", f.x, f.y, 93 * f.size)
-          : tree(f.x, f.y, f.size),
+      draw: () => tree(f.x, f.y, f.size, f.species),
     })),
     ...state.village.buildings.map((b) => ({
       depth: b.x + b.y,
@@ -794,7 +804,8 @@ function setup() {
   $("#placement-grid").onchange = (event) => {
     settings.placementGrid = event.target.checked;
     $("#settings-status").textContent = saveSettings(settings)
-      ? "Saved on this device." : "Applied for this session. Device storage is unavailable.";
+      ? "Saved on this device."
+      : "Applied for this session. Device storage is unavailable.";
   };
   $("#help").onclick = () => $("#help-dialog").showModal();
   $("#close-help").onclick = $("#start-playing").onclick = () =>
@@ -884,7 +895,7 @@ try {
   await init();
   await Promise.all([
     atlas.decode(),
-    mango.decode(),
+    forestArt.decode(),
     cisternArt.decode(),
     terrain.decode(),
     peopleArt.decode(),

@@ -912,15 +912,72 @@ dialog .hint {
   cursor: pointer;
 }
 
-#settings-dialog { width: min(480px, 90vw); }
-.settings-section { border-top: 1px solid #dcdccc; margin-top: 24px; padding-top: 16px; }
-.settings-section h3 { font: 600 12px 'DM Sans', sans-serif; color: #65755c; margin: 0 0 16px; }
-.setting-row { display: flex; align-items: center; gap: 24px; cursor: pointer; }
-.setting-row span { flex: 1; }
-.setting-row b { display: block; font-size: 15px; color: #354f38; }
-.setting-row small { display: block; font-size: 12px; line-height: 1.5; margin-top: 6px; color: #6d7865; }
-.setting-row input { appearance: none; width: 42px; height: 24px; flex-shrink: 0; border: 1px solid #a7b29c; border-radius: 20px; background: #d5dbc9; cursor: pointer; position: relative; }
-.setting-row input::after { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fffbed; box-shadow: 0 1px 3px #354f3830; }
-.setting-row input:checked { background: #52734a; border-color: #52734a; }
-.setting-row input:checked::after { left: 21px; }
-.setting-row input:focus-visible { outline: 3px solid #c99a42; outline-offset: 3px; }
+#settings-dialog {
+  width: min(480px, 90vw);
+}
+.settings-section {
+  border-top: 1px solid #dcdccc;
+  margin-top: 24px;
+  padding-top: 16px;
+}
+.settings-section h3 {
+  font:
+    600 12px "DM Sans",
+    sans-serif;
+  color: #65755c;
+  margin: 0 0 16px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  cursor: pointer;
+}
+.setting-row span {
+  flex: 1;
+}
+.setting-row b {
+  display: block;
+  font-size: 15px;
+  color: #354f38;
+}
+.setting-row small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 6px;
+  color: #6d7865;
+}
+.setting-row input {
+  appearance: none;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid #a7b29c;
+  border-radius: 20px;
+  background: #d5dbc9;
+  cursor: pointer;
+  position: relative;
+}
+.setting-row input::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fffbed;
+  box-shadow: 0 1px 3px #354f3830;
+}
+.setting-row input:checked {
+  background: #52734a;
+  border-color: #52734a;
+}
+.setting-row input:checked::after {
+  left: 21px;
+}
+.setting-row input:focus-visible {
+  outline: 3px solid #c99a42;
+  outline-offset: 3px;
+}

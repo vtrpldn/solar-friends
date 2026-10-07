@@ -24,6 +24,8 @@ Choose a building in the bottom toolbar and click a clearing. Residents construc
 
 Gardens use water to produce food. Residents gather fallen timber, refill water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 20×20 lot (400 tiles, about twice the previous 196). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
 
+Open Settings (the gear button) to enable the placement grid. Tile guides appear only while a building tool is selected. Preferences are stored separately from village saves and survive a new tutorial. The forest edge mixes stylized Mata Atlântica species: jequitibá, juçara, embaúba, and pau-brasil.
+
 Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls for speed. Escape cancels placement. Saves stay in this browser's local storage and happen every 15 seconds, after placement, and on leaving the tab. Save village writes immediately.
 
 A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five individual sprite sheets animate walking, building, idling, and sitting. These are game-scaled routines, not a detailed biological model.
