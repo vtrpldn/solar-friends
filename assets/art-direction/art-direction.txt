@@ -1,0 +1,20 @@
+Solar Friends — approved visual direction
+
+Reference: brazilian-ecovila-approved.png
+Approved by the user on 2026-10-07.
+Generated with the built-in image generation tool; this is concept art, not a gameplay screenshot or a ready-to-use sprite sheet.
+
+Use a warm, illustrated Brazilian rural ecovila in an isometric view.
+Keep shaded verandas, simple clay-tile roofs, limewashed walls, exposed
+red brick, turquoise doors, hammocks, rainwater tanks, and rooftop solar.
+Use reddish earth, banana plants, papaya, broad shade trees, and vegetable
+gardens. Keep residents and their shared spaces central to the composition.
+Favor earthy cream, terracotta, leafy greens, and restrained turquoise.
+
+Use this approved image as the visual target. Simplify fine details only
+where needed to keep buildings, paths, residents, and interactions readable
+at gameplay scale. Avoid European cottage architecture, ornamental stone
+walls, dense decorative flowers, photorealism, and glossy 3D surfaces.
+
+Production assets will need separate terrain tiles, building sprites,
+vegetation, props, and animated residents with consistent scale and lighting.
