@@ -675,7 +675,25 @@ function render() {
     }
   }
 }
+function closePanels() {
+  for (const button of document.querySelectorAll("[data-panel]")) {
+    $("#" + button.dataset.panel).hidden = true;
+    button.setAttribute("aria-expanded", "false");
+  }
+}
+function showPanel(id) {
+  closePanels();
+  selected = null;
+  $("#person").hidden = true;
+  if (tool) setTool(null);
+  $("#" + id).hidden = false;
+  $(`[data-panel="${id}"]`).setAttribute("aria-expanded", "true");
+  $("#" + id).querySelector("button").focus();
+  updateUI();
+}
 function selectPerson(id) {
+  closePanels();
+  if (tool) setTool(null);
   selected = id;
   response = "";
   encouragable = false;
@@ -701,7 +719,10 @@ function selectPerson(id) {
     selected = null;
     $("#person").hidden = true;
     updateUI();
+    showPanel("community-panel");
+    $(`[data-resident="${id}"]`).focus();
   };
+  $(".close-person").focus();
   $(".requests").onclick = (e) => {
     const b = e.target.closest("[data-task]");
     if (b) request(b.dataset.task, false);
@@ -715,6 +736,7 @@ function request(task, encourage) {
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
   updateUI();
+  $(encouragable ? ".persuade" : ".response").scrollIntoView({ block: "nearest" });
 }
 function replaceMarkup(element, html) {
   if (element._markup !== html) {
@@ -826,7 +848,7 @@ function updateQuests() {
     !has("compost") && !has("workshop") && !has("square") && !p.gathering_until;
   $("#compost-stock").hidden = !has("compost");
   $("#compost-stock").textContent =
-    `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched harvests`;
+    `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched ${p.enriched_harvests === 1 ? "harvest" : "harvests"}`;
   $("#tools-control").hidden = !has("workshop");
   $("#tools-stock").textContent =
     `${p.tool_uses} tool uses · ${p.tools_crafted} sets crafted`;
@@ -835,7 +857,7 @@ function updateQuests() {
   $("#gathering-status").textContent =
     p.gathering_until > v.minutes
       ? `Gathering in progress · ${Math.ceil(p.gathering_until - v.minutes)} minutes left`
-      : `${p.gatherings} gatherings shared · costs 5 prepared meals`;
+      : `${p.gatherings} ${p.gatherings === 1 ? "gathering" : "gatherings"} shared · costs 5 prepared meals`;
   $("#host-gathering").disabled =
     p.gathering_until > v.minutes ||
     p.gathering_day === Math.floor(v.minutes / 1440);
@@ -976,6 +998,14 @@ function setTool(kind) {
     openJournal();
     return;
   }
+  if (kind && $("#build-panel").hidden) {
+    closePanels();
+    $("#person").hidden = true;
+    selected = null;
+    $("#build-panel").hidden = false;
+    $('[data-panel="build-panel"]').setAttribute("aria-expanded", "true");
+    $(`[data-kind="${kind}"]`).focus();
+  }
   tool = tool === kind ? null : kind;
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
@@ -1023,6 +1053,21 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for (const button of document.querySelectorAll("[data-panel]")) {
+    button.onclick = () => {
+      const isOpen = button.getAttribute("aria-expanded") === "true";
+      if (isOpen) { closePanels(); if (tool) setTool(null); }
+      else showPanel(button.dataset.panel);
+    };
+  }
+  for (const button of document.querySelectorAll("[data-close-panel]")) {
+    button.onclick = () => {
+      const id = button.closest("[id]").id;
+      closePanels();
+      if (tool) setTool(null);
+      $(`[data-panel="${id}"]`).focus();
+    };
+  }
   $("#residents").innerHTML = state.residents
     .map(
       (r) =>
@@ -1077,8 +1122,10 @@ function setup() {
   for (const b of document.querySelectorAll("[data-speed]"))
     b.onclick = () => {
       speed = +b.dataset.speed;
-      for (const x of document.querySelectorAll("[data-speed]"))
+      for (const x of document.querySelectorAll("[data-speed]")) {
         x.classList.toggle("active", x === b);
+        x.setAttribute("aria-pressed", String(x === b));
+      }
     };
   $("#save").onclick = () => save(true);
   $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
@@ -1096,6 +1143,7 @@ function setup() {
     zoom = 1;
     time = 0;
     $("#person").hidden = true;
+    closePanels();
     $("#placement").hidden = true;
     if (paused) togglePause();
     $("#restart-dialog").close();
@@ -1182,7 +1230,15 @@ function setup() {
       e.preventDefault();
       togglePause();
     }
-    if (e.code === "Escape" && tool) setTool(null);
+    if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
+      if (tool) setTool(null);
+      else if (selected !== null) $(".close-person").click();
+      else {
+        const active = document.querySelector('[data-panel][aria-expanded="true"]');
+        closePanels();
+        active?.focus();
+      }
+    }
   });
   window.addEventListener("resize", resize);
   window.addEventListener("pagehide", () => save());

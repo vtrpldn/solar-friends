@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap");
 :root {
   --ink: #304437;
-  --muted: #7e8574;
+  --muted: #626e5b;
   --paper: #fffcf1;
   --line: #e6e5d4;
   --green: #416c49;
@@ -1336,6 +1336,70 @@ button:focus-visible {
   }
 }
 
+/* Keep floating panels within the playable area, including short windows. */
+.person {
+  max-height: calc(100% - 150px);
+  overflow-y: auto;
+  background: var(--paper);
+}
+.chapter, .community, .person, dialog {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.village-note {
+  left: 306px;
+  bottom: 140px;
+  max-width: 250px;
+}
+.resident .info { min-width: 0; }
+.resources b, #date, .stat .value { font-variant-numeric: tabular-nums; }
+button, a, input { touch-action: manipulation; }
+#world { touch-action: none; }
+.icon-button, .dialog-close, .close-person {
+  min-width: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+}
+#new-scenario, #save {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+#toast { width: max-content; max-width: calc(100% - 32px); }
+dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
+@media (max-width: 760px) {
+  .person { max-height: calc(100% - 125px); }
+  .brand { padding-right: 8px; }
+  header { gap: 6px; }
+  .resources { gap: 8px; }
+  .build-bar { width: calc(100% - 24px); max-width: none; }
+  #tools { width: 100%; padding: 4px; }
+  .build-tool { min-height: 76px; }
+  .requests button { min-height: 36px; }
+  .time-controls button { min-height: 36px; }
+  #new-scenario, #save { padding: 8px 6px; font-size: 9px; }
+}
+@media (max-width: 360px) {
+  .resources { gap: 5px; }
+  header { padding: 0 8px; gap: 5px; }
+  .icon-button { min-width: 32px; width: 32px; }
+}
+@media (max-height: 600px) {
+  .season { top: 8px; padding: 8px 12px; }
+  .season small { display: none; }
+  .chapter { top: 76px; max-height: calc(100% - 240px); padding: 12px; }
+  .community, .person { top: 8px; max-height: calc(100% - 150px); }
+}
+
+#restart-dialog { width: min(460px, calc(100% - 24px)); }
+.village-note {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fffcf1f5;
+  text-shadow: none;
+}
 .resource-cycle {
   border-top: 1px solid #d7d7c2;
   margin-top: 12px;
