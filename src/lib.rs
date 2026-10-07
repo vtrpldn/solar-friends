@@ -137,7 +137,11 @@ fn simulate(step: Res<Step>, mut village: ResMut<Village>, mut people: Query<&mu
         return;
     }
     village.minutes += dt * 4.;
-    let helpers = people.iter().filter(|r| r.task == "build").count();
+    let builders: Vec<(f32, f32)> = people
+        .iter()
+        .filter(|r| r.task == "build" && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08)
+        .map(|r| (r.target_x, r.target_y))
+        .collect();
     for mut r in &mut people {
         r.hunger = (r.hunger + dt * 0.25).min(100.);
         r.social = (r.social - dt * 0.12).max(0.);
@@ -172,7 +176,15 @@ fn simulate(step: Res<Step>, mut village: ResMut<Village>, mut people: Query<&mu
             r.energy = (r.energy + dt * 0.5).min(100.);
         }
         if r.task == "build" {
-            if let Some(b) = village.buildings.iter_mut().find(|b| b.progress < 100.) {
+            let helpers = builders
+                .iter()
+                .filter(|(x, y)| (*x - r.target_x).abs() < 0.01 && (*y - r.target_y).abs() < 0.01)
+                .count();
+            if let Some(b) = village.buildings.iter_mut().find(|b| {
+                b.progress < 100.
+                    && (b.x as f32 + 0.75 - r.target_x).abs() < 0.01
+                    && (b.y as f32 + 0.75 - r.target_y).abs() < 0.01
+            }) {
                 b.progress = (b.progress
                     + dt * if r.favorite == "build" { 3. } else { 1.8 }
                         * (if helpers > 1 { 1.25 } else { 1. }))
@@ -506,5 +518,66 @@ mod tests {
         let mut g = Game::new();
         assert!(g.request(0, "garden", false).contains("build a garden"));
         assert!(g.request(0, "build", false).contains("no construction"));
+    }
+    #[test]
+    fn saves_restore_at_task_boundaries() {
+        let mut game = Game::new();
+        let mut restored = Game::new();
+        game.place("garden", 9, 8);
+        for _ in 0..800 {
+            game.tick(0.17);
+            assert!(restored.restore(&game.snapshot()));
+        }
+    }
+    #[test]
+    fn encouragement_changes_reluctance_without_spending_resources() {
+        let mut game = Game::new();
+        let mut query = game.app.world_mut().query::<&mut Resident>();
+        query
+            .iter_mut(game.app.world_mut())
+            .find(|r| r.id == 0)
+            .unwrap()
+            .energy = 40.;
+        let wood = game.app.world().resource::<Village>().wood;
+        assert!(game.request(0, "gather", false).contains("save my energy"));
+        assert!(game.request(0, "gather", true).contains("lend a hand"));
+        assert_eq!(game.app.world().resource::<Village>().wood, wood);
+    }
+    #[test]
+    fn insufficient_resources_and_invalid_time_do_not_mutate_village() {
+        let mut game = Game::new();
+        game.app.world_mut().resource_mut::<Village>().wood = 1.;
+        let before = game.snapshot();
+        assert!(game.place("home", 10, 10).contains("need 32 timber"));
+        game.tick(0.);
+        game.tick(f32::NAN);
+        assert_eq!(game.snapshot(), before);
+    }
+    #[test]
+    fn builders_must_walk_to_the_next_construction_site() {
+        let mut game = Game::new();
+        game.place("garden", 9, 8);
+        game.place("grove", 2, 11);
+        let v = game.app.world().resource::<Village>().clone();
+        let mut query = game.app.world_mut().query::<&mut Resident>();
+        for mut r in query.iter_mut(game.app.world_mut()) {
+            r.remaining = 90.;
+            if r.id == 1 {
+                assign(&mut r, &v, "build", "Helping", true);
+                r.x = r.target_x;
+                r.y = r.target_y;
+            }
+        }
+        game.app.world_mut().resource_mut::<Village>().buildings[4].progress = 100.;
+        game.tick(0.1);
+        assert_eq!(
+            game.app.world().resource::<Village>().buildings[5].progress,
+            0.
+        );
+        game.tick(0.1);
+        assert_eq!(
+            game.app.world().resource::<Village>().buildings[5].progress,
+            0.
+        );
     }
 }

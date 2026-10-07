@@ -500,6 +500,11 @@ function updateUI() {
   const mins = Math.floor(v.minutes) % 1440;
   $("#date").textContent =
     `Day ${Math.floor(v.minutes / 1440) + 1} · ${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+  const night = mins < 360 || mins >= 1140;
+  $(".season-icon").textContent = night ? "☾" : "☀";
+  $(".season small").textContent = night
+    ? "Warm season · quiet night"
+    : "Warm season · clear skies";
   $("#latest-event").textContent = v.events[0];
   const objectives = [
     [
