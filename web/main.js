@@ -1,4 +1,5 @@
-import { quests, buildingUnlocked, questStatus } from "./quests.js?v=quests-1";
+import { flock, drawChicken } from "./chickens.js";
+import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
 import {
   project,
@@ -6,7 +7,7 @@ import {
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=quests-1";
+import init, { Game } from "./pkg/solar_friends.js?v=ecology-coop-2";
 import {
   paintTerrain,
   GROUND_START,
@@ -21,12 +22,13 @@ const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
   home: ["Home", 32, "Three beds and a good night’s rest"],
-  garden: ["Garden", 12, "Food grown with care"],
+  garden: ["Garden", 12, "Plant, water, grow, then harvest"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
-  well: ["Cistern", 18, "Keep the community watered"],
+  well: ["Cistern", 18, "Catch rainfall · store 75 more water"],
   grove: ["Food forest", 14, "Gather two fruit with every timber trip"],
   compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
   square: ["Square", 36, "Gatherings bring neighbours closer"],
+  coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
   workshop: ["Workshop", 48, "Craft tools for building and harvests"],
 };
 const tasks = {
@@ -39,11 +41,18 @@ const tasks = {
   build: "Building together",
   gather: "Gathering timber",
   cook: "Making a shared meal",
-  water: "Refilling our water",
+  water: "Collecting river water",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
+};
+const pastimes = {
+  garden: "Looking at the plants",
+  build: "Sketching building ideas",
+  cook: "Humming and dreaming up recipes",
+  gather: "Watching birds",
+  water: "Sitting and daydreaming",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const atlas = new Image();
@@ -51,9 +60,9 @@ atlas.src = "art/village-atlas-isometric.png";
 const gardenArt = new Image();
 gardenArt.src = "art/garden-simple-isometric.png";
 const questArt = Object.fromEntries(
-  ["compost", "square", "workshop"].map((kind) => {
+  ["compost", "square", "workshop", "coop"].map((kind) => {
     const image = new Image();
-    image.src = `art/${kind}-isometric.png`;
+    image.src = `art/${kind}-isometric.png${kind === "coop" ? "?v=3" : ""}`;
     return [kind, image];
   }),
 );
@@ -315,11 +324,67 @@ function cistern(x, y, alpha = 1) {
   ctx.drawImage(cisternArt, p.x - w / 2, p.y - w * 0.82, w, w);
   ctx.restore();
 }
+function drawGrowingBed(b) {
+  const corners = [
+    [-0.8, -0.8],
+    [0.8, -0.8],
+    [0.8, 0.8],
+    [-0.8, 0.8],
+  ].map(([x, y]) => iso(b.x + x, b.y + y));
+  ctx.save();
+  ctx.beginPath();
+  corners.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+  ctx.closePath();
+  ctx.fillStyle = b.crop.moisture > 0 ? "#805a40" : "#b18a60";
+  ctx.fill();
+  ctx.strokeStyle = "#c6a273";
+  ctx.lineWidth = 4 * scale;
+  ctx.stroke();
+  if (b.crop.planted) {
+    const growth = 2 + (b.crop.growth / 180) * 7;
+    for (let x = -0.5; x <= 0.5; x += 0.5) {
+      for (let y = -0.5; y <= 0.5; y += 0.5) {
+        const p = iso(b.x + x, b.y + y);
+        ctx.fillStyle = b.crop.moisture > 0 ? "#648447" : "#999052";
+        ctx.beginPath();
+        ctx.ellipse(
+          p.x,
+          p.y - (growth * scale) / 2,
+          growth * scale,
+          (growth * scale) / 2,
+          -0.5,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+    }
+  }
+  ctx.restore();
+}
+function drawResourceLabel(p, label, fraction, color) {
+  const w = 104 * scale,
+    y = p.y + 19 * scale;
+  ctx.save();
+  ctx.fillStyle = "#fffbee";
+  ctx.fillRect(p.x - w / 2, y, w, 23 * scale);
+  ctx.font = `${10 * scale}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#40503c";
+  ctx.fillText(label, p.x, y + 12 * scale);
+  ctx.fillStyle = "#dfdfcc";
+  ctx.fillRect(p.x - w / 2, y + 20 * scale, w, 3 * scale);
+  ctx.fillStyle = color;
+  ctx.fillRect(p.x - w / 2, y + 20 * scale, w * fraction, 3 * scale);
+  ctx.restore();
+}
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
   contactShadow(p.x + 9 * scale, p.y + 4 * scale, 50 * scale, 17 * scale, 0.16);
   if (b.kind === "well") cistern(b.x, b.y, complete ? 1 : 0.45);
+  else if (complete && b.kind === "garden" && b.crop.growth < 180)
+    drawGrowingBed(b);
   else
     sprite(
       b.kind,
@@ -328,6 +393,30 @@ function building(b) {
       b.kind === "garden" ? 119 : b.kind === "grove" ? 105 : 152,
       complete ? 1 : 0.4,
     );
+  if (complete && b.kind === "garden") {
+    const crop = b.crop;
+    const label = !crop.planted
+      ? "Ready to plant"
+      : crop.growth >= 180
+        ? "Ready to harvest"
+        : crop.moisture <= 0
+          ? "Needs water"
+          : `Growing ${Math.floor((crop.growth / 180) * 100)}%`;
+    drawResourceLabel(
+      p,
+      label,
+      crop.growth / 180,
+      crop.moisture <= 0 ? "#b87943" : "#72915a",
+    );
+  }
+  if (complete && b.kind === "well") {
+    drawResourceLabel(
+      p,
+      "Water storage",
+      Math.min(1, state.village.water / state.environment.water_capacity),
+      "#568d9e",
+    );
+  }
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
@@ -493,6 +582,10 @@ function render() {
       depth: b.x + b.y,
       draw: () => building(b),
     })),
+    ...flock(state.village).map((hen) => ({
+      depth: hen.x + hen.y + 0.1,
+      draw: () => drawChicken(ctx, iso(hen.x, hen.y), scale, hen),
+    })),
     ...state.residents.map((r) => ({
       depth: r.x + r.y + 0.6,
       draw: () => resident(r),
@@ -611,7 +704,7 @@ function selectPerson(id) {
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["gather", "Gather timber"],
-      ["water", "Refill water"],
+      ["water", "Collect river water"],
       ["cook", "Make a meal"],
       ["rest", "Take a rest"],
       ["socialize", "Spend time together"],
@@ -799,12 +892,49 @@ function updateUI() {
             : mins < 1200
               ? "Evening · dinner together"
               : "Evening · time to unwind";
+  const env = state.environment;
+  const gardens = v.buildings.filter(
+    (b) => b.kind === "garden" && b.progress >= 100,
+  );
+  const counts = { plant: 0, thirsty: 0, growing: 0, harvest: 0 };
+  for (const b of gardens) {
+    const c = b.crop;
+    counts[
+      !c.planted
+        ? "plant"
+        : c.growth >= 180
+          ? "harvest"
+          : c.moisture <= 0
+            ? "thirsty"
+            : "growing"
+    ]++;
+  }
+  $("#water-capacity").textContent = `Water / ${env.water_capacity}`;
+  $("#weather-status").textContent = env.raining
+    ? "Afternoon rain · filling cisterns"
+    : env.dry_day
+      ? "Dry day · collect river water"
+      : mins >= 1020
+        ? "Rain has passed · check water stores"
+        : "Rain expected 14:00–17:00";
+  $("#garden-status").textContent = gardens.length
+    ? [
+        counts.plant && `${counts.plant} to plant`,
+        counts.thirsty && `${counts.thirsty} need water`,
+        counts.growing && `${counts.growing} growing`,
+        counts.harvest && `${counts.harvest} to harvest`,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : "Build a garden to start growing food.";
+  if (env.raining) $(".season-icon").textContent = "☂";
   $("#latest-event").textContent = v.events[0];
   updateQuests();
   for (const r of state.residents) {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
-    el.querySelector("small").textContent = tasks[r.task] || r.task;
+    el.querySelector("small").textContent =
+      (r.task === "idle" ? pastimes[r.favorite] || tasks.idle : tasks[r.task]) || r.task;
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
@@ -1122,7 +1252,7 @@ function setup() {
   requestAnimationFrame(frame);
 }
 try {
-  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=quests-1" });
+  await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=ecology-coop-2" });
   await Promise.all([
     atlas.decode(),
     gardenArt.decode(),

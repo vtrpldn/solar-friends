@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#263e30" />
     <title>Solar Friends · Vila Aurora</title>
-    <link rel="stylesheet" href="style.css?v=ui-2" />
+    <link rel="stylesheet" href="style.css?v=combined-hud-2" />
     <link rel="stylesheet" href="hud.css?v=1" />
   </head>
   <body>
@@ -16,7 +16,8 @@
     </div>
     <header>
       <a class="brand" href="./" aria-label="Solar Friends"
-        ><span class="sunmark">☀</span><span>SOLAR<br /><b>FRIENDS</b></span></a
+        ><span class="sunmark">☀</span
+        ><span>SOLAR<br /><b>FRIENDS</b></span></a
       >
       <div class="village-title">
         <span class="eyebrow">OUR LITTLE ECOVILA</span>
@@ -38,6 +39,14 @@
         <progress id="quest-progress" max="7" value="0"></progress>
         <p id="tutorial-copy"></p>
         <button id="tutorial-action" class="primary" hidden></button>
+        <div class="resource-cycle" aria-label="Water and gardens">
+          <b id="weather-status"></b>
+          <p id="garden-status"></p>
+          <small
+            >Crops need three game hours of moist soil. Rain waters gardens;
+            neighbours carry river water when supplies run low.</small
+          >
+        </div>
         <div id="objectives"></div>
         <p id="quest-reward"></p>
         <button id="open-journal" class="journal-button">
@@ -114,11 +123,11 @@
         <div title="Gather fallen timber to build">
           <span>⌁</span><b id="wood">76</b><small>Timber</small>
         </div>
-        <div title="Gardens produce food using water">
+        <div title="Plant, water, and grow crops before harvesting">
           <span>♧</span><b id="food">42</b><small>Food</small>
         </div>
-        <div title="Residents refill the cistern">
-          <span>◒</span><b id="water">65</b><small>Water</small>
+        <div title="Rain fills cisterns; residents collect river water">
+          <span>◒</span><b id="water">65</b><small id="water-capacity">Water / 40</small>
         </div>
         <div title="Average resident wellbeing">
           <span>♡</span><b id="happiness">75%</b><small>Wellbeing</small>
@@ -172,11 +181,12 @@
           exhausted people still need rest.
         </li>
         <li>
-          <b>Find your balance.</b> Gardens turn water into food. Gather timber
-          for buildings and refill water at the cistern. Residents choose work,
-          meals, rest and company for themselves. Each home has three beds.
-          Breakfast is at 06:30, lunch at noon, dinner at 18:00, and bedtime
-          around 21:30.
+          <b>Find your balance.</b> Plant gardens, water their soil, and let
+          crops grow before harvesting. Cisterns catch afternoon rain;
+          neighbours collect river water during dry spells. Gather timber for
+          buildings. Residents choose work, meals, rest and company for
+          themselves. Each home has three beds. Breakfast is at 06:30, lunch at
+          noon, dinner at 18:00, and bedtime around 21:30.
         </li>
       </ol>
       <p class="hint">
@@ -235,6 +245,6 @@
       <button id="cancel-restart">Keep this village</button>
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
-    <script type="module" src="main.js?v=quiet-hud-1"></script>
+    <script type="module" src="main.js?v=combined-hud-2"></script>
   </body>
 </html>
