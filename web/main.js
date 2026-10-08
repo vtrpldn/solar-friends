@@ -463,7 +463,7 @@ function placementValid(kind, x, y) {
   return !placementReason(state.village, kind, x, y);
 }
 function activityLabel(r) {
-  if(r.trip)return tripLabel(r);
+  if(r.trip)return tripLabel(r,state.environment.economy.jobs.find(j=>j.id===r.id));
   if(r.task === "sleep")return sleepLabel(r);
   if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
   if (r.task === "visit") {
@@ -779,7 +779,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["gather", "Forage food"],
@@ -802,6 +802,7 @@ function selectPerson(id) {
     updateUI();
     $(`[data-citizen="${id}"]`).focus();
   };
+  $('#person .occupation-toggle').onchange=event=>{game.set_resident_job(id,event.target.checked);state=JSON.parse(game.snapshot());updateUI();save();};
   paintPortraits();
   $(".close-person").focus();
   $("#person .requests").onclick = (e) => {
@@ -1128,6 +1129,13 @@ function updateUI() {
   }
   if (selected !== null) {
     const r = state.residents.find((r) => r.id === selected);
+    const job=env.economy.jobs.find(j=>j.id===r.id);
+    $('#person .occupation-title').textContent=job.title;
+    $('#person .occupation-income').textContent=`R$ ${job.income/100} for the shared fund · 09:00–17:00`;
+    $('#person .occupation-description').textContent=job.description;
+    $('#person .occupation-toggle').checked=job.enabled;
+    $('#person .occupation-toggle').setAttribute('aria-label',`Schedule ${r.name}'s outside job`);
+    $('#person .occupation-schedule-note').textContent=r.trip?.purpose==='work'?'This shift is committed. Turning this off stops future shifts.':job.enabled?(v.minutes%1440>=600?'Next outside shift tomorrow at 09:00. Lunch is provided off-site.':'Leaves 09:00–10:00 when rested. Lunch is provided off-site.'):'Optional · staying available for village life.';
     for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
     $("#person .quote").hidden = !!response && r.requested && response.endsWith(r.reason);
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
@@ -1263,7 +1271,7 @@ function setup() {
     if(!$('#village-book').hidden){closePanels();return;}
     showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
   };
-  economyUI=installEconomyUI({snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {

@@ -8,7 +8,7 @@ export function recipeSummary(state,kind){
   const total=Array(15).fill(0);for(const s of r.standard)for(let i=0;i<15;i++)total[i]+=s.items[i];
   return total.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ');
 }
-export function installEconomyUI({snapshot,game,changed,notify,locate,openTown}){
+export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,avatar,paintPortraits}){
   const $=s=>document.querySelector(s);let lastProjects='',lastInventory='',lastOrders='',lastLand='',pickupNoticeOrder=null;
   const transact=result=>{if(result!=='ok')notify(result);else{changed();update();}};
   const materials=snapshot().environment.economy.materials;
@@ -52,7 +52,9 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
   $('#town-shortages').onclick=()=>{const e=snapshot().environment.economy;for(let i=0;i<15;i++)$(`[data-material="${i}"]`).value=Math.min(e.shortage[i],100);quote();};
   $('#town-clear').onclick=()=>{for(const input of $('#town-catalog').querySelectorAll('input'))input.value=0;quote();};
   $('#town-order').onclick=()=>{const pickup=pickupMode(),orderId=snapshot().village.economy.next_order,driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),result=pickup?game().order_supplies_pickup(JSON.stringify(basket()),Number($('#pickup-driver').value)):game().order_supplies(JSON.stringify(basket()));if(result==='ok'){if(pickup)pickupNoticeOrder=orderId;$('#town-clear').click();}transact(result);if(result==='ok'&&pickup)notify(pickupMessage(driver.name));};
-  $('#outside-work').onchange=event=>{game().set_outside_work(event.target.checked);changed();update();};
+  const jobs=snapshot().environment.economy.jobs;
+  $('#outside-jobs').innerHTML=jobs.map(job=>`<article class="occupation-card"><div class="occupation-heading">${avatar(job.id)}<div><strong>${escape(job.name)}</strong><b>${escape(job.title)}</b></div><label><input type="checkbox" data-outside-job="${job.id}" aria-label="Schedule ${escape(job.name)}'s outside job"> Work outside</label></div><p>${escape(job.description)}</p><small>09:00–17:00 · ${money(job.income)} contribution per shift</small><span data-job-status="${job.id}"></span></article>`).join('');paintPortraits();
+  $('#outside-jobs').onchange=event=>{const input=event.target.closest('[data-outside-job]');if(!input)return;game().set_resident_job(Number(input.dataset.outsideJob),input.checked);changed();update();};
   $('#sell-surplus').onclick=()=>transact(game().sell_surplus(Math.min(20,snapshot().environment.economy.saleable_food)));
   $('#exchange-parts').onclick=()=>transact(game().exchange_parts());
   $('#town-orders').onclick=event=>{
@@ -75,7 +77,14 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
   $('#land-sources').onclick=event=>{const button=event.target.closest('[data-restore-source]');if(button)transact(game().restore_source(Number(button.dataset.restoreSource)));};
   function update(){
     const s=snapshot(),e=s.environment.economy,v=s.village;
-    $('#fund').textContent=money(e.money);$('#town-fund').textContent=money(e.money);$('#outside-work').checked=e.outside_work;
+    $('#fund').textContent=money(e.money);$('#town-fund').textContent=money(e.money);
+    const enabled=e.jobs.filter(j=>j.enabled),away=s.residents.filter(r=>r.trip?.purpose==='work'&&r.trip.phase==='away');
+    $('#jobs-outlook').textContent=enabled.length?`${enabled.length} optional ${enabled.length===1?'shift':'shifts'} · up to ${money(enabled.reduce((sum,j)=>sum+j.income,0))} per day${away.length?' · '+away.length+' working off-site':''}`:'Outside shifts are optional. Open occupations to choose who works.';
+    for(const job of e.jobs){
+      $(`[data-outside-job="${job.id}"]`).checked=job.enabled;
+      const r=s.residents.find(r=>r.id===job.id),working=r.trip?.purpose==='work';
+      $(`[data-job-status="${job.id}"]`).textContent=working?r.trip.phase==='leaving'?`Leaving for ${job.place}`:r.trip.phase==='away'?'Working off-site · returns at 17:00':`Back from work · ${money(job.income)} contributed`:job.paid_today?`Today’s contribution received · ${job.enabled?'scheduled again tomorrow':'future shifts off'}`:!job.enabled?'Staying available for village life':v.minutes%1440>=600?'No shift taken today · next departure tomorrow at 09:00':'Scheduled · leaves between 09:00 and 10:00 when rested';
+    }
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
     $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders`;

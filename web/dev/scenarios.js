@@ -14,6 +14,7 @@ export const scenarios = [
   { id: 'cook', name: 'Overworked cook', detail: 'Staged cooking history across two days; one tick raises the real concern.' },
   { id: 'coop', name: 'Full coop', detail: 'Three hens, a fed batch almost complete, and room for eggs.' },
   { id: 'night', name: 'Night lighting', detail: 'All buildings at 21:00, with the normal night renderer.' },
+  { id: 'occupations', name: 'Outside occupations', detail: 'All five personal jobs enabled at 09:00. Advance to watch departures, independent shifts, and contributions at 17:00.' },
   { id: 'rain', name: 'Afternoon rain', detail: 'The real 15:00 rain: streaks, splashes, river ripples, cloud cover and wet ground. Run the scene to see it move.' },
   { id: 'after-rain', name: 'After the rain', detail: '18:00 after a wet afternoon. Pools dry gradually while sunset lighting returns.' },
   { id: 'dry-afternoon', name: 'A dry afternoon', detail: '15:00 on a dry day. Compare clear light with the rainy scene.' },
@@ -53,6 +54,7 @@ export function makeScenario(id, fresh, established) {
     }
     v.roads=[...roads.values()].filter(([x,y])=>x>=1&&y>=1&&x<MAP_SIZE-1&&y<MAP_SIZE-1&&!riverBank(x,y)&&!v.buildings.some(b=>occupies(b,x,y)));
   }
+  if(id==='occupations'){v.minutes=1440+540;v.economy.outside_jobs=[true,true,true,true,true];}
   if(id==='rain')v.minutes=1440+900;
   if(id==='after-rain')v.minutes=1440+1080;
   if(id==='dry-afternoon')v.minutes=2880+900;
