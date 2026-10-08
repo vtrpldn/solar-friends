@@ -517,7 +517,7 @@ function render() {
   const objects = [
     ...state.village.economy.sources.map((site,index)=>({depth:site.x+site.y,draw:()=>{const p=iso(site.x,site.y);drawEconomyArt(ctx,index,p.x,p.y,scale,nightAmount(state.village.minutes),site.remaining/site.maximum);}})),
     {depth:23,draw:()=>{const p=iso(10,13);drawEconomyArt(ctx,5,p.x,p.y,scale,nightAmount(state.village.minutes));}},
-    ...flora.map((f) => ({
+    ...flora.filter(f=>!state.village.economy.sources.some(site=>Math.hypot(f.x-site.x,f.y-site.y)<2.5)).map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),

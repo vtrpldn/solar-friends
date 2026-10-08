@@ -12,7 +12,7 @@ See the [completed polish pass](art-polish-2026-10-08.md) for the fixes and veri
 
 ## Canonical assets
 
-The library contains 69 entries backed by 46 source images: 68 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 297 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
+The library contains 75 entries backed by 47 source images: 74 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 303 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
 
 | Structure | Source-cell width at zoom 1 |
 | --- | ---: |
@@ -43,7 +43,7 @@ Gardens and greenhouses use painted empty structures plus separate crop layers. 
 
 Foundations need to meet roads without grass gaps. [building-footprints.js](../../web/building-footprints.js) registers painted ground-contact landmarks inside exact tile plots and draws their stone or soil foundation. Square and solar farm occupy 3×3 tiles; cistern, compost, coop and street light occupy one tile; the remaining buildings and all home variations occupy 2×2 tiles. Plot corners lie on half-tile boundaries, matching roads. Even plots keep the existing saved anchor at their front tile.
 
-The placement ghost, construction frame, selection area, and road checks share these plots. Crop layers follow the same registration as their structure. Roofs and foliage retain their natural silhouettes; the foundation defines the exact plot edge. New roads cannot cross a building's plot, and new buildings cannot cover roads. Older saves still load, with any roads under buildings hidden and removable.
+The placement ghost, construction frame, selection area, and road checks share these plots. Crop layers follow the same registration as their structure. Roofs and foliage retain their natural silhouettes; the foundation defines the exact plot edge. New roads cannot cross a building's plot, and new buildings cannot cover roads. Version 3 saves preserve plot anchors and roads. Earlier formats reset for the construction economy.
 
 Use **Dev Tools → Grid & road edges** to compare actual placed sizes and road joins for all 15 variants. `node scripts/verify-grid-foundations.mjs` checks shared edges at four zooms, the foundation drawing path, JavaScript/Rust road occupancy, both placement orders, and legacy saves.
 
@@ -88,3 +88,9 @@ Final square prompt (old square as edit target):
 > Rebuild this pergola sprite with CORRECT GEOMETRY, preserving the warm illustrated Brazilian palette, bunting, vines, two benches and table. Transparent square canvas. Essential change: FOUR posts form a perfect rectangular prism in 2:1 orthographic game isometric projection. On a nominal 1000x1000 canvas place four post FEET at back (500,450), left (180,610), right (820,610), front (500,770). Their TOPS are back (500,150), left (180,310), right (820,310), front (500,470). All four straight upright posts exactly same height. Join their tops with four straight horizontal wooden beams; all beam edges slopes +0.5 or -0.5, no perspective convergence. Front post must be centered x=500, NOT shifted right as in reference. Benches and table align to these SAME two ground axes. Keep generous clear transparent border. No grid or text or coordinate markers. Simplified painted style, not photorealistic.
 
 Prompt constraints describe the requested output; the camera section records the actual limits of the delivered raster assets.
+
+## Land and supplies
+
+Six sprites in [economy-prompts.json](economy-prompts.json) share one transparent three-column/two-row atlas. Managed timber, bamboo, earth, stone, salvage and the receiving bench use the same warm painted Brazilian palette. [economy-art.js](../../web/economy-art.js) supplies their crops, widths and ground anchors to both the village and artwork catalogue. Widths are 85–108 px at zoom 1, below a home and appropriate beside residents. Rendering preserves each source rectangle’s height/width ratio. Three crowded atlas cells use measured transparent gutters instead of equal column cuts, retaining the complete earth, stone and salvage silhouettes. Empty sites fade and desaturate, and the normal night brightness applies. No alternate night atlas is needed for these unlit props.
+
+Local construction recipes use the existing veranda house and a stone-colored plot edge; they retain the same exact footprint and calibrated projection. Construction posts and beams follow the two ground axes, with low foundation stakes before taller structure scaffolding. Blueprints and unfinished equipment remain dim until installation is complete.

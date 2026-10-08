@@ -9,7 +9,7 @@ for(const scenario of ['economy','economy-poor','economy-depleted']){
   const g=new Game(),fixture=makeScenario(scenario,fresh,established);fixture.village.food=36;
   assert(g.restore(JSON.stringify(fixture)));g.set_outside_work(true);
   assert.equal(g.configure_project(0,2,false,'local'),'ok');
-  const waking=Array(5).fill(0),relax=Array(5).fill(0);let orders=0,maxHunger=0,minFood=Infinity,seenSource=false,seenPreparation=false;
+  const waking=Array(5).fill(0),relax=Array(5).fill(0);let orders=0,maxHunger=0,minFood=Infinity;
   for(let i=0;i<24*1440/.75;i++){
     const s=snap(g),e=s.environment.economy;
     if(i%100===0){
@@ -20,7 +20,7 @@ for(const scenario of ['economy','economy-poor','economy-depleted']){
     }
     assert(e.money>=0&&e.used<=e.capacity);assert(e.materials.every(m=>m.available>=0&&m.reserved<=m.stored));
     minFood=Math.min(minFood,s.village.food);maxHunger=Math.max(maxHunger,...s.residents.map(r=>r.hunger));
-    for(const r of s.residents){seenSource||=r.task==='source';seenPreparation||=r.task==='prepare';if(r.task!=='sleep'){waking[r.id]++;if(['idle','nature_walk','birdwatch','stretch','daydream','stargaze','socialize','rest'].includes(r.task))relax[r.id]++;}}
+    for(const r of s.residents){if(r.task!=='sleep'){waking[r.id]++;if(['idle','nature_walk','birdwatch','stretch','daydream','stargaze','socialize','rest'].includes(r.task))relax[r.id]++;}}
     g.tick(.25);
   }
   const s=snap(g);assert(s.village.buildings.every(b=>b.progress===100),`${scenario}: all three mixed-material projects finish`);

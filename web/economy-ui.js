@@ -47,7 +47,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate}){
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
     $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including confirmed deliveries`;
-    $('#project-summary').textContent=e.projects.length?`${e.projects.length} active projects · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
+    $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
     $('#property-description').textContent=e.property;
     $('#preparation-recipes').innerHTML=`<p>${e.workshop?'Workshop preparation includes roof tiles and efficient salvage recovery.':'Residents prepare frames, wall material and fittings at the camp. A workshop adds roof tiles and more efficient salvage recovery.'}</p>`+e.preparation.map(r=>`<p class="recipe-stage"><b>${r.yield} ${e.materials[r.material].name.toLowerCase()}</b>${r.inputs.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('');
     const projectKey=JSON.stringify(e.projects.map(p=>({...p,labour:Math.floor(p.labour),progress:Math.floor(p.progress)})));
