@@ -27,7 +27,9 @@ export function residentActivity(r, minutes) {
   if (['birdwatch', 'stargaze', 'nature_walk'].includes(r.task)) return 'look';
   if (r.task === 'stretch') return Math.floor(minutes / 8) % 2 ? 'stretch' : 'breathe';
   if (['rest', 'eat'].includes(r.task)) return 'sit';
-  if (['build','craft','source','prepare','outside'].includes(r.task)) return 'work';
+  if(r.task==='source')return [2,3].includes(r.sourceMaterial)?'tend':'work';
+  if(r.task==='outside')return 'tend';
+  if (['build','craft','prepare'].includes(r.task)) return 'work';
   if (r.task === 'cook') return 'cook';
   if (r.task === 'water') return 'water';
   if (['garden', 'compost', 'gather'].includes(r.task)) return 'tend';

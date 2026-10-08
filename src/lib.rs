@@ -321,14 +321,21 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
                 .iter()
                 .find(|b| b.kind == "workshop" && b.progress >= 100.)
             {
-                spacing::approach(v, b, r.id).unwrap_or((10., 13.))
+                (b.x as f32, b.y as f32)
             } else {
-                (10., 13.)
+                CAMP
             };
-            (r.target_x, r.target_y) = (
-                base.0 + 0.7 + (r.id as f32 % 2.) * 1.3,
-                (base.1 + 0.7).min(26.5),
-            );
+            if let Some(point) = spacing::material_spot(v, base.0, base.1, r.id) {
+                (r.target_x, r.target_y) = point;
+            } else {
+                assign(
+                    r,
+                    v,
+                    "rest",
+                    "There is no clear workspot here. Taking a break where there is room.",
+                    requested,
+                );
+            }
         }
     } else if task == "outside" {
         r.remaining = 20.;

@@ -9,6 +9,39 @@ pub fn land(x: f32, y: f32) -> bool {
         && !river_bank(x.floor() as i32, y.floor() as i32)
 }
 
+fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
+    let size = interactions::footprint_size(&b.kind);
+    let left = (b.x - size / 2) as f32 - 0.5;
+    let back = (b.y - size / 2) as f32 - 0.5;
+    x <= left - 0.2
+        || x >= left + size as f32 + 0.2
+        || y <= back - 0.2
+        || y >= back + size as f32 + 0.2
+}
+
+pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32)> {
+    let mut spots: Vec<(f32, f32)> = vec![];
+    for radius in [0.7, 1.4, 2.1, 2.8, 3.5] {
+        for angle in [90f32, 45., 0., 135., -45., 180., 225., -90.] {
+            let angle = angle.to_radians();
+            let p = (x + radius * angle.cos(), y + radius * angle.sin());
+            if land(p.0, p.1)
+                && p.0 < 25.8 + (p.1 * 0.32).sin() * 0.65 - 2.3
+                && v.buildings.iter().all(|b| clear_plot(b, p.0, p.1))
+                && spots
+                    .iter()
+                    .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
+            {
+                spots.push(p);
+                if spots.len() > id {
+                    return Some(spots[id]);
+                }
+            }
+        }
+    }
+    None
+}
+
 pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
     let mut spots: Vec<(f32, f32)> = Vec::new();
     // Start along the visible front of the building, then try the sides.
@@ -22,13 +55,7 @@ pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
                 b.y as f32 + radius * angle.sin(),
             );
             if land(p.0, p.1)
-                && v.buildings.iter().all(|other| {
-                    other.id == b.id
-                        || (p.0 - other.x as f32)
-                            .abs()
-                            .max((p.1 - other.y as f32).abs())
-                            >= interactions::radius(&other.kind) as f32 + 0.15
-                })
+                && v.buildings.iter().all(|other| clear_plot(other, p.0, p.1))
                 && spots
                     .iter()
                     .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
@@ -104,10 +131,11 @@ mod tests {
             for (i, &(x, y)) in spots.iter().enumerate() {
                 assert!(land(x, y), "{} has an inaccessible approach", b.kind);
                 for other in v.buildings.iter().filter(|other| other.id != b.id) {
-                    assert!(
-                        (x - other.x as f32).abs().max((y - other.y as f32).abs())
-                            >= interactions::radius(&other.kind) as f32 + 0.15
-                    );
+                    assert!(!interactions::occupies(
+                        other,
+                        x.round() as i32,
+                        y.round() as i32
+                    ));
                 }
                 for &(ox, oy) in &spots[i + 1..] {
                     assert!(
@@ -120,6 +148,42 @@ mod tests {
         }
     }
 
+    #[test]
+    fn material_workers_have_reachable_separate_spots_at_every_source() {
+        let game = Game::new();
+        let v = game.app.world().resource::<Village>();
+        for source in &v.economy.sources {
+            let a = material_spot(v, source.x as f32, source.y as f32, 2).unwrap();
+            let b = material_spot(v, source.x as f32, source.y as f32, 3).unwrap();
+            assert!(land(a.0, a.1) && land(b.0, b.1));
+            assert!((a.0 - b.0).hypot(a.1 - b.1) >= PERSONAL_SPACE);
+        }
+    }
+    #[test]
+    fn preparation_spots_do_not_enter_adjacent_buildings() {
+        let mut game = Game::new();
+        game.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        assert_eq!(game.place("workshop", 8, 8), "ok");
+        assert_eq!(game.place("home", 11, 8), "ok");
+        assert_eq!(game.place("home", 12, 14), "ok");
+        let v = game.app.world().resource::<Village>();
+        for (x, y) in [(8., 8.), CAMP] {
+            let a = material_spot(v, x, y, 2).unwrap();
+            let b = material_spot(v, x, y, 3).unwrap();
+            assert!((a.0 - b.0).hypot(a.1 - b.1) >= PERSONAL_SPACE);
+            for p in [a, b] {
+                assert!(v.buildings.iter().all(|building| !interactions::occupies(
+                    building,
+                    p.0.round() as i32,
+                    p.1.round() as i32
+                )));
+            }
+        }
+    }
     #[test]
     fn tightly_packed_buildings_do_not_fall_back_to_a_shared_point() {
         let mut game = Game::new();

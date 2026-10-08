@@ -432,7 +432,7 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
@@ -1492,7 +1492,7 @@ const devAPI = {
   advance(minutes) {
     if (!sandbox) throw new Error('Load a sandbox before advancing time.');
     if (!paused) togglePause();
-    advanceGame(game, minutes); state = JSON.parse(game.snapshot()); updateUI(); render();
+    advanceGame(game, minutes); residentAnimations.clear(); state = JSON.parse(game.snapshot()); updateUI(); render();
     return devAPI.snapshot();
   },
   run() { if (!sandbox) throw new Error('Load a sandbox first.'); if (paused) togglePause(); },
