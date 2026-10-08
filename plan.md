@@ -26,7 +26,7 @@ Construction should combine materials available on a Brazilian countryside prope
 4. [x] Add town supplier, basket quotes, combined orders, starting savings and limited outside-work income. Confirmed orders debit atomically; recovery from zero money needs no expensive prerequisite. Catalogue contains essentials and equipment.
 5. [x] Add scheduled dispatch/delivery, fees, receiving capacity and visible delivery events. Save/reload and large time steps never duplicate arrivals or refunds. Orders cannot exceed future storage capacity.
 6. [x] Place finite resource sites on the map with spaced access points, regeneration for managed resources, visible depletion and restoration. Food foraging stays separate from structural-material collection.
-7. [x] Add camp preparation, advanced workshop recipes, project-driven job choice and worker limits. Residents stop collecting at project demand, leaving only small batch remainders; jobs obey work hours and urgent food/rest needs.
+7. [x] Add camp preparation, advanced workshop recipes, project-driven job choice and worker limits. Residents stop collecting at project demand and one small tool-making batch, leaving only small batch remainders; jobs obey work hours and urgent food/rest needs.
 8. [x] Implement visible foundation/structure/finishing/installation stages and connect completion to beds, food, workshop and power. Waiting projects release workers. All painted/procedural props align with the grid and existing scene.
 9. [x] Complete build costs, project board, inventory, Town, shared fund, order history, resident requests and actionable blocker messages. Rewrite tutorial, quests and timber-only copy; make the full loop understandable in the desktop game.
 10. [x] Add recipe choices with visible appearance differences, finite neighbour exchange, surplus sales protected by food reserves, and half-price resale of unreserved materials for storage recovery. Persist recipe selection; prevent free conversions after materials are committed.
@@ -71,3 +71,7 @@ Construction should combine materials available on a Brazilian countryside prope
 ## Deliberate boundaries
 
 This implements the construction economy described above. Vehicle routes, physical delivery hauling, contractors, credit/loans, real market prices, regional soil surveys and seasonal crop economics remain later design work. Prices, quantities, local deposits and outside income are fictional balancing values. Old village migration is intentionally omitted.
+
+## Follow-up playtest
+
+The completed [gameplay and artwork playtest](playtest.md) corrected cancellation lookups, tutorial/action feedback, work pickup, bounded tool maintenance, persisted house variations, shared night shading, source-worker destinations, actual plot clearance and task poses. It added protected checkpoint replay and desktop zoom/focus fixes. The follow-up passed 74 Rust tests, all 15 verification scripts and the live artwork checks. See the playtest report for coverage, evidence and prototype limits.

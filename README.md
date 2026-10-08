@@ -11,6 +11,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Run locally](#run-locally)
 - [Play](#play)
 - [Construction economy](#construction-economy)
+- [Completed gameplay and artwork playtest](playtest.md)
 - [Village quests](#village-quests)
 - [Village situations](#village-situations)
 - [Development tools](#development-tools)
@@ -59,7 +60,9 @@ The community starts with R$ 3,000 and modest material stocks. Fifteen materials
 
 Enable **Outside shifts** for one short neighbouring-farm contribution of R$ 180 each day. Nina handles the autonomous shift within normal work hours; food, rest and agreements take precedence. Selling produce keeps 36 ingredients for the household. A neighbour exchanges four surplus ingredients for two fittings at most once per day. Spare unreserved building materials can be sold at half price to recover money and receiving space; future stages may need them again. Reserved stock and incoming orders cannot be sold.
 
-Painted resource sites mark managed timber and bamboo, finite earth and stone, and salvage. Two residents collect and prepare supplies only for active project demand; batches leave at most a few spare units. Managed stands regrow one unit per day, or three after restoration with two compost. Earth, stone and salvage do not regenerate. When deposits are exhausted, town purchases still provide essentials.
+Painted resource sites mark managed timber and bamboo, finite earth and stone, and salvage. Two residents collect and prepare supplies for active project demand and one eight-timber tool-making batch; batches leave at most a few spare units. Managed stands regrow one unit per day, or three after restoration with two compost. Earth, stone and salvage do not regenerate. When deposits are exhausted, town purchases still provide essentials.
+
+When tools run low, local workers collect enough timber for one batch; Bento prioritizes making it after urgent needs and ready construction. Turning tool use off also stops this maintenance collection.
 
 The camp can prepare frames from timber and fittings, wall material from earth, and fittings from salvage. A completed workshop adds roof tiles from earth and timber and doubles fitting recovery using salvage and stone. These recipes are shown in Projects; prepared goods are also purchasable, so a workshop never blocks its own construction. Site access points remain spaced apart. Residents keep their normal work windows, meals, hobbies and substantial free time.
 
@@ -147,9 +150,9 @@ Repeatable scenarios and shared rendering controls shorten gameplay debugging an
 
 ### Simulation workbench
 
-Economy scenarios **Our first projects**, **An empty shared fund** and **Depleted land** exercise project controls and purchasing recovery. Load a fresh arrival, established village, hungry village, mature harvest, overworked cook, full coop, night scene, or a copy of the current village. These are staged fixtures: subsequent time steps run the real simulation. The cook fixture seeds history and raises its concern on the first tick.
+Economy scenarios **Our first projects**, **An empty shared fund** and **Depleted land** exercise project controls and purchasing recovery. Load a fresh arrival, established village, hungry village, mature harvest, overworked cook, full coop, night scene, or a copy of the current village. These are staged fixtures: subsequent time steps run the real simulation. **Import sandbox checkpoint** replays a validated village export without replacing the saved village; malformed or oversized files leave the current scene intact. The cook fixture seeds history and raises its concern on the first tick.
 
-**Grid & road edges** places roads against every building and home variation. Select Road to show the grid. Foundations, placement previews, selection areas, and road exclusion use the same whole-tile plots, so paths meet foundations without a grass gap. Run `node scripts/verify-grid-foundations.mjs` after building to check the joins, road conflicts, and version 3 save round trips.
+**Grid & road edges** places roads against every building and home variation. Select Road to show the grid. Foundations, placement previews, selection areas, and road exclusion use the same whole-tile plots, so paths meet foundations without a grass gap. Run `node scripts/verify-grid-foundations.mjs` after building to check the joins, road conflicts, and version 3 save round trips. `node scripts/verify-playtest.mjs` checks cancellation identities, persistent house variations, goal routes, desktop zoom and reachable material collection.
 
 The sandbox holds the original game in memory and disables village autosaves, imports, and restarts. **Return to village** restores that game; reloading returns to the last saved village. Export a scenario before leaving if it should be kept. A quarter-second tick advances 0.75 game minutes. Longer advances use the same bounded ticks, up to one game day per action.
 
@@ -180,7 +183,7 @@ Run `npm run dev:check` to check Rust formatting, tests and lint, rebuild WebAss
 
 **Fix camera & pause** prepares comparable canvas captures. **Export diagnostic report** includes the current state, resident diagnostics, and errors observed after Dev Tools initialized. Browser checks also capture the complete interface at desktop sizes.
 
-The browser exposes `window.solarDev` for development automation: `loadScenario(id)`, `advance(gameMinutes)`, `snapshot()`, `inspect()`, `fixedView()`, and `returnToVillage()`. Advancing requires a sandbox. The UI calls this same interface.
+The browser exposes `window.solarDev` for development automation: `loadScenario(id)`, `advance(gameMinutes)`, `snapshot()`, `inspect()`, `fixedView()`, `returnToVillage()`, and `importSandbox(raw)`. Advancing requires a sandbox. The UI calls this same interface.
 
 ## Implementation
 
