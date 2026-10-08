@@ -9,7 +9,7 @@ export function recipeSummary(state,kind){
   return total.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ');
 }
 export function installEconomyUI({snapshot,game,changed,notify,locate,openTown}){
-  const $=s=>document.querySelector(s);let lastProjects='',lastInventory='',lastOrders='',lastLand='';
+  const $=s=>document.querySelector(s);let lastProjects='',lastInventory='',lastOrders='',lastLand='',pickupNoticeOrder=null;
   const transact=result=>{if(result!=='ok')notify(result);else{changed();update();}};
   const materials=snapshot().environment.economy.materials;
   $('#town-catalog').innerHTML=materials.map(m=>`<article class="town-item"><div class="trade-item-art">${itemIcon(materialIcons[m.id])}</div><label for="buy-${m.id}">${m.name}</label><small class="trade-price">${money(m.price)}</small><div class="trade-quantity"><button type="button" data-adjust="-1" aria-label="Remove one ${m.name.toLowerCase()}">−</button><input id="buy-${m.id}" type="number" min="0" max="100" step="1" value="0" aria-label="Order ${m.name}" data-material="${m.id}"><button type="button" data-adjust="1" aria-label="Add one ${m.name.toLowerCase()}">+</button></div></article>`).join('');
@@ -46,12 +46,12 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
   $('#pickup-close').onclick=()=>$('#pickup-dialog').close();
   $('#pickup-dialog').addEventListener('close',()=>$('#town-panel [data-close-panel]').focus());
   $('#pickup-order-driver').onchange=updatePickupDialog;
-  $('#pickup-confirm').onclick=()=>{const id=Number($('#pickup-confirm').dataset.order),driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-order-driver').value),result=game().collect_order(id,Number($('#pickup-order-driver').value));transact(result);if(result==='ok'){$('#pickup-dialog').close();notify(pickupMessage(driver.name));}else updatePickupDialog();};
+  $('#pickup-confirm').onclick=()=>{const id=Number($('#pickup-confirm').dataset.order),driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-order-driver').value),result=game().collect_order(id,Number($('#pickup-order-driver').value));if(result==='ok')pickupNoticeOrder=id;transact(result);if(result==='ok'){$('#pickup-dialog').close();notify(pickupMessage(driver.name));}else updatePickupDialog();};
   $('#town-catalog').addEventListener('input',quote);
   $('#town-catalog').addEventListener('click',event=>{const button=event.target.closest('[data-adjust]');if(!button)return;const input=button.closest('.town-item').querySelector('input');input.value=Math.max(0,Math.min(100,(Number(input.value)||0)+Number(button.dataset.adjust)));quote();});
   $('#town-shortages').onclick=()=>{const e=snapshot().environment.economy;for(let i=0;i<15;i++)$(`[data-material="${i}"]`).value=Math.min(e.shortage[i],100);quote();};
   $('#town-clear').onclick=()=>{for(const input of $('#town-catalog').querySelectorAll('input'))input.value=0;quote();};
-  $('#town-order').onclick=()=>{const pickup=pickupMode(),driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),result=pickup?game().order_supplies_pickup(JSON.stringify(basket()),Number($('#pickup-driver').value)):game().order_supplies(JSON.stringify(basket()));if(result==='ok')$('#town-clear').click();transact(result);if(result==='ok'&&pickup){const message=pickupMessage(driver.name);$('#town-pickup-status').textContent=message;notify(message);}};
+  $('#town-order').onclick=()=>{const pickup=pickupMode(),orderId=snapshot().village.economy.next_order,driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),result=pickup?game().order_supplies_pickup(JSON.stringify(basket()),Number($('#pickup-driver').value)):game().order_supplies(JSON.stringify(basket()));if(result==='ok'){if(pickup)pickupNoticeOrder=orderId;$('#town-clear').click();}transact(result);if(result==='ok'&&pickup)notify(pickupMessage(driver.name));};
   $('#outside-work').onchange=event=>{game().set_outside_work(event.target.checked);changed();update();};
   $('#sell-surplus').onclick=()=>transact(game().sell_surplus(Math.min(20,snapshot().environment.economy.saleable_food)));
   $('#exchange-parts').onclick=()=>transact(game().exchange_parts());
@@ -105,6 +105,8 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
     const landKey=JSON.stringify(v.economy.sources.map(s=>({...s,remaining:Math.floor(s.remaining)})));if(landKey!==lastLand){lastLand=landKey;$('#land-sources').innerHTML=v.economy.sources.map((s,i)=>`<article class="source-row"><div><b>${e.materials[s.material].name}</b><small>${Math.floor(s.remaining)} / ${s.maximum} locally available · ${s.material<=1?(s.restored?'restored · 3 units/day':'managed · 1 unit/day'):'finite deposit'}</small></div>${s.material<=1?`<button data-restore-source="${i}" ${s.restored||v.progress.compost<2?'disabled':''}>${s.restored?'Restored':'Restore · 2 compost'}</button>`:''}</article>`).join('');}
     refreshDrivers($('#pickup-driver'));refreshDrivers($('#pickup-order-driver'));
     if($('#pickup-dialog').open)updatePickupDialog();
+    const notice=v.economy.orders.find(o=>o.id===pickupNoticeOrder&&o.pickup_by!=null),driver=s.residents.find(r=>r.id===notice?.pickup_by);
+    $('#town-pickup-status').textContent=!notice?'':notice.status==='delivered'?`${driver.name} brought our supplies home. They are ready to use.`:driver.trip?.phase==='away'?`${driver.name} is driving to collect supplies · back ${time(notice.arrival)}`:pickupMessage(driver.name);
     quote();spareQuote();
   }
   update();return {update};

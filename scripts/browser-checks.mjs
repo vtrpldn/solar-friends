@@ -78,6 +78,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(pickup.village.economy.orders[0].status,'delivered');
   assert.equal(pickup.environment.economy.materials[12].stored,stockBefore+2);
   assert.equal(pickup.environment.economy.materials[12].incoming,0);
+  assert((await page.locator('#town-pickup-status').textContent()).includes('supplies home'));
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   // An order awaiting dispatch can switch to pickup without paying twice.
   await page.locator('#dev-load').click();await page.locator('#dev-close').click();
