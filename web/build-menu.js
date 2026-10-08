@@ -9,7 +9,7 @@ const groups = [
 
 // Icons use the same corrected artwork as the map. Fit painted bounds, rather
 // than transparent source cells, into a common thumbnail frame and baseline.
-function paintIcon(canvas, kind, image) {
+export function paintIcon(canvas, kind, image, art = buildingArt[kind]) {
   const source = document.createElement('canvas');
   source.width = source.height = 320;
   const ctx = source.getContext('2d');
@@ -23,7 +23,7 @@ function paintIcon(canvas, kind, image) {
     ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = '#dcc098';
     ctx.beginPath(); ctx.moveTo(109, 198); ctx.lineTo(160, 173); ctx.lineTo(211, 198); ctx.stroke();
-  } else drawBuildingArt(ctx, image, buildingArt[kind], 160, 220);
+  } else drawBuildingArt(ctx, image, art, 160, 220);
   const pixels = ctx.getImageData(0, 0, 320, 320).data;
   let left = 320, top = 320, right = 0, bottom = 0;
   for (let y = 0; y < 320; y++) for (let x = 0; x < 320; x++) {

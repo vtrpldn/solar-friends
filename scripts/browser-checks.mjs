@@ -17,7 +17,9 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#main-menu').waitFor({state:'hidden'});
   await page.locator('#pause').click();
   await page.locator('#settings').click();await page.locator('#save').click();await page.locator('#close-settings').click();
-  await page.getByRole('button',{name:'Dev Tools',exact:true}).click();
+  await page.locator('#help').click();
+  await page.locator('#help-dialog .dev-tools summary').click();
+  await page.locator('#help-open-dev').click();
   assert(await page.locator('#dev-dialog').isVisible());
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
@@ -37,6 +39,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(requested.task,'water');assert(requested.requested,'A real click must assign the task');
   await capture('Accepted helping request with paused-time guidance','helping-request.png');
   await page.getByRole('button',{name:'Close resident details',exact:true}).click();
+  await page.getByRole('button',{name:'Village',exact:true}).click();
   await page.getByRole('button',{name:'Buildings',exact:true}).click();
   await page.locator('#building-choice').selectOption('0');
   await page.locator('#building-neighbours [data-visitor="0"]').click();

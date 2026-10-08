@@ -1,3 +1,4 @@
+import {installGameUI} from './game-ui.js';
 import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
 import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
@@ -133,7 +134,7 @@ let game,
   state,
   selected = null,
   tool = null,
-  buildMenu, economyUI,
+  buildMenu, economyUI, gameUI,
   speed = 1,
   paused = false,
   zoom = 1.3,
@@ -155,6 +156,8 @@ let response = "",
 const modeStores = Object.fromEntries(['story','sandbox'].map(mode => [mode,new VillageStorage(undefined,`${SAVE_KEY}-${mode}`)]));
 let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
+const villagePanels = new Set(["building-panel","supplies-panel","projects-panel","town-panel","power-panel"]);
+let lastVillagePanel = "building-panel";
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
 let pendingRemoval = null;
@@ -737,6 +740,8 @@ function render() {
   }
 }
 function closePanels() {
+  $("#village-book").hidden = true;
+  $("#open-village").setAttribute("aria-expanded","false");
   for (const button of document.querySelectorAll("[data-panel]")) {
     $("#" + button.dataset.panel).hidden = true;
     button.setAttribute("aria-expanded", "false");
@@ -748,6 +753,11 @@ function showPanel(id) {
   $("#person").hidden = true;
   if (tool) setTool(null);
   $("#" + id).hidden = false;
+  if(villagePanels.has(id)) {
+    $("#village-book").hidden = false;
+    $("#open-village").setAttribute("aria-expanded","true");
+    lastVillagePanel = id;
+  }
   $(`[data-panel="${id}"]`).setAttribute("aria-expanded", "true");
   $("#" + id).querySelector("button").focus();
   updateUI();
@@ -763,7 +773,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["gather", "Forage food"],
@@ -784,9 +794,9 @@ function selectPerson(id) {
     selected = null;
     $("#person").hidden = true;
     updateUI();
-    showPanel("community-panel");
-    $(`[data-resident="${id}"]`).focus();
+    $(`[data-citizen="${id}"]`).focus();
   };
+  paintPortraits();
   $(".close-person").focus();
   $("#person .requests").onclick = (e) => {
     const b = e.target.closest("[data-task]");
@@ -1021,6 +1031,8 @@ function updateSupplies(v) {
 function updateSituations() {
   const view = situationView(state.village, state.residents);
   $("#situations-label").textContent = view.label;
+  $("#open-situations").dataset.concern=String(!!state.village.situations.active);
+  $("#open-situations").setAttribute("aria-label",view.label);
   replaceMarkup($("#situation-content"), view.markup);
 }
 function openSituations() {
@@ -1030,8 +1042,8 @@ function openSituations() {
 }
 function updateUI() {
   const free = state.village.mode==='sandbox';
-  $('#mode-badge').textContent=free?'Sandbox · free building':'Story';
-  $('#mode-label').textContent=`${free?'SANDBOX':'STORY'} · OUR LITTLE ECOVILA`;
+  $('#mode-badge').textContent=free?'Sandbox':'Story';
+  $('#mode-label').textContent=`${free?'SANDBOX':'STORY'}`;
   $('.goal-tracker').hidden=free;
   $('[data-panel="goals-panel"]').hidden=free;
   $('[data-panel="projects-panel"]').hidden=free;
@@ -1039,7 +1051,7 @@ function updateUI() {
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
   $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Projects tracks construction materials and Town supplies equipment by delivery. Each chapter opens the next part of village life.';
-  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Goals and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Projects; residents build during normal work hours.');
+  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Projects; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1055,19 +1067,7 @@ function updateUI() {
     `Day ${Math.floor(v.minutes / 1440) + 1} · ${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
   const night = mins < 360 || mins >= 1140;
   $(".season-icon").textContent = night ? "☾" : "☀";
-  $(".season small").textContent = night
-    ? "Warm season · quiet night"
-    : mins < 480
-      ? "Morning · breakfast & waking up"
-      : mins < 720
-        ? "Daylight · community work"
-        : mins < 840
-          ? "Midday · lunch & a little rest"
-          : mins < 1050
-            ? "Afternoon · community work"
-            : mins < 1200
-              ? "Evening · dinner together"
-              : "Evening · time to unwind";
+  $(".season small").textContent = state.environment.raining ? 'Rainfall' : mins < 360 || mins >= 1260 ? 'Night' : mins < 720 ? 'Morning' : mins < 1080 ? 'Afternoon' : 'Evening';
   const env = state.environment;
   const gardens = v.buildings.filter(
     (b) => ["garden", "greenhouse"].includes(b.kind) && b.progress >= 100,
@@ -1176,6 +1176,7 @@ function updateUI() {
     button.classList.toggle("active", button.dataset.kind === tool);
     button.setAttribute("aria-pressed", String(button.dataset.kind === tool));
   }
+  gameUI?.update(state,!!sandbox||artworkPreview||!!directScenario,selected);
 }
 function setTool(kind) {
   if (kind && !buildingUnlocked(state.village, kind)) {
@@ -1240,6 +1241,14 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  gameUI=installGameUI({images:buildingImages,avatar,paintPortraits,selectPerson,
+    showPanel,closePanels,openDev:()=>{$('#help-dialog').close();devTools.open();},
+    focusAt:(x,y)=>{const p=iso(x,y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.45-p.y,dt:1/60};},
+    worldView:()=>[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>unproject(x,y,origin,scale))});
+  $('#open-village').onclick=()=>{
+    if(!$('#village-book').hidden){closePanels();return;}
+    showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
+  };
   economyUI=installEconomyUI({snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
@@ -1323,7 +1332,7 @@ function setup() {
       const id = button.closest("[id]").id;
       closePanels();
       if (tool) setTool(null);
-      $(`[data-panel="${id}"]`).focus();
+      $(villagePanels.has(id)?'#open-village':`[data-panel="${id}"]`).focus();
     };
   }
   $("#residents").innerHTML = state.residents
@@ -1541,13 +1550,18 @@ function setup() {
       e.preventDefault();
       togglePause();
     }
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat&&!document.querySelector('dialog[open]')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) {
+      const shortcuts={KeyB:'build-panel',KeyV:$(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel,KeyJ:'goals-panel',KeyP:'community-panel',KeyI:'supplies-panel'};
+      if(shortcuts[e.code]){e.preventDefault();const id=shortcuts[e.code];if(!$(`[data-panel="${id}"]`).hidden)showPanel(id);}
+      if(e.code==='KeyM'){e.preventDefault();if(tool)setTool(null);closePanels();selected=null;$('#person').hidden=true;$('#village-map').focus();}
+    }
     if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
       if (tool) setTool(null);
       else if (selected !== null) $(".close-person").click();
       else {
         const active = document.querySelector('[data-panel][aria-expanded="true"]');
-        closePanels();
-        active?.focus();
+        if(active){const focus=villagePanels.has(active.dataset.panel)?$('#open-village'):active;closePanels();focus.focus();}
+        else openMainMenu();
       }
     }
   });
