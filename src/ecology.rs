@@ -113,11 +113,12 @@ pub fn advance(v: &mut Village, minutes: f32) {
 }
 
 pub fn tend(v: &mut Village, r: &Resident) {
-    let Some(index) = v.buildings.iter().position(|b| {
-        needs_tending(b, v.water)
-            && (b.x as f32 + 0.75 - r.target_x).abs() < 0.2
-            && (b.y as f32 + 0.75 - r.target_y).abs() < 0.2
-    }) else {
+    let building = spacing::building(r, v);
+    let Some(index) = v
+        .buildings
+        .iter()
+        .position(|b| needs_tending(b, v.water) && Some(b.id) == building)
+    else {
         return;
     };
     let capacity = moisture_capacity(&v.buildings[index]);

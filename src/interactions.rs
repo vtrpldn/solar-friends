@@ -3,15 +3,18 @@ use super::*;
 pub fn radius(kind: &str) -> i32 {
     if kind == "square" { 2 } else { 1 }
 }
-pub fn approach(b: &Building, id: usize) -> (f32, f32) {
-    if b.kind == "square" {
-        (b.x as f32 + (id as f32 - 2.) * 0.4, b.y as f32 + 1.0)
-    } else {
-        (b.x as f32 + 0.75, b.y as f32 + 0.75)
-    }
-}
 pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     let b = &v.buildings[index];
+    let Some(point) = spacing::approach(v, b, r.id) else {
+        assign(
+            r,
+            v,
+            "rest",
+            "Taking a break where there is room. That building is too crowded.",
+            requested,
+        );
+        return;
+    };
     assign(
         r,
         v,
@@ -20,7 +23,8 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
         requested,
     );
     r.visit_building = Some(index);
-    (r.target_x, r.target_y) = approach(b, r.id);
+    r.activity_building = Some(index);
+    (r.target_x, r.target_y) = point;
     r.reason = match b.kind.as_str() {
         "home" => "Resting on the porch.",
         "garden" | "greenhouse" => "Checking and tending this garden.",

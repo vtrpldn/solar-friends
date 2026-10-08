@@ -9,6 +9,7 @@ mod interactions;
 mod leisure;
 mod progression;
 mod situations;
+mod spacing;
 mod supplies;
 use progression::Progress;
 
@@ -59,6 +60,8 @@ pub struct Resident {
     pub last_meal_slot: i32,
     #[serde(default)]
     pub visit_building: Option<usize>,
+    #[serde(default)]
+    pub activity_building: Option<usize>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Building {
@@ -193,54 +196,64 @@ fn available(v: &Village, task: &str) -> bool {
 }
 fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
     if task == "water" {
-        return (23., 14. + id as f32 * 0.3);
+        return (22.5, 11. + id as f32 * 1.25);
     }
     if task == "sleep" || task == "rest" {
         return shelter(v, id)
-            .map(|b| (b.x as f32 + 0.75, b.y as f32 + 0.75))
-            .unwrap_or((CAMP.0 + (id as f32 - 2.) * 0.45, CAMP.1));
+            .and_then(|b| {
+                if task == "sleep" {
+                    Some((b.x as f32 + 0.75, b.y as f32 + 0.75))
+                } else {
+                    spacing::approach(v, b, id)
+                }
+            })
+            .unwrap_or((CAMP.0 + (id as f32 - 2.) * 1.25, CAMP.1));
     }
     if task == "gather" && !ready(v, "grove") {
-        return (3. + id as f32 * 0.4, 14.);
+        return (3., 11. + id as f32 * 1.25);
     }
-    let b = v.buildings.iter().find(|b| {
-        if task == "garden" {
-            ecology::needs_tending(b, v.water)
-        } else if task == "build" {
-            b.progress < 100.
-        } else {
-            b.progress >= 100.
-                && b.kind
-                    == match task {
-                        "garden" => "garden",
-                        "cook" | "eat" => "kitchen",
-                        "socialize" if ready(v, "square") => "square",
-                        "socialize" => "kitchen",
-                        "gathering" if ready(v, "square") => "square",
-                        "gathering" => "kitchen",
-                        "compost" => "compost",
-                        "craft" => "workshop",
-                        "water" => "well",
-                        _ => "grove",
-                    }
-        }
-    });
-    b.map(|b| {
-        if b.kind == "square" && matches!(task, "socialize" | "gathering") {
-            return interactions::approach(b, id);
-        }
-        if matches!(task, "eat" | "socialize" | "gathering") {
-            return (
-                b.x as f32 + 0.75 + (id as f32 - 2.) * 0.35,
-                b.y as f32 + 1.4,
-            );
-        }
-        (
-            b.x as f32 + 0.75 + (id % 2) as f32 * 0.15,
-            b.y as f32 + 0.75,
-        )
-    })
-    .unwrap_or((CAMP.0 + (id as f32 - 2.) * 0.45, CAMP.1 + 0.5))
+    destination_building(v, task, id)
+        .and_then(|b| spacing::approach(v, b, id))
+        .unwrap_or((CAMP.0 + (id as f32 - 2.) * 1.25, CAMP.1 + 0.5))
+}
+fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a Building> {
+    let eligible: Vec<_> = v
+        .buildings
+        .iter()
+        .filter(|b| {
+            if task == "garden" {
+                ecology::needs_tending(b, v.water)
+            } else if task == "build" {
+                b.progress < 100.
+            } else {
+                b.progress >= 100.
+                    && b.kind
+                        == match task {
+                            "garden" => "garden",
+                            "cook" | "eat" => "kitchen",
+                            "socialize" if ready(v, "square") => "square",
+                            "socialize" => "kitchen",
+                            "gathering" if ready(v, "square") => "square",
+                            "gathering" => "kitchen",
+                            "compost" => "compost",
+                            "craft" => "workshop",
+                            "water" => "well",
+                            _ => "grove",
+                        }
+            }
+        })
+        .collect();
+    if eligible.is_empty() {
+        return None;
+    }
+    // Small teams can still build together while several projects or gardens
+    // receive attention instead of everyone choosing the first one.
+    let group = if matches!(task, "build" | "garden") {
+        id / 2
+    } else {
+        id
+    };
+    Some(eligible[group % eligible.len()])
 }
 // Each resident has a separate set of quiet spots, spaced three tiles apart.
 // Derive the choice from saved time so loading a village keeps the same routine.
@@ -264,6 +277,13 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
 
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
     r.visit_building = None;
+    r.activity_building = if matches!(task, "sleep" | "rest") {
+        shelter(v, r.id).map(|b| b.id)
+    } else if matches!(task, "idle" | "water" | "visit") || leisure::hobby(task) {
+        None
+    } else {
+        destination_building(v, task, r.id).map(|b| b.id)
+    };
     r.task = task.into();
     r.reason = reason.into();
     r.requested = requested;
@@ -273,6 +293,17 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
+    if task != "sleep"
+        && r.activity_building
+            .is_some_and(|id| spacing::approach(v, &v.buildings[id], r.id).is_none())
+    {
+        r.activity_building = None;
+        r.task = "rest".into();
+        r.reason = "Taking a break where there is room. That building is too crowded.".into();
+        (r.target_x, r.target_y) =
+            idle_destination(v, r.id).unwrap_or((CAMP.0 + (r.id as f32 - 2.) * 1.25, CAMP.1));
+        return;
+    }
     if task == "idle" || leisure::hobby(task) {
         r.remaining = 24. + r.id as f32 * 2.;
         (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((r.x, r.y));
@@ -489,16 +520,25 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             let b = v.buildings.iter().find(|b| {
                 b.kind == "square"
                     && b.progress >= 100.
-                    && (r.x - b.x as f32).abs() <= 2.
-                    && (r.y - b.y as f32).abs() <= 2.
+                    && r.activity_building == Some(b.id)
+                    && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
             })?;
             Some((r.id, b.id))
         })
         .collect();
-    let builders: Vec<(f32, f32)> = people
+    let neighbours: Vec<_> = people
+        .iter()
+        .filter(|r| {
+            !(r.task == "sleep"
+                && shelter(&v, r.id).is_some()
+                && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08)
+        })
+        .map(|r| (r.id, r.x, r.y))
+        .collect();
+    let builders: Vec<usize> = people
         .iter()
         .filter(|r| r.task == "build" && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08)
-        .map(|r| (r.target_x, r.target_y))
+        .filter_map(|r| spacing::building(r, &v))
         .collect();
     for mut r in &mut people {
         let sleeping = r.task == "sleep";
@@ -528,9 +568,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         let dy = r.target_y - r.y;
         let d = dx.hypot(dy);
         if d > 0.08 {
-            let movement = (dt * 0.7).min(d);
-            r.x += dx / d * movement;
-            r.y += dy / d * movement;
+            spacing::walk(&mut r, &neighbours, dt);
             r.energy = (r.energy - dt * 0.035).max(0.);
             continue;
         }
@@ -573,15 +611,13 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             } else {
                 1.
             };
-            let helpers = builders
-                .iter()
-                .filter(|(x, y)| (*x - r.target_x).abs() < 0.2 && (*y - r.target_y).abs() < 0.2)
-                .count();
-            if let Some(b) = v.buildings.iter_mut().find(|b| {
-                b.progress < 100.
-                    && (b.x as f32 + 0.75 - r.target_x).abs() < 0.2
-                    && (b.y as f32 + 0.75 - r.target_y).abs() < 0.2
-            }) {
+            let building = spacing::building(&r, &v);
+            let helpers = builders.iter().filter(|&&id| Some(id) == building).count();
+            if let Some(b) = v
+                .buildings
+                .iter_mut()
+                .find(|b| b.progress < 100. && Some(b.id) == building)
+            {
                 b.contributors |= 1 << r.id;
                 b.progress = (b.progress
                     + dt * if r.favorite == "build" { 2.5 } else { 1.5 }
@@ -745,9 +781,9 @@ impl Game {
                 hunger: 22. + id as f32 * 3.,
                 social: 70.,
                 happiness: 75.,
-                x: 9. + id as f32 * 0.45,
+                x: 7.5 + id as f32 * 1.25,
                 y: 18.5 + id as f32 * 0.15,
-                target_x: CAMP.0 + (id as f32 - 2.) * 0.45,
+                target_x: CAMP.0 + (id as f32 - 2.) * 1.25,
                 target_y: CAMP.1,
                 task: "arrive".into(),
                 reason: "Walking into the clearing with our founding group.".into(),
@@ -755,6 +791,7 @@ impl Game {
                 requested: false,
                 last_meal_slot: -1,
                 visit_building: None,
+                activity_building: None,
             });
         }
         Self { app }
@@ -1094,6 +1131,8 @@ impl Game {
                 || !r.remaining.is_finite()
                 || !(0.0..=100.).contains(&r.remaining)
                 || r.visit_building.is_some_and(|id| id >= v.buildings.len())
+                || r.activity_building
+                    .is_some_and(|id| id >= v.buildings.len())
                 || !TASKS.contains(&r.task.as_str())
         }) {
             return false;
