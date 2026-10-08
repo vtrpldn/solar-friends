@@ -1,3 +1,4 @@
+import { installBuildMenu } from './build-menu.js';
 import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
@@ -121,6 +122,7 @@ let game,
   state,
   selected = null,
   tool = null,
+  buildMenu,
   speed = 1,
   paused = false,
   zoom = 1.3,
@@ -992,11 +994,12 @@ function updateUI() {
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
     button.classList.toggle("locked", !unlocked);
+    button.classList.toggle("unaffordable", v.wood < kinds[button.dataset.kind][1]);
     const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[
       button.dataset.kind
     ];
     button.querySelector("small").textContent = unlocked
-      ? button.dataset.kind === "road" ? "Free" : `⌁ ${kinds[button.dataset.kind][1]}`
+      ? button.dataset.kind === "road" ? "Free" : `${kinds[button.dataset.kind][1]} timber`
       : "Quest reward";
     button.title = unlocked
       ? kinds[button.dataset.kind][2]
@@ -1016,6 +1019,7 @@ function setTool(kind) {
     openJournal();
     return;
   }
+  if (kind) buildMenu.reveal(kind);
   if (kind && $("#build-panel").hidden) {
     closePanels();
     $("#person").hidden = true;
@@ -1158,12 +1162,7 @@ function setup() {
     const b = e.target.closest("[data-resident]");
     if (b) selectPerson(+b.dataset.resident);
   };
-  $("#tools").innerHTML = Object.entries(kinds)
-    .map(
-      ([kind, [name, cost, desc]]) =>
-        `<button class="build-tool" data-kind="${kind}" title="${desc}" aria-label="Build ${name}, ${cost} timber" aria-pressed="false"><span class="tool-art"></span><b>${name}</b><small>⌁ ${cost}</small></button>`,
-    )
-    .join("");
+  buildMenu = installBuildMenu(kinds, buildingImages, () => { if (tool) setTool(null); });
   $("#tools").onclick = (e) => {
     const b = e.target.closest("[data-kind]");
     if (b) setTool(b.dataset.kind);
