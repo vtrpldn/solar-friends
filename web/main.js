@@ -6,6 +6,7 @@ import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
 import { installBuildMenu } from './build-menu.js';
 import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
+import { drawNightEmission } from './night-lighting.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
@@ -710,13 +711,9 @@ function render() {
     for(const b of state.village.buildings){
       if(b.progress<100)continue;
       const c=state.environment.power.connections.find(c=>c.id===b.id);
-      if(c?.source!=='grid' || c.light_level<=0)continue;
-      const p=iso(b.x,b.y),lamp=b.kind==='streetlight';
-      const radius=(lamp?42:25)*scale,cy=p.y+(lamp?0:4*scale);
-      ctx.save();ctx.translate(p.x,cy);ctx.scale(1,.5);
-      const glow=ctx.createRadialGradient(0,0,0,0,0,radius);
-      glow.addColorStop(0,`rgba(255,214,118,${darkness*c.light_level*(lamp?.38:.15)})`);glow.addColorStop(1,'rgba(255,214,118,0)');
-      ctx.fillStyle=glow;ctx.fillRect(-radius,-radius,radius*2,radius*2);ctx.restore();
+      if(!['grid','roof'].includes(c?.source) || c.light_level<=0)continue;
+      const p=iso(b.x,b.y),kind=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
+      drawNightEmission(ctx,nightBuildingImages[kind],allBuildingArt[kind],kind,p.x,p.y,scale,darkness*c.light_level);
     }
   }
   if (darkness > 0) {

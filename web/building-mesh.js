@@ -26,7 +26,7 @@ const cache=new WeakMap();
 export function buildingTexture(image,mesh){
   if(!mesh)return image;
   if(cache.has(image))return cache.get(image);
-  const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+  const canvas=document.createElement('canvas');canvas.width=image.naturalWidth??image.width;canvas.height=image.naturalHeight??image.height;
   const ctx=canvas.getContext('2d'),scale=canvas.width/mesh.size;
   for(const triangle of mesh.triangles){
     const source=triangle.map(i=>mesh.source[i]),target=triangle.map(i=>mesh.target[i]);

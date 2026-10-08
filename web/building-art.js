@@ -63,7 +63,9 @@ export function cameraCalibration(art) {
   return { vertical, shear: slope - vertical * right };
 }
 export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
-  if (!image?.complete || !image.naturalWidth) return;
+  const sourceWidth = image?.naturalWidth ?? image?.width;
+  const sourceHeight = image?.naturalHeight ?? image?.height;
+  if (!sourceWidth || !sourceHeight || image.complete === false) return;
   const [cx, cy, cw, ch] = art.cell || [0, 0, 1, 1];
   const w = art.width * scale;
   const { vertical, shear } = cameraCalibration(art);
@@ -71,8 +73,8 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   ctx.globalAlpha *= alpha;
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
-  ctx.drawImage(buildingTexture(image, art.mesh), cx * image.naturalWidth, cy * image.naturalHeight,
-    cw * image.naturalWidth, ch * image.naturalHeight,
+  ctx.drawImage(buildingTexture(image, art.mesh), cx * sourceWidth, cy * sourceHeight,
+    cw * sourceWidth, ch * sourceHeight,
     -w / 2, -w * art.anchor, w, w);
   ctx.restore();
 }
