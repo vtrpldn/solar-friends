@@ -609,9 +609,9 @@ function render() {
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
   const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
-  const key = JSON.stringify(visibleRoads);
+  const key = JSON.stringify([visibleRoads,state.village.economy.sources.map(s=>[s.x,s.y])]);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, visibleRoads);
+    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources);
     groundKey = key;
   }
   ctx.save();

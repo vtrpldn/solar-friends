@@ -1,4 +1,5 @@
 import { unlitFilter } from '../power.js';
+import {drawEconomySprite} from '../economy-art.js';
 import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
 import { chickenFrame } from '../chickens.js?v=painted-hens-1';
 import { drawPreparedFrame, animationFrameOptions } from '../sprite-frames.js';
@@ -56,6 +57,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   }
   function paint(ctx, img, sprite, x, y, zoom = 1) {
     if (!img?.naturalWidth) return;
+    if(sprite.group==='Land & supplies')return drawEconomySprite(ctx,img,sprite,x,y,zoom);
     if (sprite.building) return drawBuildingArt(ctx,img,sprite,x,y,zoom);
     if (sprite.portrait) return drawPreparedFrame(ctx,img,8,x,y,sprite.width*zoom,{referenceRow:2});
     if (sprite.animation) return drawPreparedFrame(ctx,img,Number($('replacement-row').value)*4+Number($('replacement-frame').value),x,y,sprite.width*zoom,animationFrameOptions(sprite));
