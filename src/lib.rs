@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 mod devtools;
 mod ecology;
 mod interactions;
+mod leisure;
 mod progression;
 mod situations;
 mod supplies;
@@ -30,6 +31,11 @@ const TASKS: &[&str] = &[
     "compost",
     "craft",
     "gathering",
+    "nature_walk",
+    "birdwatch",
+    "stretch",
+    "daydream",
+    "stargaze",
 ];
 
 #[derive(Component, Clone, Serialize, Deserialize)]
@@ -167,7 +173,7 @@ fn meal_slot(minutes: f32) -> Option<i32> {
 }
 fn work_time(minutes: f32) -> bool {
     let m = minutes % 1440.;
-    (480.0..750.).contains(&m) || (840.0..1050.).contains(&m)
+    (540.0..720.).contains(&m) || (900.0..960.).contains(&m)
 }
 fn available(v: &Village, task: &str) -> bool {
     match task {
@@ -267,16 +273,8 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
-    if task == "idle" {
-        r.reason = match r.favorite.as_str() {
-            "garden" => "Taking a quiet walk to look at the plants.",
-            "build" => "Sketching ideas for something we could build.",
-            "cook" => "Humming a tune and thinking up new recipes.",
-            "gather" => "Watching birds around the clearing.",
-            _ => "Finding a peaceful spot to sit and daydream.",
-        }
-        .into();
-        r.remaining = 16. + r.id as f32 * 3.;
+    if task == "idle" || leisure::hobby(task) {
+        r.remaining = 24. + r.id as f32 * 2.;
         (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((r.x, r.y));
     } else {
         (r.target_x, r.target_y) = destination(v, task, r.id);
@@ -312,26 +310,16 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if situations::apply_agreement(r, v) {
         return;
-    } else if !work_time(v.minutes) {
-        if r.social < 75. {
-            (
-                "socialize",
-                "Work can wait. Let's spend some time together.",
-            )
-        } else {
-            (
-                "idle",
-                "Taking a quiet moment before the next part of the day.",
-            )
-        }
-    } else if v.food < 6. && v.meals < 5 {
+    } else if supplies::urgent(v) {
         ("gather", "Foraging wild food to keep everyone fed.")
+    } else if !work_time(v.minutes) {
+        leisure::choose(r, v)
     } else if v.water < 24. && available(v, "water") {
         ("water", "Carrying river water back to our storage.")
-    } else if v.meals < 5
+    } else if supplies::needs_meals(v)
         && available(v, "cook")
         && !situations::protected(v, r.id, "cook")
-        && (r.favorite == "cook" || r.hunger > 55. || situations::helping(v, r.id))
+        && (r.id == (v.minutes / 1440.) as usize % 5 || v.meals < 3 || situations::helping(v, r.id))
     {
         (
             "cook",
@@ -341,7 +329,17 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Preparing a pot of food for everyone."
             },
         )
-    } else if available(v, "garden") {
+    } else if available(v, "build") && r.favorite == "build" {
+        (
+            "build",
+            "A little progress on our shared project before taking a break.",
+        )
+    } else if r.favorite == "gather" && v.wood < 48. {
+        (
+            "gather",
+            "Collecting a little timber for our shared projects.",
+        )
+    } else if supplies::needs_ingredients(v) && available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && (r.favorite == "build" || r.id.is_multiple_of(2)) {
         ("build", "Let's get our basic infrastructure ready.")
@@ -350,9 +348,12 @@ fn choose(r: &mut Resident, v: &Village) {
             "compost",
             "Turning kitchen scraps into nourishment for our soil.",
         )
-    } else if ready(v, "grove") && v.progress.fruit < 6 {
-        ("gather", "Gathering the first fruit from our food forest.")
-    } else if v.wood < 90. {
+    } else if supplies::needs_ingredients(v) {
+        (
+            "gather",
+            "Gathering a little fresh food for the next few meals.",
+        )
+    } else if v.wood < 64. {
         ("gather", "Collecting fallen timber for our next building.")
     } else if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
         ("craft", "Making tools for our next shared project.")
@@ -361,19 +362,8 @@ fn choose(r: &mut Resident, v: &Village) {
     } else if r.social < 55. {
         ("socialize", "A little company would be good.")
     } else {
-        (
-            "idle",
-            "Our immediate needs are met. Enjoying the clearing.",
-        )
+        leisure::choose(r, v)
     };
-    if task == "idle" {
-        let buildings: Vec<_> = v.buildings.iter().filter(|b| b.progress >= 100.).collect();
-        if !buildings.is_empty() {
-            let index = ((v.minutes / 60.) as usize + r.id) % buildings.len();
-            interactions::start(r, v, buildings[index].id, false);
-            return;
-        }
-    }
     assign(r, v, task, reason, false);
 }
 fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Option<String> {
@@ -515,8 +505,22 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
         v.water = (v.water - dt * if sleeping { 0.002 } else { 0.009 }).max(0.);
+        let chores_finished = !r.requested
+            && !work_time(v.minutes)
+            && matches!(
+                r.task.as_str(),
+                "build" | "garden" | "water" | "cook" | "compost" | "craft" | "gather" | "visit"
+            )
+            && !(r.task == "gather" && supplies::urgent(&v));
+        let chores_start = !r.requested
+            && work_time(v.minutes)
+            && !work_time(before)
+            && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
         if r.task != "arrive"
-            && (sleeping_time(v.minutes, r.id) != (r.task == "sleep") || r.remaining <= 0.)
+            && (sleeping_time(v.minutes, r.id) != (r.task == "sleep")
+                || r.remaining <= 0.
+                || chores_finished
+                || chores_start)
         {
             choose(&mut r, &v);
         }
@@ -550,10 +554,14 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 r.social = (r.social + dt * 1.3).min(100.);
                 r.energy = (r.energy + dt * 0.12).min(100.);
             }
+            task if leisure::hobby(task) => {
+                r.energy = (r.energy + dt * 0.3).min(100.);
+            }
             "idle" | "eat" => r.energy = (r.energy + dt * 0.08).min(100.),
             _ => r.energy = (r.energy - dt * 0.11).max(0.),
         }
-        if matches!(r.task.as_str(), "rest" | "socialize" | "gathering") {
+        if leisure::hobby(&r.task) || matches!(r.task.as_str(), "rest" | "socialize" | "gathering")
+        {
             situations::recovered(&mut v, r.id, dt * MINUTES_PER_SECOND);
         }
         if r.task == "gathering" && v.progress.gathering_until > v.minutes {
@@ -616,24 +624,27 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     }
                 }
                 "gather" => {
-                    let timber = if r.favorite == "gather" { 6 } else { 4 }
-                        + if progression::use_tool(&mut v) { 2 } else { 0 };
-                    v.wood += timber as f32;
-                    v.progress.timber = v.progress.timber.saturating_add(timber);
-                    if ready(&v, "grove") {
+                    if r.requested || v.wood < 64. {
+                        let timber = if r.favorite == "gather" { 6 } else { 4 }
+                            + if progression::use_tool(&mut v) { 2 } else { 0 };
+                        v.wood += timber as f32;
+                        v.progress.timber = v.progress.timber.saturating_add(timber);
+                    }
+                    if supplies::needs_ingredients(&v) || (r.requested && ready(&v, "grove")) {
                         v.food += 2.;
                         v.supplies.gathered += 2.;
-                        v.progress.fruit = v.progress.fruit.saturating_add(2);
-                    } else if v.food < 6. {
-                        v.food += 2.;
-                        v.supplies.gathered += 2.;
+                        if ready(&v, "grove") {
+                            v.progress.fruit = v.progress.fruit.saturating_add(2);
+                        }
                     }
                 }
-                "garden" => ecology::tend(&mut v, &r),
+                "garden" if r.requested || supplies::needs_ingredients(&v) => {
+                    ecology::tend(&mut v, &r)
+                }
                 "water" if v.water < ecology::capacity(&v) => {
                     v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
-                "cook" if supplies::can_cook(&v) => {
+                "cook" if supplies::can_cook(&v) && (r.requested || supplies::needs_meals(&v)) => {
                     supplies::cook(&mut v);
                     situations::cooked(&mut v, r.id);
                 }
@@ -1191,10 +1202,9 @@ mod tests {
         let later: Save = serde_json::from_str(&g.snapshot()).unwrap();
         for residents in [&initial.residents, &later.residents] {
             for (i, r) in residents.iter().enumerate() {
-                assert_eq!(r.task, "idle");
+                assert!(leisure::hobby(&r.task));
                 for other in &residents[i + 1..] {
                     assert!((r.target_x - other.target_x).hypot(r.target_y - other.target_y) >= 3.);
-                    assert_ne!(r.reason, other.reason);
                 }
             }
         }
@@ -1393,7 +1403,8 @@ mod tests {
             ("kitchen", 10, 10),
             ("home", 12, 7),
         ] {
-            for _ in 0..400 {
+            // Timber may wait for tomorrow's short chore window.
+            for _ in 0..4800 {
                 if g.app.world().resource::<Village>().wood >= cost(k).unwrap() {
                     break;
                 }
@@ -1402,7 +1413,7 @@ mod tests {
             assert_eq!(g.place(k, x, y), "ok");
             advance(&mut g, 85.);
         }
-        advance(&mut g, 650.);
+        advance(&mut g, 1920.);
         let v = g.app.world().resource::<Village>();
         assert!(v.buildings.iter().all(|b| b.progress >= 100.));
         assert!(v.harvests > 0);

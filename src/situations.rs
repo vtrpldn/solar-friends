@@ -144,6 +144,7 @@ pub fn protected(v: &Village, id: usize, task: &str) -> bool {
         && s.resident == id
         && (task == "cook"
             || (s.response == Some(Response::DayOff)
+                && !crate::leisure::hobby(task)
                 && !matches!(
                     task,
                     "rest" | "sleep" | "eat" | "socialize" | "gathering" | "idle"

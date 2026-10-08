@@ -6,6 +6,7 @@ export const scenarios = [
   { id: 'cook', name: 'Overworked cook', detail: 'Staged cooking history across two days; one tick raises the real concern.' },
   { id: 'coop', name: 'Full coop', detail: 'Three hens, a fed batch almost complete, and room for eggs.' },
   { id: 'night', name: 'Night lighting', detail: 'All buildings at 21:00, with the normal night renderer.' },
+  { id: 'leisure', name: 'A relaxed afternoon', detail: 'A modest pantry and content neighbours. Advance to see their hobbies, then evening stargazing.' },
 ];
 // Fixtures are deliberately staged. Real ticks, requests, and systems run after loading.
 export function makeScenario(id, fresh, established) {
@@ -27,6 +28,7 @@ export function makeScenario(id, fresh, established) {
     for (const r of state.residents) r.hunger = 85;
   }
   if (id === 'harvest') {
+    v.food = 12; v.meals = 5;
     const garden = v.buildings.find(b => b.kind === 'garden');
     Object.assign(garden.crop, { planted: true, kind: 'lettuce', next_kind: 'lettuce', growth: 180, moisture: 180, harvests: 0 });
     const r = state.residents.find(r => r.id === 0);
@@ -35,6 +37,11 @@ export function makeScenario(id, fresh, established) {
   if (id === 'cook') v.situations.cooking = [[0,0,4,0,0],[0,0,4,0,0],[0,0,0,0,0]];
   if (id === 'coop') v.buildings.find(b => b.kind === 'coop').poultry.remaining = .75;
   if (id === 'night') v.minutes = 1440 + 1260;
+  if (id === 'leisure') {
+    v.minutes = 1440 + 810;
+    v.food = 18; v.meals = 8;
+    for (const r of state.residents) r.last_meal_slot = 4;
+  }
   return state;
 }
 export function advanceGame(game, minutes) {

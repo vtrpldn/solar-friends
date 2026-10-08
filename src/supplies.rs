@@ -1,6 +1,16 @@
 //! Gentle food production: fed hens lay eggs; kitchens stretch ingredients.
 use super::*;
 
+pub fn urgent(v: &Village) -> bool {
+    v.food < 4. && v.meals < 3
+}
+pub fn needs_ingredients(v: &Village) -> bool {
+    v.food < 18. && v.food + (v.meals as f32) < 30.
+}
+pub fn needs_meals(v: &Village) -> bool {
+    v.meals < 8
+}
+
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct Poultry {
     pub remaining: f32,
@@ -51,22 +61,30 @@ pub fn advance(v: &mut Village, minutes: f32) {
     if elapsed == 0. {
         return;
     }
+    // Reserve space for fed batches too, so several coops cannot overproduce.
+    let mut reserved_eggs = v.supplies.eggs
+        + 3 * v
+            .buildings
+            .iter()
+            .filter(|b| b.kind == "coop" && b.progress >= 100. && b.poultry.remaining > 0.)
+            .count() as u32;
     for b in &mut v.buildings {
         if b.kind != "coop" || b.progress < 100. {
             continue;
         }
         if b.poultry.remaining <= 0. {
             // Keep six ingredients for residents, and avoid wasting feed at capacity.
-            if !v.supplies.feed_hens || v.food < 9. || v.supplies.eggs >= 60 {
+            if !v.supplies.feed_hens || v.food < 9. || reserved_eggs + 3 > 12 {
                 continue;
             }
             v.food -= 3.;
             v.supplies.used += 3.;
             b.poultry.remaining = 720.;
+            reserved_eggs += 3;
         }
         b.poultry.remaining = (b.poultry.remaining - elapsed).max(0.);
         if b.poultry.remaining == 0. {
-            let laid = 3.min(60 - v.supplies.eggs);
+            let laid = 3.min(12u32.saturating_sub(v.supplies.eggs));
             v.supplies.eggs += laid;
             v.supplies.eggs_laid += laid;
         }
@@ -150,6 +168,27 @@ mod tests {
         v.buildings[0].progress = 99.;
         run(&mut v, 10);
         assert_eq!(v.food, food);
+    }
+    #[test]
+    fn several_coops_reserve_only_a_dozen_eggs_and_keep_legacy_surplus() {
+        let mut v = coop();
+        v.food = 100.;
+        let building = v.buildings[0].clone();
+        for id in 1..6 {
+            let mut b = building.clone();
+            b.id = id;
+            v.buildings.push(b);
+        }
+        run(&mut v, 720);
+        assert_eq!(v.supplies.eggs, 12);
+        assert_eq!(v.food, 88.);
+        run(&mut v, 2880);
+        assert_eq!(v.supplies.eggs, 12);
+        assert_eq!(v.food, 88.);
+        v.supplies.eggs = 60;
+        run(&mut v, 1440);
+        assert_eq!(v.supplies.eggs, 60);
+        assert_eq!(v.food, 88.);
     }
     #[test]
     fn recipes_account_for_inputs_and_fallback() {

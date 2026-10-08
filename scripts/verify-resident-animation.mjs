@@ -9,6 +9,11 @@ for (const task of ['idle','socialize','gathering']) {
 }
 for (const task of ['rest','eat']) assert.equal(residentActivity({...resident,task},0),'sit');
 assert.equal(residentActivity({...resident,task:'sleep'},0),'sleep');
+for (const task of ['birdwatch','nature_walk','stargaze']) assert.equal(residentActivity({...resident,task},0),'look');
+assert.equal(residentActivity({...resident,task:'daydream'},0),'sit');
+assert.equal(residentActivity({...resident,task:'stretch'},8),'stretch');
+assert.equal(residentActivity({...resident,task:'stretch'},16),'breathe');
+for (const task of ['birdwatch','nature_walk','stargaze','daydream','stretch']) assert.equal(residentActivity({...resident,task,target_x:12},0),'walk');
 assert.equal(residentActivity({...resident,target_x:12,task:'rest'},0),'walk');
 for (const mode of Object.keys(residentClips)) {
   for (let step=0;step<800;step++) {

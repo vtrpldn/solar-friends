@@ -23,6 +23,9 @@ export const idleLabels = {
 export function residentActivity(r, minutes) {
   if (Math.hypot(r.target_x - r.x, r.target_y - r.y) > .1) return 'walk';
   if (r.task === 'sleep') return 'sleep';
+  if (r.task === 'daydream') return 'sit';
+  if (['birdwatch', 'stargaze', 'nature_walk'].includes(r.task)) return 'look';
+  if (r.task === 'stretch') return Math.floor(minutes / 8) % 2 ? 'stretch' : 'breathe';
   if (['rest', 'eat'].includes(r.task)) return 'sit';
   if (['build', 'craft'].includes(r.task)) return 'work';
   if (r.task === 'cook') return 'cook';

@@ -49,7 +49,7 @@ const kinds = {
   garden: ["Garden", 12, "Plant, water, grow, then harvest"],
   kitchen: ["Kitchen", 40, "Meals taste better together"],
   well: ["Cistern", 18, "Catch rainfall · store 75 more water"],
-  grove: ["Food forest", 14, "Gather two fruit with every timber trip"],
+  grove: ["Food forest", 14, "Gather fresh fruit when the pantry needs it"],
   compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
   square: ["Square", 36, "Gatherings bring neighbours closer"],
   coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
@@ -64,13 +64,18 @@ const tasks = {
   rest: "Resting in the shade",
   garden: "Tending the garden",
   build: "Building together",
-  gather: "Gathering timber",
+  gather: "Gathering supplies",
   cook: "Making a shared meal",
   water: "Collecting river water",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
+  nature_walk: "Enjoying a nature walk",
+  birdwatch: "Watching the birds",
+  stretch: "Enjoying gentle stretches",
+  daydream: "Sitting and daydreaming",
+  stargaze: "Watching the stars",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const buildingImages = Object.fromEntries(Object.entries(allBuildingArt).map(([kind, art]) => {
@@ -841,17 +846,18 @@ function updateSupplies(v) {
   const fed = coops.filter(b => b.poultry.remaining > 0);
   const days = (v.food + v.meals) / 15;
   $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
-  $("#pantry-outlook").textContent = `${days < 1 ? "Pantry running low. " : ""}About ${days.toFixed(1)} days of food at 15 portions/day, before cooking gains, hen feed, or new harvests.`;
+  $("#pantry-outlook").textContent = `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of food before cooking gains or hen feed. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
   $("#kitchen-status").textContent = !v.buildings.some(b => b.kind === "kitchen" && b.progress >= 100)
     ? "Build a kitchen to stretch your harvest into meals."
+    : v.meals >= 8 ? "Enough meals for now. The kitchen can take a break."
     : v.water < 1 ? "Cooking needs water. Residents can collect it from the river."
     : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
     : s.use_eggs && s.eggs >= 2 ? "Next pot: egg meals. Residents cook when meals are running low." : "Next pot: simple meals. Residents cook when meals are running low.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
-    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs >= 60 ? "Egg storage is full." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
+    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
 }
 function updateSituations() {

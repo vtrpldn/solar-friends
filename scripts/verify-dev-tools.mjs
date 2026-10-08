@@ -19,6 +19,7 @@ for(const scenario of scenarios) {
   assert.equal(after.village.minutes,minute+.75);
   if(scenario.id==='cook') assert.equal(after.village.situations.active.resident,2);
   if(scenario.id==='coop') assert.equal(after.village.supplies.eggs,3);
+  if(scenario.id==='leisure') assert(after.residents.every(r=>['nature_walk','birdwatch','stretch','daydream'].includes(r.task)));
   assert(g.restore(g.snapshot()),'scenario must remain save-valid');
 }
 const before = g.snapshot();
@@ -42,7 +43,7 @@ assert.deepEqual(measureAlpha(pixels,4,4).bounds,[2,1,2,1]);
 assert.equal(compareAlpha(pixels,pixels),1);
 assert.equal(compareAlpha(pixels,new Uint8ClampedArray(pixels.length)),0);
 g.free();
-console.log('PASS: all seven validated scenarios, exact stepping, real concern and eggs, read-only diagnostics and alpha measurements');
+console.log(`PASS: all ${scenarios.length} validated scenarios, exact stepping, real hobbies, concern and eggs, read-only diagnostics and alpha measurements`);
 
 execFileSync(process.execPath,['scripts/sync-art-prompts.mjs','--check']);
 const draft = { version:1,asset:'coop',config:{width:100,anchor:.75,axes:[.5,-.5]},candidate:null };
