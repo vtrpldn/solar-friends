@@ -1,0 +1,29 @@
+{
+  "reviewed": "2026-10-08",
+  "scope": "All 13 building variants, day and night. Ground-plane structural directions use the game orthographic slopes +0.5 and -0.5. Organic grove excluded from straight-edge measurements.",
+  "method": "Hand-traced structural landmarks, shared game renderer, day/night visual review. Per-edge tolerance 2 pixels at zoom 1. These are raster illustration tolerances, not a claim that every painted detail has exact geometry. PNG hashes require renewed review after any source replacement.",
+  "files": {
+    "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+    "cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "compost-isometric-night.png": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+    "compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "coop-isometric-night.png": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+    "coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "garden-simple-isometric-night.png": "63f00e1ed22e677d962b506a510ce8c48bc2e1a5bcbc3d3b2cb68f1f59c9e72f",
+    "garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "greenhouse-isometric-night.png": "0765160786340f40ff8300c138aaff787d41aa572c156401a06ff2a7e133fa45",
+    "greenhouse-isometric.png": "81ea84c91afdc625f415a375b21e802ee5b5430f7219c98668c1434fe6bb1fe4",
+    "home-courtyard-night.png": "12aec649596f296dd0904266a2247ee6b78197d476c4e2f61169acca3ec07205",
+    "home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "home-gable-night.png": "3385f279c694fb380dac3469ea18f36dff26cca0e5720700e88235cb2bde2740",
+    "home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "home-veranda-night.png": "3a9e0e11fc2cd8bc81b415007a16b7d012d60e214d5f26782b52327ef51c5e3b",
+    "home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "square-isometric-night.png": "fb068f69ae5749a3ce52517e0a746b04b55127905b37a87255dffeacc0135f67",
+    "square-isometric.png": "4bda771313b6ea54200e9dbc214f3073c4ea83a4ef8ed6190ff980183b0d71fa",
+    "village-atlas-isometric-night.png": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+    "village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "workshop-isometric-night.png": "cfd3713369ac4e999f2994c43001e95f6bc0c04bd25908c09cc6f22469096574",
+    "workshop-isometric.png": "b0479e0f929831a1842928829640135e4668f311fafc496e7cf5ab1d0e637db5"
+  }
+}

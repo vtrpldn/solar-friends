@@ -3,26 +3,34 @@
 // Axis calibration keeps verticals vertical and maps the two measured ground
 // directions to the same +/- 1/2 slopes used by projection.js.
 import { TILE_HALF_HEIGHT, TILE_HALF_WIDTH } from './projection.js';
+import { measuredAxes } from './building-projection.js';
+import { pergolaMesh, buildingTexture } from './building-mesh.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
-  home: { name: 'Home', file: atlas, cell: [0, 0, .5, .5], width: 179.36, anchor: .70, axes: [.50, -.50] },
-  kitchen: { name: 'Kitchen', file: atlas, cell: [.5, 0, .5, .5], width: 179.36, anchor: .70, axes: [.58, -.58] },
+  home: { name: 'Home', file: atlas, cell: [0, 0, .5, .5], width: 179.36, anchor: .70 },
+  kitchen: { name: 'Kitchen', file: atlas, cell: [.5, 0, .5, .5], width: 179.36, anchor: .70 },
   grove: { name: 'Banana grove', file: atlas, cell: [.5, .5, .5, .5], width: 123.9, anchor: .74 },
-  garden: { name: 'Garden', file: 'garden-simple-isometric.png', width: 140.42, anchor: .52, axes: [.55, -.55] },
-  greenhouse: { name: 'Greenhouse', file: 'greenhouse-isometric.png', width: 188, anchor: .66, axes: [.55, -.50] },
-  well: { name: 'Cistern', file: 'cistern-isometric.png', width: 77, anchor: .82, axes: [.55, -.55] },
-  compost: { name: 'Compost station', file: 'compost-isometric.png', width: 78, anchor: .75, axes: [.60, -.60] },
-  square: { name: 'Community square', file: 'square-isometric.png', width: 172, anchor: .73, axes: [.50, -.50] },
-  workshop: { name: 'Workshop', file: 'workshop-isometric.png', width: 158, anchor: .81, axes: [.52, -.42] },
-  coop: { name: 'Chicken coop', file: 'coop-isometric.png', width: 100, anchor: .76, axes: [.55, -.40] },
+  garden: { name: 'Garden', file: 'garden-simple-isometric.png', width: 140.42, anchor: .52 },
+  greenhouse: { name: 'Greenhouse', file: 'greenhouse-isometric.png', width: 188, anchor: .66 },
+  well: { name: 'Cistern', file: 'cistern-isometric.png', width: 77, anchor: .82 },
+  compost: { name: 'Compost station', file: 'compost-isometric.png', width: 78, anchor: .75 },
+  square: { name: 'Community square', file: 'square-isometric.png', width: 172, anchor: .73 },
+  workshop: { name: 'Workshop', file: 'workshop-isometric.png', width: 158, anchor: .81 },
+  coop: { name: 'Chicken coop', file: 'coop-isometric.png', width: 100, anchor: .76 },
 };
 // Visual variants share the home simulation kind, cost, beds and footprint.
 export const homeVariants = {
-  'home-veranda': { name:'Home · veranda', file:'home-veranda.png', width:158, anchor:.70, axes:[.50,-.50] },
-  'home-gable': { name:'Home · gable', file:'home-gable.png', width:164, anchor:.68, axes:[.50,-.50] },
-  'home-courtyard': { name:'Home · entry terrace', file:'home-courtyard.png', width:156, anchor:.70, axes:[.50,-.50] },
+  'home-veranda': { name:'Home · veranda', file:'home-veranda.png', width:158, anchor:.70 },
+  'home-gable': { name:'Home · gable', file:'home-gable.png', width:164, anchor:.68 },
+  'home-courtyard': { name:'Home · entry terrace', file:'home-courtyard.png', width:156, anchor:.70 },
 };
 export const allBuildingArt = {...buildingArt,...homeVariants};
+for (const [key, art] of Object.entries(allBuildingArt)) {
+  const axes=measuredAxes(key);
+  if(axes)art.axes=axes;
+}
+allBuildingArt.square.mesh=pergolaMesh;
+allBuildingArt.square.axes=[.5,-.5];
 export const homeArtKeys = ['home', ...Object.keys(homeVariants)];
 export function buildingArtKey(building, buildings) {
   if(building.kind!=='home')return building.kind;
@@ -54,7 +62,7 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   ctx.globalAlpha *= alpha;
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
-  ctx.drawImage(image, cx * image.naturalWidth, cy * image.naturalHeight,
+  ctx.drawImage(buildingTexture(image, art.mesh), cx * image.naturalWidth, cy * image.naturalHeight,
     cw * image.naturalWidth, ch * image.naturalHeight,
     -w / 2, -w * art.anchor, w, w);
   ctx.restore();
