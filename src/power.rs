@@ -137,6 +137,16 @@ mod tests {
     use super::*;
     fn village() -> Village {
         let mut game = Game::new();
+        game.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        game.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .later_completed = [true; 3];
         assert_eq!(game.place("solar_farm", 5, 5), "ok");
         assert_eq!(game.place("streetlight", 10, 5), "ok");
         assert_eq!(game.place("home", 14, 5), "ok");

@@ -146,6 +146,11 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         .world_mut()
         .resource_mut::<Village>()
         .progress
+        .completed = [true, true, true, false];
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .progress
         .completed[0] = true;
     assert_eq!(g.place("home", 8, 8), "ok");
     let v = g.app.world().resource::<Village>().clone();
@@ -209,6 +214,11 @@ fn tools_cost_timber_and_can_be_conserved() {
 #[test]
 fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
     let mut g = setup();
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .progress
+        .completed[1] = true;
     ready_building(&mut g, "kitchen", 10, 10);
     g.app
         .world_mut()
@@ -269,7 +279,7 @@ fn old_saves_gain_defaults_and_invalid_progress_is_rejected_atomically() {
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 0);
     let before = g.snapshot();
     for (key, value) in [
-        ("tracked", 4),
+        ("tracked", 7),
         ("social_mask", 32),
         ("tool_uses", 37),
         ("gathering_until", 999999),

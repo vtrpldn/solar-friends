@@ -88,6 +88,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
             let laid = 3.min(12u32.saturating_sub(v.supplies.eggs));
             v.supplies.eggs += laid;
             v.supplies.eggs_laid += laid;
+            v.progress.eggs_collected += laid;
         }
     }
 }
@@ -127,6 +128,16 @@ mod tests {
     use super::*;
     fn coop() -> Village {
         let mut game = Game::new();
+        game.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        game.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .later_completed = [true; 3];
         assert_eq!(game.place("coop", 5, 5), "ok");
         let mut v = game.app.world().resource::<Village>().clone();
         v.buildings[0].progress = 100.;

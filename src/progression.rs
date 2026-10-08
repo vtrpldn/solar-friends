@@ -1,4 +1,4 @@
-use crate::{Village, event, ready};
+use crate::{Village, event, modes::Mode, ready};
 use serde::{Deserialize, Serialize};
 
 /// Lifetime milestones are credited even before a quest is tracked.
@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 #[serde(default)]
 pub struct Progress {
     pub completed: [bool; 4],
+    pub later_completed: [bool; 3],
+    pub eggs_collected: u32,
     pub tracked: usize,
     pub fruit: u32,
     pub timber: u32,
@@ -30,6 +32,8 @@ impl Default for Progress {
     fn default() -> Self {
         Self {
             completed: [false; 4],
+            later_completed: [false; 3],
+            eggs_collected: 0,
             tracked: 0,
             fruit: 0,
             timber: 0,
@@ -53,15 +57,34 @@ impl Default for Progress {
     }
 }
 pub fn unlocked(v: &Village, kind: &str) -> bool {
+    if v.mode == Mode::Sandbox {
+        return true;
+    }
     match kind {
         "grove" => v.progress.completed[0],
         "compost" => v.progress.completed[1],
         "square" => v.progress.completed[2],
         "workshop" => v.progress.completed[3],
+        "greenhouse" => v.progress.completed[3],
+        "coop" => v.progress.later_completed[0],
+        "solar_farm" | "streetlight" => v.progress.later_completed[1],
         _ => true,
     }
 }
+pub fn completed(v: &Village, quest: usize) -> bool {
+    if quest < 4 {
+        v.progress.completed[quest]
+    } else {
+        v.progress.later_completed[quest - 4]
+    }
+}
+pub fn available(v: &Village, quest: usize) -> bool {
+    quest == 0 || completed(v, quest - 1)
+}
 pub fn update(v: &mut Village) {
+    if v.mode == Mode::Sandbox {
+        return;
+    }
     let homes = v
         .buildings
         .iter()
@@ -81,17 +104,32 @@ pub fn update(v: &mut Village) {
         v.economy.orders.iter().any(|o| o.status == "delivered")
             && v.progress.shared_builds > 0
             && v.progress.tool_library,
+        ready(v, "workshop")
+            && ready(v, "compost")
+            && ready(v, "greenhouse")
+            && v.progress.tools_crafted > 0
+            && v.progress.enriched_harvests > 0,
+        ready(v, "coop") && v.progress.eggs_collected >= 3,
+        ready(v, "solar_farm") && ready(v, "streetlight") && v.power.stored >= 12.,
     ];
     let celebrations = [
-        "A Shared Beginning complete! Food forests and three new quests are available.",
+        "A Shared Beginning complete! Food forests and Roots for Tomorrow are available.",
         "Roots for Tomorrow complete! Build a compost station to enrich your gardens.",
         "A Place to Gather complete! Build a community square and host gatherings.",
         "Made by Our Hands complete! Build a workshop and craft useful tools.",
+        "Growing Resilience complete! Chicken coops are now available.",
+        "A Fuller Table complete! Solar farms and street lights are now available.",
+        "Sunshine to Share complete! Vila Aurora's story continues in your hands.",
     ];
-    for i in 0..4 {
-        if goals[i] && !v.progress.completed[i] && (i == 0 || v.progress.completed[0]) {
-            v.progress.completed[i] = true;
+    for i in 0..7 {
+        if goals[i] && !completed(v, i) && available(v, i) {
+            if i < 4 {
+                v.progress.completed[i] = true;
+            } else {
+                v.progress.later_completed[i - 4] = true;
+            }
             event(v, celebrations[i]);
+            v.progress.tracked = (i + 1).min(6);
         }
     }
 }

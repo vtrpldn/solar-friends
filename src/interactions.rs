@@ -143,6 +143,7 @@ mod tests {
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
+                v.progress.later_completed = [true; 3];
                 v.wood = 200.;
                 v.progress.scraps = 4;
             }
@@ -190,6 +191,7 @@ mod tests {
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
+                v.progress.later_completed = [true; 3];
                 v.wood = 200.;
             }
             assert_eq!(g.place(kind, 5, 5), "ok");
@@ -251,6 +253,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.progress.completed = [true; 4];
+            v.progress.later_completed = [true; 3];
             v.wood = 200.;
         }
         assert_ne!(g.place("square", 1, 1), "ok");

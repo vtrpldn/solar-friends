@@ -8,6 +8,7 @@ mod ecology;
 mod economy;
 mod interactions;
 mod leisure;
+mod modes;
 mod power;
 mod progression;
 mod situations;
@@ -90,6 +91,8 @@ pub struct Building {
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
+    #[serde(default)]
+    pub mode: modes::Mode,
     pub version: u32,
     pub map_size: i32,
     pub minutes: f32,
@@ -530,6 +533,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     if dt <= 0. {
         return;
     }
+    modes::replenish(&mut v);
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
@@ -823,6 +827,7 @@ impl Game {
         let mut app = App::new();
         app.insert_resource(Step::default())
             .insert_resource(Village {
+                mode: modes::Mode::Story,
                 version: 3,
                 map_size: MAP_SIZE,
                 minutes: 480.,
@@ -1059,6 +1064,14 @@ impl Game {
             poultry: supplies::Poultry::default(),
         });
         economy::plan(&mut v, id);
+        if v.mode == modes::Mode::Sandbox {
+            v.buildings.last_mut().unwrap().progress = 100.;
+            let stages = economy::recipe(kind, "standard").unwrap().len();
+            let project = v.economy.projects.last_mut().unwrap();
+            project.stage = stages;
+            project.reserved = [0; economy::COUNT];
+            economy::rebalance(&mut v);
+        }
         event(
             &mut v,
             format!("A new {kind} is planned. Residents can help build it."),
@@ -1100,7 +1113,7 @@ impl Game {
     }
     pub fn track_quest(&mut self, quest: usize) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if quest >= 4 || (quest > 0 && !v.progress.completed[0]) {
+        if quest >= 7 || v.mode == modes::Mode::Sandbox || !progression::available(&v, quest) {
             return false;
         }
         v.progress.tracked = quest;
@@ -1115,8 +1128,8 @@ impl Game {
     }
     pub fn contribute_tool_library(&mut self) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if !v.progress.completed[0] {
-            return "Finish A Shared Beginning first.".into();
+        if !progression::available(&v, 3) {
+            return "Finish A Place to Gather first.".into();
         }
         if v.progress.tool_library {
             return "The tool library contribution is already set aside.".into();
@@ -1135,6 +1148,9 @@ impl Game {
     }
     pub fn host_gathering(&mut self) -> String {
         let v = self.app.world().resource::<Village>();
+        if v.mode == modes::Mode::Story && !progression::available(v, 2) {
+            return "Finish Roots for Tomorrow before hosting our welcome supper.".into();
+        }
         if !ready(v, "square")
             && !(v.progress.completed[0] && ready(v, "kitchen") && !v.progress.welcome_supper)
         {
@@ -1206,7 +1222,7 @@ impl Game {
         }
         let p = &v.progress;
         if !situations::valid(v)
-            || p.tracked >= 4
+            || p.tracked >= 7
             || p.social_mask > 31
             || p.invited > 31
             || p.attended > 31

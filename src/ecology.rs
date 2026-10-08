@@ -175,6 +175,16 @@ mod farming_tests {
     use super::*;
     fn setup(kind: &str) -> (Game, Resident) {
         let mut g = Game::new();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .later_completed = [true; 3];
         assert_eq!(g.place(kind, 5, 5), "ok");
         g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
         let mut q = g.app.world_mut().query::<&Resident>();
