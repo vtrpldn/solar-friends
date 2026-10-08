@@ -4,7 +4,7 @@ import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
 import { RESIDENT_WIDTH, preparedFrames } from './sprite-frames.js';
 import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
-import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
+import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
@@ -73,12 +73,12 @@ const tasks = {
   gathering: "Sharing food and stories",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
-const buildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+const buildingImages = Object.fromEntries(Object.entries(allBuildingArt).map(([kind, art]) => {
   const image = new Image();
   image.src = `art/${art.file}`;
   return [kind, image];
 }));
-const nightBuildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+const nightBuildingImages = Object.fromEntries(Object.entries(allBuildingArt).map(([kind, art]) => {
   const image = new Image();
   image.src = `art/${art.nightFile}`;
   return [kind, image];
@@ -290,7 +290,7 @@ function tree(x, y, s = 1, species = 0) {
   );
 }
 function sprite(kind, x, y, alpha = 1) {
-  const art = buildingArt[kind];
+  const art = allBuildingArt[kind];
   if (!art) return;
   const p = iso(x, y);
   const night = nightAmount(state.village.minutes);
@@ -308,7 +308,8 @@ function sprite(kind, x, y, alpha = 1) {
 function cistern(x, y, alpha = 1) {
   sprite('well', x, y, alpha);
 }
-function buildingSprite(kind, x, y, alpha = 1) {
+function buildingSprite(kind, x, y, alpha = 1, id) {
+  kind = buildingArtKey({kind,id},state.village.buildings);
   if (kind === "well") cistern(x, y, alpha);
   else sprite(kind, x, y, alpha);
 }
@@ -358,7 +359,7 @@ function building(b) {
     complete = b.progress >= 100;
   const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
   contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
-  buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
+  buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4, b.id);
   if (complete && ['garden','greenhouse'].includes(b.kind)) drawCrops(ctx,b,p.x,p.y,scale,nightAmount(state.village.minutes));
   if (!complete) {
     const s = scale;
@@ -1463,7 +1464,7 @@ try {
   if (artworkPreview && previewParams.has('art-draft')) {
     const draft = readArtDraft(previewParams.get('art-draft'));
     if (draft.config) {
-      const canonical = Object.values(buildingArt).find(art => art.name === draft.sprite.name.replace(' · night', ''));
+      const canonical = Object.values(allBuildingArt).find(art => art.name === draft.sprite.name.replace(' · night', ''));
       if (canonical) Object.assign(canonical, { width: draft.config.width, anchor: draft.config.anchor, ...(draft.config.axes ? {axes:draft.config.axes} : {}) });
     }
     if (draft.candidate) {

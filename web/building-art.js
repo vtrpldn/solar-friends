@@ -16,8 +16,23 @@ export const buildingArt = {
   workshop: { name: 'Workshop', file: 'workshop-isometric.png', width: 158, anchor: .81, axes: [.52, -.42] },
   coop: { name: 'Chicken coop', file: 'coop-isometric.png', width: 100, anchor: .76, axes: [.55, -.40] },
 };
+// Visual variants share the home simulation kind, cost, beds and footprint.
+export const homeVariants = {
+  'home-veranda': { name:'Home · veranda', file:'home-veranda.png', width:158, anchor:.70, axes:[.50,-.50] },
+  'home-gable': { name:'Home · gable', file:'home-gable.png', width:164, anchor:.68, axes:[.50,-.50] },
+  'home-courtyard': { name:'Home · entry terrace', file:'home-courtyard.png', width:156, anchor:.70, axes:[.50,-.50] },
+};
+export const allBuildingArt = {...buildingArt,...homeVariants};
+export const homeArtKeys = ['home', ...Object.keys(homeVariants)];
+export function buildingArtKey(building, buildings) {
+  if(building.kind!=='home')return building.kind;
+  // IDs survive save/reload and unrelated building additions. The placement
+  // ghost has no ID and uses the next house's place in the same sequence.
+  const ordinal=buildings.filter(b=>b.kind==='home' && (building.id==null || b.id<building.id)).length;
+  return homeArtKeys[ordinal%homeArtKeys.length];
+}
 // Night variants share the original crop, camera, scale and ground anchor.
-for (const art of Object.values(buildingArt)) art.nightFile = art.file.replace('.png', '-night.png');
+for (const art of Object.values(allBuildingArt)) art.nightFile = art.file.replace('.png', '-night.png');
 export function nightAmount(minutes) {
   const hour = (((minutes % 1440) + 1440) % 1440) / 60;
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);

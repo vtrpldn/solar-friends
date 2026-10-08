@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { catalog } from '../web/artwork/catalog.js';
-import { buildingArt, cameraCalibration, drawBuildingArt, nightAmount } from '../web/building-art.js';
+import { buildingArt, allBuildingArt, homeArtKeys, buildingArtKey, cameraCalibration, drawBuildingArt, nightAmount } from '../web/building-art.js';
 const art = new URL('../web/art/', import.meta.url);
 const files = readdirSync(art, { recursive: true }).filter(file => /\.(png|svg)$/.test(file));
 assert.equal(new Set(catalog.map(sprite => sprite.id)).size, catalog.length, 'Sprite IDs must be unique');
@@ -21,7 +21,7 @@ for (const sprite of catalog) {
   const [x, y, w, h] = sprite.cell;
   assert(x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= 1 && y + h <= 1, `Invalid crop: ${sprite.id}`);
 }
-for (const sprite of Object.values(buildingArt)) {
+for (const sprite of Object.values(allBuildingArt)) {
   const entry = catalog.find(item => item.name === sprite.name && item.building);
   assert(entry, `Missing building: ${sprite.name}`);
   assert.equal(entry.width, sprite.width, `Studio scale drift: ${sprite.name}`);
@@ -62,4 +62,11 @@ assert.equal(nightAmount(21 * 60), 1);
 assert.equal(nightAmount(1440), nightAmount(0));
 assert(nightAmount(18 * 60) > 0 && nightAmount(18 * 60) < 1);
 assert(Math.abs(nightAmount(18 * 60 - .001) - nightAmount(18 * 60 + .001)) < .001);
-console.log('PASS: ten night variants, shared geometry, alpha, and continuous day/night timing');
+const houses=[{id:1,kind:'home'},{id:4,kind:'home'},{id:8,kind:'home'},{id:9,kind:'home'}];
+const village=[{id:0,kind:'well'},...houses,{id:10,kind:'garden'}];
+assert.deepEqual(houses.map(b=>buildingArtKey(b,village)),homeArtKeys);
+assert.deepEqual(houses.map(b=>buildingArtKey(b,JSON.parse(JSON.stringify(village)).reverse())),homeArtKeys,'Variant assignment survives save/reload and render ordering');
+assert.equal(buildingArtKey({kind:'home'},village),'home','The fifth home repeats the original');
+for(let i=0;i<houses.length;i++)assert.equal(buildingArtKey({kind:'home'},houses.slice(0,i)),buildingArtKey(houses[i],village),'Placement previews match the next built home');
+assert.equal(buildingArtKey({kind:'garden',id:10},village),'garden');
+console.log(`PASS: ${Object.keys(allBuildingArt).length} night variants, shared geometry, alpha, continuous day/night timing, and stable home variation previews`);

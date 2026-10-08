@@ -1,12 +1,12 @@
 import { RESIDENT_WIDTH, FRAME_ANCHOR } from '../sprite-frames.js';
-import { buildingArt } from '../building-art.js?v=night-1';
+import { allBuildingArt } from '../building-art.js?v=night-1';
 import { CHICKEN_WIDTH, chickenFrame } from '../chickens.js?v=painted-hens-1';
 // Cell coordinates are fractions of the original image; originals are never rewritten.
 export const catalog = [];
 function add(id, name, file, group, options = {}) {
   catalog.push({ id, name, file: `../art/${file}`, group, usage: 'Active', cell: [0, 0, 1, 1], width: 152, anchor: .76, ...options });
 }
-for (const [kind, art] of Object.entries(buildingArt)) {
+for (const [kind, art] of Object.entries(allBuildingArt)) {
   const id = { home: 'village-atlas-isometric.png-0', kitchen: 'village-atlas-isometric.png-1', grove: 'village-atlas-isometric.png-3', garden: 'garden-simple', well: 'cistern' }[kind] || kind;
   add(id, art.name, art.file, 'Buildings', { ...art, file: `../art/${art.file}`, building: true });
   add(`${id}-night`, `${art.name} · night`, art.nightFile, 'Buildings', { ...art, name: `${art.name} · night`, file: `../art/${art.nightFile}`, building: true });
