@@ -1,13 +1,23 @@
 import { catalog } from './catalog.js?v=night-1';
 import { reviewPixels } from './pixel-checks.js';
 import { preparedFrames, animationFrameOptions, FRAME_ANCHOR } from '../sprite-frames.js';
-import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
+import { buildingArt, allBuildingArt, homeArtKeys, drawBuildingArt } from '../building-art.js?v=night-1';
 import { drawCrops, loadCropArt, cropTypes } from '../crop-art.js';
 import { download } from '../dev/tools.js';
 const $=id=>document.getElementById(id),images=new Map(),results=[];
 try {
   await Promise.all([...new Set(catalog.map(s=>s.file))].map(async file=>{const img=new Image();img.src=file;await img.decode();images.set(file,img);}));
   await loadCropArt();
+  for(const night of [false,true])for(const key of homeArtKeys){
+    const art=allBuildingArt[key],figure=document.createElement('figure'),canvas=document.createElement('canvas');
+    canvas.width=440;canvas.height=340;canvas.setAttribute('aria-label',`${art.name} · ${night?'night':'day'} at shared game scale`);
+    const ctx=canvas.getContext('2d');ctx.scale(2,2);
+    ctx.fillStyle=night?'#263c4b':'#dde5ca';ctx.fillRect(0,0,220,170);
+    drawBuildingArt(ctx,images.get(`../art/${night?art.nightFile:art.file}`),art,110,125,1);
+    const resident=catalog.find(s=>s.id==='portrait-0');
+    ctx.drawImage(preparedFrames(images.get(resident.file),{referenceRow:2})[8],176,125-48*FRAME_ANCHOR,48,48);
+    figure.append(canvas);const caption=document.createElement('figcaption');caption.textContent=`${art.name} · ${night?'night':'day'}`;figure.append(caption);$('houses').append(figure);
+  }
   for(const sprite of catalog){
     const report=reviewPixels(images.get(sprite.file),images.get(sprite.file),sprite);
     const bad=report.frames.filter(f=>f.original.empty || (sprite.group!=='Terrain' && sprite.usage!=='Reference' && f.original.edgePixels>0) || ((sprite.animation||sprite.crop)&&Math.min(...f.original.padding)<.03));

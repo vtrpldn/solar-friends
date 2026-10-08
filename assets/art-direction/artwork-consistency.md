@@ -12,11 +12,14 @@ See the [completed polish pass](art-polish-2026-10-08.md) for the fixes and veri
 
 ## Canonical assets
 
-The library contains 59 entries backed by 36 source images: 58 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 287 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
+The library contains 65 entries backed by 42 source images: 64 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 293 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
 
 | Structure | Source-cell width at zoom 1 |
 | --- | ---: |
 | Home / kitchen | 179.36 px |
+| Home · veranda | 158 px |
+| Home · gable | 164 px |
+| Home · entry terrace | 156 px |
 | Greenhouse | 188 px |
 | Community square | 172 px |
 | Workshop | 158 px |
@@ -27,6 +30,8 @@ The library contains 59 entries backed by 36 source images: 58 active entries an
 | Cistern | 77 px |
 
 Widths include transparent padding. Compare painted objects in the studio at game scale. A compost bin is about waist high beside a resident; a coop is smaller than a home.
+
+Homes cycle through the original, veranda, gable and entry-terrace artwork in construction order. All remain the same three-bed home with the same cost and collision footprint. Their source widths differ to compensate for transparent padding and keep painted doors, roofs and foundations at comparable sizes. Placement ghosts select the next variation; saved building IDs keep the sequence stable after reload. The artwork preview contains all four homes, and the live checks show their day/night versions together. Exact built-in image-generation prompts and references are in [house-variation-prompts.json](house-variation-prompts.json).
 
 Residents use 48 px prepared cells, with a ground anchor of 0.95. Complete connected poses are isolated from the original sheets at load time, aligned by lower-body pivots and normalized with one scale per sheet. This preserves the shorter seated and kneeling poses without clipping adjacent artwork. Hens use 20 px cells and their pose-specific ground anchors. Crop layers use 22 px cells for lettuce and 26 px for beans and tomatoes, with one shared atlas scale so growth stages keep their relative sizes.
 
