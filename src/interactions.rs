@@ -22,7 +22,9 @@ pub fn occupies(b: &Building, x: i32, y: i32) -> bool {
     (left..left + size).contains(&x) && (back..back + size).contains(&y)
 }
 pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
-    let b = &v.buildings[index];
+    let Some(b) = v.buildings.iter().find(|b| b.id == index) else {
+        return;
+    };
     let Some(point) = spacing::approach(v, b, r.id) else {
         assign(
             r,
@@ -58,7 +60,10 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     .into();
 }
 pub fn finish(v: &mut Village, r: &mut Resident) {
-    let Some(index) = r.visit_building else {
+    let Some(id) = r.visit_building else {
+        return;
+    };
+    let Some(index) = v.buildings.iter().position(|b| b.id == id) else {
         return;
     };
     let Some(b) = v.buildings.get(index) else {
@@ -108,7 +113,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             v.progress.scraps -= 2;
             v.progress.compost += 1;
         }
-        "workshop" if v.wood >= 8. && v.progress.tool_uses <= 24 => {
+        "workshop" if economy::free(v, 0) >= 8 && v.progress.tool_uses <= 24 => {
             v.wood -= 8.;
             v.progress.tool_uses += 12;
             v.progress.tools_crafted += 1;

@@ -131,6 +131,7 @@ mod tests {
         let mut v = game.app.world().resource::<Village>().clone();
         v.buildings[0].progress = 100.;
         v.minutes = 360.;
+        v.economy.ledger.clear();
         v
     }
     fn run(v: &mut Village, minutes: u32) {

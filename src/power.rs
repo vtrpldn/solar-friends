@@ -124,10 +124,12 @@ pub fn valid(v: &Village) -> bool {
     v.power.stored.is_finite()
         && v.power.stored >= 0.
         && v.power.stored <= farms(v) as f32 * STORAGE_PER_FARM + 0.001
-        && v.power
-            .disabled
-            .iter()
-            .all(|id| ids.insert(*id) && v.buildings.get(*id).is_some_and(|b| load(&b.kind) > 0.))
+        && v.power.disabled.iter().all(|id| {
+            ids.insert(*id)
+                && v.buildings
+                    .iter()
+                    .any(|b| b.id == *id && load(&b.kind) > 0.)
+        })
 }
 
 #[cfg(test)]
@@ -143,6 +145,7 @@ mod tests {
             b.progress = 100.;
         }
         v.minutes = 360.;
+        v.economy.ledger.clear();
         v
     }
     fn run(v: &mut Village, minutes: u32) {

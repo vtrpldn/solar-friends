@@ -242,6 +242,7 @@ mod tests {
         v.arrived = true;
         v.minutes = 2. * 1440. + 600.;
         v.situations.day = 2;
+        v.economy.next_building = 1;
         v.buildings.push(Building {
             id: 0,
             kind: "kitchen".into(),

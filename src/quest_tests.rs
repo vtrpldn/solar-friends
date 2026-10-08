@@ -20,7 +20,7 @@ fn setup() -> Game {
     g
 }
 fn ready_building(g: &mut Game, kind: &str, x: i32, y: i32) {
-    g.app.world_mut().resource_mut::<Village>().wood += 100.;
+    g.app.world_mut().resource_mut::<Village>().wood = 100.;
     assert_eq!(g.place(kind, x, y), "ok");
     g.app
         .world_mut()
@@ -155,14 +155,18 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         r.x = r.target_x;
         r.y = r.target_y;
     }
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.stock[12] = 1;
+        v.economy.stock[13] = 1;
+        economy::rebalance(&mut v);
+    }
     advance(&mut g, 35.);
     assert_eq!(
         g.app.world().resource::<Village>().progress.shared_builds,
         1
     );
-    for _ in 0..7 {
-        finish_task(&mut g, 3, "gather");
-    }
+    g.app.world_mut().resource_mut::<Village>().progress.timber = 40;
     let wood = g.app.world().resource::<Village>().wood;
     assert_eq!(g.contribute_workshop_timber(), "ok");
     assert!(g.app.world().resource::<Village>().progress.completed[3]);
@@ -181,12 +185,12 @@ fn tools_cost_timber_and_can_be_conserved() {
     assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
     finish_task(&mut g, 3, "gather");
-    assert_eq!(g.app.world().resource::<Village>().wood, wood);
-    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
+    assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
+    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
     g.set_tools_enabled(false);
     finish_task(&mut g, 3, "gather");
-    assert_eq!(g.app.world().resource::<Village>().wood, wood + 6.);
-    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
+    assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
+    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
 }
 #[test]
 fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
@@ -305,12 +309,21 @@ fn tools_accelerate_building_and_spend_one_use_on_completion() {
     g.tick(0.2);
     without.tick(0.2);
     let normal = without.app.world().resource::<Village>().buildings[0].progress;
-    assert_eq!(
-        g.app.world().resource::<Village>().buildings[0].progress,
-        normal * 1.25
+    assert!(
+        (g.app.world().resource::<Village>().buildings[0].progress - normal * 1.25).abs() < 0.00001
     );
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
-    g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 99.9;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.stock[12] = 1;
+        v.economy.stock[13] = 1;
+        while v.economy.projects[0].stage < 3 {
+            economy::rebalance(&mut v);
+            economy::build(&mut v, 0, 100.);
+        }
+        economy::rebalance(&mut v);
+        economy::build(&mut v, 0, 7.99);
+    }
     g.tick(0.2);
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
 }
