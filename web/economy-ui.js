@@ -38,7 +38,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
     if(button.dataset.action==='locate')locate(id);
     if(button.dataset.action==='supplies'){openTown();$('#town-shortages').click();$('#town-shortages').focus();}
     if(button.dataset.action==='pause')transact(game().configure_project(id,p.priority,!p.paused,p.recipe));
-    if(button.dataset.action==='cancel'){$('#project-cancel-note').textContent=`Cancel ${names[p.kind]} ${id+1}? Unused reservations return in full. Half of each consumed material can be salvaged. Town orders continue unless cancelled separately.`;$('#project-cancel-confirm').dataset.project=id;$('#project-cancel-dialog').showModal();}
+    if(button.dataset.action==='cancel'){$('#project-cancel-note').textContent=`Cancel ${names[p.kind]} ${id+1}? Unused reservations return in full. Half of each consumed material can be salvaged. Trade orders continue unless cancelled separately.`;$('#project-cancel-confirm').dataset.project=id;$('#project-cancel-dialog').showModal();}
   };
   $('#project-cancel-close').onclick=()=>$('#project-cancel-dialog').close();
   $('#project-cancel-confirm').onclick=()=>{transact(game().cancel_project(Number($('#project-cancel-confirm').dataset.project)));$('#project-cancel-dialog').close();};

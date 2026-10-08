@@ -158,6 +158,7 @@ let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
 const villagePanels = new Set(["building-panel","supplies-panel","projects-panel","town-panel","power-panel"]);
 let lastVillagePanel = "building-panel";
+let journalPage = 0;
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
 let pendingRemoval = null;
@@ -831,8 +832,12 @@ function objectiveMarkup(objectives, completed = false) {
     .join("");
 }
 function openJournal() {
+  if(tool)setTool(null);
+  closePanels();selected=null;$('#person').hidden=true;
+  journalPage = state.village.progress.tracked;
   updateQuests();
   $("#quest-dialog").showModal();
+  $('[data-panel="goals-panel"]').setAttribute('aria-expanded','true');
 }
 function updateQuests() {
   const v = state.village,
@@ -881,7 +886,7 @@ function updateQuests() {
     label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
     onClick=()=>showPanel('projects-panel');
     const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
-    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Projects when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Projects for the recipe and Town for missing equipment. Incoming deliveries arrive at 10:00 after dispatch.`;
+    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Incoming deliveries arrive at 10:00 after dispatch.`;
   }
   if(route?.type==='supper'||route?.type==='tool_library'){
     const supper=route.type==='supper', underway=supper&&p.gathering_until>v.minutes;
@@ -904,13 +909,14 @@ function updateQuests() {
     `${Math.min(5, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
   $("#quest-total").textContent =
     `${completions.filter(Boolean).length} of ${quests.length} chapters complete`;
+  replaceMarkup($('#journal-chapters'),quests.map((q,i)=>`<button data-chapter="${i}" aria-pressed="${i===journalPage}"><span class="chapter-number">${completions[i]?'✓':i+1}</span><span><b>${q.title}</b><small>${questStatus(v,i)}</small></span></button>`).join(''));
   replaceMarkup(
     $("#quest-list"),
     quests
       .map((q, i) => {
         const status = questStatus(v, i),
           locked = !questAvailable(v,i);
-        return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}">
+        return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}" ${i===journalPage?'':'hidden'}>
       <div class="quest-card-art ${q.art}">${i ? `<img src="art/${buildingArt[q.art]?.file || q.art + '-isometric.png'}" alt="${kinds[q.art]?.[0] || q.theme} illustration">` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
       ${objectiveMarkup(q.objectives(v), completions[i])}
@@ -991,12 +997,12 @@ function updateBuildingPanel() {
     $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering costs 2 water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
-  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Projects for stage materials, purchases and priorities." : visitors.length
+  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Village → Construction for stage materials, purchases and priorities." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
   const utility = b && ["solar_farm", "streetlight"].includes(b.kind);
   $("#building-visits").hidden = utility;
-  if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Projects for materials and installation. It connects when construction finishes." : "Works automatically. Manage shared lighting in Power.";
+  if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : "Works automatically. Manage shared lighting in Power.";
   for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100 || !!state.residents.find(r=>r.id===Number(button.dataset.visitor))?.trip;
 }
 function inspectBuilding(id) {
@@ -1033,7 +1039,9 @@ function updateSituations() {
   $("#situations-label").textContent = view.label;
   $("#open-situations").dataset.concern=String(!!state.village.situations.active);
   $("#open-situations").setAttribute("aria-label",view.label);
-  replaceMarkup($("#situation-content"), view.markup);
+  const portrait=state.village.situations.active?`<div class="situation-portrait">${avatar(state.village.situations.active.resident)}</div>`:'';
+  const content=$('#situation-content'),markup=portrait+view.markup;
+  if(content._markup!==markup){replaceMarkup(content,markup);paintPortraits();}
 }
 function openSituations() {
   $("#quest-dialog").close();
@@ -1050,8 +1058,8 @@ function updateUI() {
   $('[data-panel="town-panel"]').hidden=free;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
-  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Projects tracks construction materials and Town supplies equipment by delivery. Each chapter opens the next part of village life.';
-  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Projects; residents build during normal work hours.');
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Village → Construction tracks materials and Trade supplies equipment by delivery. Each chapter opens the next part of village life.';
+  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1322,6 +1330,7 @@ function setup() {
   };
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
+      if(button.dataset.panel==='goals-panel'){openJournal();return;}
       const isOpen = button.getAttribute("aria-expanded") === "true";
       if (isOpen && !villagePanels.has(button.dataset.panel)) { closePanels(); if (tool) setTool(null); }
       else showPanel(button.dataset.panel);
@@ -1353,6 +1362,8 @@ function setup() {
   };
   $("#open-journal").onclick = openJournal;
   $("#close-journal").onclick = () => $("#quest-dialog").close();
+  $('#quest-dialog').addEventListener('close',()=>{$('[data-panel="goals-panel"]').setAttribute('aria-expanded','false');$('[data-panel="goals-panel"]').focus();});
+  $('#journal-chapters').onclick=e=>{const button=e.target.closest('[data-chapter]');if(!button)return;journalPage=Number(button.dataset.chapter);updateQuests();$(`#journal-chapters [data-chapter="${journalPage}"]`).focus({preventScroll:true});};
   $("#quest-list").onclick = (e) => {
     const button = e.target.closest("[data-track]");
     if (!button) return;
@@ -1551,8 +1562,9 @@ function setup() {
       togglePause();
     }
     if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat&&!document.querySelector('dialog[open]')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) {
-      const shortcuts={KeyB:'build-panel',KeyV:$(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel,KeyJ:'goals-panel',KeyP:'community-panel',KeyI:'supplies-panel'};
+      const shortcuts={KeyB:'build-panel',KeyV:$(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel,KeyP:'community-panel',KeyI:'supplies-panel'};
       if(shortcuts[e.code]){e.preventDefault();const id=shortcuts[e.code];if(!$(`[data-panel="${id}"]`).hidden)showPanel(id);}
+      if(e.code==='KeyJ'&&!$('[data-panel="goals-panel"]').hidden){e.preventDefault();openJournal();}
       if(e.code==='KeyM'){e.preventDefault();if(tool)setTool(null);closePanels();selected=null;$('#person').hidden=true;$('#village-map').focus();}
     }
     if (e.code === "Escape" && !document.querySelector("dialog[open]")) {

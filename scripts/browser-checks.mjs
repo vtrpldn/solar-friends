@@ -38,6 +38,10 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.keyboard.press('Escape');assert(!await page.locator('#build-panel').isVisible());
   await page.keyboard.press('Escape');assert(await page.locator('#main-menu').isVisible());
   await page.locator('#menu-return').click();
+  await page.keyboard.press('j');assert(await page.locator('#quest-dialog').isVisible());
+  await page.locator('[data-chapter="1"]').click();assert.equal(await page.locator('.quest-card:not([hidden])').count(),1);
+  assert((await page.locator('.quest-card:not([hidden]) h3').textContent()).includes('Roots for Tomorrow'));
+  await page.locator('#close-journal').click();
   await page.locator('#help').click();if(!await page.locator('#help-dialog .dev-tools').evaluate(el=>el.open))await page.locator('#help-dialog .dev-tools summary').click();await page.locator('#help-open-dev').click();
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));

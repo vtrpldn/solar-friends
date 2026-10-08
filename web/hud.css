@@ -146,3 +146,22 @@ footer .resources button>span{display:block!important}footer .resources b,footer
   #resident-strip{bottom:102px}.minimap{bottom:184px}.world-controls{bottom:353px}.village-alert{bottom:193px}
   #build-panel{max-width:calc(100vw - 36px);bottom:100px}.developer-session #dev-button{left:auto;right:108px;top:24px}
 }
+footer .resources b[hidden]{display:none!important}
+.community .panel-heading{padding:0 24px 0 0}
+#build-panel .tool-art{background:none!important;margin:0}
+#build-panel .build-tool{max-width:none}
+.panel .panel-close,.panel .close-person,dialog .dialog-close{width:26px;height:26px;min-width:26px;min-height:26px;padding:0!important;border:1px solid #ad8f56;border-bottom:2px solid #86623a;border-radius:4px;background:linear-gradient(#e0c997,#c7ad74);color:#735332}
+/* The journal is a chapter index and a single quest page, rather than a card grid. */
+#quest-dialog{width:min(860px,calc(100vw - 64px));padding:26px 28px;background:linear-gradient(95deg,#e8d5a5,#f3e6c6 38%,#eddeb7)}
+#quest-dialog h2{font:600 27px "Fraunces",Georgia,serif;margin:0 0 10px}.journal-intro{max-width:none;color:#8b7650!important;font-size:12px!important;margin:0 0 10px!important}
+#quest-total{font-size:11px;margin:10px 0;color:#90774a}.journal-spread{display:grid;grid-template-columns:220px minmax(0,1fr);gap:21px;border-top:1px solid #c5aa74;margin-top:12px;padding-top:16px}
+#journal-chapters{display:flex;flex-direction:column;gap:6px;padding-right:14px;border-right:1px solid #c7ad76}
+#quest-dialog #journal-chapters button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:10px 8px;background:none;border:1px solid transparent;box-shadow:none;border-radius:4px;font-size:11px}
+#quest-dialog #journal-chapters button[aria-pressed=true]{background:#d8c48c;border-color:#b69657;box-shadow:inset 0 1px 0 #eddca7}
+.chapter-number{flex:none;display:grid;place-items:center;width:23px;height:23px;border:1px solid #c3a368;border-radius:4px;background:#ead8a6;color:#7d6134;font-size:12px}.journal-spread b{display:block;font-size:11px;line-height:1.35}.journal-spread small{display:block;color:#9b8457;font-size:9px;margin-top:3px}
+#quest-list{display:block;margin:0}.quest-card{display:block;border:0;border-radius:0;box-shadow:none;background:none;overflow:visible;padding:0;margin:0;min-height:430px}.quest-card.complete{background:none;border:0}.quest-card-art{float:right;width:94px;height:78px;margin:0 0 12px 10px;background:none!important;border-radius:0;display:grid;place-items:center}.quest-card-art img{width:94px;height:78px;object-fit:contain}.quest-card-art>span{font-size:43px;color:#c4a15c}.quest-card-content{padding:0;background:none}.quest-card h3{font:600 24px/1.2 "Fraunces",Georgia,serif;margin:8px 0 13px}.quest-card .eyebrow{display:block;font-size:9px;letter-spacing:.4px;color:#957747}.quest-card p{font-size:12px;line-height:1.6;color:#7e6944}.quest-card .objective{clear:both;padding:9px 0}.quest-card .objective b{font-size:12px;font-weight:normal}.quest-card .objective small{font-size:10px}.quest-card .journal-reward b{font-size:10px;color:#866a39}.quest-card button{width:100%;margin-top:12px;min-height:34px}
+.situation-portrait{float:left;margin:0 13px 12px 0}.situation-portrait .avatar{display:block;width:57px;height:66px;border:2px solid #b3955c;border-radius:5px;background:#d9cca0!important;overflow:hidden}
+#situation-content>h2{margin-top:6px}#situation-dialog blockquote{clear:both}#situation-dialog cite{display:block;margin-top:7px;text-align:right;font:11px "Trebuchet MS",Verdana,sans-serif;color:#927644}
+#situation-dialog .situation-choices{display:flex;flex-direction:column;gap:7px}#situation-dialog .situation-choices button{text-align:left;padding:10px 12px}#situation-dialog .situation-choices button b{display:block;font-size:13px;margin-bottom:4px}#situation-dialog .situation-choices button span{display:block;font-size:11px;line-height:1.45;color:#88703e}
+#power-loads label{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #c8b48155}#power-loads label>span{flex:1;min-width:0}#power-loads b{display:block;font-size:12px}#power-loads small{display:block;margin-top:3px;font-size:10px;line-height:1.4;color:#897443}
+.volume-control{display:grid;grid-template-columns:1fr auto;gap:8px;margin:14px 0}.volume-control output{font-variant-numeric:tabular-nums;color:#897443}.volume-control input{grid-column:1/-1;width:100%;margin:0;cursor:pointer}.settings-section>small{display:block;line-height:1.5}
