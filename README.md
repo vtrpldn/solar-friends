@@ -69,7 +69,17 @@ The community starts with R$ 3,000 and modest material stocks. Fifteen materials
 
 **Town** combines supplies in one basket. Delivery costs R$ 60, dispatches after two game hours and arrives at 10:00 after dispatch. The fund is charged on confirmation. Cancel before dispatch for a full refund; dispatched orders must arrive. Receiving capacity includes incoming stock. The order book retains bounded history while keeping every active order.
 
-Enable **Outside jobs** for one neighbouring-farm job per day, normally handled by Nina. Residents walk to a clear village exit, leave the map while working, and return from 17:00 with R$ 180 for the shared fund. Lunch is supplied off-site. Morning food, rest and agreements take precedence; an accepted job finishes even if the toggle is disabled. The daily job is reserved at departure and paid once on return. Selling produce keeps 36 ingredients for the household. A neighbour exchanges four surplus ingredients for two fittings at most once per day. Spare unreserved building materials can be sold at half price to recover money and receiving space; future stages may need them again. Reserved stock and incoming orders cannot be sold.
+Each resident has an optional outside occupation. Configure schedules in **Village → Trade → Outside occupations** or in the resident's details. Enabled residents leave between 09:00 and 10:00, work until 17:00, and contribute to the shared fund on return. Lunch is supplied off-site. Morning food, rest, pickup trips and agreed days off take precedence. Disabling a schedule stops future shifts; an active shift finishes normally. Each resident's shift is committed at departure and paid once on return.
+
+| Resident | Outside occupation | Contribution per shift |
+| --- | --- | --- |
+| Iara | Plant nursery assistant | R$ 160 |
+| Bento | Bamboo carpenter | R$ 240 |
+| Luz | School canteen cook | R$ 180 |
+| Cauã | Atlantic Forest guide | R$ 200 |
+| Nina | Rainwater systems technician | R$ 220 |
+
+Keep some residents in the village for construction, cooking and material preparation. Selling produce keeps 36 ingredients for the household. A neighbour exchanges four surplus ingredients for two fittings at most once per day. Spare unreserved building materials can be sold at half price to recover money and receiving space; future stages may need them again. Reserved stock and incoming orders cannot be sold.
 
 Painted resource sites mark managed timber and bamboo, finite earth and stone, and salvage. Two residents collect and prepare supplies for active project demand and one eight-timber tool-making batch; batches leave at most a few spare units. Managed stands regrow one unit per day, or three after restoration with two compost. Earth, stone and salvage do not regenerate. When deposits are exhausted, town purchases still provide essentials.
 
