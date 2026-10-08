@@ -29,7 +29,20 @@ Portraits now derive from the same character art used in the world. The original
 - First harvest advanced one game hour through the developer tools: food increased from 100 to 110 and the garden replanted at 0% growth.
 - Game, artwork studio and live-check tabs returned no browser warnings or errors. All active studio entries are marked consistent; the reference study is excluded from active approval.
 
-The original audit's seven-scenario and three-day simulation evidence remains linked there. This follow-up repeats the affected art and harvest checks rather than claiming that every possible gameplay sequence was retested. Painterly architecture remains approximate; metadata calibration does not prove every painted beam is geometrically exact.
+Painterly architecture remains approximate; metadata calibration does not prove every painted beam is geometrically exact.
+
+## Audit closure recheck
+
+The subsequent check of all seven findings found no remaining failures. Its purpose was to verify the fixes against the original acceptance criteria and add regression coverage where the earlier evidence was narrow.
+
+- All 59 catalogue entries still match the source hashes in the reviewed inventory. A fresh browser load again reported 287 cells with zero boundary/gutter/registration failures and exposed all 60 crop-state views. No active studio entry remained marked “Needs work”.
+- `verify-resident-animation.mjs` now exercises 156 clip transitions, including the new activity bank, checking aggregate opacity, valid frames, preserved mirrored facing, completion and pause behavior. This is a state-machine check; it does not certify frame pacing.
+- `verify-dev-tools.mjs` now runs the actual chooser with a completed kitchen, available ingredients, no cooked meals and hungry residents. All five choose eating and use the corrected explanation.
+- The browser loaded the direct Established village URL with the correct selector value. Selecting Hungry village and refreshing resident diagnostics preserved that pending selection; loading it then activated Hungry village.
+- All seven scenarios passed a fresh 72-hour simulation sweep with resource/vital bounds and 504 hourly save restores. Results are saved locally at `artifacts/audit-closure/three-day-results.json`.
+- Rust formatting, all 49 tests, strict Clippy, all nine JavaScript verification scripts and syntax checks for the edited scripts passed. The game and live artwork tabs returned no warnings or errors. `artifacts/audit-closure/current-checks.png` records the fresh browser result.
+
+These results close the recorded findings within the stated coverage; they do not claim exhaustive coverage of every possible player action sequence.
 
 ## Inspect the result
 

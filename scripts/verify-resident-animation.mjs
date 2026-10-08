@@ -34,6 +34,31 @@ const paused=advanceResidentAnimation(animation,stopped,0,0);
 assert.deepEqual(paused,animation,'Pause must freeze pose, facing, breathing, and transition');
 animation=advanceResidentAnimation(animation,stopped,0,.1);
 assert(animation.layers.every(p=>p.sheet==='idle'));
+// Exercise every clip-to-clip transition, including the new activity bank.
+// Samples must stay opaque in aggregate, retain facing, and finish on the target.
+const clipInputs = {
+  cook:{task:'cook'}, water:{task:'water'}, tend:{task:'garden'},
+  feed:{task:'visit',visitingKind:'coop'}, walk:{task:'idle',target_x:11},
+  work:{task:'build'}, sit:{task:'rest'}, sleep:{task:'sleep'},
+  look:{task:'idle',minutes:0}, relax:{task:'idle',minutes:24},
+  stretch:{task:'idle',minutes:72}, wave:{task:'idle',minutes:144},
+};
+let transitions=0;
+for(const from of Object.keys(residentClips))for(const [to,input] of Object.entries(clipInputs)) {
+  const r={...resident,...input};
+  let state={mode:from,phase:.31,transition:.18,facing:-1,x:r.x,y:r.y};
+  for(let step=0;step<16;step++) {
+    state=advanceResidentAnimation(state,r,input.minutes??0,1/60);
+    assert.equal(state.mode,to);
+    assert.equal(state.facing,-1,'Changing activity must preserve mirrored facing');
+    assert(Math.abs(state.layers.reduce((sum,p)=>sum+p.weight,0)-1)<1e-10,`${from} → ${to}: opacity`);
+    assert(state.layers.every(p=>p.frame>=0&&p.frame<4&&p.row>=0&&p.row<4&&Number.isFinite(p.weight)));
+    assert.deepEqual(advanceResidentAnimation(state,r,input.minutes??0,0),state,'A paused transition must not advance');
+  }
+  assert(state.layers.every(p=>p.sheet===residentClips[to].sheet));
+  assert.equal(state.from,undefined);
+  transitions++;
+}
 await init({module_or_path:await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const game=new Game();
 assert(game.restore(await fs.readFile(new URL('../web/artwork/resident-preview.json',import.meta.url),'utf8')));
@@ -45,4 +70,4 @@ for (const name of ['iara','bento','luz','caua','nina']) {
   assert.equal(png.readUInt32BE(16),png.readUInt32BE(20),'Idle atlas must have square cells');
   assert.equal(png[25],6,'Idle atlas must have an alpha channel');
 }
-console.log('PASS: four standing idles, seated task boundaries, eased frames and transitions, stable facing, pause, and resident preview');
+console.log(`PASS: standing idles, task boundaries, ${transitions} clip transitions, mirrored facing, pause, and resident preview`);
