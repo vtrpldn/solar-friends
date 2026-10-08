@@ -7,6 +7,7 @@ import { footprintCorners, occupies, placementArt, drawFoundation } from './buil
 import { installBuildMenu } from './build-menu.js';
 import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { drawNightEmission } from './night-lighting.js';
+import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
@@ -122,6 +123,7 @@ const activityAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => 
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
 let animationDelta = 0;
+let weatherTime = 0;
 let groundLayer,
   groundKey = null;
 const forestArt = new Image();
@@ -600,6 +602,8 @@ for (let i = 0; i < 170; i++) {
   });
 }
 function render() {
+  const weather = weatherConditions(state.environment,state.village.minutes);
+  canvas.dataset.weather = weather.label;
   if (cameraTarget) {
     const blend = reducedMotion.matches ? 1 : 1 - Math.exp(-cameraTarget.dt * 9);
     pan.x += (cameraTarget.x - pan.x) * blend;
@@ -609,6 +613,7 @@ function render() {
   scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.45, scale);
   origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
+  const weatherView = {conditions:weather,buildings:state.village.buildings,project:iso,scale,time:weatherTime,width,height,reducedMotion:reducedMotion.matches};
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
@@ -645,6 +650,7 @@ function render() {
   }
   drawPlacementGrid();
   // Foundations and road tiles share the same half-tile boundary lattice.
+  drawGroundWeather(ctx,weatherView);
   const objects = [
     ...state.village.economy.sources.map((site,index)=>({depth:site.x+site.y,draw:()=>{const p=iso(site.x,site.y);drawEconomyArt(ctx,index,p.x,p.y,scale,nightAmount(state.village.minutes),site.remaining/site.maximum);}})),
     {depth:23,draw:()=>{const p=iso(10,13);drawEconomyArt(ctx,5,p.x,p.y,scale,nightAmount(state.village.minutes));}},
@@ -686,7 +692,7 @@ function render() {
   }
   canvas.style.cursor = drag?.moved ? "grabbing" : tool ? "crosshair" : hovered ? "pointer" : "grab";
   // Tiny birds drifting past the clearing.
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!reducedMotion.matches && !weather.rain) {
     for (let i = 0; i < 3; i++) {
       const x = ((time * 13 + i * 130) % (width + 100)) - 50,
         y = height * 0.2 + Math.sin(time * 0.25 + i) * 20;
@@ -699,6 +705,7 @@ function render() {
       ctx.stroke();
     }
   }
+  drawWeatherAir(ctx,weatherView);
   const hour = (state.village.minutes % 1440) / 60;
   // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
@@ -1228,6 +1235,7 @@ function frame(stamp) {
   if (cameraTarget) cameraTarget.dt = dt;
   sound.update(running, state.environment.raining, state.village.minutes, state.residents.some(r => r.task === "build" && Math.hypot(r.x-r.target_x, r.y-r.target_y) < 0.2));
   if (running) {
+    if(!reducedMotion.matches)weatherTime += dt;
     time += advanceSimulation(game, Math.min(elapsed, 1), speed);
   }
   state = JSON.parse(game.snapshot());
@@ -1591,7 +1599,7 @@ function setup() {
 // a sandbox; the original Game object stays untouched until it is restored.
 function refreshDevScene() {
   setZoom(zoom);
-  residentAnimations.clear(); groundKey = null; time = 0; animationDelta = 0;
+  residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
@@ -1655,7 +1663,7 @@ const devAPI = {
     return devAPI.snapshot();
   },
   run() { if (!sandbox) throw new Error('Load a sandbox first.'); if (paused) togglePause(); },
-  fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
+  fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; weatherTime = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
   locate(id) {
     const r = state.residents.find(r => r.id === id);
     if (!r) return;
