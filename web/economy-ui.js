@@ -21,7 +21,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
   function quote(){const s=snapshot(),e=s.environment.economy,items=basket(),valid=items.every(n=>Number.isInteger(n)&&n>=0&&n<=100),quantity=items.reduce((a,b)=>a+b,0),total=items.reduce((a,n,i)=>a+n*e.materials[i].price,0)+(quantity?6000:0);
     $('#town-total').textContent=money(total);$('#town-delivery').textContent=quantity?'Includes R$ 60 delivery · dispatch in two game hours, arrival at 10:00 after dispatch.':'Combine purchases for several projects in one delivery.';
     $('#town-order').disabled=!valid||!quantity||e.money<total||e.used+quantity>e.capacity;
-    $('#town-basket-status').textContent=!valid?'Use whole quantities from 0 to 100.':e.money<total?'The fund is too small. Enable an outside shift or sell surplus.':e.used+quantity>e.capacity?'Receiving space is full; use stored materials first.':quantity?`${quantity} ${quantity===1?'unit':'units'} · ${e.capacity-e.used-quantity} receiving spaces left`:'Choose supplies or fill this list from village needs.';
+    $('#town-basket-status').textContent=!valid?'Use whole quantities from 0 to 100.':e.money<total?'The fund is too small. Enable outside jobs or sell surplus.':e.used+quantity>e.capacity?'Receiving space is full; use stored materials first.':quantity?`${quantity} ${quantity===1?'unit':'units'} · ${e.capacity-e.used-quantity} receiving spaces left`:'Choose supplies or fill this list from village needs.';
   }
   $('#town-catalog').addEventListener('input',quote);
   $('#town-shortages').onclick=()=>{const e=snapshot().environment.economy;for(let i=0;i<15;i++)$(`[data-material="${i}"]`).value=Math.min(e.shortage[i],100);quote();};

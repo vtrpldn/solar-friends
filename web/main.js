@@ -1,4 +1,5 @@
 import {economyImage,drawEconomyArt} from './economy-art.js';
+import {residentVisible,tripLabel} from './resident-presence.js';
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
 import { installBuildMenu } from './build-menu.js';
@@ -76,7 +77,8 @@ const tasks = {
   gather: "Foraging fresh food",
   source: "Collecting local materials",
   prepare: "Preparing building materials",
-  outside: "Helping at a neighbouring farm",
+  outside: "Working at a neighbouring farm",
+  return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Collecting river water",
   socialize: "Finding some company",
@@ -452,6 +454,7 @@ function placementValid(kind, x, y) {
   return !placementReason(state.village, kind, x, y);
 }
 function activityLabel(r) {
+  if(r.trip)return tripLabel(r);
   if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
   if (r.task === "visit") {
     const b = state.village.buildings.find(b => b.id === r.visit_building);
@@ -461,9 +464,8 @@ function activityLabel(r) {
 }
 function residentAt(x, y) {
   return [...state.residents].reverse().find(r => {
-    const indoors = r.task === "sleep" && Math.hypot(r.target_x-r.x, r.target_y-r.y) <= 0.1 && state.village.buildings.filter(b => b.kind === "home" && b.progress >= 100)[Math.floor(r.id / 3)];
     const p = iso(r.x, r.y);
-    return !indoors && Math.hypot(p.x-x, p.y-14*scale-y) < Math.max(16, 22*scale);
+    return residentVisible(r,state.village) && Math.hypot(p.x-x, p.y-14*scale-y) < Math.max(16, 22*scale);
   });
 }
 function announceMilestones() {
@@ -535,13 +537,7 @@ function resident(r) {
   const p = iso(r.x, r.y),
     s = scale;
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
-  const indoors =
-    !moving &&
-    r.task === "sleep" &&
-    state.village.buildings.filter(
-      (b) => b.kind === "home" && b.progress >= 100,
-    )[Math.floor(r.id / 3)];
-  if (indoors) return;
+  if(!residentVisible(r,state.village))return;
   const isSelected = selected === r.id;
   contactShadow(p.x, p.y + 2 * s, 10 * s, 4 * s, 0.25);
   if (isSelected) {
@@ -726,7 +722,7 @@ function render() {
         b.kind === "home" &&
         state.residents.some(
           (r) =>
-            r.task === "sleep" &&
+            !r.trip && r.task === "sleep" &&
             Math.hypot(r.x - b.x - 0.75, r.y - b.y - 0.75) < 0.3,
         )
       ) {
@@ -987,7 +983,7 @@ function updateBuildingPanel() {
   const utility = b && ["solar_farm", "streetlight"].includes(b.kind);
   $("#building-visits").hidden = utility;
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Projects for materials and installation. It connects when construction finishes." : "Works automatically. Manage shared lighting in Power.";
-  for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100;
+  for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100 || !!state.residents.find(r=>r.id===Number(button.dataset.visitor))?.trip;
 }
 function inspectBuilding(id) {
   showPanel("building-panel");
@@ -1115,6 +1111,7 @@ function updateUI() {
   }
   if (selected !== null) {
     const r = state.residents.find((r) => r.id === selected);
+    for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
@@ -1145,7 +1142,7 @@ function updateUI() {
     }
     $(".response").hidden = !response;
     $(".response").textContent = response;
-    $(".persuade").hidden = !encouragable;
+    $(".persuade").hidden = !encouragable || !!r.trip;
   }
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);

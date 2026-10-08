@@ -114,12 +114,37 @@ pub fn walk(r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) {
         (r.x, r.y) = p;
     } else if land(direct.0, direct.1) {
         (r.x, r.y) = direct;
+    } else if land(direct.0, r.y) {
+        // Follow a bank corner along one axis rather than waiting forever for
+        // a diagonal step to cross a non-land tile.
+        r.x = direct.0;
+    } else if land(r.x, direct.1) {
+        r.y = direct.1;
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn a_return_walk_can_leave_a_riverbank_corner() {
+        let mut g = Game::new();
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        let mut r = q.iter_mut(g.app.world_mut()).next().unwrap().clone();
+        r.x = 23.707;
+        r.y = 12.994;
+        r.target_x = 10.;
+        r.target_y = 15.1;
+        assert!(land(r.x, r.y));
+        for _ in 0..200 {
+            if (r.x - r.target_x).hypot(r.y - r.target_y) < 0.08 {
+                break;
+            }
+            walk(&mut r, &[], 0.25);
+            assert!(land(r.x, r.y));
+        }
+        assert!((r.x - r.target_x).hypot(r.y - r.target_y) < 0.08);
+    }
 
     #[test]
     fn neighbours_get_separate_accessible_spots_at_every_building() {

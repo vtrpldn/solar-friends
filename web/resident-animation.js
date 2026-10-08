@@ -21,6 +21,7 @@ export const idleLabels = {
   wave: 'Waving hello', relax: 'Enjoying a quiet moment', walk: 'Taking a quiet walk',
 };
 export function residentActivity(r, minutes) {
+  if(r.trip && r.trip.phase!=='away')return 'walk';
   if (Math.hypot(r.target_x - r.x, r.target_y - r.y) > .1) return 'walk';
   if (r.task === 'sleep') return 'sleep';
   if (r.task === 'daydream') return 'sit';

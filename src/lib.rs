@@ -461,7 +461,10 @@ fn choose(r: &mut Resident, v: &Village) {
         }
     } else if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
         ("craft", "Making tools for our next shared project.")
-    } else if r.favorite == "water" && v.water < 70. && available(v, "water") {
+    } else if r.favorite == "water"
+        && v.water < 70_f32.min(ecology::capacity(v) * 0.8)
+        && available(v, "water")
+    {
         ("water", "Making sure we have water for tomorrow.")
     } else if r.social < 55. {
         ("socialize", "A little company would be good.")

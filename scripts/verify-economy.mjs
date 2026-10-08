@@ -21,15 +21,15 @@ for(const scenario of ['economy','economy-poor','economy-depleted']){
     }
     assert(e.money>=0&&e.used<=e.capacity);assert(e.materials.every(m=>m.available>=0&&m.reserved<=m.stored));
     minFood=Math.min(minFood,s.village.food);maxHunger=Math.max(maxHunger,...s.residents.map(r=>r.hunger));
-    for(const r of s.residents){if(r.task!=='sleep'){waking[r.id]++;if(['idle','nature_walk','birdwatch','stretch','daydream','stargaze','socialize','rest'].includes(r.task))relax[r.id]++;}}
+    for(const r of s.residents){if(r.trip?.purpose==='work'&&r.trip.phase==='away'){assert(s.village.minutes%1440>=540&&s.village.minutes%1440<1020,'Outside jobs stay within 09:00–17:00');}if(r.task!=='sleep'&&!r.trip){waking[r.id]++;if(['idle','nature_walk','birdwatch','stretch','daydream','stargaze','socialize','rest'].includes(r.task))relax[r.id]++;}}
     g.tick(.25);
   }
   const s=snap(g);assert(s.village.buildings.every(b=>b.progress===100),`${scenario}: all three mixed-material projects finish`);
   assert(orders>0&&s.village.economy.orders.some(o=>o.status==='delivered'));
   assert(s.village.economy.ledger.some(l=>l.amount>0),'Outside work must provide recovery income');
-  assert(maxHunger<95);assert(relax.every((n,i)=>n/waking[i]>.4),'Residents retain at least 40% waking leisure during construction');
+  assert(maxHunger<95);assert(relax.every((n,i)=>n/waking[i]>.4),'Residents retain at least 40% of in-village waking time for leisure during construction');
   if(scenario==='economy-depleted')assert(s.village.economy.sources.filter(s=>s.material>1).every(s=>s.remaining===0));
-  console.log(`PASS: ${scenario}, 24 days, ${orders} combined orders, all projects completed; minimum food ${minFood.toFixed(1)}, peak hunger ${maxHunger.toFixed(1)}, leisure ${Math.floor(Math.min(...relax.map((n,i)=>n/waking[i]))*100)}%+.`);
+  console.log(`PASS: ${scenario}, 24 days, ${orders} combined orders, all projects completed; minimum food ${minFood.toFixed(1)}, peak hunger ${maxHunger.toFixed(1)}, in-village leisure ${Math.floor(Math.min(...relax.map((n,i)=>n/waking[i]))*100)}%+.`);
   g.free();
 }
 // Local preparation consumes inputs once and project pause stops its demand.

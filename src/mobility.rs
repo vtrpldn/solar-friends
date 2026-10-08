@@ -396,4 +396,17 @@ mod tests {
             assert!(v.buildings.iter().all(|b| spacing::clear_plot(b, x, y)));
         }
     }
+    #[test]
+    fn a_small_water_store_does_not_keep_the_caretaker_working_forever() {
+        let mut g = healthy();
+        g.app.world_mut().resource_mut::<Village>().water = 39.;
+        let v = g.app.world().resource::<Village>().clone();
+        let mut nina = residents(&mut g)[4].clone();
+        choose(&mut nina, &v);
+        assert!(leisure::hobby(&nina.task));
+        let mut low = v.clone();
+        low.water = 20.;
+        choose(&mut nina, &low);
+        assert_eq!(nina.task, "water");
+    }
 }
