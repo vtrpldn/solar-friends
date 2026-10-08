@@ -32,7 +32,7 @@ Open [the village](http://127.0.0.1:4173). The pinned Rust toolchain includes th
 
 Choose a building in the bottom toolbar and click a clearing. Residents construct it autonomously, or you can select a resident and ask for help. People can refuse based on their energy or hunger. Explaining the community need can overcome reluctance, but never exhaustion.
 
-Chicken coops cost 24 timber and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes three ingredients, while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Egg storage holds 60; full storage pauses new feeding.
+Chicken coops cost 24 timber and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes three ingredients, while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Feeding reserves room for at most twelve eggs across all coops, including batches underway. Larger egg stocks from older saves remain available to use.
 
 Gardens need planting, watering, moist growth, and harvesting. Lettuce takes three game hours; beans take six; tomatoes take five before the first of three harvests. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents gather fallen timber, carry river water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 28×28 lot (784 tiles, roughly twice the previous 400). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
 
@@ -42,7 +42,7 @@ Open Settings (the gear button) to enable the placement grid. Tile guides appear
 
 Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls for speed. Escape cancels placement. Saves stay in this browser's local storage and happen every 15 seconds, after placement, and on leaving the tab. Save village writes immediately.
 
-A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Residents work in morning and afternoon blocks, with evenings for rest and company. The lighting changes continuously at dawn and dusk. Five base sprite sheets animate walking, building, and sitting; five additional sheets add looking around, stretching, waving, and relaxed standing. Eased frame and activity blends soften pose changes. These are game-scaled routines, not a detailed biological model.
+A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Autonomous chores run from 09:00 to noon and 15:00 to 16:00; urgent foraging can interrupt free time while residents are awake. Requested work can continue outside those windows, subject to their needs. Residents spend free time on nature walks, birdwatching, gentle stretches, daydreaming, and stargazing after 20:00. Hobbies restore energy, use individual quiet spots, and survive reloading. The lighting changes continuously at dawn and dusk. Existing walking, looking, stretching, and sitting animations accompany these activities.
 
 New village restarts the scenario after confirmation and retains one backup under `solar-friends-v2-backup`. Earlier prototype saves remain untouched under `solar-friends-v1`.
 
@@ -64,7 +64,7 @@ A **greenhouse** costs 60 timber and supports the same crops and resident intera
 
 ## Building interactions
 
-Click a building on the map or open **Buildings**, select a building, and ask a named neighbour to visit. They walk there before using it. Residents also choose completed buildings during free time. Visits respect bedtime, hunger, and energy needs, and their target survives saving and reloading.
+Click a building on the map or open **Buildings**, select a building, and ask a named neighbour to visit. They walk there before using it. Free time is reserved for hobbies and company. Visits respect bedtime, hunger, and energy needs, and their target survives saving and reloading.
 
 Homes restore energy; gardens are tended; kitchens cook with available supplies; cistern drinks use one water to restore energy and ease hunger; food forests provide two fruit. Coop care improves connection and advances an already-fed egg batch by thirty daylight minutes. Compost stations convert two scraps to one compost; workshops consume eight timber for twelve tool uses. Production visits share a sixty-game-minute cooldown per building.
 
@@ -77,6 +77,10 @@ Open **Supplies** for ingredients, eggs, prepared meals, today's production and 
 Kitchens make five meals from three ingredients and one water. With egg cooking enabled and eggs available, they make seven meals from two ingredients, two eggs, and one water. Simple meals remain the fallback. Both recipes produce compost scraps. Turn egg cooking or automatic hen feeding off in Supplies to conserve resources. Already-fed coops finish their current batch.
 
 When ingredients and meals run low, residents prioritize gathering wild food even without a food forest. Water remains available from the river. Shortages pause hen production and crop growth without killing hens or crops. Existing saves start with no eggs and retain their ingredients, buildings, and village progress.
+
+Autonomous food work tops up ingredients only below eighteen ingredients and thirty ingredients plus meals. Cooking resumes below eight prepared meals, with kitchen duty rotating across residents. Completed harvests and pots can exceed those thresholds by one batch; workers recheck the pantry before adding more. Timber trips stop adding unwanted fruit. Explicitly requested production still works when the pantry is full. Old surpluses are consumed normally rather than discarded.
+
+The **A relaxed afternoon** developer scenario demonstrates hobbies with a modest pantry. Run `node scripts/verify-leisure.mjs` after rebuilding to check two weeks each of arrival, established, hungry, and surplus villages, including food bounds, individual free time, and save compatibility.
 
 ## Village quests
 
@@ -102,7 +106,7 @@ The first situation, **More than the cook**, appears when one neighbour finishes
 
 The collective can share kitchen shifts or protect a day off. Sharing shifts takes the resident off cooking and gives them a break while other neighbours prioritize meals over their projects. A day off protects them from all work until recovery is complete. Requests cannot override either agreement. Food, water, sleep, and rest needs still apply to helpers.
 
-Recovery requires two other cooks (one for a day off), 72 game minutes of rest or company, and a full game day after the agreement. Choosing a response does not complete the situation. Without an agreement, actual help and recovery can also settle the concern after a day. More cooking by the affected resident reduces recovery by 36 minutes per batch. Sleep does not count as personal free time.
+Recovery requires two other cooks (one for a day off), 72 game minutes of rest, company, or hobbies at their destination, and a full game day after the agreement. Choosing a response does not complete the situation. Without an agreement, actual help and recovery can also settle the concern after a day. More cooking by the affected resident reduces recovery by 36 minutes per batch. Sleep does not count as personal free time.
 
 An unresolved concern can lower that resident's wellbeing by up to 12 points. Rest and company ease it. Resolved situations remain visible for three game days, then make room for another concern. Cooking history resets on resolution. Situation history, agreements, and recovery persist in village saves; older saves begin with no recorded cooking.
 
