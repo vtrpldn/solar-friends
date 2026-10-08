@@ -118,7 +118,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   }
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
-  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['arrival',null],['village',null]]) {
+  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
     await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
@@ -130,7 +130,21 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
     await page.evaluate(()=>window.solarDev.fixedView());
     await page.locator('#dev-close').click();
+    if(['rain','after-rain','dry-afternoon'].includes(id)) {
+      assert.equal(await page.locator('#world').getAttribute('data-weather'),{rain:'rain','after-rain':'after-rain','dry-afternoon':'dry'}[id]);
+      assert.equal(state.environment.raining,id==='rain');
+      if(id==='after-rain')assert((await page.locator('.season small').textContent()).includes('After the rain'));
+    }
     await capture(`Fixed scenario: ${id}`,`scenario-${id}.png`);
+    if(id==='rain') {
+      const before=await page.locator('#world').evaluate(el=>el.toDataURL());
+      await page.waitForTimeout(120);
+      assert.equal(await page.locator('#world').evaluate(el=>el.toDataURL()),before,'Paused rainfall must stay fixed');
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await capture('Rain with reduced motion: cloud cover and wet ground','weather-reduced-motion.png');
+      assert.equal(await page.locator('#world').getAttribute('data-weather'),'rain');
+      await page.emulateMedia({reducedMotion:'no-preference'});
+    }
     await page.locator('#dev-button').click();
   }
   await page.locator('#dev-scenario').selectOption('cook');await page.locator('#dev-load').click();

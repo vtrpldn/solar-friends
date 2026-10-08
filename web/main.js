@@ -271,7 +271,7 @@ function enterVillage(candidate,mode) {
   game.free();game=candidate;storage=modeStores[mode];gameActive=true;
   state=JSON.parse(game.snapshot());
   residentAnimations.clear();selected=null;tool=null;pointer=null;cameraTarget=null;
-  pan={x:0,y:0};time=0;speed=1;last=0;saveElapsed=0;
+  pan={x:0,y:0};time=0;weatherTime=0;speed=1;last=0;saveElapsed=0;
   setZoom(1.3);
   $('#person').hidden=true;$('#placement').hidden=true;closePanels();
   for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
@@ -1080,7 +1080,7 @@ function updateUI() {
     `Day ${Math.floor(v.minutes / 1440) + 1} · ${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
   const night = mins < 360 || mins >= 1140;
   $(".season-icon").textContent = night ? "☾" : "☀";
-  $(".season small").textContent = state.environment.raining ? 'Rainfall' : mins < 360 || mins >= 1260 ? 'Night' : mins < 720 ? 'Morning' : mins < 1080 ? 'Afternoon' : 'Evening';
+  $(".season small").textContent = state.environment.raining ? 'Rainfall' : weatherConditions(state.environment,v.minutes).wet>.1 ? 'After the rain' : mins < 360 || mins >= 1260 ? 'Night' : mins < 720 ? 'Morning' : mins < 1080 ? 'Afternoon' : 'Evening';
   const env = state.environment;
   const gardens = v.buildings.filter(
     (b) => ["garden", "greenhouse"].includes(b.kind) && b.progress >= 100,

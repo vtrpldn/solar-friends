@@ -4,7 +4,7 @@ import { occupies } from './building-footprints.js';
 const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = x => { const n = clamp(x); return n * n * (3 - 2 * n); };
 const seed = n => { const v = Math.sin(n * 127.1 + 43.7) * 43758.5453; return v - Math.floor(v); };
-const sites = Array.from({length:480},(_,i)=>({x:1+seed(i*3)*26,y:1+seed(i*3+1)*26,phase:seed(i*3+2)}));
+const sites = Array.from({length:480},(_,i)=>({id:i,x:1+seed(i*3)*26,y:1+seed(i*3+1)*26,phase:seed(i*3+2)}));
 
 // Only the simulation's raining flag can produce rainfall. The afternoon
 // schedule supplies visual buildup, cloud cover, and two hours of drying.
@@ -27,7 +27,7 @@ export function drawGroundWeather(ctx, {conditions, buildings, project, scale, t
   ctx.save();
   // Small shallow pools sit on the ground plane, underneath buildings and
   // residents. The same seeded positions survive panning, zooming and pause.
-  for(const [i,site] of clear.slice(0,34).entries()) {
+  for(const site of clear.filter(p=>p.id<34)) {
     if(riverBank(site.x,site.y)||conditions.wet<=.01)continue;
     const p=project(site.x,site.y),radius=(10+site.phase*17)*scale;
     ctx.save();ctx.translate(p.x,p.y);ctx.scale(1,.5);
@@ -35,13 +35,13 @@ export function drawGroundWeather(ctx, {conditions, buildings, project, scale, t
     sheen.addColorStop(0,`rgba(123,161,160,${conditions.wet*.36})`);
     sheen.addColorStop(.65,`rgba(96,132,130,${conditions.wet*.25})`);
     sheen.addColorStop(1,'rgba(88,120,116,0)');
-    ctx.fillStyle=sheen;ctx.beginPath();ctx.ellipse(0,0,radius,radius*(.7+seed(i)*.2),0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=sheen;ctx.beginPath();ctx.ellipse(0,0,radius,radius*(.7+seed(site.id)*.2),0,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle=`rgba(211,226,214,${conditions.wet*.28})`;ctx.lineWidth=.8*scale;
     ctx.beginPath();ctx.ellipse(-radius*.15,-radius*.2,radius*.55,radius*.25,-.15,Math.PI,Math.PI*1.8);ctx.stroke();
     ctx.restore();counts.puddles++;
   }
   if(conditions.rain&&!reducedMotion) {
-    for(const site of clear.slice(0,160)) {
+    for(const site of clear.filter(p=>p.id<160)) {
       const phase=(time*1.6+site.phase)%1;if(phase>.45)continue;
       const p=project(site.x,site.y),water=riverBank(site.x,site.y),r=(1.5+phase*(water?16:8))*scale;
       ctx.strokeStyle=`rgba(213,231,226,${conditions.rain*(1-phase/.45)*(water?.36:.32)})`;
