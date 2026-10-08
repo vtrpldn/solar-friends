@@ -899,6 +899,10 @@ pub fn finish_outside(v: &mut Village, id: usize) {
     }
 }
 
+pub fn contribute(v: &mut Village, n: i64, note: &str) {
+    ledger(v, -n, note.into());
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -955,7 +959,6 @@ mod tests {
         assert_eq!(v.wood, wood - 4.);
         assert!(!build(&mut v, 0, 1.));
         assert_eq!(quantity(&v, 2), earth - 4);
-        drop(v);
         assert_ne!(g.configure_project(0, 1, false, "local"), "ok");
         assert_eq!(g.cancel_project(0), "ok");
         let v = g.app.world().resource::<Village>();
@@ -1011,7 +1014,6 @@ mod tests {
         let mut g = Game::new();
         let mut v = g.app.world_mut().resource_mut::<Village>();
         assert!(local_job(&v).is_none());
-        drop(v);
         assert_eq!(g.place("garden", 8, 8), "ok");
         v = g.app.world_mut().resource_mut::<Village>();
         v.economy.stock[2] = 0;
@@ -1037,7 +1039,6 @@ mod tests {
         v.buildings[0].progress = 100.;
         assert_eq!(preparation(&v, 7), Some((bundle(&[(2, 2), (0, 1)]), 2)));
         assert_eq!(preparation(&v, 8), Some((bundle(&[(4, 1), (3, 1)]), 2)));
-        drop(v);
         assert_eq!(g.place("home", 12, 8), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.economy.stock[7] = 0;
@@ -1189,8 +1190,4 @@ mod tests {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), before);
     }
-}
-
-pub fn contribute(v: &mut Village, n: i64, note: &str) {
-    ledger(v, -n, note.into());
 }

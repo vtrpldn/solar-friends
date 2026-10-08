@@ -14,11 +14,11 @@ export function installDevTools(api) {
     <nav class="dev-tabs" aria-label="Developer workspaces"><button data-dev-tab="simulation" aria-pressed="true">Simulation</button><button data-dev-tab="art" aria-pressed="false">Artwork</button><button data-dev-tab="checks" aria-pressed="false">Checks & captures</button></nav>
     <section data-dev-page="simulation"><div class="dev-grid"><section class="dev-card"><h3>Scenario launcher</h3>
       <label for="dev-scenario">Start from</label><select id="dev-scenario">${scenarios.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}<option value="copy">Copy of my current village</option><option value="imported" disabled>Imported checkpoint</option></select>
-      <p id="dev-scenario-detail"></p><div class="dev-actions"><button id="dev-load">Load sandbox</button><button id="dev-return">Return to village</button></div>
-      <p>Scenarios are staged test fixtures. Your village stays in memory while you experiment; sandbox progress never autosaves.</p>
+      <p id="dev-scenario-detail"></p><div class="dev-actions"><button id="dev-load">Load test scene</button><button id="dev-return">Return to village</button></div>
+      <p>Scenarios are staged test fixtures. Your village stays in memory while you experiment; test scene progress never autosaves.</p>
       <div class="dev-actions"><button data-dev-step="0.75">Single tick · ¼ second</button><button data-dev-step="1">+1 game minute</button><button data-dev-step="60">+1 game hour</button></div>
       <label for="dev-minutes">Game minutes to advance (up to one day)</label><input id="dev-minutes" type="number" min="0.75" max="1440" value="60" step="0.75"><button id="dev-advance">Advance</button>
-      <div class="dev-actions"><button id="dev-run">Run sandbox in game</button><button id="dev-fixture">Export scenario</button><button id="dev-import">Import sandbox checkpoint</button><input id="dev-import-file" type="file" accept="application/json,.json" hidden></div><p>Import a village export into the sandbox to replay an earned checkpoint. Your saved village stays protected.</p>
+      <div class="dev-actions"><button id="dev-run">Run test scene in game</button><button id="dev-fixture">Export scenario</button><button id="dev-import">Import test scene checkpoint</button><input id="dev-import-file" type="file" accept="application/json,.json" hidden></div><p>Import a village export into the test scene to replay an earned checkpoint. Your saved village stays protected.</p>
       <p id="dev-clock"></p><p id="dev-message" role="status"></p>
     </section><section class="dev-card"><h3>Resident decisions</h3><label for="dev-resident">Inspect a neighbour</label><select id="dev-resident"></select><div class="dev-actions"><button id="dev-inspect">Refresh</button><button id="dev-follow">Locate in game</button></div><div id="dev-inspection"></div></section></div></section>
     <section data-dev-page="art" hidden><div class="dev-grid"><section class="dev-card"><h3>Artwork workbench</h3>
@@ -32,7 +32,7 @@ export function installDevTools(api) {
   document.body.append(dialog);
   const $ = id => document.getElementById(id);
   const banner = document.createElement('div'); banner.id = 'dev-banner'; banner.hidden = true;
-  banner.innerHTML = 'Development sandbox · autosave off <button>Dev Tools</button>'; document.body.append(banner);
+  banner.innerHTML = 'Development test scene · autosave off <button>Dev Tools</button>'; document.body.append(banner);
   const errors = [];
   let observedScenario;
   const recordError = error => { errors.push(String(error)); if (errors.length > 50) errors.shift(); };
@@ -47,7 +47,7 @@ export function installDevTools(api) {
         $('dev-scenario').onchange();
       }
     }
-    $('dev-mode').textContent = api.isSandbox() ? `Sandbox · ${scenarios.find(s => s.id === api.scenario())?.name || (api.scenario()==='imported'?'Imported checkpoint':api.scenario())} · saved village protected` : 'Viewing your village · load a sandbox to advance or experiment';
+    $('dev-mode').textContent = api.isSandbox() ? `Test scene · ${scenarios.find(s => s.id === api.scenario())?.name || (api.scenario()==='imported'?'Imported checkpoint':api.scenario())} · saved village protected` : 'Viewing your village · load a test scene to advance or experiment';
     banner.hidden = !api.isSandbox();
     $('dev-clock').textContent = clock(snapshot.village.minutes);
     $('dev-return').disabled = !api.isSandbox();
@@ -60,7 +60,7 @@ export function installDevTools(api) {
     const data = api.inspect(), id = Number($('dev-resident').value);
     const entry = data.residents.find(p => p.resident.id === id); if (!entry) return;
     const r = entry.resident;
-    $('dev-inspection').innerHTML = `<p><b>${escape(r.task)}</b> · ${r.requested ? 'requested' : 'autonomous'}<br>${escape(r.reason)}</p><p>Energy ${r.energy.toFixed(0)} · Hunger ${r.hunger.toFixed(0)} · Social ${r.social.toFixed(0)}<br>Destination (${r.target_x.toFixed(2)}, ${r.target_y.toFixed(2)}) · ${r.remaining.toFixed(1)} task seconds left</p><p><b>If choosing now:</b> ${escape(entry.next.task)}<br>${escape(entry.next.reason)}</p><p>This prediction runs the real chooser on a copy. An ongoing task may continue first. The alternatives below show request eligibility, not a priority score.</p><table><thead><tr><th>Alternative request</th><th>Current result</th></tr></thead><tbody>${entry.alternatives.map(a => `<tr><td>${escape(a.task)}</td><td>${escape(a.blocker || 'Available')}${a.blocker && !a.encouraged_blocker ? ' (explanation can overcome this)' : ''}</td></tr>`).join('')}</tbody></table><h4>Recent activity changes</h4><p>Recorded while diagnostics are enabled; latest 150 changes across all residents.</p><ol id="dev-history">${data.history.filter(d => d.resident === id).reverse().map(d => `<li>${clock(d.minute)} · ${escape(d.task)}<br>${escape(d.reason)}</li>`).join('') || '<li>No changes recorded yet. Advance the sandbox or let the village run.</li>'}</ol>`;
+    $('dev-inspection').innerHTML = `<p><b>${escape(r.task)}</b> · ${r.requested ? 'requested' : 'autonomous'}<br>${escape(r.reason)}</p><p>Energy ${r.energy.toFixed(0)} · Hunger ${r.hunger.toFixed(0)} · Social ${r.social.toFixed(0)}<br>Destination (${r.target_x.toFixed(2)}, ${r.target_y.toFixed(2)}) · ${r.remaining.toFixed(1)} task seconds left</p><p><b>If choosing now:</b> ${escape(entry.next.task)}<br>${escape(entry.next.reason)}</p><p>This prediction runs the real chooser on a copy. An ongoing task may continue first. The alternatives below show request eligibility, not a priority score.</p><table><thead><tr><th>Alternative request</th><th>Current result</th></tr></thead><tbody>${entry.alternatives.map(a => `<tr><td>${escape(a.task)}</td><td>${escape(a.blocker || 'Available')}${a.blocker && !a.encouraged_blocker ? ' (explanation can overcome this)' : ''}</td></tr>`).join('')}</tbody></table><h4>Recent activity changes</h4><p>Recorded while diagnostics are enabled; latest 150 changes across all residents.</p><ol id="dev-history">${data.history.filter(d => d.resident === id).reverse().map(d => `<li>${clock(d.minute)} · ${escape(d.task)}<br>${escape(d.reason)}</li>`).join('') || '<li>No changes recorded yet. Advance the test scene or let the village run.</li>'}</ol>`;
   }
   async function act(fn) { try { await fn(); $('dev-message').textContent = ''; refresh(); } catch (e) { $('dev-message').textContent = e.message; } }
   function open() { api.observe(); refresh(); if (!dialog.open) dialog.showModal(); }
@@ -70,7 +70,7 @@ export function installDevTools(api) {
     for (const item of dialog.querySelectorAll('[data-dev-tab]')) item.setAttribute('aria-pressed', String(item === button));
     for (const section of dialog.querySelectorAll('[data-dev-page]')) section.hidden = section.dataset.devPage !== button.dataset.devTab;
   };
-  $('dev-scenario').onchange = () => { $('dev-load').disabled=$('dev-scenario').value==='imported'; $('dev-scenario-detail').textContent = scenarios.find(s => s.id === $('dev-scenario').value)?.detail || ($('dev-scenario').value==='imported'?'An exported checkpoint, restored in the protected sandbox. Select a standard scene to start something else.':'A temporary copy of the village currently on screen.'); };
+  $('dev-scenario').onchange = () => { $('dev-load').disabled=$('dev-scenario').value==='imported'; $('dev-scenario-detail').textContent = scenarios.find(s => s.id === $('dev-scenario').value)?.detail || ($('dev-scenario').value==='imported'?'An exported checkpoint, restored in the protected test scene. Select a standard scene to start something else.':'A temporary copy of the village currently on screen.'); };
   $('dev-scenario').onchange();
   $('dev-load').onclick = () => act(() => api.loadScenario($('dev-scenario').value));
   $('dev-return').onclick = () => act(() => api.returnToVillage());

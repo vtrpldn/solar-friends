@@ -22,6 +22,41 @@ pub fn replenish(v: &mut Village) {
 
 #[wasm_bindgen]
 impl Game {
+    pub fn remove_sandbox_building(&mut self, id: usize) -> bool {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if v.mode != Mode::Sandbox {
+            return false;
+        }
+        let Some(building) = v.buildings.iter().find(|b| b.id == id) else {
+            return false;
+        };
+        let home = building.kind == "home";
+        v.buildings.retain(|b| b.id != id);
+        v.economy.projects.retain(|p| p.building != id);
+        v.power.disabled.retain(|&building| building != id);
+        v.power.stored = v.power.stored.min(power::supply(&v).capacity);
+        v.water = v.water.min(ecology::capacity(&v));
+        let village = v.clone();
+        let mut q = self.app.world_mut().query::<&mut Resident>();
+        for mut r in q.iter_mut(self.app.world_mut()) {
+            if r.visit_building == Some(id)
+                || r.activity_building == Some(id)
+                || (home && matches!(r.task.as_str(), "sleep" | "rest"))
+            {
+                r.visit_building = None;
+                r.activity_building = None;
+                r.activity_material = None;
+                assign(
+                    &mut r,
+                    &village,
+                    "rest",
+                    "Taking a break while the clearing changes.",
+                    false,
+                );
+            }
+        }
+        true
+    }
     /// Starts a fresh mode; invalid input leaves the running village untouched.
     pub fn start_mode(&mut self, mode: &str) -> bool {
         let mode = match mode {
@@ -115,5 +150,36 @@ mod tests {
         );
         assert!(!g.start_mode("invalid"));
         assert_eq!(g.snapshot(), saved);
+    }
+
+    #[test]
+    fn sandbox_removal_cleans_visits_power_and_frees_the_plot() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("solar_farm", 5, 5), "ok");
+        assert_eq!(g.place("home", 12, 5), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.power.stored = 20.;
+        }
+        assert!(g.remove_sandbox_building(0));
+        assert_eq!(g.app.world().resource::<Village>().power.stored, 0.);
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
+        r.visit_building = Some(1);
+        r.activity_building = Some(1);
+        r.task = "visit".into();
+        assert!(g.remove_sandbox_building(1));
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.place("garden", 12, 5), "ok");
+        let before = g.snapshot();
+        assert!(!g.remove_sandbox_building(99));
+        assert_eq!(g.snapshot(), before);
+        let mut story = Game::new();
+        assert_eq!(story.place("home", 5, 5), "ok");
+        let before = story.snapshot();
+        assert!(!story.remove_sandbox_building(0));
+        assert_eq!(story.snapshot(), before);
     }
 }

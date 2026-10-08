@@ -154,6 +154,7 @@ let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
+let pendingRemoval = null;
 const escapeHtml = (s) =>
   String(s).replace(
     /[&<>"']/g,
@@ -193,7 +194,7 @@ function toast(message) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
 }
 function save(manual = false) {
-  if (!gameActive || $("#main-menu").open) return;
+  if (!gameActive || ($("#main-menu").open && !manual)) return;
   if (artworkPreview || sandbox || directScenario) {
     $("#save-status").textContent = "Development preview · your saved village is unchanged";
     if (manual) toast("Preview only. Return to your village to save progress.");
@@ -316,7 +317,7 @@ function startMode(mode) {
   else toast('Every building is unlocked. Choose a clearing and make yourself at home.');
 }
 function installMenu() {
-  $('#main-menu').addEventListener('cancel',event=>event.preventDefault());
+  $('#main-menu').addEventListener('cancel',event=>{event.preventDefault();if(gameActive)$('#menu-return').click();});
   for(const button of document.querySelectorAll('[data-new-mode]'))button.onclick=()=>requestNewMode(button.dataset.newMode);
   for(const button of document.querySelectorAll('[data-continue]'))button.onclick=()=>continueMode(button.dataset.continue);
   $('#menu-return').onclick=()=>{
@@ -833,9 +834,10 @@ function updateQuests() {
     done = completions[id];
   const objectives = quest.objectives(v),
     next = objectives.find((o) => !o.done);
+  const finished=completions.every(Boolean);
   const completedCount = done ? objectives.length : objectives.filter(o => o.done).length;
-  $("#goal-label").textContent = done ? "A shared dream fulfilled" : quest.title;
-  $("#goal-next").textContent = done ? "Choose what we grow next →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
+  $("#goal-label").textContent = finished ? "A flourishing village" : done ? "A shared dream fulfilled" : quest.title;
+  $("#goal-next").textContent = finished ? "7/7 chapters complete · keep growing" : done ? "Follow our next chapter →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
   $("#goal-meter").value = completedCount; $("#goal-meter").max = objectives.length;
   $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
   $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
@@ -953,11 +955,13 @@ function updateBuildingPanel() {
   const chooser = $("#building-choice");
   const previous = chooser.value;
   const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${b.progress < 100 ? " · building" : ""}</option>`).join("");
+  chooser.disabled=!state.village.buildings.length;
   if (chooser.innerHTML !== markup) {
     chooser.innerHTML = markup;
     if ([...chooser.options].some(o => o.value === previous)) chooser.value = previous;
   }
   const b = state.village.buildings.find(b => b.id === Number(chooser.value));
+  $('#remove-sandbox-building').hidden=state.village.mode!=='sandbox'||!b;
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
   if(b?.kind==='workshop'){
     const tools=state.village.progress.tool_uses, timber=state.environment.economy.materials[0].available;
@@ -1034,6 +1038,8 @@ function updateUI() {
   $('[data-panel="town-panel"]').hidden=free;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Projects tracks construction materials and Town supplies equipment by delivery. Each chapter opens the next part of village life.';
+  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Goals and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Projects; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1248,6 +1254,21 @@ function setup() {
 
   $("#building-neighbours").innerHTML = state.residents.map(r => `<button data-visitor="${r.id}">${escapeHtml(r.name)}</button>`).join("");
   $("#building-choice").onchange = () => { $("#building-response").textContent = ""; updateBuildingPanel(); };
+  $('#remove-sandbox-building').onclick=()=>{
+    const b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));
+    if(!b||state.village.mode!=='sandbox')return;
+    pendingRemoval=b.id;
+    $('#sandbox-remove-note').textContent=`Remove ${kinds[b.kind][0].toLowerCase()} ${b.id+1} and its crops or contents? You can rebuild for free in Sandbox.`;
+    $('#sandbox-remove-dialog').showModal();
+  };
+  $('#sandbox-remove-close').onclick=()=>{pendingRemoval=null;$('#sandbox-remove-dialog').close();};
+  $('#sandbox-remove-confirm').onclick=()=>{
+    if(pendingRemoval!==null&&game.remove_sandbox_building(pendingRemoval)) {
+      residentAnimations.clear();state=JSON.parse(game.snapshot());updateUI();save();toast('The plot is clear. Build something new whenever you like.');
+    }
+    pendingRemoval=null;$('#sandbox-remove-dialog').close();
+    ($('#building-choice').disabled?$('#building-panel [data-close-panel]'):$('#building-choice')).focus();
+  };
   $("#building-neighbours").onclick = event => {
     const button = event.target.closest("[data-visitor]");
     if (!button) return;

@@ -165,6 +165,7 @@
           <details><summary>Growing details</summary><p id="crop-details"></p><p>Changes apply to the next planting. Pausing replanting lets the current crop finish, including all three tomato harvests.</p></details>
         </section>
         <p id="building-activity" role="status"></p>
+        <button id="remove-sandbox-building" class="journal-button" hidden>Remove building</button>
         <div id="building-visits"><h3>Ask a neighbour to visit</h3>
         <div id="building-neighbours" class="requests"></div>
         <p id="building-response" role="status"></p>
@@ -303,10 +304,10 @@
       <button id="close-help" class="dialog-close" aria-label="Close help">
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
-      <h2 id="help-title">Grow a place to belong.</h2><p>Blueprints are free. Open Projects to choose materials and see what each stage needs. Town purchases arrive by delivery; residents source and prepare local materials within their normal work hours.</p>
+      <h2 id="help-title">Grow a place to belong.</h2><p id="help-intro">Choose Story to follow seven chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
-        <li>
+        <li id="help-start">
           <b>Start with the essentials.</b> Open Goals and follow A Shared Beginning in the
           village journal: a cistern, homes, a garden and a shared kitchen.
           Choose a building, then click the clearing. Residents construct it
@@ -408,6 +409,7 @@
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
     <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Cancel & salvage</button></dialog>
+    <dialog id="sandbox-remove-dialog" aria-labelledby="sandbox-remove-title"><h2 id="sandbox-remove-title">Clear this plot?</h2><p id="sandbox-remove-note"></p><button id="sandbox-remove-close">Keep building</button><button id="sandbox-remove-confirm" class="primary">Remove building</button></dialog>
     <script type="module" src="main.js?v=modes-1"></script>
   </body>
 </html>

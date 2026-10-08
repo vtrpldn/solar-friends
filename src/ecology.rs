@@ -217,7 +217,6 @@ mod farming_tests {
         assert_eq!(v.food - initial, 14.);
         tend(&mut v, &r);
         assert!(!v.buildings[0].crop.planted);
-        drop(v);
         assert!(g.configure_crop(0, "beans", true));
         let mut v = g.app.world_mut().resource_mut::<Village>();
         tend(&mut v, &r);

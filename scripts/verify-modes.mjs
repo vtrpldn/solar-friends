@@ -41,7 +41,9 @@ for(const kind of buildings) {
   const saved=g.snapshot(),restore=new Game();assert(restore.restore(saved));assert.equal(restore.snapshot(),saved);
   const invalid=JSON.parse(saved);invalid.village.mode='unknown';assert(!restore.restore(JSON.stringify(invalid)));assert.equal(restore.snapshot(),saved);
   assert(!restore.start_mode('unknown'));assert.equal(restore.snapshot(),saved);
-  assert(restore.start_mode('story'));assert.equal(snap(restore).village.buildings.length,0);assert.equal(snap(restore).village.mode,'story');
+  assert(restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,0);
+  assert(restore.restore(restore.snapshot()));assert.equal(restore.place(kind,5,5),'ok');
+  assert(restore.start_mode('story'));assert(!restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,0);assert.equal(snap(restore).village.mode,'story');
   g.free();restore.free();
 }
 const g=new Game();assert.equal(g.host_gathering().includes('Roots for Tomorrow'),true);assert.equal(g.contribute_tool_library().includes('A Place to Gather'),true);

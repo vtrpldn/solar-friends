@@ -10,6 +10,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 
 - [Run locally](#run-locally)
 - [Play](#play)
+- [Game modes](#game-modes)
 - [Construction economy](#construction-economy)
 - [Completed gameplay and artwork playtest](playtest.md)
 - [Village quests](#village-quests)
@@ -46,7 +47,17 @@ Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls f
 
 A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and staggered bedtimes begin at 21:30. Autonomous chores run from 09:00 to noon and 15:00 to 16:00; urgent foraging can interrupt free time while residents are awake. Requested household tasks can continue outside those windows, subject to their needs. Material collection, preparation and outside shifts respect community work hours even when requested. Residents spend free time on nature walks, birdwatching, gentle stretches, daydreaming, and stargazing after 20:00. Hobbies restore energy, use individual quiet spots, and survive reloading. The lighting changes continuously at dawn and dusk. Existing walking, looking, stretching, and sitting animations accompany these activities.
 
-New village restarts after confirmation and retains one backup under `solar-friends-v3-backup`. This economy uses version 3 saves; previous formats do not import. Old browser keys remain untouched, and the game explains the fresh start.
+New villages restart after confirmation and retain a backup for their mode. This economy uses version 3 saves; earlier formats do not import. Old browser keys remain untouched.
+
+## Game modes
+
+The main menu appears on launch. **New game** starts Story; **Sandbox** starts a separate village. Continue either mode from its own saved slot. Click the Solar Friends mark or use Settings → Main menu to return. Reading the menu pauses village life.
+
+**Story** starts with roads, homes, gardens, kitchens and cisterns. Seven chapters introduce new buildings and mechanics in order; the next chapter is followed automatically. Construction uses local materials, town purchases and resident labour. Earlier contributions still count toward later objectives. After the final chapter, all buildings remain available and resource management continues.
+
+**Sandbox** unlocks every building from the start. Placement completes immediately without spending materials or funds. Ingredients stay at least 80, meals at least 20, water fills available storage, funds stay at least R$ 100,000, and tools replenish to 36 uses on simulation ticks. Residents, crops, rain, hens and solar lighting retain their normal routines. Select a building in Buildings to remove it and reuse its plot; rebuilding is free. Roads can be toggled in either mode.
+
+Story saves under `solar-friends-v3-story`; Sandbox uses `solar-friends-v3-sandbox`. Each has its own backup and recovery keys. Confirmed restarts replace only that mode and retain a backup. Imports use the mode in the exported file. An earlier version 3 village remains available as Story without changing its original browser key. Development scenarios and artwork previews bypass the main menu and never save over either playable mode.
 
 ## Construction economy
 
@@ -112,13 +123,16 @@ The **A relaxed afternoon** developer scenario demonstrates hobbies with a modes
 
 ## Village quests
 
-The journal starts with **A Shared Beginning**: arrive, build water and shelter, harvest, serve a cooked meal, and reach the next morning. Completion unlocks food forests and three parallel quests. Follow one quest on screen; all available quests progress together. Recorded earlier efforts count, and completed quests remain complete.
+The journal starts with **A Shared Beginning**: arrive, build water and shelter, harvest, serve a cooked meal, and reach the next morning. Completion unlocks food forests and **Roots for Tomorrow**. Finish each chapter before following the next. Recorded earlier efforts count, and completed chapters remain complete.
 
 | Quest | Objectives | Reward |
 | --- | --- | --- |
 | Roots for Tomorrow | Finish a food forest and gather six fruit. | Compost station. Cooking produces scraps; two scraps make one compost, which adds three food to the next garden harvest. |
 | A Place to Gather | Serve five meals, complete a social break with each neighbour, and host a welcome supper at the kitchen. | Community square for repeat gatherings. |
-| Made by Our Hands | Receive a town delivery, contribute R$ 120 to a tool library, and finish a building with at least two contributors. | Workshop. Eight timber makes twelve tool uses. |
+| Made by Our Hands | Receive a town delivery, contribute R$ 120 to a tool library, and finish a building with at least two contributors. | Workshop and greenhouse. Tools and protected seedlings. |
+| Growing Resilience | Build a workshop, compost station and greenhouse; craft tools and bring in an enriched harvest. | Chicken coop. |
+| A Fuller Table | Build a chicken coop and collect three eggs across daylight batches. | Solar farms and street lights. |
+| Sunshine to Share | Finish a solar farm and street light; store twelve energy. | Story complete; continue managing the village freely. |
 
 Gatherings cost five prepared meals and require at least three rested, fed neighbours. Start between 08:00 and 18:00, at most once per day. They last two game hours; at least three neighbours must reach the venue. Attendees gain connection, fullness, and mutual friendship memories visible in resident details. The welcome supper uses the kitchen; later gatherings use the square.
 
@@ -150,11 +164,11 @@ Repeatable scenarios and shared rendering controls shorten gameplay debugging an
 
 ### Simulation workbench
 
-Economy scenarios **Our first projects**, **An empty shared fund** and **Depleted land** exercise project controls and purchasing recovery. Load a fresh arrival, established village, hungry village, mature harvest, overworked cook, full coop, night scene, or a copy of the current village. These are staged fixtures: subsequent time steps run the real simulation. **Import sandbox checkpoint** replays a validated village export without replacing the saved village; malformed or oversized files leave the current scene intact. The cook fixture seeds history and raises its concern on the first tick.
+Economy scenarios **Our first projects**, **An empty shared fund** and **Depleted land** exercise project controls and purchasing recovery. Load a fresh arrival, established village, hungry village, mature harvest, overworked cook, full coop, night scene, or a copy of the current village. These are staged fixtures: subsequent time steps run the real simulation. **Import test scene checkpoint** replays a validated village export without replacing the saved village; malformed or oversized files leave the current scene intact. The cook fixture seeds history and raises its concern on the first tick.
 
 **Grid & road edges** places roads against every building and home variation. Select Road to show the grid. Foundations, placement previews, selection areas, and road exclusion use the same whole-tile plots, so paths meet foundations without a grass gap. Run `node scripts/verify-grid-foundations.mjs` after building to check the joins, road conflicts, and version 3 save round trips. `node scripts/verify-playtest.mjs` checks cancellation identities, persistent house variations, goal routes, desktop zoom and reachable material collection.
 
-The sandbox holds the original game in memory and disables village autosaves, imports, and restarts. **Return to village** restores that game; reloading returns to the last saved village. Export a scenario before leaving if it should be kept. A quarter-second tick advances 0.75 game minutes. Longer advances use the same bounded ticks, up to one game day per action.
+The development test scene (separate from playable Sandbox mode) holds the original game in memory and disables village autosaves, imports, and restarts. **Return to village** restores that game; reloading returns to the main menu. Export a scenario before leaving if it should be kept. A quarter-second tick advances 0.75 game minutes. Longer advances use the same bounded ticks, up to one game day per action.
 
 Resident diagnostics show the current task and destination, the real chooser's prediction on a copy, request eligibility and refusals, and the latest 150 activity changes across all residents while observation is enabled. An ongoing task can finish before the predicted decision applies. These observations are excluded from village saves.
 
@@ -190,6 +204,7 @@ The browser exposes `window.solarDev` for development automation: `loadScenario(
 Rust owns simulation and validated saves. Bevy App and ECS schedule systems and store resident entities. `wasm-bindgen` exposes the game to the browser. Canvas 2D draws the isometric world; HTML provides the controls and resident details. This slice uses Bevy's simulation modules, not its GPU renderer.
 
 - `src/lib.rs`: simulation, requests, construction, saves, and tests.
+- `src/modes.rs`: Story/Sandbox initialization, replenishment and Sandbox removal.
 - `src/economy.rs`: materials, stage reservations, orders, finite sites, preparation, income and sales.
 - `web/economy-ui.js` and `web/economy-art.js`: project/Town controls and shared resource sprites.
 - `src/progression.rs`: persistent quest milestones and building unlocks.
