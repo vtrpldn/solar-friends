@@ -139,23 +139,6 @@ fn river_bank(x: i32, y: i32) -> bool {
     // Keep footprints and resident approach points on the village side.
     x as f32 >= 25.8 + (y as f32 * 0.32).sin() * 0.65 - 2.3
 }
-fn cost(kind: &str) -> Option<f32> {
-    match kind {
-        "home" => Some(32.),
-        "garden" => Some(12.),
-        "greenhouse" => Some(60.),
-        "kitchen" => Some(40.),
-        "well" => Some(18.),
-        "grove" => Some(14.),
-        "compost" => Some(20.),
-        "square" => Some(36.),
-        "workshop" => Some(48.),
-        "coop" => Some(24.),
-        "solar_farm" => Some(48.),
-        "streetlight" => Some(6.),
-        _ => None,
-    }
-}
 fn ready(v: &Village, kind: &str) -> bool {
     v.buildings
         .iter()
@@ -194,7 +177,9 @@ fn available(v: &Village, task: &str) -> bool {
     match task {
         "build" => v.buildings.iter().any(|b| economy::can_build(v, b.id)),
         "source" | "prepare" => economy::local_job(v).is_some_and(|(t, _)| t == task),
-        "outside" => v.economy.outside_work,
+        "outside" => {
+            v.economy.outside_work && !v.economy.work_day.contains(&((v.minutes / 1440.) as i32))
+        }
         "garden" => v
             .buildings
             .iter()
@@ -331,6 +316,12 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
             let base = if task == "source" {
                 let s = &v.economy.sources[i];
                 (s.x as f32, s.y as f32)
+            } else if let Some(b) = v
+                .buildings
+                .iter()
+                .find(|b| b.kind == "workshop" && b.progress >= 100.)
+            {
+                spacing::approach(v, b, r.id).unwrap_or((10., 13.))
             } else {
                 (10., 13.)
             };
@@ -400,7 +391,7 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if v.economy.outside_work
         && r.id == 4
-        && v.economy.work_day[r.id] != (v.minutes / 1440.) as i32
+        && !v.economy.work_day.contains(&((v.minutes / 1440.) as i32))
     {
         (
             "outside",
@@ -465,6 +456,9 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
             | "outside"
     ) {
         return Some("That request is not available.".into());
+    }
+    if matches!(task, "source" | "prepare" | "outside") && !work_time(v.minutes) {
+        return Some("Material collection, preparation and outside shifts wait for community work hours: 09:00–12:00 and 15:00–16:00.".into());
     }
     if situations::protected(v, id, task) {
         return Some(
@@ -599,7 +593,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
         v.water = (v.water - dt * if sleeping { 0.002 } else { 0.009 }).max(0.);
-        let chores_finished = !r.requested
+        let chores_finished = (!r.requested
+            || matches!(r.task.as_str(), "source" | "prepare" | "outside"))
             && !work_time(v.minutes)
             && matches!(
                 r.task.as_str(),
@@ -1091,22 +1086,22 @@ impl Game {
             .progress
             .use_tools = enabled;
     }
-    pub fn contribute_workshop_timber(&mut self) -> String {
+    pub fn contribute_tool_library(&mut self) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if !v.progress.completed[0] {
             return "Finish A Shared Beginning first.".into();
         }
-        if v.progress.workshop_timber {
-            return "The workshop timber is already set aside.".into();
+        if v.progress.tool_library {
+            return "The tool library contribution is already set aside.".into();
         }
-        if v.wood < 24. {
-            return "Gather 24 timber to set aside for our tool library.".into();
+        if v.economy.money < 12000 {
+            return "Set aside R$ 120 from the shared fund for our tool library.".into();
         }
-        v.wood -= 24.;
-        v.progress.workshop_timber = true;
+        economy::contribute(&mut v, 12000, "Shared tool library");
+        v.progress.tool_library = true;
         event(
             &mut v,
-            "Timber set aside for our first tool library. Bento has a plan!",
+            "A shared fund contribution supports our first tool library. Bento has a plan!",
         );
         progression::update(&mut v);
         "ok".into()
@@ -1238,7 +1233,7 @@ impl Game {
                 || b.next_visit < 0.
                 || !ecology::valid(b)
                 || b.contributors > 31
-                || cost(&b.kind).is_none()
+                || economy::recipe(&b.kind, "standard").is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
                 || !(1..=MAP_SIZE - 2).contains(&b.y)
                 || river_bank(b.x, b.y)

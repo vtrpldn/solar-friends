@@ -60,7 +60,7 @@ export const quests = [
         "Give everyone a bed",
         count(v, "home"),
         2,
-        "Build a second home. Gather timber if supplies run low.",
+        "Build a second home. Check Projects for materials and order missing equipment in Town.",
         "home",
       ),
       goal(
@@ -94,7 +94,7 @@ export const quests = [
         "Gather fruit",
         v.progress.fruit,
         6,
-        "Ask a neighbour to gather timber. With a finished food forest, each trip also brings two fruit.",
+        "Ask a neighbour to forage food. With a finished food forest, each trip also brings two fruit.",
       ),
     ],
   },
@@ -142,22 +142,22 @@ export const quests = [
     reward: "Workshop · craft & conserve tools",
     building: "workshop",
     after:
-      "Build a workshop. Eight timber crafts twelve tool uses: +2 timber or food per job, or 25% faster construction. Pause tool use to save materials.",
+      "Build a workshop. Eight free timber crafts twelve tool uses for 25% faster construction. Pause tool use to save materials.",
     objectives: (v) => [
       goal(
-        "Gather timber together",
-        v.progress.timber,
-        40,
-        "Ask neighbours to gather timber. Materials already gathered count, even after being spent.",
+        "Receive a town delivery",
+        +v.economy.orders.some(o=>o.status==='delivered'),
+        1,
+        "Combine project purchases in Town and let the supplies arrive.",
       ),
       {
         ...goal(
-          "Set aside timber for a tool library",
-          +v.progress.workshop_timber,
+          "Support a shared tool library",
+          +v.progress.tool_library,
           1,
-          "Contribute 24 timber to our tool library. This is spent once, separately from building the workshop.",
+          "Contribute R$ 120 from our shared fund once. Outside shifts and surplus sales can replenish it.",
         ),
-        action: "timber",
+        action: "tool_library",
       },
       goal(
         "Finish a shared construction",

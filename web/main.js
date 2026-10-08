@@ -1,3 +1,5 @@
+import {economyImage,drawEconomyArt} from './economy-art.js';
+import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
 import { installBuildMenu } from './build-menu.js';
 import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
@@ -46,19 +48,19 @@ let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
-  road: ["Road", 0, "Click to add or remove a road tile"],
-  home: ["Home", 32, "Three beds and a good night’s rest"],
-  greenhouse: ["Greenhouse", 60, "Retain moisture · raise seedlings · needs stored water"],
-  garden: ["Garden", 12, "Plant, water, grow, then harvest"],
-  kitchen: ["Kitchen", 40, "Meals taste better together"],
-  well: ["Cistern", 18, "Catch rainfall · store 75 more water"],
-  grove: ["Food forest", 14, "Gather fresh fruit when the pantry needs it"],
-  compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
-  square: ["Square", 36, "Gatherings bring neighbours closer"],
-  coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
-  workshop: ["Workshop", 48, "Craft tools for building and harvests"],
-  solar_farm: ["Solar farm", 48, "Collect sunshine · store energy for shared lights"],
-  streetlight: ["Street light", 6, "Light village paths · needs shared solar power"],
+  road: ["Road", "Click to add or remove a road tile"],
+  home: ["Home", "Three beds and a good night’s rest"],
+  greenhouse: ["Greenhouse", "Retain moisture · raise seedlings · needs stored water"],
+  garden: ["Garden", "Plant, water, grow, then harvest"],
+  kitchen: ["Kitchen", "Meals taste better together"],
+  well: ["Cistern", "Catch rainfall · store 75 more water"],
+  grove: ["Food forest", "Gather fresh fruit when the pantry needs it"],
+  compost: ["Compost", "Two kitchen scraps enrich the next harvest"],
+  square: ["Square", "Gatherings bring neighbours closer"],
+  coop: ["Chicken coop", "A sheltered home for three roaming hens"],
+  workshop: ["Workshop", "Craft tools for building and harvests"],
+  solar_farm: ["Solar farm", "Collect sunshine · store energy for shared lights"],
+  streetlight: ["Street light", "Light village paths · needs shared solar power"],
 };
 const tasks = {
   visit: "Visiting a village building",
@@ -69,7 +71,10 @@ const tasks = {
   rest: "Resting in the shade",
   garden: "Tending the garden",
   build: "Building together",
-  gather: "Gathering supplies",
+  gather: "Foraging fresh food",
+  source: "Collecting local materials",
+  prepare: "Preparing building materials",
+  outside: "Helping at a neighbouring farm",
   cook: "Making a shared meal",
   water: "Collecting river water",
   socialize: "Finding some company",
@@ -123,7 +128,7 @@ let game,
   state,
   selected = null,
   tool = null,
-  buildMenu,
+  buildMenu, economyUI,
   speed = 1,
   paused = false,
   zoom = 1.3,
@@ -313,10 +318,11 @@ function sprite(kind, x, y, alpha = 1, id) {
   }
 }
 function buildingSprite(kind, x, y, alpha = 1, id) {
-  sprite(buildingArtKey({kind,id},state.village.buildings),x,y,alpha,id);
+  const local=state.village.economy.projects.find(p=>p.building===id)?.recipe==='local';
+  sprite(kind==='home'&&local?'home-veranda':buildingArtKey({kind,id},state.village.buildings),x,y,alpha,id);
 }
 function placementValid(kind, x, y) {
-  return !placementReason(state.village, kind, x, y, kinds[kind][1]);
+  return !placementReason(state.village, kind, x, y);
 }
 function activityLabel(r) {
   if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
@@ -360,7 +366,13 @@ function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
 
-  buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4, b.id);
+  const project=state.village.economy.projects.find(p=>p.building===b.id);
+  const stages=state.environment.economy.projects.find(p=>p.building===b.id)?.stages.length||1;
+  buildingSprite(b.kind,b.x,b.y,complete?1:.16+.65*((project?.stage||0)/stages),b.id);
+  if(project?.recipe==='local'){
+    ctx.save();ctx.strokeStyle=b.kind==='garden'?'#9eaa8a':'#bbbd8b';ctx.lineWidth=3*scale;
+    ctx.beginPath();footprintCorners(b.kind,b.x,b.y).forEach(([x,y],i)=>{const q=iso(x,y);if(i)ctx.lineTo(q.x,q.y-2*scale);else ctx.moveTo(q.x,q.y-2*scale);});ctx.closePath();ctx.stroke();ctx.restore();
+  }
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     const registration=placementArt(b.kind,buildingArt[b.kind]);
     drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));
@@ -369,7 +381,7 @@ function building(b) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
     const corners = footprintCorners(b.kind,b.x,b.y).map(([x,y])=>iso(x,y));
-    const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
+    const scaffoldHeight = (b.kind === "garden" ? 15 : (project?.stage||0)===0?20:65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
         next = corners[(i + 1) % corners.length];
@@ -384,6 +396,9 @@ function building(b) {
       );
     }
     ctx.fillStyle = "#fffcf0";
+    ctx.font=`${10*s}px 'DM Sans',sans-serif`;ctx.textAlign='center';
+    const stage=state.environment.economy.projects.find(project=>project.building===b.id);
+    ctx.fillText(stage?.paused?'Paused':stage?.stage||'Blueprint',p.x,p.y+30*s);
     ctx.fillRect(p.x - 27 * s, p.y + 9 * s, 54 * s, 5 * s);
     ctx.fillStyle = "#7c9859";
     ctx.fillRect(p.x - 27 * s, p.y + 9 * s, (54 * s * b.progress) / 100, 5 * s);
@@ -500,6 +515,8 @@ function render() {
   drawPlacementGrid();
   // Foundations and road tiles share the same half-tile boundary lattice.
   const objects = [
+    ...state.village.economy.sources.map((site,index)=>({depth:site.x+site.y,draw:()=>{const p=iso(site.x,site.y);drawEconomyArt(ctx,index,p.x,p.y,scale,nightAmount(state.village.minutes),site.remaining/site.maximum);}})),
+    {depth:23,draw:()=>{const p=iso(10,13);drawEconomyArt(ctx,5,p.x,p.y,scale,nightAmount(state.village.minutes));}},
     ...flora.map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
@@ -520,12 +537,12 @@ function render() {
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y);
-    const reason = placementReason(state.village, tool, t.x, t.y, kinds[tool][1]);
+    const reason = placementReason(state.village, tool, t.x, t.y);
     polygon(footprintCorners(tool,t.x,t.y).map(([x,y]) => {
       const p = iso(x,y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
     if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
-    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber`} · Drag to pan · Esc to cancel`;
+    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · Blueprint · ${recipeSummary(state,tool)}`} · Drag to pan · Esc to cancel`;
     $("#placement").classList.toggle("invalid", Boolean(reason));
   }
   const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
@@ -624,7 +641,9 @@ function selectPerson(id) {
     `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
-      ["gather", "Gather timber"],
+      ["gather", "Forage food"],
+      ["source", "Source materials"],
+      ["prepare", "Prepare materials"],
       ["water", "Collect river water"],
       ["cook", "Make a meal"],
       ["rest", "Take a rest"],
@@ -726,23 +745,23 @@ function updateQuests() {
   const action = $("#tutorial-action");
   action.hidden = (!kind || planned || enough) && !(!done && next?.action);
   action.textContent = kind
-    ? `Plan ${kinds[kind][0].toLowerCase()} · ${kinds[kind][1]} timber`
+    ? `Plan ${kinds[kind][0].toLowerCase()} · free blueprint`
     : "";
   if (!done && next?.action) {
     action.textContent =
       next.action === "supper"
         ? "Host welcome supper · 5 meals"
-        : "Set aside 24 timber";
+        : "Support tool library · R$ 120";
     action.onclick = () => {
       const result =
         next.action === "supper"
           ? game.host_gathering()
-          : game.contribute_workshop_timber();
+          : game.contribute_tool_library();
       toast(
         result === "ok"
           ? next.action === "supper"
             ? "Welcome supper is starting at the kitchen."
-            : "The tool library timber is set aside."
+            : "The shared tool library is funded."
           : result,
       );
       state = JSON.parse(game.snapshot());
@@ -838,12 +857,12 @@ function updateBuildingPanel() {
     $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering costs 2 water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
-  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Construction must finish before visits." : visitors.length
+  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Projects for stage materials, purchases and priorities." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
   const utility = b && ["solar_farm", "streetlight"].includes(b.kind);
   $("#building-visits").hidden = utility;
-  if (utility) $("#building-activity").textContent = b.progress < 100 ? "Residents are building it. It connects when construction finishes." : "Works automatically. Manage shared lighting in Power.";
+  if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Projects for materials and installation. It connects when construction finishes." : "Works automatically. Manage shared lighting in Power.";
   for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100;
 }
 function inspectBuilding(id) {
@@ -884,6 +903,7 @@ function openSituations() {
   $("#situation-dialog").showModal();
 }
 function updateUI() {
+  economyUI?.update();
   updateSituations();
   const v = state.village;
   updateSupplies(v);
@@ -993,20 +1013,20 @@ function updateUI() {
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
     button.classList.toggle("locked", !unlocked);
-    button.classList.toggle("unaffordable", v.wood < kinds[button.dataset.kind][1]);
+    button.classList.remove("unaffordable");
     const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[
       button.dataset.kind
     ];
     button.querySelector("small").textContent = unlocked
-      ? button.dataset.kind === "road" ? "Free" : `${kinds[button.dataset.kind][1]} timber`
+      ? button.dataset.kind === "road" ? "Free" : "Free blueprint"
       : "Quest reward";
     button.title = unlocked
-      ? kinds[button.dataset.kind][2]
+      ? `${kinds[button.dataset.kind][1]} · ${recipeSummary(state,button.dataset.kind)}`
       : `Complete ${quests[quest].title} to unlock`;
     button.setAttribute(
       "aria-label",
       unlocked
-        ? `Build ${kinds[button.dataset.kind][0]}, ${kinds[button.dataset.kind][1]} timber`
+        ? `Plan ${kinds[button.dataset.kind][0]}, free blueprint`
         : `View quest to unlock ${kinds[button.dataset.kind][0]}`,
     );
     button.classList.toggle("active", button.dataset.kind === tool);
@@ -1032,7 +1052,7 @@ function setTool(kind) {
   $("#placement").classList.remove("invalid");
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · Blueprint · ${recipeSummary(state,tool)} · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -1080,6 +1100,7 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  economyUI=installEconomyUI({snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
@@ -1502,6 +1523,7 @@ try {
     loadChickenArt(chickenSource),
     ...Object.values(buildingImages).map((image) => image.decode()),
     ...Object.values(nightBuildingImages).map((image) => image.decode()),
+    economyImage.decode(),
     forestArt.decode(),
     terrain.decode(),
     ...animations.map((image) => image.decode()),
@@ -1524,7 +1546,7 @@ try {
       saved = JSON.stringify(fixture);
     }
   } else if (!directScenario) {
-    try { saved = storage.read(); } catch {
+    try { saved = storage.read(); if(saved===null&&localStorage.getItem('solar-friends-v2'))toast('The new construction economy starts a fresh village. Previous villages use the earlier format.'); } catch {
       $("#save-warning").hidden = false;
     }
   }

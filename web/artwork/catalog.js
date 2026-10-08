@@ -1,3 +1,4 @@
+import {economyArt} from '../economy-art.js';
 import { RESIDENT_WIDTH, FRAME_ANCHOR } from '../sprite-frames.js';
 import { allBuildingArt } from '../building-art.js?v=night-1';
 import { CHICKEN_WIDTH, chickenFrame } from '../chickens.js?v=painted-hens-1';
@@ -22,3 +23,5 @@ add('resident-reference','Original resident study','residents-cistern.png','Refe
 
 ['iara','bento','luz','caua','nina'].forEach((id,i) => add(`${id}-activities`,`${['Iara','Bento','Luz','Cauã','Nina'][i]} · daily work`,`animations/${id}-activities.png`,'Animations',{animation:true,activityAnimation:true,width:RESIDENT_WIDTH,anchor:FRAME_ANCHOR}));
 ['Lettuce','Beans','Tomatoes'].forEach((name,column) => ['Seedling','Growing','Harvestable'].forEach((stage,row) => add(`crop-${column}-${row}`,`${name} · ${stage}`,'crops.png','Crops',{crop:true,frame:row*3+column,cell:[column/3,row/3,1/3,1/3],width:column?26:22,anchor:FRAME_ANCHOR})));
+
+economyArt.forEach((art,i)=>add(`economy-${i}`,art.name,'economy-atlas.png','Land & supplies',{...art,width:art.width,anchor:art.anchor,aspect:art.cell[3]/art.cell[2]}));

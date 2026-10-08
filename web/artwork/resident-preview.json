@@ -1,1 +1,393 @@
-{"environment":{"dry_day":true,"raining":false,"water_capacity":115.0},"residents":[{"energy":90,"favorite":"garden","happiness":92.70214080810547,"hunger":10,"id":0,"last_meal_slot":15,"name":"Iara","reason":"Taking a quiet break in the animation preview.","remaining":90,"requested":false,"social":90,"target_x":8.0,"target_y":12.5,"task":"idle","trait_name":"Patient \u00b7 gardener","x":8.0,"y":12.5},{"energy":90,"favorite":"build","happiness":92.62425231933594,"hunger":10,"id":1,"last_meal_slot":15,"name":"Bento","reason":"Taking a quiet break in the animation preview.","remaining":90,"requested":false,"social":90,"target_x":9.4,"target_y":12.5,"task":"idle","trait_name":"Practical \u00b7 builder","x":9.4,"y":12.5},{"energy":90,"favorite":"cook","happiness":85.34672546386719,"hunger":10,"id":2,"last_meal_slot":13,"name":"Luz","reason":"Taking a quiet break in the animation preview.","remaining":90,"requested":false,"social":90,"target_x":10.8,"target_y":12.5,"task":"idle","trait_name":"Sociable \u00b7 cook","x":10.8,"y":12.5},{"energy":90,"favorite":"gather","happiness":92.81918334960938,"hunger":10,"id":3,"last_meal_slot":15,"name":"Cau\u00e3","reason":"Taking a quiet break in the animation preview.","remaining":90,"requested":false,"social":90,"target_x":12.2,"target_y":12.5,"task":"idle","trait_name":"Curious \u00b7 forager","x":12.2,"y":12.5},{"energy":90,"favorite":"water","happiness":91.81570434570312,"hunger":10,"id":4,"last_meal_slot":15,"name":"Nina","reason":"Taking a quiet break in the animation preview.","remaining":90,"requested":false,"social":90,"target_x":13.6,"target_y":12.5,"task":"idle","trait_name":"Thoughtful \u00b7 caretaker","x":13.6,"y":12.5}],"village":{"arrived":true,"buildings":[{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":0,"kind":"well","progress":100.0,"x":6,"y":10},{"contributors":7,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":1,"kind":"home","progress":100.0,"x":8,"y":8},{"contributors":7,"crop":{"growth":117.0,"moisture":123.0,"planted":true},"id":2,"kind":"garden","progress":100.0,"x":13,"y":10},{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":3,"kind":"kitchen","progress":100.0,"x":10,"y":10},{"contributors":7,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":4,"kind":"home","progress":100.0,"x":12,"y":7},{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":5,"kind":"grove","progress":100.0,"x":20,"y":14},{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":6,"kind":"compost","progress":100.0,"x":5,"y":14},{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":7,"kind":"square","progress":100.0,"x":8,"y":16},{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":8,"kind":"workshop","progress":100.0,"x":12,"y":16},{"contributors":23,"crop":{"growth":0.0,"moisture":0.0,"planted":false},"id":9,"kind":"coop","progress":100.0,"x":15,"y":16}],"events":["Our coop is ready. Built together!","A new coop is planned. Residents can help build it.","A new morning. The community is waking up.","Our workshop is ready. Built together!","A new workshop is planned. Residents can help build it.","Our square is ready. Built together!","A new morning. The community is waking up.","A new square is planned. Residents can help build it.","Our compost is ready. Built together!","A new compost is planned. Residents can help build it.","Made by Our Hands complete! Build a workshop and craft useful tools.","Timber set aside for our first tool library. Bento has a plan!"],"food":132.0,"harvests":10,"map_size":28,"meals":5,"meals_served":45,"minutes":7828,"mornings":5,"progress":{"attended":0,"completed":[true,true,true,true],"compost":1,"enriched_harvests":4,"friendships":[0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],"fruit":94,"gathering_day":1,"gathering_until":0.0,"gatherings":1,"invited":0,"scraps":0,"shared_builds":10,"social_mask":31,"timber":258,"tool_uses":35,"tools_crafted":3,"tracked":3,"use_tools":true,"welcome_supper":true,"workshop_timber":true},"version":2,"water":101.52159881591797,"wood":44.0}}
+{
+  "environment": {
+    "dry_day": true,
+    "raining": false,
+    "water_capacity": 115.0
+  },
+  "residents": [
+    {
+      "energy": 90,
+      "favorite": "garden",
+      "happiness": 92.70214080810547,
+      "hunger": 10,
+      "id": 0,
+      "last_meal_slot": 15,
+      "name": "Iara",
+      "reason": "Taking a quiet break in the animation preview.",
+      "remaining": 90,
+      "requested": false,
+      "social": 90,
+      "target_x": 8.0,
+      "target_y": 12.5,
+      "task": "idle",
+      "trait_name": "Patient \u00b7 gardener",
+      "x": 8.0,
+      "y": 12.5
+    },
+    {
+      "energy": 90,
+      "favorite": "build",
+      "happiness": 92.62425231933594,
+      "hunger": 10,
+      "id": 1,
+      "last_meal_slot": 15,
+      "name": "Bento",
+      "reason": "Taking a quiet break in the animation preview.",
+      "remaining": 90,
+      "requested": false,
+      "social": 90,
+      "target_x": 9.4,
+      "target_y": 12.5,
+      "task": "idle",
+      "trait_name": "Practical \u00b7 builder",
+      "x": 9.4,
+      "y": 12.5
+    },
+    {
+      "energy": 90,
+      "favorite": "cook",
+      "happiness": 85.34672546386719,
+      "hunger": 10,
+      "id": 2,
+      "last_meal_slot": 13,
+      "name": "Luz",
+      "reason": "Taking a quiet break in the animation preview.",
+      "remaining": 90,
+      "requested": false,
+      "social": 90,
+      "target_x": 10.8,
+      "target_y": 12.5,
+      "task": "idle",
+      "trait_name": "Sociable \u00b7 cook",
+      "x": 10.8,
+      "y": 12.5
+    },
+    {
+      "energy": 90,
+      "favorite": "gather",
+      "happiness": 92.81918334960938,
+      "hunger": 10,
+      "id": 3,
+      "last_meal_slot": 15,
+      "name": "Cau\u00e3",
+      "reason": "Taking a quiet break in the animation preview.",
+      "remaining": 90,
+      "requested": false,
+      "social": 90,
+      "target_x": 12.2,
+      "target_y": 12.5,
+      "task": "idle",
+      "trait_name": "Curious \u00b7 forager",
+      "x": 12.2,
+      "y": 12.5
+    },
+    {
+      "energy": 90,
+      "favorite": "water",
+      "happiness": 91.81570434570312,
+      "hunger": 10,
+      "id": 4,
+      "last_meal_slot": 15,
+      "name": "Nina",
+      "reason": "Taking a quiet break in the animation preview.",
+      "remaining": 90,
+      "requested": false,
+      "social": 90,
+      "target_x": 13.6,
+      "target_y": 12.5,
+      "task": "idle",
+      "trait_name": "Thoughtful \u00b7 caretaker",
+      "x": 13.6,
+      "y": 12.5
+    }
+  ],
+  "village": {
+    "arrived": true,
+    "buildings": [
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 0,
+        "kind": "well",
+        "progress": 100.0,
+        "x": 6,
+        "y": 10
+      },
+      {
+        "contributors": 7,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 1,
+        "kind": "home",
+        "progress": 100.0,
+        "x": 8,
+        "y": 8
+      },
+      {
+        "contributors": 7,
+        "crop": {
+          "growth": 117.0,
+          "moisture": 123.0,
+          "planted": true
+        },
+        "id": 2,
+        "kind": "garden",
+        "progress": 100.0,
+        "x": 13,
+        "y": 10
+      },
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 3,
+        "kind": "kitchen",
+        "progress": 100.0,
+        "x": 10,
+        "y": 10
+      },
+      {
+        "contributors": 7,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 4,
+        "kind": "home",
+        "progress": 100.0,
+        "x": 12,
+        "y": 7
+      },
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 5,
+        "kind": "grove",
+        "progress": 100.0,
+        "x": 20,
+        "y": 14
+      },
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 6,
+        "kind": "compost",
+        "progress": 100.0,
+        "x": 5,
+        "y": 14
+      },
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 7,
+        "kind": "square",
+        "progress": 100.0,
+        "x": 8,
+        "y": 16
+      },
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 8,
+        "kind": "workshop",
+        "progress": 100.0,
+        "x": 12,
+        "y": 16
+      },
+      {
+        "contributors": 23,
+        "crop": {
+          "growth": 0.0,
+          "moisture": 0.0,
+          "planted": false
+        },
+        "id": 9,
+        "kind": "coop",
+        "progress": 100.0,
+        "x": 15,
+        "y": 16
+      }
+    ],
+    "events": [
+      "Our coop is ready. Built together!",
+      "A new coop is planned. Residents can help build it.",
+      "A new morning. The community is waking up.",
+      "Our workshop is ready. Built together!",
+      "A new workshop is planned. Residents can help build it.",
+      "Our square is ready. Built together!",
+      "A new morning. The community is waking up.",
+      "A new square is planned. Residents can help build it.",
+      "Our compost is ready. Built together!",
+      "A new compost is planned. Residents can help build it.",
+      "Made by Our Hands complete! Build a workshop and craft useful tools.",
+      "Timber set aside for our first tool library. Bento has a plan!"
+    ],
+    "food": 132.0,
+    "harvests": 10,
+    "map_size": 28,
+    "meals": 5,
+    "meals_served": 45,
+    "minutes": 7828,
+    "mornings": 5,
+    "progress": {
+      "attended": 0,
+      "completed": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "compost": 1,
+      "enriched_harvests": 4,
+      "friendships": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ],
+      "fruit": 94,
+      "gathering_day": 1,
+      "gathering_until": 0.0,
+      "gatherings": 1,
+      "invited": 0,
+      "scraps": 0,
+      "shared_builds": 10,
+      "social_mask": 31,
+      "timber": 258,
+      "tool_uses": 35,
+      "tools_crafted": 3,
+      "tracked": 3,
+      "use_tools": true,
+      "welcome_supper": true,
+      "tool_library": true
+    },
+    "version": 3,
+    "water": 101.52159881591797,
+    "wood": 32,
+    "economy": {
+      "stock": [
+        0,
+        12,
+        36,
+        18,
+        4,
+        8,
+        12,
+        14,
+        10,
+        5,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "money": 300000,
+      "ledger": [],
+      "projects": [],
+      "orders": [],
+      "sources": [
+        {
+          "material": 0,
+          "x": 0,
+          "y": 2,
+          "remaining": 72,
+          "maximum": 72,
+          "restored": false
+        },
+        {
+          "material": 1,
+          "x": 0,
+          "y": 25,
+          "remaining": 96,
+          "maximum": 96,
+          "restored": false
+        },
+        {
+          "material": 2,
+          "x": 22,
+          "y": 0,
+          "remaining": 140,
+          "maximum": 140,
+          "restored": false
+        },
+        {
+          "material": 3,
+          "x": 22,
+          "y": 27,
+          "remaining": 64,
+          "maximum": 64,
+          "restored": false
+        },
+        {
+          "material": 4,
+          "x": 0,
+          "y": 20,
+          "remaining": 24,
+          "maximum": 24,
+          "restored": false
+        }
+      ],
+      "next_building": 10,
+      "next_order": 0,
+      "outside_work": false,
+      "work_day": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "exchange_day": -1,
+      "last_delivery": 0
+    }
+  }
+}

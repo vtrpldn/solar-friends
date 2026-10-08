@@ -1,6 +1,9 @@
 import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 export const scenarios = [
+  { id: 'economy', name: 'Our first projects', detail: 'A home, greenhouse and solar farm with staged materials. Try priorities, local recipes, purchases and deliveries.' },
+  { id: 'economy-poor', name: 'An empty shared fund', detail: 'Three blueprints, no money. Enable outside shifts in Town to recover without selling household food.' },
+  { id: 'economy-depleted', name: 'Depleted land', detail: 'Finite deposits are empty. Local preparation and town purchases still provide a route forward.' },
   { id: 'grid', name: 'Grid & road edges', detail: 'Every foundation with roads along its front edges. Select Road to inspect grid registration.' },
   { id: 'power', name: 'Stored sunshine', detail: 'A charged solar farm and connected lights at 21:00. Switch loads off in Power to compare.' },
   { id: 'power-outage', name: 'Empty battery', detail: 'An empty shared battery at 21:00; rooftop homes remain lit. Advance until sunrise to recharge.' },
@@ -27,6 +30,16 @@ export function makeScenario(id, fresh, established) {
     r.reason = 'Ready for a development scenario.'; r.remaining = 0;
     r.requested = false; r.visit_building = null; r.last_meal_slot = 3;
     r.target_x = r.x; r.target_y = r.y;
+  }
+  if (id.startsWith('economy')) {
+    v.power={stored:0,disabled:[]};
+    v.buildings=[['home',8,8],['greenhouse',13,8],['solar_farm',17,13]].map(([kind,x,y],id)=>({id,kind,x,y,progress:0,contributors:0,next_visit:0,visits:0,crop:structuredClone(fresh.village.buildings[0]?.crop||established.village.buildings[0].crop),poultry:{remaining:0}}));
+    v.economy=structuredClone(fresh.village.economy);v.wood=12;v.economy.next_building=3;
+    v.economy.projects=v.buildings.map(b=>({building:b.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(15).fill(0),consumed:Array(15).fill(0)}));
+    const stock=[v.wood,...v.economy.stock.slice(1)];
+    for(const p of v.economy.projects){const kind=v.buildings[p.building].kind,needs=fresh.environment.economy.recipes.find(r=>r.kind===kind).standard[0].items;for(let i=0;i<15;i++){p.reserved[i]=Math.min(stock[i],needs[i]);stock[i]-=p.reserved[i];}}
+    if(id==='economy-poor'){v.economy.money=0;v.economy.ledger=[];}
+    if(id==='economy-depleted')for(const source of v.economy.sources)if(source.material>1)source.remaining=0;
   }
   if (id === 'grid') {
     const roads=new Map();

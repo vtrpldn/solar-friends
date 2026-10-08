@@ -6,7 +6,7 @@ await init({ module_or_path: await fs.readFile(new URL('../web/pkg/solar_friends
 const game = new Game();
 const fixture = JSON.parse(game.snapshot());
 fixture.village.progress.completed = [true, true, true, true];
-fixture.village.wood = 1000;
+fixture.village.wood = 100;
 assert.equal(game.restore(JSON.stringify(fixture)), true);
 assert.equal(game.place('home', 8, 8), 'ok');
 assert.equal(game.place('square', 16, 16), 'ok');
@@ -21,7 +21,7 @@ for (const [kind, price] of Object.entries({solar_farm:48, streetlight:6, road: 
   }
 }
 const poor = structuredClone(village); poor.wood = 0;
-assert.match(placementReason(poor,'home',20,8,32), /32 more timber/);
+assert.equal(placementReason(poor,'home',20,8,32),'');
 assert.deepEqual(milestones(null, village), []);
 assert.deepEqual(milestones(village, structuredClone(village)), []);
 const next = structuredClone(village); next.buildings[0].progress = 100; next.harvests++;

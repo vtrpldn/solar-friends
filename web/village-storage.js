@@ -1,4 +1,4 @@
-export const SAVE_KEY = "solar-friends-v2";
+export const SAVE_KEY = "solar-friends-v3";
 
 // Keep the original bytes until a rejected save has a separate durable copy.
 export class VillageStorage {

@@ -19,7 +19,7 @@ pub struct Progress {
     pub use_tools: bool,
     pub gatherings: u32,
     pub welcome_supper: bool,
-    pub workshop_timber: bool,
+    pub tool_library: bool,
     pub gathering_until: f32,
     pub gathering_day: i32,
     pub invited: u8,
@@ -43,7 +43,7 @@ impl Default for Progress {
             use_tools: true,
             gatherings: 0,
             welcome_supper: false,
-            workshop_timber: false,
+            tool_library: false,
             gathering_until: 0.,
             gathering_day: -1,
             invited: 0,
@@ -78,7 +78,9 @@ pub fn update(v: &mut Village) {
         introduction,
         ready(v, "grove") && v.progress.fruit >= 6,
         v.meals_served >= 5 && v.progress.social_mask == 31 && v.progress.welcome_supper,
-        v.progress.timber >= 40 && v.progress.shared_builds > 0 && v.progress.workshop_timber,
+        v.economy.orders.iter().any(|o| o.status == "delivered")
+            && v.progress.shared_builds > 0
+            && v.progress.tool_library,
     ];
     let celebrations = [
         "A Shared Beginning complete! Food forests and three new quests are available.",

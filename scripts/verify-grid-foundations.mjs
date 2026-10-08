@@ -7,7 +7,7 @@ import {project} from '../web/projection.js';
 import {placementReason} from '../web/polish.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const game=new Game(),base=JSON.parse(game.snapshot());
-base.village.wood=1000;base.village.progress.completed=[true,true,true,true];
+base.village.wood=100;base.village.progress.completed=[true,true,true,true];
 assert.deepEqual(footprintCorners('home',8,8),[[6.5,6.5],[8.5,6.5],[8.5,8.5],[6.5,8.5]]);
 for(const [kind,art]of Object.entries(allBuildingArt)){
   const f=footprint(kind,8,8),registration=placementArt(kind,art);
@@ -40,7 +40,7 @@ for(const [kind,art]of Object.entries(allBuildingArt)){
   assert(game.restore(JSON.stringify(base)));
   assert.equal(game.toggle_road(8,8),'ok');
   assert.notEqual(game.place(kind,8,8),'ok','Buildings must not cover existing roads');
-  assert.equal(JSON.parse(game.snapshot()).village.wood,1000);
+  assert.equal(JSON.parse(game.snapshot()).village.wood,100);
   assert(game.restore(JSON.stringify(base)));
   assert.equal(game.toggle_road(rx,ry),'ok');
   assert.equal(game.place(kind,8,8),'ok','A new foundation must fit directly beside an existing road');

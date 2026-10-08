@@ -406,7 +406,7 @@
       "tracked": 3,
       "use_tools": true,
       "welcome_supper": true,
-      "workshop_timber": true
+      "tool_library": true
     },
     "version": 3,
     "water": 101.52159881591797,

@@ -83,6 +83,9 @@ impl Game {
                     "socialize",
                     "compost",
                     "craft",
+                    "source",
+                    "prepare",
+                    "outside",
                 ]
                 .iter()
                 .map(|task| {

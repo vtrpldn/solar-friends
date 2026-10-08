@@ -57,7 +57,7 @@ fn locked_buildings_and_quests_cannot_be_used_early() {
     }
     assert!(!g.track_quest(1));
     assert!(!g.track_quest(4));
-    assert_ne!(g.contribute_workshop_timber(), "ok");
+    assert_ne!(g.contribute_tool_library(), "ok");
     assert_ne!(g.host_gathering(), "ok");
     assert_eq!(before, g.snapshot());
 }
@@ -166,13 +166,27 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         g.app.world().resource::<Village>().progress.shared_builds,
         1
     );
-    g.app.world_mut().resource_mut::<Village>().progress.timber = 40;
-    let wood = g.app.world().resource::<Village>().wood;
-    assert_eq!(g.contribute_workshop_timber(), "ok");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.orders.push(economy::Order {
+            id: 0,
+            items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            paid: 6700,
+            dispatch: 1.,
+            arrival: 2.,
+            status: "delivered".into(),
+        });
+        v.economy.next_order = 1;
+    }
+    let funds = g.app.world().resource::<Village>().economy.money;
+    assert_eq!(g.contribute_tool_library(), "ok");
     assert!(g.app.world().resource::<Village>().progress.completed[3]);
-    assert_eq!(g.app.world().resource::<Village>().wood, wood - 24.);
+    assert_eq!(
+        g.app.world().resource::<Village>().economy.money,
+        funds - 12000
+    );
     let before = g.snapshot();
-    assert_ne!(g.contribute_workshop_timber(), "ok");
+    assert_ne!(g.contribute_tool_library(), "ok");
     assert_eq!(g.snapshot(), before);
 }
 #[test]

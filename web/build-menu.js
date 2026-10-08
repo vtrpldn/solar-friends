@@ -49,16 +49,16 @@ export function installBuildMenu(kinds, images, onGroupChange) {
     filter.onclick = () => { onGroupChange(); showGroup(group.id); };
     filters.append(filter);
     for (const kind of group.kinds) {
-      const [name, cost, description] = kinds[kind];
+      const [name, description] = kinds[kind];
       const button = document.createElement('button');
       button.className = 'build-tool'; button.dataset.kind = kind;
       button.dataset.group = group.id; button.title = description;
-      button.setAttribute('aria-label', `Build ${name}, ${cost} timber`);
+      button.setAttribute('aria-label', `Plan ${name}, free blueprint`);
       button.setAttribute('aria-pressed', 'false');
       const canvas = document.createElement('canvas');
       canvas.className = 'tool-art'; canvas.setAttribute('aria-hidden', 'true');
       const label = document.createElement('b'); label.textContent = name;
-      const price = document.createElement('small'); price.textContent = cost ? `${cost} timber` : 'Free';
+      const price = document.createElement('small'); price.textContent = kind==='road' ? 'Free' : 'Free blueprint';
       button.append(canvas, label, price); tools.append(button);
       paintIcon(canvas, kind, images[kind]);
     }

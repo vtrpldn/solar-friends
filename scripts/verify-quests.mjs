@@ -9,6 +9,7 @@ await init({
 const output = process.argv[2];
 if (output) await fs.mkdir(output, { recursive: true });
 const g = new Game();
+g.set_outside_work(true);
 const snap = () => JSON.parse(g.snapshot());
 function until(test, label, limit = 16000) {
   for (let i = 0; i < limit; i++) {
@@ -21,22 +22,12 @@ async function fixture(name) {
   if (output) await fs.writeFile(`${output}/solar-${name}.json`, g.snapshot());
 }
 function build(kind, x, y) {
-  until(
-    (s) =>
-      s.village.wood >=
-      {
-        well: 18,
-        home: 32,
-        garden: 12,
-        kitchen: 40,
-        grove: 14,
-        compost: 20,
-        square: 36,
-        workshop: 48,
-      }[kind],
-    "timber for " + kind,
-  );
   assert.equal(g.place(kind, x, y), "ok");
+  const missing=snap().environment.economy.shortage;
+  if(missing.some(n=>n)){
+    until(s=>s.environment.economy.money>=missing.reduce((sum,n,i)=>sum+n*s.environment.economy.materials[i].price,6000),'fund purchases');
+    assert.equal(g.order_supplies(JSON.stringify(missing)),'ok');
+  }
   until(
     (s) =>
       s.village.buildings.find((b) => b.x === x && b.y === y).progress >= 100,
@@ -74,7 +65,7 @@ await fixture("supper-ready");
 until(() => g.host_gathering() === "ok", "start welcome supper");
 until((s) => s.village.progress.completed[2], "gather quest");
 g.track_quest(3);
-until(() => g.contribute_workshop_timber() === "ok", "contribute timber");
+until(() => g.contribute_tool_library() === "ok", "contribute timber");
 until((s) => s.village.progress.completed[3], "hands");
 for (const [k, x, y] of [
   ["compost", 6, 16],

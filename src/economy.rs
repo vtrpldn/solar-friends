@@ -1,5 +1,5 @@
 //! Project-led sourcing and a local town economy. All transactions live here.
-use crate::{Game, Village, event};
+use crate::{Game, Village, event, ready};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -178,7 +178,7 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
         ],
         "well" => vec![
             stage("Foundation", &[(3, 6), (2, 2)], 12.),
-            stage("Tank & pipes", &[(9, 4), (8, 2)], 24.),
+            stage("Tank, pump & pipes", &[(9, 4), (8, 2), (14, 1)], 24.),
         ],
         "kitchen" => vec![
             stage("Foundation", &[(2, 4), (3, 4)], 12.),
@@ -379,31 +379,33 @@ pub fn shortage(v: &Village) -> Bundle {
     }
     needs
 }
-fn preparation(i: usize) -> Option<(Bundle, u32)> {
+fn preparation(v: &Village, i: usize) -> Option<(Bundle, u32)> {
     match i {
         5 => Some((bundle(&[(0, 2), (8, 1)]), 1)),
         6 => Some((bundle(&[(2, 2)]), 2)),
+        7 if ready(v, "workshop") => Some((bundle(&[(2, 2), (0, 1)]), 2)),
+        8 if ready(v, "workshop") => Some((bundle(&[(4, 1), (3, 1)]), 2)),
         8 => Some((bundle(&[(4, 2)]), 1)),
         _ => None,
     }
 }
 pub fn local_job(v: &Village) -> Option<(String, usize)> {
     let needs = shortage(v);
-    if storage(v) >= CAPACITY {
-        return None;
-    }
-    for i in [5, 6, 8] {
+    for i in [5, 6, 7, 8] {
         if needs[i] > 0
-            && let Some((inputs, _)) = preparation(i)
+            && let Some((inputs, _)) = preparation(v, i)
             && (0..COUNT).all(|j| free(v, j) >= inputs[j])
         {
             return Some(("prepare".into(), i));
         }
     }
+    if storage(v) >= CAPACITY {
+        return None;
+    }
     let mut raw = needs;
-    for i in [5, 6, 8] {
+    for i in [5, 6, 7, 8] {
         if raw[i] > 0
-            && let Some((inputs, yield_)) = preparation(i)
+            && let Some((inputs, yield_)) = preparation(v, i)
         {
             for j in 0..COUNT {
                 raw[j] += (inputs[j] * (raw[i].div_ceil(yield_))).saturating_sub(free(v, j));
@@ -434,8 +436,8 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
         if i == 0 {
             v.progress.timber += n;
         }
-    } else if let Some((inputs, yield_)) = preparation(index) {
-        if storage(v) + yield_ > CAPACITY {
+    } else if let Some((inputs, yield_)) = preparation(v, index) {
+        if storage(v) - inputs.iter().sum::<u32>() + yield_ > CAPACITY {
             return;
         }
         for (i, &n) in inputs.iter().enumerate() {
@@ -514,8 +516,16 @@ pub fn view(v: &Village) -> serde_json::Value {
         Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
     }).collect();
     let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local")})).collect();
+    let preparation: Vec<_> = [5, 6, 7, 8]
+        .into_iter()
+        .filter_map(|i| {
+            preparation(v, i).map(
+                |(inputs, yield_)| serde_json::json!({"material":i,"inputs":inputs,"yield":yield_}),
+            )
+        })
+        .collect();
     let day = (v.minutes / 1440.) as i32;
-    serde_json::json!({"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":CAPACITY,"shortage":shortage(v),"outside_work":v.economy.outside_work,"income":18000,"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Southeastern countryside · earth, managed bamboo and timber, stone, and a salvage clearing"})
+    serde_json::json!({"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":CAPACITY,"shortage":shortage(v),"outside_work":v.economy.outside_work,"income":18000,"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Southeastern countryside · earth, managed bamboo and timber, stone, and a salvage clearing"})
 }
 pub fn valid(v: &Village) -> bool {
     let e = &v.economy;
@@ -674,7 +684,24 @@ impl Game {
             Err(e) => return e,
         };
         if v.economy.orders.len() >= 100 {
-            return "The order book is full.".into();
+            let keep = v
+                .economy
+                .orders
+                .iter()
+                .filter(|o| matches!(o.status.as_str(), "confirmed" | "dispatched"))
+                .count();
+            if keep >= 100 {
+                return "Wait for a delivery or cancel an undispatched order first.".into();
+            }
+            let mut discard = v.economy.orders.len().saturating_sub(79);
+            v.economy.orders.retain(|o| {
+                if discard > 0 && matches!(o.status.as_str(), "delivered" | "cancelled") {
+                    discard -= 1;
+                    false
+                } else {
+                    true
+                }
+            });
         }
         let id = v.economy.next_order;
         v.economy.next_order += 1;
@@ -715,6 +742,20 @@ impl Game {
             .resource_mut::<Village>()
             .economy
             .outside_work = enabled;
+    }
+    pub fn sell_material(&mut self, material: usize, n: u32) -> String {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if material >= COUNT || n == 0 || n > 20 || free(&v, material) < n {
+            return "Sell 1–20 stored, unreserved units. Project reservations and incoming orders cannot be sold.".into();
+        }
+        remove(&mut v, material, n);
+        ledger(
+            &mut v,
+            n as i64 * PRICES[material] / 2,
+            format!("Spare {} sold at half price", LABELS[material]),
+        );
+        rebalance(&mut v);
+        "ok".into()
     }
     pub fn sell_surplus(&mut self, n: u32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -821,7 +862,7 @@ impl Game {
 }
 pub fn finish_outside(v: &mut Village, id: usize) {
     let day = (v.minutes / 1440.) as i32;
-    if v.economy.outside_work && v.economy.work_day[id] != day {
+    if v.economy.outside_work && !v.economy.work_day.contains(&day) {
         v.economy.work_day[id] = day;
         ledger(v, 18000, "Neighbouring farm shift contribution".into());
         event(v, "A short outside shift added R$ 180 to our shared fund.");
@@ -953,6 +994,83 @@ mod tests {
         assert!(local_job(&v).is_none());
     }
     #[test]
+    fn workshop_unlocks_tiles_and_improves_salvage_without_double_consumption() {
+        let mut g = Game::new();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        assert_eq!(g.place("workshop", 8, 8), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(preparation(&v, 7).is_none());
+        v.buildings[0].progress = 100.;
+        assert_eq!(preparation(&v, 7), Some((bundle(&[(2, 2), (0, 1)]), 2)));
+        assert_eq!(preparation(&v, 8), Some((bundle(&[(4, 1), (3, 1)]), 2)));
+        drop(v);
+        assert_eq!(g.place("home", 12, 8), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.stock[7] = 0;
+        rebalance(&mut v);
+        assert_eq!(local_job(&v), Some(("prepare".into(), 7)));
+        let earth = quantity(&v, 2);
+        let wood = v.wood;
+        finish_job(&mut v, "prepare", 7);
+        assert_eq!(quantity(&v, 7), 2);
+        assert_eq!(quantity(&v, 2), earth - 2);
+        assert_eq!(v.wood, wood - 1.);
+    }
+    #[test]
+    fn outside_income_is_one_community_shift_per_day() {
+        let mut g = Game::new();
+        g.set_outside_work(true);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let money = v.economy.money;
+        finish_outside(&mut v, 4);
+        finish_outside(&mut v, 0);
+        assert_eq!(v.economy.money, money + 18000);
+        v.minutes += 1440.;
+        finish_outside(&mut v, 0);
+        assert_eq!(v.economy.money, money + 36000);
+    }
+    #[test]
+    fn completed_order_history_never_blocks_future_purchases() {
+        let mut g = Game::new();
+        for _ in 0..125 {
+            town_order(&mut g, &[(2, 1)]);
+            let id = g.app.world().resource::<Village>().economy.next_order - 1;
+            assert_eq!(g.cancel_order(id), "ok");
+        }
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(v.economy.money, 300000);
+        assert!(v.economy.orders.len() <= 100);
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+    }
+    #[test]
+    fn full_storage_recovers_by_selling_spares_but_never_reserved_stock() {
+        let mut g = Game::new();
+        assert_eq!(g.place("garden", 8, 8), "ok");
+        let before = g.snapshot();
+        assert_ne!(g.sell_material(2, 36), "ok");
+        assert_eq!(g.snapshot(), before);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.economy.stock = [0; COUNT];
+            v.wood = 0.;
+            v.economy.stock[12] = 600;
+            v.economy.money = 0;
+            rebalance(&mut v);
+        }
+        assert_eq!(g.sell_material(12, 20), "ok");
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(storage(v), 580);
+        assert_eq!(v.economy.money, 280000);
+        town_order(&mut g, &[(2, 4), (0, 4)]);
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+    }
+    #[test]
     fn new_save_rejects_old_versions_and_corrupt_transactions_atomically() {
         let mut g = Game::new();
         let before = g.snapshot();
@@ -964,4 +1082,8 @@ mod tests {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), before);
     }
+}
+
+pub fn contribute(v: &mut Village, n: i64, note: &str) {
+    ledger(v, -n, note.into());
 }

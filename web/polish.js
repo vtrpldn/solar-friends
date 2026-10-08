@@ -1,7 +1,7 @@
 import { occupies } from './building-footprints.js';
 import { MAP_SIZE, riverBank } from './terrain.js';
 
-export function placementReason(village, kind, x, y, cost) {
+export function placementReason(village, kind, x, y) {
   if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2) return 'Choose a clearing inside the village.';
   if (kind === 'road') {
     if (riverBank(x, y)) return 'Keep the riverbank clear.';
@@ -13,7 +13,7 @@ export function placementReason(village, kind, x, y, cost) {
   if (Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) return 'Leave the arrival clearing open for everyone.';
   if (village.buildings.some(b => Math.abs(b.x - x) < radius + (['square','solar_farm'].includes(b.kind) ? 2 : 1) && Math.abs(b.y - y) < radius + (['square','solar_farm'].includes(b.kind) ? 2 : 1))) return 'Leave a little room between buildings.';
   if (village.roads.some(([rx,ry])=>occupies({kind,x,y},rx,ry))) return 'Keep roads clear. Choose a plot beside the road.';
-  if (village.wood < cost) return `Need ${Math.ceil(cost - village.wood)} more timber. Ask a neighbour to gather.`;
+  if (village.economy?.sources.some(s=>Math.abs(s.x-x)<=radius&&Math.abs(s.y-y)<=radius)) return 'Keep the local resource site accessible.';
   return '';
 }
 
