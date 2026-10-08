@@ -174,6 +174,7 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.economy.orders.push(economy::Order {
+            pickup_by: None,
             id: 0,
             items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             paid: 6700,

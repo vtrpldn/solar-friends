@@ -16,6 +16,7 @@ mod situations;
 mod sleep;
 mod spacing;
 mod supplies;
+mod town_pickup;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
@@ -46,6 +47,7 @@ const TASKS: &[&str] = &[
     "prepare",
     "outside",
     "return",
+    "pickup",
 ];
 
 #[derive(Component, Clone, Serialize, Deserialize)]
@@ -956,9 +958,11 @@ impl Game {
             && residents.all(|r| {
                 if let Some(t) = &r.trip {
                     return t.phase == mobility::Phase::Away
-                        && (t.purpose == mobility::Purpose::Work
-                            || (r.sleep.started_at.is_some()
-                                && r.sleep.slept_minutes < r.sleep.duration_minutes));
+                        && (matches!(
+                            t.purpose,
+                            mobility::Purpose::Work | mobility::Purpose::Pickup
+                        ) || (r.sleep.started_at.is_some()
+                            && r.sleep.slept_minutes < r.sleep.duration_minutes));
                 }
                 r.task == "sleep"
                     && shelter(v, r.id).is_some()
@@ -976,12 +980,16 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        let mut economy = economy::view(&village);
+        economy["pickup_drivers"] = serde_json::json!(residents.iter().map(|r| serde_json::json!({"id":r.id,"name":r.name,"blocker":town_pickup::blocker(&village,r)})).collect::<Vec<_>>());
+        economy["pickup_capacity"] = town_pickup::CAPACITY.into();
+        economy["pickup_fee"] = 2000.into();
         serde_json::json!({
             "environment": {
                 "raining": ecology::raining(village.minutes),
                 "water_capacity": ecology::capacity(&village),
                 "power": power::supply(&village),
-                "economy": economy::view(&village),
+                "economy": economy,
                 "dry_day": (village.minutes / 1440.) as u32 % 3 == 2,
             },
             "village": village,
@@ -1306,6 +1314,9 @@ impl Game {
             return false;
         }
         if !supplies::valid(v) || !power::valid(v) || !economy::valid(v) {
+            return false;
+        }
+        if !town_pickup::valid(v, &save.residents) {
             return false;
         }
         let p = &v.progress;

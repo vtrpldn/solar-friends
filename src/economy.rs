@@ -65,6 +65,8 @@ pub struct Order {
     pub dispatch: f32,
     pub arrival: f32,
     pub status: String,
+    #[serde(default)]
+    pub pickup_by: Option<usize>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Source {
@@ -230,7 +232,7 @@ pub fn quantity(v: &Village, i: usize) -> u32 {
         v.economy.stock[i]
     }
 }
-fn add(v: &mut Village, i: usize, n: u32) {
+pub(crate) fn add(v: &mut Village, i: usize, n: u32) {
     if i == 0 {
         v.wood += n as f32
     } else {
@@ -254,7 +256,7 @@ pub fn incoming(v: &Village, i: usize) -> u32 {
     v.economy
         .orders
         .iter()
-        .filter(|o| matches!(o.status.as_str(), "confirmed" | "dispatched"))
+        .filter(|o| matches!(o.status.as_str(), "confirmed" | "dispatched" | "collecting"))
         .map(|o| o.items[i])
         .sum()
 }
@@ -492,7 +494,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     }
     let mut arrived = vec![];
     for o in &mut v.economy.orders {
-        if o.status == "confirmed" && v.minutes >= o.dispatch {
+        if o.pickup_by.is_none() && o.status == "confirmed" && v.minutes >= o.dispatch {
             o.status = "dispatched".into();
         }
         if o.status == "dispatched" && v.minutes >= o.arrival {
@@ -515,7 +517,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     }
     rebalance(v);
 }
-fn parse_items(data: &str) -> Result<Bundle, String> {
+pub(crate) fn parse_items(data: &str) -> Result<Bundle, String> {
     let b: Bundle =
         serde_json::from_str(data).map_err(|_| "Choose valid quantities.".to_string())?;
     if b.iter().all(|n| *n == 0) || b.iter().any(|n| *n > 100) {
@@ -525,6 +527,9 @@ fn parse_items(data: &str) -> Result<Bundle, String> {
     }
 }
 pub fn quote(v: &Village, items: Bundle) -> Result<i64, String> {
+    quote_with_fee(v, items, 6000)
+}
+fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     if storage(v) + items.iter().sum::<u32>() > CAPACITY {
         return Err(
             "There is not enough receiving space. Finish a project or use stored materials.".into(),
@@ -535,7 +540,7 @@ pub fn quote(v: &Village, items: Bundle) -> Result<i64, String> {
         .zip(PRICES)
         .map(|(&n, p)| n as i64 * p)
         .sum::<i64>()
-        + 6000;
+        + fee;
     if v.economy.money < total {
         return Err(
             "The shared fund is too small. Enable outside work or sell genuine surplus.".into(),
@@ -674,10 +679,15 @@ pub fn valid(v: &Village) -> bool {
                     .zip(PRICES)
                     .map(|(&n, p)| n as i64 * p)
                     .sum::<i64>()
-                    + 6000
+                    + if o.pickup_by.is_some() { 2000 } else { 6000 }
+            || o.pickup_by.is_some_and(|id| id >= 5)
+            || (o.pickup_by.is_some()
+                && (!matches!(o.status.as_str(), "collecting" | "delivered")
+                    || o.items.iter().sum::<u32>() > crate::town_pickup::CAPACITY))
+            || (o.pickup_by.is_none() && o.status == "collecting")
             || !matches!(
                 o.status.as_str(),
-                "confirmed" | "dispatched" | "delivered" | "cancelled"
+                "confirmed" | "dispatched" | "collecting" | "delivered" | "cancelled"
             )
         {
             return false;
@@ -685,6 +695,8 @@ pub fn valid(v: &Village) -> bool {
         if o.status == "confirmed" && v.minutes >= o.dispatch
             || o.status == "dispatched" && (v.minutes < o.dispatch || v.minutes >= o.arrival)
             || o.status == "delivered" && v.minutes < o.arrival
+            || o.pickup_by.is_some()
+                && (o.dispatch > v.minutes || (o.status == "collecting" && o.arrival <= v.minutes))
         {
             return false;
         }
@@ -710,57 +722,89 @@ pub fn valid(v: &Village) -> bool {
             && l.note.len() <= 200
     })
 }
+pub(crate) fn place_order(
+    v: &mut Village,
+    items: Bundle,
+    pickup_by: Option<usize>,
+) -> Result<u32, String> {
+    let paid = if pickup_by.is_some() {
+        quote_with_fee(v, items, 2000)
+    } else {
+        quote(v, items)
+    }?;
+    if v.economy.orders.len() >= 100 {
+        let keep = v
+            .economy
+            .orders
+            .iter()
+            .filter(|o| matches!(o.status.as_str(), "confirmed" | "dispatched" | "collecting"))
+            .count();
+        if keep >= 100 {
+            return Err("Wait for a delivery or cancel an undispatched order first.".into());
+        }
+        let mut discard = v.economy.orders.len().saturating_sub(79);
+        v.economy.orders.retain(|o| {
+            if discard > 0 && matches!(o.status.as_str(), "delivered" | "cancelled") {
+                discard -= 1;
+                false
+            } else {
+                true
+            }
+        });
+    }
+    let id = v.economy.next_order;
+    v.economy.next_order += 1;
+    let dispatch = v.minutes + if pickup_by.is_some() { 0. } else { 120. };
+    let arrival = if pickup_by.is_some() {
+        v.minutes + 120.
+    } else {
+        (dispatch / 1440.).floor() * 1440. + if dispatch % 1440. < 600. { 600. } else { 2040. }
+    };
+    v.economy.orders.push(Order {
+        id,
+        items,
+        paid,
+        dispatch,
+        arrival,
+        status: if pickup_by.is_some() {
+            "collecting"
+        } else {
+            "confirmed"
+        }
+        .into(),
+        pickup_by,
+    });
+    ledger(
+        v,
+        -paid,
+        format!(
+            "Town order {} including {}",
+            id + 1,
+            if pickup_by.is_some() {
+                "pickup fuel"
+            } else {
+                "delivery"
+            }
+        ),
+    );
+    Ok(id)
+}
+
 #[wasm_bindgen]
 impl Game {
     pub fn order_supplies(&mut self, data: &str) -> String {
         let items = match parse_items(data) {
-            Ok(b) => b,
+            Ok(items) => items,
             Err(e) => return e,
         };
-        let mut v = self.app.world_mut().resource_mut::<Village>();
-        let paid = match quote(&v, items) {
-            Ok(n) => n,
-            Err(e) => return e,
-        };
-        if v.economy.orders.len() >= 100 {
-            let keep = v
-                .economy
-                .orders
-                .iter()
-                .filter(|o| matches!(o.status.as_str(), "confirmed" | "dispatched"))
-                .count();
-            if keep >= 100 {
-                return "Wait for a delivery or cancel an undispatched order first.".into();
-            }
-            let mut discard = v.economy.orders.len().saturating_sub(79);
-            v.economy.orders.retain(|o| {
-                if discard > 0 && matches!(o.status.as_str(), "delivered" | "cancelled") {
-                    discard -= 1;
-                    false
-                } else {
-                    true
-                }
-            });
-        }
-        let id = v.economy.next_order;
-        v.economy.next_order += 1;
-        let dispatch = v.minutes + 120.;
-        let arrival =
-            (dispatch / 1440.).floor() * 1440. + if dispatch % 1440. < 600. { 600. } else { 2040. };
-        v.economy.orders.push(Order {
-            id,
+        match place_order(
+            &mut self.app.world_mut().resource_mut::<Village>(),
             items,
-            paid,
-            dispatch,
-            arrival,
-            status: "confirmed".into(),
-        });
-        ledger(
-            &mut v,
-            -paid,
-            format!("Town order {} including delivery", id + 1),
-        );
-        "ok".into()
+            None,
+        ) {
+            Ok(_) => "ok".into(),
+            Err(e) => e,
+        }
     }
     pub fn cancel_order(&mut self, id: u32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
