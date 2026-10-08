@@ -1,3 +1,4 @@
+import { occupies } from './building-footprints.js';
 import { MAP_SIZE, riverBank } from './terrain.js';
 
 export function placementReason(village, kind, x, y, cost) {
@@ -5,12 +6,13 @@ export function placementReason(village, kind, x, y, cost) {
   if (kind === 'road') {
     if (riverBank(x, y)) return 'Keep the riverbank clear.';
     if (village.roads.some(([rx, ry]) => rx === x && ry === y)) return '';
-    return village.buildings.some(b => b.x === x && b.y === y) ? 'A building occupies this spot.' : '';
+    return village.buildings.some(b => occupies(b,x,y)) ? 'A building occupies this spot.' : '';
   }
   const radius = ['square','solar_farm'].includes(kind) ? 2 : 1;
   if (x - radius < 0 || y - radius < 0 || x + radius >= MAP_SIZE || y + radius >= MAP_SIZE || riverBank(x + radius - 1, y)) return 'Keep the riverbank clear. Move farther inland.';
   if (Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) return 'Leave the arrival clearing open for everyone.';
   if (village.buildings.some(b => Math.abs(b.x - x) < radius + (['square','solar_farm'].includes(b.kind) ? 2 : 1) && Math.abs(b.y - y) < radius + (['square','solar_farm'].includes(b.kind) ? 2 : 1))) return 'Leave a little room between buildings.';
+  if (village.roads.some(([rx,ry])=>occupies({kind,x,y},rx,ry))) return 'Keep roads clear. Choose a plot beside the road.';
   if (village.wood < cost) return `Need ${Math.ceil(cost - village.wood)} more timber. Ask a neighbour to gather.`;
   return '';
 }

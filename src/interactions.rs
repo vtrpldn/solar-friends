@@ -7,6 +7,20 @@ pub fn radius(kind: &str) -> i32 {
         1
     }
 }
+/// Occupied tile centers. Even plots keep the saved anchor at their front tile.
+pub fn footprint_size(kind: &str) -> i32 {
+    match kind {
+        "square" | "solar_farm" => 3,
+        "well" | "compost" | "coop" | "streetlight" => 1,
+        _ => 2,
+    }
+}
+pub fn occupies(b: &Building, x: i32, y: i32) -> bool {
+    let size = footprint_size(&b.kind);
+    let left = b.x - size / 2;
+    let back = b.y - size / 2;
+    (left..left + size).contains(&x) && (back..back + size).contains(&y)
+}
 pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     let b = &v.buildings[index];
     let Some(point) = spacing::approach(v, b, r.id) else {

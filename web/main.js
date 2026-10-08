@@ -1,3 +1,4 @@
+import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
 import { installBuildMenu } from './build-menu.js';
 import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { readArtDraft } from './dev/art-draft.js';
@@ -301,12 +302,13 @@ function tree(x, y, s = 1, species = 0) {
 }
 function sprite(kind, x, y, alpha = 1, id) {
   const art=allBuildingArt[kind];if(!art)return;
-  const p=iso(x,y),night=nightAmount(state.village.minutes);
+  const p=iso(x,y),night=nightAmount(state.village.minutes),registration=placementArt(kind,art);
+  drawFoundation(ctx,kind,p.x,p.y,scale,alpha,night);
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
   const level=buildingLighting(state.environment.power,id,kind,complete);
   for(const layer of lightingLayers(night,level,alpha)){
     ctx.save();ctx.filter=layer.filter;
-    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x,p.y,scale,layer.alpha);
+    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
     ctx.restore();
   }
 }
@@ -357,19 +359,16 @@ function resetPolish() {
 function building(b) {
   const p = iso(b.x, b.y),
     complete = b.progress >= 100;
-  const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
-  contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
+
   buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4, b.id);
-  if (complete && ['garden','greenhouse'].includes(b.kind)) drawCrops(ctx,b,p.x,p.y,scale,nightAmount(state.village.minutes));
+  if (complete && ['garden','greenhouse'].includes(b.kind)) {
+    const registration=placementArt(b.kind,buildingArt[b.kind]);
+    drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));
+  }
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
-    const corners = [
-      [-0.9, -0.9],
-      [0.9, -0.9],
-      [0.9, 0.9],
-      [-0.9, 0.9],
-    ].map(([x, y]) => iso(b.x + x * (["square", "solar_farm"].includes(b.kind) ? 2 : 1), b.y + y * (["square", "solar_farm"].includes(b.kind) ? 2 : 1)));
+    const corners = footprintCorners(b.kind,b.x,b.y).map(([x,y])=>iso(x,y));
     const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
@@ -467,9 +466,10 @@ function render() {
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
-  const key = JSON.stringify(state.village.roads);
+  const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
+  const key = JSON.stringify(visibleRoads);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, state.village.roads);
+    groundLayer = paintTerrain(terrain, visibleRoads);
     groundKey = key;
   }
   ctx.save();
@@ -498,7 +498,7 @@ function render() {
     line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
   }
   drawPlacementGrid();
-  // Player roads remain visible beneath individually placed structures.
+  // Foundations and road tiles share the same half-tile boundary lattice.
   const objects = [
     ...flora.map((f) => ({
       depth: f.x + f.y,
@@ -521,9 +521,8 @@ function render() {
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y);
     const reason = placementReason(state.village, tool, t.x, t.y, kinds[tool][1]);
-    const radius = tool === "road" ? 0.5 : ["square", "solar_farm"].includes(tool) ? 2 : 1;
-    polygon([[-radius,-radius],[radius,-radius],[radius,radius],[-radius,radius]].map(([x,y]) => {
-      const p = iso(t.x+x,t.y+y); return [p.x,p.y];
+    polygon(footprintCorners(tool,t.x,t.y).map(([x,y]) => {
+      const p = iso(x,y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
     if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
     $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber`} · Drag to pan · Esc to cancel`;
@@ -1360,8 +1359,7 @@ function setup() {
       else {
         const cell = uniso(x, y);
         const b = [...state.village.buildings].reverse().find(b => {
-          const radius = ["square", "solar_farm"].includes(b.kind) ? 2 : 1;
-          return Math.abs(b.x-cell.x) <= radius && Math.abs(b.y-cell.y) <= radius;
+          return occupies(b,cell.x,cell.y);
         });
         if (b) inspectBuilding(b.id);
       }

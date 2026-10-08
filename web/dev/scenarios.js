@@ -1,4 +1,7 @@
+import { footprint, occupies } from '../building-footprints.js';
+import { MAP_SIZE, riverBank } from '../terrain.js';
 export const scenarios = [
+  { id: 'grid', name: 'Grid & road edges', detail: 'Every foundation with roads along its front edges. Select Road to inspect grid registration.' },
   { id: 'power', name: 'Stored sunshine', detail: 'A charged solar farm and connected lights at 21:00. Switch loads off in Power to compare.' },
   { id: 'power-outage', name: 'Empty battery', detail: 'An empty shared battery at 21:00; rooftop homes remain lit. Advance until sunrise to recharge.' },
   { id: 'arrival', name: 'Fresh arrival', detail: 'The real starting state, before anyone reaches the clearing.' },
@@ -24,6 +27,15 @@ export function makeScenario(id, fresh, established) {
     r.reason = 'Ready for a development scenario.'; r.remaining = 0;
     r.requested = false; r.visit_building = null; r.last_meal_slot = 3;
     r.target_x = r.x; r.target_y = r.y;
+  }
+  if (id === 'grid') {
+    const roads=new Map();
+    for(const b of v.buildings){
+      const f=footprint(b.kind,b.x,b.y),right=Math.floor(f.maxX)+1,front=Math.floor(f.maxY)+1;
+      for(let x=Math.ceil(f.minX);x<=right;x++)roads.set(`${x},${front}`,[x,front]);
+      for(let y=Math.ceil(f.minY);y<=front;y++)roads.set(`${right},${y}`,[right,y]);
+    }
+    v.roads=[...roads.values()].filter(([x,y])=>x>=1&&y>=1&&x<MAP_SIZE-1&&y<MAP_SIZE-1&&!riverBank(x,y)&&!v.buildings.some(b=>occupies(b,x,y)));
   }
   if (id === 'hungry') {
     v.food = 0; v.meals = 0;

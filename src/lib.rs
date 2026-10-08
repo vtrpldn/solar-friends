@@ -913,7 +913,7 @@ impl Game {
         {
             return "Place roads inside the lot, away from the riverbank.".into();
         }
-        if v.buildings.iter().any(|b| b.x == x && b.y == y) {
+        if v.buildings.iter().any(|b| interactions::occupies(b, x, y)) {
             return "Choose a tile beside the building.".into();
         }
         v.roads.push((x, y));
@@ -950,6 +950,13 @@ impl Game {
                 && (b.y - y).abs() < interactions::radius(&b.kind) + radius
         }) {
             return "Leave a little room between buildings.".into();
+        }
+        let size = interactions::footprint_size(kind);
+        if v.roads.iter().any(|&(rx, ry)| {
+            (x - size / 2..x - size / 2 + size).contains(&rx)
+                && (y - size / 2..y - size / 2 + size).contains(&ry)
+        }) {
+            return "Keep roads clear. Choose a plot beside the road.".into();
         }
         if v.wood < price {
             return format!("We need {} timber for this project.", price as i32);

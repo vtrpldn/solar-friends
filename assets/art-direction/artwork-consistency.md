@@ -31,13 +31,21 @@ The library contains 69 entries backed by 46 source images: 68 active entries an
 | Solar farm | 188 px |
 | Street light | 80 px |
 
-Widths include transparent padding. Compare painted objects in the studio at game scale. A compost bin is about waist high beside a resident; a coop is smaller than a home.
+Widths include transparent padding and describe the source calibration. The placed village also applies the plot registration described below. A compost bin is about waist high beside a resident; a coop is smaller than a home.
 
 Homes cycle through the original, veranda, gable and entry-terrace artwork in construction order. All remain the same three-bed home with the same cost and collision footprint. Their source widths differ to compensate for transparent padding and keep painted doors, roofs and foundations at comparable sizes. Placement ghosts select the next variation; saved building IDs keep the sequence stable after reload. The artwork preview contains all four homes, and the live checks show their day/night versions together. Exact built-in image-generation prompts and references are in [house-variation-prompts.json](house-variation-prompts.json).
 
 Residents use 48 px prepared cells, with a ground anchor of 0.95. Complete connected poses are isolated from the original sheets at load time, aligned by lower-body pivots and normalized with one scale per sheet. This preserves the shorter seated and kneeling poses without clipping adjacent artwork. Hens use 20 px cells and their pose-specific ground anchors. Crop layers use 22 px cells for lettuce and 26 px for beans and tomatoes, with one shared atlas scale so growth stages keep their relative sizes.
 
 Gardens and greenhouses use painted empty structures plus separate crop layers. The taller greenhouse has two rows of four plants along its side beds and a clear central aisle. Registered glass and doorway apertures keep plants behind the painted frame; glass softens their color. [greenhouse-layout.js](../../web/greenhouse-layout.js) shares that layout between the game and crop previews. The wall-height revision and night pair were generated with the built-in image tool; exact prompts are in [greenhouse-height-prompts.json](greenhouse-height-prompts.json). Empty, young, growing, mature and dry states follow simulation data, including repeat tomato harvests. The [live artwork checks](../../web/artwork/checks.html) render all 60 crop/structure/light combinations and every resident frame.
+
+## Tile foundations
+
+Foundations need to meet roads without grass gaps. [building-footprints.js](../../web/building-footprints.js) registers painted ground-contact landmarks inside exact tile plots and draws their stone or soil foundation. Square and solar farm occupy 3×3 tiles; cistern, compost, coop and street light occupy one tile; the remaining buildings and all home variations occupy 2×2 tiles. Plot corners lie on half-tile boundaries, matching roads. Even plots keep the existing saved anchor at their front tile.
+
+The placement ghost, construction frame, selection area, and road checks share these plots. Crop layers follow the same registration as their structure. Roofs and foliage retain their natural silhouettes; the foundation defines the exact plot edge. New roads cannot cross a building's plot, and new buildings cannot cover roads. Older saves still load, with any roads under buildings hidden and removable.
+
+Use **Dev Tools → Grid & road edges** to compare actual placed sizes and road joins for all 15 variants. `node scripts/verify-grid-foundations.mjs` checks shared edges at four zooms, the foundation drawing path, JavaScript/Rust road occupancy, both placement orders, and legacy saves.
 
 ## Camera calibration
 

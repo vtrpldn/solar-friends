@@ -134,6 +134,8 @@ Repeatable scenarios and shared rendering controls shorten gameplay debugging an
 
 Load a fresh arrival, established village, hungry village, mature harvest, overworked cook, full coop, night scene, or a copy of the current village. These are staged fixtures: subsequent time steps run the real simulation. The cook fixture seeds history and raises its concern on the first tick.
 
+**Grid & road edges** places roads against every building and home variation. Select Road to show the grid. Foundations, placement previews, selection areas, and road exclusion use the same whole-tile plots, so paths meet foundations without a grass gap. Run `node scripts/verify-grid-foundations.mjs` after building to check the joins, road conflicts, and old saves.
+
 The sandbox holds the original game in memory and disables village autosaves, imports, and restarts. **Return to village** restores that game; reloading returns to the last saved village. Export a scenario before leaving if it should be kept. A quarter-second tick advances 0.75 game minutes. Longer advances use the same bounded ticks, up to one game day per action.
 
 Resident diagnostics show the current task and destination, the real chooser's prediction on a copy, request eligibility and refusals, and the latest 150 activity changes across all residents while observation is enabled. An ongoing task can finish before the predicted decision applies. These observations are excluded from village saves.

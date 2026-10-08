@@ -97,7 +97,7 @@ export function paintTerrain(texture, roads = []) {
   p.lineJoin = "round";
   p.strokeStyle = p.fillStyle = "white";
   p.shadowColor = "white";
-  p.shadowBlur = 12;
+  p.shadowBlur = 0;
   const unit = RESOLUTION / GROUND_SIZE;
   for (const [x, y] of roads) {
     const [px, py] = groundPoint(x, y);
