@@ -1,7 +1,11 @@
 //! Building visits finish only after residents reach the selected building.
 use super::*;
 pub fn radius(kind: &str) -> i32 {
-    if kind == "square" { 2 } else { 1 }
+    if matches!(kind, "square" | "solar_farm") {
+        2
+    } else {
+        1
+    }
 }
 pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     let b = &v.buildings[index];

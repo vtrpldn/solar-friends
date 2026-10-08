@@ -7,6 +7,7 @@ mod devtools;
 mod ecology;
 mod interactions;
 mod leisure;
+mod power;
 mod progression;
 mod situations;
 mod spacing;
@@ -90,6 +91,8 @@ pub struct Village {
     pub food: f32,
     #[serde(default)]
     pub supplies: supplies::Supplies,
+    #[serde(default)]
+    pub power: power::Power,
     pub water: f32,
     pub meals: u32,
     pub meals_served: u32,
@@ -141,6 +144,8 @@ fn cost(kind: &str) -> Option<f32> {
         "square" => Some(36.),
         "workshop" => Some(48.),
         "coop" => Some(24.),
+        "solar_farm" => Some(48.),
+        "streetlight" => Some(6.),
         _ => None,
     }
 }
@@ -471,6 +476,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
+    power::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
     situations::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
@@ -747,6 +753,7 @@ impl Game {
                 wood: 110.,
                 food: 36.,
                 supplies: supplies::Supplies::default(),
+                power: power::Power::default(),
                 water: 32.,
                 meals: 0,
                 meals_served: 0,
@@ -815,12 +822,28 @@ impl Game {
             "environment": {
                 "raining": ecology::raining(village.minutes),
                 "water_capacity": ecology::capacity(&village),
+                "power": power::supply(&village),
                 "dry_day": (village.minutes / 1440.) as u32 % 3 == 2,
             },
             "village": village,
             "residents": residents,
         })
         .to_string()
+    }
+    pub fn set_power_enabled(&mut self, building: usize, enabled: bool) -> bool {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        if !v
+            .buildings
+            .get(building)
+            .is_some_and(|b| power::load(&b.kind) > 0.)
+        {
+            return false;
+        }
+        v.power.disabled.retain(|id| *id != building);
+        if !enabled {
+            v.power.disabled.push(building);
+        }
+        true
     }
     pub fn configure_crop(&mut self, building: usize, kind: &str, replant: bool) -> bool {
         if !ecology::crop_kind(kind) {
@@ -1087,7 +1110,7 @@ impl Game {
         {
             return false;
         }
-        if !supplies::valid(v) {
+        if !supplies::valid(v) || !power::valid(v) {
             return false;
         }
         let p = &v.progress;
