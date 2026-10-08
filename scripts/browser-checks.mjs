@@ -5,7 +5,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
   context.on('page',page=>{
     page.on('pageerror',e=>errors.push(e.message));
-    page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+    page.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
+    page.on('console',msg=>{if(msg.type()==='error'){const url=msg.location().url;errors.push(msg.text()+(url?' · '+url:''));}});
   });
   let page=await context.newPage();
   async function capture(label,file) { await page.screenshot({path:path.join(output,file),fullPage:true});screenshots.push({label,file}); }
