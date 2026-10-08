@@ -1,0 +1,2012 @@
+{
+  "implementationCommit": "d5adfa1",
+  "reviewedOn": "2026-10-08",
+  "activeEntries": 58,
+  "referenceEntries": 1,
+  "resolvedFindings": [
+    "ART-01",
+    "ART-02",
+    "ART-03",
+    "ART-04",
+    "ART-05",
+    "DEV-01",
+    "COPY-01"
+  ],
+  "sprites": [
+    {
+      "id": "village-atlas-isometric.png-0",
+      "name": "Home",
+      "file": "../art/village-atlas-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        0.5,
+        0.5
+      ],
+      "width": 179.36,
+      "anchor": 0.7,
+      "axes": [
+        0.5,
+        -0.5
+      ],
+      "nightFile": "village-atlas-isometric-night.png",
+      "building": true,
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "review": {
+        "id": "village-atlas-isometric.png-0",
+        "name": "Home",
+        "source": "../art/village-atlas-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "village-atlas-isometric.png-0",
+        "name": "Home",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "village-atlas-isometric.png-0-night",
+      "name": "Home · night",
+      "file": "../art/village-atlas-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        0.5,
+        0.5
+      ],
+      "width": 179.36,
+      "anchor": 0.7,
+      "axes": [
+        0.5,
+        -0.5
+      ],
+      "nightFile": "village-atlas-isometric-night.png",
+      "building": true,
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "review": {
+        "id": "village-atlas-isometric.png-0-night",
+        "name": "Home · night",
+        "source": "../art/village-atlas-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "village-atlas-isometric.png-0-night",
+        "name": "Home · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "village-atlas-isometric.png-1",
+      "name": "Kitchen",
+      "file": "../art/village-atlas-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0,
+        0.5,
+        0.5
+      ],
+      "width": 179.36,
+      "anchor": 0.7,
+      "axes": [
+        0.58,
+        -0.58
+      ],
+      "nightFile": "village-atlas-isometric-night.png",
+      "building": true,
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "review": {
+        "id": "village-atlas-isometric.png-1",
+        "name": "Kitchen",
+        "source": "../art/village-atlas-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "village-atlas-isometric.png-1",
+        "name": "Kitchen",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "village-atlas-isometric.png-1-night",
+      "name": "Kitchen · night",
+      "file": "../art/village-atlas-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0,
+        0.5,
+        0.5
+      ],
+      "width": 179.36,
+      "anchor": 0.7,
+      "axes": [
+        0.58,
+        -0.58
+      ],
+      "nightFile": "village-atlas-isometric-night.png",
+      "building": true,
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "review": {
+        "id": "village-atlas-isometric.png-1-night",
+        "name": "Kitchen · night",
+        "source": "../art/village-atlas-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "village-atlas-isometric.png-1-night",
+        "name": "Kitchen · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "village-atlas-isometric.png-3",
+      "name": "Banana grove",
+      "file": "../art/village-atlas-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "width": 123.9,
+      "anchor": 0.74,
+      "nightFile": "village-atlas-isometric-night.png",
+      "building": true,
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "review": {
+        "id": "village-atlas-isometric.png-3",
+        "name": "Banana grove",
+        "source": "../art/village-atlas-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "village-atlas-isometric.png-3",
+        "name": "Banana grove",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "village-atlas-isometric.png-3-night",
+      "name": "Banana grove · night",
+      "file": "../art/village-atlas-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "width": 123.9,
+      "anchor": 0.74,
+      "nightFile": "village-atlas-isometric-night.png",
+      "building": true,
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "review": {
+        "id": "village-atlas-isometric.png-3-night",
+        "name": "Banana grove · night",
+        "source": "../art/village-atlas-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "village-atlas-isometric.png-3-night",
+        "name": "Banana grove · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "garden-simple",
+      "name": "Garden",
+      "file": "../art/garden-simple-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 140.42,
+      "anchor": 0.52,
+      "axes": [
+        0.55,
+        -0.55
+      ],
+      "nightFile": "garden-simple-isometric-night.png",
+      "building": true,
+      "sha256": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+      "review": {
+        "id": "garden-simple",
+        "name": "Garden",
+        "source": "../art/garden-simple-isometric.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted empty bed; separate lettuce, beans and tomatoes show planting, growth, maturity and dryness."
+      },
+      "pixelChecks": {
+        "id": "garden-simple",
+        "name": "Garden",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "garden-simple-night",
+      "name": "Garden · night",
+      "file": "../art/garden-simple-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 140.42,
+      "anchor": 0.52,
+      "axes": [
+        0.55,
+        -0.55
+      ],
+      "nightFile": "garden-simple-isometric-night.png",
+      "building": true,
+      "sha256": "63f00e1ed22e677d962b506a510ce8c48bc2e1a5bcbc3d3b2cb68f1f59c9e72f",
+      "review": {
+        "id": "garden-simple-night",
+        "name": "Garden · night",
+        "source": "../art/garden-simple-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Empty bed retains matching cool night geometry; crop overlays follow night lighting."
+      },
+      "pixelChecks": {
+        "id": "garden-simple-night",
+        "name": "Garden · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "greenhouse",
+      "name": "Greenhouse",
+      "file": "../art/greenhouse-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 188,
+      "anchor": 0.66,
+      "axes": [
+        0.55,
+        -0.5
+      ],
+      "nightFile": "greenhouse-isometric-night.png",
+      "building": true,
+      "sha256": "81ea84c91afdc625f415a375b21e802ee5b5430f7219c98668c1434fe6bb1fe4",
+      "review": {
+        "id": "greenhouse",
+        "name": "Greenhouse",
+        "source": "../art/greenhouse-isometric.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted timber, brick and teal glass now match the village; 188 px source width and adult-sized doorway. Crops appear inside the open doorway."
+      },
+      "pixelChecks": {
+        "id": "greenhouse",
+        "name": "Greenhouse",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "greenhouse-night",
+      "name": "Greenhouse · night",
+      "file": "../art/greenhouse-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 188,
+      "anchor": 0.66,
+      "axes": [
+        0.55,
+        -0.5
+      ],
+      "nightFile": "greenhouse-isometric-night.png",
+      "building": true,
+      "sha256": "0765160786340f40ff8300c138aaff787d41aa572c156401a06ff2a7e133fa45",
+      "review": {
+        "id": "greenhouse-night",
+        "name": "Greenhouse · night",
+        "source": "../art/greenhouse-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Matching painted moonlit greenhouse; shared geometry, scale and ground anchor."
+      },
+      "pixelChecks": {
+        "id": "greenhouse-night",
+        "name": "Greenhouse · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "cistern",
+      "name": "Cistern",
+      "file": "../art/cistern-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 77,
+      "anchor": 0.82,
+      "axes": [
+        0.55,
+        -0.55
+      ],
+      "nightFile": "cistern-isometric-night.png",
+      "building": true,
+      "sha256": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+      "review": {
+        "id": "cistern",
+        "name": "Cistern",
+        "source": "../art/cistern-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "cistern",
+        "name": "Cistern",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "cistern-night",
+      "name": "Cistern · night",
+      "file": "../art/cistern-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 77,
+      "anchor": 0.82,
+      "axes": [
+        0.55,
+        -0.55
+      ],
+      "nightFile": "cistern-isometric-night.png",
+      "building": true,
+      "sha256": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+      "review": {
+        "id": "cistern-night",
+        "name": "Cistern · night",
+        "source": "../art/cistern-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "cistern-night",
+        "name": "Cistern · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "compost",
+      "name": "Compost station",
+      "file": "../art/compost-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 78,
+      "anchor": 0.75,
+      "axes": [
+        0.6,
+        -0.6
+      ],
+      "nightFile": "compost-isometric-night.png",
+      "building": true,
+      "sha256": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+      "review": {
+        "id": "compost",
+        "name": "Compost station",
+        "source": "../art/compost-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "compost",
+        "name": "Compost station",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "compost-night",
+      "name": "Compost station · night",
+      "file": "../art/compost-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 78,
+      "anchor": 0.75,
+      "axes": [
+        0.6,
+        -0.6
+      ],
+      "nightFile": "compost-isometric-night.png",
+      "building": true,
+      "sha256": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+      "review": {
+        "id": "compost-night",
+        "name": "Compost station · night",
+        "source": "../art/compost-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "compost-night",
+        "name": "Compost station · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "square",
+      "name": "Community square",
+      "file": "../art/square-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 172,
+      "anchor": 0.73,
+      "axes": [
+        0.5,
+        -0.5
+      ],
+      "nightFile": "square-isometric-night.png",
+      "building": true,
+      "sha256": "4bda771313b6ea54200e9dbc214f3073c4ea83a4ef8ed6190ff980183b0d71fa",
+      "review": {
+        "id": "square",
+        "name": "Community square",
+        "source": "../art/square-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "square",
+        "name": "Community square",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "square-night",
+      "name": "Community square · night",
+      "file": "../art/square-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 172,
+      "anchor": 0.73,
+      "axes": [
+        0.5,
+        -0.5
+      ],
+      "nightFile": "square-isometric-night.png",
+      "building": true,
+      "sha256": "fb068f69ae5749a3ce52517e0a746b04b55127905b37a87255dffeacc0135f67",
+      "review": {
+        "id": "square-night",
+        "name": "Community square · night",
+        "source": "../art/square-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "square-night",
+        "name": "Community square · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "workshop",
+      "name": "Workshop",
+      "file": "../art/workshop-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 158,
+      "anchor": 0.81,
+      "axes": [
+        0.52,
+        -0.42
+      ],
+      "nightFile": "workshop-isometric-night.png",
+      "building": true,
+      "sha256": "b0479e0f929831a1842928829640135e4668f311fafc496e7cf5ab1d0e637db5",
+      "review": {
+        "id": "workshop",
+        "name": "Workshop",
+        "source": "../art/workshop-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "workshop",
+        "name": "Workshop",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "workshop-night",
+      "name": "Workshop · night",
+      "file": "../art/workshop-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 158,
+      "anchor": 0.81,
+      "axes": [
+        0.52,
+        -0.42
+      ],
+      "nightFile": "workshop-isometric-night.png",
+      "building": true,
+      "sha256": "cfd3713369ac4e999f2994c43001e95f6bc0c04bd25908c09cc6f22469096574",
+      "review": {
+        "id": "workshop-night",
+        "name": "Workshop · night",
+        "source": "../art/workshop-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "workshop-night",
+        "name": "Workshop · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "coop",
+      "name": "Chicken coop",
+      "file": "../art/coop-isometric.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 100,
+      "anchor": 0.76,
+      "axes": [
+        0.55,
+        -0.4
+      ],
+      "nightFile": "coop-isometric-night.png",
+      "building": true,
+      "sha256": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+      "review": {
+        "id": "coop",
+        "name": "Chicken coop",
+        "source": "../art/coop-isometric.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "coop",
+        "name": "Chicken coop",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "coop-night",
+      "name": "Chicken coop · night",
+      "file": "../art/coop-isometric-night.png",
+      "group": "Buildings",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 100,
+      "anchor": 0.76,
+      "axes": [
+        0.55,
+        -0.4
+      ],
+      "nightFile": "coop-isometric-night.png",
+      "building": true,
+      "sha256": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+      "review": {
+        "id": "coop-night",
+        "name": "Chicken coop · night",
+        "source": "../art/coop-isometric-night.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact."
+      },
+      "pixelChecks": {
+        "id": "coop-night",
+        "name": "Chicken coop · night",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "forest-0",
+      "name": "Jequitibá-rosa",
+      "file": "../art/mata-atlantica-atlas.png",
+      "group": "Vegetation",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        0.5,
+        0.5
+      ],
+      "width": 145,
+      "anchor": 0.85,
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "review": {
+        "id": "forest-0",
+        "name": "Jequitibá-rosa",
+        "source": "../art/mata-atlantica-atlas.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted broadleaf vegetation and palette fit. Base painted height 102.4 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height."
+      },
+      "pixelChecks": {
+        "id": "forest-0",
+        "name": "Jequitibá-rosa",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "forest-1",
+      "name": "Juçara",
+      "file": "../art/mata-atlantica-atlas.png",
+      "group": "Vegetation",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0,
+        0.5,
+        0.5
+      ],
+      "width": 112,
+      "anchor": 0.85,
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "review": {
+        "id": "forest-1",
+        "name": "Juçara",
+        "source": "../art/mata-atlantica-atlas.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted broadleaf vegetation and palette fit. Base painted height 79.8 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height."
+      },
+      "pixelChecks": {
+        "id": "forest-1",
+        "name": "Juçara",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "forest-2",
+      "name": "Embaúba",
+      "file": "../art/mata-atlantica-atlas.png",
+      "group": "Vegetation",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "width": 113,
+      "anchor": 0.85,
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "review": {
+        "id": "forest-2",
+        "name": "Embaúba",
+        "source": "../art/mata-atlantica-atlas.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted broadleaf vegetation and palette fit. Base painted height 77.1 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height."
+      },
+      "pixelChecks": {
+        "id": "forest-2",
+        "name": "Embaúba",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "forest-3",
+      "name": "Pau-brasil",
+      "file": "../art/mata-atlantica-atlas.png",
+      "group": "Vegetation",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "width": 125,
+      "anchor": 0.85,
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "review": {
+        "id": "forest-3",
+        "name": "Pau-brasil",
+        "source": "../art/mata-atlantica-atlas.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Painted broadleaf vegetation and palette fit. Base painted height 84.7 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height."
+      },
+      "pixelChecks": {
+        "id": "forest-3",
+        "name": "Pau-brasil",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "terrain-0",
+      "name": "Meadow",
+      "file": "../art/terrain-atlas.png",
+      "group": "Terrain",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        0.5,
+        1
+      ],
+      "width": 152,
+      "anchor": 0.5,
+      "sha256": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+      "review": {
+        "id": "terrain-0",
+        "name": "Meadow",
+        "source": "../art/terrain-atlas.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Meadow/red-earth palette and painted texture fit the reference. Opaque terrain swatches intentionally have no transparent gutter; they are not isolated-object sprites."
+      },
+      "pixelChecks": {
+        "id": "terrain-0",
+        "name": "Meadow",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "terrain-1",
+      "name": "Red earth",
+      "file": "../art/terrain-atlas.png",
+      "group": "Terrain",
+      "usage": "Active",
+      "cell": [
+        0.5,
+        0,
+        0.5,
+        1
+      ],
+      "width": 152,
+      "anchor": 0.5,
+      "sha256": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+      "review": {
+        "id": "terrain-1",
+        "name": "Red earth",
+        "source": "../art/terrain-atlas.png",
+        "status": "Consistent",
+        "notes": "Audit 2026-10-08. Meadow/red-earth palette and painted texture fit the reference. Opaque terrain swatches intentionally have no transparent gutter; they are not isolated-object sprites."
+      },
+      "pixelChecks": {
+        "id": "terrain-1",
+        "name": "Red earth",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "portrait-0",
+      "name": "Iara",
+      "file": "../art/animations/iara.png",
+      "group": "Portraits",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.5,
+        0.25,
+        0.25
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "portrait": true,
+      "sha256": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+      "review": {
+        "id": "portrait-0",
+        "name": "Iara",
+        "source": "../art/animations/iara.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Uses the same normalized base character pose as the game; old portrait atlas is reference-only."
+      },
+      "pixelChecks": {
+        "id": "portrait-0",
+        "name": "Iara",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "portrait-1",
+      "name": "Bento",
+      "file": "../art/animations/bento.png",
+      "group": "Portraits",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.5,
+        0.25,
+        0.25
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "portrait": true,
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+      "review": {
+        "id": "portrait-1",
+        "name": "Bento",
+        "source": "../art/animations/bento.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Uses the same normalized base character pose as the game; old portrait atlas is reference-only."
+      },
+      "pixelChecks": {
+        "id": "portrait-1",
+        "name": "Bento",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "portrait-2",
+      "name": "Luz",
+      "file": "../art/animations/luz.png",
+      "group": "Portraits",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.5,
+        0.25,
+        0.25
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "portrait": true,
+      "sha256": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+      "review": {
+        "id": "portrait-2",
+        "name": "Luz",
+        "source": "../art/animations/luz.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Uses the same normalized base character pose as the game; old portrait atlas is reference-only."
+      },
+      "pixelChecks": {
+        "id": "portrait-2",
+        "name": "Luz",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "portrait-3",
+      "name": "Cauã",
+      "file": "../art/animations/caua.png",
+      "group": "Portraits",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.5,
+        0.25,
+        0.25
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "portrait": true,
+      "sha256": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+      "review": {
+        "id": "portrait-3",
+        "name": "Cauã",
+        "source": "../art/animations/caua.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Uses the same normalized base character pose as the game; old portrait atlas is reference-only."
+      },
+      "pixelChecks": {
+        "id": "portrait-3",
+        "name": "Cauã",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "portrait-4",
+      "name": "Nina",
+      "file": "../art/animations/nina.png",
+      "group": "Portraits",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.5,
+        0.25,
+        0.25
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "portrait": true,
+      "sha256": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+      "review": {
+        "id": "portrait-4",
+        "name": "Nina",
+        "source": "../art/animations/nina.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Uses the same normalized base character pose as the game; old portrait atlas is reference-only."
+      },
+      "pixelChecks": {
+        "id": "portrait-4",
+        "name": "Nina",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "resident-reference",
+      "name": "Original resident study",
+      "file": "../art/residents-cistern.png",
+      "group": "References",
+      "usage": "Reference",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 200,
+      "anchor": 0.5,
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "review": {
+        "id": "resident-reference",
+        "name": "Original resident study",
+        "source": "../art/residents-cistern.png",
+        "status": "Unreviewed",
+        "notes": ""
+      },
+      "pixelChecks": {
+        "id": "resident-reference",
+        "name": "Original resident study",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "iara",
+      "name": "Iara",
+      "file": "../art/animations/iara.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "sha256": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+      "review": {
+        "id": "iara",
+        "name": "Iara",
+        "source": "../art/animations/iara.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "iara",
+        "name": "Iara",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "bento",
+      "name": "Bento",
+      "file": "../art/animations/bento.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+      "review": {
+        "id": "bento",
+        "name": "Bento",
+        "source": "../art/animations/bento.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "bento",
+        "name": "Bento",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "luz",
+      "name": "Luz",
+      "file": "../art/animations/luz.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "sha256": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+      "review": {
+        "id": "luz",
+        "name": "Luz",
+        "source": "../art/animations/luz.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "luz",
+        "name": "Luz",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "caua",
+      "name": "Cauã",
+      "file": "../art/animations/caua.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "sha256": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+      "review": {
+        "id": "caua",
+        "name": "Cauã",
+        "source": "../art/animations/caua.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "caua",
+        "name": "Cauã",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "nina",
+      "name": "Nina",
+      "file": "../art/animations/nina.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "sha256": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+      "review": {
+        "id": "nina",
+        "name": "Nina",
+        "source": "../art/animations/nina.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "nina",
+        "name": "Nina",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "hen-0",
+      "name": "Cream chicken",
+      "file": "../art/chickens.png",
+      "group": "Animals",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        0.3333333333333333,
+        0.5
+      ],
+      "width": 20,
+      "anchor": 0.93359375,
+      "chicken": true,
+      "variant": 0,
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "review": {
+        "id": "hen-0",
+        "name": "Cream chicken",
+        "source": "../art/chickens.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Reduced source width from 26 to 20 px; both poses retain their ground anchor. Standing hens now read around one-third adult height."
+      },
+      "pixelChecks": {
+        "id": "hen-0",
+        "name": "Cream chicken",
+        "frames": 2,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 36
+      }
+    },
+    {
+      "id": "hen-1",
+      "name": "Ochre chicken",
+      "file": "../art/chickens.png",
+      "group": "Animals",
+      "usage": "Active",
+      "cell": [
+        0.3333333333333333,
+        0,
+        0.3333333333333333,
+        0.5
+      ],
+      "width": 20,
+      "anchor": 0.93359375,
+      "chicken": true,
+      "variant": 1,
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "review": {
+        "id": "hen-1",
+        "name": "Ochre chicken",
+        "source": "../art/chickens.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Reduced source width from 26 to 20 px; both poses retain their ground anchor. Standing hens now read around one-third adult height."
+      },
+      "pixelChecks": {
+        "id": "hen-1",
+        "name": "Ochre chicken",
+        "frames": 2,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 37
+      }
+    },
+    {
+      "id": "hen-2",
+      "name": "Brown chicken",
+      "file": "../art/chickens.png",
+      "group": "Animals",
+      "usage": "Active",
+      "cell": [
+        0.6666666666666666,
+        0,
+        0.3333333333333333,
+        0.5
+      ],
+      "width": 20,
+      "anchor": 0.93359375,
+      "chicken": true,
+      "variant": 2,
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "review": {
+        "id": "hen-2",
+        "name": "Brown chicken",
+        "source": "../art/chickens.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Reduced source width from 26 to 20 px; both poses retain their ground anchor. Standing hens now read around one-third adult height."
+      },
+      "pixelChecks": {
+        "id": "hen-2",
+        "name": "Brown chicken",
+        "frames": 2,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 36
+      }
+    },
+    {
+      "id": "iara-idle",
+      "name": "Iara · standing idles",
+      "file": "../art/animations/iara-idle.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "idleAnimation": true,
+      "sha256": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+      "review": {
+        "id": "iara-idle",
+        "name": "Iara · standing idles",
+        "source": "../art/animations/iara-idle.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "iara-idle",
+        "name": "Iara · standing idles",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "bento-idle",
+      "name": "Bento · standing idles",
+      "file": "../art/animations/bento-idle.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "idleAnimation": true,
+      "sha256": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943",
+      "review": {
+        "id": "bento-idle",
+        "name": "Bento · standing idles",
+        "source": "../art/animations/bento-idle.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "bento-idle",
+        "name": "Bento · standing idles",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "luz-idle",
+      "name": "Luz · standing idles",
+      "file": "../art/animations/luz-idle.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "idleAnimation": true,
+      "sha256": "c37a9572fe8d3c0c4085d1c6595adefdbc2c26f70dd016fb0d5ba02e17bdeb52",
+      "review": {
+        "id": "luz-idle",
+        "name": "Luz · standing idles",
+        "source": "../art/animations/luz-idle.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "luz-idle",
+        "name": "Luz · standing idles",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "caua-idle",
+      "name": "Cauã · standing idles",
+      "file": "../art/animations/caua-idle.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "idleAnimation": true,
+      "sha256": "bed9db91f965fcf36585a2bd46257baaff07bd8144bae7b085915e204c90fc97",
+      "review": {
+        "id": "caua-idle",
+        "name": "Cauã · standing idles",
+        "source": "../art/animations/caua-idle.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "caua-idle",
+        "name": "Cauã · standing idles",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "nina-idle",
+      "name": "Nina · standing idles",
+      "file": "../art/animations/nina-idle.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "idleAnimation": true,
+      "sha256": "5a95ba9e25991ea97bb3e7e1e225ab1b6423e5c53449d51195e6877209ea7116",
+      "review": {
+        "id": "nina-idle",
+        "name": "Nina · standing idles",
+        "source": "../art/animations/nina-idle.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "nina-idle",
+        "name": "Nina · standing idles",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "iara-activities",
+      "name": "Iara · daily work",
+      "file": "../art/animations/iara-activities.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "activityAnimation": true,
+      "sha256": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+      "review": {
+        "id": "iara-activities",
+        "name": "Iara · daily work",
+        "source": "../art/animations/iara-activities.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "iara-activities",
+        "name": "Iara · daily work",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "bento-activities",
+      "name": "Bento · daily work",
+      "file": "../art/animations/bento-activities.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "activityAnimation": true,
+      "sha256": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530",
+      "review": {
+        "id": "bento-activities",
+        "name": "Bento · daily work",
+        "source": "../art/animations/bento-activities.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "bento-activities",
+        "name": "Bento · daily work",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "luz-activities",
+      "name": "Luz · daily work",
+      "file": "../art/animations/luz-activities.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "activityAnimation": true,
+      "sha256": "5ef0f67c8af7a4f9d0d7d212f5d72495d06f5a4a7ee478840d054367d859da70",
+      "review": {
+        "id": "luz-activities",
+        "name": "Luz · daily work",
+        "source": "../art/animations/luz-activities.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "luz-activities",
+        "name": "Luz · daily work",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "caua-activities",
+      "name": "Cauã · daily work",
+      "file": "../art/animations/caua-activities.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "activityAnimation": true,
+      "sha256": "8234d1c277c528b0a9917da578167c79829de9f80f6c8b289c926c63575bdc6b",
+      "review": {
+        "id": "caua-activities",
+        "name": "Cauã · daily work",
+        "source": "../art/animations/caua-activities.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "caua-activities",
+        "name": "Cauã · daily work",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "nina-activities",
+      "name": "Nina · daily work",
+      "file": "../art/animations/nina-activities.png",
+      "group": "Animations",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "width": 48,
+      "anchor": 0.95,
+      "animation": true,
+      "activityAnimation": true,
+      "sha256": "f58b8323bade79235a119d25b53d135dfbba844c9ca8cb70867d91ab5058a570",
+      "review": {
+        "id": "nina-activities",
+        "name": "Nina · daily work",
+        "source": "../art/animations/nina-activities.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Complete painted poses are isolated before rendering, with one scale per sheet, a shared ground baseline and stable body pivots. All 240 registered frames pass boundary/gutter checks. Daily work now has cook, water, tend and feed poses; construction keeps its hammer. Reviewed in the live frame sheet and game."
+      },
+      "pixelChecks": {
+        "id": "nina-activities",
+        "name": "Nina · daily work",
+        "frames": 16,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 1
+      }
+    },
+    {
+      "id": "crop-0-0",
+      "name": "Lettuce · Seedling",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0,
+        0,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 22,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 0,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-0-0",
+        "name": "Lettuce · Seedling",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-0-0",
+        "name": "Lettuce · Seedling",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-0-1",
+      "name": "Lettuce · Growing",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 22,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 3,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-0-1",
+        "name": "Lettuce · Growing",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-0-1",
+        "name": "Lettuce · Growing",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-0-2",
+      "name": "Lettuce · Harvestable",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0,
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 22,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 6,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-0-2",
+        "name": "Lettuce · Harvestable",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-0-2",
+        "name": "Lettuce · Harvestable",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-1-0",
+      "name": "Beans · Seedling",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0.3333333333333333,
+        0,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 26,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 1,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-1-0",
+        "name": "Beans · Seedling",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-1-0",
+        "name": "Beans · Seedling",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-1-1",
+      "name": "Beans · Growing",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 26,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 4,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-1-1",
+        "name": "Beans · Growing",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-1-1",
+        "name": "Beans · Growing",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-1-2",
+      "name": "Beans · Harvestable",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0.3333333333333333,
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 26,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 7,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-1-2",
+        "name": "Beans · Harvestable",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-1-2",
+        "name": "Beans · Harvestable",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-2-0",
+      "name": "Tomatoes · Seedling",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0.6666666666666666,
+        0,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 26,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 2,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-2-0",
+        "name": "Tomatoes · Seedling",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-2-0",
+        "name": "Tomatoes · Seedling",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-2-1",
+      "name": "Tomatoes · Growing",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 26,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 5,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-2-1",
+        "name": "Tomatoes · Growing",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-2-1",
+        "name": "Tomatoes · Growing",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    },
+    {
+      "id": "crop-2-2",
+      "name": "Tomatoes · Harvestable",
+      "file": "../art/crops.png",
+      "group": "Crops",
+      "usage": "Active",
+      "cell": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "width": 26,
+      "anchor": 0.95,
+      "crop": true,
+      "frame": 8,
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "review": {
+        "id": "crop-2-2",
+        "name": "Tomatoes · Harvestable",
+        "source": "../art/crops.png",
+        "status": "Consistent",
+        "notes": "Resolved 2026-10-08 in d5adfa1. Painted crop layer reviewed in empty, young, growing, mature and dry garden/greenhouse views. Shared atlas scale preserves plant growth; night tint follows the game."
+      },
+      "pixelChecks": {
+        "id": "crop-2-2",
+        "name": "Tomatoes · Harvestable",
+        "frames": 1,
+        "passed": true,
+        "edgeOrGutterFailures": [],
+        "baselineSpread": 0
+      }
+    }
+  ]
+}

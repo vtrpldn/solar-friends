@@ -1,8 +1,10 @@
 ---
-description: Gameplay and all-sprite consistency audit, with unresolved art defects and acceptance criteria for the next polish pass.
+description: Historical gameplay and sprite audit; all listed findings were addressed in the subsequent art polish pass.
 ---
 
 # Gameplay and art consistency audit
+
+**Historical before-state.** All seven findings below were addressed in `d5adfa1`. See the [completed polish pass](art-polish-2026-10-08.md), its current inventory and live checks. The original verdicts and evidence below are preserved to explain what changed; they do not describe the current artwork.
 
 The art audit **needs work**. Of 42 catalogue entries, 27 are visually consistent within the current stylized scale and 15 need corrections. The procedural greenhouse is an additional failure outside the catalogue. All 195 source cells were inspected, including all 160 resident animation frames. The gameplay checks passed within the coverage below.
 

@@ -8,15 +8,16 @@ description: Canonical sprite sizes, camera calibration, and prompts for the art
 
 Small utility structures need to read at a plausible size beside homes and residents. The game, placement ghosts, and artwork studio use [building-art.js](../../web/building-art.js) for source crops, widths, ground anchors, and camera calibration. Library thumbnails use one common scale; the focus bench defaults to game scale.
 
-See the [full gameplay and sprite audit](consistency-audit-2026-10-08.md) for per-entry verdicts and unresolved defects.
+See the [completed polish pass](art-polish-2026-10-08.md) for the fixes and verification, and the [original audit](consistency-audit-2026-10-08.md) for the before-state.
 
 ## Canonical assets
 
-The library contains 42 entries backed by 28 source images. Obsolete village and mango variants are removed; Git retains their history. Unused garden and cistern cells remain embedded in atlases needed by active assets, but have no library entry. Portraits and animated residents have different active uses.
+The library contains 59 entries backed by 36 source images: 58 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 287 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
 
 | Structure | Source-cell width at zoom 1 |
 | --- | ---: |
 | Home / kitchen | 179.36 px |
+| Greenhouse | 188 px |
 | Community square | 172 px |
 | Workshop | 158 px |
 | Garden | 140.42 px |
@@ -27,6 +28,10 @@ The library contains 42 entries backed by 28 source images. Obsolete village and
 
 Widths include transparent padding. Compare painted objects in the studio at game scale. A compost bin is about waist high beside a resident; a coop is smaller than a home.
 
+Residents use 48 px prepared cells, with a ground anchor of 0.95. Complete connected poses are isolated from the original sheets at load time, aligned by lower-body pivots and normalized with one scale per sheet. This preserves the shorter seated and kneeling poses without clipping adjacent artwork. Hens use 20 px cells and their pose-specific ground anchors. Crop layers use 22 px cells for lettuce and 26 px for beans and tomatoes, with one shared atlas scale so growth stages keep their relative sizes.
+
+Gardens and greenhouses use painted empty structures plus separate crop layers. Empty, young, growing, mature and dry states follow simulation data, including repeat tomato harvests. The [live artwork checks](../../web/artwork/checks.html) render all 60 crop/structure/light combinations and every resident frame.
+
 ## Camera calibration
 
 The map uses a 2:1 orthographic game projection, with ground axes at slopes +0.5 and -0.5. This is the conventional game projection, not mathematical 30-degree isometry. Source `axes` values approximate the dominant painted ground-edge slopes. The shared Canvas transform preserves verticals and maps those two directions to the map axes. It does not prove that every painted edge is parallel: individual roof tiles, irregular timber, and the pergola still have local deviations. Exact architectural geometry would require a constrained model or a manually constructed source.
@@ -34,6 +39,8 @@ The map uses a 2:1 orthographic game projection, with ground axes at slopes +0.5
 Run `node scripts/verify-artwork.mjs` for duplicate-file hashes, duplicate catalog crops, coverage, shared dimensions, relative-size bounds, and calibration arithmetic. The arithmetic check verifies the declared axes, not pixel-level geometry; inspect the artwork visually after replacing a PNG.
 
 ## Generation prompts
+
+The built-in image-generation tool produced the greenhouse day/night pair, empty garden pair, crop atlas and five activity sheets in the latest pass. Exact prompts, references and destinations are in [art-polish-prompts.json](art-polish-prompts.json).
 
 The built-in image-generation tool edited compost, workshop, coop, and square PNGs in [web/art](../../web/art/). Workshop, compost, and coop used their old sprite as edit target and the village atlas as style reference.
 
@@ -58,4 +65,3 @@ Final square prompt (old square as edit target):
 > Rebuild this pergola sprite with CORRECT GEOMETRY, preserving the warm illustrated Brazilian palette, bunting, vines, two benches and table. Transparent square canvas. Essential change: FOUR posts form a perfect rectangular prism in 2:1 orthographic game isometric projection. On a nominal 1000x1000 canvas place four post FEET at back (500,450), left (180,610), right (820,610), front (500,770). Their TOPS are back (500,150), left (180,310), right (820,310), front (500,470). All four straight upright posts exactly same height. Join their tops with four straight horizontal wooden beams; all beam edges slopes +0.5 or -0.5, no perspective convergence. Front post must be centered x=500, NOT shifted right as in reference. Benches and table align to these SAME two ground axes. Keep generous clear transparent border. No grid or text or coordinate markers. Simplified painted style, not photorealistic.
 
 Prompt constraints describe the requested output; the camera section records the actual limits of the delivered raster assets.
-
