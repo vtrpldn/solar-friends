@@ -402,6 +402,15 @@ fn choose(r: &mut Resident, v: &Village) {
             "build",
             "A little progress on our shared project before taking a break.",
         )
+    } else if r.id == 1
+        && v.progress.use_tools
+        && v.progress.tool_uses == 0
+        && available(v, "craft")
+    {
+        (
+            "craft",
+            "Making a small batch of tools for our next shared project.",
+        )
     } else if supplies::needs_ingredients(v) && available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && matches!(r.id, 0 | 1) {
@@ -611,9 +620,20 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     | "outside"
             )
             && !(r.task == "gather" && supplies::urgent(&v));
+        let ready_work = match r.id {
+            0 => available(&v, "build"),
+            1 => {
+                available(&v, "build")
+                    || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"))
+            }
+            2 | 3 => economy::local_job(&v).is_some(),
+            4 => available(&v, "outside"),
+            _ => false,
+        };
         let chores_start = !r.requested
             && work_time(v.minutes)
-            && !work_time(before)
+            && (!work_time(before)
+                || (ready_work && r.social >= 65. && !situations::protected(&v, r.id, "cook")))
             && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
         if r.task != "arrive"
             && (sleeping_time(v.minutes, r.id) != (r.task == "sleep")

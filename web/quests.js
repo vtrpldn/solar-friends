@@ -32,7 +32,7 @@ export const quests = [
         "Build a cistern",
         count(v, "well"),
         1,
-        "Cisterns catch afternoon rain and add 75 water storage. Neighbours can also carry water from the river.",
+        "Place a free cistern blueprint, then check Projects. Buy its pump in Town; neighbours carry river water while it is being built. You can plan homes, a garden and a kitchen while supplies arrive.",
         "well",
       ),
       goal(
@@ -178,4 +178,15 @@ export function questStatus(v, id) {
     : id > 0 && !v.progress.completed[0]
       ? "After our arrival"
       : "Available";
+}
+
+// Goals always provide a next step through planning, construction and use.
+export function goalRoute(state, objective) {
+  if(objective?.action)return {type:objective.action};
+  if(!objective?.build)return null;
+  const kind=objective.build, buildings=state.village.buildings.filter(b=>b.kind===kind);
+  const project=state.environment.economy.projects.find(p=>p.kind===kind&&!p.paused)||state.environment.economy.projects.find(p=>p.kind===kind);
+  if(project)return {type:'project',id:project.building,project};
+  if(buildings.filter(b=>b.progress>=100).length>=objective.target)return {type:'visit',id:buildings.find(b=>b.progress>=100).id};
+  return {type:'plan',kind};
 }

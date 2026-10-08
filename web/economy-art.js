@@ -1,3 +1,4 @@
+import { unlitFilter } from './power.js';
 // Three crowded atlas cells use measured transparent gutters rather than equal column cuts.
 export const economyArt = [
   {name:'Managed timber',cell:[0,0,1/3,.5],width:100,anchor:.95},
@@ -12,7 +13,7 @@ if(economyImage)economyImage.src='art/economy-atlas.png';
 export function drawEconomyArt(ctx,index,x,y,scale,night=0,remaining=1){
   if(!economyImage?.complete||!economyImage.naturalWidth)return;
   const a=economyArt[index],[u,v,cw,ch]=a.cell,w=a.width*scale,h=w*ch/cw;
-  ctx.save();ctx.filter=`brightness(${1-night*.65}) saturate(${remaining<.03 ? .25 : 1})`;
+  ctx.save();ctx.filter=unlitFilter(night,remaining<.03?.25:1);
   ctx.globalAlpha*=remaining<.03 ? .55 : 1;
   ctx.drawImage(economyImage,u*economyImage.naturalWidth,v*economyImage.naturalHeight,cw*economyImage.naturalWidth,ch*economyImage.naturalHeight,x-w/2,y-h*a.anchor,w,h);ctx.restore();
 }

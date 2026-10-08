@@ -47,6 +47,8 @@ pub type Bundle = [u32; COUNT];
 pub struct Project {
     pub building: usize,
     pub recipe: String,
+    #[serde(default)]
+    pub appearance: Option<u8>,
     pub priority: u32,
     pub paused: bool,
     pub stage: usize,
@@ -264,8 +266,31 @@ fn ledger(v: &mut Village, amount: i64, note: String) {
     }
 }
 pub fn plan(v: &mut Village, id: usize) {
+    let appearance = if v.buildings.iter().any(|b| b.id == id && b.kind == "home") {
+        v.economy
+            .projects
+            .iter()
+            .filter(|p| {
+                v.buildings
+                    .iter()
+                    .any(|b| b.id == p.building && b.kind == "home")
+            })
+            .max_by_key(|p| p.building)
+            .map_or(
+                ((v.buildings.iter().filter(|b| b.kind == "home").count() - 1) % 4) as u8,
+                |p| {
+                    p.appearance.map_or(
+                        ((v.buildings.iter().filter(|b| b.kind == "home").count() - 1) % 4) as u8,
+                        |n| (n + 1) % 4,
+                    )
+                },
+            )
+    } else {
+        0
+    };
     v.economy.projects.push(Project {
         building: id,
+        appearance: Some(appearance),
         recipe: "standard".into(),
         priority: 1,
         paused: false,
@@ -373,6 +398,10 @@ pub fn shortage(v: &Village) -> Bundle {
                 needs[i] += n;
             }
         }
+    }
+    // One small tool batch is maintenance demand, never an open-ended timber stockpile.
+    if ready(v, "workshop") && v.progress.use_tools && v.progress.tool_uses <= 2 {
+        needs[0] += 8;
     }
     for (i, n) in needs.iter_mut().enumerate() {
         *n = n.saturating_sub(quantity(v, i) + incoming(v, i));
@@ -572,6 +601,7 @@ pub fn valid(v: &Village) -> bool {
         };
         if !ids.insert(p.building)
             || p.priority > 3
+            || p.appearance.is_some_and(|n| n > 3)
             || p.stage > stages.len()
             || !p.labour.is_finite()
             || p.labour < 0.
@@ -1069,6 +1099,83 @@ mod tests {
         town_order(&mut g, &[(2, 4), (0, 4)]);
         let saved = g.snapshot();
         assert!(g.restore(&saved));
+    }
+    #[test]
+    fn house_appearance_survives_earlier_cancellation_and_reload() {
+        let mut g = Game::new();
+        assert_eq!(g.place("home", 8, 8), "ok");
+        assert_eq!(g.place("home", 12, 8), "ok");
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.projects[1].appearance,
+            Some(1)
+        );
+        assert_eq!(g.cancel_project(0), "ok");
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.projects[0].appearance,
+            Some(1)
+        );
+        assert_eq!(g.place("home", 8, 8), "ok");
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.projects[1].appearance,
+            Some(2)
+        );
+    }
+    #[test]
+    fn new_ready_work_interrupts_an_autonomous_walk_only_during_work_hours() {
+        let mut g = Game::new();
+        assert_eq!(g.place("garden", 8, 8), "ok");
+        g.app.world_mut().resource_mut::<Village>().minutes = 600.;
+        let mut query = g.app.world_mut().query::<&mut crate::Resident>();
+        for mut r in query.iter_mut(g.app.world_mut()) {
+            r.task = "nature_walk".into();
+            r.remaining = 24.;
+            r.requested = false;
+            r.energy = 90.;
+            r.hunger = 20.;
+            r.social = 90.;
+            r.last_meal_slot = 0;
+            r.target_x = 20.;
+            r.target_y = 20.;
+        }
+        g.tick(0.25);
+        let mut query = g.app.world_mut().query::<&crate::Resident>();
+        assert!(
+            query
+                .iter(g.app.world())
+                .filter(|r| r.id < 2)
+                .all(|r| r.task == "build")
+        );
+        g.app.world_mut().resource_mut::<Village>().minutes = 780.;
+        g.tick(0.25);
+        assert!(query.iter(g.app.world()).all(|r| r.task != "build"));
+    }
+    #[test]
+    fn tool_maintenance_is_bounded_and_conservation_stops_collection() {
+        let mut g = Game::new();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        assert_eq!(g.place("workshop", 8, 8), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.buildings[0].progress = 100.;
+        v.wood = 0.;
+        assert_eq!(shortage(&v)[0], 8);
+        assert_eq!(local_job(&v), Some(("source".into(), 0)));
+        finish_job(&mut v, "source", 0);
+        finish_job(&mut v, "source", 0);
+        assert_eq!(v.wood, 8.);
+        assert!(local_job(&v).is_none());
+        v.progress.tool_uses = 12;
+        assert_eq!(shortage(&v)[0], 0);
+        v.progress.tool_uses = 0;
+        v.wood = 0.;
+        v.progress.use_tools = false;
+        assert_eq!(shortage(&v)[0], 0);
+        assert!(local_job(&v).is_none());
     }
     #[test]
     fn new_save_rejects_old_versions_and_corrupt_transactions_atomically() {

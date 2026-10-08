@@ -34,9 +34,16 @@ for (const [key, art] of Object.entries(allBuildingArt)) {
 allBuildingArt.square.mesh=pergolaMesh;
 allBuildingArt.square.axes=[.5,-.5];
 export const homeArtKeys = ['home', ...Object.keys(homeVariants)];
-export function buildingArtKey(building, buildings) {
+export function buildingArtKey(building, buildings, projects = []) {
   if(building.kind!=='home')return building.kind;
-  // IDs survive save/reload and unrelated building additions. The placement
+  const project=projects.find(p=>p.building===building.id);
+  if(project?.recipe==='local')return 'home-veranda';
+  if(project?.appearance!=null)return homeArtKeys[project.appearance];
+  if(building.id==null){
+    const previous=[...projects].filter(p=>buildings.some(b=>b.id===p.building&&b.kind==='home')).sort((a,b)=>b.building-a.building)[0];
+    if(previous?.appearance!=null)return homeArtKeys[(previous.appearance+1)%homeArtKeys.length];
+  }
+  // Preview fixtures without projects use construction order. IDs survive save/reload and unrelated building additions. The placement
   // ghost has no ID and uses the next house's place in the same sequence.
   const ordinal=buildings.filter(b=>b.kind==='home' && (building.id==null || b.id<building.id)).length;
   return homeArtKeys[ordinal%homeArtKeys.length];

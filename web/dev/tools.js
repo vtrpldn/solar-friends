@@ -13,12 +13,12 @@ export function installDevTools(api) {
     <p id="dev-mode" role="status"></p>
     <nav class="dev-tabs" aria-label="Developer workspaces"><button data-dev-tab="simulation" aria-pressed="true">Simulation</button><button data-dev-tab="art" aria-pressed="false">Artwork</button><button data-dev-tab="checks" aria-pressed="false">Checks & captures</button></nav>
     <section data-dev-page="simulation"><div class="dev-grid"><section class="dev-card"><h3>Scenario launcher</h3>
-      <label for="dev-scenario">Start from</label><select id="dev-scenario">${scenarios.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}<option value="copy">Copy of my current village</option></select>
+      <label for="dev-scenario">Start from</label><select id="dev-scenario">${scenarios.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}<option value="copy">Copy of my current village</option><option value="imported" disabled>Imported checkpoint</option></select>
       <p id="dev-scenario-detail"></p><div class="dev-actions"><button id="dev-load">Load sandbox</button><button id="dev-return">Return to village</button></div>
       <p>Scenarios are staged test fixtures. Your village stays in memory while you experiment; sandbox progress never autosaves.</p>
       <div class="dev-actions"><button data-dev-step="0.75">Single tick · ¼ second</button><button data-dev-step="1">+1 game minute</button><button data-dev-step="60">+1 game hour</button></div>
       <label for="dev-minutes">Game minutes to advance (up to one day)</label><input id="dev-minutes" type="number" min="0.75" max="1440" value="60" step="0.75"><button id="dev-advance">Advance</button>
-      <div class="dev-actions"><button id="dev-run">Run sandbox in game</button><button id="dev-fixture">Export scenario</button></div>
+      <div class="dev-actions"><button id="dev-run">Run sandbox in game</button><button id="dev-fixture">Export scenario</button><button id="dev-import">Import sandbox checkpoint</button><input id="dev-import-file" type="file" accept="application/json,.json" hidden></div><p>Import a village export into the sandbox to replay an earned checkpoint. Your saved village stays protected.</p>
       <p id="dev-clock"></p><p id="dev-message" role="status"></p>
     </section><section class="dev-card"><h3>Resident decisions</h3><label for="dev-resident">Inspect a neighbour</label><select id="dev-resident"></select><div class="dev-actions"><button id="dev-inspect">Refresh</button><button id="dev-follow">Locate in game</button></div><div id="dev-inspection"></div></section></div></section>
     <section data-dev-page="art" hidden><div class="dev-grid"><section class="dev-card"><h3>Artwork workbench</h3>
@@ -42,12 +42,12 @@ export function installDevTools(api) {
     const snapshot = api.snapshot();
     if (observedScenario !== api.scenario()) {
       observedScenario = api.scenario();
-      if (scenarios.some(s => s.id === observedScenario)) {
+      if (scenarios.some(s => s.id === observedScenario)||observedScenario==='imported') {
         $('dev-scenario').value = observedScenario;
         $('dev-scenario').onchange();
       }
     }
-    $('dev-mode').textContent = api.isSandbox() ? `Sandbox · ${scenarios.find(s => s.id === api.scenario())?.name || api.scenario()} · saved village protected` : 'Viewing your village · load a sandbox to advance or experiment';
+    $('dev-mode').textContent = api.isSandbox() ? `Sandbox · ${scenarios.find(s => s.id === api.scenario())?.name || (api.scenario()==='imported'?'Imported checkpoint':api.scenario())} · saved village protected` : 'Viewing your village · load a sandbox to advance or experiment';
     banner.hidden = !api.isSandbox();
     $('dev-clock').textContent = clock(snapshot.village.minutes);
     $('dev-return').disabled = !api.isSandbox();
@@ -70,7 +70,7 @@ export function installDevTools(api) {
     for (const item of dialog.querySelectorAll('[data-dev-tab]')) item.setAttribute('aria-pressed', String(item === button));
     for (const section of dialog.querySelectorAll('[data-dev-page]')) section.hidden = section.dataset.devPage !== button.dataset.devTab;
   };
-  $('dev-scenario').onchange = () => { $('dev-scenario-detail').textContent = scenarios.find(s => s.id === $('dev-scenario').value)?.detail || 'A temporary copy of the village currently on screen.'; };
+  $('dev-scenario').onchange = () => { $('dev-load').disabled=$('dev-scenario').value==='imported'; $('dev-scenario-detail').textContent = scenarios.find(s => s.id === $('dev-scenario').value)?.detail || ($('dev-scenario').value==='imported'?'An exported checkpoint, restored in the protected sandbox. Select a standard scene to start something else.':'A temporary copy of the village currently on screen.'); };
   $('dev-scenario').onchange();
   $('dev-load').onclick = () => act(() => api.loadScenario($('dev-scenario').value));
   $('dev-return').onclick = () => act(() => api.returnToVillage());
@@ -78,6 +78,8 @@ export function installDevTools(api) {
   $('dev-advance').onclick = () => act(() => api.advance(Number($('dev-minutes').value)));
   $('dev-run').onclick = () => { api.run(); dialog.close(); };
   $('dev-fixture').onclick = () => download(api.snapshot(), 'solar-friends-scenario.json');
+  $('dev-import').onclick=()=>$('dev-import-file').click();
+  $('dev-import-file').onchange=()=>act(async()=>{const file=$('dev-import-file').files[0];if(!file)return;try{if(file.size>5_000_000)throw new Error('Choose a checkpoint smaller than 5 MB.');api.importSandbox(await file.text());}finally{$('dev-import-file').value='';}});
   $('dev-inspect').onclick = inspect; $('dev-resident').onchange = inspect;
   $('dev-follow').onclick = () => { api.locate(Number($('dev-resident').value)); dialog.close(); };
   $('dev-fixed').onclick = () => { api.fixedView(); $('dev-message').textContent = 'Camera fixed and simulation paused.'; };

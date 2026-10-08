@@ -1,3 +1,4 @@
+import { unlitFilter } from '../power.js';
 import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
 import { chickenFrame } from '../chickens.js?v=painted-hens-1';
 import { drawPreparedFrame, animationFrameOptions } from '../sprite-frames.js';
@@ -80,7 +81,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     paint(ctx,images.get(`../art/${homeFile}`),home,w*.22,y,z);
     const original = images.get(selected.file);
     const pair = catalog.find(s => s.building && s.name === selected.name.replace(' · night','') + ' · night');
-    paint(ctx,original,draft,w*.66,y,z);
+    ctx.save();if(selected.group==='Land & supplies')ctx.filter=unlitFilter(light);paint(ctx,original,draft,w*.66,y,z);ctx.restore();
     if (pair && !selected.name.includes('night')) { ctx.save();ctx.globalAlpha=light;paint(ctx,images.get(pair.file),draft,w*.66,y,z);ctx.restore(); }
     const iara = catalog.find(s=>s.id==='portrait-0'); paint(ctx,images.get(iara.file),iara,w*.44,y,z);
     ctx.fillStyle = light>.5?'#fff4d7':'#294535';ctx.font='12px Trebuchet MS';ctx.fillText('Home',w*.22-18,h-18);ctx.fillText('Iara',w*.44-12,h-18);ctx.fillText('Calibration draft',w*.66-42,h-18);

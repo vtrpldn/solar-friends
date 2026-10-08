@@ -4,9 +4,12 @@ export function buildingLighting(power, id, kind, complete = true) {
   const connection=power?.connections.find(c=>c.id===id);
   return connection?.source==='grid' || connection?.source==='roof' ? connection.light_level : kind==='streetlight'?0:1;
 }
+export function unlitFilter(night=1, saturation=1) {
+  return `brightness(${1-night*.35}) saturate(${(1-night*.28)*saturation})`;
+}
 export function lightingLayers(night, level, alpha=1) {
   const layers=[{source:'day',weight:1-night,filter:'none'},
-    {source:'day',weight:night*(1-level),filter:'brightness(.65) saturate(.72)'},
+    {source:'day',weight:night*(1-level),filter:unlitFilter()},
     {source:'night',weight:night*level,filter:'brightness(1.45)'}];
   let later=0;
   for(let i=layers.length-1;i>=0;i--){const layer=layers[i];layer.alpha=layer.weight?alpha*layer.weight/(1-alpha*later):0;later+=layer.weight;}
@@ -36,7 +39,7 @@ export function updatePowerUI(state,kinds) {
   $('power-generation').textContent=`${p.generation.toFixed(1)} / hour`;
   $('power-demand').textContent=`${p.demand.toFixed(1)} / hour`;
   const loads=powerConnections(state),nightLoad=loads.filter(c=>c.enabled).reduce((sum,c)=>sum+c.load,0);
-  $('power-outlook').textContent=!p.farms?'A completed farm starts empty and charges in daylight.':!nightLoad?'No shared lights are drawing power.':`${(p.stored/nightLoad).toFixed(1)} hours of full-night lighting stored for ${loads.filter(c=>c.enabled).length} connected buildings and lights.`;
+  $('power-outlook').textContent=!p.farms?'A completed farm starts empty and charges in daylight.':!nightLoad?'No shared lights are drawing power.':`${(p.stored/nightLoad).toFixed(1)} hours of full-night lighting stored for ${loads.filter(c=>c.enabled).length} connected ${loads.filter(c=>c.enabled).length===1?'building or light':'buildings and lights'}.`;
   $('power-roofs').textContent=`${p.connections.filter(c=>c.source==='roof' && c.enabled).length} ${p.connections.filter(c=>c.source==='roof' && c.enabled).length===1?'home uses its':'homes use their'} own rooftop panels and batteries.`;
   const list=$('power-loads'),key=loads.map(c=>`${c.id}:${c.building.kind}`).join(',');
   if(list.dataset.key!==key){

@@ -12,7 +12,7 @@ import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
 import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
-import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
+import { quests, buildingUnlocked, questStatus, goalRoute } from "./quests.js?v=ecology-coop-2";
 import { loadSettings, saveSettings } from "./settings.js";
 import { placementReason, milestones } from "./polish.js";
 import { VillageAudio } from "./village-audio.js";
@@ -22,6 +22,8 @@ import {
   unproject,
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
+  zoomLimits,
+  clampZoom,
 } from "./projection.js";
 import init, { Game } from "./pkg/solar_friends.js?v=devtools-1";
 import {
@@ -207,10 +209,16 @@ function save(manual = false) {
       );
   }
 }
+function setZoom(value) {
+  zoom=clampZoom(width,height,value);
+  const limits=zoomLimits(width,height);
+  $('#zoom-out').disabled=zoom<=limits.min+1e-6;$('#zoom-in').disabled=zoom>=limits.max-1e-6;
+}
 function resize() {
   const r = canvas.getBoundingClientRect();
   width = r.width;
   height = r.height;
+  setZoom(zoom);
   const dpr = Math.min(devicePixelRatio, 2);
   canvas.width = width * dpr;
   canvas.height = height * dpr;
@@ -318,8 +326,7 @@ function sprite(kind, x, y, alpha = 1, id) {
   }
 }
 function buildingSprite(kind, x, y, alpha = 1, id) {
-  const local=state.village.economy.projects.find(p=>p.building===id)?.recipe==='local';
-  sprite(kind==='home'&&local?'home-veranda':buildingArtKey({kind,id},state.village.buildings),x,y,alpha,id);
+  sprite(buildingArtKey({kind,id},state.village.buildings,state.village.economy.projects),x,y,alpha,id);
 }
 function placementValid(kind, x, y) {
   return !placementReason(state.village, kind, x, y);
@@ -359,7 +366,7 @@ function announceMilestones() {
 function resetPolish() {
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
-  cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; zoom = 1.3;
+  cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; setZoom(1.3);
 }
 
 function building(b) {
@@ -712,9 +719,6 @@ function updateQuests() {
   $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
   $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
   $("#goal-shortcut").onclick = () => done ? openJournal() : showPanel("goals-panel");
-  $("#goal-action").hidden = done || !next?.build;
-  $("#goal-action").textContent = next?.build ? `Plan ${kinds[next.build][0].toLowerCase()}` : "";
-  $("#goal-action").onclick = () => setTool(next.build);
   $("#tutorial-count").textContent = `${quest.theme} · QUEST ${id + 1} OF 4`;
   $("#tutorial-title").textContent = quest.title;
   $("#tutorial-copy").textContent = done
@@ -734,41 +738,31 @@ function updateQuests() {
     `${quest.title} objectives completed`,
   );
   replaceMarkup($("#objectives"), objectiveMarkup(objectives, done));
-  const kind = done ? quest.building : next?.build;
-  const count = kind
-    ? v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length
-    : 0;
-  const planned =
-    kind && v.buildings.some((b) => b.kind === kind && b.progress < 100);
-  const enough = kind && (kind === "home" ? count >= next?.target : count > 0);
-  $("#goal-action").hidden = done || !kind || planned || enough;
-  const action = $("#tutorial-action");
-  action.hidden = (!kind || planned || enough) && !(!done && next?.action);
-  action.textContent = kind
-    ? `Plan ${kinds[kind][0].toLowerCase()} · free blueprint`
-    : "";
-  if (!done && next?.action) {
-    action.textContent =
-      next.action === "supper"
-        ? "Host welcome supper · 5 meals"
-        : "Support tool library · R$ 120";
-    action.onclick = () => {
-      const result =
-        next.action === "supper"
-          ? game.host_gathering()
-          : game.contribute_tool_library();
-      toast(
-        result === "ok"
-          ? next.action === "supper"
-            ? "Welcome supper is starting at the kitchen."
-            : "The shared tool library is funded."
-          : result,
-      );
-      state = JSON.parse(game.snapshot());
-      updateUI();
-      save();
+  const route=goalRoute(state,done?{build:quest.building,target:1}:next);
+  const action=$("#tutorial-action"), shortcut=$("#goal-action");
+  action.disabled=false;shortcut.disabled=false;
+  let label='',onClick=()=>{};
+  if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>setTool(route.kind);}
+  if(route?.type==='visit'){label=`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
+  if(route?.type==='project'){
+    label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
+    onClick=()=>showPanel('projects-panel');
+    const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
+    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Projects when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Projects for the recipe and Town for missing equipment. Incoming deliveries arrive at 10:00 after dispatch.`;
+  }
+  if(route?.type==='supper'||route?.type==='tool_library'){
+    const supper=route.type==='supper', underway=supper&&p.gathering_until>v.minutes;
+    label=underway?'Welcome supper underway':supper?'Host welcome supper · 5 meals':'Support tool library · R$ 120';
+    action.disabled=underway;shortcut.disabled=underway;
+    if(underway)$('#tutorial-copy').textContent=`The neighbours are making their way to the kitchen. ${p.attended.toString(2).replaceAll('0','').length} have arrived; three need to attend before the supper ends. ${Math.ceil(p.gathering_until-v.minutes)} game minutes remain.`;
+    onClick=()=>{
+      const result=supper?game.host_gathering():game.contribute_tool_library();
+      toast(result==='ok'?(supper?'Welcome supper is starting at the kitchen.':'The shared tool library is funded.'):result);
+      state=JSON.parse(game.snapshot());updateUI();save();
     };
-  } else action.onclick = () => setTool(kind);
+  }
+  action.hidden=!route;action.textContent=label;action.onclick=onClick;
+  shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
   $("#open-journal").textContent =
     done && id === 0
       ? "Choose our next quest →"
@@ -843,6 +837,10 @@ function updateBuildingPanel() {
   }
   const b = state.village.buildings.find(b => b.id === Number(chooser.value));
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
+  if(b?.kind==='workshop'){
+    const tools=state.village.progress.tool_uses, timber=state.environment.economy.materials[0].available;
+    $('#building-purpose').textContent=`${tools}/36 tool uses ready. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'Eight unreserved timber makes twelve more tool uses.'}`;
+  }
   $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
   $("#crop-controls").hidden = !farming;
@@ -1100,7 +1098,7 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
-  economyUI=installEconomyUI({snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  economyUI=installEconomyUI({snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
@@ -1305,7 +1303,7 @@ function setup() {
     selected = null;
     tool = null;
     pan = { x: 0, y: 0 };
-    zoom = 1;
+    setZoom(1);
     time = 0;
     $("#person").hidden = true;
     closePanels();
@@ -1332,11 +1330,11 @@ function setup() {
   $("#help").onclick = () => $("#help-dialog").showModal();
   $("#close-help").onclick = $("#start-playing").onclick = () =>
     $("#help-dialog").close();
-  $("#zoom-in").onclick = () => (zoom = Math.min(1.8, zoom + 0.15));
-  $("#zoom-out").onclick = () => (zoom = Math.max(0.6, zoom - 0.15));
+  $("#zoom-in").onclick = () => {setZoom(zoom + 0.15);render();};
+  $("#zoom-out").onclick = () => {setZoom(zoom - 0.15);render();};
   $("#center").onclick = () => {
     cameraTarget = null;
-    zoom = 1.3;
+    setZoom(1.3);
     pan = { x: 0, y: 0 };
   };
   canvas.addEventListener("pointerdown", (e) => {
@@ -1394,7 +1392,7 @@ function setup() {
     "wheel",
     (e) => {
       e.preventDefault();
-      zoom = Math.max(0.6, Math.min(1.8, zoom - e.deltaY * 0.001));
+      setZoom(zoom - e.deltaY * 0.001);
     },
     { passive: false },
   );
@@ -1433,6 +1431,7 @@ function setup() {
 // Both the workbench and automated checks use this interface. Mutations require
 // a sandbox; the original Game object stays untouched until it is restored.
 function refreshDevScene() {
+  setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
@@ -1469,6 +1468,15 @@ const devAPI = {
     game = candidate; sandboxName = id; game.dev_observe(true);
     if (!paused) togglePause();
     refreshDevScene(); devTools?.refresh();
+  },
+  importSandbox(raw) {
+    if(loadingScenario)throw new Error('Wait for the scenario to finish loading.');
+    if(raw.length>5_000_000)throw new Error('Choose a checkpoint smaller than 5 MB.');
+    const candidate=new Game();
+    if(!candidate.restore(raw)){candidate.free();throw new Error('This checkpoint is not a valid village. The current scene is unchanged.');}
+    if(!sandbox)sandbox={game,paused,zoom,pan:{...pan},time};else game.free();
+    game=candidate;sandboxName='imported';game.dev_observe(true);if(!paused)togglePause();
+    refreshDevScene();devTools?.refresh();
   },
   returnToVillage() {
     if (loadingScenario) throw new Error('Wait for the scenario to finish loading.');
