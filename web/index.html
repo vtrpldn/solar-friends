@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css?v=combined-hud-2" />
     <link rel="stylesheet" href="hud.css?v=community-alignment-1" />
     <link rel="stylesheet" href="dev/tools.css">
+    <link rel="stylesheet" href="main-menu.css?v=modes-1">
   </head>
   <body>
     <div id="loading">
@@ -21,10 +22,11 @@
         ><span>SOLAR<br /><b>FRIENDS</b></span></a
       >
       <div class="village-title">
-        <span class="eyebrow">OUR LITTLE ECOVILA</span>
+        <span class="eyebrow" id="mode-label">STORY · OUR LITTLE ECOVILA</span>
         <h1>Vila Aurora <span>✦</span></h1>
       </div>
       <button id="dev-button">Dev Tools</button>
+      <span id="mode-badge" class="game-mode-badge">Story</span>
       <button class="icon-button" id="settings" aria-label="Settings">⚙</button>
       <button class="icon-button" id="help" aria-label="How to play">?</button>
     </header>
@@ -100,13 +102,13 @@
         <h3>Today so far</h3>
         <p id="pantry-flow"></p>
         <h3>Kitchen</h3>
-        <label><input id="use-eggs" type="checkbox" /> Cook with eggs when available</label>
+        <label id="egg-control"><input id="use-eggs" type="checkbox" /> Cook with eggs when available</label>
         <details><summary>Recipes &amp; cooking</summary><p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p></details>
         <p id="kitchen-status"></p>
-        <h3>Chicken coops</h3>
+        <section id="hen-controls"><h3>Chicken coops</h3>
         <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
         <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
-        <p id="coop-status"></p>
+        <p id="coop-status"></p></section>
         <h3>Water &amp; weather</h3>
         <p id="pantry-weather"></p>
         <details><summary>How the pantry works</summary><p>Ingredients include garden vegetables and gathered fruit. Residents forage wild food when the pantry runs low. Hungry hens wait safely; crops wait for water.</p></details>
@@ -231,6 +233,46 @@
         <button data-speed="8" aria-label="8× simulation speed" aria-pressed="false">8×</button>
       </div>
     </footer>
+    <dialog id="main-menu" aria-labelledby="menu-title">
+      <div class="menu-layout">
+        <section class="menu-welcome">
+          <span class="menu-kicker"><span aria-hidden="true">☀</span> A LITTLE PLACE TO GROW</span>
+          <h1 id="menu-title">Solar<br><em>Friends.</em></h1>
+          <p>Five friends. A patch of Brazilian earth.<br>A village we make together.</p>
+          <div class="menu-village" aria-hidden="true">
+            <div class="menu-land"></div>
+            <img class="menu-garden" src="art/garden-simple-isometric.png" alt="">
+            <img class="menu-greenhouse" src="art/greenhouse-isometric.png" alt="">
+            <img class="menu-home" src="art/home-veranda.png" alt="">
+          </div>
+          <span class="menu-place">VILA AURORA <span>✦</span> MATA ATLÂNTICA</span>
+        </section>
+        <section class="menu-choices" aria-label="Choose how to play">
+          <div class="menu-return" hidden><button id="menu-return">← Return to village</button></div>
+          <div id="menu-continues" hidden>
+            <span class="eyebrow">YOUR VILLAGES</span>
+            <button data-continue="story" hidden><span><b>Continue story</b><small></small></span><span aria-hidden="true">↗</span></button>
+            <button data-continue="sandbox" hidden><span><b>Continue sandbox</b><small></small></span><span aria-hidden="true">↗</span></button>
+          </div>
+          <span class="eyebrow">A CLEARING FULL OF POSSIBILITIES</span>
+          <button class="mode-choice story-choice" data-new-mode="story">
+            <span class="mode-number">01 <span>OUR SHARED STORY</span></span>
+            <strong>New game <span aria-hidden="true">→</span></strong>
+            <span class="mode-description">Grow from your first arrival to a flourishing ecovila. Manage resources, follow your neighbours’ stories, and unlock new possibilities, one chapter at a time.</span>
+            <span class="mode-features">7 chapters <i>·</i> Resources & quests <i>·</i> Building unlocks</span>
+          </button>
+          <button class="mode-choice" data-new-mode="sandbox">
+            <span class="mode-number">02 <span>ROOM TO EXPERIMENT</span></span>
+            <strong>Sandbox <span aria-hidden="true">→</span></strong>
+            <span class="mode-description">Make a village your own way. Every building is ready to use, construction is instant and free, and supplies replenish while daily life unfolds.</span>
+            <span class="mode-features">Everything unlocked <i>·</i> No resource pressure</span>
+          </button>
+          <p class="menu-save-note">Story and Sandbox have separate saves on this device.</p>
+          <p id="menu-status" role="status"></p>
+          <div class="menu-links"><button id="menu-settings">Settings</button><button id="menu-help">How to play</button></div>
+        </section>
+      </div>
+    </dialog>
     <dialog id="situation-dialog" aria-labelledby="situation-title">
       <button id="close-situation" class="dialog-close" aria-label="Close situation">×</button>
       <div id="situation-content"></div>
@@ -254,8 +296,7 @@
       <p id="quest-total"></p>
       <div id="quest-list"></div>
       <p class="hint">
-        The village pauses while you read. Follow any available quest; all three
-        paths progress together.
+        The village pauses while you read. Follow the chapters in order to unlock each new part of village life.
       </p>
     </dialog>
     <dialog id="help-dialog" aria-labelledby="help-title">
@@ -340,7 +381,7 @@
       </section>
       <section class="settings-section" aria-label="Village save">
         <h3>Your village</h3>
-        <div class="save-actions"><button id="save">Save village</button><button id="new-scenario">New village</button></div>
+        <div class="save-actions"><button id="save">Save village</button><button id="new-scenario">New village</button><button id="open-main-menu">Main menu</button></div>
         <div class="save-actions"><button id="export-save">Export village</button><button id="import-save">Import village</button><button id="restore-backup">Restore backup</button><button id="export-recovery" hidden>Export original save</button></div>
         <input type="file" id="import-file" accept=".json,application/json" hidden />
         <p id="recovery-notice" role="status" hidden>Your previous save could not be read. Its original data has been preserved. Export the original save before clearing browser data.</p>
@@ -367,6 +408,6 @@
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
     <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Cancel & salvage</button></dialog>
-    <script type="module" src="main.js?v=playtest-1"></script>
+    <script type="module" src="main.js?v=modes-1"></script>
   </body>
 </html>

@@ -12,11 +12,11 @@ import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
 import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
-import { quests, buildingUnlocked, questStatus, goalRoute } from "./quests.js?v=ecology-coop-2";
+import { quests, buildingUnlocked, questStatus, goalRoute, unlockQuest, questCompleted, questAvailable, completedQuests } from "./quests.js?v=modes-1";
 import { loadSettings, saveSettings } from "./settings.js";
 import { placementReason, milestones } from "./polish.js";
 import { VillageAudio } from "./village-audio.js";
-import { VillageStorage } from "./village-storage.js";
+import { VillageStorage, SAVE_KEY } from "./village-storage.js";
 import {
   project,
   unproject,
@@ -149,7 +149,10 @@ let width = 0,
   toastTimer;
 let response = "",
   encouragable = false;
-const storage = new VillageStorage();
+const modeStores = Object.fromEntries(['story','sandbox'].map(mode => [mode,new VillageStorage(undefined,`${SAVE_KEY}-${mode}`)]));
+let storage = modeStores.story;
+let gameActive = false, menuWasPaused = false, pendingMode = null;
+const legacyStorage = new VillageStorage();
 let pendingImport = null;
 const escapeHtml = (s) =>
   String(s).replace(
@@ -190,6 +193,7 @@ function toast(message) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
 }
 function save(manual = false) {
+  if (!gameActive || $("#main-menu").open) return;
   if (artworkPreview || sandbox || directScenario) {
     $("#save-status").textContent = "Development preview · your saved village is unchanged";
     if (manual) toast("Preview only. Return to your village to save progress.");
@@ -208,6 +212,121 @@ function save(manual = false) {
         "This browser could not save. Keep this tab open to preserve your village.",
       );
   }
+}
+function readModeSave(mode) {
+  const raw = modeStores[mode].read();
+  // Keep the earlier village intact while making it available as a Story save.
+  return raw ?? (mode === 'story' ? legacyStorage.read() : null);
+}
+function refreshMenu() {
+  let any = false;
+  $('#menu-status').textContent='';
+  for(const mode of ['story','sandbox']) {
+    const button=$(`[data-continue="${mode}"]`);
+    button.hidden=true;
+    const candidate=new Game();
+    try {
+      const raw=readModeSave(mode);
+      if(raw!==null) {
+        if(!candidate.restore(raw)) {
+          $('#menu-status').textContent='An earlier village could not be read. Its saved data is preserved.';
+          continue;
+        }
+        const v=JSON.parse(candidate.snapshot()).village;
+        if((v.mode || 'story')!==mode) continue;
+        button.hidden=false;any=true;
+        button.querySelector('small').textContent=`Day ${1+Math.floor(v.minutes/1440)} · ${v.buildings.length} ${v.buildings.length===1?'building':'buildings'}${mode==='story'?` · ${completedQuests(v).filter(Boolean).length}/7 chapters`:''}`;
+      }
+    } catch {
+      $('#menu-status').textContent='Device storage is unavailable. You can play this session and export your village in Settings.';
+    } finally {candidate.free();}
+  }
+  $('#menu-continues').hidden=!any;
+  $('.menu-return').hidden=!gameActive;
+}
+function openMainMenu() {
+  if(sandbox || artworkPreview || directScenario) return;
+  if(gameActive)save();
+  menuWasPaused=paused;
+  closePanels();
+  for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
+  refreshMenu();
+  $('.settings-section[aria-label="Village save"]').hidden=!gameActive;
+  document.body.classList.add('in-main-menu');
+  $('#main-menu').showModal();
+}
+function enterVillage(candidate,mode) {
+  game.free();game=candidate;storage=modeStores[mode];gameActive=true;
+  state=JSON.parse(game.snapshot());
+  residentAnimations.clear();selected=null;tool=null;pointer=null;cameraTarget=null;
+  pan={x:0,y:0};time=0;speed=1;last=0;saveElapsed=0;
+  setZoom(1.3);
+  $('#person').hidden=true;$('#placement').hidden=true;closePanels();
+  for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
+  document.body.classList.remove('in-main-menu');
+  if(paused)togglePause();
+  for(const button of document.querySelectorAll('[data-speed]')) {
+    const active=button.dataset.speed==='1';button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
+  }
+  resetPolish();updateUI();render();devTools?.refresh();
+  $('#save-status').textContent='Saved on this device';
+  $('.settings-section[aria-label="Village save"]').hidden=false;
+  $('#settings').focus();
+}
+function continueMode(mode) {
+  const candidate=new Game();
+  try {
+    const raw=readModeSave(mode);
+    if(raw===null || !candidate.restore(raw) || (JSON.parse(candidate.snapshot()).village.mode||'story')!==mode) {
+      candidate.free();$('#menu-status').textContent='This village could not be loaded. Its saved data is preserved.';return;
+    }
+    enterVillage(candidate,mode);save();
+  } catch {candidate.free();$('#menu-status').textContent='Device storage could not be read. Your village is preserved.';}
+}
+function requestNewMode(mode) {
+  if(sandbox || artworkPreview || directScenario)return;
+  let existing;
+  try {existing=readModeSave(mode);} catch {existing=null;}
+  if(existing===null){startMode(mode);return;}
+  pendingMode=mode;
+  $('#restart-title').textContent=`Start a new ${mode==='story'?'story':'sandbox'}?`;
+  $('#restart-dialog p').textContent=`This replaces only your ${mode==='story'?'Story':'Sandbox'} village. Its previous save stays in a backup. Your other mode is kept.`;
+  $('#confirm-restart').textContent=`Start new ${mode==='story'?'story':'sandbox'}`;
+  $('#restart-dialog').showModal();
+}
+function startMode(mode) {
+  const candidate=new Game();candidate.start_mode(mode);
+  let durable=true, existing=null;
+  try {
+    existing=readModeSave(mode);
+    if(existing!==null)modeStores[mode].backup(existing);
+    modeStores[mode].write(candidate.snapshot());
+  } catch {
+    // An unreadable slot is never replaced. A new session can still be exported.
+    if(existing!==null) {
+      candidate.free();$('#restart-dialog').close();pendingMode=null;
+      toast('Could not back up this village. Export it in Settings before starting again.');return;
+    }
+    durable=false;
+  }
+  enterVillage(candidate,mode);pendingMode=null;
+  $('#save-warning').hidden=durable;
+  if(!durable)$('#save-status').textContent='Saving unavailable · export your village to keep it';
+  if(mode==='story')showPanel('goals-panel');
+  else toast('Every building is unlocked. Choose a clearing and make yourself at home.');
+}
+function installMenu() {
+  $('#main-menu').addEventListener('cancel',event=>event.preventDefault());
+  for(const button of document.querySelectorAll('[data-new-mode]'))button.onclick=()=>requestNewMode(button.dataset.newMode);
+  for(const button of document.querySelectorAll('[data-continue]'))button.onclick=()=>continueMode(button.dataset.continue);
+  $('#menu-return').onclick=()=>{
+    $('#main-menu').close();document.body.classList.remove('in-main-menu');
+    if(paused!==menuWasPaused)togglePause();$('#settings').focus();
+  };
+  $('#open-main-menu').onclick=openMainMenu;
+  $('.brand').onclick=event=>{if(!artworkPreview&&!directScenario){event.preventDefault();openMainMenu();}};
+  $('#menu-settings').onclick=()=>$('#settings').click();
+  $('#menu-help').onclick=()=>$('#help-dialog').showModal();
 }
 function setZoom(value) {
   zoom=clampZoom(width,height,value);
@@ -549,7 +668,7 @@ function render() {
       const p = iso(x,y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
     if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
-    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · Blueprint · ${recipeSummary(state,tool)}`} · Drag to pan · Esc to cancel`;
+    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${state.village.mode==='sandbox'?'Free · instant':recipeSummary(state,tool)}`} · Drag to pan · Esc to cancel`;
     $("#placement").classList.toggle("invalid", Boolean(reason));
   }
   const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
@@ -707,9 +826,11 @@ function openJournal() {
 function updateQuests() {
   const v = state.village,
     p = v.progress;
+  const completions = completedQuests(v);
+  if(v.mode !== 'sandbox') {
   const id = p.tracked,
     quest = quests[id],
-    done = p.completed[id];
+    done = completions[id];
   const objectives = quest.objectives(v),
     next = objectives.find((o) => !o.done);
   const completedCount = done ? objectives.length : objectives.filter(o => o.done).length;
@@ -719,7 +840,7 @@ function updateQuests() {
   $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
   $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
   $("#goal-shortcut").onclick = () => done ? openJournal() : showPanel("goals-panel");
-  $("#tutorial-count").textContent = `${quest.theme} · QUEST ${id + 1} OF 4`;
+  $("#tutorial-count").textContent = `${quest.theme} · CHAPTER ${id + 1} OF ${quests.length}`;
   $("#tutorial-title").textContent = quest.title;
   $("#tutorial-copy").textContent = done
     ? quest.after
@@ -766,27 +887,28 @@ function updateQuests() {
   $("#open-journal").textContent =
     done && id === 0
       ? "Choose our next quest →"
-      : `Village journal · ${p.completed.filter(Boolean).length}/4`;
+      : `Village journal · ${completions.filter(Boolean).length}/${quests.length}`;
   $("#village-needs").textContent =
     `${Math.min(5, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
   $("#quest-total").textContent =
-    `${p.completed.filter(Boolean).length} of 4 shared dreams fulfilled`;
+    `${completions.filter(Boolean).length} of ${quests.length} chapters complete`;
   replaceMarkup(
     $("#quest-list"),
     quests
       .map((q, i) => {
         const status = questStatus(v, i),
-          locked = i > 0 && !p.completed[0];
-        return `<article class="quest-card ${p.completed[i] ? "complete" : ""} ${locked ? "locked" : ""}">
-      <div class="quest-card-art ${q.art}">${i ? `<img src="art/${q.art}-isometric.png" alt="${kinds[q.building][0]} quest reward">` : "<span>☀</span>"}</div>
+          locked = !questAvailable(v,i);
+        return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}">
+      <div class="quest-card-art ${q.art}">${i ? `<img src="art/${buildingArt[q.art]?.file || q.art + '-isometric.png'}" alt="${kinds[q.art]?.[0] || q.theme} illustration">` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
-      ${objectiveMarkup(q.objectives(v), p.completed[i])}
-      <p class="journal-reward"><b>${p.completed[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
-      ${p.completed[i] ? `<p class="quest-after">${q.after}</p>` : ""}
-      <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? "Complete A Shared Beginning first" : i === id ? "Following this quest" : p.completed[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
+      ${objectiveMarkup(q.objectives(v), completions[i])}
+      <p class="journal-reward"><b>${completions[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
+      ${completions[i] ? `<p class="quest-after">${q.after}</p>` : ""}
+      <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? `Complete ${quests[i-1]?.title} first` : i === id ? "Following this quest" : completions[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
       })
       .join(""),
   );
+  }
   const has = (kind) =>
     v.buildings.some((b) => b.kind === kind && b.progress >= 100);
   $("#village-craft").hidden =
@@ -871,12 +993,14 @@ function inspectBuilding(id) {
   updateBuildingPanel();
 }
 function updateSupplies(v) {
+  $('#hen-controls').hidden=!buildingUnlocked(v,'coop');
+  $('#egg-control').hidden=!buildingUnlocked(v,'coop');
   const s = v.supplies;
   const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
   const fed = coops.filter(b => b.poultry.remaining > 0);
   const days = (v.food + v.meals) / 15;
   $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
-  $("#pantry-outlook").textContent = `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of food before cooking gains or hen feed. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
+  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of food before cooking gains or hen feed. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
@@ -901,6 +1025,15 @@ function openSituations() {
   $("#situation-dialog").showModal();
 }
 function updateUI() {
+  const free = state.village.mode==='sandbox';
+  $('#mode-badge').textContent=free?'Sandbox · free building':'Story';
+  $('#mode-label').textContent=`${free?'SANDBOX':'STORY'} · OUR LITTLE ECOVILA`;
+  $('.goal-tracker').hidden=free;
+  $('[data-panel="goals-panel"]').hidden=free;
+  $('[data-panel="projects-panel"]').hidden=free;
+  $('[data-panel="town-panel"]').hidden=free;
+  $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
+  $('#new-scenario').textContent=free?'New sandbox':'New story';
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1012,19 +1145,17 @@ function updateUI() {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
     button.classList.toggle("locked", !unlocked);
     button.classList.remove("unaffordable");
-    const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[
-      button.dataset.kind
-    ];
+    const quest = unlockQuest[button.dataset.kind];
     button.querySelector("small").textContent = unlocked
-      ? button.dataset.kind === "road" ? "Free" : "Free blueprint"
+      ? button.dataset.kind === "road" ? "Free" : v.mode==='sandbox' ? "Free · instant" : "Free blueprint"
       : "Quest reward";
     button.title = unlocked
-      ? `${kinds[button.dataset.kind][1]} · ${recipeSummary(state,button.dataset.kind)}`
+      ? `${kinds[button.dataset.kind][1]} · ${free?'Free · instant construction':recipeSummary(state,button.dataset.kind)}`
       : `Complete ${quests[quest].title} to unlock`;
     button.setAttribute(
       "aria-label",
       unlocked
-        ? `Plan ${kinds[button.dataset.kind][0]}, free blueprint`
+        ? v.mode==='sandbox' ? `Build ${kinds[button.dataset.kind][0]}, free and instant` : `Plan ${kinds[button.dataset.kind][0]}, free blueprint`
         : `View quest to unlock ${kinds[button.dataset.kind][0]}`,
     );
     button.classList.toggle("active", button.dataset.kind === tool);
@@ -1050,7 +1181,7 @@ function setTool(kind) {
   $("#placement").classList.remove("invalid");
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · Blueprint · ${recipeSummary(state,tool)} · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${state.village.mode==='sandbox'?'Free · instant':recipeSummary(state,tool)} · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -1230,7 +1361,7 @@ function setup() {
     link.href = url; link.download = name; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  $("#export-save").onclick = () => downloadVillage(game.snapshot(), "solar-friends-village.json");
+  $("#export-save").onclick = () => downloadVillage(game.snapshot(), `solar-friends-${state.village.mode||'story'}.json`);
   $("#export-recovery").onclick = () => downloadVillage(storage.rejected, "solar-friends-recovery.json");
   $("#import-save").onclick = () => $("#import-file").click();
   $("#restore-backup").onclick = () => {
@@ -1265,8 +1396,12 @@ function setup() {
     if (sandbox || artworkPreview || directScenario) return;
     if (!pendingImport || sandbox || artworkPreview || directScenario) return;
     try {
-      storage.backup(game.snapshot());
-      storage.write(pendingImport);
+      const mode=JSON.parse(pendingImport).village.mode || 'story';
+      const target=modeStores[mode];
+      const existing=target.read();
+      if(existing!==null)target.backup(existing);
+      target.write(pendingImport);
+      storage=target;
     } catch {
       $("#save-warning").hidden = false;
       toast("Could not back up and save the import. Your current village is unchanged.");
@@ -1284,36 +1419,9 @@ function setup() {
   };
   for (const id of ["import-save", "restore-backup", "new-scenario"]) $("#" + id).disabled = artworkPreview || !!directScenario;
   $("#save-warning").onclick = () => $("#settings").click();
-  $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
-  $("#cancel-restart").onclick = () => $("#restart-dialog").close();
-  $("#confirm-restart").onclick = () => {
-    if (sandbox || artworkPreview || directScenario) return;
-    try {
-      if (!artworkPreview) storage.backup(game.snapshot());
-    } catch {
-      $("#restart-dialog").close();
-      $("#save-warning").hidden = false;
-      toast("Could not back up your village. Export it before starting again.");
-      return;
-    }
-    game.free();
-    game = new Game();
-    residentAnimations.clear();
-    state = JSON.parse(game.snapshot());
-    selected = null;
-    tool = null;
-    pan = { x: 0, y: 0 };
-    setZoom(1);
-    time = 0;
-    $("#person").hidden = true;
-    closePanels();
-    $("#placement").hidden = true;
-    if (paused) togglePause();
-    $("#restart-dialog").close();
-    resetPolish();
-    updateUI();
-    save();
-  };
+  $('#new-scenario').onclick = () => requestNewMode(state.village.mode || 'story');
+  $('#cancel-restart').onclick = () => {pendingMode=null;$('#restart-dialog').close();};
+  $('#confirm-restart').onclick = () => {if(pendingMode)startMode(pendingMode);};
   $("#placement-grid").checked = settings.placementGrid;
   $("#settings").onclick = () => {
     try { storage.readRecovery(); } catch { /* A download already held in memory remains available. */ }
@@ -1366,7 +1474,7 @@ function setup() {
         result = tool === "road" ? game.toggle_road(p.x, p.y) : game.place(tool, p.x, p.y);
       if (result === "ok") {
         if (tool !== "road") {
-          toast(`${kinds[tool][0]} planned. Let's build it together.`);
+          toast(state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
           setTool(null);
         }
         state = JSON.parse(game.snapshot());
@@ -1553,10 +1661,6 @@ try {
       fixture.village.minutes = Math.floor(fixture.village.minutes / 1440) * 1440 + 21 * 60;
       saved = JSON.stringify(fixture);
     }
-  } else if (!directScenario) {
-    try { saved = storage.read(); if(saved===null&&localStorage.getItem('solar-friends-v2'))toast('The new construction economy starts a fresh village. Previous villages use the earlier format.'); } catch {
-      $("#save-warning").hidden = false;
-    }
   }
   if (saved !== null && saved !== undefined && !game.restore(saved)) {
     if (artworkPreview) throw new Error("The artwork preview fixture is invalid");
@@ -1566,10 +1670,13 @@ try {
     toast("This save could not load. Your original data is preserved; export it in Settings.");
   }
   state = JSON.parse(game.snapshot());
+  gameActive=artworkPreview || !!directScenario;
   setup();
+  installMenu();
   devTools = installDevTools(devAPI);
   window.solarDev = Object.freeze(devAPI);
   if (directScenario) { await devAPI.loadScenario(directScenario); devTools.open(); }
+  if(!artworkPreview && !directScenario) openMainMenu();
   if (artworkPreview) {
     const notice = document.createElement('a');
     notice.href = './';

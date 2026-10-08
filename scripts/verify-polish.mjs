@@ -6,6 +6,7 @@ await init({ module_or_path: await fs.readFile(new URL('../web/pkg/solar_friends
 const game = new Game();
 const fixture = JSON.parse(game.snapshot());
 fixture.village.progress.completed = [true, true, true, true];
+fixture.village.progress.later_completed=[true,true,true];
 fixture.village.wood = 100;
 assert.equal(game.restore(JSON.stringify(fixture)), true);
 assert.equal(game.place('home', 8, 8), 'ok');

@@ -30,3 +30,15 @@ const denied = new VillageStorage(() => { throw new Error('storage denied'); });
 assert.throws(() => denied.read());
 assert.throws(() => denied.write('fresh'));
 console.log('Save recovery, quota failure, import backup, and denied storage checks passed.');
+
+const story=new VillageStorage(storage.storage,`${SAVE_KEY}-story`);
+const sandbox=new VillageStorage(storage.storage,`${SAVE_KEY}-sandbox`);
+story.write('story day 4');sandbox.write('sandbox village');
+story.backup(story.read());story.write('new story');
+assert.equal(story.readBackup(),'story day 4');
+assert.equal(sandbox.read(),'sandbox village');
+sandbox.backup(sandbox.read());sandbox.write('new sandbox');
+assert.equal(story.read(),'new story');
+assert.equal(sandbox.readBackup(),'sandbox village');
+assert.equal(records.get(SAVE_KEY),'imported village','mode saves preserve the earlier village');
+console.log('PASS: Story and Sandbox slots, backups and legacy bytes stay isolated.');

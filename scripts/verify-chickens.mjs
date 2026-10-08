@@ -1,9 +1,11 @@
+import {unlockStory} from './story-fixture.mjs';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import init, { Game } from '../web/pkg/solar_friends.js';
 import { flock, chickenFrame } from '../web/chickens.js';
 await init({module_or_path: await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm', import.meta.url))});
 const game = new Game();
+unlockStory(game);
 const snapshot = () => JSON.parse(game.snapshot());
 for (let i = 0; i < 100; i++) game.tick(.25);
 const timber = snapshot().village.wood;

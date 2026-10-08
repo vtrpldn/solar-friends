@@ -1,0 +1,44 @@
+#main-menu {
+  width: 100vw; max-width: none; height: 100dvh; max-height: none;
+  margin: 0; padding: clamp(30px, 5vw, 90px); border: 0; border-radius: 0;
+  color: var(--ink); background: #e7ead7; overflow: auto;
+  background-image: radial-gradient(ellipse at 18% 70%, #c6d6aa80, transparent 60%), radial-gradient(ellipse at 90% 0%, #fff6d4, transparent 60%);
+}
+#main-menu::backdrop { background: #e7ead7; }
+.menu-layout { max-width: 1160px; min-height: 100%; margin: auto; display: grid; grid-template-columns: minmax(260px, 1.15fr) minmax(310px, 1fr); align-items: center; gap: clamp(28px, 5vw, 90px); }
+.menu-kicker { display: flex; align-items: center; gap: 12px; font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+.menu-kicker > span { font-size: 39px; color: #c58b3f; letter-spacing: 0; }
+#menu-title { font: 500 clamp(60px, 7.5vw, 108px)/.98 "Fraunces", Georgia, serif; letter-spacing: -5px; margin: 28px 0 22px; }
+#menu-title em { color: #52734d; font-weight: 400; }
+.menu-welcome > p { color: #596950; font-size: 16px; line-height: 1.65; }
+.menu-village { position: relative; height: clamp(175px, 20vw, 280px); margin: 10px 0 18px; }
+.menu-land { position: absolute; left: 0; right: 0; top: 45%; bottom: 0; border-radius: 50%; transform: skewY(-4deg); background: #a3ba7930; box-shadow: 0 28px 48px #718d4820; }
+.menu-village img { position: absolute; object-fit: contain; }
+.menu-home { width: 48%; left: 3%; bottom: 7%; z-index: 2; }
+.menu-greenhouse { width: 43%; right: 2%; bottom: 16%; }
+.menu-garden { width: 26%; right: 6%; bottom: 0; }
+.menu-place { font-size: 9px; letter-spacing: 2px; font-weight: 700; color: #708160; }
+.menu-place span { margin: 0 10px; color: #b48b46; }
+.menu-choices { display: grid; gap: 14px; }
+.mode-choice { display: grid; gap: 14px; padding: 25px 27px; text-align: left; border-radius: 20px; border: 1px solid #bcc9a7; background: #fffdf0b0; box-shadow: 0 4px 0 #71835708; transition: border-color .15s, background .15s; }
+.mode-choice:hover { border-color: #658553; background: #fffdf1; filter: none; }
+.story-choice { border-color: #8aa474; background: #fffcf1; }
+.mode-number { display: flex; gap: 15px; font-size: 12px; color: #688259; }
+.mode-number > span { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; }
+.mode-choice strong { font: 500 31px/1.1 "Fraunces", Georgia, serif; display: flex; justify-content: space-between; align-items: center; }
+.mode-choice strong > span { font: 22px "DM Sans", sans-serif; color: #708860; }
+.mode-description { font-size: 13px; line-height: 1.65; color: #5c6b52; }
+.mode-features { font-size: 10px; color: #67805b; font-weight: 600; }
+.mode-features i { margin: 0 4px; font-style: normal; }
+.menu-save-note { font-size: 11px; color: #6b785f; line-height: 1.5; }
+#menu-status { font-size: 12px; color: #925232; }
+#menu-status:empty { display: none; }
+.menu-links { display: flex; gap: 24px; }
+.menu-links button, #menu-return { background: transparent; padding: 5px 0; font-size: 12px; border-bottom: 1px solid #8c9b7280; }
+#menu-continues { display: grid; gap: 8px; margin-bottom: 12px; }
+#menu-continues button { display: flex; justify-content: space-between; text-align: left; align-items: center; background: #d5dfc1; padding: 12px 17px; border: 1px solid #b9c9a2; border-radius: 12px; }
+#menu-continues b, #menu-continues small { display: block; }
+#menu-continues small { margin-top: 4px; font-size: 10px; color: #657657; }
+#main-menu [hidden] { display: none; }
+body.in-main-menu #dev-scene-badge, body.in-main-menu .artwork-preview-notice { display: none; }
+.game-mode-badge { padding: 8px 12px; border: 1px solid #60704b30; border-radius: 8px; background: #fffcf1db; color: #4e6544; font-size: 11px; font-weight: 600; }

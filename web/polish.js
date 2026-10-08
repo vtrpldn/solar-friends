@@ -27,6 +27,9 @@ export function milestones(before, after) {
   after.progress.completed.forEach((done, i) => {
     if (done && !before.progress.completed[i]) messages.push({ kind: 'quest', quest: i });
   });
+  (after.progress.later_completed || []).forEach((done,i)=> {
+    if(done && !before.progress.later_completed?.[i])messages.push({kind:'quest',quest:i+4});
+  });
   if (after.progress.friendships.some((value, i) => value > 0 && !before.progress.friendships[i])) messages.push({ kind: 'friendship' });
   return messages;
 }

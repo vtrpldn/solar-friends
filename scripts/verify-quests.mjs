@@ -49,6 +49,7 @@ console.log(
   "Introduction complete on day",
   1 + Math.floor(snap().village.minutes / 1440),
 );
+assert.equal(g.track_quest(2),false,'later chapters stay locked');
 g.track_quest(1);
 build("grove", 15, 13);
 until((s) => s.village.progress.completed[1], "roots");
@@ -83,9 +84,20 @@ until(
   (s) => s.village.minutes % 1440 >= 500 && s.village.minutes % 1440 < 1000,
   "daylight",
 );
+assert.equal(snap().village.progress.tracked,4);
+build('greenhouse',18,8);
+until(s=>s.village.progress.later_completed[0],'growing resilience');
+assert.equal(g.track_quest(6),false);
+build('coop',18,18);
+until(s=>s.village.progress.later_completed[1],'first eggs');
+build('solar_farm',20,23);
+build('streetlight',16,22);
+until(s=>s.village.progress.later_completed[2],'stored sunshine');
 await fixture("complete");
 const s = snap();
 assert.deepEqual(s.village.progress.completed, [true, true, true, true]);
+assert.deepEqual(s.village.progress.later_completed,[true,true,true]);
+const restored=new Game();assert(restored.restore(g.snapshot()));assert.equal(restored.snapshot(),g.snapshot());restored.free();
 console.log(
   JSON.stringify(
     {

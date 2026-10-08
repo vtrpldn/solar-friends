@@ -1,3 +1,4 @@
+import {unlockStory} from './story-fixture.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -9,6 +10,7 @@ import {clampZoom,zoomLimits} from '../web/projection.js';
 import {powerConnections,unlitFilter,lightingLayers} from '../web/power.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const g=new Game(),snapshot=()=>JSON.parse(g.snapshot());
+unlockStory(g);
 assert.equal(g.place('home',8,8),'ok');assert.equal(g.place('home',12,8),'ok');assert.equal(g.place('greenhouse',16,8),'ok');
 let s=snapshot();const appearance=s=>buildingArtKey(s.village.buildings.find(b=>b.id===1),s.village.buildings,s.village.economy.projects);
 assert.equal(appearance(s),'home-veranda');assert.equal(g.cancel_project(0),'ok');s=snapshot();assert.equal(appearance(s),'home-veranda');
@@ -33,7 +35,7 @@ for(const [w,h] of [[848,1328],[1024,768],[1440,900],[1920,1080]]){
 }
 console.log('PASS: desktop zoom limits have no invisible range or extra recovery clicks.');
 
-const materials=new Game();for(let i=0;i<600&&!JSON.parse(materials.snapshot()).village.arrived;i++)materials.tick(.25);
+const materials=new Game();unlockStory(materials);for(let i=0;i<600&&!JSON.parse(materials.snapshot()).village.arrived;i++)materials.tick(.25);
 assert.equal(materials.place('garden',8,8),'ok');assert.equal(materials.place('solar_farm',16,8),'ok');let fixture=JSON.parse(materials.snapshot());
 fixture.village.minutes=540;fixture.village.food=80;fixture.village.meals=10;fixture.village.water=100;fixture.village.economy.stock[2]=0;fixture.village.economy.stock[3]=0;
 for(const p of fixture.village.economy.projects){p.reserved[2]=0;p.reserved[3]=0;}

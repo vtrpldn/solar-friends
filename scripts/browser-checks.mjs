@@ -10,12 +10,16 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   let page=await context.newPage();
   async function capture(label,file) { await page.screenshot({path:path.join(output,file),fullPage:true});screenshots.push({label,file}); }
   await page.goto(base);await page.waitForFunction(()=>window.solarDev);
-  await page.evaluate(()=>{ for(const d of document.querySelectorAll('dialog[open]'))d.close(); });
+  await page.locator('#main-menu').waitFor({state:'visible'});
+  await capture('Main menu: Story and Sandbox','main-menu.png');
+  await page.locator('[data-new-mode="story"]').click();
+  await page.locator('#main-menu').waitFor({state:'hidden'});
+  await page.locator('#pause').click();
+  await page.locator('#settings').click();await page.locator('#save').click();await page.locator('#close-settings').click();
   await page.getByRole('button',{name:'Dev Tools',exact:true}).click();
   assert(await page.locator('#dev-dialog').isVisible());
   const original=await page.evaluate(()=>window.solarDev.snapshot());
-  await page.evaluate(()=>localStorage.setItem('solar-friends-v3',JSON.stringify(window.solarDev.snapshot())));
-  const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3'));
+  const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['arrival',null],['village',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
@@ -25,7 +29,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
     if(id==='coop')assert.equal(state.village.supplies.eggs,3);
-    assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3')),saved);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
     await page.evaluate(()=>window.solarDev.fixedView());
     await page.locator('#dev-close').click();
     await capture(`Fixed scenario: ${id}`,`scenario-${id}.png`);
@@ -41,15 +45,15 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.evaluate(()=>window.solarDev.snapshot().village.minutes),before+60);
   // Exercise autosave and page lifecycle paths while sandbox is active.
   await page.evaluate(()=>{window.dispatchEvent(new Event('pagehide'));document.dispatchEvent(new Event('visibilitychange'));});
-  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3')),saved);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   const runStart=await page.evaluate(()=>window.solarDev.snapshot().village.minutes);
   await page.locator('#dev-run').click();
   await page.waitForFunction(start=>window.solarDev.snapshot().village.minutes>start+48,runStart,{timeout:30000});
-  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3')),saved,'timed autosave must skip sandbox');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved,'timed autosave must skip sandbox');
   await page.locator('#dev-button').click();
   await page.getByRole('button',{name:'Return to village',exact:true}).click();
   assert.deepEqual(await page.evaluate(()=>window.solarDev.snapshot()),original);
-  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3')),saved);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('[data-dev-tab="checks"]').click();
   const download=page.waitForEvent('download');await page.locator('#dev-bundle').click();
   const diagnostic=await download;await diagnostic.saveAs(path.join(output,'diagnostic.json'));
@@ -92,7 +96,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const candidatePromise=context.waitForEvent('page');await page.locator('#replacement-preview').click();
   const candidatePreview=await candidatePromise;await candidatePreview.waitForFunction(()=>window.solarDev);
   assert((await candidatePreview.locator('.artwork-preview-notice').textContent()).includes('ART DRAFT'));
-  assert.equal(await candidatePreview.evaluate(()=>localStorage.getItem('solar-friends-v3')),saved);
+  assert.equal(await candidatePreview.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await candidatePreview.close();
   await page.locator('#replacement-mode').selectOption('overlay');
   await page.locator('#replacement-light').focus();await page.keyboard.press('Home');

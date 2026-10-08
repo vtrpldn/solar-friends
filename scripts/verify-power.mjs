@@ -1,3 +1,4 @@
+import {unlockStory} from './story-fixture.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import init, { Game } from '../web/pkg/solar_friends.js';
@@ -50,6 +51,7 @@ p=snapshot().environment.power;assert.equal(p.capacity,0);assert.equal(p.generat
 
 // Construction uses the public placement API and reserves mixed materials without charging for the blueprint.
 const fresh=new Game(), start=JSON.parse(fresh.snapshot()).village.wood;
+unlockStory(fresh);
 assert.equal(fresh.place('solar_farm',5,5),'ok');
 assert.equal(fresh.place('streetlight',10,5),'ok');
 assert.equal(JSON.parse(fresh.snapshot()).village.wood,start);
@@ -58,7 +60,7 @@ fresh.free();g.free();
 
 // Cancelling an early project must keep every later lighting control attached
 // to its persistent building identity, including after a second cancellation.
-const gaps=new Game();
+const gaps=new Game();unlockStory(gaps);
 assert.equal(gaps.place('home',5,5),'ok');assert.equal(gaps.place('greenhouse',10,5),'ok');assert.equal(gaps.place('streetlight',15,5),'ok');
 assert.equal(gaps.cancel_project(0),'ok');
 let connections=powerConnections(JSON.parse(gaps.snapshot()));

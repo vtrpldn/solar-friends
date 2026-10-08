@@ -17,10 +17,10 @@ export const quests = [
     art: "grove",
     story:
       "Five neighbours. A patch of Brazilian earth. Let's make a place where everyone belongs.",
-    reward: "Food forest + three new quest paths",
+    reward: "Food forest · fruit gathering",
     building: "grove",
     after:
-      "Our first roots are down. Open the journal and choose what we grow next.",
+      "Our first roots are down. Follow Roots for Tomorrow to grow our food forest.",
     objectives: (v) => [
       goal(
         "Welcome all five neighbours",
@@ -139,10 +139,10 @@ export const quests = [
     art: "workshop",
     story:
       "“Many hands made these homes. With a few good tools, imagine what we could make next.”",
-    reward: "Workshop · craft & conserve tools",
+    reward: "Workshop + greenhouse · tools & seedlings",
     building: "workshop",
     after:
-      "Build a workshop. Eight free timber crafts twelve tool uses for 25% faster construction. Pause tool use to save materials.",
+      "Build a workshop and a greenhouse. Eight free timber crafts twelve tool uses for 25% faster construction; moist greenhouse beds raise seedlings.",
     objectives: (v) => [
       goal(
         "Receive a town delivery",
@@ -167,17 +167,51 @@ export const quests = [
       ),
     ],
   },
+  {
+    title: "Growing Resilience", person: "Bento & Iara", theme: "CRAFT & CULTIVATE",
+    art: "greenhouse", building: "coop", reward: "Chicken coop · caring for hens & fresh eggs",
+    story: "“Good tools, living soil, and seedlings under glass. Let's make our harvests more dependable.”",
+    after: "A resilient garden makes room for a fuller table. Build a chicken coop and keep food aside for the hens.",
+    objectives: v => [
+      goal("Build a workshop", count(v,"workshop"),1,"Finish a workshop in Projects, then let Bento make tools.","workshop"),
+      goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight free timber at the workshop. Ask Bento to craft during normal work hours.","workshop"),
+      goal("Build a compost station",count(v,"compost"),1,"Kitchen scraps become compost for our gardens.","compost"),
+      goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Make compost from kitchen scraps. The next garden harvest uses it automatically.","garden"),
+      goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
+    ],
+  },
+  {
+    title: "A Fuller Table", person: "Nina", theme: "CARE & ABUNDANCE",
+    art: "coop", building: "solar_farm", reward: "Solar farm + street lights · shared power",
+    story: "“A few hens, a little care, and fresh eggs for everyone. We can grow without rushing.”",
+    after: "Our table is more varied. Now collect sunshine to keep our shared buildings and paths lit after dusk.",
+    objectives: v => [
+      goal("Build a chicken coop",count(v,"coop"),1,"Finish a coop and keep at least nine ingredients in the pantry.","coop"),
+      {...goal("Collect our first three eggs",v.progress.eggs_collected||0,3,"Enable hen feeding in Supplies. Three ingredients feed a batch; eggs arrive after twelve daylight hours.","coop"),buildTarget:1},
+    ],
+  },
+  {
+    title: "Sunshine to Share", person: "Our founding five", theme: "ENERGY & INDEPENDENCE",
+    art: "solar_farm", building: "solar_farm", reward: "A flourishing village · keep growing at your own pace",
+    story: "“The sun gives us more than warm mornings. Let's save a little of it for the evening.”",
+    after: "All seven chapters are complete. Every building is unlocked. Keep tending Vila Aurora, with the same resources and rhythms you've learned.",
+    objectives: v => [
+      goal("Build a solar farm",count(v,"solar_farm"),1,"Order panels, batteries and electrical equipment in Town, then complete the solar farm.","solar_farm"),
+      goal("Light a village path",count(v,"streetlight"),1,"Place a street light beside a road. It draws from our shared battery after dusk.","streetlight"),
+      goal("Store twelve energy",Math.floor(v.power.stored),12,"Let the farm charge in daylight. Open Power to watch generation, charge and demand.",null),
+    ],
+  },
+
 ];
-export function buildingUnlocked(v, kind) {
-  const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[kind];
-  return quest === undefined || v.progress.completed[quest];
+export const unlockQuest = { grove:0, compost:1, square:2, workshop:3, greenhouse:3, coop:4, solar_farm:5, streetlight:5 };
+export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[false,false,false])[id-4];
+export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
+export const completedQuests = v => quests.map((_,i)=>questCompleted(v,i));
+export function buildingUnlocked(v,kind) {
+  return v.mode==='sandbox' || unlockQuest[kind]===undefined || questCompleted(v,unlockQuest[kind]);
 }
-export function questStatus(v, id) {
-  return v.progress.completed[id]
-    ? "Complete"
-    : id > 0 && !v.progress.completed[0]
-      ? "After our arrival"
-      : "Available";
+export function questStatus(v,id) {
+  return questCompleted(v,id) ? "Complete" : questAvailable(v,id) ? "Available" : `After ${quests[id-1].title}`;
 }
 
 // Goals always provide a next step through planning, construction and use.
@@ -187,6 +221,6 @@ export function goalRoute(state, objective) {
   const kind=objective.build, buildings=state.village.buildings.filter(b=>b.kind===kind);
   const project=state.environment.economy.projects.find(p=>p.kind===kind&&!p.paused)||state.environment.economy.projects.find(p=>p.kind===kind);
   if(project)return {type:'project',id:project.building,project};
-  if(buildings.filter(b=>b.progress>=100).length>=objective.target)return {type:'visit',id:buildings.find(b=>b.progress>=100).id};
+  if(buildings.filter(b=>b.progress>=100).length>=(objective.buildTarget??objective.target))return {type:'visit',id:buildings.find(b=>b.progress>=100).id};
   return {type:'plan',kind};
 }
