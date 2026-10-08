@@ -1323,7 +1323,7 @@ function setup() {
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
       const isOpen = button.getAttribute("aria-expanded") === "true";
-      if (isOpen) { closePanels(); if (tool) setTool(null); }
+      if (isOpen && !villagePanels.has(button.dataset.panel)) { closePanels(); if (tool) setTool(null); }
       else showPanel(button.dataset.panel);
     };
   }
@@ -1556,6 +1556,7 @@ function setup() {
       if(e.code==='KeyM'){e.preventDefault();if(tool)setTool(null);closePanels();selected=null;$('#person').hidden=true;$('#village-map').focus();}
     }
     if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
+      e.preventDefault();
       if (tool) setTool(null);
       else if (selected !== null) $(".close-person").click();
       else {

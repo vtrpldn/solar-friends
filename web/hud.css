@@ -3,7 +3,7 @@
 body,button,input,select,textarea{font-family:"Trebuchet MS",Verdana,sans-serif}
 main{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
 #world{width:100%;height:100%;display:block}
-button{transition:background .12s,box-shadow .12s;touch-action:auto}
+button{transition:background .12s,box-shadow .12s}
 button:focus-visible,a:focus-visible,canvas:focus-visible{outline:3px solid #efc968;outline-offset:3px}
 button:hover{filter:brightness(1.05)}
 button:disabled{filter:saturate(.35);opacity:.5;cursor:default}
@@ -135,3 +135,14 @@ footer .season.panel{top:auto;right:auto;height:auto;max-height:none;margin:0}
 .town-checkout b{font-size:19px}.town-checkout p{max-width:310px}.town-checkout>button.primary{padding:10px 14px;min-height:42px}
 #village-book .panel-close{width:26px;height:26px;border:1px solid #ad8f56;border-bottom:2px solid #86623a;border-radius:4px;background:linear-gradient(#e0c997,#c7ad74);color:#735332;padding:0}
 #loading{background:#3c5131;color:#f0dfa8}#loading .sunmark{color:#e5bd68}#loading h1{font:600 42px "Fraunces",Georgia,serif;color:#f0dfa8;text-shadow:0 3px 0 #2b351e}#loading p{color:#bccc9f}
+/* A narrow desktop preview pane still needs the same readable game controls. */
+footer .resources button>span{display:block!important}footer .resources b,footer .resources small{display:block!important}
+@media (max-width:1000px){
+  .resources{left:18px;right:18px;top:84px;justify-content:space-between}.resources>button{flex:1;min-width:0;padding:3px 5px}.resources>button:first-child{min-width:96px}.resources .item-icon{width:26px;height:26px}.resources b{font-size:12px}.resources small{font-size:9px}
+  .goal-tracker{top:155px}#village-book{top:155px;width:min(630px,calc(100vw - 36px));max-height:calc(100dvh - 278px)}#village-book>.panel{max-height:calc(100dvh - 336px)!important}#village-book .panel-close{top:167px}
+  .community,.person,.chapter{top:155px;max-height:calc(100dvh - 286px)}
+  .hud-dock>button{width:56px;height:60px}.hud-dock canvas{width:48px;height:33px}.hud-dock .item-icon{width:32px;height:32px}.dock-label{font-size:10px;gap:4px}.dock-label kbd{font-size:8px}.hud-dock{gap:5px;padding:5px 7px}
+  footer .season.panel,.time-controls{width:185px}.time-controls button{min-width:23px;padding:4px 5px;font-size:10px}
+  #resident-strip{bottom:102px}.minimap{bottom:184px}.world-controls{bottom:353px}.village-alert{bottom:193px}
+  #build-panel{max-width:calc(100vw - 36px);bottom:100px}.developer-session #dev-button{left:auto;right:108px;top:24px}
+}

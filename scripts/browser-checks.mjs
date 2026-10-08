@@ -21,6 +21,24 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#help-dialog .dev-tools summary').click();
   await page.locator('#help-open-dev').click();
   assert(await page.locator('#dev-dialog').isVisible());
+  await page.locator('#dev-close').click();
+  // Game HUD controls route into the appropriate village page.
+  await page.locator('[data-hud-resource="materials"]').click();
+  assert(await page.locator('#supplies-panel').isVisible());
+  assert(await page.locator('#materials-stores').evaluate(el=>el.open));
+  assert.equal(await page.locator('.material-slot').count(),15);
+  await page.getByRole('button',{name:'Trade',exact:true}).click();
+  await page.getByRole('button',{name:'Add one timber',exact:true}).click();
+  assert.equal(await page.locator('#buy-0').inputValue(),'1');
+  assert((await page.locator('#town-total').textContent()).includes('67'));
+  await page.getByRole('button',{name:'Remove one timber',exact:true}).click();
+  assert.equal(await page.locator('#buy-0').inputValue(),'0');
+  await page.getByRole('button',{name:'Close town',exact:true}).click();
+  await page.keyboard.press('b');assert(await page.locator('#build-panel').isVisible());
+  await page.keyboard.press('Escape');assert(!await page.locator('#build-panel').isVisible());
+  await page.keyboard.press('Escape');assert(await page.locator('#main-menu').isVisible());
+  await page.locator('#menu-return').click();
+  await page.locator('#help').click();if(!await page.locator('#help-dialog .dev-tools').evaluate(el=>el.open))await page.locator('#help-dialog .dev-tools summary').click();await page.locator('#help-open-dev').click();
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   // Exercise the real request controls. Building visitors also use a .requests grid.
@@ -93,6 +111,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.evaluate(()=>window.solarDev.fixedView());
   await capture('Fixed desktop village','village.png');
   await page.setViewportSize({width:1280,height:800});
+  await capture('Game HUD at 1280 × 800','game-hud-1280.png');
   await page.getByRole('button',{name:'Dev Tools',exact:true}).first().click();
   await capture('Dev Tools at 1280 × 800','dev-tools-1280.png');
   await page.setViewportSize({width:1440,height:1000});
