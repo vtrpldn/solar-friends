@@ -57,7 +57,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     const key=b?buildingArtKey(b,state.village.buildings,state.village.economy.projects):'';
     $('#building-name').textContent=b?`${buildingNames[b.kind]} ${b.id+1}`:'Buildings';
     $('#building-portrait').hidden=!b;
-    $('#building-visits').hidden=!b;
+    $('#building-visits').hidden=!b||['solar_farm','streetlight'].includes(b.kind);
     $('#plan-first-building').hidden=!!b;
     if(key&&key!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[key],allBuildingArt[key]);buildingKey=key;}
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);

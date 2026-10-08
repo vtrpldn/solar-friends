@@ -66,6 +66,11 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#building-choice').selectOption('0');
   await page.locator('#building-neighbours [data-visitor="0"]').click();
   assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).task),'visit','Resident requests must not replace the building-visit handler');
+  for(const name of ['Solar farm','Street light']) {
+    const value=await page.locator('#building-choice option').filter({hasText:name}).first().getAttribute('value');
+    await page.locator('#building-choice').selectOption(value);
+    assert(!await page.locator('#building-visits').isVisible(),'Automatic utilities must not offer resident visits');
+  }
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['arrival',null],['village',null]]) {
