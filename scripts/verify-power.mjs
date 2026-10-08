@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import init, { Game } from '../web/pkg/solar_friends.js';
 import { advanceGame } from '../web/dev/scenarios.js';
-import { buildingLighting, lightingLayers } from '../web/power.js';
+import { buildingLighting, lightingLayers, powerConnections } from '../web/power.js';
 
 await init({module_or_path: await readFile(new URL('../web/pkg/solar_friends_bg.wasm', import.meta.url))});
 const g=new Game(), fixture=JSON.parse(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8'));
@@ -55,6 +55,17 @@ assert.equal(fresh.place('streetlight',10,5),'ok');
 assert.equal(JSON.parse(fresh.snapshot()).village.wood,start);
 assert.equal(JSON.parse(fresh.snapshot()).environment.power.capacity,0);
 fresh.free();g.free();
+
+// Cancelling an early project must keep every later lighting control attached
+// to its persistent building identity, including after a second cancellation.
+const gaps=new Game();
+assert.equal(gaps.place('home',5,5),'ok');assert.equal(gaps.place('greenhouse',10,5),'ok');assert.equal(gaps.place('streetlight',15,5),'ok');
+assert.equal(gaps.cancel_project(0),'ok');
+let connections=powerConnections(JSON.parse(gaps.snapshot()));
+assert.deepEqual(connections.map(c=>[c.id,c.building.id,c.building.kind]),[[1,1,'greenhouse'],[2,2,'streetlight']]);
+assert.equal(gaps.cancel_project(2),'ok');
+connections=powerConnections(JSON.parse(gaps.snapshot()));assert.deepEqual(connections.map(c=>c.building.kind),['greenhouse']);
+assert(gaps.restore(gaps.snapshot()));gaps.free();
 
 // An outage must never draw the baked, illuminated night texture. Check the
 // source-over opacity across the entire dusk/dawn blend, including ghosts.
