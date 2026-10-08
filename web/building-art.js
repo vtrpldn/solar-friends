@@ -13,7 +13,7 @@ export const buildingArt = {
   kitchen: { name: 'Kitchen', file: atlas, cell: [.5, 0, .5, .5], width: 179.36, anchor: .70 },
   grove: { name: 'Banana grove', file: atlas, cell: [.5, .5, .5, .5], width: 123.9, anchor: .74 },
   garden: { name: 'Garden', file: 'garden-simple-isometric.png', width: 140.42, anchor: .52 },
-  greenhouse: { name: 'Greenhouse', file: 'greenhouse-isometric.png', width: 188, anchor: .66 },
+  greenhouse: { name: 'Greenhouse', file: 'greenhouse-isometric.png', width: 174, anchor: .76 },
   well: { name: 'Cistern', file: 'cistern-isometric.png', width: 77, anchor: .82 },
   compost: { name: 'Compost station', file: 'compost-isometric.png', width: 78, anchor: .75 },
   square: { name: 'Community square', file: 'square-isometric.png', width: 172, anchor: .73 },

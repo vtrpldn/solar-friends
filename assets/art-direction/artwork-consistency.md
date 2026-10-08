@@ -20,7 +20,7 @@ The library contains 69 entries backed by 46 source images: 68 active entries an
 | Home · veranda | 158 px |
 | Home · gable | 164 px |
 | Home · entry terrace | 156 px |
-| Greenhouse | 188 px |
+| Greenhouse | 174 px |
 | Community square | 172 px |
 | Workshop | 158 px |
 | Garden | 140.42 px |
@@ -37,7 +37,7 @@ Homes cycle through the original, veranda, gable and entry-terrace artwork in co
 
 Residents use 48 px prepared cells, with a ground anchor of 0.95. Complete connected poses are isolated from the original sheets at load time, aligned by lower-body pivots and normalized with one scale per sheet. This preserves the shorter seated and kneeling poses without clipping adjacent artwork. Hens use 20 px cells and their pose-specific ground anchors. Crop layers use 22 px cells for lettuce and 26 px for beans and tomatoes, with one shared atlas scale so growth stages keep their relative sizes.
 
-Gardens and greenhouses use painted empty structures plus separate crop layers. Empty, young, growing, mature and dry states follow simulation data, including repeat tomato harvests. The [live artwork checks](../../web/artwork/checks.html) render all 60 crop/structure/light combinations and every resident frame.
+Gardens and greenhouses use painted empty structures plus separate crop layers. The taller greenhouse has two rows of four plants along its side beds and a clear central aisle. Registered glass and doorway apertures keep plants behind the painted frame; glass softens their color. [greenhouse-layout.js](../../web/greenhouse-layout.js) shares that layout between the game and crop previews. The wall-height revision and night pair were generated with the built-in image tool; exact prompts are in [greenhouse-height-prompts.json](greenhouse-height-prompts.json). Empty, young, growing, mature and dry states follow simulation data, including repeat tomato harvests. The [live artwork checks](../../web/artwork/checks.html) render all 60 crop/structure/light combinations and every resident frame.
 
 ## Camera calibration
 
@@ -45,7 +45,7 @@ The map uses a 2:1 orthographic game projection, with ground axes at slopes +0.5
 
 The pergola needs more than a camera adjustment: its original front post is displaced, and its four posts have different painted heights. [building-mesh.js](../../web/building-mesh.js) maps the existing texture onto a constrained rectangular prism. All four registered top beams follow exact 2:1 directions and the four registered posts are vertical and equal in height. Structural edges are triangle boundaries so they stay straight during interpolation. Day and night use the same geometry and separate cached textures; the correction is prepared once per loaded image, not every animation frame. The original PNGs retain their painted materials and props.
 
-Open [Building projection](../../web/artwork/projection.html), linked from the artwork studio and live checks, for all 15 variants. Toggle day/night, uncorrected source/game projection, and measured-edge overlays. Teal guides show the target directions; orange dashes show traced painted edges. The review covers 30 day/night views. Traced-edge residuals are at most 1.96 pixels at zoom 1; roof tiles, irregular timber, furniture details and foliage remain illustrations rather than exact architectural geometry. This tolerance is explicit: it is not a claim that every painted pixel is perfectly orthogonal.
+Open [Building projection](../../web/artwork/projection.html), linked from the artwork studio and live checks, for all 15 variants. Toggle day/night, uncorrected source/game projection, and measured-edge overlays. Teal guides show the target directions; orange dashes show traced painted edges. The review covers 30 day/night views. Traced-edge residuals are at most 1.23 pixels at zoom 1; roof tiles, irregular timber, furniture details and foliage remain illustrations rather than exact architectural geometry. This tolerance is explicit: it is not a claim that every painted pixel is perfectly orthogonal.
 
 Run `node scripts/verify-building-projection.mjs` for measured-edge tolerances, verticals, exact pergola beam slopes and post heights, triangle coverage without folds, and the actual cached Canvas drawing transforms. [building-projection-review.json](building-projection-review.json) pins all 26 reviewed source-file hashes; replacing a PNG requires re-tracing and visual review before updating its hash. Run `node scripts/verify-artwork.mjs` for catalog coverage, day/night geometry parity, transparency and relative-size bounds.
 

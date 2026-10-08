@@ -1,0 +1,16 @@
+{
+  "tool": "Built-in image generation",
+  "reason": "Raise greenhouse walls while keeping the orthographic camera; open two side beds around a clear central aisle.",
+  "day": {
+    "prompt": "Use case: precise-object-edit. Edit the supplied Solar Friends greenhouse sprite. Make the greenhouse TALLER by extending only the straight vertical wall posts and glass walls by about 45 percent, raising the existing pitched roof bodily upward. Preserve the existing footprint, roof pitch, camera azimuth, orthographic ground directions, width, warm painted timber/terracotta/teal-glass style, doorway on the right-facing gable wall, and clean transparent background. Keep the original foundation in approximately the same position on the square canvas, entire object in frame with clear margin. No perspective convergence, all posts perfectly vertical. The taller interior must be clearly visible through mostly clear softly teal glass: two EMPTY narrow soil beds run the full length down the two sides, from the back wall to the front wall, with a clear central walking aisle aligned to the door. No plants, no pots, no furniture: crops will be rendered separately by the game. Door opening stays empty with a stone threshold, absolutely no soil bed blocking the doorway. No text, grid, background scenery, external shadow or new ornaments. Preserve the subject identity; this is a height and interior layout correction, not a redesign.",
+    "reference": "web/art/greenhouse-isometric.png at commit 2b17b13",
+    "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4912cfab-625f-439e-bc0b-a54b24dc9bd9.png",
+    "destination": "web/art/greenhouse-isometric.png"
+  },
+  "night": {
+    "prompt": "Use case: lighting-weather. Edit this exact taller greenhouse sprite into its NIGHT lighting variant. Preserve EXACT canvas dimensions, transparent background, all timber positions, glass panes, two empty side soil beds, clear central aisle and empty doorway, silhouette, roof pitch, perspective and margins. Change ONLY illumination: cool subdued blue moonlight on timber, glass, terracotta and empty soil. Keep the glass readable and translucent teal-blue. No plants, new objects, lamps, glow, light rays, stars, moon, background, text or cast shadow. Do not redraw or reposition any structural feature. This must register pixel-for-pixel with the daytime game sprite.",
+    "reference": "Updated daytime greenhouse",
+    "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-983c67c2-e44a-45d5-9f38-10ebf88cd1d2.png",
+    "destination": "web/art/greenhouse-isometric-night.png"
+  }
+}

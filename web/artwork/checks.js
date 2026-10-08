@@ -38,13 +38,13 @@ try {
     });$('sheets').append(section);
   }
   for(const night of [false,true])for(const kind of ['garden','greenhouse'])for(const crop of ['lettuce','beans','tomatoes'])for(const phase of ['Empty','Young','Growing','Mature','Dry']){
-    const figure=document.createElement('figure'),canvas=document.createElement('canvas');canvas.width=440;canvas.height=300;
+    const figure=document.createElement('figure'),canvas=document.createElement('canvas');canvas.width=480;canvas.height=500;
     const ctx=canvas.getContext('2d');ctx.scale(2,2);
     const c={kind:crop,growth:cropTypes[crop].minutes*(phase==='Young'?.15:phase==='Growing'?.6:1),moisture:phase==='Dry'?0:100,planted:phase!=='Empty',harvests:0};
-    if(night){ctx.fillStyle='#263c4b';ctx.fillRect(0,0,220,150);}
+    if(night){ctx.fillStyle='#263c4b';ctx.fillRect(0,0,240,250);}
     const file=buildingArt[kind].file.replace('.png',night?'-night.png':'.png');
-    drawBuildingArt(ctx,images.get(`../art/${file}`),buildingArt[kind],110,95,1.5);
-    drawCrops(ctx,{kind,crop:c},110,95,1.5,Number(night));figure.append(canvas);
+    drawBuildingArt(ctx,images.get(`../art/${file}`),buildingArt[kind],120,180,1.5);
+    drawCrops(ctx,{kind,crop:c},120,180,1.5,Number(night));figure.append(canvas);
     const caption=document.createElement('figcaption');caption.textContent=`${kind} · ${crop} · ${phase} · ${night?'night':'day'}`;figure.append(caption);$('crops').append(figure);
   }
   const failures=results.filter(r=>!r.passed);$('status').textContent=`${results.length} entries · ${results.reduce((n,r)=>n+r.frames,0)} cells · ${failures.length} failures. Pixel checks verify separation, gutters and ground registration; inspect style and motion visually.`;
