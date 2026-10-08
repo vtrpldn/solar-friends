@@ -27,7 +27,8 @@ for(const [kind,art]of Object.entries(allBuildingArt)){
   // Exercise the real foundation draw path, not just its footprint helper.
   const drawn=[];let polygon;
   drawFoundation({save(){},restore(){},translate(){},scale(){},beginPath(){polygon=[];},moveTo(x,y){polygon.push([x,y]);},lineTo(x,y){polygon.push([x,y]);},closePath(){},fill(){drawn.push(polygon);}},kind,0,0);
-  assert.deepEqual(drawn[0],footprintCorners(kind,0,0).map(([x,y])=>[(x-y)*34,(x+y)*17]));
+  if(kind==='grove')assert.equal(drawn.length,0,'Food forests use natural ground cover instead of a raised foundation');
+  else assert.deepEqual(drawn[0],footprintCorners(kind,0,0).map(([x,y])=>[(x-y)*34,(x+y)*17]));
   if(kind.startsWith('home-'))continue;
   assert(game.restore(JSON.stringify(base)));assert.equal(game.place(kind,8,8),'ok');
   const saved=game.snapshot(),v=JSON.parse(saved).village;

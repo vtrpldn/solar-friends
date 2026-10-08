@@ -51,8 +51,10 @@ export function placementArt(kind,art) {
   return {scale:gain,x:-(cx-cy)*W*gain,y:center*2*H-(cx+cy)*H*gain-2};
 }
 export function drawFoundation(ctx,kind,x,y,scale=1,alpha=1,night=0) {
+  // A food forest grows directly in the terrain; its sprite includes ground cover.
+  if(kind==='grove')return;
   const corners=footprintCorners(kind,0,0).map(([u,v])=>[(u-v)*W,(u+v)*H]);
-  const soil=['garden','grove','solar_farm','compost'].includes(kind);
+  const soil=['garden','solar_farm','compost'].includes(kind);
   const path=(points,color)=>{ctx.beginPath();points.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();ctx.fillStyle=color;ctx.fill();};
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.globalAlpha*=alpha;ctx.filter=`brightness(${1-night*.45})`;
   path(corners,soil?'#987650':'#b5a181');
