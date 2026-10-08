@@ -50,14 +50,14 @@ pub fn prepare(r: &mut Resident, now: f32) {
     }
     let day = (now / 1440.).floor() as i32;
     if r.sleep.day >= 0
-        && r.task == "sleep"
         && now >= r.sleep.bedtime
+        && (r.task == "sleep" || now - r.sleep.bedtime < 600.)
         && r.sleep.started_at.is_none()
     {
         return;
     }
     if r.sleep.day != day {
-        let previous = now.rem_euclid(1440.) < 360.;
+        let previous = now.rem_euclid(1440.) < 360. && r.sleep.day < day - 1;
         let plan_day = if previous { (day - 1).max(0) } else { day };
         r.sleep = Routine {
             day: plan_day,
@@ -122,7 +122,9 @@ pub fn valid(r: &Resident, now: f32) -> bool {
         return false;
     }
     if let Some(start) = s.started_at {
-        if !start.is_finite()
+        if s.day < 0
+            || s.last_tick.is_some() != s.wake_at.is_some()
+            || !start.is_finite()
             || start < 0.
             || start > now
             || !(360.0..=540.).contains(&s.duration_minutes)
@@ -212,6 +214,19 @@ mod tests {
         assert!(r.sleep.bedtime > 1440.);
     }
     #[test]
+    fn waking_before_dawn_does_not_restart_the_same_night() {
+        let mut r = person(2, 100.);
+        prepare(&mut r, 1200.);
+        tick(&mut r, 1260.);
+        tick(&mut r, 1620.);
+        assert!(!due(&r, 1620.));
+        r.task = "daydream".into();
+        prepare(&mut r, 1620.1);
+        assert_eq!(r.sleep.day, 1);
+        assert!(r.sleep.bedtime >= 2640.);
+        assert!(!due(&r, 1700.));
+    }
+    #[test]
     fn interrupted_sleep_preserves_target_but_does_not_count_travel() {
         let mut r = person(0, 0.);
         prepare(&mut r, 1200.);
@@ -239,6 +254,10 @@ mod tests {
         let saved = g.snapshot();
         let mut restored = Game::new();
         assert!(restored.restore(&saved));
+        assert_eq!(restored.snapshot(), saved);
+        let mut broken: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        broken["residents"][0]["sleep"]["wake_at"] = serde_json::Value::Null;
+        assert!(!restored.restore(&broken.to_string()));
         assert_eq!(restored.snapshot(), saved);
         for (key, value) in [
             ("duration_minutes", 359.),
