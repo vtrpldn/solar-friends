@@ -1202,7 +1202,8 @@ function togglePause() {
 }
 function frame(stamp) {
   if (!last) last = stamp;
-  const dt = Math.min((stamp - last) / 1000, 0.1);
+  const elapsed = Math.max(0, (stamp - last) / 1000);
+  const dt = Math.min(elapsed, 0.1);
   last = stamp;
   const running =
     !paused && !document.hidden && !document.querySelector("dialog[open]");
@@ -1210,13 +1211,13 @@ function frame(stamp) {
   if (cameraTarget) cameraTarget.dt = dt;
   sound.update(running, state.environment.raining, state.village.minutes, state.residents.some(r => r.task === "build" && Math.hypot(r.x-r.target_x, r.y-r.target_y) < 0.2));
   if (running) {
-    time += advanceSimulation(game, dt, speed);
+    time += advanceSimulation(game, Math.min(elapsed, 1), speed);
   }
   state = JSON.parse(game.snapshot());
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   render();
   uiElapsed += dt;
-  saveElapsed += dt;
+  saveElapsed += elapsed;
   if (uiElapsed > 0.3) {
     updateUI();
     if (running) announceMilestones();

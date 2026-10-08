@@ -48,7 +48,11 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   const runStart=await page.evaluate(()=>window.solarDev.snapshot().village.minutes);
   await page.locator('#dev-run').click();
-  await page.waitForFunction(start=>window.solarDev.snapshot().village.minutes>start+48,runStart,{timeout:30000});
+  // Autosave uses wall time. Rendering throughput must not decide whether this check passes.
+  await page.waitForFunction(()=>!document.querySelector('dialog[open]') && document.querySelector('#pause').getAttribute('aria-label')==='Pause simulation');
+  const wallStart=await page.evaluate(()=>performance.now());
+  await page.waitForFunction(start=>performance.now()>start+16000,wallStart,{timeout:45000,polling:250});
+  assert(await page.evaluate(start=>window.solarDev.snapshot().village.minutes>start,runStart),'Running the scene must advance its clock');
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved,'timed autosave must skip sandbox');
   await page.locator('#dev-button').click();
   await page.getByRole('button',{name:'Return to village',exact:true}).click();
