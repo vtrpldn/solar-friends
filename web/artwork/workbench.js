@@ -89,14 +89,19 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     ctx.fillStyle = light>.5?'#fff4d7':'#294535';ctx.font='12px Trebuchet MS';ctx.fillText('Home',w*.22-18,h-18);ctx.fillText('Iara',w*.44-12,h-18);ctx.fillText('Calibration draft',w*.66-42,h-18);
   }
   function anchor() {
-    const {ctx,w,h} = setup($('anchor-canvas')), img=images.get(selected.file), size=280, x=(w-size)/2, y=20;
+    const {ctx,w,h} = setup($('anchor-canvas')), img=images.get(selected.file), {width:size,height}=anchorDimensions(w,h), x=(w-size)/2, y=20;
     if (img?.naturalWidth) {
       if(selected.portrait) drawPreparedFrame(ctx,img,8,x+size/2,y+size*selected.anchor,size,{referenceRow:2});
       else if(selected.animation) drawPreparedFrame(ctx,img,0,x+size/2,y+size*selected.anchor,size,animationFrameOptions(selected));
       else if(selected.crop) drawPreparedFrame(ctx,img,selected.frame,x+size/2,y+size*selected.anchor,size,cropFrameOptions);
-      else {const [cx,cy,cw,ch]=selected.cell;ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x,y,size,size);}
+      else {const [cx,cy,cw,ch]=selected.cell;ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x,y,size,height);}
     }
-    const ground=y+size*draft.anchor; ctx.strokeStyle='#b65236';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+size,ground);ctx.stroke();ctx.beginPath();ctx.arc(w/2,ground,7,0,Math.PI*2);ctx.fillStyle='#b65236';ctx.fill();
+    const ground=y+height*draft.anchor; ctx.strokeStyle='#b65236';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+size,ground);ctx.stroke();ctx.beginPath();ctx.arc(w/2,ground,7,0,Math.PI*2);ctx.fillStyle='#b65236';ctx.fill();
+  }
+  function anchorDimensions(w,h){
+    const aspect=selected.group==='Land & supplies'?selected.aspect:1;
+    const width=Math.min(280,w-40,(h-40)/aspect);
+    return {width,height:width*aspect};
   }
   function replacement() {
     const {ctx,w,h} = setup($('replacement-scene')), original=images.get(selected.file), mode=$('replacement-mode').value, y=h*.76;
@@ -128,7 +133,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   };
   for(const id of ['calibration-zoom','calibration-light','replacement-mode','replacement-light','replacement-zoom','replacement-row','replacement-frame']) $(id).oninput=redraw;
   const anchorCanvas=$('anchor-canvas');
-  function moveAnchor(e) { const rect=anchorCanvas.getBoundingClientRect();draft.anchor=Math.round(Math.max(0,Math.min(1,(e.clientY-rect.top-20)/280))*1000)/1000;controls();redraw(); }
+  function moveAnchor(e) { const rect=anchorCanvas.getBoundingClientRect(),{height}=anchorDimensions(rect.width,rect.height);draft.anchor=Math.round(Math.max(0,Math.min(1,(e.clientY-rect.top-20)/height))*1000)/1000;controls();redraw(); }
   anchorCanvas.onpointerdown=e=>{anchorCanvas.setPointerCapture(e.pointerId);moveAnchor(e);};
   anchorCanvas.onpointermove=e=>{if(anchorCanvas.hasPointerCapture(e.pointerId))moveAnchor(e);};
   anchorCanvas.onpointerup=e=>anchorCanvas.releasePointerCapture(e.pointerId);

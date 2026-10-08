@@ -1,14 +1,15 @@
 import { unlitFilter } from './power.js';
-export const economyAtlasFile='economy-atlas.png';
-export const economyAtlasSize=[1254,1254];
-// Three crowded atlas cells use measured transparent gutters rather than equal column cuts.
+export const economyAtlasFile='economy-atlas-v2.png';
+export const economyAtlasSize=[1536,1024];
+// Measured rectangles keep complete silhouettes and transparent gutters on all six props.
+const cell=(x,y,w,h)=>[x/1536,y/1024,w/1536,h/1024];
 export const economyArt = [
-  {name:'Managed timber',cell:[0,0,1/3,.5],width:100,anchor:.95},
-  {name:'Bamboo stand',cell:[1/3,0,1/3,.5],width:90,anchor:.95},
-  {name:'Building earth',cell:[824/1254,0,430/1254,.5],width:108.02,anchor:.95},
-  {name:'Stone deposit',cell:[0,.5,432/1254,.5],width:103.35,anchor:.76},
-  {name:'Salvage clearing',cell:[432/1254,.5,402/1254,.5],width:96.17,anchor:.76},
-  {name:'Camp receiving bench',cell:[2/3,.5,1/3,.5],width:85,anchor:.76},
+  {name:'Managed timber',cell:cell(8,62,492,548),width:90,anchor:.95},
+  {name:'Bamboo stand',cell:cell(540,24,430,560),width:78,anchor:.965},
+  {name:'Building earth',cell:cell(1000,248,535,352),width:88,anchor:.94},
+  {name:'Stone deposit',cell:cell(20,670,495,321),width:78,anchor:.93},
+  {name:'Salvage clearing',cell:cell(550,568,440,437),width:66,anchor:.95},
+  {name:'Camp receiving bench',cell:cell(1047,608,477,391),width:62,anchor:.95},
 ];
 economyArt.forEach(art=>{art.aspect=art.cell[3]*economyAtlasSize[1]/(art.cell[2]*economyAtlasSize[0]);});
 export const economyImage = typeof Image==='undefined'?null:new Image();
@@ -18,6 +19,10 @@ export function drawEconomySprite(ctx,image,art,x,y,scale=1){
   if(!image?.naturalWidth)return;
   const [u,v,cw,ch]=art.cell,w=art.width*scale;
   const sw=cw*image.naturalWidth,sh=ch*image.naturalHeight,h=w*sh/sw;
+  ctx.save();ctx.translate(x,y-3*scale);ctx.scale(w*.34,w*.17);
+  const shade=ctx.createRadialGradient(0,0,.05,0,0,1);
+  shade.addColorStop(0,'#34452b20');shade.addColorStop(1,'#34452b00');
+  ctx.fillStyle=shade;ctx.fillRect(-1,-1,2,2);ctx.restore();
   ctx.drawImage(image,u*image.naturalWidth,v*image.naturalHeight,sw,sh,x-w/2,y-h*art.anchor,w,h);
 }
 export function drawEconomyArt(ctx,index,x,y,scale,night=0,remaining=1){
