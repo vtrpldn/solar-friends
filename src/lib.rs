@@ -799,7 +799,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     }
                 }
                 "gather" => {
-                    if supplies::needs_ingredients(&v) || (r.requested && ready(&v, "grove")) {
+                    if r.requested || supplies::needs_ingredients(&v) {
                         v.food += 2.;
                         v.supplies.gathered += 2.;
                         if ready(&v, "grove") {
@@ -1573,6 +1573,45 @@ mod tests {
         assert_eq!(v.map_size, 28);
         assert_eq!(v.buildings.len(), 1);
         assert_eq!(v.wood, 32.);
+    }
+    #[test]
+    fn a_requested_foraging_batch_produces_food_without_a_food_forest() {
+        let mut g = Game::new();
+        arrived(&mut g);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.food = 80.;
+            v.minutes = 600.;
+        }
+        let mut query = g.app.world_mut().query::<&mut Resident>();
+        for mut r in query.iter_mut(g.app.world_mut()) {
+            r.task = "rest".into();
+            r.remaining = 90.;
+            r.energy = 90.;
+            r.hunger = 0.;
+            r.social = 90.;
+            r.last_meal_slot = 0;
+            r.target_x = r.x;
+            r.target_y = r.y;
+        }
+        assert!(g.request(0, "gather", false).contains("Happy"));
+        let mut query = g.app.world_mut().query::<&mut Resident>();
+        for mut r in query.iter_mut(g.app.world_mut()).filter(|r| r.id == 0) {
+            r.x = r.target_x;
+            r.y = r.target_y;
+        }
+        for _ in 0..40 {
+            g.tick(0.25);
+        }
+        assert_eq!(g.app.world().resource::<Village>().food, 82.);
+        assert_eq!(g.app.world().resource::<Village>().supplies.gathered, 2.);
+        g.tick(0.25); // The next decision returns them to their own plans.
+        assert_eq!(g.app.world().resource::<Village>().food, 82.);
+        let people: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert!(
+            !people.residents[0].requested,
+            "One helping hand, then return to their own routine"
+        );
     }
     #[test]
     fn exhaustion_and_bedtime_cannot_be_persuaded() {

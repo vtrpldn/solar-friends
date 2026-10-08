@@ -21,6 +21,28 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(await page.locator('#dev-dialog').isVisible());
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
+  // Exercise the real request controls. Building visitors also use a .requests grid.
+  await page.locator('#dev-scenario').selectOption('village');await page.locator('#dev-load').click();
+  await page.waitForFunction(()=>window.solarDev.scenario()==='village');
+  await page.locator('#dev-close').click();
+  await page.getByRole('button',{name:'People',exact:true}).click();
+  await page.getByRole('button',{name:'Meet Iara',exact:true}).click();
+  await page.getByRole('button',{name:'Help build',exact:true}).click();
+  assert((await page.locator('#person .response').textContent()).includes('No stage is ready'),'Refusals must be visible in the resident panel');
+  await page.getByRole('button',{name:'Collect river water',exact:true}).click();
+  assert((await page.locator('#person .response').textContent()).includes('Happy'));
+  assert(await page.locator('#person .response').isVisible());
+  assert(await page.getByRole('button',{name:'Resume time',exact:true}).isVisible());
+  const requested=await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0));
+  assert.equal(requested.task,'water');assert(requested.requested,'A real click must assign the task');
+  await capture('Accepted helping request with paused-time guidance','helping-request.png');
+  await page.getByRole('button',{name:'Close resident details',exact:true}).click();
+  await page.getByRole('button',{name:'Buildings',exact:true}).click();
+  await page.locator('#building-choice').selectOption('0');
+  await page.locator('#building-neighbours [data-visitor="0"]').click();
+  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).task),'visit','Resident requests must not replace the building-visit handler');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['arrival',null],['village',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);

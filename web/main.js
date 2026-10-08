@@ -763,7 +763,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["gather", "Forage food"],
@@ -779,7 +779,7 @@ function selectPerson(id) {
       .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
       .join(
         "",
-      )}</div><p class="friendship-note"></p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button>`;
+      )}</div><p class="friendship-note"></p>`;
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
@@ -788,11 +788,12 @@ function selectPerson(id) {
     $(`[data-resident="${id}"]`).focus();
   };
   $(".close-person").focus();
-  $(".requests").onclick = (e) => {
+  $("#person .requests").onclick = (e) => {
     const b = e.target.closest("[data-task]");
     if (b) request(b.dataset.task, false);
   };
-  $(".persuade").onclick = () => request(lastTask, true);
+  $("#person .persuade").onclick = () => request(lastTask, true);
+  $("#person .resume-request").onclick = () => { if(paused)togglePause(); updateUI(); };
   updateUI();
 }
 function request(task, encourage) {
@@ -801,7 +802,8 @@ function request(task, encourage) {
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
   updateUI();
-  $(encouragable ? ".persuade" : ".response").scrollIntoView({ block: "nearest" });
+  save();
+  $(encouragable ? "#person .persuade" : "#person .response").scrollIntoView({ block: "nearest" });
 }
 function replaceMarkup(element, html) {
   if (element._markup !== html) {
@@ -1114,6 +1116,7 @@ function updateUI() {
   if (selected !== null) {
     const r = state.residents.find((r) => r.id === selected);
     for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
+    $("#person .quote").hidden = !!response && r.requested && response.endsWith(r.reason);
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
@@ -1142,9 +1145,16 @@ function updateUI() {
           b.progress >= 100,
       );
     }
-    $(".response").hidden = !response;
-    $(".response").textContent = response;
-    $(".persuade").hidden = !encouragable || !!r.trip;
+    const activity=(r.requested ? 'Your request · ' : '') + (!r.trip && r.task!=='sleep' && Math.hypot(r.x-r.target_x,r.y-r.target_y)>.08 ? 'On the way · ' : '') + activityLabel(r);
+    const activityEl=$("#person .person-activity");
+    if(activityEl.textContent!==activity)activityEl.textContent=activity;
+    $("#person .response").hidden = !response;
+    const reply=$("#person .response");
+    if(reply.textContent!==response)reply.textContent=response;
+    $("#person .persuade").hidden = !encouragable || !!r.trip;
+    $("#person .request-pause").hidden = !paused || !r.requested;
+    $("#person .request-pause").textContent = `The village is paused. Resume time to let ${r.name} continue.`;
+    $("#person .resume-request").hidden = !paused || !r.requested;
   }
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
