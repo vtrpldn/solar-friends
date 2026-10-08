@@ -36,7 +36,7 @@ until(job,s=>!s.residents[4].trip,'back in village');assert.equal(snap(job).vill
 
 const nightReady=ready(1260,1);await checkpoint(nightReady,'night-ready');nightReady.free();
 for(const homes of [0,1,2]){
-  const g=ready(1380,homes);g.tick(.25);
+  const g=ready(1439,homes);g.tick(.25);
   const expected=5-Math.min(5,homes*3);
   assert.equal(snap(g).residents.filter(r=>r.trip).length,expected);
   if(expected){

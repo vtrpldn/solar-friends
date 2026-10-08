@@ -13,6 +13,7 @@ mod modes;
 mod power;
 mod progression;
 mod situations;
+mod sleep;
 mod spacing;
 mod supplies;
 use progression::Progress;
@@ -74,6 +75,8 @@ pub struct Resident {
     pub activity_material: Option<usize>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub trip: Option<mobility::Trip>,
+    #[serde(default)]
+    pub sleep: sleep::Routine,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Building {
@@ -157,10 +160,8 @@ fn shelter(v: &Village, id: usize) -> Option<&Building> {
         .filter(|b| b.kind == "home" && b.progress >= 100.)
         .nth(id / 3)
 }
-fn sleeping_time(minutes: f32, id: usize) -> bool {
-    let m = minutes % 1440.;
-    let offset = id as f32 * 10.;
-    m >= 1290. + offset || m < 360. + offset
+fn sleeping_time(minutes: f32, r: &Resident) -> bool {
+    sleep::due(r, minutes)
 }
 fn meal_slot(minutes: f32) -> Option<i32> {
     let m = minutes % 1440.;
@@ -285,6 +286,9 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
 }
 
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
+    if task != "sleep" {
+        sleep::pause(r);
+    }
     r.trip = None;
     r.visit_building = None;
     r.activity_material = None;
@@ -369,7 +373,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
 }
 fn choose(r: &mut Resident, v: &Village) {
     let meal_due = meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot);
-    let (task, reason) = if sleeping_time(v.minutes, r.id) {
+    let (task, reason) = if sleeping_time(v.minutes, r) {
         (
             "sleep",
             if shelter(v, r.id).is_some() {
@@ -531,7 +535,7 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
     if r.task == "arrive" {
         return Some(format!("{}: Let me reach the clearing first.", r.name));
     }
-    if sleeping_time(v.minutes, id) && task != "rest" {
+    if sleeping_time(v.minutes, r) && task != "rest" {
         return Some(format!(
             "{}: It is bedtime. Let's pick this up in the morning.",
             r.name
@@ -639,6 +643,14 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         .filter_map(|r| spacing::building(r, &v))
         .collect();
     for mut r in &mut people {
+        sleep::prepare(&mut r, v.minutes);
+        if r.trip.is_none() && r.task == "sleep" {
+            if shelter(&v, r.id).is_some() && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08 {
+                sleep::tick(&mut r, v.minutes);
+            } else {
+                sleep::pause(&mut r);
+            }
+        }
         if mobility::advance(&mut r, &mut v, &neighbours, dt) {
             continue;
         }
@@ -681,8 +693,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 || (ready_work && r.social >= 65. && !situations::protected(&v, r.id, "cook")))
             && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
         if r.task != "arrive"
-            && (sleeping_time(v.minutes, r.id) != (r.task == "sleep")
-                || (sleeping_time(v.minutes, r.id) && shelter(&v, r.id).is_none())
+            && (sleeping_time(v.minutes, &r) != (r.task == "sleep")
+                || (sleeping_time(v.minutes, &r) && shelter(&v, r.id).is_none())
                 || r.remaining <= 0.
                 || chores_finished
                 || chores_start)
@@ -707,6 +719,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         r.remaining = (r.remaining - dt).max(0.);
         match r.task.as_str() {
             "sleep" => {
+                if r.sleep.started_at.is_none() || r.sleep.last_tick.is_none() {
+                    sleep::tick(&mut r, v.minutes);
+                }
                 r.energy = (r.energy
                     + dt * if shelter(&v, r.id).is_some() {
                         0.48
@@ -920,6 +935,7 @@ impl Game {
                 activity_building: None,
                 activity_material: None,
                 trip: None,
+                sleep: sleep::Routine::default(),
             });
         }
         Self { app }
@@ -929,6 +945,27 @@ impl Game {
             self.app.world_mut().resource_mut::<Step>().0 = seconds.clamp(0., 0.25);
             self.app.update();
         }
+    }
+    /// Only actual sleep and off-site work qualify, never a commute or walking to bed.
+    pub fn fast_forward_ready(&mut self) -> bool {
+        let mut query = self.app.world_mut().query::<&Resident>();
+        let world = self.app.world();
+        let v = world.resource::<Village>();
+        let mut residents = query.iter(world).peekable();
+        residents.peek().is_some()
+            && residents.all(|r| {
+                if let Some(t) = &r.trip {
+                    return t.phase == mobility::Phase::Away
+                        && (t.purpose == mobility::Purpose::Work
+                            || (r.sleep.started_at.is_some()
+                                && r.sleep.slept_minutes < r.sleep.duration_minutes));
+                }
+                r.task == "sleep"
+                    && shelter(v, r.id).is_some()
+                    && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
+                    && r.sleep.started_at.is_some()
+                    && r.sleep.slept_minutes < r.sleep.duration_minutes
+            })
     }
     pub fn snapshot(&mut self) -> String {
         let village = self.app.world().resource::<Village>().clone();
@@ -1006,11 +1043,7 @@ impl Game {
                 r.name
             );
         }
-        if r.task == "arrive"
-            || sleeping_time(v.minutes, resident)
-            || r.energy < 25.
-            || r.hunger > 75.
-        {
+        if r.task == "arrive" || sleeping_time(v.minutes, &r) || r.energy < 25. || r.hunger > 75. {
             return format!(
                 "{} needs to finish arriving, eat or rest before visiting.",
                 r.name
@@ -1324,6 +1357,7 @@ impl Game {
                 })
                 || !TASKS.contains(&r.task.as_str())
                 || !mobility::valid(v, r)
+                || !sleep::valid(r, v.minutes)
         }) {
             return false;
         }
@@ -1558,23 +1592,41 @@ mod tests {
     fn night_interrupts_work_and_morning_wakes_everyone() {
         let mut g = Game::new();
         arrived(&mut g);
-        g.app.world_mut().resource_mut::<Village>().minutes = 1380.;
-        g.tick(0.1);
+        g.app.world_mut().resource_mut::<Village>().minutes = 1439.;
+        for _ in 0..200 {
+            g.tick(0.25);
+        }
+        let residents: Vec<_> = g
+            .app
+            .world_mut()
+            .query::<&Resident>()
+            .iter(g.app.world())
+            .cloned()
+            .collect();
         assert!(
-            g.app
-                .world_mut()
-                .query::<&Resident>()
-                .iter(g.app.world())
-                .all(|r| r.task == "sleep")
+            residents
+                .iter()
+                .all(|r| r.task == "sleep" && r.sleep.started_at.is_some())
         );
-        g.app.world_mut().resource_mut::<Village>().minutes = 1890.;
-        g.tick(0.1);
+        assert!(
+            residents
+                .iter()
+                .all(|r| (360.0..=540.).contains(&r.sleep.duration_minutes))
+        );
+        let wake = residents
+            .iter()
+            .filter_map(|r| r.sleep.wake_at)
+            .fold(0_f32, f32::max);
+        g.app.world_mut().resource_mut::<Village>().minutes = wake;
+        for _ in 0..600 {
+            g.tick(0.25);
+        }
         assert!(
             g.app
                 .world_mut()
                 .query::<&Resident>()
                 .iter(g.app.world())
-                .all(|r| r.task != "sleep")
+                .all(|r| r.task != "sleep" && r.trip.is_none())
         );
     }
     #[test]

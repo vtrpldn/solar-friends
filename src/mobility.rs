@@ -45,16 +45,18 @@ pub fn gate(v: &Village, id: usize) -> (f32, f32) {
     (10., 27.6)
 }
 pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
+    if purpose == Purpose::Overnight {
+        sleep::pause(r);
+    }
     let day = (v.minutes / 1440.).floor() * 1440.;
-    let morning = 360. + r.id as f32 * 10.;
     let return_at = match purpose {
         Purpose::Work => day + 1020.,
         Purpose::Overnight => {
-            day + morning
-                + if v.minutes.rem_euclid(1440.) < morning {
-                    0.
+            v.minutes
+                + if r.sleep.started_at.is_some() {
+                    r.sleep.duration_minutes - r.sleep.slept_minutes
                 } else {
-                    1440.
+                    sleep::duration(r.energy)
                 }
         }
     };
@@ -82,6 +84,19 @@ pub fn advance(
     let Some(mut trip) = r.trip.clone() else {
         return false;
     };
+    if trip.purpose == Purpose::Overnight {
+        if trip.phase == Phase::Leaving {
+            trip.return_at = v.minutes
+                + if r.sleep.started_at.is_some() {
+                    r.sleep.duration_minutes - r.sleep.slept_minutes
+                } else {
+                    sleep::duration(r.energy)
+                };
+        } else if trip.phase == Phase::Away {
+            sleep::tick(r, v.minutes);
+            trip.return_at = r.sleep.wake_at.unwrap();
+        }
+    }
     if trip.purpose == Purpose::Work && trip.phase == Phase::Leaving {
         v.economy.outside_committed_day = (trip.return_at / 1440.).floor() as i32;
     }
@@ -132,6 +147,10 @@ pub fn advance(
         v.water = (v.water - dt * 0.009).max(0.);
     } else if trip.phase == Phase::Leaving {
         trip.phase = Phase::Away;
+        if trip.purpose == Purpose::Overnight {
+            sleep::tick(r, v.minutes);
+            trip.return_at = r.sleep.wake_at.unwrap();
+        }
         r.reason=match trip.purpose {
             Purpose::Work=>"Working at a neighbouring farm until 17:00. Lunch is provided there.",
             Purpose::Overnight=>"Sleeping at our neighbours' place. Back in the morning; I still need a village bed.",
@@ -164,11 +183,16 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
     {
         return false;
     }
-    let expected = match t.purpose {
-        Purpose::Work => 1020.,
-        Purpose::Overnight => 360. + r.id as f32 * 10.,
-    };
-    if (t.return_at.rem_euclid(1440.) - expected).abs() > 0.01 {
+    if t.purpose == Purpose::Work && (t.return_at.rem_euclid(1440.) - 1020.).abs() > 0.01 {
+        return false;
+    }
+    if t.purpose == Purpose::Overnight
+        && t.phase != Phase::Leaving
+        && r.sleep.day >= 0
+        && r.sleep
+            .wake_at
+            .is_none_or(|wake| (t.return_at - wake).abs() > 0.1)
+    {
         return false;
     }
     if t.purpose == Purpose::Work
@@ -321,7 +345,7 @@ mod tests {
     fn only_neighbours_without_beds_leave_and_new_beds_wait_until_morning() {
         let mut g = healthy();
         home(&mut g, 8, 8);
-        g.app.world_mut().resource_mut::<Village>().minutes = 1380.;
+        g.app.world_mut().resource_mut::<Village>().minutes = 1439.;
         g.tick(0.25);
         let rs = residents(&mut g);
         assert!(rs[..3].iter().all(|r| r.trip.is_none()));
@@ -342,12 +366,17 @@ mod tests {
             residents(&mut g)[3].trip.as_ref().unwrap().phase,
             Phase::Away
         );
-        g.app.world_mut().resource_mut::<Village>().minutes = 1830.;
+        let wake = residents(&mut g)[3].sleep.wake_at.unwrap();
+        g.app.world_mut().resource_mut::<Village>().minutes = wake;
         g.tick(0.25);
         let rs = residents(&mut g);
         assert_eq!(rs[3].trip.as_ref().unwrap().phase, Phase::Returning);
-        assert_eq!(rs[4].trip.as_ref().unwrap().phase, Phase::Away);
-        g.app.world_mut().resource_mut::<Village>().minutes = 1840.;
+        assert!(rs[4].sleep.wake_at.is_some());
+        let wake = residents(&mut g)
+            .iter()
+            .filter_map(|r| r.sleep.wake_at)
+            .fold(0_f32, f32::max);
+        g.app.world_mut().resource_mut::<Village>().minutes = wake;
         g.tick(0.25);
         until(&mut g, |rs| rs.iter().all(|r| r.trip.is_none()));
         round_trip(&mut g);
@@ -355,13 +384,12 @@ mod tests {
     #[test]
     fn off_site_sleep_does_not_consume_village_stores_and_invalid_trips_are_atomic() {
         let mut g = healthy();
-        g.app.world_mut().resource_mut::<Village>().minutes = 1380.;
+        g.app.world_mut().resource_mut::<Village>().minutes = 1439.;
         g.tick(0.25);
         until(&mut g, |rs| {
             rs.iter()
                 .all(|r| r.trip.as_ref().is_some_and(|t| t.phase == Phase::Away))
         });
-        g.app.world_mut().resource_mut::<Village>().minutes = 1440.;
         let before = g.app.world().resource::<Village>().clone();
         let energy = residents(&mut g)[0].energy;
         for _ in 0..40 {

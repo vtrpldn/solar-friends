@@ -1,5 +1,6 @@
 import {economyImage,drawEconomyArt} from './economy-art.js';
-import {residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
+import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
+import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
 import { installBuildMenu } from './build-menu.js';
@@ -455,6 +456,7 @@ function placementValid(kind, x, y) {
 }
 function activityLabel(r) {
   if(r.trip)return tripLabel(r);
+  if(r.task === "sleep")return sleepLabel(r);
   if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
   if (r.task === "visit") {
     const b = state.village.buildings.find(b => b.id === r.visit_building);
@@ -1204,19 +1206,14 @@ function frame(stamp) {
   last = stamp;
   const running =
     !paused && !document.hidden && !document.querySelector("dialog[open]");
-  animationDelta = running ? dt * Math.min(speed, 2) : 0;
+  animationDelta = running ? dt * Math.min(simulationSpeed(game, speed), 2) : 0;
   if (cameraTarget) cameraTarget.dt = dt;
   sound.update(running, state.environment.raining, state.village.minutes, state.residents.some(r => r.task === "build" && Math.hypot(r.x-r.target_x, r.y-r.target_y) < 0.2));
   if (running) {
-    time += dt * speed;
-    let remaining = dt * speed;
-    while (remaining > 0) {
-      const step = Math.min(remaining, 0.1);
-      game.tick(step);
-      remaining -= step;
-    }
+    time += advanceSimulation(game, dt, speed);
   }
   state = JSON.parse(game.snapshot());
+  $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   render();
   uiElapsed += dt;
   saveElapsed += dt;
