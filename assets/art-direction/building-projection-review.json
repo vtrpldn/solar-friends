@@ -1,6 +1,6 @@
 {
   "reviewed": "2026-10-08",
-  "scope": "All 13 building variants, day and night. Ground-plane structural directions use the game orthographic slopes +0.5 and -0.5. Organic grove excluded from straight-edge measurements.",
+  "scope": "All 15 building variants, day and night. Ground-plane structural directions use the game orthographic slopes +0.5 and -0.5. Organic grove excluded from straight-edge measurements.",
   "method": "Hand-traced structural landmarks, shared game renderer, day/night visual review. Per-edge tolerance 2 pixels at zoom 1. These are raster illustration tolerances, not a claim that every painted detail has exact geometry. PNG hashes require renewed review after any source replacement.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
@@ -24,6 +24,10 @@
     "village-atlas-isometric-night.png": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
     "village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
     "workshop-isometric-night.png": "cfd3713369ac4e999f2994c43001e95f6bc0c04bd25908c09cc6f22469096574",
-    "workshop-isometric.png": "b0479e0f929831a1842928829640135e4668f311fafc496e7cf5ab1d0e637db5"
+    "workshop-isometric.png": "b0479e0f929831a1842928829640135e4668f311fafc496e7cf5ab1d0e637db5",
+    "solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "solar-farm-night.png": "02f5502b3f9f67a3876237f16882a2773b702c623b1123b647bf185b51fea92b",
+    "streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131"
   }
 }

@@ -12,7 +12,7 @@ See the [completed polish pass](art-polish-2026-10-08.md) for the fixes and veri
 
 ## Canonical assets
 
-The library contains 65 entries backed by 42 source images: 64 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 293 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
+The library contains 69 entries backed by 46 source images: 68 active entries and one original resident study retained as a reference. Portraits use the same base character artwork as the animated residents. The live checks cover 297 cells, including all 240 resident poses. Unused garden and cistern cells remain embedded in older atlases but have no active library entry.
 
 | Structure | Source-cell width at zoom 1 |
 | --- | ---: |
@@ -28,6 +28,8 @@ The library contains 65 entries backed by 42 source images: 64 active entries an
 | Coop | 100 px |
 | Compost | 78 px |
 | Cistern | 77 px |
+| Solar farm | 188 px |
+| Street light | 80 px |
 
 Widths include transparent padding. Compare painted objects in the studio at game scale. A compost bin is about waist high beside a resident; a coop is smaller than a home.
 
@@ -43,11 +45,13 @@ The map uses a 2:1 orthographic game projection, with ground axes at slopes +0.5
 
 The pergola needs more than a camera adjustment: its original front post is displaced, and its four posts have different painted heights. [building-mesh.js](../../web/building-mesh.js) maps the existing texture onto a constrained rectangular prism. All four registered top beams follow exact 2:1 directions and the four registered posts are vertical and equal in height. Structural edges are triangle boundaries so they stay straight during interpolation. Day and night use the same geometry and separate cached textures; the correction is prepared once per loaded image, not every animation frame. The original PNGs retain their painted materials and props.
 
-Open [Building projection](../../web/artwork/projection.html), linked from the artwork studio and live checks, for all 13 variants. Toggle day/night, uncorrected source/game projection, and measured-edge overlays. Teal guides show the target directions; orange dashes show traced painted edges. The review covers 26 day/night views. Traced-edge residuals are at most 1.96 pixels at zoom 1; roof tiles, irregular timber, furniture details and foliage remain illustrations rather than exact architectural geometry. This tolerance is explicit: it is not a claim that every painted pixel is perfectly orthogonal.
+Open [Building projection](../../web/artwork/projection.html), linked from the artwork studio and live checks, for all 15 variants. Toggle day/night, uncorrected source/game projection, and measured-edge overlays. Teal guides show the target directions; orange dashes show traced painted edges. The review covers 30 day/night views. Traced-edge residuals are at most 1.96 pixels at zoom 1; roof tiles, irregular timber, furniture details and foliage remain illustrations rather than exact architectural geometry. This tolerance is explicit: it is not a claim that every painted pixel is perfectly orthogonal.
 
-Run `node scripts/verify-building-projection.mjs` for measured-edge tolerances, verticals, exact pergola beam slopes and post heights, triangle coverage without folds, and the actual cached Canvas drawing transforms. [building-projection-review.json](building-projection-review.json) pins all 22 reviewed source-file hashes; replacing a PNG requires re-tracing and visual review before updating its hash. Run `node scripts/verify-artwork.mjs` for catalog coverage, day/night geometry parity, transparency and relative-size bounds.
+Run `node scripts/verify-building-projection.mjs` for measured-edge tolerances, verticals, exact pergola beam slopes and post heights, triangle coverage without folds, and the actual cached Canvas drawing transforms. [building-projection-review.json](building-projection-review.json) pins all 26 reviewed source-file hashes; replacing a PNG requires re-tracing and visual review before updating its hash. Run `node scripts/verify-artwork.mjs` for catalog coverage, day/night geometry parity, transparency and relative-size bounds.
 
 Three built-in image-generation attempts at a new pergola were rejected because their post geometry remained inconsistent. No candidate was installed. The exact prompts and disposition are recorded in [building-projection-attempts.json](building-projection-attempts.json).
+
+Solar farms and street lights use the same calibrated camera. Their exact day/night generation prompts are in [solar-power-prompts.json](solar-power-prompts.json). Powered lights use the night texture; disconnected or depleted lights use a dimmed daytime texture so painted illumination cannot remain on during an outage. Rooftop-panel homes stay independently lit.
 
 ## Generation prompts
 

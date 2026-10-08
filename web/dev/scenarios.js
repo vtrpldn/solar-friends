@@ -1,4 +1,6 @@
 export const scenarios = [
+  { id: 'power', name: 'Stored sunshine', detail: 'A charged solar farm and connected lights at 21:00. Switch loads off in Power to compare.' },
+  { id: 'power-outage', name: 'Empty battery', detail: 'An empty shared battery at 21:00; rooftop homes remain lit. Advance until sunrise to recharge.' },
   { id: 'arrival', name: 'Fresh arrival', detail: 'The real starting state, before anyone reaches the clearing.' },
   { id: 'village', name: 'Established village', detail: 'Every building, supplies, and completed quests for interaction checks.' },
   { id: 'hungry', name: 'Hungry village', detail: 'Empty pantry and hungry residents during the morning work block.' },
@@ -36,7 +38,9 @@ export function makeScenario(id, fresh, established) {
   }
   if (id === 'cook') v.situations.cooking = [[0,0,4,0,0],[0,0,4,0,0],[0,0,0,0,0]];
   if (id === 'coop') v.buildings.find(b => b.kind === 'coop').poultry.remaining = .75;
-  if (id === 'night') v.minutes = 1440 + 1260;
+  if (['night','power','power-outage'].includes(id)) v.minutes = 1440 + 1260;
+  if(id==='power')v.power.stored=28;
+  if(id==='power-outage')v.power.stored=0;
   if (id === 'leisure') {
     v.minutes = 1440 + 810;
     v.food = 18; v.meals = 8;

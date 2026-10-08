@@ -12,7 +12,7 @@ assert.equal(game.place('home', 8, 8), 'ok');
 assert.equal(game.place('square', 16, 16), 'ok');
 const base = game.snapshot(), village = JSON.parse(base).village;
 let checks = 0;
-for (const [kind, price] of Object.entries({road: 0, home: 32, garden: 12, greenhouse: 60, square: 36, well: 18})) {
+for (const [kind, price] of Object.entries({solar_farm:48, streetlight:6, road: 0, home: 32, garden: 12, greenhouse: 60, square: 36, well: 18})) {
   for (let x = 0; x < 28; x++) for (let y = 0; y < 28; y++) {
     assert.equal(game.restore(base), true);
     const expected = kind === 'road' ? game.toggle_road(x,y) : game.place(kind,x,y);

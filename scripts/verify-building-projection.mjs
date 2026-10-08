@@ -70,4 +70,4 @@ try{
   drawBuildingArt({...context,globalAlpha:1,translate(){},drawImage(image){drawn=image;}},day,allBuildingArt.square,0,0);
   assert.equal(drawn,texture,'The actual game draw path must use the corrected artwork');
 }finally{if(savedDocument===undefined)delete globalThis.document;else globalThis.document=savedDocument;}
-console.log(`PASS: 26 reviewed views; painted-edge drift ≤ ${largest.toFixed(2)} px at zoom 1; exact pergola beam axes, equal upright posts, unfolded texture mesh and cached day/night rendering.`);
+console.log(`PASS: ${Object.keys(allBuildingArt).length*2} reviewed views; painted-edge drift ≤ ${largest.toFixed(2)} px at zoom 1; exact pergola beam axes, equal upright posts, unfolded texture mesh and cached day/night rendering.`);

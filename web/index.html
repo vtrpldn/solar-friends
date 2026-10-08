@@ -111,6 +111,20 @@
         <p id="pantry-weather"></p>
         <details><summary>How the pantry works</summary><p>Ingredients include garden vegetables and gathered fruit. Residents forage wild food when the pantry runs low. Hungry hens wait safely; crops wait for water.</p></details>
       </aside>
+      <aside id="power-panel" class="supplies panel" hidden aria-label="Village power">
+        <button class="panel-close" data-close-panel aria-label="Close power">×</button>
+        <span class="eyebrow">OUR SHARED SUNSHINE</span>
+        <h2 id="power-title">Sunshine for everyone</h2>
+        <p id="power-summary"></p>
+        <div class="power-battery-label"><b>Battery</b><span id="power-charge"></span></div>
+        <progress id="power-battery" aria-label="Stored solar energy" value="0" max="36"></progress>
+        <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting demand<b id="power-demand"></b></span></div>
+        <p id="power-outlook"></p>
+        <div class="power-build"><button id="build-solar" class="primary">Solar farm · 48 timber</button><button id="build-streetlight">Street light · 6 timber</button></div>
+        <h3>Shared lighting</h3><div id="power-loads"></div>
+        <p id="power-roofs"></p>
+        <details><summary>How village power works</summary><p>Each solar farm supplies up to 6 energy per hour and stores 36 energy for the night. Production follows the sun; lights switch on at dusk. Buildings connect automatically across the village. Add farms or switch off lights to stretch the charge.</p><p>Rooftop-panel homes have their own battery. Gardens, food forests and compost do not need electricity. Residents still cook on the kitchen stove and work by hand during outages.</p></details>
+      </aside>
       <aside id="building-panel" class="supplies panel" hidden aria-label="Building interactions">
         <button class="panel-close" data-close-panel aria-label="Close buildings">×</button>
         <span class="eyebrow">LIFE IN THE VILLAGE</span>
@@ -118,6 +132,7 @@
         <label for="building-choice">Choose a building</label>
         <select id="building-choice"></select>
         <p id="building-purpose"></p>
+        <p id="building-power"></p>
         <section id="crop-controls" hidden>
           <h3>Growing plan</h3>
           <label for="next-crop">Next crop</label>
@@ -128,10 +143,10 @@
           <details><summary>Growing details</summary><p id="crop-details"></p><p>Changes apply to the next planting. Pausing replanting lets the current crop finish, including all three tomato harvests.</p></details>
         </section>
         <p id="building-activity" role="status"></p>
-        <h3>Ask a neighbour to visit</h3>
+        <div id="building-visits"><h3>Ask a neighbour to visit</h3>
         <div id="building-neighbours" class="requests"></div>
         <p id="building-response" role="status"></p>
-        <details><summary>How visits work</summary><p>Invite a neighbour to use this building. Work needs its usual supplies; tired or hungry neighbours need care first. Left to themselves, neighbours spend their free time on hobbies and company.</p></details>
+        <details><summary>How visits work</summary><p>Invite a neighbour to use this building. Work needs its usual supplies; tired or hungry neighbours need care first. Left to themselves, neighbours spend their free time on hobbies and company.</p></details></div>
       </aside>
       <section id="person" class="person panel" hidden></section>
       <div class="world-controls">
@@ -156,6 +171,7 @@
         <button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Goals</button>
         <button data-panel="building-panel" aria-controls="building-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l7-4v17M10 10l11-5v16M3 21h18M6 10v1m0 4v1m8-3v1m4-3v1m-4 5v1m4-3v1"/></svg> Buildings</button>
         <button data-panel="supplies-panel" aria-controls="supplies-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 9-5 9 5v12H3ZM3 8h18M8 12h8v5H8Z"/></svg> Supplies</button>
+        <button data-panel="power-panel" aria-controls="power-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-13h-8Z"/></svg> Power</button>
         <button id="open-situations"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8m-8 4h5"/></svg> <span id="situations-label">Situations</span></button>
         <button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button>
       </nav>

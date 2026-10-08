@@ -43,7 +43,7 @@ const preview = new Game();
 assert(preview.restore(await fs.readFile(new URL('../web/artwork/village-preview.json', import.meta.url), 'utf8')));
 const previewVillage = JSON.parse(preview.snapshot()).village;
 assert.deepEqual([...new Set(previewVillage.buildings.map(b => b.kind))].sort(),
-  ['home','kitchen','garden','greenhouse','well','grove','compost','square','workshop','coop'].sort());
+  ['home','kitchen','garden','greenhouse','well','grove','compost','square','workshop','coop','solar_farm','streetlight'].sort());
 assert(previewVillage.buildings.every(b => b.progress >= 100));
 assert.equal(flock(previewVillage).length, 3);
 console.log('PASS: painted hen variants, pose foot anchors, and complete in-game artwork preview');

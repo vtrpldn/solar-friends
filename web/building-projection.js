@@ -4,6 +4,8 @@
 // Keep these landmarks visible in the projection review; do not infer a pass
 // merely from the requested camera in an image-generation prompt.
 export const buildingProjection = {
+  solar_farm: { size:1280, right:[[101,778,595,1030],[595,321,910,476]], left:[[595,1030,1160,713],[1042,500,1111,461]], upright:[804,668,804,749] },
+  streetlight: { size:1280, right:[[533,1002,609,1038],[561,167,608,190]], left:[[609,1038,685,1000],[608,190,653,167]], upright:[610,400,610,950] },
   home: { size:640, right:[[75,440,289,542],[182,326,222,348]], left:[[289,542,527,422],[161,237,358,135]], upright:[283,382,283,522] },
   kitchen: { size:640, right:[[64,429,329,572],[181,411,311,481]], left:[[329,572,541,452],[493,290,370,360]], upright:[358,381,358,536] },
   garden: { size:1280, right:[[178,659,627,906],[636,416,1080,654]], left:[[178,643,623,403],[639,905,1084,668]], upright:[627,912,627,939] },

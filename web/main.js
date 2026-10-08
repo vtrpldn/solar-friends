@@ -1,3 +1,4 @@
+import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
@@ -54,6 +55,8 @@ const kinds = {
   square: ["Square", 36, "Gatherings bring neighbours closer"],
   coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
   workshop: ["Workshop", 48, "Craft tools for building and harvests"],
+  solar_farm: ["Solar farm", 48, "Collect sunshine · store energy for shared lights"],
+  streetlight: ["Street light", 6, "Light village paths · needs shared solar power"],
 };
 const tasks = {
   visit: "Visiting a village building",
@@ -294,29 +297,19 @@ function tree(x, y, s = 1, species = 0) {
     w,
   );
 }
-function sprite(kind, x, y, alpha = 1) {
-  const art = allBuildingArt[kind];
-  if (!art) return;
-  const p = iso(x, y);
-  const night = nightAmount(state.village.minutes);
-  // Compensate source-over opacity so construction and placement ghosts stay translucent.
-  const dayAlpha = night < 1 ? alpha * (1 - night) / (1 - alpha * night) : 0;
-  if (dayAlpha > 0) drawBuildingArt(ctx, buildingImages[kind], art, p.x, p.y, scale, dayAlpha);
-  if (night > 0) {
-    ctx.save();
-    // The full-scene night tint follows this pass; keep painted window light readable.
-    ctx.filter = 'brightness(1.45)';
-    drawBuildingArt(ctx, nightBuildingImages[kind], art, p.x, p.y, scale, alpha * night);
+function sprite(kind, x, y, alpha = 1, id) {
+  const art=allBuildingArt[kind];if(!art)return;
+  const p=iso(x,y),night=nightAmount(state.village.minutes);
+  const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
+  const level=buildingLighting(state.environment.power,id,kind,complete);
+  for(const layer of lightingLayers(night,level,alpha)){
+    ctx.save();ctx.filter=layer.filter;
+    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x,p.y,scale,layer.alpha);
     ctx.restore();
   }
 }
-function cistern(x, y, alpha = 1) {
-  sprite('well', x, y, alpha);
-}
 function buildingSprite(kind, x, y, alpha = 1, id) {
-  kind = buildingArtKey({kind,id},state.village.buildings);
-  if (kind === "well") cistern(x, y, alpha);
-  else sprite(kind, x, y, alpha);
+  sprite(buildingArtKey({kind,id},state.village.buildings),x,y,alpha,id);
 }
 function placementValid(kind, x, y) {
   return !placementReason(state.village, kind, x, y, kinds[kind][1]);
@@ -374,7 +367,7 @@ function building(b) {
       [0.9, -0.9],
       [0.9, 0.9],
       [-0.9, 0.9],
-    ].map(([x, y]) => iso(b.x + x * (b.kind === "square" ? 2 : 1), b.y + y * (b.kind === "square" ? 2 : 1)));
+    ].map(([x, y]) => iso(b.x + x * (["square", "solar_farm"].includes(b.kind) ? 2 : 1), b.y + y * (["square", "solar_farm"].includes(b.kind) ? 2 : 1)));
     const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
@@ -526,7 +519,7 @@ function render() {
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y);
     const reason = placementReason(state.village, tool, t.x, t.y, kinds[tool][1]);
-    const radius = tool === "road" ? 0.5 : tool === "square" ? 2 : 1;
+    const radius = tool === "road" ? 0.5 : ["square", "solar_farm"].includes(tool) ? 2 : 1;
     polygon([[-radius,-radius],[radius,-radius],[radius,radius],[-radius,radius]].map(([x,y]) => {
       const p = iso(t.x+x,t.y+y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
@@ -566,6 +559,19 @@ function render() {
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
   ctx.fillRect(0, 0, width, height);
+  if(darkness>0){
+    for(const b of state.village.buildings){
+      if(b.progress<100)continue;
+      const c=state.environment.power.connections.find(c=>c.id===b.id);
+      if(c?.source!=='grid' || c.light_level<=0)continue;
+      const p=iso(b.x,b.y),lamp=b.kind==='streetlight';
+      const radius=(lamp?42:25)*scale,cy=p.y+(lamp?0:4*scale);
+      ctx.save();ctx.translate(p.x,cy);ctx.scale(1,.5);
+      const glow=ctx.createRadialGradient(0,0,0,0,0,radius);
+      glow.addColorStop(0,`rgba(255,214,118,${darkness*c.light_level*(lamp?.38:.15)})`);glow.addColorStop(1,'rgba(255,214,118,0)');
+      ctx.fillStyle=glow;ctx.fillRect(-radius,-radius,radius*2,radius*2);ctx.restore();
+    }
+  }
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
@@ -794,6 +800,8 @@ function updateQuests() {
         : "Host a gathering";
 }
 const buildingPurposes = {
+  solar_farm: "Collects sunshine and charges the shared battery. Generation peaks at 6 energy per hour; each farm stores 36 energy.",
+  streetlight: "Lights the path after sunset, using 0.1 energy per hour from the shared battery.",
   home: "Rest on the porch to recover energy.",
   garden: "Plant, water, or harvest this bed when it is ready.",
   greenhouse: "Grow crops under glass and raise seedlings for outdoor beds. Rain stays outside.",
@@ -815,6 +823,7 @@ function updateBuildingPanel() {
   }
   const b = state.village.buildings.find(b => b.id === Number(chooser.value));
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
+  $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
   $("#crop-controls").hidden = !farming;
   if (farming) {
@@ -831,6 +840,9 @@ function updateBuildingPanel() {
   $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Construction must finish before visits." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
+  const utility = b && ["solar_farm", "streetlight"].includes(b.kind);
+  $("#building-visits").hidden = utility;
+  if (utility) $("#building-activity").textContent = b.progress < 100 ? "Residents are building it. It connects when construction finishes." : "Works automatically. Manage shared lighting in Power.";
   for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100;
 }
 function inspectBuilding(id) {
@@ -874,6 +886,7 @@ function updateUI() {
   updateSituations();
   const v = state.village;
   updateSupplies(v);
+  updatePowerUI(state,kinds);
   updateBuildingPanel();
   for (const k of ["wood", "food", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
@@ -1091,6 +1104,13 @@ function setup() {
     save();
   };
 
+  $("#build-solar").onclick=()=>setTool("solar_farm");
+  $("#build-streetlight").onclick=()=>setTool("streetlight");
+  $("#power-loads").onchange=event=>{
+    const input=event.target.closest('[data-power-building]');if(!input)return;
+    game.set_power_enabled(Number(input.dataset.powerBuilding),input.checked);
+    state=JSON.parse(game.snapshot());updateUI();save();
+  };
   for (const id of ["feed-hens", "use-eggs"]) {
     $("#" + id).onchange = () => {
       game.set_food_preferences($("#feed-hens").checked, $("#use-eggs").checked);
@@ -1341,7 +1361,7 @@ function setup() {
       else {
         const cell = uniso(x, y);
         const b = [...state.village.buildings].reverse().find(b => {
-          const radius = b.kind === "square" ? 2 : 1;
+          const radius = ["square", "solar_farm"].includes(b.kind) ? 2 : 1;
           return Math.abs(b.x-cell.x) <= radius && Math.abs(b.y-cell.y) <= radius;
         });
         if (b) inspectBuilding(b.id);

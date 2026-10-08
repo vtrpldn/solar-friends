@@ -48,6 +48,14 @@ New village restarts the scenario after confirmation and retains one backup unde
 
 Existing 20×20 saves expand in place. A meandering river runs along the eastern edge, with animated currents, shallow banks, and stones. Construction is blocked along the riverbank so buildings and their approach points remain on the village side.
 
+## Solar power
+
+Why: shared buildings and street lights need a player-built source of energy. Build a **solar farm** for 48 timber and **street lights** for 6 timber each. Residents finish construction as usual. Each completed farm starts with an empty battery, generates up to 6 energy per game hour in daylight, and adds 36 energy of storage. Batteries supply lighting after sunset; an empty battery turns shared lights off until sunshine returns. More farms increase generation and storage.
+
+Open **Power** for generation, demand, stored energy, and an estimate of remaining nighttime lighting. Switch individual shared lights off to save energy. Connections span the village automatically. Homes with rooftop panels use their own batteries; gardens, food forests, and compost need no electricity. Residents can still cook on the kitchen stove and work by hand during outages. Charge and switches are saved; older villages start without shared power.
+
+The developer scenarios **Stored sunshine** and **Empty battery** provide matching nighttime views for checking lighting and controls.
+
 ## Farming
 
 Select a garden or greenhouse in **Buildings** to choose its next crop, pause replanting, and inspect growth, soil moisture, and expected yield. Crop changes wait until the current cycle ends; paused replanting still allows watering and harvesting existing plants. Existing gardens migrate to lettuce with their growth intact.

@@ -37,7 +37,7 @@ function render(){
     caption.replaceChildren(document.createTextNode(art.name));const detail=document.createElement('span');
     detail.textContent=m?`${error.toFixed(2)} px maximum traced-edge drift at game scale`:'Organic grove · no rectangular structure to calibrate';caption.append(detail);
   }
-  $('status').textContent=`13 variants · 26 day/night views reviewed. ${corrected?'Measured structural directions aligned to the map.':'Original camera angles before correction.'} Drift reports the remaining painted-edge variation, not a pixel-perfect geometry claim.`;
+  $('status').textContent=`${cards.length} variants · ${cards.length*2} day/night views reviewed. ${corrected?'Measured structural directions aligned to the map.':'Original camera angles before correction.'} Drift reports the remaining painted-edge variation, not a pixel-perfect geometry claim.`;
 }
 try{
   await Promise.all([...new Set(Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]))].map(async file=>{const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}));

@@ -7,6 +7,8 @@ import { measuredAxes } from './building-projection.js';
 import { pergolaMesh, buildingTexture } from './building-mesh.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
+  solar_farm: { name: 'Solar farm', file: 'solar-farm.png', width: 188, anchor: .60 },
+  streetlight: { name: 'Street light', file: 'streetlight.png', width: 80, anchor: .86 },
   home: { name: 'Home', file: atlas, cell: [0, 0, .5, .5], width: 179.36, anchor: .70 },
   kitchen: { name: 'Kitchen', file: atlas, cell: [.5, 0, .5, .5], width: 179.36, anchor: .70 },
   grove: { name: 'Banana grove', file: atlas, cell: [.5, .5, .5, .5], width: 123.9, anchor: .74 },

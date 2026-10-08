@@ -1,0 +1,26 @@
+{
+  "tool": "Built-in image generation",
+  "date": "2026-10-08",
+  "references": [
+    "web/art/home-veranda.png",
+    "web/art/workshop-isometric.png"
+  ],
+  "assets": [
+    {
+      "file": "web/art/solar-farm.png",
+      "prompt": "Create one new transparent Solar Friends game building sprite: a small community SOLAR FARM, matching the warm painted Brazilian ecovila style, materials and blue solar panels in the two references. Three low rows of two deep blue photovoltaic panels (six panels total), on simple short timber and muted metal supports, a small cream/teal battery cabinet at the rear side, tidy narrow red-earth footprint and just a few leafy plants. No house, roof, fence, people, text, labels or loose wires. Compact small village installation, panel racks around waist height beside residents. Rigorous elevated orthographic 2:1 game projection: ground directions slopes +0.5 and -0.5, vertical posts straight vertical, all ground-parallel rails parallel, no vanishing points. Warm top-left daylight, same softly illustrated texture and saturation as the references. Square canvas, whole object with generous 12% transparent border, no cast shadow beyond footprint, real alpha transparency."
+    },
+    {
+      "file": "web/art/solar-farm-night.png",
+      "prompt": "Use case: lighting-weather. Edit target: supplied transparent Solar Friends solar farm sprite. Create its NIGHT lighting alternative. Preserve EXACT canvas dimensions, geometry, six solar panels, cabinet, all props, silhouette, positions, scale, transparent padding and orthographic camera. Lighting only: cool dim blue moonlight, deep but readable blue shadows and subdued earth. Solar panels do not emit light. Cabinet has no windows, lamps or glowing indicators. No internal warm glow anywhere. No added objects, backgrounds, moon, stars, sky, people or text. Real transparent alpha."
+    },
+    {
+      "file": "web/art/streetlight.png",
+      "prompt": "Create one transparent game sprite: a SINGLE village STREET LIGHT matching the warm hand-painted Solar Friends Brazilian ecovila buildings in the reference. A slim straight warm timber post on a small cream stone foot, with a small muted teal metal arm and a simple amber-glass rectangular downward-facing lantern near the top. No solar panel on this lamp: it is powered by the village solar farm. DAYTIME version, lantern switched OFF, glass muted pale blue-gray, no luminous yellow/orange interior, no glow. Simple clean readable silhouette, slightly taller than a person (about the cottage eaves, never as tall as a roof ridge). Same elevated 2:1 orthographic camera, perfectly vertical post, base edges slope +0.5/-0.5, softly painted wood/stone/teal metal texture, upper-left warm daylight. Exactly one isolated street light centered on square transparent canvas, broad 12% empty border. No house, path, trees, plants, ground patch, people, text, power wires or background. Actual alpha transparency."
+    },
+    {
+      "file": "web/art/streetlight-night.png",
+      "prompt": "Use case: lighting-weather. Edit target: supplied transparent Solar Friends street-light sprite. Create its POWERED NIGHT alternative. Preserve EXACT canvas, geometry, upright post, lamp position, size, stone base, proportions, silhouette, empty padding and camera. Change only lighting: cool dark moonlit timber and teal metal, lantern glass glowing warm amber with a restrained small halo. Keep the shape and all positions exactly, so this aligns pixel for pixel when blended with the daytime source. No new props, solar panel, wires, text, ground, sky or background. Real alpha transparency including the halo."
+    }
+  ]
+}

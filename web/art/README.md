@@ -103,3 +103,8 @@ Per-source additions:
 The selected compost revision used this corrective prompt:
 
 > Edit the supplied DAYTIME compost station into a NIGHT variant. Change lighting only: uniformly cool dim blue moonlight. NO orange or yellow light ANYWHERE. Compost and spaces between wooden boards are dark brown/blue, completely unlit. There is no fire, electricity, lamp, ember, bioluminescence or internal light in this object. Keep exact silhouette, layout, scale, padding, isometric camera, all props and canvas dimensions. Real transparent background. Painterly game sprite.
+
+
+## Solar power assets
+
+The built-in image-generation tool produced `solar-farm.png`, `solar-farm-night.png`, `streetlight.png`, and `streetlight-night.png` using existing village buildings as style references. Exact prompts and source paths are in [solar-power-prompts.json](../../assets/art-direction/solar-power-prompts.json). They share calibrated day/night geometry, transparent backgrounds, and the village palette. The farm renders at 188 px source width; the street light at 80 px, including transparent padding. The lamp is dark during the day and emits warm light only when shared power is available at night.
