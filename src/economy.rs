@@ -93,10 +93,16 @@ pub struct Economy {
     pub next_building: usize,
     pub next_order: u32,
     pub outside_work: bool,
+    #[serde(default = "uncommitted_day")]
+    pub outside_committed_day: i32,
     pub work_day: [i32; 5],
     pub exchange_day: i32,
     pub last_delivery: f32,
 }
+fn uncommitted_day() -> i32 {
+    -1
+}
+
 impl Default for Economy {
     fn default() -> Self {
         Self {
@@ -129,6 +135,7 @@ impl Default for Economy {
             next_building: 0,
             next_order: 0,
             outside_work: false,
+            outside_committed_day: -1,
             work_day: [-1; 5],
             exchange_day: -1,
             last_delivery: 0.,
@@ -566,7 +573,9 @@ pub fn valid(v: &Village) -> bool {
     {
         return false;
     }
-    if e.money < 0
+    if e.outside_committed_day < -1
+        || e.outside_committed_day > (v.minutes / 1440.) as i32
+        || e.money < 0
         || e.money > 1_000_000_000
         || e.stock[0] != 0
         || storage(v) > CAPACITY
@@ -892,10 +901,15 @@ impl Game {
 }
 pub fn finish_outside(v: &mut Village, id: usize) {
     let day = (v.minutes / 1440.) as i32;
-    if v.economy.outside_work && !v.economy.work_day.contains(&day) {
+    if (v.economy.outside_work || v.economy.outside_committed_day == day)
+        && !v.economy.work_day.contains(&day)
+    {
         v.economy.work_day[id] = day;
         ledger(v, 18000, "Neighbouring farm shift contribution".into());
-        event(v, "A short outside shift added R$ 180 to our shared fund.");
+        event(
+            v,
+            "Our neighbour returned from their 09:00–17:00 job with R$ 180 for the shared fund.",
+        );
     }
 }
 

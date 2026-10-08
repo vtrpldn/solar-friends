@@ -8,6 +8,7 @@ mod ecology;
 mod economy;
 mod interactions;
 mod leisure;
+mod mobility;
 mod modes;
 mod power;
 mod progression;
@@ -43,6 +44,7 @@ const TASKS: &[&str] = &[
     "source",
     "prepare",
     "outside",
+    "return",
 ];
 
 #[derive(Component, Clone, Serialize, Deserialize)]
@@ -70,6 +72,8 @@ pub struct Resident {
     pub activity_building: Option<usize>,
     #[serde(default)]
     pub activity_material: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trip: Option<mobility::Trip>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Building {
@@ -181,7 +185,10 @@ fn available(v: &Village, task: &str) -> bool {
         "build" => v.buildings.iter().any(|b| economy::can_build(v, b.id)),
         "source" | "prepare" => economy::local_job(v).is_some_and(|(t, _)| t == task),
         "outside" => {
-            v.economy.outside_work && !v.economy.work_day.contains(&((v.minutes / 1440.) as i32))
+            v.economy.outside_work
+                && mobility::departure_time(v.minutes)
+                && v.economy.outside_committed_day != (v.minutes / 1440.) as i32
+                && !v.economy.work_day.contains(&((v.minutes / 1440.) as i32))
         }
         "garden" => v
             .buildings
@@ -278,6 +285,7 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
 }
 
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
+    r.trip = None;
     r.visit_building = None;
     r.activity_material = None;
     r.activity_building = if matches!(task, "source" | "prepare" | "outside") {
@@ -298,6 +306,18 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
+    if task == "outside" || (task == "sleep" && shelter(v, r.id).is_none()) {
+        mobility::begin(
+            r,
+            v,
+            if task == "outside" {
+                mobility::Purpose::Work
+            } else {
+                mobility::Purpose::Overnight
+            },
+        );
+        return;
+    }
     if task != "sleep"
         && r.activity_building.is_some_and(|id| {
             v.buildings
@@ -340,9 +360,6 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
                 );
             }
         }
-    } else if task == "outside" {
-        r.remaining = 20.;
-        (r.target_x, r.target_y) = (2., 13.);
     } else if task == "idle" || leisure::hobby(task) {
         r.remaining = 24. + r.id as f32 * 2.;
         (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((r.x, r.y));
@@ -358,7 +375,7 @@ fn choose(r: &mut Resident, v: &Village) {
             if shelter(v, r.id).is_some() {
                 "Time for bed. A roof makes all the difference."
             } else {
-                "Sleeping at our arrival spot. We still need shelter."
+                "Staying with neighbours overnight until we have a village bed."
             },
         )
     } else if (meal_due || r.hunger > 60. || (v.meals > 0 && r.hunger > 30.)) && available(v, "eat")
@@ -382,6 +399,11 @@ fn choose(r: &mut Resident, v: &Village) {
         return;
     } else if supplies::urgent(v) {
         ("gather", "Foraging wild food to keep everyone fed.")
+    } else if r.id == 4 && available(v, "outside") {
+        (
+            "outside",
+            "Leaving for my job at a neighbouring farm until 17:00.",
+        )
     } else if !work_time(v.minutes) {
         leisure::choose(r, v)
     } else if v.water < 24. && available(v, "water") {
@@ -398,14 +420,6 @@ fn choose(r: &mut Resident, v: &Village) {
             } else {
                 "Preparing a pot of food for everyone."
             },
-        )
-    } else if v.economy.outside_work
-        && r.id == 4
-        && !v.economy.work_day.contains(&((v.minutes / 1440.) as i32))
-    {
-        (
-            "outside",
-            "Helping at a nearby farm for a short paid shift.",
         )
     } else if available(v, "build") && matches!(r.id, 0 | 1) {
         (
@@ -458,6 +472,12 @@ fn choose(r: &mut Resident, v: &Village) {
 }
 fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Option<String> {
     let id = r.id;
+    if r.trip.is_some() {
+        return Some(format!(
+            "{} is away or commuting. Ask again after returning to the village.",
+            r.name
+        ));
+    }
     if !matches!(
         task,
         "build"
@@ -476,8 +496,11 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
     ) {
         return Some("That request is not available.".into());
     }
-    if matches!(task, "source" | "prepare" | "outside") && !work_time(v.minutes) {
-        return Some("Material collection, preparation and outside shifts wait for community work hours: 09:00–12:00 and 15:00–16:00.".into());
+    if task == "outside" && !mobility::departure_time(v.minutes) {
+        return Some("Outside jobs leave between 09:00 and 10:00 and return at 17:00.".into());
+    }
+    if matches!(task, "source" | "prepare") && !work_time(v.minutes) {
+        return Some("Material collection and preparation wait for community work hours: 09:00–12:00 and 15:00–16:00.".into());
     }
     if situations::protected(v, id, task) {
         return Some(
@@ -597,9 +620,13 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     let neighbours: Vec<_> = people
         .iter()
         .filter(|r| {
-            !(r.task == "sleep"
-                && shelter(&v, r.id).is_some()
-                && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08)
+            !r.trip
+                .as_ref()
+                .is_some_and(|t| t.phase == mobility::Phase::Away)
+                && !(r.trip.is_none()
+                    && r.task == "sleep"
+                    && shelter(&v, r.id).is_some()
+                    && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08)
         })
         .map(|r| (r.id, r.x, r.y))
         .collect();
@@ -609,6 +636,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         .filter_map(|r| spacing::building(r, &v))
         .collect();
     for mut r in &mut people {
+        if mobility::advance(&mut r, &mut v, &neighbours, dt) {
+            continue;
+        }
         let sleeping = r.task == "sleep";
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
@@ -644,15 +674,20 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         let chores_start = !r.requested
             && work_time(v.minutes)
             && (!work_time(before)
+                || (r.id == 4 && available(&v, "outside"))
                 || (ready_work && r.social >= 65. && !situations::protected(&v, r.id, "cook")))
             && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
         if r.task != "arrive"
             && (sleeping_time(v.minutes, r.id) != (r.task == "sleep")
+                || (sleeping_time(v.minutes, r.id) && shelter(&v, r.id).is_none())
                 || r.remaining <= 0.
                 || chores_finished
                 || chores_start)
         {
             choose(&mut r, &v);
+        }
+        if mobility::advance(&mut r, &mut v, &neighbours, 0.) {
+            continue;
         }
         let dx = r.target_x - r.x;
         let dy = r.target_y - r.y;
@@ -759,7 +794,6 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                         economy::finish_job(&mut v, &r.task, i);
                     }
                 }
-                "outside" => economy::finish_outside(&mut v, r.id),
                 "garden" if r.requested || supplies::needs_ingredients(&v) => {
                     ecology::tend(&mut v, &r)
                 }
@@ -882,6 +916,7 @@ impl Game {
                 visit_building: None,
                 activity_building: None,
                 activity_material: None,
+                trip: None,
             });
         }
         Self { app }
@@ -962,6 +997,12 @@ impl Game {
         else {
             return "Resident not found.".into();
         };
+        if r.trip.is_some() {
+            return format!(
+                "{} is away or commuting. Ask again after returning to the village.",
+                r.name
+            );
+        }
         if r.task == "arrive"
             || sleeping_time(v.minutes, resident)
             || r.energy < 25.
@@ -1080,21 +1121,32 @@ impl Game {
     }
     pub fn request(&mut self, id: usize, task: &str, encourage: bool) -> String {
         let v = self.app.world().resource::<Village>().clone();
-        let mut query = self.app.world_mut().query::<&mut Resident>();
-        let Some(mut r) = query.iter_mut(self.app.world_mut()).find(|r| r.id == id) else {
-            return "Resident not found.".into();
+        let message = {
+            let mut query = self.app.world_mut().query::<&mut Resident>();
+            let Some(mut r) = query.iter_mut(self.app.world_mut()).find(|r| r.id == id) else {
+                return "Resident not found.".into();
+            };
+            if let Some(reason) = request_blocker(&v, &r, task, encourage) {
+                return reason;
+            }
+            let reason = if encourage {
+                "You explained why this matters. I'll lend a hand."
+            } else {
+                "Happy to help with your request."
+            };
+            assign(&mut r, &v, task, reason, true);
+            format!("{}: {}", r.name, reason)
         };
-        if let Some(reason) = request_blocker(&v, &r, task, encourage) {
-            return reason;
+        if task == "outside" {
+            self.app
+                .world_mut()
+                .resource_mut::<Village>()
+                .economy
+                .outside_committed_day = (v.minutes / 1440.) as i32;
         }
-        let reason = if encourage {
-            "You explained why this matters. I'll lend a hand."
-        } else {
-            "Happy to help with your request."
-        };
-        assign(&mut r, &v, task, reason, true);
-        format!("{}: {}", r.name, reason)
+        message
     }
+
     pub fn respond_situation(&mut self, response: &str) -> String {
         let result = situations::respond(
             &mut self.app.world_mut().resource_mut::<Village>(),
@@ -1169,7 +1221,7 @@ impl Game {
         let mut invited: u8 = 0;
         let mut q = self.app.world_mut().query::<&Resident>();
         for r in q.iter(self.app.world()) {
-            if r.energy >= 25. && r.hunger <= 75. && r.task != "arrive" {
+            if r.trip.is_none() && r.energy >= 25. && r.hunger <= 75. && r.task != "arrive" {
                 invited |= 1 << r.id;
             }
         }
@@ -1268,6 +1320,7 @@ impl Game {
                     i >= economy::COUNT || (r.task == "source" && i >= v.economy.sources.len())
                 })
                 || !TASKS.contains(&r.task.as_str())
+                || !mobility::valid(v, r)
         }) {
             return false;
         }

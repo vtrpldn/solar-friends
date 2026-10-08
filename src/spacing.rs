@@ -9,7 +9,7 @@ pub fn land(x: f32, y: f32) -> bool {
         && !river_bank(x.floor() as i32, y.floor() as i32)
 }
 
-fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
+pub(crate) fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
     let size = interactions::footprint_size(&b.kind);
     let left = (b.x - size / 2) as f32 - 0.5;
     let back = (b.y - size / 2) as f32 - 0.5;

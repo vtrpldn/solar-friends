@@ -39,9 +39,10 @@ impl Game {
         let village = v.clone();
         let mut q = self.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(self.app.world_mut()) {
-            if r.visit_building == Some(id)
-                || r.activity_building == Some(id)
-                || (home && matches!(r.task.as_str(), "sleep" | "rest"))
+            if r.trip.is_none()
+                && (r.visit_building == Some(id)
+                    || r.activity_building == Some(id)
+                    || (home && matches!(r.task.as_str(), "sleep" | "rest")))
             {
                 r.visit_building = None;
                 r.activity_building = None;
