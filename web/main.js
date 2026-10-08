@@ -81,6 +81,7 @@ const tasks = {
   source: "Collecting local materials",
   prepare: "Preparing building materials",
   outside: "Working at a neighbouring farm",
+  pickup: "Driving to collect town supplies",
   return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Collecting river water",
@@ -883,7 +884,7 @@ function updateQuests() {
     label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
     onClick=()=>showPanel('projects-panel');
     const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
-    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Incoming deliveries arrive at 10:00 after dispatch.`;
+    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
   }
   if(route?.type==='supper'||route?.type==='tool_library'){
     const supper=route.type==='supper', underway=supper&&p.gathering_until>v.minutes;
@@ -1055,7 +1056,7 @@ function updateUI() {
   $('[data-panel="town-panel"]').hidden=free;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
-  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Village → Construction tracks materials and Trade supplies equipment by delivery. Each chapter opens the next part of village life.';
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
   replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();

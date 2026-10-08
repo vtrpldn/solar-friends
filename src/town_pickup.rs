@@ -334,4 +334,29 @@ mod tests {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), original);
     }
+
+    #[test]
+    fn pickup_uses_its_lower_fee_and_dispatched_delivery_cannot_switch() {
+        let mut g = healthy();
+        g.app.world_mut().resource_mut::<Village>().economy.money = 2700;
+        let mut items = [0u32; economy::COUNT];
+        items[0] = 1;
+        let data = serde_json::to_string(&items).unwrap();
+        let before = g.snapshot();
+        assert_ne!(g.order_supplies(&data), "ok");
+        assert_eq!(g.snapshot(), before);
+        assert_eq!(g.order_supplies_pickup(&data, 0), "ok");
+        assert_eq!(state(&mut g).village.economy.money, 0);
+
+        let mut dispatched = healthy();
+        assert_eq!(dispatched.order_supplies(&bundle()), "ok");
+        {
+            let mut v = dispatched.app.world_mut().resource_mut::<Village>();
+            v.minutes = 800.;
+            economy::advance(&mut v, 0.);
+        }
+        let before = dispatched.snapshot();
+        assert_ne!(dispatched.collect_order(0, 0), "ok");
+        assert_eq!(dispatched.snapshot(), before);
+    }
 }

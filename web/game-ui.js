@@ -45,13 +45,13 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
       let button=portraits.get(r.id);
       if(!button){button=document.createElement('button');button.dataset.citizen=r.id;button.innerHTML=`${avatar(r.id)}<span class="citizen-status" aria-hidden="true"></span>`;button.onclick=()=>selectPerson(r.id);$('#resident-strip').append(button);portraits.set(r.id,button);paintPortraits();}
       const away=r.trip?.phase==='away',asleep=r.task==='sleep'&&(away||Math.hypot(r.x-r.target_x,r.y-r.target_y)<=.08)&&r.sleep?.started_at!=null;
-      const condition=away&&r.trip.purpose==='work'?'At work':asleep?'Asleep':r.trip?'Travelling':r.hunger>75?'Hungry':r.energy<25?'Tired':'In the village';
+      const condition=away&&r.trip.purpose==='pickup'?'Collecting supplies':away&&r.trip.purpose==='work'?'At work':asleep?'Asleep':r.trip?'Travelling':r.hunger>75?'Hungry':r.energy<25?'Tired':'In the village';
       button.title=`${r.name} · ${condition} · Energy ${Math.round(r.energy)}`;
       button.setAttribute('aria-label',`Select ${r.name}. ${condition}. Energy ${Math.round(r.energy)}`);
       button.classList.toggle('active',r.id===selected);
       button.style.setProperty('--energy',`${r.energy}%`);
       button.dataset.condition=condition;
-      button.querySelector('.citizen-status').textContent=away&&r.trip.purpose==='work'?'↗':asleep?'z':r.trip?'↔':r.hunger>75||r.energy<25?'!':'';
+      button.querySelector('.citizen-status').textContent=away&&r.trip.purpose==='pickup'?'⇄':away&&r.trip.purpose==='work'?'↗':asleep?'z':r.trip?'↔':r.hunger>75||r.energy<25?'!':'';
     }
     const b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));
     const key=b?buildingArtKey(b,state.village.buildings,state.village.economy.projects):'';

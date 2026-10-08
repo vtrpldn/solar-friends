@@ -19,20 +19,49 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
   $('#sell-material').onclick=()=>transact(game().sell_material(Number($('#spare-material').value),Number($('#spare-quantity').value)));
   $('#project-list').addEventListener('focusout',()=>queueMicrotask(update));
   const basket=()=>Array.from({length:15},(_,i)=>Number($(`[data-material="${i}"]`).value));
-  function quote(){const s=snapshot(),e=s.environment.economy,items=basket(),valid=items.every(n=>Number.isInteger(n)&&n>=0&&n<=100),quantity=items.reduce((a,b)=>a+b,0),total=items.reduce((a,n,i)=>a+n*e.materials[i].price,0)+(quantity?6000:0);
-    $('#town-total').textContent=money(total);$('#town-delivery').textContent=quantity?'Includes R$ 60 delivery · dispatch in two game hours, arrival at 10:00 after dispatch.':'Combine purchases for several projects in one delivery.';
-    $('#town-order').disabled=!valid||!quantity||e.money<total||e.used+quantity>e.capacity;
-    $('#town-basket-status').textContent=!valid?'Use whole quantities from 0 to 100.':e.money<total?'The fund is too small. Enable outside jobs or sell surplus.':e.used+quantity>e.capacity?'Receiving space is full; use stored materials first.':quantity?`${quantity} ${quantity===1?'unit':'units'} · ${e.capacity-e.used-quantity} receiving spaces left`:'Choose supplies or fill this list from village needs.';
+  const pickupMode=()=>$('[name="town-transport"]:checked').value==='pickup';
+  function refreshDrivers(select){
+    const drivers=snapshot().environment.economy.pickup_drivers;
+    const previous=select.value,markup=drivers.map(r=>`<option value="${r.id}" ${r.blocker?'disabled':''}>${escape(r.name)}${r.blocker?' · '+escape(r.blocker):''}</option>`).join('');
+    if(select.innerHTML!==markup){select.innerHTML=markup;select.value=drivers.some(r=>String(r.id)===previous)?previous:String(drivers.find(r=>!r.blocker)?.id??'');}
   }
+  function pickupMessage(name){return `${name} is collecting our supplies. ${$('#pause').getAttribute('aria-label')==='Resume simulation'?'Resume time to let the trip begin.':'The order will arrive when they return.'}`;}
+  function quote(){
+    const s=snapshot(),e=s.environment.economy,items=basket(),valid=items.every(n=>Number.isInteger(n)&&n>=0&&n<=100),quantity=items.reduce((a,b)=>a+b,0),pickup=pickupMode(),driver=e.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),fee=pickup?e.pickup_fee:6000,total=items.reduce((a,n,i)=>a+n*e.materials[i].price,0)+(quantity?fee:0);
+    $('#pickup-controls').hidden=!pickup;
+    $('#pickup-driver-note').textContent=driver?.blocker||'Two hours driving and loading, plus the walk to the truck. The resident is unavailable for village chores during the trip.';
+    $('#town-total').textContent=money(total);
+    $('#town-delivery').textContent=pickup?'Includes R$ 20 fuel. Supplies enter our stores when the driver returns.':quantity?'Includes R$ 60 delivery · dispatch in two game hours, arrival at 10:00 after dispatch.':'Combine purchases for several projects in one delivery.';
+    const blocked=pickup&&(quantity>e.pickup_capacity||!driver||driver.blocker);
+    $('#town-order').disabled=!valid||!quantity||e.money<total||e.used+quantity>e.capacity||!!blocked;
+    $('#town-order').textContent=pickup?'Buy & collect':'Buy supplies';
+    $('#town-basket-status').textContent=!valid?'Use whole quantities from 0 to 100.':pickup&&quantity>e.pickup_capacity?'The truck holds 40 units. Split this order or choose town delivery.':pickup&&(!driver||driver.blocker)?driver?.blocker||'No resident is ready to drive.':e.money<total?'The fund is too small. Enable outside jobs or sell surplus.':e.used+quantity>e.capacity?'Receiving space is full; use stored materials first.':quantity?`${quantity} ${quantity===1?'unit':'units'} · ${e.capacity-e.used-quantity} receiving spaces left`:'Choose supplies or fill this list from village needs.';
+  }
+  document.querySelector('.transport-choice').onchange=()=>{$('#town-pickup-status').textContent='';quote();};
+  function updatePickupDialog(){
+    const e=snapshot().environment.economy,o=snapshot().village.economy.orders.find(o=>o.id===Number($('#pickup-confirm').dataset.order)),driver=e.pickup_drivers.find(r=>String(r.id)===$('#pickup-order-driver').value);
+    $('#pickup-order-status').textContent=!o||o.status!=='confirmed'?'This order is no longer awaiting dispatch.':driver?.blocker||(!driver?'No resident is ready to drive.':'Ready to collect. Supplies stay incoming until the driver returns.');
+    $('#pickup-confirm').disabled=!o||o.status!=='confirmed'||!driver||!!driver.blocker;
+  }
+  $('#pickup-close').onclick=()=>$('#pickup-dialog').close();
+  $('#pickup-dialog').addEventListener('close',()=>$('#town-panel [data-close-panel]').focus());
+  $('#pickup-order-driver').onchange=updatePickupDialog;
+  $('#pickup-confirm').onclick=()=>{const id=Number($('#pickup-confirm').dataset.order),driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-order-driver').value),result=game().collect_order(id,Number($('#pickup-order-driver').value));transact(result);if(result==='ok'){$('#pickup-dialog').close();notify(pickupMessage(driver.name));}else updatePickupDialog();};
   $('#town-catalog').addEventListener('input',quote);
   $('#town-catalog').addEventListener('click',event=>{const button=event.target.closest('[data-adjust]');if(!button)return;const input=button.closest('.town-item').querySelector('input');input.value=Math.max(0,Math.min(100,(Number(input.value)||0)+Number(button.dataset.adjust)));quote();});
   $('#town-shortages').onclick=()=>{const e=snapshot().environment.economy;for(let i=0;i<15;i++)$(`[data-material="${i}"]`).value=Math.min(e.shortage[i],100);quote();};
   $('#town-clear').onclick=()=>{for(const input of $('#town-catalog').querySelectorAll('input'))input.value=0;quote();};
-  $('#town-order').onclick=()=>{const result=game().order_supplies(JSON.stringify(basket()));if(result==='ok')$('#town-clear').click();transact(result);};
+  $('#town-order').onclick=()=>{const pickup=pickupMode(),driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),result=pickup?game().order_supplies_pickup(JSON.stringify(basket()),Number($('#pickup-driver').value)):game().order_supplies(JSON.stringify(basket()));if(result==='ok')$('#town-clear').click();transact(result);if(result==='ok'&&pickup){const message=pickupMessage(driver.name);$('#town-pickup-status').textContent=message;notify(message);}};
   $('#outside-work').onchange=event=>{game().set_outside_work(event.target.checked);changed();update();};
   $('#sell-surplus').onclick=()=>transact(game().sell_surplus(Math.min(20,snapshot().environment.economy.saleable_food)));
   $('#exchange-parts').onclick=()=>transact(game().exchange_parts());
-  $('#town-orders').onclick=event=>{const button=event.target.closest('[data-cancel-order]');if(button)transact(game().cancel_order(Number(button.dataset.cancelOrder)));};
+  $('#town-orders').onclick=event=>{
+    const cancel=event.target.closest('[data-cancel-order]');if(cancel){transact(game().cancel_order(Number(cancel.dataset.cancelOrder)));return;}
+    const collect=event.target.closest('[data-collect-order]');if(!collect)return;
+    const o=snapshot().village.economy.orders.find(o=>o.id===Number(collect.dataset.collectOrder));if(!o)return;
+    $('#pickup-confirm').dataset.order=o.id;$('#pickup-order-summary').textContent=`Order ${o.id+1} · ${o.items.reduce((a,b)=>a+b,0)} ${o.items.reduce((a,b)=>a+b,0)===1?'unit':'units'}. R$ 40 of the delivery fee returns to the fund; R$ 20 covers fuel.`;
+    refreshDrivers($('#pickup-order-driver'));updatePickupDialog();$('#pickup-dialog').showModal();
+  };
   $('#project-list').onclick=event=>{
     const button=event.target.closest('button');if(!button)return;const id=Number(button.dataset.project),p=snapshot().environment.economy.projects.find(p=>p.building===id);if(!p)return;
     if(button.dataset.action==='locate')locate(id);
@@ -49,7 +78,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
     $('#fund').textContent=money(e.money);$('#town-fund').textContent=money(e.money);$('#outside-work').checked=e.outside_work;
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
-    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including confirmed deliveries`;
+    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders`;
     $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
     $('#property-description').textContent=e.property;
     $('#preparation-recipes').innerHTML=`<p>${e.workshop?'Workshop preparation includes roof tiles and efficient salvage recovery.':'Residents prepare frames, wall material and fittings at the camp. A workshop adds roof tiles and more efficient salvage recovery.'}</p>`+e.preparation.map(r=>`<p class="recipe-stage"><b>${r.yield} ${e.materials[r.material].name.toLowerCase()}</b>${r.inputs.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('');
@@ -66,9 +95,16 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown})
       for(const id of expanded){const card=$(`#project-list [data-project="${id}"]`)?.closest('.project-card');if(card)card.querySelector('details').open=true;}
     }
     const inventoryKey=JSON.stringify({mode:v.mode,materials:e.materials});if(inventoryKey!==lastInventory){lastInventory=inventoryKey;$('#material-inventory').innerHTML=`<div class="material-slots">${e.materials.map(m=>`<article class="material-slot" data-item="${m.id}" title="${m.name}: ${m.stored} stored, ${m.reserved} reserved, ${m.available} free, ${m.incoming} incoming"><div class="material-art">${itemIcon(materialIcons[m.id])}<b class="slot-count">${v.mode==='sandbox'?'∞':m.stored}</b></div><strong>${m.name}</strong><small>${v.mode==='sandbox'?'Unlimited':`${m.available} free${m.reserved?' · '+m.reserved+' reserved':''}`}</small>${m.incoming?`<span class="slot-incoming">+${m.incoming} on the way</span>`:''}</article>`).join('')}</div>`;}
-    const orderKey=JSON.stringify(v.economy.orders);if(orderKey!==lastOrders){lastOrders=orderKey;$('#town-orders').innerHTML=[...v.economy.orders].reverse().map(o=>`<article class="order-row"><div><b>Order ${o.id+1} · ${money(o.paid)}</b><small>${o.items.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</small><span>${o.status==='cancelled'?'Cancelled · fully refunded':o.status==='delivered'?'Delivered to the receiving area':`${o.status==='confirmed'?'Awaiting dispatch':'On the way'} · arrives ${time(o.arrival)}`}</span></div>${o.status==='confirmed'?`<button data-cancel-order="${o.id}">Cancel & refund</button>`:''}</article>`).join('')||'<p>No orders yet. Confirm a combined delivery when you need supplies.</p>';}
+    const orderKey=JSON.stringify({orders:v.economy.orders.map(o=>({...o,arrival:Math.floor(o.arrival)})),trips:s.residents.map(r=>[r.id,r.trip?.phase])});
+    if(orderKey!==lastOrders){lastOrders=orderKey;$('#town-orders').innerHTML=[...v.economy.orders].reverse().map(o=>{
+      const driver=s.residents.find(r=>r.id===o.pickup_by),quantity=o.items.reduce((a,b)=>a+b,0),pickup=o.pickup_by!=null;
+      const status=o.status==='cancelled'?'Cancelled · fully refunded':o.status==='delivered'?pickup?`Collected by ${driver?.name||'our neighbour'} · supplies received`:'Delivered to the receiving area':o.status==='collecting'?driver?.trip?.phase==='leaving'?`${driver.name} is walking to the truck · 2 hours away after departure`:`${driver?.name||'Our neighbour'} is driving to collect supplies · back ${time(o.arrival)}`:`${o.status==='confirmed'?'Awaiting dispatch':'On the way'} · arrives ${time(o.arrival)}`;
+      return `<article class="order-row"><div><b>Order ${o.id+1} · ${money(o.paid)}${pickup?' · pickup':''}</b><small>${o.items.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</small><span>${escape(status)}</span></div>${o.status==='confirmed'?`<div class="order-actions"><button data-collect-order="${o.id}" ${quantity>e.pickup_capacity?'disabled title="The truck holds at most 40 units"':''}>Drive to collect</button><button data-cancel-order="${o.id}">Cancel & refund</button></div>`:''}</article>`;
+    }).join('')||'<p>No orders yet. Choose delivery or send a resident to collect supplies.</p>';}
     $('#fund-ledger').innerHTML=[...v.economy.ledger].reverse().slice(0,12).map(l=>`<div class="ledger-row"><span>${escape(l.note)}<small>${time(l.minute)}</small></span><b>${l.amount>0?'+':''}${money(l.amount)}</b></div>`).join('');
     const landKey=JSON.stringify(v.economy.sources.map(s=>({...s,remaining:Math.floor(s.remaining)})));if(landKey!==lastLand){lastLand=landKey;$('#land-sources').innerHTML=v.economy.sources.map((s,i)=>`<article class="source-row"><div><b>${e.materials[s.material].name}</b><small>${Math.floor(s.remaining)} / ${s.maximum} locally available · ${s.material<=1?(s.restored?'restored · 3 units/day':'managed · 1 unit/day'):'finite deposit'}</small></div>${s.material<=1?`<button data-restore-source="${i}" ${s.restored||v.progress.compost<2?'disabled':''}>${s.restored?'Restored':'Restore · 2 compost'}</button>`:''}</article>`).join('');}
+    refreshDrivers($('#pickup-driver'));refreshDrivers($('#pickup-order-driver'));
+    if($('#pickup-dialog').open)updatePickupDialog();
     quote();spareQuote();
   }
   update();return {update};
