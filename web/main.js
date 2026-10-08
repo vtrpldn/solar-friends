@@ -1,5 +1,5 @@
 import {economyImage,drawEconomyArt} from './economy-art.js';
-import {residentVisible,tripLabel} from './resident-presence.js';
+import {residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
 import { installBuildMenu } from './build-menu.js';
@@ -759,7 +759,7 @@ function selectPerson(id) {
   $("#person").hidden = false;
   const r = state.residents.find((p) => p.id === id);
   const p = iso(r.x, r.y);
-  cameraTarget = { x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
+  cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
     `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="requests">${[
       ["garden", "Tend garden"],
