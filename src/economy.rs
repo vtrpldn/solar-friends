@@ -94,12 +94,20 @@ pub struct Economy {
     pub sources: Vec<Source>,
     pub next_building: usize,
     pub next_order: u32,
+    #[serde(default, skip_serializing)]
     pub outside_work: bool,
-    #[serde(default = "uncommitted_day")]
+    #[serde(default)]
+    pub outside_jobs: [bool; 5],
+    #[serde(default = "uncommitted_days")]
+    pub outside_committed_days: [i32; 5],
+    #[serde(default = "uncommitted_day", skip_serializing)]
     pub outside_committed_day: i32,
     pub work_day: [i32; 5],
     pub exchange_day: i32,
     pub last_delivery: f32,
+}
+fn uncommitted_days() -> [i32; 5] {
+    [-1; 5]
 }
 fn uncommitted_day() -> i32 {
     -1
@@ -137,6 +145,8 @@ impl Default for Economy {
             next_building: 0,
             next_order: 0,
             outside_work: false,
+            outside_jobs: [false; 5],
+            outside_committed_days: [-1; 5],
             outside_committed_day: -1,
             work_day: [-1; 5],
             exchange_day: -1,
@@ -566,7 +576,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         })
         .collect();
     let day = (v.minutes / 1440.) as i32;
-    serde_json::json!({"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":CAPACITY,"shortage":shortage(v),"outside_work":v.economy.outside_work,"income":18000,"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Southeastern countryside · earth, managed bamboo and timber, stone, and a salvage clearing"})
+    serde_json::json!({"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":CAPACITY,"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Southeastern countryside · earth, managed bamboo and timber, stone, and a salvage clearing"})
 }
 pub fn valid(v: &Village) -> bool {
     let e = &v.economy;
@@ -578,8 +588,9 @@ pub fn valid(v: &Village) -> bool {
     {
         return false;
     }
-    if e.outside_committed_day < -1
-        || e.outside_committed_day > (v.minutes / 1440.) as i32
+    if e.outside_committed_days
+        .iter()
+        .any(|d| *d < -1 || *d > (v.minutes / 1440.) as i32)
         || e.money < 0
         || e.money > 1_000_000_000
         || e.stock[0] != 0
@@ -819,13 +830,19 @@ impl Game {
         ledger(&mut v, paid, format!("Refund for order {}", id + 1));
         "ok".into()
     }
+    /// Existing scenario helpers enable Nina's job; players use individual toggles.
     pub fn set_outside_work(&mut self, enabled: bool) {
-        self.app
-            .world_mut()
-            .resource_mut::<Village>()
-            .economy
-            .outside_work = enabled;
+        self.set_resident_job(4, enabled);
     }
+    pub fn set_resident_job(&mut self, resident: usize, enabled: bool) -> bool {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        let Some(job) = v.economy.outside_jobs.get_mut(resident) else {
+            return false;
+        };
+        *job = enabled;
+        true
+    }
+
     pub fn sell_material(&mut self, material: usize, n: u32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if material >= COUNT || n == 0 || n > 20 || free(&v, material) < n {
@@ -945,14 +962,26 @@ impl Game {
 }
 pub fn finish_outside(v: &mut Village, id: usize) {
     let day = (v.minutes / 1440.) as i32;
-    if (v.economy.outside_work || v.economy.outside_committed_day == day)
-        && !v.economy.work_day.contains(&day)
-    {
+    if id < 5 && v.economy.outside_committed_days[id] == day && v.economy.work_day[id] != day {
         v.economy.work_day[id] = day;
-        ledger(v, 18000, "Neighbouring farm shift contribution".into());
+        let job = crate::occupations::JOBS[id];
+        ledger(
+            v,
+            job.income,
+            format!(
+                "{} · {} contribution",
+                crate::occupations::NAMES[id],
+                job.title
+            ),
+        );
         event(
             v,
-            "Our neighbour returned from their 09:00–17:00 job with R$ 180 for the shared fund.",
+            format!(
+                "{} returned from their {} shift with R$ {} for the shared fund.",
+                crate::occupations::NAMES[id],
+                job.title.to_lowercase(),
+                job.income / 100
+            ),
         );
     }
 }
@@ -1110,17 +1139,20 @@ mod tests {
         assert_eq!(v.wood, wood - 1.);
     }
     #[test]
-    fn outside_income_is_one_community_shift_per_day() {
+    fn outside_income_is_paid_once_per_resident_shift() {
         let mut g = Game::new();
         g.set_outside_work(true);
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let money = v.economy.money;
+        v.economy.outside_committed_days[4] = 0;
+        finish_outside(&mut v, 4);
         finish_outside(&mut v, 4);
         finish_outside(&mut v, 0);
-        assert_eq!(v.economy.money, money + 18000);
+        assert_eq!(v.economy.money, money + 22000);
         v.minutes += 1440.;
-        finish_outside(&mut v, 0);
-        assert_eq!(v.economy.money, money + 36000);
+        v.economy.outside_committed_days[4] = 1;
+        finish_outside(&mut v, 4);
+        assert_eq!(v.economy.money, money + 44000);
     }
     #[test]
     fn completed_order_history_never_blocks_future_purchases() {

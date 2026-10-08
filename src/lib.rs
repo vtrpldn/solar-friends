@@ -10,6 +10,7 @@ mod interactions;
 mod leisure;
 mod mobility;
 mod modes;
+mod occupations;
 mod power;
 mod progression;
 mod situations;
@@ -187,12 +188,7 @@ fn available(v: &Village, task: &str) -> bool {
     match task {
         "build" => v.buildings.iter().any(|b| economy::can_build(v, b.id)),
         "source" | "prepare" => economy::local_job(v).is_some_and(|(t, _)| t == task),
-        "outside" => {
-            v.economy.outside_work
-                && mobility::departure_time(v.minutes)
-                && v.economy.outside_committed_day != (v.minutes / 1440.) as i32
-                && !v.economy.work_day.contains(&((v.minutes / 1440.) as i32))
-        }
+        "outside" => (0..5).any(|id| occupations::available(v, id)),
         "garden" => v
             .buildings
             .iter()
@@ -405,7 +401,7 @@ fn choose(r: &mut Resident, v: &Village) {
         return;
     } else if supplies::urgent(v) {
         ("gather", "Foraging wild food to keep everyone fed.")
-    } else if r.id == 4 && available(v, "outside") {
+    } else if occupations::available(v, r.id) {
         (
             "outside",
             "Leaving for my job at a neighbouring farm until 17:00.",
@@ -504,6 +500,9 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
             | "outside"
     ) {
         return Some("That request is not available.".into());
+    }
+    if task == "outside" && !occupations::available(v, id) {
+        return Some("Enable this neighbour’s outside job first. Each person can work one shift per day, leaving 09:00–10:00.".into());
     }
     if task == "outside" && !mobility::departure_time(v.minutes) {
         return Some("Outside jobs leave between 09:00 and 10:00 and return at 17:00.".into());
@@ -685,13 +684,13 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"))
             }
             2 | 3 => economy::local_job(&v).is_some(),
-            4 => available(&v, "outside"),
+            4 => occupations::available(&v, r.id),
             _ => false,
         };
         let chores_start = !r.requested
             && work_time(v.minutes)
             && (!work_time(before)
-                || (r.id == 4 && available(&v, "outside"))
+                || (occupations::available(&v, r.id))
                 || (ready_work && r.social >= 65. && !situations::protected(&v, r.id, "cook")))
             && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
         if r.task != "arrive"
@@ -1186,7 +1185,7 @@ impl Game {
                 .world_mut()
                 .resource_mut::<Village>()
                 .economy
-                .outside_committed_day = (v.minutes / 1440.) as i32;
+                .outside_committed_days[id] = (v.minutes / 1440.) as i32;
         }
         message
     }
@@ -1301,6 +1300,12 @@ impl Game {
         let Ok(mut save) = serde_json::from_str::<Save>(data) else {
             return false;
         };
+        if save.village.economy.outside_committed_day < -1
+            || save.village.economy.outside_committed_day > (save.village.minutes / 1440.) as i32
+        {
+            return false;
+        }
+        occupations::migrate(&mut save);
         let v = &save.village;
         let mut road_tiles = std::collections::HashSet::new();
         if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
