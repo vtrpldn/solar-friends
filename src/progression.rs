@@ -61,13 +61,13 @@ pub fn unlocked(v: &Village, kind: &str) -> bool {
         return true;
     }
     match kind {
-        "grove" => v.progress.completed[0],
-        "compost" => v.progress.completed[1],
+        "grove" | "warehouse" => v.progress.completed[0],
+        "compost" | "eco_toilet" => v.progress.completed[1],
         "square" => v.progress.completed[2],
         "workshop" => v.progress.completed[3],
-        "greenhouse" => v.progress.completed[3],
-        "coop" => v.progress.later_completed[0],
-        "solar_farm" | "streetlight" => v.progress.later_completed[1],
+        "greenhouse" | "wetland" => v.progress.completed[3],
+        "coop" | "biodigester" => v.progress.later_completed[0],
+        "solar_farm" | "streetlight" | "hydro" => v.progress.later_completed[1],
         _ => true,
     }
 }
@@ -110,7 +110,9 @@ pub fn update(v: &mut Village) {
             && v.progress.tools_crafted > 0
             && v.progress.enriched_harvests > 0,
         ready(v, "coop") && v.progress.eggs_collected >= 3,
-        ready(v, "solar_farm") && ready(v, "streetlight") && v.power.stored >= 12.,
+        (ready(v, "solar_farm") || ready(v, "hydro"))
+            && ready(v, "streetlight")
+            && v.power.stored >= 12.,
     ];
     let celebrations = [
         "A Shared Beginning complete! Food forests and Roots for Tomorrow are available.",

@@ -101,9 +101,13 @@ pub fn cook(v: &mut Village) {
     }
     let eggs = v.supplies.use_eggs && v.supplies.eggs >= 2 && v.food >= 2.;
     let ingredients = if eggs { 2. } else { 3. };
-    let meals = if eggs { 7 } else { 5 };
+    let fuel = v.circular.use_biogas && v.circular.biogas >= 1.;
+    let meals = (if eggs { 7 } else { 5 }) + u32::from(fuel);
+    if fuel {
+        v.circular.biogas -= 1.;
+    }
     v.food -= ingredients;
-    v.water -= 1.;
+    sanitation::household_water(v, 1.);
     if eggs {
         v.supplies.eggs -= 2;
     }

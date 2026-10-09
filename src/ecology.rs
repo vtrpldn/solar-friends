@@ -117,7 +117,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
     let Some(index) = v
         .buildings
         .iter()
-        .position(|b| needs_tending(b, v.water) && Some(b.id) == building)
+        .position(|b| needs_tending(b, sanitation::irrigation_water(v)) && Some(b.id) == building)
     else {
         return;
     };
@@ -164,8 +164,12 @@ pub fn tend(v: &mut Village, r: &Resident) {
         }
         v.supplies.gathered += v.food - before;
         v.harvests += 1;
-    } else if v.water >= 2. {
-        v.water -= 2.;
+    } else if v.circular.reclaimed >= 2. || v.water >= 2. {
+        if v.circular.reclaimed >= 2. {
+            v.circular.reclaimed -= 2.;
+        } else {
+            v.water -= 2.;
+        }
         crop.moisture = capacity;
     }
 }

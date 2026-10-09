@@ -13,6 +13,7 @@ mod modes;
 mod occupations;
 mod power;
 mod progression;
+mod sanitation;
 mod situations;
 mod sleep;
 mod spacing;
@@ -49,6 +50,7 @@ const TASKS: &[&str] = &[
     "outside",
     "return",
     "pickup",
+    "sanitation",
 ];
 
 #[derive(Component, Clone, Serialize, Deserialize)]
@@ -70,6 +72,8 @@ pub struct Resident {
     pub remaining: f32,
     pub requested: bool,
     pub last_meal_slot: i32,
+    #[serde(default = "sanitation::unused_day")]
+    pub last_sanitation_day: i32,
     #[serde(default)]
     pub visit_building: Option<usize>,
     #[serde(default)]
@@ -113,6 +117,8 @@ pub struct Village {
     pub supplies: supplies::Supplies,
     #[serde(default)]
     pub power: power::Power,
+    #[serde(default)]
+    pub circular: sanitation::Circular,
     pub water: f32,
     pub meals: u32,
     pub meals_served: u32,
@@ -151,6 +157,10 @@ fn event(v: &mut Village, text: impl Into<String>) {
 fn river_bank(x: i32, y: i32) -> bool {
     // Keep footprints and resident approach points on the village side.
     x as f32 >= 25.8 + (y as f32 * 0.32).sin() * 0.65 - 2.3
+}
+fn hydro_site(x: i32, y: i32) -> bool {
+    let centre = 25.8 + (y as f32 * 0.32).sin() * 0.65;
+    x as f32 >= centre - 1.35 && (x as f32) < centre - 0.35
 }
 fn ready(v: &Village, kind: &str) -> bool {
     v.buildings
@@ -192,7 +202,8 @@ fn available(v: &Village, task: &str) -> bool {
         "garden" => v
             .buildings
             .iter()
-            .any(|b| ecology::needs_tending(b, v.water)),
+            .any(|b| ecology::needs_tending(b, sanitation::irrigation_water(v))),
+        "sanitation" => ready(v, "eco_toilet"),
         "cook" => ready(v, "kitchen") && supplies::can_cook(v),
         "water" => v.water < ecology::capacity(v),
         "compost" => ready(v, "compost") && v.progress.scraps >= 2,
@@ -230,11 +241,12 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
         .iter()
         .filter(|b| {
             if task == "garden" {
-                ecology::needs_tending(b, v.water)
+                ecology::needs_tending(b, sanitation::irrigation_water(v))
             } else if task == "build" {
                 economy::can_build(v, b.id)
             } else {
                 b.progress >= 100.
+                    && (task != "sanitation" || b.next_visit <= v.minutes)
                     && b.kind
                         == match task {
                             "garden" => "garden",
@@ -246,6 +258,7 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
                             "compost" => "compost",
                             "craft" => "workshop",
                             "water" => "well",
+                            "sanitation" => "eco_toilet",
                             _ => "grove",
                         }
             }
@@ -305,6 +318,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     r.remaining = match task {
         "sleep" => 60.,
         "eat" => 5.,
+        "sanitation" => 4.,
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
@@ -401,6 +415,11 @@ fn choose(r: &mut Resident, v: &Village) {
         return;
     } else if supplies::urgent(v) {
         ("gather", "Foraging wild food to keep everyone fed.")
+    } else if sanitation::due(v, r) {
+        (
+            "sanitation",
+            "Taking a private moment at the ecological toilet.",
+        )
     } else if occupations::available(v, r.id) {
         (
             "outside",
@@ -570,6 +589,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     economy::advance(&mut v, dt * MINUTES_PER_SECOND);
     power::advance(&mut v, dt * MINUTES_PER_SECOND);
+    sanitation::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
     situations::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
@@ -658,7 +678,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         let sleeping = r.task == "sleep";
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
-        v.water = (v.water - dt * if sleeping { 0.002 } else { 0.009 }).max(0.);
+        sanitation::household_water(&mut v, dt * if sleeping { 0.002 } else { 0.009 });
         let chores_finished = (!r.requested
             || matches!(r.task.as_str(), "source" | "prepare" | "outside"))
             && !work_time(v.minutes)
@@ -823,6 +843,16 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     supplies::cook(&mut v);
                     situations::cooked(&mut v, r.id);
                 }
+                "sanitation" => {
+                    sanitation::use_toilet(&mut v, &mut r);
+                    if r.last_sanitation_day < (v.minutes / 1440.) as i32
+                        && v.water >= 1.
+                        && v.circular.waste < 80.
+                        && ready(&v, "eco_toilet")
+                    {
+                        r.remaining = 1.;
+                    }
+                }
                 "compost" if v.progress.scraps >= 2 => {
                     v.progress.scraps -= 2;
                     v.progress.compost += 1;
@@ -889,6 +919,7 @@ impl Game {
                 food: 36.,
                 supplies: supplies::Supplies::default(),
                 power: power::Power::default(),
+                circular: sanitation::Circular::default(),
                 water: 32.,
                 meals: 0,
                 meals_served: 0,
@@ -932,6 +963,7 @@ impl Game {
                 remaining: 0.,
                 requested: false,
                 last_meal_slot: -1,
+                last_sanitation_day: -1,
                 visit_building: None,
                 activity_building: None,
                 activity_material: None,
@@ -1000,7 +1032,8 @@ impl Game {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if !v
             .buildings
-            .get(building)
+            .iter()
+            .find(|b| b.id == building)
             .is_some_and(|b| power::load(&b.kind) > 0.)
         {
             return false;
@@ -1088,7 +1121,10 @@ impl Game {
         "ok".into()
     }
     pub fn place(&mut self, kind: &str, x: i32, y: i32) -> String {
-        let Some(_) = economy::recipe(kind, "standard") else {
+        self.place_with_recipe(kind, x, y, "standard")
+    }
+    pub fn place_with_recipe(&mut self, kind: &str, x: i32, y: i32, variant: &str) -> String {
+        let Some(_) = economy::recipe(kind, variant) else {
             return "Unknown building.".into();
         };
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -1104,9 +1140,18 @@ impl Game {
             || y - radius < 0
             || x + radius >= MAP_SIZE
             || y + radius >= MAP_SIZE
-            || river_bank(x + radius - 1, y)
+            || if kind == "hydro" {
+                !hydro_site(x, y)
+            } else {
+                river_bank(x + radius - 1, y)
+            }
         {
-            return "Keep the river and its banks clear. Choose a clearing farther inland.".into();
+            return if kind == "hydro" {
+                "Place the generator in the shallow village side of the river. Workers approach from the bank."
+            } else {
+                "Keep the river and its banks clear. Choose a clearing farther inland."
+            }
+            .into();
         }
         if (x as f32 - CAMP.0).abs() < radius as f32 + 0.5
             && (y as f32 - CAMP.1).abs() < radius as f32 + 0.5
@@ -1148,9 +1193,23 @@ impl Game {
             poultry: supplies::Poultry::default(),
         });
         economy::plan(&mut v, id);
+        if variant != "standard" {
+            let ordinal = v
+                .buildings
+                .iter()
+                .filter(|b| b.kind == "home")
+                .count()
+                .saturating_sub(1);
+            let project = v.economy.projects.last_mut().unwrap();
+            project.recipe = variant.into();
+            if variant == "adobe" {
+                project.appearance = Some(4 + (ordinal % 2) as u8);
+            }
+            economy::rebalance(&mut v);
+        }
         if v.mode == modes::Mode::Sandbox {
             v.buildings.last_mut().unwrap().progress = 100.;
-            let stages = economy::recipe(kind, "standard").unwrap().len();
+            let stages = economy::recipe(kind, variant).unwrap().len();
             let project = v.economy.projects.last_mut().unwrap();
             project.stage = stages;
             project.reserved = [0; economy::COUNT];
@@ -1318,7 +1377,7 @@ impl Game {
         {
             return false;
         }
-        if !supplies::valid(v) || !power::valid(v) || !economy::valid(v) {
+        if !supplies::valid(v) || !power::valid(v) || !economy::valid(v) || !sanitation::valid(v) {
             return false;
         }
         if !town_pickup::valid(v, &save.residents) {
@@ -1371,6 +1430,8 @@ impl Game {
                 || r.activity_material.is_some_and(|i| {
                     i >= economy::COUNT || (r.task == "source" && i >= v.economy.sources.len())
                 })
+                || r.last_sanitation_day < -1
+                || r.last_sanitation_day > (v.minutes / 1440.) as i32
                 || !TASKS.contains(&r.task.as_str())
                 || !mobility::valid(v, r)
                 || !sleep::valid(r, v.minutes)
@@ -1385,7 +1446,11 @@ impl Game {
                 || economy::recipe(&b.kind, "standard").is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
                 || !(1..=MAP_SIZE - 2).contains(&b.y)
-                || river_bank(b.x, b.y)
+                || if b.kind == "hydro" {
+                    !hydro_site(b.x, b.y)
+                } else {
+                    river_bank(b.x, b.y)
+                }
                 || !b.progress.is_finite()
                 || !(0.0..=100.).contains(&b.progress)
         }) {

@@ -175,6 +175,18 @@ fn stage(name: &'static str, items: &[(usize, u32)], work: f32) -> Stage {
     }
 }
 pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
+    if kind == "home" && variant == "adobe" {
+        return Some(vec![
+            stage("Stone foundation", &[(2, 6), (3, 4)], 12.),
+            stage(
+                "Dry adobe bricks & bamboo frame",
+                &[(2, 16), (1, 8), (8, 2)],
+                32.,
+            ),
+            stage("Roof & joinery", &[(7, 6), (8, 2)], 18.),
+            stage("Rooftop power", &[(12, 1), (13, 1), (10, 1)], 8.),
+        ]);
+    }
     if !matches!(variant, "standard" | "local") {
         return None;
     }
@@ -232,6 +244,43 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
             stage("Footing & post", &[(3, 1), (0, 2)], 8.),
             stage("Electrical installation", &[(10, 1), (8, 1)], 12.),
         ],
+        "hydro" => vec![
+            stage("Riverbank footings", &[(3, 6), (1, 4)], 16.),
+            stage(
+                "Wheel & generator",
+                &[(8, 4), (10, 2), (14, 1), (13, 1)],
+                24.,
+            ),
+        ],
+        "eco_toilet" => vec![
+            stage("Sealed chamber", &[(3, 4), (2, 6)], 14.),
+            stage(
+                "Privacy hut & handwash",
+                &[(1, 6), (7, 3), (9, 2), (8, 2)],
+                20.,
+            ),
+        ],
+        "wetland" => vec![
+            stage("Lined reed bed", &[(3, 8), (2, 4), (11, 1)], 18.),
+            stage("Reeds, pipes & collection", &[(9, 3), (8, 2)], 16.),
+        ],
+        "biodigester" => vec![
+            stage("Sealed tanks", &[(3, 4), (6, 6), (9, 3)], 22.),
+            stage(
+                "Gas plumbing & service shelter",
+                &[(8, 3), (9, 2), (7, 2)],
+                20.,
+            ),
+        ],
+        "warehouse" => vec![
+            stage("Foundation", &[(3, 8), (2, 8)], 16.),
+            stage(
+                "Adobe walls & bamboo frame",
+                &[(2, 20), (1, 12), (8, 3)],
+                30.,
+            ),
+            stage("Roof & storage racks", &[(7, 10), (5, 2), (8, 2)], 22.),
+        ],
         _ => return None,
     })
 }
@@ -272,6 +321,14 @@ pub fn incoming(v: &Village, i: usize) -> u32 {
 }
 pub fn storage(v: &Village) -> u32 {
     (0..COUNT).map(|i| quantity(v, i) + incoming(v, i)).sum()
+}
+pub fn capacity(v: &Village) -> u32 {
+    CAPACITY
+        + 300
+            * v.buildings
+                .iter()
+                .filter(|b| b.kind == "warehouse" && b.progress >= 100.)
+                .count() as u32
 }
 fn ledger(v: &mut Village, amount: i64, note: String) {
     v.economy.money += amount;
@@ -447,7 +504,7 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
             return Some(("prepare".into(), i));
         }
     }
-    if storage(v) >= CAPACITY {
+    if storage(v) >= capacity(v) {
         return None;
     }
     let mut raw = needs;
@@ -478,14 +535,14 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
         let i = v.economy.sources[index].material;
         let n = 4
             .min(v.economy.sources[index].remaining.floor() as u32)
-            .min(CAPACITY - storage(v));
+            .min(capacity(v) - storage(v));
         v.economy.sources[index].remaining -= n as f32;
         add(v, i, n);
         if i == 0 {
             v.progress.timber += n;
         }
     } else if let Some((inputs, yield_)) = preparation(v, index) {
-        if storage(v) - inputs.iter().sum::<u32>() + yield_ > CAPACITY {
+        if storage(v) - inputs.iter().sum::<u32>() + yield_ > capacity(v) {
             return;
         }
         for (i, &n) in inputs.iter().enumerate() {
@@ -540,7 +597,7 @@ pub fn quote(v: &Village, items: Bundle) -> Result<i64, String> {
     quote_with_fee(v, items, 6000)
 }
 fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
-    if storage(v) + items.iter().sum::<u32>() > CAPACITY {
+    if storage(v) + items.iter().sum::<u32>() > capacity(v) {
         return Err(
             "There is not enough receiving space. Finish a project or use stored materials.".into(),
         );
@@ -566,7 +623,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let missing:Bundle=std::array::from_fn(|i|if p.committed{0}else{s.items[i].saturating_sub(p.reserved[i])});
         Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
     }).collect();
-    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local")})).collect();
+    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","biodigester","warehouse"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
     let preparation: Vec<_> = [5, 6, 7, 8]
         .into_iter()
         .filter_map(|i| {
@@ -576,14 +633,17 @@ pub fn view(v: &Village) -> serde_json::Value {
         })
         .collect();
     let day = (v.minutes / 1440.) as i32;
-    serde_json::json!({"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":CAPACITY,"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Southeastern countryside · earth, managed bamboo and timber, stone, and a salvage clearing"})
+    serde_json::json!({"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Southeastern countryside · earth, managed bamboo and timber, stone, and a salvage clearing"})
 }
 pub fn valid(v: &Village) -> bool {
     let e = &v.economy;
-    if e.stock.iter().any(|n| *n > CAPACITY)
-        || e.projects
-            .iter()
-            .any(|p| p.reserved.iter().chain(&p.consumed).any(|n| *n > CAPACITY))
+    if e.stock.iter().any(|n| *n > capacity(v))
+        || e.projects.iter().any(|p| {
+            p.reserved
+                .iter()
+                .chain(&p.consumed)
+                .any(|n| *n > capacity(v))
+        })
         || e.orders.iter().any(|o| o.items.iter().any(|n| *n > 100))
     {
         return false;
@@ -594,7 +654,7 @@ pub fn valid(v: &Village) -> bool {
         || e.money < 0
         || e.money > 1_000_000_000
         || e.stock[0] != 0
-        || storage(v) > CAPACITY
+        || storage(v) > capacity(v)
         || e.orders.len() > 100
         || e.projects.len() > 676
         || e.sources.len() != 5
@@ -626,7 +686,8 @@ pub fn valid(v: &Village) -> bool {
         };
         if !ids.insert(p.building)
             || p.priority > 3
-            || p.appearance.is_some_and(|n| n > 3)
+            || p.appearance
+                .is_some_and(|n| n > 5 || (n >= 4 && (b.kind != "home" || p.recipe != "adobe")))
             || p.stage > stages.len()
             || !p.labour.is_finite()
             || p.labour < 0.
@@ -877,7 +938,7 @@ impl Game {
         if v.economy.exchange_day == day {
             return "Our neighbour's spare fittings are already exchanged today.".into();
         }
-        if v.food < 40. || storage(&v) + 2 > CAPACITY {
+        if v.food < 40. || storage(&v) + 2 > capacity(&v) {
             return "The neighbour asks for four surplus ingredients; keep 36 for the household and room for two fittings.".into();
         }
         v.food -= 4.;
@@ -924,7 +985,17 @@ impl Game {
         if p.recipe != variant && p.consumed != [0; COUNT] {
             return "Materials are committed. Keep this recipe or cancel for half-material salvage.".into();
         }
+        let home_ordinal = v
+            .buildings
+            .iter()
+            .filter(|b| b.kind == "home" && b.id < id)
+            .count();
         let p = &mut v.economy.projects[index];
+        if variant == "adobe" {
+            p.appearance = Some(4 + (home_ordinal % 2) as u8);
+        } else if p.appearance.is_some_and(|n| n >= 4) {
+            p.appearance = Some((home_ordinal % 4) as u8);
+        }
         p.priority = priority;
         p.paused = paused;
         p.recipe = variant.into();
@@ -940,7 +1011,7 @@ impl Game {
             return "Completed buildings cannot be cancelled.".into();
         }
         let salvage = v.economy.projects[index].consumed.map(|n| n / 2);
-        if storage(&v) + salvage.iter().sum::<u32>() > CAPACITY {
+        if storage(&v) + salvage.iter().sum::<u32>() > capacity(&v) {
             return "Make storage room for the salvaged materials first.".into();
         }
         v.economy.projects.remove(index);
@@ -1279,5 +1350,48 @@ mod tests {
         bad["village"]["economy"]["money"] = (-1).into();
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), before);
+    }
+}
+
+#[cfg(test)]
+mod infrastructure_tests {
+    use super::*;
+    #[test]
+    fn adobe_uses_local_earth_and_appearance_survives_reload_and_recipe_changes() {
+        let mut g = Game::new();
+        assert_eq!(g.place("home", 5, 5), "ok");
+        assert_eq!(g.configure_project(0, 1, false, "adobe"), "ok");
+        let r = recipe("home", "adobe").unwrap();
+        assert!(r.iter().map(|s| s.items[2]).sum::<u32>() >= 22);
+        assert_eq!(r.iter().map(|s| s.items[0]).sum::<u32>(), 0);
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.projects[0].appearance,
+            Some(4)
+        );
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
+        assert_eq!(restored.configure_project(0, 1, false, "standard"), "ok");
+        assert_eq!(
+            restored.app.world().resource::<Village>().economy.projects[0].appearance,
+            Some(0)
+        );
+    }
+    #[test]
+    fn completed_storage_adds_capacity_incoming_reserves_it_and_removal_cannot_overfill() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("warehouse", 5, 5), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            assert_eq!(capacity(&v), 900);
+            v.wood = 700.;
+            v.economy.stock = [0; COUNT];
+        }
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
+        assert!(!g.remove_sandbox_building(0));
+        g.app.world_mut().resource_mut::<Village>().wood = 500.;
+        assert!(g.remove_sandbox_building(0));
+        assert_eq!(capacity(g.app.world().resource::<Village>()), 600);
     }
 }

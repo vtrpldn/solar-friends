@@ -30,6 +30,11 @@ impl Game {
         let Some(building) = v.buildings.iter().find(|b| b.id == id) else {
             return false;
         };
+        if building.kind == "warehouse"
+            && economy::storage(&v) > economy::capacity(&v).saturating_sub(300)
+        {
+            return false;
+        }
         let home = building.kind == "home";
         v.buildings.retain(|b| b.id != id);
         v.economy.projects.retain(|p| p.building != id);

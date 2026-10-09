@@ -1,4 +1,4 @@
-//! Shared solar generation and stored energy for village lighting.
+//! Shared solar and river generation and stored energy for village lighting.
 use super::*;
 
 const STORAGE_PER_FARM: f32 = 36.;
@@ -21,6 +21,9 @@ pub struct Connection {
 #[derive(Serialize)]
 pub struct Supply {
     pub farms: usize,
+    pub hydros: usize,
+    pub solar_generation: f32,
+    pub hydro_generation: f32,
     pub capacity: f32,
     pub stored: f32,
     pub generation: f32,
@@ -34,8 +37,8 @@ pub fn load(kind: &str) -> f32 {
         "kitchen" | "workshop" => 0.6,
         "greenhouse" => 0.5,
         "square" => 0.4,
-        "well" => 0.2,
-        "coop" | "streetlight" => 0.1,
+        "well" | "warehouse" => 0.2,
+        "coop" | "streetlight" | "eco_toilet" => 0.1,
         _ => 0.,
     }
 }
@@ -45,10 +48,30 @@ fn farms(v: &Village) -> usize {
         .filter(|b| b.kind == "solar_farm" && b.progress >= 100.)
         .count()
 }
+fn hydros(v: &Village) -> usize {
+    v.buildings
+        .iter()
+        .filter(|b| b.kind == "hydro" && b.progress >= 100.)
+        .count()
+}
+fn capacity(v: &Village) -> f32 {
+    farms(v) as f32 * STORAGE_PER_FARM + hydros(v) as f32 * 18.
+}
+fn hydro_generation(v: &Village, minutes: f32) -> f32 {
+    let flow = if ecology::raining(minutes) {
+        1.3
+    } else if (minutes / 1440.) as u32 % 3 == 2 {
+        0.65
+    } else {
+        1.
+    };
+    hydros(v) as f32 * 1.8 * flow
+}
 fn rates(v: &Village, minutes: f32) -> (f32, f32, f32) {
     let altitude = (((minutes.rem_euclid(1440.) / 60.) - 6.) / 12. * std::f32::consts::PI).sin();
     let darkness = ((0.18 - altitude) / 0.65).clamp(0., 1.);
-    let generation = farms(v) as f32 * PEAK_GENERATION * altitude.max(0.);
+    let generation =
+        farms(v) as f32 * PEAK_GENERATION * altitude.max(0.) + hydro_generation(v, minutes);
     let demand = v
         .buildings
         .iter()
@@ -60,12 +83,13 @@ fn rates(v: &Village, minutes: f32) -> (f32, f32, f32) {
 }
 pub fn supply(v: &Village) -> Supply {
     let farms = farms(v);
-    let capacity = farms as f32 * STORAGE_PER_FARM;
+    let hydros = hydros(v);
+    let capacity = capacity(v);
     let (generation, demand, darkness) = rates(v, v.minutes);
     let stored = v.power.stored.min(capacity);
     // Fade during the final minute of charge; sunlight can directly supply a
     // partially lit grid at dawn. No on/off oscillation around an empty battery.
-    let grid_level = if farms == 0 {
+    let grid_level = if farms + hydros == 0 {
         0.
     } else if demand <= f32::EPSILON {
         1.
@@ -74,6 +98,9 @@ pub fn supply(v: &Village) -> Supply {
     };
     Supply {
         farms,
+        hydros,
+        solar_generation: (generation - hydro_generation(v, v.minutes)).max(0.),
+        hydro_generation: hydro_generation(v, v.minutes),
         capacity,
         stored,
         generation,
@@ -88,6 +115,8 @@ pub fn supply(v: &Village) -> Supply {
                     "roof"
                 } else if load(&b.kind) > 0. {
                     "grid"
+                } else if b.kind == "hydro" {
+                    "hydro"
                 } else if b.kind == "solar_farm" {
                     "solar"
                 } else {
@@ -114,7 +143,7 @@ pub fn supply(v: &Village) -> Supply {
     }
 }
 pub fn advance(v: &mut Village, minutes: f32) {
-    let capacity = farms(v) as f32 * STORAGE_PER_FARM;
+    let capacity = capacity(v);
     // Evaluate at the middle of the actual simulated interval, including dawn.
     let (generation, demand, _) = rates(v, v.minutes - minutes / 2.);
     v.power.stored = (v.power.stored + (generation - demand) * minutes / 60.).clamp(0., capacity);
@@ -123,7 +152,7 @@ pub fn valid(v: &Village) -> bool {
     let mut ids = std::collections::HashSet::new();
     v.power.stored.is_finite()
         && v.power.stored >= 0.
-        && v.power.stored <= farms(v) as f32 * STORAGE_PER_FARM + 0.001
+        && v.power.stored <= capacity(v) + 0.001
         && v.power.disabled.iter().all(|id| {
             ids.insert(*id)
                 && v.buildings
@@ -234,5 +263,35 @@ mod tests {
             old["village"]["power"] = bad;
             assert!(!restored.restore(&old.to_string()));
         }
+    }
+}
+
+#[cfg(test)]
+mod hydro_tests {
+    use super::*;
+    #[test]
+    fn river_generator_requires_bank_access_and_powers_the_night_in_dry_weather() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_ne!(g.place("hydro", 5, 5), "ok");
+        assert_ne!(g.place("hydro", 25, 5), "ok");
+        assert_eq!(g.place("hydro", 26, 5), "ok");
+        assert_eq!(g.place("streetlight", 20, 5), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.minutes = 2. * 1440. + 1260.;
+        v.power.stored = 0.;
+        let p = supply(&v);
+        assert_eq!(p.hydros, 1);
+        assert_eq!(p.farms, 0);
+        assert_eq!(p.capacity, 18.);
+        assert!((p.generation - 1.17).abs() < 0.001);
+        assert_eq!(p.grid_level, 1.);
+        advance(&mut v, 60.);
+        assert!(v.power.stored > 1.);
+        for id in 0..5 {
+            assert!(spacing::approach(&v, &v.buildings[0], id).is_some());
+        }
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
     }
 }

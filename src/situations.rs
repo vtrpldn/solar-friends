@@ -147,7 +147,7 @@ pub fn protected(v: &Village, id: usize, task: &str) -> bool {
                 && !crate::leisure::hobby(task)
                 && !matches!(
                     task,
-                    "rest" | "sleep" | "eat" | "socialize" | "gathering" | "idle"
+                    "rest" | "sleep" | "eat" | "socialize" | "gathering" | "idle" | "sanitation"
                 )))
 }
 
