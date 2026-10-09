@@ -70,7 +70,7 @@ Construction should combine materials available on a Brazilian countryside prope
 
 ## Deliberate boundaries
 
-This implements the construction economy described above. Vehicle routes, physical delivery hauling, contractors, credit/loans, real market prices, regional soil surveys and seasonal crop economics remain later design work. Prices, quantities, local deposits and outside income are fictional balancing values. Old village migration is intentionally omitted.
+This implements the construction economy described above. Vehicle routes, physical delivery hauling, contractors, credit/loans, real market prices, regional soil surveys and seasonal crop economics remain later design work. Prices, quantities, local deposits and outside income are fictional balancing values. Saves predating version 3 remain unsupported; the player-managed resource follow-up below retires the fixed sites in version 3 saves.
 
 ## Follow-up playtest
 
@@ -85,6 +85,8 @@ Why: resource production should come from choices the player makes, rather than 
 - [x] Grow planted timber and bamboo over game days. Residents tend and harvest within normal work windows; bamboo resprouts, timber is replanted, and lack of water or seedling funds pauses the cycle visibly.
 - [x] Keep collection limited to project/tool demand, with explicit manual harvest and replant controls. Save growth, yields, settings and depleted reserves without duplicating resources.
 - [x] Replace always-visible economy props with placed sites and growing plants. Add Land & materials tools, growth/harvest status, actionable shortages and a cultivation test scene.
-- [ ] Check new-game emptiness, placement conflicts, harvest/replant conservation, finite deposits, worker arrival/spacing, save/reload and actual desktop controls.
+- [x] Check new-game emptiness, placement conflicts, harvest/replant conservation, finite deposits, worker arrival/spacing, save/reload and actual desktop controls.
 
 Growth durations and prices are game-balance abstractions. Town purchases remain the immediate alternative while plants mature.
+
+Delivered in incremental commits with 114 native tests, Rust formatting and clippy, a release WebAssembly build and all 24 gameplay verification scripts passing. The new placement verifier compares all 3,380 plot previews with native rules. Browser playtesting placed a paid timber plot, grew timber and bamboo, queued harvests, verified resident work produced eight timber and four bamboo, changed harvest settings and cleared a quarry. Regression checks cover these same controls while protecting the player's saved village. Standing trees use the existing forest art; bamboo and finite sites reuse the established material atlas.
