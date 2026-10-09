@@ -3,13 +3,14 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
+  context.setDefaultTimeout(30000);context.setDefaultNavigationTimeout(30000);
   context.on('page',page=>{
     page.on('pageerror',e=>errors.push(e.message));
     page.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`);});
     page.on('console',msg=>{if(msg.type()==='error'){const url=msg.location().url;errors.push(msg.text()+(url?' · '+url:''));}});
   });
   let page=await context.newPage();
-  async function capture(label,file) { await page.screenshot({path:path.join(output,file),fullPage:true});screenshots.push({label,file}); }
+  async function capture(label,file) { console.log('Browser capture: '+label);await page.screenshot({path:path.join(output,file),fullPage:true});screenshots.push({label,file}); }
   await page.goto(base);await page.waitForFunction(()=>window.solarDev);
   await page.locator('#main-menu').waitFor({state:'visible'});
   await capture('Main menu: Story and Sandbox','main-menu.png');

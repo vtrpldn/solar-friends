@@ -49,7 +49,13 @@ try {
   const { checkBrowser } = await import('./browser-checks.mjs');
   server=await serve(); const base=`http://127.0.0.1:${server.address().port}`;
   browser=await chromium.launch({headless:true});
-  await checkBrowser({browser,base,output,screenshots,errors});
+  let browserDeadline;
+  try {
+    await Promise.race([
+      checkBrowser({browser,base,output,screenshots,errors}),
+      new Promise((_,reject)=>{browserDeadline=setTimeout(()=>reject(new Error('Desktop browser checks exceeded five minutes. Inspect the last capture and browser errors.')),300000);}),
+    ]);
+  } finally { clearTimeout(browserDeadline); }
   results.push({label:'Desktop interactions, save isolation, artwork tools and captures',status:'PASS'});
 } catch(error) {
   console.error(error);
