@@ -150,6 +150,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  assert((await page.locator('#digester-status').textContent()).includes('Ready to digest'));
+  assert((await page.locator('#wetland-status').textContent()).includes('Ready to filter'));
   for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).uncheck();
   let circular=await page.evaluate(()=>window.solarDev.snapshot());
   assert(!circular.village.circular.auto_feed&&!circular.village.circular.filter_water&&!circular.village.circular.use_biogas);
