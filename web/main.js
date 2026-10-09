@@ -514,10 +514,6 @@ function building(b) {
   const project=state.village.economy.projects.find(p=>p.building===b.id);
   const stages=state.environment.economy.projects.find(p=>p.building===b.id)?.stages.length||1;
   buildingSprite(b.kind,b.x,b.y,complete?1:.16+.65*((project?.stage||0)/stages),b.id);
-  if(project?.recipe==='local'){
-    ctx.save();ctx.strokeStyle=b.kind==='garden'?'#9eaa8a':'#bbbd8b';ctx.lineWidth=3*scale;
-    ctx.beginPath();footprintCorners(b.kind,b.x,b.y).forEach(([x,y],i)=>{const q=iso(x,y);if(i)ctx.lineTo(q.x,q.y-2*scale);else ctx.moveTo(q.x,q.y-2*scale);});ctx.closePath();ctx.stroke();ctx.restore();
-  }
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     const registration=placementArt(b.kind,buildingArt[b.kind]);
     drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));

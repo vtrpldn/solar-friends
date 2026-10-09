@@ -13,7 +13,7 @@ assert.deepEqual(footprintCorners('home',8,8),[[6.5,6.5],[8.5,6.5],[8.5,8.5],[6.
 for(const [kind,art]of Object.entries(allBuildingArt)){
   const f=footprint(kind,8,8),registration=placementArt(kind,art);
   assert(Object.values(registration).every(Number.isFinite));
-  assert(registration.scale>0 && registration.scale<=1.5);
+  assert(registration.scale>0);
   for(const p of footprintCorners(kind,8,8))for(const coordinate of p)assert.equal(coordinate%1,.5,'Every occupied plot corner belongs to a tile boundary');
   // A road along the front face shares the exact ground segment, at any zoom.
   const rx=Math.ceil(f.minX),ry=f.maxY+.5;

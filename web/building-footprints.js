@@ -1,6 +1,6 @@
 import { TILE_HALF_WIDTH as W, TILE_HALF_HEIGHT as H } from './projection.js';
 import { cameraCalibration } from './building-art.js';
-import { meshPoint } from './building-mesh.js';
+import { buildingSilhouettes } from './building-silhouettes.js';
 
 export function footprintSize(kind) {
   if (['square','solar_farm'].includes(kind)) return 3;
@@ -21,7 +21,7 @@ export function footprintCorners(kind,x,y) {
 }
 // Painted ground-contact landmarks, left/front/right, in source-cell units.
 // These register the building to its plot independently of transparent padding.
-const grounds={
+export const paintedGrounds={
   hydro:[1280,[[229,902],[551,1060],[1090,864]]],
   eco_toilet:[1280,[[237,975],[609,1168],[1087,974]]],
   wetland:[1774,[[357,511],[989,797],[1355,571]]],
@@ -45,15 +45,22 @@ const grounds={
   grove:[640,[[60,440],[300,570],[570,440]]],
   streetlight:[1280,[[533,1002],[609,1038],[685,1000]]],
 };
+const placements=new WeakMap();
 export function placementArt(kind,art) {
-  const [size,landmarks]=grounds[kind],{vertical,shear}=cameraCalibration(art);
-  const points=landmarks.map(p=>{
-    const [u,v]=meshPoint(art.mesh,p),x=(u/size-.5)*art.width,y=((v/size-art.anchor*(art.aspect||1))*vertical+(u/size-.5)*shear)*art.width;
-    return [(x/W+y/H)/2,(y/H-x/W)/2];
-  });
-  const min=axis=>Math.min(...points.map(p=>p[axis])),max=axis=>Math.max(...points.map(p=>p[axis]));
-  const n=footprintSize(kind),gain=Math.min(n*.96/Math.max(max(0)-min(0),max(1)-min(1)),['streetlight','well','coop','compost','grove','hydro','eco_toilet'].includes(kind)?1:1.5);
-  const cx=(min(0)+max(0))/2,cy=(min(1)+max(1))/2;
-  const center=(n-1)/2-Math.floor(n/2);
-  return {scale:gain,x:-(cx-cy)*W*gain,y:center*2*H-(cx+cy)*H*gain-2};
+  const key=[kind,art.width,art.anchor,art.aspect,art.axes?.join(',')].join('|'),cached=placements.get(art);
+  if(cached?.key===key)return cached.value;
+  const [size,landmarks]=paintedGrounds[kind],{vertical,shear}=cameraCalibration(art);
+  const groundX=(landmarks[0][0]/size+landmarks[2][0]/size-1)*art.width/2;
+  const outline=buildingSilhouettes[kind].hull.map(([u,v])=>[
+    (u-.5)*art.width-groundX,
+    ((v-art.anchor*(art.aspect||1))*vertical+(u-.5)*shear)*art.width,
+  ]);
+  const n=footprintSize(kind),halfWidth=Math.max(...outline.map(([x])=>Math.abs(x)));
+  const front=Math.max(...outline.map(([x,y])=>y+Math.abs(x)*H/W));
+  // Use the full painted volume, preserving its proportions. Walls and roofs
+  // rise above their ground plot. Its actual front outline meets the tile edges;
+  // transparent canvas padding never counts towards the size or the anchor.
+  const gain=n*W/halfWidth,center=(n-1)/2-Math.floor(n/2);
+  const value={scale:gain,x:-groundX*gain,y:center*2*H+n*H-front*gain};
+  placements.set(art,{key,value});return value;
 }

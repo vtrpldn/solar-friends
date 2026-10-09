@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { allBuildingArt, cameraCalibration, drawBuildingArt } from '../web/building-art.js';
 import { buildingProjection } from '../web/building-projection.js';
+import { placementArt } from '../web/building-footprints.js';
 import { meshPoint } from '../web/building-mesh.js';
 const review=JSON.parse(readFileSync(new URL('../assets/art-direction/building-projection-review.json',import.meta.url)));
 const files=[...new Set(Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]))];
@@ -22,7 +23,7 @@ for(const[key,art]of Object.entries(allBuildingArt)){
     assert(measurement[direction].length>=2,'Use separate painted edges for each direction');
     for(const[x,y,X,Y]of measurement[direction]){
       const p=project(x,y),q=project(X,Y);
-      const error=Math.abs(q[1]-p[1]-slope*(q[0]-p[0]))*art.width/measurement.size;
+      const error=Math.abs(q[1]-p[1]-slope*(q[0]-p[0]))*art.width/measurement.size*placementArt(key,art).scale;
       largest=Math.max(largest,error);
       assert(error<=2,`${key}: painted ${direction} edge drifts ${error.toFixed(2)} px at zoom 1`);
     }

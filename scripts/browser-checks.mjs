@@ -305,6 +305,12 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#workbench-sprite').selectOption('coop');await page.locator('[data-art-tab="recipe"]').click();
   assert((await page.locator('#recipe-history').textContent()).includes('Browser check:'));
   await capture('Recipe cards with saved revision history','recipes.png');
+  await page.goto(base+'artwork/grid-fit.html');
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('22 variants'));
+  assert.equal(await page.locator('#cards figure').count(),22);
+  await capture('All painted building sprites on their actual grid cells','sprite-grid-day.png');
+  await page.locator('#lighting').selectOption('night');
+  await capture('Shared full-sprite grid fit at night','sprite-grid-night.png');
   assert.deepEqual(errors,[],'Browser errors must be resolved');
   await context.close();
 }
