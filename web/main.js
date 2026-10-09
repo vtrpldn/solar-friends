@@ -1256,6 +1256,7 @@ function togglePause() {
   );
   $("#pause").classList.toggle("active", paused);
 }
+let paintedState = null, paintedView = "";
 function frame(stamp) {
   if (!last) last = stamp;
   const elapsed = Math.max(0, (stamp - last) / 1000);
@@ -1272,7 +1273,10 @@ function frame(stamp) {
     state = JSON.parse(game.snapshot());
   }
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
-  render();
+  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused].join("|");
+  if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
+    render(); paintedState = state; paintedView = viewKey;
+  }
   uiElapsed += dt;
   saveElapsed += elapsed;
   if (uiElapsed > 0.3) {
