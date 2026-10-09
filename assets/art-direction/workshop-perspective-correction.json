@@ -1,0 +1,7 @@
+{
+  "why": "Align the workshop roof and front framing with its walls and foundation while preserving its painted style and two-cell footprint.",
+  "edit_target": "web/art/workshop-isometric.png",
+  "night_target": "web/art/workshop-isometric-night.png",
+  "method": "built-in imagegen",
+  "status": "Artwork correction and day/night grid review in progress"
+}
