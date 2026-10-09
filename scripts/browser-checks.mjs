@@ -184,7 +184,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.mouse.click(plot.x,plot.y);
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   const project=circular.village.economy.projects.at(-1);
-  assert.equal(project.recipe,'adobe');assert.equal(circular.village.buildings.at(-1).appearance>=4,true);
+  assert.equal(project.recipe,'adobe');assert(project.appearance>=4);
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
   // Individual schedules synchronize between Trade and resident details.

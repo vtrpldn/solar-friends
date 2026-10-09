@@ -103,7 +103,7 @@ Why: household water and waste can support village resources without entering dr
 
 Manage processing in **Village → Supplies → Water & waste**. A reed bed turns 12 greywater into 8 irrigation water over six game hours. Gardens use reclaimed water first; cooking, drinking and handwashing always use fresh water. A biodigester consumes two sealed waste and two kitchen scraps over eight hours, producing four cooking gas and two digestate. Digestate cures for a full game day before becoming compost. One gas adds one meal to a cooked pot without replacing its ingredients.
 
-Filtration and digestion can be paused; full output stores stop new batches. Curing continues in sealed storage. Processing timers, settings and stocks survive saves without duplicating outputs. These simplified cycles are game rules. The **Circular village** and **Circular village at night** development scenes exercise the complete system and its artwork.
+Filtration and digestion can be paused; full output stores stop new batches. Curing continues in sealed storage. Processing timers, settings and stocks survive saves without duplicating outputs. These simplified cycles are game rules. The **Closing the loop** and **Circular village at night** development scenes exercise the complete system and its artwork.
 
 ## Farming
 
