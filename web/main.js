@@ -3,7 +3,7 @@ import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
 import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
-import { footprintCorners, occupies, placementArt, drawFoundation } from './building-footprints.js';
+import { footprintCorners, occupies, placementArt } from './building-footprints.js';
 import { installBuildMenu, paintIcon } from './build-menu.js';
 import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { drawNightEmission } from './night-lighting.js';
@@ -453,7 +453,6 @@ function tree(x, y, s = 1, species = 0) {
 function sprite(kind, x, y, alpha = 1, id) {
   const art=allBuildingArt[kind];if(!art)return;
   const p=iso(x,y),night=nightAmount(state.village.minutes),registration=placementArt(kind,art);
-  drawFoundation(ctx,kind,p.x,p.y,scale,alpha,night);
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
   const level=buildingLighting(state.environment.power,id,kind,complete);
   for(const layer of lightingLayers(night,level,alpha)){
