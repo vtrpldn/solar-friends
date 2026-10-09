@@ -118,7 +118,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   }
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
-  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null]]) {
+  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
     await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
@@ -147,6 +147,44 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     }
     await page.locator('#dev-button').click();
   }
+  // Circular infrastructure uses actual player controls and real simulation time.
+  await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).uncheck();
+  let circular=await page.evaluate(()=>window.solarDev.snapshot());
+  assert(!circular.village.circular.auto_feed&&!circular.village.circular.filter_water&&!circular.village.circular.use_biogas);
+  assert((await page.locator('#digester-status').textContent()).includes('paused'));
+  for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).check();
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('240');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  circular=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(circular.village.circular.toilet_visits,5);assert.equal(circular.environment.economy.capacity,900);
+  assert((await page.locator('#toilet-status').textContent()).includes('5 daily visits'));
+  assert((await page.locator('#digester-status').textContent()).includes('Digesting'));
+  await capture('Five private routines and active water and waste processing','circular-controls.png');
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('241');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  circular=await page.evaluate(()=>window.solarDev.snapshot());
+  assert(circular.village.circular.biogas>0&&circular.village.circular.water_reused>=8);
+  assert((await page.locator('#digester-status').textContent()).includes('curing'));
+  await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('circular-night');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Power',exact:true}).click();
+  assert((await page.locator('#power-generation').textContent()).includes('river 1.8'));
+  await page.locator('[data-power-building="9"]').uncheck();
+  assert((await page.evaluate(()=>window.solarDev.snapshot())).village.power.disabled.includes(9));
+  await page.locator('[data-power-building="9"]').check();
+  await page.getByRole('button',{name:'Close power',exact:true}).click();
+  await page.getByRole('button',{name:'Build',exact:true}).click();
+  await page.locator('#home-material-method').selectOption('adobe');
+  assert((await page.locator('[data-kind="home"]').textContent()).includes('Adobe'));
+  await page.locator('[data-kind="home"]').click();
+  // Empty plot, away from the fixture buildings; resolve through the same view as the world.
+  await page.evaluate(()=>window.solarDev.fixedView());
+  const plot=await page.evaluate(async()=>{const {project}=await import('./projection.js');const r=document.querySelector('#world').getBoundingClientRect();const scale=Math.max(.45,Math.min(r.width/1900,r.height/1050));const p=project(5,5,{x:r.width*.49,y:r.height*.5-459*scale},scale);return {x:p.x+r.left,y:p.y+r.top};});
+  await page.mouse.click(plot.x,plot.y);
+  circular=await page.evaluate(()=>window.solarDev.snapshot());
+  const project=circular.village.economy.projects.at(-1);
+  assert.equal(project.recipe,'adobe');assert.equal(circular.village.buildings.at(-1).appearance>=4,true);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
   // Individual schedules synchronize between Trade and resident details.
   await page.locator('#dev-scenario').selectOption('occupations');await page.locator('#dev-load').click();
   await page.locator('#dev-close').click();await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Trade',exact:true}).click();

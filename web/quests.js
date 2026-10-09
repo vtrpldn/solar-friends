@@ -17,7 +17,7 @@ export const quests = [
     art: "grove",
     story:
       "Five neighbours. A patch of Brazilian earth. Let's make a place where everyone belongs.",
-    reward: "Food forest · fruit gathering",
+    reward: "Food forest + storage · gathering & keeping supplies",
     building: "grove",
     after:
       "Our first roots are down. Follow Roots for Tomorrow to grow our food forest.",
@@ -78,7 +78,7 @@ export const quests = [
     art: "compost",
     story:
       "“A food forest feeds us today. Returning our scraps to the soil will feed us tomorrow.”",
-    reward: "Compost station · richer harvests",
+    reward: "Compost + ecological toilet · caring for the land",
     building: "compost",
     after:
       "Build a compost station. Two kitchen scraps become one compost; gardens use it automatically for three extra food per harvest.",
@@ -139,7 +139,7 @@ export const quests = [
     art: "workshop",
     story:
       "“Many hands made these homes. With a few good tools, imagine what we could make next.”",
-    reward: "Workshop + greenhouse · tools & seedlings",
+    reward: "Workshop + greenhouse + reed bed · tools, seedlings & water",
     building: "workshop",
     after:
       "Build a workshop and a greenhouse. Eight free timber crafts twelve tool uses for 25% faster construction; moist greenhouse beds raise seedlings.",
@@ -169,7 +169,7 @@ export const quests = [
   },
   {
     title: "Growing Resilience", person: "Bento & Iara", theme: "CRAFT & CULTIVATE",
-    art: "greenhouse", building: "coop", reward: "Chicken coop · caring for hens & fresh eggs",
+    art: "greenhouse", building: "coop", reward: "Chicken coop + biodigester · eggs & cooking fuel",
     story: "“Good tools, living soil, and seedlings under glass. Let's make our harvests more dependable.”",
     after: "A resilient garden makes room for a fuller table. Build a chicken coop and keep food aside for the hens.",
     objectives: v => [
@@ -182,7 +182,7 @@ export const quests = [
   },
   {
     title: "A Fuller Table", person: "Nina", theme: "CARE & ABUNDANCE",
-    art: "coop", building: "solar_farm", reward: "Solar farm + street lights · shared power",
+    art: "coop", building: "solar_farm", reward: "Solar farm + river generator + street lights · shared power",
     story: "“A few hens, a little care, and fresh eggs for everyone. We can grow without rushing.”",
     after: "Our table is more varied. Now collect sunshine to keep our shared buildings and paths lit after dusk.",
     objectives: v => [
@@ -196,14 +196,14 @@ export const quests = [
     story: "“The sun gives us more than warm mornings. Let's save a little of it for the evening.”",
     after: "All seven chapters are complete. Every building is unlocked. Keep tending Vila Aurora, with the same resources and rhythms you've learned.",
     objectives: v => [
-      goal("Build a solar farm",count(v,"solar_farm"),1,"Order panels, batteries and electrical equipment in Town, then complete the solar farm.","solar_farm"),
+      goal("Build a shared generator",count(v,"solar_farm")+count(v,"hydro"),1,"Choose a solar farm or river generator. Order its equipment in Town, then complete construction.","solar_farm"),
       goal("Light a village path",count(v,"streetlight"),1,"Place a street light beside a road. It draws from our shared battery after dusk.","streetlight"),
-      goal("Store twelve energy",Math.floor(v.power.stored),12,"Let the farm charge in daylight. Open Power to watch generation, charge and demand.",null),
+      goal("Store twelve energy",Math.floor(v.power.stored),12,"Let solar or river generation charge the battery. Open Power to watch generation, charge and demand.",null),
     ],
   },
 
 ];
-export const unlockQuest = { grove:0, compost:1, square:2, workshop:3, greenhouse:3, coop:4, solar_farm:5, streetlight:5 };
+export const unlockQuest = { grove:0, warehouse:0, compost:1, eco_toilet:1, square:2, workshop:3, greenhouse:3, wetland:3, coop:4, biodigester:4, solar_farm:5, hydro:5, streetlight:5 };
 export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[false,false,false])[id-4];
 export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
 export const completedQuests = v => quests.map((_,i)=>questCompleted(v,i));

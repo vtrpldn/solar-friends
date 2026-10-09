@@ -27,9 +27,9 @@ for(const [kind,art]of Object.entries(allBuildingArt)){
   // Exercise the real foundation draw path, not just its footprint helper.
   const drawn=[];let polygon;
   drawFoundation({save(){},restore(){},translate(){},scale(){},beginPath(){polygon=[];},moveTo(x,y){polygon.push([x,y]);},lineTo(x,y){polygon.push([x,y]);},closePath(){},fill(){drawn.push(polygon);}},kind,0,0);
-  if(kind==='grove')assert.equal(drawn.length,0,'Food forests use natural ground cover instead of a raised foundation');
+  if(['grove','hydro','wetland','biodigester'].includes(kind))assert.equal(drawn.length,0,'Food forests use natural ground cover instead of a raised foundation');
   else assert.deepEqual(drawn[0],footprintCorners(kind,0,0).map(([x,y])=>[(x-y)*34,(x+y)*17]));
-  if(kind.startsWith('home-'))continue;
+  if(kind.startsWith('home-')||kind.startsWith('adobe-')||kind==='hydro')continue;
   assert(game.restore(JSON.stringify(base)));assert.equal(game.place(kind,8,8),'ok');
   const saved=game.snapshot(),v=JSON.parse(saved).village;
   for(let x=Math.ceil(f.minX);x<f.maxX;x++)for(let y=Math.ceil(f.minY);y<f.maxY;y++){
@@ -52,4 +52,4 @@ assert(game.restore(JSON.stringify(base)));assert.equal(game.place('home',8,8),'
 const legacy=JSON.parse(game.snapshot());legacy.village.roads=[[7,8]];
 assert(game.restore(JSON.stringify(legacy)));assert.equal(game.toggle_road(7,8),'ok');
 game.free();
-console.log('PASS: all 15 plot footprints on exact tile edges, natural food forest ground, road joins at four zooms, full-plot road exclusion, building/road conflicts and legacy saves.');
+console.log('PASS: all 22 plot footprints on exact tile edges, natural food forest ground, road joins at four zooms, full-plot road exclusion, building/road conflicts and legacy saves.');

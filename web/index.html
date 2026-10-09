@@ -111,7 +111,7 @@
         <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
         <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
         <p id="coop-status"></p></section>
-        <h3>Water &amp; weather</h3>
+        <section id="circular-controls"><h3>Water &amp; waste</h3><p id="circular-stock"></p><p id="circular-output"></p><p id="toilet-status"></p><label><input id="filter-greywater" type="checkbox"> Filter greywater automatically</label><p id="wetland-status"></p><label><input id="auto-digest" type="checkbox"> Feed the biodigester automatically</label><p id="digester-status"></p><label><input id="use-biogas" type="checkbox"> Cook with biogas when available</label><details><summary>Closing the loop</summary><p>Daily toilet waste stays sealed. Two waste + two kitchen scraps take 8 hours to make 4 cooking gas and 2 digestate. Digestate cures for a full day before becoming compost. One cooking gas stretches a pot by one meal.</p><p>A lined reed bed filters 12 greywater into 8 irrigation water over 6 hours. Gardens use reclaimed water first. Drinking, cooking, and handwashing always need fresh water. Processing pauses at full output stores.</p></details></section><h3>Water &amp; weather</h3>
         <p id="pantry-weather"></p>
         <details><summary>How the pantry works</summary><p>Ingredients include garden vegetables and gathered fruit. Residents forage wild food when the pantry runs low. Hungry hens wait safely; crops wait for water.</p></details>
       </aside>
@@ -143,13 +143,13 @@
         <h2 id="power-title">Sunshine for everyone</h2>
         <p id="power-summary"></p>
         <div class="power-battery-label"><b>Battery</b><span id="power-charge"></span></div>
-        <progress id="power-battery" aria-label="Stored solar energy" value="0" max="36"></progress>
+        <progress id="power-battery" aria-label="Stored shared energy" value="0" max="36"></progress>
         <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting demand<b id="power-demand"></b></span></div>
         <p id="power-outlook"></p>
-        <div class="power-build"><button id="build-solar" class="primary">Plan solar farm</button><button id="build-streetlight">Plan street light</button></div>
+        <div class="power-build"><button id="build-solar" class="primary">Plan solar farm</button><button id="build-hydro">Plan river generator</button><button id="build-streetlight">Plan street light</button></div>
         <h3>Shared lighting</h3><div id="power-loads"></div>
         <p id="power-roofs"></p>
-        <details><summary>How village power works</summary><p>Each solar farm supplies up to 6 energy per hour and stores 36 energy for the night. Production follows the sun; lights switch on at dusk. Buildings connect automatically across the village. Add farms or switch off lights to stretch the charge.</p><p>Rooftop-panel homes have their own battery. Gardens, food forests and compost do not need electricity. Residents still cook on the kitchen stove and work by hand during outages.</p></details>
+        <details><summary>How village power works</summary><p>Each solar farm supplies up to 6 energy per hour and stores 36 energy for the night. Production follows the sun; lights switch on at dusk. Buildings connect automatically across the village. River generators supply 1.8 energy per hour through the night and add 18 storage; rainfall boosts flow and dry days reduce it. Add generators or switch off lights to stretch the charge.</p><p>Rooftop-panel homes have their own battery. Gardens, food forests and compost do not need electricity. Residents still cook on the kitchen stove and work by hand during outages.</p></details>
       </aside>
       <aside id="building-panel" class="supplies panel" hidden aria-label="Building interactions">
         <button class="panel-close" data-close-panel aria-label="Close buildings">×</button>
@@ -190,7 +190,7 @@
         <button class="panel-close" data-close-panel aria-label="Close building tools">×</button>
         <div class="build-heading"><h2>Build</h2><span>Choose a blueprint</span></div>
         <div id="build-categories" role="group" aria-label="Building categories"></div>
-        <div id="tools" role="group" aria-label="Available buildings"></div>
+        <label class="home-method" id="home-method-control">House walls <select id="home-material-method"><option value="standard">Prepared materials</option><option value="local">Local bamboo</option><option value="adobe">Adobe bricks &amp; bamboo</option></select></label><div id="tools" role="group" aria-label="Available buildings"></div>
         <div class="build-guidance"><p class="build-hint">Choose a building, then find a clearing.</p><div id="placement" class="placement" hidden></div><kbd>Esc</kbd></div>
       </nav>
       <nav class="hud-dock" aria-label="Village controls"><button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button><button id="open-village" aria-controls="village-book" aria-expanded="false"><span>Village</span></button><button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Journal</button><button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button></nav>

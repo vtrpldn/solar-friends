@@ -5,7 +5,7 @@ import {riverBank,MAP_SIZE} from './terrain.js';
 const sheet=new URL('./ui/items.svg',import.meta.url).href;
 export const materialIcons=['timber','bamboo','earth','stone','salvage','frames','walls','tiles','fittings','plumbing','electrical','covering','panels','batteries','pumps'];
 export const itemIcon=key=>`<svg class="item-icon" aria-hidden="true" viewBox="0 0 48 48"><use href="${sheet}#${key}"/></svg>`;
-const buildingNames={home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost station',square:'Village square',coop:'Chicken coop',workshop:'Workshop',solar_farm:'Solar farm',streetlight:'Street light'};
+const buildingNames={hydro:'River generator',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost station',square:'Village square',coop:'Chicken coop',workshop:'Workshop',solar_farm:'Solar farm',streetlight:'Street light'};
 
 export function installGameUI({images,avatar,paintPortraits,selectPerson,showPanel,openDev,focusAt,worldView}) {
   const $=s=>document.querySelector(s);
@@ -57,7 +57,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     const key=b?buildingArtKey(b,state.village.buildings,state.village.economy.projects):'';
     $('#building-name').textContent=b?`${buildingNames[b.kind]} ${b.id+1}`:'Buildings';
     $('#building-portrait').hidden=!b;
-    $('#building-visits').hidden=!b||['solar_farm','streetlight'].includes(b.kind);
+    $('#building-visits').hidden=!b||['solar_farm','streetlight','hydro','wetland','biodigester','warehouse'].includes(b.kind);
     $('#plan-first-building').hidden=!!b;
     if(key&&key!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[key],allBuildingArt[key]);buildingKey=key;}
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);

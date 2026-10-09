@@ -4,7 +4,7 @@ import { meshPoint } from './building-mesh.js';
 
 export function footprintSize(kind) {
   if (['square','solar_farm'].includes(kind)) return 3;
-  if (['well','compost','coop','streetlight','road'].includes(kind)) return 1;
+  if (['well','compost','coop','streetlight','road','hydro','eco_toilet'].includes(kind)) return 1;
   return 2;
 }
 export function footprint(kind,x,y) {
@@ -22,6 +22,13 @@ export function footprintCorners(kind,x,y) {
 // Painted ground-contact landmarks, left/front/right, in source-cell units.
 // These register the building to its plot independently of transparent padding.
 const grounds={
+  hydro:[1280,[[229,902],[551,1060],[1090,864]]],
+  eco_toilet:[1280,[[237,975],[609,1168],[1087,974]]],
+  wetland:[1774,[[357,511],[989,797],[1355,571]]],
+  biodigester:[1280,[[130,844],[401,949],[1164,858]]],
+  warehouse:[1280,[[107,848],[741,1133],[1188,936]]],
+  'adobe-gable':[1280,[[122,882],[643,1138],[1198,917]]],
+  'adobe-veranda':[1280,[[103,876],[656,1162],[1185,911]]],
   home:[640,[[75,440],[289,542],[527,422]]],
   kitchen:[640,[[64,429],[329,572],[541,452]]],
   garden:[1280,[[150,678],[626,943],[1112,696]]],
@@ -41,18 +48,18 @@ const grounds={
 export function placementArt(kind,art) {
   const [size,landmarks]=grounds[kind],{vertical,shear}=cameraCalibration(art);
   const points=landmarks.map(p=>{
-    const [u,v]=meshPoint(art.mesh,p),x=(u/size-.5)*art.width,y=((v/size-art.anchor)*vertical+(u/size-.5)*shear)*art.width;
+    const [u,v]=meshPoint(art.mesh,p),x=(u/size-.5)*art.width,y=((v/size-art.anchor*(art.aspect||1))*vertical+(u/size-.5)*shear)*art.width;
     return [(x/W+y/H)/2,(y/H-x/W)/2];
   });
   const min=axis=>Math.min(...points.map(p=>p[axis])),max=axis=>Math.max(...points.map(p=>p[axis]));
-  const n=footprintSize(kind),gain=Math.min(n*.96/Math.max(max(0)-min(0),max(1)-min(1)),['streetlight','well','coop','compost','grove'].includes(kind)?1:1.5);
+  const n=footprintSize(kind),gain=Math.min(n*.96/Math.max(max(0)-min(0),max(1)-min(1)),['streetlight','well','coop','compost','grove','hydro','eco_toilet'].includes(kind)?1:1.5);
   const cx=(min(0)+max(0))/2,cy=(min(1)+max(1))/2;
   const center=(n-1)/2-Math.floor(n/2);
   return {scale:gain,x:-(cx-cy)*W*gain,y:center*2*H-(cx+cy)*H*gain-2};
 }
 export function drawFoundation(ctx,kind,x,y,scale=1,alpha=1,night=0) {
   // A food forest grows directly in the terrain; its sprite includes ground cover.
-  if(kind==='grove')return;
+  if(['grove','hydro','wetland','biodigester'].includes(kind))return;
   const corners=footprintCorners(kind,0,0).map(([u,v])=>[(u-v)*W,(u+v)*H]);
   const soil=['garden','solar_farm','compost'].includes(kind);
   const path=(points,color)=>{ctx.beginPath();points.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();ctx.fillStyle=color;ctx.fill();};

@@ -1,6 +1,6 @@
 {
-  "reviewed": "2026-10-08",
-  "scope": "All 15 building variants, day and night. Ground-plane structural directions use the game orthographic slopes +0.5 and -0.5. Organic grove excluded from straight-edge measurements.",
+  "reviewed": "2026-10-09",
+  "scope": "All 22 building variants, day and night. Measured ground-plane structural directions calibrated to game orthographic axes; the organic grove is excluded.",
   "method": "Hand-traced structural landmarks, shared game renderer, day/night visual review. Per-edge tolerance 2 pixels at zoom 1. These are raster illustration tolerances, not a claim that every painted detail has exact geometry. PNG hashes require renewed review after any source replacement.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
@@ -28,6 +28,20 @@
     "solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
     "solar-farm-night.png": "02f5502b3f9f67a3876237f16882a2773b702c623b1123b647bf185b51fea92b",
     "streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
-    "streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131"
+    "streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
+    "hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "hydro-night.png": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
+    "eco-toilet.png": "057263ac0ebc03804d83cf60e374abb2e2b337221ac670f9cd79265562d4e2ec",
+    "eco-toilet-night.png": "6897f45456fafd0357e6043007c44a29baac4a0064636a37af3f8b157dd474fb",
+    "wetland.png": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
+    "wetland-night.png": "e81b8e41cc5c2d4bc920ede7b62b34d90f0f94b6183b662950d14d7d0c6ebf8b",
+    "biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "biodigester-night.png": "ff2327fd6479d3682323c0ffc7f2423a009a52547da3d4c145aac9f2b3332a24",
+    "warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "warehouse-night.png": "a3922fe7eae2cee37991410d89b56a82bba5940a53b2e71c53127efc35447164",
+    "adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "adobe-gable-night.png": "471e9510f73406a82124940f2f77cd71f48333adb12f61bc58f9e076cccf9a7a",
+    "adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "adobe-veranda-night.png": "0ab2a6b62393681e7bc44ff2ea319a6ed60bf84bfcb665db7b8e5be18024e655"
   }
 }

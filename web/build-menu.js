@@ -1,10 +1,11 @@
 import { buildingArt, drawBuildingArt } from './building-art.js';
 
 const groups = [
-  { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'square'] },
+  { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'warehouse', 'square'] },
   { id: 'food', name: 'Food & growing', kinds: ['garden', 'greenhouse', 'kitchen', 'grove', 'coop'] },
   { id: 'craft', name: 'Craft & reuse', kinds: ['workshop', 'compost'] },
-  { id: 'power', name: 'Power', kinds: ['solar_farm', 'streetlight'] },
+  { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','biodigester'] },
+  { id: 'power', name: 'Power', kinds: ['solar_farm', 'hydro', 'streetlight'] },
 ];
 
 // Icons use the same corrected artwork as the map. Fit painted bounds, rather
@@ -64,6 +65,7 @@ export function installBuildMenu(kinds, images, onGroupChange) {
     }
   }
   function showGroup(id) {
+    document.getElementById('home-method-control').hidden=id!=='village';
     for (const button of filters.children) button.setAttribute('aria-pressed', String(button.dataset.buildGroup === id));
     for (const button of tools.children) button.hidden = button.dataset.group !== id;
   }

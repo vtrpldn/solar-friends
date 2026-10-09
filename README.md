@@ -63,9 +63,9 @@ Story saves under `solar-friends-v3-story`; Sandbox uses `solar-friends-v3-sandb
 
 Why: building an ecovila uses resources from its land and equipment bought elsewhere. [plan.md](plan.md) records the completed implementation stages and acceptance checks. This fictional southeastern property and its prices are game assumptions.
 
-The community starts with R$ 3,000 and modest material stocks. Fifteen materials include timber, bamboo, earth, stone, salvage, prepared frames, walls, roof tiles, fittings, plumbing, electrical supplies, greenhouse covering, panels, batteries and pumps. Stored stock plus incoming orders share 600 spaces. The Rust snapshot is the source for recipes, quotes and reservations.
+The community starts with R$ 3,000 and modest material stocks. Fifteen materials include timber, bamboo, earth, stone, salvage, prepared frames, walls, roof tiles, fittings, plumbing, electrical supplies, greenhouse covering, panels, batteries and pumps. Stored stock plus incoming orders share 600 spaces; each completed general storage building adds 300. Sandbox removal is blocked if the remaining stores cannot hold existing stock and incoming orders. The Rust snapshot is the source for recipes, quotes and reservations.
 
-**Projects** reserves only each current stage. Priority decides who gets scarce materials. Labour consumes a stage once; waiting projects leave workers free. Pause releases unused reservations. Cancellation releases unused stock and returns half of consumed materials. Orders remain independent. Choose local bamboo structures or stone garden borders before labour starts; local homes use veranda artwork and local plots have a different foundation edge. All existing buildings have mixed recipes, and only completed buildings provide their benefits.
+**Projects** reserves only each current stage. Priority decides who gets scarce materials. Labour consumes a stage once; waiting projects leave workers free. Pause releases unused reservations. Cancellation releases unused stock and returns half of consumed materials. Orders remain independent. Choose local bamboo structures, adobe homes or stone garden borders before labour starts; local homes use veranda artwork and local plots have a different foundation edge. Choose **Build → House walls → Adobe bricks & bamboo** before placing a home, including in Sandbox. Adobe homes use earth and bamboo instead of prepared walls and alternate between two painted designs. All buildings have mixed recipes, and only completed buildings provide their benefits.
 
 **Town** combines supplies in one basket. Delivery costs R$ 60, dispatches after two game hours and arrives at 10:00 after dispatch. The fund is charged on confirmation. Cancel before dispatch for a full refund; dispatched orders must arrive. Receiving capacity includes incoming stock. The order book retains bounded history while keeping every active order.
 
@@ -91,9 +91,19 @@ The camp can prepare frames from timber and fittings, wall material from earth, 
 
 Why: shared buildings and street lights need a player-built source of energy. Plan a **solar farm** using stone supports, fittings, panels, batteries and electrical supplies; **street lights** need stone, timber, fittings and electrical supplies. Residents finish construction as usual. Each completed farm starts with an empty battery, generates up to 6 energy per game hour in daylight, and adds 36 energy of storage. Batteries supply lighting after sunset; an empty battery turns shared lights off until sunshine returns. More farms increase generation and storage.
 
+A **river generator** must sit on the shallow village-side channel of the river. Each completed generator supplies 1.8 energy per game hour through day and night and adds 18 battery capacity. Rain raises output by 30%; the dry day reduces it by 35%. Residents approach from the bank. Shared power works with either solar or river generation.
+
 Open **Power** for generation, demand, stored energy, and an estimate of remaining nighttime lighting. Switch individual shared lights off to save energy. Connections span the village automatically. Homes with rooftop panels use their own batteries; gardens, food forests, and compost need no electricity. Residents can still cook on the kitchen stove and work by hand during outages. Charge and switches are saved.
 
 The developer scenarios **Stored sunshine** and **Empty battery** provide matching nighttime views for checking lighting and controls.
+
+## Ecological sanitation
+
+Why: household water and waste can support village resources without entering drinking supplies. Build an **ecological toilet**, **reed bed** and **biodigester** as their Story chapters unlock, or immediately in Sandbox. Residents visit the toilet privately once per day while awake; each visit uses one fresh water for handwashing and adds sealed waste. Household water use also produces greywater.
+
+Manage processing in **Village → Supplies → Water & waste**. A reed bed turns 12 greywater into 8 irrigation water over six game hours. Gardens use reclaimed water first; cooking, drinking and handwashing always use fresh water. A biodigester consumes two sealed waste and two kitchen scraps over eight hours, producing four cooking gas and two digestate. Digestate cures for a full game day before becoming compost. One gas adds one meal to a cooked pot without replacing its ingredients.
+
+Filtration and digestion can be paused; full output stores stop new batches. Curing continues in sealed storage. Processing timers, settings and stocks survive saves without duplicating outputs. These simplified cycles are game rules. The **Circular village** and **Circular village at night** development scenes exercise the complete system and its artwork.
 
 ## Farming
 
