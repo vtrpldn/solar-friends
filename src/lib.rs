@@ -13,6 +13,7 @@ mod modes;
 mod occupations;
 mod power;
 mod progression;
+mod resource_sites;
 mod sanitation;
 mod situations;
 mod sleep;
@@ -352,6 +353,9 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     if matches!(task, "source" | "prepare") {
         if let Some((_, i)) = economy::local_job(v) {
             r.activity_material = Some(i);
+            if task == "source" {
+                r.reason = resource_sites::reason(v, i).into();
+            }
             let base = if task == "source" {
                 let s = &v.economy.sources[i];
                 (s.x as f32, s.y as f32)
@@ -1114,7 +1118,12 @@ impl Game {
         {
             return "Place roads inside the lot, away from the riverbank.".into();
         }
-        if v.buildings.iter().any(|b| interactions::occupies(b, x, y)) {
+        if v.buildings.iter().any(|b| interactions::occupies(b, x, y))
+            || v.economy
+                .sources
+                .iter()
+                .any(|s| resource_sites::occupies(s, x, y))
+        {
             return "Choose a tile beside the building.".into();
         }
         v.roads.push((x, y));
@@ -1171,12 +1180,8 @@ impl Game {
         }) {
             return "Keep roads clear. Choose a plot beside the road.".into();
         }
-        if v.economy
-            .sources
-            .iter()
-            .any(|s| (s.x - x).abs() <= radius && (s.y - y).abs() <= radius)
-        {
-            return "Keep the local resource site accessible.".into();
+        if resource_sites::conflicts(&v, kind, x, y) {
+            return "Keep the local resource plot accessible.".into();
         }
         let id = v.economy.next_building;
         v.economy.next_building += 1;
@@ -1365,6 +1370,7 @@ impl Game {
             return false;
         }
         occupations::migrate(&mut save);
+        resource_sites::retire_legacy(&mut save.village, &mut save.residents);
         let v = &save.village;
         let mut road_tiles = std::collections::HashSet::new();
         if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1428,7 +1434,11 @@ impl Game {
                 || r.activity_building
                     .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
                 || r.activity_material.is_some_and(|i| {
-                    i >= economy::COUNT || (r.task == "source" && i >= v.economy.sources.len())
+                    if r.task == "source" {
+                        v.economy.sources.get(i).is_none_or(|s| !s.active)
+                    } else {
+                        i >= economy::COUNT
+                    }
                 })
                 || r.last_sanitation_day < -1
                 || r.last_sanitation_day > (v.minutes / 1440.) as i32
