@@ -1,5 +1,7 @@
 // Hand-traced structural edges, in a 1280 px reference view (640 for atlas
-// cells). Roof pitches, foliage, bunting and curved tank rims are not axes.
+// cells, or the actual source size for replaced sprites). Sloping roof pitches,
+// foliage, bunting and curved tank rims are not ground axes; roof ridges and
+// horizontal eaves are, and must agree with the walls and foundation.
 // Each direction contains two independently traced, nominally parallel edges.
 // Keep these landmarks visible in the projection review; do not infer a pass
 // merely from the requested camera in an image-generation prompt.
@@ -20,7 +22,7 @@ export const buildingProjection = {
   well: { size:1280, right:[[337,950,505,1040],[218,944,475,1086]], left:[[785,1001,1026,869],[790,1091,1040,953]], upright:[961,343,961,684] },
   compost: { size:1280, right:[[550,307,747,415],[538,657,735,773]], left:[[247,441,484,299],[540,598,754,464]], upright:[781,805,781,1075] },
   square: { size:1280, right:[[460,851,598,911],[649,752,786,810]], left:[[310,733,541,611],[752,898,994,764]], upright:[599,919,599,966] },
-  workshop: { size:1280, right:[[116,894,588,1141],[173,511,503,684]], left:[[591,1141,1149,930],[602,651,1025,505]], upright:[554,714,554,990] },
+  workshop: { size:1254, right:[[118,917,548,1145],[152,522,505,708],[471,185,828,374]], left:[[553,1145,1131,981],[594,640,1007,531],[637,867,876,806]], upright:[558,746,558,1002], rightLabels:['Side foundation','Side eave','Roof ridge'], leftLabels:['Front foundation','Front lintel','Workbench front'] },
   coop: { size:1280, right:[[355,753,591,884],[277,486,579,657]], left:[[665,648,921,547],[661,886,746,853]], upright:[634,709,634,994] },
   'home-veranda': { size:1280, right:[[100,852,574,1098],[350,612,445,658]], left:[[574,1098,1156,852],[636,699,1102,503]], upright:[571,731,571,1065] },
   'home-gable': { size:1280, right:[[151,797,650,1061],[200,484,603,699]], left:[[650,1061,1140,841],[897,757,970,724]], upright:[674,719,674,1020] },
