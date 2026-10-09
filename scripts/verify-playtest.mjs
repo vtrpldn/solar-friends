@@ -36,7 +36,7 @@ for(const [w,h] of [[848,1328],[1024,768],[1440,900],[1920,1080]]){
 console.log('PASS: desktop zoom limits have no invisible range or extra recovery clicks.');
 
 const materials=new Game();unlockStory(materials);for(let i=0;i<600&&!JSON.parse(materials.snapshot()).village.arrived;i++)materials.tick(.25);
-assert.equal(materials.place('garden',8,8),'ok');assert.equal(materials.place('solar_farm',16,8),'ok');let fixture=JSON.parse(materials.snapshot());
+assert.equal(materials.place_source(2,5,5),'ok');assert.equal(materials.place('garden',8,8),'ok');assert.equal(materials.place('solar_farm',16,8),'ok');let fixture=JSON.parse(materials.snapshot());
 fixture.village.minutes=540;fixture.village.food=80;fixture.village.meals=10;fixture.village.water=100;fixture.village.economy.stock[2]=0;fixture.village.economy.stock[3]=0;
 for(const p of fixture.village.economy.projects){p.reserved[2]=0;p.reserved[3]=0;}
 for(const r of fixture.residents){r.task='idle';r.remaining=0;r.requested=false;r.energy=90;r.hunger=20;r.social=90;r.last_meal_slot=0;r.target_x=r.x;r.target_y=r.y;}
@@ -44,5 +44,5 @@ assert(materials.restore(JSON.stringify(fixture)));
 materials.tick(.25);let workers=JSON.parse(materials.snapshot()).residents.filter(r=>[2,3].includes(r.id));
 for(const r of workers){assert.equal(r.task,'source');assert(!riverBank(r.target_x,r.target_y),'Collection destinations must remain on land');assert.equal(residentActivity({...r,x:r.target_x,y:r.target_y,sourceMaterial:2},540),'tend');}
 assert(Math.hypot(workers[0].target_x-workers[1].target_x,workers[0].target_y-workers[1].target_y)>=1.1);
-for(let i=0;i<800;i++)materials.tick(.25);const materialState=JSON.parse(materials.snapshot());assert(materialState.village.economy.sources[2].remaining<140);assert(materials.restore(materials.snapshot()));materials.free();
+for(let i=0;i<800;i++)materials.tick(.25);const materialState=JSON.parse(materials.snapshot());assert(materialState.village.economy.sources[0].remaining<140);assert(materials.restore(materials.snapshot()));materials.free();
 console.log('PASS: source workers reach land, remain separated, actually collect materials and use the digging pose.');

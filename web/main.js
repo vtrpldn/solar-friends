@@ -1,3 +1,4 @@
+import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {installGameUI} from './game-ui.js';
 import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
@@ -5,7 +6,7 @@ import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-pr
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt } from './building-footprints.js';
 import { installBuildMenu, paintIcon } from './build-menu.js';
-import { buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
+import { unlitFilter, buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { drawNightEmission } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { readArtDraft } from './dev/art-draft.js';
@@ -450,6 +451,21 @@ function tree(x, y, s = 1, species = 0) {
     w,
   );
 }
+function materialSite(site,alpha=1){
+  if(!site.active)return;
+  ctx.save();ctx.globalAlpha*=alpha;ctx.filter=unlitFilter(nightAmount(state.village.minutes));
+  if(site.material===0){
+    const mature=site.growth>=1,trees=mature?Math.ceil(site.remaining/8):site.planted?4:0;
+    for(let i=0;i<4;i++){const x=site.x+(i%2?.7:-.7),y=site.y+(i<2?-.7:.7);
+      if(i<trees)tree(x,y,.18+.42*(mature?1:site.growth),0);
+      else {const p=iso(x,y);ctx.fillStyle='#86502e';ctx.fillRect(p.x-4*scale,p.y-4*scale,8*scale,5*scale);ctx.fillStyle='#c78c4d';ctx.beginPath();ctx.ellipse(p.x,p.y-4*scale,4*scale,2*scale,0,0,Math.PI*2);ctx.fill();}
+    }
+  }else if(site.material===1){const growth=site.planted?site.growth:0,cut=site.growth>=1?site.remaining/site.maximum:1;
+    for(const [dx,dy]of [[-.35,.35],[.35,-.35]]){const p=iso(site.x+dx,site.y+dy);drawEconomyArt(ctx,1,p.x,p.y,scale*(.25+.75*growth)*(.45+.55*cut),nightAmount(state.village.minutes),1);}
+  }else{const p=iso(site.x,site.y);drawEconomyArt(ctx,site.material,p.x,p.y,scale,nightAmount(state.village.minutes),site.remaining/site.maximum);}
+  ctx.restore();
+}
+
 function sprite(kind, x, y, alpha = 1, id) {
   const art=allBuildingArt[kind];if(!art)return;
   const p=iso(x,y),night=nightAmount(state.village.minutes),registration=placementArt(kind,art);
@@ -560,7 +576,7 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
@@ -620,9 +636,9 @@ function render() {
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
   const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
-  const key = JSON.stringify([visibleRoads,state.village.economy.sources.map(s=>[s.x,s.y])]);
+  const key = JSON.stringify([visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y])]);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources);
+    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active));
     groundKey = key;
   }
   ctx.save();
@@ -654,9 +670,8 @@ function render() {
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
   const objects = [
-    ...state.village.economy.sources.map((site,index)=>({depth:site.x+site.y,draw:()=>{const p=iso(site.x,site.y);drawEconomyArt(ctx,index,p.x,p.y,scale,nightAmount(state.village.minutes),site.remaining/site.maximum);}})),
-    {depth:23,draw:()=>{const p=iso(10,13);drawEconomyArt(ctx,5,p.x,p.y,scale,nightAmount(state.village.minutes));}},
-    ...flora.filter(f=>!state.village.economy.sources.some(site=>Math.hypot(f.x-site.x,f.y-site.y)<2.5)).map((f) => ({
+    ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
+    ...flora.filter(f=>!state.village.economy.sources.some(site=>site.active&&Math.hypot(f.x-site.x,f.y-site.y)<2.5)).map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),
@@ -680,8 +695,9 @@ function render() {
     polygon(footprintCorners(tool,t.x,t.y).map(([x,y]) => {
       const p = iso(x,y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
-    if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
-    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`;
+    if(tool.startsWith('source_'))materialSite({material:sourceMaterial(tool),x:t.x,y:t.y,active:true,planted:true,growth:0.4,remaining:16,maximum:32},.55);
+    else if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
+    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`;
     $("#placement").classList.toggle("invalid", Boolean(reason));
   }
   const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
@@ -1201,6 +1217,7 @@ function updateUI() {
     button.classList.toggle("locked", !unlocked);
     button.classList.remove("unaffordable");
     const quest = unlockQuest[button.dataset.kind];
+    if(button.dataset.kind.startsWith('source_')){const option=state.environment.economy.source_options.find(s=>s.key===button.dataset.kind);button.querySelector('small').textContent=free?'Free planting':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(option.cost/100);button.title=option.description+' · '+recipeSummary(state,option.key);button.setAttribute('aria-label','Place '+option.name);button.setAttribute('aria-pressed',String(button.dataset.kind===tool));continue;}
     button.querySelector("small").textContent = unlocked
       ? button.dataset.kind === "road" ? "Free" : v.mode==='sandbox' ? "Free · instant" : "Free blueprint"
       : "Quest reward";
@@ -1237,7 +1254,7 @@ function setTool(kind) {
   $("#placement").classList.remove("invalid");
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'} · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'} · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -1285,6 +1302,7 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for(const option of state.environment.economy.source_options)kinds[option.key]=[option.name,option.description];
   gameUI=installGameUI({images:buildingImages,avatar,paintPortraits,selectPerson,
     showPanel,closePanels,openDev:()=>{$('#help-dialog').close();devTools.open();},
     focusAt:(x,y)=>{const p=iso(x,y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.45-p.y,dt:1/60};},
@@ -1293,7 +1311,7 @@ function setup() {
     if(!$('#village-book').hidden){closePanels();return;}
     showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
   };
-  economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
@@ -1566,10 +1584,10 @@ function setup() {
     pointer = { x, y };
     if (tool) {
       const p = uniso(x, y),
-        result = tool === "road" ? game.toggle_road(p.x, p.y) : game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
+        result = tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
       if (result === "ok") {
         if (tool !== "road") {
-          toast(state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
+          toast(tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
           setTool(null);
         }
         state = JSON.parse(game.snapshot());

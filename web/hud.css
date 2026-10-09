@@ -171,3 +171,5 @@ footer .resources b[hidden]{display:none!important}
 .home-method {display:flex;align-items:center;gap:10px;margin:6px 0 12px;color:#5c4c30;font-size:13px;font-weight:700;}
 .home-method select {width:auto;min-width:220px;padding:6px 12px;background:#fff5d7;border:1px solid #9b865d;border-radius:3px;color:#4c412c;font:inherit;}
 .home-method[hidden] {display:none;}
+
+.source-plans,.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.source-row label{display:block;margin:8px 0}.source-row p{margin:8px 0}.source-row{display:block}

@@ -80,11 +80,11 @@ The completed [gameplay and artwork playtest](playtest.md) corrected cancellatio
 
 Why: resource production should come from choices the player makes, rather than extraction props added to every new village.
 
-- [ ] Start new villages without timber, bamboo, earth, stone or salvage sites. Keep legacy village inventory while retiring the old fixed sites.
-- [ ] Add player placement, costs, real plot occupancy and clearing controls for timber plots, bamboo cultivation and finite extraction sites. Stone extraction belongs in the property's stony southeast; multiple sites share the same finite reserve.
-- [ ] Grow planted timber and bamboo over game days. Residents tend and harvest within normal work windows; bamboo resprouts, timber is replanted, and lack of water or seedling funds pauses the cycle visibly.
-- [ ] Keep collection limited to project/tool demand, with explicit manual harvest and replant controls. Save growth, yields, settings and depleted reserves without duplicating resources.
-- [ ] Replace always-visible economy props with placed sites and growing plants. Add Land & materials tools, growth/harvest status, actionable shortages and a cultivation test scene.
+- [x] Start new villages without timber, bamboo, earth, stone or salvage sites. Keep legacy village inventory while retiring the old fixed sites.
+- [x] Add player placement, costs, real plot occupancy and clearing controls for timber plots, bamboo cultivation and finite extraction sites. Stone extraction belongs in the property's stony southeast; multiple sites share the same finite reserve.
+- [x] Grow planted timber and bamboo over game days. Residents tend and harvest within normal work windows; bamboo resprouts, timber is replanted, and lack of water or seedling funds pauses the cycle visibly.
+- [x] Keep collection limited to project/tool demand, with explicit manual harvest and replant controls. Save growth, yields, settings and depleted reserves without duplicating resources.
+- [x] Replace always-visible economy props with placed sites and growing plants. Add Land & materials tools, growth/harvest status, actionable shortages and a cultivation test scene.
 - [ ] Check new-game emptiness, placement conflicts, harvest/replant conservation, finite deposits, worker arrival/spacing, save/reload and actual desktop controls.
 
 Growth durations and prices are game-balance abstractions. Town purchases remain the immediate alternative while plants mature.

@@ -97,7 +97,11 @@ pub fn reason(v: &Village, index: usize) -> &'static str {
         if v.economy.sources[index].planted {
             "Watering our growing material crops."
         } else {
-            "Planting the next timber crop."
+            if v.economy.sources[index].material == 0 {
+                "Planting the next timber crop."
+            } else {
+                "Encouraging new bamboo shoots."
+            }
         }
     } else {
         "Harvesting materials from our chosen plot."
@@ -118,13 +122,19 @@ pub fn finish(v: &mut Village, index: usize) -> bool {
     }
     let material = v.economy.sources[index].material;
     if !v.economy.sources[index].planted {
-        economy::contribute(v, replant_cost(material), "Timber seedlings for replanting");
+        if material == 0 {
+            economy::contribute(v, replant_cost(material), "Timber seedlings for replanting");
+        }
         v.economy.sources[index].plant_requested = false;
         v.economy.sources[index].planted = true;
         v.economy.sources[index].growth = 0.;
         event(
             v,
-            "A new timber crop has been planted. It needs time and water to mature.",
+            if material == 0 {
+                "A new timber crop has been planted. It needs time and water to mature."
+            } else {
+                "Bamboo is growing again from its roots. It needs time and water to mature."
+            },
         );
     }
     water(v);
@@ -228,7 +238,7 @@ pub fn valid(v: &Village) -> bool {
         .land
         .iter()
         .enumerate()
-        .any(|(i, n)| !n.is_finite() || *n < 0. || *n > LAND[i])
+        .any(|(i, n)| !n.is_finite() || *n < 0. || *n > LAND[i] || n.fract() != 0.)
         || v.economy.sources.len() > 676
     {
         return false;
@@ -240,6 +250,7 @@ pub fn valid(v: &Village) -> bool {
             || !s.remaining.is_finite()
             || s.remaining < 0.
             || s.remaining > s.maximum
+            || s.remaining.fract() != 0.
             || !s.growth.is_finite()
             || !(0.0..=1.).contains(&s.growth)
             || !s.moisture.is_finite()
@@ -283,7 +294,7 @@ pub fn valid(v: &Village) -> bool {
             {
                 return false;
             }
-        } else if s.remaining != 0. || s.planted || s.harvest_requested {
+        } else if s.remaining != 0. || s.planted || s.harvest_requested || s.plant_requested {
             return false;
         }
     }
@@ -559,5 +570,84 @@ mod tests {
             assert!(!g.restore(&bad.to_string()));
             assert_eq!(g.snapshot(), saved);
         }
+    }
+    #[test]
+    fn harvest_settings_and_unfunded_replanting_survive_reload() {
+        let mut g = Game::new();
+        assert_eq!(g.place_source(0, 5, 5), "ok");
+        assert_eq!(g.configure_source(0, true, false), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.economy.sources[0].growth = 1.;
+            v.economy.sources[0].remaining = 32.;
+            let mut needs = [0; economy::COUNT];
+            needs[0] = 8;
+            assert!(!wanted(&v, 0, &needs));
+        }
+        assert_eq!(g.harvest_source(0), "ok");
+        let checkpoint = g.snapshot();
+        assert!(g.restore(&checkpoint));
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            assert!(wanted(&v, 0, &[0; economy::COUNT]));
+            for _ in 0..4 {
+                v.economy.sources[0].harvest_requested = true;
+                economy::finish_job(&mut v, "source", 0);
+            }
+            v.economy.money = 3999;
+            assert!(!care(&v, 0));
+            assert!(!finish(&mut v, 0));
+            assert!(!v.economy.sources[0].planted);
+            assert_eq!(v.economy.money, 3999);
+            assert!(view(&v).to_string().contains("seedling funds"));
+        }
+        assert_ne!(g.replant_source(0), "ok");
+        let checkpoint = g.snapshot();
+        assert!(g.restore(&checkpoint));
+    }
+    #[test]
+    fn clearing_an_assigned_plot_preserves_other_indices_and_stops_work() {
+        let mut g = Game::new();
+        for _ in 0..16 {
+            assert_eq!(g.place_source(2, 5, 5), "ok");
+            let index = g.app.world().resource::<Village>().economy.sources.len() - 1;
+            assert_eq!(g.clear_source(index), "ok");
+        }
+        assert_eq!(g.place_source(2, 5, 5), "ok");
+        {
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 2).unwrap();
+            r.task = "source".into();
+            r.activity_material = Some(16);
+            r.remaining = 20.;
+        }
+        let checkpoint = g.snapshot();
+        assert!(
+            g.restore(&checkpoint),
+            "Source indices are not material indices"
+        );
+        assert_eq!(g.clear_source(16), "ok");
+        let mut q = g.app.world_mut().query::<&Resident>();
+        let r = q.iter(g.app.world()).find(|r| r.id == 2).unwrap();
+        assert_eq!(r.task, "idle");
+        assert_eq!(r.activity_material, None);
+        assert_eq!(r.remaining, 0.);
+        assert_eq!(g.app.world().resource::<Village>().economy.land[0], 140.);
+        let checkpoint = g.snapshot();
+        assert!(g.restore(&checkpoint));
+    }
+    #[test]
+    fn fractional_reserves_and_inactive_requests_are_rejected_atomically() {
+        let mut g = Game::new();
+        assert_eq!(g.place_source(3, 18, 18), "ok");
+        assert_eq!(g.clear_source(0), "ok");
+        let saved = g.snapshot();
+        let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        bad["village"]["economy"]["land"][0] = 139.5.into();
+        assert!(!g.restore(&bad.to_string()));
+        bad = serde_json::from_str(&saved).unwrap();
+        bad["village"]["economy"]["sources"][0]["plant_requested"] = true.into();
+        assert!(!g.restore(&bad.to_string()));
+        assert_eq!(g.snapshot(), saved);
     }
 }

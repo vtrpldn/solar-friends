@@ -1,6 +1,7 @@
 import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 export const scenarios = [
+  {id:'cultivation',name:'Player-managed material plots',detail:'Planted timber at 75% growth, cultivated bamboo at 50%, and a manually placed quarry. Advance to watch tending and maturation; request a harvest and compare reserves.'},
   {id:'circular',name:'Closing the loop',detail:'River power, dry toilets, reed beds, biodigestion, storage, and two adobe homes. Start at 10:00; advance to watch private routines and processing.'},
   {id:'circular-night',name:'Circular village at night',detail:'River generation after sunset alongside adobe homes and the new utilities.'},
   { id: 'economy', name: 'Our first projects', detail: 'A home, greenhouse and solar farm with staged materials. Try priorities, local recipes, purchases and deliveries.' },
@@ -45,7 +46,14 @@ export function makeScenario(id, fresh, established) {
     const stock=[v.wood,...v.economy.stock.slice(1)];
     for(const p of v.economy.projects){const kind=v.buildings[p.building].kind,needs=fresh.environment.economy.recipes.find(r=>r.kind===kind).standard[0].items;for(let i=0;i<15;i++){p.reserved[i]=Math.min(stock[i],needs[i]);stock[i]-=p.reserved[i];}}
     if(id==='economy-poor'){v.economy.money=0;v.economy.ledger=[];}
-    if(id==='economy-depleted')for(const source of v.economy.sources)if(source.material>1)source.remaining=0;
+    if(id==='economy-depleted'){v.economy.land=[0,0,0];for(const source of v.economy.sources)if(source.material>1)source.remaining=0;}
+  }
+  if(id==='cultivation'){
+    v.economy.sources=[
+      {material:0,x:4,y:3,maximum:32,remaining:0,growth:.75},
+      {material:1,x:10,y:4,maximum:24,remaining:0,growth:.5},
+      {material:3,x:22,y:22,maximum:96,remaining:v.economy.land[1],growth:1},
+    ].map(site=>({...site,restored:false,player_placed:true,active:true,moisture:site.material<2?1440:0,planted:site.material<2,auto_replant:true,auto_harvest:true,harvest_requested:false,plant_requested:false,harvests:0}));
   }
   if(id.startsWith('circular')) {
     v.buildings=[['home',6,8],['home',10,8],['eco_toilet',14,8],['kitchen',18,8],['biodigester',6,13],['wetland',14,13],['warehouse',18,13],['garden',14,17],['well',18,17],['streetlight',21,13],['hydro',24,13]].map(([kind,x,y],id)=>({id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop:structuredClone(established.village.buildings[0].crop),poultry:{remaining:0}}));

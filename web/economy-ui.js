@@ -4,11 +4,12 @@ const time=t=>`Day ${Math.floor(t/1440)+1} · ${String(Math.floor(t%1440/60)).pa
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const names={hydro:'River generator',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost',square:'Square',workshop:'Workshop',coop:'Chicken coop',solar_farm:'Solar farm',streetlight:'Street light'};
 export function recipeSummary(state,kind,variant='standard'){
-  const e=state.environment.economy,r=e.recipes.find(r=>r.kind===kind);if(!r)return 'Free';
+  const e=state.environment.economy,source=e.source_options?.find(s=>s.key===kind);if(source)return state.village.mode==='sandbox'?'Free planting':money(source.cost)+(source.material<2?' · 2 irrigation water':'');
+  const r=e.recipes.find(r=>r.kind===kind);if(!r)return 'Free';
   const total=Array(15).fill(0);for(const s of r[variant]||r.standard)for(let i=0;i<15;i++)total[i]+=s.items[i];
   return total.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ');
 }
-export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,avatar,paintPortraits}){
+export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,planSource,avatar,paintPortraits}){
   const $=s=>document.querySelector(s);let lastProjects='',lastInventory='',lastOrders='',lastLand='',pickupNoticeOrder=null;
   const transact=result=>{if(result!=='ok')notify(result);else{changed();update();}};
   const materials=snapshot().environment.economy.materials;
@@ -74,7 +75,15 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,a
   $('#project-cancel-close').onclick=()=>$('#project-cancel-dialog').close();
   $('#project-cancel-confirm').onclick=()=>{transact(game().cancel_project(Number($('#project-cancel-confirm').dataset.project)));$('#project-cancel-dialog').close();};
   $('#project-list').onchange=event=>{const input=event.target.closest('select');if(!input)return;const id=Number(input.dataset.project),p=snapshot().environment.economy.projects.find(p=>p.building===id);if(p)transact(game().configure_project(id,input.dataset.action==='priority'?Number(input.value):p.priority,p.paused,input.dataset.action==='recipe'?input.value:p.recipe));};
-  $('#land-sources').onclick=event=>{const button=event.target.closest('[data-restore-source]');if(button)transact(game().restore_source(Number(button.dataset.restoreSource)));};
+  $('#land-sources').onclick=event=>{
+    const button=event.target.closest('button');if(!button)return;
+    if(button.dataset.planSource!=null){planSource(Number(button.dataset.planSource));return;}
+    const index=Number(button.dataset.site),action=button.dataset.action;
+    if(action==='clear'&&!confirm('Clear this plot? Standing crops are lost; the property’s finite reserves remain unchanged.'))return;
+    const result=action==='harvest'?game().harvest_source(index):action==='plant'?game().replant_source(index):action==='enrich'?game().restore_source(index):game().clear_source(index);
+    transact(result);if(result==='ok'&&['harvest','plant'].includes(action))notify('Queued for community work. Resume time if the village is paused.');
+  };
+  $('#land-sources').onchange=event=>{const input=event.target.closest('[data-source-setting]');if(!input)return;const index=Number(input.dataset.site),site=snapshot().village.economy.sources[index];transact(game().configure_source(index,input.dataset.sourceSetting==='replant'?input.checked:site.auto_replant,input.dataset.sourceSetting==='harvest'?input.checked:site.auto_harvest));};
   function update(){
     const s=snapshot(),e=s.environment.economy,v=s.village;
     $('#fund').textContent=money(e.money);$('#town-fund').textContent=money(e.money);
@@ -111,7 +120,17 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,a
       return `<article class="order-row"><div><b>Order ${o.id+1} · ${money(o.paid)}${pickup?' · pickup':''}</b><small>${o.items.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</small><span>${escape(status)}</span></div>${o.status==='confirmed'?`<div class="order-actions"><button data-collect-order="${o.id}" ${quantity>e.pickup_capacity?'disabled title="The truck holds at most 40 units"':''}>Drive to collect</button><button data-cancel-order="${o.id}">Cancel & refund</button></div>`:''}</article>`;
     }).join('')||'<p>No orders yet. Choose delivery or send a resident to collect supplies.</p>';}
     $('#fund-ledger').innerHTML=[...v.economy.ledger].reverse().slice(0,12).map(l=>`<div class="ledger-row"><span>${escape(l.note)}<small>${time(l.minute)}</small></span><b>${l.amount>0?'+':''}${money(l.amount)}</b></div>`).join('');
-    const landKey=JSON.stringify(v.economy.sources.map(s=>({...s,remaining:Math.floor(s.remaining)})));if(landKey!==lastLand){lastLand=landKey;$('#land-sources').innerHTML=v.economy.sources.map((s,i)=>`<article class="source-row"><div><b>${e.materials[s.material].name}</b><small>${Math.floor(s.remaining)} / ${s.maximum} locally available · ${s.material<=1?(s.restored?'restored · 3 units/day':'managed · 1 unit/day'):'finite deposit'}</small></div>${s.material<=1?`<button data-restore-source="${i}" ${s.restored||v.progress.compost<2?'disabled':''}>${s.restored?'Restored':'Restore · 2 compost'}</button>`:''}</article>`).join('');}
+    const sources=e.source_status,landKey=JSON.stringify(sources.map(row=>({...row,source:{...v.economy.sources[row.index],growth:row.growth_percent,moisture:Math.ceil(v.economy.sources[row.index].moisture/60)},growth_percent:row.growth_percent})));if(landKey!==lastLand){lastLand=landKey;
+      $('#land-sources').innerHTML='<div class="source-plans">'+e.source_options.map(o=>`<button data-plan-source="${o.material}">${o.name} · ${v.mode==='sandbox'?'Free':money(o.cost)}</button>`).join('')+'</div>'+(!sources.length?'<p>No material sites yet. Choose a plot to cultivate or extract; town supplies are available while plants grow.</p>':'')+sources.map(row=>{
+        const site=v.economy.sources[row.index],renewable=site.material<2,siteId=row.index;
+        return `<article class="source-row"><div><b>${row.name}</b><small>Plot ${site.x}, ${site.y} · ${renewable?site.planted&&site.growth<1?row.growth_percent+'% grown · about '+row.hours_left+' growth hours left':Math.floor(site.remaining)+' / '+site.maximum+' ready units':Math.floor(site.remaining)+' / '+site.maximum+' in the shared property reserve'}</small><p>${row.status}</p>${site.harvest_requested?'<p>Harvest queued for community work.</p>':''}${site.plant_requested?'<p>Planting queued for community work.</p>':''}
+        ${renewable?`<label><input type="checkbox" data-site="${siteId}" data-source-setting="replant" ${site.auto_replant?'checked':''}> ${site.material===0?'Replant after cutting · R$ 40 per crop':'Regrow bamboo shoots after cutting'}</label>`:''}
+        <label><input type="checkbox" data-site="${siteId}" data-source-setting="harvest" ${site.auto_harvest?'checked':''}> Harvest for project demand</label>
+        <div class="source-actions"><button data-site="${siteId}" data-action="harvest" ${!row.ready||site.harvest_requested?'disabled':''}>${site.material===0?'Cut one tree · 8 timber':renewable?'Harvest bamboo':'Extract a batch'}</button>
+        ${renewable&&!site.planted?`<button data-site="${siteId}" data-action="plant" ${site.plant_requested?'disabled':''}>Plant again</button>`:''}
+        ${renewable?`<button data-site="${siteId}" data-action="enrich" ${site.restored||v.progress.compost<2?'disabled':''}>${site.restored?'Soil enriched':'Enrich · 2 compost'}</button>`:''}<button data-site="${siteId}" data-action="clear">Clear plot</button></div></div></article>`;
+      }).join('');
+    }
     refreshDrivers($('#pickup-driver'));refreshDrivers($('#pickup-order-driver'));
     if($('#pickup-dialog').open)updatePickupDialog();
     const notice=v.economy.orders.find(o=>o.id===pickupNoticeOrder&&o.pickup_by!=null),driver=s.residents.find(r=>r.id===notice?.pickup_by);
