@@ -226,6 +226,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-power-building="9"]').check();
   await page.getByRole('button',{name:'Close power',exact:true}).click();
   await page.getByRole('button',{name:'Build',exact:true}).click();
+  await page.locator('[data-build-group="village"]').click();
   await page.locator('#home-material-method').selectOption('adobe');
   assert((await page.locator('[data-kind="home"]').textContent()).includes('Adobe'));
   await page.locator('[data-kind="home"]').click();
