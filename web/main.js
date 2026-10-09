@@ -1269,15 +1269,14 @@ function frame(stamp) {
   if (running) {
     if(!reducedMotion.matches)weatherTime += dt;
     time += advanceSimulation(game, Math.min(elapsed, 1), speed);
+    state = JSON.parse(game.snapshot());
   }
-  state = JSON.parse(game.snapshot());
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   render();
   uiElapsed += dt;
   saveElapsed += elapsed;
   if (uiElapsed > 0.3) {
-    updateUI();
-    if (running) announceMilestones();
+    if (running) { updateUI(); announceMilestones(); }
     uiElapsed = 0;
   }
   if (saveElapsed > 15) {

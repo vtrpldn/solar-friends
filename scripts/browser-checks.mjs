@@ -28,6 +28,12 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(await page.locator('#supplies-panel').isVisible());
   assert(await page.locator('#materials-stores').evaluate(el=>el.open));
   assert.equal(await page.locator('.material-slot').count(),15);
+  const idleRefreshes=await page.evaluate(()=>new Promise(resolve=>{
+    let count=0;const observer=new MutationObserver(records=>{count+=records.length;});
+    observer.observe(document.querySelector('#supplies-panel'),{subtree:true,childList:true,characterData:true});
+    setTimeout(()=>{observer.disconnect();resolve(count);},1000);
+  }));
+  assert.equal(idleRefreshes,0,'Paused panels must stay stable until an action changes them');
   await page.getByRole('button',{name:'Trade',exact:true}).click();
   await page.getByRole('button',{name:'Add one timber',exact:true}).click();
   assert.equal(await page.locator('#buy-0').inputValue(),'1');
