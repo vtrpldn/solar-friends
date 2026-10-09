@@ -1,0 +1,51 @@
+{
+  "mode": "builtin",
+  "style_references": [
+    "web/art/home-veranda.png",
+    "web/art/workshop-isometric.png"
+  ],
+  "assets": [
+    {
+      "asset": "web/art/hydro.png",
+      "night": "web/art/hydro-night.png",
+      "prompt": "See shared utility brief",
+      "night_prompt": "Preserve exact original geometry, silhouette, canvas padding and transparent alpha. Cool painted moonlight; small amber doorway glow only in the toilet and warehouse."
+    },
+    {
+      "asset": "web/art/biodigester.png",
+      "night": "web/art/biodigester-night.png",
+      "prompt": "See shared utility brief",
+      "night_prompt": "Preserve exact original geometry, silhouette, canvas padding and transparent alpha. Cool painted moonlight; small amber doorway glow only in the toilet and warehouse."
+    },
+    {
+      "asset": "web/art/eco-toilet.png",
+      "night": "web/art/eco-toilet-night.png",
+      "prompt": "See shared utility brief",
+      "night_prompt": "Preserve exact original geometry, silhouette, canvas padding and transparent alpha. Cool painted moonlight; small amber doorway glow only in the toilet and warehouse."
+    },
+    {
+      "asset": "web/art/wetland.png",
+      "night": "web/art/wetland-night.png",
+      "prompt": "See shared utility brief",
+      "night_prompt": "Preserve exact original geometry, silhouette, canvas padding and transparent alpha. Cool painted moonlight; small amber doorway glow only in the toilet and warehouse."
+    },
+    {
+      "asset": "web/art/warehouse.png",
+      "night": "web/art/warehouse-night.png",
+      "prompt": "See shared utility brief",
+      "night_prompt": "Preserve exact original geometry, silhouette, canvas padding and transparent alpha. Cool painted moonlight; small amber doorway glow only in the toilet and warehouse."
+    },
+    {
+      "asset": "web/art/adobe-gable.png",
+      "night": "web/art/adobe-gable-night.png",
+      "prompt": "Create one transparent building sprite for Solar Friends, a painted Brazilian ecovillage game. The supplied home and workshop are exact STYLE and SCALE references, not edit targets. Match warm handmade painted texture, terracotta roof tiles, teal doors, tropical potted plants, gentle outlines. Orthographic 2:1 view: all ground axes at +0.5/-0.5 slopes, verticals straight, no perspective convergence. Compact two-tile single-storey home. Adult-height doors and windows match the references, same ceiling height and footprint, no oversized props. Simple gabled roof, visible unfired sandy ochre adobe brick walls, softly rounded earthen mortar and teal door, a tiny sheltered entry. Include one small blue rooftop solar panel, tiny water barrel at the side, small plants at the feet. Clean stone foundation with straight diamond edges. Elevated view of front and right side. Square canvas with transparent padding, no background, grass tile, people or text. Match existing art rather than miniature model photorealism. Real transparent alpha.",
+      "night_prompt": "Edit this exact Solar Friends home sprite into its NIGHT counterpart. Preserve all objects, geometry, position, orthographic projection, size, silhouette, transparent padding and original square canvas exactly. Cool painted moonlight on roof, earth bricks and foliage. Gentle amber light through the window slats and around door frame only. Real transparent alpha, no new objects, no background, no ground patch. It will crossfade with the original so maintain precise alignment."
+    },
+    {
+      "asset": "web/art/adobe-veranda.png",
+      "night": "web/art/adobe-veranda-night.png",
+      "prompt": "Create one transparent building sprite for Solar Friends, a painted Brazilian ecovillage game. The supplied home and workshop are exact STYLE and SCALE references, not edit targets. Match warm handmade painted texture, terracotta roof tiles, teal doors, tropical potted plants, gentle outlines. Orthographic 2:1 view: all ground axes at +0.5/-0.5 slopes, verticals straight, no perspective convergence. Compact two-tile single-storey home. Adult-height doors and windows match the references, same ceiling height and footprint, no oversized props. Warm exposed golden adobe brick cottage with a small shaded veranda on two bamboo posts, teal window shutters, modest earthen plaster patches. Include one small blue rooftop solar panel, tiny water barrel at the side, small plants at the feet. Clean stone foundation with straight diamond edges. Elevated view of front and right side. Square canvas with transparent padding, no background, grass tile, people or text. Match existing art rather than miniature model photorealism. Real transparent alpha.",
+      "night_prompt": "Edit this exact Solar Friends home sprite into its NIGHT counterpart. Preserve all objects, geometry, position, orthographic projection, size, silhouette, transparent padding and original square canvas exactly. Cool painted moonlight on roof, earth bricks and foliage. Gentle amber light through the window slats and around door frame only. Real transparent alpha, no new objects, no background, no ground patch. It will crossfade with the original so maintain precise alignment."
+    }
+  ]
+}
