@@ -83,10 +83,17 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
     r.visit_building = None;
     (r.target_x, r.target_y) = gate(v, r.id);
     r.reason=match purpose {
-        Purpose::Work=>"Walking out for my 09:00–17:00 job. I'll bring my contribution home after work.",
+        Purpose::Work=>"Walking out for my 09:00–17:00 shift. My contribution comes home after work.",
         Purpose::Pickup=>"Walking to the shared pickup truck. I'll drive to town for our supplies.",
         Purpose::Overnight=>"There is no bed for me yet. Staying with neighbours tonight and returning in the morning.",
     }.into();
+    if purpose == Purpose::Work {
+        r.reason = format!(
+            "Walking out for my {} shift at {}. Back at 17:00.",
+            occupations::JOBS[r.id].title.to_lowercase(),
+            occupations::JOBS[r.id].place
+        );
+    }
 }
 
 pub fn advance(
@@ -125,7 +132,7 @@ pub fn advance(
         }
     }
     if trip.purpose == Purpose::Work && trip.phase == Phase::Leaving {
-        v.economy.outside_committed_day = (trip.return_at / 1440.).floor() as i32;
+        v.economy.outside_committed_days[r.id] = (trip.return_at / 1440.).floor() as i32;
     }
     if trip.phase != Phase::Returning && v.minutes >= trip.return_at {
         if trip.phase == Phase::Away {
@@ -193,6 +200,13 @@ pub fn advance(
             Purpose::Pickup=>"Driving to town, loading supplies and bringing them home in the shared truck. About two hours away.",
             Purpose::Overnight=>"Sleeping at our neighbours' place. Back in the morning; I still need a village bed.",
         }.into();
+        if trip.purpose == Purpose::Work {
+            r.reason = format!(
+                "Working as a {} at {} until 17:00. Lunch is provided there.",
+                occupations::JOBS[r.id].title.to_lowercase(),
+                occupations::JOBS[r.id].place
+            );
+        }
     } else {
         r.trip = None;
         choose(r, v);
@@ -257,7 +271,7 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
     }
     if t.purpose == Purpose::Work
         && t.phase != Phase::Returning
-        && v.economy.outside_committed_day != (t.return_at / 1440.) as i32
+        && v.economy.outside_committed_days[r.id] != (t.return_at / 1440.) as i32
     {
         return false;
     }
@@ -370,7 +384,7 @@ mod tests {
         );
         assert_eq!(
             g.app.world().resource::<Village>().economy.money,
-            fund + 18000
+            fund + 22000
         );
         round_trip(&mut g);
         until(&mut g, |rs| rs[4].trip.is_none());
@@ -379,20 +393,20 @@ mod tests {
         }
         assert_eq!(
             g.app.world().resource::<Village>().economy.money,
-            fund + 18000
+            fund + 22000
         );
     }
     #[test]
     fn the_paid_job_is_reserved_on_request_and_cannot_be_double_booked() {
         let mut g = healthy();
-        g.set_outside_work(true);
+        g.set_resident_job(0, true);
         assert!(g.request(0, "outside", true).contains("lend a hand"));
         assert_eq!(
             g.app
                 .world()
                 .resource::<Village>()
                 .economy
-                .outside_committed_day,
+                .outside_committed_days[0],
             0
         );
         let before = g.snapshot();

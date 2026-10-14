@@ -24,12 +24,13 @@ function render(){
     let error=0;
     if(m){
       const point=(x,y)=>{const [u,v]=meshPoint(config.mesh,[x,y]);return [200+(u/m.size-.5)*w,260+((v/m.size-art.anchor)*vertical+(u/m.size-.5)*shear)*w];};
-      for(const [direction,target]of [['right',.5],['left',-.5]])for(const[x,y,X,Y]of m[direction]){
+      for(const [direction,target]of [['right',.5],['left',-.5]])for(const [index,[x,y,X,Y]]of m[direction].entries()){
         const p=point(x,y),q=point(X,Y),ideal=[q[0],p[1]+target*(q[0]-p[0])];
         error=Math.max(error,Math.abs(q[1]-ideal[1])/1.85);
         if(guides){
           ctx.lineWidth=1.7;ctx.strokeStyle='#50e1ce';ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...ideal);ctx.stroke();
           ctx.lineWidth=1.2;ctx.strokeStyle='#f4a44c';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();ctx.setLineDash([]);
+          const label=m[direction+'Labels']?.[index];if(label){ctx.font='8px sans-serif';ctx.fillStyle=night?'#fff6dc':'#263b31';ctx.fillText(label,p[0]+3,p[1]-4);}
         }
       }
       if(guides){const[x,y,X,Y]=m.upright,p=point(x,y),q=point(X,Y);ctx.strokeStyle='#50e1ce';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();}

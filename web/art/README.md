@@ -96,7 +96,7 @@ Per-source additions:
 
 - Village atlas: Keep the exact 2 by 2 atlas layout: home top left, kitchen top right, garden bottom left, banana grove bottom right. Warm home window slats and kitchen oven embers.
 - Garden, cistern, compost: Moonlight only; no lamps or glowing objects.
-- Square: Small warm lantern illumination under the pergola, restrained.
+- Square: An open seating area with two benches and a table. Its portable table lantern provides restrained warm night lighting. The pergola was removed with the built-in image tool; the [edit prompts](../../assets/art-direction/open-square-prompts.json) record the day and night changes.
 - Workshop: Warm light on workbench from inside.
 - Coop: Coop interior stays dark for sleeping chickens; moonlight only.
 
