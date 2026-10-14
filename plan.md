@@ -109,3 +109,14 @@ Why: the seven original chapters leave newer buildings and systems unexplained. 
 Delivered in incremental commits with 114 native tests, Rust formatting and clippy, a release WebAssembly build and all 24 gameplay verification scripts passing. The new placement verifier compares all 3,380 plot previews with native rules. Browser playtesting placed a paid timber plot, grew timber and bamboo, queued harvests, verified resident work produced eight timber and four bamboo, changed harvest settings and cleared a quarry. Regression checks cover these same controls while protecting the player's saved village. Standing trees use the existing forest art; bamboo and finite sites reuse the established material atlas.
 
 The public game API completed all thirteen chapters on day 47, with each earned checkpoint saved and reloaded. All seventeen building kinds were constructed. Native tests cover old-save padding, invalid progress, real rain/energy/cooking credit and the late-story check-in; a harvest-priority regression protects manually requested work from repeated gardening. Desktop journal and care checks use the earned checkpoints in a protected test scene.
+
+## Resident building work
+
+Why: changing the village layout should take real resident effort and offer a choice between speed and recovering materials.
+
+- [ ] Add queued demolition, careful salvage and two-stage relocation, with saved progress and cancellation before packing finishes.
+- [ ] Require residents to reach the worksite and work during normal community hours in both modes. Keep food, rest and sleep ahead of these jobs.
+- [ ] Reserve relocation destinations against buildings, roads and material plots; retain identities, recipes, crops and equipment when moving.
+- [ ] Recover half of actually consumed materials only after salvage finishes, reserve receiving space, and keep utility/bed/storage transitions consistent.
+- [ ] Add building-management controls, job feedback and destination previews using the existing game interface and artwork.
+- [ ] Verify work duration, material conservation, blocked placement, save/reload, home and utility changes, cancellation and actual desktop controls.
