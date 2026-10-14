@@ -13,7 +13,7 @@ export const economyArt = [
 ];
 economyArt.forEach(art=>{art.aspect=art.cell[3]*economyAtlasSize[1]/(art.cell[2]*economyAtlasSize[0]);});
 export const economyImage = typeof Image==='undefined'?null:new Image();
-if(economyImage)economyImage.src=`art/${economyAtlasFile}`;
+if(economyImage)economyImage.src=new URL(`./art/${economyAtlasFile}`,import.meta.url).href;
 // Runtime and artwork tools share actual crop geometry, including rectangular atlases.
 export function drawEconomySprite(ctx,image,art,x,y,scale=1){
   if(!image?.naturalWidth)return;
