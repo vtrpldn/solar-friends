@@ -91,7 +91,11 @@ pub fn record<'a>(
 }
 pub fn refresh<'a>(v: &mut Village, people: impl IntoIterator<Item = &'a Resident>) {
     v.activity_claims = std::array::from_fn(|_| None);
+    v.workforce_peers = std::array::from_fn(|_| None);
     for r in people {
+        if r.id < 5 {
+            v.workforce_peers[r.id] = Some(r.clone());
+        }
         if r.id < 5 && r.trip.is_none() && r.remaining > 0. {
             v.activity_claims[r.id] = Claim::from_resident(r);
         }
@@ -139,6 +143,8 @@ pub struct Offer {
     pub destination: [f32; 2],
     pub travel_minutes: f32,
     pub score: f32,
+    #[serde(skip)]
+    urgency: f32,
     #[serde(skip)]
     reason: &'static str,
 }
@@ -232,6 +238,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             destination: [worker.target_x, worker.target_y],
             travel_minutes: travel,
             score: score(v, r, task, urgency, travel),
+            urgency,
             reason,
         });
     };
@@ -342,6 +349,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             destination: [r.x, r.y],
             travel_minutes: travel,
             score: score(v, r, "haul", urgency, travel),
+            urgency,
             reason: "Bringing supplies along a clear route to where they are needed.",
         });
     }
@@ -354,7 +362,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     out
 }
 pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
-    let Some(job) = offers(v, r).into_iter().next() else {
+    let Some(job) = offers(v, r).into_iter().find(|job| assigned_to(v, r, job)) else {
         return false;
     };
     assign(r, v, &job.task, job.reason, false);
@@ -365,6 +373,67 @@ pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
     r.activity_building = job.building;
     r.activity_material = job.material;
     (r.target_x, r.target_y) = (job.destination[0], job.destination[1]);
+    true
+}
+
+fn willing(v: &Village, r: &Resident, task: &str) -> bool {
+    r.trip.is_none()
+        && !r.requested
+        && r.energy >= 28.
+        && r.hunger <= 60.
+        && !sleeping_time(v.minutes, r)
+        && !occupations::available(v, r.id)
+        && !meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot)
+        && !situations::protected(v, r.id, task)
+        && (r.remaining <= 0.
+            || leisure::hobby(&r.task)
+            || matches!(r.task.as_str(), "idle" | "socialize"))
+}
+/// Offer a limited position to the best available neighbour rather than always
+/// giving it to the first entity in the simulation loop. Existing work keeps
+/// its claim until completion or a needs interruption.
+fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
+    if job.task == "haul" {
+        return true;
+    } // Shipment reservations own these slots.
+    let capacity = if matches!(job.task.as_str(), "build" | "building_work" | "water") {
+        2
+    } else {
+        1
+    };
+    let free = capacity - occupied(v, r, &job.task, job.building, job.material);
+    let mut better = 0;
+    for peer in v
+        .workforce_peers
+        .iter()
+        .flatten()
+        .filter(|peer| peer.id != r.id && willing(v, peer, &job.task))
+    {
+        let point = if let Some(id) = job.building {
+            v.buildings
+                .iter()
+                .find(|b| b.id == id)
+                .and_then(|b| spacing::approach(v, b, peer.id))
+        } else if matches!(job.task.as_str(), "source" | "prepare") {
+            let mut worker = peer.clone();
+            assign(&mut worker, v, &job.task, job.reason, false);
+            (worker.task == job.task && worker.activity_material == job.material)
+                .then_some((worker.target_x, worker.target_y))
+        } else {
+            Some(destination(v, &job.task, peer.id))
+        };
+        let Some((x, y)) = point else {
+            continue;
+        };
+        let travel = (peer.x - x).hypot(peer.y - y) * MINUTES_PER_SECOND / 0.7;
+        let s = score(v, peer, &job.task, job.urgency, travel);
+        if s > job.score || (s == job.score && peer.id < r.id) {
+            better += 1;
+        }
+        if better >= free {
+            return false;
+        }
+    }
     true
 }
 
@@ -482,6 +551,78 @@ mod tests {
                 .unwrap()
                 .score
                 > tired_score
+        );
+    }
+    #[test]
+    fn project_priority_selects_the_actual_site_and_caps_the_crew() {
+        let (mut g, _, mut r) = scene();
+        assert_eq!(g.place("garden", 6, 6), "ok");
+        assert_eq!(g.place("garden", 16, 6), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 570.;
+        v.food = 80.;
+        v.meals = 8;
+        v.water = 40.;
+        logistics::fixture_stage(&mut v, 0);
+        logistics::fixture_stage(&mut v, 1);
+        v.economy.projects[0].priority = 0;
+        v.economy.projects[1].priority = 3;
+        choose(&mut r, &v);
+        assert_eq!(r.task, "build");
+        assert_eq!(r.activity_building, Some(1));
+        let b = &v.buildings[1];
+        assert_eq!(
+            (r.target_x, r.target_y),
+            spacing::approach(&v, b, r.id).unwrap()
+        );
+        for id in [1, 2] {
+            v.activity_claims[id] = Some(Claim {
+                task: "build".into(),
+                building: Some(1),
+                material: None,
+            });
+        }
+        choose(&mut r, &v);
+        assert_eq!(
+            r.activity_building,
+            Some(0),
+            "Two workers already cover the high priority site"
+        );
+        v.activity_claims[1] = None;
+        choose(&mut r, &v);
+        assert_eq!(
+            r.activity_building,
+            Some(1),
+            "A released position becomes available again"
+        );
+    }
+    #[test]
+    fn limited_job_goes_to_the_best_available_neighbour_and_rotates() {
+        let (_, mut v, mut first) = scene();
+        v.water = 40.;
+        let mut near = first.clone();
+        near.id = 1;
+        near.x = 3.;
+        near.y = 12.25;
+        refresh(&mut v, [&first, &near]);
+        choose(&mut first, &v);
+        assert!(
+            leisure::hobby(&first.task),
+            "First in the entity loop must not monopolise a shared chore"
+        );
+        choose(&mut near, &v);
+        assert_eq!(near.task, "gather");
+        record(&mut v, 540., 780., [&near]);
+        v.minutes = 2010.;
+        near.task = "idle".into();
+        near.remaining = 0.;
+        first.task = "idle".into();
+        first.remaining = 0.;
+        refresh(&mut v, [&first, &near]);
+        choose(&mut first, &v);
+        assert_eq!(
+            first.task, "gather",
+            "Recent workload gives the neighbour a turn off"
         );
     }
     #[test]

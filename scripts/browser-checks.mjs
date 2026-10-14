@@ -307,6 +307,18 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#storage-locations').scrollIntoViewIfNeeded();
   await capture('Located storage after two resident deliveries','physical-storage.png');
   await page.getByRole('button',{name:'Close supplies',exact:true}).click();await page.locator('#dev-button').click();
+  // Preferences go through the resident panel and remain in native state.
+  await page.locator('#dev-close').click();
+  await page.locator('[data-citizen="0"]').click();
+  await page.locator('#person .work-preferences summary').click();
+  await page.getByLabel('Iara: Hauling preference',{exact:true}).selectOption('2');
+  await page.getByLabel('Iara: Materials preference',{exact:true}).selectOption('0');
+  const workPreferences=await page.evaluate(()=>window.solarDev.snapshot().village.workforce.preferences[0]);
+  assert.deepEqual(workPreferences,[1,2,1,0,1]);
+  assert((await page.locator('.work-preference-response').textContent()).includes('next chore'));
+  await capture('Resident work preferences in the village','resident-work.png');
+  await page.getByRole('button',{name:'Close resident details',exact:true}).click();
+  await page.locator('#dev-button').click();
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();

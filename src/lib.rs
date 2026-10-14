@@ -79,6 +79,8 @@ pub struct Resident {
     pub reason: String,
     pub remaining: f32,
     pub requested: bool,
+    #[serde(default)]
+    pub work_check_at: f32,
     pub last_meal_slot: i32,
     #[serde(default = "sanitation::unused_day")]
     pub last_sanitation_day: i32,
@@ -123,6 +125,8 @@ pub struct Village {
     pub workforce: workforce::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
+    #[serde(skip)]
+    pub workforce_peers: [Option<Resident>; 5],
     pub version: u32,
     pub map_size: i32,
     pub minutes: f32,
@@ -413,6 +417,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     }
 }
 fn choose(r: &mut Resident, v: &Village) {
+    r.work_check_at = v.minutes;
     let meal_due = meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot);
     let (task, reason) = if sleeping_time(v.minutes, r) {
         (
@@ -725,12 +730,18 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             || logistics::pending(&v, r.id)
             || economy::local_job(&v).is_some()
             || occupations::available(&v, r.id)
-            || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"));
+            || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"))
+            || (workforce::cooking(&v, r.id) && available(&v, "cook"))
+            || workforce::ingredients(&v, r.id)
+            || v.water < 24.;
         let chores_start = !r.requested
             && work_time(v.minutes)
             && (!work_time(before)
                 || (occupations::available(&v, r.id))
-                || (ready_work && r.social >= 65. && !situations::protected(&v, r.id, "cook")))
+                || (ready_work
+                    && v.minutes - r.work_check_at >= 5.
+                    && r.social >= 65.
+                    && !situations::protected(&v, r.id, "cook")))
             && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
         if r.task != "arrive"
             && (sleeping_time(v.minutes, &r) != (r.task == "sleep")
@@ -740,9 +751,11 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 || chores_start)
             || (r.task == "haul" && (r.energy < 28. || r.hunger > 60.))
         {
+            v.workforce_peers[r.id] = Some(r.clone());
             choose(&mut r, &v);
         }
         v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
+        v.workforce_peers[r.id] = Some(r.clone());
         if r.task != "haul" {
             logistics::interrupt(&mut v, &r);
         }
@@ -978,6 +991,7 @@ impl Game {
                 logistics: None,
                 workforce: workforce::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
+                workforce_peers: std::array::from_fn(|_| None),
                 version: 4,
                 map_size: MAP_SIZE,
                 minutes: 480.,
@@ -1030,6 +1044,7 @@ impl Game {
                 reason: "Walking into the clearing with our founding group.".into(),
                 remaining: 0.,
                 requested: false,
+                work_check_at: 0.,
                 last_meal_slot: -1,
                 last_sanitation_day: -1,
                 visit_building: None,
@@ -1485,6 +1500,8 @@ impl Game {
                     .iter()
                     .any(|n| !n.is_finite() || !(0.0..=MAP_SIZE as f32).contains(n))
                 || !r.remaining.is_finite()
+                || !r.work_check_at.is_finite()
+                || !(0.0..=v.minutes).contains(&r.work_check_at)
                 || !(0.0..=100.).contains(&r.remaining)
                 || r.visit_building
                     .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))

@@ -42,8 +42,9 @@ fixture.village.minutes=540;fixture.village.food=80;fixture.village.meals=10;fix
 for(const p of fixture.village.economy.projects){p.reserved[2]=0;p.reserved[3]=0;}
 for(const r of fixture.residents){r.task='idle';r.remaining=0;r.requested=false;r.energy=90;r.hunger=20;r.social=90;r.last_meal_slot=0;r.target_x=r.x;r.target_y=r.y;}
 assert(materials.restore(JSON.stringify(resetMaterialLocations(fixture))));
-materials.tick(.25);let workers=JSON.parse(materials.snapshot()).residents.filter(r=>[2,3].includes(r.id));
+materials.tick(.25);let workers=JSON.parse(materials.snapshot()).residents.filter(r=>r.task==='source');
+assert.equal(workers.length,1,'A material batch has one claimed work position, chosen from all residents');
 for(const r of workers){assert.equal(r.task,'source');assert(!riverBank(r.target_x,r.target_y),'Collection destinations must remain on land');assert.equal(residentActivity({...r,x:r.target_x,y:r.target_y,sourceMaterial:2},540),'tend');}
-assert(Math.hypot(workers[0].target_x-workers[1].target_x,workers[0].target_y-workers[1].target_y)>=1.1);
+assert.equal(new Set(workers.map(r=>r.activity_material)).size,workers.length,'No extraction batch can have duplicate workers');
 for(let i=0;i<800;i++)materials.tick(.25);const materialState=JSON.parse(materials.snapshot());assert(materialState.village.economy.sources[0].remaining<140);assert(materials.restore(materials.snapshot()));materials.free();
-console.log('PASS: source workers reach land, remain separated, actually collect materials and use the digging pose.');
+console.log('PASS: source workers reach land, claim distinct batches, actually collect materials and use the digging pose.');

@@ -819,7 +819,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -844,6 +844,14 @@ function selectPerson(id) {
     $(`[data-citizen="${id}"]`).focus();
   };
   $('#person .occupation-toggle').onchange=event=>{game.set_resident_job(id,event.target.checked);state=JSON.parse(game.snapshot());updateUI();save();};
+  $('#person .work-preferences').onchange=event=>{
+    const input=event.target.closest('[data-work-preference]');
+    if(!input)return;
+    const result=game.set_work_preference(id,input.dataset.workPreference,Number(input.value));
+    state=JSON.parse(game.snapshot());
+    updateUI();save();
+    $('#person .work-preference-response').textContent=result==='ok'?'Noted. This guides the next chore.':result;
+  };
   paintPortraits();
   $(".close-person").focus();
   $("#person .requests").onclick = (e) => {
@@ -1218,6 +1226,12 @@ function updateUI() {
     $('#person .occupation-income').textContent=`R$ ${job.income/100} for the shared fund · 09:00–17:00`;
     $('#person .occupation-description').textContent=job.description;
     $('#person .occupation-toggle').checked=job.enabled;
+    const workToday=v.workforce.days.find(day=>day.day===Math.floor(v.minutes/1440))?.residents[r.id]?.reduce((sum,n)=>sum+n,0)||0;
+    $('#person .work-today').textContent=`${Math.round(workToday)} min of village chores today, including travel. Community hours: 09:00–12:00 and 15:00–16:00.`;
+    for(const [i,key] of ['construction','hauling','food','materials','care'].entries()){
+      const input=$(`#person [data-work-preference="${key}"]`);
+      if(input!==document.activeElement)input.value=String(v.workforce.preferences[r.id][i]);
+    }
     $('#person .occupation-toggle').setAttribute('aria-label',`Schedule ${r.name}'s outside job`);
     $('#person .occupation-schedule-note').textContent=r.trip?.purpose==='work'?'This shift is committed. Turning this off stops future shifts.':job.enabled?(v.minutes%1440>=600?'Next outside shift tomorrow at 09:00. Lunch is provided off-site.':'Leaves 09:00–10:00 when rested. Lunch is provided off-site.'):'Optional · staying available for village life.';
     for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;

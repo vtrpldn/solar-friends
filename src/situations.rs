@@ -55,7 +55,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
             } else {
                 2
             };
-            if s.helpers.count_ones() >= helpers
+            if (!s.story_check_in || s.response.is_some())
+                && s.helpers.count_ones() >= helpers
                 && s.recovery >= 72.
                 && v.minutes - s.agreed.unwrap_or(s.opened) >= 1440.
             {
@@ -293,6 +294,30 @@ mod tests {
         v.minutes += 3. * 1440.;
         advance(&mut v, 0.);
         assert!(v.situations.active.is_none());
+    }
+    #[test]
+    fn an_unanswered_story_check_in_cannot_count_as_a_completed_agreement() {
+        let mut v = concerned_village();
+        v.situations.active.as_mut().unwrap().story_check_in = true;
+        cooked(&mut v, 0);
+        cooked(&mut v, 1);
+        recovered(&mut v, 2, 1440.);
+        v.minutes += 2880.;
+        advance(&mut v, 2880.);
+        assert_eq!(v.situations.resolved_count, 0);
+        assert!(v.situations.active.as_ref().unwrap().resolved.is_none());
+        assert_eq!(respond(&mut v, "share_shifts"), "ok");
+        cooked(&mut v, 0);
+        cooked(&mut v, 1);
+        recovered(&mut v, 2, 72.);
+        advance(&mut v, 0.);
+        assert_eq!(
+            v.situations.resolved_count, 0,
+            "The agreed recovery day has not passed"
+        );
+        v.minutes += 1440.;
+        advance(&mut v, 1440.);
+        assert_eq!(v.situations.resolved_count, 1);
     }
     #[test]
     fn agreement_needs_real_help_recovery_and_time_then_has_a_cooldown() {
