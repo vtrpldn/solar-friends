@@ -11,6 +11,7 @@ mod interactions;
 mod leisure;
 mod mobility;
 mod modes;
+mod navigation;
 mod occupations;
 mod power;
 mod progression;

@@ -303,15 +303,16 @@ mod tests {
     #[test]
     fn cooking_credit_requires_consumed_eggs_and_gas_and_survives_use() {
         let mut g = Game::new();
-        let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.food = 2.;
-        v.supplies.eggs = 2;
-        v.circular.biogas = 1.;
-        crate::supplies::cook(&mut v);
-        assert!(v.progress.egg_meal && v.progress.biogas_meal);
-        assert_eq!(v.supplies.eggs, 0);
-        assert_eq!(v.circular.biogas, 0.);
-        drop(v);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.food = 2.;
+            v.supplies.eggs = 2;
+            v.circular.biogas = 1.;
+            crate::supplies::cook(&mut v);
+            assert!(v.progress.egg_meal && v.progress.biogas_meal);
+            assert_eq!(v.supplies.eggs, 0);
+            assert_eq!(v.circular.biogas, 0.);
+        }
         let save = g.snapshot();
         assert!(g.restore(&save));
         assert_eq!(g.snapshot(), save);
@@ -330,18 +331,19 @@ mod tests {
         assert!(g.start_mode("sandbox"));
         assert_eq!(g.place("well", 5, 5), "ok");
         assert_eq!(g.place("streetlight", 9, 5), "ok");
-        let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.minutes = 900.;
-        v.water = crate::ecology::capacity(&v);
-        crate::ecology::advance(&mut v, 1.);
-        assert!(!v.progress.rain_caught);
-        v.water -= 1.;
-        crate::ecology::advance(&mut v, 1.);
-        assert!(v.progress.rain_caught);
-        v.minutes = 1320.;
-        crate::power::advance(&mut v, 1.);
-        assert!(!v.progress.night_lights);
-        drop(v);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.minutes = 900.;
+            v.water = crate::ecology::capacity(&v);
+            crate::ecology::advance(&mut v, 1.);
+            assert!(!v.progress.rain_caught);
+            v.water -= 1.;
+            crate::ecology::advance(&mut v, 1.);
+            assert!(v.progress.rain_caught);
+            v.minutes = 1320.;
+            crate::power::advance(&mut v, 1.);
+            assert!(!v.progress.night_lights);
+        }
         assert_eq!(g.place("solar_farm", 13, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.power.stored = 12.;
