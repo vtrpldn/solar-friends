@@ -89,4 +89,21 @@ Why: resource production should come from choices the player makes, rather than 
 
 Growth durations and prices are game-balance abstractions. Town purchases remain the immediate alternative while plants mature.
 
+## Story progression through the complete village
+
+Why: the seven original chapters leave newer buildings and systems unexplained. Extend Story to thirteen chapters, with playable objectives and shortcuts to the relevant tools.
+
+- [ ] Arrival: shelter, food, cistern, cooking, personal sleep rhythms and automatic time acceleration.
+- [ ] Roots: food forest, planted timber and cultivated bamboo. Gathering: welcome supper, friendships and square.
+- [ ] Shared work: storage, paid outside occupations, town pickup, deliveries and shared tools.
+- [ ] Resilience and hens: workshop preparation, compost, greenhouse seedlings, crop care and egg cooking.
+- [ ] Sunshine: solar farm, battery and actual lighting after dusk.
+- [ ] Water loop: ecological toilet, greywater, reed bed, rain collection and reclaimed irrigation.
+- [ ] Scraps to energy: biodigester, cooking gas and fully cured compost.
+- [ ] Homes of earth: finite extraction, renewable timber harvest/replant, material preparation, adobe construction, surplus sales and neighbour exchange.
+- [ ] River power: a placed river generator supplying energy after dusk.
+- [ ] Community care: an actual agreement, shared cooking, rest and hobbies. Offer a story check-in so balanced play does not require deliberately overworking someone.
+- [ ] A flourishing village: all building kinds, beds, healthy reserves and another gathering.
+- [ ] Preserve milestone credit, existing saves and free Sandbox; test native/UI unlock parity, the full public-API playthrough, reloads and desktop quest navigation.
+
 Delivered in incremental commits with 114 native tests, Rust formatting and clippy, a release WebAssembly build and all 24 gameplay verification scripts passing. The new placement verifier compares all 3,380 plot previews with native rules. Browser playtesting placed a paid timber plot, grew timber and bamboo, queued harvests, verified resident work produced eight timber and four bamboo, changed harvest settings and cleared a quarry. Regression checks cover these same controls while protecting the player's saved village. Standing trees use the existing forest art; bamboo and finite sites reuse the established material atlas.
