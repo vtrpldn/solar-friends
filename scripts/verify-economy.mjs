@@ -28,7 +28,7 @@ for(const scenario of ['economy','economy-poor','economy-depleted']){
   assert(orders>0&&s.village.economy.orders.some(o=>o.status==='delivered'));
   assert(s.village.economy.ledger.some(l=>l.amount>0),'Outside work must provide recovery income');
   assert(maxHunger<95);assert(relax.every((n,i)=>n/waking[i]>.4),'Residents retain at least 40% of in-village waking time for leisure during construction');
-  if(scenario==='economy-depleted')assert(s.village.economy.sources.filter(s=>s.material>1).every(s=>s.remaining===0));
+  if(scenario==='economy-depleted'){assert.deepEqual(s.village.economy.land,[0,0,0]);assert(s.village.economy.sources.filter(s=>s.material>1).every(s=>s.remaining===0));}
   console.log(`PASS: ${scenario}, 24 days, ${orders} combined orders, all projects completed; minimum food ${minFood.toFixed(1)}, peak hunger ${maxHunger.toFixed(1)}, in-village leisure ${Math.floor(Math.min(...relax.map((n,i)=>n/waking[i]))*100)}%+.`);
   g.free();
 }
