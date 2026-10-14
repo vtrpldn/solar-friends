@@ -298,13 +298,15 @@ pub fn quantity(v: &Village, i: usize) -> u32 {
     }
 }
 pub(crate) fn add(v: &mut Village, i: usize, n: u32) {
+    crate::simulation::material_change(v, i, n, true);
     if i == 0 {
         v.wood += n as f32
     } else {
         v.economy.stock[i] += n;
     }
 }
-fn remove(v: &mut Village, i: usize, n: u32) {
+pub(crate) fn remove(v: &mut Village, i: usize, n: u32) {
+    crate::simulation::material_change(v, i, n, false);
     if i == 0 {
         v.wood -= n as f32
     } else {

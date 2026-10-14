@@ -119,7 +119,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             v.progress.compost += 1;
         }
         "workshop" if economy::free(v, 0) >= 8 && v.progress.tool_uses <= 24 => {
-            v.wood -= 8.;
+            economy::remove(v, 0, 8);
             v.progress.tool_uses += 12;
             v.progress.tools_crafted += 1;
         }

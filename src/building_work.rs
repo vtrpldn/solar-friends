@@ -17,6 +17,8 @@ pub enum Stage {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Job {
+    #[serde(default)]
+    pub id: Option<simulation::Id>,
     pub building: usize,
     pub action: Action,
     pub stage: Stage,
@@ -391,6 +393,7 @@ impl Game {
                 return "Make room in remaining storage for this job and its recovered materials first.".into();
             }
             let j = Job {
+                id: None,
                 building: id,
                 action,
                 stage: if action == Action::Move {
@@ -415,6 +418,11 @@ impl Game {
                     .find(|p| p.building == id)
                     .is_some_and(|p| p.paused),
             };
+            let Some(work_id) = v.simulation.allocate() else {
+                return "Work identity limit reached.".into();
+            };
+            let mut j = j;
+            j.id = Some(work_id);
             v.building_jobs.push(j);
             v.buildings
                 .iter_mut()

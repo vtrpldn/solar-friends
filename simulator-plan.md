@@ -8,7 +8,7 @@ description: Implementation stages for physical resources, production, resident 
 
 Make village planning depend on where resources are, how people spend their time, and how the land and infrastructure change. The player identifies a bottleneck, compares solutions, commits space and resources, observes the result, and adjusts. Residents retain meals, sleep, friendships, optional outside jobs, and hobbies.
 
-This is a proposed implementation plan. Its stages are not implemented by this planning change. The existing [construction economy plan](plan.md) remains the record of delivered economy work.
+Implementation is active. The stages below remain the complete scope; the progress section records delivered parts and outstanding work. The existing [construction economy plan](plan.md) remains the record of delivered economy work.
 
 ## Contents
 
@@ -177,3 +177,8 @@ Run [the development check](scripts/dev-check.mjs) for Rust formatting, tests, l
 The dev report should expose material conservation, travelling cargo, route failures, daily time use, queues, actual versus forecast completion, soil changes, utility flows, and condition. Keep long-running scenarios reproducible through exported seed and state. Verify good and bad layouts with the same inputs so a faster result demonstrates a planning benefit.
 
 Completion requires all six systems, the redesigned Story introductions, configurable Sandbox constraints, and repeated seasonal operation to meet their acceptance checks. Record unresolved performance or balance limits alongside the corresponding result. Update this plan as stages are delivered, and preserve incremental review and commits.
+
+## Implementation progress
+
+- Stage 0 in progress: persisted simulation schema and seed; a shared ID allocator used by resident building-work jobs; eight days of observed time per resident; material receipt and spending accounts; read-only diagnostics and strict state validation. Physical inventories, shipment ownership, routing, production batches, utility connections, and maintenance jobs follow in their stages. The inventory report explicitly identifies the existing shared-stock model.
+- Native checks cover exact reloads, midnight splitting, bounded history, invalid state, accounting differences, stable IDs, seed persistence, and read-only inspection. The full six-system completion audit remains outstanding.

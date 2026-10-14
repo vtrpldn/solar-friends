@@ -34,6 +34,7 @@ export function makeScenario(id, fresh, established) {
   if(id==='art'||id==='art-night')return makeArtPreview(fresh,established,{night:id==='art-night'});
   const state = id==='grid'?makeArtPreview(fresh,established):structuredClone(established), v = state.village;
   v.minutes = 1440 + 600;
+  v.simulation=structuredClone(fresh.village.simulation);v.simulation.materials=null;
   v.wood = 110; v.food = 100; v.water = 100; v.meals = 10;
   v.supplies.eggs = 0;
   v.situations = { day: 1, cooking: [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], active: null, resolved_count: 0 };

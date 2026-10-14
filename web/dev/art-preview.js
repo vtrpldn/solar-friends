@@ -8,6 +8,7 @@ export function makeArtPreview(fresh,established,{night=false}={}) {
   const state=structuredClone(established),v=state.village;
   v.economy=structuredClone(fresh.village.economy);
   v.buildings=[];v.roads=[];v.minutes=1440+(night?1260:600);
+  v.simulation=structuredClone(fresh.village.simulation);v.simulation.materials=null;
   v.power={stored:24,disabled:[]};v.circular=structuredClone(fresh.village.circular);
   v.food=100;v.water=100;v.meals=10;v.wood=110;
   v.progress.completed.fill(true);v.progress.later_completed.fill(true);

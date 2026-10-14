@@ -44,6 +44,8 @@ impl Game {
             v.wood = 100.;
             v.economy.stock[1..].fill(24);
             replenish(&mut v);
+            v.simulation.materials = None;
+            simulation::start_materials(&mut v);
         }
         true
     }
