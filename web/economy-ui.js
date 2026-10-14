@@ -2,7 +2,7 @@ import {itemIcon,materialIcons} from './game-ui.js';
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:n%100?2:0,maximumFractionDigits:2}).format(n/100);
 const time=t=>`Day ${Math.floor(t/1440)+1} · ${String(Math.floor(t%1440/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const names={hydro:'River generator',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost',square:'Square',workshop:'Workshop',coop:'Chicken coop',solar_farm:'Solar farm',streetlight:'Street light'};
+const names={hydro:'River generator',eco_toilet:'Ecological toilet',banana_treatment:'Banana treatment bed',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost',square:'Square',workshop:'Workshop',coop:'Chicken coop',solar_farm:'Solar farm',streetlight:'Street light'};
 export function recipeSummary(state,kind,variant='standard'){
   const e=state.environment.economy,source=e.source_options?.find(s=>s.key===kind);if(source)return state.village.mode==='sandbox'?'Free planting':money(source.cost)+(source.material<2?' · 2 irrigation water':'');
   const r=e.recipes.find(r=>r.kind===kind);if(!r)return 'Free';

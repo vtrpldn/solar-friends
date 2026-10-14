@@ -53,7 +53,7 @@ const b=snap().village.buildings.find(b=>b.id===lamp);
 // Actual adjacent free path, without occupying the lamp's cell.
 for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
 await complete(6);
-for(const k of ['eco_toilet','wetland'])build(k);await complete(7);
+for(const k of ['eco_toilet','wetland','banana_treatment'])build(k);await complete(7);
 build('biodigester');await complete(8);
 for(const material of [2,3,4])source(material);
 for(let i=0;i<5;i++){
@@ -81,4 +81,4 @@ gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);
 const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
 for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
 assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
-g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 17 building kinds taught.');
+g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 18 building kinds taught.');

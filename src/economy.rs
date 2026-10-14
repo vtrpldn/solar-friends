@@ -262,6 +262,14 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
             stage("Lined reed bed", &[(3, 8), (2, 4), (11, 1)], 18.),
             stage("Reeds, pipes & collection", &[(9, 3), (8, 2)], 16.),
         ],
+        "banana_treatment" => vec![
+            stage(
+                "Sealed basin & drainage layers",
+                &[(3, 8), (2, 8), (6, 6)],
+                20.,
+            ),
+            stage("Banana planting & inlet", &[(9, 3), (8, 2)], 16.),
+        ],
         "biodigester" => vec![
             stage("Sealed tanks", &[(3, 4), (6, 6), (9, 3)], 22.),
             stage(
@@ -632,7 +640,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let missing:Bundle=std::array::from_fn(|i|if p.committed{0}else{s.items[i].saturating_sub(p.reserved[i])});
         Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
     }).collect();
-    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","biodigester","warehouse"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
+    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","banana_treatment","biodigester","warehouse"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
     let preparation: Vec<_> = [5, 6, 7, 8]
         .into_iter()
         .filter_map(|i| {

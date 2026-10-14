@@ -1,0 +1,19 @@
+{
+  "created": "2026-10-14",
+  "tool": "Built-in image_gen",
+  "source": "https://biblioteca.emater.df.gov.br/jspui/handle/123456789/128",
+  "gameplay": "Abstract throughput of one sealed waste per 240 game minutes per completed bed. No drinking, irrigation, food or compost output.",
+  "day": {
+    "file": "web/art/banana-treatment.png",
+    "prompt": "Use case: stylized-concept. Asset: single transparent game building sprite for Solar Friends. Reference images: village-atlas-isometric.png supplies the warm hand-painted Brazilian ecovillage style and banana leaf proportions; wetland.png supplies the masonry and teal pipe material treatment. Create a NEW banana-tree ecological sewage treatment bed (tanque de evapotranspiração / TEvap): a compact square sealed earth-and-stone masonry planted basin with THREE banana plants spread evenly across the entire bed, mature but modestly sized; low ochre/terracotta stone rim, dark mulched soil, a short capped teal inlet pipe at the back and a small sealed inspection lid flush with the soil, a few low tropical companion leaves. Banana leaves exactly like the atlas, warm golden upper-left sunlight, richly painted soft shading. Elevated orthographic isometric camera with NO perspective convergence: horizontal ground axes slope exactly +1/2 and -1/2, all verticals upright; square ground plan appears a 2:1 diamond with clear front/left/right masonry corners. Keep trees proportional to the banana grove, crowns fit within this building footprint, tallest leaves no higher than one house roof. Full object centered within square canvas with transparent gutters, foliage not clipped. Actual transparent background, no cast shadow outside silhouette, no gray foundation platform, no concrete slab, no floating ground patch, no surrounding landscape, no exposed sewage or water, no fruit harvest props, no text. One building only, not an atlas. This is a sewage treatment bed, not a food forest.",
+    "references": [
+      "web/art/village-atlas-isometric.png",
+      "web/art/wetland.png"
+    ]
+  },
+  "night": {
+    "file": "web/art/banana-treatment-night.png",
+    "prompt": "Lighting-only edit: cool blue-green moonlight; preserve exact sprite geometry, transparency, padding and footprint. No glow or added lamps.",
+    "reference": "web/art/banana-treatment.png"
+  }
+}

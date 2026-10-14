@@ -278,3 +278,11 @@ Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local serv
 Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
 
 Add building source crops, scales, anchors, and camera calibration to `web/building-art.js`; the game and studio share these values. Add other sprite entries to `web/artwork/catalog.js`. Run `node scripts/verify-artwork.mjs` to catch uncatalogued files, missing sources, duplicate IDs, and invalid crop bounds. See [artwork consistency](assets/art-direction/artwork-consistency.md) for scale values, generation prompts, and the limits of painted geometry.
+
+### Banana sewage treatment
+
+Build a **Banana treatment bed** under **Build → Water & waste**. Story unlocks it after Sunshine to Share and introduces it in Water Comes Around; Sandbox has it immediately. Residents build its sealed basin, drainage layers, planted bed and inlet using stone, earth, bricks, pipes and fittings.
+
+A completed 2×2 bed treats up to six sealed toilet waste per game day without power. Water & waste shows lifetime treatment and lets you pause it to reserve waste for the biodigester. It produces no drinking water, irrigation water or food. Moving, demolishing or salvaging closes the bed while residents work.
+
+The simplified game cycle is inspired by the [Emater-DF banana evapotranspiration basin](https://biblioteca.emater.df.gov.br/jspui/handle/123456789/128). Day/night sprites and their prompts are recorded in `assets/art-direction/banana-sanitation-prompts.json`; the artwork preview includes both. The protected `banana` development scenario starts with accumulated waste and digestion paused.

@@ -59,6 +59,7 @@ const canvas = $("#world"),
 const kinds = {
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
   eco_toilet:['Ecological toilet','Private dry toilet · sealed waste collection · handwash'],
+  banana_treatment:['Banana treatment bed','Treat sewage in a sealed banana basin'],
   wetland:['Reed bed','Filter greywater into irrigation water'],
   biodigester:['Biodigester','Sealed waste + scraps → cooking gas and cured compost'],
   warehouse:['Storage house','Store 300 extra construction materials'],
@@ -1008,6 +1009,7 @@ function updateQuests() {
 const buildingPurposes = {
   hydro:'Produces 1.8 energy/hour day and night (less on dry days, more during rain). Adds 18 battery capacity. Workers approach from land.',
   eco_toilet:'Residents use this private toilet once a day and wash their hands with one fresh water. Waste stays sealed until processed.',
+  banana_treatment:'A sealed banana evapotranspiration bed treats one toilet waste every four game hours (six per day). It produces no water or food. Open Water & waste to pause it and reserve waste for biogas.',
   wetland:'A lined reed bed filters 12 greywater into 8 irrigation water over six hours. Reclaimed water is never used for drinking or cooking.',
   biodigester:'Two sealed waste + two kitchen scraps take eight hours to produce four cooking gas and two digestate. Digestate cures for a full day before becoming compost.',
   warehouse:'A communal store adds 300 spaces for construction materials, including incoming supplies. Manage its contents in Supplies.',
@@ -1066,7 +1068,7 @@ function updateBuildingPanel() {
   $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Village → Construction for stage materials, purchases and priorities." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
-  const utility = b && ["solar_farm", "streetlight", "hydro", "wetland", "biodigester", "warehouse"].includes(b.kind);
+  const utility = b && ["solar_farm", "streetlight", "hydro", "banana_treatment", "wetland", "biodigester", "warehouse"].includes(b.kind);
   $("#building-visits").hidden = utility;
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
   if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
@@ -1084,8 +1086,12 @@ function updateCircularUI(v) {
   $('#circular-controls').hidden=!buildingUnlocked(v,'eco_toilet');
   $('#circular-stock').textContent=`${c.waste.toFixed(0)} / 80 sealed waste · ${c.greywater.toFixed(1)} / 120 greywater`;
   $('#circular-output').textContent=`${c.reclaimed.toFixed(0)} / 60 irrigation water · ${c.biogas.toFixed(0)} / 12 cooking gas`;
-  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste>=80?'Waste store is full. Build or resume a biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
+  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste>=80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
   $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':!c.filter_water?'Filtration paused.':c.filtration>0?`Filtering · ${Math.ceil(c.filtration/60)} hours left`:c.reclaimed>52?'Irrigation water store is full. Gardens use this before fresh water.':c.greywater>=12?'Ready to filter when time resumes.':'Waiting for 12 greywater.';
+  const beds=v.buildings.filter(b=>b.kind==='banana_treatment'&&b.progress>=100).length;
+  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment?'Banana treatment paused. Waste remains available for biogas.':`${c.waste>0 ? `Treating up to ${beds*6} waste per day.` : 'Waiting for toilet waste.'} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
+  $('#banana-treatment').checked=c.banana_treatment??true;
+  $('#banana-treatment').disabled=!beds;
   $('#digester-status').textContent=c.pending_compost?`Two digestate curing · ${Math.ceil(c.curing/60)} hours left`:!ready('biodigester')?'Build a biodigester to turn sealed waste and scraps into cooking fuel.':!c.auto_feed?'Digestion paused.':c.digestion>0?`Digesting · ${Math.ceil(c.digestion/60)} hours left`:c.biogas>8?'Gas store is full. Use it in the kitchen.':c.waste>=2&&v.progress.scraps>=2?'Ready to digest when time resumes.':'Waiting for two waste and two scraps.';
   $('#auto-digest').checked=c.auto_feed;$('#filter-greywater').checked=c.filter_water;$('#use-biogas').checked=c.use_biogas;
   $('#auto-digest').disabled=!ready('biodigester');$('#filter-greywater').disabled=!ready('wetland');
@@ -1407,6 +1413,10 @@ function setup() {
   };
   for(const id of ['auto-digest','filter-greywater','use-biogas']) $('#'+id).onchange=()=>{
     game.configure_sanitation($('#auto-digest').checked,$('#filter-greywater').checked,$('#use-biogas').checked);
+    state=JSON.parse(game.snapshot());updateUI();save();
+  };
+  $('#banana-treatment').onchange=()=>{
+    game.configure_banana_treatment($('#banana-treatment').checked);
     state=JSON.parse(game.snapshot());updateUI();save();
   };
   for (const id of ["feed-hens", "use-eggs"]) {

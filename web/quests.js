@@ -1,5 +1,5 @@
 // Text and objective views; Rust owns permanent completion and unlocks.
-export const storyBuildingKinds = ["home","garden","well","kitchen","grove","warehouse","compost","square","workshop","greenhouse","coop","solar_farm","streetlight","eco_toilet","wetland","biodigester","hydro"];
+export const storyBuildingKinds = ["home","garden","well","kitchen","grove","warehouse","compost","square","workshop","greenhouse","coop","solar_farm","streetlight","eco_toilet","wetland","banana_treatment","biodigester","hydro"];
 const actionGoal = (action, label, value, target, hint) => ({...goal(label,value,target,hint),action});
 const count = (v, kind) =>
   v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
@@ -221,6 +221,8 @@ export const quests = [
     objectives:v=>[
       goal("Build an ecological toilet",count(v,"eco_toilet"),1,"Residents use it daily. Keep fresh water for handwashing; waste stays sealed.","eco_toilet"),
       goal("Build a lined reed bed",count(v,"wetland"),1,"A reed bed filters household greywater. Its output is irrigation water, never drinking water.","wetland"),
+      goal("Build a banana treatment bed",count(v,"banana_treatment"),1,"A sealed basin planted with banana trees treats toilet sewage through its soil and roots. Its water stays separate from our drinking and irrigation stores.","banana_treatment"),
+      actionGoal("supplies","Treat five toilet waste",Math.floor(v.circular.waste_treated ?? 0),5,"Enable banana treatment in Water & waste. Each finished bed treats one waste every four game hours. It needs no power and produces no water or food."),
       actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water available per visit."),
       actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Rain falls 14:00–17:00 on two days out of three. A completed cistern catches it when there is space."),
       actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Twelve greywater becomes eight reclaimed water over six hours."),
@@ -283,7 +285,7 @@ export const quests = [
   },
 
 ];
-export const unlockQuest = { grove:0, warehouse:0, compost:1, eco_toilet:6, square:1, workshop:3, greenhouse:3, wetland:6, coop:4, biodigester:7, solar_farm:5, hydro:9, streetlight:5 };
+export const unlockQuest = { grove:0, warehouse:0, compost:1, eco_toilet:6, square:1, workshop:3, greenhouse:3, wetland:6, banana_treatment:6, coop:4, biodigester:7, solar_farm:5, hydro:9, streetlight:5 };
 export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[])[id-4] || false;
 export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
 export const completedQuests = v => quests.map((_,i)=>questCompleted(v,i));

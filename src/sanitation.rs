@@ -21,6 +21,8 @@ pub struct Circular {
     pub toilet_visits: u32,
     pub batches: u32,
     pub water_reused: f32,
+    pub banana_treatment: bool,
+    pub waste_treated: f32,
 }
 impl Default for Circular {
     fn default() -> Self {
@@ -39,6 +41,8 @@ impl Default for Circular {
             toilet_visits: 0,
             batches: 0,
             water_reused: 0.,
+            banana_treatment: true,
+            waste_treated: 0.,
         }
     }
 }
@@ -143,6 +147,13 @@ pub fn advance(v: &mut Village, minutes: f32) {
             v.circular.filtration = 360.;
         }
     }
+    // The sealed banana bed consumes waste; it has no water or food outlet.
+    // Digesters take their feedstock first, so both systems conserve one store.
+    if v.circular.banana_treatment {
+        let treated = (minutes * count(v, "banana_treatment") / 240.).min(v.circular.waste);
+        v.circular.waste -= treated;
+        v.circular.waste_treated += treated;
+    }
 }
 pub fn valid(v: &Village) -> bool {
     let c = &v.circular;
@@ -159,6 +170,8 @@ pub fn valid(v: &Village) -> bool {
     .all(|&(n, max)| n.is_finite() && (0.0..=max).contains(&n))
         && c.water_reused.is_finite()
         && c.water_reused >= 0.
+        && c.waste_treated.is_finite()
+        && c.waste_treated >= 0.
         && matches!(c.pending_compost, 0 | 2)
         && ((c.pending_compost == 0 && c.curing == 0.) || (c.pending_compost == 2 && c.curing > 0.))
         && (c.digestion == 0. || (c.pending_compost == 0 && c.biogas <= 8.))
@@ -166,6 +179,13 @@ pub fn valid(v: &Village) -> bool {
 }
 #[wasm_bindgen]
 impl Game {
+    pub fn configure_banana_treatment(&mut self, enabled: bool) {
+        self.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .circular
+            .banana_treatment = enabled;
+    }
     pub fn configure_sanitation(&mut self, auto_feed: bool, filter_water: bool, use_biogas: bool) {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.circular.auto_feed = auto_feed;
@@ -301,11 +321,96 @@ mod tests {
             ("biogas", -1.),
             ("digestion", 481.),
             ("curing", 1.),
+            ("waste_treated", -1.),
         ] {
             let mut save: serde_json::Value = serde_json::from_str(&before).unwrap();
             save["village"]["circular"][key] = value.into();
             assert!(!g.restore(&save.to_string()));
             assert_eq!(g.snapshot(), before);
         }
+    }
+    #[test]
+    fn banana_beds_conserve_waste_without_producing_water_food_or_fuel() {
+        let mut g = setup();
+        assert_eq!(g.place("banana_treatment", 8, 10), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.circular.auto_feed = false;
+        v.circular.filter_water = false;
+        v.circular.waste = 7.;
+        let outputs = (
+            v.water,
+            v.food,
+            v.circular.reclaimed,
+            v.circular.biogas,
+            v.progress.compost,
+        );
+        advance(&mut v, 120.);
+        assert_eq!(v.circular.waste, 6.5);
+        assert_eq!(v.circular.waste_treated, 0.5);
+        advance(&mut v, 1440.);
+        assert_eq!(v.circular.waste, 0.5);
+        advance(&mut v, 1440.);
+        assert_eq!(v.circular.waste, 0.);
+        assert_eq!(v.circular.waste_treated, 7.);
+        assert_eq!(
+            outputs,
+            (
+                v.water,
+                v.food,
+                v.circular.reclaimed,
+                v.circular.biogas,
+                v.progress.compost
+            )
+        );
+        assert!(valid(&v));
+    }
+    #[test]
+    fn banana_treatment_pauses_for_controls_and_building_work_and_survives_reload() {
+        let mut g = setup();
+        assert_eq!(g.place("banana_treatment", 8, 10), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.circular.auto_feed = false;
+            v.circular.waste = 4.;
+            advance(&mut v, 240.);
+        }
+        g.configure_banana_treatment(false);
+        let mut restored = Game::new();
+        assert!(restored.restore(&g.snapshot()));
+        assert_eq!(restored.snapshot(), g.snapshot());
+        {
+            let mut v = restored.app.world_mut().resource_mut::<Village>();
+            advance(&mut v, 240.);
+            assert_eq!(v.circular.waste, 3.);
+        }
+        restored.configure_banana_treatment(true);
+        let id = restored
+            .app
+            .world()
+            .resource::<Village>()
+            .buildings
+            .last()
+            .unwrap()
+            .id;
+        assert_eq!(restored.queue_building_work(id, "move", 12, 10), "ok");
+        let mut v = restored.app.world_mut().resource_mut::<Village>();
+        advance(&mut v, 240.);
+        assert_eq!(v.circular.waste, 3.);
+        assert_eq!(v.circular.waste_treated, 1.);
+    }
+    #[test]
+    fn multiple_banana_beds_share_the_same_waste_store_with_digesters() {
+        let mut g = setup();
+        for x in [8, 12] {
+            assert_eq!(g.place("banana_treatment", x, 10), "ok");
+        }
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.circular.waste = 3.;
+        v.progress.scraps = 2;
+        advance(&mut v, 120.);
+        assert_eq!(v.circular.waste, 0.);
+        assert_eq!(v.circular.waste_treated, 1.);
+        assert_eq!(v.circular.digestion, 480.);
+        assert_eq!(v.progress.scraps, 0);
     }
 }
