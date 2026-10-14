@@ -1,6 +1,9 @@
 import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
+import {makeArtPreview} from './art-preview.js';
 export const scenarios = [
+  {id:'art',name:'All building artwork',detail:'Every building and house variation, including adobe homes, river power, sanitation and storage. Separate completed plots, normal game scale and renderer; saved villages stay protected.'},
+  {id:'art-night',name:'All building artwork at night',detail:'The complete building gallery at 21:00, with rooftop and shared power, matching night sprites and interior lighting.'},
   {id:'cultivation',name:'Player-managed material plots',detail:'Planted timber at 75% growth, cultivated bamboo at 50%, and a manually placed quarry. Advance to watch tending and maturation; request a harvest and compare reserves.'},
   {id:'circular',name:'Closing the loop',detail:'River power, dry toilets, reed beds, biodigestion, storage, and two adobe homes. Start at 10:00; advance to watch private routines and processing.'},
   {id:'circular-night',name:'Circular village at night',detail:'River generation after sunset alongside adobe homes and the new utilities.'},
@@ -11,12 +14,12 @@ export const scenarios = [
   { id: 'power', name: 'Stored sunshine', detail: 'A charged solar farm and connected lights at 21:00. Switch loads off in Power to compare.' },
   { id: 'power-outage', name: 'Empty battery', detail: 'An empty shared battery at 21:00; rooftop homes remain lit. Advance until sunrise to recharge.' },
   { id: 'arrival', name: 'Fresh arrival', detail: 'The real starting state, before anyone reaches the clearing.' },
-  { id: 'village', name: 'Established village', detail: 'Every building, supplies, and completed quests for interaction checks.' },
+  { id: 'village', name: 'Established village', detail: 'A compact established village, supplies, and completed quests for interaction checks.' },
   { id: 'hungry', name: 'Hungry village', detail: 'Empty pantry and hungry residents during the morning work block.' },
   { id: 'harvest', name: 'First harvest', detail: 'A mature lettuce bed, ready for Iara to harvest.' },
   { id: 'cook', name: 'Overworked cook', detail: 'Staged cooking history across two days; one tick raises the real concern.' },
   { id: 'coop', name: 'Full coop', detail: 'Three hens, a fed batch almost complete, and room for eggs.' },
-  { id: 'night', name: 'Night lighting', detail: 'All buildings at 21:00, with the normal night renderer.' },
+  { id: 'night', name: 'Night lighting', detail: 'The compact established village at 21:00, with the normal night renderer.' },
   { id: 'occupations', name: 'Outside occupations', detail: 'All five personal jobs enabled at 09:00. Advance to watch departures, independent shifts, and contributions at 17:00.' },
   { id: 'rain', name: 'Afternoon rain', detail: 'The real 15:00 rain: streaks, splashes, river ripples, cloud cover and wet ground. Run the scene to see it move.' },
   { id: 'after-rain', name: 'After the rain', detail: '18:00 after a wet afternoon. Pools dry gradually while sunset lighting returns.' },
@@ -27,6 +30,7 @@ export const scenarios = [
 export function makeScenario(id, fresh, established) {
   if (!scenarios.some(s => s.id === id)) throw new Error('Unknown scenario');
   if (id === 'arrival') return structuredClone(fresh);
+  if(id==='art'||id==='art-night')return makeArtPreview(fresh,established,{night:id==='art-night'});
   const state = structuredClone(established), v = state.village;
   v.minutes = 1440 + 600;
   v.wood = 110; v.food = 100; v.water = 100; v.meals = 10;

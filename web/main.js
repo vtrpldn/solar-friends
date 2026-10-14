@@ -1,4 +1,5 @@
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
+import {makeArtPreview} from './dev/art-preview.js';
 import {installGameUI} from './game-ui.js';
 import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
@@ -1775,11 +1776,12 @@ try {
     const response = await fetch(residentPreview ? './artwork/resident-preview.json' : './artwork/village-preview.json');
     if (!response.ok) throw new Error('Artwork preview could not load');
     saved = await response.text();
-    if (nightPreview) {
-      const fixture = JSON.parse(saved);
-      for (const building of fixture.village.buildings) if (building.kind === 'garden') building.crop.growth = 180;
-      fixture.village.minutes = Math.floor(fixture.village.minutes / 1440) * 1440 + 21 * 60;
-      saved = JSON.stringify(fixture);
+    if(!residentPreview){
+      const fresh=JSON.parse(game.snapshot()),baseline=new Game();
+      try{
+        if(!baseline.restore(saved))throw new Error('Artwork preview baseline is invalid');
+        saved=JSON.stringify(makeArtPreview(fresh,JSON.parse(baseline.snapshot()),{night:nightPreview}));
+      }finally{baseline.free();}
     }
   }
   if (saved !== null && saved !== undefined && !game.restore(saved)) {
@@ -1801,7 +1803,7 @@ try {
     const notice = document.createElement('a');
     notice.href = './';
     notice.className = 'artwork-preview-notice';
-    notice.textContent = `${previewParams.has('art-draft') ? 'ART DRAFT · ' : ''}${nightPreview ? 'Night artwork' : residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
+    notice.textContent = `${previewParams.has('art-draft') ? 'ART DRAFT · ' : ''}${residentPreview?'Resident animation':`${nightPreview?'Night artwork':'Artwork'} · ${state.village.buildings.length} building variants`} preview · Return to your village ↗`;
     document.body.append(notice);
     togglePause();
     save();
