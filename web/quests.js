@@ -149,7 +149,7 @@ export const quests = [
     after:
       "Build a workshop and a greenhouse. Eight free timber crafts twelve tool uses for 25% faster construction; moist greenhouse beds raise seedlings.",
     objectives: (v) => [
-      goal("Build a storage house",count(v,"warehouse"),1,"Incoming orders also use space. A storage house adds 300 receiving spaces.","warehouse"),
+      goal("Build a storage house",count(v,"warehouse"),1,"Incoming orders and queued salvage also reserve space. A storage house adds 300 receiving spaces. Buildings offers resident demolition, salvage and moving; clear stock before dismantling a store.","warehouse"),
       actionGoal("town", "Bring home an outside-job contribution", +v.economy.work_day.some(day=>day>=0),1,"Enable one personal occupation in Town. Residents leave for their 09:00–17:00 shift and contribute its income after returning. Jobs are optional; you may disable them after this lesson."),
       actionGoal("town", "Collect an order by truck", +v.economy.orders.some(o=>o.status==="delivered"&&o.pickup_by!=null),1,"Buy a small basket, choose resident pickup and an available driver. The truck holds 40 units; it must return before supplies count. Larger orders use next-day delivery."),
       goal(

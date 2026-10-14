@@ -114,9 +114,11 @@ The public game API completed all thirteen chapters on day 47, with each earned 
 
 Why: changing the village layout should take real resident effort and offer a choice between speed and recovering materials.
 
-- [ ] Add queued demolition, careful salvage and two-stage relocation, with saved progress and cancellation before packing finishes.
-- [ ] Require residents to reach the worksite and work during normal community hours in both modes. Keep food, rest and sleep ahead of these jobs.
-- [ ] Reserve relocation destinations against buildings, roads and material plots; retain identities, recipes, crops and equipment when moving.
-- [ ] Recover half of actually consumed materials only after salvage finishes, reserve receiving space, and keep utility/bed/storage transitions consistent.
-- [ ] Add building-management controls, job feedback and destination previews using the existing game interface and artwork.
-- [ ] Verify work duration, material conservation, blocked placement, save/reload, home and utility changes, cancellation and actual desktop controls.
+- [x] Add queued demolition, careful salvage and two-stage relocation, with saved progress and cancellation before packing finishes.
+- [x] Require residents to reach the worksite and work during normal community hours in both modes. Keep food, rest and sleep ahead of these jobs.
+- [x] Reserve relocation destinations against buildings, roads and material plots; retain identities, recipes, crops and equipment when moving.
+- [x] Recover half of actually consumed materials only after salvage finishes, reserve receiving space, and keep utility/bed/storage transitions consistent.
+- [x] Add building-management controls, job feedback and destination previews using the existing game interface and artwork.
+- [x] Verify work duration, material conservation, blocked placement, save/reload, home and utility changes, cancellation and actual desktop controls.
+
+Resident-work validation: 126 native tests and lint pass; the public API verifies actual crew arrival, faster demolition, once-only salvage, both relocation stages, preserved appearance, cancellation, exact saves and 16,224 placement comparisons. Existing gameplay/art verifiers pass. Desktop review exercised paid-garden salvage and relocation in a protected scene; saved Story data was preserved.

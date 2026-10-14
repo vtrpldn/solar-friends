@@ -537,7 +537,9 @@ function building(b) {
   buildingSprite(b.kind,b.x,b.y,work?.stage==='rebuild'?.45:complete?1:.16+.65*((project?.stage||0)/stages),b.id);
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     const registration=placementArt(b.kind,buildingArt[b.kind]);
+    ctx.save();if(work?.stage==='rebuild')ctx.globalAlpha*=.45;
     drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));
+    ctx.restore();
   }
   if(work){
     const total=work.stage==='pack'?24:work.stage==='rebuild'?36:work.action==='demolish'?18:54;
@@ -1701,7 +1703,7 @@ function setup() {
 function refreshDevScene() {
   setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
-  state = JSON.parse(game.snapshot()); selected = null; tool = null;
+  state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; pendingRemoval = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   clearTimeout(toastTimer); $("#toast").hidden = true;
