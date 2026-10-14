@@ -9,6 +9,7 @@ const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
   hydro: { name:'River generator', file:'hydro.png', width:96, anchor:.75 },
   eco_toilet: { name:'Ecological toilet', file:'eco-toilet.png', width:100, anchor:.88 },
+  banana_treatment: { name:'Banana treatment bed', file:'banana-treatment.png', width:162, anchor:.85 },
   wetland: { name:'Reed bed', file:'wetland.png', width:162, anchor:.72, aspect:.5 },
   biodigester: { name:'Biodigester', file:'biodigester.png', width:150, anchor:.71 },
   warehouse: { name:'Storage house', file:'warehouse.png', width:178, anchor:.78 },

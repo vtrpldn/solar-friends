@@ -3,7 +3,9 @@ import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { allBuildingArt, cameraCalibration, drawBuildingArt } from '../web/building-art.js';
 import { buildingProjection } from '../web/building-projection.js';
+import { placementArt } from '../web/building-footprints.js';
 import { meshPoint } from '../web/building-mesh.js';
+import { readAlpha } from './lib/png-alpha.mjs';
 const review=JSON.parse(readFileSync(new URL('../assets/art-direction/building-projection-review.json',import.meta.url)));
 const files=[...new Set(Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]))];
 assert.deepEqual(Object.keys(review.files).sort(),files.sort(),'Review every current day/night source');
@@ -12,6 +14,14 @@ for(const file of files){
   assert.equal(createHash('sha256').update(bytes).digest('hex'),review.files[file],`Re-trace and visually review replaced artwork: ${file}`);
 }
 let largest=0;
+assert.deepEqual(buildingProjection.workshop.rightLabels,['Side foundation','Side eave','Roof ridge'],'Workshop review must include roof geometry as well as the base');
+assert.deepEqual(buildingProjection.workshop.leftLabels,['Front foundation','Front lintel','Workbench front'],'Review the usable opening and interior frame direction');
+assert.equal(buildingProjection.workshop.right.length,3);assert.equal(buildingProjection.workshop.left.length,3);
+const workshopDay=readAlpha(readFileSync(new URL('../web/art/workshop-isometric.png',import.meta.url))),workshopNight=readAlpha(readFileSync(new URL('../web/art/workshop-isometric-night.png',import.meta.url)));
+assert.equal(workshopDay.width,workshopNight.width);assert.equal(workshopDay.height,workshopNight.height);
+let union=0,intersection=0;
+for(let i=0;i<workshopDay.alpha.length;i++){const day=workshopDay.alpha[i]>=32,night=workshopNight.alpha[i]>=32;union+=day||night;intersection+=day&&night;}
+assert(intersection/union>.99,'Workshop lighting must preserve its silhouette without a visible day/night position jump');
 for(const[key,art]of Object.entries(allBuildingArt)){
   const measurement=buildingProjection[key];
   if(key==='grove'){assert(!measurement && !art.axes,'Organic grove has no architectural axes');continue;}
@@ -22,7 +32,7 @@ for(const[key,art]of Object.entries(allBuildingArt)){
     assert(measurement[direction].length>=2,'Use separate painted edges for each direction');
     for(const[x,y,X,Y]of measurement[direction]){
       const p=project(x,y),q=project(X,Y);
-      const error=Math.abs(q[1]-p[1]-slope*(q[0]-p[0]))*art.width/measurement.size;
+      const error=Math.abs(q[1]-p[1]-slope*(q[0]-p[0]))*art.width/measurement.size*placementArt(key,art).scale;
       largest=Math.max(largest,error);
       assert(error<=2,`${key}: painted ${direction} edge drifts ${error.toFixed(2)} px at zoom 1`);
     }

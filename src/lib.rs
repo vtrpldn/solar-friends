@@ -3,6 +3,7 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod building_work;
 mod devtools;
 mod ecology;
 mod economy;
@@ -13,6 +14,7 @@ mod modes;
 mod occupations;
 mod power;
 mod progression;
+mod resource_sites;
 mod sanitation;
 mod situations;
 mod sleep;
@@ -33,6 +35,7 @@ const TASKS: &[&str] = &[
     "rest",
     "cook",
     "build",
+    "building_work",
     "garden",
     "water",
     "gather",
@@ -124,6 +127,8 @@ pub struct Village {
     pub meals_served: u32,
     pub buildings: Vec<Building>,
     #[serde(default)]
+    pub building_jobs: Vec<building_work::Job>,
+    #[serde(default)]
     pub roads: Vec<(i32, i32)>,
     pub events: Vec<String>,
     pub harvests: u32,
@@ -196,6 +201,7 @@ fn work_time(minutes: f32) -> bool {
 }
 fn available(v: &Village, task: &str) -> bool {
     match task {
+        "building_work" => building_work::next(v).is_some(),
         "build" => v.buildings.iter().any(|b| economy::can_build(v, b.id)),
         "source" | "prepare" => economy::local_job(v).is_some_and(|(t, _)| t == task),
         "outside" => (0..5).any(|id| occupations::available(v, id)),
@@ -322,6 +328,10 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
+    if task == "building_work" {
+        building_work::assign_target(r, v);
+        return;
+    }
     if task == "outside" || (task == "sleep" && shelter(v, r.id).is_none()) {
         mobility::begin(
             r,
@@ -352,6 +362,9 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     if matches!(task, "source" | "prepare") {
         if let Some((_, i)) = economy::local_job(v) {
             r.activity_material = Some(i);
+            if task == "source" {
+                r.reason = resource_sites::reason(v, i).into();
+            }
             let base = if task == "source" {
                 let s = &v.economy.sources[i];
                 (s.x as f32, s.y as f32)
@@ -442,6 +455,11 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Preparing a pot of food for everyone."
             },
         )
+    } else if matches!(r.id, 0 | 1) && available(v, "building_work") {
+        (
+            "building_work",
+            "Making time for our queued building crew work.",
+        )
     } else if available(v, "build") && matches!(r.id, 0 | 1) {
         (
             "build",
@@ -456,6 +474,20 @@ fn choose(r: &mut Resident, v: &Village) {
             "craft",
             "Making a small batch of tools for our next shared project.",
         )
+    } else if matches!(r.id, 2 | 3)
+        && v.economy
+            .sources
+            .iter()
+            .any(|s| s.active && (s.harvest_requested || s.plant_requested))
+        && let Some((task, _)) = economy::local_job(v)
+    {
+        // A queued player request gets a turn before repeat routine gardening.
+        // Hunger, meals, fatigue and the community work window still come first.
+        if task == "source" {
+            ("source", "Making time for the material work we requested.")
+        } else {
+            ("prepare", "Preparing materials for our approved project.")
+        }
     } else if supplies::needs_ingredients(v) && available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && matches!(r.id, 0 | 1) {
@@ -526,8 +558,18 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
     if task == "outside" && !mobility::departure_time(v.minutes) {
         return Some("Outside jobs leave between 09:00 and 10:00 and return at 17:00.".into());
     }
-    if matches!(task, "source" | "prepare") && !work_time(v.minutes) {
+    if matches!(task, "source" | "prepare" | "building_work") && !work_time(v.minutes) {
         return Some("Material collection and preparation wait for community work hours: 09:00–12:00 and 15:00–16:00.".into());
+    }
+    if task == "building_work"
+        && let Some(building) =
+            building_work::next(v).and_then(|id| v.buildings.iter().find(|b| b.id == id))
+        && spacing::approach(v, building, id).is_none()
+    {
+        return Some(
+            "There is no clear work spot for me at this site. Make a little room around it first."
+                .into(),
+        );
     }
     if situations::protected(v, id, task) {
         return Some(
@@ -537,6 +579,7 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
     if !available(v, task) {
         return Some(
             match task {
+                "building_work" => "Queue a building job in Buildings and leave a clear worksite for residents.",
                 "build" => "No stage is ready. Check project supplies, incoming deliveries, or paused projects.",
                 "garden" => {
                     "Gardens need planting, two water when dry, or time to grow before harvest."
@@ -664,6 +707,20 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         .filter_map(|r| spacing::building(r, &v))
         .collect();
     for mut r in &mut people {
+        building_work::sync(&mut r, &v);
+        if r.activity_building
+            .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
+            || r.visit_building
+                .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
+        {
+            assign(
+                &mut r,
+                &v,
+                "rest",
+                "Taking a break while the clearing changes.",
+                false,
+            );
+        }
         sleep::prepare(&mut r, v.minutes);
         if r.trip.is_none() && r.task == "sleep" {
             if shelter(&v, r.id).is_some() && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08 {
@@ -680,11 +737,15 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         r.social = (r.social - dt * 0.035).max(0.);
         sanitation::household_water(&mut v, dt * if sleeping { 0.002 } else { 0.009 });
         let chores_finished = (!r.requested
-            || matches!(r.task.as_str(), "source" | "prepare" | "outside"))
+            || matches!(
+                r.task.as_str(),
+                "source" | "prepare" | "outside" | "building_work"
+            ))
             && !work_time(v.minutes)
             && matches!(
                 r.task.as_str(),
                 "build"
+                    | "building_work"
                     | "garden"
                     | "water"
                     | "cook"
@@ -698,9 +759,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             )
             && !(r.task == "gather" && supplies::urgent(&v));
         let ready_work = match r.id {
-            0 => available(&v, "build"),
+            0 => available(&v, "build") || available(&v, "building_work"),
             1 => {
                 available(&v, "build")
+                    || available(&v, "building_work")
                     || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"))
             }
             2 | 3 => economy::local_job(&v).is_some(),
@@ -769,6 +831,19 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task == "gathering" && v.progress.gathering_until > v.minutes {
             v.progress.attended |= 1 << r.id;
         }
+        if r.task == "building_work" {
+            if let Some(id) = r.activity_building {
+                if building_work::work(
+                    &mut v,
+                    id,
+                    dt * if r.favorite == "build" { 2.5 } else { 1.5 },
+                ) {
+                    r.remaining = 0.;
+                }
+            } else {
+                r.remaining = 0.;
+            }
+        }
         if r.task == "build" {
             let tool_bonus = if v.progress.use_tools && v.progress.tool_uses > 0 {
                 1.25
@@ -804,6 +879,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         }
         if r.remaining <= 0. {
             match r.task.as_str() {
+                task if leisure::hobby(task) => {
+                    v.progress.hobby_mask |= 1 << r.id;
+                }
                 "visit" => {
                     interactions::finish(&mut v, &mut r);
                     if let Some(id) = r.visit_building
@@ -894,6 +972,26 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             - situations::concern(&v, r.id))
         .clamp(0., 100.);
     }
+    // A later worker may finish after earlier residents have already ticked.
+    // Detach every stale activity before snapshots can observe a removed site.
+    for mut r in &mut people {
+        if r.activity_building
+            .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
+            || r.visit_building
+                .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
+            || (r.task == "building_work"
+                && r.activity_building
+                    .is_none_or(|id| building_work::job(&v, id).is_none()))
+        {
+            assign(
+                &mut r,
+                &v,
+                "rest",
+                "The crew work is finished. Taking a break.",
+                false,
+            );
+        }
+    }
     if !v.arrived && people.iter().all(|r| r.task != "arrive") {
         v.arrived = true;
         event(
@@ -924,6 +1022,7 @@ impl Game {
                 meals: 0,
                 meals_served: 0,
                 buildings: vec![],
+                building_jobs: vec![],
                 roads: vec![],
                 events: vec!["Five friends, one empty lot. Your new beginning starts here.".into()],
                 harvests: 0,
@@ -1114,8 +1213,16 @@ impl Game {
         {
             return "Place roads inside the lot, away from the riverbank.".into();
         }
-        if v.buildings.iter().any(|b| interactions::occupies(b, x, y)) {
+        if v.buildings.iter().any(|b| interactions::occupies(b, x, y))
+            || v.economy
+                .sources
+                .iter()
+                .any(|s| resource_sites::occupies(s, x, y))
+        {
             return "Choose a tile beside the building.".into();
+        }
+        if building_work::reserved(&v, x, y, None) {
+            return "That plot is reserved for a building move.".into();
         }
         v.roads.push((x, y));
         "ok".into()
@@ -1132,51 +1239,8 @@ impl Game {
             return "Complete the linked quest in the village journal to unlock this building."
                 .into();
         }
-        if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) {
-            return "Choose a clearing inside the marked lot.".into();
-        }
-        let radius = interactions::radius(kind);
-        if x - radius < 0
-            || y - radius < 0
-            || x + radius >= MAP_SIZE
-            || y + radius >= MAP_SIZE
-            || if kind == "hydro" {
-                !hydro_site(x, y)
-            } else {
-                river_bank(x + radius - 1, y)
-            }
-        {
-            return if kind == "hydro" {
-                "Place the generator in the shallow village side of the river. Workers approach from the bank."
-            } else {
-                "Keep the river and its banks clear. Choose a clearing farther inland."
-            }
-            .into();
-        }
-        if (x as f32 - CAMP.0).abs() < radius as f32 + 0.5
-            && (y as f32 - CAMP.1).abs() < radius as f32 + 0.5
-        {
-            return "Keep the arrival clearing free for gathering and supplies.".into();
-        }
-        if v.buildings.iter().any(|b| {
-            (b.x - x).abs() < interactions::radius(&b.kind) + radius
-                && (b.y - y).abs() < interactions::radius(&b.kind) + radius
-        }) {
-            return "Leave a little room between buildings.".into();
-        }
-        let size = interactions::footprint_size(kind);
-        if v.roads.iter().any(|&(rx, ry)| {
-            (x - size / 2..x - size / 2 + size).contains(&rx)
-                && (y - size / 2..y - size / 2 + size).contains(&ry)
-        }) {
-            return "Keep roads clear. Choose a plot beside the road.".into();
-        }
-        if v.economy
-            .sources
-            .iter()
-            .any(|s| (s.x - x).abs() <= radius && (s.y - y).abs() <= radius)
-        {
-            return "Keep the local resource site accessible.".into();
+        if let Err(reason) = building_work::placement(&v, kind, x, y, None) {
+            return reason.into();
         }
         let id = v.economy.next_building;
         v.economy.next_building += 1;
@@ -1267,7 +1331,10 @@ impl Game {
     }
     pub fn track_quest(&mut self, quest: usize) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if quest >= 7 || v.mode == modes::Mode::Sandbox || !progression::available(&v, quest) {
+        if quest >= progression::CHAPTER_COUNT
+            || v.mode == modes::Mode::Sandbox
+            || !progression::available(&v, quest)
+        {
             return false;
         }
         v.progress.tracked = quest;
@@ -1365,6 +1432,7 @@ impl Game {
             return false;
         }
         occupations::migrate(&mut save);
+        resource_sites::retire_legacy(&mut save.village, &mut save.residents);
         let v = &save.village;
         let mut road_tiles = std::collections::HashSet::new();
         if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1377,7 +1445,12 @@ impl Game {
         {
             return false;
         }
-        if !supplies::valid(v) || !power::valid(v) || !economy::valid(v) || !sanitation::valid(v) {
+        if !building_work::valid(v)
+            || !supplies::valid(v)
+            || !power::valid(v)
+            || !economy::valid(v)
+            || !sanitation::valid(v)
+        {
             return false;
         }
         if !town_pickup::valid(v, &save.residents) {
@@ -1385,7 +1458,8 @@ impl Game {
         }
         let p = &v.progress;
         if !situations::valid(v)
-            || p.tracked >= 7
+            || p.tracked >= progression::CHAPTER_COUNT
+            || p.hobby_mask > 31
             || p.social_mask > 31
             || p.invited > 31
             || p.attended > 31
@@ -1428,10 +1502,17 @@ impl Game {
                 || r.activity_building
                     .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
                 || r.activity_material.is_some_and(|i| {
-                    i >= economy::COUNT || (r.task == "source" && i >= v.economy.sources.len())
+                    if r.task == "source" {
+                        v.economy.sources.get(i).is_none_or(|s| !s.active)
+                    } else {
+                        i >= economy::COUNT
+                    }
                 })
                 || r.last_sanitation_day < -1
                 || r.last_sanitation_day > (v.minutes / 1440.) as i32
+                || (r.task == "building_work"
+                    && r.activity_building
+                        .is_none_or(|id| building_work::job(v, id).is_none()))
                 || !TASKS.contains(&r.task.as_str())
                 || !mobility::valid(v, r)
                 || !sleep::valid(r, v.minutes)

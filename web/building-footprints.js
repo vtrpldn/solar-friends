@@ -1,9 +1,9 @@
 import { TILE_HALF_WIDTH as W, TILE_HALF_HEIGHT as H } from './projection.js';
 import { cameraCalibration } from './building-art.js';
-import { meshPoint } from './building-mesh.js';
+import { buildingSilhouettes } from './building-silhouettes.js';
 
 export function footprintSize(kind) {
-  if (['square','solar_farm'].includes(kind)) return 3;
+  if (['square','solar_farm','source_timber'].includes(kind)) return 3;
   if (['well','compost','coop','streetlight','road','hydro','eco_toilet'].includes(kind)) return 1;
   return 2;
 }
@@ -21,9 +21,10 @@ export function footprintCorners(kind,x,y) {
 }
 // Painted ground-contact landmarks, left/front/right, in source-cell units.
 // These register the building to its plot independently of transparent padding.
-const grounds={
+export const paintedGrounds={
   hydro:[1280,[[229,902],[551,1060],[1090,864]]],
   eco_toilet:[1280,[[237,975],[609,1168],[1087,974]]],
+  banana_treatment:[1280,[[92,743],[630,1137],[1173,754]]],
   wetland:[1774,[[357,511],[989,797],[1355,571]]],
   biodigester:[1280,[[130,844],[401,949],[1164,858]]],
   warehouse:[1280,[[107,848],[741,1133],[1188,936]]],
@@ -36,7 +37,7 @@ const grounds={
   'home-veranda':[1280,[[100,887],[574,1130],[1156,887]]],
   'home-gable':[1280,[[151,823],[650,1085],[1140,867]]],
   'home-courtyard':[1280,[[84,880],[584,1124],[1173,880]]],
-  workshop:[1280,[[116,918],[588,1165],[1149,954]]],
+  workshop:[1254,[[118,935],[548,1167],[1131,1002]]],
   square:[1280,[[54,879],[634,1168],[1234,895]]],
   solar_farm:[1280,[[101,778],[595,1030],[1160,713]]],
   well:[1280,[[218,944],[590,1140],[1040,953]]],
@@ -45,26 +46,22 @@ const grounds={
   grove:[640,[[60,440],[300,570],[570,440]]],
   streetlight:[1280,[[533,1002],[609,1038],[685,1000]]],
 };
+const placements=new WeakMap();
 export function placementArt(kind,art) {
-  const [size,landmarks]=grounds[kind],{vertical,shear}=cameraCalibration(art);
-  const points=landmarks.map(p=>{
-    const [u,v]=meshPoint(art.mesh,p),x=(u/size-.5)*art.width,y=((v/size-art.anchor*(art.aspect||1))*vertical+(u/size-.5)*shear)*art.width;
-    return [(x/W+y/H)/2,(y/H-x/W)/2];
-  });
-  const min=axis=>Math.min(...points.map(p=>p[axis])),max=axis=>Math.max(...points.map(p=>p[axis]));
-  const n=footprintSize(kind),gain=Math.min(n*.96/Math.max(max(0)-min(0),max(1)-min(1)),['streetlight','well','coop','compost','grove','hydro','eco_toilet'].includes(kind)?1:1.5);
-  const cx=(min(0)+max(0))/2,cy=(min(1)+max(1))/2;
-  const center=(n-1)/2-Math.floor(n/2);
-  return {scale:gain,x:-(cx-cy)*W*gain,y:center*2*H-(cx+cy)*H*gain-2};
-}
-export function drawFoundation(ctx,kind,x,y,scale=1,alpha=1,night=0) {
-  // A food forest grows directly in the terrain; its sprite includes ground cover.
-  if(['grove','hydro','wetland','biodigester'].includes(kind))return;
-  const corners=footprintCorners(kind,0,0).map(([u,v])=>[(u-v)*W,(u+v)*H]);
-  const soil=['garden','solar_farm','compost'].includes(kind);
-  const path=(points,color)=>{ctx.beginPath();points.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();ctx.fillStyle=color;ctx.fill();};
-  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.globalAlpha*=alpha;ctx.filter=`brightness(${1-night*.45})`;
-  path(corners,soil?'#987650':'#b5a181');
-  path(corners.map(([a,b])=>[a,b-2]),soil?'#bc9668':'#ddc9a5');
-  ctx.restore();
+  const key=[kind,art.width,art.anchor,art.aspect,art.axes?.join(',')].join('|'),cached=placements.get(art);
+  if(cached?.key===key)return cached.value;
+  const [size,landmarks]=paintedGrounds[kind],{vertical,shear}=cameraCalibration(art);
+  const groundX=(landmarks[0][0]/size+landmarks[2][0]/size-1)*art.width/2;
+  const outline=buildingSilhouettes[kind].hull.map(([u,v])=>[
+    (u-.5)*art.width-groundX,
+    ((v-art.anchor*(art.aspect||1))*vertical+(u-.5)*shear)*art.width,
+  ]);
+  const n=footprintSize(kind),halfWidth=Math.max(...outline.map(([x])=>Math.abs(x)));
+  const front=Math.max(...outline.map(([x,y])=>y+Math.abs(x)*H/W));
+  // Use the full painted volume, preserving its proportions. Walls and roofs
+  // rise above their ground plot. Its actual front outline meets the tile edges;
+  // transparent canvas padding never counts towards the size or the anchor.
+  const gain=n*W/halfWidth,center=(n-1)/2-Math.floor(n/2);
+  const value={scale:gain,x:-groundX*gain,y:center*2*H+n*H-front*gain};
+  placements.set(art,{key,value});return value;
 }
