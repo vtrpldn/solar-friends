@@ -169,7 +169,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   }
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
-  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null]]) {
+  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
     await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
@@ -178,6 +178,10 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
     if(id==='coop')assert.equal(state.village.supplies.eggs,3);
+    if(id==='art'||id==='art-night'){
+      const rendered=await page.evaluate(async()=>{const {allBuildingArt,buildingArtKey}=await import('./building-art.js?v=night-1');const s=window.solarDev.snapshot();return {expected:Object.keys(allBuildingArt).sort(),actual:s.village.buildings.map(b=>buildingArtKey(b,s.village.buildings,s.village.economy.projects)).sort()};});
+      assert.deepEqual(rendered.actual,rendered.expected,'All building artwork must be present through the actual Dev Tools launcher');
+    }
     assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
     await page.evaluate(()=>window.solarDev.fixedView());
     await page.locator('#dev-close').click();
@@ -320,8 +324,15 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const popupPromise=context.waitForEvent('page');await page.locator('#cal-preview').click();
   const preview=await popupPromise;await preview.waitForFunction(()=>window.solarDev);
   assert((await preview.locator('.artwork-preview-notice').textContent()).includes('ART DRAFT'));
+  const expectedVariants=await preview.evaluate(async()=>Object.keys((await import('./building-art.js?v=night-1')).allBuildingArt).length);
+  assert.equal(await preview.evaluate(()=>window.solarDev.snapshot().village.buildings.length),expectedVariants,'Draft previews must include all buildings and skins');
   const calibrated=await preview.evaluate(async()=>{const {buildingArt}=await import('./building-art.js?v=night-1');return buildingArt.coop.width;});assert.equal(calibrated,110);
   await preview.close();
+  const nightGallery=await context.newPage();await nightGallery.goto(new URL('/?night-preview',base).href);await nightGallery.waitForFunction(()=>window.solarDev);
+  assert((await nightGallery.locator('.artwork-preview-notice').textContent()).includes(`${expectedVariants} building variants`));
+  assert.equal(await nightGallery.evaluate(()=>window.solarDev.snapshot().village.minutes%1440),1260);
+  assert.equal(await nightGallery.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await nightGallery.close();
   await capture('Artwork calibration with shared game scale','calibration.png');
   await page.locator('[data-art-tab="replacement"]').click();
   await page.locator('#replacement-file').setInputFiles('web/art/coop-isometric.png');

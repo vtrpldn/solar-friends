@@ -31,7 +31,7 @@ export function makeScenario(id, fresh, established) {
   if (!scenarios.some(s => s.id === id)) throw new Error('Unknown scenario');
   if (id === 'arrival') return structuredClone(fresh);
   if(id==='art'||id==='art-night')return makeArtPreview(fresh,established,{night:id==='art-night'});
-  const state = structuredClone(established), v = state.village;
+  const state = id==='grid'?makeArtPreview(fresh,established):structuredClone(established), v = state.village;
   v.minutes = 1440 + 600;
   v.wood = 110; v.food = 100; v.water = 100; v.meals = 10;
   v.supplies.eggs = 0;
