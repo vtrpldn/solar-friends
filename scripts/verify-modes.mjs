@@ -41,7 +41,9 @@ for(const kind of buildings) {
   const saved=g.snapshot(),restore=new Game();assert(restore.restore(saved));assert.equal(restore.snapshot(),saved);
   const invalid=JSON.parse(saved);invalid.village.mode='unknown';assert(!restore.restore(JSON.stringify(invalid)));assert.equal(restore.snapshot(),saved);
   assert(!restore.start_mode('unknown'));assert.equal(restore.snapshot(),saved);
-  assert(restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,0);
+  assert(restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,1);
+  for(let tick=0;tick<4000&&snap(restore).village.building_jobs.length;tick++)restore.tick(.25);
+  assert.equal(snap(restore).village.buildings.length,0,'Sandbox removal also needs resident work');
   assert(restore.restore(restore.snapshot()));assert.equal(restore.place(kind,kind==='hydro'?26:5,5),'ok');
   assert(restore.start_mode('story'));assert(!restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,0);assert.equal(snap(restore).village.mode,'story');
   g.free();restore.free();
@@ -49,4 +51,4 @@ for(const kind of buildings) {
 const g=new Game();assert.equal(g.host_gathering().includes('Roots for Tomorrow'),true);assert.equal(g.contribute_tool_library().includes('A Place to Gather'),true);
 assert.equal(goalRoute({village:{buildings:[{id:0,kind:'coop',progress:100}]},environment:{economy:{projects:[]}}},{build:'coop',target:3,buildTarget:1}).type,'visit');
 g.free();story.free();
-console.log('PASS: all 17 buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');
+console.log('PASS: all 18 buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');

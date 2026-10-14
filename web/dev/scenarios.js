@@ -2,6 +2,7 @@ import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 import {makeArtPreview} from './art-preview.js';
 export const scenarios = [
+  {id:'banana',name:'Banana sewage treatment',detail:'A sealed banana bed beside our sanitation buildings, eight accumulated toilet waste and digestion paused. Compare automatic treatment with biogas in Water & waste; saved villages stay protected.'},
   {id:'art',name:'All building artwork',detail:'Every building and house variation, including adobe homes, river power, sanitation and storage. Separate completed plots, normal game scale and renderer; saved villages stay protected.'},
   {id:'art-night',name:'All building artwork at night',detail:'The complete building gallery at 21:00, with rooftop and shared power, matching night sprites and interior lighting.'},
   {id:'cultivation',name:'Player-managed material plots',detail:'Planted timber at 75% growth, cultivated bamboo at 50%, and a manually placed quarry. Advance to watch tending and maturation; request a harvest and compare reserves.'},
@@ -59,11 +60,12 @@ export function makeScenario(id, fresh, established) {
       {material:3,x:22,y:22,maximum:96,remaining:v.economy.land[1],growth:1},
     ].map(site=>({...site,restored:false,player_placed:true,active:true,moisture:site.material<2?1440:0,planted:site.material<2,auto_replant:true,auto_harvest:true,harvest_requested:false,plant_requested:false,harvests:0}));
   }
-  if(id.startsWith('circular')) {
+  if(id.startsWith('circular')||id==='banana') {
     v.buildings=[['home',6,8],['home',10,8],['eco_toilet',14,8],['kitchen',18,8],['biodigester',6,13],['wetland',14,13],['warehouse',18,13],['garden',14,17],['well',18,17],['streetlight',21,13],['hydro',24,13]].map(([kind,x,y],id)=>({id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop:structuredClone(established.village.buildings[0].crop),poultry:{remaining:0}}));
+    if(id==='banana')v.buildings.push({...structuredClone(v.buildings[0]),id:v.buildings.length,kind:'banana_treatment',x:9,y:17});
     v.economy.projects=v.buildings.map(b=>({building:b.id,recipe:b.kind==='home'?'adobe':'standard',appearance:b.kind==='home'?4+b.id:0,priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===b.kind)[b.kind==='home'?'adobe':'standard'].length,labour:0,committed:false,reserved:Array(15).fill(0),consumed:Array(15).fill(0)}));
     v.economy.next_building=v.buildings.length;v.economy.orders=[];
-    v.circular={...fresh.village.circular,waste:4,greywater:24};v.progress.scraps=4;
+    v.circular={...fresh.village.circular,waste:id==='banana'?8:4,greywater:24,auto_feed:id!=='banana'};v.progress.scraps=4;
     v.power={stored:12,disabled:[]};v.minutes=1440+(id==='circular-night'?1260:600);
     v.roads=[[5,10],[6,10],[7,10],[9,10],[10,10],[11,10],[17,15],[18,15],[19,15]];
     for(const r of state.residents){r.x=r.target_x=5+r.id*2.5;r.y=r.target_y=19;r.last_sanitation_day=-1;r.activity_building=null;r.trip=null;}

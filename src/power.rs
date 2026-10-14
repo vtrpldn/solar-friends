@@ -55,7 +55,10 @@ fn hydros(v: &Village) -> usize {
         .count()
 }
 fn capacity(v: &Village) -> f32 {
-    farms(v) as f32 * STORAGE_PER_FARM + hydros(v) as f32 * 18.
+    farms(v) as f32 * STORAGE_PER_FARM
+        + hydros(v) as f32 * 18.
+        + crate::building_work::held_capacity(v, "solar_farm") as f32 * STORAGE_PER_FARM
+        + crate::building_work::held_capacity(v, "hydro") as f32 * 18.
 }
 fn hydro_generation(v: &Village, minutes: f32) -> f32 {
     let flow = if ecology::raining(minutes) {
@@ -89,7 +92,7 @@ pub fn supply(v: &Village) -> Supply {
     let stored = v.power.stored.min(capacity);
     // Fade during the final minute of charge; sunlight can directly supply a
     // partially lit grid at dawn. No on/off oscillation around an empty battery.
-    let grid_level = if farms + hydros == 0 {
+    let grid_level = if capacity <= f32::EPSILON {
         0.
     } else if demand <= f32::EPSILON {
         1.

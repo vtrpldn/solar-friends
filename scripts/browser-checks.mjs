@@ -88,6 +88,39 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
 
+  // Building work uses a garden earned through resident construction.
+  const gardenFile='artifacts/building-work/earned-garden.json',earnedGarden=JSON.parse(await readFile(gardenFile,'utf8'));
+  async function loadEarnedGarden(){
+    await page.locator('#dev-import-file').setInputFiles(gardenFile);
+    await page.waitForFunction(expected=>{const v=window.solarDev.snapshot().village;return v.minutes===expected&&v.buildings.length===1&&v.buildings[0].kind==='garden'&&v.buildings[0].progress===100&&v.building_jobs.length===0;},earnedGarden.village.minutes);
+    await page.locator('#dev-close').click();
+    await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Buildings',exact:true}).click();
+  }
+  await loadEarnedGarden();
+  const earnedWood=await page.evaluate(()=>window.solarDev.snapshot().village.wood);
+  await page.locator('[data-building-work="salvage"]').click();
+  assert((await page.locator('#building-work-note').textContent()).includes('2 timber, 2 building earth'));
+  await page.locator('#building-work-confirm').click();
+  let crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.buildings.length,1);assert.equal(crew.village.wood,earnedWood);assert.equal(crew.village.building_jobs[0].work,0);
+  assert((await page.locator('#building-work-status').textContent()).includes('Paused'));
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('10');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  crew=await page.evaluate(()=>window.solarDev.snapshot());assert(crew.village.building_jobs[0].work>0);assert.equal(crew.village.wood,earnedWood);assert.equal(crew.village.buildings.length,1);
+  await capture('Resident salvage underway; recovered materials remain pending','building-salvage.png');
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('90');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.buildings.length,0);assert.equal(crew.village.wood,earnedWood+2);
+  await page.locator('#dev-button').click();await loadEarnedGarden();
+  await page.evaluate(()=>window.solarDev.fixedView());
+  await page.locator('[data-building-work="move"]').click();
+  const movePoint=await page.evaluate(async()=>{const {project}=await import('./projection.js');const r=document.querySelector('#world').getBoundingClientRect(),s=Math.max(.45,Math.min(r.width/1900,r.height/1050));const p=project(18,18,{x:r.width*.49,y:r.height*.5-459*s},s);return{x:r.left+p.x,y:r.top+p.y};});
+  await page.mouse.click(movePoint.x,movePoint.y);
+  crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.building_jobs[0].action,'move');assert.deepEqual(crew.village.building_jobs[0].destination,[18,18]);assert.equal(crew.village.buildings[0].x,6);
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('20');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.building_jobs[0].stage,'rebuild');assert.equal(crew.village.buildings[0].x,18);assert.equal(crew.village.buildings[0].progress,0);
+  await capture('Packing complete; crew walks to the new site to rebuild','building-move.png');
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('360');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.building_jobs.length,0);assert.equal(crew.village.buildings[0].id,0);assert.equal(crew.village.buildings[0].progress,100);assert.equal(crew.village.wood,earnedWood);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
   // Place a real material plot and exercise its controls without touching the player's saved village.
   await page.locator('#dev-scenario').selectOption('arrival');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.getByRole('button',{name:'Build',exact:true}).click();await page.locator('[data-build-group="land"]').click();
@@ -257,6 +290,17 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   assert(circular.village.circular.biogas>0&&circular.village.circular.water_reused>=8);
   assert((await page.locator('#digester-status').textContent()).includes('curing'));
+  await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('banana');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  await page.locator('#banana-treatment').uncheck();
+  assert((await page.locator('#banana-status').textContent()).includes('paused'));
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert.equal((await page.evaluate(()=>window.solarDev.snapshot())).village.circular.waste_treated,0);
+  await page.locator('#banana-treatment').check();
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert(Math.abs((await page.evaluate(()=>window.solarDev.snapshot())).village.circular.waste_treated-.5)<.001);
+  assert((await page.locator('#banana-status').textContent()).includes('0.5 treated'));
+  await capture('Banana bed treatment and player pause control','banana-treatment.png');
   await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('circular-night');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Power',exact:true}).click();
   assert((await page.locator('#power-generation').textContent()).includes('river 1.8'));
@@ -397,8 +441,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert((await page.locator('#recipe-history').textContent()).includes('Browser check:'));
   await capture('Recipe cards with saved revision history','recipes.png');
   await page.goto(new URL('/artwork/grid-fit.html',base).href);
-  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('22 variants'));
-  assert.equal(await page.locator('#cards figure').count(),22);
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('23 variants'));
+  assert.equal(await page.locator('#cards figure').count(),23);
   await capture('All painted building sprites on their actual grid cells','sprite-grid-day.png');
   await page.locator('#lighting').selectOption('night');
   await capture('Shared full-sprite grid fit at night','sprite-grid-night.png');

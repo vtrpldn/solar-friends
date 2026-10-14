@@ -21,7 +21,7 @@ import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus, goalRoute, unlockQuest, questCompleted, questAvailable, completedQuests } from "./quests.js?v=modes-1";
 import { loadSettings, saveSettings } from "./settings.js";
-import { placementReason, milestones } from "./polish.js";
+import { placementReason, movePlacementReason, milestones } from "./polish.js";
 import { VillageAudio } from "./village-audio.js";
 import { VillageStorage, SAVE_KEY } from "./village-storage.js";
 import {
@@ -59,6 +59,7 @@ const canvas = $("#world"),
 const kinds = {
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
   eco_toilet:['Ecological toilet','Private dry toilet · sealed waste collection · handwash'],
+  banana_treatment:['Banana treatment bed','Treat sewage in a sealed banana basin'],
   wetland:['Reed bed','Filter greywater into irrigation water'],
   biodigester:['Biodigester','Sealed waste + scraps → cooking gas and cured compost'],
   warehouse:['Storage house','Store 300 extra construction materials'],
@@ -86,6 +87,7 @@ const tasks = {
   rest: "Resting in the shade",
   garden: "Tending the garden",
   build: "Building together",
+  building_work: "Working on a building crew",
   gather: "Foraging fresh food",
   source: "Collecting local materials",
   prepare: "Preparing building materials",
@@ -173,7 +175,7 @@ let lastVillagePanel = "building-panel";
 let journalPage = 0;
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
-let pendingRemoval = null;
+let pendingRemoval = null, movingBuilding = null;
 const escapeHtml = (s) =>
   String(s).replace(
     /[&<>"']/g,
@@ -483,7 +485,7 @@ function buildingSprite(kind, x, y, alpha = 1, id) {
   sprite(buildingArtKey({kind,id},state.village.buildings,state.village.economy.projects),x,y,alpha,id);
 }
 function placementValid(kind, x, y) {
-  return !placementReason(state.village, kind, x, y);
+  return !(movingBuilding===null?placementReason(state.village,kind,x,y):movePlacementReason(state.village,movingBuilding,x,y));
 }
 function activityLabel(r) {
   if(r.trip)return tripLabel(r,state.environment.economy.jobs.find(j=>j.id===r.id));
@@ -506,6 +508,7 @@ function announceMilestones() {
   previousVillage = state.village;
   for (const event of found) {
     const text = event.kind === "building" ? `${kinds[event.building][0]} ready · A new place for village life.`
+      : event.kind === "building_work" ? event.action==='move'?"Building moved · ready in its new place.":event.action==='salvage'?"Salvage finished · materials returned to storage.":"Demolition finished · the plot is clear."
       : event.kind === "harvest" ? "Harvest gathered · Fresh food for everyone."
       : event.kind === "quest" ? `${quests[event.quest].title} complete · Unlocked ${quests[event.quest].reward}`
       : "A new friendship · Shared time is bringing neighbours closer.";
@@ -521,19 +524,30 @@ function announceMilestones() {
 function resetPolish() {
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
+  movingBuilding = null; pendingRemoval = null;
   cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; setZoom(1.3);
 }
 
 function building(b) {
   const p = iso(b.x, b.y),
-    complete = b.progress >= 100;
+    work=(state.village.building_jobs||[]).find(j=>j.building===b.id),
+    complete = b.progress >= 100 || (work?.original_progress||0)>=100;
 
   const project=state.village.economy.projects.find(p=>p.building===b.id);
   const stages=state.environment.economy.projects.find(p=>p.building===b.id)?.stages.length||1;
-  buildingSprite(b.kind,b.x,b.y,complete?1:.16+.65*((project?.stage||0)/stages),b.id);
+  buildingSprite(b.kind,b.x,b.y,work?.stage==='rebuild'?.45:complete?1:.16+.65*((project?.stage||0)/stages),b.id);
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     const registration=placementArt(b.kind,buildingArt[b.kind]);
+    ctx.save();if(work?.stage==='rebuild')ctx.globalAlpha*=.45;
     drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));
+    ctx.restore();
+  }
+  if(work){
+    const total=work.stage==='pack'?24:work.stage==='rebuild'?36:work.action==='demolish'?18:54;
+    ctx.fillStyle='#f6e7be';ctx.font=`${10*scale}px Georgia`;ctx.textAlign='center';
+    ctx.fillText(work.stage==='pack'?'Packing':work.stage==='rebuild'?'Rebuilding':work.action==='salvage'?'Salvaging':'Demolishing',p.x,p.y+29*scale);
+    ctx.fillRect(p.x-28*scale,p.y+9*scale,56*scale,5*scale);ctx.fillStyle='#9b7447';ctx.fillRect(p.x-28*scale,p.y+9*scale,56*scale*work.work/total,5*scale);
+    return;
   }
   if (!complete) {
     const s = scale;
@@ -690,15 +704,17 @@ function render() {
     })),
   ];
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
+  for(const job of state.village.building_jobs||[]){if(job.stage!=='pack'||!job.destination)continue;const b=state.village.buildings.find(b=>b.id===job.building);polygon(footprintCorners(b.kind,...job.destination).map(([x,y])=>{const p=iso(x,y);return[p.x,p.y];}),'#a5b77422','#b9cf8b');}
+
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y);
-    const reason = placementReason(state.village, tool, t.x, t.y);
+    const reason = movingBuilding===null?placementReason(state.village, tool, t.x, t.y):movePlacementReason(state.village,movingBuilding,t.x,t.y);
     polygon(footprintCorners(tool,t.x,t.y).map(([x,y]) => {
       const p = iso(x,y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
     if(tool.startsWith('source_'))materialSite({material:sourceMaterial(tool),x:t.x,y:t.y,active:true,planted:true,growth:0.4,remaining:16,maximum:32},.55);
-    else if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
-    $("#placement").textContent = reason || `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`;
+    else if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55,movingBuilding??undefined);
+    $("#placement").textContent = reason || (movingBuilding!==null ? "Choose the new plot · residents will pack and rebuild · Esc to cancel" : `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`);
     $("#placement").classList.toggle("invalid", Boolean(reason));
   }
   const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
@@ -801,6 +817,7 @@ function selectPerson(id) {
     `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
+      ["building_work", "Help building crew"],
       ["gather", "Forage food"],
       ["source", "Source materials"],
       ["prepare", "Prepare materials"],
@@ -906,7 +923,7 @@ function updateQuests() {
   action.disabled=false;shortcut.disabled=false;
   let label='',onClick=()=>{};
   if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>{if(route.recipe){$('#home-material-method').value=route.recipe;$('#home-material-method').dispatchEvent(new Event('change'));}setTool(route.kind);};}
-  if(route?.type==='visit'){label=`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
+  if(route?.type==='visit'){label=(v.building_jobs||[]).some(j=>j.building===route.id)?'Review crew work':`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
   if(route?.type==='project'){
     label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
     onClick=()=>showPanel('projects-panel');
@@ -992,6 +1009,7 @@ function updateQuests() {
 const buildingPurposes = {
   hydro:'Produces 1.8 energy/hour day and night (less on dry days, more during rain). Adds 18 battery capacity. Workers approach from land.',
   eco_toilet:'Residents use this private toilet once a day and wash their hands with one fresh water. Waste stays sealed until processed.',
+  banana_treatment:'A sealed banana evapotranspiration bed treats one toilet waste every four game hours (six per day). It produces no water or food. Open Water & waste to pause it and reserve waste for biogas.',
   wetland:'A lined reed bed filters 12 greywater into 8 irrigation water over six hours. Reclaimed water is never used for drinking or cooking.',
   biodigester:'Two sealed waste + two kitchen scraps take eight hours to produce four cooking gas and two digestate. Digestate cures for a full day before becoming compost.',
   warehouse:'A communal store adds 300 spaces for construction materials, including incoming supplies. Manage its contents in Supplies.',
@@ -1011,14 +1029,23 @@ const buildingPurposes = {
 function updateBuildingPanel() {
   const chooser = $("#building-choice");
   const previous = chooser.value;
-  const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${b.progress < 100 ? " · building" : ""}</option>`).join("");
+  const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${(state.village.building_jobs||[]).some(j=>j.building===b.id)?" · crew working":b.progress < 100 ? " · building" : ""}</option>`).join("");
   chooser.disabled=!state.village.buildings.length;
   if (chooser.innerHTML !== markup) {
     chooser.innerHTML = markup;
     if ([...chooser.options].some(o => o.value === previous)) chooser.value = previous;
   }
   const b = state.village.buildings.find(b => b.id === Number(chooser.value));
-  $('#remove-sandbox-building').hidden=state.village.mode!=='sandbox'||!b;
+  $('#building-work-controls').hidden=!b;
+  const crew=b&&(state.village.building_jobs||[]).find(j=>j.building===b.id);
+  $('#building-work-actions').hidden=!!crew;
+  $('#cancel-building-work').hidden=!crew||crew.stage==='rebuild';
+  const crewMembers=crew?state.residents.filter(r=>r.task==='building_work'&&r.activity_building===b.id):[];
+  const clockMinute=state.village.minutes%1440,crewHours=clockMinute>=540&&clockMinute<720||clockMinute>=900&&clockMinute<960;
+  const crewNote=paused?'Paused · resume time for resident work.':crewMembers.length?crewMembers.map(r=>`${r.name} ${Math.hypot(r.x-r.target_x,r.y-r.target_y)<=.08?'working':'on the way'}`).join(' · '):crewHours?'Queued · neighbours will finish their meals or rest first.':'Queued · next community work window: 09:00–12:00 or 15:00–16:00.';
+  $('#building-work-status').textContent=crew?`${crew.stage==='pack'?'Packing':crew.stage==='rebuild'?'Rebuilding':crew.action==='salvage'?'Careful salvage':'Demolition'} · ${Math.floor(crew.work/(crew.stage==='pack'?24:crew.stage==='rebuild'?36:crew.action==='demolish'?18:54)*100)}%. ${crewNote}`:'Demolition clears quickly with no material return. Salvage takes three times the work and recovers half of recorded materials. Moving packs and rebuilds the same building.';
+  $('#building-work-actions [data-building-work="move"]').disabled=!b||b.progress<100;
+
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
   if(b?.kind==='workshop'){
     const tools=state.village.progress.tool_uses, timber=state.environment.economy.materials[0].available;
@@ -1041,9 +1068,10 @@ function updateBuildingPanel() {
   $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Village → Construction for stage materials, purchases and priorities." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
-  const utility = b && ["solar_farm", "streetlight", "hydro", "wetland", "biodigester", "warehouse"].includes(b.kind);
+  const utility = b && ["solar_farm", "streetlight", "hydro", "banana_treatment", "wetland", "biodigester", "warehouse"].includes(b.kind);
   $("#building-visits").hidden = utility;
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
+  if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
   for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100 || !!state.residents.find(r=>r.id===Number(button.dataset.visitor))?.trip;
 }
 function inspectBuilding(id) {
@@ -1058,8 +1086,12 @@ function updateCircularUI(v) {
   $('#circular-controls').hidden=!buildingUnlocked(v,'eco_toilet');
   $('#circular-stock').textContent=`${c.waste.toFixed(0)} / 80 sealed waste · ${c.greywater.toFixed(1)} / 120 greywater`;
   $('#circular-output').textContent=`${c.reclaimed.toFixed(0)} / 60 irrigation water · ${c.biogas.toFixed(0)} / 12 cooking gas`;
-  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste>=80?'Waste store is full. Build or resume a biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
+  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste>=80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
   $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':!c.filter_water?'Filtration paused.':c.filtration>0?`Filtering · ${Math.ceil(c.filtration/60)} hours left`:c.reclaimed>52?'Irrigation water store is full. Gardens use this before fresh water.':c.greywater>=12?'Ready to filter when time resumes.':'Waiting for 12 greywater.';
+  const beds=v.buildings.filter(b=>b.kind==='banana_treatment'&&b.progress>=100).length;
+  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment?'Banana treatment paused. Waste remains available for biogas.':`${c.waste>0 ? `Treating up to ${beds*6} waste per day.` : 'Waiting for toilet waste.'} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
+  $('#banana-treatment').checked=c.banana_treatment??true;
+  $('#banana-treatment').disabled=!beds;
   $('#digester-status').textContent=c.pending_compost?`Two digestate curing · ${Math.ceil(c.curing/60)} hours left`:!ready('biodigester')?'Build a biodigester to turn sealed waste and scraps into cooking fuel.':!c.auto_feed?'Digestion paused.':c.digestion>0?`Digesting · ${Math.ceil(c.digestion/60)} hours left`:c.biogas>8?'Gas store is full. Use it in the kitchen.':c.waste>=2&&v.progress.scraps>=2?'Ready to digest when time resumes.':'Waiting for two waste and two scraps.';
   $('#auto-digest').checked=c.auto_feed;$('#filter-greywater').checked=c.filter_water;$('#use-biogas').checked=c.use_biogas;
   $('#auto-digest').disabled=!ready('biodigester');$('#filter-greywater').disabled=!ready('wetland');
@@ -1112,7 +1144,7 @@ function updateUI() {
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
   $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows thirteen chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
-  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
+  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1206,6 +1238,7 @@ function updateUI() {
           .map((other) => `${other.name} (${friendships[r.id * 5 + other.id]})`)
           .join(", ")
       : "Friendships grow when neighbours attend gatherings together.";
+    $('[data-task="building_work"]').hidden=!(state.village.building_jobs||[]).length;
     for (const task of ["compost", "craft"]) {
       $(`[data-task="${task}"]`).hidden = !state.village.buildings.some(
         (b) =>
@@ -1248,6 +1281,7 @@ function updateUI() {
   gameUI?.update(state,!!sandbox||artworkPreview||!!directScenario,selected);
 }
 function setTool(kind) {
+  movingBuilding = null;
   if (kind && !buildingUnlocked(state.village, kind)) {
     openJournal();
     return;
@@ -1342,22 +1376,24 @@ function setup() {
 
   $("#building-neighbours").innerHTML = state.residents.map(r => `<button data-visitor="${r.id}">${escapeHtml(r.name)}</button>`).join("");
   $("#building-choice").onchange = () => { $("#building-response").textContent = ""; updateBuildingPanel(); };
-  $('#remove-sandbox-building').onclick=()=>{
-    const b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));
-    if(!b||state.village.mode!=='sandbox')return;
-    pendingRemoval=b.id;
-    $('#sandbox-remove-note').textContent=`Remove ${kinds[b.kind][0].toLowerCase()} ${b.id+1} and its crops or contents? You can rebuild for free in Sandbox.`;
-    $('#sandbox-remove-dialog').showModal();
-  };
-  $('#sandbox-remove-close').onclick=()=>{pendingRemoval=null;$('#sandbox-remove-dialog').close();};
-  $('#sandbox-remove-confirm').onclick=()=>{
-    if(pendingRemoval!==null&&game.remove_sandbox_building(pendingRemoval)) {
-      residentAnimations.clear();state=JSON.parse(game.snapshot());updateUI();save();toast('The plot is clear. Build something new whenever you like.');
+  $('#building-work-actions').onclick=event=>{
+    const button=event.target.closest('[data-building-work]'),b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));if(!button||!b)return;
+    if(button.dataset.buildingWork==='move'){
+      closePanels();selected=null;movingBuilding=b.id;tool=b.kind;cameraTarget=null;$('#placement').hidden=false;$('#placement').textContent='Choose a new plot · residents will pack and rebuild · Esc to cancel';toast('Choose a new plot for this building.');return;
     }
-    else if(pendingRemoval!==null)toast("Make room in remaining storage before removing this store.");
-    pendingRemoval=null;$('#sandbox-remove-dialog').close();
-    ($('#building-choice').disabled?$('#building-panel [data-close-panel]'):$('#building-choice')).focus();
+    const quote=JSON.parse(game.building_work_quote(b.id)),salvage=button.dataset.buildingWork==='salvage';
+    const returns=quote.salvage.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
+    pendingRemoval={id:b.id,action:button.dataset.buildingWork};
+    $('#building-work-title').textContent=salvage?'Salvage this building?':'Demolish this building?';
+    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; shared inventory remains. Removing a cistern or generator reduces water or battery capacity when work finishes.`;
+    $('#building-work-dialog').showModal();
   };
+  $('#building-work-close').onclick=()=>{pendingRemoval=null;$('#building-work-dialog').close();};
+  $('#building-work-confirm').onclick=()=>{
+    if(pendingRemoval){const result=game.queue_building_work(pendingRemoval.id,pendingRemoval.action,0,0);toast(result==='ok'?`Crew job queued. ${paused?'Resume time to let residents work.':'Neighbours will work during community hours.'}`:result);state=JSON.parse(game.snapshot());updateUI();save();}
+    pendingRemoval=null;$('#building-work-dialog').close();
+  };
+  $('#cancel-building-work').onclick=()=>{const result=game.cancel_building_work(Number($('#building-choice').value));toast(result==='ok'?'Crew job cancelled.':result);state=JSON.parse(game.snapshot());updateUI();save();};
   $("#building-neighbours").onclick = event => {
     const button = event.target.closest("[data-visitor]");
     if (!button) return;
@@ -1377,6 +1413,10 @@ function setup() {
   };
   for(const id of ['auto-digest','filter-greywater','use-biogas']) $('#'+id).onchange=()=>{
     game.configure_sanitation($('#auto-digest').checked,$('#filter-greywater').checked,$('#use-biogas').checked);
+    state=JSON.parse(game.snapshot());updateUI();save();
+  };
+  $('#banana-treatment').onchange=()=>{
+    game.configure_banana_treatment($('#banana-treatment').checked);
     state=JSON.parse(game.snapshot());updateUI();save();
   };
   for (const id of ["feed-hens", "use-eggs"]) {
@@ -1596,10 +1636,10 @@ function setup() {
     pointer = { x, y };
     if (tool) {
       const p = uniso(x, y),
-        result = tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
+        result = movingBuilding!==null?game.queue_building_work(movingBuilding,"move",p.x,p.y):tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
       if (result === "ok") {
         if (tool !== "road") {
-          toast(tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
+          toast(movingBuilding!==null?'Move queued. Residents will pack here and rebuild at the new plot.':tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
           setTool(null);
         }
         state = JSON.parse(game.snapshot());
@@ -1673,7 +1713,7 @@ function setup() {
 function refreshDevScene() {
   setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
-  state = JSON.parse(game.snapshot()); selected = null; tool = null;
+  state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; pendingRemoval = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   clearTimeout(toastTimer); $("#toast").hidden = true;

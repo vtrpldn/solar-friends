@@ -23,4 +23,4 @@ for(const [kind,art]of Object.entries(allBuildingArt))for(const file of [art.fil
     }
   }
 }
-console.log(`PASS: all 44 day/night source outlines fit their actual tile columns and front edges at four zooms (${pixels} source-edge checks); no padding, scale cap, platform or image clipping used.`);
+console.log(`PASS: all 46 day/night source outlines fit their actual tile columns and front edges at four zooms (${pixels} source-edge checks); no padding, scale cap, platform or image clipping used.`);

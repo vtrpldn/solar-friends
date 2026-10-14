@@ -135,6 +135,18 @@ Homes restore energy; gardens are tended; kitchens cook with available supplies;
 
 The community square is 1.5 times its original width and height, with a larger placement footprint for new construction. Residents use separate meeting spots, recover connection and energy, and build mutual friendship when visiting together. Gatherings remain available through People.
 
+## Building crews
+
+Why: changing the layout takes resident effort. In **Village → Buildings**, choose **Demolish**, **Salvage**, or **Move building**. These jobs need resident work in both Story and Sandbox; Sandbox construction stays instant and free.
+
+Demolition uses 18 crew effort and returns no materials. Careful salvage uses 54 effort and returns half of each recorded, actually consumed construction material, rounded down, when the job finishes. Free Sandbox buildings have no consumed materials to recover. Incoming salvage reserves receiving space immediately; inventory is credited only on completion. A storage house cannot be removed if stock and incoming reservations would overflow the remaining space.
+
+Moving completed buildings requires choosing a legal grid plot, 24 effort packing at the source, travel to the new plot, and 36 effort rebuilding there. The destination is reserved against other buildings, roads and material sites. Identity, recipe, house variation, crops and equipment remain with the structure. The old plot is released after packing; the new site becomes usable after rebuilding. A crew job can be cancelled before packing finishes; once packed, the move must finish at its reserved site.
+
+Buildings close during crew work. Residents work 09:00–12:00 and 15:00–16:00, prioritising food, fatigue, sleep and existing care agreements. Buildings shows the stage, progress and which neighbours are working or on the way. People offers **Help building crew** for an explicit request. Cistern and generator storage remains until removal completes; excess water or charge is clamped to the new capacity then. Moves retain capacity and stock, while generation, crop growth and hen production pause. Household inventory and sanitation stores stay communal.
+
+Empty, unstarted blueprints still cancel immediately in Construction. Cancelling a structure that already consumed materials queues careful salvage instead. Work progress, reservations and both relocation stages survive export/import and saves. `node scripts/verify-building-work.mjs` exercises real resident labour, conservation, cancellation, timing and native/preview placement agreement.
+
 ## Village supplies
 
 Open **Supplies** for ingredients, eggs, prepared meals, today's production and use, and the weather outlook. Gardens and foraging share the ingredient stock. The pantry estimates food days at fifteen portions per day for five residents; cooking gains, hen feed, future harvests, and extra hunger are excluded from that estimate.
@@ -266,3 +278,11 @@ Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local serv
 Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
 
 Add building source crops, scales, anchors, and camera calibration to `web/building-art.js`; the game and studio share these values. Add other sprite entries to `web/artwork/catalog.js`. Run `node scripts/verify-artwork.mjs` to catch uncatalogued files, missing sources, duplicate IDs, and invalid crop bounds. See [artwork consistency](assets/art-direction/artwork-consistency.md) for scale values, generation prompts, and the limits of painted geometry.
+
+### Banana sewage treatment
+
+Build a **Banana treatment bed** under **Build → Water & waste**. Story unlocks it after Sunshine to Share and introduces it in Water Comes Around; Sandbox has it immediately. Residents build its sealed basin, drainage layers, planted bed and inlet using stone, earth, bricks, pipes and fittings.
+
+A completed 2×2 bed treats up to six sealed toilet waste per game day without power. Water & waste shows lifetime treatment and lets you pause it to reserve waste for the biodigester. It produces no drinking water, irrigation water or food. Moving, demolishing or salvaging closes the bed while residents work.
+
+The simplified game cycle is inspired by the [Emater-DF banana evapotranspiration basin](https://biblioteca.emater.df.gov.br/jspui/handle/123456789/128). Day/night sprites and their prompts are recorded in `assets/art-direction/banana-sanitation-prompts.json`; the artwork preview includes both. The protected `banana` development scenario starts with accumulated waste and digestion paused.
