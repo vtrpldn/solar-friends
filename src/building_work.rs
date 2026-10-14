@@ -516,6 +516,7 @@ impl Game {
                 );
             }
         }
+        self.sync_help();
         "ok".into()
     }
 }

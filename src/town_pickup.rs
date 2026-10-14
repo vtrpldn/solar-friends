@@ -34,6 +34,7 @@ fn send_driver(g: &mut Game, id: usize) {
         .iter_mut(g.app.world_mut())
         .find(|r| r.id == id)
         .unwrap();
+    requests::pause(&mut r);
     sleep::pause(&mut r);
     r.task = "pickup".into();
     r.requested = true;

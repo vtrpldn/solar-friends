@@ -166,6 +166,21 @@ fn occupied(
         })
         .count()
 }
+pub fn claim_available(
+    v: &Village,
+    r: &Resident,
+    task: &str,
+    building: Option<usize>,
+    material: Option<usize>,
+) -> bool {
+    task == "haul"
+        || occupied(v, r, task, building, material)
+            < if matches!(task, "build" | "building_work" | "water") {
+                2
+            } else {
+                1
+            }
+}
 fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f32 {
     let c = category(task).unwrap();
     let preference = f32::from(v.workforce.preferences[r.id][c]) - 1.;

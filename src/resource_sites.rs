@@ -420,6 +420,7 @@ impl Game {
                 r.target_y = r.y;
             }
         }
+        self.sync_help();
         "ok".into()
     }
 }

@@ -671,6 +671,9 @@ fn plan(v: &Village, r: &Resident) -> Option<Plan> {
         let s = v.logistics.as_ref().unwrap();
         let from = s.stores.iter().find(|p| p.id == c.from).unwrap();
         let to = s.stores.iter().find(|p| p.id == c.to).unwrap();
+        if !requests::matches_haul(r, from.owner, to.owner) {
+            continue;
+        }
         let Some(a) = approaches(v, from, r.id) else {
             continue;
         };
@@ -741,7 +744,6 @@ fn claim(v: &mut Village, r: &mut Resident) -> bool {
     });
     (r.target_x, r.target_y) = (a[0], a[1]);
     r.remaining = 100.;
-    r.requested = false;
     r.activity_building = None;
     r.activity_material = None;
     r.visit_building = None;
