@@ -53,6 +53,40 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   assert.equal(original.village.economy.sources.length,0,'New villages start without fixed resource sites');
+  // Earned full-story checkpoints come from verify-quests, not completion cheats.
+  async function storyCheckpoint(chapter){
+    await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);
+    await page.waitForFunction(()=>document.querySelector('#dev-scenario').value==='imported');
+    await page.locator('#dev-close').click();
+  }
+  await storyCheckpoint(9);
+  assert.equal(await page.locator('#goal-action').textContent(),'Open Land & materials');
+  await page.locator('#goal-action').click();
+  assert(await page.locator('#projects-panel').isVisible());
+  assert(await page.locator('#land-sources').evaluate(el=>el.closest('details').open));
+  await page.getByRole('button',{name:'Close projects',exact:true}).click();
+  await page.keyboard.press('j');
+  assert.equal(await page.locator('[data-chapter]').count(),13);
+  assert((await page.locator('#quest-total').textContent()).includes('9 of 13'));
+  assert((await page.locator('.quest-card:not([hidden]) .quest-guidance').textContent()).includes('request a mature harvest'));
+  await page.locator('[data-chapter="12"]').click();
+  assert((await page.locator('.quest-card:not([hidden]) h3').textContent()).includes('A Village in Balance'));
+  assert(!await page.locator('[data-track="12"]').isEnabled());
+  await capture('Thirteen Story chapters and the locked finale','story-journal.png');
+  await page.locator('#close-journal').click();
+  await page.locator('#dev-button').click();
+  await storyCheckpoint(11);
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert.equal(await page.locator('#goal-action').textContent(),'Hear our community check-in');
+  await page.locator('#goal-action').click();
+  assert((await page.locator('#situation-title').textContent()).includes('A day for ourselves'));
+  await page.locator('[data-situation-response="day_off"]').click();
+  assert((await page.locator('#situation-dialog').textContent()).includes('Protect a day off'));
+  await capture('Story care agreement requires actual follow-through','story-care.png');
+  await page.locator('#close-situation').click();
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
+
   // Place a real material plot and exercise its controls without touching the player's saved village.
   await page.locator('#dev-scenario').selectOption('arrival');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.getByRole('button',{name:'Build',exact:true}).click();await page.locator('[data-build-group="land"]').click();

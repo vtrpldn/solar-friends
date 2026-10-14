@@ -951,6 +951,7 @@ function updateQuests() {
         return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}" ${i===journalPage?'':'hidden'}>
       <div class="quest-card-art ${q.art}">${i ? `<img src="art/${buildingArt[q.art]?.file || q.art + '-isometric.png'}" alt="${kinds[q.art]?.[0] || q.theme} illustration">` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
+      ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."}</p>` : ""}
       ${objectiveMarkup(q.objectives(v), completions[i])}
       <p class="journal-reward"><b>${completions[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
       ${completions[i] ? `<p class="quest-after">${q.after}</p>` : ""}

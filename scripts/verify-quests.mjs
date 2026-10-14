@@ -1,112 +1,84 @@
-import fs from "node:fs/promises";
-import assert from "node:assert/strict";
-import init, { Game } from "../web/pkg/solar_friends.js";
-await init({
-  module_or_path: await fs.readFile(
-    new URL("../web/pkg/solar_friends_bg.wasm", import.meta.url),
-  ),
-});
-const output = process.argv[2];
-if (output) await fs.mkdir(output, { recursive: true });
-const g = new Game();
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import init,{Game} from '../web/pkg/solar_friends.js';
+import {quests,questCompleted,storyBuildingKinds,goalRoute} from '../web/quests.js';
+import {placementReason} from '../web/polish.js';
+import {sourceKinds} from '../web/resource-sites.js';
+await init({module_or_path:await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
+const g=new Game(),snap=()=>JSON.parse(g.snapshot()),output=process.argv[2]||'artifacts/story';
+if(output)await fs.mkdir(output,{recursive:true});
 g.set_outside_work(true);
-const snap = () => JSON.parse(g.snapshot());
-function until(test, label, limit = 16000) {
-  for (let i = 0; i < limit; i++) {
-    if (test(snap())) return;
-    g.tick(0.25);
-  }
-  throw new Error("Timed out: " + label + " " + g.snapshot());
+function until(test,label,limit=24000){
+ for(let i=0;i<limit;i++){if(test(snap()))return;g.tick(.25);}
+ const s=snap(),chapter=s.village.progress.tracked;
+ throw new Error(`Timed out: ${label} on day ${1+Math.floor(s.village.minutes/1440)}. ${JSON.stringify({chapter,goals:quests[chapter].objectives(s.village).filter(o=>!o.done),stock:s.environment.economy.shortage,residents:s.residents.map(r=>[r.name,r.task,r.reason]),progress:s.village.progress})}`);
 }
-async function fixture(name) {
-  if (output) await fs.writeFile(`${output}/solar-${name}.json`, g.snapshot());
+function location(kind){const v=snap().village;for(let y=5;y<=25;y++)for(let x=5;x<=26;x++)if(!placementReason(v,kind,x,y))return [x,y];throw Error(`No space for ${kind}`);}
+function purchase(items){if(!items.some(Boolean))return;until(s=>s.environment.economy.money>=items.reduce((n,q,i)=>n+q*s.environment.economy.materials[i].price,6000),'purchase funds');assert.equal(g.order_supplies(JSON.stringify(items)),'ok');}
+function build(kind,recipe='standard',local=false){
+ const [x,y]=location(kind);assert.equal(g.place_with_recipe(kind,x,y,recipe),'ok',`${kind} placement`);
+ const id=snap().village.buildings.at(-1).id;
+ const missing=snap().environment.economy.shortage;
+ if(local){for(const i of [5,6,7,8])missing[i]=0;missing[0]+=12;missing[2]+=20;missing[4]+=6;}
+ purchase(missing);
+ until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`);
+ return id;
 }
-function build(kind, x, y) {
-  assert.equal(g.place(kind, x, y), "ok");
-  const missing=snap().environment.economy.shortage;
-  if(missing.some(n=>n)){
-    until(s=>s.environment.economy.money>=missing.reduce((sum,n,i)=>sum+n*s.environment.economy.materials[i].price,6000),'fund purchases');
-    assert.equal(g.order_supplies(JSON.stringify(missing)),'ok');
-  }
-  until(
-    (s) =>
-      s.village.buildings.find((b) => b.x === x && b.y === y).progress >= 100,
-    "finish " + kind,
-  );
+function source(material){const [x,y]=location(sourceKinds[material]);assert.equal(g.place_source(material,x,y),'ok');return snap().village.economy.sources.length-1;}
+async function complete(chapter){
+ until(s=>questCompleted(s.village,chapter),quests[chapter].title);
+ const saved=g.snapshot(),s=snap();assert(quests[chapter].objectives(s.village).every(o=>o.done),`Rust and UI agree: ${quests[chapter].title}`);
+ assert(g.restore(saved),`reload chapter ${chapter+1}`);assert.equal(g.snapshot(),saved);
+ assert.equal(s.village.progress.tracked,Math.min(chapter+1,quests.length-1));
+ if(output)await fs.writeFile(`${output}/solar-${chapter===0?'intro':chapter===12?'complete':`chapter-${chapter+1}`}.json`,saved);
+ console.log(`Chapter ${chapter+1}/${quests.length}: ${quests[chapter].title} · day ${1+Math.floor(s.village.minutes/1440)}`);
+ if(chapter<quests.length-2)assert(!g.track_quest(chapter+2),'cannot skip a chapter');
 }
-until((s) => s.village.arrived, "arrival");
-for (const [k, x, y] of [
-  ["well", 6, 10],
-  ["home", 8, 8],
-  ["garden", 13, 10],
-  ["kitchen", 10, 10],
-  ["home", 12, 7],
-])
-  build(k, x, y);
-until((s) => s.village.progress.completed[0], "intro");
-await fixture("intro");
-console.log(
-  "Introduction complete on day",
-  1 + Math.floor(snap().village.minutes / 1440),
-);
-assert.equal(g.track_quest(2),false,'later chapters stay locked');
-g.track_quest(1);
-build("grove", 15, 13);
-until((s) => s.village.progress.completed[1], "roots");
-g.track_quest(2);
-until(
-  (s) =>
-    s.village.progress.social_mask === 31 &&
-    s.village.meals >= 5 &&
-    s.village.minutes % 1440 >= 480 &&
-    s.village.minutes % 1440 < 1080,
-  "welcome supper ready",
-);
-await fixture("supper-ready");
-until(() => g.host_gathering() === "ok", "start welcome supper");
-until((s) => s.village.progress.completed[2], "gather quest");
-g.track_quest(3);
-until(() => g.contribute_tool_library() === "ok", "contribute timber");
-until((s) => s.village.progress.completed[3], "hands");
-for (const [k, x, y] of [
-  ["compost", 6, 16],
-  ["square", 6, 21],
-  ["workshop", 12, 16],
-])
-  build(k, x, y);
-until(
-  (s) =>
-    s.village.progress.enriched_harvests > 0 &&
-    s.village.progress.tools_crafted > 0,
-  "use compost and tools",
-);
-until(
-  (s) => s.village.minutes % 1440 >= 500 && s.village.minutes % 1440 < 1000,
-  "daylight",
-);
-assert.equal(snap().village.progress.tracked,4);
-build('greenhouse',18,8);
-until(s=>s.village.progress.later_completed[0],'growing resilience');
-assert.equal(g.track_quest(6),false);
-build('coop',18,18);
-until(s=>s.village.progress.later_completed[1],'first eggs');
-build('solar_farm',20,23);
-build('streetlight',16,22);
-until(s=>s.village.progress.later_completed[2],'stored sunshine');
-await fixture("complete");
-const s = snap();
-assert.deepEqual(s.village.progress.completed, [true, true, true, true]);
-assert.deepEqual(s.village.progress.later_completed,[true,true,true]);
-const restored=new Game();assert(restored.restore(g.snapshot()));assert.equal(restored.snapshot(),g.snapshot());restored.free();
-console.log(
-  JSON.stringify(
-    {
-      day: 1 + Math.floor(s.village.minutes / 1440),
-      buildings: s.village.buildings.length,
-      progress: s.village.progress,
-    },
-    null,
-    2,
-  ),
-);
-g.free();
+until(s=>s.village.arrived,'arrival');
+for(const k of ['well','home','garden','kitchen','home'])build(k);
+await complete(0);
+build('grove');const timber=source(0),bamboo=source(1);await complete(1);
+build('square');
+until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
+await complete(2);
+build('warehouse');
+const basket=Array(15).fill(0);basket[0]=1;
+until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
+until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
+for(const k of ['workshop','compost','greenhouse'])build(k);
+await complete(4);
+build('coop');await complete(5);
+build('solar_farm');const lamp=build('streetlight');
+const b=snap().village.buildings.find(b=>b.id===lamp);
+// Actual adjacent free path, without occupying the lamp's cell.
+for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
+await complete(6);
+for(const k of ['eco_toilet','wetland'])build(k);await complete(7);
+build('biodigester');await complete(8);
+for(const material of [2,3,4])source(material);
+for(let i=0;i<5;i++){
+ until(s=>s.village.economy.sources[i].remaining>0,`source ${i} maturity`);
+ assert.equal(g.harvest_source(i),'ok');until(s=>s.village.economy.sources[i].harvests>0,`source ${i} resident harvest`);
+}
+for(let tree=0;tree<4&&!snap().village.progress.timber_replanted;tree++){
+ until(s=>s.village.economy.sources[timber].remaining>=8,'timber maturity');assert.equal(g.harvest_source(timber),'ok');
+ const harvests=snap().village.economy.sources[timber].harvests;
+ until(s=>s.village.economy.sources[timber].harvests>harvests,'whole timber tree harvest');
+ if(!snap().village.economy.sources[timber].planted)break;
+}
+until(s=>s.village.progress.timber_replanted,'resident replanting');
+build('home','adobe',true);
+function gatherExtra(test,label){until(s=>{if(test(s))return true;const r=s.residents.find(r=>r.id===3);if(r.task!=='gather'&&!r.requested)g.request(3,'gather',false);return false;},label);}
+gatherExtra(()=>g.sell_surplus(1)==='ok','sell surplus');
+gatherExtra(()=>g.exchange_parts()==='ok','neighbour exchange');await complete(9);
+build('hydro');await complete(10);
+g.set_outside_work(false);
+until(s=>s.village.situations.resolved_count>0||s.village.situations.active,'story check-in');
+if(!snap().village.situations.resolved_count&&snap().village.situations.active.response==null)assert.equal(g.respond_situation('day_off'),'ok');
+await complete(11);
+until(()=>g.host_gathering()==='ok','second gathering');
+gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);
+const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
+for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
+assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
+g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 17 building kinds taught.');
