@@ -71,6 +71,7 @@ pub fn capacity(v: &Village) -> f32 {
             .iter()
             .filter(|b| b.kind == "well" && b.progress >= 100.)
             .count() as f32
+        + 75. * crate::building_work::held_capacity(v, "well") as f32
 }
 
 pub fn needs_tending(b: &Building, water: f32) -> bool {

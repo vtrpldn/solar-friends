@@ -70,10 +70,10 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     if(button.dataset.action==='locate')locate(id);
     if(button.dataset.action==='supplies'){openTown();$('#town-shortages').click();$('#town-shortages').focus();}
     if(button.dataset.action==='pause')transact(game().configure_project(id,p.priority,!p.paused,p.recipe));
-    if(button.dataset.action==='cancel'){$('#project-cancel-note').textContent=`Cancel ${names[p.kind]} ${id+1}? Unused reservations return in full. Half of each consumed material can be salvaged. Trade orders continue unless cancelled separately.`;$('#project-cancel-confirm').dataset.project=id;$('#project-cancel-dialog').showModal();}
+    if(button.dataset.action==='cancel'){$('#project-cancel-note').textContent=`Cancel ${names[p.kind]} ${id+1}? Unused reservations return in full. If materials were consumed, residents must carefully dismantle the structure before half can be recovered. Empty blueprints cancel immediately. Trade orders continue unless cancelled separately.`;$('#project-cancel-confirm').dataset.project=id;$('#project-cancel-dialog').showModal();}
   };
   $('#project-cancel-close').onclick=()=>$('#project-cancel-dialog').close();
-  $('#project-cancel-confirm').onclick=()=>{transact(game().cancel_project(Number($('#project-cancel-confirm').dataset.project)));$('#project-cancel-dialog').close();};
+  $('#project-cancel-confirm').onclick=()=>{const id=Number($('#project-cancel-confirm').dataset.project),result=game().cancel_project(id);transact(result);if(result==='ok')notify((snapshot().village.building_jobs||[]).some(j=>j.building===id)?'Salvage queued. Residents must finish dismantling before materials return.':'Empty blueprint cancelled.');$('#project-cancel-dialog').close();};
   $('#project-list').onchange=event=>{const input=event.target.closest('select');if(!input)return;const id=Number(input.dataset.project),p=snapshot().environment.economy.projects.find(p=>p.building===id);if(p)transact(game().configure_project(id,input.dataset.action==='priority'?Number(input.value):p.priority,p.paused,input.dataset.action==='recipe'?input.value:p.recipe));};
   $('#land-sources').onclick=event=>{
     const button=event.target.closest('button');if(!button)return;
@@ -96,7 +96,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     }
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
-    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders`;
+    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}`;
     $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
     $('#property-description').textContent=e.property;
     $('#preparation-recipes').innerHTML=`<p>${e.workshop?'Workshop preparation includes roof tiles and efficient salvage recovery.':'Residents prepare frames, wall material and fittings at the camp. A workshop adds roof tiles and more efficient salvage recovery.'}</p>`+e.preparation.map(r=>`<p class="recipe-stage"><b>${r.yield} ${e.materials[r.material].name.toLowerCase()}</b>${r.inputs.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('');

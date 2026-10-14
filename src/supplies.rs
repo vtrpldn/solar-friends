@@ -67,7 +67,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         + 3 * v
             .buildings
             .iter()
-            .filter(|b| b.kind == "coop" && b.progress >= 100. && b.poultry.remaining > 0.)
+            .filter(|b| b.kind == "coop" && b.poultry.remaining > 0.)
             .count() as u32;
     for b in &mut v.buildings {
         if b.kind != "coop" || b.progress < 100. {

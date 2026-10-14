@@ -178,3 +178,6 @@ footer .resources b[hidden]{display:none!important}
 #journal-chapters{max-height:64vh;overflow-y:auto;overscroll-behavior:contain}
 
 .quest-card-art canvas{width:94px;height:60px;object-fit:contain}
+
+.building-work-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.building-work-actions [data-building-work="move"]{grid-column:1/-1}
+#building-work-controls{border-top:1px solid #c7b07e;margin-top:14px;padding-top:8px}
