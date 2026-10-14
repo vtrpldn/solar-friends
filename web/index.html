@@ -4,16 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#263e30" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <title>Solar Friends · Vila Aurora</title>
     <link rel="stylesheet" href="style.css?v=combined-hud-2" />
-    <link rel="stylesheet" href="hud.css?v=community-alignment-1" />
+    <link rel="stylesheet" href="hud.css?v=game-interface-1" />
     <link rel="stylesheet" href="dev/tools.css">
-    <link rel="stylesheet" href="main-menu.css?v=modes-1">
+    <link rel="stylesheet" href="main-menu.css?v=title-screen-1">
   </head>
   <body>
     <div id="loading">
       <span class="sunmark">☀</span>
-      <h1>A little place to grow.</h1>
+      <h1>Solar Friends</h1>
       <p id="load-status">Preparing Vila Aurora…</p>
     </div>
     <header>
@@ -36,7 +37,7 @@
         aria-label="Isometric ecovila. Select a building tool and click a clearing to build. Residents are also selectable from the community panel."
       ></canvas>
       <section class="goal-tracker" aria-label="Current goal">
-        <button id="goal-shortcut"><span id="goal-label"></span><strong id="goal-next"></strong><progress id="goal-meter" max="7" value="0"></progress></button>
+        <button id="goal-shortcut"><span id="goal-label"></span><strong id="goal-next"></strong><progress id="goal-meter" max="13" value="0"></progress></button>
         <button id="goal-action" hidden></button>
       </section>
       <div id="resident-hint" hidden></div>
@@ -46,7 +47,7 @@
         <span class="eyebrow" id="tutorial-count">ARRIVAL</span>
         <h2 id="tutorial-title">A shared beginning</h2>
         <p id="quest-speaker"></p>
-        <progress id="quest-progress" max="7" value="0"></progress>
+        <progress id="quest-progress" max="13" value="0"></progress>
         <p id="tutorial-copy"></p>
         <button id="tutorial-action" class="primary" hidden></button>
         <div class="resource-cycle" aria-label="Water and gardens">
@@ -66,9 +67,9 @@
       </section>
       <aside class="community panel" id="community-panel" hidden aria-label="Community">
         <div class="panel-heading">
-          <span class="eyebrow">BETTER TOGETHER</span>
+          <span class="eyebrow">RESIDENTS</span>
           <button class="panel-close" data-close-panel aria-label="Close community">×</button>
-          <h2>Our community</h2>
+          <h2>Residents</h2>
           <span class="count" aria-label="5 residents">5</span>
         </div>
         <div id="residents"></div>
@@ -81,7 +82,7 @@
           hidden
           aria-label="Unlocked village activities"
         >
-          <span class="eyebrow">OUR NEW POSSIBILITIES</span>
+          <span class="eyebrow">Village activities</span>
           <p id="compost-stock" hidden></p>
           <label id="tools-control" hidden
             ><input id="use-tools" type="checkbox" /> Use tools
@@ -93,13 +94,14 @@
           </div>
         </section>
       </aside>
+      <section id="village-book" hidden aria-label="Village records"><nav class="book-tabs" aria-label="Village sections"><button data-panel="building-panel" aria-controls="building-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l7-4v17M10 10l11-5v16M3 21h18M6 10v1m0 4v1m8-3v1m4-3v1m-4 5v1m4-3v1"/></svg> Buildings</button><button data-panel="supplies-panel" aria-controls="supplies-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 9-5 9 5v12H3ZM3 8h18M8 12h8v5H8Z"/></svg> Supplies</button><button data-panel="projects-panel" aria-controls="projects-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3h14v18H5zM8 7h8M8 12h8M8 17h5"/></svg> Projects</button><button data-panel="town-panel" aria-controls="town-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10h18l-2-6H5zM5 10v10h14V10M9 20v-7h6v7"/></svg> Town</button><button data-panel="power-panel" aria-controls="power-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-13h-8Z"/></svg> Power</button></nav>
       <aside id="supplies-panel" class="supplies panel" hidden aria-label="Village supplies">
         <button class="panel-close" data-close-panel aria-label="Close supplies">×</button>
         <span class="eyebrow">ENOUGH FOR EVERYONE</span>
-        <h2>Village pantry</h2>
+        <h2>Supplies</h2>
         <p id="pantry-stock"></p>
         <p id="pantry-outlook" role="status"></p>
-        <h3>Today so far</h3>
+        <details class="economy-section" id="materials-stores"><summary>Construction materials</summary><p id="storage-summary"></p><div id="material-inventory"></div></details><h3>Today so far</h3>
         <p id="pantry-flow"></p>
         <h3>Kitchen</h3>
         <label id="egg-control"><input id="use-eggs" type="checkbox" /> Cook with eggs when available</label>
@@ -109,29 +111,31 @@
         <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
         <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
         <p id="coop-status"></p></section>
-        <h3>Water &amp; weather</h3>
+        <section id="circular-controls"><h3>Water &amp; waste</h3><p id="circular-stock"></p><p id="circular-output"></p><p id="toilet-status"></p><label><input id="filter-greywater" type="checkbox"> Filter greywater automatically</label><p id="wetland-status"></p><label><input id="banana-treatment" type="checkbox"> Treat sewage with banana trees automatically</label><p id="banana-status"></p><label><input id="auto-digest" type="checkbox"> Feed the biodigester automatically</label><p id="digester-status"></p><label><input id="use-biogas" type="checkbox"> Cook with biogas when available</label><details><summary>Closing the loop</summary><p>Daily toilet waste stays sealed. Two waste + two kitchen scraps take 8 hours to make 4 cooking gas and 2 digestate. Digestate cures for a full day before becoming compost. One cooking gas stretches a pot by one meal.</p><p>A lined reed bed filters 12 greywater into 8 irrigation water over 6 hours. Gardens use reclaimed water first. Drinking, cooking, and handwashing always need fresh water. Processing pauses at full output stores.</p><p>A banana treatment bed is a sealed evapotranspiration basin for toilet sewage. Each finished bed treats up to six waste per day through its planted soil and roots, without producing drinking water, irrigation water or food. Pause banana treatment to keep more waste for the biodigester.</p></details></section><h3>Water &amp; weather</h3>
         <p id="pantry-weather"></p>
         <details><summary>How the pantry works</summary><p>Ingredients include garden vegetables and gathered fruit. Residents forage wild food when the pantry runs low. Hungry hens wait safely; crops wait for water.</p></details>
       </aside>
       <aside id="projects-panel" class="panel economy-panel" hidden aria-label="Construction projects">
         <button class="panel-close" data-close-panel aria-label="Close projects">×</button>
-        <span class="eyebrow">ONE STAGE AT A TIME</span><h2>Our shared projects</h2><p id="project-summary"></p>
+        <span class="eyebrow">ONE STAGE AT A TIME</span><h2>Construction</h2><p id="project-summary"></p>
         <div id="project-list"></div>
-        <details class="economy-section"><summary>Materials & receiving space</summary><p id="storage-summary"></p><div id="material-inventory"></div></details>
+
         <details class="economy-section"><summary>Preparing materials</summary><div id="preparation-recipes"></div></details>
-        <details class="economy-section"><summary>Our land resources</summary><p id="property-description"></p><div id="land-sources"></div><p>Residents collect only what active projects need. Managed stands regrow; earth, stone and salvage are finite. Prepare frames and wall material at the camp workbench.</p></details>
+        <details class="economy-section"><summary>Our land resources</summary><p id="property-description"></p><div id="land-sources"></div><p>Plant timber and bamboo where you choose. Growth needs water and time; neighbours harvest for projects or a requested batch. Timber is replanted and bamboo resprouts. Earth, stone and salvage share finite property reserves.</p></details>
       </aside>
       <aside id="town-panel" class="panel economy-panel town-panel" hidden aria-label="Town supplier">
         <button class="panel-close" data-close-panel aria-label="Close town">×</button>
-        <span class="eyebrow">FROM OUR LAND, FROM OUR NEIGHBOURS</span><h2>A trip to town</h2>
-        <div class="town-account"><span>Shared fund<b id="town-fund"></b></span><label><input id="outside-work" type="checkbox"> Outside jobs<small>One resident per day · 09:00–17:00 · R$ 180 contribution<br>Lunch is provided off-site. Committed jobs finish even if you turn this off.</small></label></div>
-        <div class="town-list-heading"><h3>Our shopping list</h3><div><button id="town-shortages">Add village needs</button><button id="town-clear">Clear</button></div></div>
-        <div id="town-catalog"></div><div class="town-checkout"><div><b id="town-total"></b><p id="town-delivery"></p><small id="town-basket-status" role="status"></small></div><button id="town-order" class="primary">Confirm delivery</button></div>
+        <span class="eyebrow">FROM OUR LAND, FROM OUR NEIGHBOURS</span><h2>Town trader</h2>
+        <div class="town-account"><span>Shared fund<b id="town-fund"></b></span><small id="jobs-outlook"></small></div>
+        <details class="economy-section outside-jobs"><summary>Outside occupations</summary><p>Choose who works a 09:00–17:00 shift. Each contribution reaches the shared fund on return; lunch is provided off-site. Keep some neighbours home for building, meals and town pickups.</p><div id="outside-jobs"></div><small>Turning a schedule off stops future shifts. A shift already started finishes normally; rest, meals and agreed days off still come first.</small></details>
+        <div class="town-list-heading"><h3>Building supplies</h3><div><button id="town-shortages">Add village needs</button><button id="town-clear">Clear</button></div></div>
+        <fieldset class="transport-choice"><legend>Bring supplies home</legend><label><input type="radio" name="town-transport" value="delivery" checked> Town delivery <small>R$ 60 · next scheduled delivery</small></label><label><input type="radio" name="town-transport" value="pickup"> Drive to collect <small>R$ 20 fuel · up to 40 units · about 2 hours away</small></label><div id="pickup-controls" hidden><label for="pickup-driver">Driver</label><select id="pickup-driver"></select><small id="pickup-driver-note"></small></div></fieldset>
+        <div id="town-catalog"></div><div class="town-checkout"><div><b id="town-total"></b><p id="town-delivery"></p><small id="town-basket-status" role="status"></small><small id="town-pickup-status" role="status"></small></div><button id="town-order" class="primary">Buy supplies</button></div>
         <details class="economy-section"><summary>Orders & deliveries</summary><div id="town-orders"></div></details>
         <details class="economy-section"><summary>Surplus & neighbour exchange</summary><p>Keep 36 ingredients for household meals. Our neighbour can exchange two spare fittings for four surplus ingredients once each day.</p><button id="sell-surplus"></button><button id="exchange-parts">Exchange 4 surplus food → 2 fittings</button></details>
         <details class="economy-section"><summary>Spare materials & receiving space</summary><p>Sell stored, unreserved materials at half their town price to free space. Future stages may need them again; incoming supplies and current reservations stay protected.</p><div class="spare-sale"><label>Material<select id="spare-material"></select></label><label>Units<input id="spare-quantity" type="number" min="1" max="20" step="1" value="5"></label><button id="sell-material">Sell spare materials</button></div><p id="spare-quote" role="status"></p></details>
         <details class="economy-section"><summary>Shared fund ledger</summary><div id="fund-ledger"></div></details>
-        <p class="economy-note">Prices and delivery schedules are game values. Basic materials and equipment can be purchased even before a workshop is built.</p>
+
       </aside>
       <aside id="power-panel" class="supplies panel" hidden aria-label="Village power">
         <button class="panel-close" data-close-panel aria-label="Close power">×</button>
@@ -139,18 +143,18 @@
         <h2 id="power-title">Sunshine for everyone</h2>
         <p id="power-summary"></p>
         <div class="power-battery-label"><b>Battery</b><span id="power-charge"></span></div>
-        <progress id="power-battery" aria-label="Stored solar energy" value="0" max="36"></progress>
+        <progress id="power-battery" aria-label="Stored shared energy" value="0" max="36"></progress>
         <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting demand<b id="power-demand"></b></span></div>
         <p id="power-outlook"></p>
-        <div class="power-build"><button id="build-solar" class="primary">Plan solar farm</button><button id="build-streetlight">Plan street light</button></div>
+        <div class="power-build"><button id="build-solar" class="primary">Plan solar farm</button><button id="build-hydro">Plan river generator</button><button id="build-streetlight">Plan street light</button></div>
         <h3>Shared lighting</h3><div id="power-loads"></div>
         <p id="power-roofs"></p>
-        <details><summary>How village power works</summary><p>Each solar farm supplies up to 6 energy per hour and stores 36 energy for the night. Production follows the sun; lights switch on at dusk. Buildings connect automatically across the village. Add farms or switch off lights to stretch the charge.</p><p>Rooftop-panel homes have their own battery. Gardens, food forests and compost do not need electricity. Residents still cook on the kitchen stove and work by hand during outages.</p></details>
+        <details><summary>How village power works</summary><p>Each solar farm supplies up to 6 energy per hour and stores 36 energy for the night. Production follows the sun; lights switch on at dusk. Buildings connect automatically across the village. River generators supply 1.8 energy per hour through the night and add 18 storage; rainfall boosts flow and dry days reduce it. Add generators or switch off lights to stretch the charge.</p><p>Rooftop-panel homes have their own battery. Gardens, food forests and compost do not need electricity. Residents still cook on the kitchen stove and work by hand during outages.</p></details>
       </aside>
       <aside id="building-panel" class="supplies panel" hidden aria-label="Building interactions">
         <button class="panel-close" data-close-panel aria-label="Close buildings">×</button>
         <span class="eyebrow">LIFE IN THE VILLAGE</span>
-        <h2>Buildings</h2>
+        <div class="building-heading"><canvas id="building-portrait" width="216" height="136" aria-hidden="true"></canvas><h2 id="building-name">Buildings</h2></div>
         <label for="building-choice">Choose a building</label>
         <select id="building-choice"></select>
         <p id="building-purpose"></p>
@@ -165,12 +169,18 @@
           <details><summary>Growing details</summary><p id="crop-details"></p><p>Changes apply to the next planting. Pausing replanting lets the current crop finish, including all three tomato harvests.</p></details>
         </section>
         <p id="building-activity" role="status"></p>
-        <button id="remove-sandbox-building" class="journal-button" hidden>Remove building</button>
-        <div id="building-visits"><h3>Ask a neighbour to visit</h3>
+        <section id="building-work-controls" hidden>
+          <h3>Change this building</h3><p id="building-work-status" role="status"></p>
+          <div id="building-work-actions" class="building-work-actions"><button data-building-work="demolish">Demolish · faster</button><button data-building-work="salvage">Salvage · recover materials</button><button data-building-work="move">Move building</button></div>
+          <button id="cancel-building-work" hidden>Cancel crew job</button>
+          <p class="hint">Residents do the work during 09:00–12:00 and 15:00–16:00. Food, rest and sleep come first. The building is unavailable while the crew works.</p>
+        </section>
+        <button id="plan-first-building" hidden>Choose a blueprint</button><div id="building-visits"><h3>Ask a neighbour to visit</h3>
         <div id="building-neighbours" class="requests"></div>
         <p id="building-response" role="status"></p>
         <details><summary>How visits work</summary><p>Invite a neighbour to use this building. Work needs its usual supplies; tired or hungry neighbours need care first. Left to themselves, neighbours spend their free time on hobbies and company.</p></details></div>
       </aside>
+      </section>
       <section id="person" class="person panel" hidden></section>
       <div class="world-controls">
         <button id="zoom-out" aria-label="Zoom out">−</button
@@ -183,22 +193,16 @@
       </section>
       <nav class="build-bar panel" id="build-panel" hidden aria-label="Building tools">
         <button class="panel-close" data-close-panel aria-label="Close building tools">×</button>
-        <div class="build-heading"><h2>Build our village</h2><span>One little addition at a time.</span></div>
+        <div class="build-heading"><h2>Build</h2><span>Choose a blueprint</span></div>
         <div id="build-categories" role="group" aria-label="Building categories"></div>
-        <div id="tools" role="group" aria-label="Available buildings"></div>
+        <label class="home-method" id="home-method-control">House walls <select id="home-material-method"><option value="standard">Prepared materials</option><option value="local">Local bamboo</option><option value="adobe">Adobe bricks &amp; bamboo</option></select></label><div id="tools" role="group" aria-label="Available buildings"></div>
         <div class="build-guidance"><p class="build-hint">Choose a building, then find a clearing.</p><div id="placement" class="placement" hidden></div><kbd>Esc</kbd></div>
       </nav>
-      <nav class="hud-dock" aria-label="Village controls">
-        <button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button>
-        <button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Goals</button>
-        <button data-panel="building-panel" aria-controls="building-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l7-4v17M10 10l11-5v16M3 21h18M6 10v1m0 4v1m8-3v1m4-3v1m-4 5v1m4-3v1"/></svg> Buildings</button>
-        <button data-panel="supplies-panel" aria-controls="supplies-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 9-5 9 5v12H3ZM3 8h18M8 12h8v5H8Z"/></svg> Supplies</button>
-        <button data-panel="projects-panel" aria-controls="projects-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3h14v18H5zM8 7h8M8 12h8M8 17h5"/></svg> Projects</button>
-        <button data-panel="town-panel" aria-controls="town-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10h18l-2-6H5zM5 10v10h14V10M9 20v-7h6v7"/></svg> Town</button>
-        <button data-panel="power-panel" aria-controls="power-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-13h-8Z"/></svg> Power</button>
-        <button id="open-situations"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8m-8 4h5"/></svg> <span id="situations-label">Situations</span></button>
-        <button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button>
-      </nav>
+      <nav class="hud-dock" aria-label="Village controls"><button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button><button id="open-village" aria-controls="village-book" aria-expanded="false"><span>Village</span></button><button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Journal</button><button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button></nav>
+      <nav id="resident-strip" aria-label="Resident portraits"></nav>
+      <div class="village-alert"><button id="open-situations"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8m-8 4h5"/></svg> <span id="situations-label">Situations</span></button></div>
+      <section class="minimap" aria-label="Village map"><span>Vila Aurora <kbd aria-hidden="true">M</kbd></span><canvas id="village-map" width="224" height="224" tabindex="0" aria-label="Village map. Click to centre the view; arrow keys move the camera."></canvas></section>
+
       <button id="save-warning" class="save-warning" hidden>Progress is not being saved · Open Settings to export your village</button>
       <div id="toast" role="status" hidden></div>
     </main>
@@ -212,21 +216,14 @@
         </div>
       </section>
       <div class="resources" aria-label="Village resources">
-        <div title="Community savings for town purchases"><span aria-hidden="true">◉</span><b id="fund"></b><small>Shared fund</small></div>
-        <div title="Timber stored for planned construction">
-          <span>⌁</span><b id="wood">76</b><small>Timber</small>
-        </div>
-        <div title="Plant, water, and grow crops before harvesting">
-          <span>♧</span><b id="food">42</b><small>Food</small>
-        </div>
-        <div title="Rain fills cisterns; residents collect river water">
-          <span>◒</span><b id="water">65</b><small id="water-capacity">Water / 40</small>
-        </div>
-        <div title="Average resident wellbeing">
-          <span>♡</span><b id="happiness">75%</b><small>Wellbeing</small>
-        </div>
+        <button data-hud-resource="fund" title="Village fund · town trader"><span data-item-icon="coins" aria-hidden="true"></span><span><b id="fund"></b><small>Fund</small></span></button>
+        <button data-hud-resource="materials" title="Stored building materials"><span data-item-icon="materials" aria-hidden="true"></span><span><b id="material-total">0</b><small>Materials</small><b id="wood" hidden>0</b></span></button>
+        <button data-hud-resource="food" title="Ingredients · open supplies"><span data-item-icon="food" aria-hidden="true"></span><span><b id="food">42</b><small>Food</small></span></button>
+        <button data-hud-resource="water" title="Water stores · open supplies"><span data-item-icon="water" aria-hidden="true"></span><span><b id="water">65</b><small id="water-capacity">Water / 40</small></span></button>
+        <button data-hud-resource="happiness" title="Resident wellbeing"><span data-item-icon="heart" aria-hidden="true"></span><span><b id="happiness">75%</b><small>Wellbeing</small></span></button>
       </div>
       <div class="time-controls" aria-label="Time controls">
+        <span id="auto-speed" hidden role="status" title="Everyone is asleep or working off-site. Your chosen speed resumes when someone is available.">16× <small>Auto</small></span>
         <button id="pause" aria-label="Pause simulation">Ⅱ</button>
         <button data-speed="1" class="active" aria-label="1× simulation speed" aria-pressed="true">1×</button>
         <button data-speed="2" aria-label="2× simulation speed" aria-pressed="false">2×</button>
@@ -236,41 +233,14 @@
     </footer>
     <dialog id="main-menu" aria-labelledby="menu-title">
       <div class="menu-layout">
-        <section class="menu-welcome">
-          <span class="menu-kicker"><span aria-hidden="true">☀</span> A LITTLE PLACE TO GROW</span>
-          <h1 id="menu-title">Solar<br><em>Friends.</em></h1>
-          <p>Five friends. A patch of Brazilian earth.<br>A village we make together.</p>
-          <div class="menu-village" aria-hidden="true">
-            <div class="menu-land"></div>
-            <img class="menu-garden" src="art/garden-simple-isometric.png" alt="">
-            <img class="menu-greenhouse" src="art/greenhouse-isometric.png" alt="">
-            <img class="menu-home" src="art/home-veranda.png" alt="">
-          </div>
-          <span class="menu-place">VILA AURORA <span>✦</span> MATA ATLÂNTICA</span>
-        </section>
+        <section class="menu-welcome"><span class="menu-sun" aria-hidden="true">☀</span><h1 id="menu-title">Solar<br><em>Friends</em></h1><p>Vila Aurora · Mata Atlântica</p></section>
         <section class="menu-choices" aria-label="Choose how to play">
-          <div class="menu-return" hidden><button id="menu-return">← Return to village</button></div>
-          <div id="menu-continues" hidden>
-            <span class="eyebrow">YOUR VILLAGES</span>
-            <button data-continue="story" hidden><span><b>Continue story</b><small></small></span><span aria-hidden="true">↗</span></button>
-            <button data-continue="sandbox" hidden><span><b>Continue sandbox</b><small></small></span><span aria-hidden="true">↗</span></button>
-          </div>
-          <span class="eyebrow">A CLEARING FULL OF POSSIBILITIES</span>
-          <button class="mode-choice story-choice" data-new-mode="story">
-            <span class="mode-number">01 <span>OUR SHARED STORY</span></span>
-            <strong>New game <span aria-hidden="true">→</span></strong>
-            <span class="mode-description">Grow from your first arrival to a flourishing ecovila. Manage resources, follow your neighbours’ stories, and unlock new possibilities, one chapter at a time.</span>
-            <span class="mode-features">7 chapters <i>·</i> Resources & quests <i>·</i> Building unlocks</span>
-          </button>
-          <button class="mode-choice" data-new-mode="sandbox">
-            <span class="mode-number">02 <span>ROOM TO EXPERIMENT</span></span>
-            <strong>Sandbox <span aria-hidden="true">→</span></strong>
-            <span class="mode-description">Make a village your own way. Every building is ready to use, construction is instant and free, and supplies replenish while daily life unfolds.</span>
-            <span class="mode-features">Everything unlocked <i>·</i> No resource pressure</span>
-          </button>
-          <p class="menu-save-note">Story and Sandbox have separate saves on this device.</p>
-          <p id="menu-status" role="status"></p>
+          <div class="menu-return" hidden><button id="menu-return">Resume village</button></div>
+          <div id="menu-continues" hidden><button data-continue="story" hidden><b>Continue story</b><small></small></button><button data-continue="sandbox" hidden><b>Continue sandbox</b><small></small></button></div>
+          <button class="mode-choice story-choice" data-new-mode="story"><strong>New game</strong><span class="mode-description">Story · Build a village through thirteen chapters</span></button>
+          <button class="mode-choice" data-new-mode="sandbox"><strong>Sandbox</strong><span class="mode-description">Free building · Everything unlocked</span></button>
           <div class="menu-links"><button id="menu-settings">Settings</button><button id="menu-help">How to play</button></div>
+          <p class="menu-save-note">Story and Sandbox have separate saves.</p><p id="menu-status" role="status"></p>
         </section>
       </div>
     </dialog>
@@ -279,6 +249,7 @@
       <div id="situation-content"></div>
       <p class="hint">The village pauses while you listen. Close this page to let daily life unfold.</p>
     </dialog>
+    <dialog id="pickup-dialog" aria-labelledby="pickup-title"><button id="pickup-close" class="dialog-close" aria-label="Close town pickup">×</button><h2 id="pickup-title">Collect the town order</h2><p id="pickup-order-summary"></p><label for="pickup-order-driver">Choose a driver</label><select id="pickup-order-driver"></select><p id="pickup-order-status" role="status"></p><button id="pickup-confirm" class="primary">Send driver</button><p class="hint">The resident walks to the shared truck, drives to town, and brings the supplies back. Resume time after sending them if the village is paused.</p></dialog>
     <dialog id="quest-dialog" aria-labelledby="journal-title">
       <button
         id="close-journal"
@@ -288,14 +259,14 @@
         ×
       </button>
       <span class="eyebrow">VILA AURORA · OUR SHARED STORY</span>
-      <h2 id="journal-title">Little steps. Lasting roots.</h2>
+      <h2 id="journal-title">Village journal</h2>
       <p class="journal-intro">
         Start with a place to belong. Then follow the dreams of the people who
         call it home. Earlier efforts always count.
       </p>
       <button id="journal-situations" class="journal-button">Listen to village situations →</button>
       <p id="quest-total"></p>
-      <div id="quest-list"></div>
+      <div class="journal-spread"><nav id="journal-chapters" aria-label="Story chapters"></nav><div id="quest-list"></div></div>
       <p class="hint">
         The village pauses while you read. Follow the chapters in order to unlock each new part of village life.
       </p>
@@ -304,11 +275,11 @@
       <button id="close-help" class="dialog-close" aria-label="Close help">
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
-      <h2 id="help-title">Grow a place to belong.</h2><p id="help-intro">Choose Story to follow seven chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
+      <h2 id="help-title">How to play</h2><p id="help-intro">Choose Story to follow thirteen chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li id="help-start">
-          <b>Start with the essentials.</b> Open Goals and follow A Shared Beginning in the
+          <b>Start with the essentials.</b> Open Journal and follow A Shared Beginning in the
           village journal: a cistern, homes, a garden and a shared kitchen.
           Choose a building, then click the clearing. Residents construct it
           during working hours.
@@ -321,20 +292,20 @@
         <li>
           <b>Find your balance.</b> Plant gardens, water their soil, and let
           crops grow before harvesting. Cisterns catch afternoon rain;
-          neighbours collect river water during dry spells. Plan construction in Projects,
-          source local materials, and combine purchases in Town. Residents choose work, meals, rest and company for
+          neighbours collect river water during dry spells. Plan construction in Village → Construction,
+          source local materials, and combine purchases in Trade. Residents choose work, meals, rest and company for
           themselves. Each home has three beds. Breakfast is at 06:30, lunch at
-          noon, dinner at 18:00, and bedtime around 21:30.
+          noon, and dinner at 18:00. Neighbours choose their own bedtime and sleep for 6–9 hours, depending on their energy.
         </li>
       </ol>
       <p class="hint">
-        A full day takes eight minutes at 1×. Pause and change speed at the
-        bottom. Escape cancels building. Your village autosaves locally; open
+        A full day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site, then returns to your chosen speed. Pause and change speed at the
+        bottom left. B opens Build, V the village window, J the journal, P residents, I supplies, and M the map. Space pauses time; Escape closes a window or opens the menu. Your village autosaves locally; open
         Settings to save immediately or start a new village.
       </p>
       <details class="dev-tools">
         <summary>Debug &amp; development tools</summary>
-        <p>Previews use a separate village and never overwrite your progress.</p>
+        <p>Previews use a separate village and never overwrite your progress.</p><button id="help-open-dev">Dev Tools</button>
         <nav aria-label="Development tools">
           <a href="./artwork/" target="_blank" rel="noopener">Artwork studio <span>Inspect sprites, scale, and animation</span></a>
           <a href="./?artwork-preview" target="_blank" rel="noopener">Village artwork preview <span>All buildings in one clearing</span></a>
@@ -408,8 +379,8 @@
       <button id="cancel-restart">Keep this village</button>
       <button id="confirm-restart" class="primary">Start new village</button>
     </dialog>
-    <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Cancel & salvage</button></dialog>
-    <dialog id="sandbox-remove-dialog" aria-labelledby="sandbox-remove-title"><h2 id="sandbox-remove-title">Clear this plot?</h2><p id="sandbox-remove-note"></p><button id="sandbox-remove-close">Keep building</button><button id="sandbox-remove-confirm" class="primary">Remove building</button></dialog>
+    <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Confirm cancellation</button></dialog>
+    <dialog id="building-work-dialog" aria-labelledby="building-work-title"><h2 id="building-work-title">Queue building work?</h2><p id="building-work-note"></p><button id="building-work-close">Keep building</button><button id="building-work-confirm" class="primary">Queue resident work</button></dialog>
     <script type="module" src="main.js?v=modes-1"></script>
   </body>
 </html>

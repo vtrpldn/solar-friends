@@ -31,12 +31,12 @@ const beforeRequest=job.snapshot();assert(!job.request(0,'outside',true).include
 await checkpoint(job,'job-away');job.set_outside_work(false);
 advanceGame(job,1019-snap(job).village.minutes);assert.equal(snap(job).village.economy.money,money);
 advanceGame(job,2);assert.equal(snap(job).residents[4].trip.phase,'returning');
-assert(residentVisible(snap(job).residents[4],snap(job).village));assert.equal(snap(job).village.economy.money,money+18000);await checkpoint(job,'job-returning');
-until(job,s=>!s.residents[4].trip,'back in village');assert.equal(snap(job).village.economy.money,money+18000);reload(job);job.free();
+assert(residentVisible(snap(job).residents[4],snap(job).village));assert.equal(snap(job).village.economy.money,money+22000);await checkpoint(job,'job-returning');
+until(job,s=>!s.residents[4].trip,'back in village');assert.equal(snap(job).village.economy.money,money+22000);reload(job);job.free();
 
 const nightReady=ready(1260,1);await checkpoint(nightReady,'night-ready');nightReady.free();
 for(const homes of [0,1,2]){
-  const g=ready(1380,homes);g.tick(.25);
+  const g=ready(1439,homes);g.tick(.25);
   const expected=5-Math.min(5,homes*3);
   assert.equal(snap(g).residents.filter(r=>r.trip).length,expected);
   if(expected){

@@ -30,9 +30,11 @@ for (const sprite of Object.values(allBuildingArt)) {
   const night = catalog.find(item => item.name === `${sprite.name} · night`);
   assert(night, `Missing night variant: ${sprite.name}`);
   assert.equal(night.file, `../art/${sprite.nightFile}`);
-  for (const key of ['width', 'anchor', 'cell', 'axes', 'mesh']) assert.deepEqual(night[key], entry[key], `Night geometry drift: ${sprite.name}/${key}`);
+  for (const key of ['width', 'anchor', 'cell', 'axes', 'mesh','aspect']) assert.deepEqual(night[key], entry[key], `Night geometry drift: ${sprite.name}/${key}`);
   const bytes = readFileSync(new URL(sprite.nightFile, art));
-  assert.equal(bytes.readUInt32BE(16), bytes.readUInt32BE(20), 'Night sprite canvas must stay square');
+  assert.equal(bytes.readUInt32BE(20) / bytes.readUInt32BE(16), sprite.aspect || 1, 'Canvas aspect must match runtime rendering');
+  const dayBytes=readFileSync(new URL(sprite.file,art));
+  assert.deepEqual([bytes.readUInt32BE(16),bytes.readUInt32BE(20)],[dayBytes.readUInt32BE(16),dayBytes.readUInt32BE(20)],'Day and night dimensions must match');
   assert.equal(bytes[25], 6, 'Night sprites need RGBA transparency');
   const { vertical, shear } = cameraCalibration(sprite);
   if (sprite.axes) {
