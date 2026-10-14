@@ -99,7 +99,7 @@ export const quests = [
         "Ask a neighbour to forage food. With a finished food forest, each trip also brings two fruit.",
       ),
       actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0), 1, "Open Land in Projects and plant a timber plot. It needs water and four moist days before whole trees can be harvested; start early."),
-      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1), 1, "Place a bamboo plot. Moist growth takes two days; shoots regrow after cutting. Town purchases can bridge the wait."),
+      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1), 1, "Place a bamboo plot. Moist growth takes two days; shoots regrow after cutting. Two compost can enrich a material plot for faster growth. Town purchases can bridge the wait."),
     ],
   },
   {
@@ -239,11 +239,11 @@ export const quests = [
     ],
   },
   {
-    title:"Homes of Earth",person:"Bento & Cauã",theme:"LOCAL MATERIALS & EXCHANGE",art:"home",building:"hydro",reward:"River generator · dependable evening power",
+    title:"Homes of Earth",person:"Bento & Cauã",theme:"LOCAL MATERIALS & EXCHANGE",art:"adobe-gable",building:"hydro",reward:"River generator · dependable evening power",
     story:"“Use what the land can give, renew what grows, and buy the pieces we cannot make here.”",
     after:"Our adobe home brings local earth into everyday life. Next, meet the river that keeps moving after sunset.",
     objectives:v=>[
-      ...["Timber trees","Bamboo","Earth","Stone","Salvage"].map((name,m)=>actionGoal("land",`Harvest ${name.toLowerCase()}`, +v.economy.sources.some(s=>s.material===m&&s.harvests>0),1,m<2?"Open Land and request a mature harvest batch. Residents do the work during community work hours; timber takes four moist days and bamboo two.":"Place your own extraction site and request a batch in Land. Stone belongs on stony southeast ground. All sites share finite property reserves; clearing one does not renew the deposit.")),
+      actionGoal("land","Harvest the five local materials",[0,1,2,3,4].filter(m=>v.economy.sources.some(s=>s.material===m&&s.harvests>0)).length,5,"Open Land and request a mature harvest batch for timber and bamboo. Place earth, stone and salvage extraction sites and request their batches too; stone belongs on southeast ground. Residents work 09:00–12:00 and 15:00–16:00. Extraction reserves are finite; clearing a site does not refill them. Missing: "+["timber","bamboo","earth","stone","salvage"].filter((_,m)=>!v.economy.sources.some(s=>s.material===m&&s.harvests>0)).join(", ")+"."),
       actionGoal("land","Replant a harvested timber plot",+v.progress.timber_replanted,1,"Harvest all four whole trees, then enable replanting or request it. A resident plants the next crop using R$ 40 and two irrigation water."),
       actionGoal("preparation","Prepare building materials locally",v.progress.prepared_batches||0,1,"Choose Local or Adobe for an unfinished project before materials are committed. Supply raw earth/timber/salvage; neighbours prepare frames, walls and fittings at camp, and tiles at the workshop when the project needs them."),
       {...goal("Complete an adobe home",+v.economy.projects.some(p=>p.recipe==="adobe"&&v.buildings.some(b=>b.id===p.building&&b.kind==="home"&&b.progress>=100)),1,"Plan a home, choose Adobe before building starts, then follow its stages in Projects. Imported fittings and roofing still matter.","home"),recipe:"adobe"},

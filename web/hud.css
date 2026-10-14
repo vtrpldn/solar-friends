@@ -176,3 +176,5 @@ footer .resources b[hidden]{display:none!important}
 
 /* Keep the extended story contents beside the current journal page. */
 #journal-chapters{max-height:64vh;overflow-y:auto;overscroll-behavior:contain}
+
+.quest-card-art canvas{width:94px;height:60px;object-fit:contain}

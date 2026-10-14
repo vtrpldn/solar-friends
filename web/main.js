@@ -949,7 +949,7 @@ function updateQuests() {
         const status = questStatus(v, i),
           locked = !questAvailable(v,i);
         return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}" ${i===journalPage?'':'hidden'}>
-      <div class="quest-card-art ${q.art}">${i ? `<img src="art/${buildingArt[q.art]?.file || q.art + '-isometric.png'}" alt="${kinds[q.art]?.[0] || q.theme} illustration">` : "<span>☀</span>"}</div>
+      <div class="quest-card-art ${q.art}">${i ? `<canvas data-quest-art="${q.art}" role="img" aria-label="${allBuildingArt[q.art]?.name || q.theme} illustration"></canvas>` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
       ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."}</p>` : ""}
       ${objectiveMarkup(q.objectives(v), completions[i])}
@@ -959,6 +959,9 @@ function updateQuests() {
       })
       .join(""),
   );
+  for(const canvas of $('#quest-list').querySelectorAll('[data-quest-art]')){
+    if(!canvas._painted){const key=canvas.dataset.questArt;paintIcon(canvas,key,buildingImages[key],allBuildingArt[key]);canvas._painted=true;}
+  }
   }
   const has = (kind) =>
     v.buildings.some((b) => b.kind === kind && b.progress >= 100);
