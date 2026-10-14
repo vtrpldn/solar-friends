@@ -71,6 +71,7 @@ pub fn capacity(v: &Village) -> f32 {
             .iter()
             .filter(|b| b.kind == "well" && b.progress >= 100.)
             .count() as f32
+        + 75. * crate::building_work::held_capacity(v, "well") as f32
 }
 
 pub fn needs_tending(b: &Building, water: f32) -> bool {
@@ -90,7 +91,9 @@ pub fn advance(v: &mut Village, minutes: f32) {
             .filter(|b| b.kind == "well" && b.progress >= 100.)
             .count();
         if v.water < capacity(v) {
+            let before = v.water;
             v.water = (v.water + minutes * cisterns as f32 * 0.3).min(capacity(v));
+            v.progress.rain_caught |= v.water > before;
         }
     }
     for b in &mut v.buildings {
@@ -106,7 +109,9 @@ pub fn advance(v: &mut Village, minutes: f32) {
         b.crop.moisture = (b.crop.moisture - minutes * drying).max(0.);
         if b.kind == "greenhouse" && v.seedlings < 12 {
             let progress = b.crop.nursery + wet_minutes;
-            v.seedlings += ((progress / 480.).floor() as u32).min(12 - v.seedlings);
+            let raised = ((progress / 480.).floor() as u32).min(12 - v.seedlings);
+            v.seedlings += raised;
+            v.progress.seedlings_raised = v.progress.seedlings_raised.saturating_add(raised);
             b.crop.nursery = progress % 480.;
         }
     }
@@ -130,6 +135,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
         crop.harvests = 0;
         crop.growth = if outdoor && v.seedlings > 0 {
             v.seedlings -= 1;
+            v.progress.seedlings_used = v.progress.seedlings_used.saturating_add(1);
             duration(crop) * 0.25
         } else {
             0.
@@ -167,6 +173,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
     } else if v.circular.reclaimed >= 2. || v.water >= 2. {
         if v.circular.reclaimed >= 2. {
             v.circular.reclaimed -= 2.;
+            v.progress.reclaimed_irrigation = true;
         } else {
             v.water -= 2.;
         }
@@ -188,7 +195,7 @@ mod farming_tests {
             .world_mut()
             .resource_mut::<Village>()
             .progress
-            .later_completed = [true; 3];
+            .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(g.place(kind, 5, 5), "ok");
         g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
         let mut q = g.app.world_mut().query::<&Resident>();

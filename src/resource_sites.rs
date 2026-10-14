@@ -53,6 +53,7 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     }
     if plot.iter().any(|&(plot_x, plot_y)| {
         ((plot_x as f32 - CAMP.0).abs() < 1.5 && (plot_y as f32 - CAMP.1).abs() < 1.5)
+            || crate::building_work::reserved(v, plot_x, plot_y, None)
             || v.roads.contains(&(plot_x, plot_y))
             || v.buildings
                 .iter()
@@ -72,6 +73,7 @@ pub fn water_available(v: &Village) -> bool {
 fn water(v: &mut Village) {
     if v.circular.reclaimed >= 2. {
         v.circular.reclaimed -= 2.;
+        v.progress.reclaimed_irrigation = true;
     } else {
         v.water -= 2.;
     }
@@ -124,6 +126,7 @@ pub fn finish(v: &mut Village, index: usize) -> bool {
     if !v.economy.sources[index].planted {
         if material == 0 {
             economy::contribute(v, replant_cost(material), "Timber seedlings for replanting");
+            v.progress.timber_replanted = true;
         }
         v.economy.sources[index].plant_requested = false;
         v.economy.sources[index].planted = true;
@@ -605,6 +608,39 @@ mod tests {
         let checkpoint = g.snapshot();
         assert!(g.restore(&checkpoint));
     }
+    #[test]
+    fn an_explicit_harvest_gets_a_turn_before_repeated_gardening() {
+        let mut g = Game::new();
+        assert_eq!(g.place("garden", 6, 6), "ok");
+        assert_eq!(g.place_source(0, 18, 18), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.arrived = true;
+            v.minutes = 540.;
+            v.food = 17.;
+            v.meals = 12;
+            v.buildings[0].progress = 100.;
+            v.economy.sources[0].growth = 1.;
+            v.economy.sources[0].remaining = 32.;
+        }
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        for mut r in q.iter_mut(g.app.world_mut()) {
+            r.task = "idle".into();
+            r.remaining = 0.;
+        }
+        assert_eq!(g.harvest_source(0), "ok");
+        for _ in 0..1200 {
+            g.tick(0.25);
+            if g.app.world().resource::<Village>().economy.sources[0].harvests > 0 {
+                break;
+            }
+        }
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(v.economy.sources[0].harvests, 1);
+        assert_eq!(v.economy.sources[0].remaining, 24.);
+        assert!(!v.economy.sources[0].harvest_requested);
+    }
+
     #[test]
     fn clearing_an_assigned_plot_preserves_other_indices_and_stops_work() {
         let mut g = Game::new();
