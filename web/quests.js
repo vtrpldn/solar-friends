@@ -247,7 +247,7 @@ export const quests = [
       actionGoal("land","Replant a harvested timber plot",+v.progress.timber_replanted,1,"Harvest all four whole trees, then enable replanting or request it. A resident plants the next crop using R$ 40 and two irrigation water."),
       actionGoal("preparation","Prepare building materials locally",v.progress.prepared_batches||0,1,"Choose Local or Adobe for an unfinished project before materials are committed. Supply raw earth/timber/salvage; neighbours prepare frames, walls and fittings at camp, and tiles at the workshop when the project needs them."),
       {...goal("Complete an adobe home",+v.economy.projects.some(p=>p.recipe==="adobe"&&v.buildings.some(b=>b.id===p.building&&b.kind==="home"&&b.progress>=100)),1,"Plan a home, choose Adobe before building starts, then follow its stages in Projects. Imported fittings and roofing still matter.","home"),recipe:"adobe"},
-      actionGoal("town","Sell genuine surplus",+v.progress.surplus_sold,1,"Gather a little extra, then sell at least one surplus ingredient in Town. Keep the protected 36-ingredient household reserve."),
+      actionGoal("town","Sell genuine surplus",+v.progress.surplus_sold,1,"Ask for extra garden harvests or gathering in People until you have at least 37 ingredients, then sell one in Town. Normal chores keep a smaller healthy pantry; this one-off sale must leave the protected 36-ingredient reserve."),
       actionGoal("town","Exchange with our neighbour",+v.progress.parts_exchanged,1,"Set aside four ingredients above the 36 reserve and exchange them for two fittings in Town. The neighbour trades once per day."),
     ],
   },

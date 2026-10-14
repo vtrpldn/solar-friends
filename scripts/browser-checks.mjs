@@ -56,7 +56,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){
     await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);
-    await page.waitForFunction(()=>document.querySelector('#dev-scenario').value==='imported');
+    await page.waitForFunction(chapter=>window.solarDev.snapshot().village.progress.tracked===chapter,chapter);
     await page.locator('#dev-close').click();
   }
   await storyCheckpoint(9);
@@ -69,6 +69,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.locator('[data-chapter]').count(),13);
   assert((await page.locator('#quest-total').textContent()).includes('9 of 13'));
   assert((await page.locator('.quest-card:not([hidden]) .quest-guidance').textContent()).includes('request a mature harvest'));
+  assert.equal(await page.locator('.quest-card:not([hidden]) [data-quest-art]').getAttribute('data-quest-art'),'adobe-gable');
   await page.locator('[data-chapter="12"]').click();
   assert((await page.locator('.quest-card:not([hidden]) h3').textContent()).includes('A Village in Balance'));
   assert(!await page.locator('[data-track="12"]').isEnabled());
