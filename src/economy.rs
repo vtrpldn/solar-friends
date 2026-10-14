@@ -905,6 +905,9 @@ pub(crate) fn place_order(
     } else {
         quote(v, items)
     }?;
+    let Some(next_order) = v.economy.next_order.checked_add(1) else {
+        return Err("Order identity limit reached.".into());
+    };
     if v.economy.orders.len() >= 100 {
         let keep = v
             .economy
@@ -926,7 +929,7 @@ pub(crate) fn place_order(
         });
     }
     let id = v.economy.next_order;
-    v.economy.next_order += 1;
+    v.economy.next_order = next_order;
     let dispatch = v.minutes + if pickup_by.is_some() { 0. } else { 120. };
     let arrival = if pickup_by.is_some() {
         v.minutes + 120.

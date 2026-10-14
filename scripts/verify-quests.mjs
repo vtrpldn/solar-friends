@@ -8,6 +8,7 @@ import {sourceKinds} from '../web/resource-sites.js';
 await init({module_or_path:await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot()),output=process.argv[2]||'artifacts/story';
 if(output)await fs.mkdir(output,{recursive:true});
+await fs.mkdir('artifacts/logistics',{recursive:true});
 g.set_outside_work(true);
 function until(test,label,limit=24000){
  for(let i=0;i<limit;i++){if(test(snap()))return;g.tick(.25);}

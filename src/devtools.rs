@@ -59,7 +59,7 @@ impl Game {
     }
     /// Run the real chooser on a copy, and the same refusal rules used by requests.
     pub fn dev_inspect(&mut self) -> String {
-        let v = self.app.world().resource::<Village>().clone();
+        let mut v = self.app.world().resource::<Village>().clone();
         let people: Vec<_> = self
             .app
             .world_mut()
@@ -67,6 +67,7 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        workforce::refresh(&mut v, people.iter());
         let residents: Vec<_> = people
             .iter()
             .map(|r| {

@@ -471,12 +471,18 @@ fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> {
     (navigation::clear(v, x, y) && doorway(v, p, [x, y])).then_some([x, y])
 }
 fn doorway(v: &Village, p: &Store, to: [f32; 2]) -> bool {
+    // River generators are supplied from a land approach. Their connection to
+    // that approach crosses water; the resident's walking route never does.
+    let river_structure = v
+        .buildings
+        .iter()
+        .any(|b| b.kind == "hydro" && p.owner == Owner::Site(b.id));
     let steps = ((to[0] - p.x).hypot(to[1] - p.y) / 0.1).ceil().max(1.) as u32;
     (0..=steps).all(|i| {
         let t = i as f32 / steps as f32;
         let x = p.x + (to[0] - p.x) * t;
         let y = p.y + (to[1] - p.y) * t;
-        spacing::land(x, y)
+        (spacing::land(x, y) || river_structure)
             && v.buildings
                 .iter()
                 .filter(|b| !matches!(p.owner,Owner::Site(id)|Owner::Warehouse(id) if id==b.id))
@@ -1621,6 +1627,98 @@ mod tests {
         let saved = g.snapshot();
         assert!(g.restore(&saved));
         assert_eq!(g.snapshot(), saved);
+    }
+    #[test]
+    fn routine_pantry_topups_do_not_starve_bounded_preparation() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("workshop", 5, 5), "ok");
+        assert_eq!(g.place("garden", 13, 5), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.minutes = 540.;
+            v.arrived = true;
+            v.food = 12.;
+            v.meals = 6;
+            fixture_stock(&mut v, 5, 0);
+        }
+        assert_eq!(g.place("home", 16, 12), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            fixture_stage(&mut v, 2);
+            economy::build(&mut v, 2, 100.);
+            assert!(supplies::needs_ingredients(&v));
+            assert!(!supplies::urgent(&v));
+        }
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        for mut r in q.iter_mut(g.app.world_mut()) {
+            r.task = "idle".into();
+            r.remaining = 0.;
+            r.hunger = 10.;
+            r.social = 90.;
+            r.last_meal_slot = 0;
+        }
+        for _ in 0..1800 {
+            g.tick(0.25);
+        }
+        let v = g.app.world().resource::<Village>();
+        assert!(v.progress.prepared_batches > 0);
+        assert!(v.food >= 0.);
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+    }
+    #[test]
+    fn project_and_town_identity_exhaustion_leave_the_world_unchanged() {
+        let mut g = Game::new();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .economy
+            .next_building = u32::MAX as usize;
+        let before = g.snapshot();
+        assert_ne!(g.place("garden", 5, 5), "ok");
+        assert_eq!(g.snapshot(), before);
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .economy
+            .next_order = u32::MAX;
+        let before = g.snapshot();
+        let mut items = [0; COUNT];
+        items[0] = 1;
+        assert_ne!(
+            g.order_supplies(&serde_json::to_string(&items).unwrap()),
+            "ok"
+        );
+        assert_eq!(g.snapshot(), before);
+    }
+    #[test]
+    fn a_river_generator_receives_real_cargo_from_the_bank() {
+        let mut g = scene(13, 15);
+        assert_eq!(g.cancel_project(0), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.progress.completed = [true; 4];
+            v.progress.later_completed = [true; progression::LATER_CHAPTERS];
+            economy::add(&mut v, 13, 1);
+            economy::add(&mut v, 14, 1);
+        }
+        assert_eq!(g.place("hydro", 26, 5), "ok");
+        complete(&mut g);
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(v.buildings[0].kind, "hydro");
+        assert_eq!(v.buildings[0].progress, 100.);
+        assert_eq!(total(v, 13), 0);
+        assert_eq!(total(v, 14), 0);
+        assert!(
+            simulation::view(v)["materials"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|m| m["difference"] == 0.)
+        );
     }
     #[test]
     fn malformed_locations_cargo_and_shared_id_collisions_fail_atomically() {

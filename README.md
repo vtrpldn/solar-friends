@@ -296,7 +296,7 @@ Use the compact, dispersed, empty-fund, enclosed-storage and established simulat
 
 ### Physical construction supplies
 
-Construction materials live in camp storage, individual storage houses, material-plot output piles and project staging. The materials total includes carried loads. Residents collect up to 12 units per trip; a construction stage starts after its inputs reach the site. Roads speed up hauling, while occupied plots and the river block routes. Residents retain meals, sleep, outside jobs and community work hours.
+Construction materials live in camp storage, individual storage houses, material-plot output piles and project staging. The materials total includes carried loads. Residents collect up to 12 units per trip; a construction stage starts after its inputs reach the site. Roads speed up hauling, while occupied plots and the river block routes. Residents retain meals, sleep, outside jobs and community work hours. Existing cooking and foraging work covers the expected food deficit before more neighbours join it, leaving other people free to help with projects.
 
 Open **Supplies → Construction materials → Where supplies are** to inspect locations and deliveries. A storage house reserve queues local hauling. Lowering a reserve queues returns; changing a target never transfers goods immediately. Town deliveries and resident pickups unload at camp. Keep room there for incoming orders.
 
