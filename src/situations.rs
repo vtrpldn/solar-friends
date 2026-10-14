@@ -77,23 +77,22 @@ pub fn advance(v: &mut Village, minutes: f32) {
     let totals: [u32; 5] =
         std::array::from_fn(|id| v.situations.cooking.iter().map(|day| day[id]).sum());
     let total: u32 = totals.iter().sum();
-    let story_check_in = v.mode == crate::modes::Mode::Story
+    let concerned_resident = (0..5).find(|&id| {
+        totals[id] >= 6
+            && totals[id] * 5 >= total * 3
+            && v.situations
+                .cooking
+                .iter()
+                .filter(|day| day[id] > 0)
+                .count()
+                >= 2
+    });
+    let story_check_in = concerned_resident.is_none()
+        && v.mode == crate::modes::Mode::Story
         && !crate::progression::completed(v, 11)
         && crate::progression::available(v, 11)
         && v.situations.resolved_count == 0;
-    let Some(resident) = (0..5)
-        .find(|&id| {
-            totals[id] >= 6
-                && totals[id] * 5 >= total * 3
-                && v.situations
-                    .cooking
-                    .iter()
-                    .filter(|day| day[id] > 0)
-                    .count()
-                    >= 2
-        })
-        .or(if story_check_in { Some(2) } else { None })
-    else {
+    let Some(resident) = concerned_resident.or(if story_check_in { Some(2) } else { None }) else {
         return;
     };
     v.situations.active = Some(Situation {

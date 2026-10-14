@@ -375,4 +375,21 @@ mod tests {
             "A promise without actual help is not completion"
         );
     }
+    #[test]
+    fn a_real_cooking_concern_takes_precedence_over_the_story_check_in() {
+        let mut g = Game::new();
+        assert!(g.start_mode("sandbox"));
+        assert_eq!(g.place("kitchen", 5, 5), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.arrived = true;
+        v.mode = Mode::Story;
+        v.progress.completed.fill(true);
+        v.progress.later_completed[..7].fill(true);
+        v.situations.cooking = [[3, 0, 0, 0, 0], [3, 0, 0, 0, 0], [0; 5]];
+        crate::situations::advance(&mut v, 1.);
+        let s = v.situations.active.as_ref().unwrap();
+        assert_eq!(s.resident, 0);
+        assert!(!s.story_check_in);
+        assert_eq!(s.worry, 4.);
+    }
 }

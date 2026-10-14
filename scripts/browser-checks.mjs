@@ -101,7 +101,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(land.village.economy.sources.length,1);assert.equal(land.village.economy.sources[0].growth,0);
   assert.equal(land.village.economy.money,planting.village.economy.money-8000);assert.equal(land.village.water,planting.village.water-2);
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Construction',exact:true}).click();
-  await page.getByText('Our land resources',{exact:true}).click();
+  if(!await page.locator('#land-sources').evaluate(el=>el.closest('details').open))await page.getByText('Our land resources',{exact:true}).click();
   assert(!await page.getByRole('button',{name:'Cut one tree · 8 timber',exact:true}).isEnabled());
   assert((await page.locator('#land-sources').textContent()).includes('0% grown'));
   await page.locator('[data-site="0"][data-source-setting="harvest"]').uncheck();
@@ -111,7 +111,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#dev-minutes').fill('1440');await page.locator('#dev-advance').click();
   await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Construction',exact:true}).click();
-  if(!await page.locator('#land-sources').isVisible())await page.getByText('Our land resources',{exact:true}).click();
+  if(!await page.locator('#land-sources').isVisible())if(!await page.locator('#land-sources').evaluate(el=>el.closest('details').open))await page.getByText('Our land resources',{exact:true}).click();
   land=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(land.village.economy.sources[0].remaining,32);assert.equal(land.village.economy.sources[1].remaining,24);
   const harvestedTimber=land.village.wood,harvestedBamboo=land.village.economy.stock[1];
