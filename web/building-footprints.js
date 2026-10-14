@@ -3,7 +3,7 @@ import { cameraCalibration } from './building-art.js';
 import { buildingSilhouettes } from './building-silhouettes.js';
 
 export function footprintSize(kind) {
-  if (['square','solar_farm'].includes(kind)) return 3;
+  if (['square','solar_farm','source_timber'].includes(kind)) return 3;
   if (['well','compost','coop','streetlight','road','hydro','eco_toilet'].includes(kind)) return 1;
   return 2;
 }
@@ -24,6 +24,7 @@ export function footprintCorners(kind,x,y) {
 export const paintedGrounds={
   hydro:[1280,[[229,902],[551,1060],[1090,864]]],
   eco_toilet:[1280,[[237,975],[609,1168],[1087,974]]],
+  banana_treatment:[1280,[[92,743],[630,1137],[1173,754]]],
   wetland:[1774,[[357,511],[989,797],[1355,571]]],
   biodigester:[1280,[[130,844],[401,949],[1164,858]]],
   warehouse:[1280,[[107,848],[741,1133],[1188,936]]],
@@ -36,7 +37,7 @@ export const paintedGrounds={
   'home-veranda':[1280,[[100,887],[574,1130],[1156,887]]],
   'home-gable':[1280,[[151,823],[650,1085],[1140,867]]],
   'home-courtyard':[1280,[[84,880],[584,1124],[1173,880]]],
-  workshop:[1280,[[116,918],[588,1165],[1149,954]]],
+  workshop:[1254,[[118,935],[548,1167],[1131,1002]]],
   square:[1280,[[54,879],[634,1168],[1234,895]]],
   solar_farm:[1280,[[101,778],[595,1030],[1160,713]]],
   well:[1280,[[218,944],[590,1140],[1040,953]]],

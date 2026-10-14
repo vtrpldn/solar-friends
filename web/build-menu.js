@@ -1,10 +1,13 @@
+import {economyImage,economyArt,drawEconomySprite} from './economy-art.js';
+import {sourceMaterial,sourceKinds} from './resource-sites.js';
 import { buildingArt, drawBuildingArt } from './building-art.js';
 
 const groups = [
+  {id:'land',name:'Land & materials',kinds:sourceKinds},
   { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'warehouse', 'square'] },
   { id: 'food', name: 'Food & growing', kinds: ['garden', 'greenhouse', 'kitchen', 'grove', 'coop'] },
   { id: 'craft', name: 'Craft & reuse', kinds: ['workshop', 'compost'] },
-  { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','biodigester'] },
+  { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','banana_treatment','biodigester'] },
   { id: 'power', name: 'Power', kinds: ['solar_farm', 'hydro', 'streetlight'] },
 ];
 
@@ -14,7 +17,8 @@ export function paintIcon(canvas, kind, image, art = buildingArt[kind]) {
   const source = document.createElement('canvas');
   source.width = source.height = 320;
   const ctx = source.getContext('2d');
-  if (kind === 'road') {
+  if(kind.startsWith('source_'))drawEconomySprite(ctx,economyImage,economyArt[sourceMaterial(kind)],160,260,1.6);
+  else if (kind === 'road') {
     ctx.fillStyle = '#c29b6c';
     ctx.strokeStyle = '#ab8456';
     ctx.lineWidth = 2;
