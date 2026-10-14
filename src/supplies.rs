@@ -67,7 +67,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         + 3 * v
             .buildings
             .iter()
-            .filter(|b| b.kind == "coop" && b.progress >= 100. && b.poultry.remaining > 0.)
+            .filter(|b| b.kind == "coop" && b.poultry.remaining > 0.)
             .count() as u32;
     for b in &mut v.buildings {
         if b.kind != "coop" || b.progress < 100. {
@@ -101,11 +101,17 @@ pub fn cook(v: &mut Village) {
     }
     let eggs = v.supplies.use_eggs && v.supplies.eggs >= 2 && v.food >= 2.;
     let ingredients = if eggs { 2. } else { 3. };
-    let meals = if eggs { 7 } else { 5 };
+    let fuel = v.circular.use_biogas && v.circular.biogas >= 1.;
+    let meals = (if eggs { 7 } else { 5 }) + u32::from(fuel);
+    if fuel {
+        v.circular.biogas -= 1.;
+        v.progress.biogas_meal = true;
+    }
     v.food -= ingredients;
-    v.water -= 1.;
+    sanitation::household_water(v, 1.);
     if eggs {
         v.supplies.eggs -= 2;
+        v.progress.egg_meal = true;
     }
     v.meals += meals;
     v.supplies.used += ingredients;
@@ -137,7 +143,7 @@ mod tests {
             .world_mut()
             .resource_mut::<Village>()
             .progress
-            .later_completed = [true; 3];
+            .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(game.place("coop", 5, 5), "ok");
         let mut v = game.app.world().resource::<Village>().clone();
         v.buildings[0].progress = 100.;

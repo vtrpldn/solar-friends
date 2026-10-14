@@ -9,7 +9,7 @@ pub fn land(x: f32, y: f32) -> bool {
         && !river_bank(x.floor() as i32, y.floor() as i32)
 }
 
-fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
+pub(crate) fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
     let size = interactions::footprint_size(&b.kind);
     let left = (b.x - size / 2) as f32 - 0.5;
     let back = (b.y - size / 2) as f32 - 0.5;
@@ -114,12 +114,37 @@ pub fn walk(r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) {
         (r.x, r.y) = p;
     } else if land(direct.0, direct.1) {
         (r.x, r.y) = direct;
+    } else if land(direct.0, r.y) {
+        // Follow a bank corner along one axis rather than waiting forever for
+        // a diagonal step to cross a non-land tile.
+        r.x = direct.0;
+    } else if land(r.x, direct.1) {
+        r.y = direct.1;
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn a_return_walk_can_leave_a_riverbank_corner() {
+        let mut g = Game::new();
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        let mut r = q.iter_mut(g.app.world_mut()).next().unwrap().clone();
+        r.x = 23.707;
+        r.y = 12.994;
+        r.target_x = 10.;
+        r.target_y = 15.1;
+        assert!(land(r.x, r.y));
+        for _ in 0..200 {
+            if (r.x - r.target_x).hypot(r.y - r.target_y) < 0.08 {
+                break;
+            }
+            walk(&mut r, &[], 0.25);
+            assert!(land(r.x, r.y));
+        }
+        assert!((r.x - r.target_x).hypot(r.y - r.target_y) < 0.08);
+    }
 
     #[test]
     fn neighbours_get_separate_accessible_spots_at_every_building() {
@@ -150,7 +175,10 @@ mod tests {
 
     #[test]
     fn material_workers_have_reachable_separate_spots_at_every_source() {
-        let game = Game::new();
+        let mut game = Game::new();
+        for (material, x, y) in [(0, 5, 5), (1, 10, 5), (2, 15, 5), (3, 20, 20), (4, 5, 10)] {
+            assert_eq!(game.place_source(material, x, y), "ok");
+        }
         let v = game.app.world().resource::<Village>();
         for source in &v.economy.sources {
             let a = material_spot(v, source.x as f32, source.y as f32, 2).unwrap();

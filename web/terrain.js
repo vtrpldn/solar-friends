@@ -75,7 +75,7 @@ function groundPoint(x, y) {
   return [(x - GROUND_START) * unit, (y - GROUND_START) * unit];
 }
 
-export function paintTerrain(texture, roads = []) {
+export function paintTerrain(texture, roads = [], resourceSites = []) {
   const ground = surface();
   const g = ground.getContext("2d");
   const half = texture.width / 2;
@@ -135,6 +135,14 @@ export function paintTerrain(texture, roads = []) {
   e.bezierCurveTo(0.13, 0.94, 0.035, 0.86, 0.065, 0.71);
   e.bezierCurveTo(0.045, 0.51, 0.025, 0.34, 0.08, 0.15);
   e.fill();
+  // Resource clearings sit at the property edge. Keep the same meadow texture
+  // under their complete ground contact instead of dissolving it into blank space.
+  for(const site of resourceSites){
+    const x=(site.x-GROUND_START)/GROUND_SIZE,y=(site.y-GROUND_START)/GROUND_SIZE,r=2.3/GROUND_SIZE;
+    const cover=e.createRadialGradient(x,y,r*.55,x,y,r);
+    cover.addColorStop(0,'white');cover.addColorStop(1,'#ffffff00');
+    e.fillStyle=cover;e.beginPath();e.arc(x,y,r,0,Math.PI*2);e.fill();
+  }
   g.globalCompositeOperation = "destination-in";
   g.filter = "blur(25px)";
   g.drawImage(edge, 0, 0);
