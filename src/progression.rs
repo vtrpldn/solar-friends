@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 pub const CHAPTER_COUNT: usize = 13;
 pub const LATER_CHAPTERS: usize = CHAPTER_COUNT - 4;
-pub const BUILDINGS: [&str; 17] = [
+pub const BUILDINGS: [&str; 18] = [
     "home",
     "garden",
     "well",
@@ -19,6 +19,7 @@ pub const BUILDINGS: [&str; 17] = [
     "streetlight",
     "eco_toilet",
     "wetland",
+    "banana_treatment",
     "biodigester",
     "hydro",
 ];
@@ -130,7 +131,7 @@ pub fn unlocked(v: &Village, kind: &str) -> bool {
         "workshop" | "greenhouse" => Some(3),
         "coop" => Some(4),
         "solar_farm" | "streetlight" => Some(5),
-        "eco_toilet" | "wetland" => Some(6),
+        "eco_toilet" | "wetland" | "banana_treatment" => Some(6),
         "biodigester" => Some(7),
         "hydro" => Some(9),
         _ => None,
@@ -197,6 +198,8 @@ pub fn update(v: &mut Village) {
             && v.progress.night_lights,
         ready(v, "eco_toilet")
             && ready(v, "wetland")
+            && ready(v, "banana_treatment")
+            && v.circular.waste_treated >= 5.
             && v.circular.toilet_visits >= 5
             && v.circular.water_reused >= 8.
             && v.progress.rain_caught

@@ -290,6 +290,17 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   assert(circular.village.circular.biogas>0&&circular.village.circular.water_reused>=8);
   assert((await page.locator('#digester-status').textContent()).includes('curing'));
+  await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('banana');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  await page.locator('#banana-treatment').uncheck();
+  assert((await page.locator('#banana-status').textContent()).includes('paused'));
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert.equal((await page.evaluate(()=>window.solarDev.snapshot())).village.circular.waste_treated,0);
+  await page.locator('#banana-treatment').check();
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert(Math.abs((await page.evaluate(()=>window.solarDev.snapshot())).village.circular.waste_treated-.5)<.001);
+  assert((await page.locator('#banana-status').textContent()).includes('0.5 treated'));
+  await capture('Banana bed treatment and player pause control','banana-treatment.png');
   await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('circular-night');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Power',exact:true}).click();
   assert((await page.locator('#power-generation').textContent()).includes('river 1.8'));
@@ -430,8 +441,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert((await page.locator('#recipe-history').textContent()).includes('Browser check:'));
   await capture('Recipe cards with saved revision history','recipes.png');
   await page.goto(new URL('/artwork/grid-fit.html',base).href);
-  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('22 variants'));
-  assert.equal(await page.locator('#cards figure').count(),22);
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('23 variants'));
+  assert.equal(await page.locator('#cards figure').count(),23);
   await capture('All painted building sprites on their actual grid cells','sprite-grid-day.png');
   await page.locator('#lighting').selectOption('night');
   await capture('Shared full-sprite grid fit at night','sprite-grid-night.png');

@@ -7,7 +7,7 @@ const groups = [
   { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'warehouse', 'square'] },
   { id: 'food', name: 'Food & growing', kinds: ['garden', 'greenhouse', 'kitchen', 'grove', 'coop'] },
   { id: 'craft', name: 'Craft & reuse', kinds: ['workshop', 'compost'] },
-  { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','biodigester'] },
+  { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','banana_treatment','biodigester'] },
   { id: 'power', name: 'Power', kinds: ['solar_farm', 'hydro', 'streetlight'] },
 ];
 

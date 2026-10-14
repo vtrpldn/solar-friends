@@ -51,4 +51,4 @@ for(const kind of buildings) {
 const g=new Game();assert.equal(g.host_gathering().includes('Roots for Tomorrow'),true);assert.equal(g.contribute_tool_library().includes('A Place to Gather'),true);
 assert.equal(goalRoute({village:{buildings:[{id:0,kind:'coop',progress:100}]},environment:{economy:{projects:[]}}},{build:'coop',target:3,buildTarget:1}).type,'visit');
 g.free();story.free();
-console.log('PASS: all 17 buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');
+console.log('PASS: all 18 buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');
