@@ -22,6 +22,7 @@ export function installDevTools(api) {
       <p id="dev-clock"></p><p id="dev-message" role="status"></p>
     </section><section class="dev-card"><h3>Resident decisions</h3><label for="dev-resident">Inspect a neighbour</label><select id="dev-resident"></select><div class="dev-actions"><button id="dev-inspect">Refresh</button><button id="dev-follow">Locate in game</button></div><div id="dev-inspection"></div></section></div></section>
     <section data-dev-page="art" hidden><div class="dev-grid"><section class="dev-card"><h3>Artwork workbench</h3>
+      <a class="dev-link" href="./artwork/grid-fit.html" target="_blank" rel="noopener"><b>Sprite grid fit ↗</b><span>Every day/night building on its actual tile plot, beside a resident.</span></a>
       <a class="dev-link" href="./artwork/?tool=calibration" target="_blank" rel="noopener"><b>Calibration bench ↗</b><span>Ground anchors, scale, camera axes, and game-size comparisons.</span></a>
       <a class="dev-link" href="./artwork/?tool=replacement" target="_blank" rel="noopener"><b>Replacement review ↗</b><span>Inspect a candidate sprite against the current artwork.</span></a>
       <a class="dev-link" href="./artwork/?tool=recipe" target="_blank" rel="noopener"><b>Art recipe cards ↗</b><span>References, constraints, prompts, and revision notes.</span></a>

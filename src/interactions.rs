@@ -11,7 +11,7 @@ pub fn radius(kind: &str) -> i32 {
 pub fn footprint_size(kind: &str) -> i32 {
     match kind {
         "square" | "solar_farm" => 3,
-        "well" | "compost" | "coop" | "streetlight" => 1,
+        "well" | "compost" | "coop" | "streetlight" | "hydro" | "eco_toilet" => 1,
         _ => 2,
     }
 }
@@ -47,6 +47,7 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     (r.target_x, r.target_y) = point;
     r.reason = match b.kind.as_str() {
         "home" => "Resting on the porch.",
+        "eco_toilet" => "Using the ecological toilet and washing my hands.",
         "garden" | "greenhouse" => "Checking and tending this garden.",
         "kitchen" => "Preparing a pot in this kitchen.",
         "well" => "Taking a refreshing drink at the cistern.",
@@ -74,7 +75,11 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
     }
     let kind = b.kind.clone();
     // Shared production cooldown prevents five simultaneous visitors multiplying output.
-    if kind != "home" && kind != "square" && b.next_visit > v.minutes {
+    if kind != "home" && kind != "square" && kind != "eco_toilet" && b.next_visit > v.minutes {
+        return;
+    }
+    if kind == "eco_toilet" {
+        sanitation::use_toilet(v, r);
         return;
     }
     v.buildings[index].visits = v.buildings[index].visits.saturating_add(1);
@@ -143,7 +148,7 @@ mod tests {
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
-                v.progress.later_completed = [true; 3];
+                v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
                 v.wood = 200.;
                 v.progress.scraps = 4;
             }
@@ -191,7 +196,7 @@ mod tests {
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
-                v.progress.later_completed = [true; 3];
+                v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
                 v.wood = 200.;
             }
             assert_eq!(g.place(kind, 5, 5), "ok");
@@ -253,7 +258,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.progress.completed = [true; 4];
-            v.progress.later_completed = [true; 3];
+            v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
             v.wood = 200.;
         }
         assert_ne!(g.place("square", 1, 1), "ok");

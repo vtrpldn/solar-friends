@@ -175,7 +175,10 @@ mod tests {
 
     #[test]
     fn material_workers_have_reachable_separate_spots_at_every_source() {
-        let game = Game::new();
+        let mut game = Game::new();
+        for (material, x, y) in [(0, 5, 5), (1, 10, 5), (2, 15, 5), (3, 20, 20), (4, 5, 10)] {
+            assert_eq!(game.place_source(material, x, y), "ok");
+        }
         let v = game.app.world().resource::<Village>();
         for source in &v.economy.sources {
             let a = material_spot(v, source.x as f32, source.y as f32, 2).unwrap();
