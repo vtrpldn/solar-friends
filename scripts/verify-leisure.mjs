@@ -33,8 +33,8 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
     for (const r of residents) {
       const c = counts[r.id];
       maxHunger = Math.max(maxHunger, r.hunger);
-      if (r.task !== 'sleep') c.awake++;
-      if (work.has(r.task)) c.work++;
+      if (r.task !== 'sleep' && !r.trip) c.awake++;
+      if (!r.trip && work.has(r.task)) c.work++;
       if (leisure.has(r.task)) c.leisure++;
       if (hobbies.has(r.task)) c.hobbies.add(r.task);
       assert.notEqual(r.task, 'visit', 'Free time must not become a productive building visit');
@@ -48,13 +48,13 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
     }
   }
   for (const c of counts) {
-    assert(c.work / c.awake < .35, 'Every resident should spend a minority of waking time working');
-    assert(c.leisure / c.awake > .55, 'Most waking time should be free time');
+    assert(c.work / c.awake < .35, 'Every resident should spend a minority of in-village waking time working');
+    assert(c.leisure / c.awake > .55, 'Most in-village waking time should be free time');
     assert(c.hobbies.size >= 3, 'Each resident needs varied hobbies, including evenings');
   }
   assert(minStock > 0, 'Food reserve must recover and stay available after the first day');
   assert(maxStock <= (scenario === 'surplus' ? 250 : 50), 'Autonomous food production must remain modest');
-  console.log(`PASS: ${scenario}, 14 days, food reserve ${minStock}–${maxStock}, peak hunger ${maxHunger.toFixed(1)}, leisure ${Math.round(Math.min(...counts.map(c=>c.leisure/c.awake))*100)}%+ of each resident's waking time`);
+  console.log(`PASS: ${scenario}, 14 days, food reserve ${minStock}–${maxStock}, peak hunger ${maxHunger.toFixed(1)}, leisure ${Math.round(Math.min(...counts.map(c=>c.leisure/c.awake))*100)}%+ of each resident's in-village waking time`);
   game.free();
 }
 template.free();

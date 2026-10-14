@@ -1,19 +1,24 @@
+import {economyImage,economyArt,drawEconomySprite} from './economy-art.js';
+import {sourceMaterial,sourceKinds} from './resource-sites.js';
 import { buildingArt, drawBuildingArt } from './building-art.js';
 
 const groups = [
-  { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'square'] },
+  {id:'land',name:'Land & materials',kinds:sourceKinds},
+  { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'warehouse', 'square'] },
   { id: 'food', name: 'Food & growing', kinds: ['garden', 'greenhouse', 'kitchen', 'grove', 'coop'] },
   { id: 'craft', name: 'Craft & reuse', kinds: ['workshop', 'compost'] },
-  { id: 'power', name: 'Power', kinds: ['solar_farm', 'streetlight'] },
+  { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','banana_treatment','biodigester'] },
+  { id: 'power', name: 'Power', kinds: ['solar_farm', 'hydro', 'streetlight'] },
 ];
 
 // Icons use the same corrected artwork as the map. Fit painted bounds, rather
 // than transparent source cells, into a common thumbnail frame and baseline.
-function paintIcon(canvas, kind, image) {
+export function paintIcon(canvas, kind, image, art = buildingArt[kind]) {
   const source = document.createElement('canvas');
   source.width = source.height = 320;
   const ctx = source.getContext('2d');
-  if (kind === 'road') {
+  if(kind.startsWith('source_'))drawEconomySprite(ctx,economyImage,economyArt[sourceMaterial(kind)],160,260,1.6);
+  else if (kind === 'road') {
     ctx.fillStyle = '#c29b6c';
     ctx.strokeStyle = '#ab8456';
     ctx.lineWidth = 2;
@@ -23,7 +28,7 @@ function paintIcon(canvas, kind, image) {
     ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = '#dcc098';
     ctx.beginPath(); ctx.moveTo(109, 198); ctx.lineTo(160, 173); ctx.lineTo(211, 198); ctx.stroke();
-  } else drawBuildingArt(ctx, image, buildingArt[kind], 160, 220);
+  } else drawBuildingArt(ctx, image, art, 160, 220);
   const pixels = ctx.getImageData(0, 0, 320, 320).data;
   let left = 320, top = 320, right = 0, bottom = 0;
   for (let y = 0; y < 320; y++) for (let x = 0; x < 320; x++) {
@@ -64,6 +69,7 @@ export function installBuildMenu(kinds, images, onGroupChange) {
     }
   }
   function showGroup(id) {
+    document.getElementById('home-method-control').hidden=id!=='village';
     for (const button of filters.children) button.setAttribute('aria-pressed', String(button.dataset.buildGroup === id));
     for (const button of tools.children) button.hidden = button.dataset.group !== id;
   }

@@ -1,0 +1,24 @@
+{
+  "tool": "Built-in image generation",
+  "intent": "precise-object-edit",
+  "reference": "web/art/economy-atlas.png",
+  "style_reference": "web/art/home-veranda.png",
+  "destination": "web/art/economy-atlas-v2.png",
+  "prompt": "Use case: precise-object-edit.\nAsset type: transparent six-sprite atlas for the existing Solar Friends game.\nInput image 1 is the EDIT TARGET: the economy atlas. Input image 2 is a STYLE AND HUMAN-SCALE reference only: the approved house, door, roof tiles and porch furniture. Do not add a house.\nPreserve the warm painted Brazilian countryside style, all SIX subjects, their identities and recognizable silhouettes. Revise proportions and ground contact, not the art direction.\nLayout: 3 columns by 2 rows, generous transparent gutters, each composition isolated completely inside its cell. Top row: managed timber, bamboo, earth excavation. Bottom row: stone deposit, reclaimed-material salvage, camp receiving bench. Equal square cells on a 3:2 rectangular canvas, no grid lines, no labels, no text.\nGround contact: remove the opaque orange dirt ovals and raised-looking soil islands under all six subjects. Actual alpha transparency between and around objects. Keep only small sparse individual grass tufts at contact points, matching the greens of the house reference. No continuous grassy plate, no orange halo, no big external shadow. Roots, feet, wheels and scattered objects rest on a single 2:1 orthographic ground plane, upright verticals, upper-left daylight.\nPhysical proportions: use a 2-meter salvaged door as the scale reference. Timber: two slender coppiced trees, modest stack of slender sawn beams; reduce beam thickness and sawbuck bulk so the sawbuck is waist-high (0.8 m) and hand saw about 0.6 m. Bamboo: tall slender culms, small modest bundle of cut poles. Earth: shallow excavation, realistic hand shovel and two modest baskets. Stone: low natural deposit and a human-size wheelbarrow, not giant blocks. Salvage: full-height 2 m teal door, 0.9 m cream window frame, small 0.22 m roof tiles and 0.1–0.25 m metal fittings; preserve their original arrangement but reduce the outsized tiles and hardware. Receiving bench: modest 0.8 m-high timber table, smaller crates and hammer, a portable 0.7 m blue panel and smaller pipe coil; reduce the oversized foliage and bulky props. Do not enlarge small props merely to fill a cell.\nKeep everything readable at game scale with the same material brushwork, restrained highlights, softer contrast and coherent 2:1 projection as the house. No people, landscape, buildings, border, platform, watermark or background. Preserve genuine PNG alpha transparency.",
+  "calibration": {
+    "physical_reference": "Resident height and a 2 m reclaimed door; 0.8 m table and sawbuck",
+    "runtime_widths": [
+      90,
+      78,
+      88,
+      78,
+      66,
+      62
+    ],
+    "source_size": [
+      1536,
+      1024
+    ],
+    "original_preserved_as": "Original economy prop study in artwork References"
+  }
+}

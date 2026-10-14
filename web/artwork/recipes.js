@@ -11,6 +11,11 @@ export function defaultRecipe(sprite) {
   if (sprite.animation) references.push('../art/residents-cistern.png');
   const layout = sprite.crop ? 'Keep a 3×3 grid: columns lettuce, beans, tomatoes; rows seedling, growing, harvestable. Preserve relative plant sizes.' : sprite.animation || sprite.portrait ? `Keep a 4×4 grid, four frames per activity, consistent foot baselines, face, clothing, and proportions.${sprite.activityAnimation ? ' Rows: stirring a cooking pot, watering with a can, kneeling with a trowel, feeding hens from a basket.' : ''}` : sprite.chicken ? 'Keep three columns of hens and two rows (standing, pecking), preserving each hen’s identity.' : `Keep source crop ${sprite.cell.join(', ')} in the complete source canvas.`;
   const rules = { ...artRules };
+  if(sprite.group==='Land & supplies'){
+    references.push('../art/home-veranda.png');
+    rules.output='Transparent PNG with measured gutters. No opaque soil island, platform or background. Small grass tufts only at ground contact.';
+    rules.proportions='Use resident height and house doors as physical references. Furniture is waist-high; tiles, hand tools and fittings stay small. Preserve the crop pixel aspect.';
+  }
   if (sprite.group === 'Terrain') {
     rules.camera = 'Overhead ground surface, exactly two equal square panels side by side: meadow then red earth.';
     rules.lighting = 'Even lighting, low-to-medium contrast, soft painted material texture.';

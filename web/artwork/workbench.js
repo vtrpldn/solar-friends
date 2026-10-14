@@ -1,4 +1,6 @@
 import { unlitFilter } from '../power.js';
+import {drawEconomySprite} from '../economy-art.js';
+import {placementArt} from '../building-footprints.js';
 import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
 import { chickenFrame } from '../chickens.js?v=painted-hens-1';
 import { drawPreparedFrame, animationFrameOptions } from '../sprite-frames.js';
@@ -56,6 +58,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   }
   function paint(ctx, img, sprite, x, y, zoom = 1) {
     if (!img?.naturalWidth) return;
+    if(sprite.group==='Land & supplies')return drawEconomySprite(ctx,img,sprite,x,y,zoom);
     if (sprite.building) return drawBuildingArt(ctx,img,sprite,x,y,zoom);
     if (sprite.portrait) return drawPreparedFrame(ctx,img,8,x,y,sprite.width*zoom,{referenceRow:2});
     if (sprite.animation) return drawPreparedFrame(ctx,img,Number($('replacement-row').value)*4+Number($('replacement-frame').value),x,y,sprite.width*zoom,animationFrameOptions(sprite));
@@ -78,7 +81,8 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     for (let x=-w;x<w*2;x+=68*z) { ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+h*2,h);ctx.moveTo(x,h);ctx.lineTo(x+h*2,0);ctx.stroke(); }
     const home = {...buildingArt.home,building:true};
     const homeFile = light > .5 ? home.nightFile : home.file;
-    paint(ctx,images.get(`../art/${homeFile}`),home,w*.22,y,z);
+    const registration=placementArt('home',home);
+    drawBuildingArt(ctx,images.get(`../art/${homeFile}`),home,w*.22+registration.x*z,y+registration.y*z,z*registration.scale);
     const original = images.get(selected.file);
     const pair = catalog.find(s => s.building && s.name === selected.name.replace(' · night','') + ' · night');
     ctx.save();if(selected.group==='Land & supplies')ctx.filter=unlitFilter(light);paint(ctx,original,draft,w*.66,y,z);ctx.restore();
@@ -87,14 +91,19 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     ctx.fillStyle = light>.5?'#fff4d7':'#294535';ctx.font='12px Trebuchet MS';ctx.fillText('Home',w*.22-18,h-18);ctx.fillText('Iara',w*.44-12,h-18);ctx.fillText('Calibration draft',w*.66-42,h-18);
   }
   function anchor() {
-    const {ctx,w,h} = setup($('anchor-canvas')), img=images.get(selected.file), size=280, x=(w-size)/2, y=20;
+    const {ctx,w,h} = setup($('anchor-canvas')), img=images.get(selected.file), {width:size,height}=anchorDimensions(w,h), x=(w-size)/2, y=20;
     if (img?.naturalWidth) {
       if(selected.portrait) drawPreparedFrame(ctx,img,8,x+size/2,y+size*selected.anchor,size,{referenceRow:2});
       else if(selected.animation) drawPreparedFrame(ctx,img,0,x+size/2,y+size*selected.anchor,size,animationFrameOptions(selected));
       else if(selected.crop) drawPreparedFrame(ctx,img,selected.frame,x+size/2,y+size*selected.anchor,size,cropFrameOptions);
-      else {const [cx,cy,cw,ch]=selected.cell;ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x,y,size,size);}
+      else {const [cx,cy,cw,ch]=selected.cell;ctx.drawImage(img,cx*img.naturalWidth,cy*img.naturalHeight,cw*img.naturalWidth,ch*img.naturalHeight,x,y,size,height);}
     }
-    const ground=y+size*draft.anchor; ctx.strokeStyle='#b65236';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+size,ground);ctx.stroke();ctx.beginPath();ctx.arc(w/2,ground,7,0,Math.PI*2);ctx.fillStyle='#b65236';ctx.fill();
+    const ground=y+height*draft.anchor; ctx.strokeStyle='#b65236';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+size,ground);ctx.stroke();ctx.beginPath();ctx.arc(w/2,ground,7,0,Math.PI*2);ctx.fillStyle='#b65236';ctx.fill();
+  }
+  function anchorDimensions(w,h){
+    const aspect=selected.group==='Land & supplies'?selected.aspect:1;
+    const width=Math.min(280,w-40,(h-40)/aspect);
+    return {width,height:width*aspect};
   }
   function replacement() {
     const {ctx,w,h} = setup($('replacement-scene')), original=images.get(selected.file), mode=$('replacement-mode').value, y=h*.76;
@@ -126,7 +135,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   };
   for(const id of ['calibration-zoom','calibration-light','replacement-mode','replacement-light','replacement-zoom','replacement-row','replacement-frame']) $(id).oninput=redraw;
   const anchorCanvas=$('anchor-canvas');
-  function moveAnchor(e) { const rect=anchorCanvas.getBoundingClientRect();draft.anchor=Math.round(Math.max(0,Math.min(1,(e.clientY-rect.top-20)/280))*1000)/1000;controls();redraw(); }
+  function moveAnchor(e) { const rect=anchorCanvas.getBoundingClientRect(),{height}=anchorDimensions(rect.width,rect.height);draft.anchor=Math.round(Math.max(0,Math.min(1,(e.clientY-rect.top-20)/height))*1000)/1000;controls();redraw(); }
   anchorCanvas.onpointerdown=e=>{anchorCanvas.setPointerCapture(e.pointerId);moveAnchor(e);};
   anchorCanvas.onpointermove=e=>{if(anchorCanvas.hasPointerCapture(e.pointerId))moveAnchor(e);};
   anchorCanvas.onpointerup=e=>anchorCanvas.releasePointerCapture(e.pointerId);

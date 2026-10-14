@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import init,{Game} from '../web/pkg/solar_friends.js';
+import {makeScenario,advanceGame} from '../web/dev/scenarios.js';
+import {placementReason} from '../web/polish.js';
+await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
+const g=new Game(),snap=()=>JSON.parse(g.snapshot()),fresh=snap();
+assert(g.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));
+const scenario=makeScenario('banana',fresh,snap());
+assert(g.restore(JSON.stringify(scenario)));
+const recipe=snap().environment.economy.recipes.find(r=>r.kind==='banana_treatment').standard;
+assert.equal(recipe.length,2);assert(recipe.every(stage=>stage.work>0&&stage.items.some(n=>n>0)));
+const bed=snap().village.buildings.find(b=>b.kind==='banana_treatment');
+assert.equal(placementReason({...snap().village,buildings:snap().village.buildings.filter(b=>b.id!==bed.id)},bed.kind,bed.x,bed.y),'');
+await mkdir('artifacts/banana-treatment',{recursive:true});
+await writeFile('artifacts/banana-treatment/preview.json',g.snapshot());
+g.configure_banana_treatment(false);
+advanceGame(g,120);assert.equal(snap().village.circular.waste_treated,0);
+const saved=g.snapshot();assert(g.restore(saved));assert.equal(g.snapshot(),saved);
+g.configure_banana_treatment(true);
+advanceGame(g,120);assert(Math.abs(snap().village.circular.waste_treated-.5)<.001);
+const mid=g.snapshot();assert(g.restore(mid));assert.equal(g.snapshot(),mid);
+assert.equal(g.queue_building_work(bed.id,'move',9,22),'ok');
+const before=snap().village.circular.waste_treated;
+// The building closes when packing is queued, rather than treating while moved.
+advanceGame(g,1);assert.equal(snap().village.circular.waste_treated,before);
+assert.equal(g.cancel_building_work(bed.id),'ok');
+advanceGame(g,120);assert(snap().village.circular.waste_treated>before);
+const corrupt=snap();corrupt.village.circular.waste_treated=-1;
+const valid=g.snapshot();assert(!g.restore(JSON.stringify(corrupt)));assert.equal(g.snapshot(),valid);
+// Previous saves default to automatic treatment and zero lifetime treatment.
+const previous=snap();delete previous.village.circular.banana_treatment;delete previous.village.circular.waste_treated;
+assert(g.restore(JSON.stringify(previous)));assert.equal(snap().village.circular.banana_treatment,true);assert.equal(snap().village.circular.waste_treated,0);
+g.free();
+console.log('PASS: banana recipe, legal fixture, gradual real-time treatment, automatic controls, exact saves, paused relocation, cancellation and old-save defaults.');
