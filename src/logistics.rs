@@ -656,9 +656,9 @@ pub fn pending(v: &Village, id: usize) -> bool {
         .is_some_and(|s| v.minutes >= s.retry_after[id])
         && !candidates(v).is_empty()
 }
-fn claim(v: &mut Village, r: &mut Resident) -> bool {
+type Plan = (Candidate, [f32; 2], [f32; 2], navigation::Route, f32);
+fn plan(v: &Village, r: &Resident) -> Option<Plan> {
     let options = candidates(v);
-    let destinations: std::collections::HashSet<_> = options.iter().map(|c| c.to).collect();
     let mut best = None;
     for c in options {
         if best.as_ref().is_some_and(
@@ -688,6 +688,23 @@ fn claim(v: &mut Village, r: &mut Resident) -> bool {
             best = Some((c, a, b, first, effort));
         }
     }
+    best
+}
+/// The same two reachable routes used when a resident claims a load.
+pub fn quote(v: &Village, r: &Resident) -> Option<(f32, f32)> {
+    plan(v, r).map(|(c, _, _, _, minutes)| {
+        let urgency = match c.rank.0 {
+            0 => 850.,
+            1 => 600. + (3 - c.rank.1) as f32 * 60.,
+            2 => 380.,
+            _ => 200.,
+        };
+        (minutes, urgency)
+    })
+}
+fn claim(v: &mut Village, r: &mut Resident) -> bool {
+    let destinations: std::collections::HashSet<_> = candidates(v).iter().map(|c| c.to).collect();
+    let best = plan(v, r);
     let Some((c, a, b, path, _)) = best else {
         for p in &mut v.logistics.as_mut().unwrap().stores {
             if destinations.contains(&p.id) {

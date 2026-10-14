@@ -119,8 +119,10 @@ pub struct Village {
     pub simulation: simulation::State,
     #[serde(default)]
     pub logistics: Option<logistics::State>,
+    #[serde(default)]
+    pub workforce: workforce::State,
     #[serde(skip)]
-    pub activity_claims: [Option<String>; 5],
+    pub activity_claims: [Option<workforce::Claim>; 5],
     pub version: u32,
     pub map_size: i32,
     pub minutes: f32,
@@ -454,93 +456,8 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if !work_time(v.minutes) {
         leisure::choose(r, v)
-    } else if v.water < 24. && available(v, "water") {
-        ("water", "Carrying river water back to our storage.")
-    } else if workforce::cooking(v, r.id)
-        && available(v, "cook")
-        && !situations::protected(v, r.id, "cook")
-        && (r.id == (v.minutes / 1440.) as usize % 5 || v.meals < 3 || situations::helping(v, r.id))
-    {
-        (
-            "cook",
-            if situations::helping(v, r.id) {
-                "Taking a kitchen shift so our neighbour can have time back."
-            } else {
-                "Preparing a pot of food for everyone."
-            },
-        )
-    } else if available(v, "building_work") {
-        (
-            "building_work",
-            "Making time for our queued building crew work.",
-        )
-    } else if available(v, "build") {
-        (
-            "build",
-            "A little progress on our shared project before taking a break.",
-        )
-    } else if logistics::pending(v, r.id) {
-        (
-            "haul",
-            "Bringing supplies to where our community needs them.",
-        )
-    } else if r.id == 1
-        && v.progress.use_tools
-        && v.progress.tool_uses == 0
-        && available(v, "craft")
-    {
-        (
-            "craft",
-            "Making a small batch of tools for our next shared project.",
-        )
-    } else if matches!(r.id, 2 | 3)
-        && v.economy
-            .sources
-            .iter()
-            .any(|s| s.active && (s.harvest_requested || s.plant_requested))
-        && let Some((task, _)) = economy::local_job(v)
-    {
-        // A queued player request gets a turn before repeat routine gardening.
-        // Hunger, meals, fatigue and the community work window still come first.
-        if task == "source" {
-            ("source", "Making time for the material work we requested.")
-        } else {
-            ("prepare", "Preparing materials for our approved project.")
-        }
-    } else if economy::local_job(v).is_some() {
-        let (task, _) = economy::local_job(v).unwrap();
-        if task == "source" {
-            (
-                "source",
-                "Collecting the materials our approved projects need.",
-            )
-        } else {
-            (
-                "prepare",
-                "Preparing a bounded batch for our approved project.",
-            )
-        }
-    } else if workforce::ingredients(v, r.id) && available(v, "garden") {
-        ("garden", "Our next meals start in the garden.")
-    } else if available(v, "build") {
-        ("build", "Let's get our basic infrastructure ready.")
-    } else if available(v, "compost") && v.progress.compost < 4 {
-        (
-            "compost",
-            "Turning kitchen scraps into nourishment for our soil.",
-        )
-    } else if workforce::ingredients(v, r.id) {
-        (
-            "gather",
-            "Gathering a little fresh food for the next few meals.",
-        )
-    } else if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
-        ("craft", "Making tools for our next shared project.")
-    } else if r.favorite == "water"
-        && v.water < 70_f32.min(ecology::capacity(v) * 0.8)
-        && available(v, "water")
-    {
-        ("water", "Making sure we have water for tomorrow.")
+    } else if workforce::choose_work(r, v) {
+        return;
     } else if r.social < 55. {
         ("socialize", "A little company would be good.")
     } else {
@@ -668,6 +585,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         f64::from(until),
         &activities,
     );
+    workforce::record(&mut v, f64::from(before), f64::from(until), people.iter());
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     economy::advance(&mut v, dt * MINUTES_PER_SECOND);
     power::advance(&mut v, dt * MINUTES_PER_SECOND);
@@ -824,7 +742,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         {
             choose(&mut r, &v);
         }
-        v.activity_claims[r.id] = (r.trip.is_none() && r.remaining > 0.).then(|| r.task.clone());
+        v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
         if r.task != "haul" {
             logistics::interrupt(&mut v, &r);
         }
@@ -1058,6 +976,7 @@ impl Game {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
                 logistics: None,
+                workforce: workforce::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 version: 4,
                 map_size: MAP_SIZE,
@@ -1513,6 +1432,7 @@ impl Game {
             return false;
         }
         if !logistics::valid(v, &save.residents)
+            || !workforce::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
             || !supplies::valid(v)
