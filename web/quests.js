@@ -297,6 +297,12 @@ export function questStatus(v,id) {
 // Goals always provide a next step through planning, construction and use.
 export function goalRoute(state, objective) {
   if(objective?.action)return {type:objective.action};
+  if(objective?.build){
+    const fits=b=>b.kind===objective.build&&(!objective.recipe||state.village.economy.projects.some(p=>p.building===b.id&&p.recipe===objective.recipe));
+    const ready=state.village.buildings.filter(b=>fits(b)&&b.progress>=100).length;
+    const moving=(state.village.building_jobs||[]).filter(j=>j.action==='move'&&j.original_progress>=100&&state.village.buildings.some(b=>b.id===j.building&&fits(b)));
+    if(moving.length&&ready+(moving.length)>=(objective.buildTarget??objective.target))return {type:'visit',id:moving[0].building};
+  }
   if(objective?.recipe && !state.village.economy.projects.some(p=>p.recipe===objective.recipe&&state.village.buildings.some(b=>b.id===p.building&&b.progress>=100))) {
     const project=state.environment.economy.projects.find(p=>p.kind===objective.build&&p.recipe===objective.recipe);
     return project?{type:"project",id:project.building,project}:{type:"plan",kind:objective.build,recipe:objective.recipe};

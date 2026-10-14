@@ -194,7 +194,13 @@ pub fn next(v: &Village) -> Option<usize> {
 }
 pub fn assign_target(r: &mut Resident, v: &Village) {
     let Some(id) = next(v) else {
-        r.remaining = 0.;
+        assign(
+            r,
+            v,
+            "rest",
+            "There is no available crew job. Taking a break.",
+            false,
+        );
         return;
     };
     let b = v.buildings.iter().find(|b| b.id == id).unwrap();
@@ -215,8 +221,13 @@ pub fn assign_target(r: &mut Resident, v: &Village) {
         }
         .into();
     } else {
-        r.activity_building = None;
-        r.remaining = 0.;
+        assign(
+            r,
+            v,
+            "rest",
+            "There is no clear work spot here. Taking a break.",
+            false,
+        );
     }
 }
 pub fn sync(r: &mut Resident, v: &Village) {
@@ -649,5 +660,17 @@ mod tests {
             assert_eq!(v.water, 40.);
         }
         checkpoint(&mut g);
+    }
+    #[test]
+    fn missing_worksites_leave_a_valid_rest_activity_instead_of_an_orphaned_job() {
+        let mut g = Game::new();
+        let v = g.app.world().resource::<Village>().clone();
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        let mut r = q.iter_mut(g.app.world_mut()).next().unwrap();
+        assign(&mut r, &v, "building_work", "Please help", true);
+        assert_eq!(r.task, "rest");
+        assert_eq!(r.activity_building, None);
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
     }
 }

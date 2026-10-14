@@ -3,6 +3,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
 import {placementReason,movePlacementReason,milestones} from '../web/polish.js';
 import {sourceKinds} from '../web/resource-sites.js';
+import {goalRoute} from '../web/quests.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const snap=g=>JSON.parse(g.snapshot());
 function until(g,test,label,limit=6000){for(let i=0;i<limit;i++){const s=snap(g);if(test(s))return s;g.tick(.25);}throw Error(`Timed out: ${label}`);}
@@ -32,6 +33,7 @@ assert(timings[0]<timings[1],'Demolition must finish sooner than salvage from th
 const g=new Game();g.start_mode('sandbox');assert.equal(g.place_with_recipe('home',5,5,'adobe'),'ok');
 assert.equal(g.queue_building_work(0,'move',18,18),'ok');assert.equal(g.cancel_building_work(0),'ok');assert.equal(snap(g).village.buildings[0].x,5);checkpoint(g);
 const before=snap(g);assert.equal(g.queue_building_work(0,'move',18,18),'ok');checkpoint(g);
+assert.deepEqual(goalRoute(snap(g),{build:'home',recipe:'adobe',target:1}),{type:'visit',id:0},'A moved prerequisite should route to crew review instead of an unnecessary replacement');
 assert.notEqual(g.place('home',18,18),'ok');assert.notEqual(g.toggle_road(18,18),'ok');assert.notEqual(g.place_source(0,18,18),'ok');
 assert(placementReason(snap(g).village,'home',18,18));assert(placementReason(snap(g).village,'road',18,18));assert(placementReason(snap(g).village,sourceKinds[0],18,18));
 until(g,s=>s.village.building_jobs[0]?.stage==='rebuild','packing');

@@ -922,7 +922,7 @@ function updateQuests() {
   action.disabled=false;shortcut.disabled=false;
   let label='',onClick=()=>{};
   if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>{if(route.recipe){$('#home-material-method').value=route.recipe;$('#home-material-method').dispatchEvent(new Event('change'));}setTool(route.kind);};}
-  if(route?.type==='visit'){label=`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
+  if(route?.type==='visit'){label=(v.building_jobs||[]).some(j=>j.building===route.id)?'Review crew work':`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
   if(route?.type==='project'){
     label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
     onClick=()=>showPanel('projects-panel');

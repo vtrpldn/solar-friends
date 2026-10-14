@@ -561,6 +561,16 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
     if matches!(task, "source" | "prepare" | "building_work") && !work_time(v.minutes) {
         return Some("Material collection and preparation wait for community work hours: 09:00–12:00 and 15:00–16:00.".into());
     }
+    if task == "building_work"
+        && let Some(building) =
+            building_work::next(v).and_then(|id| v.buildings.iter().find(|b| b.id == id))
+        && spacing::approach(v, building, id).is_none()
+    {
+        return Some(
+            "There is no clear work spot for me at this site. Make a little room around it first."
+                .into(),
+        );
+    }
     if situations::protected(v, id, task) {
         return Some(
             "We agreed to cover this work. Let our neighbour have their time back.".into(),
