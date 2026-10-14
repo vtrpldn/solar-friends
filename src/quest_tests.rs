@@ -109,6 +109,8 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
         .progress
         .completed[0] = true;
     ready_building(&mut g, "grove", 8, 8);
+    assert_eq!(g.place_source(0, 18, 18), "ok");
+    assert_eq!(g.place_source(1, 22, 18), "ok");
     for _ in 0..3 {
         finish_task(&mut g, 3, "gather");
     }
@@ -174,7 +176,7 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.economy.orders.push(economy::Order {
-            pickup_by: None,
+            pickup_by: Some(4),
             id: 0,
             items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             paid: 6700,
@@ -183,7 +185,9 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
             status: "delivered".into(),
         });
         v.economy.next_order = 1;
+        v.economy.work_day[4] = 0;
     }
+    ready_building(&mut g, "warehouse", 18, 18);
     let funds = g.app.world().resource::<Village>().economy.money;
     assert_eq!(g.contribute_tool_library(), "ok");
     assert!(g.app.world().resource::<Village>().progress.completed[3]);
@@ -221,6 +225,7 @@ fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
         .progress
         .completed[1] = true;
     ready_building(&mut g, "kitchen", 10, 10);
+    ready_building(&mut g, "square", 6, 10);
     g.app
         .world_mut()
         .resource_mut::<Village>()
@@ -280,7 +285,7 @@ fn old_saves_gain_defaults_and_invalid_progress_is_rejected_atomically() {
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 0);
     let before = g.snapshot();
     for (key, value) in [
-        ("tracked", 7),
+        ("tracked", 13),
         ("social_mask", 32),
         ("tool_uses", 37),
         ("gathering_until", 999999),

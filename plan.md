@@ -89,4 +89,36 @@ Why: resource production should come from choices the player makes, rather than 
 
 Growth durations and prices are game-balance abstractions. Town purchases remain the immediate alternative while plants mature.
 
+## Story progression through the complete village
+
+Why: the seven original chapters leave newer buildings and systems unexplained. Extend Story to thirteen chapters, with playable objectives and shortcuts to the relevant tools.
+
+- [x] Arrival: shelter, food, cistern, cooking, personal sleep rhythms and automatic time acceleration.
+- [x] Roots: food forest, planted timber and cultivated bamboo. Gathering: welcome supper, friendships and square.
+- [x] Shared work: storage, paid outside occupations, town pickup, deliveries and shared tools.
+- [x] Resilience and hens: workshop preparation, compost, greenhouse seedlings, crop care and egg cooking.
+- [x] Sunshine: solar farm, battery and actual lighting after dusk.
+- [x] Water loop: ecological toilet, greywater, reed bed, rain collection and reclaimed irrigation.
+- [x] Scraps to energy: biodigester, cooking gas and fully cured compost.
+- [x] Homes of earth: finite extraction, renewable timber harvest/replant, material preparation, adobe construction, surplus sales and neighbour exchange.
+- [x] River power: a placed river generator supplying energy after dusk.
+- [x] Community care: an actual agreement, shared cooking, rest and hobbies. Offer a story check-in so balanced play does not require deliberately overworking someone.
+- [x] A flourishing village: all building kinds, beds, healthy reserves and another gathering.
+- [x] Preserve milestone credit, existing saves and free Sandbox; test native/UI unlock parity, the full public-API playthrough, reloads and desktop quest navigation.
+
 Delivered in incremental commits with 114 native tests, Rust formatting and clippy, a release WebAssembly build and all 24 gameplay verification scripts passing. The new placement verifier compares all 3,380 plot previews with native rules. Browser playtesting placed a paid timber plot, grew timber and bamboo, queued harvests, verified resident work produced eight timber and four bamboo, changed harvest settings and cleared a quarry. Regression checks cover these same controls while protecting the player's saved village. Standing trees use the existing forest art; bamboo and finite sites reuse the established material atlas.
+
+The public game API completed all thirteen chapters on day 47, with each earned checkpoint saved and reloaded. All seventeen building kinds were constructed. Native tests cover old-save padding, invalid progress, real rain/energy/cooking credit and the late-story check-in; a harvest-priority regression protects manually requested work from repeated gardening. Desktop journal and care checks use the earned checkpoints in a protected test scene.
+
+## Resident building work
+
+Why: changing the village layout should take real resident effort and offer a choice between speed and recovering materials.
+
+- [x] Add queued demolition, careful salvage and two-stage relocation, with saved progress and cancellation before packing finishes.
+- [x] Require residents to reach the worksite and work during normal community hours in both modes. Keep food, rest and sleep ahead of these jobs.
+- [x] Reserve relocation destinations against buildings, roads and material plots; retain identities, recipes, crops and equipment when moving.
+- [x] Recover half of actually consumed materials only after salvage finishes, reserve receiving space, and keep utility/bed/storage transitions consistent.
+- [x] Add building-management controls, job feedback and destination previews using the existing game interface and artwork.
+- [x] Verify work duration, material conservation, blocked placement, save/reload, home and utility changes, cancellation and actual desktop controls.
+
+Resident-work validation: 127 native tests and lint pass; the public API verifies actual crew arrival, faster demolition, once-only salvage, both relocation stages, preserved appearance, cancellation, exact saves and 16,224 placement comparisons. Existing gameplay/art verifiers pass. Desktop review exercised paid-garden salvage and relocation in a protected scene; saved Story data was preserved.

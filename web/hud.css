@@ -173,3 +173,11 @@ footer .resources b[hidden]{display:none!important}
 .home-method[hidden] {display:none;}
 
 .source-plans,.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.source-row label{display:block;margin:8px 0}.source-row p{margin:8px 0}.source-row{display:block}
+
+/* Keep the extended story contents beside the current journal page. */
+#journal-chapters{max-height:64vh;overflow-y:auto;overscroll-behavior:contain}
+
+.quest-card-art canvas{width:94px;height:60px;object-fit:contain}
+
+.building-work-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.building-work-actions [data-building-work="move"]{grid-column:1/-1}
+#building-work-controls{border-top:1px solid #c7b07e;margin-top:14px;padding-top:8px}

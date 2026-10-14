@@ -2,7 +2,7 @@ import {itemIcon,materialIcons} from './game-ui.js';
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:n%100?2:0,maximumFractionDigits:2}).format(n/100);
 const time=t=>`Day ${Math.floor(t/1440)+1} · ${String(Math.floor(t%1440/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const names={hydro:'River generator',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost',square:'Square',workshop:'Workshop',coop:'Chicken coop',solar_farm:'Solar farm',streetlight:'Street light'};
+const names={hydro:'River generator',eco_toilet:'Ecological toilet',banana_treatment:'Banana treatment bed',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost',square:'Square',workshop:'Workshop',coop:'Chicken coop',solar_farm:'Solar farm',streetlight:'Street light'};
 export function recipeSummary(state,kind,variant='standard'){
   const e=state.environment.economy,source=e.source_options?.find(s=>s.key===kind);if(source)return state.village.mode==='sandbox'?'Free planting':money(source.cost)+(source.material<2?' · 2 irrigation water':'');
   const r=e.recipes.find(r=>r.kind===kind);if(!r)return 'Free';
@@ -70,10 +70,10 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     if(button.dataset.action==='locate')locate(id);
     if(button.dataset.action==='supplies'){openTown();$('#town-shortages').click();$('#town-shortages').focus();}
     if(button.dataset.action==='pause')transact(game().configure_project(id,p.priority,!p.paused,p.recipe));
-    if(button.dataset.action==='cancel'){$('#project-cancel-note').textContent=`Cancel ${names[p.kind]} ${id+1}? Unused reservations return in full. Half of each consumed material can be salvaged. Trade orders continue unless cancelled separately.`;$('#project-cancel-confirm').dataset.project=id;$('#project-cancel-dialog').showModal();}
+    if(button.dataset.action==='cancel'){$('#project-cancel-note').textContent=`Cancel ${names[p.kind]} ${id+1}? Unused reservations return in full. If materials were consumed, residents must carefully dismantle the structure before half can be recovered. Empty blueprints cancel immediately. Trade orders continue unless cancelled separately.`;$('#project-cancel-confirm').dataset.project=id;$('#project-cancel-dialog').showModal();}
   };
   $('#project-cancel-close').onclick=()=>$('#project-cancel-dialog').close();
-  $('#project-cancel-confirm').onclick=()=>{transact(game().cancel_project(Number($('#project-cancel-confirm').dataset.project)));$('#project-cancel-dialog').close();};
+  $('#project-cancel-confirm').onclick=()=>{const id=Number($('#project-cancel-confirm').dataset.project),result=game().cancel_project(id);transact(result);if(result==='ok')notify((snapshot().village.building_jobs||[]).some(j=>j.building===id)?'Salvage queued. Residents must finish dismantling before materials return.':'Empty blueprint cancelled.');$('#project-cancel-dialog').close();};
   $('#project-list').onchange=event=>{const input=event.target.closest('select');if(!input)return;const id=Number(input.dataset.project),p=snapshot().environment.economy.projects.find(p=>p.building===id);if(p)transact(game().configure_project(id,input.dataset.action==='priority'?Number(input.value):p.priority,p.paused,input.dataset.action==='recipe'?input.value:p.recipe));};
   $('#land-sources').onclick=event=>{
     const button=event.target.closest('button');if(!button)return;
@@ -96,7 +96,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     }
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
-    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders`;
+    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}`;
     $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
     $('#property-description').textContent=e.property;
     $('#preparation-recipes').innerHTML=`<p>${e.workshop?'Workshop preparation includes roof tiles and efficient salvage recovery.':'Residents prepare frames, wall material and fittings at the camp. A workshop adds roof tiles and more efficient salvage recovery.'}</p>`+e.preparation.map(r=>`<p class="recipe-stage"><b>${r.yield} ${e.materials[r.material].name.toLowerCase()}</b>${r.inputs.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('');
