@@ -254,7 +254,9 @@ Rust owns simulation and validated saves. Bevy App and ECS schedule systems and 
 
 - `src/lib.rs`: simulation, requests, construction, saves, and tests.
 - `src/modes.rs`: Story/Sandbox initialization, replenishment and Sandbox removal.
-- `src/economy.rs`: materials, stage reservations, orders, finite sites, preparation, income and sales.
+- `src/economy.rs`: stage reservations, orders, preparation, income and sales.
+- `src/logistics.rs` and `src/navigation.rs`: located ownership, cargo, supply routes, storage targets and recovery.
+- `src/workforce.rs`: food-work reservations derived from current resident activities.
 - `web/economy-ui.js` and `web/economy-art.js`: project/Town controls and shared resource sprites.
 - `src/resource_sites.rs` and `web/resource-sites.js`: player plot placement, cultivation, finite property reserves and preview rules.
 - `src/progression.rs`: persistent quest milestones and building unlocks.
@@ -268,7 +270,7 @@ Run `cargo test --locked` for resource accounting, refusal, construction/harvest
 
 ## Prototype scope
 
-This is a small playable slice. Resident movement follows direct paths; collision-aware navigation, deeper relationship stories, skill progression, seasonal ecology, vehicle deliveries, contracts, specialist crews and the full first-year scenario are future work. Each home provides three beds. Residents without a bed walk out to stay with neighbours overnight, leave the map while sleeping, and begin their return when their individual 6–9 hour sleep target is complete. Those with beds sleep inside village homes and recover faster. New beds do not interrupt an overnight stay already underway. Departures, absence and return walks persist in saves; the People panel shows the reason and return time, and local requests wait until residents return. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
+This is a small playable slice. Material hauling follows routes around occupied plots and the river. Other resident activities retain direct steering. Deeper relationship stories, skill progression, seasonal ecology, connected utilities, contracts, specialist crews and the full first-year scenario remain future work. Each home provides three beds. Residents without a bed walk out to stay with neighbours overnight, leave the map while sleeping, and begin their return when their individual 6–9 hour sleep target is complete. Those with beds sleep inside village homes and recover faster. New beds do not interrupt an overnight stay already underway. Departures, absence and return walks persist in saves; the People panel shows the reason and return time, and local requests wait until residents return. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
 
 Artwork was generated with OpenAI's built-in image generation tool using the user-approved Brazilian ecovila concept. The browser game uses separate sprites rather than displaying the concept as a background.
 
