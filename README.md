@@ -53,7 +53,7 @@ New villages restart after confirmation and retain a backup for their mode. This
 
 The main menu appears on launch. **New game** starts Story; **Sandbox** starts a separate village. Continue either mode from its own saved slot. Click the Solar Friends mark or use Settings → Main menu to return. Reading the menu pauses village life.
 
-**Story** starts with roads, homes, gardens, kitchens and cisterns. Seven chapters introduce new buildings and mechanics in order; the next chapter is followed automatically. Construction uses local materials, town purchases and resident labour. Earlier contributions still count toward later objectives. After the final chapter, all buildings remain available and resource management continues.
+**Story** starts with roads, homes, gardens, kitchens and cisterns. Thirteen chapters introduce new buildings and mechanics in order; the next chapter is followed automatically. Construction uses local materials, town purchases and resident labour. Earlier contributions still count toward later objectives. After the final chapter, all buildings remain available and resource management continues.
 
 **Sandbox** unlocks every building from the start. Placement completes immediately without spending materials or funds. Ingredients stay at least 80, meals at least 20, water fills available storage, funds stay at least R$ 100,000, and tools replenish to 36 uses on simulation ticks. Residents, crops, rain, hens and solar lighting retain their normal routines. Select a building in Buildings to remove it and reuse its plot; rebuilding is free. Roads can be toggled in either mode.
 
@@ -153,18 +153,26 @@ The journal starts with **A Shared Beginning**: arrive, build water and shelter,
 
 | Quest | Objectives | Reward |
 | --- | --- | --- |
-| Roots for Tomorrow | Finish a food forest and gather six fruit. | Compost station. Cooking produces scraps; two scraps make one compost, which adds three food to the next garden harvest. |
-| A Place to Gather | Serve five meals, complete a social break with each neighbour, and host a welcome supper at the kitchen. | Community square for repeat gatherings. |
-| Made by Our Hands | Receive a town delivery, contribute R$ 120 to a tool library, and finish a building with at least two contributors. | Workshop and greenhouse. Tools and protected seedlings. |
-| Growing Resilience | Build a workshop, compost station and greenhouse; craft tools and bring in an enriched harvest. | Chicken coop. |
-| A Fuller Table | Build a chicken coop and collect three eggs across daylight batches. | Solar farms and street lights. |
-| Sunshine to Share | Finish a solar farm and street light; store twelve energy. | Story complete; continue managing the village freely. |
+| Roots for Tomorrow | Food forest, six fruit, planted timber and cultivated bamboo. | Compost and square; material crops mature in the background. |
+| A Place to Gather | Square, five meals, time with all five neighbours and a welcome supper. | Shared work and community friendships. |
+| Made by Our Hands | Storage house, a paid outside shift, returned truck pickup, town supplies, R$ 120 tool library and shared construction. | Workshop and greenhouse. |
+| Growing Resilience | Workshop tools, compost-enriched harvest, greenhouse seedling raised and planted outdoors. | Chicken coop. |
+| A Fuller Table | Coop, three eggs collected and an actual egg meal cooked. | Solar farm and street lights. |
+| Sunshine to Share | Solar farm, street light, twelve stored energy and actual lighting after dusk. | Ecological toilet and reed bed. |
+| Water Comes Around | Toilet visits, captured rain, filtered greywater and reclaimed irrigation. | Biodigester. |
+| Scraps into Energy | Digestion batch, gas used in cooking and fully cured digestate. | Local construction chapter. |
+| Homes of Earth | Actual timber/bamboo/earth/stone/salvage harvesting, timber replanting, material preparation, adobe home, surplus sale and neighbour exchange. | River generator. |
+| The River Keeps Giving | River generator installed and producing after dusk. | Community care chapter. |
+| Room to Breathe | Follow through on a kitchen agreement and give every neighbour time for a hobby. | Final village chapter. |
+| A Village in Balance | All seventeen building kinds, beds for everyone, healthy food/fresh water and a second gathering. | Complete Story; continue at your own pace. |
 
-Gatherings cost five prepared meals and require at least three rested, fed neighbours. Start between 08:00 and 18:00, at most once per day. They last two game hours; at least three neighbours must reach the venue. Attendees gain connection, fullness, and mutual friendship memories visible in resident details. The welcome supper uses the kitchen; later gatherings use the square.
+Gatherings cost five prepared meals and require at least three rested, fed neighbours. Start between 08:00 and 18:00, at most once per day. They last two game hours; at least three neighbours must reach the venue. Attendees gain connection, fullness, and mutual friendship memories visible in resident details. The welcome supper can use the kitchen; once the square is ready, gatherings meet there.
 
 Tools add two food to gardening harvests or make construction 25% faster. Each finished task or building consumes one use. The community panel lets you conserve tools, inspect compost supplies, and host gatherings. Residents can make compost and tools autonomously or on request. Tool stock is capped at 36 uses.
 
-The journal, unlocks, tools, friendships and economy persist together in version 3 village saves.
+The journal, unlocks, tools, friendships and economy persist together in version 3 village saves. Activity milestones remain credited after supplies are consumed, and seven-chapter saves retain their achievements while gaining the next chapters. Sandbox remains free with every building unlocked.
+
+The care chapter offers Luz a personal-time check-in if no cooking concern has arisen, so balanced play never requires deliberately overworking a resident. The agreement still needs actual cooking cover, rest and a full day; accepting it alone does not complete the chapter.
 
 ## Village situations
 
@@ -243,7 +251,7 @@ Rust owns simulation and validated saves. Bevy App and ECS schedule systems and 
 - `web/art/`: generated transparent game sprites.
 - `assets/art-direction/`: approved concept and visual constraints.
 
-Run `cargo test --locked` for resource accounting, refusal, construction/harvest progression, and save validation. Run `cargo fmt --check` and `cargo clippy --locked -- -D warnings` before pushing. GitHub Actions builds and tests the same WASM artifact. After building, `node scripts/verify-economy.mjs` checks 24 game days each of funded, empty-fund and depleted properties, including completion, intermediate save round trips, capacity and leisure. `node scripts/verify-resource-sites.mjs` checks cultivation, whole-tree harvests and all 3,380 plot placement previews against the native rules. The cultivation Dev Tools scene provides growing timber, bamboo and a manually established quarry for visual checks. `node scripts/verify-quests.mjs` (Node 22+) completes all seven Story chapters through the public game API and checks the reward mechanics. Pass an output directory to save its playthrough checkpoints for browser testing.
+Run `cargo test --locked` for resource accounting, refusal, construction/harvest progression, and save validation. Run `cargo fmt --check` and `cargo clippy --locked -- -D warnings` before pushing. GitHub Actions builds and tests the same WASM artifact. After building, `node scripts/verify-economy.mjs` checks 24 game days each of funded, empty-fund and depleted properties, including completion, intermediate save round trips, capacity and leisure. `node scripts/verify-resource-sites.mjs` checks cultivation, whole-tree harvests and all 3,380 plot placement previews against the native rules. The cultivation Dev Tools scene provides growing timber, bamboo and a manually established quarry for visual checks. `node scripts/verify-quests.mjs` (Node 22+) completes all thirteen Story chapters through the public game API and checks the reward mechanics. Pass an output directory to save its playthrough checkpoints for browser testing.
 
 ## Prototype scope
 

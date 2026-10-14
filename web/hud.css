@@ -173,3 +173,6 @@ footer .resources b[hidden]{display:none!important}
 .home-method[hidden] {display:none;}
 
 .source-plans,.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.source-row label{display:block;margin:8px 0}.source-row p{margin:8px 0}.source-row{display:block}
+
+/* Keep the extended story contents beside the current journal page. */
+#journal-chapters{max-height:64vh;overflow-y:auto;overscroll-behavior:contain}

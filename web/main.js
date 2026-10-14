@@ -255,7 +255,7 @@ function refreshMenu() {
         const v=JSON.parse(candidate.snapshot()).village;
         if((v.mode || 'story')!==mode) continue;
         button.hidden=false;any=true;
-        button.querySelector('small').textContent=`Day ${1+Math.floor(v.minutes/1440)} · ${v.buildings.length} ${v.buildings.length===1?'building':'buildings'}${mode==='story'?` · ${completedQuests(v).filter(Boolean).length}/7 chapters`:''}`;
+        button.querySelector('small').textContent=`Day ${1+Math.floor(v.minutes/1440)} · ${v.buildings.length} ${v.buildings.length===1?'building':'buildings'}${mode==='story'?` · ${completedQuests(v).filter(Boolean).length}/${quests.length} chapters`:''}`;
       }
     } catch {
       $('#menu-status').textContent='Device storage is unavailable. You can play this session and export your village in Settings.';
@@ -877,7 +877,7 @@ function updateQuests() {
   const finished=completions.every(Boolean);
   const completedCount = done ? objectives.length : objectives.filter(o => o.done).length;
   $("#goal-label").textContent = finished ? "A flourishing village" : done ? "A shared dream fulfilled" : quest.title;
-  $("#goal-next").textContent = finished ? "7/7 chapters complete · keep growing" : done ? "Follow our next chapter →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
+  $("#goal-next").textContent = finished ? `${quests.length}/${quests.length} chapters complete · keep growing` : done ? "Follow our next chapter →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
   $("#goal-meter").value = completedCount; $("#goal-meter").max = objectives.length;
   $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
   $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
@@ -905,7 +905,7 @@ function updateQuests() {
   const action=$("#tutorial-action"), shortcut=$("#goal-action");
   action.disabled=false;shortcut.disabled=false;
   let label='',onClick=()=>{};
-  if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>setTool(route.kind);}
+  if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>{if(route.recipe){$('#home-material-method').value=route.recipe;$('#home-material-method').dispatchEvent(new Event('change'));}setTool(route.kind);};}
   if(route?.type==='visit'){label=`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
   if(route?.type==='project'){
     label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
@@ -924,6 +924,13 @@ function updateQuests() {
       state=JSON.parse(game.snapshot());updateUI();save();
     };
   }
+  const chapterPanels={build:['build-panel','Review village buildings'],town:['town-panel','Open Town'],land:['projects-panel','Open Land & materials'],preparation:['projects-panel','Review material preparation'],supplies:['supplies-panel','Open Supplies'],power:['power-panel','Open Power'],people:['community-panel','Meet our neighbours']};
+  if(chapterPanels[route?.type]){
+    const [panel,text]=chapterPanels[route.type];label=text;
+    onClick=()=>{showPanel(panel);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
+  }
+  if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
+  if(route?.type==='gathering'){label='Host a gathering · 5 meals';onClick=()=>{const result=game.host_gathering();toast(result==='ok'?'Our gathering is starting.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
   action.hidden=!route;action.textContent=label;action.onclick=onClick;
   shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
   $("#open-journal").textContent =
@@ -1100,7 +1107,7 @@ function updateUI() {
   $('[data-panel="town-panel"]').hidden=free;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
-  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows seven chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows thirteen chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
   replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or remove it and reuse the plot.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();

@@ -98,6 +98,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 .progress
                 .compost
                 .saturating_add(v.circular.pending_compost);
+            v.progress.digestate_cured = true;
             v.circular.pending_compost = 0;
             event(
                 v,

@@ -37,7 +37,7 @@
         aria-label="Isometric ecovila. Select a building tool and click a clearing to build. Residents are also selectable from the community panel."
       ></canvas>
       <section class="goal-tracker" aria-label="Current goal">
-        <button id="goal-shortcut"><span id="goal-label"></span><strong id="goal-next"></strong><progress id="goal-meter" max="7" value="0"></progress></button>
+        <button id="goal-shortcut"><span id="goal-label"></span><strong id="goal-next"></strong><progress id="goal-meter" max="13" value="0"></progress></button>
         <button id="goal-action" hidden></button>
       </section>
       <div id="resident-hint" hidden></div>
@@ -47,7 +47,7 @@
         <span class="eyebrow" id="tutorial-count">ARRIVAL</span>
         <h2 id="tutorial-title">A shared beginning</h2>
         <p id="quest-speaker"></p>
-        <progress id="quest-progress" max="7" value="0"></progress>
+        <progress id="quest-progress" max="13" value="0"></progress>
         <p id="tutorial-copy"></p>
         <button id="tutorial-action" class="primary" hidden></button>
         <div class="resource-cycle" aria-label="Water and gardens">
@@ -232,7 +232,7 @@
         <section class="menu-choices" aria-label="Choose how to play">
           <div class="menu-return" hidden><button id="menu-return">Resume village</button></div>
           <div id="menu-continues" hidden><button data-continue="story" hidden><b>Continue story</b><small></small></button><button data-continue="sandbox" hidden><b>Continue sandbox</b><small></small></button></div>
-          <button class="mode-choice story-choice" data-new-mode="story"><strong>New game</strong><span class="mode-description">Story · Build a village through seven chapters</span></button>
+          <button class="mode-choice story-choice" data-new-mode="story"><strong>New game</strong><span class="mode-description">Story · Build a village through thirteen chapters</span></button>
           <button class="mode-choice" data-new-mode="sandbox"><strong>Sandbox</strong><span class="mode-description">Free building · Everything unlocked</span></button>
           <div class="menu-links"><button id="menu-settings">Settings</button><button id="menu-help">How to play</button></div>
           <p class="menu-save-note">Story and Sandbox have separate saves.</p><p id="menu-status" role="status"></p>
@@ -270,7 +270,7 @@
       <button id="close-help" class="dialog-close" aria-label="Close help">
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
-      <h2 id="help-title">How to play</h2><p id="help-intro">Choose Story to follow seven chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
+      <h2 id="help-title">How to play</h2><p id="help-intro">Choose Story to follow thirteen chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
       <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li id="help-start">

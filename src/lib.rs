@@ -460,6 +460,20 @@ fn choose(r: &mut Resident, v: &Village) {
             "craft",
             "Making a small batch of tools for our next shared project.",
         )
+    } else if matches!(r.id, 2 | 3)
+        && v.economy
+            .sources
+            .iter()
+            .any(|s| s.active && (s.harvest_requested || s.plant_requested))
+        && let Some((task, _)) = economy::local_job(v)
+    {
+        // A queued player request gets a turn before repeat routine gardening.
+        // Hunger, meals, fatigue and the community work window still come first.
+        if task == "source" {
+            ("source", "Making time for the material work we requested.")
+        } else {
+            ("prepare", "Preparing materials for our approved project.")
+        }
     } else if supplies::needs_ingredients(v) && available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
     } else if available(v, "build") && matches!(r.id, 0 | 1) {
@@ -808,6 +822,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         }
         if r.remaining <= 0. {
             match r.task.as_str() {
+                task if leisure::hobby(task) => {
+                    v.progress.hobby_mask |= 1 << r.id;
+                }
                 "visit" => {
                     interactions::finish(&mut v, &mut r);
                     if let Some(id) = r.visit_building
@@ -1272,7 +1289,10 @@ impl Game {
     }
     pub fn track_quest(&mut self, quest: usize) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if quest >= 7 || v.mode == modes::Mode::Sandbox || !progression::available(&v, quest) {
+        if quest >= progression::CHAPTER_COUNT
+            || v.mode == modes::Mode::Sandbox
+            || !progression::available(&v, quest)
+        {
             return false;
         }
         v.progress.tracked = quest;
@@ -1391,7 +1411,8 @@ impl Game {
         }
         let p = &v.progress;
         if !situations::valid(v)
-            || p.tracked >= 7
+            || p.tracked >= progression::CHAPTER_COUNT
+            || p.hobby_mask > 31
             || p.social_mask > 31
             || p.invited > 31
             || p.attended > 31

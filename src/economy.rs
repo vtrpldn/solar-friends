@@ -555,6 +555,7 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
             remove(v, i, n);
         }
         add(v, index, yield_);
+        v.progress.prepared_batches = v.progress.prepared_batches.saturating_add(1);
     }
     rebalance(v);
 }
@@ -913,6 +914,7 @@ impl Game {
                 .into();
         }
         v.food -= n as f32;
+        v.progress.surplus_sold = true;
         ledger(
             &mut v,
             n as i64 * 300,
@@ -932,6 +934,7 @@ impl Game {
         v.food -= 4.;
         add(&mut v, 8, 2);
         v.economy.exchange_day = day;
+        v.progress.parts_exchanged = true;
         rebalance(&mut v);
         event(
             &mut v,

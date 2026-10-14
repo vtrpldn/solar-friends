@@ -6,16 +6,16 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const snap=g=>JSON.parse(g.snapshot());
 const story=new Game();
 const buildings=snap(story).environment.economy.recipes.map(r=>r.kind);
-assert.equal(quests.length,7);
-for(let chapter=0;chapter<7;chapter++) {
+assert.equal(quests.length,13);
+for(let chapter=0;chapter<quests.length;chapter++) {
   const fixture=snap(story);
   fixture.village.progress.completed=Array.from({length:4},(_,i)=>i<chapter);
-  fixture.village.progress.later_completed=Array.from({length:3},(_,i)=>i+4<chapter);
+  fixture.village.progress.later_completed=Array.from({length:quests.length-4},(_,i)=>i+4<chapter);
   fixture.village.progress.tracked=chapter;
   assert(story.restore(JSON.stringify(fixture)));
   const v=snap(story).village;
-  for(let i=0;i<7;i++)assert.equal(questAvailable(v,i),i<=chapter);
-  assert.deepEqual(completedQuests(v),Array.from({length:7},(_,i)=>i<chapter));
+  for(let i=0;i<quests.length;i++)assert.equal(questAvailable(v,i),i<=chapter);
+  assert.deepEqual(completedQuests(v),Array.from({length:quests.length},(_,i)=>i<chapter));
   for(const kind of buildings) {
     const g=new Game();assert(g.restore(story.snapshot()));
     const allowed=unlockQuest[kind]===undefined || unlockQuest[kind]<chapter;
@@ -49,4 +49,4 @@ for(const kind of buildings) {
 const g=new Game();assert.equal(g.host_gathering().includes('Roots for Tomorrow'),true);assert.equal(g.contribute_tool_library().includes('A Place to Gather'),true);
 assert.equal(goalRoute({village:{buildings:[{id:0,kind:'coop',progress:100}]},environment:{economy:{projects:[]}}},{build:'coop',target:3,buildTarget:1}).type,'visit');
 g.free();story.free();
-console.log('PASS: all 17 buildings across seven Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');
+console.log('PASS: all 17 buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');

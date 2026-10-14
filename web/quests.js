@@ -1,4 +1,6 @@
 // Text and objective views; Rust owns permanent completion and unlocks.
+export const storyBuildingKinds = ["home","garden","well","kitchen","grove","warehouse","compost","square","workshop","greenhouse","coop","solar_farm","streetlight","eco_toilet","wetland","biodigester","hydro"];
+const actionGoal = (action, label, value, target, hint) => ({...goal(label,value,target,hint),action});
 const count = (v, kind) =>
   v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
 const goal = (label, value, target, hint, build = null) => ({
@@ -67,7 +69,7 @@ export const quests = [
         "Welcome the next morning",
         v.mornings,
         1,
-        "Let the village rest overnight. Morning begins at 06:00.",
+        "Neighbours choose their own bedtimes and sleep six to nine hours as needed. Without a bed they stay outside overnight. Time speeds to 16× while everyone is sleeping or at an outside job; normal speed returns with them.",
       ),
     ],
   },
@@ -78,7 +80,7 @@ export const quests = [
     art: "compost",
     story:
       "“A food forest feeds us today. Returning our scraps to the soil will feed us tomorrow.”",
-    reward: "Compost + ecological toilet · caring for the land",
+    reward: "Compost + community square · soil & friendship",
     building: "compost",
     after:
       "Build a compost station. Two kitchen scraps become one compost; gardens use it automatically for three extra food per harvest.",
@@ -96,6 +98,8 @@ export const quests = [
         6,
         "Ask a neighbour to forage food. With a finished food forest, each trip also brings two fruit.",
       ),
+      actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0), 1, "Open Land in Projects and plant a timber plot. It needs water and four moist days before whole trees can be harvested; start early."),
+      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1), 1, "Place a bamboo plot. Moist growth takes two days; shoots regrow after cutting. Town purchases can bridge the wait."),
     ],
   },
   {
@@ -104,11 +108,12 @@ export const quests = [
     theme: "CARE & CONNECTION",
     art: "square",
     story: "“We share the work. Let's make time to share our stories, too.”",
-    reward: "Community square · gatherings & friendships",
+    reward: "Shared work · storage, town trips & income",
     building: "square",
     after:
-      "Build a community square. Host a gathering with five prepared meals; neighbours who attend grow closer. Once a day, between 08:00 and 18:00.",
+      "Keep meeting at our square. Next, organise storage, town trips and income to support the work we share.",
     objectives: (v) => [
+      goal("Build our community square",count(v,"square"),1,"Make a place to meet. After the welcome supper, gatherings at the square strengthen friendships.","square"),
       goal(
         "Serve five cooked meals",
         v.meals_served,
@@ -139,11 +144,14 @@ export const quests = [
     art: "workshop",
     story:
       "“Many hands made these homes. With a few good tools, imagine what we could make next.”",
-    reward: "Workshop + greenhouse + reed bed · tools, seedlings & water",
+    reward: "Workshop + greenhouse · tools & seedlings",
     building: "workshop",
     after:
       "Build a workshop and a greenhouse. Eight free timber crafts twelve tool uses for 25% faster construction; moist greenhouse beds raise seedlings.",
     objectives: (v) => [
+      goal("Build a storage house",count(v,"warehouse"),1,"Incoming orders also use space. A storage house adds 300 receiving spaces.","warehouse"),
+      actionGoal("town", "Bring home an outside-job contribution", +v.economy.work_day.some(day=>day>=0),1,"Enable one personal occupation in Town. Residents leave for their 09:00–17:00 shift and contribute its income after returning. Jobs are optional; you may disable them after this lesson."),
+      actionGoal("town", "Collect an order by truck", +v.economy.orders.some(o=>o.status==="delivered"&&o.pickup_by!=null),1,"Buy a small basket, choose resident pickup and an available driver. The truck holds 40 units; it must return before supplies count. Larger orders use next-day delivery."),
       goal(
         "Receive a town delivery",
         +v.economy.orders.some(o=>o.status==='delivered'),
@@ -169,7 +177,7 @@ export const quests = [
   },
   {
     title: "Growing Resilience", person: "Bento & Iara", theme: "CRAFT & CULTIVATE",
-    art: "greenhouse", building: "coop", reward: "Chicken coop + biodigester · eggs & cooking fuel",
+    art: "greenhouse", building: "coop", reward: "Chicken coop · varied meals",
     story: "“Good tools, living soil, and seedlings under glass. Let's make our harvests more dependable.”",
     after: "A resilient garden makes room for a fuller table. Build a chicken coop and keep food aside for the hens.",
     objectives: v => [
@@ -178,33 +186,105 @@ export const quests = [
       goal("Build a compost station",count(v,"compost"),1,"Kitchen scraps become compost for our gardens.","compost"),
       goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Make compost from kitchen scraps. The next garden harvest uses it automatically.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
+      actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight hours of moist growth raises a seedling; rain does not water covered beds."),
+      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Its next planting uses an available seedling for a growth head start. Supplies also lets you choose beans, lettuce or tomatoes."),
     ],
   },
   {
     title: "A Fuller Table", person: "Nina", theme: "CARE & ABUNDANCE",
-    art: "coop", building: "solar_farm", reward: "Solar farm + river generator + street lights · shared power",
+    art: "coop", building: "solar_farm", reward: "Solar farm + street lights · shared power",
     story: "“A few hens, a little care, and fresh eggs for everyone. We can grow without rushing.”",
     after: "Our table is more varied. Now collect sunshine to keep our shared buildings and paths lit after dusk.",
     objectives: v => [
       goal("Build a chicken coop",count(v,"coop"),1,"Finish a coop and keep at least nine ingredients in the pantry.","coop"),
+      actionGoal("supplies", "Cook with our eggs",+v.progress.egg_meal,1,"Enable cooking with eggs in Supplies. Two eggs, two ingredients and one fresh water make seven meals when a neighbour cooks."),
       {...goal("Collect our first three eggs",v.progress.eggs_collected||0,3,"Enable hen feeding in Supplies. Three ingredients feed a batch; eggs arrive after twelve daylight hours.","coop"),buildTarget:1},
     ],
   },
   {
     title: "Sunshine to Share", person: "Our founding five", theme: "ENERGY & INDEPENDENCE",
-    art: "solar_farm", building: "solar_farm", reward: "A flourishing village · keep growing at your own pace",
+    art: "solar_farm", building: "solar_farm", reward: "Ecological toilet + reed bed · close the water loop",
     story: "“The sun gives us more than warm mornings. Let's save a little of it for the evening.”",
-    after: "All seven chapters are complete. Every building is unlocked. Keep tending Vila Aurora, with the same resources and rhythms you've learned.",
+    after: "Our evenings are lit. Next, separate household wastewater and turn greywater into irrigation water.",
     objectives: v => [
-      goal("Build a shared generator",count(v,"solar_farm")+count(v,"hydro"),1,"Choose a solar farm or river generator. Order its equipment in Town, then complete construction.","solar_farm"),
+      goal("Build a solar farm",count(v,"solar_farm"),1,"Order solar equipment in Town. A completed farm generates through daylight and adds 36 battery capacity.","solar_farm"),
       goal("Light a village path",count(v,"streetlight"),1,"Place a street light beside a road. It draws from our shared battery after dusk.","streetlight"),
-      goal("Store twelve energy",Math.floor(v.power.stored),12,"Let solar or river generation charge the battery. Open Power to watch generation, charge and demand.",null),
+      actionGoal("power", "Light a path after dusk",+v.progress.night_lights,1,"Finish a street light and leave it enabled in Power. Wait for the battery to actually supply it after dusk. Buildings without roof panels use the same village grid."),
+      goal("Store twelve energy",Math.floor(v.power.stored),12,"Let daytime solar generation charge the battery. Open Power to watch generation, charge and demand.",null),
+    ],
+  },
+
+  {
+    title:"Water Comes Around",person:"Iara & Nina",theme:"WATER & SANITATION",art:"wetland",building:"biodigester",reward:"Biodigester · cooking gas & cured compost",
+    story:"“Fresh water for our bodies, reclaimed water for our roots. Each has its own place.”",
+    after:"Our water has a second life. Now give sealed toilet waste and kitchen scraps a safe, useful destination.",
+    objectives:v=>[
+      goal("Build an ecological toilet",count(v,"eco_toilet"),1,"Residents use it daily. Keep fresh water for handwashing; waste stays sealed.","eco_toilet"),
+      goal("Build a lined reed bed",count(v,"wetland"),1,"A reed bed filters household greywater. Its output is irrigation water, never drinking water.","wetland"),
+      actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water available per visit."),
+      actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Rain falls 14:00–17:00 on two days out of three. A completed cistern catches it when there is space."),
+      actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Twelve greywater becomes eight reclaimed water over six hours."),
+      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. Keep a planted plot growing."),
+    ],
+  },
+  {
+    title:"Scraps into Energy",person:"Luz",theme:"CLOSE THE LOOP",art:"biodigester",building:"biodigester",reward:"Local construction · build with the land",
+    story:"“A careful little cycle: scraps, sealed waste, cooking gas, then compost when it is ready.”",
+    after:"Gas stretches our cooking, and cured digestate returns to the soil. Let's build our next home from local earth.",
+    objectives:v=>[
+      goal("Build a biodigester",count(v,"biodigester"),1,"Order its equipment and complete the sealed installation.","biodigester"),
+      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Two sealed waste and two kitchen scraps take eight hours to make four gas and two digestate."),
+      actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking. The next pot uses one gas and yields one extra meal; fresh water is still required."),
+      actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Digestate becomes usable compost only after curing; its later use will not erase this milestone."),
+    ],
+  },
+  {
+    title:"Homes of Earth",person:"Bento & Cauã",theme:"LOCAL MATERIALS & EXCHANGE",art:"home",building:"hydro",reward:"River generator · dependable evening power",
+    story:"“Use what the land can give, renew what grows, and buy the pieces we cannot make here.”",
+    after:"Our adobe home brings local earth into everyday life. Next, meet the river that keeps moving after sunset.",
+    objectives:v=>[
+      ...["Timber trees","Bamboo","Earth","Stone","Salvage"].map((name,m)=>actionGoal("land",`Harvest ${name.toLowerCase()}`, +v.economy.sources.some(s=>s.material===m&&s.harvests>0),1,m<2?"Open Land and request a mature harvest batch. Residents do the work during community work hours; timber takes four moist days and bamboo two.":"Place your own extraction site and request a batch in Land. Stone belongs on stony southeast ground. All sites share finite property reserves; clearing one does not renew the deposit.")),
+      actionGoal("land","Replant a harvested timber plot",+v.progress.timber_replanted,1,"Harvest all four whole trees, then enable replanting or request it. A resident plants the next crop using R$ 40 and two irrigation water."),
+      actionGoal("preparation","Prepare building materials locally",v.progress.prepared_batches||0,1,"Choose Local or Adobe for an unfinished project before materials are committed. Supply raw earth/timber/salvage; neighbours prepare frames, walls and fittings at camp, and tiles at the workshop when the project needs them."),
+      {...goal("Complete an adobe home",+v.economy.projects.some(p=>p.recipe==="adobe"&&v.buildings.some(b=>b.id===p.building&&b.kind==="home"&&b.progress>=100)),1,"Plan a home, choose Adobe before building starts, then follow its stages in Projects. Imported fittings and roofing still matter.","home"),recipe:"adobe"},
+      actionGoal("town","Sell genuine surplus",+v.progress.surplus_sold,1,"Gather a little extra, then sell at least one surplus ingredient in Town. Keep the protected 36-ingredient household reserve."),
+      actionGoal("town","Exchange with our neighbour",+v.progress.parts_exchanged,1,"Set aside four ingredients above the 36 reserve and exchange them for two fittings in Town. The neighbour trades once per day."),
+    ],
+  },
+  {
+    title:"The River Keeps Giving",person:"Nina",theme:"RIVER ENERGY",art:"hydro",building:"hydro",reward:"Community care · a rhythm worth keeping",
+    story:"“The river can cover part of our evening demand while the solar panels rest.”",
+    after:"Sun and water share the grid. What matters now is making room for the people who care for it.",
+    objectives:v=>[
+      goal("Place a river generator",count(v,"hydro"),1,"Choose a river cell with land access and order turbine equipment. This generator adds eighteen battery capacity.","hydro"),
+      actionGoal("power","Generate river power after dusk",+v.progress.river_night,1,"Wait for the completed generator to run after dusk. Power shows its live output: rain increases flow and dry days reduce it. Switch unneeded loads off to stretch the battery."),
+    ],
+  },
+  {
+    title:"Room to Breathe",person:"Luz & our founding five",theme:"REST & SHARED CARE",art:"square",building:"square",reward:"A village in balance · our final chapter",
+    story:"“Our village is more than the things we build. Let's protect time to simply live here.”",
+    after:"An agreement matters when we follow through. Keep the food healthy and leave time for everyone's own interests.",
+    objectives:v=>[
+      actionGoal("situations","Follow through on a community agreement",v.situations.resolved_count,1,"Open Situations and choose shared shifts or a day off. Other neighbours must actually cook, the person needs 72 minutes of rest or company, and a full day must pass. If no concern arose, Luz offers a story check-in for personal time."),
+      actionGoal("people","Let everyone enjoy a hobby",(v.progress.hobby_mask||0).toString(2).replaceAll("0","").length,5,"Let normal leisure unfold: walks, birdwatching, stretching, daydreaming and stargazing. Turn off outside jobs or release repeated requests if they leave too little time."),
+    ],
+  },
+  {
+    title:"A Village in Balance",person:"Our founding five",theme:"LIFE TOGETHER",art:"grove",building:"square",reward:"Our story continues · every building unlocked",
+    story:"“A village fed by its land, connected to its neighbours, with time enough to enjoy both.”",
+    after:"All thirteen chapters are complete. Keep growing Vila Aurora at your own pace, with every building and the rhythms we have learned together.",
+    objectives:v=>[
+      actionGoal("build","Make room for every village building",storyBuildingKinds.filter(k=>count(v,k)>0).length,storyBuildingKinds.length,"Finish every kind of building introduced by the journal. Open Build to find any missing plans."),
+      goal("Keep beds for everyone",count(v,"home"),2,"Two homes provide six beds for our five neighbours.","home"),
+      actionGoal("supplies","Keep a healthy food reserve",Math.floor(v.food),18,"Keep eighteen ingredients for household cooking, then let neighbours enjoy their free time. Trade still protects its larger 36-ingredient reserve before accepting a sale."),
+      actionGoal("supplies","Keep fresh water ready",Math.floor(v.water),20,"Keep twenty fresh water in the cistern. Reclaimed water irrigates plants; drinking and cooking need fresh water."),
+      actionGoal("gathering","Meet again at our square",v.progress.gatherings,2,"Set aside five meals and host another gathering at the square, between 08:00 and 18:00. At least three fed, rested neighbours must attend."),
     ],
   },
 
 ];
-export const unlockQuest = { grove:0, warehouse:0, compost:1, eco_toilet:1, square:2, workshop:3, greenhouse:3, wetland:3, coop:4, biodigester:4, solar_farm:5, hydro:5, streetlight:5 };
-export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[false,false,false])[id-4];
+export const unlockQuest = { grove:0, warehouse:0, compost:1, eco_toilet:6, square:1, workshop:3, greenhouse:3, wetland:6, coop:4, biodigester:7, solar_farm:5, hydro:9, streetlight:5 };
+export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[])[id-4] || false;
 export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
 export const completedQuests = v => quests.map((_,i)=>questCompleted(v,i));
 export function buildingUnlocked(v,kind) {
@@ -217,6 +297,10 @@ export function questStatus(v,id) {
 // Goals always provide a next step through planning, construction and use.
 export function goalRoute(state, objective) {
   if(objective?.action)return {type:objective.action};
+  if(objective?.recipe && !state.village.economy.projects.some(p=>p.recipe===objective.recipe&&state.village.buildings.some(b=>b.id===p.building&&b.progress>=100))) {
+    const project=state.environment.economy.projects.find(p=>p.kind===objective.build&&p.recipe===objective.recipe);
+    return project?{type:"project",id:project.building,project}:{type:"plan",kind:objective.build,recipe:objective.recipe};
+  }
   if(!objective?.build)return null;
   const kind=objective.build, buildings=state.village.buildings.filter(b=>b.kind===kind);
   const project=state.environment.economy.projects.find(p=>p.kind===kind&&!p.paused)||state.environment.economy.projects.find(p=>p.kind===kind);
