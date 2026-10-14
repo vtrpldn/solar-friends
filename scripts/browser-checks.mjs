@@ -115,6 +115,13 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.mouse.click(movePoint.x,movePoint.y);
   crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.building_jobs[0].action,'move');assert.deepEqual(crew.village.building_jobs[0].destination,[18,18]);assert.equal(crew.village.buildings[0].x,6);
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('20');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  // A live earned checkpoint retains residents' unfinished activities and
+  // travel. Observe the handoff instead of assuming packing ends at minute 20.
+  for(let minute=0;minute<180;minute++){
+    crew=await page.evaluate(()=>window.solarDev.snapshot());
+    if(crew.village.building_jobs[0]?.stage!=='pack')break;
+    await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  }
   crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.building_jobs[0].stage,'rebuild');assert.equal(crew.village.buildings[0].x,18);assert.equal(crew.village.buildings[0].progress,0);
   await capture('Packing complete; crew walks to the new site to rebuild','building-move.png');
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('360');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
