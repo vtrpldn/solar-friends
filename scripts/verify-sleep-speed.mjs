@@ -60,7 +60,7 @@ for(const homes of [0,1,2]){
   traces.push({homes,residents:[...starts].map(([id,s])=>({id,...s,wake:wakes.get(id)}))});g.free();
 }
 // Actual availability matters: travelling, walking to bed and village chores remain at selected speed.
-const g=ready(2,600),s=snap(g);s.village.economy.outside_committed_day=0;
+const g=ready(2,600),s=snap(g);s.village.economy.outside_committed_days=[0,0,0,0,0];
 s.residents.forEach(r=>{r.task='outside';r.trip={purpose:'work',phase:'away',return_at:1020};});
 assert(g.restore(JSON.stringify(s)));assert(g.fast_forward_ready());
 for(const phase of ['leaving','returning']){
