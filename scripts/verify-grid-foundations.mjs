@@ -8,7 +8,7 @@ import {placementReason} from '../web/polish.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const game=new Game(),base=JSON.parse(game.snapshot());
 base.village.wood=100;base.village.progress.completed=[true,true,true,true];
-base.village.progress.later_completed=[true,true,true];
+base.village.progress.later_completed.fill(true);
 assert.deepEqual(footprintCorners('home',8,8),[[6.5,6.5],[8.5,6.5],[8.5,8.5],[6.5,8.5]]);
 for(const [kind,art]of Object.entries(allBuildingArt)){
   const f=footprint(kind,8,8),registration=placementArt(kind,art);
@@ -47,4 +47,4 @@ assert(game.restore(JSON.stringify(base)));assert.equal(game.place('home',8,8),'
 const legacy=JSON.parse(game.snapshot());legacy.village.roads=[[7,8]];
 assert(game.restore(JSON.stringify(legacy)));assert.equal(game.toggle_road(7,8),'ok');
 game.free();
-console.log('PASS: all 22 occupied plots on tile boundaries, road adjacency at four zooms, full-plot road exclusion, building/road conflicts and legacy saves.');
+console.log('PASS: all 23 occupied plots on tile boundaries, road adjacency at four zooms, full-plot road exclusion, building/road conflicts and legacy saves.');
