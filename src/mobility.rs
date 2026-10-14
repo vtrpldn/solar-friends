@@ -6,6 +6,7 @@ use crate::*;
 pub enum Purpose {
     Work,
     Overnight,
+    Pickup,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -19,6 +20,8 @@ pub struct Trip {
     pub purpose: Purpose,
     pub phase: Phase,
     pub return_at: f32,
+    #[serde(default)]
+    pub order: Option<u32>,
 }
 
 pub fn departure_time(minutes: f32) -> bool {
@@ -51,6 +54,7 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
     let day = (v.minutes / 1440.).floor() * 1440.;
     let return_at = match purpose {
         Purpose::Work => day + 1020.,
+        Purpose::Pickup => v.minutes + town_pickup::DRIVE_MINUTES,
         Purpose::Overnight => {
             v.minutes
                 + if r.sleep.started_at.is_some() {
@@ -64,15 +68,32 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
         purpose,
         phase: Phase::Leaving,
         return_at,
+        order: if purpose == Purpose::Pickup {
+            v.economy
+                .orders
+                .iter()
+                .find(|o| o.pickup_by == Some(r.id) && o.status == "collecting")
+                .map(|o| o.id)
+        } else {
+            None
+        },
     });
     r.activity_building = None;
     r.activity_material = None;
     r.visit_building = None;
     (r.target_x, r.target_y) = gate(v, r.id);
     r.reason=match purpose {
-        Purpose::Work=>"Walking out for my 09:00–17:00 job. I'll bring my contribution home after work.",
+        Purpose::Work=>"Walking out for my 09:00–17:00 shift. My contribution comes home after work.",
+        Purpose::Pickup=>"Walking to the shared pickup truck. I'll drive to town for our supplies.",
         Purpose::Overnight=>"There is no bed for me yet. Staying with neighbours tonight and returning in the morning.",
     }.into();
+    if purpose == Purpose::Work {
+        r.reason = format!(
+            "Walking out for my {} shift at {}. Back at 17:00.",
+            occupations::JOBS[r.id].title.to_lowercase(),
+            occupations::JOBS[r.id].place
+        );
+    }
 }
 
 pub fn advance(
@@ -84,6 +105,19 @@ pub fn advance(
     let Some(mut trip) = r.trip.clone() else {
         return false;
     };
+    if trip.purpose == Purpose::Pickup && trip.phase == Phase::Leaving {
+        // Driving starts at the village gate, rather than consuming the trip
+        // while the resident is still walking to the vehicle.
+        trip.return_at = v.minutes + town_pickup::DRIVE_MINUTES;
+        if let Some(o) = v
+            .economy
+            .orders
+            .iter_mut()
+            .find(|o| Some(o.id) == trip.order)
+        {
+            o.arrival = trip.return_at;
+        }
+    }
     if trip.purpose == Purpose::Overnight {
         if trip.phase == Phase::Leaving {
             trip.return_at = v.minutes
@@ -98,12 +132,18 @@ pub fn advance(
         }
     }
     if trip.purpose == Purpose::Work && trip.phase == Phase::Leaving {
-        v.economy.outside_committed_day = (trip.return_at / 1440.).floor() as i32;
+        v.economy.outside_committed_days[r.id] = (trip.return_at / 1440.).floor() as i32;
     }
     if trip.phase != Phase::Returning && v.minutes >= trip.return_at {
         if trip.phase == Phase::Away {
             if trip.purpose == Purpose::Work {
                 economy::finish_outside(v, r.id);
+            }
+            if trip.purpose == Purpose::Pickup
+                && let Some(order) = trip.order
+            {
+                town_pickup::finish(v, order, r.id);
+                trip.order = None;
             }
             // A new building may have occupied the old departure spot while away.
             (r.x, r.y) = gate(v, r.id);
@@ -113,6 +153,7 @@ pub fn advance(
         (r.target_x, r.target_y) = spacing::material_spot(v, CAMP.0, CAMP.1, r.id).unwrap_or(CAMP);
         r.reason = match trip.purpose {
             Purpose::Work => "Back from work. Walking into the village for the evening.",
+            Purpose::Pickup => "Back with the town supplies. Walking into the village.",
             Purpose::Overnight => {
                 "Back from staying with neighbours. Walking into the village this morning."
             }
@@ -134,7 +175,10 @@ pub fn advance(
         } else {
             r.energy = (r.energy - dt * 0.08).max(0.);
             let lunch = (v.minutes / 1440.).floor() as i32 * 3 + 1;
-            if v.minutes.rem_euclid(1440.) >= 720. && r.last_meal_slot != lunch {
+            if trip.purpose == Purpose::Work
+                && v.minutes.rem_euclid(1440.) >= 720.
+                && r.last_meal_slot != lunch
+            {
                 r.hunger = (r.hunger - 45.).max(0.);
                 r.last_meal_slot = lunch;
             }
@@ -153,8 +197,16 @@ pub fn advance(
         }
         r.reason=match trip.purpose {
             Purpose::Work=>"Working at a neighbouring farm until 17:00. Lunch is provided there.",
+            Purpose::Pickup=>"Driving to town, loading supplies and bringing them home in the shared truck. About two hours away.",
             Purpose::Overnight=>"Sleeping at our neighbours' place. Back in the morning; I still need a village bed.",
         }.into();
+        if trip.purpose == Purpose::Work {
+            r.reason = format!(
+                "Working as a {} at {} until 17:00. Lunch is provided there.",
+                occupations::JOBS[r.id].title.to_lowercase(),
+                occupations::JOBS[r.id].place
+            );
+        }
     } else {
         r.trip = None;
         choose(r, v);
@@ -172,8 +224,30 @@ pub fn advance(
 
 pub fn valid(v: &Village, r: &Resident) -> bool {
     let Some(t) = &r.trip else {
-        return r.task != "return";
+        return !matches!(r.task.as_str(), "return" | "pickup");
     };
+    if t.purpose == Purpose::Pickup && t.phase == Phase::Returning {
+        if t.order.is_some() {
+            return false;
+        }
+    } else if t.purpose == Purpose::Pickup {
+        let Some(order) = v.economy.orders.iter().find(|o| Some(o.id) == t.order) else {
+            return false;
+        };
+        if order.pickup_by != Some(r.id)
+            || (order.arrival - t.return_at).abs() > 0.1
+            || order.status
+                != if t.phase == Phase::Returning {
+                    "delivered"
+                } else {
+                    "collecting"
+                }
+        {
+            return false;
+        }
+    } else if t.order.is_some() {
+        return false;
+    }
     if !t.return_at.is_finite()
         || t.return_at < 0.
         || t.return_at > v.minutes + 1440.
@@ -197,7 +271,7 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
     }
     if t.purpose == Purpose::Work
         && t.phase != Phase::Returning
-        && v.economy.outside_committed_day != (t.return_at / 1440.) as i32
+        && v.economy.outside_committed_days[r.id] != (t.return_at / 1440.) as i32
     {
         return false;
     }
@@ -206,6 +280,7 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
     } else {
         match t.purpose {
             Purpose::Work => "outside",
+            Purpose::Pickup => "pickup",
             Purpose::Overnight => "sleep",
         }
     };
@@ -309,7 +384,7 @@ mod tests {
         );
         assert_eq!(
             g.app.world().resource::<Village>().economy.money,
-            fund + 18000
+            fund + 22000
         );
         round_trip(&mut g);
         until(&mut g, |rs| rs[4].trip.is_none());
@@ -318,20 +393,20 @@ mod tests {
         }
         assert_eq!(
             g.app.world().resource::<Village>().economy.money,
-            fund + 18000
+            fund + 22000
         );
     }
     #[test]
     fn the_paid_job_is_reserved_on_request_and_cannot_be_double_booked() {
         let mut g = healthy();
-        g.set_outside_work(true);
+        g.set_resident_job(0, true);
         assert!(g.request(0, "outside", true).contains("lend a hand"));
         assert_eq!(
             g.app
                 .world()
                 .resource::<Village>()
                 .economy
-                .outside_committed_day,
+                .outside_committed_days[0],
             0
         );
         let before = g.snapshot();
