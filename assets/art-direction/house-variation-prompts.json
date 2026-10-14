@@ -1,0 +1,31 @@
+{
+  "tool": "Built-in image_gen",
+  "transparent_background": true,
+  "created": "2026-10-08",
+  "reference": "web/art/village-atlas-isometric.png (top-left house)",
+  "variations": [
+    {
+      "slug": "veranda",
+      "prompt": "Create ONE additional home sprite for the Solar Friends game. Reference image is a 2x2 atlas: match ONLY the small house in the TOP LEFT for style, size proportions, camera, materials and detail density. Output a single isolated house on a square transparent canvas, NOT an atlas. Warm hand-painted Brazilian ecovila, cream plaster with small exposed terracotta brick patches, orange clay tile roof, teal joinery, small blue roof solar panel, one blue rain barrel. Elevated orthographic 2:1 game view, ground edges slope +0.5 and -0.5, upright verticals. Same modest one-story three-bed cottage size and door height as reference. Entire roof, steps, planters and barrel contained inside generous 12% transparent margins. Composition: center building ground footprint near (50%,70%); front corner around (50%,86%); roof ridge around y=18%. Upper-left daylight, crisp readable painterly silhouette, no external cast shadow, no people, no text, no border. Variation: A welcoming full-width shallow wooden veranda with two square timber posts, a simple horizontal railing on the left, teal door on the right, a small wooden bench and one red-flowered clay pot. Keep the veranda within the same compact foundation; no extra yard. Distinctive but same building family.",
+      "day": "web/art/home-veranda.png",
+      "night": "web/art/home-veranda-night.png"
+    },
+    {
+      "slug": "gable",
+      "prompt": "Create ONE additional home sprite for the Solar Friends game. Reference image is a 2x2 atlas: match ONLY the small house in the TOP LEFT for style, size proportions, camera, materials and detail density. Output a single isolated house on a square transparent canvas, NOT an atlas. Warm hand-painted Brazilian ecovila, cream plaster with small exposed terracotta brick patches, orange clay tile roof, teal joinery, small blue roof solar panel, one blue rain barrel. Elevated orthographic 2:1 game view, ground edges slope +0.5 and -0.5, upright verticals. Same modest one-story three-bed cottage size and door height as reference. Entire roof, steps, planters and barrel contained inside generous 12% transparent margins. Composition: center building ground footprint near (50%,70%); front corner around (50%,86%); roof ridge around y=18%. Upper-left daylight, crisp readable painterly silhouette, no external cast shadow, no people, no text, no border. Variation: A compact cottage with the gable end facing the viewer's right, a small round attic vent below the gable, two teal shuttered windows, a recessed central teal door and two stone steps. A modest vine beside the entry and two clay pots. Keep one story, the same roof mass and compact footprint, no chimney or extra yard.",
+      "day": "web/art/home-gable.png",
+      "night": "web/art/home-gable-night.png"
+    },
+    {
+      "slug": "courtyard",
+      "prompt": "Create ONE additional home sprite for the Solar Friends game. Reference image is a 2x2 atlas: match ONLY the small house in the TOP LEFT for style, size proportions, camera, materials and detail density. Output a single isolated house on a square transparent canvas, NOT an atlas. Warm hand-painted Brazilian ecovila, cream plaster with small exposed terracotta brick patches, orange clay tile roof, teal joinery, small blue roof solar panel, one blue rain barrel. Elevated orthographic 2:1 game view, ground edges slope +0.5 and -0.5, upright verticals. Same modest one-story three-bed cottage size and door height as reference. Entire roof, steps, planters and barrel contained inside generous 12% transparent margins. Composition: center building ground footprint near (50%,70%); front corner around (50%,86%); roof ridge around y=18%. Upper-left daylight, crisp readable painterly silhouette, no external cast shadow, no people, no text, no border. Variation: A compact cottage with a slightly offset teal front door, a broad teal shuttered window, a short terracotta half-wall enclosing a tiny entry terrace on the right, one wooden chair and a bougainvillea pot. One simple orange pitched roof, same roof height and compact foundation as reference. No large courtyard or extra wing.",
+      "day": "web/art/home-courtyard.png",
+      "night": "web/art/home-courtyard-night.png"
+    }
+  ],
+  "nightPrompt": "Lighting-only edit of image 1: make the night counterpart of this exact Solar Friends house sprite. Image 2 is a STYLE/LIGHTING reference only: match the cool blue moonlit upper-left light and warm amber window illumination of its TOP LEFT house. Preserve image 1 canvas size, object position, every silhouette edge, roof tiles, solar panel, doors, shutters, plants, pots, furniture, barrel and exact transparent padding. Do not move, add or remove any object or repaint geometry. Cool violet-blue roof and cream walls in blue shadow, restrained warm amber light visible through existing window shutter slats. Readable darks; no external glow or cast shadow outside the footprint. Single house only, no atlas, no text, genuinely transparent background.",
+  "nightReferences": [
+    "corresponding day sprite",
+    "web/art/village-atlas-isometric-night.png (top-left house)"
+  ]
+}

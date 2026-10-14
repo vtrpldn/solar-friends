@@ -1,0 +1,558 @@
+{
+  "version": 1,
+  "date": "2026-10-08",
+  "baselineCommit": "4dfe5f3",
+  "verdict": "Needs work",
+  "scope": {
+    "sourceImages": 28,
+    "catalogueEntries": 42,
+    "sourceCells": 195,
+    "residentFrames": 160,
+    "scenarios": 7,
+    "proceduralExtras": [
+      "greenhouse",
+      "crop overlays",
+      "river",
+      "roads",
+      "construction indicators"
+    ]
+  },
+  "summary": {
+    "consistent": 27,
+    "needsWork": 15,
+    "additionalUncataloguedFailure": "greenhouse"
+  },
+  "sprites": [
+    {
+      "id": "village-atlas-isometric.png-0",
+      "name": "Home",
+      "group": "Buildings",
+      "source": "../art/village-atlas-isometric.png",
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "village-atlas-isometric.png-0-night",
+      "name": "Home · night",
+      "group": "Buildings",
+      "source": "../art/village-atlas-isometric-night.png",
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "village-atlas-isometric.png-1",
+      "name": "Kitchen",
+      "group": "Buildings",
+      "source": "../art/village-atlas-isometric.png",
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "village-atlas-isometric.png-1-night",
+      "name": "Kitchen · night",
+      "group": "Buildings",
+      "source": "../art/village-atlas-isometric-night.png",
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "village-atlas-isometric.png-3",
+      "name": "Banana grove",
+      "group": "Buildings",
+      "source": "../art/village-atlas-isometric.png",
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "village-atlas-isometric.png-3-night",
+      "name": "Banana grove · night",
+      "group": "Buildings",
+      "source": "../art/village-atlas-isometric-night.png",
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "garden-simple",
+      "name": "Garden",
+      "group": "Buildings",
+      "source": "../art/garden-simple-isometric.png",
+      "sha256": "6d7c5b1a49d33d0df96b6344efc0d80d7b0d3c9faa2c3bba436b542a690b0f4c",
+      "status": "Needs work",
+      "notes": "Painted style and bed scale fit. Fixed lettuce artwork does not represent empty, growing, dry, beans or tomato states; the garden renderer never calls drawGrowingBed.",
+      "issues": [
+        "ART-03"
+      ],
+      "framesReviewed": 1
+    },
+    {
+      "id": "garden-simple-night",
+      "name": "Garden · night",
+      "group": "Buildings",
+      "source": "../art/garden-simple-isometric-night.png",
+      "sha256": "dac50de480f6053046182b68453c8122b546031d0e6774c83b3567b4411cecb5",
+      "status": "Needs work",
+      "notes": "Painted style and bed scale fit. Fixed lettuce artwork does not represent empty, growing, dry, beans or tomato states; the garden renderer never calls drawGrowingBed.",
+      "issues": [
+        "ART-03"
+      ],
+      "framesReviewed": 1
+    },
+    {
+      "id": "cistern",
+      "name": "Cistern",
+      "group": "Buildings",
+      "source": "../art/cistern-isometric.png",
+      "sha256": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "cistern-night",
+      "name": "Cistern · night",
+      "group": "Buildings",
+      "source": "../art/cistern-isometric-night.png",
+      "sha256": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "compost",
+      "name": "Compost station",
+      "group": "Buildings",
+      "source": "../art/compost-isometric.png",
+      "sha256": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "compost-night",
+      "name": "Compost station · night",
+      "group": "Buildings",
+      "source": "../art/compost-isometric-night.png",
+      "sha256": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "square",
+      "name": "Community square",
+      "group": "Buildings",
+      "source": "../art/square-isometric.png",
+      "sha256": "4bda771313b6ea54200e9dbc214f3073c4ea83a4ef8ed6190ff980183b0d71fa",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "square-night",
+      "name": "Community square · night",
+      "group": "Buildings",
+      "source": "../art/square-isometric-night.png",
+      "sha256": "fb068f69ae5749a3ce52517e0a746b04b55127905b37a87255dffeacc0135f67",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "workshop",
+      "name": "Workshop",
+      "group": "Buildings",
+      "source": "../art/workshop-isometric.png",
+      "sha256": "b0479e0f929831a1842928829640135e4668f311fafc496e7cf5ab1d0e637db5",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "workshop-night",
+      "name": "Workshop · night",
+      "group": "Buildings",
+      "source": "../art/workshop-isometric-night.png",
+      "sha256": "cfd3713369ac4e999f2994c43001e95f6bc0c04bd25908c09cc6f22469096574",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "coop",
+      "name": "Chicken coop",
+      "group": "Buildings",
+      "source": "../art/coop-isometric.png",
+      "sha256": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "coop-night",
+      "name": "Chicken coop · night",
+      "group": "Buildings",
+      "source": "../art/coop-isometric-night.png",
+      "sha256": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+      "status": "Consistent",
+      "notes": "Painted palette, materials and game-scale relationship fit the village. Shared camera calibration and day/night dimensions pass. Local painted edges are approximate, not geometrically exact.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "forest-0",
+      "name": "Jequitibá-rosa",
+      "group": "Vegetation",
+      "source": "../art/mata-atlantica-atlas.png",
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "status": "Consistent",
+      "notes": "Painted broadleaf vegetation and palette fit. Base painted height 102.4 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "forest-1",
+      "name": "Juçara",
+      "group": "Vegetation",
+      "source": "../art/mata-atlantica-atlas.png",
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "status": "Consistent",
+      "notes": "Painted broadleaf vegetation and palette fit. Base painted height 79.8 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "forest-2",
+      "name": "Embaúba",
+      "group": "Vegetation",
+      "source": "../art/mata-atlantica-atlas.png",
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "status": "Consistent",
+      "notes": "Painted broadleaf vegetation and palette fit. Base painted height 77.1 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "forest-3",
+      "name": "Pau-brasil",
+      "group": "Vegetation",
+      "source": "../art/mata-atlantica-atlas.png",
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "status": "Consistent",
+      "notes": "Painted broadleaf vegetation and palette fit. Base painted height 84.7 px; in-game size variation is intentional. Treat tree scale as stylized, not botanical height.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "terrain-0",
+      "name": "Meadow",
+      "group": "Terrain",
+      "source": "../art/terrain-atlas.png",
+      "sha256": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+      "status": "Consistent",
+      "notes": "Meadow/red-earth palette and painted texture fit the reference. Opaque terrain swatches intentionally have no transparent gutter; they are not isolated-object sprites.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "terrain-1",
+      "name": "Red earth",
+      "group": "Terrain",
+      "source": "../art/terrain-atlas.png",
+      "sha256": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+      "status": "Consistent",
+      "notes": "Meadow/red-earth palette and painted texture fit the reference. Opaque terrain swatches intentionally have no transparent gutter; they are not isolated-object sprites.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "portrait-0",
+      "name": "Iara",
+      "group": "Portraits",
+      "source": "../art/residents-cistern.png",
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "status": "Consistent",
+      "notes": "Identity, clothing and palette fit the village. Painted full-body height 40.9 px at the configured 43 px cell, consistent with the other four residents.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "portrait-1",
+      "name": "Bento",
+      "group": "Portraits",
+      "source": "../art/residents-cistern.png",
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "status": "Consistent",
+      "notes": "Identity, clothing and palette fit the village. Painted full-body height 41.2 px at the configured 43 px cell, consistent with the other four residents.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "portrait-2",
+      "name": "Luz",
+      "group": "Portraits",
+      "source": "../art/residents-cistern.png",
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "status": "Consistent",
+      "notes": "Identity, clothing and palette fit the village. Painted full-body height 40.6 px at the configured 43 px cell, consistent with the other four residents.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "portrait-3",
+      "name": "Cauã",
+      "group": "Portraits",
+      "source": "../art/residents-cistern.png",
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "status": "Consistent",
+      "notes": "Identity, clothing and palette fit the village. Painted full-body height 40.5 px at the configured 43 px cell, consistent with the other four residents.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "portrait-4",
+      "name": "Nina",
+      "group": "Portraits",
+      "source": "../art/residents-cistern.png",
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "status": "Consistent",
+      "notes": "Identity, clothing and palette fit the village. Painted full-body height 39.8 px at the configured 43 px cell, consistent with the other four residents.",
+      "issues": [],
+      "framesReviewed": 1
+    },
+    {
+      "id": "iara",
+      "name": "Iara",
+      "group": "Animations",
+      "source": "../art/animations/iara.png",
+      "sha256": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion. The hammer-work row is also reused for kitchen, crop and coop visits.",
+      "issues": [
+        "ART-01",
+        "ART-04"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "bento",
+      "name": "Bento",
+      "group": "Animations",
+      "source": "../art/animations/bento.png",
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion. The hammer-work row is also reused for kitchen, crop and coop visits.",
+      "issues": [
+        "ART-01",
+        "ART-04"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "luz",
+      "name": "Luz",
+      "group": "Animations",
+      "source": "../art/animations/luz.png",
+      "sha256": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion. The hammer-work row is also reused for kitchen, crop and coop visits.",
+      "issues": [
+        "ART-01",
+        "ART-04"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "caua",
+      "name": "Cauã",
+      "group": "Animations",
+      "source": "../art/animations/caua.png",
+      "sha256": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 3, 7, 9, 10, 11, 12, 13, 14, 15, 16. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion. The hammer-work row is also reused for kitchen, crop and coop visits.",
+      "issues": [
+        "ART-01",
+        "ART-04"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "nina",
+      "name": "Nina",
+      "group": "Animations",
+      "source": "../art/animations/nina.png",
+      "sha256": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion. The hammer-work row is also reused for kitchen, crop and coop visits.",
+      "issues": [
+        "ART-01",
+        "ART-04"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "hen-0",
+      "name": "Cream chicken",
+      "group": "Animals",
+      "source": "../art/chickens.png",
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "status": "Needs work",
+      "notes": "Painted feather palette fits, but standing height is about 18.8 px against a 40.9 px adult (46%). Reduce the 26 px source-cell width toward 20 px and review all three hens beside Iara and the coop. Peck baseline mismatch in the calibration/replacement tool is fixed; production art size is unchanged.",
+      "issues": [
+        "ART-02"
+      ],
+      "framesReviewed": 2
+    },
+    {
+      "id": "hen-1",
+      "name": "Ochre chicken",
+      "group": "Animals",
+      "source": "../art/chickens.png",
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "status": "Needs work",
+      "notes": "Painted feather palette fits, but standing height is about 18.8 px against a 40.9 px adult (46%). Reduce the 26 px source-cell width toward 20 px and review all three hens beside Iara and the coop. Peck baseline mismatch in the calibration/replacement tool is fixed; production art size is unchanged.",
+      "issues": [
+        "ART-02"
+      ],
+      "framesReviewed": 2
+    },
+    {
+      "id": "hen-2",
+      "name": "Brown chicken",
+      "group": "Animals",
+      "source": "../art/chickens.png",
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "status": "Needs work",
+      "notes": "Painted feather palette fits, but standing height is about 18.8 px against a 40.9 px adult (46%). Reduce the 26 px source-cell width toward 20 px and review all three hens beside Iara and the coop. Peck baseline mismatch in the calibration/replacement tool is fixed; production art size is unchanged.",
+      "issues": [
+        "ART-02"
+      ],
+      "framesReviewed": 2
+    },
+    {
+      "id": "iara-idle",
+      "name": "Iara · standing idles",
+      "group": "Animations",
+      "source": "../art/animations/iara-idle.png",
+      "sha256": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 3, 7, 11, 15. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion.",
+      "issues": [
+        "ART-01"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "bento-idle",
+      "name": "Bento · standing idles",
+      "group": "Animations",
+      "source": "../art/animations/bento-idle.png",
+      "sha256": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 5, 6, 7, 8, 9, 10, 11, 12. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion.",
+      "issues": [
+        "ART-01"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "luz-idle",
+      "name": "Luz · standing idles",
+      "group": "Animations",
+      "source": "../art/animations/luz-idle.png",
+      "sha256": "c37a9572fe8d3c0c4085d1c6595adefdbc2c26f70dd016fb0d5ba02e17bdeb52",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 3, 6, 7, 10, 11, 12. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion.",
+      "issues": [
+        "ART-01"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "caua-idle",
+      "name": "Cauã · standing idles",
+      "group": "Animations",
+      "source": "../art/animations/caua-idle.png",
+      "sha256": "bed9db91f965fcf36585a2bd46257baaff07bd8144bae7b085915e204c90fc97",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 6, 7, 8, 10, 11. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion.",
+      "issues": [
+        "ART-01"
+      ],
+      "framesReviewed": 16
+    },
+    {
+      "id": "nina-idle",
+      "name": "Nina · standing idles",
+      "group": "Animations",
+      "source": "../art/animations/nina-idle.png",
+      "sha256": "5a95ba9e25991ea97bb3e7e1e225ab1b6423e5c53449d51195e6877209ea7116",
+      "status": "Needs work",
+      "notes": "Identity and palette fit, but opaque paint reaches nominal frame edges in cells 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16. Adjacent-row fragments/clipped poses are visible in the 4×4 crops. Repack with clear gutters and stable ground/pelvis registration before approving motion. Strong horizontal registration drift is visible across the look-around row.",
+      "issues": [
+        "ART-01"
+      ],
+      "framesReviewed": 16
+    }
+  ],
+  "previewFixCommit": "5d5be86",
+  "proceduralReview": [
+    {
+      "id": "greenhouse",
+      "status": "Needs work",
+      "issues": [
+        "ART-05"
+      ],
+      "notes": "Flat translucent structure and ellipse crops differ from painted buildings. Now present in all-building fixture; still absent from sprite catalogue."
+    },
+    {
+      "id": "river",
+      "status": "Consistent",
+      "notes": "Palette fits the terrain in observed day/night scenes; procedural rendering, no independent source sprite."
+    },
+    {
+      "id": "roads-and-construction",
+      "status": "Limited review",
+      "notes": "Source reviewed; no exhaustive per-state visual sign-off."
+    }
+  ],
+  "gameplay": {
+    "rustTests": 49,
+    "verificationScripts": 8,
+    "scenarios": 7,
+    "hoursPerScenario": 72,
+    "hourlySaveRestores": 504,
+    "browserErrorsObserved": 0,
+    "limitations": [
+      "No audio listening pass",
+      "No exhaustive player-action or balance proof",
+      "Playwright harness not run; native browser tools used instead"
+    ]
+  }
+}

@@ -1,18 +1,36 @@
+import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
+import {makeArtPreview} from './dev/art-preview.js';
+import {installGameUI} from './game-ui.js';
+import {economyImage,drawEconomyArt} from './economy-art.js';
+import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
+import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
+import {installEconomyUI,recipeSummary} from './economy-ui.js';
+import { footprintCorners, occupies, placementArt } from './building-footprints.js';
+import { installBuildMenu, paintIcon } from './build-menu.js';
+import { unlitFilter, buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
+import { drawNightEmission } from './night-lighting.js';
+import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
-import { buildingArt, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
+import { RESIDENT_WIDTH, preparedFrames } from './sprite-frames.js';
+import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
+import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
-import { quests, buildingUnlocked, questStatus } from "./quests.js?v=ecology-coop-2";
+import { quests, buildingUnlocked, questStatus, goalRoute, unlockQuest, questCompleted, questAvailable, completedQuests } from "./quests.js?v=modes-1";
 import { loadSettings, saveSettings } from "./settings.js";
-import { VillageStorage } from "./village-storage.js";
+import { placementReason, movePlacementReason, milestones } from "./polish.js";
+import { VillageAudio } from "./village-audio.js";
+import { VillageStorage, SAVE_KEY } from "./village-storage.js";
 import {
   project,
   unproject,
   TILE_HALF_WIDTH,
   TILE_HALF_HEIGHT,
+  zoomLimits,
+  clampZoom,
 } from "./projection.js";
 import init, { Game } from "./pkg/solar_friends.js?v=devtools-1";
 import {
@@ -25,6 +43,11 @@ import {
 } from "./terrain.js?v=manual-roads-1";
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
+const sound = new VillageAudio(settings);
+let cameraTarget = null, previousVillage = null, celebrationTimer;
+const milestoneQueue = [];
+let showingMilestone = false;
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const previewParams = new URLSearchParams(location.search);
 const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
@@ -34,50 +57,68 @@ let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
-  road: ["Road", 0, "Click to add or remove a road tile"],
-  home: ["Home", 32, "Three beds and a good night’s rest"],
-  greenhouse: ["Greenhouse", 60, "Retain moisture · raise seedlings · needs stored water"],
-  garden: ["Garden", 12, "Plant, water, grow, then harvest"],
-  kitchen: ["Kitchen", 40, "Meals taste better together"],
-  well: ["Cistern", 18, "Catch rainfall · store 75 more water"],
-  grove: ["Food forest", 14, "Gather two fruit with every timber trip"],
-  compost: ["Compost", 20, "Two kitchen scraps enrich the next harvest"],
-  square: ["Square", 36, "Gatherings bring neighbours closer"],
-  coop: ["Chicken coop", 24, "A sheltered home for three roaming hens"],
-  workshop: ["Workshop", 48, "Craft tools for building and harvests"],
+  hydro:['River generator','Small riverbank wheel · generates all day and night'],
+  eco_toilet:['Ecological toilet','Private dry toilet · sealed waste collection · handwash'],
+  banana_treatment:['Banana treatment bed','Treat sewage in a sealed banana basin'],
+  wetland:['Reed bed','Filter greywater into irrigation water'],
+  biodigester:['Biodigester','Sealed waste + scraps → cooking gas and cured compost'],
+  warehouse:['Storage house','Store 300 extra construction materials'],
+  road: ["Road", "Click to add or remove a road tile"],
+  home: ["Home", "Three beds and a good night’s rest"],
+  greenhouse: ["Greenhouse", "Retain moisture · raise seedlings · needs stored water"],
+  garden: ["Garden", "Plant, water, grow, then harvest"],
+  kitchen: ["Kitchen", "Meals taste better together"],
+  well: ["Cistern", "Catch rainfall · store 75 more water"],
+  grove: ["Food forest", "Gather fresh fruit when the pantry needs it"],
+  compost: ["Compost", "Two kitchen scraps enrich the next harvest"],
+  square: ["Square", "Gatherings bring neighbours closer"],
+  coop: ["Chicken coop", "A sheltered home for three roaming hens"],
+  workshop: ["Workshop", "Craft tools for building and harvests"],
+  solar_farm: ["Solar farm", "Collect sunshine · store energy for shared lights"],
+  streetlight: ["Street light", "Light village paths · needs shared power"],
 };
 const tasks = {
   visit: "Visiting a village building",
   arrive: "Arriving at our new home",
+  sanitation: "Using the ecological toilet",
   idle: "Enjoying a quiet moment",
   sleep: "Sleeping until morning",
   eat: "Sitting down to eat",
   rest: "Resting in the shade",
   garden: "Tending the garden",
   build: "Building together",
-  gather: "Gathering timber",
+  building_work: "Working on a building crew",
+  gather: "Foraging fresh food",
+  source: "Collecting local materials",
+  prepare: "Preparing building materials",
+  outside: "Working at a neighbouring farm",
+  pickup: "Driving to collect town supplies",
+  return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Collecting river water",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
+  nature_walk: "Enjoying a nature walk",
+  birdwatch: "Watching the birds",
+  stretch: "Enjoying gentle stretches",
+  daydream: "Sitting and daydreaming",
+  stargaze: "Watching the stars",
 };
 const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
-const buildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+const buildingImages = Object.fromEntries(Object.entries(allBuildingArt).map(([kind, art]) => {
   const image = new Image();
   image.src = `art/${art.file}`;
   return [kind, image];
 }));
-const nightBuildingImages = Object.fromEntries(Object.entries(buildingArt).map(([kind, art]) => {
+const nightBuildingImages = Object.fromEntries(Object.entries(allBuildingArt).map(([kind, art]) => {
   const image = new Image();
   image.src = `art/${art.nightFile}`;
   return [kind, image];
 }));
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
-const peopleArt = new Image();
-peopleArt.src = "art/residents-cistern.png";
 const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
   const image = new Image();
   image.src = `art/animations/${name}.png`;
@@ -86,9 +127,13 @@ const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
 const idleAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
   const image = new Image(); image.src = `art/animations/${name}-idle.png`; return image;
 });
+const activityAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
+  const image = new Image(); image.src = `art/animations/${name}-activities.png`; return image;
+});
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
 let animationDelta = 0;
+let weatherTime = 0;
 let groundLayer,
   groundKey = null;
 const forestArt = new Image();
@@ -103,9 +148,10 @@ let game,
   state,
   selected = null,
   tool = null,
+  buildMenu, economyUI, gameUI,
   speed = 1,
   paused = false,
-  zoom = 1,
+  zoom = 1.3,
   pan = { x: 0, y: 0 };
 let width = 0,
   height = 0,
@@ -121,8 +167,15 @@ let width = 0,
   toastTimer;
 let response = "",
   encouragable = false;
-const storage = new VillageStorage();
+const modeStores = Object.fromEntries(['story','sandbox'].map(mode => [mode,new VillageStorage(undefined,`${SAVE_KEY}-${mode}`)]));
+let storage = modeStores.story;
+let gameActive = false, menuWasPaused = false, pendingMode = null;
+const villagePanels = new Set(["building-panel","supplies-panel","projects-panel","town-panel","power-panel"]);
+let lastVillagePanel = "building-panel";
+let journalPage = 0;
+const legacyStorage = new VillageStorage();
 let pendingImport = null;
+let pendingRemoval = null, movingBuilding = null;
 const escapeHtml = (s) =>
   String(s).replace(
     /[&<>"']/g,
@@ -139,22 +192,9 @@ function avatar(id) {
   return `<span class="avatar" style="background:${colors[id]}20"><canvas data-portrait="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
 }
 function paintPortraits() {
-  const cell = peopleArt.width / 3;
-  for (const portrait of document.querySelectorAll("[data-portrait]")) {
-    const id = Number(portrait.dataset.portrait);
-    portrait
-      .getContext("2d")
-      .drawImage(
-        peopleArt,
-        ((id % 3) + 0.28) * cell,
-        (Math.floor(id / 3) + 0.01) * cell,
-        cell * 0.56,
-        cell * 0.63,
-        0,
-        0,
-        96,
-        108,
-      );
+  for (const portrait of document.querySelectorAll('[data-portrait]')) {
+    const frame=preparedFrames(animations[Number(portrait.dataset.portrait)],{referenceRow:2})?.[8];
+    if(frame) portrait.getContext('2d').drawImage(frame,64,12,128,152,0,0,96,108);
   }
 }
 function contactShadow(x, y, rx, ry, opacity = 0.2) {
@@ -175,6 +215,7 @@ function toast(message) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 4500);
 }
 function save(manual = false) {
+  if (!gameActive || ($("#main-menu").open && !manual)) return;
   if (artworkPreview || sandbox || directScenario) {
     $("#save-status").textContent = "Development preview · your saved village is unchanged";
     if (manual) toast("Preview only. Return to your village to save progress.");
@@ -194,10 +235,131 @@ function save(manual = false) {
       );
   }
 }
+function readModeSave(mode) {
+  const raw = modeStores[mode].read();
+  // Keep the earlier village intact while making it available as a Story save.
+  return raw ?? (mode === 'story' ? legacyStorage.read() : null);
+}
+function refreshMenu() {
+  let any = false;
+  $('#menu-status').textContent='';
+  for(const mode of ['story','sandbox']) {
+    const button=$(`[data-continue="${mode}"]`);
+    button.hidden=true;
+    const candidate=new Game();
+    try {
+      const raw=readModeSave(mode);
+      if(raw!==null) {
+        if(!candidate.restore(raw)) {
+          $('#menu-status').textContent='An earlier village could not be read. Its saved data is preserved.';
+          continue;
+        }
+        const v=JSON.parse(candidate.snapshot()).village;
+        if((v.mode || 'story')!==mode) continue;
+        button.hidden=false;any=true;
+        button.querySelector('small').textContent=`Day ${1+Math.floor(v.minutes/1440)} · ${v.buildings.length} ${v.buildings.length===1?'building':'buildings'}${mode==='story'?` · ${completedQuests(v).filter(Boolean).length}/${quests.length} chapters`:''}`;
+      }
+    } catch {
+      $('#menu-status').textContent='Device storage is unavailable. You can play this session and export your village in Settings.';
+    } finally {candidate.free();}
+  }
+  $('#menu-continues').hidden=!any;
+  $('.menu-return').hidden=!gameActive;
+}
+function openMainMenu() {
+  if(sandbox || artworkPreview || directScenario) return;
+  if(gameActive)save();
+  menuWasPaused=paused;
+  closePanels();
+  for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
+  refreshMenu();
+  $('.settings-section[aria-label="Village save"]').hidden=!gameActive;
+  document.body.classList.add('in-main-menu');
+  $('#main-menu').showModal();
+}
+function enterVillage(candidate,mode) {
+  game.free();game=candidate;storage=modeStores[mode];gameActive=true;
+  state=JSON.parse(game.snapshot());
+  residentAnimations.clear();selected=null;tool=null;pointer=null;cameraTarget=null;
+  pan={x:0,y:0};time=0;weatherTime=0;speed=1;last=0;saveElapsed=0;
+  setZoom(1.3);
+  $('#person').hidden=true;$('#placement').hidden=true;closePanels();
+  for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();
+  document.body.classList.remove('in-main-menu');
+  if(paused)togglePause();
+  for(const button of document.querySelectorAll('[data-speed]')) {
+    const active=button.dataset.speed==='1';button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));
+  }
+  resetPolish();updateUI();render();devTools?.refresh();
+  $('#save-status').textContent='Saved on this device';
+  $('.settings-section[aria-label="Village save"]').hidden=false;
+  $('#settings').focus();
+}
+function continueMode(mode) {
+  const candidate=new Game();
+  try {
+    const raw=readModeSave(mode);
+    if(raw===null || !candidate.restore(raw) || (JSON.parse(candidate.snapshot()).village.mode||'story')!==mode) {
+      candidate.free();$('#menu-status').textContent='This village could not be loaded. Its saved data is preserved.';return;
+    }
+    enterVillage(candidate,mode);save();
+  } catch {candidate.free();$('#menu-status').textContent='Device storage could not be read. Your village is preserved.';}
+}
+function requestNewMode(mode) {
+  if(sandbox || artworkPreview || directScenario)return;
+  let existing;
+  try {existing=readModeSave(mode);} catch {existing=null;}
+  if(existing===null){startMode(mode);return;}
+  pendingMode=mode;
+  $('#restart-title').textContent=`Start a new ${mode==='story'?'story':'sandbox'}?`;
+  $('#restart-dialog p').textContent=`This replaces only your ${mode==='story'?'Story':'Sandbox'} village. Its previous save stays in a backup. Your other mode is kept.`;
+  $('#confirm-restart').textContent=`Start new ${mode==='story'?'story':'sandbox'}`;
+  $('#restart-dialog').showModal();
+}
+function startMode(mode) {
+  const candidate=new Game();candidate.start_mode(mode);
+  let durable=true, existing=null;
+  try {
+    existing=readModeSave(mode);
+    if(existing!==null)modeStores[mode].backup(existing);
+    modeStores[mode].write(candidate.snapshot());
+  } catch {
+    // An unreadable slot is never replaced. A new session can still be exported.
+    if(existing!==null) {
+      candidate.free();$('#restart-dialog').close();pendingMode=null;
+      toast('Could not back up this village. Export it in Settings before starting again.');return;
+    }
+    durable=false;
+  }
+  enterVillage(candidate,mode);pendingMode=null;
+  $('#save-warning').hidden=durable;
+  if(!durable)$('#save-status').textContent='Saving unavailable · export your village to keep it';
+  if(mode==='story')showPanel('goals-panel');
+  else toast('Every building is unlocked. Choose a clearing and make yourself at home.');
+}
+function installMenu() {
+  $('#main-menu').addEventListener('cancel',event=>{event.preventDefault();if(gameActive)$('#menu-return').click();});
+  for(const button of document.querySelectorAll('[data-new-mode]'))button.onclick=()=>requestNewMode(button.dataset.newMode);
+  for(const button of document.querySelectorAll('[data-continue]'))button.onclick=()=>continueMode(button.dataset.continue);
+  $('#menu-return').onclick=()=>{
+    $('#main-menu').close();document.body.classList.remove('in-main-menu');
+    if(paused!==menuWasPaused)togglePause();$('#settings').focus();
+  };
+  $('#open-main-menu').onclick=openMainMenu;
+  $('.brand').onclick=event=>{if(!artworkPreview&&!directScenario){event.preventDefault();openMainMenu();}};
+  $('#menu-settings').onclick=()=>$('#settings').click();
+  $('#menu-help').onclick=()=>$('#help-dialog').showModal();
+}
+function setZoom(value) {
+  zoom=clampZoom(width,height,value);
+  const limits=zoomLimits(width,height);
+  $('#zoom-out').disabled=zoom<=limits.min+1e-6;$('#zoom-in').disabled=zoom>=limits.max-1e-6;
+}
 function resize() {
   const r = canvas.getBoundingClientRect();
   width = r.width;
   height = r.height;
+  setZoom(zoom);
   const dpr = Math.min(devicePixelRatio, 2);
   canvas.width = width * dpr;
   canvas.height = height * dpr;
@@ -292,119 +454,106 @@ function tree(x, y, s = 1, species = 0) {
     w,
   );
 }
-function sprite(kind, x, y, alpha = 1) {
-  const art = buildingArt[kind];
-  if (!art) return;
-  const p = iso(x, y);
-  const night = nightAmount(state.village.minutes);
-  // Compensate source-over opacity so construction and placement ghosts stay translucent.
-  const dayAlpha = night < 1 ? alpha * (1 - night) / (1 - alpha * night) : 0;
-  if (dayAlpha > 0) drawBuildingArt(ctx, buildingImages[kind], art, p.x, p.y, scale, dayAlpha);
-  if (night > 0) {
-    ctx.save();
-    // The full-scene night tint follows this pass; keep painted window light readable.
-    ctx.filter = 'brightness(1.45)';
-    drawBuildingArt(ctx, nightBuildingImages[kind], art, p.x, p.y, scale, alpha * night);
+function materialSite(site,alpha=1){
+  if(!site.active)return;
+  ctx.save();ctx.globalAlpha*=alpha;ctx.filter=unlitFilter(nightAmount(state.village.minutes));
+  if(site.material===0){
+    const mature=site.growth>=1,trees=mature?Math.ceil(site.remaining/8):site.planted?4:0;
+    for(let i=0;i<4;i++){const x=site.x+(i%2?.7:-.7),y=site.y+(i<2?-.7:.7);
+      if(i<trees)tree(x,y,.18+.42*(mature?1:site.growth),0);
+      else {const p=iso(x,y);ctx.fillStyle='#86502e';ctx.fillRect(p.x-4*scale,p.y-4*scale,8*scale,5*scale);ctx.fillStyle='#c78c4d';ctx.beginPath();ctx.ellipse(p.x,p.y-4*scale,4*scale,2*scale,0,0,Math.PI*2);ctx.fill();}
+    }
+  }else if(site.material===1){const growth=site.planted?site.growth:0,cut=site.growth>=1?site.remaining/site.maximum:1;
+    for(const [dx,dy]of [[-.35,.35],[.35,-.35]]){const p=iso(site.x+dx,site.y+dy);drawEconomyArt(ctx,1,p.x,p.y,scale*(.25+.75*growth)*(.45+.55*cut),nightAmount(state.village.minutes),1);}
+  }else{const p=iso(site.x,site.y);drawEconomyArt(ctx,site.material,p.x,p.y,scale,nightAmount(state.village.minutes),site.remaining/site.maximum);}
+  ctx.restore();
+}
+
+function sprite(kind, x, y, alpha = 1, id) {
+  const art=allBuildingArt[kind];if(!art)return;
+  const p=iso(x,y),night=nightAmount(state.village.minutes),registration=placementArt(kind,art);
+  const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
+  const level=buildingLighting(state.environment.power,id,kind,complete);
+  for(const layer of lightingLayers(night,level,alpha)){
+    ctx.save();ctx.filter=layer.filter;
+    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
     ctx.restore();
   }
 }
-function cistern(x, y, alpha = 1) {
-  sprite('well', x, y, alpha);
-}
-const cropTypes = {
-  lettuce: { name: "Lettuce", minutes: 180, yield: 5, note: "Quick crop · one harvest" },
-  beans: { name: "Beans", minutes: 360, yield: 10, note: "Larger harvest · soil dries half as fast" },
-  tomatoes: { name: "Tomatoes", minutes: 300, yield: 6, note: "Three harvests · later harvests take 3 hours; compost maintains yield" },
-};
-function cropDuration(c) { return c.kind === "tomatoes" && c.harvests > 0 ? 180 : cropTypes[c.kind].minutes; }
-function greenhouse(b, alpha = 1) {
-  ctx.save(); ctx.globalAlpha = alpha;
-  drawGrowingBed(b);
-  const points = [[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,y]) => iso(b.x+x,b.y+y));
-  const tops = points.map(p => ({x:p.x,y:p.y-38*scale}));
-  const ridge = [iso(b.x,b.y-1),iso(b.x,b.y+1)].map(p=>({x:p.x,y:p.y-59*scale}));
-  for (const face of [[tops[0],ridge[0],ridge[1],tops[3]],[ridge[0],tops[1],tops[2],ridge[1]],[points[1],points[2],tops[2],tops[1]],[points[2],points[3],tops[3],ridge[1],tops[2]]])
-    polygon(face.map(p=>[p.x,p.y]),"#b8dfd04d","#9cac85");
-  points.forEach((p,i)=>line(p.x,p.y,tops[i].x,tops[i].y,"#92734f",3*scale));
-  line(ridge[0].x,ridge[0].y,ridge[1].x,ridge[1].y,"#92734f",3*scale);
-  for(let i=0;i<4;i++) line(tops[i].x,tops[i].y,tops[(i+1)%4].x,tops[(i+1)%4].y,"#b89b71",2*scale);
-  ctx.restore();
-}
-function drawGrowingBed(b) {
-  const corners = [
-    [-0.8, -0.8],
-    [0.8, -0.8],
-    [0.8, 0.8],
-    [-0.8, 0.8],
-  ].map(([x, y]) => iso(b.x + x, b.y + y));
-  ctx.save();
-  ctx.beginPath();
-  corners.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-  ctx.closePath();
-  ctx.fillStyle = b.crop.moisture > 0 ? "#805a40" : "#b18a60";
-  ctx.fill();
-  ctx.strokeStyle = "#c6a273";
-  ctx.lineWidth = 4 * scale;
-  ctx.stroke();
-  if (b.crop.planted) {
-    const fraction = b.crop.growth / cropDuration(b.crop);
-    const growth = 2 + fraction * 7;
-    for (let x = -0.5; x <= 0.5; x += 0.5) {
-      for (let y = -0.5; y <= 0.5; y += 0.5) {
-        const p = iso(b.x + x, b.y + y);
-        if (b.crop.kind !== "lettuce") line(p.x,p.y,p.x,p.y-18*scale,"#a78a5c",1.5*scale);
-        ctx.fillStyle = b.crop.moisture > 0 ? (b.crop.kind === "beans" ? "#477951" : "#648447") : "#999052";
-        ctx.beginPath();
-        ctx.ellipse(
-          p.x,
-          p.y - (growth * scale) / 2,
-          growth * scale,
-          (growth * scale) / 2,
-          -0.5,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-        if (b.crop.kind === "tomatoes" && fraction > 0.6) ellipse(p.x+2*scale,p.y-6*scale,2.5*scale,2.5*scale,fraction >= 1 ? "#ce593b" : "#d5a757");
-      }
-    }
-  }
-  ctx.restore();
-}
-function buildingSprite(kind, x, y, alpha = 1) {
-  if (kind === "greenhouse") greenhouse({x,y,crop:{planted:false,moisture:0}},alpha);
-  else if (kind === "well") cistern(x, y, alpha);
-  else sprite(kind, x, y, alpha);
+function buildingSprite(kind, x, y, alpha = 1, id) {
+  if(kind==='home'&&id==null&&$('#home-material-method').value==='adobe'){sprite(['adobe-gable','adobe-veranda'][state.village.buildings.filter(b=>b.kind==='home').length%2],x,y,alpha,id);return;}
+  sprite(buildingArtKey({kind,id},state.village.buildings,state.village.economy.projects),x,y,alpha,id);
 }
 function placementValid(kind, x, y) {
-  if (x < 1 || x > MAP_SIZE - 2 || y < 1 || y > MAP_SIZE - 2 || riverBank(x, y)) return false;
-  if (kind === "road") {
-    return state.village.roads.some(([rx, ry]) => rx === x && ry === y) ||
-      !state.village.buildings.some(b => b.x === x && b.y === y);
-  }
-  const radius = kind === "square" ? 2 : 1;
-  return x - radius >= 0 && y - radius >= 0 && x + radius < MAP_SIZE && y + radius < MAP_SIZE && !riverBank(x + radius - 1, y) &&
-    !(Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) &&
-    !state.village.buildings.some(b => Math.abs(b.x - x) < radius + (b.kind === "square" ? 2 : 1) && Math.abs(b.y - y) < radius + (b.kind === "square" ? 2 : 1)) &&
-    state.village.wood >= kinds[kind][1];
+  return !(movingBuilding===null?placementReason(state.village,kind,x,y):movePlacementReason(state.village,movingBuilding,x,y));
 }
+function activityLabel(r) {
+  if(r.trip)return tripLabel(r,state.environment.economy.jobs.find(j=>j.id===r.id));
+  if(r.task === "sleep")return sleepLabel(r);
+  if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
+  if (r.task === "visit") {
+    const b = state.village.buildings.find(b => b.id === r.visit_building);
+    if (b) return `${Math.hypot(r.target_x-r.x, r.target_y-r.y) > 0.1 ? "Walking to" : "Visiting"} the ${kinds[b.kind][0].toLowerCase()}`;
+  }
+  return tasks[r.task] || r.task;
+}
+function residentAt(x, y) {
+  return [...state.residents].reverse().find(r => {
+    const p = iso(r.x, r.y);
+    return residentVisible(r,state.village) && Math.hypot(p.x-x, p.y-14*scale-y) < Math.max(16, 22*scale);
+  });
+}
+function announceMilestones() {
+  const found = milestones(previousVillage, state.village);
+  previousVillage = state.village;
+  for (const event of found) {
+    const text = event.kind === "building" ? `${kinds[event.building][0]} ready · A new place for village life.`
+      : event.kind === "building_work" ? event.action==='move'?"Building moved · ready in its new place.":event.action==='salvage'?"Salvage finished · materials returned to storage.":"Demolition finished · the plot is clear."
+      : event.kind === "harvest" ? "Harvest gathered · Fresh food for everyone."
+      : event.kind === "quest" ? `${quests[event.quest].title} complete · Unlocked ${quests[event.quest].reward}`
+      : "A new friendship · Shared time is bringing neighbours closer.";
+    if (!milestoneQueue.includes(text)) milestoneQueue.push(text);
+  }
+  if (!showingMilestone && milestoneQueue.length) {
+    showingMilestone = true;
+    $("#milestone").textContent = milestoneQueue.shift(); $("#milestone").hidden = false;
+    sound.celebrate();
+    celebrationTimer = setTimeout(() => { $("#milestone").hidden = true; showingMilestone = false; }, 5500);
+  }
+}
+function resetPolish() {
+  previousVillage = state.village; milestoneQueue.length = 0;
+  clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
+  movingBuilding = null; pendingRemoval = null;
+  cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; setZoom(1.3);
+}
+
 function building(b) {
   const p = iso(b.x, b.y),
-    complete = b.progress >= 100;
-  const shadowWidth = (buildingArt[b.kind]?.width ?? 140) * .27 * scale;
-  contactShadow(p.x, p.y + 4 * scale, shadowWidth, shadowWidth / 2, 0.16);
-  if (complete && b.kind === "greenhouse") greenhouse(b);
-  else buildingSprite(b.kind, b.x, b.y, complete ? 1 : 0.4);
+    work=(state.village.building_jobs||[]).find(j=>j.building===b.id),
+    complete = b.progress >= 100 || (work?.original_progress||0)>=100;
+
+  const project=state.village.economy.projects.find(p=>p.building===b.id);
+  const stages=state.environment.economy.projects.find(p=>p.building===b.id)?.stages.length||1;
+  buildingSprite(b.kind,b.x,b.y,work?.stage==='rebuild'?.45:complete?1:.16+.65*((project?.stage||0)/stages),b.id);
+  if (complete && ['garden','greenhouse'].includes(b.kind)) {
+    const registration=placementArt(b.kind,buildingArt[b.kind]);
+    ctx.save();if(work?.stage==='rebuild')ctx.globalAlpha*=.45;
+    drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));
+    ctx.restore();
+  }
+  if(work){
+    const total=work.stage==='pack'?24:work.stage==='rebuild'?36:work.action==='demolish'?18:54;
+    ctx.fillStyle='#f6e7be';ctx.font=`${10*scale}px Georgia`;ctx.textAlign='center';
+    ctx.fillText(work.stage==='pack'?'Packing':work.stage==='rebuild'?'Rebuilding':work.action==='salvage'?'Salvaging':'Demolishing',p.x,p.y+29*scale);
+    ctx.fillRect(p.x-28*scale,p.y+9*scale,56*scale,5*scale);ctx.fillStyle='#9b7447';ctx.fillRect(p.x-28*scale,p.y+9*scale,56*scale*work.work/total,5*scale);
+    return;
+  }
   if (!complete) {
     const s = scale;
     // Upright posts and beams follow the same ground axes as the building.
-    const corners = [
-      [-0.9, -0.9],
-      [0.9, -0.9],
-      [0.9, 0.9],
-      [-0.9, 0.9],
-    ].map(([x, y]) => iso(b.x + x * (b.kind === "square" ? 2 : 1), b.y + y * (b.kind === "square" ? 2 : 1)));
-    const scaffoldHeight = (b.kind === "garden" ? 24 : 65) * s;
+    const corners = footprintCorners(b.kind,b.x,b.y).map(([x,y])=>iso(x,y));
+    const scaffoldHeight = (b.kind === "garden" ? 15 : (project?.stage||0)===0?20:65) * s;
     for (let i = 0; i < corners.length; i++) {
       const a = corners[i],
         next = corners[(i + 1) % corners.length];
@@ -419,6 +568,9 @@ function building(b) {
       );
     }
     ctx.fillStyle = "#fffcf0";
+    ctx.font=`${10*s}px 'DM Sans',sans-serif`;ctx.textAlign='center';
+    const stage=state.environment.economy.projects.find(project=>project.building===b.id);
+    ctx.fillText(stage?.paused?'Paused':stage?.stage||'Blueprint',p.x,p.y+30*s);
     ctx.fillRect(p.x - 27 * s, p.y + 9 * s, 54 * s, 5 * s);
     ctx.fillStyle = "#7c9859";
     ctx.fillRect(p.x - 27 * s, p.y + 9 * s, (54 * s * b.progress) / 100, 5 * s);
@@ -428,13 +580,7 @@ function resident(r) {
   const p = iso(r.x, r.y),
     s = scale;
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
-  const indoors =
-    !moving &&
-    r.task === "sleep" &&
-    state.village.buildings.filter(
-      (b) => b.kind === "home" && b.progress >= 100,
-    )[Math.floor(r.id / 3)];
-  if (indoors) return;
+  if(!residentVisible(r,state.village))return;
   const isSelected = selected === r.id;
   contactShadow(p.x, p.y + 2 * s, 10 * s, 4 * s, 0.25);
   if (isSelected) {
@@ -445,16 +591,16 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, visitingKind: r.task === "visit" ? state.village.buildings[r.visit_building]?.kind : null }, state.village.minutes, animationDelta);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
     residentSurfaces.set(r.id, surface);
   }
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
-    { base: animations[r.id], idle: idleAnimations[r.id] }, animation, p.x, py, 43 * s);
+    { base: animations[r.id], idle: idleAnimations[r.id], activities: activityAnimations[r.id] }, animation, p.x, py, RESIDENT_WIDTH * s);
   if (isSelected) {
-    ctx.font = `600 ${11 * s}px 'DM Sans',sans-serif`;
+    ctx.font = `600 ${Math.max(11, 11 * s)}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
     const tw = ctx.measureText(r.name).width;
     ctx.fillStyle = "#fffcf2";
@@ -489,15 +635,25 @@ for (let i = 0; i < 170; i++) {
   });
 }
 function render() {
+  const weather = weatherConditions(state.environment,state.village.minutes);
+  canvas.dataset.weather = weather.label;
+  if (cameraTarget) {
+    const blend = reducedMotion.matches ? 1 : 1 - Math.exp(-cameraTarget.dt * 9);
+    pan.x += (cameraTarget.x - pan.x) * blend;
+    pan.y += (cameraTarget.y - pan.y) * blend;
+    if (Math.hypot(cameraTarget.x - pan.x, cameraTarget.y - pan.y) < 0.5) cameraTarget = null;
+  }
   scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.45, scale);
   origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
+  const weatherView = {conditions:weather,buildings:state.village.buildings,project:iso,scale,time:weatherTime,width,height,reducedMotion:reducedMotion.matches};
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
-  const key = JSON.stringify(state.village.roads);
+  const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
+  const key = JSON.stringify([visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y])]);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, state.village.roads);
+    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active));
     groundKey = key;
   }
   ctx.save();
@@ -526,9 +682,11 @@ function render() {
     line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
   }
   drawPlacementGrid();
-  // Player roads remain visible beneath individually placed structures.
+  // Foundations and road tiles share the same half-tile boundary lattice.
+  drawGroundWeather(ctx,weatherView);
   const objects = [
-    ...flora.map((f) => ({
+    ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
+    ...flora.filter(f=>!state.village.economy.sources.some(site=>site.active&&Math.hypot(f.x-site.x,f.y-site.y)<2.5)).map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),
@@ -546,22 +704,30 @@ function render() {
     })),
   ];
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
+  for(const job of state.village.building_jobs||[]){if(job.stage!=='pack'||!job.destination)continue;const b=state.village.buildings.find(b=>b.id===job.building);polygon(footprintCorners(b.kind,...job.destination).map(([x,y])=>{const p=iso(x,y);return[p.x,p.y];}),'#a5b77422','#b9cf8b');}
+
   if (tool && pointer) {
-    const t = uniso(pointer.x, pointer.y),
-      valid = placementValid(tool, t.x, t.y);
-    tile(
-      t.x,
-      t.y,
-      valid ? "#f5f1b299" : "#cd745a88",
-      valid ? "#fff8cf" : "#b75943",
-    );
-    if (tool === "square") {
-      polygon([[-2,-2],[2,-2],[2,2],[-2,2]].map(([x,y]) => { const p = iso(t.x+x,t.y+y); return [p.x,p.y]; }), valid ? "#f5f1b244" : "#cd745a44", valid ? "#fff8cf" : "#b75943");
-    }
-    if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55);
+    const t = uniso(pointer.x, pointer.y);
+    const reason = movingBuilding===null?placementReason(state.village, tool, t.x, t.y):movePlacementReason(state.village,movingBuilding,t.x,t.y);
+    polygon(footprintCorners(tool,t.x,t.y).map(([x,y]) => {
+      const p = iso(x,y); return [p.x,p.y];
+    }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
+    if(tool.startsWith('source_'))materialSite({material:sourceMaterial(tool),x:t.x,y:t.y,active:true,planted:true,growth:0.4,remaining:16,maximum:32},.55);
+    else if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55,movingBuilding??undefined);
+    $("#placement").textContent = reason || (movingBuilding!==null ? "Choose the new plot · residents will pack and rebuild · Esc to cancel" : `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`);
+    $("#placement").classList.toggle("invalid", Boolean(reason));
   }
+  const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
+  const hint = $("#resident-hint");
+  hint.hidden = !hovered;
+  if (hovered) {
+    hint.textContent = `${hovered.name} · ${activityLabel(hovered)}`;
+    hint.style.left = `${Math.max(16, Math.min(width - 300, pointer.x + 18))}px`;
+    hint.style.top = `${Math.max(100, Math.min(height - 150, pointer.y - 48))}px`;
+  }
+  canvas.style.cursor = drag?.moved ? "grabbing" : tool ? "crosshair" : hovered ? "pointer" : "grab";
   // Tiny birds drifting past the clearing.
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!reducedMotion.matches && !weather.rain) {
     for (let i = 0; i < 3; i++) {
       const x = ((time * 13 + i * 130) % (width + 100)) - 50,
         y = height * 0.2 + Math.sin(time * 0.25 + i) * 20;
@@ -574,6 +740,7 @@ function render() {
       ctx.stroke();
     }
   }
+  drawWeatherAir(ctx,weatherView);
   const hour = (state.village.minutes % 1440) / 60;
   // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
@@ -583,6 +750,15 @@ function render() {
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
   ctx.fillRect(0, 0, width, height);
+  if(darkness>0){
+    for(const b of state.village.buildings){
+      if(b.progress<100)continue;
+      const c=state.environment.power.connections.find(c=>c.id===b.id);
+      if(!['grid','roof'].includes(c?.source) || c.light_level<=0)continue;
+      const p=iso(b.x,b.y),kind=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
+      drawNightEmission(ctx,nightBuildingImages[kind],allBuildingArt[kind],kind,p.x,p.y,scale,darkness*c.light_level);
+    }
+  }
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
@@ -592,7 +768,7 @@ function render() {
         b.kind === "home" &&
         state.residents.some(
           (r) =>
-            r.task === "sleep" &&
+            !r.trip && r.task === "sleep" &&
             Math.hypot(r.x - b.x - 0.75, r.y - b.y - 0.75) < 0.3,
         )
       ) {
@@ -605,6 +781,8 @@ function render() {
   }
 }
 function closePanels() {
+  $("#village-book").hidden = true;
+  $("#open-village").setAttribute("aria-expanded","false");
   for (const button of document.querySelectorAll("[data-panel]")) {
     $("#" + button.dataset.panel).hidden = true;
     button.setAttribute("aria-expanded", "false");
@@ -616,6 +794,11 @@ function showPanel(id) {
   $("#person").hidden = true;
   if (tool) setTool(null);
   $("#" + id).hidden = false;
+  if(villagePanels.has(id)) {
+    $("#village-book").hidden = false;
+    $("#open-village").setAttribute("aria-expanded","true");
+    lastVillagePanel = id;
+  }
   $(`[data-panel="${id}"]`).setAttribute("aria-expanded", "true");
   $("#" + id).querySelector("button").focus();
   updateUI();
@@ -628,11 +811,16 @@ function selectPerson(id) {
   encouragable = false;
   $("#person").hidden = false;
   const r = state.residents.find((p) => p.id === id);
+  const p = iso(r.x, r.y);
+  cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
-      ["gather", "Gather timber"],
+      ["building_work", "Help building crew"],
+      ["gather", "Forage food"],
+      ["source", "Source materials"],
+      ["prepare", "Prepare materials"],
       ["water", "Collect river water"],
       ["cook", "Make a meal"],
       ["rest", "Take a rest"],
@@ -643,20 +831,22 @@ function selectPerson(id) {
       .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
       .join(
         "",
-      )}</div><p class="friendship-note"></p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button>`;
+      )}</div><p class="friendship-note"></p>`;
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
     updateUI();
-    showPanel("community-panel");
-    $(`[data-resident="${id}"]`).focus();
+    $(`[data-citizen="${id}"]`).focus();
   };
+  $('#person .occupation-toggle').onchange=event=>{game.set_resident_job(id,event.target.checked);state=JSON.parse(game.snapshot());updateUI();save();};
+  paintPortraits();
   $(".close-person").focus();
-  $(".requests").onclick = (e) => {
+  $("#person .requests").onclick = (e) => {
     const b = e.target.closest("[data-task]");
     if (b) request(b.dataset.task, false);
   };
-  $(".persuade").onclick = () => request(lastTask, true);
+  $("#person .persuade").onclick = () => request(lastTask, true);
+  $("#person .resume-request").onclick = () => { if(paused)togglePause(); updateUI(); };
   updateUI();
 }
 function request(task, encourage) {
@@ -665,7 +855,8 @@ function request(task, encourage) {
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
   updateUI();
-  $(encouragable ? ".persuade" : ".response").scrollIntoView({ block: "nearest" });
+  save();
+  $(encouragable ? "#person .persuade" : "#person .response").scrollIntoView({ block: "nearest" });
 }
 function replaceMarkup(element, html) {
   if (element._markup !== html) {
@@ -683,18 +874,32 @@ function objectiveMarkup(objectives, completed = false) {
     .join("");
 }
 function openJournal() {
+  if(tool)setTool(null);
+  closePanels();selected=null;$('#person').hidden=true;
+  journalPage = state.village.progress.tracked;
   updateQuests();
   $("#quest-dialog").showModal();
+  $('[data-panel="goals-panel"]').setAttribute('aria-expanded','true');
 }
 function updateQuests() {
   const v = state.village,
     p = v.progress;
+  const completions = completedQuests(v);
+  if(v.mode !== 'sandbox') {
   const id = p.tracked,
     quest = quests[id],
-    done = p.completed[id];
+    done = completions[id];
   const objectives = quest.objectives(v),
     next = objectives.find((o) => !o.done);
-  $("#tutorial-count").textContent = `${quest.theme} · QUEST ${id + 1} OF 4`;
+  const finished=completions.every(Boolean);
+  const completedCount = done ? objectives.length : objectives.filter(o => o.done).length;
+  $("#goal-label").textContent = finished ? "A flourishing village" : done ? "A shared dream fulfilled" : quest.title;
+  $("#goal-next").textContent = finished ? `${quests.length}/${quests.length} chapters complete · keep growing` : done ? "Follow our next chapter →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
+  $("#goal-meter").value = completedCount; $("#goal-meter").max = objectives.length;
+  $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
+  $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
+  $("#goal-shortcut").onclick = () => done ? openJournal() : showPanel("goals-panel");
+  $("#tutorial-count").textContent = `${quest.theme} · CHAPTER ${id + 1} OF ${quests.length}`;
   $("#tutorial-title").textContent = quest.title;
   $("#tutorial-copy").textContent = done
     ? quest.after
@@ -713,64 +918,68 @@ function updateQuests() {
     `${quest.title} objectives completed`,
   );
   replaceMarkup($("#objectives"), objectiveMarkup(objectives, done));
-  const kind = done ? quest.building : next?.build;
-  const count = kind
-    ? v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length
-    : 0;
-  const planned =
-    kind && v.buildings.some((b) => b.kind === kind && b.progress < 100);
-  const enough = kind && (kind === "home" ? count >= next?.target : count > 0);
-  const action = $("#tutorial-action");
-  action.hidden = (!kind || planned || enough) && !(!done && next?.action);
-  action.textContent = kind
-    ? `Plan ${kinds[kind][0].toLowerCase()} · ${kinds[kind][1]} timber`
-    : "";
-  if (!done && next?.action) {
-    action.textContent =
-      next.action === "supper"
-        ? "Host welcome supper · 5 meals"
-        : "Set aside 24 timber";
-    action.onclick = () => {
-      const result =
-        next.action === "supper"
-          ? game.host_gathering()
-          : game.contribute_workshop_timber();
-      toast(
-        result === "ok"
-          ? next.action === "supper"
-            ? "Welcome supper is starting at the kitchen."
-            : "The tool library timber is set aside."
-          : result,
-      );
-      state = JSON.parse(game.snapshot());
-      updateUI();
-      save();
+  const route=goalRoute(state,done?{build:quest.building,target:1}:next);
+  const action=$("#tutorial-action"), shortcut=$("#goal-action");
+  action.disabled=false;shortcut.disabled=false;
+  let label='',onClick=()=>{};
+  if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>{if(route.recipe){$('#home-material-method').value=route.recipe;$('#home-material-method').dispatchEvent(new Event('change'));}setTool(route.kind);};}
+  if(route?.type==='visit'){label=(v.building_jobs||[]).some(j=>j.building===route.id)?'Review crew work':`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
+  if(route?.type==='project'){
+    label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
+    onClick=()=>showPanel('projects-panel');
+    const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
+    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
+  }
+  if(route?.type==='supper'||route?.type==='tool_library'){
+    const supper=route.type==='supper', underway=supper&&p.gathering_until>v.minutes;
+    label=underway?'Welcome supper underway':supper?'Host welcome supper · 5 meals':'Support tool library · R$ 120';
+    action.disabled=underway;shortcut.disabled=underway;
+    if(underway)$('#tutorial-copy').textContent=`The neighbours are making their way to the kitchen. ${p.attended.toString(2).replaceAll('0','').length} have arrived; three need to attend before the supper ends. ${Math.ceil(p.gathering_until-v.minutes)} game minutes remain.`;
+    onClick=()=>{
+      const result=supper?game.host_gathering():game.contribute_tool_library();
+      toast(result==='ok'?(supper?'Welcome supper is starting at the kitchen.':'The shared tool library is funded.'):result);
+      state=JSON.parse(game.snapshot());updateUI();save();
     };
-  } else action.onclick = () => setTool(kind);
+  }
+  const chapterPanels={build:['build-panel','Review village buildings'],town:['town-panel','Open Town'],land:['projects-panel','Open Land & materials'],preparation:['projects-panel','Review material preparation'],supplies:['supplies-panel','Open Supplies'],power:['power-panel','Open Power'],people:['community-panel','Meet our neighbours']};
+  if(chapterPanels[route?.type]){
+    const [panel,text]=chapterPanels[route.type];label=text;
+    onClick=()=>{showPanel(panel);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
+  }
+  if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
+  if(route?.type==='gathering'){label='Host a gathering · 5 meals';onClick=()=>{const result=game.host_gathering();toast(result==='ok'?'Our gathering is starting.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
+  action.hidden=!route;action.textContent=label;action.onclick=onClick;
+  shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
   $("#open-journal").textContent =
     done && id === 0
       ? "Choose our next quest →"
-      : `Village journal · ${p.completed.filter(Boolean).length}/4`;
+      : `Village journal · ${completions.filter(Boolean).length}/${quests.length}`;
   $("#village-needs").textContent =
     `${Math.min(5, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
   $("#quest-total").textContent =
-    `${p.completed.filter(Boolean).length} of 4 shared dreams fulfilled`;
+    `${completions.filter(Boolean).length} of ${quests.length} chapters complete`;
+  replaceMarkup($('#journal-chapters'),quests.map((q,i)=>`<button data-chapter="${i}" aria-pressed="${i===journalPage}"><span class="chapter-number">${completions[i]?'✓':i+1}</span><span><b>${q.title}</b><small>${questStatus(v,i)}</small></span></button>`).join(''));
   replaceMarkup(
     $("#quest-list"),
     quests
       .map((q, i) => {
         const status = questStatus(v, i),
-          locked = i > 0 && !p.completed[0];
-        return `<article class="quest-card ${p.completed[i] ? "complete" : ""} ${locked ? "locked" : ""}">
-      <div class="quest-card-art ${q.art}">${i ? `<img src="art/${q.art}-isometric.png" alt="${kinds[q.building][0]} quest reward">` : "<span>☀</span>"}</div>
+          locked = !questAvailable(v,i);
+        return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}" ${i===journalPage?'':'hidden'}>
+      <div class="quest-card-art ${q.art}">${i ? `<canvas data-quest-art="${q.art}" role="img" aria-label="${allBuildingArt[q.art]?.name || q.theme} illustration"></canvas>` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
-      ${objectiveMarkup(q.objectives(v), p.completed[i])}
-      <p class="journal-reward"><b>${p.completed[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
-      ${p.completed[i] ? `<p class="quest-after">${q.after}</p>` : ""}
-      <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? "Complete A Shared Beginning first" : i === id ? "Following this quest" : p.completed[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
+      ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."}</p>` : ""}
+      ${objectiveMarkup(q.objectives(v), completions[i])}
+      <p class="journal-reward"><b>${completions[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
+      ${completions[i] ? `<p class="quest-after">${q.after}</p>` : ""}
+      <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? `Complete ${quests[i-1]?.title} first` : i === id ? "Following this quest" : completions[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
       })
       .join(""),
   );
+  for(const canvas of $('#quest-list').querySelectorAll('[data-quest-art]')){
+    if(!canvas._painted){const key=canvas.dataset.questArt;paintIcon(canvas,key,buildingImages[key],allBuildingArt[key]);canvas._painted=true;}
+  }
+  }
   const has = (kind) =>
     v.buildings.some((b) => b.kind === kind && b.progress >= 100);
   $("#village-craft").hidden =
@@ -798,6 +1007,14 @@ function updateQuests() {
         : "Host a gathering";
 }
 const buildingPurposes = {
+  hydro:'Produces 1.8 energy/hour day and night (less on dry days, more during rain). Adds 18 battery capacity. Workers approach from land.',
+  eco_toilet:'Residents use this private toilet once a day and wash their hands with one fresh water. Waste stays sealed until processed.',
+  banana_treatment:'A sealed banana evapotranspiration bed treats one toilet waste every four game hours (six per day). It produces no water or food. Open Water & waste to pause it and reserve waste for biogas.',
+  wetland:'A lined reed bed filters 12 greywater into 8 irrigation water over six hours. Reclaimed water is never used for drinking or cooking.',
+  biodigester:'Two sealed waste + two kitchen scraps take eight hours to produce four cooking gas and two digestate. Digestate cures for a full day before becoming compost.',
+  warehouse:'A communal store adds 300 spaces for construction materials, including incoming supplies. Manage its contents in Supplies.',
+  solar_farm: "Collects sunshine and charges the shared battery. Generation peaks at 6 energy per hour; each farm stores 36 energy.",
+  streetlight: "Lights the path after sunset, using 0.1 energy per hour from the shared battery.",
   home: "Rest on the porch to recover energy.",
   garden: "Plant, water, or harvest this bed when it is ready.",
   greenhouse: "Grow crops under glass and raise seedlings for outdoor beds. Rain stays outside.",
@@ -812,13 +1029,29 @@ const buildingPurposes = {
 function updateBuildingPanel() {
   const chooser = $("#building-choice");
   const previous = chooser.value;
-  const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${b.progress < 100 ? " · building" : ""}</option>`).join("");
+  const markup = state.village.buildings.map(b => `<option value="${b.id}">${kinds[b.kind][0]} ${b.id + 1}${(state.village.building_jobs||[]).some(j=>j.building===b.id)?" · crew working":b.progress < 100 ? " · building" : ""}</option>`).join("");
+  chooser.disabled=!state.village.buildings.length;
   if (chooser.innerHTML !== markup) {
     chooser.innerHTML = markup;
     if ([...chooser.options].some(o => o.value === previous)) chooser.value = previous;
   }
   const b = state.village.buildings.find(b => b.id === Number(chooser.value));
+  $('#building-work-controls').hidden=!b;
+  const crew=b&&(state.village.building_jobs||[]).find(j=>j.building===b.id);
+  $('#building-work-actions').hidden=!!crew;
+  $('#cancel-building-work').hidden=!crew||crew.stage==='rebuild';
+  const crewMembers=crew?state.residents.filter(r=>r.task==='building_work'&&r.activity_building===b.id):[];
+  const clockMinute=state.village.minutes%1440,crewHours=clockMinute>=540&&clockMinute<720||clockMinute>=900&&clockMinute<960;
+  const crewNote=paused?'Paused · resume time for resident work.':crewMembers.length?crewMembers.map(r=>`${r.name} ${Math.hypot(r.x-r.target_x,r.y-r.target_y)<=.08?'working':'on the way'}`).join(' · '):crewHours?'Queued · neighbours will finish their meals or rest first.':'Queued · next community work window: 09:00–12:00 or 15:00–16:00.';
+  $('#building-work-status').textContent=crew?`${crew.stage==='pack'?'Packing':crew.stage==='rebuild'?'Rebuilding':crew.action==='salvage'?'Careful salvage':'Demolition'} · ${Math.floor(crew.work/(crew.stage==='pack'?24:crew.stage==='rebuild'?36:crew.action==='demolish'?18:54)*100)}%. ${crewNote}`:'Demolition clears quickly with no material return. Salvage takes three times the work and recovers half of recorded materials. Moving packs and rebuilds the same building.';
+  $('#building-work-actions [data-building-work="move"]').disabled=!b||b.progress<100;
+
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
+  if(b?.kind==='workshop'){
+    const tools=state.village.progress.tool_uses, timber=state.environment.economy.materials[0].available;
+    $('#building-purpose').textContent=`${tools}/36 tool uses ready. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'Eight unreserved timber makes twelve more tool uses.'}`;
+  }
+  $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
   $("#crop-controls").hidden = !farming;
   if (farming) {
@@ -827,14 +1060,19 @@ function updateBuildingPanel() {
     $("#replant-crop").checked = c.replant;
     const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
     const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.progress.tool_uses > 0 ? 2 : 0);
-    $("#crop-status").textContent = `${spec.name}: ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · waiting for water" : ""}`}. Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food, depending on gardener. ${spec.note}.`;
-    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering costs 2 water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
+    $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food.`;
+    $("#crop-details").textContent = `Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Harvest size depends on the gardener. ${spec.note}.`;
+    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
-  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Construction must finish before visits." : visitors.length
+  $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Village → Construction for stage materials, purchases and priorities." : visitors.length
     ? visitors.map(r => `${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y) > 0.1 ? "on the way" : "using the building"}`).join(" · ")
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
-  for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100;
+  const utility = b && ["solar_farm", "streetlight", "hydro", "banana_treatment", "wetland", "biodigester", "warehouse"].includes(b.kind);
+  $("#building-visits").hidden = utility;
+  if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
+  if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
+  for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100 || !!state.residents.find(r=>r.id===Number(button.dataset.visitor))?.trip;
 }
 function inspectBuilding(id) {
   showPanel("building-panel");
@@ -843,29 +1081,52 @@ function inspectBuilding(id) {
   $("#building-response").textContent = "";
   updateBuildingPanel();
 }
+function updateCircularUI(v) {
+  const c=v.circular,ready=kind=>v.buildings.some(b=>b.kind===kind&&b.progress>=100);
+  $('#circular-controls').hidden=!buildingUnlocked(v,'eco_toilet');
+  $('#circular-stock').textContent=`${c.waste.toFixed(0)} / 80 sealed waste · ${c.greywater.toFixed(1)} / 120 greywater`;
+  $('#circular-output').textContent=`${c.reclaimed.toFixed(0)} / 60 irrigation water · ${c.biogas.toFixed(0)} / 12 cooking gas`;
+  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste>=80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
+  $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':!c.filter_water?'Filtration paused.':c.filtration>0?`Filtering · ${Math.ceil(c.filtration/60)} hours left`:c.reclaimed>52?'Irrigation water store is full. Gardens use this before fresh water.':c.greywater>=12?'Ready to filter when time resumes.':'Waiting for 12 greywater.';
+  const beds=v.buildings.filter(b=>b.kind==='banana_treatment'&&b.progress>=100).length;
+  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment?'Banana treatment paused. Waste remains available for biogas.':`${c.waste>0 ? `Treating up to ${beds*6} waste per day.` : 'Waiting for toilet waste.'} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
+  $('#banana-treatment').checked=c.banana_treatment??true;
+  $('#banana-treatment').disabled=!beds;
+  $('#digester-status').textContent=c.pending_compost?`Two digestate curing · ${Math.ceil(c.curing/60)} hours left`:!ready('biodigester')?'Build a biodigester to turn sealed waste and scraps into cooking fuel.':!c.auto_feed?'Digestion paused.':c.digestion>0?`Digesting · ${Math.ceil(c.digestion/60)} hours left`:c.biogas>8?'Gas store is full. Use it in the kitchen.':c.waste>=2&&v.progress.scraps>=2?'Ready to digest when time resumes.':'Waiting for two waste and two scraps.';
+  $('#auto-digest').checked=c.auto_feed;$('#filter-greywater').checked=c.filter_water;$('#use-biogas').checked=c.use_biogas;
+  $('#auto-digest').disabled=!ready('biodigester');$('#filter-greywater').disabled=!ready('wetland');
+}
 function updateSupplies(v) {
+  updateCircularUI(v);
+  $('#hen-controls').hidden=!buildingUnlocked(v,'coop');
+  $('#egg-control').hidden=!buildingUnlocked(v,'coop');
   const s = v.supplies;
   const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
   const fed = coops.filter(b => b.poultry.remaining > 0);
   const days = (v.food + v.meals) / 15;
   $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
-  $("#pantry-outlook").textContent = `${days < 1 ? "Pantry running low. " : ""}About ${days.toFixed(1)} days of food at 15 portions/day, before cooking gains, hen feed, or new harvests.`;
+  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of food before cooking gains or hen feed. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
   $("#kitchen-status").textContent = !v.buildings.some(b => b.kind === "kitchen" && b.progress >= 100)
     ? "Build a kitchen to stretch your harvest into meals."
+    : v.meals >= 8 ? "Enough meals for now. The kitchen can take a break."
     : v.water < 1 ? "Cooking needs water. Residents can collect it from the river."
     : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
     : s.use_eggs && s.eggs >= 2 ? "Next pot: egg meals. Residents cook when meals are running low." : "Next pot: simple meals. Residents cook when meals are running low.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
-    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs >= 60 ? "Egg storage is full." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
+    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Feed is available."}`;
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
 }
 function updateSituations() {
   const view = situationView(state.village, state.residents);
-  $("#open-situations").textContent = view.label;
-  replaceMarkup($("#situation-content"), view.markup);
+  $("#situations-label").textContent = view.label;
+  $("#open-situations").dataset.concern=String(!!state.village.situations.active);
+  $("#open-situations").setAttribute("aria-label",view.label);
+  const portrait=state.village.situations.active?`<div class="situation-portrait">${avatar(state.village.situations.active.resident)}</div>`:'';
+  const content=$('#situation-content'),markup=portrait+view.markup;
+  if(content._markup!==markup){replaceMarkup(content,markup);paintPortraits();}
 }
 function openSituations() {
   $("#quest-dialog").close();
@@ -873,9 +1134,22 @@ function openSituations() {
   $("#situation-dialog").showModal();
 }
 function updateUI() {
+  const free = state.village.mode==='sandbox';
+  $('#mode-badge').textContent=free?'Sandbox':'Story';
+  $('#mode-label').textContent=`${free?'SANDBOX':'STORY'}`;
+  $('.goal-tracker').hidden=free;
+  $('[data-panel="goals-panel"]').hidden=free;
+  $('[data-panel="projects-panel"]').hidden=free;
+  $('[data-panel="town-panel"]').hidden=free;
+  $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
+  $('#new-scenario').textContent=free?'New sandbox':'New story';
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows thirteen chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
+  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
+  economyUI?.update();
   updateSituations();
   const v = state.village;
   updateSupplies(v);
+  updatePowerUI(state,kinds);
   updateBuildingPanel();
   for (const k of ["wood", "food", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
@@ -886,19 +1160,7 @@ function updateUI() {
     `Day ${Math.floor(v.minutes / 1440) + 1} · ${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
   const night = mins < 360 || mins >= 1140;
   $(".season-icon").textContent = night ? "☾" : "☀";
-  $(".season small").textContent = night
-    ? "Warm season · quiet night"
-    : mins < 480
-      ? "Morning · breakfast & waking up"
-      : mins < 720
-        ? "Daylight · community work"
-        : mins < 840
-          ? "Midday · lunch & a little rest"
-          : mins < 1050
-            ? "Afternoon · community work"
-            : mins < 1200
-              ? "Evening · dinner together"
-              : "Evening · time to unwind";
+  $(".season small").textContent = state.environment.raining ? 'Rainfall' : weatherConditions(state.environment,v.minutes).wet>.1 ? 'After the rain' : mins < 360 || mins >= 1260 ? 'Night' : mins < 720 ? 'Morning' : mins < 1080 ? 'Afternoon' : 'Evening';
   const env = state.environment;
   const gardens = v.buildings.filter(
     (b) => ["garden", "greenhouse"].includes(b.kind) && b.progress >= 100,
@@ -941,11 +1203,20 @@ function updateUI() {
     const el = $(`[data-resident="${r.id}"]`);
     el.classList.toggle("selected", r.id === selected);
     el.querySelector("small").textContent =
-      (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] : tasks[r.task]) || r.task;
+      activityLabel(r);
     el.querySelector(".energy-tiny i").style.width = r.energy + "%";
   }
   if (selected !== null) {
     const r = state.residents.find((r) => r.id === selected);
+    const job=env.economy.jobs.find(j=>j.id===r.id);
+    $('#person .occupation-title').textContent=job.title;
+    $('#person .occupation-income').textContent=`R$ ${job.income/100} for the shared fund · 09:00–17:00`;
+    $('#person .occupation-description').textContent=job.description;
+    $('#person .occupation-toggle').checked=job.enabled;
+    $('#person .occupation-toggle').setAttribute('aria-label',`Schedule ${r.name}'s outside job`);
+    $('#person .occupation-schedule-note').textContent=r.trip?.purpose==='work'?'This shift is committed. Turning this off stops future shifts.':job.enabled?(v.minutes%1440>=600?'Next outside shift tomorrow at 09:00. Lunch is provided off-site.':'Leaves 09:00–10:00 when rested. Lunch is provided off-site.'):'Optional · staying available for village life.';
+    for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
+    $("#person .quote").hidden = !!response && r.requested && response.endsWith(r.reason);
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
@@ -967,6 +1238,7 @@ function updateUI() {
           .map((other) => `${other.name} (${friendships[r.id * 5 + other.id]})`)
           .join(", ")
       : "Friendships grow when neighbours attend gatherings together.";
+    $('[data-task="building_work"]').hidden=!(state.village.building_jobs||[]).length;
     for (const task of ["compost", "craft"]) {
       $(`[data-task="${task}"]`).hidden = !state.village.buildings.some(
         (b) =>
@@ -974,37 +1246,47 @@ function updateUI() {
           b.progress >= 100,
       );
     }
-    $(".response").hidden = !response;
-    $(".response").textContent = response;
-    $(".persuade").hidden = !encouragable;
+    const activity=(r.requested ? 'Your request · ' : '') + (!r.trip && r.task!=='sleep' && Math.hypot(r.x-r.target_x,r.y-r.target_y)>.08 ? 'On the way · ' : '') + activityLabel(r);
+    const activityEl=$("#person .person-activity");
+    if(activityEl.textContent!==activity)activityEl.textContent=activity;
+    $("#person .response").hidden = !response;
+    const reply=$("#person .response");
+    if(reply.textContent!==response)reply.textContent=response;
+    $("#person .persuade").hidden = !encouragable || !!r.trip;
+    $("#person .request-pause").hidden = !paused || !r.requested;
+    $("#person .request-pause").textContent = `The village is paused. Resume time to let ${r.name} continue.`;
+    $("#person .resume-request").hidden = !paused || !r.requested;
   }
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
     button.classList.toggle("locked", !unlocked);
-    const quest = { grove: 0, compost: 1, square: 2, workshop: 3 }[
-      button.dataset.kind
-    ];
+    button.classList.remove("unaffordable");
+    const quest = unlockQuest[button.dataset.kind];
+    if(button.dataset.kind.startsWith('source_')){const option=state.environment.economy.source_options.find(s=>s.key===button.dataset.kind);button.querySelector('small').textContent=free?'Free planting':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(option.cost/100);button.title=option.description+' · '+recipeSummary(state,option.key);button.setAttribute('aria-label','Place '+option.name);button.setAttribute('aria-pressed',String(button.dataset.kind===tool));continue;}
     button.querySelector("small").textContent = unlocked
-      ? button.dataset.kind === "road" ? "Free" : `⌁ ${kinds[button.dataset.kind][1]}`
+      ? button.dataset.kind === "road" ? "Free" : v.mode==='sandbox' ? "Free · instant" : "Free blueprint"
       : "Quest reward";
     button.title = unlocked
-      ? kinds[button.dataset.kind][2]
+      ? `${kinds[button.dataset.kind][1]} · ${free?'Free · instant construction':recipeSummary(state,button.dataset.kind,button.dataset.kind==='home'?$('#home-material-method').value:'standard')}`
       : `Complete ${quests[quest].title} to unlock`;
     button.setAttribute(
       "aria-label",
       unlocked
-        ? `Build ${kinds[button.dataset.kind][0]}, ${kinds[button.dataset.kind][1]} timber`
+        ? v.mode==='sandbox' ? `Build ${kinds[button.dataset.kind][0]}, free and instant` : `Plan ${kinds[button.dataset.kind][0]}, free blueprint`
         : `View quest to unlock ${kinds[button.dataset.kind][0]}`,
     );
     button.classList.toggle("active", button.dataset.kind === tool);
     button.setAttribute("aria-pressed", String(button.dataset.kind === tool));
   }
+  gameUI?.update(state,!!sandbox||artworkPreview||!!directScenario,selected);
 }
 function setTool(kind) {
+  movingBuilding = null;
   if (kind && !buildingUnlocked(state.village, kind)) {
     openJournal();
     return;
   }
+  if (kind) buildMenu.reveal(kind);
   if (kind && $("#build-panel").hidden) {
     closePanels();
     $("#person").hidden = true;
@@ -1013,10 +1295,12 @@ function setTool(kind) {
     $('[data-panel="build-panel"]').setAttribute("aria-expanded", "true");
     $(`[data-kind="${kind}"]`).focus();
   }
+  cameraTarget = null;
   tool = tool === kind ? null : kind;
+  $("#placement").classList.remove("invalid");
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${kinds[tool][1]} timber · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'} · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -1030,28 +1314,31 @@ function togglePause() {
   );
   $("#pause").classList.toggle("active", paused);
 }
+let paintedState = null, paintedView = "";
 function frame(stamp) {
   if (!last) last = stamp;
-  const dt = Math.min((stamp - last) / 1000, 0.1);
+  const elapsed = Math.max(0, (stamp - last) / 1000);
+  const dt = Math.min(elapsed, 0.1);
   last = stamp;
   const running =
     !paused && !document.hidden && !document.querySelector("dialog[open]");
-  animationDelta = running ? dt * Math.min(speed, 2) : 0;
+  animationDelta = running ? dt * Math.min(simulationSpeed(game, speed), 2) : 0;
+  if (cameraTarget) cameraTarget.dt = dt;
+  sound.update(running, state.environment.raining, state.village.minutes, state.residents.some(r => r.task === "build" && Math.hypot(r.x-r.target_x, r.y-r.target_y) < 0.2));
   if (running) {
-    time += dt * speed;
-    let remaining = dt * speed;
-    while (remaining > 0) {
-      const step = Math.min(remaining, 0.1);
-      game.tick(step);
-      remaining -= step;
-    }
+    if(!reducedMotion.matches)weatherTime += dt;
+    time += advanceSimulation(game, Math.min(elapsed, 1), speed);
+    state = JSON.parse(game.snapshot());
   }
-  state = JSON.parse(game.snapshot());
-  render();
+  $("#auto-speed").hidden = !running || !game.fast_forward_ready();
+  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused].join("|");
+  if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
+    render(); paintedState = state; paintedView = viewKey;
+  }
   uiElapsed += dt;
-  saveElapsed += dt;
+  saveElapsed += elapsed;
   if (uiElapsed > 0.3) {
-    updateUI();
+    if (running) { updateUI(); announceMilestones(); }
     uiElapsed = 0;
   }
   if (saveElapsed > 15) {
@@ -1061,6 +1348,27 @@ function frame(stamp) {
   requestAnimationFrame(frame);
 }
 function setup() {
+  for(const option of state.environment.economy.source_options)kinds[option.key]=[option.name,option.description];
+  gameUI=installGameUI({images:buildingImages,avatar,paintPortraits,selectPerson,
+    showPanel,closePanels,openDev:()=>{$('#help-dialog').close();devTools.open();},
+    focusAt:(x,y)=>{const p=iso(x,y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.45-p.y,dt:1/60};},
+    worldView:()=>[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>unproject(x,y,origin,scale))});
+  $('#open-village').onclick=()=>{
+    if(!$('#village-book').hidden){closePanels();return;}
+    showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
+  };
+  economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  previousVillage = state.village;
+  for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
+  for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
+    const input = $("#" + id); input.value = Math.round(settings[key] * 100);
+    $("#" + id + "-value").textContent = `${input.value}%`;
+    input.oninput = () => {
+      settings[key] = Number(input.value) / 100;
+      $("#" + id + "-value").textContent = `${input.value}%`;
+      $("#settings-status").textContent = saveSettings(settings) ? "Saved on this device." : "Applied for this session. Device storage is unavailable.";
+    };
+  }
   for (const id of ["next-crop", "replant-crop"]) $("#"+id).onchange = () => {
     game.configure_crop(Number($("#building-choice").value), $("#next-crop").value, $("#replant-crop").checked);
     state = JSON.parse(game.snapshot()); updateUI(); save();
@@ -1068,6 +1376,24 @@ function setup() {
 
   $("#building-neighbours").innerHTML = state.residents.map(r => `<button data-visitor="${r.id}">${escapeHtml(r.name)}</button>`).join("");
   $("#building-choice").onchange = () => { $("#building-response").textContent = ""; updateBuildingPanel(); };
+  $('#building-work-actions').onclick=event=>{
+    const button=event.target.closest('[data-building-work]'),b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));if(!button||!b)return;
+    if(button.dataset.buildingWork==='move'){
+      closePanels();selected=null;movingBuilding=b.id;tool=b.kind;cameraTarget=null;$('#placement').hidden=false;$('#placement').textContent='Choose a new plot · residents will pack and rebuild · Esc to cancel';toast('Choose a new plot for this building.');return;
+    }
+    const quote=JSON.parse(game.building_work_quote(b.id)),salvage=button.dataset.buildingWork==='salvage';
+    const returns=quote.salvage.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
+    pendingRemoval={id:b.id,action:button.dataset.buildingWork};
+    $('#building-work-title').textContent=salvage?'Salvage this building?':'Demolish this building?';
+    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; shared inventory remains. Removing a cistern or generator reduces water or battery capacity when work finishes.`;
+    $('#building-work-dialog').showModal();
+  };
+  $('#building-work-close').onclick=()=>{pendingRemoval=null;$('#building-work-dialog').close();};
+  $('#building-work-confirm').onclick=()=>{
+    if(pendingRemoval){const result=game.queue_building_work(pendingRemoval.id,pendingRemoval.action,0,0);toast(result==='ok'?`Crew job queued. ${paused?'Resume time to let residents work.':'Neighbours will work during community hours.'}`:result);state=JSON.parse(game.snapshot());updateUI();save();}
+    pendingRemoval=null;$('#building-work-dialog').close();
+  };
+  $('#cancel-building-work').onclick=()=>{const result=game.cancel_building_work(Number($('#building-choice').value));toast(result==='ok'?'Crew job cancelled.':result);state=JSON.parse(game.snapshot());updateUI();save();};
   $("#building-neighbours").onclick = event => {
     const button = event.target.closest("[data-visitor]");
     if (!button) return;
@@ -1077,6 +1403,22 @@ function setup() {
     save();
   };
 
+  $("#build-hydro").onclick=()=>setTool("hydro");
+  $("#build-solar").onclick=()=>setTool("solar_farm");
+  $("#build-streetlight").onclick=()=>setTool("streetlight");
+  $("#power-loads").onchange=event=>{
+    const input=event.target.closest('[data-power-building]');if(!input)return;
+    game.set_power_enabled(Number(input.dataset.powerBuilding),input.checked);
+    state=JSON.parse(game.snapshot());updateUI();save();
+  };
+  for(const id of ['auto-digest','filter-greywater','use-biogas']) $('#'+id).onchange=()=>{
+    game.configure_sanitation($('#auto-digest').checked,$('#filter-greywater').checked,$('#use-biogas').checked);
+    state=JSON.parse(game.snapshot());updateUI();save();
+  };
+  $('#banana-treatment').onchange=()=>{
+    game.configure_banana_treatment($('#banana-treatment').checked);
+    state=JSON.parse(game.snapshot());updateUI();save();
+  };
   for (const id of ["feed-hens", "use-eggs"]) {
     $("#" + id).onchange = () => {
       game.set_food_preferences($("#feed-hens").checked, $("#use-eggs").checked);
@@ -1100,8 +1442,9 @@ function setup() {
   };
   for (const button of document.querySelectorAll("[data-panel]")) {
     button.onclick = () => {
+      if(button.dataset.panel==='goals-panel'){openJournal();return;}
       const isOpen = button.getAttribute("aria-expanded") === "true";
-      if (isOpen) { closePanels(); if (tool) setTool(null); }
+      if (isOpen && !villagePanels.has(button.dataset.panel)) { closePanels(); if (tool) setTool(null); }
       else showPanel(button.dataset.panel);
     };
   }
@@ -1110,7 +1453,7 @@ function setup() {
       const id = button.closest("[id]").id;
       closePanels();
       if (tool) setTool(null);
-      $(`[data-panel="${id}"]`).focus();
+      $(villagePanels.has(id)?'#open-village':`[data-panel="${id}"]`).focus();
     };
   }
   $("#residents").innerHTML = state.residents
@@ -1124,18 +1467,22 @@ function setup() {
     const b = e.target.closest("[data-resident]");
     if (b) selectPerson(+b.dataset.resident);
   };
-  $("#tools").innerHTML = Object.entries(kinds)
-    .map(
-      ([kind, [name, cost, desc]]) =>
-        `<button class="build-tool" data-kind="${kind}" title="${desc}" aria-label="Build ${name}, ${cost} timber" aria-pressed="false"><span class="tool-art"></span><b>${name}</b><small>⌁ ${cost}</small></button>`,
-    )
-    .join("");
+  buildMenu = installBuildMenu(kinds, buildingImages, () => { if (tool) setTool(null); });
+  $('#home-material-method').onchange=()=>{
+    const method=$('#home-material-method').value,key=method==='adobe'?'adobe-gable':method==='local'?'home-veranda':'home';
+    const button=$('.build-tool[data-kind="home"]');
+    paintIcon(button.querySelector('canvas'),key,buildingImages[key],allBuildingArt[key]);
+    button.querySelector('b').textContent=method==='adobe'?'Adobe home':'Home';
+    updateUI();
+  };
   $("#tools").onclick = (e) => {
     const b = e.target.closest("[data-kind]");
     if (b) setTool(b.dataset.kind);
   };
   $("#open-journal").onclick = openJournal;
   $("#close-journal").onclick = () => $("#quest-dialog").close();
+  $('#quest-dialog').addEventListener('close',()=>{$('[data-panel="goals-panel"]').setAttribute('aria-expanded','false');$('[data-panel="goals-panel"]').focus();});
+  $('#journal-chapters').onclick=e=>{const button=e.target.closest('[data-chapter]');if(!button)return;journalPage=Number(button.dataset.chapter);updateQuests();$(`#journal-chapters [data-chapter="${journalPage}"]`).focus({preventScroll:true});};
   $("#quest-list").onclick = (e) => {
     const button = e.target.closest("[data-track]");
     if (!button) return;
@@ -1179,9 +1526,21 @@ function setup() {
     link.href = url; link.download = name; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  $("#export-save").onclick = () => downloadVillage(game.snapshot(), "solar-friends-village.json");
+  $("#export-save").onclick = () => downloadVillage(game.snapshot(), `solar-friends-${state.village.mode||'story'}.json`);
   $("#export-recovery").onclick = () => downloadVillage(storage.rejected, "solar-friends-recovery.json");
   $("#import-save").onclick = () => $("#import-file").click();
+  $("#restore-backup").onclick = () => {
+    const candidate = new Game();
+    try {
+      const raw = storage.readBackup();
+      if (raw === null) { toast("No backup yet. Imports and new villages create one automatically."); return; }
+      if (!candidate.restore(raw)) { toast("This backup could not be read. Your current village is unchanged."); return; }
+      pendingImport = candidate.snapshot();
+      $("#import-summary").textContent = "Restore the previous village? Your current village will take its place in the backup.";
+      $("#import-dialog").showModal();
+    } catch { toast("Device storage is unavailable. Import an exported village instead."); }
+    finally { candidate.free(); }
+  };
   $("#import-file").onchange = async (event) => {
     const file = event.target.files[0];
     event.target.value = "";
@@ -1200,10 +1559,14 @@ function setup() {
   $("#cancel-import").onclick = () => { pendingImport = null; $("#import-dialog").close(); };
   $("#confirm-import").onclick = () => {
     if (sandbox || artworkPreview || directScenario) return;
-    if (!pendingImport) return;
+    if (!pendingImport || sandbox || artworkPreview || directScenario) return;
     try {
-      storage.backup(game.snapshot());
-      storage.write(pendingImport);
+      const mode=JSON.parse(pendingImport).village.mode || 'story';
+      const target=modeStores[mode];
+      const existing=target.read();
+      if(existing!==null)target.backup(existing);
+      target.write(pendingImport);
+      storage=target;
     } catch {
       $("#save-warning").hidden = false;
       toast("Could not back up and save the import. Your current village is unchanged.");
@@ -1217,41 +1580,19 @@ function setup() {
     selected = null; tool = null; closePanels();
     $("#person").hidden = true; $("#placement").hidden = true;
     $("#import-dialog").close(); $("#settings-dialog").close();
-    updateUI(); save(); toast("Your village is ready. Welcome back.");
+    resetPolish(); updateUI(); save(); toast("Your village is ready. Welcome back.");
   };
-  for (const id of ["import-save", "new-scenario"]) $("#" + id).disabled = artworkPreview;
-  $("#save-warning").onclick = () => $("#settings-dialog").showModal();
-  $("#new-scenario").onclick = () => $("#restart-dialog").showModal();
-  $("#cancel-restart").onclick = () => $("#restart-dialog").close();
-  $("#confirm-restart").onclick = () => {
-    if (sandbox || artworkPreview || directScenario) return;
-    try {
-      if (!artworkPreview) storage.backup(game.snapshot());
-    } catch {
-      $("#restart-dialog").close();
-      $("#save-warning").hidden = false;
-      toast("Could not back up your village. Export it before starting again.");
-      return;
-    }
-    game.free();
-    game = new Game();
-    residentAnimations.clear();
-    state = JSON.parse(game.snapshot());
-    selected = null;
-    tool = null;
-    pan = { x: 0, y: 0 };
-    zoom = 1;
-    time = 0;
-    $("#person").hidden = true;
-    closePanels();
-    $("#placement").hidden = true;
-    if (paused) togglePause();
-    $("#restart-dialog").close();
-    updateUI();
-    save();
-  };
+  for (const id of ["import-save", "restore-backup", "new-scenario"]) $("#" + id).disabled = artworkPreview || !!directScenario;
+  $("#save-warning").onclick = () => $("#settings").click();
+  $('#new-scenario').onclick = () => requestNewMode(state.village.mode || 'story');
+  $('#cancel-restart').onclick = () => {pendingMode=null;$('#restart-dialog').close();};
+  $('#confirm-restart').onclick = () => {if(pendingMode)startMode(pendingMode);};
   $("#placement-grid").checked = settings.placementGrid;
-  $("#settings").onclick = () => $("#settings-dialog").showModal();
+  $("#settings").onclick = () => {
+    try { storage.readRecovery(); } catch { /* A download already held in memory remains available. */ }
+    $("#export-recovery").hidden = storage.rejected === null;
+    $("#settings-dialog").showModal();
+  };
   $("#close-settings").onclick = () => $("#settings-dialog").close();
   $("#placement-grid").onchange = (event) => {
     settings.placementGrid = event.target.checked;
@@ -1262,10 +1603,11 @@ function setup() {
   $("#help").onclick = () => $("#help-dialog").showModal();
   $("#close-help").onclick = $("#start-playing").onclick = () =>
     $("#help-dialog").close();
-  $("#zoom-in").onclick = () => (zoom = Math.min(1.8, zoom + 0.15));
-  $("#zoom-out").onclick = () => (zoom = Math.max(0.6, zoom - 0.15));
+  $("#zoom-in").onclick = () => {setZoom(zoom + 0.15);render();};
+  $("#zoom-out").onclick = () => {setZoom(zoom - 0.15);render();};
   $("#center").onclick = () => {
-    zoom = 1;
+    cameraTarget = null;
+    setZoom(1.3);
     pan = { x: 0, y: 0 };
   };
   canvas.addEventListener("pointerdown", (e) => {
@@ -1275,7 +1617,8 @@ function setup() {
   canvas.addEventListener("pointermove", (e) => {
     const r = canvas.getBoundingClientRect();
     pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
-    if (drag && !tool) {
+    if (drag) {
+      cameraTarget = null;
       const dx = e.clientX - drag.x,
         dy = e.clientY - drag.y;
       if (Math.hypot(dx, dy) > 5) drag.moved = true;
@@ -1293,26 +1636,22 @@ function setup() {
     pointer = { x, y };
     if (tool) {
       const p = uniso(x, y),
-        result = tool === "road" ? game.toggle_road(p.x, p.y) : game.place(tool, p.x, p.y);
+        result = movingBuilding!==null?game.queue_building_work(movingBuilding,"move",p.x,p.y):tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
       if (result === "ok") {
         if (tool !== "road") {
-          toast(`${kinds[tool][0]} planned. Let's build it together.`);
+          toast(movingBuilding!==null?'Move queued. Residents will pack here and rebuild at the new plot.':tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
           setTool(null);
         }
         state = JSON.parse(game.snapshot());
         save();
       } else toast(result);
     } else {
-      const r = state.residents.find((r) => {
-        const p = iso(r.x, r.y);
-        return Math.hypot(p.x - x, p.y - 14 * scale - y) < 22 * scale;
-      });
+      const r = residentAt(x, y);
       if (r) selectPerson(r.id);
       else {
         const cell = uniso(x, y);
         const b = [...state.village.buildings].reverse().find(b => {
-          const radius = b.kind === "square" ? 2 : 1;
-          return Math.abs(b.x-cell.x) <= radius && Math.abs(b.y-cell.y) <= radius;
+          return occupies(b,cell.x,cell.y);
         });
         if (b) inspectBuilding(b.id);
       }
@@ -1326,7 +1665,7 @@ function setup() {
     "wheel",
     (e) => {
       e.preventDefault();
-      zoom = Math.max(0.6, Math.min(1.8, zoom - e.deltaY * 0.001));
+      setZoom(zoom - e.deltaY * 0.001);
     },
     { passive: false },
   );
@@ -1341,13 +1680,20 @@ function setup() {
       e.preventDefault();
       togglePause();
     }
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat&&!document.querySelector('dialog[open]')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) {
+      const shortcuts={KeyB:'build-panel',KeyV:$(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel,KeyP:'community-panel',KeyI:'supplies-panel'};
+      if(shortcuts[e.code]){e.preventDefault();const id=shortcuts[e.code];if(!$(`[data-panel="${id}"]`).hidden)showPanel(id);}
+      if(e.code==='KeyJ'&&!$('[data-panel="goals-panel"]').hidden){e.preventDefault();openJournal();}
+      if(e.code==='KeyM'){e.preventDefault();if(tool)setTool(null);closePanels();selected=null;$('#person').hidden=true;$('#village-map').focus();}
+    }
     if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
+      e.preventDefault();
       if (tool) setTool(null);
       else if (selected !== null) $(".close-person").click();
       else {
         const active = document.querySelector('[data-panel][aria-expanded="true"]');
-        closePanels();
-        active?.focus();
+        if(active){const focus=villagePanels.has(active.dataset.panel)?$('#open-village'):active;closePanels();focus.focus();}
+        else openMainMenu();
       }
     }
   });
@@ -1355,7 +1701,7 @@ function setup() {
   window.addEventListener("pagehide", () => save());
   document.addEventListener("visibilitychange", () => {
     last = 0;
-    if (document.hidden) save();
+    if (document.hidden) { save(); sound.update(false, false, 0, false); }
   });
   resize();
   updateUI();
@@ -1365,10 +1711,14 @@ function setup() {
 // Both the workbench and automated checks use this interface. Mutations require
 // a sandbox; the original Game object stays untouched until it is restored.
 function refreshDevScene() {
-  residentAnimations.clear(); groundKey = null; time = 0; animationDelta = 0;
-  state = JSON.parse(game.snapshot()); selected = null; tool = null;
+  setZoom(zoom);
+  residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
+  state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; pendingRemoval = null;
+  previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
+  clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
+  clearTimeout(toastTimer); $("#toast").hidden = true;
   closePanels(); $("#person").hidden = true; $("#placement").hidden = true;
-  for (const id of ['import-save', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
+  for (const id of ['import-save', 'restore-backup', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
   updateUI(); render();
 }
 const devAPI = {
@@ -1399,6 +1749,15 @@ const devAPI = {
     if (!paused) togglePause();
     refreshDevScene(); devTools?.refresh();
   },
+  importSandbox(raw) {
+    if(loadingScenario)throw new Error('Wait for the scenario to finish loading.');
+    if(raw.length>5_000_000)throw new Error('Choose a checkpoint smaller than 5 MB.');
+    const candidate=new Game();
+    if(!candidate.restore(raw)){candidate.free();throw new Error('This checkpoint is not a valid village. The current scene is unchanged.');}
+    if(!sandbox)sandbox={game,paused,zoom,pan:{...pan},time};else game.free();
+    game=candidate;sandboxName='imported';game.dev_observe(true);if(!paused)togglePause();
+    refreshDevScene();devTools?.refresh();
+  },
   returnToVillage() {
     if (loadingScenario) throw new Error('Wait for the scenario to finish loading.');
     if (!sandbox) return;
@@ -1413,14 +1772,15 @@ const devAPI = {
   advance(minutes) {
     if (!sandbox) throw new Error('Load a sandbox before advancing time.');
     if (!paused) togglePause();
-    advanceGame(game, minutes); state = JSON.parse(game.snapshot()); updateUI(); render();
+    advanceGame(game, minutes); residentAnimations.clear(); state = JSON.parse(game.snapshot()); updateUI(); render();
     return devAPI.snapshot();
   },
   run() { if (!sandbox) throw new Error('Load a sandbox first.'); if (paused) togglePause(); },
-  fixedView() { if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
+  fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; weatherTime = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
   locate(id) {
     const r = state.residents.find(r => r.id === id);
     if (!r) return;
+    cameraTarget = null;
     const point = project(r.x, r.y, origin, scale);
     pan.x += width / 2 - point.x; pan.y += height / 2 - point.y;
     render();
@@ -1432,48 +1792,50 @@ const devAPI = {
 };
 try {
   await init({ module_or_path: "./pkg/solar_friends_bg.wasm?v=devtools-1" });
-  let chickenSource;
+  let chickenSource, cropSource;
   if (artworkPreview && previewParams.has('art-draft')) {
     const draft = readArtDraft(previewParams.get('art-draft'));
     if (draft.config) {
-      const canonical = Object.values(buildingArt).find(art => art.name === draft.sprite.name.replace(' · night', ''));
+      const canonical = Object.values(allBuildingArt).find(art => art.name === draft.sprite.name.replace(' · night', ''));
       if (canonical) Object.assign(canonical, { width: draft.config.width, anchor: draft.config.anchor, ...(draft.config.axes ? {axes:draft.config.axes} : {}) });
     }
     if (draft.candidate) {
       const path = draft.sprite.file.replace('../', '');
-      const allImages = [...Object.values(buildingImages), ...Object.values(nightBuildingImages), forestArt, terrain, peopleArt, ...animations, ...idleAnimations];
+      const allImages = [...Object.values(buildingImages), ...Object.values(nightBuildingImages), forestArt, terrain, ...animations, ...idleAnimations, ...activityAnimations];
       for (const image of allImages) if (new URL(image.src).pathname.endsWith('/' + path)) image.src = draft.candidate;
       if (path === 'art/chickens.png') chickenSource = draft.candidate;
+      if (path === 'art/crops.png') cropSource = draft.candidate;
     }
   }
   await Promise.all([
     loadChickenArt(chickenSource),
     ...Object.values(buildingImages).map((image) => image.decode()),
     ...Object.values(nightBuildingImages).map((image) => image.decode()),
+    economyImage.decode(),
     forestArt.decode(),
     terrain.decode(),
-    peopleArt.decode(),
     ...animations.map((image) => image.decode()),
     ...idleAnimations.map((image) => image.decode()),
+    ...activityAnimations.map((image) => image.decode()),
+    loadCropArt(cropSource),
   ]);
+  for (const image of animations) preparedFrames(image,{referenceRow:2});
+  for (const image of [...idleAnimations,...activityAnimations]) preparedFrames(image);
   game = new Game();
   let saved;
   if (artworkPreview) {
     const response = await fetch(residentPreview ? './artwork/resident-preview.json' : './artwork/village-preview.json');
     if (!response.ok) throw new Error('Artwork preview could not load');
     saved = await response.text();
-    if (nightPreview) {
-      const fixture = JSON.parse(saved);
-      for (const building of fixture.village.buildings) if (building.kind === 'garden') building.crop.growth = 180;
-      fixture.village.minutes = Math.floor(fixture.village.minutes / 1440) * 1440 + 21 * 60;
-      saved = JSON.stringify(fixture);
-    }
-  } else if (!directScenario) {
-    try { saved = storage.read(); } catch {
-      $("#save-warning").hidden = false;
+    if(!residentPreview){
+      const fresh=JSON.parse(game.snapshot()),baseline=new Game();
+      try{
+        if(!baseline.restore(saved))throw new Error('Artwork preview baseline is invalid');
+        saved=JSON.stringify(makeArtPreview(fresh,JSON.parse(baseline.snapshot()),{night:nightPreview}));
+      }finally{baseline.free();}
     }
   }
-  if (saved && !game.restore(saved)) {
+  if (saved !== null && saved !== undefined && !game.restore(saved)) {
     if (artworkPreview) throw new Error("The artwork preview fixture is invalid");
     try { storage.quarantine(saved); } catch { $("#save-warning").hidden = false; }
     $("#recovery-notice").hidden = false;
@@ -1481,15 +1843,18 @@ try {
     toast("This save could not load. Your original data is preserved; export it in Settings.");
   }
   state = JSON.parse(game.snapshot());
+  gameActive=artworkPreview || !!directScenario;
   setup();
+  installMenu();
   devTools = installDevTools(devAPI);
   window.solarDev = Object.freeze(devAPI);
   if (directScenario) { await devAPI.loadScenario(directScenario); devTools.open(); }
+  if(!artworkPreview && !directScenario) openMainMenu();
   if (artworkPreview) {
     const notice = document.createElement('a');
     notice.href = './';
     notice.className = 'artwork-preview-notice';
-    notice.textContent = `${previewParams.has('art-draft') ? 'ART DRAFT · ' : ''}${nightPreview ? 'Night artwork' : residentPreview ? 'Resident animation' : 'Artwork'} preview · Return to your village ↗`;
+    notice.textContent = `${previewParams.has('art-draft') ? 'ART DRAFT · ' : ''}${residentPreview?'Resident animation':`${nightPreview?'Night artwork':'Artwork'} · ${state.village.buildings.length} building variants`} preview · Return to your village ↗`;
     document.body.append(notice);
     togglePause();
     save();

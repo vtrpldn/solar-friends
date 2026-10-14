@@ -10,6 +10,8 @@ pub enum Response {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Situation {
+    #[serde(default)]
+    pub story_check_in: bool,
     pub resident: usize,
     pub opened: f32,
     pub response: Option<Response>,
@@ -75,7 +77,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     let totals: [u32; 5] =
         std::array::from_fn(|id| v.situations.cooking.iter().map(|day| day[id]).sum());
     let total: u32 = totals.iter().sum();
-    let Some(resident) = (0..5).find(|&id| {
+    let concerned_resident = (0..5).find(|&id| {
         totals[id] >= 6
             && totals[id] * 5 >= total * 3
             && v.situations
@@ -84,22 +86,33 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 .filter(|day| day[id] > 0)
                 .count()
                 >= 2
-    }) else {
+    });
+    let story_check_in = concerned_resident.is_none()
+        && v.mode == crate::modes::Mode::Story
+        && !crate::progression::completed(v, 11)
+        && crate::progression::available(v, 11)
+        && v.situations.resolved_count == 0;
+    let Some(resident) = concerned_resident.or(if story_check_in { Some(2) } else { None }) else {
         return;
     };
     v.situations.active = Some(Situation {
+        story_check_in,
         resident,
         opened: v.minutes,
         response: None,
         agreed: None,
         helpers: 0,
         recovery: 0.,
-        worry: 4.,
+        worry: if story_check_in { 0. } else { 4. },
         resolved: None,
     });
     event(
         v,
-        "Someone has been carrying the kitchen. Open Situations to hear their concern.",
+        if story_check_in {
+            "Luz would like a day for herself. Open Situations to plan time off together."
+        } else {
+            "Someone has been carrying the kitchen. Open Situations to hear their concern."
+        },
     );
 }
 
@@ -144,9 +157,10 @@ pub fn protected(v: &Village, id: usize, task: &str) -> bool {
         && s.resident == id
         && (task == "cook"
             || (s.response == Some(Response::DayOff)
+                && !crate::leisure::hobby(task)
                 && !matches!(
                     task,
-                    "rest" | "sleep" | "eat" | "socialize" | "gathering" | "idle"
+                    "rest" | "sleep" | "eat" | "socialize" | "gathering" | "idle" | "sanitation"
                 )))
 }
 
@@ -241,6 +255,7 @@ mod tests {
         v.arrived = true;
         v.minutes = 2. * 1440. + 600.;
         v.situations.day = 2;
+        v.economy.next_building = 1;
         v.buildings.push(Building {
             id: 0,
             kind: "kitchen".into(),

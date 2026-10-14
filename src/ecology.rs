@@ -71,6 +71,7 @@ pub fn capacity(v: &Village) -> f32 {
             .iter()
             .filter(|b| b.kind == "well" && b.progress >= 100.)
             .count() as f32
+        + 75. * crate::building_work::held_capacity(v, "well") as f32
 }
 
 pub fn needs_tending(b: &Building, water: f32) -> bool {
@@ -90,7 +91,9 @@ pub fn advance(v: &mut Village, minutes: f32) {
             .filter(|b| b.kind == "well" && b.progress >= 100.)
             .count();
         if v.water < capacity(v) {
+            let before = v.water;
             v.water = (v.water + minutes * cisterns as f32 * 0.3).min(capacity(v));
+            v.progress.rain_caught |= v.water > before;
         }
     }
     for b in &mut v.buildings {
@@ -106,18 +109,21 @@ pub fn advance(v: &mut Village, minutes: f32) {
         b.crop.moisture = (b.crop.moisture - minutes * drying).max(0.);
         if b.kind == "greenhouse" && v.seedlings < 12 {
             let progress = b.crop.nursery + wet_minutes;
-            v.seedlings += ((progress / 480.).floor() as u32).min(12 - v.seedlings);
+            let raised = ((progress / 480.).floor() as u32).min(12 - v.seedlings);
+            v.seedlings += raised;
+            v.progress.seedlings_raised = v.progress.seedlings_raised.saturating_add(raised);
             b.crop.nursery = progress % 480.;
         }
     }
 }
 
 pub fn tend(v: &mut Village, r: &Resident) {
-    let Some(index) = v.buildings.iter().position(|b| {
-        needs_tending(b, v.water)
-            && (b.x as f32 + 0.75 - r.target_x).abs() < 0.2
-            && (b.y as f32 + 0.75 - r.target_y).abs() < 0.2
-    }) else {
+    let building = spacing::building(r, v);
+    let Some(index) = v
+        .buildings
+        .iter()
+        .position(|b| needs_tending(b, sanitation::irrigation_water(v)) && Some(b.id) == building)
+    else {
         return;
     };
     let capacity = moisture_capacity(&v.buildings[index]);
@@ -129,6 +135,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
         crop.harvests = 0;
         crop.growth = if outdoor && v.seedlings > 0 {
             v.seedlings -= 1;
+            v.progress.seedlings_used = v.progress.seedlings_used.saturating_add(1);
             duration(crop) * 0.25
         } else {
             0.
@@ -163,8 +170,13 @@ pub fn tend(v: &mut Village, r: &Resident) {
         }
         v.supplies.gathered += v.food - before;
         v.harvests += 1;
-    } else if v.water >= 2. {
-        v.water -= 2.;
+    } else if v.circular.reclaimed >= 2. || v.water >= 2. {
+        if v.circular.reclaimed >= 2. {
+            v.circular.reclaimed -= 2.;
+            v.progress.reclaimed_irrigation = true;
+        } else {
+            v.water -= 2.;
+        }
         crop.moisture = capacity;
     }
 }
@@ -174,6 +186,16 @@ mod farming_tests {
     use super::*;
     fn setup(kind: &str) -> (Game, Resident) {
         let mut g = Game::new();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .completed = [true; 4];
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .progress
+            .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(g.place(kind, 5, 5), "ok");
         g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
         let mut q = g.app.world_mut().query::<&Resident>();
@@ -206,7 +228,6 @@ mod farming_tests {
         assert_eq!(v.food - initial, 14.);
         tend(&mut v, &r);
         assert!(!v.buildings[0].crop.planted);
-        drop(v);
         assert!(g.configure_crop(0, "beans", true));
         let mut v = g.app.world_mut().resource_mut::<Village>();
         tend(&mut v, &r);

@@ -71,7 +71,9 @@ impl Game {
             .iter()
             .map(|r| {
                 let mut next = r.clone();
-                choose(&mut next, &v);
+                if r.trip.is_none() {
+                    choose(&mut next, &v);
+                }
                 let alternatives: Vec<_> = [
                     "build",
                     "garden",
@@ -83,6 +85,9 @@ impl Game {
                     "socialize",
                     "compost",
                     "craft",
+                    "source",
+                    "prepare",
+                    "outside",
                 ]
                 .iter()
                 .map(|task| {

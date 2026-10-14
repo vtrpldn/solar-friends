@@ -20,7 +20,7 @@ fn setup() -> Game {
     g
 }
 fn ready_building(g: &mut Game, kind: &str, x: i32, y: i32) {
-    g.app.world_mut().resource_mut::<Village>().wood += 100.;
+    g.app.world_mut().resource_mut::<Village>().wood = 100.;
     assert_eq!(g.place(kind, x, y), "ok");
     g.app
         .world_mut()
@@ -57,7 +57,7 @@ fn locked_buildings_and_quests_cannot_be_used_early() {
     }
     assert!(!g.track_quest(1));
     assert!(!g.track_quest(4));
-    assert_ne!(g.contribute_workshop_timber(), "ok");
+    assert_ne!(g.contribute_tool_library(), "ok");
     assert_ne!(g.host_gathering(), "ok");
     assert_eq!(before, g.snapshot());
 }
@@ -109,6 +109,8 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
         .progress
         .completed[0] = true;
     ready_building(&mut g, "grove", 8, 8);
+    assert_eq!(g.place_source(0, 18, 18), "ok");
+    assert_eq!(g.place_source(1, 22, 18), "ok");
     for _ in 0..3 {
         finish_task(&mut g, 3, "gather");
     }
@@ -146,6 +148,11 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         .world_mut()
         .resource_mut::<Village>()
         .progress
+        .completed = [true, true, true, false];
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .progress
         .completed[0] = true;
     assert_eq!(g.place("home", 8, 8), "ok");
     let v = g.app.world().resource::<Village>().clone();
@@ -155,20 +162,41 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         r.x = r.target_x;
         r.y = r.target_y;
     }
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.stock[12] = 1;
+        v.economy.stock[13] = 1;
+        economy::rebalance(&mut v);
+    }
     advance(&mut g, 35.);
     assert_eq!(
         g.app.world().resource::<Village>().progress.shared_builds,
         1
     );
-    for _ in 0..7 {
-        finish_task(&mut g, 3, "gather");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.orders.push(economy::Order {
+            pickup_by: Some(4),
+            id: 0,
+            items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            paid: 6700,
+            dispatch: 1.,
+            arrival: 2.,
+            status: "delivered".into(),
+        });
+        v.economy.next_order = 1;
+        v.economy.work_day[4] = 0;
     }
-    let wood = g.app.world().resource::<Village>().wood;
-    assert_eq!(g.contribute_workshop_timber(), "ok");
+    ready_building(&mut g, "warehouse", 18, 18);
+    let funds = g.app.world().resource::<Village>().economy.money;
+    assert_eq!(g.contribute_tool_library(), "ok");
     assert!(g.app.world().resource::<Village>().progress.completed[3]);
-    assert_eq!(g.app.world().resource::<Village>().wood, wood - 24.);
+    assert_eq!(
+        g.app.world().resource::<Village>().economy.money,
+        funds - 12000
+    );
     let before = g.snapshot();
-    assert_ne!(g.contribute_workshop_timber(), "ok");
+    assert_ne!(g.contribute_tool_library(), "ok");
     assert_eq!(g.snapshot(), before);
 }
 #[test]
@@ -181,17 +209,23 @@ fn tools_cost_timber_and_can_be_conserved() {
     assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
     finish_task(&mut g, 3, "gather");
-    assert_eq!(g.app.world().resource::<Village>().wood, wood);
-    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
+    assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
+    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
     g.set_tools_enabled(false);
     finish_task(&mut g, 3, "gather");
-    assert_eq!(g.app.world().resource::<Village>().wood, wood + 6.);
-    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
+    assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
+    assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
 }
 #[test]
 fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
     let mut g = setup();
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .progress
+        .completed[1] = true;
     ready_building(&mut g, "kitchen", 10, 10);
+    ready_building(&mut g, "square", 6, 10);
     g.app
         .world_mut()
         .resource_mut::<Village>()
@@ -251,7 +285,7 @@ fn old_saves_gain_defaults_and_invalid_progress_is_rejected_atomically() {
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 0);
     let before = g.snapshot();
     for (key, value) in [
-        ("tracked", 4),
+        ("tracked", 13),
         ("social_mask", 32),
         ("tool_uses", 37),
         ("gathering_until", 999999),
@@ -305,12 +339,21 @@ fn tools_accelerate_building_and_spend_one_use_on_completion() {
     g.tick(0.2);
     without.tick(0.2);
     let normal = without.app.world().resource::<Village>().buildings[0].progress;
-    assert_eq!(
-        g.app.world().resource::<Village>().buildings[0].progress,
-        normal * 1.25
+    assert!(
+        (g.app.world().resource::<Village>().buildings[0].progress - normal * 1.25).abs() < 0.00001
     );
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
-    g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 99.9;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.economy.stock[12] = 1;
+        v.economy.stock[13] = 1;
+        while v.economy.projects[0].stage < 3 {
+            economy::rebalance(&mut v);
+            economy::build(&mut v, 0, 100.);
+        }
+        economy::rebalance(&mut v);
+        economy::build(&mut v, 0, 7.99);
+    }
     g.tick(0.2);
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 11);
 }

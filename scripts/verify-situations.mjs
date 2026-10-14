@@ -21,8 +21,9 @@ for (const [kind, x, y, cost] of [
   ['well', 6, 10, 18], ['home', 8, 8, 32], ['garden', 13, 10, 12],
   ['kitchen', 10, 10, 40], ['home', 12, 7, 32],
 ]) {
-  until(game, s => s.village.wood >= cost, `supplies for ${kind}`);
+
   assert.equal(game.place(kind, x, y), 'ok');
+  const missing=snapshot(game).environment.economy.shortage;if(missing.some(n=>n))assert.equal(game.order_supplies(JSON.stringify(missing)),'ok');
   until(game, s => s.village.buildings.at(-1).progress >= 100, `finish ${kind}`);
 }
 // Building visits now share cooking naturally. Deliberately assign repeated

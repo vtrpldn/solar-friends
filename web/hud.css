@@ -1,125 +1,183 @@
-/* A quiet city-builder HUD: the world stays visible until a tool is needed. */
-:root { --hud: #243d35ed; --hud-line: #ffffff24; --hud-text: #f4f3df; }
-main { position: fixed; inset: 0; height: 100dvh; }
-header { position: fixed; inset: 18px 20px auto; height: 44px; padding: 0; gap: 8px; background: none; border: 0; pointer-events: none; }
-header > * { pointer-events: auto; }
-.brand { gap: 8px; padding: 8px 14px; border: 0; border-radius: 10px; background: var(--hud); color: var(--hud-text); box-shadow: var(--shadow); }
-.brand .sunmark { font-size: 28px; }
-.brand span:last-child, .brand b { font-size: 9px; letter-spacing: 1.5px; }
-.village-title { display: none; }
-header #settings { margin-left: auto; }
-header .icon-button { width: 36px; height: 36px; color: var(--hud-text); background: var(--hud); border: 1px solid var(--hud-line); border-radius: 9px; }
-footer { position: fixed; z-index: 5; inset: auto 0 0; height: 48px; padding: 0 20px; gap: 24px; background: var(--hud); color: var(--hud-text); border-top: 1px solid var(--hud-line); backdrop-filter: blur(16px); }
-footer .season { position: static; display: flex; padding: 0; gap: 9px; background: none; border: 0; box-shadow: none; flex: none; }
-.season .eyebrow, .season small { display: none; }
-.season b { font-size: 12px; margin: 0; }
-.season-icon { font-size: 22px; }
-.resources { margin: 0 auto; gap: 26px; }
-.resources > div { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.resources span { font-size: 23px; color: #bdd49b; }
-.resources b { font-size: 13px; }
-.resources small { font-size: 10px; color: #d4ddc9; }
-.time-controls { gap: 3px; }
-.time-controls button { min-height: 32px; color: #d4ddc9; padding: 6px 9px; }
-.time-controls button.active { background: #a9c789; color: #20382a; }
-.hud-dock { position: absolute; z-index: 6; bottom: 64px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; padding: 5px; border: 1px solid var(--hud-line); border-radius: 13px; background: var(--hud); box-shadow: 0 6px 24px #152b3430; backdrop-filter: blur(16px); }
-.hud-dock button { display: flex; align-items: center; justify-content: center; gap: 9px; min-width: 100px; height: 44px; padding: 0 16px; border-radius: 8px; background: transparent; color: var(--hud-text); font-size: 12px; }
-.hud-dock button svg { width: 22px; height: 22px; flex: none; color: #bdd49b; line-height: 1; }
-.hud-dock button[aria-expanded="true"] { background: #a9c789; color: #20382a; }
-.hud-dock button[aria-expanded="true"] svg { color: inherit; }
-.panel-close { position: absolute; right: 10px; top: 8px; width: 32px; height: 32px; border-radius: 7px; background: transparent; font-size: 22px; z-index: 1; }
-.chapter, .community, .person { top: auto; bottom: 132px; left: auto; right: 20px; width: 300px; max-height: calc(100dvh - 216px); background: var(--paper); z-index: 5; }
-.chapter, .person { padding: 22px; }
-.chapter > .eyebrow { display: block; padding-right: 25px; }
-.community .panel-heading { padding-right: 48px; }
-.chapter p, .chapter #tutorial-copy, .chapter #quest-reward { display: block; font-size: 12px; }
-.chapter #objectives { display: block; }
-.chapter #quest-speaker { display: none; }
-.chapter #village-needs { display: block; }
-.chapter h2 { font-size: 24px; }
-.objective { font-size: 11px; }
-.person .quote { margin: 12px 0; }
-.build-bar { bottom: 132px; width: max-content; max-width: calc(100% - 40px); padding: 14px 44px 12px 12px; gap: 12px; background: var(--paper); z-index: 5; }
-.build-label { display: none; }
-#tools { width: auto; padding: 3px; }
-.build-tool { width: 76px; min-height: 78px; }
-.placement { bottom: 250px; z-index: 6; max-width: calc(100% - 40px); white-space: normal; width: max-content; text-align: center; }
-.world-controls { left: auto; right: 20px; top: 76px; bottom: auto; flex-direction: column; gap: 5px; }
-.world-controls button { background: var(--hud); color: var(--hud-text); border: 1px solid var(--hud-line); width: 34px; height: 34px; }
-.village-note, .footer-tip { display: none; }
-#toast { top: 78px; max-width: min(440px, calc(100% - 110px)); }
-.save-actions { display: flex; gap: 10px; margin-bottom: 10px; }
-#save, #new-scenario { font-size: 12px; margin: 0; padding: 10px 14px; }
-#save-status { font-size: 11px; }
-@media (max-width: 760px) {
-  header { inset: 12px 12px auto; }
-  .brand span:last-child { display: block; }
-  footer { height: 80px; padding: 6px 12px; gap: 4px 12px; flex-wrap: wrap; justify-content: space-between; }
-  .resources { order: -1; width: 100%; justify-content: space-between; gap: 8px; margin: 0; }
-  .resources > div { display: flex; gap: 4px; }
-  .resources span { display: none; }
-  .resources b { font-size: 12px; }
-  .resources small { font-size: 9px; }
-  .season b { font-size: 10px; }
-  .season-icon { font-size: 18px; }
-  .time-controls button { min-height: 30px; padding: 5px 7px; }
-  .hud-dock { bottom: 92px; }
-  .hud-dock button { min-width: 88px; padding: 0 10px; height: 40px; gap: 6px; }
-  .chapter, .community, .person { bottom: 156px; right: 12px; width: min(320px, calc(100% - 24px)); max-height: calc(100dvh - 226px); }
-  .community .panel-heading h2 { font-size: 23px; }
-  .resident { padding: 10px 18px; gap: 10px; }
-  .resident b { font-size: 12px; }
-  .resident small { font-size: 11px; }
-  .avatar { width: 32px; height: 36px; }
-  .build-bar { bottom: 156px; width: calc(100% - 24px); max-width: none; padding: 10px 38px 10px 8px; }
-  #tools { width: 100%; }
-  .build-tool { width: 68px; }
-  .placement { bottom: 266px; font-size: 11px; }
-  .world-controls { right: 12px; top: 70px; }
-  #village-craft { margin: 10px; padding: 12px; font-size: 12px; }
-  #host-gathering { padding: 10px; font-size: 12px; }
-  #toast { top: 68px; }
+/* The game overlays the world: wood edges, paper windows, item slots and portraits. */
+:root{--ink:#443a29;--muted:#786849;--paper:#efe4c5;--line:#d5c398;--green:#617849;--gold:#dfb969;--wood:#72502f;--rim:#40321f;--shadow:0 5px 0 #352a2060,0 12px 24px #17271740}
+body,button,input,select,textarea{font-family:"Trebuchet MS",Verdana,sans-serif}
+main{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
+#world{width:100%;height:100%;display:block}
+button{transition:background .12s,box-shadow .12s}
+button:focus-visible,a:focus-visible,canvas:focus-visible{outline:3px solid #efc968;outline-offset:3px}
+button:hover{filter:brightness(1.05)}
+button:disabled{filter:saturate(.35);opacity:.5;cursor:default}
+[hidden]{display:none!important}
+header{position:fixed;left:18px;top:16px;right:auto;width:auto;z-index:30;display:flex;align-items:center;gap:10px;padding:0}
+.brand{width:44px;height:44px;display:grid;place-items:center;border:2px solid #bd9751;border-radius:50%;background:#4c5e38;box-shadow:inset 0 0 0 3px #344329,0 3px 0 #35271f70;padding:0;color:#edc770;text-decoration:none}
+.brand>span:last-child{display:none}.brand .sunmark{font-size:29px;line-height:1;color:#edc770}
+.village-title{display:block;color:#f9edc8;text-shadow:0 2px 2px #293520}
+.village-title h1{margin:1px 0 0;font:600 21px/1.15 "Fraunces",Georgia,serif}.village-title h1>span{display:none}
+#mode-label{font-size:9px;letter-spacing:1px;color:#f1dc9f;text-shadow:0 1px 2px #23361e}
+.game-mode-badge{font-size:10px;line-height:1;background:#4a5b39;border:1px solid #ac9558;border-radius:4px;color:#ecdbad;padding:5px 8px}
+header>.icon-button,.world-controls button{width:36px;height:36px;min-width:0;min-height:0;display:grid;place-items:center;padding:0;border:2px solid #684829;border-radius:7px;background:linear-gradient(#e5d8ac,#c3a576);box-shadow:inset 0 1px 0 #fff1c4,0 3px 0 #3f301fa0;color:#493b24;font-size:19px}
+#settings{position:fixed;right:62px;top:18px}#help{position:fixed;right:18px;top:18px}
+#dev-button{display:none;position:fixed;left:290px;top:22px;background:#465b3b;color:#f2e5ba;border:1px solid #c1a162;border-radius:5px;padding:7px 10px;font-size:11px}
+.developer-session #dev-button{display:block}
+footer{position:fixed;inset:0;z-index:28;display:block;padding:0;background:none;border:none;box-shadow:none;pointer-events:none;height:auto}
+.resources{position:absolute;right:112px;top:14px;display:flex;align-items:stretch;gap:0;margin:0;padding:5px 7px;border:3px solid #5f4429;border-radius:8px;background:linear-gradient(165deg,#796040,#543e29);box-shadow:inset 0 0 0 1px #bb975c,var(--shadow);pointer-events:auto}
+.resources>button{display:flex;align-items:center;gap:6px;min-width:77px;min-height:42px;padding:3px 8px;background:transparent;border:none;border-right:1px solid #b5955e55;border-radius:0;color:#ffefbb;text-align:left}
+.resources>button:first-child{min-width:111px}.resources>button:last-child{border-right:0}
+.resources>button:hover{background:#f2d49215}.resources b{display:block;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-shadow:0 1px 1px #352517}
+.resources small{display:block;font-size:9px;line-height:1.3;color:#decca4;white-space:nowrap}
+.item-icon{width:36px;height:36px;flex:none;overflow:visible;filter:drop-shadow(0 2px 1px #31241440)}
+.resources .item-icon{width:30px;height:30px}.sandbox-mode [data-hud-resource="fund"]{display:none}
+footer .season.panel{position:fixed;left:18px;bottom:53px;display:flex;align-items:center;gap:9px;width:213px;padding:10px 12px 5px;background:linear-gradient(#786244,#5b452f);border:3px solid #5b3e25;border-bottom:0;border-radius:9px 9px 0 0;box-shadow:inset 0 0 0 1px #b5945c;color:#f5e6b9;pointer-events:auto}
+.season .eyebrow{display:none}.season-icon{color:#edcb71;font-size:26px}.season b{display:block;font-size:13px;font-variant-numeric:tabular-nums}.season small{display:block;color:#d8c6a0;font-size:9px;margin-top:2px}
+.time-controls{position:fixed;left:18px;bottom:18px;display:flex;gap:3px;width:213px;min-height:38px;align-items:center;justify-content:center;padding:4px 6px 6px;border:3px solid #5b3e25;border-top:0;border-radius:0 0 9px 9px;background:#5b452f;box-shadow:inset 0 -1px 0 #b5945c,0 4px 0 #3e2d2060;pointer-events:auto}
+.time-controls button{min-height:25px;min-width:27px;padding:4px 6px;color:#e7d7ad;background:#493b2b;border:1px solid #8b744a;border-radius:4px;font-size:11px}
+.time-controls button.active{color:#403923;background:#d7c48a;border-color:#f0dca2;box-shadow:inset 0 1px 0 #fff2c3}
+#auto-speed{font-size:10px;background:#879456;color:#fff3be;border:1px solid #baca78;border-radius:3px;padding:5px 4px;white-space:nowrap}#auto-speed small{display:none}
+.hud-dock{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:7px;align-items:stretch;z-index:32;padding:6px 9px;border:3px solid #624629;border-radius:10px;background:linear-gradient(#927144,#59402a);box-shadow:inset 0 0 0 1px #c29d60,var(--shadow)}
+.hud-dock>button{width:78px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;padding:3px;border:1px solid #71512c;border-bottom:3px solid #4f3822;border-radius:6px;background:linear-gradient(#dbc595,#b59462);box-shadow:inset 0 1px 0 #f3dfac;color:#45391f}
+.hud-dock>button[aria-expanded="true"]{border-color:#ecd081;background:linear-gradient(#ecdbab,#c8b57b);box-shadow:inset 0 0 0 2px #ad8844}
+.hud-dock canvas{width:66px;height:41px;object-fit:contain}.hud-dock .item-icon{width:40px;height:40px}.dock-label{display:flex;gap:7px;align-items:center;font-size:11px;font-weight:700;line-height:1.4}
+.dock-label kbd{font:9px "Trebuchet MS",sans-serif;opacity:.65;border:0;background:none;padding:0;color:inherit}
+.people-emblem{height:39px;display:flex;align-items:center;justify-content:center;position:relative}.people-emblem .avatar{width:29px;height:35px;margin:0 -2px;overflow:hidden;border-radius:50% 50% 4px 4px;background:#b6bb83!important;border:1px solid #8d7546}.people-emblem .avatar canvas{width:100%;height:100%}
+#resident-strip{position:fixed;right:18px;bottom:18px;z-index:32;display:flex;align-items:center;gap:7px;padding:6px 8px;border:3px solid #624629;border-radius:9px;background:linear-gradient(#897044,#59402a);box-shadow:inset 0 0 0 1px #c29d60,var(--shadow)}
+#resident-strip button{position:relative;display:grid;place-items:center;width:43px;height:48px;min-width:0;padding:3px;border:0;border-radius:7px;background:conic-gradient(#9eae66 var(--energy),#483c2a 0);box-shadow:0 2px 0 #3a2b1e}
+#resident-strip button.active{outline:2px solid #f4d582;outline-offset:2px}#resident-strip .avatar{width:36px;height:42px;margin:0;border:1px solid #6e5334;border-radius:5px;background:#d6cf9c!important;overflow:hidden}#resident-strip .avatar canvas{width:100%;height:100%;object-fit:contain}
+.citizen-status{position:absolute;right:-4px;bottom:-4px;min-width:13px;height:15px;display:grid;place-items:center;font-size:10px;font-weight:bold;color:#ffedbd;background:#536348;border:1px solid #b7ac72;border-radius:50%;padding:0 2px}.citizen-status:empty{display:none}
+#resident-strip [data-condition="Hungry"] .citizen-status,#resident-strip [data-condition="Tired"] .citizen-status{background:#b77c40}
+.minimap{position:fixed;right:18px;bottom:95px;width:140px;padding:4px 6px 7px;z-index:27;border:3px solid #68482a;border-radius:7px;background:linear-gradient(#8b6b41,#59432e);box-shadow:inset 0 0 0 1px #c19d65,var(--shadow)}
+.minimap>span{display:flex;justify-content:space-between;margin-bottom:5px;font-size:10px;color:#ecdcae}.minimap kbd{background:none;border:0;color:#d2bb89;font:9px "Trebuchet MS";padding:0}.minimap canvas{width:122px;height:122px;display:block;border:1px solid #392d1e;cursor:crosshair}
+.world-controls{position:fixed;right:20px;bottom:264px;top:auto;z-index:27;display:flex;flex-direction:column;gap:6px}.world-controls button{width:31px;height:31px;font-size:20px}
+.panel,dialog{border:5px solid #765333;border-radius:10px;background:linear-gradient(120deg,#f4eacd,#e9dbb4);box-shadow:inset 0 0 0 2px #c5a36b,inset 0 0 0 3px #f8ebc8,var(--shadow)}
+.panel h2,dialog h2{font:600 24px/1.2 "Fraunces",Georgia,serif;color:#4a3a25;margin:6px 0 14px;letter-spacing:0}
+.panel>.eyebrow,.panel-heading>.eyebrow,dialog>.eyebrow{display:none}
+.panel p,dialog p{font-size:12px;line-height:1.55;color:#756747}.panel h3,dialog h3{font:700 14px/1.3 "Trebuchet MS",Verdana,sans-serif;color:#665231;margin:16px 0 8px}
+.panel-close,.dialog-close,.close-person{float:none;position:absolute;right:10px;top:10px;width:26px;height:26px;padding:0;display:grid;place-items:center;border:1px solid #b28e59;border-bottom:2px solid #785632;border-radius:5px;background:#dcc695;color:#755333;font-size:18px;line-height:1}
+.panel button:not(.panel-close):not(.resident),dialog button:not(.dialog-close):not(.mode-choice){border:1px solid #a88b55;border-bottom:3px solid #8c6a3c;border-radius:5px;background:linear-gradient(#e6d8af,#cebb85);box-shadow:inset 0 1px 0 #fff0c5;padding:7px 11px;color:#504327;font-size:12px}
+.panel button.primary,dialog button.primary,.panel .resume-request{background:linear-gradient(#a5b774,#7f9755)!important;border-color:#6b803d!important;color:#26331a!important}
+.panel button:active,.hud-dock button:active,dialog button:active{box-shadow:inset 0 2px 3px #40311f30;transform:translateY(1px)}
+.panel input[type=number],.panel select,dialog input[type=number],dialog select{border:1px solid #b29763;border-radius:4px;background:#faf0d3;color:#4e4028;padding:6px;font:12px "Trebuchet MS",Verdana,sans-serif}
+.panel input[type=checkbox],dialog input[type=checkbox]{accent-color:#758a48;width:17px;height:17px;appearance:auto!important;vertical-align:middle;border-radius:3px}.setting-row input::after{content:none!important}
+.panel details,dialog details{border-top:1px solid #c7b483;padding:12px 0;font-size:12px}.panel summary,dialog summary{font-weight:700;color:#715634;cursor:pointer}
+.panel progress,dialog progress{height:11px;border:1px solid #b29863;border-radius:4px;background:#d8c89e;accent-color:#7f9853;overflow:hidden}.panel progress::-webkit-progress-bar,dialog progress::-webkit-progress-bar{background:#d8c89e}.panel progress::-webkit-progress-value,dialog progress::-webkit-progress-value{background:linear-gradient(#b3c77c,#819b50)}
+#village-book{position:fixed;right:18px;top:86px;bottom:126px;width:min(630px,calc(100vw - 340px));z-index:40;border:5px solid #765333;border-radius:11px;background:#d5bd83;box-shadow:inset 0 0 0 2px #c5a36b,var(--shadow);overflow:hidden}
+.book-tabs{height:58px;padding:8px 40px 0 10px;display:flex;gap:4px;align-items:stretch;background:linear-gradient(#87623d,#6d4f2f);border-bottom:2px solid #79532d}
+.book-tabs button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;border:1px solid #5f4126;border-bottom:0;border-radius:5px 5px 0 0;background:#b39863;color:#473a26;box-shadow:inset 0 1px 0 #d7bd84;font-size:10px;font-weight:bold}
+.book-tabs button[aria-expanded=true]{background:#efe1b9;box-shadow:inset 0 3px 0 #e7c779;color:#4b3b24}.book-tabs .item-icon{width:24px;height:24px}.book-house{font-size:28px;line-height:24px;color:#735432}
+#village-book>.panel{position:absolute!important;inset:58px 0 0!important;width:100%!important;max-width:none!important;max-height:none!important;height:auto!important;overflow-y:auto;padding:20px 23px 24px;border:0;border-radius:0;box-shadow:none;background:linear-gradient(100deg,#f1e6c4,#e8dab2)}
+#village-book .panel-close{position:fixed;right:31px;top:98px;z-index:44}
+#village-book h2{font-size:25px;padding-right:22px;margin-top:2px}
+.building-heading{display:flex;align-items:center;gap:10px;margin:0 0 12px}.building-heading canvas{width:92px;height:64px;object-fit:contain}.building-heading h2{margin:0!important}
+#building-panel>label{font-size:11px;display:block;color:#756744;margin-bottom:4px}#building-choice{width:100%;margin-bottom:6px}
+.supplies h3{border-bottom:1px solid #cbb887;padding-bottom:5px}.supplies label{display:flex;gap:8px;align-items:center;margin:9px 0;font-size:12px}
+.power-rates{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #ceb982;border-bottom:1px solid #ceb982;padding:12px 0}.power-rates span{font-size:12px}.power-rates b{display:block;font-size:20px;color:#546b36}
+#power-battery{width:100%;height:18px}.power-battery-label{display:flex;justify-content:space-between;margin-bottom:6px}.power-loads,#power-loads{margin-top:8px}.power-load{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #d6c49b}.power-load span{display:block}.power-load small{display:block;margin-top:3px;font-size:11px;color:#766847}
+.community,.person,.chapter{position:fixed;right:18px;left:auto;top:88px;width:335px;max-height:calc(100dvh - 216px);padding:22px 20px 18px;z-index:40;overflow-y:auto}
+.chapter{width:370px}.chapter #tutorial-count{display:block;font-size:10px;letter-spacing:.5px;color:#8a6c35;font-weight:bold}.chapter h2{font-size:24px}.chapter #tutorial-copy{display:block;font-size:13px}.chapter #quest-speaker{display:block;font-size:11px}.chapter .resource-cycle{background:none;border-radius:0;border-top:1px solid #cbb589;padding:10px 0;margin:12px 0}.chapter .resource-cycle small{font-size:10px}.objective{border-bottom:1px solid #d4c094;font-size:12px}.chapter #village-needs{display:block}
+.community .panel-heading{position:relative;display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;padding-right:24px}.community .panel-heading h2{margin:0;font-size:25px}.community .panel-heading .panel-close{top:-15px;right:-10px}.community .count{border:1px solid #bea171;background:#d6c38b;color:#796132;border-radius:4px;width:26px;height:25px;display:grid;place-items:center;font-size:12px}
+#residents{display:flex;flex-direction:column;gap:2px;margin:0}
+.resident{display:flex;align-items:center;width:100%;padding:9px 0;gap:12px;border:0;border-bottom:1px solid #d5c192;border-radius:0;background:none;text-align:left}
+.resident .avatar{width:44px;height:50px;flex:none;border:2px solid #b3965b;border-radius:5px;background:#dfd4a4!important;overflow:hidden;margin:0}.avatar canvas{display:block;width:100%;height:100%}.resident .info{flex:1;min-width:0}.resident b{font-size:14px;color:#51412a}.resident small{display:block;font-size:11px;line-height:1.4;color:#7a6a47;margin-top:3px}.resident .arrow{color:#9a7a42;font-size:17px}.energy-tiny{display:block;max-width:110px;height:3px;background:#c8bc94;margin-top:5px}.energy-tiny i{display:block;height:100%;background:#8b9f57}
+.community-footer{border:0;background:none;margin:12px 0 0;padding:0;font-size:10px;color:#8c7954}.live-dot{width:5px;height:5px;background:#92a255;border-radius:50%}
+#village-craft.panel{position:static;border:0;background:none;box-shadow:none;border-radius:0;padding:14px 0 0;margin-top:14px;border-top:1px solid #ccb787}#village-craft>.eyebrow{display:none}
+.person h2{font-size:27px;margin:4px 0 3px}.person .traits{font-size:11px;margin:3px 0 16px;color:#8d764e}.person-portrait{float:left;margin-right:14px}.person-portrait .avatar{display:block;width:54px;height:62px;border:2px solid #b19056;border-radius:7px;overflow:hidden;background:#d6c99a!important}
+.person .person-activity{clear:both;padding:9px 10px;margin:15px 0 12px;font-size:11px;line-height:1.5;border:1px solid #c0ae76;border-radius:4px;background:#e4dbb1;color:#69733e}
+.person .quote{font:italic 14px/1.5 "Fraunces",Georgia,serif;margin:12px 0;color:#80643d}.person .stat{font-size:11px;grid-template-columns:68px 1fr 26px;gap:8px;margin-top:10px}.meter{height:6px;background:#d4c59b;border:1px solid #bba371;border-radius:2px}.meter i{background:#8b9f56}
+.request-title{font-size:11px;font-weight:bold;letter-spacing:0;margin:20px 0 10px;color:#795d32}.requests{display:grid;grid-template-columns:1fr 1fr;gap:6px}.person .requests button{min-height:31px;font-size:11px;padding:6px}.response{background:#e9d6a3;color:#79592d;border:1px solid #c4a568;border-radius:4px;font-size:12px;line-height:1.5;margin:0 0 10px;padding:9px}.person .request-pause{font-size:11px;margin:8px 0;color:#7b6844}.person .resume-request{margin-bottom:11px}.person .friendship-note{font-size:10px;margin:15px 0 0;color:#98815a}.person .persuade{margin:0 0 10px}
+.goal-tracker{position:fixed;top:85px;left:18px;width:240px;z-index:25;padding:0;border:3px solid #80613b;border-radius:6px;background:linear-gradient(100deg,#efe3ba,#ddcea0);box-shadow:inset 0 0 0 1px #f8edc7,0 3px 0 #4d382555}
+#goal-shortcut{display:block;width:100%;text-align:left;background:none;padding:11px 12px 8px;box-shadow:none;border:0;color:#5e4a2c}.goal-tracker #goal-label{font-size:9px;letter-spacing:.4px;font-weight:bold;color:#957241;display:block;margin:0 0 5px}.goal-tracker #goal-next{display:block;font-size:12px;line-height:1.45}.goal-tracker progress{width:100%;height:5px;margin-top:8px;border:1px solid #b29b63;background:#c9b981;accent-color:#809351}.goal-tracker #goal-action{font-size:10px;margin:0 12px 10px;padding:5px 8px;border:1px solid #ad945d;background:#c7d197;border-radius:3px;color:#546034}
+#build-panel{position:fixed;left:50%;right:auto;bottom:109px;top:auto;transform:translateX(-50%);width:650px;max-width:calc(100vw - 350px);z-index:40;padding:14px 16px 10px;display:block;white-space:normal}
+.build-heading{display:flex;align-items:baseline;gap:12px;padding-right:25px}.build-heading h2{font-size:23px;margin:0}.build-heading>span{font-size:11px;color:#8b754b}
+#build-categories{display:flex;gap:5px;margin:12px 0 10px;border-bottom:1px solid #c5ad78;padding-bottom:8px}#build-categories button{font-size:11px;padding:5px 9px}#build-categories button[aria-pressed=true]{background:#aebc78;color:#40512c;border-color:#84944d}
+#tools{display:flex;align-items:stretch;gap:7px;min-height:103px;overflow-x:auto;margin:0;padding:0 1px 4px}
+#build-panel .build-tool{position:relative;flex:1 0 100px;max-width:130px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:3px 5px 8px;min-height:108px;min-width:0;gap:3px;border:2px solid #b69a64;border-bottom:3px solid #8b6b3c;border-radius:4px;background:linear-gradient(#e9d9ad,#d5c28e);box-shadow:inset 0 0 0 1px #f8e8b9}
+#build-panel .build-tool.active{border-color:#937336;background:#c9d19d;box-shadow:inset 0 0 0 2px #ecde96}.build-tool.locked{opacity:.65;filter:saturate(.2)}#build-panel .tool-art{width:94px;height:59px;display:block;object-fit:contain}#build-panel .build-tool b{font-size:11px;white-space:nowrap;font-weight:bold;color:#67512d}#build-panel .build-tool small{font-size:9px;color:#8c754c;white-space:nowrap}
+.build-guidance{display:flex;align-items:center;gap:12px;border-top:1px solid #c9b282;margin-top:8px;padding-top:8px}.build-guidance .build-hint{font-size:11px;margin:0;color:#8d754a}.build-guidance kbd{margin-left:auto;border:1px solid #b69b62;padding:2px 5px;background:#e8d6aa;border-radius:3px;font-size:9px;color:#967749}.build-guidance .placement{position:static;transform:none;max-width:none;font-size:10px;border:0;box-shadow:none;border-radius:0;background:none;color:#6d623d;padding:0;margin:0}.build-guidance:has(.placement:not([hidden])) .build-hint{display:none}.build-guidance .placement.invalid{color:#b56936}
+#milestone,#toast{position:fixed;top:auto;left:50%;bottom:112px;transform:translateX(-50%);z-index:50;border:2px solid #a0844e;border-radius:6px;background:#e4d5a4;color:#5e4c2c;padding:11px 17px;max-width:560px;font-size:13px;box-shadow:0 3px 0 #3a2c2050}
+#milestone{bottom:124px;background:#d6dda9;border-color:#849652;color:#4a5d33}.village-note{display:none}#resident-hint{font-size:11px;background:#eddfb8;border:1px solid #a2844c;border-radius:4px;color:#665231}
+.village-alert{position:fixed;right:175px;bottom:102px;z-index:29}.village-alert #open-situations{width:43px;min-height:38px;display:grid;place-items:center;background:linear-gradient(#daca99,#b99a62);border:2px solid #6d5030;border-radius:6px;box-shadow:inset 0 1px 0 #efdaa8,0 3px 0 #48301f70;color:#6a5730;padding:5px}.village-alert svg{width:25px;height:25px}.village-alert #situations-label{display:block;position:absolute;right:0;top:0;transform:translate(25%,-30%);font-size:0;background:none}.village-alert #open-situations[data-concern="true"] #situations-label::after{content:'!';font-size:10px;background:#bd8650;color:#fff0c1;border:1px solid #806037;border-radius:50%;display:grid;place-items:center;width:15px;height:15px}
+#save-warning{position:fixed;bottom:112px;left:50%;transform:translateX(-50%);max-width:540px;background:#845135;color:#ffecd1;border:2px solid #d7aa69;border-radius:5px;z-index:55;padding:10px;font-size:12px}
+dialog{padding:28px 30px;width:min(620px,calc(100vw - 100px));max-height:calc(100dvh - 60px);overflow:auto;color:#58482c}
+dialog::backdrop{background:#21321dc0;backdrop-filter:blur(2px)}dialog h2{font-size:28px;padding-right:24px}dialog li{font-size:13px;line-height:1.6;color:#786544;margin:12px 0}dialog .hint{font-size:11px;color:#95805a;background:none;border:0;margin-top:20px}dialog .primary{min-height:36px}
+.settings-section{background:none;border-radius:0;border-top:1px solid #ccb782;padding:14px 0;margin:0}.settings-section h3{margin:0 0 10px}.setting-row{gap:12px}.setting-row b{font-size:13px}.setting-row small{font-size:11px;line-height:1.5}.volume-control{font-size:12px}.volume-control input{accent-color:#889951}.save-actions{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.settings-section small{font-size:11px;color:#94805a}
+.quest-entry{border:0;border-bottom:1px solid #c7b07e;border-radius:0;background:none;box-shadow:none;padding:14px 0}.quest-entry h3{font-size:16px}.quest-entry.completed{background:#b8c48e33}.journal-intro{font-size:13px}.resource-cycle{background:none;border-radius:0}.journal-button{font-size:12px}
+#situation-dialog blockquote{background:#e5d8ac;border-left:3px solid #a2874d;color:#715735;font:italic 18px/1.6 "Fraunces",Georgia,serif;padding:14px 18px;margin:18px 0}
+.project-card{border:0;border-bottom:1px solid #cbb280;border-radius:0;padding:16px 0;margin:0;background:none;box-shadow:none}.project-title h3{font:600 19px "Fraunces",Georgia,serif;margin:0}.project-stage{margin:12px 0 6px;font-size:11px}.project-card progress{height:9px}.project-actions{display:flex;flex-wrap:wrap;gap:7px}.project-actions label{font-size:10px}.project-card details{padding:10px 0}.recipe-stage{font-size:11px;border-color:#cbb280}
+.town-account{background:none;border-radius:0;border-top:1px solid #cbb280;border-bottom:1px solid #cbb280;padding:12px 0;margin:12px 0;gap:15px}.town-account b{font:700 22px "Trebuchet MS",sans-serif;color:#8a6b35}.town-account label{font-size:12px}.town-account small{font-size:10px}.town-list-heading{margin:16px 0 10px}.town-list-heading button{font-size:10px!important}.town-checkout{border-top:2px solid #b79c62;margin-top:14px;padding:12px 0}.town-checkout b{font-size:21px;color:#8b6b34}.town-checkout p,.town-checkout small{font-size:10px}.source-row,.order-row,.ledger-row{border-color:#cab17c;font-size:12px}.source-row small,.order-row small,.ledger-row small{font-size:10px}.economy-empty{background:none;border:0;border-radius:0;font:italic 17px "Fraunces",Georgia,serif;padding:20px 0}.economy-empty p{font:12px/1.5 "Trebuchet MS",sans-serif}
+.panel,dialog{scrollbar-width:thin;scrollbar-color:#a48a54 #e2d3a8}
+#dev-banner{border:2px solid #82693d;border-radius:5px;background:#516643;color:#eadcb9;font-size:11px;padding:9px 11px;box-shadow:0 3px 0 #293a2470}#dev-banner button{background:#ded3a5;color:#485733;border:1px solid #ac9c65;border-radius:4px;font-size:11px}
+body.in-main-menu header,body.in-main-menu footer,body.in-main-menu .hud-dock,body.in-main-menu .goal-tracker,body.in-main-menu #resident-strip,body.in-main-menu .world-controls,body.in-main-menu .minimap,body.in-main-menu .village-alert{visibility:hidden}
+@media (max-height:780px){#village-book{top:82px;bottom:114px}.community,.person,.chapter{top:82px;max-height:calc(100dvh - 194px)}.person{padding-top:18px}.minimap{width:120px}.minimap canvas{width:102px;height:102px}.world-controls{bottom:244px}}
+@media (prefers-reduced-motion:reduce){button{transition:none}}
+/* Reset the old page header and pinned sidebar geometry. */
+header{height:auto;background:linear-gradient(#536b40,#3d5130);border:2px solid #897044;border-radius:9px;padding:5px 8px;box-shadow:inset 0 0 0 1px #a38b54,0 3px 0 #2b381e60}
+#mode-label{display:none}
+footer .season.panel{top:auto;right:auto;height:auto;max-height:none;margin:0}
+.time-controls{top:auto;right:auto;height:auto;margin:0}
+.world-controls{left:auto;right:20px;width:31px;max-width:31px}
+#village-book{bottom:auto;max-height:calc(100dvh - 212px);display:flex;flex-direction:column}
+.book-tabs{flex:none}
+#village-book>.panel{position:relative!important;inset:auto!important;flex:0 1 auto;max-height:calc(100dvh - 270px)!important}
+.goal-tracker progress::-webkit-progress-bar{background:#cbb88b}.goal-tracker progress::-webkit-progress-value{background:#889c59}
+@media (max-height:780px){#village-book{bottom:auto;max-height:calc(100dvh - 198px)}#village-book>.panel{max-height:calc(100dvh - 256px)!important}}
+/* Resource stacks and the trader use the same illustrated item vocabulary. */
+.material-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
+.material-slot{position:relative;min-width:0;text-align:center;padding:7px 5px 8px;border:2px solid #b89a5b;border-radius:5px;background:linear-gradient(#e7d7a9,#d5bf89);box-shadow:inset 0 0 0 1px #f9e9ba,0 2px 0 #92723b40}
+.material-art{height:46px;position:relative;display:grid;place-items:center}.material-art .item-icon{width:45px;height:45px}.slot-count{position:absolute;right:0;bottom:0;font:700 13px "Trebuchet MS",Verdana,sans-serif;color:#5f4827;text-shadow:0 1px 0 #f9e7b5}
+.material-slot strong{display:block;font-size:10px;line-height:1.3;color:#76582e;font-weight:700;margin-top:4px}.material-slot small{display:block;font-size:9px;line-height:1.35;color:#958051;margin-top:4px}.slot-incoming{display:block;font-size:9px;color:#597149;margin-top:4px}
+#town-catalog{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:0;margin-top:12px;max-height:none;overflow:visible}
+#town-catalog .town-item{display:flex;flex-direction:column;align-items:center;min-width:0;padding:8px 5px 7px;margin:0;border:2px solid #b59759;border-bottom:3px solid #8f6d3b;border-radius:5px;background:linear-gradient(#e6d7ad,#d6c18d);box-shadow:inset 0 0 0 1px #f9e9ba;text-align:center;gap:0}
+.trade-item-art{height:48px;display:grid;place-items:center}.trade-item-art .item-icon{width:47px;height:47px}.town-item>label{display:grid;place-items:center;min-height:25px;font-size:10px;line-height:1.25;color:#71512b;font-weight:bold;margin:4px 0 1px}.trade-price{font-size:10px!important;color:#94723a!important;margin:0 0 6px!important;display:block;font-weight:700}
+.trade-quantity{display:flex;align-items:stretch;justify-content:center;width:100%;gap:3px;margin-top:auto}
+#town-catalog .trade-quantity button{width:22px;min-width:22px;height:24px;padding:0;font-size:15px;line-height:20px;border-width:1px;border-bottom-width:2px;color:#785a2e}
+#town-catalog .trade-quantity input{width:35px;height:24px;min-width:0;padding:2px;text-align:center;border:1px solid #b2935c;border-radius:3px;font-size:11px;font-weight:bold;background:#f5e6bf;appearance:textfield;-moz-appearance:textfield}
+.trade-quantity input::-webkit-inner-spin-button,.trade-quantity input::-webkit-outer-spin-button{appearance:none;margin:0}
+.town-checkout{position:sticky;bottom:-24px;background:#eddfba;margin:12px -23px -24px;padding:12px 23px 16px;border-top:3px solid #bc9e63;box-shadow:0 -4px 9px #82683820;z-index:2}
+.town-checkout b{font-size:19px}.town-checkout p{max-width:310px}.town-checkout>button.primary{padding:10px 14px;min-height:42px}
+#village-book .panel-close{width:26px;height:26px;border:1px solid #ad8f56;border-bottom:2px solid #86623a;border-radius:4px;background:linear-gradient(#e0c997,#c7ad74);color:#735332;padding:0}
+#loading{background:#3c5131;color:#f0dfa8}#loading .sunmark{color:#e5bd68}#loading h1{font:600 42px "Fraunces",Georgia,serif;color:#f0dfa8;text-shadow:0 3px 0 #2b351e}#loading p{color:#bccc9f}
+/* A narrow desktop preview pane still needs the same readable game controls. */
+footer .resources button>span{display:block!important}footer .resources b,footer .resources small{display:block!important}
+@media (max-width:1000px){
+  .resources{left:18px;right:18px;top:84px;justify-content:space-between}.resources>button{flex:1;min-width:0;padding:3px 5px}.resources>button:first-child{min-width:96px}.resources .item-icon{width:26px;height:26px}.resources b{font-size:12px}.resources small{font-size:9px}
+  .goal-tracker{top:155px}#village-book{top:155px;width:min(630px,calc(100vw - 36px));max-height:calc(100dvh - 278px)}#village-book>.panel{max-height:calc(100dvh - 336px)!important}#village-book .panel-close{top:167px}
+  .community,.person,.chapter{top:155px;max-height:calc(100dvh - 286px)}
+  .hud-dock>button{width:56px;height:60px}.hud-dock canvas{width:48px;height:33px}.hud-dock .item-icon{width:32px;height:32px}.dock-label{font-size:10px;gap:4px}.dock-label kbd{font-size:8px}.hud-dock{gap:5px;padding:5px 7px}
+  footer .season.panel,.time-controls{width:185px}.time-controls button{min-width:23px;padding:4px 5px;font-size:10px}
+  #resident-strip{bottom:102px}.minimap{bottom:184px}.world-controls{bottom:353px}.village-alert{bottom:193px}
+  #build-panel{max-width:calc(100vw - 36px);bottom:100px}.developer-session #dev-button{left:auto;right:108px;top:24px}
 }
-@media (max-height: 500px) and (min-width: 761px) {
-  .chapter, .community, .person { bottom: 64px; max-height: calc(100dvh - 142px); }
-}
+footer .resources b[hidden]{display:none!important}
+.community .panel-heading{padding:0 24px 0 0}
+#build-panel .tool-art{background:none!important;margin:0}
+#build-panel .build-tool{max-width:none}
+.panel .panel-close,.panel .close-person,dialog .dialog-close{width:26px;height:26px;min-width:26px;min-height:26px;padding:0!important;border:1px solid #ad8f56;border-bottom:2px solid #86623a;border-radius:4px;background:linear-gradient(#e0c997,#c7ad74);color:#735332}
+/* The journal is a chapter index and a single quest page, rather than a card grid. */
+#quest-dialog{width:min(860px,calc(100vw - 64px));padding:26px 28px;background:linear-gradient(95deg,#e8d5a5,#f3e6c6 38%,#eddeb7)}
+#quest-dialog h2{font:600 27px "Fraunces",Georgia,serif;margin:0 0 10px}.journal-intro{max-width:none;color:#8b7650!important;font-size:12px!important;margin:0 0 10px!important}
+#quest-total{font-size:11px;margin:10px 0;color:#90774a}.journal-spread{display:grid;grid-template-columns:220px minmax(0,1fr);gap:21px;border-top:1px solid #c5aa74;margin-top:12px;padding-top:16px}
+#journal-chapters{display:flex;flex-direction:column;gap:6px;padding-right:14px;border-right:1px solid #c7ad76}
+#quest-dialog #journal-chapters button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:10px 8px;background:none;border:1px solid transparent;box-shadow:none;border-radius:4px;font-size:11px}
+#quest-dialog #journal-chapters button[aria-pressed=true]{background:#d8c48c;border-color:#b69657;box-shadow:inset 0 1px 0 #eddca7}
+.chapter-number{flex:none;display:grid;place-items:center;width:23px;height:23px;border:1px solid #c3a368;border-radius:4px;background:#ead8a6;color:#7d6134;font-size:12px}.journal-spread b{display:block;font-size:11px;line-height:1.35}.journal-spread small{display:block;color:#9b8457;font-size:9px;margin-top:3px}
+#quest-list{display:block;margin:0}.quest-card{display:block;border:0;border-radius:0;box-shadow:none;background:none;overflow:visible;padding:0;margin:0;min-height:430px}.quest-card.complete{background:none;border:0}.quest-card-art{float:right;width:94px;height:78px;margin:0 0 12px 10px;background:none!important;border-radius:0;display:grid;place-items:center}.quest-card-art img{width:94px;height:78px;object-fit:contain}.quest-card-art>span{font-size:43px;color:#c4a15c}.quest-card-content{padding:0;background:none}.quest-card h3{font:600 24px/1.2 "Fraunces",Georgia,serif;margin:8px 0 13px}.quest-card .eyebrow{display:block;font-size:9px;letter-spacing:.4px;color:#957747}.quest-card p{font-size:12px;line-height:1.6;color:#7e6944}.quest-card .objective{clear:both;padding:9px 0}.quest-card .objective b{font-size:12px;font-weight:normal}.quest-card .objective small{font-size:10px}.quest-card .journal-reward b{font-size:10px;color:#866a39}.quest-card button{width:100%;margin-top:12px;min-height:34px}
+.situation-portrait{float:left;margin:0 13px 12px 0}.situation-portrait .avatar{display:block;width:57px;height:66px;border:2px solid #b3955c;border-radius:5px;background:#d9cca0!important;overflow:hidden}
+#situation-content>h2{margin-top:6px}#situation-dialog blockquote{clear:both}#situation-dialog cite{display:block;margin-top:7px;text-align:right;font:11px "Trebuchet MS",Verdana,sans-serif;color:#927644}
+#situation-dialog .situation-choices{display:flex;flex-direction:column;gap:7px}#situation-dialog .situation-choices button{text-align:left;padding:10px 12px}#situation-dialog .situation-choices button b{display:block;font-size:13px;margin-bottom:4px}#situation-dialog .situation-choices button span{display:block;font-size:11px;line-height:1.45;color:#88703e}
+#power-loads label{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #c8b48155}#power-loads label>span{flex:1;min-width:0}#power-loads b{display:block;font-size:12px}#power-loads small{display:block;margin-top:3px;font-size:10px;line-height:1.4;color:#897443}
+.volume-control{display:grid;grid-template-columns:1fr auto;gap:8px;margin:14px 0}.volume-control output{font-variant-numeric:tabular-nums;color:#897443}.volume-control input{grid-column:1/-1;width:100%;margin:0;cursor:pointer}.settings-section>small{display:block;line-height:1.5}
+.transport-choice{border:1px solid #bda16b;border-radius:5px;padding:10px 12px;margin:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:9px;background:#e2d1a433}.transport-choice legend{font-size:11px;font-weight:bold;color:#775e34;padding:0 5px}.transport-choice>label{font-size:12px;cursor:pointer}.transport-choice input{accent-color:#7a8c50}.transport-choice small{display:block;font-size:10px;color:#8f7648;line-height:1.45;margin:5px 0 0 23px}.transport-choice #pickup-controls{grid-column:1/-1;border-top:1px solid #c8b07b;padding-top:9px}.transport-choice #pickup-controls label{font-size:11px;margin-right:8px}.transport-choice select{max-width:100%;font-size:11px}#pickup-driver-note{margin-left:0}.town-checkout #town-pickup-status{display:block;color:#60703d;margin-top:6px;max-width:350px}.order-actions{display:flex;flex-direction:column;gap:5px;flex:none}.order-actions button{font-size:10px!important}.order-row>div:first-child{min-width:0;flex:1}.order-row span{font-size:11px;line-height:1.5;display:block;margin-top:4px}#pickup-dialog label{font-size:12px;display:block;margin:16px 0 7px}#pickup-order-driver{width:100%;padding:8px;background:#f4e6c0;border:1px solid #b3975e;border-radius:4px;font-size:12px}#pickup-confirm{width:100%}
+#town-panel .town-checkout{position:static;margin-bottom:0}
+.town-account #jobs-outlook{max-width:260px;font-size:11px;line-height:1.5}.outside-jobs>p,.outside-jobs>small{font-size:11px;line-height:1.5;color:#88734d}.occupation-card{padding:13px 0;border-bottom:1px solid #c9b27d}.occupation-heading{display:flex;align-items:center;gap:9px}.occupation-heading>div{flex:1;min-width:0}.occupation-heading strong{display:block;font:600 16px "Fraunces",Georgia,serif;color:#66512c}.occupation-heading b{display:block;font-size:11px;color:#877045;margin-top:3px}.occupation-heading label{font-size:10px;white-space:nowrap;cursor:pointer}.occupation-heading input,.resident-occupation input{accent-color:#829752}.occupation-heading .avatar{width:36px;height:42px;overflow:hidden;border:1px solid #ab8e56;border-radius:4px;background:#d4c594!important;flex:none}.occupation-heading canvas{width:100%;height:100%}.occupation-card p{font-size:11px;margin:7px 0;line-height:1.5}.occupation-card>small{font-size:10px;color:#8a7043}.occupation-card>span{display:block;font-size:10px;color:#617141;margin-top:6px}.resident-occupation{border-top:1px solid #c3aa71;border-bottom:1px solid #c3aa71;padding:11px 0;margin:12px 0}.resident-occupation>b{display:block;font-size:12px;color:#6b542e}.resident-occupation>small{display:block;font-size:10px;color:#90764b;margin-top:4px;line-height:1.45}.resident-occupation p{font-size:11px;margin:7px 0}.resident-occupation label{font-size:11px;cursor:pointer;display:block;margin-top:7px}
+.home-method {display:flex;align-items:center;gap:10px;margin:6px 0 12px;color:#5c4c30;font-size:13px;font-weight:700;}
+.home-method select {width:auto;min-width:220px;padding:6px 12px;background:#fff5d7;border:1px solid #9b865d;border-radius:3px;color:#4c412c;font:inherit;}
+.home-method[hidden] {display:none;}
 
-.artwork-preview-notice { position: fixed; z-index: 30; top: 18px; left: 50%; transform: translateX(-50%); padding: 12px 18px; border-radius: 8px; background: #fff7df; color: #273e35; font-size: 13px; box-shadow: 0 2px 12px #263e3020; }
-.supplies { position: absolute; z-index: 5; right: 20px; bottom: 128px; width: 360px; max-height: calc(100dvh - 210px); overflow-y: auto; padding: 24px; }
-.supplies h2 { margin: 6px 0 16px; }
-.supplies h3 { margin: 20px 0 8px; font-size: 15px; }
-.supplies p, .supplies label { font-size: 13px; line-height: 1.6; }
-.supplies small { display: block; margin-top: 16px; line-height: 1.5; }
-#pantry-outlook { padding: 10px; background: #e4ead6; border-radius: 8px; }
+.source-plans,.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.source-row label{display:block;margin:8px 0}.source-row p{margin:8px 0}.source-row{display:block}
 
-/* Situations read like a neighbour's note beside the village journal. */
-#situation-dialog { width: min(640px, calc(100vw - 80px)); padding: 38px 42px 28px; }
-#situation-dialog h2 { font-size: 38px; margin: 8px 0; }
-#situation-dialog h3 { font-size: 16px; margin: 20px 0 10px; }
-#situation-dialog p { line-height: 1.6; }
-.situation-byline { color: #71775d; margin-top: 0; }
-#situation-dialog blockquote { margin: 24px 0; padding: 18px 22px; border-left: 3px solid #a5b16c; background: #e9ecd9; font: 21px/1.5 Georgia, serif; }
-#situation-dialog cite { display: block; margin-top: 10px; font: 12px/1.5 sans-serif; }
-.situation-feeling { color: #795d3b; font-size: 13px; }
-.situation-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.situation-choices button { text-align: left; background: #f0efdf; border: 1px solid #acb695; border-radius: 10px; padding: 18px; color: #34493a; }
-.situation-choices button:hover { background: #e1e7ca; }
-.situation-choices button:focus-visible { outline: 3px solid #697d40; outline-offset: 3px; }
-.situation-choices b, .situation-choices span { display: block; }
-.situation-choices span { font-size: 12px; line-height: 1.5; margin-top: 9px; }
-.situation-progress { padding: 1px 18px 10px; background: #f0efdf; border-radius: 10px; }
-.situation-progress p, .situation-memory { font-size: 13px; }
-.situation-quiet { padding: 24px; margin: 24px 0; border: 1px dashed #acb695; border-radius: 10px; font: 20px/1.5 Georgia, serif; }
+/* Keep the extended story contents beside the current journal page. */
+#journal-chapters{max-height:64vh;overflow-y:auto;overscroll-behavior:contain}
 
-/* Quiet, persistent feedback; details stay available without filling the scene. */
-.save-warning { position: fixed; z-index: 12; top: 76px; left: 20px; max-width: 340px; padding: 12px 16px; text-align: left; border: 1px solid #b96a45; background: #fff0d9; color: #743e25; border-radius: 10px; }
-.save-actions { flex-wrap: wrap; }
-.save-actions button { padding: 10px 14px; border-radius: 7px; background: #e9eddd; }
-#recovery-notice { color: #743e25; background: #fff0d9; padding: 12px; border-radius: 8px; }
-.dev-tools { margin: 22px 0; padding: 16px 0; border-block: 1px solid var(--line); }
-.dev-tools summary, details summary { cursor: pointer; font-weight: 600; }
-.dev-tools nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.dev-tools a { padding: 12px; border-radius: 8px; background: #edf0e1; color: var(--ink); text-decoration: none; font-weight: 600; }
-.dev-tools a:hover { background: #dfe7cd; }
-.dev-tools a span { display: block; margin-top: 5px; font-size: 11px; font-weight: 400; color: var(--muted); }
-[hidden] { display: none !important; }
+.quest-card-art canvas{width:94px;height:60px;object-fit:contain}
+
+.building-work-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.building-work-actions [data-building-work="move"]{grid-column:1/-1}
+#building-work-controls{border-top:1px solid #c7b07e;margin-top:14px;padding-top:8px}

@@ -1,6 +1,11 @@
 // Visual state only: saved simulation time chooses idle activities; animation
 // seconds advance only while the simulation runs. No village/save mutations.
+import { preparedFrames, FRAME_ANCHOR } from './sprite-frames.js';
 export const residentClips = {
+  cook: { sheet: 'activities', row: 0, fps: 3, frames: [0,1,2,3,2,1], loop: true },
+  water: { sheet: 'activities', row: 1, fps: 2, frames: [0,1,2,3,2,1], loop: true },
+  tend: { sheet: 'activities', row: 2, fps: 3, frames: [0,1,2,3,2,1], loop: true },
+  feed: { sheet: 'activities', row: 3, fps: 2, frames: [0,1,2,3,2,1], loop: true },
   walk: { sheet: 'base', row: 0, fps: 8, frames: [0, 1, 2, 3], loop: true },
   work: { sheet: 'base', row: 1, fps: 5, frames: [0, 1, 2, 3], loop: true },
   sit: { sheet: 'base', row: 3, fps: .8, frames: [0, 1, 2, 1], loop: true },
@@ -16,12 +21,26 @@ export const idleLabels = {
   wave: 'Waving hello', relax: 'Enjoying a quiet moment', walk: 'Taking a quiet walk',
 };
 export function residentActivity(r, minutes) {
+  if(r.trip && r.trip.phase!=='away')return 'walk';
   if (Math.hypot(r.target_x - r.x, r.target_y - r.y) > .1) return 'walk';
   if (r.task === 'sleep') return 'sleep';
+  if (r.task === 'daydream') return 'sit';
+  if (['birdwatch', 'stargaze', 'nature_walk'].includes(r.task)) return 'look';
+  if (r.task === 'stretch') return Math.floor(minutes / 8) % 2 ? 'stretch' : 'breathe';
   if (['rest', 'eat'].includes(r.task)) return 'sit';
-  if (['build', 'craft', 'compost'].includes(r.task)) return 'work';
+  if(r.task==='source'&&r.sourceCare)return 'tend';
+  if(r.task==='source')return [2,3].includes(r.sourceMaterial)?'tend':'work';
+  if(r.task==='outside')return 'tend';
+  if (['build','building_work','craft','prepare'].includes(r.task)) return 'work';
+  if (r.task === 'cook') return 'cook';
+  if (r.task === 'water') return 'water';
+  if (['garden', 'compost', 'gather'].includes(r.task)) return 'tend';
   if (r.task === 'visit') {
-    if (['workshop', 'compost', 'kitchen', 'garden', 'greenhouse', 'coop'].includes(r.visitingKind)) return 'work';
+    if (r.visitingKind === 'workshop') return 'work';
+    if (r.visitingKind === 'kitchen') return 'cook';
+    if (r.visitingKind === 'coop') return 'feed';
+    if (r.visitingKind === 'well') return 'water';
+    if (['compost', 'garden', 'greenhouse', 'grove'].includes(r.visitingKind)) return 'tend';
     if (['home', 'square'].includes(r.visitingKind)) return 'sit';
   }
   const slot = Math.floor((minutes + r.id * 29) / 24);
@@ -69,16 +88,16 @@ export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, wid
   buffer.globalCompositeOperation = 'lighter';
   for (const pose of animation.layers) {
     if (pose.weight <= 0) continue;
-    const sheet = sheets[pose.sheet];
+    const frame = preparedFrames(sheets[pose.sheet], {referenceRow:pose.sheet === 'base' ? 2 : 0})?.[pose.row*4+pose.frame];
+    if (!frame) continue;
     buffer.globalAlpha = pose.weight;
-    buffer.drawImage(sheet, pose.frame * sheet.naturalWidth / 4, pose.row * sheet.naturalHeight / 4,
-      sheet.naturalWidth / 4, sheet.naturalHeight / 4, 0, 0, surface.width, surface.height);
+    buffer.drawImage(frame, 0, 0, surface.width, surface.height);
   }
   buffer.globalAlpha = 1;
   buffer.globalCompositeOperation = 'source-over';
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(animation.facing, animation.breath);
-  ctx.drawImage(surface, -width / 2, -width * .97, width, width);
+  ctx.drawImage(surface, -width / 2, -width * FRAME_ANCHOR, width, width);
   ctx.restore();
 }

@@ -16,7 +16,7 @@
 #dev-inspection th,#dev-inspection td{text-align:left;border-bottom:1px solid #d9dece;padding:7px}
 #dev-history{padding-left:18px;max-height:250px;overflow:auto}
 #dev-button{font-size:12px;padding:9px 14px;white-space:nowrap}
-#dev-banner{position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:15;background:#2f5343;color:#fff9ec;border:1px solid #b4c2a2;border-radius:6px;padding:10px 18px;font:13px 'Trebuchet MS',sans-serif}
+#dev-banner{position:fixed;top:224px;left:20px;transform:none;z-index:15;background:#2f5343;color:#fff9ec;border:1px solid #b4c2a2;border-radius:6px;padding:10px 18px;font:11px 'DM Sans',sans-serif}
 #dev-banner button{margin-left:12px;padding:5px 10px}
 .dev-link{display:block;padding:10px 0;border-bottom:1px solid #dddcca;text-decoration:none}.dev-link b{display:block}.dev-link span{font-size:12px}
 #dev-errors{max-height:180px;overflow:auto}

@@ -1,17 +1,40 @@
 //! Building visits finish only after residents reach the selected building.
 use super::*;
 pub fn radius(kind: &str) -> i32 {
-    if kind == "square" { 2 } else { 1 }
-}
-pub fn approach(b: &Building, id: usize) -> (f32, f32) {
-    if b.kind == "square" {
-        (b.x as f32 + (id as f32 - 2.) * 0.4, b.y as f32 + 1.0)
+    if matches!(kind, "square" | "solar_farm") {
+        2
     } else {
-        (b.x as f32 + 0.75, b.y as f32 + 0.75)
+        1
     }
 }
+/// Occupied tile centers. Even plots keep the saved anchor at their front tile.
+pub fn footprint_size(kind: &str) -> i32 {
+    match kind {
+        "square" | "solar_farm" => 3,
+        "well" | "compost" | "coop" | "streetlight" | "hydro" | "eco_toilet" => 1,
+        _ => 2,
+    }
+}
+pub fn occupies(b: &Building, x: i32, y: i32) -> bool {
+    let size = footprint_size(&b.kind);
+    let left = b.x - size / 2;
+    let back = b.y - size / 2;
+    (left..left + size).contains(&x) && (back..back + size).contains(&y)
+}
 pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
-    let b = &v.buildings[index];
+    let Some(b) = v.buildings.iter().find(|b| b.id == index) else {
+        return;
+    };
+    let Some(point) = spacing::approach(v, b, r.id) else {
+        assign(
+            r,
+            v,
+            "rest",
+            "Taking a break where there is room. That building is too crowded.",
+            requested,
+        );
+        return;
+    };
     assign(
         r,
         v,
@@ -20,9 +43,11 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
         requested,
     );
     r.visit_building = Some(index);
-    (r.target_x, r.target_y) = approach(b, r.id);
+    r.activity_building = Some(index);
+    (r.target_x, r.target_y) = point;
     r.reason = match b.kind.as_str() {
         "home" => "Resting on the porch.",
+        "eco_toilet" => "Using the ecological toilet and washing my hands.",
         "garden" | "greenhouse" => "Checking and tending this garden.",
         "kitchen" => "Preparing a pot in this kitchen.",
         "well" => "Taking a refreshing drink at the cistern.",
@@ -36,7 +61,10 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     .into();
 }
 pub fn finish(v: &mut Village, r: &mut Resident) {
-    let Some(index) = r.visit_building else {
+    let Some(id) = r.visit_building else {
+        return;
+    };
+    let Some(index) = v.buildings.iter().position(|b| b.id == id) else {
         return;
     };
     let Some(b) = v.buildings.get(index) else {
@@ -47,7 +75,11 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
     }
     let kind = b.kind.clone();
     // Shared production cooldown prevents five simultaneous visitors multiplying output.
-    if kind != "home" && kind != "square" && b.next_visit > v.minutes {
+    if kind != "home" && kind != "square" && kind != "eco_toilet" && b.next_visit > v.minutes {
+        return;
+    }
+    if kind == "eco_toilet" {
+        sanitation::use_toilet(v, r);
         return;
     }
     v.buildings[index].visits = v.buildings[index].visits.saturating_add(1);
@@ -86,7 +118,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             v.progress.scraps -= 2;
             v.progress.compost += 1;
         }
-        "workshop" if v.wood >= 8. && v.progress.tool_uses <= 24 => {
+        "workshop" if economy::free(v, 0) >= 8 && v.progress.tool_uses <= 24 => {
             v.wood -= 8.;
             v.progress.tool_uses += 12;
             v.progress.tools_crafted += 1;
@@ -116,6 +148,7 @@ mod tests {
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
+                v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
                 v.wood = 200.;
                 v.progress.scraps = 4;
             }
@@ -163,6 +196,7 @@ mod tests {
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
+                v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
                 v.wood = 200.;
             }
             assert_eq!(g.place(kind, 5, 5), "ok");
@@ -224,6 +258,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.progress.completed = [true; 4];
+            v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
             v.wood = 200.;
         }
         assert_ne!(g.place("square", 1, 1), "ok");

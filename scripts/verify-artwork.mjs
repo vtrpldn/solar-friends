@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { catalog } from '../web/artwork/catalog.js';
-import { buildingArt, cameraCalibration, drawBuildingArt, nightAmount } from '../web/building-art.js';
+import { buildingArt, allBuildingArt, homeArtKeys, buildingArtKey, cameraCalibration, drawBuildingArt, nightAmount } from '../web/building-art.js';
+import {economyArt,economyAtlasFile,economyAtlasSize,drawEconomySprite} from '../web/economy-art.js';
 const art = new URL('../web/art/', import.meta.url);
 const files = readdirSync(art, { recursive: true }).filter(file => /\.(png|svg)$/.test(file));
 assert.equal(new Set(catalog.map(sprite => sprite.id)).size, catalog.length, 'Sprite IDs must be unique');
@@ -21,7 +22,7 @@ for (const sprite of catalog) {
   const [x, y, w, h] = sprite.cell;
   assert(x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= 1 && y + h <= 1, `Invalid crop: ${sprite.id}`);
 }
-for (const sprite of Object.values(buildingArt)) {
+for (const sprite of Object.values(allBuildingArt)) {
   const entry = catalog.find(item => item.name === sprite.name && item.building);
   assert(entry, `Missing building: ${sprite.name}`);
   assert.equal(entry.width, sprite.width, `Studio scale drift: ${sprite.name}`);
@@ -29,9 +30,11 @@ for (const sprite of Object.values(buildingArt)) {
   const night = catalog.find(item => item.name === `${sprite.name} · night`);
   assert(night, `Missing night variant: ${sprite.name}`);
   assert.equal(night.file, `../art/${sprite.nightFile}`);
-  for (const key of ['width', 'anchor', 'cell', 'axes']) assert.deepEqual(night[key], entry[key], `Night geometry drift: ${sprite.name}/${key}`);
+  for (const key of ['width', 'anchor', 'cell', 'axes', 'mesh','aspect']) assert.deepEqual(night[key], entry[key], `Night geometry drift: ${sprite.name}/${key}`);
   const bytes = readFileSync(new URL(sprite.nightFile, art));
-  assert.equal(bytes.readUInt32BE(16), bytes.readUInt32BE(20), 'Night sprite canvas must stay square');
+  assert.equal(bytes.readUInt32BE(20) / bytes.readUInt32BE(16), sprite.aspect || 1, 'Canvas aspect must match runtime rendering');
+  const dayBytes=readFileSync(new URL(sprite.file,art));
+  assert.deepEqual([bytes.readUInt32BE(16),bytes.readUInt32BE(20)],[dayBytes.readUInt32BE(16),dayBytes.readUInt32BE(20)],'Day and night dimensions must match');
   assert.equal(bytes[25], 6, 'Night sprites need RGBA transparency');
   const { vertical, shear } = cameraCalibration(sprite);
   if (sprite.axes) {
@@ -56,10 +59,34 @@ assert.equal(calls[2][7], buildingArt.kitchen.width * 2);
 assert.equal(ctx.globalAlpha, .4);
 console.log(`Artwork coverage: ${files.length} source files, ${catalog.length} sprite entries.`);
 
+// Real source dimensions must agree with the studio and preserve every crop's
+// shape at game zooms. The old workbench compressed tall props into squares.
+const economyBytes=readFileSync(new URL(economyAtlasFile,art));
+assert.deepEqual([economyBytes.readUInt32BE(16),economyBytes.readUInt32BE(20)],economyAtlasSize);
+const economySource={naturalWidth:economyAtlasSize[0],naturalHeight:economyAtlasSize[1]};
+for(const sprite of economyArt)for(const zoom of [.65,1,1.8]){
+  let drawn;
+  drawEconomySprite({save(){},restore(){},translate(){},scale(){},createRadialGradient(){return {addColorStop(){}};},fillRect(){},drawImage(...args){drawn=args;}},economySource,sprite,137,91,zoom);
+  const [,sx,sy,sw,sh,dx,dy,dw,dh]=drawn;
+  assert(Math.abs(dh/dw-sh/sw)<1e-10,`${sprite.name}: preserve source aspect`);
+  assert(Math.abs(dy+dh*sprite.anchor-91)<1e-10,`${sprite.name}: exact ground anchor`);
+  assert(Math.abs(dx+dw/2-137)<1e-10,`${sprite.name}: centered crop`);
+  assert(sx>=0&&sy>=0&&sx+sw<=economySource.naturalWidth&&sy+sh<=economySource.naturalHeight);
+  assert(Math.abs(sprite.aspect-sh/sw)<1e-10,`${sprite.name}: studio aspect matches gameplay`);
+}
+console.log('PASS: economy crop proportions and ground anchors match the rectangular source at three game zooms.');
+
 assert.equal(nightAmount(12 * 60), 0);
 assert.equal(nightAmount(0), 1);
 assert.equal(nightAmount(21 * 60), 1);
 assert.equal(nightAmount(1440), nightAmount(0));
 assert(nightAmount(18 * 60) > 0 && nightAmount(18 * 60) < 1);
 assert(Math.abs(nightAmount(18 * 60 - .001) - nightAmount(18 * 60 + .001)) < .001);
-console.log('PASS: nine night variants, shared geometry, alpha, and continuous day/night timing');
+const houses=[{id:1,kind:'home'},{id:4,kind:'home'},{id:8,kind:'home'},{id:9,kind:'home'}];
+const village=[{id:0,kind:'well'},...houses,{id:10,kind:'garden'}];
+assert.deepEqual(houses.map(b=>buildingArtKey(b,village)),homeArtKeys);
+assert.deepEqual(houses.map(b=>buildingArtKey(b,JSON.parse(JSON.stringify(village)).reverse())),homeArtKeys,'Variant assignment survives save/reload and render ordering');
+assert.equal(buildingArtKey({kind:'home'},village),'home','The fifth home repeats the original');
+for(let i=0;i<houses.length;i++)assert.equal(buildingArtKey({kind:'home'},houses.slice(0,i)),buildingArtKey(houses[i],village),'Placement previews match the next built home');
+assert.equal(buildingArtKey({kind:'garden',id:10},village),'garden');
+console.log(`PASS: ${Object.keys(allBuildingArt).length} night variants, shared geometry, alpha, continuous day/night timing, and stable home variation previews`);
