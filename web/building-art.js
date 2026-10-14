@@ -4,11 +4,12 @@
 // directions to the same +/- 1/2 slopes used by projection.js.
 import { TILE_HALF_HEIGHT, TILE_HALF_WIDTH } from './projection.js';
 import { measuredAxes } from './building-projection.js';
-import { pergolaMesh, buildingTexture } from './building-mesh.js';
+import { buildingTexture } from './building-mesh.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
   hydro: { name:'River generator', file:'hydro.png', width:96, anchor:.75 },
   eco_toilet: { name:'Ecological toilet', file:'eco-toilet.png', width:100, anchor:.88 },
+  banana_treatment: { name:'Banana treatment bed', file:'banana-treatment.png', width:162, anchor:.85 },
   wetland: { name:'Reed bed', file:'wetland.png', width:162, anchor:.72, aspect:.5 },
   biodigester: { name:'Biodigester', file:'biodigester.png', width:150, anchor:.71 },
   warehouse: { name:'Storage house', file:'warehouse.png', width:178, anchor:.78 },
@@ -40,8 +41,6 @@ for (const [key, art] of Object.entries(allBuildingArt)) {
   const axes=measuredAxes(key);
   if(axes)art.axes=axes;
 }
-allBuildingArt.square.mesh=pergolaMesh;
-allBuildingArt.square.axes=[.5,-.5];
 export const homeArtKeys = ['home', ...Object.keys(homeVariants)];
 export function buildingArtKey(building, buildings, projects = []) {
   if(building.kind!=='home')return building.kind;

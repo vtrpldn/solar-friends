@@ -55,7 +55,10 @@ fn hydros(v: &Village) -> usize {
         .count()
 }
 fn capacity(v: &Village) -> f32 {
-    farms(v) as f32 * STORAGE_PER_FARM + hydros(v) as f32 * 18.
+    farms(v) as f32 * STORAGE_PER_FARM
+        + hydros(v) as f32 * 18.
+        + crate::building_work::held_capacity(v, "solar_farm") as f32 * STORAGE_PER_FARM
+        + crate::building_work::held_capacity(v, "hydro") as f32 * 18.
 }
 fn hydro_generation(v: &Village, minutes: f32) -> f32 {
     let flow = if ecology::raining(minutes) {
@@ -89,7 +92,7 @@ pub fn supply(v: &Village) -> Supply {
     let stored = v.power.stored.min(capacity);
     // Fade during the final minute of charge; sunlight can directly supply a
     // partially lit grid at dawn. No on/off oscillation around an empty battery.
-    let grid_level = if farms + hydros == 0 {
+    let grid_level = if capacity <= f32::EPSILON {
         0.
     } else if demand <= f32::EPSILON {
         1.
@@ -145,7 +148,16 @@ pub fn supply(v: &Village) -> Supply {
 pub fn advance(v: &mut Village, minutes: f32) {
     let capacity = capacity(v);
     // Evaluate at the middle of the actual simulated interval, including dawn.
-    let (generation, demand, _) = rates(v, v.minutes - minutes / 2.);
+    let midpoint = v.minutes - minutes / 2.;
+    let (generation, demand, darkness) = rates(v, midpoint);
+    if minutes > 0. && darkness > 0.5 {
+        v.progress.river_night |= hydro_generation(v, midpoint) > 0.;
+        v.progress.night_lights |= demand > 0.
+            && (generation > 0. || v.power.stored > 0.)
+            && v.buildings.iter().any(|b| {
+                b.kind == "streetlight" && b.progress >= 100. && !v.power.disabled.contains(&b.id)
+            });
+    }
     v.power.stored = (v.power.stored + (generation - demand) * minutes / 60.).clamp(0., capacity);
 }
 pub fn valid(v: &Village) -> bool {
@@ -175,7 +187,7 @@ mod tests {
             .world_mut()
             .resource_mut::<Village>()
             .progress
-            .later_completed = [true; 3];
+            .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(game.place("solar_farm", 5, 5), "ok");
         assert_eq!(game.place("streetlight", 10, 5), "ok");
         assert_eq!(game.place("home", 14, 5), "ok");

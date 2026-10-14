@@ -1,11 +1,14 @@
 // Hand-traced structural edges, in a 1280 px reference view (640 for atlas
-// cells). Roof pitches, foliage, bunting and curved tank rims are not axes.
+// cells, or the actual source size for replaced sprites). Sloping roof pitches,
+// foliage, bunting and curved tank rims are not ground axes; roof ridges and
+// horizontal eaves are, and must agree with the walls and foundation.
 // Each direction contains two independently traced, nominally parallel edges.
 // Keep these landmarks visible in the projection review; do not infer a pass
 // merely from the requested camera in an image-generation prompt.
 export const buildingProjection = {
   hydro:{size:1280,right:[[304,744,566,873],[359,685,629,819]],left:[[563,872,740,792],[650,787,826,707]],upright:[620,584,620,818]},
   eco_toilet:{size:1280,right:[[237,975,609,1168],[345,879,614,1014]],left:[[609,1168,1087,974],[664,975,938,864]],upright:[626,725,626,1028]},
+  banana_treatment:{size:1280,right:[[92,743,630,1137],[92,667,630,1063]],left:[[630,1137,1173,754],[630,1063,1173,677]],upright:[632,1062,632,1128]},
   wetland:{size:1774,right:[[357,511,989,797],[366,428,990,710]],left:[[989,797,1355,571],[998,710,1343,500]],upright:[990,713,990,789]},
   biodigester:{size:1280,right:[[868,899,961,937],[880,752,971,789]],left:[[961,937,1164,858],[973,867,1172,789]],upright:[956,690,956,888]},
   warehouse:{size:1280,right:[[107,848,741,1133],[274,741,700,933]],left:[[741,1133,1188,936],[742,1055,1014,935]],upright:[733,792,733,1051]},
@@ -19,8 +22,8 @@ export const buildingProjection = {
   greenhouse: { size:1280, right:[[211,843,592,1132],[269,428,588,653]], left:[[595,1135,1059,909],[733,615,1005,481]], upright:[607,704,607,1033] },
   well: { size:1280, right:[[337,950,505,1040],[218,944,475,1086]], left:[[785,1001,1026,869],[790,1091,1040,953]], upright:[961,343,961,684] },
   compost: { size:1280, right:[[550,307,747,415],[538,657,735,773]], left:[[247,441,484,299],[540,598,754,464]], upright:[781,805,781,1075] },
-  square: { size:1280, right:[[625,160,1090,411],[199,383,699,605]], left:[[199,383,625,160],[699,605,1090,411]], upright:[1092,478,1092,817] },
-  workshop: { size:1280, right:[[116,894,588,1141],[173,511,503,684]], left:[[591,1141,1149,930],[602,651,1025,505]], upright:[554,714,554,990] },
+  square: { size:1280, right:[[460,851,598,911],[649,752,786,810]], left:[[310,733,541,611],[752,898,994,764]], upright:[599,919,599,966] },
+  workshop: { size:1254, right:[[118,917,548,1145],[152,522,505,708],[471,185,828,374]], left:[[553,1145,1131,981],[594,640,1007,531],[637,867,876,806]], upright:[558,746,558,1002], rightLabels:['Side foundation','Side eave','Roof ridge'], leftLabels:['Front foundation','Front lintel','Workbench front'] },
   coop: { size:1280, right:[[355,753,591,884],[277,486,579,657]], left:[[665,648,921,547],[661,886,746,853]], upright:[634,709,634,994] },
   'home-veranda': { size:1280, right:[[100,852,574,1098],[350,612,445,658]], left:[[574,1098,1156,852],[636,699,1102,503]], upright:[571,731,571,1065] },
   'home-gable': { size:1280, right:[[151,797,650,1061],[200,484,603,699]], left:[[650,1061,1140,841],[897,757,970,724]], upright:[674,719,674,1020] },
