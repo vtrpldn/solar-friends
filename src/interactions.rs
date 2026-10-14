@@ -149,11 +149,11 @@ mod tests {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
                 v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
-                v.wood = 200.;
+                crate::logistics::fixture_stock(&mut v, 0, 200);
                 v.progress.scraps = 4;
             }
             assert_eq!(g.place(kind, 5, 5), "ok", "{kind}");
-            g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
+            crate::logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
             {
                 let mut q = g.app.world_mut().query::<&mut Resident>();
                 let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
@@ -197,11 +197,11 @@ mod tests {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.progress.completed = [true; 4];
                 v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
-                v.wood = 200.;
+                crate::logistics::fixture_stock(&mut v, 0, 200);
             }
             assert_eq!(g.place(kind, 5, 5), "ok");
             let mut v = g.app.world().resource::<Village>().clone();
-            v.buildings[0].progress = 100.;
+            crate::logistics::fixture_finish(&mut v, 0);
             v.buildings[0].poultry.remaining = 100.;
             v.progress.scraps = 2;
             let mut q = g.app.world_mut().query::<&Resident>();
@@ -259,7 +259,7 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.progress.completed = [true; 4];
             v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
-            v.wood = 200.;
+            crate::logistics::fixture_stock(&mut v, 0, 200);
         }
         assert_ne!(g.place("square", 1, 1), "ok");
         assert_eq!(g.place("square", 5, 5), "ok");
@@ -272,7 +272,7 @@ mod tests {
         assert_eq!(g.place("home", 5, 5), "ok");
         assert!(g.visit_building(0, 0).contains("Finish construction"));
         assert!(g.visit_building(0, 99).contains("not found"));
-        g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
         assert!(g.visit_building(0, 0).contains("needs to"));
     }
 }

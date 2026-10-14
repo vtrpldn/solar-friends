@@ -345,13 +345,11 @@ mod tests {
     }
     fn home(g: &mut Game, x: i32, y: i32) {
         assert_eq!(g.place("home", x, y), "ok");
-        g.app
-            .world_mut()
-            .resource_mut::<Village>()
-            .buildings
-            .last_mut()
-            .unwrap()
-            .progress = 100.;
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let id = v.buildings.last().unwrap().id;
+            crate::logistics::fixture_finish(&mut v, id);
+        }
     }
 
     #[test]

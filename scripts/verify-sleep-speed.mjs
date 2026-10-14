@@ -1,3 +1,4 @@
+import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -12,7 +13,7 @@ function ready(homes=1,minute=1080){
   const s=snap(g),v=s.village;v.minutes=minute;v.arrived=true;v.food=80;v.meals=12;v.water=40;
   v.buildings.forEach(b=>b.progress=100);
   s.residents.forEach((r,i)=>{r.task='idle';r.remaining=0;r.energy=[95,70,20,80,45][i];r.hunger=20;r.social=90;r.last_meal_slot=2;r.target_x=r.x;r.target_y=r.y;});
-  assert(g.restore(JSON.stringify(s)));return g;
+  assert(g.restore(JSON.stringify(resetMaterialLocations(s))));return g;
 }
 function reload(g){const raw=g.snapshot(),copy=new Game();assert(copy.restore(raw));assert.equal(copy.snapshot(),raw);copy.free();}
 async function checkpoint(g,name){reload(g);if(output)await fs.writeFile(`${output}/${name}.json`,g.snapshot());}
@@ -62,7 +63,7 @@ for(const homes of [0,1,2]){
 // Actual availability matters: travelling, walking to bed and village chores remain at selected speed.
 const g=ready(2,600),s=snap(g);s.village.economy.outside_committed_days=[0,0,0,0,0];
 s.residents.forEach(r=>{r.task='outside';r.trip={purpose:'work',phase:'away',return_at:1020};});
-assert(g.restore(JSON.stringify(s)));assert(g.fast_forward_ready());
+assert(g.restore(JSON.stringify(resetMaterialLocations(s))));assert(g.fast_forward_ready());
 for(const phase of ['leaving','returning']){
  const travel=structuredClone(s);travel.residents[0].trip.phase=phase;
  if(phase==='returning'){travel.village.minutes=1020;travel.residents.forEach(r=>{r.trip.phase='returning';r.task='return';});}

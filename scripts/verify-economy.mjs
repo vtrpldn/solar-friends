@@ -1,3 +1,4 @@
+import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 import {unlockStory} from './story-fixture.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -33,7 +34,7 @@ for(const scenario of ['economy','economy-poor','economy-depleted']){
   g.free();
 }
 // Local preparation consumes inputs once and project pause stops its demand.
-const g=new Game();unlockStory(g);assert.equal(g.place('greenhouse',8,8),'ok');let s=snap(g);s.village.economy.stock[5]=0;s.village.economy.stock[8]=10;assert(g.restore(JSON.stringify(s)));g.dev_observe(true);
+const g=new Game();unlockStory(g);assert.equal(g.place('greenhouse',8,8),'ok');let s=snap(g);s.village.economy.stock[5]=0;s.village.economy.stock[8]=10;assert(g.restore(JSON.stringify(resetMaterialLocations(s))));g.dev_observe(true);
 for(let i=0;i<5000;i++)g.tick(.25);
 s=snap(g);assert(s.village.economy.stock[5]>0||s.village.economy.projects[0].consumed[5]>0,'Residents prepare frames from available local inputs');
 assert.equal(g.configure_project(0,1,true,'standard'),'ok');const before=g.snapshot();const malformed=JSON.parse(before);malformed.village.economy.projects[0].reserved[0]=999999999;assert(!g.restore(JSON.stringify(malformed)));assert.equal(g.snapshot(),before);

@@ -181,3 +181,4 @@ footer .resources b[hidden]{display:none!important}
 
 .building-work-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.building-work-actions [data-building-work="move"]{grid-column:1/-1}
 #building-work-controls{border-top:1px solid #c7b07e;margin-top:14px;padding-top:8px}
+.storage-reserve{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:end;gap:10px}.storage-reserve label{display:flex;flex-direction:column;gap:5px;font-size:11px}.storage-reserve select,.storage-reserve input{width:100%;box-sizing:border-box;min-width:0;background:#f5edcf;border:1px solid #b79a62;color:#354b35;padding:7px;font:12px 'Trebuchet MS',sans-serif}.storage-reserve button{margin:8px 0}.storage-location small{display:block}

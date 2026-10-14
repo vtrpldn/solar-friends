@@ -20,15 +20,11 @@ fn setup() -> Game {
     g
 }
 fn ready_building(g: &mut Game, kind: &str, x: i32, y: i32) {
-    g.app.world_mut().resource_mut::<Village>().wood = 100.;
+    logistics::fixture_stock(&mut g.app.world_mut().resource_mut::<Village>(), 0, 100);
     assert_eq!(g.place(kind, x, y), "ok");
-    g.app
-        .world_mut()
-        .resource_mut::<Village>()
-        .buildings
-        .last_mut()
-        .unwrap()
-        .progress = 100.;
+    let mut v = g.app.world_mut().resource_mut::<Village>();
+    let id = v.buildings.last().unwrap().id;
+    logistics::fixture_finish(&mut v, id);
 }
 fn finish_task(g: &mut Game, id: usize, task: &str) {
     let v = g.app.world().resource::<Village>().clone();
@@ -155,6 +151,7 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         .progress
         .completed[0] = true;
     assert_eq!(g.place("home", 8, 8), "ok");
+    logistics::fixture_stage(&mut g.app.world_mut().resource_mut::<Village>(), 0);
     let v = g.app.world().resource::<Village>().clone();
     let mut q = g.app.world_mut().query::<&mut Resident>();
     for mut r in q.iter_mut(g.app.world_mut()).filter(|r| r.id < 2) {
@@ -164,11 +161,11 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
     }
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.economy.stock[12] = 1;
-        v.economy.stock[13] = 1;
+        logistics::fixture_stock(&mut v, 12, 1);
+        logistics::fixture_stock(&mut v, 13, 1);
         economy::rebalance(&mut v);
     }
-    advance(&mut g, 35.);
+    advance(&mut g, 2000.);
     assert_eq!(
         g.app.world().resource::<Village>().progress.shared_builds,
         1
@@ -327,6 +324,7 @@ fn tools_accelerate_building_and_spend_one_use_on_completion() {
         .resource_mut::<Village>()
         .progress
         .tool_uses = 12;
+    logistics::fixture_stage(&mut g.app.world_mut().resource_mut::<Village>(), 0);
     let v = g.app.world().resource::<Village>().clone();
     let mut q = g.app.world_mut().query::<&mut Resident>();
     let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 1).unwrap();
@@ -345,13 +343,15 @@ fn tools_accelerate_building_and_spend_one_use_on_completion() {
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.economy.stock[12] = 1;
-        v.economy.stock[13] = 1;
+        logistics::fixture_stock(&mut v, 12, 1);
+        logistics::fixture_stock(&mut v, 13, 1);
         while v.economy.projects[0].stage < 3 {
             economy::rebalance(&mut v);
+            logistics::fixture_stage(&mut v, 0);
             economy::build(&mut v, 0, 100.);
         }
         economy::rebalance(&mut v);
+        logistics::fixture_stage(&mut v, 0);
         economy::build(&mut v, 0, 7.99);
     }
     g.tick(0.2);

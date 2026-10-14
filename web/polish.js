@@ -15,6 +15,7 @@ export function placementReason(village, kind, x, y) {
   if (x - radius < 0 || y - radius < 0 || x + radius >= MAP_SIZE || y + radius >= MAP_SIZE || (kind==='hydro' ? x<riverCenter(y)-1.35||x>=riverCenter(y)-.35 : riverBank(x + radius - 1, y))) return kind==='hydro'?'Place in the shallow village side of the river.':'Keep the riverbank clear. Move farther inland.';
   if (Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) return 'Leave the arrival clearing open for everyone.';
   if (village.buildings.some(b => Math.abs(b.x - x) < radius + (['square','solar_farm'].includes(b.kind) ? 2 : 1) && Math.abs(b.y - y) < radius + (['square','solar_farm'].includes(b.kind) ? 2 : 1))) return 'Leave a little room between buildings.';
+  if(village.logistics?.stores.some(p=>p.owner.kind==='ground'&&p.items.some(n=>n)&&occupies({kind,x,y},Math.round(p.x),Math.round(p.y))))return 'Let residents collect the materials lying on this plot before building here.';
   if (village.roads.some(([rx,ry])=>occupies({kind,x,y},rx,ry))) return 'Keep roads clear. Choose a plot beside the road.';
   if(reservations.some(b=>Math.abs(b.x-x)<radius+(['square','solar_farm'].includes(b.kind)?2:1)&&Math.abs(b.y-y)<radius+(['square','solar_farm'].includes(b.kind)?2:1)))return 'That plot is reserved for a building move.';
   if (sourceConflicts(village,kind,x,y)) return 'Keep the local resource site accessible.';

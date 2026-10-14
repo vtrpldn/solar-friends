@@ -313,6 +313,9 @@ impl Game {
         if v.economy.sources.len() >= 676 {
             return "This village has reached its plot limit.".into();
         }
+        if v.logistics.is_some() && v.simulation.next_id.checked_add(1).is_none() {
+            return "Material location identity limit reached.".into();
+        }
         if material >= 2 && v.economy.land[material - 2] <= 0. {
             return "This property’s reserve has been exhausted. Buy supplies in town.".into();
         }
@@ -354,6 +357,7 @@ impl Game {
             plant_requested: false,
             harvests: 0,
         });
+        crate::logistics::sync(&mut v);
         event(&mut v, "A player-managed material plot is established.");
         "ok".into()
     }
@@ -402,6 +406,7 @@ impl Game {
             s.planted = false;
             s.harvest_requested = false;
             s.plant_requested = false;
+            crate::logistics::sync(&mut v);
         }
         let mut q = self.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(self.app.world_mut()) {
@@ -619,7 +624,7 @@ mod tests {
             v.minutes = 540.;
             v.food = 17.;
             v.meals = 12;
-            v.buildings[0].progress = 100.;
+            crate::logistics::fixture_finish(&mut v, 0);
             v.economy.sources[0].growth = 1.;
             v.economy.sources[0].remaining = 32.;
         }

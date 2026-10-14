@@ -119,6 +119,16 @@ pub fn placement(
         return Err("Leave a little room between buildings.");
     }
     let size = interactions::footprint_size(kind);
+    if v.logistics.as_ref().is_some_and(|s| {
+        s.stores.iter().any(|p| {
+            p.owner == logistics::Owner::Ground
+                && p.items.iter().any(|n| *n > 0)
+                && (x - size / 2..x - size / 2 + size).contains(&(p.x.round() as i32))
+                && (y - size / 2..y - size / 2 + size).contains(&(p.y.round() as i32))
+        })
+    }) {
+        return Err("Let residents collect the materials lying on this plot before building here.");
+    }
     for px in x - size / 2..x - size / 2 + size {
         for py in y - size / 2..y - size / 2 + size {
             if v.roads.contains(&(px, py)) {
@@ -187,10 +197,11 @@ pub fn next(v: &Village) -> Option<usize> {
     v.building_jobs
         .iter()
         .find(|j| {
-            v.buildings
-                .iter()
-                .find(|b| b.id == j.building)
-                .is_some_and(|b| (0..2).any(|id| spacing::approach(v, b, id).is_some()))
+            !logistics::occupied_building(v, j.building)
+                && v.buildings
+                    .iter()
+                    .find(|b| b.id == j.building)
+                    .is_some_and(|b| (0..2).any(|id| spacing::approach(v, b, id).is_some()))
         })
         .map(|j| j.building)
 }
@@ -245,6 +256,9 @@ pub fn sync(r: &mut Resident, v: &Village) {
     }
 }
 pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
+    if logistics::occupied_building(v, id) {
+        return false;
+    }
     let Some(index) = v.building_jobs.iter().position(|j| j.building == id) else {
         return false;
     };
@@ -259,12 +273,24 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
         (b.x, b.y) = destination;
         v.building_jobs[index].stage = Stage::Rebuild;
         v.building_jobs[index].work = 0.;
+        logistics::sync(v);
         event(
             v,
             "Packing is finished. Residents will walk to the new site and rebuild there.",
         );
         return true;
     }
+    let returns = v.building_jobs[index].returns;
+    let recovered = if v.logistics.is_some() && returns.iter().any(|n| *n > 0) {
+        let j = &v.building_jobs[index];
+        let Some(store) = logistics::salvage_store(v, j.original_x, j.original_y) else {
+            v.building_jobs[index].work = (needed - 0.001).max(0.);
+            return false;
+        };
+        Some(store)
+    } else {
+        None
+    };
     let j = v.building_jobs.remove(index);
     if j.action == Action::Move {
         v.buildings
@@ -280,13 +306,17 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
         v.buildings.retain(|b| b.id != id);
         v.economy.projects.retain(|p| p.building != id);
         v.power.disabled.retain(|&b| b != id);
-        for (i, n) in j.returns.iter().enumerate() {
-            economy::add(v, i, *n);
+        if let Some(store) = recovered {
+            logistics::receive_salvage(v, store, j.returns);
+        } else {
+            for (i, n) in j.returns.iter().enumerate() {
+                economy::add(v, i, *n);
+            }
         }
         event(
             v,
             if j.action == Action::Salvage {
-                "Salvage is finished. Recovered materials are back in storage."
+                "Salvage is finished. Recovered materials await collection at the cleared plot."
             } else {
                 "Demolition is finished. The plot is clear."
             },
@@ -628,7 +658,7 @@ mod tests {
         let mut g = sandbox("warehouse");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.economy.stock[1] = 400;
+            crate::logistics::fixture_stock(&mut v, 1, 400);
         }
         let before = g.snapshot();
         assert_ne!(g.queue_building_work(0, "demolish", 0, 0), "ok");
@@ -639,7 +669,7 @@ mod tests {
         assert_eq!(g.cancel_building_work(0), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.economy.stock[1] = 24;
+            crate::logistics::fixture_stock(&mut v, 1, 24);
         }
         assert_eq!(g.queue_building_work(0, "salvage", 0, 0), "ok");
         assert_eq!(economy::capacity(g.app.world().resource::<Village>()), 600);

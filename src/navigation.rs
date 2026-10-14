@@ -1,5 +1,5 @@
-//! Read-only routes for the upcoming material-hauling system.
-//! Ordinary resident movement is not routed through this module yet.
+//! Routes and read-only cost estimates for resident material hauling.
+//! Other resident activities retain the existing movement system.
 use crate::*;
 use std::{cmp::Reverse, collections::BinaryHeap};
 
@@ -21,7 +21,7 @@ pub fn clear(v: &Village, x: f32, y: f32) -> bool {
             x <= left - 0.2 || x >= left + n + 0.2 || y <= top - 0.2 || y >= top + n + 0.2
         })
 }
-fn segment(v: &Village, a: [f32; 2], b: [f32; 2]) -> bool {
+pub(crate) fn segment(v: &Village, a: [f32; 2], b: [f32; 2]) -> bool {
     let distance = (b[0] - a[0]).hypot(b[1] - a[1]);
     let steps = (distance / 0.1).ceil().max(1.) as u32;
     (0..=steps).all(|i| {

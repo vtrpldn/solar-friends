@@ -60,7 +60,7 @@ pub fn finish(v: &mut Village, order: u32, driver: usize) {
     event(
         v,
         format!(
-            "Town pickup {} is back. Supplies are ready for our projects.",
+            "Town pickup {} is back at camp. Supplies await local distribution.",
             order + 1
         ),
     );

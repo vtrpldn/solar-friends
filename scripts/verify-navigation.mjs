@@ -38,4 +38,4 @@ const stable=g.snapshot();
 for(let n=0;n<10;n++)assert.deepEqual(quote(4,8,12,8),detour);
 assert.equal(g.snapshot(),stable,'Repeated and rejected quotes remain read-only');
 g.free();restored.free();
-console.log('PASS: deterministic planned transport routes, road costs, foundation and source detours, inaccessible endpoints, reloads and read-only public queries. Resident hauling remains a later integration.');
+console.log('PASS: deterministic planned transport routes, road costs, foundation and source detours, inaccessible endpoints, reloads and read-only public queries.');

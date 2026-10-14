@@ -197,7 +197,7 @@ mod farming_tests {
             .progress
             .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(g.place(kind, 5, 5), "ok");
-        g.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
         let mut q = g.app.world_mut().query::<&Resident>();
         let mut r = q
             .iter(g.app.world())
@@ -250,7 +250,7 @@ mod farming_tests {
         }
         assert_eq!(g.place("garden", 8, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.buildings[1].progress = 100.;
+        crate::logistics::fixture_finish(&mut v, 1);
         let mut outdoor = r.clone();
         outdoor.target_x = 8.75;
         tend(&mut v, &outdoor);

@@ -195,6 +195,7 @@ mod tests {
         for b in &mut v.buildings {
             b.progress = 100.;
         }
+        crate::logistics::sync(&mut v);
         v.minutes = 360.;
         v.economy.ledger.clear();
         v
@@ -228,7 +229,7 @@ mod tests {
         assert_eq!(p.grid_level, 0.);
         assert_eq!(p.connections[2].source, "roof");
         assert_eq!(p.connections[2].light_level, 1.);
-        v.buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut v, 0);
         v.power.stored = 0.0005;
         assert!(supply(&v).grid_level > 0. && supply(&v).grid_level < 1.);
         run(&mut v, 1);

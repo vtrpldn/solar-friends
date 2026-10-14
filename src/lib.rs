@@ -9,6 +9,7 @@ mod ecology;
 mod economy;
 mod interactions;
 mod leisure;
+mod logistics;
 mod mobility;
 mod modes;
 mod navigation;
@@ -56,6 +57,7 @@ const TASKS: &[&str] = &[
     "return",
     "pickup",
     "sanitation",
+    "haul",
 ];
 
 #[derive(Component, Clone, Serialize, Deserialize)]
@@ -114,6 +116,8 @@ pub struct Village {
     pub mode: modes::Mode,
     #[serde(default)]
     pub simulation: simulation::State,
+    #[serde(default)]
+    pub logistics: Option<logistics::State>,
     pub version: u32,
     pub map_size: i32,
     pub minutes: f32,
@@ -313,7 +317,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     r.trip = None;
     r.visit_building = None;
     r.activity_material = None;
-    r.activity_building = if matches!(task, "source" | "prepare" | "outside") {
+    r.activity_building = if matches!(task, "source" | "prepare" | "outside" | "haul") {
         None
     } else if matches!(task, "sleep" | "rest") {
         shelter(v, r.id).map(|b| b.id)
@@ -363,7 +367,10 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
             idle_destination(v, r.id).unwrap_or((CAMP.0 + (r.id as f32 - 2.) * 1.25, CAMP.1));
         return;
     }
-    if matches!(task, "source" | "prepare") {
+    if task == "haul" {
+        (r.target_x, r.target_y) = (r.x, r.y);
+        r.remaining = 100.;
+    } else if matches!(task, "source" | "prepare") {
         if let Some((_, i)) = economy::local_job(v) {
             r.activity_material = Some(i);
             if task == "source" {
@@ -459,15 +466,20 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Preparing a pot of food for everyone."
             },
         )
-    } else if matches!(r.id, 0 | 1) && available(v, "building_work") {
+    } else if available(v, "building_work") {
         (
             "building_work",
             "Making time for our queued building crew work.",
         )
-    } else if available(v, "build") && matches!(r.id, 0 | 1) {
+    } else if available(v, "build") {
         (
             "build",
             "A little progress on our shared project before taking a break.",
+        )
+    } else if logistics::pending(v, r.id) {
+        (
+            "haul",
+            "Bringing supplies to where our community needs them.",
         )
     } else if r.id == 1
         && v.progress.use_tools
@@ -494,7 +506,7 @@ fn choose(r: &mut Resident, v: &Village) {
         }
     } else if supplies::needs_ingredients(v) && available(v, "garden") {
         ("garden", "Our next meals start in the garden.")
-    } else if available(v, "build") && matches!(r.id, 0 | 1) {
+    } else if available(v, "build") {
         ("build", "Let's get our basic infrastructure ready.")
     } else if available(v, "compost") && v.progress.compost < 4 {
         (
@@ -580,7 +592,13 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
             "We agreed to cover this work. Let our neighbour have their time back.".into(),
         );
     }
-    if !available(v, task) {
+    let hauling_for_build = task == "build" && logistics::pending(v, id);
+    if hauling_for_build && !work_time(v.minutes) {
+        return Some(
+            "Supply hauling waits for community work hours: 09:00–12:00 and 15:00–16:00.".into(),
+        );
+    }
+    if !available(v, task) && !hauling_for_build {
         return Some(
             match task {
                 "building_work" => "Queue a building job in Buildings and leave a clear worksite for residents.",
@@ -744,6 +762,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 sleep::pause(&mut r);
             }
         }
+        if r.task != "haul" {
+            logistics::interrupt(&mut v, &r);
+        }
         if mobility::advance(&mut r, &mut v, &neighbours, dt) {
             continue;
         }
@@ -771,19 +792,15 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     | "source"
                     | "prepare"
                     | "outside"
+                    | "haul"
             )
             && !(r.task == "gather" && supplies::urgent(&v));
-        let ready_work = match r.id {
-            0 => available(&v, "build") || available(&v, "building_work"),
-            1 => {
-                available(&v, "build")
-                    || available(&v, "building_work")
-                    || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"))
-            }
-            2 | 3 => economy::local_job(&v).is_some(),
-            4 => occupations::available(&v, r.id),
-            _ => false,
-        };
+        let ready_work = available(&v, "build")
+            || available(&v, "building_work")
+            || logistics::pending(&v, r.id)
+            || (matches!(r.id, 2 | 3) && economy::local_job(&v).is_some())
+            || occupations::available(&v, r.id)
+            || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"));
         let chores_start = !r.requested
             && work_time(v.minutes)
             && (!work_time(before)
@@ -796,10 +813,17 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 || r.remaining <= 0.
                 || chores_finished
                 || chores_start)
+            || (r.task == "haul" && (r.energy < 28. || r.hunger > 60.))
         {
             choose(&mut r, &v);
         }
+        if r.task != "haul" {
+            logistics::interrupt(&mut v, &r);
+        }
         if mobility::advance(&mut r, &mut v, &neighbours, 0.) {
+            continue;
+        }
+        if logistics::advance(&mut v, &mut r, &neighbours, dt) {
             continue;
         }
         let dx = r.target_x - r.x;
@@ -1025,7 +1049,8 @@ impl Game {
             .insert_resource(Village {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
-                version: 3,
+                logistics: None,
+                version: 4,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1087,6 +1112,7 @@ impl Game {
             });
         }
         simulation::start_materials(&mut app.world_mut().resource_mut::<Village>());
+        logistics::initialise(&mut app.world_mut().resource_mut::<Village>());
         Self { app }
     }
     pub fn tick(&mut self, seconds: f32) {
@@ -1259,6 +1285,9 @@ impl Game {
         if let Err(reason) = building_work::placement(&v, kind, x, y, None) {
             return reason.into();
         }
+        if v.logistics.is_some() && v.simulation.next_id.checked_add(2).is_none() {
+            return "Material location identity limit reached.".into();
+        }
         let id = v.economy.next_building;
         v.economy.next_building += 1;
         v.buildings.push(Building {
@@ -1312,12 +1341,21 @@ impl Game {
             if let Some(reason) = request_blocker(&v, &r, task, encourage) {
                 return reason;
             }
-            let reason = if encourage {
+            let hauling = task == "build" && !available(&v, "build") && logistics::pending(&v, id);
+            let reason = if hauling {
+                "I'll bring the reserved building supplies to the site first."
+            } else if encourage {
                 "You explained why this matters. I'll lend a hand."
             } else {
                 "Happy to help with your request."
             };
-            assign(&mut r, &v, task, reason, true);
+            assign(
+                &mut r,
+                &v,
+                if hauling { "haul" } else { task },
+                reason,
+                true,
+            );
             format!("{}: {}", r.name, reason)
         };
         if task == "outside" {
@@ -1462,7 +1500,8 @@ impl Game {
         {
             return false;
         }
-        if !simulation::valid(v)
+        if !logistics::valid(v, &save.residents)
+            || !simulation::valid(v)
             || !building_work::valid(v)
             || !supplies::valid(v)
             || !power::valid(v)
@@ -1491,7 +1530,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || v.version != 3
+            || !matches!(v.version, 3 | 4)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1554,6 +1593,16 @@ impl Game {
                 || !(0.0..=100.).contains(&b.progress)
         }) {
             return false;
+        }
+        if !logistics::valid(v, &save.residents) {
+            return false;
+        }
+        if save.village.version == 3 {
+            if !logistics::initialise(&mut save.village) {
+                return false;
+            }
+            save.village.version = 4;
+            economy::rebalance(&mut save.village);
         }
         let entities: Vec<Entity> = self
             .app
@@ -1705,15 +1754,13 @@ mod tests {
         advance(g, 15.);
     }
     fn build(g: &mut Game, kind: &str, x: i32, y: i32) {
-        g.app.world_mut().resource_mut::<Village>().wood += 100.;
+        crate::logistics::fixture_stock(&mut g.app.world_mut().resource_mut::<Village>(), 0, 100);
         assert_eq!(g.place(kind, x, y), "ok");
-        g.app
-            .world_mut()
-            .resource_mut::<Village>()
-            .buildings
-            .last_mut()
-            .unwrap()
-            .progress = 100.;
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let id = v.buildings.last().unwrap().id;
+            crate::logistics::fixture_finish(&mut v, id);
+        }
     }
     #[test]
     fn tutorial_starts_empty_and_residents_arrive() {
@@ -1928,12 +1975,12 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":3", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":4", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {
         let mut g = Game::new();
-        g.app.world_mut().resource_mut::<Village>().wood = 0.;
+        crate::logistics::fixture_stock(&mut g.app.world_mut().resource_mut::<Village>(), 0, 0);
         let before = g.snapshot();
         g.tick(f32::NAN);
         g.tick(0.);

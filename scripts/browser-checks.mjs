@@ -284,6 +284,22 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
   assert.equal(balances.length,15);assert(balances.every(text=>text==='0'));
   await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
+  // A storage target queues resident trips instead of moving material instantly.
+  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="materials"]').click();
+  const stockBeforeHaul=await page.evaluate(()=>window.solarDev.snapshot().environment.economy.materials[0].stored);
+  await page.getByLabel('Reserve quantity for storage house 3',{exact:true}).fill('24');
+  await page.getByRole('button',{name:'Set reserve',exact:true}).click();
+  let located=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(located.village.logistics.stores.find(p=>p.owner.kind==='warehouse').items[0],0);
+  await page.getByRole('button',{name:'Close supplies',exact:true}).click();await page.locator('#dev-button').click();
+  await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();
+  located=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(located.village.logistics.stores.find(p=>p.owner.kind==='warehouse').items[0],24);
+  assert.equal(located.environment.economy.materials[0].stored,stockBeforeHaul);
+  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="materials"]').click();
+  await page.locator('#storage-locations').scrollIntoViewIfNeeded();
+  await capture('Located storage after two resident deliveries','physical-storage.png');
+  await page.getByRole('button',{name:'Close supplies',exact:true}).click();await page.locator('#dev-button').click();
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();

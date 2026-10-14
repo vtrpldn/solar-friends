@@ -290,6 +290,16 @@ The simplified game cycle is inspired by the [Emater-DF banana evapotranspiratio
 
 ### Simulation foundations
 
-Dev Tools records observed time for each neighbour: travel, village work, outside work, meals, rest, social time, leisure and sleep. Leisure walks count as leisure. Eight days of observations survive saves. Material accounting compares receipts and spending with current stock, keeping reservations, incoming orders and expected salvage separate. Edited test scenes establish their own baseline. Physical inventories and hauling remain the next implementation stage in [the simulator plan](simulator-plan.md).
+Dev Tools records observed time for each neighbour: travel, village work, outside work, meals, rest, social time, leisure and sleep. Leisure walks count as leisure. Eight days of observations survive saves. Material accounting compares receipts and spending with current stock, keeping reservations, incoming orders and expected salvage separate. Edited test scenes establish their own baseline. The continuing stages are tracked in [the simulator plan](simulator-plan.md).
 
 Use the compact, dispersed, empty-fund, enclosed-storage and established simulation baselines to compare layouts. Each is a protected scene with its own observations; loading one never replaces a playable village save.
+
+### Physical construction supplies
+
+Construction materials live in camp storage, individual storage houses, material-plot output piles and project staging. The materials total includes carried loads. Residents collect up to 12 units per trip; a construction stage starts after its inputs reach the site. Roads speed up hauling, while occupied plots and the river block routes. Residents retain meals, sleep, outside jobs and community work hours.
+
+Open **Supplies → Construction materials → Where supplies are** to inspect locations and deliveries. A storage house reserve queues local hauling. Lowering a reserve queues returns; changing a target never transfers goods immediately. Town deliveries and resident pickups unload at camp. Keep room there for incoming orders.
+
+Interrupted loads remain recoverable where they are put down. Cancelled staging and salvage stay at their plot until collected. Storage houses must empty before a resident crew can pack or dismantle them. Blocked access appears in construction and storage details. Save version 4 validates location ownership and cargo; older aggregate fixtures establish located storage once when imported. Protected dev scenes remain separate from saved villages.
+
+The simulator work is ongoing. Production inputs, connected utilities, land properties, maintenance and the shared work forecasts follow in their respective plan stages. The logistics verifier exports real pickup, cargo and night artwork checkpoints under the generated artifacts directory for replay through Dev Tools.

@@ -1,3 +1,4 @@
+import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -13,7 +14,7 @@ function ready(minute,homes=0){
   const s=snap(g),v=s.village;v.minutes=minute;v.arrived=true;v.food=80;v.meals=12;v.water=40;
   v.buildings.forEach(b=>{b.progress=100;});
   s.residents.forEach(r=>{r.task='idle';r.remaining=0;r.requested=false;r.energy=90;r.hunger=20;r.social=90;r.last_meal_slot=0;r.target_x=r.x;r.target_y=r.y;});
-  assert(g.restore(JSON.stringify(s)));return g;
+  assert(g.restore(JSON.stringify(resetMaterialLocations(s))));return g;
 }
 function until(g,test,label){for(let i=0;i<2400;i++){if(test(snap(g)))return;g.tick(.25);}throw Error('Timed out: '+label);}
 function reload(g){const raw=g.snapshot(),other=new Game();assert(other.restore(raw));assert.equal(other.snapshot(),raw);other.free();}
