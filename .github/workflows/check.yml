@@ -23,10 +23,14 @@ jobs:
       - run: npm run dev:check
       - uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: development-check
           path: artifacts/dev-check/
+          retention-days: 7
       - uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: solar-friends-browser
           path: web/
+          retention-days: 7

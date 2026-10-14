@@ -19,11 +19,12 @@ export function connectionLabel(connection, power) {
   if(!connection)return '';
   if(connection.source==='roof')return connection.enabled?'Own rooftop panels · independent lighting':'Rooftop panels available after construction';
   if(connection.source==='solar')return connection.enabled?'Adds 6 energy/hour at midday and 36 battery capacity':'Connects after construction';
+  if(connection.source==='hydro')return connection.enabled?'River flow · up to 2.3 energy/hour · 18 battery capacity':'Connects after construction';
   if(connection.source==='none')return 'No electricity needed';
   if(!connection.enabled)return 'Lights switched off or construction unfinished';
-  if(!power.farms)return 'Needs a solar farm';
+  if(!power.farms&&!power.hydros)return 'Needs a solar farm or river generator';
   if(power.darkness===0)return 'Connected · lights turn on at dusk';
-  return connection.light_level>=.99?'Powered by stored sunshine':connection.light_level>.01?'Low charge · lights dimming':'Battery empty · lights off';
+  return connection.light_level>=.99?'Powered by the shared grid':connection.light_level>.01?'Low charge · lights dimming':'Battery empty · lights off';
 }
 // Building identities survive cancellations; array positions do not.
 export function powerConnections(state) {
@@ -32,14 +33,14 @@ export function powerConnections(state) {
 }
 export function updatePowerUI(state,kinds) {
   const p=state.environment.power,$=id=>document.getElementById(id);
-  $('power-title').textContent=!p.farms?'Sunshine for everyone':p.darkness>.1?'Light after sunset':'Saving the sunshine';
-  $('power-summary').textContent=!p.farms?'Build a solar farm to light shared buildings and streets. Homes with rooftop panels provide their own lighting.':p.generation>p.demand?(p.stored>=p.capacity-.01?'The battery is full. Extra sunshine is left unused.':'Panels are powering the village and charging its battery.'):p.stored>.01?'Stored sunshine is supplying the village.':'The shared battery is empty. Connected lights wait for sunshine.';
+  $('power-title').textContent=!(p.farms+p.hydros)?'Shared village power':p.darkness>.1?'Light after sunset':'Charging our battery';
+  $('power-summary').textContent=!(p.farms+p.hydros)?'Build a solar farm or river generator to light shared buildings and streets. Homes with rooftop panels provide their own lighting.':p.generation>p.demand?(p.stored>=p.capacity-.01?'The battery is full. Extra generation is left unused.':'Our generators are powering the village and charging its battery.'):p.stored>.01?'Stored energy is supplying the village.':'The shared battery is empty. Connected lights wait for generation.';
   $('power-charge').textContent=`${p.stored.toFixed(1)} / ${p.capacity.toFixed(0)} energy`;
   $('power-battery').max=p.capacity||1;$('power-battery').value=p.stored;
-  $('power-generation').textContent=`${p.generation.toFixed(1)} / hour`;
+  $('power-generation').textContent=`${p.generation.toFixed(1)} / hour · solar ${p.solar_generation.toFixed(1)} + river ${p.hydro_generation.toFixed(1)}`;
   $('power-demand').textContent=`${p.demand.toFixed(1)} / hour`;
   const loads=powerConnections(state),nightLoad=loads.filter(c=>c.enabled).reduce((sum,c)=>sum+c.load,0);
-  $('power-outlook').textContent=!p.farms?'A completed farm starts empty and charges in daylight.':!nightLoad?'No shared lights are drawing power.':`${(p.stored/nightLoad).toFixed(1)} hours of full-night lighting stored for ${loads.filter(c=>c.enabled).length} connected ${loads.filter(c=>c.enabled).length===1?'building or light':'buildings and lights'}.`;
+  $('power-outlook').textContent=!(p.farms+p.hydros)?'Solar farms charge in daylight; river generators produce through the night.':!nightLoad?'No shared lights are drawing power.':`${(p.stored/nightLoad).toFixed(1)} hours of full-night lighting stored for ${loads.filter(c=>c.enabled).length} connected ${loads.filter(c=>c.enabled).length===1?'building or light':'buildings and lights'}.`;
   $('power-roofs').textContent=`${p.connections.filter(c=>c.source==='roof' && c.enabled).length} ${p.connections.filter(c=>c.source==='roof' && c.enabled).length===1?'home uses its':'homes use their'} own rooftop panels and batteries.`;
   const list=$('power-loads'),key=loads.map(c=>`${c.id}:${c.building.kind}`).join(',');
   if(list.dataset.key!==key){

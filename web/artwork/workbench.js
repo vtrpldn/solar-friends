@@ -1,6 +1,6 @@
 import { unlitFilter } from '../power.js';
 import {drawEconomySprite} from '../economy-art.js';
-import {placementArt,drawFoundation} from '../building-footprints.js';
+import {placementArt} from '../building-footprints.js';
 import { buildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
 import { chickenFrame } from '../chickens.js?v=painted-hens-1';
 import { drawPreparedFrame, animationFrameOptions } from '../sprite-frames.js';
@@ -82,7 +82,6 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     const home = {...buildingArt.home,building:true};
     const homeFile = light > .5 ? home.nightFile : home.file;
     const registration=placementArt('home',home);
-    drawFoundation(ctx,'home',w*.22,y,z,1,light);
     drawBuildingArt(ctx,images.get(`../art/${homeFile}`),home,w*.22+registration.x*z,y+registration.y*z,z*registration.scale);
     const original = images.get(selected.file);
     const pair = catalog.find(s => s.building && s.name === selected.name.replace(' · night','') + ' · night');
