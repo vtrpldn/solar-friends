@@ -1,13 +1,4 @@
-// Orthographic registration of the pergola's four equal-height posts.
-// A single affine camera cannot repair its displaced front post. This small
-// constrained texture mesh moves the painted structure onto a rectangular
-// prism without replacing the village's materials, vines or furniture.
-export const pergolaMesh = {
-  size:1280,
-  source:[[0,0],[1280,0],[1280,1280],[0,1280],[625,158],[199,382],[1092,413],[698,607],[625,548],[199,828],[1092,838],[698,1058]],
-  target:[[0,0],[1280,0],[1280,1280],[0,1280],[650,170],[210,390],[1090,390],[650,610],[650,600],[210,820],[1090,820],[650,1040]],
-  triangles:[[0,1,4],[0,4,5],[1,4,6],[4,5,8],[4,6,8],[6,7,8],[0,3,9],[0,5,9],[5,7,8],[5,7,9],[1,2,10],[1,6,10],[6,7,10],[2,3,11],[3,9,11],[7,9,11],[7,10,11],[2,10,11]],
-};
+// Optional texture meshes for artwork that needs local projection repair.
 function weights(p,a,b,c){
   const d=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1]);
   const u=((b[1]-c[1])*(p[0]-c[0])+(c[0]-b[0])*(p[1]-c[1]))/d;
