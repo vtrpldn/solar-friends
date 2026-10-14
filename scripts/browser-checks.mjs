@@ -270,6 +270,20 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     }
     await page.locator('#dev-button').click();
   }
+  // Simulator foundations are observed through the actual scenario controls.
+  await page.locator('#dev-scenario').selectOption('sim-compact');await page.locator('#dev-load').click();
+  await page.locator('#dev-minutes').fill('60');await page.locator('#dev-advance').click();
+  assert((await page.locator('#dev-inspection').textContent()).includes('60.0 game minutes observed'));
+  const observed=await page.evaluate(()=>window.solarDev.snapshot());
+  const latest=observed.village.simulation.days.at(-1);
+  for(const times of latest.residents)assert(Math.abs(times.reduce((sum,n)=>sum+n,0)-60)<.001);
+  const inspectionBefore=JSON.stringify(observed);
+  await page.locator('#dev-inspect').click();
+  assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
+  await page.locator('#dev-inspection details summary').click();
+  const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
+  assert.equal(balances.length,15);assert(balances.every(text=>text==='0'));
+  await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();

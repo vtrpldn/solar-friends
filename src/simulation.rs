@@ -114,6 +114,10 @@ pub fn activity(r: &Resident) -> usize {
         }
         return 0;
     }
+    // A nature walk is leisure throughout, including the walk itself.
+    if leisure::hobby(&r.task) {
+        return 6;
+    }
     if (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08 {
         return 0;
     }
@@ -266,6 +270,37 @@ mod tests {
             restored.tick(0.25);
         }
         assert_eq!(g.snapshot(), restored.snapshot());
+    }
+    #[test]
+    fn time_categories_follow_the_activity_and_distinguish_sleep_from_a_commute() {
+        let mut g = Game::new();
+        let mut q = g.app.world_mut().query::<&Resident>();
+        let mut r = q.iter(g.app.world()).next().unwrap().clone();
+        r.task = "nature_walk".into();
+        r.target_x = r.x + 5.;
+        assert_eq!(activity(&r), 6);
+        r.task = "build".into();
+        assert_eq!(activity(&r), 0);
+        r.target_x = r.x;
+        r.target_y = r.y;
+        assert_eq!(activity(&r), 1);
+        r.task = "eat".into();
+        assert_eq!(activity(&r), 3);
+        for (purpose, expected) in [
+            (mobility::Purpose::Work, 2),
+            (mobility::Purpose::Overnight, 7),
+            (mobility::Purpose::Pickup, 0),
+        ] {
+            r.trip = Some(mobility::Trip {
+                purpose,
+                phase: mobility::Phase::Away,
+                return_at: 2000.,
+                order: None,
+            });
+            assert_eq!(activity(&r), expected);
+            r.trip.as_mut().unwrap().phase = mobility::Phase::Returning;
+            assert_eq!(activity(&r), 0);
+        }
     }
     #[test]
     fn material_bookkeeping_separates_ownership_reservations_and_incoming() {

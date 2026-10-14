@@ -1567,6 +1567,7 @@ impl Game {
             self.app.world_mut().spawn(r);
         }
         save.village.map_size = MAP_SIZE;
+        simulation::start_materials(&mut save.village);
         progression::update(&mut save.village);
         self.app.insert_resource(save.village);
         self.app
