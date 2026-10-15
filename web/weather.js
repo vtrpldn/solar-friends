@@ -10,6 +10,14 @@ const sites = Array.from({length:480},(_,i)=>({id:i,x:1+seed(i*3)*26,y:1+seed(i*
 // schedule supplies visual buildup, cloud cover, and two hours of drying.
 export function weatherConditions(environment, minutes) {
   const minute = ((minutes % 1440) + 1440) % 1440;
+  const weather=environment.weather;
+  if(weather?.enabled&&weather.current&&weather.forecast?.[0]){
+    const d=weather.forecast[0],now=weather.current;
+    const edge=Math.min(smooth((minute-d.rain_start)/12),smooth((d.rain_end-minute)/18));
+    const rain=environment.raining?clamp(now.rain)*(.35+.65*edge):0;
+    const wet=clamp(now.wet),clouds=clamp(now.clouds);
+    return {rain,clouds,wet,label:rain?'rain':wet>.01?'after-rain':environment.dry_day?'dry':'clear'};
+  }
   const rain = environment.raining ? .35 + .65 * Math.min(smooth((minute-840)/12),smooth((1020-minute)/18)) : 0;
   const clouds = environment.dry_day ? .06 : .12 + .88 * smooth((minute-810)/30) * (1-smooth((minute-1020)/30));
   const wet = environment.dry_day ? 0 : environment.raining ? smooth((minute-840)/40) : minute>=1020 ? 1-smooth((minute-1020)/120) : 0;

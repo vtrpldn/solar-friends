@@ -19,6 +19,7 @@ import {checkFoodControls} from './food-browser-checks.mjs';
 import {checkKitchenControls} from './kitchen-browser-checks.mjs';
 import {checkBatteryControls} from './battery-browser-checks.mjs';
 import {checkGatheringControls} from './gathering-browser-checks.mjs';
+import {checkClimateControls,checkClimateSandboxSave} from './climate-browser-checks.mjs';
 export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
   context.setDefaultTimeout(30000);context.setDefaultNavigationTimeout(30000);
@@ -76,6 +77,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkCultivationControls({page,saved,capture});
   await checkPlantingControls({page,saved,capture});
   await checkLivingLandControls({page,saved,capture});
+  await checkClimateControls({page,saved,capture});
   await checkUtilityRoutes({page,saved,capture});
   await checkWaterControls({page,saved,capture});
   await checkPipeControls({page,saved,capture});
@@ -664,4 +666,6 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await capture('Shared full-sprite grid fit at night','sprite-grid-night.png');
   assert.deepEqual(errors,[],'Browser errors must be resolved');
   await context.close();
+  await checkClimateSandboxSave({browser,base,output,screenshots,errors});
+  assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
 }

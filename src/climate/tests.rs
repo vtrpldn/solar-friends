@@ -19,6 +19,10 @@ fn arrival_weather_stays_viable_and_sandbox_seasons_are_optional() {
     assert!(!g.app.world().resource::<Village>().climate.enabled);
     assert!(g.set_seasons_enabled(true));
     assert!(g.app.world().resource::<Village>().climate.enabled);
+    assert!(
+        at(g.app.world().resource::<Village>(), 480.).evaporation < 1.,
+        "Sandbox seasons take effect immediately"
+    );
 }
 
 #[test]

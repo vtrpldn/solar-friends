@@ -16,6 +16,7 @@ import { installBuildMenu, paintIcon } from './build-menu.js';
 import { unlitFilter, buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
 import { drawNightEmission } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
+import { weatherSummary, updateClimateForecast } from './climate-ui.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
@@ -1167,7 +1168,9 @@ function updateSupplies(v) {
     : "Neighbours queue a pot when the reserve needs topping up and there is room for its meals.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
     : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop during community hours."}`;
-  $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${Math.round(state.environment.water_capacity)} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
+  const weatherLine=state.environment.weather ? weatherSummary(state.environment.weather,v.minutes) : state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon" : "Rain today from 14:00 to 17:00";
+  $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${Math.round(state.environment.water_capacity)} water. ${weatherLine}. Gardens pause safely when dry.`;
+  updateClimateForecast(state);
 }
 function updateSituations() {
   const view = situationView(state.village, state.residents);
@@ -1211,6 +1214,7 @@ function updateUI() {
   const night = mins < 360 || mins >= 1140;
   $(".season-icon").textContent = night ? "☾" : "☀";
   $(".season small").textContent = state.environment.raining ? 'Rainfall' : weatherConditions(state.environment,v.minutes).wet>.1 ? 'After the rain' : mins < 360 || mins >= 1260 ? 'Night' : mins < 720 ? 'Morning' : mins < 1080 ? 'Afternoon' : 'Evening';
+  if(state.environment.weather?.enabled){const season=state.environment.weather.forecast[0].season;$('.season small').textContent=`${season==='wet'?'Wet':'Dry'} season · ${$('.season small').textContent}`;}
   const env = state.environment;
   const gardens = v.buildings.filter(
     (b) => ["garden", "greenhouse"].includes(b.kind) && b.progress >= 100,
@@ -1229,7 +1233,7 @@ function updateUI() {
     ]++;
   }
   $("#water-capacity").textContent = `Water / ${Math.round(env.water_capacity)}`;
-  $("#weather-status").textContent = env.raining
+  $("#weather-status").textContent = env.weather ? weatherSummary(env.weather,v.minutes) : env.raining
     ? "Afternoon rain · filling cisterns"
     : env.dry_day
       ? "Dry day · fetch treated water"
@@ -1595,6 +1599,14 @@ function setup() {
     state = JSON.parse(game.snapshot());
     updateUI();
     save();
+  };
+  $('#season-weather').onchange=e=>{
+    if(typeof game.set_seasons_enabled!=='function'||!game.set_seasons_enabled(e.target.checked))return;
+    state=JSON.parse(game.snapshot());updateUI();render();save();
+  };
+  $('#weather-open').onclick=()=>{
+    showPanel('supplies-panel');
+    const forecast=$('#weather-forecast');forecast.open=true;forecast.scrollIntoView({block:'start'});forecast.querySelector('summary').focus({preventScroll:true});
   };
   $("#pause").onclick = togglePause;
   for (const b of document.querySelectorAll("[data-speed]"))

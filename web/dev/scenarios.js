@@ -3,6 +3,7 @@ import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 import {makeArtPreview} from './art-preview.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
+import {withSeasonalWeather} from './climate-fixture.js';
 export const scenarios = [
   {id:'sim-compact',name:'Simulation baseline · compact',detail:'Homes, food and storage grouped together. Compare observed travel with the dispersed layout using the same starting supplies and seed.'},
   {id:'sim-spread',name:'Simulation baseline · dispersed',detail:'The same homes and services spread across the property. A paired baseline for transport, travel budgets and later completion forecasts.'},
@@ -32,6 +33,8 @@ export const scenarios = [
   { id: 'rain', name: 'Afternoon rain', detail: 'The real 15:00 rain: streaks, splashes, river ripples, cloud cover and wet ground. Run the scene to see it move.' },
   { id: 'after-rain', name: 'After the rain', detail: '18:00 after a wet afternoon. Pools dry gradually while sunset lighting returns.' },
   { id: 'dry-afternoon', name: 'A dry afternoon', detail: '15:00 on a dry day. Compare clear light with the rainy scene.' },
+  {id:'climate-wet',name:'Wet season rain',detail:'Actual seeded rain after the arrival period. Compare cistern collection, moist soil, cloud-reduced solar output and river generation with the dry-season scene.'},
+  {id:'climate-dry',name:'First dry season',detail:'The same property under its seeded dry-season forecast. Soil dries faster and the river produces less; inspect the seven-day forecast in Supplies.'},
   { id: 'leisure', name: 'A relaxed afternoon', detail: 'A modest pantry and content neighbours. Advance to see their hobbies, then evening stargazing.' },
 ];
 // Fixtures are deliberately staged. Real ticks, requests, and systems run after loading.
@@ -128,7 +131,13 @@ export function makeScenario(id, fresh, established) {
     v.food = 18; v.meals = 8;
     for (const r of state.residents) r.last_meal_slot = 4;
   }
+  if(id.startsWith('climate-')&&!v.buildings.some(b=>b.kind==='hydro')){
+    const id=v.economy.next_building++,kind='hydro';
+    v.buildings.push({...structuredClone(v.buildings[0]),id,kind,x:26,y:5,progress:100,contributors:0,next_visit:0,visits:0});
+    v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(24).fill(0),consumed:Array(24).fill(0)});
+  }
   const prepared=resetMaterialLocations(state);
+  if(id.startsWith('climate-'))return withAuthoredElectricalCircuits(withSeasonalWeather(prepared,{dry:id==='climate-dry'}));
   return ['night','power','power-outage','circular-night'].includes(id)?withAuthoredElectricalCircuits(prepared):prepared;
 }
 export function advanceGame(game, minutes) {

@@ -166,6 +166,13 @@ assert(tableRoads>=8,'Invest in a useful delivery corridor as the village expand
 g.set_outside_work(false);
 until(s=>s.village.situations.resolved_count>0||s.village.situations.active,'story check-in');
 if(!snap().village.situations.resolved_count&&snap().village.situations.active.response==null)assert.equal(g.respond_situation('day_off'),'ok');
+until(s=>{
+ if(s.village.situations.resolved_count>0)return true;
+ const concern=s.village.situations.active;
+ const helper=s.residents.find(r=>r.id!==concern?.resident&&!r.trip);
+ if(helper&&(!helper.help||helper.help.finished!=null))g.request(helper.id,'cook',false);
+ return false;
+},'follow through with a neighbour helping at the kitchen');
 await complete(11);
 until(()=>g.host_gathering()==='ok','second gathering');
 gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);

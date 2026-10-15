@@ -37,14 +37,17 @@ pub struct Weather {
 fn wet_season(day: u32) -> bool {
     (day / SEASON_DAYS).is_multiple_of(2)
 }
+fn seasonal(v: &Village, day: u32) -> bool {
+    v.climate.enabled && (v.mode == modes::Mode::Sandbox || day >= INTRO_DAYS)
+}
 fn rainy_day(v: &Village, day: u32) -> bool {
-    if !v.climate.enabled || day < INTRO_DAYS {
+    if !seasonal(v, day) {
         return day % 3 != 2;
     }
     simulation::sample(v.simulation.seed, 40, day) % 100 < if wet_season(day) { 70 } else { 18 }
 }
 pub fn day(v: &Village, day: u32) -> Day {
-    let seasonal = v.climate.enabled && day >= INTRO_DAYS;
+    let seasonal = seasonal(v, day);
     let wet = wet_season(day);
     let expected = rainy_day(v, day);
     let sample = |domain| simulation::sample(v.simulation.seed, domain, day);
@@ -100,7 +103,7 @@ pub fn at(v: &Village, minutes: f32) -> Weather {
     let index = (minutes / 1440.) as u32;
     let d = day(v, index);
     let minute = minutes.rem_euclid(1440.);
-    let seasonal = v.climate.enabled && index >= INTRO_DAYS;
+    let seasonal = seasonal(v, index);
     let raining = if seasonal {
         d.rain_expected && (d.rain_start..d.rain_end).contains(&minute)
     } else {
@@ -145,7 +148,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         "season_days": SEASON_DAYS,
         "current": at(v, v.minutes),
         "forecast": (0..7).map(|offset| day(v, today.saturating_add(offset))).collect::<Vec<_>>(),
-        "note": "A compressed game calendar. Forecasts use the saved village seed. Dry weather dries soil faster and lowers river output; irrigation keeps plants growing. New arrivals have two weeks of familiar afternoon weather."
+        "note": "A compressed game calendar. Forecasts use the saved village seed. Dry weather dries soil faster and lowers river output; irrigation keeps plants growing. New Story villages have two weeks of familiar afternoon weather."
     })
 }
 #[wasm_bindgen]

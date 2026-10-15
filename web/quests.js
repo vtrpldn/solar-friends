@@ -267,7 +267,7 @@ export const quests = [
     story:"“Our village is more than the things we build. Let's protect time to simply live here.”",
     after:"An agreement matters when we follow through. Keep the food healthy and leave time for everyone's own interests.",
     objectives:v=>[
-      actionGoal("situations","Follow through on a community agreement",v.situations.resolved_count,1,"Open Situations and choose shared shifts or a day off. Other neighbours must actually cook, the person needs 72 minutes of rest or company, and a full day must pass. If no concern arose, Luz offers a story check-in for personal time."),
+      actionGoal("situations","Follow through on a community agreement",v.situations.resolved_count,1,"Choose shared shifts or a day off in Situations, then ask another neighbour for cooking help. Bring the pot's missing ingredients. The person needs 72 minutes of rest or company, and a full day must pass. Luz offers a story check-in if no concern arose."),
       actionGoal("people","Let everyone enjoy a hobby",(v.progress.hobby_mask||0).toString(2).replaceAll("0","").length,5,"Let normal leisure unfold: walks, birdwatching, stretching, daydreaming and stargazing. Turn off outside jobs or release repeated requests if they leave too little time."),
     ],
   },
