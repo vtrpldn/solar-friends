@@ -73,6 +73,19 @@ pub fn sync(v: &mut Village) {
         return;
     }
     let wanted = wanted(v);
+    let river_recovery: Vec<_> = v
+        .power
+        .network
+        .nodes
+        .iter()
+        .filter(|n| n.kind == NodeKind::Hydro && !wanted.iter().any(|d| d.0 == n.owner))
+        .filter_map(|n| {
+            (1..=4)
+                .map(|offset| (n.x - offset, n.y))
+                .find(|&(x, y)| utilities::clear(v, x, y))
+                .map(|position| (n.id, position))
+        })
+        .collect();
     let nodes = &mut v.power.network.nodes;
     nodes.retain_mut(|n| {
         if n.owner == Owner::Ground {
@@ -87,6 +100,10 @@ pub fn sync(v: &mut Village) {
             return true;
         }
         if n.capacity > 0. {
+            if let Some((_, (x, y))) = river_recovery.iter().find(|(id, _)| *id == n.id) {
+                n.x = *x;
+                n.y = *y;
+            }
             n.owner = Owner::Ground;
             n.kind = NodeKind::Battery;
             n.size = 1;
@@ -301,7 +318,7 @@ pub fn valid(v: &Village) -> bool {
     }
     let wanted = wanted(v);
     v.power.network.nodes.iter().all(|n| {
-        n.owner == Owner::Ground
+        (n.owner == Owner::Ground && n.size == 1 && !river_bank(n.x, n.y))
             || wanted.iter().any(|&(owner, kind, x, y, size, capacity)| {
                 (n.owner, n.kind, n.x, n.y, n.size, n.capacity)
                     == (owner, kind, x, y, size, capacity)
@@ -459,6 +476,59 @@ mod tests {
         assert_eq!(recovered.kind, NodeKind::Battery);
         assert_eq!(recovered.charge, 10.);
         assert_eq!(v.power.stored, 10.);
+    }
+    #[test]
+    fn river_generator_removal_keeps_its_charge_on_the_accessible_bank() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("hydro", 26, 5), "ok");
+        let id;
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.economy.outside_jobs.fill(false);
+            sync(&mut v);
+            let n = v
+                .power
+                .network
+                .nodes
+                .iter_mut()
+                .find(|n| n.kind == NodeKind::Hydro)
+                .unwrap();
+            id = n.id;
+            n.charge = 12.;
+            v.power.network.account.opening = 12.;
+            summaries(&mut v);
+        }
+        assert_eq!(g.queue_building_work(0, "demolish", 0, 0), "ok");
+        let mut done = false;
+        for _ in 0..12000 {
+            g.tick(0.25);
+            if g.app.world().resource::<Village>().buildings.is_empty() {
+                done = true;
+                break;
+            }
+        }
+        assert!(done);
+        check(&mut g);
+        let v = g.app.world().resource::<Village>();
+        let n = v.power.network.nodes.iter().find(|n| n.id == id).unwrap();
+        assert_eq!(n.owner, Owner::Ground);
+        assert_eq!(n.charge, 12.);
+        assert_eq!(n.capacity, 18.);
+        assert!(utilities::clear(v, n.x, n.y));
+        assert!(!river_bank(n.x, n.y));
+        let raw = g.snapshot();
+        let mut bad: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        let row = bad["village"]["power"]["network"]["nodes"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .find(|n| n["id"].as_u64() == Some(u64::from(id.0)))
+            .unwrap();
+        row["x"] = 26.into();
+        row["y"] = 5.into();
+        assert!(!g.restore(&bad.to_string()));
+        assert_eq!(g.snapshot(), raw);
     }
     #[test]
     fn forged_banks_and_old_save_versions_fail_without_altering_the_live_scene() {
