@@ -1,4 +1,5 @@
 import {installProcessUI} from './process-ui.js';
+import {installWaterUI} from './water-ui.js';
 import {freshnessMarkup,freshnessWarning,expiryNote} from './freshness-ui.js';
 import {itemIcon,materialIcons} from './game-ui.js';
 import {createProjectForecasts} from './forecasts.js';
@@ -21,6 +22,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   const transact=result=>{if(result!=='ok')notify(result);else{forecasts.invalidate();lastProjects='';changed();update();}};
   const productionUI=installProductionUI({snapshot,game,transact,notify});
   const processUI=installProcessUI({snapshot,game,transact});
+  const waterUI=installWaterUI({game});
   const materials=snapshot().environment.economy.materials;
   $('#town-catalog').innerHTML=materials.filter(m=>m.buyable!==false).map(m=>`<article class="town-item"><div class="trade-item-art">${itemIcon(materialIcons[m.id])}</div><label for="buy-${m.id}">${m.name}</label><small class="trade-price">${money(m.price)}</small><div class="trade-quantity"><button type="button" data-adjust="-1" aria-label="Remove one ${m.name.toLowerCase()}">−</button><input id="buy-${m.id}" type="number" min="0" max="100" step="1" value="0" aria-label="Order ${m.name}" data-material="${m.id}"><button type="button" data-adjust="1" aria-label="Add one ${m.name.toLowerCase()}">+</button></div></article>`).join('');
   $('#spare-material').innerHTML=materials.filter(m=>m.price>0).map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
@@ -128,6 +130,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#property-description').textContent=e.property;
     productionUI.update(s);
     processUI.update(s);
+    waterUI.update(s);
     const freshnessKey=JSON.stringify(e.freshness);if(freshnessKey!==lastFreshness){lastFreshness=freshnessKey;$('#food-freshness').innerHTML=freshnessMarkup(s);const warning=freshnessWarning(s);$('#food-freshness-warning').textContent=warning;$('#food-freshness-warning').hidden=!warning;}
     const locations=v.logistics?.stores||[],shipments=v.logistics?.shipments||[],locationKey=JSON.stringify({locations,shipments:shipments.map(h=>[h.resident,h.material,h.amount,h.carrying])});
     if(locationKey!==lastLocations&&!$('#storage-locations').contains(document.activeElement)){

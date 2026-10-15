@@ -62,7 +62,7 @@ fn caps(kind: &str) -> Option<[f64; 2]> {
         "well" => [75., 0.],
         "home" => [8., 0.],
         "kitchen" => [6., 0.],
-        "eco_toilet" => [4., 0.],
+        "eco_toilet" => [8., 0.],
         "garden" | "greenhouse" => [4., 4.],
         "wetland" => [0., 60.],
         _ => return None,
@@ -379,15 +379,22 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
         return (0., false, 0.);
     }
     match p.owner {
-        Owner::Camp => (
-            40.,
-            false,
-            if p.water[0] + incoming(v, p.id, Class::Fresh) < 12. {
-                1100.
-            } else {
-                140.
-            },
-        ),
+        Owner::Camp => {
+            // Arrival barrels serve neighbours without a home. Once everyone
+            // is housed, refill their actual household buffers instead of
+            // shuttling a reserve into an unused camp and back out again.
+            let people = (0..5).filter(|&r| shelter(v, r).is_none()).count();
+            let essential = people as f64 * 2.4;
+            (
+                people as f64 * 8.,
+                false,
+                if p.water[0] + incoming(v, p.id, Class::Fresh) < essential {
+                    1100.
+                } else {
+                    140.
+                },
+            )
+        }
         Owner::Building(id) => match v
             .buildings
             .iter()
@@ -395,7 +402,7 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
             .map(|b| b.kind.as_str())
         {
             Some("kitchen") => (6., false, if p.water[0] < 1. { 1080. } else { 260. }),
-            Some("eco_toilet") => (4., false, if p.water[0] < 1. { 1050. } else { 200. }),
+            Some("eco_toilet") => (8., false, if p.water[0] < 1. { 1050. } else { 200. }),
             Some("home") => {
                 let people = (0..5)
                     .filter(|&r| shelter(v, r).is_some_and(|b| b.id == id))
@@ -454,7 +461,11 @@ fn deficit(v: &Village, p: &Tank) -> Option<(f64, bool, f32)> {
     } else {
         0.
     };
-    let low = if p.owner == Owner::Camp { 32. } else { 2. };
+    let low = if p.owner == Owner::Camp {
+        desired * 0.8
+    } else {
+        2.
+    };
     // A low-water trigger and a larger refill target prevent repeated tiny
     // trips. Incoming loads already own their receiving space and satisfy it.
     if fresh.max(used_irrigation) >= low {
@@ -813,6 +824,12 @@ pub fn advance(
             .unwrap();
         row.carrying = true;
         row.handling = 3.;
+        r.reason = if h.class == Class::Fresh {
+            "Carrying fresh water to its local container."
+        } else {
+            "Carrying reclaimed irrigation to a growing plot."
+        }
+        .into();
         (r.target_x, r.target_y) = (h.dropoff[0], h.dropoff[1]);
         walking::clear(r);
     } else {

@@ -1,6 +1,6 @@
 import {installLandMap} from './land-map.js';
 import {gatheringInfo} from './gathering-ui.js';
-import {drawCarriedMaterials,drawSupplyPile} from './logistics-art.js';
+import {drawCarriedMaterials,drawSupplyPile,drawCarriedWater,drawWaterPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {makeArtPreview} from './dev/art-preview.js';
 import {installGameUI} from './game-ui.js';
@@ -100,7 +100,7 @@ const tasks = {
   pickup: "Driving to collect town supplies",
   return: "Returning to the village",
   cook: "Making a shared meal",
-  water: "Collecting river water",
+  water: "Carrying water to local stores",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   restore: "Restoring the soil",
@@ -606,6 +606,7 @@ function resident(r) {
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
     { base: animations[r.id], idle: idleAnimations[r.id], activities: activityAnimations[r.id] }, animation, p.x, py, RESIDENT_WIDTH * s);
   if(state.village.logistics?.shipments.some(h=>h.resident===r.id&&h.carrying))drawCarriedMaterials(ctx,p,s,animation.facing,nightAmount(state.village.minutes));
+  const waterLoad=state.village.water_supply.trips.find(h=>h.resident===r.id&&h.carrying);if(waterLoad)drawCarriedWater(ctx,p,s,animation.facing,waterLoad.class,nightAmount(state.village.minutes));
   if (isSelected) {
     ctx.font = `600 ${Math.max(11, 11 * s)}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -683,6 +684,7 @@ function render() {
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
   const objects = [
+    ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
     ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
     ...standingTrees.map((f) => ({
@@ -821,7 +823,7 @@ function selectPerson(id) {
       ["gather", "Forage food"],
       ["source", "Source materials"],
       ["prepare", "Prepare materials"],
-      ["water", "Collect river water"],
+      ["water", "Fetch & deliver water"],
       ["cook", "Make a meal"],
       ["rest", "Take a rest"],
       ["socialize", "Spend time together"],
@@ -1104,7 +1106,8 @@ function updateCircularUI(v) {
   $('#circular-controls').hidden=!buildingUnlocked(v,'eco_toilet');
   $('#circular-stock').textContent=`${(c.waste+(passive?.held_waste||0)).toFixed(1)} / 80 sealed waste${passive?.held_waste?` · ${passive.held_waste} held in digesters`:''} · ${(c.greywater+(passive?.held_greywater||0)).toFixed(1)} / 120 greywater${passive?.held_greywater?` · ${passive.held_greywater} filtering`:''}`;
   $('#circular-output').textContent=`${c.reclaimed.toFixed(0)} / 60 irrigation water · ${c.biogas.toFixed(0)} / 12 cooking gas`;
-  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste+(state.environment.economy.processes?.held_waste||0)+1>80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
+  const wetToilet=v.buildings.some(b=>b.kind==='eco_toilet'&&b.progress>=100&&!v.building_jobs.some(j=>j.building===b.id)&&v.water_supply.tanks.some(p=>p.owner.kind==='building'&&p.owner.id===b.id&&p.water[0]>=1));
+  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':!wetToilet?'Handwashing needs one fresh water delivered to an open toilet.':c.waste+(state.environment.economy.processes?.held_waste||0)+1>80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
   const filters=passive?.stations.filter(s=>s.kind==='filtration')||[];
   $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':filters.length===1?filters[0].reason:`${filters.length} reed beds. Each keeps its own saved batch; review its inputs and status below.`;
   const beds=v.buildings.filter(b=>b.kind==='banana_treatment'&&b.progress>=100).length;
@@ -1207,7 +1210,7 @@ function updateUI() {
   $("#weather-status").textContent = env.raining
     ? "Afternoon rain · filling cisterns"
     : env.dry_day
-      ? "Dry day · collect river water"
+      ? "Dry day · fetch treated water"
       : mins >= 1020
         ? "Rain has passed · check water stores"
         : "Rain expected 14:00–17:00";
@@ -1281,7 +1284,7 @@ function updateUI() {
     $('#person .help-order').hidden=!help;
     if(help){
       const titles={accepted:'Accepted',travelling:'On the way',working:'Working',paused:'Paused',blocked:'Waiting',complete:'Finished',cancelled:'Cancelled'};
-      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend garden',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Collect river water',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
+      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend garden',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Fetch & deliver water',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
       const target=help.building==null?null:v.buildings.find(b=>b.id===help.building);
       const text={'.help-phase':titles[help.phase],'.help-task':(names[help.task]||help.task)+(target?` · ${kinds[target.kind][0]} at ${target.x}, ${target.y}`:''),'.help-reason':help.reason,'.help-time':`Accepted day ${1+Math.floor(help.created/1440)} · ${String(Math.floor(help.created%1440/60)).padStart(2,'0')}:${String(Math.floor(help.created%60)).padStart(2,'0')}`};
       for(const [selector,value] of Object.entries(text)){const el=$('#person '+selector);if(el.textContent!==value)el.textContent=value;}
@@ -1427,7 +1430,7 @@ function setup() {
     const returns=quote.salvage.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
     pendingRemoval={id:b.id,action:button.dataset.buildingWork};
     $('#building-work-title').textContent=salvage?'Salvage this building?':'Demolish this building?';
-    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; shared inventory remains. Removing a cistern or generator reduces water or battery capacity when work finishes.`;
+    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; owned supplies remain recoverable. Cistern contents stay in containers at the original plot. Removing a generator reduces battery capacity when work finishes.`;
     $('#building-work-dialog').showModal();
   };
   $('#building-work-close').onclick=()=>{pendingRemoval=null;$('#building-work-dialog').close();};

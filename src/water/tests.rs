@@ -363,6 +363,28 @@ fn healthy_local_reserves_wait_for_a_useful_refill_batch() {
     assert_eq!(q.amount, 5.);
 }
 #[test]
+fn household_buffers_replace_the_camp_reserve_after_everyone_is_housed() {
+    let mut g = scene();
+    g.start_mode("sandbox");
+    assert_eq!(g.place("home", 5, 10), "ok");
+    assert_eq!(g.place("home", 18, 10), "ok");
+    let mut v = g.app.world().resource::<Village>().clone();
+    replenish(&mut v);
+    draw(&mut v, Owner::Camp, Class::Fresh, 40.);
+    assert!((0..5).all(|id| shelter(&v, id).is_some()));
+    assert!(
+        !has_work(&v),
+        "An unused arrival reserve must not generate hauling work"
+    );
+    let home = shelter(&v, 0).unwrap().id;
+    draw(&mut v, Owner::Building(home), Class::Fresh, 8.);
+    let world = g.app.world_mut();
+    let r = world.query::<&Resident>().iter(world).next().unwrap();
+    let q = quote(&v, r).unwrap();
+    assert_eq!(q.to, owner_tank(&v, Owner::Building(home)).unwrap().id);
+    assert_eq!(q.amount, 8.);
+}
+#[test]
 fn an_incoming_essential_load_lowers_reserve_urgency_for_other_consumers() {
     let mut g = scene();
     let mut v = g.app.world().resource::<Village>().clone();

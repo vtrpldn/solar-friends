@@ -183,7 +183,7 @@ export const quests = [
     objectives: v => [
       goal("Build a workshop", count(v,"workshop"),1,"Finish a workshop in Projects, then let Bento make tools.","workshop"),
       goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight timber available and ask Bento to craft during community hours. He brings inputs to an open workshop and resumes the saved batch after breaks. Finished tools travel onward to projects and harvests.","workshop"),
-      goal("Build a compost station",count(v,"compost"),1,"Neighbours deliver kitchen scraps here and turn them into compost. In Land views, mark a poor plot and queue soil work: two delivered compost and a neighbour's time gradually restore its soil.","compost"),
+      goal("Build a compost station",count(v,"compost"),1,"Neighbours turn delivered kitchen scraps into compost. Ask a neighbour to turn extra scraps, or buy mature compost in Trade. In Land views, queue soil work: two delivered compost and a neighbour's time gradually restore its soil.","compost"),
       goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Keep the kitchen, compost station and gardens connected by short paths. Neighbours carry scraps for composting and deliver mature compost to the plot before its harvest.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
       actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds."),

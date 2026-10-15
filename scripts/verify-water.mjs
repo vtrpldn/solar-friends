@@ -27,6 +27,10 @@ assert.equal(destination.water[0],0,'Water in transit is not usable at its desti
 const cancellation=new Game();assert(cancellation.restore(g.snapshot()));const before=report(cancellation),person=s.residents.find(r=>r.id===h.resident);
 assert.match(cancellation.request(h.resident,'rest',false),/Happy/);const recovery=snap(cancellation).village.water_supply.tanks.find(p=>p.id===h.recovery);
 assert.equal(recovery.owner.kind,'ground');assert.equal(recovery.water[0],h.amount);assert.equal(recovery.x,person.x);assert.equal(recovery.y,person.y);assert.deepEqual(report(cancellation).present,before.present);assert.deepEqual(report(cancellation).received,before.received);checkpoint(cancellation);account(cancellation);await writeFile('artifacts/water/interrupted.json',cancellation.snapshot());
+// Appearance fixture only: retain the real recovered load and change the clock
+// so its ground contact and palette can also be reviewed after dusk.
+const night=new Game(),nightFixture=snap(cancellation);nightFixture.village.minutes=1260;
+assert(night.restore(JSON.stringify(nightFixture)));checkpoint(night);account(night);await writeFile('artifacts/water/interrupted-night.json',night.snapshot());night.free();
 until(g,s=>tank(s,'camp').water[0]>=10,'Resident delivers the collected load');checkpoint(g);account(g);await writeFile('artifacts/water/delivered.json',g.snapshot());
 const manual=scene();until(manual,s=>s.village.water_supply.trips.some(h=>h.from==null&&!h.carrying),'Manual treated-water trip starts');assert.equal(snap(manual).village.water,0);
 until(manual,s=>s.village.water_supply.trips.some(h=>h.from==null&&h.carrying),'Manual treated-water pickup');assert.equal(tank(snap(manual),'camp').water[0],0);assert(report(manual).received[0]>0);checkpoint(manual);account(manual);await writeFile('artifacts/water/manual-carrying.json',manual.snapshot());
