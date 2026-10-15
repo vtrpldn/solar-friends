@@ -98,22 +98,41 @@ pub fn sync(v: &mut Village) {
         return;
     }
     let wanted = wanted(v);
-    let river_recovery: Vec<_> = v
+    let detached: Vec<_> = v
         .power
         .network
         .nodes
         .iter()
-        .filter(|n| n.kind == NodeKind::Hydro && !wanted.iter().any(|d| d.0 == n.owner))
-        .filter_map(|n| {
-            (1..=4)
-                .map(|offset| (n.x - offset, n.y))
-                .find(|&(x, y)| utilities::clear(v, x, y))
-                .map(|position| (n.id, position))
+        .filter(|n| {
+            n.capacity > 0.
+                && matches!(n.owner, Owner::Building(_))
+                && !wanted.iter().any(|d| d.0 == n.owner)
         })
+        .cloned()
         .collect();
+    let mut recovery = vec![];
+    if !detached.is_empty() {
+        let mut placement = v.clone();
+        for n in detached {
+            if let Some(p) = batteries::recovery_location(&placement, &n) {
+                recovery.push((n.id, p));
+                let reserved = placement
+                    .power
+                    .network
+                    .nodes
+                    .iter_mut()
+                    .find(|b| b.id == n.id)
+                    .unwrap();
+                reserved.owner = Owner::Ground;
+                reserved.kind = NodeKind::Battery;
+                reserved.size = 1;
+                [reserved.x, reserved.y] = p;
+            }
+        }
+    }
     let nodes = &mut v.power.network.nodes;
     nodes.retain_mut(|n| {
-        if n.owner == Owner::Ground {
+        if matches!(n.owner, Owner::Ground | Owner::Carrier(_)) {
             return true;
         }
         if let Some(&(_, kind, x, y, size, capacity)) = wanted.iter().find(|d| d.0 == n.owner) {
@@ -125,9 +144,9 @@ pub fn sync(v: &mut Village) {
             return true;
         }
         if n.capacity > 0. {
-            if let Some((_, (x, y))) = river_recovery.iter().find(|(id, _)| *id == n.id) {
-                n.x = *x;
-                n.y = *y;
+            if let Some((_, p)) = recovery.iter().find(|(id, _)| *id == n.id) {
+                n.x = p[0];
+                n.y = p[1];
             }
             n.owner = Owner::Ground;
             n.kind = NodeKind::Battery;
@@ -144,6 +163,10 @@ pub fn sync(v: &mut Village) {
         let Some(id) = v.simulation.allocate() else {
             continue;
         };
+        let equipment = match owner {
+            Owner::Building(id) if capacity > 0. => batteries::installed_equipment(v, id),
+            _ => 0,
+        };
         v.power.network.nodes.push(Node {
             id,
             owner,
@@ -153,6 +176,7 @@ pub fn sync(v: &mut Village) {
             size,
             capacity,
             charge: 0.,
+            equipment,
         });
     }
     summaries(v);
@@ -161,7 +185,17 @@ pub fn initialise(v: &mut Village) -> bool {
     let inherited = f64::from(v.power.stored);
     v.power.network = State::default();
     v.power.frame = None;
+    v.power.battery_jobs.clear();
+    v.power.salvaged_equipment = 0;
+    v.power.retired_equipment = 0;
     sync(v);
+    v.power.opening_equipment = v
+        .power
+        .network
+        .nodes
+        .iter()
+        .map(|n| u64::from(n.equipment))
+        .sum();
     let mut left = inherited;
     for n in &mut v.power.network.nodes {
         if n.kind == NodeKind::Roof {
@@ -192,7 +226,8 @@ pub fn open(v: &Village, n: &Node) -> bool {
                 && p.plan.kind != utilities::Kind::Electricity
                 && p.plan.cells[0] == [n.x, n.y]
         }),
-        Owner::Ground => true,
+        Owner::Ground => !batteries::busy(v, n.id),
+        Owner::Carrier(_) => false,
     }
 }
 pub fn node(v: &Village, owner: Owner) -> Option<&Node> {
@@ -366,10 +401,19 @@ pub fn valid(v: &Village) -> bool {
     }
     let wanted = wanted(v);
     v.power.network.nodes.iter().all(|n| {
-        (n.owner == Owner::Ground && n.size == 1 && !river_bank(n.x, n.y))
+        (matches!(n.owner, Owner::Ground | Owner::Carrier(_))
+            && n.size == 1
+            && !river_bank(n.x, n.y))
             || wanted.iter().any(|&(owner, kind, x, y, size, capacity)| {
                 (n.owner, n.kind, n.x, n.y, n.size, n.capacity)
                     == (owner, kind, x, y, size, capacity)
+                    && n.equipment
+                        == match owner {
+                            Owner::Building(id) if capacity > 0. => {
+                                batteries::installed_equipment(v, id)
+                            }
+                            _ => 0,
+                        }
             })
     }) && wanted
         .iter()
@@ -414,6 +458,43 @@ mod tests {
         let mut h = Game::new();
         assert!(h.restore(&raw));
         assert_eq!(h.snapshot(), raw);
+    }
+    #[test]
+    fn simultaneous_source_recovery_reserves_distinct_clear_ground_for_each_bank() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("solar_farm", 5, 5), "ok");
+        assert_eq!(g.place("solar_farm", 10, 5), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            for n in &mut v.power.network.nodes {
+                n.charge = 6.;
+            }
+            v.power.network.account.opening = 12.;
+            v.buildings.clear();
+            v.economy.projects.clear();
+            // Both former generators prefer the same small clearing. Roads
+            // remain walkable, but cannot receive recovered equipment.
+            v.roads = (1..MAP_SIZE - 1)
+                .flat_map(|y| (1..MAP_SIZE - 1).map(move |x| (x, y)))
+                .filter(|&(x, y)| {
+                    !river_bank(x, y)
+                        && ((x - 10).abs() >= 2 || (y - 13).abs() >= 2)
+                        && (x, y) != (8, 8)
+                        && (x, y) != (18, 20)
+                })
+                .collect();
+            logistics::sync(&mut v);
+            assert_eq!(v.power.network.nodes.len(), 2);
+            let a = &v.power.network.nodes[0];
+            let b = &v.power.network.nodes[1];
+            assert_eq!(a.owner, Owner::Ground);
+            assert_eq!(b.owner, Owner::Ground);
+            assert_ne!([a.x, a.y], [b.x, b.y]);
+            assert_eq!(a.charge + b.charge, 12.);
+            assert!(super::batteries::valid(&v));
+        }
+        check(&mut g);
     }
     #[test]
     fn rainy_river_generation_is_a_valid_electrical_frame() {
@@ -601,7 +682,8 @@ mod tests {
         assert_eq!(n.owner, Owner::Ground);
         assert_eq!(n.charge, 12.);
         assert_eq!(n.capacity, 18.);
-        assert!(utilities::clear(v, n.x, n.y));
+        assert!(batteries::placeable(v, n.x, n.y, Some(n.id)));
+        assert!(!utilities::clear(v, n.x, n.y));
         assert!(!river_bank(n.x, n.y));
         let raw = g.snapshot();
         let mut bad: serde_json::Value = serde_json::from_str(&raw).unwrap();

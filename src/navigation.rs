@@ -18,6 +18,7 @@ pub fn clear(v: &Village, x: f32, y: f32) -> bool {
     x.is_finite()
         && y.is_finite()
         && spacing::land(x, y)
+        && power::batteries::clear_at(v, x, y)
         && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y))
         && v.economy
             .sources
@@ -59,6 +60,17 @@ fn departure_path(v: &Village, path: &[[f32; 2]]) -> bool {
         .iter()
         .map(|s| source_clear(s, from[0], from[1]))
         .collect();
+    let banks: Vec<_> = v
+        .power
+        .network
+        .nodes
+        .iter()
+        .filter(|n| n.owner == crate::electricity::Owner::Ground)
+        .collect();
+    let mut banks_out: Vec<_> = banks
+        .iter()
+        .map(|n| power::batteries::clear_bank(n, from[0], from[1]))
+        .collect();
     for leg in path.windows(2) {
         let from = leg[0];
         let to = leg[1];
@@ -78,6 +90,13 @@ fn departure_path(v: &Village, path: &[[f32; 2]]) -> bool {
                 if spacing::clear_plot(b, x, y) {
                     buildings_out[j] = true;
                 } else if buildings_out[j] {
+                    return false;
+                }
+            }
+            for (j, n) in banks.iter().enumerate() {
+                if power::batteries::clear_bank(n, x, y) {
+                    banks_out[j] = true;
+                } else if banks_out[j] {
                     return false;
                 }
             }

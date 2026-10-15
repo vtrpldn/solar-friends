@@ -2,7 +2,8 @@
 export function resetMaterialLocations(state) {
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
-  if(state.village.power)delete state.village.power.network;
+  if(state.village.power?.battery_jobs?.some(j=>!['complete','cancelled'].includes(j.phase)))throw new Error('Finish battery work before restaging a material fixture.');
+  if(state.village.power)for(const field of ['network','opening_equipment','salvaged_equipment','retired_equipment','battery_jobs'])delete state.village.power[field];
   state.village.pipes={schema:1,lines:[]};
   state.village.restoration=[];
   delete state.village.water_supply;

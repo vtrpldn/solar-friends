@@ -9,6 +9,7 @@ const EPS: f64 = 0.000_001;
 pub enum Owner {
     Building(usize),
     Pump(Id),
+    Carrier(usize),
     Ground,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -31,6 +32,8 @@ pub struct Node {
     pub size: i32,
     pub capacity: f64,
     pub charge: f64,
+    #[serde(default)]
+    pub equipment: u8,
 }
 impl Node {
     fn valid(&self, next: u32) -> bool {
@@ -39,6 +42,7 @@ impl Node {
             && (1..MAP_SIZE - 1).contains(&self.x)
             && (1..MAP_SIZE - 1).contains(&self.y)
             && (1..=3).contains(&self.size)
+            && self.equipment <= u8::from(self.capacity > 0.)
             && self.charge.is_finite()
             && self.charge >= 0.
             && self.charge <= self.capacity
@@ -51,11 +55,12 @@ impl Node {
             }
             && match self.owner {
                 Owner::Pump(id) => id.0 > 0 && id.0 < next && id != self.id,
+                Owner::Carrier(id) => id < 5,
                 _ => true,
             }
             && matches!(
                 (self.owner, self.kind),
-                (Owner::Ground, Kind::Battery)
+                (Owner::Ground | Owner::Carrier(_), Kind::Battery)
                     | (Owner::Pump(_), Kind::Pump)
                     | (
                         Owner::Building(_),
@@ -138,6 +143,7 @@ impl State {
                         || owners.insert(match n.owner {
                             Owner::Building(i) => (0, i as u64),
                             Owner::Pump(i) => (1, u64::from(i.0)),
+                            Owner::Carrier(i) => (2, i as u64),
                             Owner::Ground => unreachable!(),
                         }))
             })
@@ -262,6 +268,16 @@ impl State {
     }
 }
 impl Frame {
+    pub(crate) fn relocate_battery(&mut self, id: Id, owner: Owner, x: i32, y: i32) {
+        let i = self.index(id).unwrap();
+        let n = &mut self.state.nodes[i];
+        assert_eq!(n.kind, Kind::Battery);
+        assert!(matches!(owner, Owner::Ground | Owner::Carrier(_)));
+        n.owner = owner;
+        n.x = x;
+        n.y = y;
+        self.open[i] = false;
+    }
     /// A moved pipe keeps its pump equipment, but cannot operate during rebuilding.
     pub(crate) fn relocate_pump(&mut self, id: Id, owner: Owner, x: i32, y: i32) {
         let i = self.state.nodes.iter().position(|n| n.id == id).unwrap();
@@ -464,6 +480,7 @@ mod tests {
                 _ => 0.,
             },
             charge,
+            equipment: 0,
         }
     }
     fn wire(id: u32, a: u32, b: u32, rate: f64) -> Wire {

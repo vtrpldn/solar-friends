@@ -385,6 +385,7 @@ pub fn storage(v: &Village) -> u32 {
         .map(|i| quantity(v, i) + incoming(v, i))
         .sum::<u32>()
         + v.building_jobs.iter().flat_map(|j| j.returns).sum::<u32>()
+        + crate::power::batteries::reserve(v)
         + crate::production::reserved_space(v)
         + crate::food::reserved_space(v, None)
         + crate::organics::processing(v, SCRAPS)

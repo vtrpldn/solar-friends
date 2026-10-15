@@ -66,6 +66,7 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
         ((plot_x as f32 - CAMP.0).abs() < 1.5 && (plot_y as f32 - CAMP.1).abs() < 1.5)
             || crate::building_work::reserved(v, plot_x, plot_y, None)
             || crate::restoration::reserved(v, plot_x, plot_y)
+            || crate::power::batteries::reserved(v, plot_x, plot_y, None)
             || crate::pipes::reserved(v, plot_x, plot_y)
             || v.roads.contains(&(plot_x, plot_y))
             || v.buildings

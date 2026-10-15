@@ -126,6 +126,11 @@ pub fn placement(
             if restoration::reserved(v, px, py) {
                 return Err("That ground is reserved for soil restoration.");
             }
+            if power::batteries::reserved(v, px, py, None) {
+                return Err(
+                    "Move the recovered battery or its reserved destination before building here.",
+                );
+            }
             if pipes::reserved(v, px, py) {
                 return Err("Remove the utility line on this plot before building here.");
             }
@@ -173,7 +178,14 @@ pub fn salvage(v: &Village, id: usize) -> economy::Bundle {
             maximum[i] += n;
         }
     }
-    std::array::from_fn(|i| p.consumed[i].min(maximum[i]) / 2)
+    std::array::from_fn(|i| {
+        let n = p.consumed[i].min(maximum[i]);
+        if i == 13 {
+            n.saturating_sub(power::batteries::retained_equipment(v, id)) / 2
+        } else {
+            n / 2
+        }
+    })
 }
 pub fn total(j: &Job) -> f32 {
     match j.stage {
@@ -283,6 +295,11 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
             "Packing is finished. Residents will walk to the new site and rebuild there.",
         );
         return true;
+    }
+    if v.building_jobs[index].stage == Stage::Remove && !power::batteries::can_recover_after(v, id)
+    {
+        v.building_jobs[index].work = (needed - 0.001).max(0.);
+        return false;
     }
     let returns = v.building_jobs[index].returns;
     let recovered = if v.logistics.is_some() && returns.iter().any(|n| *n > 0) {

@@ -154,7 +154,7 @@ mod tests {
     }
 
     #[test]
-    fn sandbox_removal_cleans_visits_power_and_frees_the_plot() {
+    fn sandbox_removal_cleans_visits_and_keeps_recovered_battery_plots_occupied() {
         let mut g = Game::new();
         g.start_mode("sandbox");
         assert_eq!(g.place("solar_farm", 5, 5), "ok");
@@ -190,7 +190,7 @@ mod tests {
         assert!(g.restore(&saved));
         assert_ne!(g.place("garden", 12, 5), "ok");
         crate::building_work::work(&mut g.app.world_mut().resource_mut::<Village>(), 1, 18.);
-        assert_eq!(g.place("garden", 12, 5), "ok");
+        assert!(g.place("garden", 12, 5).contains("recovered battery"));
         let before = g.snapshot();
         assert!(!g.remove_sandbox_building(99));
         assert_eq!(g.snapshot(), before);

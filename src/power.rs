@@ -1,5 +1,6 @@
 //! Owned solar, river and rooftop batteries with connected electrical demand.
 use super::*;
+pub(crate) mod batteries;
 mod network;
 pub(crate) fn replace_pump(v: &mut Village, previous: simulation::Id, next: simulation::Id) {
     network::replace_pump(v, previous, next);
@@ -12,6 +13,10 @@ pub struct Power {
     pub stored: f32,
     pub disabled: Vec<usize>,
     pub network: electricity::State,
+    pub opening_equipment: u64,
+    pub salvaged_equipment: u64,
+    pub retired_equipment: u64,
+    pub battery_jobs: Vec<batteries::Job>,
     #[serde(skip)]
     pub frame: Option<Frame>,
 }
@@ -163,6 +168,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
 }
 pub fn finish_frame(v: &mut Village, minutes: f32) {
     network::finish(v, minutes);
+    batteries::finish_ready(v);
 }
 pub fn pump_available(v: &Village, id: simulation::Id) -> f64 {
     network::available(v, Owner::Pump(id))
@@ -212,12 +218,16 @@ pub fn valid(v: &Village) -> bool {
             && v.power.network.account.consumed == 0.
             && v.power.network.account.curtailed == 0.
             && v.power.network.account.discharged == 0.
+            && v.power.opening_equipment == 0
+            && v.power.salvaged_equipment == 0
+            && v.power.retired_equipment == 0
+            && v.power.battery_jobs.is_empty()
             && v.power.stored <= capacity + 0.001;
     }
-    network::valid(v)
+    network::valid(v) && batteries::valid(v)
 }
 pub fn report(v: &Village) -> serde_json::Value {
-    serde_json::json!({"network":v.power.network,"supply":supply(v),"circuits":network::circuit_report(v),"frame_error":network::frame(v,1.,v.minutes).err(),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment. Crossed corridors only join at connected ports; pumps run before attended tools and lighting."})
+    serde_json::json!({"network":v.power.network,"supply":supply(v),"circuits":network::circuit_report(v),"frame_error":network::frame(v,1.,v.minutes).err(),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"batteries":batteries::view(v),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment. Crossed corridors only join at connected ports; pumps run before attended tools and lighting."})
 }
 #[wasm_bindgen]
 impl Game {
@@ -394,6 +404,7 @@ pub fn endpoints(v: &Village) -> Vec<utilities::Endpoint> {
                 Owner::Building(id) => v.buildings.iter().find(|b| b.id == id)?.kind.clone(),
                 Owner::Pump(_) => "pump".into(),
                 Owner::Ground => "battery".into(),
+                Owner::Carrier(_) => return None,
             };
             let ports = if kind == "hydro" {
                 utilities::hydro_ports(
@@ -449,3 +460,6 @@ mod cable_tests;
 
 #[cfg(test)]
 pub(crate) mod fixtures;
+
+#[cfg(test)]
+mod battery_tests;

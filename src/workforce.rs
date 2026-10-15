@@ -495,9 +495,9 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             reason: "Restoring the soil with delivered compost.",
         });
     }
-    for p in v.pipes.lines.iter().filter(|p| pipes::ready(v, p)) {
+    for (id, priority) in utilities::crew_jobs(v, r.id) {
         let mut worker = r.clone();
-        if !pipes::assign_target(&mut worker, v, p.id)
+        if !utilities::assign_crew(&mut worker, v, id)
             || occupied(v, r, "utility", None, worker.activity_material, None) > 0
         {
             continue;
@@ -506,7 +506,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             Ok((route, _)) => (Some(route.minutes), None),
             Err(e) => (None, Some(e.into())),
         };
-        let urgency = 540. + f32::from(p.priority) * 60.;
+        let urgency = 540. + f32::from(priority) * 60.;
         out.push(Offer {
             task: "utility".into(),
             building: None,
@@ -517,7 +517,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             blocker,
             score: travel.map_or(-1000., |t| score(v, r, "utility", urgency, t)),
             urgency,
-            reason: pipes::work_reason(p),
+            reason: utilities::crew_reason(v, id).unwrap(),
         });
     }
     out.sort_by(|a, b| {

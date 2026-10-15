@@ -90,6 +90,7 @@ fn target(v: &Village, x: i32, y: i32) -> Result<Job, &'static str> {
                 || river_bank(a, b)
                 || v.roads.contains(&(a, b))
                 || building_work::reserved(v, a, b, None)
+                || power::batteries::reserved(v, a, b, None)
                 || pipes::reserved(v, a, b)
             {
                 return Err("Keep restoration on clear land, away from roads and river water.");

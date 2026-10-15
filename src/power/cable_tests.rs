@@ -99,7 +99,7 @@ fn until(g: &mut Game, goal: impl Fn(&Village) -> bool, label: &str) {
     }
     panic!("{label}: {}", g.electricity_report());
 }
-fn install(g: &mut Game, from: u32, to: u32) -> simulation::Id {
+pub(super) fn install(g: &mut Game, from: u32, to: u32) -> simulation::Id {
     let before = g.snapshot();
     let quote: serde_json::Value =
         serde_json::from_str(&g.electrical_connection_quote(from, to)).unwrap();

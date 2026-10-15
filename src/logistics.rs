@@ -257,6 +257,17 @@ pub(crate) fn layout(v: &Village) -> u32 {
         mix(s.x as u32);
         mix(s.y as u32);
     }
+    for n in v
+        .power
+        .network
+        .nodes
+        .iter()
+        .filter(|n| n.owner == crate::electricity::Owner::Ground)
+    {
+        mix(n.id.0);
+        mix(n.x as u32);
+        mix(n.y as u32);
+    }
     for &(x, y) in &v.roads {
         mix(x as u32);
         mix(y as u32);
