@@ -706,6 +706,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     }
     water::summaries(v);
 }
+#[cfg(test)]
 pub fn view(v: &Village) -> serde_json::Value {
     view_filtered(v, None)
 }

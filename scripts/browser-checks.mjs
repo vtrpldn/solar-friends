@@ -1,4 +1,4 @@
-import {checkWorkshopPowerControls} from './electricity-browser-checks.mjs';
+import {checkWorkshopPowerControls,checkElectricalControls} from './electricity-browser-checks.mjs';
 import {checkOrganicControls} from './organics-browser-checks.mjs';
 import {checkCultivationControls} from './cultivation-browser-checks.mjs';
 import {checkLandControls} from './land-browser-checks.mjs';
@@ -388,6 +388,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkFoodControls({page,saved,capture});
   await checkKitchenControls({page,saved,capture});
   await checkWorkshopPowerControls({page,saved,capture});
+  await checkElectricalControls({page,saved,capture});
   await checkGatheringControls({page,saved,capture});
   await checkFreshnessControls({page,saved,capture});
   await checkProcessControls({page,saved,capture});

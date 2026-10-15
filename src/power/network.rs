@@ -266,6 +266,24 @@ pub fn frame(v: &Village, minutes: f64, at: f32) -> Result<electricity::Frame, &
         &wires(v),
     )
 }
+pub fn circuit_report(v: &Village) -> serde_json::Value {
+    let Ok(f) = frame(v, 1., v.minutes) else {
+        return serde_json::json!([]);
+    };
+    let pumps = pipes::pump_loads(v, 1.);
+    let groups:Vec<_> = f.circuits().into_iter().map(|ids| {
+        let nodes: Vec<_> = v.power.network.nodes.iter().filter(|n| ids.contains(&n.id)).collect();
+        let owns = |owner| nodes.iter().any(|n| n.owner == owner);
+        let demand: f64 = nodes.iter().map(|n| light_load(v, n)).sum();
+        let pump_demand: f64 = pumps.iter().filter(|(id, _)| owns(Owner::Pump(*id))).map(|(_, n)| n*60.).sum();
+        let powered_tools: f64 = v.production.sites.iter().filter(|s| s.powered && s.building.is_some_and(|id| owns(Owner::Building(id)))).count() as f64 * production::WORKSHOP_ENERGY_PER_HOUR;
+        serde_json::json!({"id":ids[0],"nodes":ids,"private_roof":nodes.iter().all(|n| n.kind==NodeKind::Roof),
+            "stored":nodes.iter().map(|n|n.charge).sum::<f64>(),"capacity":nodes.iter().map(|n|n.capacity).sum::<f64>(),
+            "generation":nodes.iter().map(|n|generation(v,n,v.minutes)).sum::<f64>(),
+            "full_night_lighting":demand,"pump_demand":pump_demand,"powered_tools_when_attended":powered_tools})
+    }).collect();
+    serde_json::json!(groups)
+}
 pub fn begin(v: &mut Village, minutes: f32) {
     sync(v);
     if minutes <= 0. {

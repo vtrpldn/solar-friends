@@ -157,14 +157,24 @@
         <span class="eyebrow">OUR SHARED SUNSHINE</span>
         <h2 id="power-title">Sunshine for everyone</h2>
         <p id="power-summary"></p>
-        <div class="power-battery-label"><b>Battery</b><span id="power-charge"></span></div>
+        <div class="power-battery-label"><b>Stored shared energy</b><span id="power-charge"></span></div>
         <progress id="power-battery" aria-label="Stored shared energy" value="0" max="36"></progress>
-        <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting &amp; pumps<b id="power-demand"></b></span></div>
+        <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting &amp; pump requests<b id="power-demand"></b></span></div>
         <p id="power-outlook"></p><p id="power-pumps"></p>
         <div class="power-build"><button id="build-solar" class="primary">Plan solar farm</button><button id="build-hydro">Plan river generator</button><button id="build-streetlight">Plan street light</button></div>
+        <section id="electrical-network" hidden aria-label="Local electrical circuits">
+          <h3>Local circuits</h3><p id="circuit-summary"></p><div id="electrical-circuits"></div>
+          <details id="cable-planner"><summary>Plan an electrical cable</summary>
+            <div class="cable-endpoints"><label for="cable-from">First electrical port</label><select id="cable-from"></select><label for="cable-to">Second electrical port</label><select id="cable-to"></select></div>
+            <p id="cable-quote" role="status"></p><button id="cable-locate">Locate cable route</button><button id="cable-queue">Queue cable installation</button>
+          </details>
+          <label class="cable-overlay"><input id="cable-overlay" type="checkbox"> Show cables on the village</label>
+          <p class="pipe-legend">Gold: installed cable · pale dashes: planned work · grey: paused · rust: dismantling. Routes join at ports; crossing corridors alone does not connect them.</p>
+          <button id="cable-buy-parts">Find missing cable parts in Trade</button><div id="electrical-lines"></div>
+        </section>
         <h3>Shared lighting</h3><div id="power-loads"></div>
         <p id="power-roofs"></p>
-        <details><summary>How village power works</summary><p>Each solar farm supplies up to 6 energy per hour and stores 36 energy for the night. Production follows the sun; lights switch on at dusk. Buildings connect automatically across the village. River generators supply 1.8 energy per hour through the night and add 18 storage; rainfall boosts flow and dry days reduce it. Add generators or switch off lights to stretch the charge.</p><p>Rooftop-panel homes have their own battery. Gardens, food forests and compost do not need electricity. Residents still cook on the kitchen stove and work by hand during outages.</p></details>
+        <details><summary>How village power works</summary><p id="power-explanation">Solar farms generate during daylight; river generators run through the night. Stored energy supplies shared lights after dusk. Rain boosts river generation and dry days reduce it.</p><p id="power-tools-explanation">Rooftop-panel homes supply their own lighting. Gardens, food forests and compost need no electricity. Early cooking and hand-tool work remain available without shared power.</p></details>
       </aside>
       <aside id="building-panel" class="supplies panel" hidden aria-label="Building interactions">
         <button class="panel-close" data-close-panel aria-label="Close buildings">×</button>

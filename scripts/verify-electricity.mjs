@@ -21,6 +21,7 @@ for(const r of authored.residents)Object.assign(r,{task:'idle',trip:null,help:nu
 assert(g.restore(JSON.stringify(resetMaterialLocations(authored))));
 assert.equal(snap(g).village.version,20);
 assert.equal(g.set_production_target(17,0),'ok');
+await writeFile(`${output}/before.json`,g.snapshot());
 const port=building=>snap(g).village.power.network.nodes.find(n=>n.owner.kind==='building'&&n.owner.id===building).id;
 function install(building){
  const from=port(0),to=port(building),before=g.snapshot(),quote=JSON.parse(g.electrical_connection_quote(from,to));assert(quote.allowed);assert.equal(g.snapshot(),before);assert.equal(quote.parts[9],0);assert.equal(quote.parts[14],0);
@@ -33,6 +34,12 @@ function install(building){
  });assert(carried&&partial);checkpoint(g);return id;
 }
 const cable=install(1),lamp=install(2);
+let circuitReport=JSON.parse(g.electricity_report());
+assert(circuitReport.circuits.some(c=>!c.private_roof&&c.nodes.includes(port(0))&&c.nodes.includes(port(1))&&c.nodes.includes(port(2))));
+assert(circuitReport.circuits.some(c=>c.private_roof&&c.nodes.length===1&&c.nodes[0]===port(3)));
+assert.equal(JSON.parse(g.simulation_report()).water_connections.lines.length,0);
+assert.equal(JSON.parse(g.simulation_report()).electricity.connections.lines.length,2);
+
 until(g,s=>s.village.progress.night_lights,'A real cable powers a light after dusk');assert(line(snap(g),lamp).transferred>0);
 const site=snap(g).village.production.sites.find(s=>s.building===1).id;
 assert.equal(g.set_workshop_powered(site,true),'ok');

@@ -1,3 +1,4 @@
+import {paintUtilityRoute} from './utility-lines-art.js';
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const names={camp:'Arrival barrels',well:'Cistern',home:'Home',kitchen:'Kitchen',garden:'Garden',greenhouse:'Greenhouse',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',banana_treatment:'Banana treatment bed',source_timber:'Timber plot',source_bamboo:'Bamboo patch'};
 const number=n=>Number(n.toFixed(n>0&&n<.1?3:1)).toLocaleString('en');
@@ -70,19 +71,12 @@ export function installWaterConnections({game,snapshot,transact,openTown}){
 }
 function kindName(kind){return {fresh:'Fresh water',irrigation:'Reclaimed irrigation',greywater:'Greywater',sewage:'Sealed sewage'}[kind];}
 export function drawWaterConnections(ctx,iso,scale,state){
-  const enabled=!!document.getElementById('pipe-overlay')?.checked,live=state.village.pipes.lines.filter(p=>p.phase!=='retired');
+  const enabled=!!document.getElementById('pipe-overlay')?.checked,live=state.village.pipes.lines.filter(p=>p.phase!=='retired'&&p.plan.kind!=='electricity');
   const showPreview=previewVisible();
   for(const [key,value]of Object.entries({waterLines:enabled?live.length:0,waterPreview:enabled&&showPreview}))if(ctx.canvas.dataset[key]!==String(value))ctx.canvas.dataset[key]=String(value);
   if(!enabled)return;
   ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
-  const paint=(plan,color,dashed)=>{
-    const points=[plan.start.edge,...plan.cells,plan.end.edge].map(([x,y])=>iso(x,y));
-    ctx.strokeStyle='#263d32bb';ctx.lineWidth=Math.max(3,5*scale);ctx.setLineDash([]);ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
-    ctx.strokeStyle=color;ctx.lineWidth=Math.max(1.5,2.5*scale);ctx.setLineDash(dashed?[6*scale,4*scale]:[]);ctx.stroke();
-    ctx.setLineDash([]);ctx.fillStyle='#d9ba7f';ctx.strokeStyle='#5f492c';ctx.lineWidth=1;
-    const p=points[1];ctx.beginPath();ctx.arc(p.x,p.y,Math.max(3,5*scale),0,Math.PI*2);ctx.fill();ctx.stroke();
-    ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(p.x-3*scale,p.y);ctx.lineTo(p.x+3*scale,p.y);ctx.stroke();
-  };
+  const paint=(plan,color,dashed)=>paintUtilityRoute(ctx,iso,scale,plan,color,dashed,{pump:true});
   for(const p of live)paint(p.plan,p.paused?'#bab69b':p.phase==='removing'?'#c27d50':p.phase==='active'?({fresh:'#7bb8c8',irrigation:'#9dbb68',greywater:'#b99dbb',sewage:'#c6a06a'}[p.plan.kind]):'#d4ad65',p.phase!=='active');
   if(showPreview)paint(preview,'#e6dbaa',true);
   ctx.restore();

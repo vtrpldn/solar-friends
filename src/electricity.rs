@@ -376,6 +376,41 @@ impl Frame {
             .route(start, |i| probe.state.nodes[i].capacity > 0.)
             .is_some()
     }
+    /// Physical enabled circuits, independent of charge and this frame's spent bandwidth.
+    pub fn circuits(&self) -> Vec<Vec<Id>> {
+        let mut seen = vec![false; self.state.nodes.len()];
+        let mut circuits = vec![];
+        for start in 0..seen.len() {
+            if seen[start] || !self.open[start] {
+                continue;
+            }
+            let mut queue = VecDeque::from([start]);
+            seen[start] = true;
+            let mut nodes = vec![];
+            while let Some(i) = queue.pop_front() {
+                let id = self.state.nodes[i].id;
+                nodes.push(id);
+                for w in &self.wires {
+                    let target = if w.from == id {
+                        w.to
+                    } else if w.to == id {
+                        w.from
+                    } else {
+                        continue;
+                    };
+                    let j = self.index(target).unwrap();
+                    if self.open[j] && !seen[j] {
+                        seen[j] = true;
+                        queue.push_back(j);
+                    }
+                }
+            }
+            nodes.sort_by_key(|id| id.0);
+            circuits.push(nodes);
+        }
+        circuits.sort_by_key(|nodes| nodes[0].0);
+        circuits
+    }
     pub fn cable_used(&self, id: Id) -> Option<f64> {
         let i = self.wires.iter().position(|w| w.id == id)?;
         Some(self.limits[i] - self.remaining[i])
@@ -458,6 +493,7 @@ mod tests {
         assert!((f.spend(Id(2), 0.1) - 0.05).abs() < EPS);
         assert!((f.cable_used(Id(20)).unwrap() - 0.2).abs() < EPS);
         assert!((f.cable_used(Id(21)).unwrap() - 0.15).abs() < EPS);
+        assert_eq!(f.circuits(), vec![vec![Id(1), Id(2), Id(3)]]);
         let s = f.finish();
         assert!((s.nodes[0].charge - 9.8).abs() < EPS);
         assert!((s.account.consumed - 0.2).abs() < EPS);
@@ -514,6 +550,7 @@ mod tests {
         let mut f = s.begin(100, 60., &[Id(1), Id(3)], &[], &wires).unwrap();
         assert_eq!(f.spend(Id(3), 1.), 0.);
         assert_eq!(f.spend(Id(2), 1.), 0.);
+        assert_eq!(f.circuits(), vec![vec![Id(1)], vec![Id(3)]]);
         check(&f.finish());
         let mut f = s.begin(100, 60., &open(&s), &[], &wires[..1]).unwrap();
         assert_eq!(f.spend(Id(3), 1.), 0.);

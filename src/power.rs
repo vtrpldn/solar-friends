@@ -215,11 +215,13 @@ pub fn valid(v: &Village) -> bool {
     }
     network::valid(v)
 }
+pub fn report(v: &Village) -> serde_json::Value {
+    serde_json::json!({"network":v.power.network,"supply":supply(v),"circuits":network::circuit_report(v),"frame_error":network::frame(v,1.,v.minutes).err(),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment. Crossed corridors only join at connected ports; pumps run before attended tools and lighting."})
+}
 #[wasm_bindgen]
 impl Game {
     pub fn electricity_report(&self) -> String {
-        let v = self.app.world().resource::<Village>();
-        serde_json::json!({"network":v.power.network,"supply":supply(v),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment."}).to_string()
+        report(self.app.world().resource::<Village>()).to_string()
     }
 }
 

@@ -1,3 +1,4 @@
+import {drawElectricalConnections,electricalOverlayRevision} from './electricity-ui.js';
 import {drawWaterConnections,waterOverlayRevision} from './water-connections.js';
 import {installLandMap} from './land-map.js';
 import {gatheringInfo} from './gathering-ui.js';
@@ -102,7 +103,7 @@ const tasks = {
   return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Moving water or closed service containers",
-  utility: "Working on water lines",
+  utility: "Working on village services",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   restore: "Restoring the soil",
@@ -640,6 +641,7 @@ function render() {
     pan.y += (cameraTarget.y - pan.y) * blend;
     if (Math.hypot(cameraTarget.x - pan.x, cameraTarget.y - pan.y) < 0.5) cameraTarget = null;
   }
+  if(ctx.canvas.dataset.cameraMoving!==String(!!cameraTarget))ctx.canvas.dataset.cameraMoving=String(!!cameraTarget);
   scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.45, scale);
   origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
@@ -686,6 +688,7 @@ function render() {
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
   drawWaterConnections(ctx,iso,scale,state);
+  drawElectricalConnections(ctx,iso,scale,state);
   const objects = [
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
@@ -1379,7 +1382,7 @@ function frame(stamp) {
     state = JSON.parse(game.snapshot());
   }
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
-  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision()].join("|");
+  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
     render(); paintedState = state; paintedView = viewKey;
   }
@@ -1406,7 +1409,15 @@ function setup() {
     showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
   };
   landMap=installLandMap({game:()=>game,snapshot:()=>state,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,render:()=>{paintedState=null;render();}});
-  economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  const focusUtility=plan=>{
+    const points=[plan.start.edge,...plan.cells,plan.end.edge].map(([x,y])=>iso(x,y));
+    const middleX=(Math.min(...points.map(p=>p.x))+Math.max(...points.map(p=>p.x)))/2;
+    const middleY=(Math.min(...points.map(p=>p.y))+Math.max(...points.map(p=>p.y)))/2;
+    const freeWidth=Math.max(180,$('#village-book').getBoundingClientRect().left-20);
+    cameraTarget={x:pan.x+freeWidth/2-middleX,y:pan.y+height*.46-middleY,dt:1/60};
+    ctx.canvas.dataset.cameraMoving='true';
+  };
+  economyUI=installEconomyUI({avatar,paintPortraits,focusUtility,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
