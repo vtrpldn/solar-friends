@@ -14,7 +14,7 @@ export async function checkCultivationControls({page,saved,capture}){
   assert.match(await page.locator('#crop-status').textContent(),/At current soil and supplies: \d+–\d+ food/);
   assert.match(await page.locator('#crop-details').textContent(),/Root-zone wetness.*tree shade.*Growth ×0\./);
   await page.locator('#building-panel [data-close-panel]').click();
-  await page.locator('[data-hud-resource="food"]').click();
+  await page.locator('[data-hud-resource="food"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
   if(!await page.locator('[data-growing-plots]').evaluate(el=>el.open))await page.locator('[data-growing-plots] summary').click();
   assert.match(await page.locator('[data-growing-plots]').textContent(),/Soil fertility.*moisture.*tree shade.*growth ×/);
   await capture('Actual resident-tended crops show persistent soil conditions and adjusted growing time','cultivation-soil.png');

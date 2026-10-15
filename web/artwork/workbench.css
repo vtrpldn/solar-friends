@@ -1,12 +1,14 @@
-#art-workbench{margin:0 0 30px;padding:24px;background:#e7ebdf;border:1px solid #bec8b6;border-radius:9px;scroll-margin-top:16px}
+#art-workbench{margin:0 0 30px;padding:24px;background:#e9dcb5;border:3px solid #8e7041;border-radius:7px;scroll-margin-top:16px}
 .workbench-heading{display:flex;justify-content:space-between;align-items:center;gap:20px}.workbench-heading h2{font-size:30px}
-.workbench-tabs{display:flex;gap:8px;margin:20px 0}.workbench-tabs button[aria-pressed=true]{background:#365c49;color:#fff9eb}
+.workbench-tabs{display:flex;gap:8px;margin:20px 0}.workbench-tabs button[aria-pressed=true]{background:linear-gradient(#b9c88c,#97ab63);border-color:#687d40;color:#344321}
 .workbench-layout{display:grid;grid-template-columns:minmax(360px,1.5fr) minmax(300px,1fr);gap:22px}
 #calibration-scene,#replacement-scene{width:100%;height:320px;display:block;background:#b2be94;border-radius:7px}
 #anchor-canvas{width:100%;height:340px;display:block;touch-action:none;cursor:ns-resize}
 .workbench-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.workbench-form input{width:100%}
 .workbench-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-#art-workbench pre{white-space:pre-wrap;max-height:260px;overflow:auto;font-size:12px;background:#fffaf0;padding:16px}
-#recipe-prompt{width:100%;min-height:190px}#recipe-references{display:flex;gap:12px;margin:15px 0}#recipe-references img{width:100px;height:95px;object-fit:contain;background:#d9dfcf;border-radius:5px}
+#art-workbench pre{white-space:pre-wrap;max-height:260px;overflow:auto;font-size:12px;background:#d5c08e70;padding:16px}
+#recipe-prompt{width:100%;min-height:190px}#recipe-references{display:flex;gap:12px;margin:15px 0}#recipe-references img{width:100px;height:95px;object-fit:contain;background:#d4c18e;border-radius:5px}
 #recipe-history{max-height:160px;overflow:auto;font-size:12px;line-height:1.6}
 #art-workbench [hidden]{display:none}#workbench-status{min-height:20px}
+
+.workbench-form :is(input,select){min-width:0;width:100%}.workbench-tabs{flex-wrap:wrap}.workbench-heading>div{min-width:0}.workbench-heading h2{font-size:25px}.workbench-layout>div{min-width:0}

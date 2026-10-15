@@ -4,7 +4,7 @@ export async function checkProcessControls({page,saved,capture}){
   async function load(file,check){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/processes/${file}.json`);await page.waitForFunction(check);
-    await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();
+    await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
   }
   await load('working',()=>window.solarDev.snapshot().village.processes.batches.some(b=>b.kind==='digestion'&&b.remaining===360));
   assert.match(await page.locator('#passive-processes').textContent(),/Biodigester 1/);
@@ -13,7 +13,7 @@ export async function checkProcessControls({page,saved,capture}){
   assert(await page.getByRole('button',{name:'Resume Biodigester 1',exact:true}).isVisible());
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('60');await page.locator('#dev-advance').click();
   let s=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(owned(s,0).remaining,360);assert.equal(owned(s,1).remaining,300);
-  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();
+  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
   await page.locator('#passive-processes').scrollIntoViewIfNeeded();await capture('Two digesters retain independent batches while one is paused','processes-paused.png');
   const waste=s.village.circular.waste,scraps=s.village.progress.scraps;
   await page.getByRole('button',{name:'Recover batch at Biodigester 2',exact:true}).click();s=await page.evaluate(()=>window.solarDev.snapshot());
@@ -25,5 +25,5 @@ export async function checkProcessControls({page,saved,capture}){
   assert.match(await page.locator('#digester-status').textContent(),/4 digestate curing/);
   await page.locator('#passive-processes').scrollIntoViewIfNeeded();await capture('Independent sealed digestate stores keep their full curing period','processes-curing.png');
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1440');await page.locator('#dev-advance').click();s=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(s.village.progress.compost,4);assert.equal(s.village.circular.pending_compost,0);
-  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();assert.match(await page.locator('#passive-processes').textContent(),/4 compost ready for the soil/);assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();assert.match(await page.locator('#passive-processes').textContent(),/4 compost ready for the soil/);assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
 }

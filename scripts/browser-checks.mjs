@@ -1,3 +1,4 @@
+import {checkInterfaceControls,checkArtworkInterface} from './interface-browser-checks.mjs';
 import {checkWorkshopPowerControls,checkElectricalControls} from './electricity-browser-checks.mjs';
 import {checkOrganicControls} from './organics-browser-checks.mjs';
 import {checkCultivationControls} from './cultivation-browser-checks.mjs';
@@ -71,6 +72,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#help').click();if(!await page.locator('#help-dialog .dev-tools').evaluate(el=>el.open))await page.locator('#help-dialog .dev-tools summary').click();await page.locator('#help-open-dev').click();
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
+  await checkInterfaceControls({page,saved,capture});
   assert.equal(original.village.economy.sources.length,0,'New villages start without fixed resource sites');
   await checkLandControls({page,saved,capture});
   await checkRestorationControls({page,saved,capture});
@@ -481,7 +483,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#dev-button').click();
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
-  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
   assert.match(await page.locator('#digester-status').textContent(),/Waiting.*scraps delivered/);
   assert((await page.locator('#wetland-status').textContent()).includes('Ready to filter'));
   for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).uncheck();
@@ -509,7 +511,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(circular.village.circular.biogas>0&&circular.village.circular.water_reused>=8);
   assert((await page.locator('#digester-status').textContent()).includes('curing'));
   await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('banana');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
-  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
   await page.locator('#banana-treatment').uncheck();
   assert((await page.locator('#banana-status').textContent()).includes('paused'));
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
@@ -608,6 +610,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   page=await studioPromise;
   await page.waitForLoadState('domcontentloaded');
   await page.waitForFunction(()=>document.querySelector('#cal-width')?.value && [...document.images].every(i=>i.complete));
+  await page.getByRole('button',{name:'Editing bench',exact:true}).click();
   await page.locator('#workbench-sprite').selectOption('coop');
   await page.locator('#cal-width').fill('110');
   await page.locator('#anchor-canvas').scrollIntoViewIfNeeded();
@@ -667,5 +670,6 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.deepEqual(errors,[],'Browser errors must be resolved');
   await context.close();
   await checkClimateSandboxSave({browser,base,output,screenshots,errors});
+  await checkArtworkInterface({browser,base,output,screenshots,errors});
   assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
 }

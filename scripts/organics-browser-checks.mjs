@@ -3,7 +3,7 @@ export async function checkOrganicControls({page,saved,capture}){
   if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
   await page.locator('#dev-import-file').setInputFiles('artifacts/organics/compost-cargo.json');
   await page.waitForFunction(()=>window.solarDev.snapshot().village.logistics.shipments.some(h=>h.carrying&&h.material===19));
-  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();
+  await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
   await page.locator('[data-organic-supplies] summary').click();
   assert.match(await page.locator('[data-organic-supplies]').textContent(),/Mature compost must reach a growing plot/);
   assert.match(await page.locator('[data-organic-cargo]').textContent(),/carrying 1 mature compost to plot/);

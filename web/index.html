@@ -103,7 +103,7 @@
           <button id="supply-tab-ecology" role="tab" data-supply-tab="ecology" aria-controls="supply-ecology" aria-selected="false" tabindex="-1">Ecology</button>
         </nav>
         <section id="supply-pantry" class="supply-page" role="tabpanel" aria-labelledby="supply-tab-pantry">
-        <p id="pantry-stock"></p>
+        <div id="pantry-stock" class="pantry-stacks" role="group" aria-label="Pantry stores"></div>
         <p id="pantry-outlook" role="status"></p>
         <p id="food-freshness-warning" role="status" hidden></p>
         <details class="economy-section"><summary>Keeping food fresh</summary><div id="food-freshness"></div></details>
@@ -111,7 +111,7 @@
         <p id="pantry-flow"></p>
         <h3>Kitchen</h3>
         <label id="egg-control"><input id="use-eggs" type="checkbox" /> Cook with eggs when available</label>
-        <details><summary>Recipes &amp; cooking</summary><p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p></details>
+        <details><summary>Recipes &amp; cooking</summary><p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p><p>Neighbours bring ingredients here and share a saved pot. Work continues through breaks. A pot needs one delivered fresh water and room for its greywater to finish; cancellation returns its fresh ingredients and held gas. Interrupted pots keep their ingredient dates; spoiled inputs cannot become meals.</p></details>
         <p id="kitchen-status"></p>
         <div id="kitchen-batches"></div>
         <section id="shared-table" hidden><h3>Our shared table</h3><p id="shared-table-status" role="status"></p><button data-cancel-gathering aria-label="Cancel gathering from Supplies" hidden>Cancel gathering</button></section>
@@ -351,10 +351,11 @@
         </li>
       </ol>
       <p class="hint">
-        A full day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site, then returns to your chosen speed. Pause and change speed at the
-        bottom left. B opens Build, V the village window, J the journal, P residents, I supplies, and M the map. Space pauses time; Escape closes a window or opens the menu. Your village autosaves locally; open
+        <span class="help-time-note">A full day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site, then returns to your chosen speed. Pause and change speed at the
+        bottom left.</span> Your village autosaves locally; open
         Settings to save immediately or start a new village.
       </p>
+      <div class="control-guide" aria-label="Game controls"><span><kbd>B</kbd>Build</span><span><kbd>V</kbd>Village</span><span><kbd>J</kbd>Journal</span><span><kbd>P</kbd>People</span><span><kbd>I</kbd>Supplies</span><span><kbd>M</kbd>Map</span><span><kbd>Space</kbd>Pause time</span><span><kbd>Esc</kbd>Close / menu</span></div>
       <details class="dev-tools">
         <summary>Debug &amp; development tools</summary>
         <p>Previews use a separate village and never overwrite your progress.</p><button id="help-open-dev">Dev Tools</button>
@@ -383,7 +384,7 @@
         <h3 id="building-settings">Building &amp; placement</h3>
         <label class="setting-row" for="placement-grid">
           <span
-            ><b>Placement grid</b
+            ><b id="placement-grid-label">Placement grid</b
             ><small id="grid-description"
               >Show tile guides while placing a building. The arrival clearing
               stays reserved.</small
@@ -393,6 +394,7 @@
             type="checkbox"
             role="switch"
             id="placement-grid"
+            aria-labelledby="placement-grid-label"
             aria-describedby="grid-description"
           />
         </label>
@@ -418,8 +420,8 @@
     <dialog id="import-dialog" aria-labelledby="import-title">
       <h2 id="import-title">Welcome back to your village</h2>
       <p id="import-summary"></p>
-      <button id="cancel-import">Keep this village</button>
-      <button id="confirm-import" class="primary">Load village</button>
+      <div class="dialog-actions"><button id="cancel-import">Keep this village</button>
+      <button id="confirm-import" class="primary">Load village</button></div>
     </dialog>
     <dialog id="restart-dialog" aria-labelledby="restart-title">
       <span class="eyebrow">A FRESH BEGINNING</span>
@@ -428,11 +430,11 @@
         Your current village will be replaced by an empty lot and five arriving
         neighbours. A backup stays on this device.
       </p>
-      <button id="cancel-restart">Keep this village</button>
-      <button id="confirm-restart" class="primary">Start new village</button>
+      <div class="dialog-actions"><button id="cancel-restart">Keep this village</button>
+      <button id="confirm-restart" class="primary">Start new village</button></div>
     </dialog>
-    <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Confirm cancellation</button></dialog>
-    <dialog id="building-work-dialog" aria-labelledby="building-work-title"><h2 id="building-work-title">Queue building work?</h2><p id="building-work-note"></p><button id="building-work-close">Keep building</button><button id="building-work-confirm" class="primary">Queue resident work</button></dialog>
+    <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><div class="dialog-actions"><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Confirm cancellation</button></div></dialog>
+    <dialog id="building-work-dialog" aria-labelledby="building-work-title"><h2 id="building-work-title">Queue building work?</h2><p id="building-work-note"></p><div class="dialog-actions"><button id="building-work-close">Keep building</button><button id="building-work-confirm" class="primary">Queue resident work</button></div></dialog>
     <script type="module" src="main.js?v=modes-1"></script>
   </body>
 </html>

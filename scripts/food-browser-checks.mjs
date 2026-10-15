@@ -5,7 +5,7 @@ export async function checkFoodControls({page,saved,capture}){
   await page.locator('#dev-import-file').setInputFiles('artifacts/food/cooked.json');
   await page.waitForFunction(()=>{const v=window.solarDev.snapshot().village;return v.buildings.length===1&&v.buildings[0].kind==='kitchen'&&v.meals===5;});
   await page.locator('#dev-close').click();
-  await page.locator('[data-hud-resource="food"]').click();
+  await page.locator('[data-hud-resource="materials"]').click();
   if(!await page.locator('#material-inventory').isVisible())await page.getByText('Stored supplies',{exact:true}).click();
   assert.equal(await page.locator('.material-slot').count(),24);
   assert((await page.locator('.material-slot[data-item="17"]').textContent()).includes('5 free'));

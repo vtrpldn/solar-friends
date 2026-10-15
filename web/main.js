@@ -6,7 +6,7 @@ import {gatheringInfo} from './gathering-ui.js';
 import {drawCarriedMaterials,drawSupplyPile,drawCarriedWater,drawWaterPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {makeArtPreview} from './dev/art-preview.js';
-import {installGameUI} from './game-ui.js';
+import {installGameUI,itemIcon} from './game-ui.js';
 import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
 import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
@@ -853,7 +853,7 @@ function selectPerson(id) {
       ["compost", "Turn scraps"],
       ["craft", "Craft tools · 8 timber"],
     ]
-      .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
+      .map(([t, n]) => `<button data-task="${t}">${itemIcon(({garden:"food",build:"frames",building_work:"frames",gather:"food",source:"timber",prepare:"walls",water:"water",cook:"meals",rest:"journal",socialize:"heart",compost:"compost",craft:"tools"})[t])}<span>${n}</span></button>`)
       .join(
         "",
       )}</div><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="friendship-note"></p>`;
@@ -982,7 +982,7 @@ function updateQuests() {
   const chapterPanels={build:['build-panel','Review village buildings'],town:['town-panel','Open Town'],land:['projects-panel','Open Land & materials'],preparation:['projects-panel','Review material preparation'],supplies:['supplies-panel','Open Supplies'],power:['power-panel','Open Power'],people:['community-panel','Meet our neighbours']};
   if(chapterPanels[route?.type]){
     const [panel,text]=chapterPanels[route.type];label=text;
-    onClick=()=>{showPanel(panel);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
+    onClick=()=>{showPanel(panel,route.page);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
   }
   if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
   if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
@@ -1155,8 +1155,8 @@ function updateSupplies(v) {
   const shared=v.progress.gathering_delivery;
   const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
   const days = (v.food + v.meals-sharedReserve) / 15;
-  $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
-  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food before cooking gains, hen feed or spoilage. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
+  replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
+  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food. Cooking, hen feed and spoilage can change this estimate.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
@@ -1277,7 +1277,7 @@ function updateUI() {
     $('#person .occupation-toggle').setAttribute('aria-label',`Schedule ${r.name}'s outside job`);
     $('#person .occupation-schedule-note').textContent=r.trip?.purpose==='work'?'This shift is committed. Turning this off stops future shifts.':job.enabled?(v.minutes%1440>=600?'Next outside shift tomorrow at 09:00. Lunch is provided off-site.':'Leaves 09:00–10:00 when rested. Lunch is provided off-site.'):'Optional · staying available for village life.';
     for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
-    $("#person .quote").hidden = !!response && r.requested && response.endsWith(r.reason);
+    $("#person .quote").hidden = r.task === "idle" || (!!response && r.requested && response.endsWith(r.reason));
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
@@ -1607,7 +1607,7 @@ function setup() {
   };
   $('#weather-open').onclick=()=>{
     showPanel('supplies-panel','water');
-    const forecast=$('#weather-forecast');forecast.open=true;forecast.scrollIntoView({block:'start'});forecast.querySelector('summary').focus({preventScroll:true});
+    const forecast=$('#weather-forecast');forecast.open=true;forecast.querySelector('summary').focus({preventScroll:true});
   };
   $("#pause").onclick = togglePause;
   for (const b of document.querySelectorAll("[data-speed]"))

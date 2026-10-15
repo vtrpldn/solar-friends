@@ -1,6 +1,6 @@
 // Text and objective views; Rust owns permanent completion and unlocks.
 export const storyBuildingKinds = ["home","garden","well","kitchen","grove","warehouse","compost","square","workshop","greenhouse","coop","solar_farm","streetlight","eco_toilet","wetland","banana_treatment","biodigester","hydro"];
-const actionGoal = (action, label, value, target, hint) => ({...goal(label,value,target,hint),action});
+const actionGoal = (action, label, value, target, hint, page) => ({...goal(label,value,target,hint),action,...(page?{page}:{})});
 const count = (v, kind) =>
   v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
 const goal = (label, value, target, hint, build = null) => ({
@@ -55,7 +55,7 @@ export const quests = [
         "Serve a cooked meal",
         count(v, "kitchen") ? v.meals_served : 0,
         1,
-        "Build a kitchen. Three food and one fresh water make five meals. Washing leaves greywater in this kitchen’s buffer; neighbours carry closed containers to the neighbouring service point until local treatment is available. Check Supplies → Where waste is if the buffer is full.",
+        "Build a kitchen. Three food and one fresh water make five meals. Washing leaves greywater in this kitchen’s buffer; neighbours carry closed containers to the neighbouring service point until local treatment is available. Check Supplies → Ecology → Where waste is if the buffer is full.",
         "kitchen",
       ),
       goal(
@@ -186,8 +186,8 @@ export const quests = [
       goal("Build a compost station",count(v,"compost"),1,"Neighbours turn delivered kitchen scraps into compost. Ask a neighbour to turn extra scraps, or buy mature compost in Trade. In Land views, queue soil work: two delivered compost and a neighbour's time gradually restore its soil.","compost"),
       goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Keep the kitchen, compost station and gardens connected by short paths. Neighbours carry scraps for composting and deliver mature compost to the plot before its harvest.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
-      actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds."),
-      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Neighbours haul a vegetable seedling from the greenhouse store to this garden. Its next attended planting uses that delivered seedling for a growth head start. Supplies also lets you choose beans, lettuce or tomatoes."),
+      actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds.","ecology"),
+      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Neighbours haul a vegetable seedling from the greenhouse store to this garden. Its next attended planting uses that delivered seedling for a growth head start. Choose beans, lettuce or tomatoes in Buildings → Growing plan.","ecology"),
     ],
   },
   {
@@ -197,7 +197,7 @@ export const quests = [
     after: "Our table is more varied. Now collect sunshine to keep our shared buildings and paths lit after dusk.",
     objectives: v => [
       goal("Build a chicken coop",count(v,"coop"),1,"Finish a coop and keep at least nine ingredients in the pantry.","coop"),
-      actionGoal("supplies", "Cook with our eggs",+v.progress.egg_meal,1,"Enable cooking with eggs in Supplies. Two eggs, two ingredients and one fresh water make seven meals when a neighbour cooks."),
+      actionGoal("supplies", "Cook with our eggs",+v.progress.egg_meal,1,"Enable cooking with eggs in Supplies. Two eggs, two ingredients and one fresh water make seven meals when a neighbour cooks.","pantry"),
       {...goal("Collect our first three eggs",v.progress.eggs_collected||0,3,"Enable hen feeding in Supplies. Three ingredients feed a batch; eggs arrive after twelve daylight hours.","coop"),buildTarget:1},
     ],
   },
@@ -222,11 +222,11 @@ export const quests = [
       goal("Build an ecological toilet",count(v,"eco_toilet"),1,"Residents use it daily. Deliver fresh water for handwashing and leave space in its local greywater and sewage buffers. Neighbours carry closed service containers, or you can install separate compatible lines through Pipes & pumps.","eco_toilet"),
       goal("Build a lined reed bed",count(v,"wetland"),1,"A reed bed filters household greywater. Its output is irrigation water, never drinking water.","wetland"),
       goal("Build a banana treatment bed",count(v,"banana_treatment"),1,"A sealed basin planted with banana trees treats toilet sewage through its soil and roots. Its water stays separate from our drinking and irrigation stores.","banana_treatment"),
-      actionGoal("supplies","Treat five toilet waste",Math.floor(v.circular.waste_treated ?? 0),5,"Enable banana treatment in Water & waste. Sewage must reach this bed through closed service containers or a sewage line. Each finished bed treats one delivered sewage every four game hours, with no power, water or food output."),
-      actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water delivered to the toilet per visit, with room in its separate greywater and sewage buffers."),
-      actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Rain falls 14:00–17:00 on two days out of three. A completed cistern catches it when there is space. In Supplies → Where water is → Pipes & pumps, connect it to a household or kitchen to reduce carrying. Residents install the kit. Connect the finished pump to a generator in Power; manual carrying remains available while its cable is missing or its circuit is empty."),
-      actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Neighbours deliver closed containers to the reed bed, or install a greywater line from a home or kitchen. Twelve delivered greywater becomes eight irrigation over six hours; the bed reserves its own output and input-return space."),
-      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. If food reserves are healthy, ask a neighbour to Tend garden in People; routine food work pauses at a healthy pantry. Neighbours carry reclaimed water, or install a separate irrigation line from the reed bed in Supplies → Where water is → Pipes & pumps."),
+      actionGoal("supplies","Treat five toilet waste",Math.floor(v.circular.waste_treated ?? 0),5,"Enable banana treatment in Water & waste. Sewage must reach this bed through closed service containers or a sewage line. Each finished bed treats one delivered sewage every four game hours, with no power, water or food output.","ecology"),
+      actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water delivered to the toilet per visit, with room in its separate greywater and sewage buffers.","ecology"),
+      actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Check the seven-day forecast from the village clock for rain. A completed cistern catches it when there is space. In Supplies → Water → Where water is → Pipes & pumps, connect it to a household or kitchen to reduce carrying. Residents install the kit. Connect the finished pump to a generator in Power; manual carrying remains available while its cable is missing or its circuit is empty.","water"),
+      actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Neighbours deliver closed containers to the reed bed, or install a greywater line from a home or kitchen. Twelve delivered greywater becomes eight irrigation over six hours; the bed reserves its own output and input-return space.","ecology"),
+      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. If food reserves are healthy, ask a neighbour to Tend garden in People; routine food work pauses at a healthy pantry. Neighbours carry reclaimed water, or install a separate irrigation line from the reed bed in Supplies → Water → Where water is → Pipes & pumps.","water"),
     ],
   },
   {
@@ -235,9 +235,9 @@ export const quests = [
     after:"Gas stretches our cooking, and cured digestate returns to the soil. Let's build our next home from local earth.",
     objectives:v=>[
       goal("Build a biodigester",count(v,"biodigester"),1,"Order its equipment and complete the sealed installation.","biodigester"),
-      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Pause banana treatment when waste is scarce so two sealed waste can reach the digester. Two delivered scraps complete its feed; digestion takes eight hours."),
-      actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking for an extra meal per pot. If a pot waits for eggs, buy them or switch off eggs in Supplies. Fresh water is still required."),
-      actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Cured compost remains in a pile at that plot until neighbours collect it; its later use will not erase this milestone."),
+      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Pause banana treatment when waste is scarce so two sealed waste can reach the digester. Two delivered scraps complete its feed; digestion takes eight hours.","ecology"),
+      actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking for an extra meal per pot. If a pot waits for eggs, buy them or switch off eggs in Supplies. Fresh water is still required.","ecology"),
+      actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Cured compost remains in a pile at that plot until neighbours collect it; its later use will not erase this milestone.","ecology"),
     ],
   },
   {
@@ -278,8 +278,8 @@ export const quests = [
     objectives:v=>[
       actionGoal("build","Make room for every village building",storyBuildingKinds.filter(k=>count(v,k)>0).length,storyBuildingKinds.length,"Finish every kind of building introduced by the journal. Open Build to find any missing plans."),
       goal("Keep beds for everyone",count(v,"home"),2,"Two homes provide six beds for our five neighbours.","home"),
-      actionGoal("supplies","Keep a healthy food reserve",Math.floor(v.food),18,"Keep eighteen ingredients for household cooking, then let neighbours enjoy their free time. Trade still protects its larger 36-ingredient reserve before accepting a sale."),
-      actionGoal("supplies","Keep fresh water ready",Math.floor(v.water),20,"Keep twenty fresh water in the cistern. Reclaimed water irrigates plants; drinking and cooking need fresh water."),
+      actionGoal("supplies","Keep a healthy food reserve",Math.floor(v.food),18,"Keep eighteen ingredients for household cooking, then let neighbours enjoy their free time. Trade still protects its larger 36-ingredient reserve before accepting a sale.","pantry"),
+      actionGoal("supplies","Keep fresh water ready",Math.floor(v.water),20,"Keep twenty fresh water in the cistern. Reclaimed water irrigates plants; drinking and cooking need fresh water.","water"),
       actionGoal("gathering","Meet again at our square",v.progress.gatherings,2,"Plan another gathering at the square between 08:00 and 18:00. Allow delivery through the following evening and give at least three fed, rested neighbours time to arrive. Follow preparation in Supplies."),
     ],
   },
@@ -298,7 +298,7 @@ export function questStatus(v,id) {
 
 // Goals always provide a next step through planning, construction and use.
 export function goalRoute(state, objective) {
-  if(objective?.action)return {type:objective.action};
+  if(objective?.action)return {type:objective.action,...(objective.page?{page:objective.page}:{})};
   if(objective?.build){
     const fits=b=>b.kind===objective.build&&(!objective.recipe||state.village.economy.projects.some(p=>p.building===b.id&&p.recipe===objective.recipe));
     const ready=state.village.buildings.filter(b=>fits(b)&&b.progress>=100).length;
