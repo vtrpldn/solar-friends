@@ -104,6 +104,14 @@ function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id o
 gatherExtra(()=>g.sell_surplus(1)==='ok','sell surplus');
 gatherExtra(()=>g.exchange_parts()==='ok','neighbour exchange');await complete(9);
 build('hydro');await complete(10);
+// The expanded village needs a useful kitchen-to-square corridor before the
+// final gathering. Use real road placement; delivery still uses resident work.
+let tableRoads=0;
+for(const [x,y] of [[11,11],[11,10],[11,9],[11,8],[12,8],[13,8],[13,7],[14,6],[14,5],[14,4],[15,3],[16,3],[17,3],[18,3]]){
+ const v=snap().village;
+ if(!v.roads.some(p=>p[0]===x&&p[1]===y)&&!placementReason(v,'road',x,y)){assert.equal(g.toggle_road(x,y),'ok');tableRoads++;}
+}
+assert(tableRoads>=8,'Invest in a useful delivery corridor as the village expands');
 g.set_outside_work(false);
 until(s=>s.village.situations.resolved_count>0||s.village.situations.active,'story check-in');
 if(!snap().village.situations.resolved_count&&snap().village.situations.active.response==null)assert.equal(g.respond_situation('day_off'),'ok');

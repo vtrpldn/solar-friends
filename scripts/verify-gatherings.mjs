@@ -55,7 +55,7 @@ assert.equal(moving.queue_building_work(0,'move',18,18),'ok');moving.tick(.25);
 assert.equal(plan(snap(moving)).phase,'cancelled');assert.equal(snap(moving).village.progress.gathering_until,0);
 checkpoint(moving);conserved(moving);
 const dusk=new Game(),late=JSON.parse(await readFile('artifacts/gathering/planned.json','utf8'));late.village.minutes=late.village.progress.gathering_delivery.deadline;
-assert(dusk.restore(JSON.stringify(late)));dusk.tick(.25);assert.equal(plan(snap(dusk)).phase,'cancelled');assert.equal(snap(dusk).village.meals,10);checkpoint(dusk);conserved(dusk);
+assert(dusk.restore(JSON.stringify(late)));dusk.tick(.25);assert.equal(plan(snap(dusk)).phase,'cancelled');assert.equal(snap(dusk).village.meals,10);assert.match(gatheringInfo(snap(dusk).village).summary,/Add a road from the pantry/);checkpoint(dusk);conserved(dusk);
 const evening=new Game(),eveningState=JSON.parse(await readFile('artifacts/gathering/start.json','utf8'));eveningState.village.minutes=945;
 assert(evening.restore(JSON.stringify(eveningState)));assert.equal(evening.host_gathering(),'ok');
 let restedOvernight=false;

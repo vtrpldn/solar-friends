@@ -263,7 +263,7 @@ pub fn view(v: &Village) -> serde_json::Value {
             inspect(&b.food_lots);
         }
     }
-    serde_json::json!({"enabled":v.mode==modes::Mode::Story,"expired":v.freshness.expired,"due_within_day":due,"next_expiry":next,"lifetimes":[{"material":FOOD,"minutes":lifetime(FOOD)},{"material":MEALS,"minutes":lifetime(MEALS)},{"material":EGGS,"minutes":lifetime(EGGS)}],"note":"Game balance days. Moving food or refunding inputs preserves its age. Use the oldest portions first."})
+    serde_json::json!({"enabled":v.mode==modes::Mode::Story,"expired":v.freshness.expired,"due_within_day":due,"next_expiry":next,"lifetimes":[{"material":FOOD,"minutes":lifetime(FOOD)},{"material":MEALS,"minutes":lifetime(MEALS)},{"material":EGGS,"minutes":lifetime(EGGS)}],"note":"Game balance days. Moving food or refunding inputs preserves its age. Prepared meals first; use the oldest reachable portions of each kind."})
 }
 #[cfg(test)]
 pub(crate) fn fixture_reseed(v: &mut Village) {

@@ -17,7 +17,7 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
   if (scenario === 'surplus') state.village.supplies.eggs = 60; // An intentionally overstocked fixture; expiry must lead to recovery.
   assert(game.restore(JSON.stringify(state)));
   const counts = Array.from({length:5}, () => ({awake:0,work:0,leisure:0,hobbies:new Set()}));
-  let minStock = Infinity, maxStock = 0, maxHunger = 0, previousStock=state.village.food+state.village.meals, previousHarvests=state.village.harvests, previousExpired=0, emptyMinutes=0, longestEmpty=0;
+  let minStock = Infinity, maxStock = 0, maxHunger = 0, previousStock=state.village.food+state.village.meals, previousHarvests=state.village.harvests, previousExpired=0;
   // Two weeks include several dry days, all kitchen rotations, and food recovery.
   for (let tick = 0; tick < 14 * 1920; tick++) {
     game.tick(.25);
@@ -32,7 +32,6 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
     const expired=v.freshness.expired[16]+v.freshness.expired[17];
     if(scenario==='surplus'&&previousStock>50&&stock>50&&expired===previousExpired)assert.equal(v.harvests,previousHarvests,'Use an ample edible surplus before harvesting more');
     previousStock=stock;previousHarvests=v.harvests;previousExpired=expired;
-    emptyMinutes=stock===0?emptyMinutes+15:0;longestEmpty=Math.max(longestEmpty,emptyMinutes);
     for (const r of residents) {
       const c = counts[r.id];
       maxHunger = Math.max(maxHunger, r.hunger);
@@ -59,8 +58,8 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
     assert(c.leisure / c.awake > .55, 'Most in-village waking time should be free time');
     assert(c.hobbies.size >= 3, 'Each resident needs varied hobbies, including evenings');
   }
-  if(scenario==='surplus'){assert(previousExpired>0,'An oversized reserve should spoil rather than last forever');assert(longestEmpty<=240,'An overstocked pantry must recover within four hours after its old food expires');}
-  else assert(minStock > 0, 'Food reserve must recover and stay available after the first day');
+  if(scenario==='surplus')assert(previousExpired>0,'An oversized reserve should spoil rather than last forever');
+  assert(minStock > 0, 'Food reserve must recover and stay available after the first day');
   assert(maxStock <= (scenario === 'surplus' ? 250 : 50), 'Autonomous food production must remain modest');
   console.log(`PASS: ${scenario}, 14 days, food reserve ${minStock}–${maxStock}, peak hunger ${maxHunger.toFixed(1)}, leisure ${Math.round(Math.min(...counts.map(c=>c.leisure/c.awake))*100)}%+ of each resident's in-village waking time`);
   game.free();

@@ -404,3 +404,24 @@ fn gathered_neighbours_cannot_serve_expired_portions_or_receive_shared_meal_rewa
     }
     checkpoint(&mut g);
 }
+
+#[test]
+fn residents_prefer_a_prepared_meal_to_older_raw_ingredients() {
+    let mut g = empty();
+    let r = g
+        .app
+        .world_mut()
+        .query::<&Resident>()
+        .iter(g.app.world())
+        .next()
+        .unwrap()
+        .clone();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(logistics::receive(&mut v, Owner::Camp, FOOD, 3));
+        v.minutes = 3000.;
+        assert!(logistics::receive(&mut v, Owner::Camp, MEALS, 2));
+        assert_eq!(food::meal(&v, &r).unwrap().1, MEALS);
+    }
+    checkpoint(&mut g);
+}

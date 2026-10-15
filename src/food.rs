@@ -189,8 +189,8 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
             if available_now > 0 && future > 0 {
                 let expires = edible.first().map_or(f32::INFINITY, |l| l.expires);
                 choices.push((
-                    expires,
                     material != MEALS,
+                    expires,
                     route.minutes,
                     p.id.0,
                     p.id,
@@ -201,8 +201,8 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
         }
     }
     choices.sort_by(|a, b| {
-        a.0.total_cmp(&b.0)
-            .then(a.1.cmp(&b.1))
+        a.0.cmp(&b.0)
+            .then(a.1.total_cmp(&b.1))
             .then(a.2.total_cmp(&b.2))
             .then(a.3.cmp(&b.3))
     });

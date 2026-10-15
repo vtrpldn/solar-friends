@@ -165,7 +165,11 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
         cancel(v);
         event(
             v,
-            "The gathering was cancelled. Unserved meals stay stored or recoverable; try an earlier time or a clearer supply route.",
+            if p.phase != Phase::Serving && v.minutes >= p.deadline {
+                "The gathering missed its delivery deadline. Unserved meals stay recoverable. Roads shorten the haul; a table closer to the pantry can help."
+            } else {
+                "The gathering was cancelled. Unserved meals stay stored or recoverable; try an earlier time or a clearer supply route."
+            },
         );
         return false;
     }
