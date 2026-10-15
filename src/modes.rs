@@ -27,6 +27,12 @@ pub fn replenish(v: &mut Village) {
         20u32.saturating_sub(economy::quantity(v, economy::MEALS)),
     );
     v.economy.money = v.economy.money.max(10_000_000);
+    for (material, target) in [(economy::TREE_STARTS, 8u32), (economy::BAMBOO_STARTS, 2u32)] {
+        let missing = target.saturating_sub(economy::quantity(v, material));
+        if missing > 0 {
+            let _ = logistics::receive(v, logistics::Owner::Camp, material, missing);
+        }
+    }
     let missing = 36u32.saturating_sub(economy::quantity(v, economy::TOOLS));
     if missing > 0 {
         let _ = logistics::receive(v, logistics::Owner::Camp, economy::TOOLS, missing);
@@ -56,6 +62,8 @@ impl Game {
             v.events = vec!["An open clearing. Every possibility is yours to explore.".into()];
             v.wood = 100.;
             v.economy.stock[1..].fill(24);
+            v.economy.stock[economy::TREE_STARTS] = 8;
+            v.economy.stock[economy::BAMBOO_STARTS] = 2;
             v.logistics = None;
             logistics::initialise(&mut v);
             replenish(&mut v);

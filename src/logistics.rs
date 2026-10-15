@@ -124,7 +124,8 @@ fn usable(v: &Village, p: &Store, i: usize) -> u32 {
             + production::held(v, p.owner, i)
             + crate::food::held(v, p.id, i, None)
             + gatherings::held(v, p.id, i)
-            + restoration::held(v, p.owner, i),
+            + restoration::held(v, p.owner, i)
+            + crate::planting::held(v, p.owner, i),
     )
 }
 fn arriving(s: &State, id: Id) -> u32 {
@@ -143,7 +144,11 @@ pub fn free(v: &Village, i: usize) -> u32 {
             .filter(|p| !closing(v, p.owner))
             .map(|p| usable(v, p, i))
             .sum::<u32>()
-            .saturating_sub(production::unclaimed(v, i) + restoration::unclaimed(v, i));
+            .saturating_sub(
+                production::unclaimed(v, i)
+                    + restoration::unclaimed(v, i)
+                    + planting::unclaimed(v, i),
+            );
     }
     let accessible = s
         .stores
@@ -178,6 +183,7 @@ pub fn sync_totals(v: &mut Village) {
     v.supplies.eggs = totals[economy::EGGS];
     v.progress.compost = totals[economy::COMPOST];
     v.progress.scraps = totals[economy::SCRAPS];
+    v.seedlings = totals[economy::SEEDLINGS];
 }
 pub(crate) fn create(v: &mut Village, owner: Owner, x: f32, y: f32, capacity: u32) -> Option<Id> {
     let id = v.simulation.allocate()?;
@@ -593,6 +599,7 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
         items[economy::TOOLS] = 1;
     }
     crate::organics::needs(v, owner, &mut items);
+    crate::planting::needs(v, owner, &mut items);
     items
 }
 fn tool_target(v: &Village, id: usize) -> bool {
@@ -750,7 +757,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 continue;
             }
             let excess = match from.owner {
-                Owner::Site(_) | Owner::Pantry(_) | Owner::Restoration(_) => {
+                Owner::Site(_) | Owner::Pantry(_) | Owner::Restoration(_) | Owner::Source(_) => {
                     available.saturating_sub(needs(v, from.owner)[i])
                 }
                 Owner::Warehouse(_) if from.managed && !closing(v, from.owner) => {
@@ -768,7 +775,11 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                     | Owner::Restoration(_)
             ) || closing(v, from.owner)
                 || (matches!(from.owner, Owner::Warehouse(_)) && from.managed);
-            if returning && excess > 0 && organics::return_surplus(v, from.owner, i, excess) {
+            if returning
+                && excess > 0
+                && organics::return_surplus(v, from.owner, i, excess)
+                && crate::planting::return_surplus(v, from.owner, i, excess)
+            {
                 for to in s.stores.iter().filter(|p| {
                     matches!(p.owner, Owner::Camp | Owner::Warehouse(_))
                         && p.id != from.id
@@ -1144,7 +1155,7 @@ fn valid_destination(v: &Village, h: &Shipment) -> bool {
             needs(v, to.owner)[h.material]
                 >= project_items(v, id)[h.material] + travelling(v, id, h.material)
         }
-        Owner::Restoration(_) => {
+        Owner::Restoration(_) | Owner::Source(_) => {
             let incoming: u32 = s
                 .shipments
                 .iter()
@@ -1381,7 +1392,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 14
+    if v.version != 15
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1501,6 +1512,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         || v.progress.tool_uses != total(v, economy::TOOLS)
         || v.progress.compost != total(v, economy::COMPOST)
         || v.progress.scraps != total(v, economy::SCRAPS)
+        || v.seedlings != total(v, economy::SEEDLINGS)
         || !owners.contains(&Owner::Camp)
         || (0..COUNT).any(|i| {
             if i == 0 {

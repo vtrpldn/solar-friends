@@ -172,7 +172,12 @@ pub fn update(v: &mut Village) {
         introduction,
         ready(v, "grove")
             && v.progress.fruit >= 6
-            && (0..2).all(|m| v.economy.sources.iter().any(|s| s.material == m)),
+            && (0..2).all(|m| {
+                v.economy
+                    .sources
+                    .iter()
+                    .any(|s| s.material == m && (s.planted || s.harvests > 0))
+            }),
         v.meals_served >= 5
             && v.progress.social_mask == 31
             && v.progress.welcome_supper

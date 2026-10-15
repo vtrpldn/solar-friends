@@ -114,7 +114,7 @@ pub fn initialise(v: &mut Village) -> bool {
     v.simulation.next_id = end;
     v.land = state;
     // This path authors a new village or an explicit version-3 development fixture.
-    // Playable version-14 saves are validated, never repaired or replenished here.
+    // Playable version-15 saves are validated, never repaired or replenished here.
     for index in 0..v.economy.sources.len() {
         let s = &v.economy.sources[index];
         if s.material < 2 {

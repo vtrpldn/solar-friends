@@ -26,8 +26,7 @@ export function sourcePlacementReason(v,material,x,y){
     if(Math.abs(X-10)<1.5&&Math.abs(Y-13)<1.5||(v.building_jobs||[]).some(j=>j.destination&&occupies({...v.buildings.find(b=>b.id===j.building),x:j.destination[0],y:j.destination[1]},X,Y))||v.roads.some(([rx,ry])=>rx===X&&ry===Y)||v.buildings.some(s=>occupies(s,X,Y))||v.economy.sources.some(s=>sourceOccupies(s,X,Y)))return 'Keep buildings, paths, other plots and the arrival clearing free.';
   }
   if(v.economy.sources.length>=676)return 'This village has reached its plot limit.';
-  if(v.mode!=='sandbox'&&v.economy.money<[8000,3000,1500,2500,1500][material])return 'The shared fund cannot cover this plot.';
-  if(material<2&&v.water<2&&(v.circular?.reclaimed||0)<2)return 'Set aside two irrigation water for planting.';
+  if(v.mode!=='sandbox'&&v.economy.money<[4000,1000,1500,2500,1500][material])return 'The shared fund cannot cover this plot.';
   return '';
 }
 export function sourceConflicts(v,kind,x,y){const f=footprint(kind,x,y);for(let X=Math.ceil(f.minX);X<f.maxX;X++)for(let Y=Math.ceil(f.minY);Y<f.maxY;Y++)if(v.economy.sources.some(s=>sourceOccupies(s,X,Y)))return true;return false;}

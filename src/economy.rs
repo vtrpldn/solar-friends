@@ -3,7 +3,10 @@ use crate::{Game, Village, event, ready, restoration};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub const COUNT: usize = 21;
+pub const COUNT: usize = 24;
+pub const SEEDLINGS: usize = 21;
+pub const TREE_STARTS: usize = 22;
+pub const BAMBOO_STARTS: usize = 23;
 pub const FOOD: usize = 16;
 pub const MEALS: usize = 17;
 pub const EGGS: usize = 18;
@@ -33,6 +36,9 @@ pub const NAMES: [&str; COUNT] = [
     "eggs",
     "compost",
     "scraps",
+    "seedlings",
+    "tree_starts",
+    "bamboo_starts",
 ];
 const LABELS: [&str; COUNT] = [
     "Timber",
@@ -56,10 +62,13 @@ const LABELS: [&str; COUNT] = [
     "Eggs",
     "Mature compost",
     "Kitchen scraps",
+    "Vegetable seedlings",
+    "Timber seedlings",
+    "Bamboo starts",
 ];
 const PRICES: [i64; COUNT] = [
     700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900, 400,
-    800, 300, 800, 0,
+    800, 300, 800, 0, 300, 1000, 2000,
 ];
 pub type Bundle = [u32; COUNT];
 #[derive(Clone, Serialize, Deserialize)]
@@ -150,7 +159,7 @@ impl Default for Economy {
     fn default() -> Self {
         Self {
             stock: [
-                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0,
+                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 4, 1,
             ],
             money: 300000,
             ledger: vec![Entry {
@@ -323,6 +332,7 @@ pub fn quantity(v: &Village, i: usize) -> u32 {
         EGGS => v.supplies.eggs,
         COMPOST => v.progress.compost,
         SCRAPS => v.progress.scraps,
+        SEEDLINGS => v.seedlings,
         _ => v.economy.stock[i],
     }
 }
@@ -544,6 +554,11 @@ pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
 }
 pub fn shortage(v: &Village) -> Bundle {
     let mut needs = gross_needs(v);
+    for index in 0..v.economy.sources.len() {
+        if let Some((material, amount)) = crate::planting::required(v, index) {
+            needs[material] += amount;
+        }
+    }
     for (i, n) in needs.iter_mut().enumerate() {
         *n = n.saturating_sub(quantity(v, i) + incoming(v, i) + crate::production::future(v, i));
     }
@@ -741,7 +756,7 @@ fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     Ok(total)
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i)+crate::restoration::reserved_amount(v,i),"processing":crate::restoration::processing(v,i)+crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
+    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i)+crate::restoration::reserved_amount(v,i)+crate::planting::reserved(v,i),"processing":crate::restoration::processing(v,i)+crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
     let projects:Vec<_>=v.economy.projects.iter().filter_map(|p|{
         let b=v.buildings.iter().find(|b|b.id==p.building)?;if b.progress>=100.{return None;}
         let stages=recipe(&b.kind,&p.recipe)?;let s=stages.get(p.stage)?;

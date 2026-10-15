@@ -149,6 +149,15 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
     ready_building(&mut g, "grove", 8, 8);
     assert_eq!(g.place_source(0, 18, 18), "ok");
     assert_eq!(g.place_source(1, 22, 18), "ok");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        for (index, material, amount) in
+            [(0, economy::TREE_STARTS, 4), (1, economy::BAMBOO_STARTS, 1)]
+        {
+            organics::fixture_transfer(&mut v, logistics::Owner::Source(index), material, amount);
+            assert!(resource_sites::finish(&mut v, index));
+        }
+    }
     for _ in 0..3 {
         finish_task(&mut g, 3, "gather");
     }

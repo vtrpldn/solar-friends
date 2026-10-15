@@ -20,6 +20,7 @@ mod modes;
 mod navigation;
 mod occupations;
 mod organics;
+mod planting;
 mod power;
 mod processes;
 mod production;
@@ -1166,7 +1167,7 @@ impl Game {
                 restoration: vec![],
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 14,
+                version: 15,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1635,8 +1636,7 @@ impl Game {
         {
             return false;
         }
-        if v.seedlings > 12
-            || !matches!(v.version, 3 | 14)
+        if !matches!(v.version, 3 | 15)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1728,7 +1728,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 14;
+            save.village.version = 15;
             if !processes::initialise(&mut save.village) {
                 return false;
             }
@@ -2175,7 +2175,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":14", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":15", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

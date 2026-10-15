@@ -98,8 +98,8 @@ export const quests = [
         6,
         "Ask a neighbour to forage food. Their saved request in People shows travel, breaks and completion. With a finished food forest, each trip also brings two fruit.",
       ),
-      actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0), 1, "Open Land in Projects and plant a timber plot. It needs water and about four moist growing days on suitable soil before whole trees can be harvested; start early."),
-      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1), 1, "Place a bamboo plot. Moist growth takes about two days on suitable soil; shoots regrow after cutting. Poor soil and heavy tree shade slow growth. Town purchases can bridge the wait."),
+      actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0&&(s.planted||s.harvests>0)), 1, "Mark a timber plot in Construction. Neighbours must deliver four timber seedlings from the arrival store, then spend a community work session planting and watering. The first stock comes with the village; order more in Trade for replanting. Trees need about four moist growing days on suitable soil before whole trees can be harvested; start early."),
+      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1&&(s.planted||s.harvests>0)), 1, "Mark a bamboo plot. A neighbour delivers one bamboo start and plants it using two irrigation water; the arrival store carries the first start. Moist growth takes about two days on suitable soil; shoots regrow after cutting. Poor soil and heavy tree shade slow growth. Town purchases can bridge the wait."),
     ],
   },
   {
@@ -187,7 +187,7 @@ export const quests = [
       goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Keep the kitchen, compost station and gardens connected by short paths. Neighbours carry scraps for composting and deliver mature compost to the plot before its harvest.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
       actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds."),
-      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Its next planting uses an available seedling for a growth head start. Supplies also lets you choose beans, lettuce or tomatoes."),
+      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Neighbours haul a vegetable seedling from the greenhouse store to this garden. Its next attended planting uses that delivered seedling for a growth head start. Supplies also lets you choose beans, lettuce or tomatoes."),
     ],
   },
   {
