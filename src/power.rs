@@ -73,8 +73,13 @@ fn hydro_generation(v: &Village, minutes: f32) -> f32 {
 fn rates(v: &Village, minutes: f32) -> (f32, f32, f32) {
     let altitude = (((minutes.rem_euclid(1440.) / 60.) - 6.) / 12. * std::f32::consts::PI).sin();
     let darkness = ((0.18 - altitude) / 0.65).clamp(0., 1.);
-    let generation =
-        farms(v) as f32 * PEAK_GENERATION * altitude.max(0.) + hydro_generation(v, minutes);
+    let sunlight: f32 = v
+        .buildings
+        .iter()
+        .filter(|b| b.kind == "solar_farm" && b.progress >= 100.)
+        .map(|b| land::solar_exposure(v, interactions::footprint_size(&b.kind), b.x, b.y))
+        .sum();
+    let generation = sunlight * PEAK_GENERATION * altitude.max(0.) + hydro_generation(v, minutes);
     let demand = v
         .buildings
         .iter()

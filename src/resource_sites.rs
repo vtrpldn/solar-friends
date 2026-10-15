@@ -1,7 +1,5 @@
 //! Player-established cultivation and finite extraction plots.
-use crate::{
-    CAMP, Game, MAP_SIZE, Resident, Village, ecology, economy, event, interactions, river_bank,
-};
+use crate::{CAMP, Game, MAP_SIZE, Resident, Village, economy, event, interactions, river_bank};
 use wasm_bindgen::prelude::*;
 pub const LAND: [f32; 3] = [140., 96., 24.];
 pub fn default_land() -> [f32; 3] {
@@ -154,7 +152,9 @@ pub fn finish(v: &mut Village, index: usize) -> bool {
         );
     }
     water(v);
-    v.economy.sources[index].moisture = 1440.;
+    let s = &v.economy.sources[index];
+    let (n, x, y) = (size(s.material), s.x, s.y);
+    crate::land::water_plot(v, n, x, y, 1.);
     true
 }
 pub fn harvested(v: &mut Village, index: usize, amount: u32) {
@@ -175,28 +175,52 @@ pub fn harvested(v: &mut Village, index: usize, amount: u32) {
             s.planted = material == 1 && s.auto_replant;
         }
     }
+    crate::land::sync_moisture(v);
 }
 pub fn advance(v: &mut Village, minutes: f32) {
-    let rain = ecology::raining(v.minutes);
     let mut matured = 0;
-    for s in &mut v.economy.sources {
-        if !s.active || s.material >= 2 || !s.planted || s.growth >= 1. {
+    for i in 0..v.economy.sources.len() {
+        let s = &v.economy.sources[i];
+        if !s.active || s.material >= 2 {
             continue;
         }
-        if rain {
-            s.moisture = 1440.;
+        let (n, x, y, material, planted, growth, restored) = (
+            size(s.material),
+            s.x,
+            s.y,
+            s.material,
+            s.planted,
+            s.growth,
+            s.restored,
+        );
+        let condition = crate::land::condition(v, n, x, y);
+        let wet = crate::land::plot_water(
+            v,
+            n,
+            x,
+            y,
+            minutes,
+            crate::land::RootZone {
+                capacity: 1440.,
+                drying: 1.,
+                covered: false,
+            },
+        );
+        if !planted || growth >= 1. {
+            continue;
         }
-        let wet = minutes.min(s.moisture);
-        s.moisture = (s.moisture - minutes).max(0.);
+        let s = &mut v.economy.sources[i];
         s.growth = (s.growth
-            + wet / (if s.material == 0 { 5760. } else { 2880. })
-                * if s.restored { 1.25 } else { 1. })
+            + wet / (if material == 0 { 5760. } else { 2880. })
+                * crate::land::growth(&condition)
+                * if restored { 1.25 } else { 1. })
         .min(1.);
         if s.growth >= 1. {
             s.remaining = s.maximum;
             matured += 1;
         }
     }
+    crate::land::sync_moisture(v);
     if matured > 0 {
         event(
             v,
@@ -204,6 +228,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         );
     }
 }
+
 pub fn retire_legacy(v: &mut Village, residents: &mut [Resident]) {
     let legacy = [
         (0, 0, 2, 72.),
@@ -373,6 +398,9 @@ impl Game {
             plant_requested: false,
             harvests: 0,
         });
+        if material < 2 {
+            crate::land::water_plot(&mut v, size(material), x, y, 1.);
+        }
         crate::logistics::sync(&mut v);
         event(&mut v, "A player-managed material plot is established.");
         "ok".into()

@@ -96,27 +96,69 @@ pub fn advance(v: &mut Village, minutes: f32) {
             v.progress.rain_caught |= v.water > before;
         }
     }
-    for b in &mut v.buildings {
-        if !farm(b) || b.progress < 100. || !b.crop.planted {
+    for i in 0..v.buildings.len() {
+        let b = &v.buildings[i];
+        if !farm(b) || b.progress < 100. {
             continue;
         }
-        if rain && b.kind != "greenhouse" {
-            b.crop.moisture = (b.crop.moisture + minutes * 3.).min(240.);
+        let (n, x, y, cap, covered, drying, planted) = (
+            interactions::footprint_size(&b.kind),
+            b.x,
+            b.y,
+            moisture_capacity(b),
+            b.kind == "greenhouse",
+            if b.crop.kind == "beans" { 0.5 } else { 1. },
+            b.crop.planted,
+        );
+        let condition = land::condition(v, n, x, y);
+        let wet_minutes = land::plot_water(
+            v,
+            n,
+            x,
+            y,
+            minutes,
+            land::RootZone {
+                capacity: cap,
+                drying,
+                covered,
+            },
+        );
+        if !planted {
+            continue;
         }
-        let drying = if b.crop.kind == "beans" { 0.5 } else { 1. };
-        let wet_minutes = minutes.min(b.crop.moisture / drying);
-        b.crop.growth = (b.crop.growth + wet_minutes).min(duration(&b.crop));
-        b.crop.moisture = (b.crop.moisture - minutes * drying).max(0.);
-        if b.kind == "greenhouse" && v.seedlings < 12 {
-            let progress = b.crop.nursery + wet_minutes;
+        let b = &mut v.buildings[i];
+        b.crop.growth =
+            (b.crop.growth + wet_minutes * land::growth(&condition)).min(duration(&b.crop));
+        if covered && v.seedlings < 12 {
+            let progress = b.crop.nursery + wet_minutes * land::growth(&condition);
             let raised = ((progress / 480.).floor() as u32).min(12 - v.seedlings);
             v.seedlings += raised;
             v.progress.seedlings_raised = v.progress.seedlings_raised.saturating_add(raised);
             b.crop.nursery = progress % 480.;
         }
     }
+    land::sync_moisture(v);
 }
 
+fn harvest_yield(v: &Village, r: &Resident, index: usize) -> u32 {
+    let b = &v.buildings[index];
+    let crop = &b.crop;
+    let base = match crop.kind.as_str() {
+        "beans" => 10.,
+        "tomatoes" if crop.harvests > 0 && v.progress.compost == 0 => 4.,
+        "tomatoes" => 6.,
+        _ => 5.,
+    };
+    let g = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
+    (base * land::yield_factor(&g)).round().max(1.) as u32
+        + if r.favorite == "garden" { 3 } else { 0 }
+        + if v.progress.compost > 0 { 3 } else { 0 }
+        + if v.progress.use_tools && logistics::site_tools(v, b.id) > 0 {
+            2
+        } else {
+            0
+        }
+}
 pub fn tend(v: &mut Village, r: &Resident) {
     let building = spacing::building(r, v);
     let Some(index) = v
@@ -126,28 +168,22 @@ pub fn tend(v: &mut Village, r: &Resident) {
     else {
         return;
     };
-    let site_id = v.buildings[index].id;
-    let capacity = moisture_capacity(&v.buildings[index]);
-    let outdoor = v.buildings[index].kind == "garden";
-    let pending = &v.buildings[index].crop;
-    if pending.planted && pending.growth >= duration(pending) {
-        let base = match pending.kind.as_str() {
-            "beans" => 10,
-            "tomatoes" if pending.harvests > 0 && v.progress.compost == 0 => 4,
-            "tomatoes" => 6,
-            _ => 5,
-        };
-        let output = base
-            + if r.favorite == "garden" { 3 } else { 0 }
-            + if v.progress.compost > 0 { 3 } else { 0 }
-            + if v.progress.use_tools && logistics::site_tools(v, site_id) > 0 {
-                2
-            } else {
-                0
-            };
-        if economy::capacity(v).saturating_sub(economy::storage(v)) < output {
-            return;
-        }
+    let b = &v.buildings[index];
+    let (site_id, n, x, y, outdoor) = (
+        b.id,
+        interactions::footprint_size(&b.kind),
+        b.x,
+        b.y,
+        b.kind == "garden",
+    );
+    let harvesting = b.crop.planted && b.crop.growth >= duration(&b.crop);
+    let output = if harvesting {
+        harvest_yield(v, r, index)
+    } else {
+        0
+    };
+    if harvesting && economy::capacity(v).saturating_sub(economy::storage(v)) < output {
+        return;
     }
     let crop = &mut v.buildings[index].crop;
     if !crop.planted {
@@ -161,15 +197,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
         } else {
             0.
         };
-    } else if crop.growth >= duration(crop) {
-        let mut yield_food = match crop.kind.as_str() {
-            "beans" => 10.,
-            "tomatoes" => 6.,
-            _ => 5.,
-        };
-        if crop.kind == "tomatoes" && crop.harvests > 0 && v.progress.compost == 0 {
-            yield_food -= 2.;
-        }
+    } else if harvesting {
         if crop.kind == "tomatoes" && crop.harvests < 2 {
             crop.harvests += 1;
             crop.growth = 0.;
@@ -179,17 +207,15 @@ pub fn tend(v: &mut Village, r: &Resident) {
             crop.moisture = 0.;
             crop.harvests = 0;
         }
-        yield_food += if r.favorite == "garden" { 3. } else { 0. };
-        if v.progress.compost > 0 {
+        let compost = v.progress.compost > 0;
+        if compost {
             v.progress.compost -= 1;
-            yield_food += 3.;
             v.progress.enriched_harvests += 1;
         }
-        if progression::use_tool(v, site_id) {
-            yield_food += 2.;
-        }
-        food::gather(v, Some(site_id), r.x, r.y, yield_food as u32);
-        v.supplies.gathered += yield_food;
+        progression::use_tool(v, site_id);
+        land::harvest_soil(v, n, x, y, compost);
+        food::gather(v, Some(site_id), r.x, r.y, output);
+        v.supplies.gathered += output as f32;
         v.harvests += 1;
     } else if v.circular.reclaimed >= 2. || v.water >= 2. {
         if v.circular.reclaimed >= 2. {
@@ -198,8 +224,9 @@ pub fn tend(v: &mut Village, r: &Resident) {
         } else {
             v.water -= 2.;
         }
-        crop.moisture = capacity;
+        land::water_plot(v, n, x, y, 1.);
     }
+    land::sync_moisture(v);
 }
 
 #[cfg(test)]

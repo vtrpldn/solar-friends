@@ -660,6 +660,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     power::advance(&mut v, dt * MINUTES_PER_SECOND);
     sanitation::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
+    land::advance_fallow(&mut v, dt * MINUTES_PER_SECOND);
     situations::advance(&mut v, dt * MINUTES_PER_SECOND);
     if ((before - 360.) / 1440.).floor() < ((v.minutes - 360.) / 1440.).floor() {
         v.mornings += 1;
@@ -1134,7 +1135,7 @@ impl Game {
                 land: land::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 11,
+                version: 12,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1593,7 +1594,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 11)
+            || !matches!(v.version, 3 | 12)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1680,7 +1681,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 11;
+            save.village.version = 12;
             if !processes::initialise(&mut save.village) {
                 return false;
             }
@@ -2127,7 +2128,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":11", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":12", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

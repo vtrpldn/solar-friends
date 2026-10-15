@@ -310,6 +310,7 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
         if let Some(p) = v.economy.projects.iter_mut().find(|p| p.building == id) {
             p.paused = j.project_paused;
         }
+        land::sync_moisture(v);
         event(v, "Our building is ready in its new place.");
     } else {
         processes::close(v, id);
@@ -594,6 +595,7 @@ mod tests {
                 moisture: 120.,
                 ..Default::default()
             };
+            land::water_plot(&mut v, 2, 5, 5, 0.5);
         }
         assert_eq!(g.queue_building_work(0, "move", 16, 18), "ok");
         checkpoint(&mut g);
@@ -615,9 +617,13 @@ mod tests {
             assert!(work(&mut v, 0, 36.));
             assert_eq!(v.buildings[0].id, 0);
             assert_eq!(v.buildings[0].crop.growth, 50.);
-            assert_eq!(v.buildings[0].crop.moisture, 120.);
+            assert_eq!(
+                v.buildings[0].crop.moisture, 0.,
+                "Root-zone water stays at the original ground, not in the moving building"
+            );
             assert_eq!(v.buildings[0].progress, 100.);
             assert_eq!(v.economy.next_building, 1);
+            assert_eq!(land::condition(&v, 2, 5, 5).moisture, 0.5);
         }
         assert_eq!(g.toggle_road(5, 5), "ok");
         checkpoint(&mut g);
