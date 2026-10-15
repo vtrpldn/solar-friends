@@ -344,7 +344,11 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         && q.building.is_some_and(|id| {
             !v.buildings.iter().any(|b| {
                 b.id == id
-                    && ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+                    && ecology::needs_tending(
+                        v,
+                        b,
+                        water::irrigation(v, water::Owner::Building(b.id)),
+                    )
             })
         })
     {
@@ -745,7 +749,10 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
                 .find(|b| b.id == id)
                 .is_none_or(|b| match q.task.as_str() {
                     "cook" | "eat" => b.kind == "kitchen",
-                    "garden" => matches!(b.kind.as_str(), "garden" | "greenhouse"),
+                    "garden" => matches!(
+                        b.kind.as_str(),
+                        "garden" | "greenhouse" | "orchard" | "goat_pasture" | "apiary"
+                    ),
                     "craft" => b.kind == "workshop",
                     "compost" => b.kind == "compost",
                     "rest" => b.kind == "home",

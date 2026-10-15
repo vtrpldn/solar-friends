@@ -3,7 +3,12 @@ use crate::{Game, Village, event, ready, restoration};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub const COUNT: usize = 24;
+pub const COUNT: usize = 29;
+pub const FODDER: usize = 24;
+pub const MILK: usize = 25;
+pub const HONEY: usize = 26;
+pub const GOATS: usize = 27;
+pub const BEES: usize = 28;
 pub const SEEDLINGS: usize = 21;
 pub const TREE_STARTS: usize = 22;
 pub const BAMBOO_STARTS: usize = 23;
@@ -39,6 +44,11 @@ pub const NAMES: [&str; COUNT] = [
     "seedlings",
     "tree_starts",
     "bamboo_starts",
+    "fodder",
+    "milk",
+    "honey",
+    "goats",
+    "bees",
 ];
 const LABELS: [&str; COUNT] = [
     "Timber",
@@ -65,10 +75,15 @@ const LABELS: [&str; COUNT] = [
     "Vegetable seedlings",
     "Timber seedlings",
     "Bamboo starts",
+    "Dry fodder",
+    "Fresh goat milk",
+    "Honey",
+    "Pair of dairy goats",
+    "Stingless bee colony",
 ];
 const PRICES: [i64; COUNT] = [
     700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900, 400,
-    800, 300, 800, 0, 300, 1000, 2000,
+    800, 300, 800, 0, 300, 1000, 2000, 200, 700, 1200, 180000, 40000,
 ];
 pub type Bundle = [u32; COUNT];
 #[derive(Clone, Serialize, Deserialize)]
@@ -159,7 +174,8 @@ impl Default for Economy {
     fn default() -> Self {
         Self {
             stock: [
-                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 4, 1,
+                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 4, 1, 0,
+                0, 0, 0, 0,
             ],
             money: 300000,
             ledger: vec![Entry {
@@ -260,6 +276,18 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
             stage("Foundation", &[(3, 6), (2, 4)], 14.),
             stage("Structure", &[(5, 6), (6, 4), (7, 4)], 24.),
             stage("Workbench & fittings", &[(0, 6), (8, 3)], 18.),
+        ],
+        "orchard" => vec![
+            stage("Mulched planting rows", &[(2, 8), (COMPOST, 2)], 18.),
+            stage("Plant four fruit trees", &[(TREE_STARTS, 4)], 16.),
+        ],
+        "goat_pasture" => vec![
+            stage("Bamboo fences & shelter", &[(1, 10), (7, 3), (8, 2)], 22.),
+            stage("Drinking trough & dairy goats", &[(9, 1), (GOATS, 1)], 14.),
+        ],
+        "apiary" => vec![
+            stage("Hive stand & shade roof", &[(0, 3), (7, 1), (8, 1)], 12.),
+            stage("Settle a stingless bee colony", &[(BEES, 1)], 10.),
         ],
         "coop" => vec![
             stage("Footings", &[(3, 2)], 8.),
@@ -767,7 +795,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let missing:Bundle=std::array::from_fn(|i|if p.committed{0}else{s.items[i].saturating_sub(p.reserved[i])});
         Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"on_site":if v.logistics.is_some(){crate::logistics::project_items(v,b.id)}else{[0;COUNT]},"hauling_blocker":v.logistics.as_ref().and_then(|s|s.stores.iter().find(|p|p.owner==crate::logistics::Owner::Site(b.id))).and_then(|p|p.blocker.as_deref()),"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
     }).collect();
-    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","banana_treatment","biodigester","warehouse"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
+    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","banana_treatment","biodigester","warehouse","orchard","goat_pasture","apiary"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
     let preparation: Vec<_> = [5, 6, 7, 8]
         .into_iter()
         .filter_map(|i| {

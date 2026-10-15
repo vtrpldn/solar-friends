@@ -1,7 +1,7 @@
 //! Building visits finish only after residents reach the selected building.
 use super::*;
 pub fn radius(kind: &str) -> i32 {
-    if matches!(kind, "square" | "solar_farm") {
+    if matches!(kind, "square" | "solar_farm" | "orchard" | "goat_pasture") {
         2
     } else {
         1
@@ -10,8 +10,8 @@ pub fn radius(kind: &str) -> i32 {
 /// Occupied tile centers. Even plots keep the saved anchor at their front tile.
 pub fn footprint_size(kind: &str) -> i32 {
     match kind {
-        "square" | "solar_farm" => 3,
-        "well" | "compost" | "coop" | "streetlight" | "hydro" | "eco_toilet" => 1,
+        "square" | "solar_farm" | "orchard" | "goat_pasture" => 3,
+        "well" | "compost" | "coop" | "streetlight" | "hydro" | "eco_toilet" | "apiary" => 1,
         _ => 2,
     }
 }
@@ -91,7 +91,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             r.energy = (r.energy + 8.).min(100.);
             v.progress.social_mask |= 1 << r.id;
         }
-        "garden" | "greenhouse" => ecology::tend(v, r),
+        "garden" | "greenhouse" | "orchard" | "goat_pasture" | "apiary" => ecology::tend(v, r),
         "kitchen" if !situations::protected(v, r.id, "cook") => {
             let _ = production::order_meals(v, Some(id));
         }

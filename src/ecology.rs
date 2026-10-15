@@ -28,7 +28,10 @@ impl Default for Crop {
     }
 }
 pub fn crop_kind(kind: &str) -> bool {
-    matches!(kind, "lettuce" | "beans" | "tomatoes")
+    matches!(
+        kind,
+        "lettuce" | "beans" | "tomatoes" | "maize" | "cassava" | "fodder"
+    )
 }
 pub fn farm(b: &Building) -> bool {
     matches!(b.kind.as_str(), "garden" | "greenhouse")
@@ -36,6 +39,9 @@ pub fn farm(b: &Building) -> bool {
 pub fn duration(c: &Crop) -> f32 {
     match c.kind.as_str() {
         "beans" => 360.,
+        "maize" => 720.,
+        "cassava" => 1440.,
+        "fodder" => 480.,
         "tomatoes" if c.harvests == 0 => 300.,
         "tomatoes" => 180.,
         _ => 180.,
@@ -68,8 +74,12 @@ pub fn capacity(v: &Village) -> f32 {
     water::capacity(v)
 }
 
-pub fn needs_tending(b: &Building, water: f32) -> bool {
+pub fn needs_tending(v: &Village, b: &Building, water: f32) -> bool {
+    if agriculture::kind(b) {
+        return agriculture::ready(v, b);
+    }
     farm(b)
+        && building_work::job(v, b.id).is_none()
         && b.progress >= 100.
         && ((!b.crop.planted && b.crop.replant)
             || (b.crop.planted
@@ -78,6 +88,7 @@ pub fn needs_tending(b: &Building, water: f32) -> bool {
 
 pub fn advance(v: &mut Village, minutes: f32) {
     water::rain(v, minutes);
+    agriculture::advance(v, minutes);
     for i in 0..v.buildings.len() {
         let b = &v.buildings[i];
         if !farm(b) || b.progress < 100. {
@@ -89,7 +100,11 @@ pub fn advance(v: &mut Village, minutes: f32) {
             b.y,
             moisture_capacity(b),
             b.kind == "greenhouse",
-            if b.crop.kind == "beans" { 0.5 } else { 1. },
+            if matches!(b.crop.kind.as_str(), "beans" | "cassava" | "fodder") {
+                0.5
+            } else {
+                1.
+            },
             b.crop.planted,
         );
         let condition = land::condition(v, n, x, y);
@@ -122,6 +137,9 @@ fn harvest_base(v: &Village, b: &Building) -> u32 {
     let crop = &b.crop;
     let base = match crop.kind.as_str() {
         "beans" => 10.,
+        "maize" => 14.,
+        "cassava" => 20.,
+        "fodder" => 10.,
         "tomatoes"
             if crop.harvests > 0
                 && organics::available(v, logistics::Owner::Site(b.id), economy::COMPOST) == 0 =>
@@ -132,7 +150,15 @@ fn harvest_base(v: &Village, b: &Building) -> u32 {
         _ => 5.,
     };
     let g = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
-    (base * land::yield_factor(&g)).round().max(1.) as u32
+    (base
+        * land::yield_factor(&g)
+        * if agriculture::pollinated(v, b) && matches!(crop.kind.as_str(), "beans" | "tomatoes") {
+            1.15
+        } else {
+            1.
+        })
+    .round()
+    .max(1.) as u32
         + if organics::available(v, logistics::Owner::Site(b.id), economy::COMPOST) > 0 {
             3
         } else {
@@ -161,13 +187,21 @@ impl Game {
         }
         let soil = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
         let minimum = harvest_base(v, &next);
-        serde_json::json!({"crop":next.crop.kind,"harvest_min":minimum,"harvest_max":minimum+3,"soil":soil,"growth_multiplier":land::growth(&soil),"nursery_minutes":480./land::growth(&soil),"seedlings_here":organics::available(v,logistics::Owner::Site(b.id),economy::SEEDLINGS)}).to_string()
+        serde_json::json!({"crop":next.crop.kind,"harvest_min":minimum,"harvest_max":minimum+3,"soil":soil,"growth_multiplier":land::growth(&soil),"nursery_minutes":480./land::growth(&soil),"seedlings_here":organics::available(v,logistics::Owner::Site(b.id),economy::SEEDLINGS),"rotations":b.agriculture.rotations,"previous_crop":b.agriculture.previous_crop,"pollinated":agriculture::pollinated(v,b),"product":if next.crop.kind=="fodder"{"fodder"}else{"food"}}).to_string()
     }
 }
 pub fn tend(v: &mut Village, r: &Resident) {
     let building = spacing::building(r, v);
+    if let Some(id) = building.filter(|id| {
+        v.buildings
+            .iter()
+            .any(|b| b.id == *id && agriculture::kind(b))
+    }) {
+        agriculture::tend(v, id);
+        return;
+    }
     let Some(index) = v.buildings.iter().position(|b| {
-        needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+        needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
             && Some(b.id) == building
     }) else {
         return;
@@ -186,7 +220,10 @@ pub fn tend(v: &mut Village, r: &Resident) {
     } else {
         0
     };
-    if harvesting && economy::capacity(v).saturating_sub(economy::storage(v)) < output {
+    if harvesting
+        && (economy::capacity(v).saturating_sub(economy::storage(v)) < output
+            || logistics::room(v, logistics::Owner::Site(site_id)) < output)
+    {
         return;
     }
     let seedling = outdoor
@@ -217,6 +254,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
             crop.moisture = 0.;
             crop.harvests = 0;
         }
+        let harvested_kind = v.buildings[index].crop.kind.clone();
         let compost = organics::available(v, logistics::Owner::Site(site_id), economy::COMPOST) > 0;
         if compost {
             logistics::spend(
@@ -229,8 +267,18 @@ pub fn tend(v: &mut Village, r: &Resident) {
         }
         progression::use_tool(v, site_id);
         land::harvest_soil(v, n, x, y, compost);
-        food::gather(v, Some(site_id), r.x, r.y, output);
-        v.supplies.gathered += output as f32;
+        agriculture::rotation(v, site_id, &harvested_kind);
+        if harvested_kind == "fodder" {
+            assert!(logistics::receive(
+                v,
+                logistics::Owner::Site(site_id),
+                economy::FODDER,
+                output
+            ));
+        } else {
+            food::gather(v, Some(site_id), r.x, r.y, output);
+            v.supplies.gathered += output as f32;
+        }
         v.harvests += 1;
     } else if water::irrigate(v, water::Owner::Building(site_id)) {
         land::water_plot(v, n, x, y, 1.);

@@ -75,7 +75,8 @@ fn caps(kind: &str) -> Option<[f64; LIQUIDS]> {
         "home" => [8., 0., 24., 0.],
         "kitchen" => [6., 0., 24., 0.],
         "eco_toilet" => [8., 0., 16., 16.],
-        "garden" | "greenhouse" => [4., 4., 0., 0.],
+        "garden" | "greenhouse" | "orchard" => [4., 4., 0., 0.],
+        "goat_pasture" => [6., 0., 0., 0.],
         "wetland" => [0., 60., 24., 0.],
         "biodigester" | "banana_treatment" => [0., 0., 0., 8.],
         _ => return None,
@@ -598,7 +599,8 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
                     if p.water[0] < 1. { 600. } else { 180. },
                 )
             }
-            Some("garden" | "greenhouse") => (
+            Some("goat_pasture") => (6., false, if p.water[0] < 2. { 700. } else { 180. }),
+            Some("garden" | "greenhouse" | "orchard") => (
                 4.,
                 true,
                 if p.water.iter().copied().fold(0., f64::max) < 2. {

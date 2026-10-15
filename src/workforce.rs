@@ -354,15 +354,15 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                 "Making time for our queued building crew work.",
             );
         }
-        if ingredients(v, r.id)
-            && ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+        if (ingredients(v, r.id) || agriculture::wanted(v, b.id))
+            && ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
         {
             add(
                 "garden",
                 Some(b.id),
                 None,
                 390.,
-                "Tending our garden for the next meals.",
+                "Tending our crops, fruit trees and animals during community hours.",
             );
         }
     }

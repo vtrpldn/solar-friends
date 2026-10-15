@@ -77,11 +77,26 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if v.buildings[index].poultry.remaining <= 0. {
             let local =
                 food::pantry(v, id).map_or(0, |p| food::available(v, p, economy::FOOD, None));
-            if !v.supplies.feed_hens || v.food < 9. || local < 3 || reserved_eggs + 3 > 12 {
+            let fodder = organics::available(v, logistics::Owner::Pantry(id), economy::FODDER) >= 2;
+            if !v.supplies.feed_hens
+                || (!fodder && (v.food < 9. || local < 3))
+                || reserved_eggs + 3 > 12
+            {
                 continue;
             }
-            logistics::spend(v, Some(logistics::Owner::Pantry(id)), economy::FOOD, 3);
-            v.supplies.used += 3.;
+            logistics::spend(
+                v,
+                Some(logistics::Owner::Pantry(id)),
+                if fodder {
+                    economy::FODDER
+                } else {
+                    economy::FOOD
+                },
+                if fodder { 2 } else { 3 },
+            );
+            if !fodder {
+                v.supplies.used += 3.;
+            }
             v.buildings[index].poultry.remaining = 720.;
             reserved_eggs += 3;
         }

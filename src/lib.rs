@@ -3,6 +3,7 @@ use bevy_ecs::prelude::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod agriculture;
 mod building_work;
 mod climate;
 mod devtools;
@@ -45,7 +46,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 21;
+pub const SAVE_VERSION: u32 = 22;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -140,6 +141,8 @@ pub struct Building {
     pub crop: ecology::Crop,
     #[serde(default)]
     pub poultry: supplies::Poultry,
+    #[serde(default)]
+    pub agriculture: agriculture::Plot,
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
@@ -273,10 +276,9 @@ fn available(v: &Village, task: &str) -> bool {
             .iter()
             .any(|b| b.active() && b.material != economy::TOOLS),
         "outside" => (0..5).any(|id| occupations::available(v, id)),
-        "garden" => v
-            .buildings
-            .iter()
-            .any(|b| ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))),
+        "garden" => v.buildings.iter().any(|b| {
+            ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
+        }),
         "sanitation" => ready(v, "eco_toilet"),
         "cook" => production::can_order_meals(v),
         "water" => water::has_work(v),
@@ -320,7 +322,7 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
         .iter()
         .filter(|b| {
             if task == "garden" {
-                ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+                ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
             } else if task == "compost" {
                 organics::can_turn(v, b.id)
             } else if task == "build" {
@@ -1102,10 +1104,15 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                         completed_batch = economy::finish_job(&mut v, &r.task, i);
                     }
                 }
-                "garden" if r.requested || supplies::needs_ingredients(&v) => {
+                "garden"
+                    if r.requested
+                        || r.activity_building
+                            .is_some_and(|id| agriculture::wanted(&v, id)) =>
+                {
                     completed_batch = v.buildings.iter().any(|b| {
                         Some(b.id) == r.activity_building
                             && ecology::needs_tending(
+                                &v,
                                 b,
                                 water::irrigation(&v, water::Owner::Building(b.id)),
                             )
@@ -1503,6 +1510,7 @@ impl Game {
             visits: 0,
             crop: ecology::Crop::default(),
             poultry: supplies::Poultry::default(),
+            agriculture: agriculture::Plot::default(),
         });
         economy::plan(&mut v, id);
         if variant != "standard" {
@@ -1778,6 +1786,7 @@ impl Game {
             !b.next_visit.is_finite()
                 || b.next_visit < 0.
                 || !ecology::valid(b)
+                || !agriculture::valid(v, b)
                 || b.contributors > 31
                 || economy::recipe(&b.kind, "standard").is_none()
                 || !(1..=MAP_SIZE - 2).contains(&b.x)
@@ -2004,6 +2013,7 @@ mod tests {
                 visits: 0,
                 crop: ecology::Crop::default(),
                 poultry: supplies::Poultry::default(),
+                agriculture: agriculture::Plot::default(),
             });
         }
         for minutes in (0..2880).step_by(30) {

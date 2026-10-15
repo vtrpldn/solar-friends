@@ -115,7 +115,7 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
             return Err("The requested worksite is closed for construction or crew work.");
         }
         if r.task == "garden"
-            && !ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+            && !ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
         {
             return Err("This plot is growing or needs water before tending can continue.");
         }

@@ -266,6 +266,7 @@ mod tests {
             contributors: 0,
             crop: Default::default(),
             poultry: Default::default(),
+            agriculture: Default::default(),
             visits: 0,
             next_visit: 0.,
         });

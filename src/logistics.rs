@@ -291,7 +291,15 @@ pub fn sync(v: &mut Village) {
     for b in &v.buildings {
         if matches!(
             b.kind.as_str(),
-            "kitchen" | "coop" | "grove" | "square" | "compost" | "biodigester"
+            "kitchen"
+                | "coop"
+                | "grove"
+                | "square"
+                | "compost"
+                | "biodigester"
+                | "goat_pasture"
+                | "apiary"
+                | "orchard"
         ) && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Pantry(b.id), b.x as f32, b.y as f32, 60));
@@ -633,6 +641,7 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
     }
     crate::organics::needs(v, owner, &mut items);
     crate::planting::needs(v, owner, &mut items);
+    crate::agriculture::needs(v, owner, &mut items);
     items
 }
 fn tool_target(v: &Village, id: usize) -> bool {
@@ -1547,7 +1556,15 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                         b.id == id
                             && matches!(
                                 b.kind.as_str(),
-                                "kitchen" | "coop" | "grove" | "square" | "compost" | "biodigester"
+                                "kitchen"
+                                    | "coop"
+                                    | "grove"
+                                    | "square"
+                                    | "compost"
+                                    | "biodigester"
+                                    | "goat_pasture"
+                                    | "apiary"
+                                    | "orchard"
                             )
                             && (b.progress >= 100.
                                 || building_work::original_progress(v, id) == Some(100.))

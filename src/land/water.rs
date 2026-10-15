@@ -116,7 +116,7 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
             tended[i] = ecology::farm(b);
             covered[i] = !matches!(
                 b.kind.as_str(),
-                "garden" | "grove" | "banana_treatment" | "compost"
+                "garden" | "grove" | "orchard" | "banana_treatment" | "compost"
             );
         }
     }
@@ -244,8 +244,8 @@ pub fn shade(v: &Village, x: i32, y: i32) -> f32 {
             || crate::building_work::job(v, b.id).is_some_and(|j| {
                 j.original_progress >= 100. && j.stage != crate::building_work::Stage::Rebuild
             });
-        if standing && matches!(b.kind.as_str(), "grove" | "banana_treatment") {
-            let (radius, strength) = if b.kind == "grove" {
+        if standing && matches!(b.kind.as_str(), "grove" | "orchard" | "banana_treatment") {
+            let (radius, strength) = if b.kind == "grove" || b.kind == "orchard" {
                 (3.5, 0.75)
             } else {
                 (2.5, 0.5)
