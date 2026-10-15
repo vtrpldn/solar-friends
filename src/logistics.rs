@@ -23,6 +23,8 @@ pub struct Store {
     pub y: f32,
     pub capacity: u32,
     pub items: Bundle,
+    #[serde(default)]
+    pub food_lots: Vec<freshness::Lot>,
     pub target: Bundle,
     #[serde(default)]
     pub managed: bool,
@@ -39,6 +41,8 @@ pub struct Shipment {
     pub material: usize,
     pub amount: u32,
     pub carrying: bool,
+    #[serde(default)]
+    pub food_lots: Vec<freshness::Lot>,
     pub pickup: [f32; 2],
     pub dropoff: [f32; 2],
     pub route: Vec<[f32; 2]>,
@@ -180,6 +184,7 @@ pub(crate) fn create(v: &mut Village, owner: Owner, x: f32, y: f32, capacity: u3
         y,
         capacity,
         items: [0; COUNT],
+        food_lots: vec![],
         target: [0; COUNT],
         managed: false,
         blocker: None,
@@ -209,6 +214,7 @@ pub fn initialise(v: &mut Village) -> bool {
         {
             let amount = left.min(p.capacity.saturating_sub(sum(&p.items)));
             p.items[i] = amount;
+            freshness::add(&mut p.food_lots, i, amount, v.minutes);
             left -= amount;
         }
         if left > 0 {
@@ -328,6 +334,26 @@ pub fn sync(v: &mut Village) {
     });
 }
 pub fn receive(v: &mut Village, owner: Owner, i: usize, n: u32) -> bool {
+    let mut lots = vec![];
+    freshness::add(&mut lots, i, n, v.minutes);
+    receive_dated(v, owner, i, n, lots)
+}
+pub fn receive_preserved(
+    v: &mut Village,
+    owner: Owner,
+    i: usize,
+    lots: Vec<freshness::Lot>,
+) -> bool {
+    let n = lots.iter().map(|l| l.amount).sum();
+    receive_dated(v, owner, i, n, lots)
+}
+fn receive_dated(
+    v: &mut Village,
+    owner: Owner,
+    i: usize,
+    n: u32,
+    lots: Vec<freshness::Lot>,
+) -> bool {
     if n == 0 {
         return true;
     }
@@ -345,7 +371,9 @@ pub fn receive(v: &mut Village, owner: Owner, i: usize, n: u32) -> bool {
         return false;
     };
     simulation::material_change(v, i, n, true);
-    v.logistics.as_mut().unwrap().stores[index].items[i] += n;
+    let p = &mut v.logistics.as_mut().unwrap().stores[index];
+    p.items[i] += n;
+    freshness::merge(&mut p.food_lots, lots);
     sync_totals(v);
     true
 }
@@ -391,16 +419,21 @@ pub fn spend_at(v: &mut Village, id: Id, i: usize, n: u32) -> bool {
         return false;
     };
     simulation::material_change(v, i, n, false);
-    v.logistics.as_mut().unwrap().stores[index].items[i] -= n;
+    let p = &mut v.logistics.as_mut().unwrap().stores[index];
+    freshness::take(&mut p.food_lots, i, n);
+    p.items[i] -= n;
     sync_totals(v);
     true
 }
 pub fn spend(v: &mut Village, owner: Option<Owner>, i: usize, n: u32) {
+    let _ = take(v, owner, i, n);
+}
+pub fn take(v: &mut Village, owner: Option<Owner>, i: usize, n: u32) -> Vec<freshness::Lot> {
     if n == 0 {
-        return;
+        return vec![];
     }
     let s = v.logistics.as_ref().unwrap();
-    let choices: Vec<_> = s
+    let mut choices: Vec<_> = s
         .stores
         .iter()
         .enumerate()
@@ -427,15 +460,44 @@ pub fn spend(v: &mut Village, owner: Option<Owner>, i: usize, n: u32) {
     );
     simulation::material_change(v, i, n, false);
     let mut left = n;
-    for (index, available) in choices {
-        let take = left.min(available);
-        v.logistics.as_mut().unwrap().stores[index].items[i] -= take;
-        left -= take;
-        if left == 0 {
-            break;
-        }
+    let mut lots = vec![];
+    while left > 0 {
+        let (choice, _) = choices
+            .iter()
+            .enumerate()
+            .filter(|(_, (_, n))| *n > 0)
+            .min_by(|(_, a), (_, b)| {
+                if freshness::lifetime(i).is_some() {
+                    let stores = &v.logistics.as_ref().unwrap().stores;
+                    let expiry = |index: usize| {
+                        stores[index]
+                            .food_lots
+                            .iter()
+                            .find(|l| l.material == i)
+                            .unwrap()
+                            .expires
+                    };
+                    expiry(a.0).total_cmp(&expiry(b.0)).then(a.0.cmp(&b.0))
+                } else {
+                    a.0.cmp(&b.0)
+                }
+            })
+            .unwrap();
+        let (index, available) = choices[choice];
+        let p = &mut v.logistics.as_mut().unwrap().stores[index];
+        let dated = p
+            .food_lots
+            .iter()
+            .find(|l| l.material == i)
+            .map_or(available, |l| l.amount);
+        let taken = left.min(available).min(dated);
+        freshness::merge(&mut lots, freshness::take(&mut p.food_lots, i, taken));
+        p.items[i] -= taken;
+        choices[choice].1 -= taken;
+        left -= taken;
     }
     sync_totals(v);
+    lots
 }
 pub fn rebalance(v: &mut Village) {
     sync(v);
@@ -992,6 +1054,7 @@ fn claim(v: &mut Village, r: &mut Resident) -> bool {
         material: c.material,
         amount: c.amount,
         carrying: false,
+        food_lots: vec![],
         pickup: a,
         dropoff: b,
         route: path.points,
@@ -1048,10 +1111,11 @@ pub fn interrupt(v: &mut Village, r: &Resident) {
     let Some(index) = s.shipments.iter().position(|h| h.resident == r.id) else {
         return;
     };
-    let h = s.shipments.remove(index);
+    let mut h = s.shipments.remove(index);
     if h.carrying {
         let p = s.stores.iter_mut().find(|p| p.id == h.recovery).unwrap();
         p.items[h.material] += h.amount;
+        freshness::merge(&mut p.food_lots, std::mem::take(&mut h.food_lots));
         p.x = r.x;
         p.y = r.y;
     }
@@ -1145,6 +1209,13 @@ pub fn advance(
         r.remaining = 0.;
         return true;
     }
+    if h.carrying {
+        r.reason = format!(
+            "Carrying {} {} to the receiving site.",
+            h.amount,
+            economy::NAMES[h.material]
+        );
+    }
     let target = if h.carrying { h.dropoff } else { h.pickup };
     if h.layout != v.logistics.as_ref().unwrap().layout
         || h.route
@@ -1183,8 +1254,11 @@ pub fn advance(
             return true;
         };
         let s = v.logistics.as_mut().unwrap();
-        s.stores.iter_mut().find(|p| p.id == h.from).unwrap().items[h.material] -= h.amount;
+        let source = s.stores.iter_mut().find(|p| p.id == h.from).unwrap();
+        let food_lots = freshness::take(&mut source.food_lots, h.material, h.amount);
+        source.items[h.material] -= h.amount;
         let h = &mut s.shipments[index];
+        h.food_lots = food_lots;
         h.carrying = true;
         h.route = path.points;
         h.next = 1;
@@ -1196,7 +1270,9 @@ pub fn advance(
         );
     } else {
         let s = v.logistics.as_mut().unwrap();
-        s.stores.iter_mut().find(|p| p.id == h.to).unwrap().items[h.material] += h.amount;
+        let target = s.stores.iter_mut().find(|p| p.id == h.to).unwrap();
+        target.items[h.material] += h.amount;
+        freshness::merge(&mut target.food_lots, h.food_lots);
         s.shipments.remove(index);
         r.remaining = 0.;
         sync(v);
@@ -1239,7 +1315,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 8
+    if v.version != 9
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1461,6 +1537,7 @@ pub fn fixture_stock(v: &mut Village, i: usize, n: u32) {
         left -= n;
     }
     sync_totals(v);
+    freshness::fixture_reseed(v);
     v.simulation.materials = None;
     simulation::start_materials(v);
 }
@@ -1496,6 +1573,8 @@ pub fn fixture_stage(v: &mut Village, id: usize) {
             }
             let n = missing.min(v.logistics.as_ref().unwrap().stores[source].items[i]);
             let s = v.logistics.as_mut().unwrap();
+            let lots = freshness::take(&mut s.stores[source].food_lots, i, n);
+            freshness::merge(&mut s.stores[site].food_lots, lots);
             s.stores[source].items[i] -= n;
             s.stores[site].items[i] += n;
             missing -= n;

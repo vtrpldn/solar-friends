@@ -2,6 +2,7 @@
 export function resetMaterialLocations(state) {
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
+  state.village.freshness={schema:1,expired:Array(19).fill(0)};
   Object.assign(state.village.progress,{gathering_delivery:null,gathering_until:0,invited:0,attended:0});
   for(const b of [state.village.economy.stock,...state.village.economy.projects.flatMap(p=>[p.reserved,p.consumed]),...state.village.economy.orders.map(o=>o.items),...(state.village.building_jobs||[]).map(j=>j.returns)])while(b.length<19)b.push(0);
   state.village.economy.stock[16]=state.village.food;
@@ -17,6 +18,19 @@ export function resetMaterialLocations(state) {
   }
   if(state.village.simulation)state.village.simulation.materials=null;
   return state;
+}
+
+// Test fixtures may restage stock; live transfers always keep native lot dates.
+function alignFoodLots(state,material){
+  const v=state.village,life=state.environment.economy.freshness?.lifetimes.find(l=>l.material===material)?.minutes||({16:5760,17:4320,18:11520})[material];
+  for(const p of v.logistics.stores){
+    p.food_lots??=[];
+    if(p.food_lots.some(l=>l.material===material&&(l.produced>v.minutes||v.mode==='story'&&l.expires<=v.minutes)))p.food_lots=p.food_lots.filter(l=>l.material!==material);
+    let current=p.food_lots.filter(l=>l.material===material).reduce((n,l)=>n+l.amount,0),delta=p.items[material]-current;
+    if(delta>0)p.food_lots.push({material,amount:delta,produced:v.minutes,expires:v.minutes+life});
+    if(delta<0){let remove=-delta;p.food_lots.sort((a,b)=>a.expires-b.expires);for(const l of p.food_lots.filter(l=>l.material===material)){const n=Math.min(remove,l.amount);l.amount-=n;remove-=n;}}
+    p.food_lots=p.food_lots.filter(l=>l.amount>0).sort((a,b)=>a.expires-b.expires||a.material-b.material||a.produced-b.produced);
+  }
 }
 
 // Deliberate test-scene stock changes. Never call while importing a playable save.
@@ -42,6 +56,8 @@ export function restockFixtureFood(state) {
       }
       if(remove)throw new Error('Finish food cargo before reducing this fixture reserve.');
     }
+    alignFoodLots(state,i);
+    v.freshness??={schema:1,expired:Array(19).fill(0)};v.freshness.expired[i]=0;
     v.economy.stock[i]=target;
     if(v.simulation.materials){v.simulation.materials.opening[i]=target;v.simulation.materials.received[i]=0;v.simulation.materials.spent[i]=0;}
   }
