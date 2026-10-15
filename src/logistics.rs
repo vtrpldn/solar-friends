@@ -729,6 +729,14 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if matches!(to, Owner::Restoration(_)) {
         return 1;
     }
+    // Forestry starts are a bounded claim for a player-established plot.
+    // Repeated optional pantry top-ups must not postpone its first planting
+    // or renewable replanting indefinitely.
+    if matches!(to, Owner::Source(_))
+        && matches!(material, economy::TREE_STARTS | economy::BAMBOO_STARTS)
+    {
+        return 1;
+    }
     let kind = match to {
         Owner::Pantry(id) => v
             .buildings
@@ -2125,6 +2133,38 @@ mod tests {
             !doorway(v, &p, [14.4, 10.]),
             "Recovery cannot cross an unrelated home"
         );
+    }
+    #[test]
+    fn reserved_forestry_starts_are_delivered_before_optional_pantry_topups() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("kitchen", 8, 8), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.arrived = true;
+            v.minutes = 540.;
+            v.progress.completed = [true; 4];
+            v.progress.later_completed = [true; 9];
+            fixture_stock(&mut v, economy::FOOD, 60);
+            fixture_stock(&mut v, economy::MEALS, 12);
+            fixture_stock(&mut v, economy::TREE_STARTS, 4);
+        }
+        assert_eq!(g.place_source(0, 16, 13), "ok");
+        let world = g.app.world_mut();
+        let mut r = world
+            .query::<&Resident>()
+            .iter(world)
+            .next()
+            .unwrap()
+            .clone();
+        r.x = CAMP.0;
+        r.y = CAMP.1;
+        let v = world.resource::<Village>();
+        assert!(!supplies::urgent(v));
+        let (candidate, ..) = plan(v, &r).expect("Delivered starts have a reachable planting site");
+        assert_eq!(candidate.material, economy::TREE_STARTS);
+        assert_eq!(candidate.amount, 4);
     }
     #[test]
     fn lowering_a_storage_target_queues_a_return_instead_of_teleporting_goods() {
