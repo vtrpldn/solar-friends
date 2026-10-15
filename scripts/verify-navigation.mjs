@@ -7,7 +7,7 @@ g.start_mode('sandbox');
 const quote=(...p)=>JSON.parse(g.route_quote(...p));
 const original=g.snapshot();
 const open=quote(3,3,13,3);
-assert.equal(open.model,'planned_haul');
+assert.equal(open.model,'routed_work');
 assert.equal(open.blocker,null);
 assert.equal(open.route.distance,10);
 assert.equal(g.snapshot(),original,'Route inspection does not spend time, stock, or money');

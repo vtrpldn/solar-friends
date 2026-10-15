@@ -18,6 +18,24 @@ pub(crate) fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
         || y <= back - 0.2
         || y >= back + size as f32 + 0.2
 }
+pub fn free_spot(v: &Village, p: (f32, f32), id: usize) -> bool {
+    !v.workforce_peers.iter().flatten().any(|r| {
+        r.id != id
+            && r.trip.is_none()
+            && r.remaining > 0.
+            && (requests::work(&r.task)
+                || matches!(
+                    r.task.as_str(),
+                    "visit" | "eat" | "rest" | "socialize" | "sanitation"
+                ))
+            && (r.target_x - p.0).hypot(r.target_y - p.1) < PERSONAL_SPACE
+    })
+}
+fn remaining_spot(v: &Village, spots: &[(f32, f32)], id: usize) -> Option<(f32, f32)> {
+    (0..spots.len())
+        .map(|i| spots[(i + id) % spots.len()])
+        .find(|p| free_spot(v, *p, id))
+}
 
 pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32)> {
     let mut spots: Vec<(f32, f32)> = vec![];
@@ -25,7 +43,8 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
         for angle in [90f32, 45., 0., 135., -45., 180., 225., -90.] {
             let angle = angle.to_radians();
             let p = (x + radius * angle.cos(), y + radius * angle.sin());
-            if land(p.0, p.1)
+            if navigation::clear(v, p.0, p.1)
+                && navigation::exit_segment(v, [x, y], [p.0, p.1])
                 && p.0 < 25.8 + (p.1 * 0.32).sin() * 0.65 - 2.3
                 && v.buildings.iter().all(|b| clear_plot(b, p.0, p.1))
                 && spots
@@ -33,13 +52,13 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
                     .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
             {
                 spots.push(p);
-                if spots.len() > id {
-                    return Some(spots[id]);
+                if spots.len() > id && free_spot(v, p, id) {
+                    return Some(p);
                 }
             }
         }
     }
-    None
+    remaining_spot(v, &spots, id)
 }
 
 pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
@@ -54,20 +73,21 @@ pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
                 b.x as f32 + radius * angle.cos(),
                 b.y as f32 + radius * angle.sin(),
             );
-            if land(p.0, p.1)
+            if navigation::clear(v, p.0, p.1)
+                && navigation::exit_segment(v, [b.x as f32, b.y as f32], [p.0, p.1])
                 && v.buildings.iter().all(|other| clear_plot(other, p.0, p.1))
                 && spots
                     .iter()
                     .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
             {
                 spots.push(p);
-                if spots.len() == 5 {
-                    return Some(spots[id]);
+                if spots.len() > id && free_spot(v, p, id) {
+                    return Some(p);
                 }
             }
         }
     }
-    spots.get(id).copied()
+    remaining_spot(v, &spots, id)
 }
 
 pub fn building(r: &Resident, v: &Village) -> Option<usize> {

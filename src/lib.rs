@@ -25,6 +25,7 @@ mod sleep;
 mod spacing;
 mod supplies;
 mod town_pickup;
+mod walking;
 mod workforce;
 use progression::Progress;
 
@@ -84,6 +85,8 @@ pub struct Resident {
     pub work_check_at: f32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub help: Option<requests::Request>,
+    #[serde(default, skip_serializing_if = "walking::State::empty")]
+    pub walking: walking::State,
     pub last_meal_slot: i32,
     #[serde(default = "sanitation::unused_day")]
     pub last_sanitation_day: i32,
@@ -124,6 +127,8 @@ pub struct Village {
     pub simulation: simulation::State,
     #[serde(default)]
     pub logistics: Option<logistics::State>,
+    #[serde(skip)]
+    pub navigation: Option<std::sync::Arc<navigation::Grid>>,
     #[serde(default)]
     pub workforce: workforce::State,
     #[serde(skip)]
@@ -323,6 +328,7 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
 }
 
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
+    walking::clear(r);
     if r.requested
         && r.help.as_ref().is_some_and(|q| {
             q.active()
@@ -684,6 +690,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         .collect();
     workforce::refresh(&mut v, people.iter());
     for mut r in &mut people {
+        navigation::refresh(&mut v);
         requests::observe(&mut r, &v);
         building_work::sync(&mut r, &v);
         if r.activity_building
@@ -795,10 +802,17 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             requests::observe(&mut r, &v);
             continue;
         }
-        let dx = r.target_x - r.x;
         requests::observe(&mut r, &v);
-        let dy = r.target_y - r.y;
-        let d = dx.hypot(dy);
+        if walking::supports(&r.task) {
+            let travelling = walking::advance(&v, &mut r, &neighbours, dt);
+            v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
+            v.workforce_peers[r.id] = Some(r.clone());
+            requests::observe(&mut r, &v);
+            if travelling {
+                continue;
+            }
+        }
+        let d = (r.target_x - r.x).hypot(r.target_y - r.y);
         if d > 0.08 {
             spacing::walk(&mut r, &neighbours, dt);
             r.energy = (r.energy - dt * 0.035).max(0.);
@@ -1037,6 +1051,7 @@ impl Game {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
                 logistics: None,
+                navigation: None,
                 workforce: workforce::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
@@ -1094,6 +1109,7 @@ impl Game {
                 requested: false,
                 work_check_at: 0.,
                 help: None,
+                walking: walking::State::default(),
                 last_meal_slot: -1,
                 last_sanitation_day: -1,
                 visit_building: None,
@@ -1335,6 +1351,7 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        navigation::refresh(&mut v);
         workforce::refresh(&mut v, people.iter());
         let message = {
             let mut query = self.app.world_mut().query::<&mut Resident>();
@@ -1526,7 +1543,10 @@ impl Game {
                     .filter_map(|r| r.help.as_ref().map(|q| q.id)),
             );
         if !all_ids.into_iter().all(|id| work_ids.insert(id))
-            || save.residents.iter().any(|r| !requests::valid(v, r))
+            || save
+                .residents
+                .iter()
+                .any(|r| !requests::valid(v, r) || !walking::valid(v, r))
         {
             return false;
         }
@@ -1979,7 +1999,11 @@ mod tests {
         );
         advance(&mut g, 4800.);
         let v = g.app.world().resource::<Village>();
-        assert!(v.buildings.iter().all(|b| b.progress >= 100.));
+        assert!(
+            v.buildings.iter().all(|b| b.progress >= 100.),
+            "{}",
+            g.snapshot()
+        );
         assert!(v.harvests > 0);
         assert!(v.meals_served > 0);
         assert!(v.mornings > 0);

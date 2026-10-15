@@ -1,7 +1,6 @@
-//! Routes and read-only cost estimates for resident material hauling.
-//! Other resident activities retain the existing movement system.
+//! Shared geometry and read-only cost estimates for hauling and village work.
 use crate::*;
-use std::{cmp::Reverse, collections::BinaryHeap};
+use std::{cmp::Reverse, collections::BinaryHeap, sync::Arc};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Route {
@@ -9,17 +8,121 @@ pub struct Route {
     pub distance: f32,
     pub minutes: f32,
 }
+fn source_clear(s: &economy::Source, x: f32, y: f32) -> bool {
+    let n = resource_sites::size(s.material) as f32;
+    let left = s.x as f32 - (n / 2.).floor() - 0.5;
+    let top = s.y as f32 - (n / 2.).floor() - 0.5;
+    x <= left - 0.2 || x >= left + n + 0.2 || y <= top - 0.2 || y >= top + n + 0.2
+}
 pub fn clear(v: &Village, x: f32, y: f32) -> bool {
     x.is_finite()
         && y.is_finite()
         && spacing::land(x, y)
         && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y))
-        && v.economy.sources.iter().filter(|s| s.active).all(|s| {
-            let n = resource_sites::size(s.material) as f32;
-            let left = s.x as f32 - (n / 2.).floor() - 0.5;
-            let top = s.y as f32 - (n / 2.).floor() - 0.5;
-            x <= left - 0.2 || x >= left + n + 0.2 || y <= top - 0.2 || y >= top + n + 0.2
-        })
+        && v.economy
+            .sources
+            .iter()
+            .filter(|s| s.active)
+            .all(|s| source_clear(s, x, y))
+}
+/// Leave an occupied origin without entering any other plot or re-entering a
+/// boundary already crossed. This is also the line of access to a worksite.
+pub fn departure_step(v: &Village, from: [f32; 2], to: [f32; 2]) -> bool {
+    if from.iter().chain(&to).any(|n| !n.is_finite()) {
+        return false;
+    }
+    let mut land = spacing::land(from[0], from[1]);
+    if !land
+        && !v
+            .buildings
+            .iter()
+            .any(|b| b.kind == "hydro" && !spacing::clear_plot(b, from[0], from[1]))
+    {
+        return false;
+    }
+    let sources: Vec<_> = v.economy.sources.iter().filter(|s| s.active).collect();
+    let mut buildings_out: Vec<_> = v
+        .buildings
+        .iter()
+        .map(|b| spacing::clear_plot(b, from[0], from[1]))
+        .collect();
+    let mut sources_out: Vec<_> = sources
+        .iter()
+        .map(|s| source_clear(s, from[0], from[1]))
+        .collect();
+    let steps = ((from[0] - to[0]).hypot(from[1] - to[1]) / 0.1)
+        .ceil()
+        .max(1.) as u32;
+    for i in 0..=steps {
+        let t = i as f32 / steps as f32;
+        let x = from[0] + (to[0] - from[0]) * t;
+        let y = from[1] + (to[1] - from[1]) * t;
+        if spacing::land(x, y) {
+            land = true;
+        } else if land {
+            return false;
+        }
+        for (j, b) in v.buildings.iter().enumerate() {
+            if spacing::clear_plot(b, x, y) {
+                buildings_out[j] = true;
+            } else if buildings_out[j] {
+                return false;
+            }
+        }
+        for (j, s) in sources.iter().enumerate() {
+            if source_clear(s, x, y) {
+                sources_out[j] = true;
+            } else if sources_out[j] {
+                return false;
+            }
+        }
+    }
+    true
+}
+pub fn exit_segment(v: &Village, from: [f32; 2], to: [f32; 2]) -> bool {
+    clear(v, to[0], to[1]) && departure_step(v, from, to)
+}
+
+/// A resident already inside a plot can walk out through its own edge. Normal
+/// travel remains on the shared route graph; this never grants a shortcut into
+/// a different foundation.
+pub fn work_route(
+    v: &Village,
+    from: [f32; 2],
+    to: [f32; 2],
+) -> Result<(Route, bool), &'static str> {
+    if clear(v, from[0], from[1]) {
+        return route(v, from, to).map(|r| (r, false));
+    }
+    if !clear(v, to[0], to[1]) {
+        return Err("The work approach is blocked.");
+    }
+    let mut best: Option<Route> = None;
+    for direction in 0..16 {
+        let angle = direction as f32 * std::f32::consts::TAU / 16.;
+        for step in 1..=18 {
+            let radius = step as f32 * 0.25;
+            let p = [
+                from[0] + radius * angle.cos(),
+                from[1] + radius * angle.sin(),
+            ];
+            if !exit_segment(v, from, p) {
+                continue;
+            }
+            if let Ok(mut path) = route(v, p, to) {
+                let distance = (from[0] - p[0]).hypot(from[1] - p[1]);
+                path.points.insert(0, from);
+                path.distance += distance;
+                path.minutes += distance * MINUTES_PER_SECOND / 0.7;
+                if best.as_ref().is_none_or(|b| path.minutes < b.minutes) {
+                    best = Some(path);
+                }
+            }
+            break;
+        }
+    }
+    best.map(|r| (r, true))
+        .ok_or("There is no clear way out to this worksite.")
 }
 pub(crate) fn segment(v: &Village, a: [f32; 2], b: [f32; 2]) -> bool {
     let distance = (b[0] - a[0]).hypot(b[1] - a[1]);
@@ -62,6 +165,75 @@ fn links(v: &Village, p: [f32; 2], free: &[bool]) -> Vec<usize> {
     }
     choices
 }
+const DIRECTIONS: [(i32, i32); 8] = [
+    (1, 0),
+    (-1, 0),
+    (0, 1),
+    (0, -1),
+    (1, 1),
+    (1, -1),
+    (-1, 1),
+    (-1, -1),
+];
+/// Derived geometry only. Caches never enter saves or change simulation time.
+pub struct Grid {
+    layout: u32,
+    free: Vec<bool>,
+    edges: Vec<Vec<(usize, u32)>>,
+}
+impl Grid {
+    fn new(v: &Village, layout: u32) -> Self {
+        let size = (MAP_SIZE * MAP_SIZE) as usize;
+        let free: Vec<_> = (0..size)
+            .map(|i| {
+                let p = point(i);
+                clear(v, p[0], p[1])
+            })
+            .collect();
+        let mut edges = vec![vec![]; size];
+        for current in 0..size {
+            if !free[current] {
+                continue;
+            }
+            let [x, y] = point(current);
+            for (dx, dy) in DIRECTIONS {
+                let Some(next) = cell(x as i32 + dx, y as i32 + dy) else {
+                    continue;
+                };
+                if !free[next]
+                    || (dx != 0
+                        && dy != 0
+                        && (!free[cell(x as i32 + dx, y as i32).unwrap()]
+                            || !free[cell(x as i32, y as i32 + dy).unwrap()]))
+                    || !segment(v, point(current), point(next))
+                {
+                    continue;
+                }
+                edges[current].push((
+                    next,
+                    (cost(v, point(current), point(next)) * 1000.).round() as u32,
+                ));
+            }
+        }
+        Self {
+            layout,
+            free,
+            edges,
+        }
+    }
+}
+fn grid(v: &Village) -> Arc<Grid> {
+    let layout = logistics::layout(v);
+    v.navigation
+        .as_ref()
+        .filter(|g| g.layout == layout)
+        .cloned()
+        .unwrap_or_else(|| Arc::new(Grid::new(v, layout)))
+}
+pub fn refresh(v: &mut Village) {
+    v.navigation = Some(grid(v));
+}
+
 pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'static str> {
     if !clear(v, from[0], from[1]) {
         return Err("The pickup approach is blocked.");
@@ -76,15 +248,11 @@ pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'stati
             minutes: 0.,
         });
     }
-    let size = (MAP_SIZE * MAP_SIZE) as usize;
-    let free: Vec<_> = (0..size)
-        .map(|i| {
-            let p = point(i);
-            clear(v, p[0], p[1])
-        })
-        .collect();
-    let starts = links(v, from, &free);
-    let goals = links(v, to, &free);
+    let grid = grid(v);
+    let size = grid.free.len();
+    let free = &grid.free;
+    let starts = links(v, from, free);
+    let goals = links(v, to, free);
     if starts.is_empty() || goals.is_empty() {
         return Err("There is no clear approach to this route.");
     }
@@ -100,34 +268,8 @@ pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'stati
         if score != distances[current] {
             continue;
         }
-        let [x, y] = point(current);
-        for (dx, dy) in [
-            (1, 0),
-            (-1, 0),
-            (0, 1),
-            (0, -1),
-            (1, 1),
-            (1, -1),
-            (-1, 1),
-            (-1, -1),
-        ] {
-            let Some(next) = cell(x as i32 + dx, y as i32 + dy) else {
-                continue;
-            };
-            if !free[next] {
-                continue;
-            }
-            if dx != 0
-                && dy != 0
-                && (!free[cell(x as i32 + dx, y as i32).unwrap()]
-                    || !free[cell(x as i32, y as i32 + dy).unwrap()])
-            {
-                continue;
-            }
-            if !segment(v, point(current), point(next)) {
-                continue;
-            }
-            let candidate = score + (cost(v, point(current), point(next)) * 1000.).round() as u32;
+        for &(next, edge) in &grid.edges[current] {
+            let candidate = score + edge;
             if candidate < distances[next] {
                 distances[next] = candidate;
                 previous[next] = Some(current);
@@ -184,14 +326,81 @@ impl Game {
             Ok(route) => (Some(route), None),
             Err(blocker) => (None, Some(blocker)),
         };
-        serde_json::json!({"route":route,"blocker":blocker,"model":"planned_haul",
-            "note":"Hauling route estimate. Ordinary resident walks still use the existing movement system."}).to_string()
+        serde_json::json!({"route":route,"blocker":blocker,"model":"routed_work",
+            "note":"Clear-ground route estimate used by hauling and village work. Needs, leisure and off-site commutes retain their current routines."}).to_string()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn derived_graph_reuse_and_invalidation_preserve_queries_and_exact_routes() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        let before = g.snapshot();
+        refresh(&mut g.app.world_mut().resource_mut::<Village>());
+        assert_eq!(g.snapshot(), before);
+        let old = g
+            .app
+            .world()
+            .resource::<Village>()
+            .navigation
+            .as_ref()
+            .unwrap()
+            .clone();
+        refresh(&mut g.app.world_mut().resource_mut::<Village>());
+        assert!(Arc::ptr_eq(
+            &old,
+            g.app
+                .world()
+                .resource::<Village>()
+                .navigation
+                .as_ref()
+                .unwrap()
+        ));
+        let path = route(g.app.world().resource::<Village>(), [3., 3.], [13., 3.]).unwrap();
+        let mut uncached = g.app.world().resource::<Village>().clone();
+        uncached.navigation = None;
+        assert_eq!(
+            serde_json::to_string(&path).unwrap(),
+            serde_json::to_string(&route(&uncached, [3., 3.], [13., 3.]).unwrap()).unwrap()
+        );
+        for x in 3..=13 {
+            g.toggle_road(x, 3);
+        }
+        refresh(&mut g.app.world_mut().resource_mut::<Village>());
+        assert!(!Arc::ptr_eq(
+            &old,
+            g.app
+                .world()
+                .resource::<Village>()
+                .navigation
+                .as_ref()
+                .unwrap()
+        ));
+        assert!(
+            route(g.app.world().resource::<Village>(), [3., 3.], [13., 3.])
+                .unwrap()
+                .minutes
+                < path.minutes
+        );
+    }
+    #[test]
+    fn an_occupied_origin_can_exit_but_cannot_cross_another_building() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        g.place("home", 8, 8);
+        g.place("home", 12, 8);
+        let v = g.app.world().resource::<Village>();
+        let (p, exiting) = work_route(v, [8., 8.], [16., 8.]).unwrap();
+        assert!(exiting);
+        assert_eq!(p.points[0], [8., 8.]);
+        assert!(exit_segment(v, p.points[0], p.points[1]));
+        assert!(p.points[1..].windows(2).all(|p| segment(v, p[0], p[1])));
+        assert!(!departure_step(v, [8., 8.], [12., 8.]));
+        assert!(!departure_step(v, [10., 8.], [8., 8.]));
+    }
     #[test]
     fn roads_improve_the_same_route_without_spending_goods_or_time() {
         let mut g = Game::new();

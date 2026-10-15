@@ -190,7 +190,7 @@ pub fn initialise(v: &mut Village) -> bool {
     }
     true
 }
-fn layout(v: &Village) -> u32 {
+pub(crate) fn layout(v: &Village) -> u32 {
     let mut h = 2166136261u32;
     let mut mix = |n: u32| h = (h ^ n).wrapping_mul(16777619);
     for b in &v.buildings {

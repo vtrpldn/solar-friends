@@ -67,6 +67,7 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        navigation::refresh(&mut v);
         workforce::refresh(&mut v, people.iter());
         let residents: Vec<_> = people
             .iter()

@@ -225,6 +225,7 @@ pub fn retire_legacy(v: &mut Village, residents: &mut [Resident]) {
         v.economy.sources.clear();
         for r in residents {
             if r.task == "source" {
+                crate::walking::clear(r);
                 r.task = "idle".into();
                 r.reason = "Choose where our new material plots belong.".into();
                 r.remaining = 0.;
@@ -411,6 +412,7 @@ impl Game {
         let mut q = self.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(self.app.world_mut()) {
             if r.task == "source" && r.activity_material == Some(index) {
+                crate::walking::clear(&mut r);
                 r.task = "idle".into();
                 r.reason = "That plot was cleared.".into();
                 r.remaining = 0.;

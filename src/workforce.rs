@@ -141,7 +141,8 @@ pub struct Offer {
     pub building: Option<usize>,
     pub material: Option<usize>,
     pub destination: [f32; 2],
-    pub travel_minutes: f32,
+    pub travel_minutes: Option<f32>,
+    pub blocker: Option<String>,
     pub score: f32,
     #[serde(skip)]
     urgency: f32,
@@ -250,16 +251,22 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         {
             return;
         }
-        let travel = (worker.x - worker.target_x).hypot(worker.y - worker.target_y)
-            * MINUTES_PER_SECOND
-            / 0.7;
+        let (travel, blocker) = match walking::quote(v, &worker) {
+            Ok((route, _)) => {
+                let point = route.points.last().unwrap();
+                (worker.target_x, worker.target_y) = (point[0], point[1]);
+                (Some(route.minutes), None)
+            }
+            Err(reason) => (None, Some(reason.to_owned())),
+        };
         out.push(Offer {
             task: task.into(),
             building: worker.activity_building,
             material: worker.activity_material,
             destination: [worker.target_x, worker.target_y],
             travel_minutes: travel,
-            score: score(v, r, task, urgency, travel),
+            blocker,
+            score: travel.map_or(-1000., |travel| score(v, r, task, urgency, travel)),
             urgency,
             reason,
         });
@@ -363,13 +370,15 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         );
     }
     if logistics::pending(v, r.id) {
-        let (travel, urgency) = logistics::quote(v, r).unwrap_or((0., -1000.));
+        let quote = logistics::quote(v, r);
+        let (travel, urgency) = quote.unwrap_or((0., -1000.));
         out.push(Offer {
             task: "haul".into(),
             building: None,
             material: None,
             destination: [r.x, r.y],
-            travel_minutes: travel,
+            travel_minutes: quote.map(|q| q.0),
+            blocker: quote.is_none().then(|| "No hauling route is ready. Check storage access, receiving space and reserved supplies.".into()),
             score: score(v, r, "haul", urgency, travel),
             urgency,
             reason: "Bringing supplies along a clear route to where they are needed.",
@@ -384,7 +393,12 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     out
 }
 pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
-    let Some(job) = offers(v, r).into_iter().find(|job| assigned_to(v, r, job)) else {
+    let Some(job) = offers(v, r)
+        .into_iter()
+        // A final hauling attempt records the specific store blocker and
+        // releases the worker immediately; it cannot reserve an invalid trip.
+        .find(|job| (job.blocker.is_none() || job.task == "haul") && assigned_to(v, r, job))
+    else {
         return false;
     };
     assign(r, v, &job.task, job.reason, false);
@@ -447,7 +461,10 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
         let Some((x, y)) = point else {
             continue;
         };
-        let travel = (peer.x - x).hypot(peer.y - y) * MINUTES_PER_SECOND / 0.7;
+        let Ok((route, _)) = navigation::work_route(v, [peer.x, peer.y], [x, y]) else {
+            continue;
+        };
+        let travel = route.minutes;
         let s = score(v, peer, &job.task, job.urgency, travel);
         if s > job.score || (s == job.score && peer.id < r.id) {
             better += 1;
@@ -484,12 +501,13 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        navigation::refresh(&mut v);
         refresh(&mut v, people.iter());
         let choices: Vec<_> = people
             .iter()
             .map(|r| serde_json::json!({"resident":r.id,"offers":offers(&v,r)}))
             .collect();
-        serde_json::json!({"categories":CATEGORIES,"preferences":v.workforce.preferences,"days":v.workforce.days,"choices":choices,"note":"Preferences guide community work; meals, rest, sleep, agreements and outside shifts take precedence. Non-hauling travel estimates use the existing walking speed."}).to_string()
+        serde_json::json!({"categories":CATEGORIES,"preferences":v.workforce.preferences,"days":v.workforce.days,"choices":choices,"note":"Preferences guide community work; meals, rest, sleep, agreements and outside shifts take precedence. Work travel follows clear paths and benefits from roads; unreachable offers report a blocker."}).to_string()
     }
 }
 #[cfg(test)]

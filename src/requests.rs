@@ -416,6 +416,18 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
     if !continuous(&q.task) {
         r.remaining = q.remaining;
     }
+    if walking::supports(task) {
+        match walking::quote(v, r) {
+            Ok((route, _)) => {
+                let point = route.points.last().unwrap();
+                (r.target_x, r.target_y) = (point[0], point[1]);
+            }
+            Err(reason) => {
+                walking::block(v, r, reason);
+                return false;
+            }
+        }
+    }
     observe(r, v);
     true
 }
