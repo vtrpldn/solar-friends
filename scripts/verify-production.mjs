@@ -18,7 +18,7 @@ const g=scene();await writeFile('artifacts/production/start.json',g.snapshot());
 for(let id=1;id<5;id++)assert(g.set_resident_job(id,true));
 assert.equal(g.set_production_target(7,2),'ok');
 let s=snap(g),b=s.village.production.batches.find(b=>b.material===7&&b.phase==='awaiting_inputs');assert(b);
-const id=b.id,site=b.site,before=g.snapshot(),report=g.production_report();assert.equal(g.snapshot(),before);assert(JSON.parse(report).recipes.some(r=>r.site===site));
+const id=b.id,site=b.site,before=g.snapshot(),report=g.production_report();assert.equal(g.snapshot(),before);assert(JSON.parse(report).recipes.some(r=>r.site===site));assert.deepEqual(JSON.parse(g.simulation_report()).production,JSON.parse(report));
 assert.match(g.request(0,'prepare',false),/Happy/);assert.equal(person(snap(g)).help.batch,id);
 assert.equal(person(snap(g)).task,'haul','Preparing a saved batch includes collecting its own inputs');
 let cargo=false,partial=false;

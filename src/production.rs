@@ -858,6 +858,8 @@ mod tests {
             .unwrap()
             .id;
         assert_eq!(batch(&v, id).unwrap().phase, Phase::AwaitingInputs);
+        assert_eq!(simulation::view(&v)["materials"][0]["reserved"], 1);
+        assert_eq!(simulation::view(&v)["materials"][2]["reserved"], 2);
         assert!(!assign_batch(&mut r, &v, id));
         fixture_inputs(&mut v, id);
         assert!(assign_batch(&mut r, &v, id));
@@ -867,6 +869,9 @@ mod tests {
         (r.x, r.y) = (r.target_x, r.target_y);
         assert!(!work(&mut v, &r, 4.));
         assert_eq!(batch(&v, id).unwrap().work, 4.);
+        assert_eq!(simulation::view(&v)["materials"][0]["reserved"], 0);
+        assert_eq!(simulation::view(&v)["materials"][0]["processing"], 1);
+        assert_eq!(simulation::view(&v)["production"], view(&v));
         assert_eq!(v.wood, before - 1.);
         assert_eq!(
             site_space(&v, Owner::Production(batch(&v, id).unwrap().site)),

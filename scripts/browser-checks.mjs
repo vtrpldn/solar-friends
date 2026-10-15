@@ -307,6 +307,11 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#dev-button').click();
   await page.locator('#dev-import-file').setInputFiles('artifacts/production/working.json');
   await page.waitForFunction(()=>window.solarDev.snapshot().village.production.batches.some(b=>b.material===7&&b.work>0));
+  await page.getByText('Production batches · 1 active',{exact:true}).click();
+  assert((await page.locator('#dev-inspection').textContent()).includes('Committed inputs: 1 timber · 2 earth'));
+  const diagnosticBefore=await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
+  await capture('Located production identity and committed input diagnostics','production-diagnostics.png');
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),diagnosticBefore,'Opening batch diagnostics never changes work or inventories');
   await showPreparation();
   production=await page.evaluate(()=>window.solarDev.snapshot());
   const roofBatch=production.village.production.batches.find(b=>b.material===7&&b.work>0),roofSite=roofBatch.site;
