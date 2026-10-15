@@ -249,7 +249,7 @@ fn available(v: &Village, task: &str) -> bool {
             .iter()
             .any(|b| ecology::needs_tending(b, sanitation::irrigation_water(v))),
         "sanitation" => ready(v, "eco_toilet"),
-        "cook" => ready(v, "kitchen") && supplies::can_cook(v),
+        "cook" => production::can_order_meals(v),
         "water" => v.water < ecology::capacity(v),
         "compost" => ready(v, "compost") && v.progress.scraps >= 2,
         "craft" => production::can_order_tools(v),
@@ -291,7 +291,11 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
                 economy::can_build(v, b.id)
             } else {
                 b.progress >= 100.
-                    && (task != "cook" || supplies::can_cook_at(v, b.id))
+                    && (task != "cook"
+                        || production::jobs(v).any(|q| {
+                            q.material == economy::MEALS
+                                && production::building(v, q.site) == Some(b.id)
+                        }))
                     && (task != "sanitation" || b.next_visit <= v.minutes)
                     && b.kind
                         == match task {
@@ -417,7 +421,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     } else if task == "haul" {
         (r.target_x, r.target_y) = (r.x, r.y);
         r.remaining = 100.;
-    } else if matches!(task, "prepare" | "craft") {
+    } else if matches!(task, "prepare" | "craft" | "cook") {
         if let Some(batch) =
             production::jobs(v).find(|b| production::matches_task(b.material, task))
         {
@@ -863,7 +867,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             continue;
         }
         r.remaining = (r.remaining - dt).max(0.);
-        if matches!(r.task.as_str(), "prepare" | "craft") {
+        if matches!(r.task.as_str(), "prepare" | "craft" | "cook") {
             let completed = production::work(&mut v, &r, dt);
             r.remaining = r
                 .activity_batch
@@ -1006,14 +1010,6 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     completed_batch = true;
                     v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
-                "cook" if supplies::can_cook(&v) && (r.requested || supplies::needs_meals(&v)) => {
-                    completed_batch = r
-                        .activity_building
-                        .is_some_and(|id| supplies::cook_at(&mut v, id));
-                    if completed_batch {
-                        situations::cooked(&mut v, r.id);
-                    }
-                }
                 "sanitation" => {
                     sanitation::use_toilet(&mut v, &mut r);
                     if r.last_sanitation_day < (v.minutes / 1440.) as i32
@@ -1100,7 +1096,7 @@ impl Game {
                 production: production::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 6,
+                version: 7,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1269,8 +1265,13 @@ impl Game {
         if b.progress < 100. {
             return "Finish construction before using this building.".into();
         }
-        if b.kind == "workshop" {
-            return self.request_at(resident, "craft", false, Some(building));
+        if matches!(b.kind.as_str(), "workshop" | "kitchen") {
+            return self.request_at(
+                resident,
+                if b.kind == "kitchen" { "cook" } else { "craft" },
+                false,
+                Some(building),
+            );
         }
         let mut query = self.app.world_mut().query::<&mut Resident>();
         let Some(mut r) = query
@@ -1305,7 +1306,7 @@ impl Game {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.supplies.feed_hens = feed_hens;
         v.supplies.use_eggs = use_eggs;
-        logistics::rebalance(&mut v);
+        economy::rebalance(&mut v);
     }
     pub fn toggle_road(&mut self, x: i32, y: i32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -1595,7 +1596,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 6)
+            || !matches!(v.version, 3 | 7)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1681,7 +1682,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 6;
+            save.village.version = 7;
             economy::rebalance(&mut save.village);
         }
         let entities: Vec<Entity> = self
@@ -2125,7 +2126,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":6", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":7", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

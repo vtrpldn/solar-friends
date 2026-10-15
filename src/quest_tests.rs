@@ -32,16 +32,33 @@ fn finish_task(g: &mut Game, id: usize, task: &str) {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let kitchen = v.buildings.iter().find(|b| b.kind == "kitchen").unwrap().id;
         food::fixture_stage(&mut v, kitchen);
+        production::order_meals(&mut v, Some(kitchen)).unwrap();
     }
     let v = g.app.world().resource::<Village>().clone();
-    let mut q = g.app.world_mut().query::<&mut Resident>();
-    let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == id).unwrap();
-    assign(&mut r, &v, task, "test", true);
-    r.x = r.target_x;
-    r.y = r.target_y;
-    r.remaining = 0.1;
-    g.tick(0.2);
+    let batch_id = {
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == id).unwrap();
+        assign(&mut r, &v, task, "test", true);
+        r.x = r.target_x;
+        r.y = r.target_y;
+        r.remaining = if task == "cook" { 10. } else { 0.1 };
+        (task == "cook").then(|| r.activity_batch.expect("a staged cooking batch"))
+    };
+    if let Some(batch_id) = batch_id {
+        for _ in 0..80 {
+            g.tick(0.25);
+            if production::batch(g.app.world().resource::<Village>(), batch_id)
+                .is_some_and(|b| b.phase == production::Phase::Complete)
+            {
+                return;
+            }
+        }
+        panic!("staged cooking did not finish: {}", g.snapshot());
+    } else {
+        g.tick(0.2);
+    }
 }
+
 fn unlock(g: &mut Game) {
     g.app
         .world_mut()

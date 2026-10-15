@@ -8,9 +8,6 @@ pub fn urgent(v: &Village) -> bool {
 pub fn needs_ingredients(v: &Village) -> bool {
     v.food < 18. && v.food + (v.meals as f32) < 30.
 }
-pub fn needs_meals(v: &Village) -> bool {
-    v.meals < 8
-}
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct Poultry {
@@ -101,6 +98,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         }
     }
 }
+#[cfg(test)]
 pub fn can_cook_at(v: &Village, id: usize) -> bool {
     let Some(b) = v
         .buildings
@@ -125,44 +123,38 @@ pub fn can_cook_at(v: &Village, id: usize) -> bool {
             >= if eggs { 7 - 4 } else { 5 - 3 }
                 + u32::from(v.circular.use_biogas && v.circular.biogas >= 1.)
 }
+#[cfg(test)]
 pub fn can_cook(v: &Village) -> bool {
     v.buildings.iter().any(|b| can_cook_at(v, b.id))
 }
+#[cfg(test)]
 pub fn cook_at(v: &mut Village, id: usize) -> bool {
     if !can_cook_at(v, id) {
         return false;
     }
-    let eggs = v.supplies.use_eggs
-        && food::pantry(v, id).is_some_and(|p| food::available(v, p, economy::EGGS, None) >= 2);
-    let ingredients = if eggs { 2 } else { 3 };
-    let fuel = v.circular.use_biogas && v.circular.biogas >= 1.;
-    let meals = if eggs { 7 } else { 5 } + u32::from(fuel);
-    if fuel {
-        v.circular.biogas -= 1.;
-        v.progress.biogas_meal = true;
+    let Some(batch) = production::order_meals(v, Some(id)) else {
+        return false;
+    };
+    while !work_time(v.minutes) {
+        v.minutes += 1.;
     }
-    logistics::spend(
-        v,
-        Some(logistics::Owner::Pantry(id)),
-        economy::FOOD,
-        ingredients,
-    );
-    if eggs {
-        logistics::spend(v, Some(logistics::Owner::Pantry(id)), economy::EGGS, 2);
-        v.progress.egg_meal = true;
+    let mut g = Game::new();
+    let mut r = g
+        .app
+        .world_mut()
+        .query::<&Resident>()
+        .iter(g.app.world())
+        .next()
+        .unwrap()
+        .clone();
+    if !production::assign_batch(&mut r, v, batch) {
+        return false;
     }
-    sanitation::household_water(v, 1.);
-    assert!(logistics::receive(
-        v,
-        logistics::Owner::Pantry(id),
-        economy::MEALS,
-        meals
-    ));
-    v.supplies.used += ingredients as f32;
-    v.supplies.meals_cooked += meals;
-    v.progress.scraps = v.progress.scraps.saturating_add(1);
-    true
+    r.x = r.target_x;
+    r.y = r.target_y;
+    production::work(v, &r, 10.)
 }
+
 #[cfg(test)]
 pub fn fixture_cook(v: &mut Village) {
     if let Some(id) = v

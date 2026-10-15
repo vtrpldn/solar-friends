@@ -111,7 +111,22 @@ fn count(v: &Village, id: usize, task: &str) -> f32 {
         .count() as f32
 }
 fn projected(v: &Village, id: usize) -> (f32, f32) {
-    let cooks = count(v, id, "cook");
+    let pots: Vec<_> = v
+        .production
+        .batches
+        .iter()
+        .filter(|b| b.active() && b.material == economy::MEALS)
+        .collect();
+    let inputs = pots
+        .iter()
+        .filter(|b| !b.committed)
+        .map(|b| b.inputs[economy::FOOD])
+        .sum::<u32>() as f32;
+    let meals = pots
+        .iter()
+        .filter(|b| production::ready(v, b))
+        .map(|b| b.output)
+        .sum::<u32>() as f32;
     let gathered = v
         .activity_claims
         .iter()
@@ -119,7 +134,7 @@ fn projected(v: &Village, id: usize) -> (f32, f32) {
         .filter(|(i, c)| *i != id && c.as_ref().is_some_and(|c| c.task == "gather"))
         .map(|(_, c)| food::forage_yield(v, c.as_ref().unwrap().building))
         .sum::<u32>() as f32;
-    (v.food + gathered - cooks * 3., v.meals as f32 + cooks * 5.)
+    (v.food + gathered - inputs, v.meals as f32 + meals)
 }
 pub fn urgent_food(v: &Village, id: usize) -> bool {
     let (food, meals) = projected(v, id);
@@ -129,16 +144,8 @@ pub fn ingredients(v: &Village, id: usize) -> bool {
     let (food, meals) = projected(v, id);
     food < 18. && food + meals < 30.
 }
-pub fn cooking(v: &Village, id: usize) -> bool {
-    let cooks = count(v, id, "cook");
-    let food = v.food - cooks * 3.;
-    v.meals as f32 + cooks * 5. < 8.
-        && food
-            >= if v.supplies.use_eggs && v.supplies.eggs as f32 >= 2. + cooks * 2. {
-                2.
-            } else {
-                3.
-            }
+pub fn cooking(v: &Village, _id: usize) -> bool {
+    production::jobs(v).any(|b| b.material == economy::MEALS)
 }
 
 #[derive(Serialize)]
@@ -193,10 +200,12 @@ pub fn claim_available(
             task,
             building,
             material,
-            if matches!(task, "prepare" | "craft") {
+            if matches!(task, "prepare" | "craft" | "cook") {
                 r.help
                     .as_ref()
-                    .filter(|q| q.active() && matches!(q.task.as_str(), "prepare" | "craft"))
+                    .filter(|q| {
+                        q.active() && matches!(q.task.as_str(), "prepare" | "craft" | "cook")
+                    })
                     .and_then(|q| q.batch)
                     .or(r.activity_batch)
             } else {
@@ -319,21 +328,6 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             "Carrying water for our essential daily needs.",
         );
     }
-    if cooking(v, r.id) && available(v, "cook") && !situations::protected(v, r.id, "cook") {
-        add(
-            "cook",
-            None,
-            None,
-            if v.meals < 3 {
-                1000.
-            } else if situations::helping(v, r.id) {
-                700.
-            } else {
-                450.
-            },
-            "Preparing enough food for our next meals.",
-        );
-    }
     for b in &v.buildings {
         if economy::can_build(v, b.id) {
             let priority = v
@@ -383,12 +377,29 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         );
     }
     for batch in production::jobs(v) {
+        if batch.material == economy::MEALS && situations::protected(v, r.id, "cook") {
+            continue;
+        }
         add(
             production::task(batch.material),
             None,
             Some(batch.id),
-            610.,
-            "Preparing a staged batch at its worksite.",
+            if batch.material == economy::MEALS {
+                if v.meals < 3 {
+                    1000.
+                } else if situations::helping(v, r.id) {
+                    700.
+                } else {
+                    450.
+                }
+            } else {
+                610.
+            },
+            if batch.material == economy::MEALS {
+                "Preparing a saved pot at the kitchen."
+            } else {
+                "Preparing a staged batch at its worksite."
+            },
         );
     }
     if available(v, "compost") && v.progress.compost < 4 {
@@ -769,31 +780,30 @@ mod tests {
         assert!(!valid(&v));
     }
     #[test]
-    fn people_already_cooking_cover_portions_and_ingredients_once() {
-        let g = Game::new();
-        let mut v = g.app.world().resource::<Village>().clone();
-        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (6.) as u32);
-        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
+    fn cooking_projection_counts_a_saved_pot_once_even_when_workers_share_it() {
+        let mut g = Game::new();
+        assert_eq!(g.place("kitchen", 5, 5), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_finish(&mut v, 0);
+        logistics::fixture_stock(&mut v, economy::FOOD, 6);
+        food::fixture_stage(&mut v, 0);
+        economy::rebalance(&mut v);
+        let batch = production::jobs(&v)
+            .find(|b| b.material == economy::MEALS)
+            .unwrap()
+            .id;
         assert!(cooking(&v, 0));
-        v.activity_claims[0] = Some(Claim {
-            task: "cook".into(),
-            building: None,
-            material: None,
-            batch: None,
-        });
-        assert!(cooking(&v, 1));
-        v.activity_claims[1] = Some(Claim {
-            task: "cook".into(),
-            building: None,
-            material: None,
-            batch: None,
-        });
-        assert!(!cooking(&v, 2));
-        assert!(!urgent_food(&v, 2));
-        assert!(
-            cooking(&v, 0),
-            "A chooser excludes its own completed or cancelled activity"
-        );
+        assert_eq!(projected(&v, 4), (3., 5.));
+        for id in 0..2 {
+            v.activity_claims[id] = Some(Claim {
+                task: "cook".into(),
+                building: Some(0),
+                material: Some(economy::MEALS),
+                batch: Some(batch),
+            });
+        }
+        assert_eq!(projected(&v, 4), (3., 5.));
+        assert!(!urgent_food(&v, 4));
     }
     #[test]
     fn enough_foragers_can_cover_an_emergency_without_sending_everybody() {

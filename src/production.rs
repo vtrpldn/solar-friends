@@ -6,9 +6,11 @@ use simulation::Id;
 
 pub const BUFFER: u32 = 60;
 const LABOUR: f32 = 10.;
-const PRODUCTS: [usize; 5] = [5, 6, 7, economy::TOOLS, 8];
+const PRODUCTS: [usize; 6] = [5, 6, 7, economy::TOOLS, 8, economy::MEALS];
 pub fn task(material: usize) -> &'static str {
-    if material == economy::TOOLS {
+    if material == economy::MEALS {
+        "cook"
+    } else if material == economy::TOOLS {
         "craft"
     } else {
         "prepare"
@@ -25,12 +27,21 @@ pub enum Phase {
     Ready,
     Processing,
     AwaitingOutput,
+    AwaitingWater,
     Paused,
     Complete,
     Cancelled,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Kind {
+    Camp,
+    Workshop,
+    Kitchen,
+}
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Site {
+    pub kind: Kind,
     pub id: Id,
     pub building: Option<usize>,
     pub x: f32,
@@ -45,7 +56,9 @@ pub struct Batch {
     pub inputs: Bundle,
     pub output: u32,
     pub work: f32,
+    pub last_worker: Option<usize>,
     pub committed: bool,
+    pub biogas: bool,
     #[serde(default)]
     pub manual: bool,
     pub phase: Phase,
@@ -67,7 +80,10 @@ pub struct State {
     pub accounting: Accounting,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Accounting {
+    pub biogas_used: u64,
+    pub retired_biogas: u64,
     pub inputs: [u64; COUNT],
     pub outputs: [u64; COUNT],
     pub retired_inputs: [u64; COUNT],
@@ -79,7 +95,7 @@ impl Default for State {
             schema: 1,
             sites: vec![],
             batches: vec![],
-            targets: [0; COUNT],
+            targets: std::array::from_fn(|i| if i == economy::MEALS { 8 } else { 0 }),
             accounting: Accounting::default(),
         }
     }
@@ -108,9 +124,18 @@ pub fn operational(v: &Village, id: Id) -> bool {
                 .is_none_or(|id| v.buildings.iter().any(|b| b.id == id && b.progress >= 100.))
     })
 }
-fn recipe(material: usize, workshop: bool) -> Option<(Bundle, u32)> {
+fn recipe(material: usize, kind: Kind, eggs: bool, gas: bool) -> Option<(Bundle, u32)> {
+    let workshop = kind == Kind::Workshop;
+    if material != economy::MEALS && (eggs || gas || kind == Kind::Kitchen) {
+        return None;
+    }
     let mut inputs = [0; COUNT];
     let (items, output): (&[(usize, u32)], u32) = match material {
+        economy::MEALS if kind == Kind::Kitchen && eggs => (
+            &[(economy::FOOD, 2), (economy::EGGS, 2)],
+            7 + u32::from(gas),
+        ),
+        economy::MEALS if kind == Kind::Kitchen => (&[(economy::FOOD, 3)], 5 + u32::from(gas)),
         5 => (&[(0, 2), (8, 1)], 1),
         6 => (&[(2, 2)], 2),
         7 if workshop => (&[(2, 2), (0, 1)], 2),
@@ -124,12 +149,52 @@ fn recipe(material: usize, workshop: bool) -> Option<(Bundle, u32)> {
     }
     Some((inputs, output))
 }
+pub fn owner(v: &Village, id: Id) -> Owner {
+    match site(v, id) {
+        Some(s) if s.kind == Kind::Kitchen => Owner::Pantry(s.building.unwrap()),
+        _ => Owner::Production(id),
+    }
+}
+pub fn pantry_site(v: &Village, building: usize) -> Option<Id> {
+    v.production
+        .sites
+        .iter()
+        .find(|s| s.kind == Kind::Kitchen && s.building == Some(building))
+        .map(|s| s.id)
+}
+pub fn held_biogas(v: &Village) -> u32 {
+    v.production
+        .batches
+        .iter()
+        .filter(|b| b.active() && b.committed && b.biogas)
+        .count() as u32
+}
+fn free_biogas(v: &Village) -> f32 {
+    v.circular.biogas
+        - v.production
+            .batches
+            .iter()
+            .filter(|b| b.active() && !b.committed && b.biogas)
+            .count() as f32
+}
+fn choice(v: &Village, id: Id, material: usize) -> Option<(Bundle, u32, bool)> {
+    let kind = site(v, id)?.kind;
+    let eggs =
+        material == economy::MEALS && v.supplies.use_eggs && economy::free(v, economy::EGGS) >= 2;
+    let gas = material == economy::MEALS && v.circular.use_biogas && free_biogas(v) >= 1.;
+    let (inputs, output) = recipe(material, kind, eggs, gas)?;
+    Some((inputs, output, gas))
+}
+fn service_ready(v: &Village, b: &Batch) -> bool {
+    b.material != economy::MEALS
+        || (v.water >= 1. && (b.committed || !b.biogas || v.circular.biogas >= 1.))
+}
 fn store(v: &Village, id: Id) -> Option<&logistics::Store> {
     v.logistics
         .as_ref()?
         .stores
         .iter()
-        .find(|p| p.owner == Owner::Production(id))
+        .find(|p| p.owner == owner(v, id))
 }
 fn pending(v: &Village, id: Id) -> Option<&Batch> {
     v.production
@@ -157,11 +222,16 @@ pub fn inbound(v: &Village, id: Id, i: usize) -> u32 {
 }
 fn present(v: &Village, id: Id, i: usize) -> u32 {
     store(v, id).map_or(0, |p| {
-        p.items[i].saturating_sub(logistics::pickup_reserved(v, p.id, i))
+        p.items[i]
+            .saturating_sub(logistics::pickup_reserved(v, p.id, i) + food::held(v, p.id, i, None))
     })
 }
 pub fn held(v: &Village, owner: Owner, i: usize) -> u32 {
-    if let Owner::Production(id) = owner {
+    if let Some(id) = match owner {
+        Owner::Production(id) => Some(id),
+        Owner::Pantry(b) => pantry_site(v, b),
+        _ => None,
+    } {
         needs(v, id)[i].min(present(v, id, i))
     } else {
         0
@@ -207,7 +277,11 @@ pub fn input_demand(v: &Village, i: usize) -> u32 {
         .sum()
 }
 pub fn site_space(v: &Village, owner: Owner) -> u32 {
-    if let Owner::Production(id) = owner {
+    if let Some(id) = match owner {
+        Owner::Production(id) => Some(id),
+        Owner::Pantry(b) => pantry_site(v, b),
+        _ => None,
+    } {
         pending(v, id)
             .filter(|b| b.committed)
             .map_or(0, |b| b.inputs.iter().sum::<u32>().max(b.output))
@@ -224,7 +298,7 @@ fn expanded_demand(v: &Village, ignore_queued: Option<usize>) -> Bundle {
         .production
         .sites
         .iter()
-        .any(|s| s.building.is_some() && operational(v, s.id));
+        .any(|s| s.kind == Kind::Workshop && operational(v, s.id));
     let supplied = |i| {
         economy::quantity(v, i)
             + economy::incoming(v, i)
@@ -239,7 +313,18 @@ fn expanded_demand(v: &Village, ignore_queued: Option<usize>) -> Bundle {
     // input is credited once after all upstream requirements have been added.
     for i in PRODUCTS {
         need[i] = gross[i].saturating_sub(supplied(i));
-        if let Some((inputs, output)) = recipe(i, workshop) {
+        if let Some((inputs, output)) = recipe(
+            i,
+            if i == economy::MEALS {
+                Kind::Kitchen
+            } else if workshop {
+                Kind::Workshop
+            } else {
+                Kind::Camp
+            },
+            false,
+            false,
+        ) {
             for j in 0..COUNT {
                 gross[j] = gross[j].saturating_add(inputs[j] * need[i].div_ceil(output));
             }
@@ -254,20 +339,34 @@ pub fn sync(v: &mut Village) {
     if v.logistics.is_none() {
         return;
     }
-    let mut wanted = vec![(None, CAMP.0, CAMP.1)];
+    let mut wanted = vec![(None, CAMP.0, CAMP.1, Kind::Camp)];
     wanted.extend(
         v.buildings
             .iter()
-            .filter(|b| b.kind == "workshop" && b.progress >= 100.)
-            .map(|b| (Some(b.id), b.x as f32, b.y as f32)),
+            .filter(|b| matches!(b.kind.as_str(), "workshop" | "kitchen") && b.progress >= 100.)
+            .map(|b| {
+                (
+                    Some(b.id),
+                    b.x as f32,
+                    b.y as f32,
+                    if b.kind == "kitchen" {
+                        Kind::Kitchen
+                    } else {
+                        Kind::Workshop
+                    },
+                )
+            }),
     );
-    for (building, x, y) in wanted {
+    for (building, x, y, kind) in wanted {
         if !v.production.sites.iter().any(|s| s.building == building)
             && v.simulation.next_id < u32::MAX - 1
         {
             let id = v.simulation.allocate().unwrap();
-            assert!(logistics::create(v, Owner::Production(id), x, y, BUFFER).is_some());
+            if kind != Kind::Kitchen {
+                assert!(logistics::create(v, Owner::Production(id), x, y, BUFFER).is_some());
+            }
             v.production.sites.push(Site {
+                kind,
                 id,
                 building,
                 x,
@@ -293,6 +392,16 @@ pub fn sync(v: &mut Village) {
         .collect();
     for id in cancel {
         cancel_batch(v, id);
+    }
+    for b in v
+        .production
+        .batches
+        .iter_mut()
+        .filter(|b| b.active() && !b.committed && b.material == economy::MEALS)
+    {
+        let eggs = b.inputs[economy::EGGS] > 0 && v.supplies.use_eggs;
+        b.biogas = b.biogas && v.circular.use_biogas;
+        (b.inputs, b.output) = recipe(economy::MEALS, Kind::Kitchen, eggs, b.biogas).unwrap();
     }
     // Unstarted batches release their promises when demand disappears. Keep
     // committed work, and allow at most one final recipe-sized surplus.
@@ -336,6 +445,10 @@ pub fn sync(v: &mut Village) {
         .map(|b| {
             let phase = if !operational(v, b.site) || !work_time(v.minutes) {
                 Phase::Paused
+            } else if !service_ready(v, b)
+                && (b.committed || (0..COUNT).all(|i| present(v, b.site, i) >= b.inputs[i]))
+            {
+                Phase::AwaitingWater
             } else if b.committed {
                 if b.work >= LABOUR {
                     Phase::AwaitingOutput
@@ -364,7 +477,13 @@ pub fn sync(v: &mut Village) {
         .production
         .batches
         .iter()
-        .filter(|b| b.active() && b.committed && b.work >= LABOUR && operational(v, b.site))
+        .filter(|b| {
+            b.active()
+                && b.committed
+                && b.work >= LABOUR
+                && operational(v, b.site)
+                && service_ready(v, b)
+        })
         .map(|b| b.id)
         .collect();
     for id in finishing {
@@ -393,7 +512,7 @@ fn can_spawn(v: &Village, id: Id, material: usize) -> bool {
     if !operational(v, id) || pending(v, id).is_some() {
         return false;
     }
-    let Some((inputs, output)) = recipe(material, building(v, id).is_some()) else {
+    let Some((inputs, output, _)) = choice(v, id, material) else {
         return false;
     };
     if !(0..COUNT).all(|i| economy::free(v, i) >= inputs[i]) {
@@ -411,7 +530,7 @@ fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
     if !can_spawn(v, id, material) {
         return None;
     }
-    let (inputs, output) = recipe(material, building(v, id).is_some())?;
+    let (inputs, output, biogas) = choice(v, id, material)?;
     let batch_id = v.simulation.allocate()?;
     let phase = if (0..COUNT).all(|i| present(v, id, i) >= inputs[i]) {
         Phase::Ready
@@ -425,7 +544,9 @@ fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
         inputs,
         output,
         work: 0.,
+        last_worker: None,
         committed: false,
+        biogas,
         manual,
         phase,
         created: v.minutes,
@@ -480,10 +601,60 @@ pub fn order_tools(v: &mut Village, at: Option<usize>) -> Option<Id> {
     None
 }
 
+pub fn can_order_meals(v: &Village) -> bool {
+    v.production
+        .batches
+        .iter()
+        .any(|b| b.active() && b.material == economy::MEALS && operational(v, b.site))
+        || (economy::quantity(v, economy::MEALS)
+            + future(v, economy::MEALS)
+            + economy::incoming(v, economy::MEALS)
+            <= 24
+            && v.production
+                .sites
+                .iter()
+                .any(|s| can_spawn(v, s.id, economy::MEALS)))
+}
+pub fn order_meals(v: &mut Village, at: Option<usize>) -> Option<Id> {
+    if let Some(b) = v.production.batches.iter().find(|b| {
+        b.active()
+            && b.material == economy::MEALS
+            && operational(v, b.site)
+            && at.is_none_or(|id| building(v, b.site) == Some(id))
+    }) {
+        return Some(b.id);
+    }
+    if economy::quantity(v, economy::MEALS)
+        + future(v, economy::MEALS)
+        + economy::incoming(v, economy::MEALS)
+        > 24
+    {
+        return None;
+    }
+    let ids: Vec<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| at.is_none_or(|id| s.building == Some(id)))
+        .map(|s| s.id)
+        .collect();
+    for id in ids {
+        if let Some(b) = spawn(v, id, economy::MEALS, true) {
+            logistics::rebalance(v);
+            return Some(b);
+        }
+    }
+    None
+}
+
+pub fn inputs_ready(v: &Village, b: &Batch) -> bool {
+    (0..COUNT).all(|i| present(v, b.site, i) >= b.inputs[i])
+}
 pub fn ready(v: &Village, b: &Batch) -> bool {
     b.active()
         && operational(v, b.site)
         && b.work < LABOUR
+        && service_ready(v, b)
         && (b.committed || (0..COUNT).all(|i| present(v, b.site, i) >= b.inputs[i]))
 }
 pub fn jobs(v: &Village) -> impl Iterator<Item = &Batch> {
@@ -507,7 +678,7 @@ pub fn assign_batch(r: &mut Resident, v: &Village, id: Id) -> bool {
     r.task = task(b.material).into();
     r.activity_batch = Some(id);
     r.activity_material = Some(b.material);
-    r.activity_building = (b.material == economy::TOOLS)
+    r.activity_building = matches!(b.material, economy::TOOLS | economy::MEALS)
         .then(|| building(v, b.site))
         .flatten();
     r.target_x = x;
@@ -527,6 +698,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         || (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08
         || seconds <= 0.
         || !seconds.is_finite()
+        || r.id >= 5
     {
         return false;
     }
@@ -537,8 +709,12 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         return false;
     }
     if !b.committed {
+        if b.biogas {
+            v.circular.biogas -= 1.;
+            v.production.accounting.biogas_used += 1;
+        }
         for (i, &n) in b.inputs.iter().enumerate() {
-            logistics::spend(v, Some(Owner::Production(b.site)), i, n);
+            logistics::spend(v, Some(owner(v, b.site)), i, n);
             v.production.accounting.inputs[i] += u64::from(n);
         }
         v.production
@@ -555,19 +731,18 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         .find(|b| b.id == id)
         .unwrap();
     b.work = (b.work + seconds).min(LABOUR);
+    b.last_worker = Some(r.id);
     b.phase = Phase::Processing;
     finish(v, id)
 }
 fn finish(v: &mut Village, id: Id) -> bool {
     let Some(b) = batch(v, id)
-        .filter(|b| b.active() && b.committed && b.work >= LABOUR)
+        .filter(|b| b.active() && b.committed && b.work >= LABOUR && service_ready(v, b))
         .cloned()
     else {
         return false;
     };
-    if logistics::room(v, Owner::Production(b.site)) + site_space(v, Owner::Production(b.site))
-        < b.output
-    {
+    if logistics::room(v, owner(v, b.site)) + site_space(v, owner(v, b.site)) < b.output {
         v.production
             .batches
             .iter_mut()
@@ -586,12 +761,20 @@ fn finish(v: &mut Village, id: Id) -> bool {
     current.finished = Some(v.minutes);
     assert!(logistics::receive(
         v,
-        Owner::Production(b.site),
+        owner(v, b.site),
         b.material,
         b.output
     ));
     v.production.accounting.outputs[b.material] += u64::from(b.output);
-    if b.material == economy::TOOLS {
+    if b.material == economy::MEALS {
+        sanitation::household_water(v, 1.);
+        v.supplies.used += b.inputs[economy::FOOD] as f32;
+        v.supplies.meals_cooked += b.output;
+        v.progress.scraps = v.progress.scraps.saturating_add(1);
+        v.progress.egg_meal |= b.inputs[economy::EGGS] > 0;
+        v.progress.biogas_meal |= b.biogas;
+        situations::cooked(v, b.last_worker.unwrap());
+    } else if b.material == economy::TOOLS {
         v.progress.tools_crafted = v.progress.tools_crafted.saturating_add(1);
     } else {
         v.progress.prepared_batches = v.progress.prepared_batches.saturating_add(1);
@@ -612,8 +795,12 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
     current.committed = false;
     current.finished = Some(v.minutes);
     if b.committed {
+        if b.biogas {
+            v.circular.biogas += 1.;
+            v.production.accounting.biogas_used -= 1;
+        }
         for (i, &n) in b.inputs.iter().enumerate() {
-            assert!(logistics::receive(v, Owner::Production(b.site), i, n));
+            assert!(logistics::receive(v, owner(v, b.site), i, n));
             v.production.accounting.inputs[i] -= u64::from(n);
         }
     }
@@ -621,8 +808,8 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
 }
 pub fn view(v: &Village) -> serde_json::Value {
     let recipes:Vec<_>=v.production.sites.iter().map(|s|{
-        let recipes:Vec<_>=PRODUCTS.into_iter().filter_map(|i|recipe(i,s.building.is_some()).map(|(inputs,output)|serde_json::json!({"material":i,"inputs":inputs,"output":output}))).collect();
-        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,Owner::Production(s.id))})
+        let recipes:Vec<_>=PRODUCTS.into_iter().filter_map(|i|recipe(i,s.kind,false,false).map(|(inputs,output)|serde_json::json!({"material":i,"inputs":inputs,"output":output}))).collect();
+        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id))})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
         "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
@@ -637,7 +824,7 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
                 .into_iter()
                 .flatten(),
         );
-        if matches!(r.task.as_str(), "prepare" | "craft")
+        if matches!(r.task.as_str(), "prepare" | "craft" | "cook")
             && r.trip.is_none()
             && r.remaining > 0.
             && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
@@ -658,7 +845,9 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         .iter_mut()
         .filter(|b| b.active() && b.committed && b.work < LABOUR)
     {
-        b.phase = if open.contains(&b.site) && working.contains(&b.id) {
+        b.phase = if b.material == economy::MEALS && v.water < 1. {
+            Phase::AwaitingWater
+        } else if open.contains(&b.site) && working.contains(&b.id) {
             Phase::Processing
         } else {
             Phase::Paused
@@ -679,6 +868,7 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
             && !recent.contains(&b.id)
             && b.phase == Phase::Complete
     }) {
+        v.production.accounting.retired_biogas += u64::from(b.biogas);
         for (i, &n) in b.inputs.iter().enumerate() {
             v.production.accounting.retired_inputs[i] += u64::from(n);
         }
@@ -718,6 +908,7 @@ pub fn valid(v: &Village) -> bool {
     if p.sites.iter().any(|s| {
         !sites.insert(s.id)
             || !places.insert(s.building)
+            || (s.kind == Kind::Camp) != s.building.is_none()
             || s.id.0 == 0
             || s.id.0 >= v.simulation.next_id
             || ![s.x, s.y]
@@ -726,7 +917,13 @@ pub fn valid(v: &Village) -> bool {
             || s.building.is_some_and(|id| id >= v.economy.next_building)
             || s.building
                 .and_then(|id| v.buildings.iter().find(|b| b.id == id))
-                .is_some_and(|b| b.kind != "workshop")
+                .is_some_and(|b| match s.kind {
+                    Kind::Workshop => {
+                        b.kind != "workshop" || (s.x, s.y) != (b.x as f32, b.y as f32)
+                    }
+                    Kind::Kitchen => b.kind != "kitchen" || (s.x, s.y) != (b.x as f32, b.y as f32),
+                    Kind::Camp => true,
+                })
             || (!closing(v, s.id) && store(v, s.id).is_none())
             || s.building.is_none() && (s.x, s.y) != CAMP
     }) {
@@ -738,18 +935,24 @@ pub fn valid(v: &Village) -> bool {
         let Some(s) = site(v, b.site) else {
             return false;
         };
-        let Some((inputs, output)) = recipe(b.material, s.building.is_some()) else {
+        let Some((inputs, output)) =
+            recipe(b.material, s.kind, b.inputs[economy::EGGS] > 0, b.biogas)
+        else {
             return false;
         };
         b.id.0 > 0
             && ids.insert(b.id)
             && b.id.0 < v.simulation.next_id
             && (!b.active() || active.insert(b.site))
-            && (!b.manual || b.material == economy::TOOLS)
+            && (!b.manual || matches!(b.material, economy::TOOLS | economy::MEALS))
             && b.inputs == inputs
             && b.output == output
             && b.work.is_finite()
             && (0.0..=LABOUR).contains(&b.work)
+            && match b.last_worker {
+                Some(id) => id < 5 && b.work > 0.,
+                None => b.work == 0.,
+            }
             && b.created.is_finite()
             && (0.0..=v.minutes).contains(&b.created)
             && b.finished.is_some() == !b.active()
@@ -759,28 +962,37 @@ pub fn valid(v: &Village) -> bool {
                 Phase::AwaitingInputs | Phase::Hauling | Phase::Ready => {
                     !b.committed && b.work == 0.
                 }
+                Phase::AwaitingWater => {
+                    b.material == economy::MEALS && (b.committed || b.work == 0.)
+                }
                 Phase::Processing => b.committed && b.work < LABOUR,
                 Phase::AwaitingOutput => b.committed && b.work == LABOUR,
                 Phase::Complete => b.committed && b.work == LABOUR,
                 Phase::Cancelled => !b.committed,
                 Phase::Paused => b.committed || b.work == 0.,
             }
-    }) && (0..COUNT).all(|i| {
-        let inputs = u128::from(p.accounting.retired_inputs[i])
-            + p.batches
-                .iter()
-                .filter(|b| b.committed)
-                .map(|b| u128::from(b.inputs[i]))
-                .sum::<u128>();
-        let outputs = u128::from(p.accounting.retired_outputs[i])
-            + p.batches
-                .iter()
-                .filter(|b| b.phase == Phase::Complete && b.material == i)
-                .map(|b| u128::from(b.output))
-                .sum::<u128>();
-        inputs == u128::from(p.accounting.inputs[i])
-            && outputs == u128::from(p.accounting.outputs[i])
-    })
+    }) && free_biogas(v) >= 0.
+        && p.accounting.biogas_used <= 9_007_199_254_740_991
+        && p.accounting.retired_biogas <= p.accounting.biogas_used
+        && p.accounting.biogas_used
+            == p.accounting.retired_biogas
+                + p.batches.iter().filter(|b| b.committed && b.biogas).count() as u64
+        && (0..COUNT).all(|i| {
+            let inputs = u128::from(p.accounting.retired_inputs[i])
+                + p.batches
+                    .iter()
+                    .filter(|b| b.committed)
+                    .map(|b| u128::from(b.inputs[i]))
+                    .sum::<u128>();
+            let outputs = u128::from(p.accounting.retired_outputs[i])
+                + p.batches
+                    .iter()
+                    .filter(|b| b.phase == Phase::Complete && b.material == i)
+                    .map(|b| u128::from(b.output))
+                    .sum::<u128>();
+            inputs == u128::from(p.accounting.inputs[i])
+                && outputs == u128::from(p.accounting.outputs[i])
+        })
 }
 
 #[wasm_bindgen]
@@ -857,6 +1069,7 @@ impl Game {
 #[cfg(test)]
 pub(crate) fn fixture_inputs(v: &mut Village, id: Id) {
     let b = batch(v, id).unwrap().clone();
+    let owner = owner(v, b.site);
     let s = v.logistics.as_mut().unwrap();
     assert!(s.shipments.is_empty());
     let from = s
@@ -864,11 +1077,7 @@ pub(crate) fn fixture_inputs(v: &mut Village, id: Id) {
         .iter()
         .position(|p| p.owner == Owner::Camp)
         .unwrap();
-    let to = s
-        .stores
-        .iter()
-        .position(|p| p.owner == Owner::Production(b.site))
-        .unwrap();
+    let to = s.stores.iter().position(|p| p.owner == owner).unwrap();
     for (i, &n) in b.inputs.iter().enumerate() {
         assert!(s.stores[from].items[i] >= n);
         s.stores[from].items[i] -= n;
@@ -878,6 +1087,10 @@ pub(crate) fn fixture_inputs(v: &mut Village, id: Id) {
     sync(v);
     logistics::rebalance(v);
 }
+
+#[cfg(test)]
+#[path = "kitchen_tests.rs"]
+mod kitchen_tests;
 
 #[cfg(test)]
 mod tests {

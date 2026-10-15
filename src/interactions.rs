@@ -92,9 +92,8 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             v.progress.social_mask |= 1 << r.id;
         }
         "garden" | "greenhouse" => ecology::tend(v, r),
-        "kitchen" if supplies::can_cook(v) && !situations::protected(v, r.id, "cook") => {
-            supplies::cook_at(v, id);
-            situations::cooked(v, r.id);
+        "kitchen" if !situations::protected(v, r.id, "cook") => {
+            let _ = production::order_meals(v, Some(id));
         }
         "well" if v.water >= 1. => {
             v.water -= 1.;
@@ -169,16 +168,24 @@ mod tests {
             for _ in 0..500 {
                 g.tick(0.25);
             }
-            if kind == "workshop" {
+            if matches!(kind, "workshop" | "kitchen") {
                 for _ in 0..4000 {
-                    if g.app.world().resource::<Village>().progress.tools_crafted > 0 {
+                    if if kind == "kitchen" {
+                        g.app.world().resource::<Village>().supplies.meals_cooked > 0
+                    } else {
+                        g.app.world().resource::<Village>().progress.tools_crafted > 0
+                    } {
                         break;
                     }
                     g.tick(0.25);
                 }
                 assert!(
-                    g.app.world().resource::<Village>().progress.tools_crafted > 0,
-                    "Workshop visits must finish a real attended batch"
+                    if kind == "kitchen" {
+                        g.app.world().resource::<Village>().supplies.meals_cooked > 0
+                    } else {
+                        g.app.world().resource::<Village>().progress.tools_crafted > 0
+                    },
+                    "Production visits must finish a real attended batch"
                 );
             } else {
                 assert!(
@@ -232,9 +239,15 @@ mod tests {
                 "home" => assert_eq!(r.energy, 58.),
                 "garden" | "greenhouse" => assert!(v.buildings[0].crop.planted),
                 "kitchen" => {
-                    assert_eq!(v.meals, 5);
-                    assert_eq!(v.food, food - 3.);
-                    assert_eq!(v.situations.cooking[0][r.id], 1);
+                    assert_eq!(v.meals, 0);
+                    assert_eq!(v.food, food);
+                    assert!(
+                        v.production
+                            .batches
+                            .iter()
+                            .any(|b| b.material == economy::MEALS && b.active())
+                    );
+                    assert_eq!(v.situations.cooking[0][r.id], 0);
                 }
                 "well" => {
                     assert_eq!(v.water, water - 1.);
