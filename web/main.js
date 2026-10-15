@@ -1042,7 +1042,7 @@ const buildingPurposes = {
   grove: "Gather two fruit for the pantry.",
   coop: "Care for hens: improve connection and advance a fed batch by 30 daylight minutes.",
   compost: "Turn two scraps into one compost.",
-  workshop: "Use eight timber to make twelve tool uses.",
+  workshop: "Deliver eight timber to this workbench to craft twelve tool supplies. Finished tools must be carried to projects and planted beds.",
   square: "Meet neighbours: recover connection and energy. The square also hosts community gatherings.",
 };
 function updateBuildingPanel() {
@@ -1068,7 +1068,7 @@ function updateBuildingPanel() {
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
   if(b?.kind==='workshop'){
     const tools=state.village.progress.tool_uses, timber=state.environment.economy.materials[0].available;
-    $('#building-purpose').textContent=`${tools}/36 tool uses ready. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'Eight unreserved timber makes twelve more tool uses.'}`;
+    $('#building-purpose').textContent=`${tools} tool uses owned across the village. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'A saved batch needs eight timber delivered here. Follow its progress in Construction → Preparing materials.'}`;
   }
   $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
@@ -1078,7 +1078,7 @@ function updateBuildingPanel() {
     $("#next-crop").value = c.next_kind;
     $("#replant-crop").checked = c.replant;
     const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
-    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.progress.tool_uses > 0 ? 2 : 0);
+    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.logistics?.stores.some(p=>p.owner.kind==='site'&&p.owner.id===b.id&&p.items[15]>0) ? 2 : 0);
     $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food.`;
     $("#crop-details").textContent = `Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Harvest size depends on the gardener. ${spec.note}.`;
     $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;

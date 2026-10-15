@@ -63,7 +63,7 @@ build('square');
 until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
 await complete(2);
 build('warehouse');
-const basket=Array(15).fill(0);basket[0]=1;
+const basket=Array(16).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);

@@ -118,10 +118,8 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             v.progress.scraps -= 2;
             v.progress.compost += 1;
         }
-        "workshop" if economy::free(v, 0) >= 8 && v.progress.tool_uses <= 24 => {
-            economy::remove(v, 0, 8);
-            v.progress.tool_uses += 12;
-            v.progress.tools_crafted += 1;
+        "workshop" => {
+            let _ = production::order_tools(v, Some(id));
         }
         _ => {}
     }
@@ -170,10 +168,23 @@ mod tests {
             for _ in 0..500 {
                 g.tick(0.25);
             }
-            assert!(
-                g.app.world().resource::<Village>().buildings[0].visits > 0,
-                "{kind} was never used"
-            );
+            if kind == "workshop" {
+                for _ in 0..4000 {
+                    if g.app.world().resource::<Village>().progress.tools_crafted > 0 {
+                        break;
+                    }
+                    g.tick(0.25);
+                }
+                assert!(
+                    g.app.world().resource::<Village>().progress.tools_crafted > 0,
+                    "Workshop visits must finish a real attended batch"
+                );
+            } else {
+                assert!(
+                    g.app.world().resource::<Village>().buildings[0].visits > 0,
+                    "{kind} was never used"
+                );
+            }
             let mut restored = Game::new();
             assert!(restored.restore(&g.snapshot()), "{kind} save failed");
         }
@@ -237,8 +248,14 @@ mod tests {
                     assert_eq!(v.progress.scraps, 0);
                 }
                 "workshop" => {
-                    assert_eq!(v.progress.tool_uses, 12);
-                    assert_eq!(v.wood, wood - 8.);
+                    assert_eq!(v.progress.tool_uses, 0);
+                    assert_eq!(v.wood, wood);
+                    assert!(
+                        v.production
+                            .batches
+                            .iter()
+                            .any(|b| b.material == economy::TOOLS && b.active())
+                    );
                 }
                 "square" => {
                     assert_eq!(r.social, 65.);

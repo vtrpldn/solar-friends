@@ -126,6 +126,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
     else {
         return;
     };
+    let site_id = v.buildings[index].id;
     let capacity = moisture_capacity(&v.buildings[index]);
     let outdoor = v.buildings[index].kind == "garden";
     let crop = &mut v.buildings[index].crop;
@@ -165,7 +166,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
             v.food += 3.;
             v.progress.enriched_harvests += 1;
         }
-        if progression::use_tool(v) {
+        if progression::use_tool(v, site_id) {
             v.food += 2.;
         }
         v.supplies.gathered += v.food - before;

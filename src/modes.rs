@@ -17,7 +17,10 @@ pub fn replenish(v: &mut Village) {
     v.water = ecology::capacity(v);
     v.meals = v.meals.max(20);
     v.economy.money = v.economy.money.max(10_000_000);
-    v.progress.tool_uses = 36;
+    let missing = 36u32.saturating_sub(economy::quantity(v, economy::TOOLS));
+    if missing > 0 {
+        let _ = logistics::receive(v, logistics::Owner::Camp, economy::TOOLS, missing);
+    }
 }
 
 #[wasm_bindgen]

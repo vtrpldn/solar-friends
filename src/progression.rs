@@ -258,9 +258,14 @@ pub fn update(v: &mut Village) {
         }
     }
 }
-pub fn use_tool(v: &mut Village) -> bool {
-    if v.progress.use_tools && v.progress.tool_uses > 0 {
-        v.progress.tool_uses -= 1;
+pub fn use_tool(v: &mut Village, building: usize) -> bool {
+    if v.progress.use_tools && crate::logistics::site_tools(v, building) > 0 {
+        crate::logistics::spend(
+            v,
+            Some(crate::logistics::Owner::Site(building)),
+            crate::economy::TOOLS,
+            1,
+        );
         true
     } else {
         false

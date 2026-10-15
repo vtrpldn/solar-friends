@@ -33,7 +33,7 @@ export function makeArtPreview(fresh,established,{night=false}={}) {
     v.buildings.push({...structuredClone(template),id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop,poultry:{remaining:0}});
     const stages=fresh.environment.economy.recipes.find(r=>r.kind===kind)?.[recipe];
     if(!stages)throw new Error(`No preview construction recipe for ${key}`);
-    v.economy.projects.push({building:id,recipe,appearance,priority:1,paused:false,stage:stages.length,labour:0,committed:false,reserved:Array(15).fill(0),consumed:Array(15).fill(0)});
+    v.economy.projects.push({building:id,recipe,appearance,priority:1,paused:false,stage:stages.length,labour:0,committed:false,reserved:Array(16).fill(0),consumed:Array(16).fill(0)});
   }
   v.economy.next_building=v.buildings.length;
   for(const r of state.residents)Object.assign(r,{task:'idle',reason:'Enjoying our artwork showcase.',remaining:0,requested:false,trip:null,visit_building:null,activity_building:null,activity_material:null,x:8+r.id*.7,y:15.5,target_x:8+r.id*.7,target_y:15.5,energy:90,hunger:20,social:80,last_meal_slot:3,last_sanitation_day:-1});
