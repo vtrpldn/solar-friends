@@ -53,40 +53,63 @@ fn open(v: &Village, building: usize) -> bool {
 }
 pub fn held(v: &Village, store: Id, material: usize) -> u32 {
     let Some(p) =
-        active(v).filter(|p| p.store == store && material == MEALS && p.spent_after.is_none())
-    else {
-        return 0;
-    };
-    if !open(v, p.building) {
-        return 0;
-    }
-    food::pantry(v, p.building).map_or(0, |s| {
-        s.items[MEALS]
-            .saturating_sub(
-                logistics::pickup_reserved(v, store, MEALS) + food::held(v, store, MEALS, None),
-            )
-            .min(PORTIONS)
-    })
-}
-pub fn unclaimed(v: &Village, material: usize) -> u32 {
-    let Some(p) =
         active(v).filter(|p| material == MEALS && p.spent_after.is_none() && open(v, p.building))
     else {
         return 0;
     };
-    let arriving: u32 = v
-        .logistics
-        .as_ref()
-        .unwrap()
+    let Some(s) = &v.logistics else {
+        return 0;
+    };
+    let Some(table) = s.stores.iter().find(|s| s.id == p.store) else {
+        return 0;
+    };
+    let Some(at) = s
+        .stores
+        .iter()
+        .find(|s| s.id == store && !logistics::closing(v, s.owner))
+    else {
+        return 0;
+    };
+    let incoming: u32 = s
         .shipments
         .iter()
-        .filter(|h| h.to == p.store && h.material == MEALS)
+        .filter(|h| h.to == table.id && h.material == MEALS)
         .map(|h| h.amount)
         .sum();
-    PORTIONS.saturating_sub(held(v, p.store, MEALS) + arriving)
+    let available = |s: &logistics::Store| {
+        s.items[MEALS].saturating_sub(
+            logistics::pickup_reserved(v, s.id, MEALS) + food::held(v, s.id, MEALS, None),
+        )
+    };
+    let local = available(table).min(PORTIONS);
+    if at.id == table.id {
+        return local;
+    }
+    let remaining = PORTIONS.saturating_sub(local + incoming);
+    if remaining == 0 {
+        return 0;
+    }
+    // Prefer portions already at the table, then nearby stores with stable ID
+    // ordering. Claims become saved shipment ownership when a carrier accepts.
+    let distance = |s: &logistics::Store| (s.x - table.x).abs() + (s.y - table.y).abs();
+    let ahead = s
+        .stores
+        .iter()
+        .filter(|s| s.id != at.id && s.id != table.id && !logistics::closing(v, s.owner))
+        .filter(|s| {
+            distance(s)
+                .total_cmp(&distance(at))
+                .then(s.id.0.cmp(&at.id.0))
+                .is_lt()
+        })
+        .map(available)
+        .sum::<u32>();
+    available(at).min(remaining.saturating_sub(ahead))
 }
 pub fn reserved(v: &Village, material: usize) -> u32 {
-    if active(v).is_some_and(|p| p.spent_after.is_none()) && material == MEALS {
+    if active(v).is_some_and(|p| p.spent_after.is_none() && open(v, p.building))
+        && material == MEALS
+    {
         PORTIONS.min(v.meals)
     } else {
         0
@@ -153,6 +176,7 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
             && held(v, p.store, MEALS) == PORTIONS
         {
             assert!(logistics::spend_at(v, p.store, MEALS, PORTIONS));
+            v.supplies.portions_eaten = v.supplies.portions_eaten.saturating_add(PORTIONS);
             let spent = v.simulation.materials.as_ref().unwrap().spent[MEALS];
             v.progress.gathering_delivery.as_mut().unwrap().spent_after = Some(spent);
             event(
@@ -167,13 +191,14 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
         return false;
     }
     let invited = p.invited & available;
-    if invited.count_ones() < 3 {
+    if invited.count_ones() < 3 || !(480.0..1080.).contains(&(v.minutes % 1440.)) {
         v.progress.gathering_delivery.as_mut().unwrap().phase = Phase::Ready;
         return false;
     }
     let plan = v.progress.gathering_delivery.as_mut().unwrap();
     plan.phase = Phase::Serving;
     plan.started = Some(v.minutes);
+    v.progress.gathering_day = (v.minutes / 1440.).floor() as i32;
     v.progress.invited = invited;
     v.progress.attended = 0;
     v.progress.gathering_until = v.minutes + 120.;
@@ -230,14 +255,14 @@ pub fn valid(v: &Village) -> bool {
         && p.attended & !p.invited == 0
         && p.created.is_finite()
         && (0.0..=v.minutes).contains(&p.created)
-        && p.deadline == day * 1440. + 1080.
+        && p.deadline == (day + 1.) * 1440. + 1080.
         && p.created < p.deadline
         && p.spent_before
             <= v.simulation
                 .materials
                 .as_ref()
                 .map_or(0, |m| m.spent[MEALS])
-        && v.progress.gathering_day == day as i32
+        && v.progress.gathering_day == p.started.map_or(day as i32, |t| (t / 1440.).floor() as i32)
         && p.started
             .is_none_or(|t| t.is_finite() && (p.created..=v.minutes).contains(&t))
         && p.finished.is_some() == !p.active()
@@ -339,7 +364,7 @@ impl Game {
             store,
             phase: Phase::Preparing,
             created: v.minutes,
-            deadline: day as f32 * 1440. + 1080.,
+            deadline: (day as f32 + 1.) * 1440. + 1080.,
             started: None,
             finished: None,
             invited,
@@ -351,7 +376,7 @@ impl Game {
         economy::rebalance(&mut v);
         event(
             &mut v,
-            "A gathering is planned. Neighbours will bring five meals to the shared table before dusk.",
+            "A gathering is planned. Neighbours will bring five meals to the shared table by tomorrow evening.",
         );
         "ok".into()
     }
@@ -533,9 +558,99 @@ mod tests {
             v.progress.attended = 0b00111;
             advance(&mut v, 0b00111);
             assert_eq!(v.meals, 5);
+            assert_eq!(v.supplies.portions_eaten, 5);
             advance(&mut v, 0b00111);
             assert_eq!(v.meals, 5);
         }
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_welcome_supper_uses_local_meals_while_an_ordinary_pantry_delivery_is_pending() {
+        let mut g = Game::new();
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.arrived = true;
+            v.minutes = 540.;
+            v.progress.completed = [true; 4];
+            v.production.targets = [0; economy::COUNT];
+            v.water = 40.;
+            logistics::fixture_stock(&mut v, MEALS, 10);
+        }
+        assert_eq!(g.place("kitchen", 6, 6), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            logistics::fixture_finish(&mut v, 0);
+            let s = v.logistics.as_mut().unwrap();
+            s.stores
+                .iter_mut()
+                .find(|p| p.owner == logistics::Owner::Camp)
+                .unwrap()
+                .items[MEALS] -= 5;
+            s.stores
+                .iter_mut()
+                .find(|p| p.owner == logistics::Owner::Pantry(0))
+                .unwrap()
+                .items[MEALS] += 5;
+            logistics::sync_totals(&mut v);
+        }
+        for mut r in g
+            .app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(g.app.world_mut())
+        {
+            r.task = "idle".into();
+            r.remaining = 0.;
+            r.requested = false;
+            r.energy = 90.;
+            r.hunger = 0.;
+            r.social = 90.;
+            r.last_meal_slot = 0;
+        }
+        g.tick(0.25);
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .logistics
+                .as_ref()
+                .unwrap()
+                .shipments
+                .iter()
+                .any(|h| h.material == MEALS)
+        );
+        assert_eq!(g.host_gathering(), "ok");
+        assert_eq!(
+            held(
+                g.app.world().resource::<Village>(),
+                active(g.app.world().resource::<Village>()).unwrap().store,
+                MEALS
+            ),
+            5
+        );
+        g.tick(0.25);
+        assert_eq!(
+            active(g.app.world().resource::<Village>()).unwrap().phase,
+            Phase::Serving
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn multiple_squares_do_not_split_invitees_between_different_tables() {
+        let mut g = scene();
+        assert_eq!(g.place("square", 16, 16), "ok");
+        logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 1);
+        assert_eq!(g.host_gathering(), "ok");
+        fixture_table(&mut g.app.world_mut().resource_mut::<Village>());
+        g.tick(0.25);
+        let mut joined = 0;
+        for r in g.app.world_mut().query::<&Resident>().iter(g.app.world()) {
+            if r.task == "gathering" {
+                joined += 1;
+                assert_eq!(r.activity_building, Some(0));
+            }
+        }
+        assert_eq!(joined, 5);
         checkpoint(&mut g);
     }
     #[test]
@@ -594,7 +709,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             stage_table(&mut v);
-            v.minutes = 1080.;
+            v.minutes = 2520.;
             advance(&mut v, 31);
             assert_eq!(v.meals, 10);
             assert_eq!(
@@ -606,6 +721,140 @@ mod tests {
                 5
             );
         }
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn late_preparation_rests_overnight_then_delivers_within_the_next_working_day() {
+        let mut g = scene();
+        g.app.world_mut().resource_mut::<Village>().minutes = 945.;
+        assert_eq!(g.host_gathering(), "ok");
+        assert_eq!(
+            active(g.app.world().resource::<Village>())
+                .unwrap()
+                .deadline,
+            2520.
+        );
+        let mut crossed_night = false;
+        for frame in 0..6000 {
+            let v = g.app.world().resource::<Village>();
+            let p = v.progress.gathering_delivery.as_ref().unwrap();
+            crossed_night |= v.minutes >= 1440. && p.phase == Phase::Preparing;
+            if p.phase == Phase::Complete {
+                break;
+            }
+            if frame % 80 == 0 {
+                checkpoint(&mut g);
+            }
+            g.tick(0.25);
+        }
+        let v = g.app.world().resource::<Village>();
+        let p = v.progress.gathering_delivery.as_ref().unwrap();
+        assert!(crossed_night);
+        assert_eq!(p.phase, Phase::Complete);
+        assert_eq!((p.started.unwrap() / 1440.).floor(), 1.);
+        assert_eq!(v.progress.gathering_day, 1);
+        assert_ne!(
+            g.host_gathering(),
+            "ok",
+            "Only one gathering starts on the same day"
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_carrier_can_use_reachable_portions_when_the_preferred_store_is_enclosed() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("warehouse", 15, 18), "ok");
+        for x in [12, 14, 16, 18] {
+            for y in [15, 21] {
+                assert_eq!(g.place("home", x, y), "ok");
+            }
+        }
+        for x in [12, 18] {
+            for y in [17, 19] {
+                assert_eq!(g.place("home", x, y), "ok");
+            }
+        }
+        assert_eq!(g.place("square", 19, 25), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.minutes = 540.;
+            v.arrived = true;
+            v.progress.completed = [true; 4];
+            v.production.targets = [0; economy::COUNT];
+            logistics::fixture_stock(&mut v, MEALS, 10);
+            let s = v.logistics.as_mut().unwrap();
+            s.stores
+                .iter_mut()
+                .find(|p| p.owner == logistics::Owner::Camp)
+                .unwrap()
+                .items[MEALS] -= 5;
+            s.stores
+                .iter_mut()
+                .find(|p| p.owner == logistics::Owner::Warehouse(0))
+                .unwrap()
+                .items[MEALS] += 5;
+            logistics::sync_totals(&mut v);
+        }
+        for mut r in g
+            .app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(g.app.world_mut())
+        {
+            r.task = "idle".into();
+            r.remaining = 0.;
+            r.requested = false;
+            r.hunger = 0.;
+            r.energy = 90.;
+            r.social = 90.;
+        }
+        assert_eq!(g.host_gathering(), "ok");
+        let v = g.app.world().resource::<Village>();
+        let warehouse = v
+            .logistics
+            .as_ref()
+            .unwrap()
+            .stores
+            .iter()
+            .find(|p| p.owner == logistics::Owner::Warehouse(0))
+            .unwrap()
+            .id;
+        assert_eq!(held(v, warehouse, MEALS), 5);
+        let mut used_camp = false;
+        for frame in 0..3000 {
+            let v = g.app.world().resource::<Village>();
+            used_camp |= v.logistics.as_ref().unwrap().shipments.iter().any(|h| {
+                h.material == MEALS
+                    && h.carrying
+                    && v.logistics
+                        .as_ref()
+                        .unwrap()
+                        .stores
+                        .iter()
+                        .any(|p| p.id == h.from && p.owner == logistics::Owner::Camp)
+            });
+            if v.progress.gathering_delivery.as_ref().unwrap().phase == Phase::Serving {
+                break;
+            }
+            if frame % 80 == 0 {
+                checkpoint(&mut g);
+            }
+            g.tick(0.25);
+        }
+        assert!(used_camp);
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .gathering_delivery
+                .as_ref()
+                .unwrap()
+                .phase,
+            Phase::Serving
+        );
         checkpoint(&mut g);
     }
     #[test]

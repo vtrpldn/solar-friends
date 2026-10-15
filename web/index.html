@@ -86,7 +86,7 @@
           <p id="compost-stock" hidden></p>
           <div id="gathering-control" hidden>
             <small id="gathering-status"></small
-            ><button id="host-gathering">Host a gathering</button>
+            ><button id="host-gathering">Host a gathering</button><button data-cancel-gathering hidden>Cancel gathering</button>
           </div>
         </section>
       </aside>
@@ -105,6 +105,7 @@
         <details><summary>Recipes &amp; cooking</summary><p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p></details>
         <p id="kitchen-status"></p>
         <div id="kitchen-batches"></div>
+        <section id="shared-table" hidden><h3>Our shared table</h3><p id="shared-table-status" role="status"></p><button data-cancel-gathering aria-label="Cancel gathering from Supplies" hidden>Cancel gathering</button></section>
         <section id="hen-controls"><h3>Chicken coops</h3>
         <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
         <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>

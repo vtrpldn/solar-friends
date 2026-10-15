@@ -67,7 +67,7 @@ impl Default for State {
 fn sum(items: &Bundle) -> u32 {
     items.iter().sum()
 }
-fn closing(v: &Village, owner: Owner) -> bool {
+pub(crate) fn closing(v: &Village, owner: Owner) -> bool {
     match owner {
         Owner::Warehouse(id) | Owner::Pantry(id) => building_work::job(v, id).is_some(),
         Owner::Production(id) => production::closing(v, id),
@@ -137,7 +137,7 @@ pub fn free(v: &Village, i: usize) -> u32 {
             .filter(|p| !closing(v, p.owner))
             .map(|p| usable(v, p, i))
             .sum::<u32>()
-            .saturating_sub(production::unclaimed(v, i) + gatherings::unclaimed(v, i));
+            .saturating_sub(production::unclaimed(v, i));
     }
     let accessible = s
         .stores
@@ -750,7 +750,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
             .filter(|p| p.id != to.id && !closing(v, p.owner))
         {
             let amount = missing
-                .min(usable(v, from, economy::MEALS))
+                .min(gatherings::held(v, from.id, economy::MEALS) + usable(v, from, economy::MEALS))
                 .min(room(v, to.owner));
             if amount > 0 {
                 out.push(Candidate {

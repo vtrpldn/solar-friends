@@ -131,7 +131,7 @@ export const quests = [
           "Host a welcome supper",
           +v.progress.welcome_supper,
           1,
-          "Set aside five prepared meals, then invite at least three rested, fed neighbours to the kitchen. Start between 08:00 and 18:00.",
+          "Plan five prepared meals. Neighbours have until the following evening to carry them to the shared table, then at least three rested, fed neighbours must arrive. Open Supplies to follow delivery or cancel.",
         ),
         action: "supper",
       },
@@ -280,7 +280,7 @@ export const quests = [
       goal("Keep beds for everyone",count(v,"home"),2,"Two homes provide six beds for our five neighbours.","home"),
       actionGoal("supplies","Keep a healthy food reserve",Math.floor(v.food),18,"Keep eighteen ingredients for household cooking, then let neighbours enjoy their free time. Trade still protects its larger 36-ingredient reserve before accepting a sale."),
       actionGoal("supplies","Keep fresh water ready",Math.floor(v.water),20,"Keep twenty fresh water in the cistern. Reclaimed water irrigates plants; drinking and cooking need fresh water."),
-      actionGoal("gathering","Meet again at our square",v.progress.gatherings,2,"Set aside five meals and host another gathering at the square, between 08:00 and 18:00. At least three fed, rested neighbours must attend."),
+      actionGoal("gathering","Meet again at our square",v.progress.gatherings,2,"Plan another gathering at the square between 08:00 and 18:00. Allow delivery through the following evening and give at least three fed, rested neighbours time to arrive. Follow preparation in Supplies."),
     ],
   },
 
