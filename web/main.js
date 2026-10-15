@@ -545,7 +545,7 @@ function building(b) {
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     const registration=placementArt(b.kind,buildingArt[b.kind]);
     ctx.save();if(work?.stage==='rebuild')ctx.globalAlpha*=.45;
-    drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes));
+    drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes),state.environment.economy.processes.growing.find(plot=>plot.building===b.id)?.health??1);
     ctx.restore();
   }
   if(work){
@@ -713,6 +713,7 @@ function render() {
     })),
   ];
   objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
+  landMap?.drawFocus(tile);
   for(const job of state.village.building_jobs||[]){if(job.stage!=='pack'||!job.destination)continue;const b=state.village.buildings.find(b=>b.id===job.building);polygon(footprintCorners(b.kind,...job.destination).map(([x,y])=>{const p=iso(x,y);return[p.x,p.y];}),'#a5b77422','#b9cf8b');}
 
   if (tool && pointer) {
@@ -1073,14 +1074,12 @@ function updateBuildingPanel() {
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
   $("#crop-controls").hidden = !farming;
   if (farming) {
-    const c = b.crop, spec = cropTypes[c.kind];
+    const c = b.crop, outlook=JSON.parse(game.crop_outlook(b.id)), spec = cropTypes[outlook.crop];
     $("#next-crop").value = c.next_kind;
     $("#replant-crop").checked = c.replant;
-    const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
-    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.logistics?.stores.some(p=>p.owner.kind==='site'&&p.owner.id===b.id&&p.items[15]>0) ? 2 : 0);
-    $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food.`;
-    $("#crop-details").textContent = `Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Harvest size depends on the gardener. ${spec.note}.`;
-    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
+    $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. At current soil and supplies: ${outlook.harvest_min}–${outlook.harvest_max} food.`;
+    $("#crop-details").textContent = `Root-zone wetness ${Math.round(outlook.soil.moisture*100)}% · retention ×${outlook.soil.retention.toFixed(2)} · tree shade ${Math.round(outlook.soil.shade*100)}%. Growth ×${outlook.growth_multiplier.toFixed(2)}. Harvest size depends on the gardener. ${spec.note}.`;
+    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per ${(outlook.nursery_minutes/60).toFixed(1)} moist growing hours at current soil and light · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water. Covered soil dries more slowly; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
   $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Village → Construction for stage materials, purchases and priorities." : visitors.length

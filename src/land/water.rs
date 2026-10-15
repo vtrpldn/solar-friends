@@ -14,10 +14,7 @@ fn cells(n: i32, x: i32, y: i32) -> impl Iterator<Item = (i32, i32)> {
     (x - n / 2..x - n / 2 + n)
         .flat_map(move |a| (y - n / 2..y - n / 2 + n).map(move |b| (a, b)))
         .filter(move |&(a, b)| {
-            valid
-                && (1..MAP_SIZE - 1).contains(&a)
-                && (1..MAP_SIZE - 1).contains(&b)
-                && !river_bank(a, b)
+            valid && (0..MAP_SIZE).contains(&a) && (0..MAP_SIZE).contains(&b) && !river_bank(a, b)
         })
 }
 pub fn wetness(v: &Village, n: i32, x: i32, y: i32) -> f32 {
@@ -123,8 +120,8 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
             }
         }
     }
-    for y in 1..MAP_SIZE - 1 {
-        for x in 1..MAP_SIZE - 1 {
+    for y in 0..MAP_SIZE {
+        for x in 0..MAP_SIZE {
             let i = (y * MAP_SIZE + x) as usize;
             if !tended[i] && !river_bank(x, y) {
                 step_cell(
@@ -151,9 +148,7 @@ pub fn moisture_valid(v: &Village) -> bool {
                 && (*n == 0. || {
                     let x = i as i32 % MAP_SIZE;
                     let y = i as i32 / MAP_SIZE;
-                    (1..MAP_SIZE - 1).contains(&x)
-                        && (1..MAP_SIZE - 1).contains(&y)
-                        && !river_bank(x, y)
+                    (0..MAP_SIZE).contains(&x) && (0..MAP_SIZE).contains(&y) && !river_bank(x, y)
                 })
         })
         && v.buildings
@@ -237,7 +232,11 @@ pub fn solar_exposure(v: &Village, n: i32, x: i32, y: i32) -> f32 {
 pub fn shade(v: &Village, x: i32, y: i32) -> f32 {
     let mut exposure = 1.;
     for b in &v.buildings {
-        if b.kind == "grove" && b.progress >= 100. {
+        let standing = b.progress >= 100.
+            || crate::building_work::job(v, b.id).is_some_and(|j| {
+                j.original_progress >= 100. && j.stage != crate::building_work::Stage::Rebuild
+            });
+        if b.kind == "grove" && standing {
             let distance = (x as f32 - b.x as f32 - 1.).hypot(y as f32 - b.y as f32 - 1.);
             exposure *= 1. - 0.75 * (1. - distance / 3.5).max(0.);
         }
@@ -277,7 +276,7 @@ pub fn harvest_soil(v: &mut Village, n: i32, x: i32, y: i32, compost: bool) {
             .iter_mut()
             .find(|s| s.x == a && s.y == b)
             .unwrap();
-        s.nutrients = (s.nutrients - 0.025 + if compost { 0.1 } else { 0. }).clamp(0.2, 1.25);
+        s.nutrients = (s.nutrients - 0.005 + if compost { 0.1 } else { 0. }).clamp(0.2, 1.25);
         if compost {
             s.disturbance = (s.disturbance - 0.02).max(0.);
             s.cover = (s.cover + 0.03).min(1.);

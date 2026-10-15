@@ -1,3 +1,4 @@
+import {checkCultivationControls} from './cultivation-browser-checks.mjs';
 import {checkLandControls} from './land-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
@@ -61,6 +62,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   assert.equal(original.village.economy.sources.length,0,'New villages start without fixed resource sites');
   await checkLandControls({page,saved,capture});
+  await checkCultivationControls({page,saved,capture});
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){
     await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);
@@ -163,6 +165,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Construction',exact:true}).click();
   if(!await page.locator('#land-sources').isVisible())if(!await page.locator('#land-sources').evaluate(el=>el.closest('details').open))await page.getByText('Our land resources',{exact:true}).click();
+  for(let hours=0;hours<24&&(await page.evaluate(()=>window.solarDev.snapshot().village.economy.sources.slice(0,2).some(s=>s.growth<1)));hours++){await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('60');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();}
   land=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(land.village.economy.sources[0].remaining,32);assert.equal(land.village.economy.sources[1].remaining,24);
   const harvestedTimber=land.village.wood,harvestedBamboo=land.village.economy.stock[1];

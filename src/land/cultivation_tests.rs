@@ -164,7 +164,7 @@ fn moisture_edits_and_forged_crop_summaries_fail_without_changing_the_world() {
         let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
         match change {
             0 => bad["village"]["land"]["water"] = serde_json::json!([]),
-            1 => bad["village"]["land"]["water"][0] = 1.into(),
+            1 => bad["village"]["land"]["water"][27] = 1.into(),
             2 => bad["village"]["land"]["water"][145] = 2.into(),
             _ => bad["village"]["buildings"][0]["crop"]["moisture"] = 119.into(),
         }
@@ -181,4 +181,98 @@ fn fixture_bootstrap_rejects_invalid_water_instead_of_clamping_it() {
     v.buildings[0].crop.planted = true;
     v.buildings[0].crop.moisture = 241.;
     assert!(!initialise(&mut v));
+}
+
+#[test]
+fn crop_outlook_matches_actual_harvest_and_next_planting_without_mutation() {
+    let mut g = garden();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.buildings[0].crop.planted = true;
+        v.buildings[0].crop.growth = 180.;
+    }
+    let saved = g.snapshot();
+    let outlook: serde_json::Value = serde_json::from_str(&g.crop_outlook(0)).unwrap();
+    assert_eq!(g.snapshot(), saved);
+    assert_eq!(g.crop_outlook(999), "{}");
+    let mut q = g.app.world_mut().query::<&Resident>();
+    let mut r = q
+        .iter(g.app.world())
+        .find(|r| r.favorite != "garden")
+        .unwrap()
+        .clone();
+    r.target_x = 5.75;
+    r.target_y = 5.75;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let before = v.food;
+        ecology::tend(&mut v, &r);
+        assert_eq!(
+            v.food - before,
+            outlook["harvest_min"].as_f64().unwrap() as f32
+        );
+    }
+    assert!(g.configure_crop(0, "beans", true));
+    let saved = g.snapshot();
+    let outlook: serde_json::Value = serde_json::from_str(&g.crop_outlook(0)).unwrap();
+    assert_eq!(outlook["crop"], "beans");
+    assert_eq!(outlook["harvest_min"], 10);
+    assert_eq!(g.snapshot(), saved);
+}
+
+#[test]
+fn legal_border_gardens_have_four_ground_cells_and_save_all_their_water() {
+    let mut g = Game::new();
+    g.start_mode("sandbox");
+    assert_eq!(g.place("garden", 1, 1), "ok");
+    let preview: serde_json::Value = serde_json::from_str(&g.land_preview("garden", 1, 1)).unwrap();
+    assert_eq!(preview["cells"], 4);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert_eq!(v.land.soil.len(), 4);
+        v.buildings[0].crop.planted = true;
+        water_plot(&mut v, 2, 1, 1, 1.);
+        for i in [0, 1, 28, 29] {
+            assert_eq!(v.land.water[i], 1.);
+        }
+        assert!(valid(&v));
+        ecology::advance(&mut v, 60.);
+        for i in [0, 1, 28, 29] {
+            assert!(v.land.water[i] > 0.5);
+            assert!(v.land.water[i] < 1.);
+        }
+    }
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+}
+#[test]
+fn grove_canopy_stays_during_packing_and_returns_only_after_rebuilding() {
+    let mut g = Game::new();
+    g.start_mode("sandbox");
+    assert_eq!(g.place("grove", 15, 15), "ok");
+    let before = ground(g.app.world().resource::<Village>(), 16, 16).shade;
+    assert_eq!(g.queue_building_work(0, "move", 5, 5), "ok");
+    assert_eq!(
+        ground(g.app.world().resource::<Village>(), 16, 16).shade,
+        before
+    );
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(crate::building_work::work(&mut v, 0, 1000.));
+        assert_eq!(ground(&v, 16, 16).shade, 0.);
+        assert_eq!(ground(&v, 6, 6).shade, 0.);
+        assert!(crate::building_work::work(&mut v, 0, 1000.));
+        assert!(ground(&v, 6, 6).shade > 0.);
+    }
+    assert_eq!(g.queue_building_work(0, "demolish", 0, 0), "ok");
+    assert!(ground(g.app.world().resource::<Village>(), 6, 6).shade > 0.);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(crate::building_work::work(&mut v, 0, 1000.));
+        assert_eq!(ground(&v, 6, 6).shade, 0.);
+    }
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
 }

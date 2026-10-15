@@ -266,10 +266,7 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     };
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
-            if !(1..MAP_SIZE - 1).contains(&a)
-                || !(1..MAP_SIZE - 1).contains(&b)
-                || river_bank(a, b)
-            {
+            if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
                 continue;
             }
             if let Some(s) = v.land.soil.iter_mut().find(|s| s.x == a && s.y == b) {
@@ -294,7 +291,7 @@ pub fn valid(v: &Village) -> bool {
     if v.land.schema != 2
         || v.land.seed != v.simulation.seed
         || v.land.deposits.len() != 9
-        || v.land.soil.len() > 676
+        || v.land.soil.len() > (MAP_SIZE * MAP_SIZE) as usize
         || !water::moisture_valid(v)
     {
         return false;
@@ -316,8 +313,8 @@ pub fn valid(v: &Village) -> bool {
     }
     let mut last = None;
     for s in &v.land.soil {
-        if !(1..MAP_SIZE - 1).contains(&s.x)
-            || !(1..MAP_SIZE - 1).contains(&s.y)
+        if !(0..MAP_SIZE).contains(&s.x)
+            || !(0..MAP_SIZE).contains(&s.y)
             || river_bank(s.x, s.y)
             || last.is_some_and(|key| key >= (s.y, s.x))
             || !s.nutrients.is_finite()
@@ -341,8 +338,8 @@ pub fn valid(v: &Village) -> bool {
     })
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let cells: Vec<_> = (1..MAP_SIZE - 1)
-        .flat_map(|y| (1..MAP_SIZE - 1).map(move |x| (x, y)))
+    let cells: Vec<_> = (0..MAP_SIZE)
+        .flat_map(|y| (0..MAP_SIZE).map(move |x| (x, y)))
         .filter(|&(x, y)| !river_bank(x, y))
         .map(|(x, y)| serde_json::json!({"x":x,"y":y,"ground":ground(v,x,y)}))
         .collect();
@@ -378,10 +375,7 @@ impl Game {
         let mut rows = vec![];
         for a in x - n / 2..x - n / 2 + n {
             for b in y - n / 2..y - n / 2 + n {
-                if !(1..MAP_SIZE - 1).contains(&a)
-                    || !(1..MAP_SIZE - 1).contains(&b)
-                    || river_bank(a, b)
-                {
+                if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
                     return "{}".into();
                 }
                 rows.push(ground(v, a, b));

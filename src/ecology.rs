@@ -140,8 +140,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     land::sync_moisture(v);
 }
 
-fn harvest_yield(v: &Village, r: &Resident, index: usize) -> u32 {
-    let b = &v.buildings[index];
+fn harvest_base(v: &Village, b: &Building) -> u32 {
     let crop = &b.crop;
     let base = match crop.kind.as_str() {
         "beans" => 10.,
@@ -151,13 +150,32 @@ fn harvest_yield(v: &Village, r: &Resident, index: usize) -> u32 {
     };
     let g = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
     (base * land::yield_factor(&g)).round().max(1.) as u32
-        + if r.favorite == "garden" { 3 } else { 0 }
         + if v.progress.compost > 0 { 3 } else { 0 }
         + if v.progress.use_tools && logistics::site_tools(v, b.id) > 0 {
             2
         } else {
             0
         }
+}
+fn harvest_yield(v: &Village, r: &Resident, index: usize) -> u32 {
+    harvest_base(v, &v.buildings[index]) + if r.favorite == "garden" { 3 } else { 0 }
+}
+#[wasm_bindgen]
+impl Game {
+    pub fn crop_outlook(&self, id: usize) -> String {
+        let v = self.app.world().resource::<Village>();
+        let Some(b) = v.buildings.iter().find(|b| b.id == id && farm(b)) else {
+            return "{}".into();
+        };
+        let mut next = b.clone();
+        if !next.crop.planted {
+            next.crop.kind = next.crop.next_kind.clone();
+            next.crop.harvests = 0;
+        }
+        let soil = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
+        let minimum = harvest_base(v, &next);
+        serde_json::json!({"crop":next.crop.kind,"harvest_min":minimum,"harvest_max":minimum+3,"soil":soil,"growth_multiplier":land::growth(&soil),"nursery_minutes":480./land::growth(&soil)}).to_string()
+    }
 }
 pub fn tend(v: &mut Village, r: &Resident) {
     let building = spacing::building(r, v);
