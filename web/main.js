@@ -819,7 +819,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -860,6 +860,11 @@ function selectPerson(id) {
   };
   $("#person .persuade").onclick = () => request(lastTask, true);
   $("#person .resume-request").onclick = () => { if(paused)togglePause(); updateUI(); };
+  $('#person .cancel-help').onclick=()=>{
+    const result=game.cancel_help(id);
+    response=result==='ok'?'Request cancelled.':result;
+    encouragable=false;state=JSON.parse(game.snapshot());updateUI();save();
+  };
   updateUI();
 }
 function request(task, encourage) {
@@ -1265,6 +1270,16 @@ function updateUI() {
           b.progress >= 100,
       );
     }
+    const help=r.help,activeHelp=help&&!['complete','cancelled'].includes(help.phase);
+    $('#person .help-order').hidden=!help;
+    if(help){
+      const titles={accepted:'Accepted',travelling:'On the way',working:'Working',paused:'Paused',blocked:'Waiting',complete:'Finished',cancelled:'Cancelled'};
+      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend garden',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Collect river water',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
+      const target=help.building==null?null:v.buildings.find(b=>b.id===help.building);
+      const text={'.help-phase':titles[help.phase],'.help-task':(names[help.task]||help.task)+(target?` · ${kinds[target.kind][0]} at ${target.x}, ${target.y}`:''),'.help-reason':help.reason,'.help-time':`Accepted day ${1+Math.floor(help.created/1440)} · ${String(Math.floor(help.created%1440/60)).padStart(2,'0')}:${String(Math.floor(help.created%60)).padStart(2,'0')}`};
+      for(const [selector,value] of Object.entries(text)){const el=$('#person '+selector);if(el.textContent!==value)el.textContent=value;}
+      $('#person .cancel-help').hidden=!activeHelp;
+    }
     const activity=(r.requested ? 'Your request · ' : '') + (!r.trip && r.task!=='sleep' && Math.hypot(r.x-r.target_x,r.y-r.target_y)>.08 ? 'On the way · ' : '') + activityLabel(r);
     const activityEl=$("#person .person-activity");
     if(activityEl.textContent!==activity)activityEl.textContent=activity;
@@ -1272,9 +1287,9 @@ function updateUI() {
     const reply=$("#person .response");
     if(reply.textContent!==response)reply.textContent=response;
     $("#person .persuade").hidden = !encouragable || !!r.trip;
-    $("#person .request-pause").hidden = !paused || !r.requested;
+    $("#person .request-pause").hidden = !paused || !(r.requested||activeHelp);
     $("#person .request-pause").textContent = `The village is paused. Resume time to let ${r.name} continue.`;
-    $("#person .resume-request").hidden = !paused || !r.requested;
+    $("#person .resume-request").hidden = !paused || !(r.requested||activeHelp);
   }
   for (const button of document.querySelectorAll(".build-tool")) {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
