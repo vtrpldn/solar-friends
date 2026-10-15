@@ -36,7 +36,7 @@ export function installDevTools(api) {
   const utilityPlanner=installUtilityPlanner(api,dialog.querySelector('[data-dev-page="utilities"]'));
   const $ = id => document.getElementById(id);
   const banner = document.createElement('div'); banner.id = 'dev-banner'; banner.hidden = true;
-  banner.innerHTML = 'Development test scene · autosave off <button>Dev Tools</button>'; document.body.append(banner);
+  banner.innerHTML = 'Development test scene · autosave off <button>Dev Tools</button>'; document.querySelector('main').append(banner);
   const errors = [];
   let observedScenario;
   const recordError = error => { errors.push(String(error)); if (errors.length > 50) errors.shift(); };
