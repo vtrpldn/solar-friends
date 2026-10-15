@@ -261,7 +261,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.getByRole('button',{name:'Meet Iara',exact:true}).click();
   await page.getByRole('button',{name:'Help build',exact:true}).click();
   assert((await page.locator('#person .response').textContent()).includes('No stage is ready'),'Refusals must be visible in the resident panel');
-  await page.getByRole('button',{name:'Fetch & deliver water',exact:true}).click();
+  await page.getByRole('button',{name:'Water & sanitation',exact:true}).click();
   assert((await page.locator('#person .response').textContent()).includes('Happy'));
   assert(await page.locator('#person .response').isVisible());
   assert(await page.getByRole('button',{name:'Resume time',exact:true}).isVisible());

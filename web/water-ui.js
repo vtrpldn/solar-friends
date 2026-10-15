@@ -5,7 +5,7 @@ export function waterContainerName(p,v){
   if(!p)return 'Unavailable container';
   if(p.owner.kind==='camp')return 'Arrival barrels';
   if(p.owner.kind==='service')return 'Neighbouring service point';
-  if(p.owner.kind==='ground')return 'Recoverable containers';
+  if(p.owner.kind==='ground')return 'Recoverable liquid containers';
   if(p.owner.kind==='source')return `${v.economy.sources[p.owner.id]?.material===0?'Timber plantation':'Bamboo patch'} ${p.owner.id+1}`;
   return `${names[v.buildings.find(b=>b.id===p.owner.id)?.kind]||'Local container'} ${p.owner.id+1}`;
 }

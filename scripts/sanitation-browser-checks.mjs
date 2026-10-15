@@ -54,7 +54,7 @@ export async function checkSanitationControls({page,saved,capture}){
   assert.equal(JSON.stringify(await snapshot()),raw,'Inspecting local buffers cannot move contents');
   const cancel=page.locator(`[data-process-cancel="${batch.id}"]`);
   await cancel.click();assert.equal((await snapshot()).village.processes.batches.find(b=>b.id===batch.id).phase,'cancelled');
-  assert.match(await page.locator('#local-waste-stores').textContent(),/Recoverable containers/);
+  assert.match(await page.locator('#local-waste-stores').textContent(),/Recoverable liquid containers/);
 
   await load('pumping');assert.match(await page.locator('#water-lines').textContent(),/Greywater · Installed/);
   assert.match(await page.locator('#water-lines').textContent(),/[1-9][\d.,]* units transferred/);

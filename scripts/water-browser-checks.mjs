@@ -31,7 +31,7 @@ export async function checkWaterControls({page,saved,capture}){
   const recovered=await load('interrupted'),ground=recovered.village.water_supply.tanks.find(p=>p.id===h.recovery);
   assert.equal(ground.owner.kind,'ground');assert.equal(ground.water[0],h.amount);
   await page.locator(`[data-water-container="${ground.id}"]`).scrollIntoViewIfNeeded();
-  assert.match(await page.locator(`[data-water-container="${ground.id}"]`).textContent(),/Recoverable water containers/);
+  assert.match(await page.locator(`[data-water-container="${ground.id}"]`).textContent(),/Recoverable liquid containers/);
   await capture('Interrupted water remains in a recoverable container','water-recovery.png');
   await load('interrupted-night');
   await page.getByRole('button',{name:'Close supplies',exact:true}).click();
