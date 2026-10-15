@@ -410,14 +410,20 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             },
         );
     }
-    if available(v, "compost") && v.progress.compost < 4 {
-        add(
-            "compost",
-            None,
-            None,
-            230.,
-            "Turning kitchen scraps into nourishment for our soil.",
-        );
+    if crate::organics::wants_compost(v) {
+        for b in v
+            .buildings
+            .iter()
+            .filter(|b| crate::organics::can_turn(v, b.id))
+        {
+            add(
+                "compost",
+                Some(b.id),
+                None,
+                230.,
+                "Turning delivered scraps into nourishment for our soil.",
+            );
+        }
     }
     if ingredients(v, r.id) {
         add(

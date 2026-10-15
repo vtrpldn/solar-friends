@@ -176,7 +176,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.circular.waste = 4.;
-            v.progress.scraps = 4;
+            crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
             advance(&mut v, 1.);
             assert_eq!(v.circular.waste, 2.);
             assert_eq!(v.progress.scraps, 2);
@@ -236,7 +236,7 @@ mod tests {
         let mut v = g.app.world().resource::<Village>().clone();
         v.circular.biogas = 12.;
         v.circular.waste = 4.;
-        v.progress.scraps = 4;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
         advance(&mut v, 1.);
         assert_eq!(v.circular.digestion, 0.);
         assert_eq!(v.circular.waste, 4.);
@@ -344,7 +344,7 @@ mod tests {
         }
         let mut v = g.app.world().resource::<Village>().clone();
         v.circular.waste = 3.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         advance(&mut v, 120.);
         assert_eq!(v.circular.waste, 0.);
         assert_eq!(v.circular.waste_treated, 1.);

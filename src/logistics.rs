@@ -174,6 +174,8 @@ pub fn sync_totals(v: &mut Village) {
     v.food = totals[economy::FOOD] as f32;
     v.meals = totals[economy::MEALS];
     v.supplies.eggs = totals[economy::EGGS];
+    v.progress.compost = totals[economy::COMPOST];
+    v.progress.scraps = totals[economy::SCRAPS];
 }
 pub(crate) fn create(v: &mut Village, owner: Owner, x: f32, y: f32, capacity: u32) -> Option<Id> {
     let id = v.simulation.allocate()?;
@@ -260,8 +262,10 @@ pub fn sync(v: &mut Village) {
     }
     let mut wanted = vec![];
     for b in &v.buildings {
-        if matches!(b.kind.as_str(), "kitchen" | "coop" | "grove" | "square")
-            && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
+        if matches!(
+            b.kind.as_str(),
+            "kitchen" | "coop" | "grove" | "square" | "compost" | "biodigester"
+        ) && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Pantry(b.id), b.x as f32, b.y as f32, 60));
         } else if b.kind == "warehouse"
@@ -398,6 +402,7 @@ pub fn room(v: &Village, owner: Owner) -> u32 {
                 + arriving(s, p.id)
                 + production::site_space(v, p.owner)
                 + food::reserved_space(v, Some(p.owner))
+                + organics::reserved_space(v, p.owner)
                 + if owner == Owner::Camp {
                     (0..COUNT).map(|i| economy::incoming(v, i)).sum()
                 } else {
@@ -574,6 +579,7 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
     {
         items[economy::TOOLS] = 1;
     }
+    crate::organics::needs(v, owner, &mut items);
     items
 }
 fn tool_target(v: &Village, id: usize) -> bool {
@@ -826,11 +832,12 @@ fn candidates(v: &Village) -> Vec<Candidate> {
         }
     }
     // Kitchen ingredients and hen feed use the same claimed, resident-carried loads.
-    for to in s
-        .stores
-        .iter()
-        .filter(|p| matches!(p.owner, Owner::Pantry(_)) && !closing(v, p.owner))
-    {
+    for to in s.stores.iter().filter(|p| {
+        matches!(
+            p.owner,
+            Owner::Pantry(_) | Owner::Site(_) | Owner::Source(_)
+        ) && !closing(v, p.owner)
+    }) {
         let required = needs(v, to.owner);
         for (i, &required) in required.iter().enumerate().skip(economy::FOOD) {
             let pending = s
@@ -1315,7 +1322,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 12
+    if v.version != 13
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1355,6 +1362,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                 + arriving(s, p.id)
                 + production::site_space(v, p.owner)
                 + food::reserved_space(v, Some(p.owner))
+                + organics::reserved_space(v, p.owner)
                 > p.capacity
         {
             return false;
@@ -1379,7 +1387,10 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                 p.capacity == 60
                     && v.buildings.iter().any(|b| {
                         b.id == id
-                            && matches!(b.kind.as_str(), "kitchen" | "coop" | "grove" | "square")
+                            && matches!(
+                                b.kind.as_str(),
+                                "kitchen" | "coop" | "grove" | "square" | "compost" | "biodigester"
+                            )
                             && (b.progress >= 100.
                                 || building_work::original_progress(v, id) == Some(100.))
                             && (p.x, p.y) == (b.x as f32, b.y as f32)
@@ -1424,6 +1435,8 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         || v.meals != total(v, economy::MEALS)
         || v.supplies.eggs != total(v, economy::EGGS)
         || v.progress.tool_uses != total(v, economy::TOOLS)
+        || v.progress.compost != total(v, economy::COMPOST)
+        || v.progress.scraps != total(v, economy::SCRAPS)
         || !owners.contains(&Owner::Camp)
         || (0..COUNT).any(|i| {
             if i == 0 {

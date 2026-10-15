@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {restockFixtureOrganics} from '../web/dev/material-fixture.js';
 import init,{Game} from '../web/pkg/solar_friends.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const snap=g=>JSON.parse(g.snapshot());
@@ -8,7 +9,7 @@ await mkdir('artifacts/cultivation',{recursive:true});
 async function harvest(name,nutrients,compost){
  const g=new Game();g.start_mode('sandbox');assert.equal(g.place('garden',5,5),'ok');
  let fixture=snap(g);for(const soil of fixture.village.land.soil)soil.nutrients=nutrients;fixture.village.progress.compost=compost;
- assert(g.restore(JSON.stringify(fixture)),'Explicit soil fixture must meet current save validation');
+ assert(g.restore(JSON.stringify(restockFixtureOrganics(fixture))),'Explicit soil fixture must meet current save validation');
  until(g,s=>s.village.arrived,'arrival');
  const before=snap(g),start=before.village.minutes,accepted=g.request(1,'garden',true);let matureAt=null,growingSave=null;
  assert.equal(snap(g).residents.find(r=>r.id===1).help?.task,'garden',accepted);
@@ -27,7 +28,7 @@ assert(tired.food<healthy.food,'Depleted ground produces less with the same work
 assert(tired.matureMinutes>healthy.matureMinutes,'Depleted ground matures later even when the same work window can contain both harvests');
 assert(amended.nutrients>tired.nutrients,'Resident-applied compost improves saved soil');assert.equal(amended.compost,0);
 const g=new Game();g.start_mode('sandbox');assert.equal(g.place('solar_farm',18,18),'ok');
-let fixture=snap(g);fixture.village.minutes=720;assert(g.restore(JSON.stringify(fixture)));
+let fixture=snap(g);fixture.village.minutes=720;assert(g.restore(JSON.stringify(restockFixtureOrganics(fixture))));
 const before=snap(g).environment.power.solar_generation;
 assert.equal(g.place('grove',15,15),'ok');const shade=JSON.parse(g.land_preview('solar_farm',18,18)),after=snap(g).environment.power.solar_generation;
 assert(shade.ground.shade>0);assert(after<before);assert(Math.abs(after/before-shade.solar_exposure)<.0001);

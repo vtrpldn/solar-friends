@@ -34,6 +34,16 @@ fn finish_task(g: &mut Game, id: usize, task: &str) {
         food::fixture_stage(&mut v, kitchen);
         production::order_meals(&mut v, Some(kitchen)).unwrap();
     }
+    if task == "compost" {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let id = v.buildings.iter().find(|b| b.kind == "compost").unwrap().id;
+        organics::fixture_transfer(&mut v, logistics::Owner::Pantry(id), economy::SCRAPS, 2);
+    }
+    if task == "garden" && g.app.world().resource::<Village>().progress.compost > 0 {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let id = v.buildings.iter().find(|b| b.kind == "garden").unwrap().id;
+        organics::fixture_transfer(&mut v, logistics::Owner::Site(id), economy::COMPOST, 1);
+    }
     let v = g.app.world().resource::<Village>().clone();
     let batch_id = {
         let mut q = g.app.world_mut().query::<&mut Resident>();

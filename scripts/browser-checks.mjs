@@ -35,7 +35,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-hud-resource="materials"]').click();
   assert(await page.locator('#supplies-panel').isVisible());
   assert(await page.locator('#materials-stores').evaluate(el=>el.open));
-  assert.equal(await page.locator('.material-slot').count(),19);
+  assert.equal(await page.locator('.material-slot').count(),21);
   const idleRefreshes=await page.evaluate(()=>new Promise(resolve=>{
     let count=0;const observer=new MutationObserver(records=>{count+=records.length;});
     observer.observe(document.querySelector('#supplies-panel'),{subtree:true,childList:true,characterData:true});
@@ -409,7 +409,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
   await page.locator('#dev-inspection details summary').filter({hasText:'Material accounting · seed'}).click();
   const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
-  assert.equal(balances.length,19);assert(balances.every(text=>text==='0'));
+  assert.equal(balances.length,21);assert(balances.every(text=>text==='0'));
   await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
   // A storage target queues resident trips instead of moving material instantly.
   await page.locator('#dev-close').click();await page.locator('[data-hud-resource="materials"]').click();

@@ -144,13 +144,22 @@ fn harvest_base(v: &Village, b: &Building) -> u32 {
     let crop = &b.crop;
     let base = match crop.kind.as_str() {
         "beans" => 10.,
-        "tomatoes" if crop.harvests > 0 && v.progress.compost == 0 => 4.,
+        "tomatoes"
+            if crop.harvests > 0
+                && organics::available(v, logistics::Owner::Site(b.id), economy::COMPOST) == 0 =>
+        {
+            4.
+        }
         "tomatoes" => 6.,
         _ => 5.,
     };
     let g = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
     (base * land::yield_factor(&g)).round().max(1.) as u32
-        + if v.progress.compost > 0 { 3 } else { 0 }
+        + if organics::available(v, logistics::Owner::Site(b.id), economy::COMPOST) > 0 {
+            3
+        } else {
+            0
+        }
         + if v.progress.use_tools && logistics::site_tools(v, b.id) > 0 {
             2
         } else {
@@ -225,9 +234,14 @@ pub fn tend(v: &mut Village, r: &Resident) {
             crop.moisture = 0.;
             crop.harvests = 0;
         }
-        let compost = v.progress.compost > 0;
+        let compost = organics::available(v, logistics::Owner::Site(site_id), economy::COMPOST) > 0;
         if compost {
-            v.progress.compost -= 1;
+            logistics::spend(
+                v,
+                Some(logistics::Owner::Site(site_id)),
+                economy::COMPOST,
+                1,
+            );
             v.progress.enriched_harvests += 1;
         }
         progression::use_tool(v, site_id);

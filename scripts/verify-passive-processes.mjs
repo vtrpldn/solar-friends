@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
-import {resetMaterialLocations} from '../web/dev/material-fixture.js';
+import {resetMaterialLocations,stageFixtureMaterial} from '../web/dev/material-fixture.js';
 import {advanceGame} from '../web/dev/scenarios.js';
 import {processMarkup} from '../web/process-ui.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
@@ -15,7 +15,8 @@ Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_comp
 Object.assign(fixture.village.circular,{waste:8,greywater:24,biogas:0,banana_treatment:false});fixture.village.economy.outside_jobs=Array(5).fill(false);
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});
 assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));
-g.tick(.25);let s=snap(g);assert.equal(s.village.version,12);assert(owned(s,0)&&owned(s,1)&&owned(s,2));
+const staged=snap(g);for(const id of [0,1])stageFixtureMaterial(staged,{kind:'pantry',id},20,2);assert(g.restore(JSON.stringify(staged)));
+g.tick(.25);let s=snap(g);assert.equal(s.village.version,13);assert(owned(s,0)&&owned(s,1)&&owned(s,2));
 assert.notEqual(owned(s,0).id,owned(s,1).id);assert.equal(owned(s,0).remaining,480);assert.equal(owned(s,1).remaining,480);assert.equal(s.environment.economy.processes.reserved_gas,8);assert.equal(s.village.circular.waste,4);assert.equal(s.village.progress.scraps,0);
 advanceGame(g,120);s=snap(g);assert.equal(owned(s,0).remaining,360);assert.equal(owned(s,1).remaining,360);checkpoint(g);
 await writeFile('artifacts/processes/working.json',g.snapshot());
