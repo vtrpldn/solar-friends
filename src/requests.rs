@@ -56,16 +56,23 @@ pub fn pending(r: &Resident, task: &str) -> bool {
 fn continuous(task: &str) -> bool {
     matches!(task, "build" | "building_work" | "outside")
 }
+fn owns_activity(r: &Resident) -> bool {
+    r.requested
+        && r.help.as_ref().is_some_and(|q| {
+            q.active() && (r.task == q.task || (r.task == "haul" && continuous(&q.task)))
+        })
+}
 fn finish(r: &mut Resident, v: &Village, phase: Phase, reason: &str) {
+    let owned = owns_activity(r);
     if let Some(q) = r.help.as_mut() {
         q.phase = phase;
         q.reason = reason.into();
         q.finished = Some(v.minutes);
     }
-    if r.requested {
+    if owned {
         r.remaining = 0.;
+        r.requested = false;
     }
-    r.requested = false;
 }
 pub fn observe(r: &mut Resident, v: &Village) {
     let Some(q) = r.help.as_ref().filter(|q| q.active()).cloned() else {
@@ -169,6 +176,9 @@ pub fn observe(r: &mut Resident, v: &Village) {
             "rest" => "Paused for rest. The request is saved.",
             "sleep" => "Paused for sleep. The request will continue during community hours.",
             "sanitation" => "Paused for a private moment. The request is saved.",
+            "outside" => {
+                "An outside shift comes first. Disable future shifts to make room for village work."
+            }
             _ if work(&q.task) && !work_time(v.minutes) => {
                 "Waiting for community hours: 09:00–12:00 and 15:00–16:00."
             }
@@ -194,11 +204,73 @@ fn wait(r: &mut Resident, phase: Phase, reason: &str) -> bool {
     r.requested = false;
     false
 }
+fn supply_wait(v: &Village, id: usize) -> String {
+    let p = v
+        .economy
+        .projects
+        .iter()
+        .find(|p| p.building == id)
+        .unwrap();
+    let b = v.buildings.iter().find(|b| b.id == id).unwrap();
+    let stages = economy::recipe(&b.kind, &p.recipe).unwrap();
+    let ordered = stages[p.stage]
+        .items
+        .iter()
+        .enumerate()
+        .all(|(i, n)| economy::incoming(v, i) >= n.saturating_sub(p.reserved[i]));
+    let missing: Vec<_> = stages[p.stage]
+        .items
+        .iter()
+        .enumerate()
+        .filter_map(|(i, n)| {
+            let n = n.saturating_sub(p.reserved[i]);
+            (n > 0).then(|| format!("{} {n}", economy::NAMES[i]))
+        })
+        .take(4)
+        .collect();
+    if !missing.is_empty() {
+        if ordered {
+            return format!(
+                "Ordered supplies are still travelling: {}. They unload at camp before residents can bring them here.",
+                missing.join(", ")
+            );
+        }
+        return format!(
+            "This stage still needs {}. Collect or prepare locally, or order from Town.",
+            missing.join(", ")
+        );
+    }
+    if v.logistics.as_ref().is_some_and(|s| {
+        s.shipments.iter().any(|h| {
+            s.stores
+                .iter()
+                .any(|p| p.id == h.to && p.owner == logistics::Owner::Site(id))
+        })
+    }) {
+        "Other deliveries are bringing this stage's supplies. I will continue when they arrive."
+            .into()
+    } else {
+        "Reserved supplies need a clear route from an accessible store. Recover loose piles, make storage room and leave clear approaches.".into()
+    }
+}
 pub fn resume(r: &mut Resident, v: &Village) -> bool {
     observe(r, v);
     let Some(q) = r.help.as_ref().filter(|q| q.active()).cloned() else {
         return false;
     };
+    let essential = (q.task == "rest" && r.energy < 28.)
+        || (q.task == "eat"
+            && (r.hunger > 60.
+                || (v.meals > 0 && r.hunger > 30.)
+                || meal_slot(v.minutes).is_some_and(|slot| slot != r.last_meal_slot)))
+        || (q.task == "gather" && supplies::urgent(v));
+    if q.task != "outside" && occupations::available(v, r.id) && !essential {
+        return wait(
+            r,
+            Phase::Paused,
+            "An outside shift comes first. Disable future shifts to make room for village work.",
+        );
+    }
     if work(&q.task) && !work_time(v.minutes) && !(q.task == "gather" && supplies::urgent(v)) {
         return wait(
             r,
@@ -213,8 +285,38 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             "Our community agreement comes first. The request is saved.",
         );
     }
+    if !continuous(&q.task)
+        && q.building
+            .is_some_and(|id| v.buildings.iter().any(|b| b.id == id && b.progress < 100.))
+    {
+        return wait(
+            r,
+            Phase::Blocked,
+            "The requested worksite is closed for construction or crew work.",
+        );
+    }
+    if q.task == "garden"
+        && q.building.is_some_and(|id| {
+            !v.buildings
+                .iter()
+                .any(|b| b.id == id && ecology::needs_tending(b, sanitation::irrigation_water(v)))
+        })
+    {
+        return wait(
+            r,
+            Phase::Blocked,
+            "This plot is growing or needs water. I will tend it when it is ready.",
+        );
+    }
     let task = if q.task == "build" {
         let id = q.building.unwrap();
+        if building_work::job(v, id).is_some() {
+            return wait(
+                r,
+                Phase::Blocked,
+                "Crew work takes precedence at this site. Finish or cancel it before continuing construction.",
+            );
+        }
         if v.economy
             .projects
             .iter()
@@ -244,11 +346,12 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         worker.task = "haul".into();
         worker.requested = true;
         if logistics::quote(v, &worker).is_none() {
-            return wait(
-                r,
-                Phase::Blocked,
-                "Waiting for site supplies or an accessible supply route. Check project materials and leave clear approaches.",
-            );
+            let reason = if q.task == "build" {
+                supply_wait(v, q.building.unwrap())
+            } else {
+                "The storage contents need an accessible receiving store and a clear route before packing can start.".into()
+            };
+            return wait(r, Phase::Blocked, &reason);
         }
     } else if matches!(task, "source" | "prepare") {
         if !economy::local_job(v).is_some_and(|(t, i)| t == task && Some(i) == q.material) {
@@ -263,6 +366,13 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             r,
             Phase::Blocked,
             "The requested batch is not ready. Check its supplies or cancel this request.",
+        );
+    }
+    if task == "eat" && !workforce::eating(v, r.id) {
+        return wait(
+            r,
+            Phase::Blocked,
+            "The available portions are already claimed. Waiting for food.",
         );
     }
     if !workforce::claim_available(v, r, task, q.building, q.material) {
@@ -417,7 +527,7 @@ pub fn enqueue(v: &mut Village, r: &mut Resident, task: &str, encourage: bool) -
         assign(
             r,
             v,
-            "rest",
+            "idle",
             "Your request is saved. Taking a break until it can continue.",
             false,
         );
@@ -462,6 +572,20 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
             }
         })
         && (matches!(q.task.as_str(), "source" | "prepare") == q.material.is_some())
+        && q.building.is_none_or(|id| {
+            v.buildings
+                .iter()
+                .find(|b| b.id == id)
+                .is_none_or(|b| match q.task.as_str() {
+                    "cook" | "eat" => b.kind == "kitchen",
+                    "garden" => matches!(b.kind.as_str(), "garden" | "greenhouse"),
+                    "craft" => b.kind == "workshop",
+                    "compost" => b.kind == "compost",
+                    "rest" => b.kind == "home",
+                    "socialize" => matches!(b.kind.as_str(), "square" | "kitchen"),
+                    _ => true,
+                })
+        })
         && (q.task != "prepare" || q.material.is_some_and(|i| (5..=8).contains(&i)))
         && (q.task != "building_work"
             || !q.active()
@@ -490,15 +614,35 @@ impl Game {
         if r.help.as_ref().is_none_or(|q| !q.active()) {
             return "There is no active request to cancel.".into();
         }
-        if r.requested {
+        let owned = owns_activity(&r);
+        if owned {
             logistics::interrupt(&mut v, &r);
         }
-        finish(
-            &mut r,
-            &v,
-            Phase::Cancelled,
-            "You cancelled this request. Carried supplies remain recoverable.",
-        );
+        let reason = if let Some(trip) = &r.trip {
+            match trip.purpose {
+                mobility::Purpose::Work => {
+                    "You cancelled this request. The committed outside shift will still finish."
+                }
+                mobility::Purpose::Pickup => {
+                    "You cancelled this request. The committed town pickup continues."
+                }
+                mobility::Purpose::Overnight => {
+                    "You cancelled this request. The overnight stay continues."
+                }
+            }
+        } else {
+            "You cancelled this request. Carried supplies remain recoverable."
+        };
+        finish(&mut r, &v, Phase::Cancelled, reason);
+        if owned && r.trip.is_none() {
+            assign(
+                &mut r,
+                &v,
+                "rest",
+                "The request was cancelled. Taking a break.",
+                false,
+            );
+        }
         self.app.insert_resource(v);
         "ok".into()
     }
@@ -796,6 +940,229 @@ mod tests {
                 .any(|p| p.owner == logistics::Owner::Ground && p.items.iter().any(|n| *n > 0))
         );
         checkpoint(&mut g);
+    }
+    #[test]
+    fn hungry_foragers_keep_working_when_the_last_portions_are_already_claimed() {
+        let mut g = scene();
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.food = 2.;
+            v.meals = 0;
+        }
+        {
+            let mut query = g.app.world_mut().query::<&mut Resident>();
+            for mut r in query.iter_mut(g.app.world_mut()) {
+                match r.id {
+                    0 => {
+                        r.task = "gather".into();
+                        r.remaining = 5.;
+                        r.x = 3.;
+                        r.y = 11.;
+                        r.hunger = 90.;
+                    }
+                    1 | 2 => {
+                        r.task = "eat".into();
+                        r.remaining = 4.;
+                        r.hunger = 80.;
+                    }
+                    _ => {
+                        r.task = "rest".into();
+                        r.remaining = 90.;
+                    }
+                }
+                r.target_x = r.x;
+                r.target_y = r.y;
+            }
+        }
+        g.tick(0.25);
+        assert_eq!(
+            person(&mut g, 0).task,
+            "gather",
+            "The forager must not chase food already claimed by two neighbours"
+        );
+        for _ in 0..19 {
+            g.tick(0.25);
+        }
+        assert_eq!(g.app.world().resource::<Village>().supplies.gathered, 2.);
+    }
+    #[test]
+    fn cancelling_a_waiting_help_request_does_not_cancel_a_committed_town_trip() {
+        let mut g = scene();
+        g.request(0, "gather", false);
+        let mut items = [0; economy::COUNT];
+        items[0] = 1;
+        assert_eq!(
+            g.order_supplies_pickup(&serde_json::to_string(&items).unwrap(), 0),
+            "ok"
+        );
+        let trip = person(&mut g, 0).trip.unwrap();
+        assert_eq!(g.cancel_help(0), "ok");
+        let r = person(&mut g, 0);
+        assert_eq!(r.task, "pickup");
+        assert!(r.requested);
+        assert_eq!(r.trip.unwrap().return_at, trip.return_at);
+        checkpoint(&mut g);
+        until(&mut g, |g| {
+            g.app.world().resource::<Village>().economy.orders[0].status == "delivered"
+        });
+        assert_eq!(person(&mut g, 0).help.unwrap().phase, Phase::Cancelled);
+    }
+    #[test]
+    fn supply_wait_names_missing_inputs_and_distinguishes_confirmed_orders() {
+        let mut g = scene();
+        assert_eq!(g.place("garden", 6, 6), "ok");
+        let (material, needed) = {
+            let stage = economy::recipe("garden", "standard").unwrap()[0].items;
+            stage
+                .iter()
+                .enumerate()
+                .find_map(|(i, n)| (*n > 0).then_some((i, *n)))
+                .unwrap()
+        };
+        logistics::fixture_stock(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            material,
+            0,
+        );
+        g.request(0, "build", false);
+        until(&mut g, |g| {
+            person(g, 0).help.as_ref().unwrap().phase == Phase::Blocked
+        });
+        assert!(
+            person(&mut g, 0)
+                .help
+                .unwrap()
+                .reason
+                .contains(economy::NAMES[material])
+        );
+        let mut items = [0; economy::COUNT];
+        items[material] = needed;
+        assert_eq!(
+            g.order_supplies(&serde_json::to_string(&items).unwrap()),
+            "ok"
+        );
+        until(&mut g, |g| {
+            person(g, 0)
+                .help
+                .unwrap()
+                .reason
+                .starts_with("Ordered supplies")
+        });
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_help_request_waits_for_a_committed_outside_shift_then_resumes() {
+        let mut g = scene();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .economy
+            .outside_jobs[0] = true;
+        g.request(0, "gather", false);
+        assert!(
+            person(&mut g, 0)
+                .help
+                .unwrap()
+                .reason
+                .contains("outside shift")
+        );
+        g.tick(0.25);
+        assert_eq!(
+            person(&mut g, 0).trip.unwrap().purpose,
+            mobility::Purpose::Work
+        );
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .economy
+            .outside_jobs[0] = false;
+        checkpoint(&mut g);
+        until(&mut g, |g| {
+            person(g, 0).help.unwrap().phase == Phase::Complete
+        });
+        assert_eq!(g.app.world().resource::<Village>().economy.work_day[0], 0);
+        assert!(g.app.world().resource::<Village>().minutes >= 1440. + 540.);
+    }
+    #[test]
+    fn cancelling_an_outside_work_request_preserves_the_shift_and_once_only_pay() {
+        let mut g = scene();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .economy
+            .outside_jobs[0] = true;
+        let funds = g.app.world().resource::<Village>().economy.money;
+        assert!(g.request(0, "outside", false).contains("Happy"));
+        let return_at = person(&mut g, 0).trip.unwrap().return_at;
+        assert_eq!(g.cancel_help(0), "ok");
+        assert_eq!(person(&mut g, 0).trip.unwrap().return_at, return_at);
+        checkpoint(&mut g);
+        until(&mut g, |g| {
+            person(g, 0).trip.is_none()
+                && g.app.world().resource::<Village>().economy.work_day[0] == 0
+        });
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.money,
+            funds + occupations::JOBS[0].income
+        );
+        assert_eq!(person(&mut g, 0).help.unwrap().phase, Phase::Cancelled);
+    }
+    #[test]
+    fn outside_departures_do_not_restart_meals_or_essential_foraging_each_frame() {
+        let mut g = scene();
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .economy
+            .outside_jobs[0] = true;
+        {
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
+            r.task = "eat".into();
+            r.remaining = 2.;
+            r.hunger = 80.;
+        }
+        for _ in 0..8 {
+            g.tick(0.25);
+        }
+        assert!(person(&mut g, 0).hunger < 20.);
+        assert_eq!(
+            g.app.world().resource::<Village>().supplies.portions_eaten,
+            1
+        );
+        g.tick(0.25);
+        assert_eq!(
+            person(&mut g, 0).trip.unwrap().purpose,
+            mobility::Purpose::Work
+        );
+        let mut hungry = scene();
+        {
+            let mut v = hungry.app.world_mut().resource_mut::<Village>();
+            v.economy.outside_jobs[0] = true;
+            v.food = 0.;
+            v.meals = 0;
+        }
+        {
+            let mut q = hungry.app.world_mut().query::<&mut Resident>();
+            let mut r = q
+                .iter_mut(hungry.app.world_mut())
+                .find(|r| r.id == 0)
+                .unwrap();
+            r.task = "gather".into();
+            r.remaining = 1.;
+            r.hunger = 50.;
+            r.x = 3.;
+            r.y = 11.;
+            r.target_x = r.x;
+            r.target_y = r.y;
+        }
+        for _ in 0..4 {
+            hungry.tick(0.25);
+        }
+        assert_eq!(
+            hungry.app.world().resource::<Village>().supplies.gathered,
+            2.
+        );
     }
     #[test]
     fn cancelled_projects_and_crew_jobs_detach_requests_before_the_next_save() {

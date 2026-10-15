@@ -173,13 +173,20 @@ pub fn claim_available(
     building: Option<usize>,
     material: Option<usize>,
 ) -> bool {
-    task == "haul"
+    !requests::work(task)
+        || task == "haul"
         || occupied(v, r, task, building, material)
             < if matches!(task, "build" | "building_work" | "water") {
                 2
             } else {
                 1
             }
+}
+/// A neighbour already walking to eat owns one portion. Essential food should
+/// not send the whole village after the same last ingredient and interrupt all
+/// foraging at once.
+pub fn eating(v: &Village, id: usize) -> bool {
+    v.food.floor() + v.meals as f32 > count(v, id, "eat")
 }
 fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f32 {
     let c = category(task).unwrap();

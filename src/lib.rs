@@ -441,7 +441,8 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Staying with neighbours overnight until we have a village bed."
             },
         )
-    } else if (meal_due || r.hunger > 60. || (v.meals > 0 && r.hunger > 30.)) && available(v, "eat")
+    } else if (meal_due || r.hunger > 60. || (v.meals > 0 && r.hunger > 30.))
+        && workforce::eating(v, r.id)
     {
         if requests::pending(r, "eat") && requests::resume(r, v) {
             return;
@@ -767,11 +768,14 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             && (sleeping_time(v.minutes, &r) != (r.task == "sleep")
                 || (sleeping_time(v.minutes, &r) && shelter(&v, r.id).is_none())
                 || r.remaining <= 0.
+                || (occupations::available(&v, r.id)
+                    && (requests::work(&r.task) || r.task == "haul")
+                    && !(r.task == "gather" && supplies::urgent(&v)))
                 || chores_finished
                 || chores_start)
             || (requests::work(&r.task) || r.task == "haul")
                 && (r.energy < 28.
-                    || (available(&v, "eat")
+                    || (workforce::eating(&v, r.id)
                         && (r.hunger > 60.
                             || meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot))))
         {
