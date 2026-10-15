@@ -58,6 +58,7 @@ impl Game {
         *self = Self::new();
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.mode = mode;
+        v.climate.enabled = mode == Mode::Story;
         if mode == Mode::Sandbox {
             v.events = vec!["An open clearing. Every possibility is yours to explore.".into()];
             v.wood = 100.;
