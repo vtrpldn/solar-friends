@@ -309,6 +309,19 @@ fn ready_process_feedback_distinguishes_staged_inputs_from_missing_inputs() {
         step(&mut v, 1.);
         assert_eq!(held(&v, Kind::Digestion), 1);
         assert_eq!(held(&v, Kind::Filtration), 1);
+        let running = view(&v);
+        assert!(
+            running["stations"][0]["reason"]
+                .as_str()
+                .unwrap()
+                .starts_with("Digesting")
+        );
+        assert!(
+            running["stations"][1]["reason"]
+                .as_str()
+                .unwrap()
+                .starts_with("Filtering")
+        );
     }
     checkpoint(&mut g);
 }

@@ -503,7 +503,12 @@ fn reason(v: &Village, b: &Batch) -> &'static str {
             "Waiting for sealed toilet waste."
         }
     } else {
-        "Processing without a resident standing here."
+        match b.kind {
+            Kind::Digestion => "Digesting without a resident standing here.",
+            Kind::Filtration => "Filtering without a resident standing here.",
+            Kind::Curing => "Curing in a sealed store without resident attendance.",
+            Kind::Banana => unreachable!(),
+        }
     }
 }
 fn station_reason(v: &Village, kind: Kind, id: usize) -> &'static str {

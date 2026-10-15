@@ -20,7 +20,7 @@ assert.notEqual(owned(s,0).id,owned(s,1).id);assert.equal(owned(s,0).remaining,4
 advanceGame(g,120);s=snap(g);assert.equal(owned(s,0).remaining,360);assert.equal(owned(s,1).remaining,360);checkpoint(g);
 await writeFile('artifacts/processes/working.json',g.snapshot());
 const beforeReport=g.snapshot();g.simulation_report();assert.equal(g.snapshot(),beforeReport,'Inspection cannot create process work or identities');
-assert.match(processMarkup(s),/Biodigester 1/);assert.match(processMarkup(s),/Recover inputs & pause/);
+assert.match(processMarkup(s),/Biodigester 1/);assert.match(processMarkup(s),/Digesting without a resident/);assert.match(processMarkup(s),/Recover inputs & pause/);
 const finished=new Game();assert(finished.restore(g.snapshot()));
 assert.equal(g.set_process_paused(0,true),'ok');advanceGame(g,60);s=snap(g);assert.equal(owned(s,0).remaining,360);assert.equal(owned(s,1).remaining,300);assert.equal(owned(s,0).phase,'paused');checkpoint(g);
 await writeFile('artifacts/processes/paused.json',g.snapshot());
