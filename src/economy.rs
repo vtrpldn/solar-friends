@@ -367,6 +367,7 @@ pub fn storage(v: &Village) -> u32 {
         .sum::<u32>()
         + v.building_jobs.iter().flat_map(|j| j.returns).sum::<u32>()
         + crate::production::reserved_space(v)
+        + crate::food::reserved_space(v, None)
 }
 pub fn capacity(v: &Village) -> u32 {
     CAPACITY
@@ -735,7 +736,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         })
         .collect();
     let day = (v.minutes / 1440.) as i32;
-    serde_json::json!({"production":crate::production::view(v),"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"salvage_reserved":v.building_jobs.iter().flat_map(|j|j.returns).sum::<u32>(),"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":(v.food-36.).max(0.).floor() as u32,"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Player-managed land · planted timber, cultivated bamboo and finite earth, stone and reclaimed reserves","source_options":crate::resource_sites::options(),"source_status":crate::resource_sites::view(v)})
+    serde_json::json!({"production":crate::production::view(v),"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"salvage_reserved":v.building_jobs.iter().flat_map(|j|j.returns).sum::<u32>(),"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":((v.food-36.).max(0.).floor() as u32).min(free(v,FOOD)),"next_delivery":(v.minutes/1440.).floor()*1440.+if v.minutes%1440.<480.{600.}else{2040.},"property":"Player-managed land · planted timber, cultivated bamboo and finite earth, stone and reclaimed reserves","source_options":crate::resource_sites::options(),"source_status":crate::resource_sites::view(v)})
 }
 pub fn valid(v: &Village) -> bool {
     let e = &v.economy;
@@ -1019,7 +1020,7 @@ impl Game {
     }
     pub fn sell_surplus(&mut self, n: u32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if n == 0 || n > 20 || v.food - (n as f32) < 36. {
+        if n == 0 || n > 20 || v.food - (n as f32) < 36. || free(&v, FOOD) < n {
             return "Keep 36 ingredients for the household. Sell up to 20 surplus ingredients."
                 .into();
         }
@@ -1039,6 +1040,7 @@ impl Game {
             return "Our neighbour's spare fittings are already exchanged today.".into();
         }
         if v.food < 40.
+            || free(&v, FOOD) < 4
             || storage(&v) + 2 > capacity(&v)
             || crate::logistics::room(&v, crate::logistics::Owner::Camp) < 2
         {

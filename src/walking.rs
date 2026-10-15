@@ -139,6 +139,7 @@ fn cooling_down(v: &Village, r: &Resident) -> bool {
         b.task == r.task
             && b.building == r.activity_building.or(r.visit_building)
             && b.material == r.activity_material
+            && b.goal == [r.target_x, r.target_y]
             && b.layout == logistics::layout(v)
             && b.retry_at > v.minutes
     })
@@ -167,6 +168,8 @@ pub fn block(v: &Village, r: &mut Resident, reason: &str) {
     r.remaining = 12.;
     r.activity_building = None;
     r.activity_material = None;
+    r.activity_store = None;
+    r.activity_batch = None;
     r.visit_building = None;
     r.requested = false;
     r.target_x = r.x;

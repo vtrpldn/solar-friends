@@ -12,11 +12,14 @@ assert.equal(snap().environment.economy.capacity,900);
 assert.equal(snap().environment.power.hydros,1);
 const homes=snap().village.buildings.filter(b=>b.kind==='home');
 assert.deepEqual(homes.map(b=>buildingArtKey(b,snap().village.buildings,snap().village.economy.projects)),['adobe-gable','adobe-veranda']);
+const routineStart=snap().village.minutes;
 advanceGame(g,240);
+// Meals and their travel take precedence; every neighbour still finishes the daily routine before dusk.
+for(let n=0;n<240&&snap().village.circular.toilet_visits<5;n++)advanceGame(g,1);
 let s=snap();assert.equal(s.village.circular.toilet_visits,5,'Every awake neighbour completes one daily routine');
 assert(s.residents.every(r=>r.last_sanitation_day===1));assert.equal(s.village.circular.waste,7);
 assert(s.village.circular.digestion>0);assert(s.village.circular.filtration>0);
-assert(g.restore(g.snapshot()));advanceGame(g,241);
+assert(g.restore(g.snapshot()));advanceGame(g,Math.max(0,routineStart+481-s.village.minutes));
 s=snap();assert(s.village.circular.biogas>0);assert.equal(s.village.circular.batches,1);
 assert(s.village.circular.pending_compost===2);assert(s.village.circular.curing>0);
 assert(s.village.circular.water_reused>=8);assert(s.environment.power.generation>0);

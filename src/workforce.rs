@@ -112,10 +112,14 @@ fn count(v: &Village, id: usize, task: &str) -> f32 {
 }
 fn projected(v: &Village, id: usize) -> (f32, f32) {
     let cooks = count(v, id, "cook");
-    (
-        v.food + count(v, id, "gather") * 2. - cooks * 3.,
-        v.meals as f32 + cooks * 5.,
-    )
+    let gathered = v
+        .activity_claims
+        .iter()
+        .enumerate()
+        .filter(|(i, c)| *i != id && c.as_ref().is_some_and(|c| c.task == "gather"))
+        .map(|(_, c)| food::forage_yield(v, c.as_ref().unwrap().building))
+        .sum::<u32>() as f32;
+    (v.food + gathered - cooks * 3., v.meals as f32 + cooks * 5.)
 }
 pub fn urgent_food(v: &Village, id: usize) -> bool {
     let (food, meals) = projected(v, id);
@@ -208,6 +212,9 @@ pub fn claim_available(
 /// not send the whole village after the same last ingredient and interrupt all
 /// foraging at once.
 pub fn eating(v: &Village, id: usize) -> bool {
+    if let Some(r) = v.workforce_peers.get(id).and_then(Option::as_ref) {
+        return food::meal(v, r).is_some();
+    }
     v.food.floor() + v.meals as f32 > count(v, id, "eat")
 }
 fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f32 {

@@ -100,7 +100,7 @@ for(let tree=0;tree<4&&!snap().village.progress.timber_replanted;tree++){
 until(s=>s.village.progress.timber_replanted,'resident replanting');
 build('home','adobe',true);
 // Share deliberate surplus work within normal hours; no after-hours foraging shift.
-function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(r.task!=='gather'&&!r.requested)g.request(id,'gather',false);}return false;},label);}
+function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(!r.requested&&r.task!=='gather'&&r.task!=='garden'){if(id!==0||!g.request(id,'garden',false).includes('Happy'))g.request(id,'gather',false);}}return false;},label);}
 gatherExtra(()=>g.sell_surplus(1)==='ok','sell surplus');
 gatherExtra(()=>g.exchange_parts()==='ok','neighbour exchange');await complete(9);
 build('hydro');await complete(10);

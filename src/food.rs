@@ -36,7 +36,10 @@ pub fn needs(v: &Village, building: usize) -> Bundle {
         return n;
     }
     match b.kind.as_str() {
-        "kitchen" if v.meals < 8 => {
+        "kitchen" => {
+            // Keep a small pantry through meal breaks; sending it back to camp
+            // after each pot creates repeated, unnecessary food trips.
+            n[MEALS] = 16;
             n[FOOD] = 6;
             if v.supplies.use_eggs {
                 n[EGGS] = 2;
@@ -63,7 +66,11 @@ pub fn pantry(v: &Village, building: usize) -> Option<&Store> {
 }
 /// Harvests stay beside their plants; wild forage is put down at the patch.
 /// A full store leaves a recoverable pile instead of silently discarding food.
-pub fn gather(v: &mut Village, building: Option<usize>, x: f32, y: f32, amount: u32) {
+pub fn gather(v: &mut Village, building: Option<usize>, x: f32, y: f32, amount: u32) -> u32 {
+    let amount = amount.min(economy::capacity(v).saturating_sub(economy::storage(v)));
+    if amount == 0 {
+        return 0;
+    }
     let owner = building
         .and_then(|id| v.buildings.iter().find(|b| b.id == id))
         .map(|b| {
@@ -74,7 +81,7 @@ pub fn gather(v: &mut Village, building: Option<usize>, x: f32, y: f32, amount: 
             }
         });
     if owner.is_some_and(|o| logistics::receive(v, o, FOOD, amount)) {
-        return;
+        return amount;
     }
     let id = logistics::create(
         v,
@@ -95,6 +102,48 @@ pub fn gather(v: &mut Village, building: Option<usize>, x: f32, y: f32, amount: 
     owner_items.items[FOOD] = amount;
     simulation::material_change(v, FOOD, amount, true);
     logistics::sync_totals(v);
+    amount
+}
+/// Fresh forage can feed its picker even when building materials fill storage.
+pub fn forage_yield(v: &Village, building: Option<usize>) -> u32 {
+    if v.buildings
+        .iter()
+        .any(|b| Some(b.id) == building && b.kind == "grove" && b.progress >= 100.)
+    {
+        6
+    } else {
+        2
+    }
+}
+pub fn forage(v: &mut Village, r: &mut Resident) -> u32 {
+    let amount = forage_yield(v, r.activity_building);
+    let stored = gather(v, r.activity_building, r.x, r.y, amount);
+    if stored > 0 {
+        return stored;
+    }
+    if r.hunger <= 60. {
+        return 0;
+    }
+    simulation::material_change(v, FOOD, 1, true);
+    simulation::material_change(v, FOOD, 1, false);
+    r.hunger = (r.hunger - 45.).max(0.);
+    v.supplies.used += 1.;
+    v.supplies.portions_eaten += 1;
+    if let Some(slot) = meal_slot(v.minutes) {
+        r.last_meal_slot = slot;
+    }
+    1
+}
+pub fn reserved_space(v: &Village, owner: Option<Owner>) -> u32 {
+    v.buildings
+        .iter()
+        .filter(|b| {
+            b.kind == "coop"
+                && b.poultry.remaining > 0.
+                && owner.is_none_or(|o| o == Owner::Pantry(b.id))
+        })
+        .count() as u32
+        * 3
 }
 pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
     let mut choices = vec![];
@@ -175,10 +224,12 @@ pub fn eat(v: &mut Village, r: &mut Resident) -> bool {
         .iter()
         .find(|p| Some(p.id) == r.activity_store)
         .unwrap();
-    let owner = store.owner;
+    let store_id = store.id;
     let i = r.activity_material.unwrap();
     // Consume this resident's saved claim before synchronising the global summary.
-    logistics::spend(v, Some(owner), i, 1);
+    if !logistics::spend_at(v, store_id, i, 1) {
+        return false;
+    }
     r.activity_store = None;
     v.supplies.portions_eaten += 1;
     if i == MEALS {
@@ -337,12 +388,225 @@ mod tests {
         conserved(&v);
     }
     #[test]
-    fn full_harvest_storage_leaves_food_at_its_actual_patch_and_summaries_are_validated() {
-        let mut g = kitchen();
+    fn sales_and_gatherings_cannot_spend_reserved_food_even_immediately_after_reload() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("warehouse", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            logistics::fixture_stock(&mut v, FOOD, 0);
+            assert!(logistics::receive(&mut v, Owner::Warehouse(0), FOOD, 40));
+        }
+        assert_eq!(g.queue_building_work(0, "move", 15, 18), "ok");
+        let before = g.snapshot();
+        assert_ne!(g.sell_surplus(1), "ok");
+        assert_ne!(g.exchange_parts(), "ok");
+        assert_eq!(g.snapshot(), before);
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("square", 5, 5), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.minutes = 540.;
+            v.arrived = true;
+            logistics::fixture_stock(&mut v, FOOD, 0);
+            logistics::fixture_stock(&mut v, MEALS, 5);
+        }
+        {
+            let mut v = g.app.world().resource::<Village>().clone();
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            for mut r in q.iter_mut(g.app.world_mut()) {
+                r.energy = 90.;
+                r.hunger = 10.;
+                crate::assign(&mut r, &v, "eat", "test", false);
+                v.workforce_peers[r.id] = Some(r.clone());
+            }
+        }
+        let before = g.snapshot();
+        assert!(g.restore(&before));
+        assert_eq!(economy::free(g.app.world().resource::<Village>(), MEALS), 0);
+        assert_ne!(g.host_gathering(), "ok");
+        assert_eq!(g.snapshot(), before);
+    }
+    #[test]
+    fn a_blocked_meal_route_releases_its_store_claim_and_can_reload() {
+        let mut g = Game::new();
+        let v = g.app.world().resource::<Village>().clone();
+        {
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
+            crate::assign(&mut r, &v, "eat", "test", true);
+            assert!(r.activity_store.is_some());
+            walking::block(&v, &mut r, "The route is blocked.");
+            assert!(r.activity_store.is_none());
+            assert!(r.activity_material.is_none());
+        }
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+    }
+    #[test]
+    fn authored_stock_summaries_are_derived_after_bootstrap_and_bought_eggs_reload() {
+        let mut g = Game::new();
+        let mut authored: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        authored["village"]["version"] = 3.into();
+        authored["village"]["logistics"] = serde_json::Value::Null;
+        authored["village"]["production"] =
+            serde_json::to_value(production::State::default()).unwrap();
+        authored["village"]["simulation"]["materials"] = serde_json::Value::Null;
+        authored["village"]["food"] = 80.into();
+        authored["village"]["meals"] = 10.into();
+        assert!(g.restore(&authored.to_string()));
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            assert!(logistics::receive(&mut v, Owner::Camp, EGGS, 100));
+        }
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+    }
+    #[test]
+    fn full_village_storage_blocks_pots_and_fresh_foraging_still_feeds_its_picker() {
+        let mut g = kitchen();
+        let mut r = resident(&mut g, 0);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_stock(&mut v, FOOD, 3);
+        fixture_stage(&mut v, 0);
+        let wood = economy::capacity(&v) - (economy::storage(&v) - economy::quantity(&v, 0));
+        logistics::fixture_stock(&mut v, 0, wood);
+        assert_eq!(economy::storage(&v), economy::capacity(&v));
+        let food = v.food;
+        let water = v.water;
+        assert!(!supplies::cook_at(&mut v, 0));
+        assert_eq!((v.food, v.water, v.meals), (food, water, 0));
+        for i in 0..COUNT {
+            logistics::fixture_stock(&mut v, i, 0);
+        }
+        logistics::fixture_stock(&mut v, 0, 600);
+        r.x = 3.;
+        r.y = 11.;
+        r.hunger = 80.;
+        r.task = "gather".into();
+        assert_eq!(forage(&mut v, &mut r), 1);
+        assert_eq!((v.food, r.hunger), (0., 35.));
+        assert_eq!(economy::storage(&v), 600);
+        assert_eq!(v.supplies.portions_eaten, 1);
+        conserved(&v);
+    }
+    #[test]
+    fn eating_from_one_ground_pile_cannot_consume_another_piles_portion() {
+        let mut g = Game::new();
+        let mut r = resident(&mut g, 0);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_stock(&mut v, FOOD, 0);
+        gather(&mut v, None, 3., 11., 1);
+        gather(&mut v, None, 20., 20., 1);
+        let piles: Vec<_> = v
+            .logistics
+            .as_ref()
+            .unwrap()
+            .stores
+            .iter()
+            .filter(|p| p.owner == Owner::Ground)
+            .map(|p| p.id)
+            .collect();
+        r.x = 20.;
+        r.y = 20.;
+        r.task = "eat".into();
+        r.remaining = 5.;
+        assert!(assign(&mut r, &v));
+        assert_eq!(r.activity_store, Some(piles[1]));
+        r.x = r.target_x;
+        r.y = r.target_y;
+        assert!(eat(&mut v, &mut r));
+        let stores = &v.logistics.as_ref().unwrap().stores;
+        assert_eq!(
+            stores.iter().find(|p| p.id == piles[0]).unwrap().items[FOOD],
+            1
+        );
+        assert_eq!(
+            stores.iter().find(|p| p.id == piles[1]).unwrap().items[FOOD],
+            0
+        );
+        conserved(&v);
+    }
+    #[test]
+    fn unreachable_food_keeps_hungry_neighbours_foraging_until_they_can_eat() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("warehouse", 15, 18), "ok");
+        for x in [12, 14, 16, 18] {
+            for y in [15, 21] {
+                assert_eq!(g.place("home", x, y), "ok");
+            }
+        }
+        for x in [12, 18] {
+            for y in [17, 19] {
+                assert_eq!(g.place("home", x, y), "ok");
+            }
+        }
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.minutes = 540.;
+            v.arrived = true;
+            logistics::fixture_stock(&mut v, FOOD, 0);
+            logistics::fixture_stock(&mut v, MEALS, 0);
+            assert!(logistics::receive(&mut v, Owner::Warehouse(0), FOOD, 40));
+        }
+        {
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            for mut r in q.iter_mut(g.app.world_mut()) {
+                r.task = "rest".into();
+                r.remaining = 100.;
+                r.energy = 90.;
+                r.social = 90.;
+                r.hunger = 0.;
+                r.last_meal_slot = 0;
+                r.x = 10. + (r.id as f32 - 2.) * 1.25;
+                r.y = 13.;
+                r.target_x = r.x;
+                r.target_y = r.y;
+                if r.id == 0 {
+                    r.hunger = 80.;
+                    r.remaining = 0.;
+                }
+            }
+        }
+        let r = resident(&mut g, 0);
+        assert!(meal(g.app.world().resource::<Village>(), &r).is_none());
+        for _ in 0..2400 {
+            g.tick(0.25);
+            if resident(&mut g, 0).hunger < 60. {
+                break;
+            }
+        }
+        assert!(
+            resident(&mut g, 0).hunger < 60.,
+            "Forage and eat locally while stored food remains inaccessible"
+        );
+        assert!(g.app.world().resource::<Village>().supplies.gathered >= 2.);
+        conserved(g.app.world().resource::<Village>());
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+    }
+
+    #[test]
+    fn full_harvest_storage_leaves_food_at_its_actual_patch_and_summaries_are_validated() {
+        let mut g = kitchen();
+        assert_eq!(g.place("garden", 5, 10), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            logistics::fixture_finish(&mut v, 1);
+            assert!(logistics::receive(&mut v, Owner::Site(1), FOOD, 150));
             let food = v.food;
-            gather(&mut v, None, 3., 11., 2);
+            gather(&mut v, Some(1), 3., 11., 2);
             assert_eq!(v.food, food + 2.);
             assert!(
                 v.logistics

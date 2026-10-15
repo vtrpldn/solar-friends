@@ -117,7 +117,10 @@ pub fn can_cook_at(v: &Village, id: usize) -> bool {
     };
     let ingredients = food::available(v, p, economy::FOOD, None);
     let eggs = v.supplies.use_eggs && food::available(v, p, economy::EGGS, None) >= 2;
-    ingredients >= if eggs { 2 } else { 3 }
+    let extra =
+        if eggs { 3 } else { 2 } + u32::from(v.circular.use_biogas && v.circular.biogas >= 1.);
+    economy::capacity(v).saturating_sub(economy::storage(v)) >= extra
+        && ingredients >= if eggs { 2 } else { 3 }
         && logistics::room(v, p.owner)
             >= if eggs { 7 - 4 } else { 5 - 3 }
                 + u32::from(v.circular.use_biogas && v.circular.biogas >= 1.)
@@ -182,7 +185,7 @@ pub fn fixture_cook(v: &mut Village) {
 
 pub fn valid(v: &Village) -> bool {
     let s = &v.supplies;
-    s.eggs <= 60
+    s.eggs <= economy::capacity(v)
         && [s.gathered, s.used]
             .iter()
             .all(|n| n.is_finite() && *n >= 0.)

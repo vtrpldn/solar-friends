@@ -1,3 +1,4 @@
+import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -9,7 +10,7 @@ function scene(){
   const g=new Game(),s=snap(g);
   Object.assign(s.village,{arrived:true,minutes:540,food:80,meals:10,water:40});
   for(const r of s.residents)Object.assign(r,{task:'idle',remaining:90,energy:90,hunger:10,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});
-  assert(g.restore(JSON.stringify(s)));return g;
+  assert(g.restore(JSON.stringify(restockFixtureFood(s))));return g;
 }
 function until(g,test){for(let n=0;n<12000;n++){if(test(snap(g)))return;g.tick(.25);}throw Error('Saved helping request failed to progress: '+g.snapshot());}
 function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();}

@@ -11,7 +11,9 @@ assert(g.restore(JSON.stringify(makeScenario('cultivation',fresh,old))));
 const trees=snap().village.economy.sources[0];assert.equal(trees.growth,.75);assert.equal(trees.remaining,0);
 advanceGame(g,1440);advanceGame(g,1);let s=snap();assert.equal(s.village.economy.sources[0].growth,1);assert.equal(s.village.economy.sources[0].remaining,32);assert.equal(s.village.economy.sources[1].remaining,24);
 assert(g.restore(g.snapshot()));assert.equal(g.harvest_source(0),'ok');const before=snap().village.wood;
-advanceGame(g,240);s=snap();assert.equal(s.village.wood,before+8);assert.equal(s.village.economy.sources[0].remaining,24);assert(!s.village.economy.sources[0].harvest_requested);
+// A distant harvest may span lunch and the next community work window.
+for(let frame=0;frame<2*1920&&snap().village.economy.sources[0].harvest_requested;frame++)g.tick(.25);
+s=snap();assert.equal(s.village.wood,before+8);assert.equal(s.village.economy.sources[0].remaining,24);assert(!s.village.economy.sources[0].harvest_requested);
 assert(g.restore(g.snapshot()));assert.equal(g.configure_source(0,false,false),'ok');assert(g.restore(g.snapshot()));
 const h=new Game();h.start_mode('sandbox');const baseline=h.snapshot();let plots=0;
 for(let material=0;material<5;material++)for(let x=1;x<=26;x++)for(let y=1;y<=26;y++){

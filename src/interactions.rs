@@ -102,9 +102,9 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             r.hunger = (r.hunger - 5.).max(0.);
         }
         "grove" => {
-            food::gather(v, Some(id), r.x, r.y, 2);
-            v.supplies.gathered += 2.;
-            v.progress.fruit = v.progress.fruit.saturating_add(2);
+            let gathered = food::gather(v, Some(id), r.x, r.y, food::forage_yield(v, Some(id)));
+            v.supplies.gathered += gathered as f32;
+            v.progress.fruit = v.progress.fruit.saturating_add(gathered);
         }
         "coop" => {
             r.social = (r.social + 10.).min(100.);
@@ -240,7 +240,7 @@ mod tests {
                     assert_eq!(v.water, water - 1.);
                     assert_eq!(r.energy, 50.);
                 }
-                "grove" => assert_eq!(v.food, food + 2.),
+                "grove" => assert_eq!(v.food, food + 6.),
                 "coop" => {
                     assert_eq!(v.buildings[0].poultry.remaining, 70.);
                     assert_eq!(r.social, 50.);

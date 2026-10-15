@@ -129,6 +129,26 @@ pub fn tend(v: &mut Village, r: &Resident) {
     let site_id = v.buildings[index].id;
     let capacity = moisture_capacity(&v.buildings[index]);
     let outdoor = v.buildings[index].kind == "garden";
+    let pending = &v.buildings[index].crop;
+    if pending.planted && pending.growth >= duration(pending) {
+        let base = match pending.kind.as_str() {
+            "beans" => 10,
+            "tomatoes" if pending.harvests > 0 && v.progress.compost == 0 => 4,
+            "tomatoes" => 6,
+            _ => 5,
+        };
+        let output = base
+            + if r.favorite == "garden" { 3 } else { 0 }
+            + if v.progress.compost > 0 { 3 } else { 0 }
+            + if v.progress.use_tools && logistics::site_tools(v, site_id) > 0 {
+                2
+            } else {
+                0
+            };
+        if economy::capacity(v).saturating_sub(economy::storage(v)) < output {
+            return;
+        }
+    }
     let crop = &mut v.buildings[index].crop;
     if !crop.planted {
         crop.planted = true;

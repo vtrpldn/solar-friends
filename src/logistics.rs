@@ -213,6 +213,7 @@ pub fn initialise(v: &mut Village) -> bool {
             return false;
         }
     }
+    sync_totals(v);
     true
 }
 pub(crate) fn layout(v: &Village) -> u32 {
@@ -365,6 +366,7 @@ pub fn room(v: &Village, owner: Owner) -> u32 {
             sum(&p.items)
                 + arriving(s, p.id)
                 + production::site_space(v, p.owner)
+                + food::reserved_space(v, Some(p.owner))
                 + if owner == Owner::Camp {
                     (0..COUNT).map(|i| economy::incoming(v, i)).sum()
                 } else {
@@ -372,6 +374,23 @@ pub fn room(v: &Village, owner: Owner) -> u32 {
                 },
         )
     })
+}
+/// A ground owner can have many piles; meals consume the exact saved store claim.
+pub fn spend_at(v: &mut Village, id: Id, i: usize, n: u32) -> bool {
+    let Some(s) = v.logistics.as_ref() else {
+        return false;
+    };
+    let Some(index) = s
+        .stores
+        .iter()
+        .position(|p| p.id == id && p.items[i].saturating_sub(held(s, p.id, i)) >= n)
+    else {
+        return false;
+    };
+    simulation::material_change(v, i, n, false);
+    v.logistics.as_mut().unwrap().stores[index].items[i] -= n;
+    sync_totals(v);
+    true
 }
 pub fn spend(v: &mut Village, owner: Option<Owner>, i: usize, n: u32) {
     if n == 0 {
@@ -663,7 +682,11 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                             to: to.id,
                             material: i,
                             amount: n,
-                            rank: (if closing(v, from.owner) { 0 } else { 2 }, 0, from.id.0),
+                            rank: (
+                                if closing(v, from.owner) { 0 } else { 2 },
+                                u32::from(i >= economy::FOOD),
+                                from.id.0,
+                            ),
                         });
                     }
                 }
@@ -734,7 +757,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         to: to.id,
                         material: i,
                         amount,
-                        rank: (1, 0, to.id.0),
+                        rank: (if matches!(to.owner,Owner::Pantry(id) if v.buildings.iter().any(|b|b.id==id && b.kind=="coop")){3}else if supplies::urgent(v){1}else{2},0,to.id.0),
                     });
                 }
             }
@@ -968,6 +991,15 @@ fn valid_destination(v: &Village, h: &Shipment) -> bool {
                 >= project_items(v, id)[h.material] + travelling(v, id, h.material)
         }
         Owner::Ground => false,
+        Owner::Pantry(_) => {
+            let incoming = s
+                .shipments
+                .iter()
+                .filter(|p| p.to == h.to && p.material == h.material)
+                .map(|p| p.amount)
+                .sum::<u32>();
+            needs(v, to.owner)[h.material] >= to.items[h.material] + incoming
+        }
         Owner::Production(id) => {
             let present = to.items[h.material].saturating_sub(held(s, to.id, h.material));
             production::needs(v, id)[h.material] >= present + production::inbound(v, id, h.material)
@@ -1209,7 +1241,11 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || p.items.iter().chain(&p.target).any(|n| *n > 600)
             || sum(&p.items) > p.capacity
             || sum(&p.target) > p.capacity
-            || sum(&p.items) + arriving(s, p.id) + production::site_space(v, p.owner) > p.capacity
+            || sum(&p.items)
+                + arriving(s, p.id)
+                + production::site_space(v, p.owner)
+                + food::reserved_space(v, Some(p.owner))
+                > p.capacity
         {
             return false;
         }

@@ -1,3 +1,4 @@
+import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import init, { Game } from '../web/pkg/solar_friends.js';
@@ -31,7 +32,7 @@ for (const [kind, x, y, cost] of [
 // Stock the scenario; all cooking records still come from completed tasks.
 const stocked = JSON.parse(game.snapshot());
 stocked.village.food = 300;
-assert(game.restore(JSON.stringify(stocked)));
+assert(game.restore(JSON.stringify(restockFixtureFood(stocked))));
 until(game, s => s.village.situations.active !== null, 'an organic cooking concern', 25000, g => {
   if (snapshot(g).residents.find(r => r.id === 2).task !== 'cook') g.request(2, 'cook', true);
 });

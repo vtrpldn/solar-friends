@@ -475,7 +475,9 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             "There is no clear work position at the requested site.",
         );
     }
-    r.activity_material = q.material;
+    if task != "eat" {
+        r.activity_material = q.material;
+    }
     if !continuous(&q.task) && !matches!(q.task.as_str(), "prepare" | "craft") {
         r.remaining = q.remaining;
     }
@@ -585,7 +587,10 @@ pub fn enqueue_at(
         task,
         "source" | "prepare" | "outside" | "water" | "gather" | "rest" | "socialize" | "eat"
     ) {
-        if matches!(task, "source" | "prepare" | "outside" | "water" | "gather") {
+        if matches!(
+            task,
+            "source" | "prepare" | "outside" | "water" | "gather" | "eat"
+        ) {
             None
         } else {
             destination_building(v, task, r.id).map(|b| b.id)

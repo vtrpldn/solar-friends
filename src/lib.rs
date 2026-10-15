@@ -499,7 +499,7 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if situations::apply_agreement(r, v) {
         return;
-    } else if workforce::urgent_food(v, r.id) || (supplies::urgent(v) && r.hunger > 60.) {
+    } else if workforce::urgent_food(v, r.id) || (r.hunger > 60. && !workforce::eating(v, r.id)) {
         if requests::pending(r, "gather") && requests::resume(r, v) {
             return;
         }
@@ -788,7 +788,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     | "outside"
                     | "haul"
             )
-            && !(r.task == "gather" && supplies::urgent(&v));
+            && !(r.task == "gather"
+                && (supplies::urgent(&v) || r.hunger > 60. && !workforce::eating(&v, r.id)));
         let ready_work = available(&v, "build")
             || available(&v, "building_work")
             || logistics::pending(&v, r.id)
@@ -814,7 +815,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 || r.remaining <= 0.
                 || (occupations::available(&v, r.id)
                     && (requests::work(&r.task) || r.task == "haul")
-                    && !(r.task == "gather" && supplies::urgent(&v)))
+                    && !(r.task == "gather"
+                        && (supplies::urgent(&v)
+                            || r.hunger > 60. && !workforce::eating(&v, r.id))))
                 || chores_finished
                 || chores_start)
             || (requests::work(&r.task) || r.task == "haul")
@@ -971,12 +974,19 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     }
                 }
                 "gather" => {
-                    if r.requested || supplies::needs_ingredients(&v) {
-                        completed_batch = true;
-                        food::gather(&mut v, r.activity_building, r.x, r.y, 2);
-                        v.supplies.gathered += 2.;
-                        if ready(&v, "grove") {
-                            v.progress.fruit = v.progress.fruit.saturating_add(2);
+                    if r.requested
+                        || supplies::needs_ingredients(&v)
+                        || r.hunger > 60. && !workforce::eating(&v, r.id)
+                    {
+                        let gathered = food::forage(&mut v, &mut r);
+                        completed_batch = gathered > 0;
+                        v.supplies.gathered += gathered as f32;
+                        if v.buildings.iter().any(|b| {
+                            Some(b.id) == r.activity_building
+                                && b.kind == "grove"
+                                && b.progress >= 100.
+                        }) {
+                            v.progress.fruit = v.progress.fruit.saturating_add(gathered);
                         }
                     }
                 }
@@ -1295,6 +1305,7 @@ impl Game {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.supplies.feed_hens = feed_hens;
         v.supplies.use_eggs = use_eggs;
+        logistics::rebalance(&mut v);
     }
     pub fn toggle_road(&mut self, x: i32, y: i32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -1461,8 +1472,8 @@ impl Game {
         if !(480.0..1080.).contains(&(v.minutes % 1440.)) {
             return "Start a gathering between 08:00 and 18:00, with time before bed.".into();
         }
-        if v.meals < 5 {
-            return "Set aside five prepared meals for the gathering.".into();
+        if v.meals < 5 || economy::free(v, economy::MEALS) < 5 {
+            return "Set aside five unreserved prepared meals for the gathering.".into();
         }
         let mut invited: u8 = 0;
         let mut q = self.app.world_mut().query::<&Resident>();
@@ -1682,6 +1693,7 @@ impl Game {
         for e in entities {
             self.app.world_mut().despawn(e);
         }
+        workforce::refresh(&mut save.village, save.residents.iter());
         for r in save.residents {
             self.app.world_mut().spawn(r);
         }

@@ -111,7 +111,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
       $(`[data-job-status="${job.id}"]`).textContent=working?r.trip.phase==='leaving'?`Leaving for ${job.place}`:r.trip.phase==='away'?'Working off-site · returns at 17:00':`Back from work · ${money(job.income)} contributed`:job.paid_today?`Today’s contribution received · ${job.enabled?'scheduled again tomorrow':'future shifts off'}`:!job.enabled?'Staying available for village life':v.minutes%1440>=600?'No shift taken today · next departure tomorrow at 09:00':'Scheduled · leaves between 09:00 and 10:00 when rested';
     }
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
-    $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
+    $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.materials[16].available<4||e.used+2>e.capacity;
     $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}${e.production?.reserved_space?` · ${e.production.reserved_space} spaces reserved for processing`:''}`;
     $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
     const outlook=forecasts.summary();
