@@ -102,6 +102,7 @@ const tasks = {
   water: "Collecting river water",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
+  restore: "Restoring the soil",
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
   nature_walk: "Enjoying a nature walk",

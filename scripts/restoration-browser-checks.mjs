@@ -4,7 +4,7 @@ export async function checkRestorationControls({page,saved,capture}){
   async function load(file){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/restoration/${file}.json`);
-    await page.waitForFunction(file=>{const j=window.solarDev.snapshot().village.restoration[0];return file==='working'?j?.work>0&&j.finished==null:j?.cancelled;},file);
+    await page.waitForFunction(file=>{const v=window.solarDev.snapshot().village,j=v.restoration[0];return file==='plantation'?v.economy.sources.length===1&&!j:file==='working'?j?.work>0&&j.finished==null:j?.cancelled;},file);
     await page.locator('#dev-close').click();
     if(!await page.locator('#land-map').isVisible())await page.getByRole('button',{name:'Land views',exact:true}).click();
   }
@@ -27,6 +27,7 @@ export async function checkRestorationControls({page,saved,capture}){
   assert.match(await page.locator('#land-restoration-note').textContent(),/18, 18 · 2 × 2 cells/);
   before=await state();await page.getByRole('button',{name:'Restore ground · 2 compost',exact:true}).click();
   after=await state();const queued=after.village.restoration.at(-1);
+  assert(!await page.getByRole('button',{name:'Clear selection',exact:true}).isVisible(),'Queueing clears the pinned selection');
   assert.equal(queued.work,0);assert.equal(queued.finished,null);assert.equal(after.village.progress.compost,before.village.progress.compost);
   assert.deepEqual(after.village.land.soil,before.village.land.soil,'Queueing and preview do not apply soil improvement');
   assert.match(await page.locator('#land-restoration-jobs').textContent(),/Waiting for compost delivery/);
@@ -40,6 +41,18 @@ export async function checkRestorationControls({page,saved,capture}){
   await page.locator('#dev-close').click();
   await page.waitForFunction(()=>document.querySelector('#land-restoration-jobs').textContent.includes('Soil restored'));
   await capture('Resident work finishes and its soil improvements remain on the land','soil-restoration-complete.png');
+  await load('plantation');
+  await page.getByRole('button',{name:'Close land views',exact:true}).click();
+  await page.locator('#open-village').click();await page.getByRole('button',{name:'Construction',exact:true}).click();
+  if(!await page.locator('#land-sources').evaluate(el=>el.closest('details').open))await page.getByText('Our land resources',{exact:true}).click();
+  const enrich=page.locator('[data-site="0"][data-action="enrich"]');assert(await enrich.isEnabled());
+  before=await state();await enrich.click();after=await state();
+  assert.equal(after.village.restoration[0].size,3);assert.equal(after.village.restoration[0].source,0);
+  assert.deepEqual(after.village.land.soil,before.village.land.soil);assert.equal(after.village.progress.compost,4);
+  assert(!await enrich.isEnabled());assert.match(await enrich.textContent(),/Soil work queued/);
+  await capture('Plantation controls reserve an attended job for the whole timber plot','soil-restoration-plantation.png');
+  await page.getByRole('button',{name:'Close projects',exact:true}).click();await page.getByRole('button',{name:'Land views',exact:true}).click();
+  await page.getByRole('button',{name:'Cancel soil work',exact:true}).click();
   await page.getByRole('button',{name:'Close land views',exact:true}).click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved,'Soil work in dev scenes must never overwrite the saved village');
   await page.locator('#dev-button').click();

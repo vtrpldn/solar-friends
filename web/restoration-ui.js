@@ -11,7 +11,7 @@ export function installRestorationUI(api){
     const s=api.snapshot();preview=pinned?JSON.parse(api.game().restoration_preview(pinned.x,pinned.y)):null;
     button.disabled=!preview?.allowed||(s.environment.economy.materials[19]?.available||0)<2;
     $('land-unpin').hidden=!pinned;
-    note.textContent=!pinned?'Click the ground to mark a plot for soil work.':preview.allowed?`Plot ${preview.x}, ${preview.y} · ${preview.size} × ${preview.size} cells. Two compost must arrive before a neighbour spends ${preview.minutes} minutes restoring the soil.`:preview.reason;
+    note.textContent=!pinned?'Click the ground to mark a plot for soil work.':preview.allowed?`Plot ${preview.x}, ${preview.y} · ${preview.size} × ${preview.size} cells. Two compost must arrive before a neighbour spends ${preview.minutes} minutes restoring the soil.${(s.environment.economy.materials[19]?.available||0)<2?' Make or buy two available compost before queueing.':''}`:preview.reason;
     const rows=JSON.parse(api.game().restoration_report()).jobs,visible=[...rows.filter(r=>r.job.finished==null),...rows.filter(r=>r.job.finished!=null).slice(-2)];
     const next=JSON.stringify(visible.map(r=>[r.job.id,r.phase,Math.ceil(r.remaining),r.compost_here]));if(next===key)return;key=next;
     const focused=document.activeElement?.dataset.cancelSoil;

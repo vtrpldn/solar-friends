@@ -9,6 +9,8 @@ for (const task of ['idle','socialize','gathering']) {
 }
 for (const task of ['rest','eat']) assert.equal(residentActivity({...resident,task},0),'sit');
 assert.equal(residentActivity({...resident,task:'sleep'},0),'sleep');
+assert.equal(residentActivity({...resident,task:'restore'},0),'tend');
+assert.equal(residentActivity({...resident,task:'restore',target_x:12},0),'walk');
 for (const task of ['birdwatch','nature_walk','stargaze']) assert.equal(residentActivity({...resident,task},0),'look');
 assert.equal(residentActivity({...resident,task:'daydream'},0),'sit');
 assert.equal(residentActivity({...resident,task:'stretch'},8),'stretch');
