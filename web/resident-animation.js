@@ -31,7 +31,7 @@ export function residentActivity(r, minutes) {
   if(r.task==='source'&&r.sourceCare)return 'tend';
   if(r.task==='source')return [2,3].includes(r.sourceMaterial)?'tend':'work';
   if(r.task==='outside')return 'tend';
-  if (['build','building_work','craft','prepare'].includes(r.task)) return 'work';
+  if (['build','building_work','craft','prepare','utility'].includes(r.task)) return 'work';
   if (r.task === 'cook') return 'cook';
   if (r.task === 'water') return 'water';
   if (['garden', 'compost', 'restore', 'gather'].includes(r.task)) return 'tend';

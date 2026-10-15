@@ -1,3 +1,4 @@
+import {drawWaterConnections,waterOverlayRevision} from './water-connections.js';
 import {installLandMap} from './land-map.js';
 import {gatheringInfo} from './gathering-ui.js';
 import {drawCarriedMaterials,drawSupplyPile,drawCarriedWater,drawWaterPile} from './logistics-art.js';
@@ -101,6 +102,7 @@ const tasks = {
   return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Carrying water to local stores",
+  utility: "Laying water lines",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   restore: "Restoring the soil",
@@ -683,6 +685,7 @@ function render() {
   drawPlacementGrid();
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
+  drawWaterConnections(ctx,iso,scale,state);
   const objects = [
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
@@ -1145,7 +1148,7 @@ function updateSupplies(v) {
     : "Neighbours queue a pot when the reserve needs topping up and there is room for its meals.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
     : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop during community hours."}`;
-  $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
+  $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${Math.round(state.environment.water_capacity)} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
 }
 function updateSituations() {
   const view = situationView(state.village, state.residents);
@@ -1206,7 +1209,7 @@ function updateUI() {
             : "growing"
     ]++;
   }
-  $("#water-capacity").textContent = `Water / ${env.water_capacity}`;
+  $("#water-capacity").textContent = `Water / ${Math.round(env.water_capacity)}`;
   $("#weather-status").textContent = env.raining
     ? "Afternoon rain · filling cisterns"
     : env.dry_day
@@ -1375,7 +1378,7 @@ function frame(stamp) {
     state = JSON.parse(game.snapshot());
   }
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
-  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused].join("|");
+  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
     render(); paintedState = state; paintedView = viewKey;
   }

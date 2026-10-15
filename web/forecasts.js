@@ -10,6 +10,7 @@ export function forecastPlan(s){
     buildings:v.buildings.map(b=>[b.id,b.kind,b.x,b.y]),
     projects:v.economy.projects.map(p=>[p.building,p.recipe,p.priority,p.paused]),
     sources:v.economy.sources.map(p=>[p.material,p.x,p.y,p.active,p.auto_replant]),
+    pipes:v.pipes?.lines.map(p=>[p.id,p.plan.kind,p.plan.from,p.plan.to,p.priority,p.paused,['removing','retired'].includes(p.phase)]),
     jobs:v.economy.outside_jobs,preferences:v.workforce.preferences,
     production:[v.production?.targets,v.production?.sites.filter(s=>s.paused).map(s=>s.id)],
     restoration:v.restoration?.map(j=>[j.id,j.x,j.y,j.size,j.cancelled]),

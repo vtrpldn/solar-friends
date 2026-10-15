@@ -224,9 +224,9 @@ export const quests = [
       goal("Build a banana treatment bed",count(v,"banana_treatment"),1,"A sealed basin planted with banana trees treats toilet sewage through its soil and roots. Its water stays separate from our drinking and irrigation stores.","banana_treatment"),
       actionGoal("supplies","Treat five toilet waste",Math.floor(v.circular.waste_treated ?? 0),5,"Enable banana treatment in Water & waste. Each finished bed treats one waste every four game hours. It needs no power and produces no water or food."),
       actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water available per visit."),
-      actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Rain falls 14:00–17:00 on two days out of three. A completed cistern catches it when there is space."),
+      actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Rain falls 14:00–17:00 on two days out of three. A completed cistern catches it when there is space. In Supplies → Where water is → Pipes & pumps, connect it to a household or kitchen to reduce carrying. Residents install the kit; pumping uses shared energy."),
       actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Twelve greywater becomes eight reclaimed water over six hours."),
-      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. Keep a planted plot growing."),
+      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. Keep a planted plot growing. Carry reclaimed water manually, or install a separate irrigation line from the reed bed in Supplies → Where water is → Pipes & pumps."),
     ],
   },
   {

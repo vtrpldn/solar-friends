@@ -19,6 +19,7 @@ v.economy.stock.fill(0);v.economy.money=20000000;v.economy.outside_jobs.fill(fal
 for(const r of f.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,trip:null,help:null,energy:90,hunger:0,social:90,last_meal_slot:0,activity_building:null,activity_material:null,activity_store:null,activity_batch:null,walking:{},x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});
 assert(g.restore(JSON.stringify(resetMaterialLocations(f))));
 const before=g.snapshot(),quote=JSON.parse(g.water_connection_quote('fresh',0,1));assert(quote.allowed);g.water_connections();g.utility_preview('fresh',0,1);assert.equal(g.snapshot(),before,'Planning reads cannot spend, move water or allocate identities');
+await writeFile('artifacts/pipes/before.json',before);
 assert.equal(g.queue_water_connection('fresh',0,1),'ok');const id=snap(g).village.pipes.lines[0].id;
 assert.equal(line(snap(g),id).work,0);assert.equal(line(snap(g),id).phase,'awaiting_inputs');checkpoint(g);await writeFile('artifacts/pipes/queued.json',g.snapshot());
 const queued=g.snapshot();assert.notEqual(g.queue_water_connection('fresh',0,1),'ok');assert.equal(g.snapshot(),queued);
@@ -39,6 +40,12 @@ assert(Math.abs(line(snap(g),id).energy_used-line(snap(g),id).transferred*.025)<
 assert.equal(g.configure_water_connection(id,3,true),'ok');const transferred=line(snap(g),id).transferred;
 for(let frame=0;frame<80;frame++)g.tick(.25);assert.equal(line(snap(g),id).transferred,transferred);checkpoint(g);await writeFile('artifacts/pipes/paused.json',g.snapshot());
 assert.equal(g.configure_water_connection(id,3,false),'ok');const active=g.snapshot();
+const night=new Game();assert(night.restore(active));until(night,s=>s.village.minutes%1440>=1260,'Actual evening for line-art review',2*1920);checkpoint(night);await writeFile('artifacts/pipes/night.json',night.snapshot());
+// Controlled outage fixture: keep the real installation and water accounts,
+// empty the night battery, and move owned buffer water back to its cistern.
+const outage=new Game(),dark=snap(night),source=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===0),target=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===1);
+assert.equal(dark.village.water_supply.trips.length,0);const back=Math.min(2,target.water[0],source.capacity[0]-source.water[0]);assert(back>0);target.water[0]-=back;source.water[0]+=back;dark.village.power.stored=0;assert(outage.restore(JSON.stringify(dark)));
+const flow=line(snap(outage),id).transferred;for(let n=0;n<20;n++)outage.tick(.25);assert.equal(line(snap(outage),id).transferred,flow);assert.equal(snap(outage).environment.power.generation,0);checkpoint(outage);await writeFile('artifacts/pipes/outage.json',outage.snapshot());night.free();outage.free();
 const moving=new Game();assert(moving.restore(active));assert.equal(moving.queue_building_work(0,'move',5,24),'ok');
 until(moving,s=>s.village.buildings.find(b=>b.id===0).y===24,'Resident packs and moves the water source');assert.equal(line(snap(moving),id).phase,'removing');checkpoint(moving);await writeFile('artifacts/pipes/disconnected.json',moving.snapshot());
 until(moving,s=>s.village.pipes.lines.some(p=>p.id!==id&&p.plan.from===0&&p.anchors[0].y===24),'Old route dismantled and replacement installation queued');checkpoint(moving);await writeFile('artifacts/pipes/replacement.json',moving.snapshot());
