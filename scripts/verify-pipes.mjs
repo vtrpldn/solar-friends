@@ -37,7 +37,14 @@ const partial=line(snap(g),id).work;assert.equal(g.configure_water_connection(id
 for(let frame=0;frame<120;frame++)g.tick(.25);assert.equal(line(snap(g),id).work,partial,'A pause preserves partial corridor work');assert.equal(g.configure_water_connection(id,1,false),'ok');checkpoint(g);
 let previousWork=line(snap(g),id).work;const observed=new Set([0]);
 until(g,s=>{const p=line(s,id);if(p.work>previousWork){observed.add(Math.min(p.plan.cells.length-1,Math.floor(previousWork/4)));previousWork=p.work;}return p.phase==='active';},'All pipe cells and pump commissioned');
-assert.equal(observed.size,quote.plan.cells.length,'Resident work advances along the complete corridor');checkpoint(g);await writeFile('artifacts/pipes/active.json',g.snapshot());
+assert.equal(observed.size,quote.plan.cells.length,'Resident work advances along the complete corridor');checkpoint(g);
+// The commissioned water route still needs its own paid electrical connection.
+const ports=snap(g).village.power.network.nodes,sourcePort=ports.find(n=>n.kind==='solar').id,pumpPort=ports.find(n=>n.owner.kind==='pump'&&n.owner.id===id).id;
+assert.equal(line(snap(g),id).transferred,0,'A distant charged source cannot run the unconnected pump');
+const cableQuote=JSON.parse(g.electrical_connection_quote(sourcePort,pumpPort));assert(cableQuote.allowed);
+assert.equal(g.queue_electrical_connection(sourcePort,pumpPort),'ok');const cable=snap(g).village.pipes.lines.at(-1).id;
+let ordered=false;until(g,()=>{if(!ordered)ordered=g.order_supplies_pickup(JSON.stringify(cableQuote.parts),4)==='ok';return ordered;},'A resident collects the paid pump cable kit');
+until(g,s=>line(s,cable).phase==='active','Residents deliver parts and commission the pump cable');checkpoint(g);await writeFile('artifacts/pipes/active.json',g.snapshot());
 // Cooking consumes delivered water and creates genuine room for the pump.
 until(g,s=>s.residents.find(r=>r.id===2).help?.task==='cook'||/Happy/.test(g.request(2,'cook',true)),'Ask a neighbour to cook using the connected kitchen');
 until(g,s=>line(s,id).transferred>0,'Connected water reaches the consumer after actual use');checkpoint(g);await writeFile('artifacts/pipes/pumping.json',g.snapshot());
@@ -49,7 +56,9 @@ const night=new Game();assert(night.restore(active));until(night,s=>s.village.mi
 // Controlled outage fixture: keep the real installation and water accounts,
 // empty the night battery, and move owned buffer water back to its cistern.
 const outage=new Game(),dark=snap(night),source=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===0),target=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===1);
-assert.equal(dark.village.water_supply.trips.length,0);const back=Math.min(2,target.water[0],source.capacity[0]-source.water[0]);assert(back>0);target.water[0]-=back;source.water[0]+=back;dark.village.power.stored=0;assert(outage.restore(JSON.stringify(dark)));
+assert.equal(dark.village.water_supply.trips.length,0);const back=Math.min(2,target.water[0],source.capacity[0]-source.water[0]);assert(back>0);target.water[0]-=back;source.water[0]+=back;
+for(const n of dark.village.power.network.nodes)if(n.kind!=='roof'){dark.village.power.network.account.discharged+=n.charge;n.charge=0;}
+dark.village.power.stored=0;assert(outage.restore(JSON.stringify(dark)));
 const flow=line(snap(outage),id).transferred;for(let n=0;n<20;n++)outage.tick(.25);assert.equal(line(snap(outage),id).transferred,flow);assert.equal(snap(outage).environment.power.generation,0);checkpoint(outage);await writeFile('artifacts/pipes/outage.json',outage.snapshot());night.free();outage.free();
 const moving=new Game();assert(moving.restore(active));assert.equal(moving.queue_building_work(0,'move',5,24),'ok');
 until(moving,s=>s.village.buildings.find(b=>b.id===0).y===24,'Resident packs and moves the water source');assert.equal(line(snap(moving),id).phase,'removing');checkpoint(moving);await writeFile('artifacts/pipes/disconnected.json',moving.snapshot());

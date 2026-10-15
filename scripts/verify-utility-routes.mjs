@@ -20,13 +20,15 @@ function minimumCells(layout,from,to){
   return Infinity;
 }
 for(const [kind,from,to]of [['fresh',-1,2],['fresh',0,1],['irrigation',3,1],['greywater',2,3],['sewage',4,5],['sewage',4,6],['electricity',7,8],['electricity',9,8],['irrigation',3,-2],['fresh',0,-3]]){
-  const layout=JSON.parse(g.utility_endpoints(kind)),result=JSON.parse(g.utility_preview(kind,from,to));assert(result.allowed,JSON.stringify(result));
-  const p=result.plan;assert.equal(p.kind,kind);assert.equal(p.from,from);assert.equal(p.to,to);assert.equal(result.preview_only,true);
-  assert.equal(p.cells.length,minimumCells(layout,from,to),'Route uses the fewest legal corridor cells');
+  const nodes=JSON.parse(g.snapshot()).village.power.network.nodes,node=building=>nodes.find(n=>n.owner.kind==='building'&&n.owner.id===building).id;
+  const a=kind==='electricity'?node(from):from,b=kind==='electricity'?node(to):to;
+  const layout=JSON.parse(g.utility_endpoints(kind)),result=JSON.parse(g.utility_preview(kind,a,b));assert(result.allowed,JSON.stringify(result));
+  const p=result.plan;assert.equal(p.kind,kind);assert.equal(p.from,a);assert.equal(p.to,b);assert.equal(result.preview_only,true);
+  assert.equal(p.cells.length,minimumCells(layout,a,b),'Route uses the fewest legal corridor cells');
   const available=new Set(layout.corridors.map(p=>p.join(',')));assert(p.cells.every(c=>available.has(c.join(','))));
   assert.deepEqual(p.cells[0],p.start.cell);assert.deepEqual(p.cells.at(-1),p.end.cell);
   assert(p.cells.every((c,i)=>!i||Math.abs(c[0]-p.cells[i-1][0])+Math.abs(c[1]-p.cells[i-1][1])===1));
-  assert.deepEqual(JSON.parse(g.utility_preview(kind,from,to)),result);reports.push(result);
+  assert.deepEqual(JSON.parse(g.utility_preview(kind,a,b)),result);reports.push(result);
 }
 for(const [kind,from,to]of [['fresh',3,2],['irrigation',3,2],['greywater',2,1],['sewage',4,1],['fresh',0,0],['electricity',7,999999],['fresh',-2147483648,1],['bad',0,1]])assert.equal(JSON.parse(g.utility_preview(kind,from,to)).allowed,false);
 assert.equal(g.snapshot(),original,'Queries never allocate IDs, spend resources, or install service');

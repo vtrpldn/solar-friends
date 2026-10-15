@@ -38,7 +38,7 @@ import {
   zoomLimits,
   clampZoom,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=devtools-1";
+import init, { Game } from "./pkg/solar_friends.js";
 import {
   paintTerrain,
   soilAppearance,

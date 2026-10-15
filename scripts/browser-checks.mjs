@@ -396,7 +396,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkProcessControls({page,saved,capture});
   await checkOrganicControls({page,saved,capture});
   await page.locator('#dev-button').click();
-  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
+  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['power-outage',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
     await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
@@ -405,6 +405,12 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
     if(id==='coop')assert.equal(state.village.supplies.eggs,3);
+    if(['night','circular-night','art-night','power-outage'].includes(id)){
+      assert(state.village.pipes.lines.some(p=>p.plan.kind==='electricity'&&p.phase==='active'),'Night scenes contain real installed cables');
+      const lights=state.environment.power.connections.filter(c=>c.source==='grid'&&c.enabled);
+      assert(lights.length>0&&lights.every(c=>c.connected),'Preview lights belong to connected circuits');
+      assert(lights.every(c=>id==='power-outage'?c.light_level===0:c.light_level>.99),'Empty circuits leave shared lamps off; charged previews illuminate them');
+    }
     if(id==='art'||id==='art-night'){
       const rendered=await page.evaluate(async()=>{const {allBuildingArt,buildingArtKey}=await import('./building-art.js?v=night-1');const s=window.solarDev.snapshot();return {expected:Object.keys(allBuildingArt).sort(),actual:s.village.buildings.map(b=>buildingArtKey(b,s.village.buildings,s.village.economy.projects)).sort()};});
       assert.deepEqual(rendered.actual,rendered.expected,'All building artwork must be present through the actual Dev Tools launcher');

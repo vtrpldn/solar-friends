@@ -52,7 +52,7 @@ export async function checkPipeControls({page,saved,capture}){
   await page.getByRole('button',{name:'Close supplies',exact:true}).click();
   await page.getByRole('button',{name:new RegExp(`^Select ${crew.name}\\.`)}).click();
   assert.match(await page.locator('#person .quote').textContent(),/Dismantling/);
-  assert.equal(await page.locator('#person .person-activity').textContent(),'Working on water lines');
+  assert.equal(await page.locator('#person .person-activity').textContent(),'Working on village services');
   await capture('An existing installer reports the switch to resident dismantling','pipes-resident-work.png');
   await page.getByRole('button',{name:'Close resident details',exact:true}).click();
   const partial=await load('installing');id=partial.village.pipes.lines[0].id;
@@ -73,11 +73,15 @@ export async function checkPipeControls({page,saved,capture}){
   await page.getByRole('button',{name:'Power',exact:true}).click();assert.match(await page.locator('#power-pumps').textContent(),/pump/i);
   await show();await page.locator('#water-lines').scrollIntoViewIfNeeded();await capture('Installed line reports delivered water and battery use','pipes-running.png');
   const beforeRemoval=(await snapshot()).village.simulation.materials.received;
+  const alreadyRemoved=new Set((await snapshot()).village.pipes.lines.filter(p=>p.phase==='retired').map(p=>p.id));
   await page.getByRole('button',{name:'Dismantle line',exact:true}).click();
   assert.equal((await snapshot()).village.pipes.lines[0].phase,'removing');
   for(let hour=0;hour<72&&(await snapshot()).village.pipes.lines[0].phase!=='retired';hour++)await advance(60);
   s=await snapshot();assert.equal(s.village.pipes.lines[0].phase,'retired');
-  for(const [i,n]of [[8,1],[9,1],[10,0],[14,1]])assert.equal(s.village.simulation.materials.received[i]-beforeRemoval[i],n,'Dismantling returns the defined kit once');
+  for(const [i,n]of [[8,1],[9,1],[10,0],[14,1]]){
+    const cables=s.village.pipes.lines.filter(p=>p.plan.kind==='electricity'&&p.phase==='retired'&&!alreadyRemoved.has(p.id));
+    assert.equal(s.village.simulation.materials.received[i]-beforeRemoval[i],n+cables.reduce((sum,p)=>sum+Math.floor(p.kit[i]/2),0),'Dismantling returns each retired water or electrical kit once');
+  }
   await load('replacement');assert.match(await page.locator('#water-lines').textContent(),/5, 24/);
   await capture('Moving a source queues a newly routed installation','pipes-replacement.png');
   for(const name of ['night','outage']){

@@ -47,6 +47,15 @@ function build(kind,recipe='standard',local=false,site=null){
  return id;
 }
 function source(material){const [x,y]=location(sourceKinds[material]);assert.equal(g.place_source(material,x,y),'ok');return snap().village.economy.sources.length-1;}
+function cable(fromBuilding,toBuilding){
+ const ports=snap().village.power.network.nodes,port=id=>ports.find(n=>n.owner.kind==='building'&&n.owner.id===id).id;
+ const from=port(fromBuilding),to=port(toBuilding),quote=JSON.parse(g.electrical_connection_quote(from,to));assert(quote.allowed,quote.reason);
+ assert.equal(g.queue_electrical_connection(from,to),'ok');const id=snap().village.pipes.lines.at(-1).id;
+ purchase(snap().environment.economy.shortage);
+ until(s=>s.village.pipes.lines.find(p=>p.id===id).phase==='active','deliver and install the paid electrical cable',8*1920);
+ const saved=g.snapshot();assert(g.restore(saved));assert.equal(g.snapshot(),saved);
+ return id;
+}
 async function complete(chapter){
  until(s=>questCompleted(s.village,chapter),quests[chapter].title);
  // Earlier valid effort may finish two newly unlocked chapters in one tick.
@@ -105,10 +114,11 @@ if(!snap().village.progress.tools_crafted){
 }
 await complete(4);
 build('coop');await complete(5);
-build('solar_farm');const lamp=build('streetlight');
+const solar=build('solar_farm'),lamp=build('streetlight');
 const b=snap().village.buildings.find(b=>b.id===lamp);
 // Actual adjacent free path, without occupying the lamp's cell.
 for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
+cable(solar,lamp);
 await complete(6);
 for(const k of ['eco_toilet','wetland','banana_treatment'])build(k);
 // A healthy pantry can leave mature crops waiting and new beds unplanted.
@@ -140,7 +150,7 @@ build('home','adobe',true);
 function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(!r.requested&&r.task!=='gather'&&r.task!=='garden'){if(id!==0||!g.request(id,'garden',false).includes('Happy'))g.request(id,'gather',false);}}return false;},label);}
 gatherExtra(()=>g.sell_surplus(1)==='ok','sell surplus');
 gatherExtra(()=>g.exchange_parts()==='ok','neighbour exchange');await complete(9);
-build('hydro');await complete(10);
+const hydro=build('hydro');cable(hydro,solar);await complete(10);
 // The expanded village needs a useful kitchen-to-square corridor before the
 // final gathering. Use real road placement; delivery still uses resident work.
 let tableRoads=0;
