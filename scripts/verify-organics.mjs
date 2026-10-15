@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
-import {resetMaterialLocations} from '../web/dev/material-fixture.js';
+import {resetMaterialLocations,stageFixtureMaterial} from '../web/dev/material-fixture.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/organics',{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),g=new Game();g.start_mode('sandbox');
@@ -10,7 +10,9 @@ const fixture=snap(g);Object.assign(fixture.village,{mode:'story',minutes:540,ar
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),compost:0,scraps:2,use_tools:false});
 fixture.village.economy.outside_jobs=Array(5).fill(false);
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{},last_meal_slot:0});
-assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));g.set_production_target(17,0);
+assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));
+// The last two scraps may be at different locations; a full recipe must still be deliverable.
+const split=snap(g);stageFixtureMaterial(split,{kind:'pantry',id:2},20,1);assert(g.restore(JSON.stringify(split)));g.set_production_target(17,0);
 let sawScraps=false,sawCompost=false,sawLocal=false,done=false;
 for(let frame=0;frame<25000;frame++){
  const s=snap(g),v=s.village,stores=v.logistics.stores,shipments=v.logistics.shipments;

@@ -6,6 +6,7 @@ export async function checkOrganicControls({page,saved,capture}){
   await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();
   await page.locator('[data-organic-supplies] summary').click();
   assert.match(await page.locator('[data-organic-supplies]').textContent(),/Mature compost must reach a growing plot/);
+  assert.match(await page.locator('[data-organic-cargo]').textContent(),/carrying 1 mature compost to plot/);
   await page.locator('[data-organic-supplies]').scrollIntoViewIfNeeded();
   await capture('Scraps and compost use local stores and resident cargo','organic-supplies.png');
   assert.equal(await page.locator('.material-slot[data-item="19"] strong').textContent(),'Mature compost');

@@ -4,11 +4,12 @@ const hours=n=>`${Math.ceil(n/60)} ${Math.ceil(n/60)===1?'hour':'hours'}`;
 export function organicMarkup(s){
   const v=s.village,stores=v.logistics?.stores||[],names={kitchen:'Kitchen',compost:'Compost station',biodigester:'Biodigester',garden:'Garden',greenhouse:'Greenhouse'};
   const rows=stores.filter(p=>p.items[19]||p.items[20]||p.owner.kind==='pantry'&&v.buildings.some(b=>b.id===p.owner.id&&b.kind==='compost'));
-  if(!rows.length)return '';
+  const cargo=(v.logistics?.shipments||[]).filter(h=>h.carrying&&(h.material===19||h.material===20));
+  if(!rows.length&&!cargo.length)return '';
   return `<details data-organic-supplies><summary>Scraps and soil supplies</summary><p>Cooking leaves scraps at the kitchen. Neighbours carry them to compost stations or digesters. Mature compost must reach a growing plot before it improves that harvest.</p>${rows.map(p=>{
     const b=['pantry','site'].includes(p.owner.kind)?v.buildings.find(b=>b.id===p.owner.id):null,name=b?(names[b.kind]||'Growing plot')+' '+(b.id+1):p.owner.kind==='camp'?'Arrival store':p.owner.kind==='warehouse'?'Storage house '+(p.owner.id+1):p.owner.kind==='source'?'Material plot '+(p.owner.id+1):'Recoverable pile';
     return `<p><b>${escape(name)}</b> · plot ${Number(p.x.toFixed(1))}, ${Number(p.y.toFixed(1))}<br>${p.items[20]} scraps · ${p.items[19]} mature compost${b?.kind==='compost'?`<br>${p.items[20]>=2?'Two delivered scraps are ready for a neighbour to turn.':'Neighbours need to deliver two scraps here.'} 2 scraps → 1 compost.`:''}</p>`;
-  }).join('')}</details>`;
+  }).join('')}${cargo.map(h=>{const r=s.residents.find(r=>r.id===h.resident),to=stores.find(p=>p.id===h.to);return `<p data-organic-cargo><b>${escape(r?.name||'A neighbour')}</b> · carrying ${h.amount} ${h.material===19?'mature compost':'kitchen scraps'}${to?` to plot ${Number(to.x.toFixed(1))}, ${Number(to.y.toFixed(1))}`:''}.</p>`;}).join('')}</details>`;
 }
 export function processMarkup(s){
   const p=s.environment.economy.processes;if(!p)return '';

@@ -865,22 +865,15 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 .map(|h| h.amount)
                 .sum::<u32>();
             let missing = required.saturating_sub(to.items[i] + pending);
+            if missing == 0 {
+                continue;
+            }
             for from in s
                 .stores
                 .iter()
                 .filter(|p| p.id != to.id && !closing(v, p.owner))
             {
                 let excess = usable(v, from, i).saturating_sub(needs(v, from.owner)[i]);
-                if i == economy::SCRAPS && missing >= 2 && excess < 2 {
-                    continue;
-                }
-                if i == economy::COMPOST
-                    && matches!(to.owner, Owner::Source(_))
-                    && missing >= 2
-                    && excess < 2
-                {
-                    continue;
-                }
                 let amount = missing.min(excess).min(room(v, to.owner)).min(LOAD);
                 if amount > 0 {
                     out.push(Candidate {

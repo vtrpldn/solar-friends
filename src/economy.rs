@@ -602,31 +602,31 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
             return Some(("source".into(), index));
         }
     }
+    if storage(v) < capacity(v) {
+        let raw = crate::production::demand(v);
+        for (index, _) in v.economy.sources.iter().enumerate() {
+            if crate::resource_sites::wanted(v, index, &raw) {
+                if v.logistics.is_some()
+                    && crate::logistics::source_space(v, index)
+                        < if v.economy.sources[index].material == 0 {
+                            8
+                        } else {
+                            1
+                        }
+                {
+                    continue;
+                }
+                return Some(("source".into(), index));
+            }
+        }
+    }
     if let Some(batch) = crate::production::jobs(v).next() {
         return Some((
             crate::production::task(batch.material).into(),
             batch.material,
         ));
     }
-    if storage(v) >= capacity(v) {
-        return None;
-    }
-    let raw = crate::production::demand(v);
-    for (index, _) in v.economy.sources.iter().enumerate() {
-        if crate::resource_sites::wanted(v, index, &raw) {
-            if v.logistics.is_some()
-                && crate::logistics::source_space(v, index)
-                    < if v.economy.sources[index].material == 0 {
-                        8
-                    } else {
-                        1
-                    }
-            {
-                continue;
-            }
-            return Some(("source".into(), index));
-        }
-    }
+
     None
 }
 pub fn finish_job(v: &mut Village, task: &str, target: usize) -> bool {

@@ -199,3 +199,62 @@ fn a_sealed_digester_cannot_load_without_its_local_recovery_store() {
     assert!(!g.restore(&bad.to_string()));
     assert_eq!(g.snapshot(), saved);
 }
+
+#[test]
+fn two_scraps_split_between_stores_can_reach_one_compost_station() {
+    let mut g = scene(&["compost", "kitchen"]);
+    let mut r = g_resident();
+    r.x = CAMP.0;
+    r.y = CAMP.1;
+    r.target_x = r.x;
+    r.target_y = r.y;
+    r.requested = false;
+    r.help = None;
+    r.walking = walking::State::default();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_stock(&mut v, SCRAPS, 2);
+        fixture_transfer(&mut v, Owner::Pantry(1), SCRAPS, 1);
+        for _ in 0..2400 {
+            if available(&v, Owner::Pantry(0), SCRAPS) == 2 {
+                break;
+            }
+            r.task = "haul".into();
+            r.remaining = 100.;
+            logistics::advance(&mut v, &mut r, &[], 0.25);
+        }
+        assert_eq!(
+            available(&v, Owner::Pantry(0), SCRAPS),
+            2,
+            "Separate single portions must not be stranded by a minimum load size"
+        );
+        assert!(turn(&mut v, 0));
+        assert_eq!(v.progress.compost, 1);
+        assert_eq!(v.progress.scraps, 0);
+    }
+}
+
+#[test]
+fn a_queued_kitchen_pot_does_not_hide_an_independent_requested_harvest() {
+    let mut g = scene(&["kitchen"]);
+    assert_eq!(g.place_source(1, 10, 10), "ok");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        v.water = 40.;
+        let source = &mut v.economy.sources[0];
+        source.growth = 1.;
+        source.remaining = source.maximum;
+        food::fixture_stage(&mut v, 0);
+        assert!(production::order_meals(&mut v, Some(0)).is_some());
+    }
+    assert_eq!(g.harvest_source(0), "ok");
+    let v = g.app.world().resource::<Village>();
+    assert!(production::jobs(v).any(|b| b.material == economy::MEALS));
+    assert_eq!(economy::local_job(v), Some(("source".into(), 0)));
+    assert!(
+        workforce::offers(v, &g_resident())
+            .iter()
+            .any(|o| o.task == "source" && o.material == Some(0))
+    );
+}

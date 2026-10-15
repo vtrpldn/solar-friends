@@ -176,6 +176,9 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(land.village.economy.sources.slice(0,2).every(s=>s.harvest_requested));
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1440');await page.locator('#dev-advance').click();
   await page.locator('#dev-minutes').fill('150');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  // Accepted harvests share real travel and community hours with the soil-supply loop.
+  // Observe their completion rather than assuming both fit the same workday.
+  for(let hours=0;hours<24&&(await page.evaluate(()=>window.solarDev.snapshot().village.economy.sources.slice(0,2).some(s=>s.harvest_requested)));hours++){await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('60');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();}
   land=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(land.village.wood,harvestedTimber+8);assert.equal(land.village.economy.stock[1],harvestedBamboo+4);
   assert.equal(land.village.economy.sources[0].remaining,24);assert.equal(land.village.economy.sources[1].remaining,20);
@@ -444,14 +447,13 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();
-  assert((await page.locator('#digester-status').textContent()).includes('Ready to digest'));
+  assert.match(await page.locator('#digester-status').textContent(),/Waiting.*scraps delivered/);
   assert((await page.locator('#wetland-status').textContent()).includes('Ready to filter'));
   for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).uncheck();
   let circular=await page.evaluate(()=>window.solarDev.snapshot());
   assert(!circular.village.circular.auto_feed&&!circular.village.circular.filter_water&&!circular.village.circular.use_biogas);
   assert((await page.locator('#digester-status').textContent()).includes('paused'));
   for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).check();
-  const circularStart=circular.village.minutes;
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('240');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   // Eating includes its real trip; daily care can follow lunch rather than finish within four hours.
@@ -461,9 +463,13 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   }
   assert.equal(circular.village.circular.toilet_visits,5);assert.equal(circular.environment.economy.capacity,900);
   assert((await page.locator('#toilet-status').textContent()).includes('5 daily visits'));
-  assert((await page.locator('#digester-status').textContent()).includes('Digesting'));
-  await capture('Five private routines and active water and waste processing','circular-controls.png');
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill(String(Math.max(0,Math.ceil(circularStart+481-circular.village.minutes))));await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  // Processing starts only after neighbours deliver scraps to this digester.
+  for(let hour=0;hour<24&&!circular.village.circular.digestion&&!circular.village.circular.batches;hour++){
+    await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('60');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();circular=await page.evaluate(()=>window.solarDev.snapshot());
+  }
+  assert(circular.village.circular.digestion>0||circular.village.circular.batches>0);
+  await capture('Resident routines and locally supplied water and waste processing','circular-controls.png');
+  if(circular.village.circular.digestion>0){await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill(String(Math.ceil(circular.village.circular.digestion)+1));await page.locator('#dev-advance').click();await page.locator('#dev-close').click();}
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   assert(circular.village.circular.biogas>0&&circular.village.circular.water_reused>=8);
   assert((await page.locator('#digester-status').textContent()).includes('curing'));

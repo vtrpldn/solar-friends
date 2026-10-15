@@ -19,7 +19,7 @@ export async function checkFoodControls({page,saved,capture}){
   const before=await page.evaluate(()=>window.solarDev.snapshot());
   await page.getByRole('button',{name:'Buy supplies',exact:true}).click();
   const ordered=await page.evaluate(()=>window.solarDev.snapshot());
-  assert.deepEqual(ordered.village.economy.orders.at(-1).items.slice(16),[1,1,1]);
+  assert.deepEqual(ordered.village.economy.orders.at(-1).items.slice(16,19),[1,1,1]);
   assert.equal(ordered.village.economy.money,before.village.economy.money-7500);
   await capture('Town food purchases use the real trade controls','food-trade.png');
   await page.locator('#dev-button').click();await page.locator('#dev-import-file').setInputFiles('artifacts/food/eating-route.json');
