@@ -1109,17 +1109,21 @@ function inspectBuilding(id) {
   updateBuildingPanel();
 }
 function updateCircularUI(v) {
-  const c=v.circular,ready=kind=>v.buildings.some(b=>b.kind===kind&&b.progress>=100);
+  const c=v.circular,passive=state.environment.economy.processes,ready=kind=>v.buildings.some(b=>b.kind===kind&&b.progress>=100);
   $('#circular-controls').hidden=!buildingUnlocked(v,'eco_toilet');
-  $('#circular-stock').textContent=`${c.waste.toFixed(0)} / 80 sealed waste · ${c.greywater.toFixed(1)} / 120 greywater`;
+  $('#circular-stock').textContent=`${(c.waste+(passive?.held_waste||0)).toFixed(1)} / 80 sealed waste${passive?.held_waste?` · ${passive.held_waste} held in digesters`:''} · ${(c.greywater+(passive?.held_greywater||0)).toFixed(1)} / 120 greywater${passive?.held_greywater?` · ${passive.held_greywater} filtering`:''}`;
   $('#circular-output').textContent=`${c.reclaimed.toFixed(0)} / 60 irrigation water · ${c.biogas.toFixed(0)} / 12 cooking gas`;
-  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste>=80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
-  $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':!c.filter_water?'Filtration paused.':c.filtration>0?`Filtering · ${Math.ceil(c.filtration/60)} hours left`:c.reclaimed>52?'Irrigation water store is full. Gardens use this before fresh water.':c.greywater>=12?'Ready to filter when time resumes.':'Waiting for 12 greywater.';
+  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':v.water<1?'Handwashing needs one fresh water.':c.waste+(state.environment.economy.processes?.held_waste||0)+1>80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
+  const filters=passive?.stations.filter(s=>s.kind==='filtration')||[];
+  $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':filters.length===1?filters[0].reason:`${filters.length} reed beds. Each keeps its own saved batch; review its inputs and status below.`;
   const beds=v.buildings.filter(b=>b.kind==='banana_treatment'&&b.progress>=100).length;
-  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment?'Banana treatment paused. Waste remains available for biogas.':`${c.waste>0 ? `Treating up to ${beds*6} waste per day.` : 'Waiting for toilet waste.'} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
+  const operatingBeds=passive?.stations.filter(s=>s.kind==='banana'&&!s.paused&&!s.closed).length||0;
+  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment||!operatingBeds?'Banana treatment paused. Waste remains available for biogas.':`${c.waste>0 ? `Treating up to ${operatingBeds*6} waste per day.` : 'Waiting for toilet waste.'} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
   $('#banana-treatment').checked=c.banana_treatment??true;
   $('#banana-treatment').disabled=!beds;
-  $('#digester-status').textContent=c.pending_compost?`Two digestate curing · ${Math.ceil(c.curing/60)} hours left`:!ready('biodigester')?'Build a biodigester to turn sealed waste and scraps into cooking fuel.':!c.auto_feed?'Digestion paused.':c.digestion>0?`Digesting · ${Math.ceil(c.digestion/60)} hours left`:c.biogas>8?'Gas store is full. Use it in the kitchen.':c.waste>=2&&v.progress.scraps>=2?'Ready to digest when time resumes.':'Waiting for two waste and two scraps.';
+  const curing=passive?.batches.filter(row=>row.batch.kind==='curing'&&['processing','paused','awaiting_output'].includes(row.batch.phase))||[];
+  const digesters=passive?.stations.filter(s=>s.kind==='digestion')||[];
+  $('#digester-status').textContent=!digesters.length&&!curing.length?'Build a biodigester to turn sealed waste and scraps into cooking fuel.':`${digesters.length===1?digesters[0].reason:`${digesters.length} digesters.`} ${c.pending_compost} digestate curing${curing.length?` · next compost in ${Math.ceil(c.curing/60)} hours`:''}. Review each process below.`;
   $('#auto-digest').checked=c.auto_feed;$('#filter-greywater').checked=c.filter_water;$('#use-biogas').checked=c.use_biogas;
   $('#auto-digest').disabled=!ready('biodigester');$('#filter-greywater').disabled=!ready('wetland');
 }

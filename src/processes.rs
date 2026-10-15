@@ -485,12 +485,85 @@ pub fn valid(v: &Village) -> bool {
         && v.circular.biogas + production::held_biogas(v) as f32 + held_gas(v) <= 12.
         && v.circular.reclaimed + held_irrigation(v) <= 60.
 }
+fn reason(v: &Village, b: &Batch) -> &'static str {
+    if !b.active() {
+        if b.phase == Phase::Cancelled {
+            "Unprocessed inputs recovered once."
+        } else {
+            "Output credited once."
+        }
+    } else if !open(v, b) {
+        "Paused. Contents stay held at this process."
+    } else if b.phase == Phase::AwaitingOutput {
+        "Waiting for output space."
+    } else if b.kind == Kind::Banana {
+        if v.circular.waste > 0. {
+            "Treating sealed waste through the planted bed; no food or water outlet."
+        } else {
+            "Waiting for sealed toilet waste."
+        }
+    } else {
+        "Processing without a resident standing here."
+    }
+}
+fn station_reason(v: &Village, kind: Kind, id: usize) -> &'static str {
+    if building_work::job(v, id).is_some() {
+        return "Closed while residents change this building. Its batch stays sealed.";
+    }
+    if v.processes.paused.contains(&id) {
+        return "Station paused. Its contents stay held here.";
+    }
+    if let Some(b) = v
+        .processes
+        .batches
+        .iter()
+        .find(|b| b.active() && b.building == Some(id))
+    {
+        return reason(v, b);
+    }
+    match kind {
+        Kind::Digestion if !v.circular.auto_feed => "Automatic digestion is paused.",
+        Kind::Digestion
+            if v.circular.biogas + production::held_biogas(v) as f32 + held_gas(v) + 4. > 12. =>
+        {
+            "Make room for four cooking gas. Kitchens use stored gas before another batch can start."
+        }
+        Kind::Digestion if v.circular.waste < 2. || v.progress.scraps < 2 => {
+            "Waiting for two sealed waste and two kitchen scraps."
+        }
+        Kind::Digestion => "Ready to digest when time resumes.",
+        Kind::Filtration if !v.circular.filter_water => "Automatic filtration is paused.",
+        Kind::Filtration if v.circular.reclaimed + held_irrigation(v) + 8. > 60. => {
+            "Make room for eight irrigation water. Gardens use reclaimed water first."
+        }
+        Kind::Filtration if v.circular.greywater < 12. => "Waiting for twelve greywater.",
+        Kind::Filtration => "Ready to filter when time resumes.",
+        Kind::Banana if !v.circular.banana_treatment => "Automatic banana treatment is paused.",
+        Kind::Banana => "Waiting for sealed toilet waste.",
+        _ => "Curing in a sealed store.",
+    }
+}
 pub fn view(v: &Village) -> serde_json::Value {
-    let rows:Vec<_>=v.processes.batches.iter().map(|b|{
-        let reason=if !b.active(){if b.phase==Phase::Cancelled{"Unprocessed inputs recovered once."}else{"Output credited once."}}else if !open(v,b){"Paused. Contents stay held at this process."}else if b.phase==Phase::AwaitingOutput{"Waiting for output space."}else if b.kind==Kind::Banana{"Treating sealed waste through the planted bed; no food or water outlet."}else{"Processing without a resident standing here."};
-        serde_json::json!({"batch":b,"reason":reason,"duration":b.kind.duration(),"labour":0,"rate_per_day":if b.kind==Kind::Banana{Some(6)}else{None}})
+    let definitions = serde_json::json!([
+        {"kind":Kind::Digestion,"name":"Biodigester","duration":480,"inputs":"2 sealed waste · 2 kitchen scraps","outputs":"4 cooking gas · 2 digestate for curing"},
+        {"kind":Kind::Filtration,"name":"Reed bed","duration":360,"inputs":"12 greywater","outputs":"8 irrigation water"},
+        {"kind":Kind::Curing,"name":"Digestate curing","duration":1440,"inputs":"2 sealed digestate","outputs":"2 compost"},
+        {"kind":Kind::Banana,"name":"Banana treatment bed","duration":0,"inputs":"Up to 6 sealed waste per day","outputs":"No food or water outlet"}
+    ]);
+    let rows:Vec<_>=v.processes.batches.iter().map(|b|serde_json::json!({"batch":b,"reason":reason(v,b),"duration":b.kind.duration(),"labour":0})).collect();
+    let stations:Vec<_>=v.buildings.iter().filter_map(|b|{
+        let kind=match b.kind.as_str(){"biodigester"=>Kind::Digestion,"wetland"=>Kind::Filtration,"banana_treatment"=>Kind::Banana,_=>return None};
+        (b.progress>=100.||building_work::job(v,b.id).is_some()).then(||serde_json::json!({"building":b.id,"kind":kind,"x":b.x,"y":b.y,"paused":v.processes.paused.contains(&b.id),"closed":building_work::job(v,b.id).is_some(),"reason":station_reason(v,kind,b.id)}))
     }).collect();
-    serde_json::json!({"batches":rows,"paused":v.processes.paused,"held_waste":held_waste(v),"held_greywater":held_greywater(v),"reserved_gas":held_gas(v),"reserved_irrigation":held_irrigation(v),"note":"Each building owns its passive process. Detached sealed digestate stores keep curing after a building moves or closes."})
+    let mut growing:Vec<_>=v.buildings.iter().filter(|b|ecology::farm(b)&&b.crop.planted).map(|b|{
+        let duration=ecology::duration(&b.crop);
+        serde_json::json!({"name":format!("{} {}",if b.kind=="greenhouse"{"Greenhouse"}else{"Garden"},b.id+1),"x":b.x,"y":b.y,"progress":b.crop.growth/duration*100.,"duration":duration,"remaining":duration-b.crop.growth,"reason":if b.progress<100.{"Paused while residents change this building."}else if b.crop.growth>=duration{"Ready for a resident to harvest."}else if b.crop.moisture<=0.{"Dry. Growth waits for irrigation or suitable rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
+    }).collect();
+    growing.extend(v.economy.sources.iter().filter(|s|s.active&&s.material<2&&s.planted).map(|s|{
+        let duration=if s.material==0{5760.}else{2880.}/if s.restored{1.25}else{1.};
+        serde_json::json!({"name":if s.material==0{"Timber trees"}else{"Bamboo"},"x":s.x,"y":s.y,"progress":s.growth*100.,"duration":duration,"remaining":(1.-s.growth)*duration,"reason":if s.growth>=1.{"Mature. A resident can harvest a batch."}else if s.moisture<=0.{"Dry. Growth waits for irrigation or rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
+    }));
+    serde_json::json!({"batches":rows,"stations":stations,"definitions":definitions,"growing":growing,"paused":v.processes.paused,"held_waste":held_waste(v),"held_greywater":held_greywater(v),"reserved_gas":held_gas(v),"reserved_irrigation":held_irrigation(v),"note":"Each building owns its passive process. Detached sealed digestate stores keep curing after a building moves or closes."})
 }
 #[wasm_bindgen]
 impl Game {

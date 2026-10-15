@@ -230,3 +230,85 @@ fn malformed_owners_summaries_and_shared_id_collisions_fail_atomically() {
     assert!(!g.restore(&bad.to_string()));
     assert_eq!(g.snapshot(), before);
 }
+
+#[test]
+fn adding_another_digester_never_accelerates_a_committed_batch() {
+    let mut g = scene(&["biodigester"]);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.circular.waste = 6.;
+        v.progress.scraps = 6;
+        step(&mut v, 1.);
+        step(&mut v, 120.);
+        assert_eq!(owned(&v, 0).remaining, 360.);
+    }
+    assert_eq!(g.place("biodigester", 10, 5), "ok");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_finish(&mut v, 1);
+        step(&mut v, 1.);
+        assert_eq!(owned(&v, 0).remaining, 359.);
+        assert_eq!(owned(&v, 1).remaining, 480.);
+        assert_eq!(v.circular.waste, 2.);
+        assert_eq!(v.progress.scraps, 2);
+    }
+    checkpoint(&mut g);
+}
+#[test]
+fn daily_toilet_visits_leave_enough_sealed_space_for_process_input_recovery() {
+    let mut g = scene(&["eco_toilet", "biodigester"]);
+    let r = g
+        .app
+        .world_mut()
+        .query::<&Resident>()
+        .iter(g.app.world())
+        .find(|r| r.id == 0)
+        .unwrap()
+        .clone();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.circular.waste = 2.;
+        v.progress.scraps = 2;
+        step(&mut v, 1.);
+        v.circular.waste = 77.5;
+        assert!(!sanitation::due(&v, &r));
+        v.circular.waste = 77.;
+        assert!(sanitation::due(&v, &r));
+    }
+    checkpoint(&mut g);
+}
+
+#[test]
+fn ready_process_feedback_distinguishes_staged_inputs_from_missing_inputs() {
+    let mut g = scene(&["biodigester", "wetland"]);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let initial = view(&v);
+        assert!(
+            initial["stations"][0]["reason"]
+                .as_str()
+                .unwrap()
+                .starts_with("Waiting")
+        );
+        v.circular.waste = 2.;
+        v.progress.scraps = 2;
+        v.circular.greywater = 12.;
+        let ready = view(&v);
+        assert!(
+            ready["stations"][0]["reason"]
+                .as_str()
+                .unwrap()
+                .starts_with("Ready to digest")
+        );
+        assert!(
+            ready["stations"][1]["reason"]
+                .as_str()
+                .unwrap()
+                .starts_with("Ready to filter")
+        );
+        step(&mut v, 1.);
+        assert_eq!(held(&v, Kind::Digestion), 1);
+        assert_eq!(held(&v, Kind::Filtration), 1);
+    }
+    checkpoint(&mut g);
+}
