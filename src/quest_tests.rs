@@ -11,6 +11,7 @@ fn setup() -> Game {
     let mut q = g.app.world_mut().query::<&mut Resident>();
     for mut r in q.iter_mut(g.app.world_mut()) {
         r.task = "idle".into();
+        r.activity_store = None;
         r.remaining = 90.;
         r.energy = 90.;
         r.hunger = 10.;
@@ -27,6 +28,11 @@ fn ready_building(g: &mut Game, kind: &str, x: i32, y: i32) {
     logistics::fixture_finish(&mut v, id);
 }
 fn finish_task(g: &mut Game, id: usize, task: &str) {
+    if task == "cook" {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let kitchen = v.buildings.iter().find(|b| b.kind == "kitchen").unwrap().id;
+        food::fixture_stage(&mut v, kitchen);
+    }
     let v = g.app.world().resource::<Village>().clone();
     let mut q = g.app.world_mut().query::<&mut Resident>();
     let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == id).unwrap();
@@ -75,9 +81,9 @@ fn introduction_opens_paths_and_remains_complete_after_resources_are_spent() {
         v.mornings = 1;
         progression::update(&mut v);
         assert_eq!(v.progress.completed, [true, false, false, false]);
-        v.food = 0.;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (0.) as u32);
         v.water = 0.;
-        v.meals = 0;
+        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
     }
     assert!(g.track_quest(1));
     assert_eq!(g.place("grove", 15, 10), "ok");
@@ -175,7 +181,7 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         v.economy.orders.push(economy::Order {
             pickup_by: Some(4),
             id: 0,
-            items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            items: std::array::from_fn(|i| u32::from(i == 0)),
             paid: 6700,
             dispatch: 1.,
             arrival: 2.,
@@ -234,7 +240,11 @@ fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
         .resource_mut::<Village>()
         .progress
         .completed[0] = true;
-    g.app.world_mut().resource_mut::<Village>().meals = 10;
+    crate::logistics::fixture_stock(
+        &mut g.app.world_mut().resource_mut::<Village>(),
+        crate::economy::MEALS,
+        10,
+    );
     for id in 0..5 {
         finish_task(&mut g, id, "socialize");
     }
@@ -260,7 +270,11 @@ fn failed_gathering_preconditions_do_not_spend_meals() {
     let before = g.snapshot();
     assert_ne!(g.host_gathering(), "ok");
     assert_eq!(before, g.snapshot());
-    g.app.world_mut().resource_mut::<Village>().meals = 5;
+    crate::logistics::fixture_stock(
+        &mut g.app.world_mut().resource_mut::<Village>(),
+        crate::economy::MEALS,
+        5,
+    );
     g.app.world_mut().resource_mut::<Village>().minutes = 1300.;
     let before = g.snapshot();
     assert_ne!(g.host_gathering(), "ok");
@@ -304,7 +318,11 @@ fn a_running_gathering_survives_save_and_reload() {
     let mut g = setup();
     unlock(&mut g);
     ready_building(&mut g, "square", 8, 8);
-    g.app.world_mut().resource_mut::<Village>().meals = 5;
+    crate::logistics::fixture_stock(
+        &mut g.app.world_mut().resource_mut::<Village>(),
+        crate::economy::MEALS,
+        5,
+    );
     assert_eq!(g.host_gathering(), "ok");
     advance(&mut g, 10.);
     let mut restored = Game::new();
@@ -369,7 +387,11 @@ fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
     let mut g = setup();
     unlock(&mut g);
     ready_building(&mut g, "square", 3, 3);
-    g.app.world_mut().resource_mut::<Village>().meals = 5;
+    crate::logistics::fixture_stock(
+        &mut g.app.world_mut().resource_mut::<Village>(),
+        crate::economy::MEALS,
+        5,
+    );
     assert_eq!(g.host_gathering(), "ok");
     let mut q = g.app.world_mut().query::<&mut Resident>();
     for mut r in q.iter_mut(g.app.world_mut()) {

@@ -890,8 +890,8 @@ mod tests {
             v.progress.use_tools = false;
             v.arrived = true;
             v.minutes = 540.;
-            v.food = 80.;
-            v.meals = 10;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
             v.water = 40.;
         }
         assert_eq!(g.place("workshop", 6, 6), "ok");
@@ -903,6 +903,7 @@ mod tests {
             .iter_mut(g.app.world_mut())
         {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.trip = None;
             r.hunger = 10.;

@@ -3,7 +3,10 @@ use crate::{Game, Village, event, ready};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub const COUNT: usize = 16;
+pub const COUNT: usize = 19;
+pub const FOOD: usize = 16;
+pub const MEALS: usize = 17;
+pub const EGGS: usize = 18;
 pub const TOOLS: usize = 15;
 pub const CAPACITY: u32 = 600;
 pub const NAMES: [&str; COUNT] = [
@@ -23,6 +26,9 @@ pub const NAMES: [&str; COUNT] = [
     "batteries",
     "pumps",
     "tools",
+    "food",
+    "meals",
+    "eggs",
 ];
 const LABELS: [&str; COUNT] = [
     "Timber",
@@ -41,9 +47,13 @@ const LABELS: [&str; COUNT] = [
     "Battery equipment",
     "Pump",
     "Tool supplies",
+    "Ingredients",
+    "Prepared meals",
+    "Eggs",
 ];
 const PRICES: [i64; COUNT] = [
-    700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900,
+    700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900, 400,
+    800, 300,
 ];
 pub type Bundle = [u32; COUNT];
 #[derive(Clone, Serialize, Deserialize)]
@@ -132,7 +142,9 @@ fn uncommitted_day() -> i32 {
 impl Default for Economy {
     fn default() -> Self {
         Self {
-            stock: [0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0],
+            stock: [
+                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0,
+            ],
             money: 300000,
             ledger: vec![Entry {
                 minute: 480.,
@@ -297,10 +309,12 @@ pub fn quantity(v: &Village, i: usize) -> u32 {
     if v.logistics.is_some() {
         return crate::logistics::total(v, i);
     }
-    if i == 0 {
-        v.wood.floor() as u32
-    } else {
-        v.economy.stock[i]
+    match i {
+        0 => v.wood.floor() as u32,
+        FOOD => v.food as u32,
+        MEALS => v.meals,
+        EGGS => v.supplies.eggs,
+        _ => v.economy.stock[i],
     }
 }
 pub(crate) fn add(v: &mut Village, i: usize, n: u32) {
@@ -986,7 +1000,12 @@ impl Game {
 
     pub fn sell_material(&mut self, material: usize, n: u32) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if material >= COUNT || n == 0 || n > 20 || free(&v, material) < n {
+        if material >= COUNT
+            || n == 0
+            || n > 20
+            || free(&v, material) < n
+            || (material == FOOD && v.food < (36 + n) as f32)
+        {
             return "Sell 1–20 stored, unreserved units. Project reservations and incoming orders cannot be sold.".into();
         }
         remove(&mut v, material, n);
@@ -1004,7 +1023,7 @@ impl Game {
             return "Keep 36 ingredients for the household. Sell up to 20 surplus ingredients."
                 .into();
         }
-        v.food -= n as f32;
+        remove(&mut v, FOOD, n);
         v.progress.surplus_sold = true;
         ledger(
             &mut v,
@@ -1025,7 +1044,7 @@ impl Game {
         {
             return "The neighbour asks for four surplus ingredients; keep 36 for the household and room for two fittings.".into();
         }
-        v.food -= 4.;
+        remove(&mut v, FOOD, 4);
         add(&mut v, 8, 2);
         v.economy.exchange_day = day;
         v.progress.parts_exchanged = true;
@@ -1280,7 +1299,11 @@ mod tests {
         assert_ne!(g.sell_surplus(1), "ok");
         assert_ne!(g.exchange_parts(), "ok");
         assert_eq!(g.snapshot(), before);
-        g.app.world_mut().resource_mut::<Village>().food = 56.;
+        crate::logistics::fixture_stock(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            crate::economy::FOOD,
+            (56.) as u32,
+        );
         assert_eq!(g.sell_surplus(20), "ok");
         assert_eq!(g.app.world().resource::<Village>().food, 36.);
     }
@@ -1440,6 +1463,7 @@ mod tests {
         let mut query = g.app.world_mut().query::<&mut crate::Resident>();
         for mut r in query.iter_mut(g.app.world_mut()) {
             r.task = "nature_walk".into();
+            r.activity_store = None;
             r.remaining = 24.;
             r.requested = false;
             r.energy = 90.;

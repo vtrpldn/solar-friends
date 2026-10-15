@@ -662,7 +662,7 @@ mod tests {
         let mut g = sandbox("warehouse");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            crate::logistics::fixture_stock(&mut v, 1, 400);
+            crate::logistics::fixture_stock(&mut v, 1, 300);
         }
         let before = g.snapshot();
         assert_ne!(g.queue_building_work(0, "demolish", 0, 0), "ok");

@@ -7,6 +7,7 @@ mod building_work;
 mod devtools;
 mod ecology;
 mod economy;
+mod food;
 mod forecast;
 mod interactions;
 mod leisure;
@@ -89,6 +90,8 @@ pub struct Resident {
     pub help: Option<requests::Request>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub activity_batch: Option<simulation::Id>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_store: Option<simulation::Id>,
     #[serde(default, skip_serializing_if = "walking::State::empty")]
     pub walking: walking::State,
     pub last_meal_slot: i32,
@@ -288,6 +291,7 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
                 economy::can_build(v, b.id)
             } else {
                 b.progress >= 100.
+                    && (task != "cook" || supplies::can_cook_at(v, b.id))
                     && (task != "sanitation" || b.next_visit <= v.minutes)
                     && b.kind
                         == match task {
@@ -354,6 +358,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     r.visit_building = None;
     r.activity_material = None;
     r.activity_batch = None;
+    r.activity_store = None;
     r.activity_building = if matches!(task, "source" | "prepare" | "outside" | "haul") {
         None
     } else if matches!(task, "sleep" | "rest") {
@@ -404,7 +409,12 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
             idle_destination(v, r.id).unwrap_or((CAMP.0 + (r.id as f32 - 2.) * 1.25, CAMP.1));
         return;
     }
-    if task == "haul" {
+    if task == "eat" {
+        if !food::assign(r, v) {
+            r.remaining = 0.;
+            (r.target_x, r.target_y) = (r.x, r.y);
+        }
+    } else if task == "haul" {
         (r.target_x, r.target_y) = (r.x, r.y);
         r.remaining = 100.;
     } else if matches!(task, "prepare" | "craft") {
@@ -963,7 +973,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 "gather" => {
                     if r.requested || supplies::needs_ingredients(&v) {
                         completed_batch = true;
-                        v.food += 2.;
+                        food::gather(&mut v, r.activity_building, r.x, r.y, 2);
                         v.supplies.gathered += 2.;
                         if ready(&v, "grove") {
                             v.progress.fruit = v.progress.fruit.saturating_add(2);
@@ -987,9 +997,12 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
                 "cook" if supplies::can_cook(&v) && (r.requested || supplies::needs_meals(&v)) => {
-                    completed_batch = true;
-                    supplies::cook(&mut v);
-                    situations::cooked(&mut v, r.id);
+                    completed_batch = r
+                        .activity_building
+                        .is_some_and(|id| supplies::cook_at(&mut v, id));
+                    if completed_batch {
+                        situations::cooked(&mut v, r.id);
+                    }
                 }
                 "sanitation" => {
                     sanitation::use_toilet(&mut v, &mut r);
@@ -1014,22 +1027,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     v.progress.social_mask |= 1 << r.id;
                 }
                 "eat" => {
-                    let fed = if v.meals > 0 {
-                        v.meals -= 1;
-                        v.meals_served += 1;
-                        v.supplies.portions_eaten += 1;
-                        r.hunger = (r.hunger - 65.).max(0.);
-                        r.social = (r.social + 8.).min(100.);
-                        true
-                    } else if v.food >= 1. {
-                        v.food -= 1.;
-                        v.supplies.used += 1.;
-                        v.supplies.portions_eaten += 1;
-                        r.hunger = (r.hunger - 45.).max(0.);
-                        true
-                    } else {
-                        false
-                    };
+                    let fed = food::eat(&mut v, &mut r);
                     completed_batch = fed;
                     if fed && let Some(slot) = meal_slot(v.minutes) {
                         r.last_meal_slot = slot;
@@ -1039,6 +1037,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
             requests::completed_batch(&mut r, &v, completed_batch);
         }
+        v.workforce_peers[r.id] = Some(r.clone());
+        v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
         let comfort = if shelter(&v, r.id).is_some() { 8. } else { 0. };
         r.happiness = (r.energy * 0.30 + (100. - r.hunger) * 0.35 + r.social * 0.25 + comfort
             - situations::concern(&v, r.id))
@@ -1090,7 +1090,7 @@ impl Game {
                 production: production::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 5,
+                version: 6,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1145,6 +1145,7 @@ impl Game {
                 work_check_at: 0.,
                 help: None,
                 activity_batch: None,
+                activity_store: None,
                 walking: walking::State::default(),
                 last_meal_slot: -1,
                 last_sanitation_day: -1,
@@ -1190,7 +1191,7 @@ impl Game {
             })
     }
     pub fn snapshot(&mut self) -> String {
-        let village = self.app.world().resource::<Village>().clone();
+        let mut village = self.app.world().resource::<Village>().clone();
         let residents: Vec<_> = self
             .app
             .world_mut()
@@ -1198,6 +1199,7 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        workforce::refresh(&mut village, residents.iter());
         let mut economy = economy::view(&village);
         economy["pickup_drivers"] = serde_json::json!(residents.iter().map(|r| serde_json::json!({"id":r.id,"name":r.name,"blocker":town_pickup::blocker(&village,r)})).collect::<Vec<_>>());
         economy["pickup_capacity"] = town_pickup::CAPACITY.into();
@@ -1473,7 +1475,7 @@ impl Game {
             return "At least three neighbours need to be rested and fed.".into();
         }
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        v.meals -= 5;
+        economy::remove(&mut v, economy::MEALS, 5);
         v.progress.gathering_day = day;
         v.progress.gathering_until = v.minutes + 120.;
         v.progress.invited = invited;
@@ -1582,7 +1584,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 5)
+            || !matches!(v.version, 3 | 6)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1618,6 +1620,13 @@ impl Game {
                     } else {
                         i >= economy::COUNT
                     }
+                })
+                || r.activity_store.is_some_and(|id| {
+                    r.task != "eat"
+                        || !v
+                            .logistics
+                            .as_ref()
+                            .is_some_and(|s| s.stores.iter().any(|p| p.id == id))
                 })
                 || r.activity_batch.is_some_and(|id| {
                     production::batch(v, id).is_none_or(|b| {
@@ -1661,7 +1670,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 5;
+            save.village.version = 6;
             economy::rebalance(&mut save.village);
         }
         let entities: Vec<Entity> = self
@@ -1776,11 +1785,12 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.minutes = 900.;
             v.water = 100.;
-            v.food = 100.;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (100.) as u32);
         }
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.social = 100.;
             r.hunger = 0.;
@@ -1911,12 +1921,13 @@ mod tests {
         arrived(&mut g);
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.food = 80.;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
             v.minutes = 600.;
         }
         let mut query = g.app.world_mut().query::<&mut Resident>();
         for mut r in query.iter_mut(g.app.world_mut()) {
             r.task = "rest".into();
+            r.activity_store = None;
             r.remaining = 90.;
             r.energy = 90.;
             r.hunger = 0.;
@@ -2053,7 +2064,16 @@ mod tests {
             ("kitchen", 10, 10),
             ("home", 12, 7),
         ] {
-            assert_eq!(g.place(k, x, y), "ok");
+            let mut placement = g.place(k, x, y);
+            for _ in 0..1920 {
+                if placement == "ok" {
+                    break;
+                }
+                assert!(placement.contains("lying on this plot"), "{k}: {placement}");
+                g.tick(0.25);
+                placement = g.place(k, x, y);
+            }
+            assert_eq!(placement, "ok", "{k} at {x},{y}");
             advance(&mut g, 85.);
         }
         let shortage = economy::shortage(g.app.world().resource::<Village>());
@@ -2061,7 +2081,18 @@ mod tests {
             g.order_supplies(&serde_json::to_string(&shortage).unwrap()),
             "ok"
         );
-        advance(&mut g, 4800.);
+        for _ in 0..(16 * 1920) {
+            if g.app
+                .world()
+                .resource::<Village>()
+                .buildings
+                .iter()
+                .all(|b| b.progress >= 100.)
+            {
+                break;
+            }
+            g.tick(0.25);
+        }
         let v = g.app.world().resource::<Village>();
         assert!(
             v.buildings.iter().all(|b| b.progress >= 100.),
@@ -2082,7 +2113,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":5", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":6", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

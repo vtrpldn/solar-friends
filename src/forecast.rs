@@ -150,8 +150,8 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.arrived = true;
             v.minutes = 540.;
-            v.food = 80.;
-            v.meals = 10;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
             v.water = 40.;
         }
         for mut r in g
@@ -161,6 +161,7 @@ mod tests {
             .iter_mut(g.app.world_mut())
         {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.trip = None;
             r.energy = 90.;

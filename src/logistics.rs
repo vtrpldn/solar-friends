@@ -12,6 +12,7 @@ pub enum Owner {
     Source(usize),
     Site(usize),
     Production(Id),
+    Pantry(usize),
     Ground,
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -68,7 +69,7 @@ fn sum(items: &Bundle) -> u32 {
 }
 fn closing(v: &Village, owner: Owner) -> bool {
     match owner {
-        Owner::Warehouse(id) => building_work::job(v, id).is_some(),
+        Owner::Warehouse(id) | Owner::Pantry(id) => building_work::job(v, id).is_some(),
         Owner::Production(id) => production::closing(v, id),
         _ => false,
     }
@@ -113,7 +114,11 @@ pub(crate) fn pickup_reserved(v: &Village, id: Id, i: usize) -> u32 {
     v.logistics.as_ref().map_or(0, |s| held(s, id, i))
 }
 fn usable(v: &Village, p: &Store, i: usize) -> u32 {
-    p.items[i].saturating_sub(pickup_reserved(v, p.id, i) + production::held(v, p.owner, i))
+    p.items[i].saturating_sub(
+        pickup_reserved(v, p.id, i)
+            + production::held(v, p.owner, i)
+            + crate::food::held(v, p.id, i, None),
+    )
 }
 fn arriving(s: &State, id: Id) -> u32 {
     s.shipments
@@ -124,6 +129,14 @@ fn arriving(s: &State, id: Id) -> u32 {
 }
 pub fn free(v: &Village, i: usize) -> u32 {
     let s = v.logistics.as_ref().unwrap();
+    if i >= economy::FOOD {
+        return s
+            .stores
+            .iter()
+            .filter(|p| !closing(v, p.owner))
+            .map(|p| usable(v, p, i))
+            .sum();
+    }
     let accessible = s
         .stores
         .iter()
@@ -152,6 +165,9 @@ pub fn sync_totals(v: &mut Village) {
     v.economy.stock = totals;
     v.economy.stock[0] = 0;
     v.progress.tool_uses = totals[economy::TOOLS];
+    v.food = totals[economy::FOOD] as f32;
+    v.meals = totals[economy::MEALS];
+    v.supplies.eggs = totals[economy::EGGS];
 }
 pub(crate) fn create(v: &mut Village, owner: Owner, x: f32, y: f32, capacity: u32) -> Option<Id> {
     let id = v.simulation.allocate()?;
@@ -235,7 +251,11 @@ pub fn sync(v: &mut Village) {
     }
     let mut wanted = vec![];
     for b in &v.buildings {
-        if b.kind == "warehouse"
+        if matches!(b.kind.as_str(), "kitchen" | "coop" | "grove")
+            && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
+        {
+            wanted.push((Owner::Pantry(b.id), b.x as f32, b.y as f32, 60));
+        } else if b.kind == "warehouse"
             && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Warehouse(b.id), b.x as f32, b.y as f32, 300));
@@ -362,7 +382,12 @@ pub fn spend(v: &mut Village, owner: Option<Owner>, i: usize, n: u32) {
         .stores
         .iter()
         .enumerate()
-        .filter(|(_, p)| owner.map_or(general(p.owner) && !closing(v, p.owner), |o| p.owner == o))
+        .filter(|(_, p)| {
+            owner.map_or(
+                (general(p.owner) || i >= economy::FOOD) && !closing(v, p.owner),
+                |o| p.owner == o,
+            )
+        })
         .map(|(j, p)| {
             (
                 j,
@@ -457,6 +482,7 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
             })
             .unwrap_or([0; COUNT]),
         Owner::Production(id) => production::needs(v, id),
+        Owner::Pantry(id) => crate::food::needs(v, id),
         _ => [0; COUNT],
     };
     if let Owner::Site(id) = owner
@@ -487,14 +513,14 @@ pub fn site_tools(v: &Village, id: usize) -> u32 {
             p.items[economy::TOOLS].saturating_sub(pickup_reserved(v, p.id, economy::TOOLS))
         })
 }
-fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> {
+pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> {
     // A put-down load can lie in a narrow walkable corridor. Pick it up where
     // it actually rests rather than requiring a ring of space around it.
     if p.owner == Owner::Ground && navigation::clear(v, p.x, p.y) {
         return Some([p.x, p.y]);
     }
     let (x, y) = match p.owner {
-        Owner::Warehouse(b) | Owner::Site(b) => {
+        Owner::Warehouse(b) | Owner::Site(b) | Owner::Pantry(b) => {
             spacing::approach(v, v.buildings.iter().find(|p| p.id == b)?, id)?
         }
         Owner::Production(site) if production::building(v, site).is_some() => {
@@ -549,7 +575,7 @@ fn doorway(v: &Village, p: &Store, to: [f32; 2]) -> bool {
         (spacing::land(x, y) || river_structure)
             && v.buildings
                 .iter()
-                .filter(|b| !matches!(p.owner,Owner::Site(id)|Owner::Warehouse(id) if id==b.id)
+                .filter(|b| !matches!(p.owner,Owner::Site(id)|Owner::Warehouse(id)|Owner::Pantry(id) if id==b.id)
                     && !matches!(p.owner,Owner::Production(id) if production::building(v,id)==Some(b.id)))
                 .all(|b| spacing::clear_plot(b, x, y))
             && v.economy
@@ -594,7 +620,9 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 continue;
             }
             let excess = match from.owner {
-                Owner::Site(_) => available.saturating_sub(needs(v, from.owner)[i]),
+                Owner::Site(_) | Owner::Pantry(_) => {
+                    available.saturating_sub(needs(v, from.owner)[i])
+                }
                 Owner::Warehouse(_) if from.managed && !closing(v, from.owner) => {
                     available.saturating_sub(from.target[i])
                 }
@@ -602,7 +630,11 @@ fn candidates(v: &Village) -> Vec<Candidate> {
             };
             let returning = matches!(
                 from.owner,
-                Owner::Site(_) | Owner::Source(_) | Owner::Ground | Owner::Production(_)
+                Owner::Site(_)
+                    | Owner::Source(_)
+                    | Owner::Ground
+                    | Owner::Production(_)
+                    | Owner::Pantry(_)
             ) || closing(v, from.owner)
                 || (matches!(from.owner, Owner::Warehouse(_)) && from.managed);
             if returning && excess > 0 {
@@ -669,6 +701,40 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         material: i,
                         amount: n,
                         rank: (1, 3 - p.priority, p.building as u32),
+                    });
+                }
+            }
+        }
+    }
+    // Kitchen ingredients and hen feed use the same claimed, resident-carried loads.
+    for to in s
+        .stores
+        .iter()
+        .filter(|p| matches!(p.owner, Owner::Pantry(_)) && !closing(v, p.owner))
+    {
+        let required = needs(v, to.owner);
+        for (i, &required) in required.iter().enumerate().skip(economy::FOOD) {
+            let pending = s
+                .shipments
+                .iter()
+                .filter(|h| h.to == to.id && h.material == i)
+                .map(|h| h.amount)
+                .sum::<u32>();
+            let missing = required.saturating_sub(to.items[i] + pending);
+            for from in s
+                .stores
+                .iter()
+                .filter(|p| p.id != to.id && !closing(v, p.owner))
+            {
+                let excess = usable(v, from, i).saturating_sub(needs(v, from.owner)[i]);
+                let amount = missing.min(excess).min(room(v, to.owner)).min(LOAD);
+                if amount > 0 {
+                    out.push(Candidate {
+                        from: from.id,
+                        to: to.id,
+                        material: i,
+                        amount,
+                        rank: (1, 0, to.id.0),
                     });
                 }
             }
@@ -1076,7 +1142,7 @@ pub fn occupied_building(v: &Village, id: usize) -> bool {
     v.logistics.as_ref().is_some_and(|s| {
         s.stores
             .iter()
-            .filter(|p| matches!(p.owner,Owner::Site(b)|Owner::Warehouse(b) if b==id)
+            .filter(|p| matches!(p.owner,Owner::Site(b)|Owner::Warehouse(b)|Owner::Pantry(b) if b==id)
                 || matches!(p.owner,Owner::Production(site) if production::building(v,site)==Some(id)))
             .any(|p| {
                 sum(&p.items) > 0 || s.shipments.iter().any(|h| h.from == p.id || h.to == p.id)
@@ -1107,7 +1173,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 5
+    if v.version != 6
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1163,6 +1229,16 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                             && (p.x, p.y) == (b.x as f32, b.y as f32)
                     })
             }
+            Owner::Pantry(id) => {
+                p.capacity == 60
+                    && v.buildings.iter().any(|b| {
+                        b.id == id
+                            && matches!(b.kind.as_str(), "kitchen" | "coop" | "grove")
+                            && (b.progress >= 100.
+                                || building_work::original_progress(v, id) == Some(100.))
+                            && (p.x, p.y) == (b.x as f32, b.y as f32)
+                    })
+            }
             Owner::Site(id) => {
                 p.capacity == 150
                     && v.buildings.iter().any(|b| {
@@ -1197,7 +1273,10 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             return false;
         }
     }
-    if v.progress.tool_uses != total(v, economy::TOOLS)
+    if v.food != total(v, economy::FOOD) as f32
+        || v.meals != total(v, economy::MEALS)
+        || v.supplies.eggs != total(v, economy::EGGS)
+        || v.progress.tool_uses != total(v, economy::TOOLS)
         || !owners.contains(&Owner::Camp)
         || (0..COUNT).any(|i| {
             if i == 0 {
@@ -1367,11 +1446,12 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.arrived = true;
             v.minutes = 540.;
-            v.food = 80.;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
         }
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.x = CAMP.0 + (r.id as f32 - 2.) * 1.25;
             r.y = CAMP.1;
@@ -1490,7 +1570,10 @@ mod tests {
             .find(|p| p.id == h.recovery)
             .unwrap();
         assert_eq!(pile.items[h.material], h.amount);
-        assert_eq!(opening, std::array::from_fn(|i| total(v, i)));
+        assert_eq!(
+            &opening[..economy::FOOD],
+            &(0..economy::FOOD).map(|i| total(v, i)).collect::<Vec<_>>()[..]
+        );
         let saved = g.snapshot();
         assert!(g.restore(&saved));
         assert_eq!(g.snapshot(), saved);
@@ -1519,7 +1602,10 @@ mod tests {
         assert_eq!(g.cancel_project(0), "ok");
         g.tick(0.25);
         let v = g.app.world().resource::<Village>();
-        assert_eq!(opening, std::array::from_fn(|i| total(v, i)));
+        assert_eq!(
+            &opening[..economy::FOOD],
+            &(0..economy::FOOD).map(|i| total(v, i)).collect::<Vec<_>>()[..]
+        );
         assert!(v.buildings.is_empty());
         let saved = g.snapshot();
         assert!(g.restore(&saved));
@@ -1528,7 +1614,10 @@ mod tests {
             g.tick(0.25);
         }
         let v = g.app.world().resource::<Village>();
-        assert_eq!(opening, std::array::from_fn(|i| total(v, i)));
+        assert_eq!(
+            &opening[..economy::FOOD],
+            &(0..economy::FOOD).map(|i| total(v, i)).collect::<Vec<_>>()[..]
+        );
     }
     #[test]
     fn moving_storage_evacuates_before_packing_and_checkpoints_every_stage() {
@@ -1557,6 +1646,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.hunger = 10.;
             r.social = 90.;
@@ -1602,7 +1692,7 @@ mod tests {
             v.mode = modes::Mode::Story;
             v.minutes = 540.;
             v.arrived = true;
-            v.meals = 20;
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 20);
             assert!(navigation::clear(&v, 11., 10.3));
             let id = create(&mut v, Owner::Ground, 11., 10.3, LOAD).unwrap();
             let s = v.logistics.as_mut().unwrap();
@@ -1618,6 +1708,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.hunger = 10.;
             r.social = 90.;
@@ -1718,6 +1809,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.x = 10. + (r.id as f32 - 2.) * 1.25;
             r.y = 13.;
@@ -1731,10 +1823,17 @@ mod tests {
         for _ in 0..120 {
             g.tick(0.25);
         }
-        let v = g.app.world().resource::<Village>();
+        let v = g.app.world().resource::<Village>().clone();
         assert_eq!(v.buildings.last().unwrap().progress, 0.);
-        assert!(v.logistics.as_ref().unwrap().shipments.is_empty());
-        assert_eq!(total(v, 0), 4);
+        assert!(
+            v.logistics
+                .as_ref()
+                .unwrap()
+                .shipments
+                .iter()
+                .all(|h| h.material >= economy::FOOD)
+        );
+        assert_eq!(total(&v, 0), 4);
         assert!(
             v.logistics
                 .as_ref()
@@ -1747,7 +1846,14 @@ mod tests {
                 .is_some()
         );
         let mut q = g.app.world_mut().query::<&Resident>();
-        assert!(q.iter(g.app.world()).all(|r| r.task != "haul"));
+        assert!(q.iter(g.app.world()).filter(|r| r.task == "haul").all(|r| {
+            v.logistics
+                .as_ref()
+                .unwrap()
+                .shipments
+                .iter()
+                .any(|h| h.resident == r.id && h.material >= economy::FOOD)
+        }));
         let saved = g.snapshot();
         assert!(g.restore(&saved));
         assert_eq!(g.snapshot(), saved);
@@ -1766,6 +1872,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.hunger = 10.;
             r.social = 90.;
@@ -1819,8 +1926,8 @@ mod tests {
             v.mode = modes::Mode::Story;
             v.minutes = 540.;
             v.arrived = true;
-            v.food = 12.;
-            v.meals = 6;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (12.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 6);
             fixture_stock(&mut v, 5, 0);
         }
         assert_eq!(g.place("home", 16, 12), "ok");
@@ -1834,6 +1941,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
             r.hunger = 10.;
             r.social = 90.;

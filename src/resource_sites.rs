@@ -625,8 +625,8 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.arrived = true;
             v.minutes = 540.;
-            v.food = 17.;
-            v.meals = 12;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (17.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 12);
             crate::logistics::fixture_finish(&mut v, 0);
             v.economy.sources[0].growth = 1.;
             v.economy.sources[0].remaining = 32.;
@@ -634,6 +634,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 0.;
         }
         assert_eq!(g.harvest_source(0), "ok");
@@ -662,6 +663,7 @@ mod tests {
             let mut q = g.app.world_mut().query::<&mut Resident>();
             let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 2).unwrap();
             r.task = "source".into();
+            r.activity_store = None;
             r.activity_material = Some(16);
             r.remaining = 20.;
         }

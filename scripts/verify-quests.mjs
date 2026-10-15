@@ -67,14 +67,14 @@ build('square');
 until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
 await complete(2);
 build('warehouse');
-const basket=Array(16).fill(0);basket[0]=1;
+const basket=Array(19).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
 // Buying tools can satisfy routine demand; the Story introduction still asks
 // the player to learn local crafting through one explicit workshop request.
 if(!snap().village.progress.tools_crafted){
- const timber=Array(16).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
+ const timber=Array(19).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
  until(s=>s.village.progress.tools_crafted>0||/Happy|already accepted/.test(g.request(1,'craft',false)),'request a saved tool batch');
 }
 await complete(4);

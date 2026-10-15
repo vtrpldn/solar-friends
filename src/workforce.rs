@@ -567,8 +567,8 @@ mod tests {
         let saved: Save = serde_json::from_str(&g.snapshot()).unwrap();
         let mut v = saved.village;
         v.minutes = 570.;
-        v.food = 12.;
-        v.meals = 8;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (12.) as u32);
+        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 8);
         v.water = 30.;
         let mut r = saved.residents[0].clone();
         r.x = 12.;
@@ -578,6 +578,7 @@ mod tests {
         r.social = 90.;
         r.trip = None;
         r.task = "idle".into();
+        r.activity_store = None;
         r.remaining = 0.;
         r.last_meal_slot = 0;
         (g, v, r)
@@ -625,6 +626,7 @@ mod tests {
         record(&mut v, 540., 570., [&r]); // idle is not a chore
         assert_eq!(v.workforce.days[0].residents[0], [0.; 5]);
         r.task = "gather".into();
+        r.activity_store = None;
         record(&mut v, 540., 570., [&r]);
         let tired_score = offers(&v, &r)
             .into_iter()
@@ -650,8 +652,8 @@ mod tests {
         assert_eq!(g.place("garden", 16, 6), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.minutes = 570.;
-        v.food = 80.;
-        v.meals = 8;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
+        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 8);
         v.water = 40.;
         logistics::fixture_stage(&mut v, 0);
         logistics::fixture_stage(&mut v, 1);
@@ -739,6 +741,7 @@ mod tests {
     fn chore_history_splits_midnight_and_releases_rest_days() {
         let (_, mut v, mut r) = scene();
         r.task = "haul".into();
+        r.activity_store = None;
         record(&mut v, 1430., 1450., [&r]);
         assert_eq!(v.workforce.days.len(), 2);
         assert_eq!(v.workforce.days[0].residents[0][1], 10.);
@@ -762,8 +765,8 @@ mod tests {
     fn people_already_cooking_cover_portions_and_ingredients_once() {
         let g = Game::new();
         let mut v = g.app.world().resource::<Village>().clone();
-        v.food = 6.;
-        v.meals = 0;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (6.) as u32);
+        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
         assert!(cooking(&v, 0));
         v.activity_claims[0] = Some(Claim {
             task: "cook".into(),
@@ -789,8 +792,8 @@ mod tests {
     fn enough_foragers_can_cover_an_emergency_without_sending_everybody() {
         let g = Game::new();
         let mut v = g.app.world().resource::<Village>().clone();
-        v.food = 2.;
-        v.meals = 0;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (2.) as u32);
+        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
         assert!(urgent_food(&v, 0));
         v.activity_claims[0] = Some(Claim {
             task: "gather".into(),

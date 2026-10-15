@@ -8,7 +8,7 @@ const names={hydro:'River generator',eco_toilet:'Ecological toilet',banana_treat
 export function recipeSummary(state,kind,variant='standard'){
   const e=state.environment.economy,source=e.source_options?.find(s=>s.key===kind);if(source)return state.village.mode==='sandbox'?'Free planting':money(source.cost)+(source.material<2?' · 2 irrigation water':'');
   const r=e.recipes.find(r=>r.kind===kind);if(!r)return 'Free';
-  const total=Array(16).fill(0);for(const s of r[variant]||r.standard)for(let i=0;i<16;i++)total[i]+=s.items[i];
+  const total=Array(e.materials.length).fill(0);for(const s of r[variant]||r.standard)for(let i=0;i<e.materials.length;i++)total[i]+=s.items[i];
   return total.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ');
 }
 export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,planSource,avatar,paintPortraits}){
@@ -25,7 +25,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   $('#spare-material').onchange=spareQuote;$('#spare-quantity').oninput=spareQuote;
   $('#sell-material').onclick=()=>transact(game().sell_material(Number($('#spare-material').value),Number($('#spare-quantity').value)));
   $('#project-list').addEventListener('focusout',()=>queueMicrotask(update));
-  const basket=()=>Array.from({length:16},(_,i)=>Number($(`[data-material="${i}"]`).value));
+  const basket=()=>Array.from({length:materials.length},(_,i)=>Number($(`[data-material="${i}"]`).value));
   const pickupMode=()=>$('[name="town-transport"]:checked').value==='pickup';
   function refreshDrivers(select){
     const drivers=snapshot().environment.economy.pickup_drivers;
@@ -56,7 +56,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   $('#pickup-confirm').onclick=()=>{const id=Number($('#pickup-confirm').dataset.order),driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-order-driver').value),result=game().collect_order(id,Number($('#pickup-order-driver').value));if(result==='ok')pickupNoticeOrder=id;transact(result);if(result==='ok'){$('#pickup-dialog').close();notify(pickupMessage(driver.name));}else updatePickupDialog();};
   $('#town-catalog').addEventListener('input',quote);
   $('#town-catalog').addEventListener('click',event=>{const button=event.target.closest('[data-adjust]');if(!button)return;const input=button.closest('.town-item').querySelector('input');input.value=Math.max(0,Math.min(100,(Number(input.value)||0)+Number(button.dataset.adjust)));quote();});
-  $('#town-shortages').onclick=()=>{const e=snapshot().environment.economy;for(let i=0;i<16;i++)$(`[data-material="${i}"]`).value=Math.min(e.shortage[i],100);quote();};
+  $('#town-shortages').onclick=()=>{const e=snapshot().environment.economy;for(let i=0;i<e.materials.length;i++)$(`[data-material="${i}"]`).value=Math.min(e.shortage[i],100);quote();};
   $('#town-clear').onclick=()=>{for(const input of $('#town-catalog').querySelectorAll('input'))input.value=0;quote();};
   $('#town-order').onclick=()=>{const pickup=pickupMode(),orderId=snapshot().village.economy.next_order,driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),result=pickup?game().order_supplies_pickup(JSON.stringify(basket()),Number($('#pickup-driver').value)):game().order_supplies(JSON.stringify(basket()));if(result==='ok'){if(pickup)pickupNoticeOrder=orderId;$('#town-clear').click();}transact(result);if(result==='ok'&&pickup)notify(pickupMessage(driver.name));};
   const jobs=snapshot().environment.economy.jobs;
@@ -90,7 +90,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     transact(result);if(result==='ok'&&['harvest','plant'].includes(action))notify('Queued for community work. Resume time if the village is paused.');
   };
   $('#land-sources').onchange=event=>{const input=event.target.closest('[data-source-setting]');if(!input)return;const index=Number(input.dataset.site),site=snapshot().village.economy.sources[index];transact(game().configure_source(index,input.dataset.sourceSetting==='replant'?input.checked:site.auto_replant,input.dataset.sourceSetting==='harvest'?input.checked:site.auto_harvest));};
-  const locationName=p=>p.owner.kind==='production'?productionSiteName(snapshot().village.production.sites.find(s=>s.id===p.owner.id)||{},snapshot().village)+' pile':({camp:'Arrival store',warehouse:`Storage house ${(p.owner.id??0)+1}`,source:`Material plot ${(p.owner.id??0)+1}`,site:`${snapshot().village.buildings.find(b=>b.id===p.owner.id)?.progress>=100?'Garden tool pile':'Construction site'} ${(p.owner.id??0)+1}`,ground:'Recoverable pile'}[p.owner.kind]);
+  const locationName=p=>p.owner.kind==='production'?productionSiteName(snapshot().village.production.sites.find(s=>s.id===p.owner.id)||{},snapshot().village)+' pile':({camp:'Arrival store',warehouse:`Storage house ${(p.owner.id??0)+1}`,source:`Material plot ${(p.owner.id??0)+1}`,site:`${snapshot().village.buildings.find(b=>b.id===p.owner.id)?.progress>=100?'Garden supplies':'Construction site'} ${(p.owner.id??0)+1}`,ground:'Recoverable pile',pantry:`${names[snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind]||'Food'} pantry ${(p.owner.id??0)+1}`}[p.owner.kind]);
   $('#storage-locations').onclick=event=>{
     const button=event.target.closest('[data-store-target]');if(!button)return;
     const row=button.closest('.storage-location'),building=Number(button.dataset.storeTarget),store=snapshot().village.logistics.stores.find(p=>p.owner.kind==='warehouse'&&p.owner.id===building),target=[...store.target];
