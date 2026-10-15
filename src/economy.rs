@@ -71,7 +71,7 @@ const LABELS: [&str; COUNT] = [
     "Prepared meals",
     "Eggs",
     "Mature compost",
-    "Kitchen scraps",
+    "Organic residues",
     "Vegetable seedlings",
     "Timber seedlings",
     "Bamboo starts",
@@ -762,7 +762,9 @@ pub fn quote(v: &Village, items: Bundle) -> Result<i64, String> {
 }
 fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     if items[SCRAPS] > 0 {
-        return Err("Kitchen scraps come from cooking, not the town shop.".into());
+        return Err(
+            "Kitchen scraps and animal residues come from village care, not the town shop.".into(),
+        );
     }
     if v.logistics.is_some()
         && items.iter().sum::<u32>() > crate::logistics::room(v, crate::logistics::Owner::Camp)
@@ -1070,7 +1072,7 @@ impl Game {
 
     pub fn sell_material(&mut self, material: usize, n: u32) -> String {
         if material == SCRAPS {
-            return "Kitchen scraps are used locally, not sold.".into();
+            return "Kitchen scraps and animal residues are used locally, not sold.".into();
         }
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if material >= COUNT

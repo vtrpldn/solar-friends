@@ -359,3 +359,42 @@ fn an_empty_kitchen_receives_ingredients_before_optional_animal_feed_and_compost
         accounts(&v);
     }
 }
+
+#[test]
+fn organic_residues_leave_a_crowded_kitchen_before_they_can_stop_cooking() {
+    let mut g = scene("kitchen");
+    let mut r = g
+        .app
+        .world_mut()
+        .query::<&Resident>()
+        .iter(g.app.world())
+        .next()
+        .unwrap()
+        .clone();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 600.;
+        logistics::fixture_stock(&mut v, SCRAPS, 54);
+        organics::fixture_transfer(&mut v, Owner::Pantry(0), SCRAPS, 54);
+        logistics::fixture_stock(&mut v, economy::FOOD, 3);
+        organics::fixture_transfer(&mut v, Owner::Pantry(0), economy::FOOD, 3);
+        r.x = CAMP.0;
+        r.y = CAMP.1;
+        r.task = "haul".into();
+        r.remaining = 100.;
+        r.activity_building = None;
+        navigation::refresh(&mut v);
+        assert!(logistics::advance(&mut v, &mut r, &[], 0.25));
+        let h = v
+            .logistics
+            .as_ref()
+            .unwrap()
+            .shipments
+            .iter()
+            .find(|h| h.resident == r.id)
+            .unwrap();
+        assert_eq!(h.material, SCRAPS);
+        assert!(h.amount >= 12);
+        accounts(&v);
+    }
+}

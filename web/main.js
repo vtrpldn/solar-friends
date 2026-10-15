@@ -80,7 +80,7 @@ const kinds = {
   kitchen: ["Kitchen", "Meals taste better together"],
   well: ["Cistern", "Catch rainfall · store 75 more water"],
   grove: ["Food forest", "Gather fresh fruit when the pantry needs it"],
-  compost: ["Compost", "Two kitchen scraps enrich the next harvest"],
+  compost: ["Compost", "Two organic residues enrich the next harvest"],
   square: ["Square", "Gatherings bring neighbours closer"],
   coop: ["Chicken coop", "A sheltered home for three roaming hens"],
   workshop: ["Workshop", "Craft tools for building and harvests"],
@@ -109,7 +109,7 @@ const tasks = {
   water: "Moving water or closed service containers",
   utility: "Working on village services",
   socialize: "Finding some company",
-  compost: "Turning kitchen scraps",
+  compost: "Turning organic residues",
   restore: "Restoring the soil",
   craft: "Crafting useful tools",
   gathering: "Sharing food and stories",
@@ -510,6 +510,12 @@ function activityLabel(r) {
   if(r.task==='haul')return r.reason;
   if(r.trip)return tripLabel(r,state.environment.economy.jobs.find(j=>j.id===r.id));
   if(r.task === "sleep")return sleepLabel(r);
+  if(r.task==='garden'){
+    const kind=state.village.buildings.find(b=>b.id===r.activity_building)?.kind;
+    if(kind==='goat_pasture')return 'Caring for the dairy goats';
+    if(kind==='apiary')return 'Inspecting the hives and gathering honey';
+    if(kind==='orchard')return 'Tending our fruit trees';
+  }
   if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
   if (r.task === "visit") {
     const b = state.village.buildings.find(b => b.id === r.visit_building);
@@ -612,7 +618,7 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, worksiteKind: state.village.buildings.find(b=>b.id===r.activity_building)?.kind, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
@@ -1051,7 +1057,7 @@ const buildingPurposes = {
   eco_toilet:'Residents use this private toilet once a day and wash their hands with one fresh water. Waste stays sealed until processed.',
   banana_treatment:'A sealed banana evapotranspiration bed treats one toilet waste every four game hours (six per day). It produces no water or food. Open Water & waste to pause it and reserve waste for biogas.',
   wetland:'A lined reed bed filters 12 greywater into 8 irrigation water over six hours. Reclaimed water is never used for drinking or cooking.',
-  biodigester:'Two sealed waste + two kitchen scraps take eight hours to produce four cooking gas and two digestate. Digestate cures for a full day before becoming compost.',
+  biodigester:'Two sealed waste + two organic residues take eight hours to produce four cooking gas and two digestate. Digestate cures for a full day before becoming compost.',
   warehouse:'A communal store adds 300 spaces for construction materials, including incoming supplies. Manage its contents in Supplies.',
   solar_farm: "Collects sunshine and charges the shared battery. Generation peaks at 6 energy per hour; each farm stores 36 energy.",
   streetlight: "Lights the path after sunset, using 0.1 energy per hour from the shared battery.",

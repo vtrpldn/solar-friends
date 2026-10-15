@@ -19,6 +19,8 @@ This branch builds on the interface polish in PR #56. Keep the implementation in
 
 ## Evidence in progress
 
-The 398 native tests and strict all-target lint pass. An 18-day farming run produced fruit, milk and honey through actual resident work, completed a bean rotation, kept every material and liquid account balanced and restored exactly at every daily checkpoint. Each resident retained more than half their waking time for rest, hobbies and social life. The desktop walkthrough passes 13 captures including all 108 artwork entries. Fresh Story and wider regressions are still being replayed.
+All 400 native tests, strict all-target lint and 55 public regression checks pass. An 18-day farming run produced fruit, milk and honey through actual resident work, completed a bean rotation, kept every material and liquid account balanced and restored exactly at every daily checkpoint. Each resident retained more than half their waking time for rest, hobbies and social life. The desktop walkthrough passes 13 captures including all 108 artwork entries. All 13 Story chapters completed through earned saved checkpoints; the final uninterrupted replay and broad desktop walkthrough are in progress. A further 84-day seasonal run kept food and all resource accounts healthy, with at least 58% leisure for every resident.
 
 Longer playtests exposed overdue feed deliveries and kitchen ingredients losing priority to optional hauling. Pastures now hold six feed, overdue animal care receives attention during normal work windows, and an empty kitchen receives ingredients before optional feed or compost trips.
+
+Crowded kitchens now send organic residues to available storage before they block cooking inputs. The final Story replay also caught and fixed a stale meal reservation when sending an eating resident on a town pickup; regression coverage saves and restores every trip phase.

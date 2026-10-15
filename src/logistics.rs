@@ -790,8 +790,17 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if kind == Some("biodigester") && material == economy::SCRAPS && v.circular.waste >= 4. {
         return 1;
     }
-    if kind == Some("kitchen") && matches!(material, economy::FOOD | economy::EGGS) && v.meals < 3 {
-        return 0;
+    if kind == Some("kitchen")
+        && v.meals < 3
+        && let Owner::Pantry(id) = to
+        && let Some(p) = food::pantry(v, id)
+        && match material {
+            economy::FOOD => p.items[economy::FOOD] < 3,
+            economy::EGGS => p.items[economy::EGGS] < 2,
+            _ => false,
+        }
+    {
+        return 1;
     }
     if kind == Some("goat_pasture") && material == economy::FODDER {
         return 1;
@@ -868,7 +877,15 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                             material: i,
                             amount: n,
                             rank: (
-                                if closing(v, from.owner) { 0 } else { 2 },
+                                if closing(v, from.owner)
+                                    || i == economy::SCRAPS
+                                        && sum(&from.items) + arriving(s, from.id)
+                                            >= from.capacity.saturating_sub(12)
+                                {
+                                    0
+                                } else {
+                                    2
+                                },
                                 u32::from(i >= economy::FOOD),
                                 from.id.0,
                             ),

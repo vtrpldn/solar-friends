@@ -80,6 +80,7 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
         },
     });
     r.activity_building = None;
+    r.activity_store = None;
     r.activity_material = None;
     r.activity_batch = None;
     r.visit_building = None;

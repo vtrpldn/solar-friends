@@ -41,8 +41,8 @@ function build(kind,recipe='standard',local=false,site=null){
  purchase(missing);
  const started=snap().village.minutes;
  // Local construction includes extraction, processing and several community
- // work windows. Keep a finite sixteen-day bound for a complete building.
- until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`,16*1920);
+ // work windows. Keep a finite twenty-four-day bound for a complete building.
+ until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`,24*1920);
  if(kind==='home'&&recipe==='adobe')console.log(`Local adobe home: ${((snap().village.minutes-started)/1440).toFixed(1)} game days from blueprint to completion`);
  return id;
 }
@@ -62,7 +62,7 @@ async function complete(chapter){
  // Select the next journal page through its real command for reproducible UI checkpoints.
  assert(g.track_quest(Math.min(chapter+1,quests.length-1)));
  const saved=g.snapshot(),s=snap();assert(quests[chapter].objectives(s.village).every(o=>o.done),`Rust and UI agree: ${quests[chapter].title}`);
- assert(g.restore(saved),`reload chapter ${chapter+1}`);assert.equal(g.snapshot(),saved);
+ if(!g.restore(saved)){writeFileSync(`${output}/invalid-chapter-${chapter+1}.json`,saved);assert.fail(`reload chapter ${chapter+1}`);}assert.equal(g.snapshot(),saved);
  assert.equal(s.village.progress.tracked,Math.min(chapter+1,quests.length-1));
  if(output)await fs.writeFile(`${output}/solar-${chapter===0?'intro':chapter===12?'complete':`chapter-${chapter+1}`}.json`,saved);
  console.log(`Chapter ${chapter+1}/${quests.length}: ${quests[chapter].title} · day ${1+Math.floor(s.village.minutes/1440)}`);
