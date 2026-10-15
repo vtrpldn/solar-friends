@@ -187,8 +187,15 @@ pub fn reserved_space(v: &Village) -> u32 {
     v.production
         .batches
         .iter()
-        .filter(|b| b.active() && b.committed)
-        .map(|b| b.inputs.iter().sum::<u32>().max(b.output))
+        .filter(|b| b.active())
+        .map(|b| {
+            let inputs = b.inputs.iter().sum::<u32>();
+            if b.committed {
+                inputs.max(b.output)
+            } else {
+                b.output.saturating_sub(inputs)
+            }
+        })
         .sum()
 }
 pub fn input_demand(v: &Village, i: usize) -> u32 {
@@ -396,7 +403,9 @@ fn can_spawn(v: &Village, id: Id, material: usize) -> bool {
         return false;
     };
     let existing: u32 = (0..COUNT).map(|i| inputs[i].min(present(v, id, i))).sum();
-    logistics::room(v, p.owner) + existing >= inputs.iter().sum::<u32>().max(output)
+    let inputs_total = inputs.iter().sum::<u32>();
+    economy::capacity(v).saturating_sub(economy::storage(v)) >= output.saturating_sub(inputs_total)
+        && logistics::room(v, p.owner) + existing >= inputs_total.max(output)
 }
 fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
     if !can_spawn(v, id, material) {
@@ -440,7 +449,6 @@ pub fn can_order_tools(v: &Village) -> bool {
                 .any(|s| can_spawn(v, s.id, economy::TOOLS)))
 }
 pub fn order_tools(v: &mut Village, at: Option<usize>) -> Option<Id> {
-    sync(v);
     if let Some(b) = v.production.batches.iter().find(|b| {
         b.active()
             && b.material == economy::TOOLS
@@ -1405,5 +1413,142 @@ mod tests {
         assert_eq!(economy::free(v, 0), 0);
         assert_eq!(economy::free(v, 2), 0);
         checkpoint(&mut g);
+    }
+    fn tool_scene() -> Game {
+        let mut g = scene();
+        assert_eq!(g.set_production_target(7, 0), "ok");
+        g
+    }
+    #[test]
+    fn tools_use_staged_inputs_and_output_space_through_checkpoint_and_cancellation() {
+        let mut g = tool_scene();
+        assert!(g.request(0, "craft", false).contains("Happy"));
+        let id = worker(&mut g).help.unwrap().batch.unwrap();
+        let mut r = worker(&mut g);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let before = economy::quantity(&v, 0);
+            fixture_inputs(&mut v, id);
+            assert!(assign_batch(&mut r, &v, id));
+            assert!(!work(&mut v, &r, 4.));
+            assert_eq!(economy::quantity(&v, 0), before);
+            (r.x, r.y) = (r.target_x, r.target_y);
+            assert!(!work(&mut v, &r, 4.));
+            assert_eq!(economy::quantity(&v, 0), before - 8);
+            assert_eq!(reserved_space(&v), 12);
+            assert_eq!(v.progress.tool_uses, 0);
+        }
+        checkpoint(&mut g);
+        let mut cancelled = Game::new();
+        assert!(cancelled.restore(&g.snapshot()));
+        let timber = cancelled.app.world().resource::<Village>().wood;
+        assert_eq!(cancelled.cancel_production_batch(id.0), "ok");
+        assert_eq!(
+            cancelled.app.world().resource::<Village>().wood,
+            timber + 8.
+        );
+        assert_ne!(cancelled.cancel_production_batch(id.0), "ok");
+        checkpoint(&mut cancelled);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            assert!(work(&mut v, &r, 6.));
+            assert_eq!(economy::quantity(&v, economy::TOOLS), 12);
+            assert_eq!(
+                store(&v, batch(&v, id).unwrap().site).unwrap().items[economy::TOOLS],
+                12
+            );
+            assert_eq!(v.production.accounting.outputs[economy::TOOLS], 12);
+            assert_eq!(v.progress.tools_crafted, 1);
+            assert!(!work(&mut v, &r, 10.));
+        }
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn tools_must_reach_the_actual_worksite_and_each_use_is_spent_once() {
+        let mut g = tool_scene();
+        assert_eq!(g.place("garden", 12, 10), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let id = v.buildings.last().unwrap().id;
+        logistics::fixture_stock(&mut v, economy::TOOLS, 2);
+        v.progress.use_tools = true;
+        assert_eq!(logistics::site_tools(&v, id), 0);
+        assert!(!progression::use_tool(&mut v, id));
+        assert_eq!(v.progress.tool_uses, 2);
+        logistics::fixture_stage(&mut v, id);
+        assert_eq!(logistics::site_tools(&v, id), 1);
+        assert!(progression::use_tool(&mut v, id));
+        assert!(!progression::use_tool(&mut v, id));
+        assert_eq!(v.progress.tool_uses, 1);
+        assert_eq!(
+            v.simulation.materials.as_ref().unwrap().spent[economy::TOOLS],
+            1
+        );
+        assert!(
+            economy::can_build(&v, id),
+            "Optional tools cannot block ordinary construction"
+        );
+        assert!(economy::build(&mut v, id, 1000.));
+        assert_eq!(v.progress.tool_uses, 1);
+    }
+    #[test]
+    fn expanding_tool_output_reserves_room_before_inputs_are_spent() {
+        let mut g = tool_scene();
+        assert_eq!(g.place("workshop", 15, 5), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_finish(&mut v, 1);
+        economy::rebalance(&mut v);
+        let room = economy::capacity(&v) - economy::storage(&v);
+        economy::add(&mut v, 2, room);
+        let timber = economy::quantity(&v, 0);
+        assert!(order_tools(&mut v, Some(0)).is_none());
+        assert_eq!(economy::quantity(&v, 0), timber);
+        economy::remove(&mut v, 2, 4);
+        let id = order_tools(&mut v, Some(0)).unwrap();
+        assert_eq!(reserved_space(&v), 4);
+        assert_eq!(economy::storage(&v), economy::capacity(&v));
+        assert!(
+            order_tools(&mut v, Some(1)).is_none(),
+            "A second station cannot overbook output room"
+        );
+        assert!(cancel_batch(&mut v, id));
+        assert_eq!(economy::capacity(&v) - economy::storage(&v), 4);
+        assert!(order_tools(&mut v, Some(1)).is_some());
+    }
+    #[test]
+    fn a_workshop_visit_binds_its_requested_batch_to_the_selected_building() {
+        let mut g = tool_scene();
+        assert_eq!(g.place("workshop", 15, 5), "ok");
+        logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 1);
+        assert!(g.visit_building(0, 1).contains("Happy"));
+        let q = worker(&mut g).help.unwrap();
+        assert_eq!(q.building, Some(1));
+        assert_eq!(q.material, Some(economy::TOOLS));
+        assert_eq!(
+            building(
+                g.app.world().resource::<Village>(),
+                batch(g.app.world().resource::<Village>(), q.batch.unwrap())
+                    .unwrap()
+                    .site
+            ),
+            Some(1)
+        );
+        let before = g.snapshot();
+        assert!(
+            g.visit_building(0, 0)
+                .contains("already helping at workshop 2")
+        );
+        assert_eq!(g.snapshot(), before);
+        assert!(g.visit_building(0, 1).contains("already accepted"));
+        assert_eq!(g.snapshot(), before);
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_forged_tool_summary_cannot_add_distant_tools() {
+        let mut g = tool_scene();
+        let before = g.snapshot();
+        let mut forged: serde_json::Value = serde_json::from_str(&before).unwrap();
+        forged["village"]["progress"]["tool_uses"] = 12.into();
+        assert!(!g.restore(&forged.to_string()));
+        assert_eq!(g.snapshot(), before);
     }
 }

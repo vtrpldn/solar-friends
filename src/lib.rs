@@ -1414,11 +1414,13 @@ impl Game {
         true
     }
     pub fn set_tools_enabled(&mut self, enabled: bool) {
-        self.app
-            .world_mut()
-            .resource_mut::<Village>()
-            .progress
-            .use_tools = enabled;
+        {
+            let mut v = self.app.world_mut().resource_mut::<Village>();
+            v.progress.use_tools = enabled;
+            economy::rebalance(&mut v);
+        }
+        self.sync_production_activities();
+        self.sync_help();
     }
     pub fn contribute_tool_library(&mut self) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -1709,6 +1711,13 @@ impl Game {
                 return "Resident not found.".into();
             };
             if let Some(q) = r.help.as_ref().filter(|q| q.active() && q.task == task) {
+                if at.is_some_and(|id| q.building != Some(id)) {
+                    return format!(
+                        "{}: I am already helping at workshop {}. Cancel that request before choosing another worksite.",
+                        r.name,
+                        q.building.unwrap_or(0) + 1
+                    );
+                }
                 return format!("{}: I already accepted this request. {}", r.name, q.reason);
             }
             if let Some(reason) = request_blocker(&v, &r, task, encourage) {

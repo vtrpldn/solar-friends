@@ -42,7 +42,11 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
     }
     if (tick % 1920 === 0) {
       const restored = new Game();
-      assert(restored.restore(game.snapshot()));
+      const saved=game.snapshot();
+      if(!restored.restore(saved)){
+        await fs.mkdir('artifacts/leisure',{recursive:true});await fs.writeFile('artifacts/leisure/invalid-checkpoint.json',saved);
+        assert.fail(`${scenario} day ${1+Math.floor(v.minutes/1440)} checkpoint rejected; see artifacts/leisure/invalid-checkpoint.json`);
+      }
       assert.equal(restored.snapshot(), game.snapshot(), 'Hobbies and pantry state survive reloading');
       restored.free();
     }
