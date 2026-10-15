@@ -7,6 +7,7 @@ mod building_work;
 mod devtools;
 mod ecology;
 mod economy;
+pub mod electricity;
 mod food;
 mod forecast;
 mod freshness;
