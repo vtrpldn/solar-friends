@@ -9,6 +9,8 @@ export async function checkUtilityRoutes({page,saved,capture}){
   }
   const state=()=>page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
   await load('ready');const initial=await state();
+  const electrical=JSON.parse(initial).village.power.network.nodes;
+  const port=building=>String(electrical.find(n=>n.owner.kind==='building'&&n.owner.id===Number(building)).id);
   assert.match(await page.locator('[data-dev-page="utilities"]').textContent(),/Preview only/);
   await page.getByLabel('Utility class',{exact:true}).selectOption('fresh');
   await page.getByLabel('Supply or waste outlet',{exact:true}).selectOption('0');await page.getByLabel('Destination',{exact:true}).selectOption('1');
@@ -16,7 +18,7 @@ export async function checkUtilityRoutes({page,saved,capture}){
   await capture('Read-only water corridor follows exact ports and existing road cells','utility-fresh-route.png');
   for(const [kind,from,to]of [['irrigation','3','-2'],['greywater','2','3'],['sewage','4','5'],['electricity','9','8']]){
     await page.getByLabel('Utility class',{exact:true}).selectOption(kind);
-    await page.getByLabel('Supply or waste outlet',{exact:true}).selectOption(from);await page.getByLabel('Destination',{exact:true}).selectOption(to);
+    await page.getByLabel('Supply or waste outlet',{exact:true}).selectOption(kind==='electricity'?port(from):from);await page.getByLabel('Destination',{exact:true}).selectOption(kind==='electricity'?port(to):to);
     assert.match(await page.locator('#dev-utility-status').textContent(),/Proposal only; nothing installed/);
     if(kind==='irrigation')assert.equal(await page.locator('#dev-utility-to option[value="2"]').count(),0,'Kitchen cannot receive reclaimed irrigation');
   }
