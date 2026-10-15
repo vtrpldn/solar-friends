@@ -48,7 +48,7 @@ export const quests = [
         "Bring in our first harvest",
         v.harvests,
         1,
-        "Build a garden and ask Iara to tend it. Plant first, water for two water, then allow three game hours of moist growth before harvesting.",
+        "Build a garden and ask Iara to tend it. Plant first and water for two water. Lettuce takes about three moist growing hours on suitable soil. Open Land views beside the minimap to compare fertility and moisture before choosing a clearing.",
         "garden",
       ),
       goal(
@@ -98,8 +98,8 @@ export const quests = [
         6,
         "Ask a neighbour to forage food. Their saved request in People shows travel, breaks and completion. With a finished food forest, each trip also brings two fruit.",
       ),
-      actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0), 1, "Open Land in Projects and plant a timber plot. It needs water and four moist days before whole trees can be harvested; start early."),
-      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1), 1, "Place a bamboo plot. Moist growth takes two days; shoots regrow after cutting. Two compost can enrich a material plot for faster growth. Town purchases can bridge the wait."),
+      actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0), 1, "Open Land in Projects and plant a timber plot. It needs water and about four moist growing days on suitable soil before whole trees can be harvested; start early."),
+      actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1), 1, "Place a bamboo plot. Moist growth takes about two days on suitable soil; shoots regrow after cutting. Poor soil and heavy tree shade slow growth. Town purchases can bridge the wait."),
     ],
   },
   {
@@ -113,7 +113,7 @@ export const quests = [
     after:
       "Keep meeting at our square. Next, organise storage, town trips and income to support the work we share.",
     objectives: (v) => [
-      goal("Build our community square",count(v,"square"),1,"Make a place to meet. After the welcome supper, gatherings at the square strengthen friendships.","square"),
+      goal("Build our community square",count(v,"square"),1,"Make a place to meet near homes and the kitchen. Roads help guests and cooked meals reach the shared table. After the welcome supper, gatherings at the square strengthen friendships.","square"),
       goal(
         "Serve five cooked meals",
         v.meals_served,
@@ -184,9 +184,9 @@ export const quests = [
       goal("Build a workshop", count(v,"workshop"),1,"Finish a workshop in Projects, then let Bento make tools.","workshop"),
       goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight timber available and ask Bento to craft during community hours. He brings inputs to an open workshop and resumes the saved batch after breaks. Finished tools travel onward to projects and harvests.","workshop"),
       goal("Build a compost station",count(v,"compost"),1,"Kitchen scraps become compost for our gardens.","compost"),
-      goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Make compost from kitchen scraps. The next garden harvest uses it automatically.","garden"),
+      goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Make compost from kitchen scraps. The next garden harvest uses it automatically, feeds the soil and gradually repairs disturbance.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
-      actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight hours of moist growth raises a seedling; rain does not water covered beds."),
+      actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds."),
       actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Its next planting uses an available seedling for a growth head start. Supplies also lets you choose beans, lettuce or tomatoes."),
     ],
   },
@@ -207,7 +207,7 @@ export const quests = [
     story: "“The sun gives us more than warm mornings. Let's save a little of it for the evening.”",
     after: "Our evenings are lit. Next, separate household wastewater and turn greywater into irrigation water.",
     objectives: v => [
-      goal("Build a solar farm",count(v,"solar_farm"),1,"Order solar equipment in Town. A completed farm generates through daylight and adds 36 battery capacity.","solar_farm"),
+      goal("Build a solar farm",count(v,"solar_farm"),1,"Order solar equipment in Town. A completed farm generates through daylight and adds 36 battery capacity. Open the Tree shade land view before placing it; nearby groves, timber and bamboo reduce its sunlight.","solar_farm"),
       goal("Light a village path",count(v,"streetlight"),1,"Place a street light beside a road. It draws from our shared battery after dusk.","streetlight"),
       actionGoal("power", "Light a path after dusk",+v.progress.night_lights,1,"Finish a street light and leave it enabled in Power. Wait for the battery to actually supply it after dusk. Buildings without roof panels use the same village grid."),
       goal("Store twelve energy",Math.floor(v.power.stored),12,"Let daytime solar generation charge the battery. Open Power to watch generation, charge and demand.",null),
