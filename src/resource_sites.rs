@@ -136,6 +136,9 @@ pub fn finish(v: &mut Village, index: usize) -> bool {
         if material == 0 && v.economy.sources[index].harvests > 0 {
             v.progress.timber_replanted = true;
         }
+        let source = &v.economy.sources[index];
+        let (n, x, y) = (size(material), source.x, source.y);
+        crate::land::disturb_plot(v, n, x, y, 0.08);
         crate::planting::consume(v, index);
         v.economy.sources[index].plant_requested = false;
         v.economy.sources[index].planted = true;
@@ -164,7 +167,13 @@ pub fn harvested(v: &mut Village, index: usize, amount: u32) {
             .deposit
             .expect("finite site has a local deposit");
         crate::land::extract(v, id, amount);
+        let s = &v.economy.sources[index];
+        let (n, x, y) = (size(s.material), s.x, s.y);
+        crate::land::disturb_plot(v, n, x, y, amount as f32 * 0.01);
     } else {
+        let s = &v.economy.sources[index];
+        let (n, x, y) = (size(s.material), s.x, s.y);
+        crate::land::harvest_soil(v, n, x, y, false);
         let s = &mut v.economy.sources[index];
         s.remaining -= amount as f32;
         if s.remaining == 0. {
@@ -528,7 +537,13 @@ mod tests {
             assert_eq!(v.economy.sources[0].growth, 0.25);
             let growth = v.economy.sources[0].growth;
             advance(&mut v, 600.);
-            assert_eq!(v.economy.sources[0].growth, growth);
+            assert!(
+                v.economy.sources[0].growth > growth,
+                "Visible perimeter shade keeps a little water after the unshaded day"
+            );
+            let dry_growth = v.economy.sources[0].growth;
+            advance(&mut v, 600.);
+            assert_eq!(v.economy.sources[0].growth, dry_growth);
             for _ in 0..3 {
                 assert!(finish(&mut v, 0));
                 advance(&mut v, 1440.);

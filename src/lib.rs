@@ -1167,7 +1167,7 @@ impl Game {
                 restoration: vec![],
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 15,
+                version: 16,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1407,6 +1407,7 @@ impl Game {
             return "That plot is reserved for a building move.".into();
         }
         v.roads.push((x, y));
+        land::disturb_plot(&mut v, 1, x, y, 0.18);
         "ok".into()
     }
     pub fn place(&mut self, kind: &str, x: i32, y: i32) -> String {
@@ -1636,7 +1637,7 @@ impl Game {
         {
             return false;
         }
-        if !matches!(v.version, 3 | 15)
+        if !matches!(v.version, 3 | 16)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1728,7 +1729,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 15;
+            save.village.version = 16;
             if !processes::initialise(&mut save.village) {
                 return false;
             }
@@ -1743,6 +1744,7 @@ impl Game {
         for e in entities {
             self.app.world_mut().despawn(e);
         }
+        land::vegetation::rebuild(&mut save.village);
         workforce::refresh(&mut save.village, save.residents.iter());
         for r in save.residents {
             self.app.world_mut().spawn(r);
@@ -2175,7 +2177,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":15", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":16", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

@@ -113,7 +113,7 @@ export const quests = [
     after:
       "Keep meeting at our square. Next, organise storage, town trips and income to support the work we share.",
     objectives: (v) => [
-      goal("Build our community square",count(v,"square"),1,"Make a place to meet near homes and the kitchen. Roads help guests and cooked meals reach the shared table. After the welcome supper, gatherings at the square strengthen friendships.","square"),
+      goal("Build our community square",count(v,"square"),1,"Make a place to meet near homes and the kitchen. Roads help guests and cooked meals reach the shared table. They disturb their ground; removing a road leaves soil to restore. After the welcome supper, gatherings at the square strengthen friendships.","square"),
       goal(
         "Serve five cooked meals",
         v.meals_served,
@@ -207,7 +207,7 @@ export const quests = [
     story: "“The sun gives us more than warm mornings. Let's save a little of it for the evening.”",
     after: "Our evenings are lit. Next, separate household wastewater and turn greywater into irrigation water.",
     objectives: v => [
-      goal("Build a solar farm",count(v,"solar_farm"),1,"Order solar equipment in Town. A completed farm generates through daylight and adds 36 battery capacity. Open the Tree shade land view before placing it; nearby groves, timber and bamboo reduce its sunlight.","solar_farm"),
+      goal("Build a solar farm",count(v,"solar_farm"),1,"Order solar equipment in Town. A completed farm generates through daylight and adds 36 battery capacity. Open the Tree shade land view before placing it; visible perimeter trees, food forests, timber, bamboo and banana beds reduce its sunlight.","solar_farm"),
       goal("Light a village path",count(v,"streetlight"),1,"Place a street light beside a road. It draws from our shared battery after dusk.","streetlight"),
       actionGoal("power", "Light a path after dusk",+v.progress.night_lights,1,"Finish a street light and leave it enabled in Power. Wait for the battery to actually supply it after dusk. Buildings without roof panels use the same village grid."),
       goal("Store twelve energy",Math.floor(v.power.stored),12,"Let daytime solar generation charge the battery. Open Power to watch generation, charge and demand.",null),

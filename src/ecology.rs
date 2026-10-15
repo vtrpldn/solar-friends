@@ -351,7 +351,8 @@ mod farming_tests {
             tend(&mut v, &r);
             advance(&mut v, 300.);
             assert_eq!(v.buildings[0].crop.growth, 300.);
-            assert_eq!(v.buildings[0].crop.moisture, 90.);
+            let shade = land::condition(&v, 2, 5, 5).shade;
+            assert!((v.buildings[0].crop.moisture - (90. + 52.5 * shade)).abs() < 0.001);
         }
         let saved = g.snapshot();
         let mut other = Game::new();

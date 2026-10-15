@@ -256,7 +256,14 @@ mod tests {
         v.buildings.push(second);
         v.minutes = 720.;
         assert_eq!(supply(&v).capacity, 72.);
-        assert!((supply(&v).generation - 12.).abs() < 0.001);
+        let expected: f32 = v
+            .buildings
+            .iter()
+            .filter(|b| b.kind == "solar_farm")
+            .map(|b| 6. * land::solar_exposure(&v, 3, b.x, b.y))
+            .sum();
+        assert!((supply(&v).generation - expected).abs() < 0.001);
+        assert!(expected > 6. && expected <= 12.);
     }
     #[test]
     fn save_migration_round_trip_and_corrupt_power_are_checked() {

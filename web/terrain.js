@@ -75,7 +75,25 @@ function groundPoint(x, y) {
   return [(x - GROUND_START) * unit, (y - GROUND_START) * unit];
 }
 
-export function paintTerrain(texture, roads = [], resourceSites = []) {
+// Quantised soil colours change only when the ground has visibly changed.
+// The painted meadow remains visible through every soft patch.
+export function soilAppearance(soil=[]){
+  return soil.map(s=>[s.x,s.y,Math.round(s.disturbance*20)/20,Math.round(s.cover*20)/20,Math.round(s.nutrients*20)/20]);
+}
+function paintSoil(g,soil){
+  const unit=RESOLUTION/GROUND_SIZE;
+  for(const [x,y,disturbance,cover,nutrients] of soil){
+    const [px,py]=groundPoint(x,y),radius=unit*.85;
+    const brown=Math.min(.25,disturbance*.18+Math.max(0,1-nutrients)*.08),green=Math.min(.12,Math.max(0,cover-.35)*.15+Math.max(0,nutrients-1)*.12);
+    for(const [alpha,rgb] of [[brown,'125,80,40'],[green,'88,119,48']]){
+      if(alpha<.005)continue;
+      const patch=g.createRadialGradient(px,py,unit*.15,px,py,radius);
+      patch.addColorStop(0,`rgba(${rgb},${alpha})`);patch.addColorStop(1,`rgba(${rgb},0)`);
+      g.fillStyle=patch;g.beginPath();g.arc(px,py,radius,0,Math.PI*2);g.fill();
+    }
+  }
+}
+export function paintTerrain(texture, roads = [], resourceSites = [],soil=[]) {
   const ground = surface();
   const g = ground.getContext("2d");
   const half = texture.width / 2;
@@ -91,6 +109,7 @@ export function paintTerrain(texture, roads = [], resourceSites = []) {
     RESOLUTION,
   );
 
+  paintSoil(g,soil);
   const paths = surface();
   const p = paths.getContext("2d");
   p.lineCap = "round";

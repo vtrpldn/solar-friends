@@ -8,8 +8,10 @@ fn garden() -> Game {
 }
 #[test]
 fn wetness_lives_in_the_ground_and_rain_does_not_enter_a_greenhouse() {
-    let mut g = garden();
-    assert_eq!(g.place("greenhouse", 9, 5), "ok");
+    let mut g = Game::new();
+    g.start_mode("sandbox");
+    assert_eq!(g.place("garden", 13, 13), "ok");
+    assert_eq!(g.place("greenhouse", 17, 13), "ok");
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.minutes = 900.;
@@ -17,19 +19,19 @@ fn wetness_lives_in_the_ground_and_rain_does_not_enter_a_greenhouse() {
             b.crop.planted = true;
         }
         ecology::advance(&mut v, 60.);
-        assert!((condition(&v, 2, 5, 5).moisture - 0.5).abs() < 0.0001);
-        assert_eq!(condition(&v, 2, 9, 5).moisture, 0.);
+        assert!((condition(&v, 2, 13, 13).moisture - 0.5).abs() < 0.0001);
+        assert_eq!(condition(&v, 2, 17, 13).moisture, 0.);
         assert!((v.buildings[0].crop.moisture - 120.).abs() < 0.001);
         assert_eq!(v.buildings[1].crop.moisture, 0.);
         assert!(valid(&v));
-        water_plot(&mut v, 2, 5, 5, 1.);
+        water_plot(&mut v, 2, 13, 13, 1.);
         v.buildings.clear();
         v.economy.projects.clear();
         logistics::sync(&mut v);
         v.minutes = 1080.;
         advance_fallow(&mut v, 60.);
         assert!(
-            (condition(&v, 2, 5, 5).moisture - 0.75).abs() < 0.0001,
+            (condition(&v, 2, 13, 13).moisture - 0.75).abs() < 0.0001,
             "Clearing a garden preserves its water and normal drying"
         );
     }
@@ -172,7 +174,7 @@ fn moisture_edits_and_forged_crop_summaries_fail_without_changing_the_world() {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), saved);
     }
-    assert!(!g.restore(&saved.replace("\"version\":15", "\"version\":11")));
+    assert!(!g.restore(&saved.replace("\"version\":16", "\"version\":11")));
 }
 
 #[test]

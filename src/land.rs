@@ -2,6 +2,7 @@
 use crate::{Game, MAP_SIZE, Village, interactions, resource_sites, river_bank, simulation};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+pub mod vegetation;
 mod water;
 pub use water::{
     RootZone, advance_fallow, condition, growth, harvest_soil, plot_water, solar_exposure,
@@ -40,6 +41,9 @@ pub struct State {
     pub deposits: Vec<Deposit>,
     pub soil: Vec<Soil>,
     pub water: Vec<f32>,
+    pub vegetation: Vec<vegetation::Tree>,
+    #[serde(skip)]
+    pub natural_light: Vec<f32>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub struct Ground {
@@ -87,7 +91,8 @@ pub fn initialise(v: &mut Village) -> bool {
         return false;
     }
     let mut state = State {
-        schema: 2,
+        schema: 3,
+        vegetation: vegetation::generate(v.simulation.seed),
         water: vec![0.; (MAP_SIZE * MAP_SIZE) as usize],
         seed: v.simulation.seed,
         ..State::default()
@@ -113,8 +118,9 @@ pub fn initialise(v: &mut Village) -> bool {
     }
     v.simulation.next_id = end;
     v.land = state;
+    vegetation::rebuild(v);
     // This path authors a new village or an explicit version-3 development fixture.
-    // Playable version-15 saves are validated, never repaired or replenished here.
+    // Playable version-16 saves are validated, never repaired or replenished here.
     for index in 0..v.economy.sources.len() {
         let s = &v.economy.sources[index];
         if s.material < 2 {
@@ -165,6 +171,8 @@ pub fn initialise(v: &mut Village) -> bool {
 pub fn reseed(v: &mut Village, seed: u32) {
     v.simulation.seed = seed;
     v.land.seed = seed;
+    v.land.vegetation = vegetation::generate(seed);
+    vegetation::rebuild(v);
     for (i, d) in v.land.deposits.iter_mut().enumerate() {
         d.maximum = quantities(seed, d.material)[i % 3];
         d.remaining = d.maximum;
@@ -264,6 +272,9 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     } else {
         0.4
     };
+    disturb_plot(v, n, x, y, impact);
+}
+pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
             if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
@@ -284,6 +295,7 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
             }
         }
     }
+    vegetation::clear(v, n, x, y);
     v.land.soil.sort_by_key(|s| (s.y, s.x));
     v.land.revision = v.land.revision.saturating_add(1);
 }
@@ -318,7 +330,8 @@ pub fn restore_soil(v: &mut Village, n: i32, x: i32, y: i32, fraction: f32) {
     v.land.revision = v.land.revision.saturating_add(1);
 }
 pub fn valid(v: &Village) -> bool {
-    if v.land.schema != 2
+    if v.land.schema != 3
+        || !vegetation::valid(v)
         || v.land.seed != v.simulation.seed
         || v.land.deposits.len() != 9
         || v.land.soil.len() > (MAP_SIZE * MAP_SIZE) as usize
@@ -432,3 +445,6 @@ impl Game {
 mod cultivation_tests;
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod environment_tests;
