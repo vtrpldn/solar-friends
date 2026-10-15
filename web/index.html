@@ -171,6 +171,7 @@
           <label class="cable-overlay"><input id="cable-overlay" type="checkbox"> Show cables on the village</label>
           <p class="pipe-legend">Gold: installed cable · pale dashes: planned work · grey: paused · rust: dismantling. Routes join at ports; crossing corridors alone does not connect them.</p>
           <button id="cable-buy-parts">Find missing cable parts in Trade</button><div id="electrical-lines"></div>
+          <section id="recovered-batteries" hidden aria-label="Recovered batteries"><h3>Recovered batteries</h3><p>Batteries keep their charge when buildings close. Neighbours pack, carry and install them. Careful salvage returns recorded battery equipment and safely discharges the remaining energy.</p><div id="battery-banks"></div></section>
         </section>
         <h3>Shared lighting</h3><div id="power-loads"></div>
         <p id="power-roofs"></p>
@@ -223,6 +224,7 @@
         <label class="home-method" id="home-method-control">House walls <select id="home-material-method"><option value="standard">Prepared materials</option><option value="local">Local bamboo</option><option value="adobe">Adobe bricks &amp; bamboo</option></select></label><div id="tools" role="group" aria-label="Available buildings"></div>
         <div class="build-guidance"><p class="build-hint">Choose a building, then find a clearing.</p><div id="placement" class="placement" hidden></div><kbd>Esc</kbd></div>
       </nav>
+      <p id="relocation-guidance" class="relocation-guidance" role="status" hidden></p>
       <nav class="hud-dock" aria-label="Village controls"><button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button><button id="open-village" aria-controls="village-book" aria-expanded="false"><span>Village</span></button><button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Journal</button><button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button></nav>
       <nav id="resident-strip" aria-label="Resident portraits"></nav>
       <div class="village-alert"><button id="open-situations"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8m-8 4h5"/></svg> <span id="situations-label">Situations</span></button></div>

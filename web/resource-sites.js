@@ -1,5 +1,6 @@
 import {occupies,footprint} from './building-footprints.js';
 import {MAP_SIZE,riverBank} from './terrain.js';
+import {batteryReserved} from './battery-plots.js';
 export const sourceKinds=['source_timber','source_bamboo','source_earth','source_stone','source_salvage'];
 export const sourceMaterial=kind=>sourceKinds.indexOf(kind);
 export const sourceSize=material=>material===0?3:2;
@@ -24,6 +25,7 @@ export function sourcePlacementReason(v,material,x,y){
     if(X<1||Y<1||X>=MAP_SIZE-1||Y>=MAP_SIZE-1||riverBank(X,Y))return 'Choose an inland clearing inside the village.';
     if((v.restoration||[]).some(j=>j.finished==null&&X>=j.x-Math.floor(j.size/2)&&X<j.x-Math.floor(j.size/2)+j.size&&Y>=j.y-Math.floor(j.size/2)&&Y<j.y-Math.floor(j.size/2)+j.size))return 'That ground is reserved for soil restoration.';
     if(v.pipes?.lines.some(p=>p.phase!=='retired'&&p.plan.cells.some(([x,y])=>x===X&&y===Y)))return 'Remove the utility line on this plot before placing a material plot.';
+    if(batteryReserved(v,X,Y))return 'Keep buildings, paths, other plots and the arrival clearing free.';
     if(Math.abs(X-10)<1.5&&Math.abs(Y-13)<1.5||(v.building_jobs||[]).some(j=>j.destination&&occupies({...v.buildings.find(b=>b.id===j.building),x:j.destination[0],y:j.destination[1]},X,Y))||v.roads.some(([rx,ry])=>rx===X&&ry===Y)||v.buildings.some(s=>occupies(s,X,Y))||v.economy.sources.some(s=>sourceOccupies(s,X,Y)))return 'Keep buildings, paths, other plots and the arrival clearing free.';
   }
   if(v.economy.sources.length>=676)return 'This village has reached its plot limit.';

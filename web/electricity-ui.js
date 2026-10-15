@@ -5,9 +5,9 @@ const number=n=>Number(n.toFixed(n>0&&n<.1?3:1)).toLocaleString('en');
 let preview=null,revision=0,previewKey='';
 const previewVisible=()=>!!preview&&!document.getElementById('power-panel')?.hidden&&!!document.getElementById('cable-planner')?.open;
 export const electricalOverlayRevision=()=>`${revision}:${previewVisible()}`;
-export function installElectricityUI({game,snapshot,transact,openTown,focusUtility}){
+export function installElectricityUI({game,snapshot,transact,openTown,focusUtility,moveBattery}){
   const $=id=>document.getElementById(id),host=$('electrical-network'),from=$('cable-from'),to=$('cable-to'),rows=$('electrical-lines');
-  let optionsKey='',rowsKey='',circuitsKey='';
+  let optionsKey='',rowsKey='',circuitsKey='',banksKey='';
   const parts=(bundle,s)=>bundle.map((n,i)=>n?`${n} ${s.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')||'None';
   const label=(endpoint,s)=>{
     const node=s.village.power.network.nodes.find(n=>n.id===endpoint.id);
@@ -19,6 +19,18 @@ export function installElectricityUI({game,snapshot,transact,openTown,focusUtili
     host.hidden=typeof game().electrical_connection_quote!=='function';
     if(host.hidden||$('power-panel').hidden)return;
     const report=JSON.parse(game().electricity_report()),endpoints=report.endpoints;
+    const banks=report.network.nodes.filter(n=>['ground','carrier'].includes(n.owner.kind));
+    const jobs=report.batteries?.jobs||[],bankList=$('battery-banks');
+    $('recovered-batteries').hidden=typeof game().queue_battery_work!=='function'||(!banks.length&&!jobs.length);
+    const bankMarkup=banks.map(n=>{
+      const job=jobs.find(j=>j.bank===n.id&&!['complete','cancelled'].includes(j.phase));
+      const carrier=n.owner.kind==='carrier'?s.residents.find(r=>r.id===n.owner.id):null;
+      const worker=job?s.residents.find(r=>r.task==='utility'&&r.activity_material===job.id):null;
+      const phase=job?({packing:'Packing',carrying:'In transit',installing:'Installing',salvaging:'Careful salvage'})[job.phase]:'Ready to connect';
+      const total=({packing:12,installing:18,salvaging:36})[job?.phase];
+      return `<article class="production-worksite" data-battery="${n.id}"><div class="production-title"><h4>Battery ${n.id} · ${carrier?`with ${esc(carrier.name)}`:`${n.x}, ${n.y}`}</h4><button data-battery-action="locate" data-battery-id="${n.id}">Locate</button></div><b>${phase}</b><p>${number(n.charge)} / ${n.capacity} energy · ${n.equipment?'one reusable battery unit recorded':'no purchased equipment recorded'}</p>${job?`<p>${job.destination?`Moving to ${job.destination.join(', ')}. `:''}${worker?`${esc(worker.name)} is ${job.phase==='carrying'?'carrying the bank':Math.hypot(worker.x-worker.target_x,worker.y-worker.target_y)>.08?'on the way':'working'}.`:'Waiting for an available neighbour during community hours.'}</p>${total?`<progress value="${job.work}" max="${total}" aria-label="Battery ${n.id} ${job.phase} progress"></progress><small>${number(job.work)} / ${total} minutes of work saved</small>`:''}${['packing','salvaging'].includes(job.phase)?`<button data-battery-action="cancel" data-battery-id="${job.id}">Cancel battery work</button>`:''}`:`<div class="project-actions"><button data-battery-action="move" data-battery-id="${n.id}">Move battery</button></div><details><summary>Salvage battery</summary><p>A neighbour spends 36 minutes dismantling this bank. ${number(n.charge)} energy will be discharged; ${n.equipment?'one reusable battery unit will remain here for collection':'no materials will be returned because this equipment was placed free'}.</p><button data-battery-action="salvage" data-battery-id="${n.id}">Queue careful salvage</button></details>`}</article>`;
+    }).join('')+jobs.filter(j=>j.phase==='complete'&&j.action==='salvage').slice(-2).map(j=>`<p>Battery ${j.bank} salvaged · ${j.recovered?'one reusable unit recovered':'no paid equipment to return'}.</p>`).join('');
+    if(bankMarkup!==banksKey&&!bankList.contains(document.activeElement)){banksKey=bankMarkup;bankList.innerHTML=bankMarkup;}
     const byId=id=>endpoints.find(e=>e.id===id);
     const options=JSON.stringify(endpoints.map(e=>[e.id,e.kind,e.x,e.y,e.ready]));
     if(options!==optionsKey){
@@ -30,7 +42,7 @@ export function installElectricityUI({game,snapshot,transact,openTown,focusUtili
         select.value=endpoints.some(e=>String(e.id)===old)?old:String(preferred?.id??endpoints.find(e=>e.ready)?.id??'');select.disabled=!endpoints.length;
       }
     }
-    const quote=endpoints.length>1?JSON.parse(game().electrical_connection_quote(Number(from.value),Number(to.value))):{allowed:false,reason:'Finish a generator and a shared building or light to plan their cable. Rooftop batteries stay private.'};
+    const quote=endpoints.length>1?JSON.parse(game().electrical_connection_quote(Number(from.value),Number(to.value))):{allowed:false,reason:'A cable needs two finished electrical ports. Add a shared building, light or generator; rooftop batteries stay private.'};
     $('cable-queue').disabled=!quote.allowed;$('cable-locate').disabled=!quote.allowed;
     let quoteText=quote.reason;
     if(quote.allowed){
@@ -82,6 +94,19 @@ export function installElectricityUI({game,snapshot,transact,openTown,focusUtili
     const priority=Number(select.value);select.blur();transact(game().configure_electrical_connection(p.id,priority,p.paused));
   });
   rows.addEventListener('focusout',()=>queueMicrotask(()=>update(snapshot())));
+  $('battery-banks').addEventListener('click',event=>{
+    const button=event.target.closest('[data-battery-action]');if(!button)return;
+    const id=Number(button.dataset.batteryId),action=button.dataset.batteryAction;
+    button.blur();
+    if(action==='move'){moveBattery(id);return;}
+    if(action==='locate'){
+      const s=snapshot(),n=s.village.power.network.nodes.find(n=>n.id===id);if(!n)return;
+      const r=n.owner.kind==='carrier'?s.residents.find(r=>r.id===n.owner.id):n,point=[r.x,r.y];
+      focusUtility({start:{edge:point},cells:[point],end:{edge:point}});return;
+    }
+    transact(action==='cancel'?game().cancel_battery_work(id):game().queue_battery_work(id,'salvage',0,0));
+  });
+  $('battery-banks').addEventListener('focusout',()=>queueMicrotask(()=>update(snapshot())));
   return {update};
 }
 export function drawElectricalConnections(ctx,iso,scale,state){

@@ -16,7 +16,7 @@ export function recipeSummary(state,kind,variant='standard'){
   const total=Array(e.materials.length).fill(0);for(const s of r[variant]||r.standard)for(let i=0;i<e.materials.length;i++)total[i]+=s.items[i];
   return total.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ');
 }
-export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,planSource,avatar,paintPortraits,focusUtility}){
+export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,planSource,avatar,paintPortraits,focusUtility,moveBattery}){
   const $=s=>document.querySelector(s);let lastProjects='',lastInventory='',lastOrders='',lastLand='',lastLocations='',lastFreshness='',pickupNoticeOrder=null;
   const forecasts=createProjectForecasts({checkpoint:()=>game().snapshot(),refresh:()=>{lastProjects='';update();}});
   $('#project-forecast-run').onclick=forecasts.start;
@@ -26,7 +26,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   const processUI=installProcessUI({snapshot,game,transact});
   const waterUI=installWaterUI({game});
   const waterConnections=installWaterConnections({game,snapshot,transact,openTown});
-  const electricityUI=installElectricityUI({game,snapshot,transact,openTown,focusUtility});
+  const electricityUI=installElectricityUI({game,snapshot,transact,openTown,focusUtility,moveBattery});
   const materials=snapshot().environment.economy.materials;
   $('#town-catalog').innerHTML=materials.filter(m=>m.buyable!==false).map(m=>`<article class="town-item"><div class="trade-item-art">${itemIcon(materialIcons[m.id])}</div><label for="buy-${m.id}">${m.name}</label><small class="trade-price">${money(m.price)}</small><div class="trade-quantity"><button type="button" data-adjust="-1" aria-label="Remove one ${m.name.toLowerCase()}">−</button><input id="buy-${m.id}" type="number" min="0" max="100" step="1" value="0" aria-label="Order ${m.name}" data-material="${m.id}"><button type="button" data-adjust="1" aria-label="Add one ${m.name.toLowerCase()}">+</button></div></article>`).join('');
   $('#spare-material').innerHTML=materials.filter(m=>m.price>0).map(m=>`<option value="${m.id}">${m.name}</option>`).join('');

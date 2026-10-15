@@ -1,4 +1,5 @@
 import {economyArt,economyAtlasFile} from '../economy-art.js';
+import {batteryArt} from '../battery-art.js';
 import { RESIDENT_WIDTH, FRAME_ANCHOR } from '../sprite-frames.js';
 import { allBuildingArt } from '../building-art.js?v=night-1';
 import { CHICKEN_WIDTH, chickenFrame } from '../chickens.js?v=painted-hens-1';
@@ -25,5 +26,6 @@ add('resident-reference','Original resident study','residents-cistern.png','Refe
 ['Lettuce','Beans','Tomatoes'].forEach((name,column) => ['Seedling','Growing','Harvestable'].forEach((stage,row) => add(`crop-${column}-${row}`,`${name} · ${stage}`,'crops.png','Crops',{crop:true,frame:row*3+column,cell:[column/3,row/3,1/3,1/3],width:column?26:22,anchor:FRAME_ANCHOR})));
 
 economyArt.forEach((art,i)=>add(`economy-${i}`,art.name,economyAtlasFile,'Land & supplies',{...art}));
+add('recovered-battery','Recovered battery','recovered-battery.png','Land & supplies',{cell:batteryArt.crop.map(n=>n/1254),width:batteryArt.width,anchor:batteryArt.anchor,aspect:batteryArt.crop[3]/batteryArt.crop[2]});
 
 add('economy-original','Original economy prop study','economy-atlas.png','References',{usage:'Reference',width:250,anchor:.95});

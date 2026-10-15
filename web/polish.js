@@ -1,6 +1,7 @@
 import {sourceMaterial,sourcePlacementReason,sourceOccupies,sourceConflicts} from './resource-sites.js';
 import { occupies } from './building-footprints.js';
 import { MAP_SIZE, riverBank, riverCenter } from './terrain.js';
+import {batteryCells,batteryReserved} from './battery-plots.js';
 
 export function placementReason(village, kind, x, y) {
   const soilReserved=(a,b)=>(village.restoration||[]).some(j=>j.finished==null&&a>=j.x-Math.floor(j.size/2)&&a<j.x-Math.floor(j.size/2)+j.size&&b>=j.y-Math.floor(j.size/2)&&b<j.y-Math.floor(j.size/2)+j.size);
@@ -10,6 +11,7 @@ export function placementReason(village, kind, x, y) {
   if (kind === 'road') {
     if(soilReserved(x,y))return 'That ground is reserved for soil restoration.';
     if (riverBank(x, y)) return 'Keep the riverbank clear.';
+    if(batteryReserved(village,x,y))return 'Move the recovered battery or its reserved destination before placing a road here.';
     if (village.roads.some(([rx, ry]) => rx === x && ry === y)) return '';
     return reservations.some(b=>occupies(b,x,y)) ? 'That plot is reserved for a building move.' : village.buildings.some(b => occupies(b,x,y))||village.economy.sources.some(s=>sourceOccupies(s,x,y)) ? 'A building or material plot occupies this spot.' : '';
   }
@@ -20,6 +22,7 @@ export function placementReason(village, kind, x, y) {
   if(village.logistics?.stores.some(p=>p.owner.kind==='ground'&&p.items.some(n=>n)&&occupies({kind,x,y},Math.round(p.x),Math.round(p.y))))return 'Let residents collect the materials lying on this plot before building here.';
   if((village.restoration||[]).some(j=>j.finished==null&&Array.from({length:j.size},(_,i)=>j.x-Math.floor(j.size/2)+i).some(a=>Array.from({length:j.size},(_,i)=>j.y-Math.floor(j.size/2)+i).some(b=>occupies({kind,x,y},a,b)))))return 'That ground is reserved for soil restoration.';
   if (village.roads.some(([rx,ry])=>occupies({kind,x,y},rx,ry))) return 'Keep roads clear. Choose a plot beside the road.';
+  if(batteryCells(village).some(([a,b])=>occupies({kind,x,y},a,b)))return 'Move the recovered battery or its reserved destination before building here.';
   if(reservations.some(b=>Math.abs(b.x-x)<radius+(['square','solar_farm'].includes(b.kind)?2:1)&&Math.abs(b.y-y)<radius+(['square','solar_farm'].includes(b.kind)?2:1)))return 'That plot is reserved for a building move.';
   if (sourceConflicts(village,kind,x,y)) return 'Keep the local resource site accessible.';
   if(village.pipes?.lines.some(p=>p.phase!=='retired'&&p.plan.cells.some(([a,b])=>occupies({kind,x,y},a,b))))return 'Remove the utility line on this plot before building here.';

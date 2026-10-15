@@ -17,6 +17,7 @@ import path from 'node:path';
 import {checkToolControls} from './tool-browser-checks.mjs';
 import {checkFoodControls} from './food-browser-checks.mjs';
 import {checkKitchenControls} from './kitchen-browser-checks.mjs';
+import {checkBatteryControls} from './battery-browser-checks.mjs';
 import {checkGatheringControls} from './gathering-browser-checks.mjs';
 export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
@@ -389,6 +390,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkKitchenControls({page,saved,capture});
   await checkWorkshopPowerControls({page,saved,capture});
   await checkElectricalControls({page,saved,capture});
+  await checkBatteryControls({page,saved,capture});
   await checkGatheringControls({page,saved,capture});
   await checkFreshnessControls({page,saved,capture});
   await checkProcessControls({page,saved,capture});
