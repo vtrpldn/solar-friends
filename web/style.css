@@ -1181,15 +1181,12 @@ button:focus-visible {
   line-height: 1.6;
 }
 #tools-control {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-#tools-control small {
   display: block;
-  width: 100%;
-  color: #6c775c;
+  margin: 14px 0;
+}
+#tools-stock {
+  color: #786747;
+  font-size: 12px;
   margin: 6px 0;
 }
 #gathering-status {
