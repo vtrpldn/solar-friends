@@ -44,7 +44,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 19;
+pub const SAVE_VERSION: u32 = 20;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -1181,6 +1181,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         );
     }
     production::finish_frame(&mut v, people.iter());
+    power::finish_frame(&mut v, dt * MINUTES_PER_SECOND);
     let residents: Vec<_> = people.iter().cloned().collect();
     pipes::prune(&mut v, &residents);
     progression::update(&mut v);
@@ -1661,6 +1662,7 @@ impl Game {
             .chain(v.water_supply.tanks.iter().map(|p| p.id))
             .chain(v.water_supply.trips.iter().map(|p| p.id))
             .chain(v.pipes.lines.iter().map(|p| p.id))
+            .chain(v.power.network.nodes.iter().map(|n| n.id))
             .chain(
                 save.residents
                     .iter()
@@ -1788,13 +1790,19 @@ impl Game {
                 return false;
             }
             save.village.version = SAVE_VERSION;
+            if !power::initialise(&mut save.village) {
+                return false;
+            }
             if !water::initialise(&mut save.village) {
                 return false;
             }
             if !processes::initialise(&mut save.village) {
                 return false;
             }
-            if !water::valid(&save.village, &save.residents) || !processes::valid(&save.village) {
+            if !water::valid(&save.village, &save.residents)
+                || !processes::valid(&save.village)
+                || !power::valid(&save.village)
+            {
                 return false;
             }
             economy::rebalance(&mut save.village);
@@ -2254,7 +2262,9 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":19", "\"version\":2")));
+        assert!(
+            !h.restore(&saved.replace(&format!("\"version\":{SAVE_VERSION}"), "\"version\":2"))
+        );
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

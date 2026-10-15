@@ -400,6 +400,7 @@ fn finish_removal(v: &mut Village, id: Id) -> bool {
     row.phase = Phase::Retired;
     row.finished = Some(v.minutes);
     release_store(v, id);
+    economy::rebalance(v);
     true
 }
 pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
@@ -509,8 +510,10 @@ fn reason(v: &Village, p: &Line) -> &'static str {
         "Source is empty or reserved for carrying."
     } else if water::room(v, to, c) <= 0. {
         "Receiving buffer is full or promised to a carrier."
-    } else if v.power.stored <= 0. {
-        "Pump needs energy in the shared battery; manual delivery remains available."
+    } else if !power::pump_connected(v, p.id) {
+        "Connect this pump to a local electrical circuit; manual delivery remains available."
+    } else if power::pump_available(v, p.id) <= 0. {
+        "This circuit has no available energy or cable capacity; manual delivery remains available."
     } else {
         "Pumping within the line's flow and power limits."
     }
@@ -593,7 +596,12 @@ pub fn advance(v: &mut Village, minutes: f32) {
         let amount = (f64::from(minutes) * FLOW_PER_MINUTE)
             .min(water::free(v, source, c, None))
             .min(water::room(v, target, c))
-            .min(f64::from(v.power.stored) / ENERGY_PER_WATER);
+            .min(power::pump_available(v, p.id) / ENERGY_PER_WATER);
+        if amount <= 0. {
+            continue;
+        }
+        let energy = power::spend_pump(v, p.id, amount * ENERGY_PER_WATER);
+        let amount = energy / ENERGY_PER_WATER;
         if amount <= 0. {
             continue;
         }
@@ -609,8 +617,6 @@ pub fn advance(v: &mut Village, minutes: f32) {
             .find(|t| t.id == p.anchors[1].tank)
             .unwrap()
             .water[i] += amount;
-        let energy = amount * ENERGY_PER_WATER;
-        v.power.stored = (v.power.stored - energy as f32).max(0.);
         let row = v.pipes.lines.iter_mut().find(|p| p.id == Id(id)).unwrap();
         row.transferred += amount;
         row.energy_used += energy;
@@ -624,25 +630,30 @@ pub fn view(v: &Village) -> serde_json::Value {
     }).collect();
     serde_json::json!({"lines":rows,"flow_per_hour":FLOW_PER_MINUTE*60.,"energy_per_water":ENERGY_PER_WATER,"power_source":"shared_battery"})
 }
-pub fn pump_demand(v: &Village) -> f32 {
+pub fn pump_loads(v: &Village, minutes: f64) -> Vec<(Id, f64)> {
     v.pipes
         .lines
         .iter()
-        .filter(|p| {
-            p.phase == Phase::Active
-                && !p.paused
-                && endpoint_open(v, p.plan.from, &p.anchors[0])
-                && endpoint_open(v, p.plan.to, &p.anchors[1])
+        .filter_map(|p| {
+            if p.phase != Phase::Active
+                || p.paused
+                || !endpoint_open(v, p.plan.from, &p.anchors[0])
+                || !endpoint_open(v, p.plan.to, &p.anchors[1])
+            {
+                return None;
+            }
+            let c = class(p.plan.kind)?;
+            let source = water::tank(v, p.anchors[0].tank)?;
+            let target = water::tank(v, p.anchors[1].tank)?;
+            let amount = (minutes * FLOW_PER_MINUTE)
+                .min(water::free(v, source, c, None))
+                .min(water::room(v, target, c));
+            (amount > 0.).then_some((p.id, amount * ENERGY_PER_WATER))
         })
-        .filter(|p| {
-            let Some(c) = class(p.plan.kind) else {
-                return false;
-            };
-            water::tank(v, p.anchors[0].tank).is_some_and(|t| water::free(v, t, c, None) > 0.)
-                && water::tank(v, p.anchors[1].tank).is_some_and(|t| water::room(v, t, c) > 0.)
-        })
-        .count() as f32
-        * (FLOW_PER_MINUTE * 60. * ENERGY_PER_WATER) as f32
+        .collect()
+}
+pub fn pump_demand(v: &Village) -> f32 {
+    pump_loads(v, 1.).iter().map(|(_, n)| n * 60.).sum::<f64>() as f32
 }
 pub fn uses_camp(v: &Village) -> bool {
     v.pipes.lines.iter().any(|p| {

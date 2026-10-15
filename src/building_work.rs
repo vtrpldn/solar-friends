@@ -36,17 +36,6 @@ pub fn job(v: &Village, id: usize) -> Option<&Job> {
 pub fn original_progress(v: &Village, id: usize) -> Option<f32> {
     job(v, id).map(|j| j.original_progress)
 }
-pub fn held_capacity(v: &Village, kind: &str) -> u32 {
-    v.building_jobs
-        .iter()
-        .filter(|j| {
-            j.original_progress >= 100.
-                && v.buildings
-                    .iter()
-                    .any(|b| b.id == j.building && b.kind == kind)
-        })
-        .count() as u32
-}
 pub fn moving_storage(v: &Village) -> u32 {
     v.building_jobs
         .iter()
@@ -339,7 +328,7 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
             },
         );
     }
-    v.power.stored = v.power.stored.min(power::supply(v).capacity);
+    power::sync(v);
     water::sync(v);
     economy::rebalance(v);
     true

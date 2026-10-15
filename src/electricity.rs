@@ -343,6 +343,19 @@ impl Frame {
         }
         self.state
     }
+    pub fn available(&self, node: Id) -> f64 {
+        self.clone().spend(node, 1e9)
+    }
+    pub fn connected_to_storage(&self, node: Id) -> bool {
+        let Some(start) = self.index(node) else {
+            return false;
+        };
+        let mut probe = self.clone();
+        probe.remaining.clone_from(&probe.limits);
+        probe
+            .route(start, |i| probe.state.nodes[i].capacity > 0.)
+            .is_some()
+    }
     pub fn cable_used(&self, id: Id) -> Option<f64> {
         let i = self.wires.iter().position(|w| w.id == id)?;
         Some(self.limits[i] - self.remaining[i])

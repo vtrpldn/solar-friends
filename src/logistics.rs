@@ -368,6 +368,7 @@ pub fn sync(v: &mut Village) {
                 .any(|h| [h.from, h.to, h.recovery].contains(&p.id))
     });
     water::sync(v);
+    power::sync(v);
     pipes::reconcile(v);
 }
 pub fn receive(v: &mut Village, owner: Owner, i: usize, n: u32) -> bool {

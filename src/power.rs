@@ -1,20 +1,23 @@
-//! Shared solar and river generation and stored energy for village lighting.
+//! Owned solar, river and rooftop batteries with connected electrical demand.
 use super::*;
-
-const STORAGE_PER_FARM: f32 = 36.;
-const PEAK_GENERATION: f32 = 6.;
+mod network;
+use crate::electricity::{Frame, Owner};
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Power {
     pub stored: f32,
     pub disabled: Vec<usize>,
+    pub network: electricity::State,
+    #[serde(skip)]
+    pub frame: Option<Frame>,
 }
 #[derive(Serialize)]
 pub struct Connection {
     pub id: usize,
     pub source: &'static str,
     pub enabled: bool,
+    pub connected: bool,
     pub load: f32,
     pub light_level: f32,
 }
@@ -43,142 +46,170 @@ pub fn load(kind: &str) -> f32 {
         _ => 0.,
     }
 }
-fn farms(v: &Village) -> usize {
-    v.buildings
-        .iter()
-        .filter(|b| b.kind == "solar_farm" && b.progress >= 100.)
-        .count()
+pub fn darkness(minutes: f32) -> f32 {
+    let altitude = (((minutes.rem_euclid(1440.) / 60. - 6.) / 12.) * std::f32::consts::PI).sin();
+    ((0.18 - altitude) / 0.65).clamp(0., 1.)
 }
-fn hydros(v: &Village) -> usize {
-    v.buildings
-        .iter()
-        .filter(|b| b.kind == "hydro" && b.progress >= 100.)
-        .count()
+pub fn sync(v: &mut Village) {
+    network::sync(v);
 }
-fn capacity(v: &Village) -> f32 {
-    farms(v) as f32 * STORAGE_PER_FARM
-        + hydros(v) as f32 * 18.
-        + crate::building_work::held_capacity(v, "solar_farm") as f32 * STORAGE_PER_FARM
-        + crate::building_work::held_capacity(v, "hydro") as f32 * 18.
-}
-fn hydro_generation(v: &Village, minutes: f32) -> f32 {
-    let flow = if ecology::raining(minutes) {
-        1.3
-    } else if (minutes / 1440.) as u32 % 3 == 2 {
-        0.65
-    } else {
-        1.
-    };
-    hydros(v) as f32 * 1.8 * flow
-}
-fn rates(v: &Village, minutes: f32) -> (f32, f32, f32) {
-    let altitude = (((minutes.rem_euclid(1440.) / 60.) - 6.) / 12. * std::f32::consts::PI).sin();
-    let darkness = ((0.18 - altitude) / 0.65).clamp(0., 1.);
-    let sunlight: f32 = v
-        .buildings
-        .iter()
-        .filter(|b| b.kind == "solar_farm" && b.progress >= 100.)
-        .map(|b| land::solar_exposure(v, interactions::footprint_size(&b.kind), b.x, b.y))
-        .sum();
-    let generation = sunlight * PEAK_GENERATION * altitude.max(0.) + hydro_generation(v, minutes);
-    let demand = v
-        .buildings
-        .iter()
-        .filter(|b| b.progress >= 100. && !v.power.disabled.contains(&b.id))
-        .map(|b| load(&b.kind))
-        .sum::<f32>()
-        * darkness;
-    (generation, demand, darkness)
+pub fn initialise(v: &mut Village) -> bool {
+    network::initialise(v)
 }
 pub fn supply(v: &Village) -> Supply {
-    let farms = farms(v);
-    let hydros = hydros(v);
-    let capacity = capacity(v);
-    let (generation, demand, darkness) = rates(v, v.minutes);
-    let pump_demand = pipes::pump_demand(v);
-    let stored = v.power.stored.min(capacity);
-    // Fade during the final minute of charge; sunlight can directly supply a
-    // partially lit grid at dawn. No on/off oscillation around an empty battery.
-    let grid_level = if capacity <= f32::EPSILON {
-        0.
-    } else if demand <= f32::EPSILON {
-        1.
-    } else {
-        ((generation + stored * 60.) / demand).clamp(0., 1.)
-    };
-    Supply {
-        farms,
-        hydros,
-        solar_generation: (generation - hydro_generation(v, v.minutes)).max(0.),
-        hydro_generation: hydro_generation(v, v.minutes),
-        capacity,
-        stored,
-        generation,
-        demand: demand + pump_demand,
-        pump_demand,
-        grid_level,
-        darkness,
-        connections: v
-            .buildings
+    let active = |kind: &str| {
+        v.buildings
             .iter()
-            .map(|b| {
-                let source = if b.kind == "home" {
-                    "roof"
-                } else if load(&b.kind) > 0. {
-                    "grid"
-                } else if b.kind == "hydro" {
-                    "hydro"
-                } else if b.kind == "solar_farm" {
-                    "solar"
+            .filter(|b| b.kind == kind && b.progress >= 100.)
+            .count()
+    };
+    let dark = darkness(v.minutes);
+    let mut forecast = network::frame(v, 1., v.minutes).ok();
+    let pumps = pipes::pump_loads(v, 1.);
+    let pump_demand = pipes::pump_demand(v);
+    for (id, need) in pumps {
+        if let Some(node) = network::node(v, Owner::Pump(id))
+            && let Some(f) = forecast.as_mut()
+        {
+            f.spend(node.id, need);
+        }
+    }
+    let mut grid_demand = 0.;
+    let mut delivered_lighting = 0.;
+    let connections = v
+        .buildings
+        .iter()
+        .map(|b| {
+            let source = match b.kind.as_str() {
+                "home" => "roof",
+                "solar_farm" => "solar",
+                "hydro" => "hydro",
+                k if load(k) > 0. => "grid",
+                _ => "none",
+            };
+            let node = network::node(v, Owner::Building(b.id));
+            let enabled = b.progress >= 100.
+                && !v.power.disabled.contains(&b.id)
+                && building_work::job(v, b.id).is_none();
+            let connected = enabled
+                && node.is_some_and(|n| {
+                    forecast
+                        .as_ref()
+                        .is_some_and(|f| f.connected_to_storage(n.id))
+                });
+            let need = node.map_or(0., |n| network::light_load(v, n) * f64::from(dark) / 60.);
+            let delivered = if enabled {
+                node.and_then(|n| forecast.as_mut().map(|f| f.spend(n.id, need)))
+                    .unwrap_or(0.)
+            } else {
+                0.
+            };
+            if source == "grid" {
+                grid_demand += load(&b.kind) * dark;
+                delivered_lighting += delivered as f32 * 60.;
+            }
+            Connection {
+                id: b.id,
+                source,
+                enabled,
+                connected,
+                load: load(&b.kind),
+                light_level: if !connected {
+                    0.
+                } else if need <= 0. {
+                    1.
                 } else {
-                    "none"
-                };
-                let enabled = b.progress >= 100. && !v.power.disabled.contains(&b.id);
-                Connection {
-                    id: b.id,
-                    source,
-                    enabled,
-                    load: load(&b.kind),
-                    light_level: if !enabled {
-                        0.
-                    } else if source == "roof" {
-                        1.
-                    } else if source == "grid" {
-                        grid_level
-                    } else {
-                        0.
-                    },
-                }
-            })
-            .collect(),
+                    (delivered / need).clamp(0., 1.) as f32
+                },
+            }
+        })
+        .collect();
+    let generated = |kind| {
+        v.power
+            .network
+            .nodes
+            .iter()
+            .filter(|n| n.kind == kind)
+            .map(|n| network::generation(v, n, v.minutes))
+            .sum::<f64>() as f32
+    };
+    let solar_generation = generated(electricity::Kind::Solar);
+    let hydro_generation = generated(electricity::Kind::Hydro);
+    Supply {
+        farms: active("solar_farm"),
+        hydros: active("hydro"),
+        solar_generation,
+        hydro_generation,
+        capacity: network::capacity(v) as f32,
+        stored: network::stored(v) as f32,
+        generation: solar_generation + hydro_generation,
+        demand: grid_demand + pump_demand,
+        pump_demand,
+        grid_level: if grid_demand > 0. {
+            (delivered_lighting / grid_demand).clamp(0., 1.)
+        } else if network::capacity(v) > 0. {
+            1.
+        } else {
+            0.
+        },
+        darkness: dark,
+        connections,
     }
 }
 pub fn advance(v: &mut Village, minutes: f32) {
-    let capacity = capacity(v);
-    // Evaluate at the middle of the actual simulated interval, including dawn.
-    let midpoint = v.minutes - minutes / 2.;
-    let (generation, demand, darkness) = rates(v, midpoint);
-    if minutes > 0. && darkness > 0.5 {
-        v.progress.river_night |= hydro_generation(v, midpoint) > 0.;
-        v.progress.night_lights |= demand > 0.
-            && (generation > 0. || v.power.stored > 0.)
-            && v.buildings.iter().any(|b| {
-                b.kind == "streetlight" && b.progress >= 100. && !v.power.disabled.contains(&b.id)
-            });
-    }
-    v.power.stored = (v.power.stored + (generation - demand) * minutes / 60.).clamp(0., capacity);
+    network::begin(v, minutes);
+}
+pub fn finish_frame(v: &mut Village, minutes: f32) {
+    network::finish(v, minutes);
+}
+pub fn pump_available(v: &Village, id: simulation::Id) -> f64 {
+    network::available(v, Owner::Pump(id))
+}
+pub fn pump_connected(v: &Village, id: simulation::Id) -> bool {
+    network::connected(v, Owner::Pump(id))
+}
+pub fn spend_pump(v: &mut Village, id: simulation::Id, energy: f64) -> f64 {
+    network::spend(v, Owner::Pump(id), energy)
 }
 pub fn valid(v: &Village) -> bool {
     let mut ids = std::collections::HashSet::new();
-    v.power.stored.is_finite()
-        && v.power.stored >= 0.
-        && v.power.stored <= capacity(v) + 0.001
-        && v.power.disabled.iter().all(|id| {
-            ids.insert(*id)
-                && v.buildings
-                    .iter()
-                    .any(|b| b.id == *id && load(&b.kind) > 0.)
-        })
+    let disabled = v.power.disabled.iter().all(|id| {
+        ids.insert(*id)
+            && v.buildings
+                .iter()
+                .any(|b| b.id == *id && load(&b.kind) > 0.)
+    });
+    if !disabled || !v.power.stored.is_finite() || v.power.stored < 0. {
+        return false;
+    }
+    if v.version == 3 {
+        let capacity = v
+            .buildings
+            .iter()
+            .filter(|b| {
+                b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.)
+            })
+            .map(|b| match b.kind.as_str() {
+                "solar_farm" => 36.,
+                "hydro" => 18.,
+                _ => 0.,
+            })
+            .sum::<f32>();
+        return v.power.network.nodes.is_empty()
+            && v.power.network.account.opening == 0.
+            && v.power.network.account.generated == 0.
+            && v.power.network.account.consumed == 0.
+            && v.power.network.account.curtailed == 0.
+            && v.power.stored <= capacity + 0.001;
+    }
+    network::valid(v)
+}
+#[wasm_bindgen]
+impl Game {
+    pub fn electricity_report(&self) -> String {
+        let v = self.app.world().resource::<Village>();
+        serde_json::json!({"network":v.power.network,"supply":supply(v),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment."}).to_string()
+    }
 }
 
 #[cfg(test)]
