@@ -204,7 +204,7 @@ fn wait(r: &mut Resident, phase: Phase, reason: &str) -> bool {
     r.requested = false;
     false
 }
-fn supply_wait(v: &Village, id: usize) -> String {
+pub(crate) fn supply_wait(v: &Village, id: usize) -> String {
     let p = v
         .economy
         .projects

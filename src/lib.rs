@@ -7,6 +7,7 @@ mod building_work;
 mod devtools;
 mod ecology;
 mod economy;
+mod forecast;
 mod interactions;
 mod leisure;
 mod logistics;
