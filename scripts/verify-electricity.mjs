@@ -64,6 +64,6 @@ until(g,s=>s.village.production.accounting.outputs[7]===4,'A full powered batch 
 s=snap(g);assert(Math.abs(s.village.production.sites.find(s=>s.id===site).energy_used-used-.3)<.000001);checkpoint(g);await writeFile(`${output}/workshop-powered-finish.json`,g.snapshot());
 const raw=g.snapshot();g.electricity_report();g.production_report();assert.equal(g.snapshot(),raw);
 const energy=s.village.power.network.account;
-assert(Math.abs(energy.opening+energy.generated-energy.consumed-energy.curtailed-s.village.power.network.nodes.reduce((n,p)=>n+p.charge,0))<.0001);
+assert(Math.abs(energy.opening+energy.generated-energy.consumed-energy.curtailed-(energy.discharged||0)-s.village.power.network.nodes.reduce((n,p)=>n+p.charge,0))<.0001);
 console.log(JSON.stringify({version:s.village.version,cables:s.village.pipes.lines.filter(p=>p.plan.kind==='electricity').length,tiles:s.village.production.accounting.outputs[7],workshop_energy:s.village.production.sites.find(s=>s.id===site).energy_used,energy,paid_orders:s.village.economy.orders.length,checks:'paid kits, actual hauling and work, dusk light, powered inputs, outage, exact continuation, manual fallback, full powered batch, conservation'},null,2));
 g.free();

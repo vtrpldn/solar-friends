@@ -211,6 +211,7 @@ pub fn valid(v: &Village) -> bool {
             && v.power.network.account.generated == 0.
             && v.power.network.account.consumed == 0.
             && v.power.network.account.curtailed == 0.
+            && v.power.network.account.discharged == 0.
             && v.power.stored <= capacity + 0.001;
     }
     network::valid(v)

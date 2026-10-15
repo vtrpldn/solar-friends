@@ -78,6 +78,8 @@ pub struct Account {
     pub generated: f64,
     pub consumed: f64,
     pub curtailed: f64,
+    #[serde(default)]
+    pub discharged: f64,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct State {
@@ -144,15 +146,36 @@ impl State {
                 self.account.generated,
                 self.account.consumed,
                 self.account.curtailed,
+                self.account.discharged,
             ]
             .iter()
             .all(|n| n.is_finite() && (0. ..=1e9).contains(n))
             && (self.account.opening + self.account.generated
                 - self.account.consumed
                 - self.account.curtailed
+                - self.account.discharged
                 - self.nodes.iter().map(|n| n.charge).sum::<f64>())
             .abs()
                 < 0.0001
+    }
+    /// Retiring detached storage dissipates its remaining charge, not useful demand.
+    /// The caller owns resident work, cable detachment and any hardware recovery.
+    pub fn retire_battery(&mut self, next: u32, id: Id) -> Result<Node, &'static str> {
+        if !self.valid(next) {
+            return Err("Invalid electrical ownership or accounts.");
+        }
+        let i = self
+            .nodes
+            .iter()
+            .position(|n| n.id == id && n.owner == Owner::Ground && n.kind == Kind::Battery)
+            .ok_or("Only a detached battery can be retired.")?;
+        let discharged = self.account.discharged + self.nodes[i].charge;
+        if discharged > 1e9 {
+            return Err("The discharged-energy account is full.");
+        }
+        let node = self.nodes.remove(i);
+        self.account.discharged = discharged;
+        Ok(node)
     }
     /// Builds a disposable frame. Bad inputs leave the live state unchanged.
     pub fn begin(
@@ -463,6 +486,34 @@ mod tests {
         let h: State = serde_json::from_str(&raw).unwrap();
         assert!(h.valid(100));
         assert_eq!(serde_json::to_string(&h).unwrap(), raw);
+    }
+    #[test]
+    fn retiring_recovered_storage_accounts_for_discharge_without_inventing_consumption() {
+        let mut s = state(vec![node(1, Kind::Battery, 12.), node(2, Kind::Solar, 5.)]);
+        let removed = s.retire_battery(100, Id(1)).unwrap();
+        assert_eq!(removed.charge, 12.);
+        assert_eq!(s.nodes.len(), 1);
+        assert_eq!(s.nodes[0].charge, 5.);
+        assert_eq!(s.account.discharged, 12.);
+        assert_eq!(s.account.consumed, 0.);
+        assert_eq!(s.account.curtailed, 0.);
+        check(&s);
+        let raw = serde_json::to_string(&s).unwrap();
+        assert!(s.retire_battery(100, Id(1)).is_err());
+        assert!(s.retire_battery(100, Id(2)).is_err());
+        assert_eq!(serde_json::to_string(&s).unwrap(), raw);
+    }
+    #[test]
+    fn invalid_discharge_accounts_are_rejected_before_any_equipment_is_removed() {
+        let original = state(vec![node(1, Kind::Battery, 4.)]);
+        for amount in [-1., 1., f64::INFINITY] {
+            let mut s = original.clone();
+            s.account.discharged = amount;
+            assert!(!s.valid(100));
+            assert!(s.retire_battery(100, Id(1)).is_err());
+            assert_eq!(s.nodes.len(), 1);
+            assert_eq!(s.nodes[0].charge, 4.);
+        }
     }
     #[test]
     fn isolated_batteries_cannot_supply_an_unconnected_consumer() {

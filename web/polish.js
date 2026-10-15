@@ -22,7 +22,7 @@ export function placementReason(village, kind, x, y) {
   if (village.roads.some(([rx,ry])=>occupies({kind,x,y},rx,ry))) return 'Keep roads clear. Choose a plot beside the road.';
   if(reservations.some(b=>Math.abs(b.x-x)<radius+(['square','solar_farm'].includes(b.kind)?2:1)&&Math.abs(b.y-y)<radius+(['square','solar_farm'].includes(b.kind)?2:1)))return 'That plot is reserved for a building move.';
   if (sourceConflicts(village,kind,x,y)) return 'Keep the local resource site accessible.';
-  if(village.pipes?.lines.some(p=>p.phase!=='retired'&&p.plan.cells.some(([a,b])=>occupies({kind,x,y},a,b))))return 'Remove the water line on this plot before building here.';
+  if(village.pipes?.lines.some(p=>p.phase!=='retired'&&p.plan.cells.some(([a,b])=>occupies({kind,x,y},a,b))))return 'Remove the utility line on this plot before building here.';
   return '';
 }
 
