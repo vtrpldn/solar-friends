@@ -692,6 +692,24 @@ struct Candidate {
     amount: u32,
     rank: (u32, u32, u32),
 }
+fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
+    let kind = match to {
+        Owner::Pantry(id) => v
+            .buildings
+            .iter()
+            .find(|b| b.id == id)
+            .map(|b| b.kind.as_str()),
+        _ => None,
+    };
+    // Routine redistribution must not indefinitely postpone useful food or waste treatment.
+    if kind == Some("biodigester") && material == economy::SCRAPS && v.circular.waste >= 4. {
+        return 1;
+    }
+    if kind == Some("coop") {
+        return if v.food >= 18. { 1 } else { 3 };
+    }
+    if supplies::urgent(v) { 1 } else { 2 }
+}
 fn candidates(v: &Village) -> Vec<Candidate> {
     let Some(s) = &v.logistics else {
         return vec![];
@@ -727,7 +745,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                     | Owner::Pantry(_)
             ) || closing(v, from.owner)
                 || (matches!(from.owner, Owner::Warehouse(_)) && from.managed);
-            if returning && excess > 0 {
+            if returning && excess > 0 && organics::return_surplus(v, from.owner, i, excess) {
                 for to in s.stores.iter().filter(|p| {
                     matches!(p.owner, Owner::Camp | Owner::Warehouse(_))
                         && p.id != from.id
@@ -853,6 +871,16 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 .filter(|p| p.id != to.id && !closing(v, p.owner))
             {
                 let excess = usable(v, from, i).saturating_sub(needs(v, from.owner)[i]);
+                if i == economy::SCRAPS && missing >= 2 && excess < 2 {
+                    continue;
+                }
+                if i == economy::COMPOST
+                    && matches!(to.owner, Owner::Source(_))
+                    && missing >= 2
+                    && excess < 2
+                {
+                    continue;
+                }
                 let amount = missing.min(excess).min(room(v, to.owner)).min(LOAD);
                 if amount > 0 {
                     out.push(Candidate {
@@ -860,7 +888,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         to: to.id,
                         material: i,
                         amount,
-                        rank: (if matches!(to.owner,Owner::Pantry(id) if v.buildings.iter().any(|b|b.id==id && b.kind=="coop")){3}else if supplies::urgent(v){1}else{2},0,to.id.0),
+                        rank: (delivery_priority(v, to.owner, i), 0, to.id.0),
                     });
                 }
             }

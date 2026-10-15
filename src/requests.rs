@@ -662,6 +662,8 @@ pub fn enqueue_at(
         finished: None,
         remaining: if task == "eat" {
             5.
+        } else if task == "compost" {
+            3.
         } else if matches!(task, "rest" | "socialize") {
             12.
         } else {

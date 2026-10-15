@@ -158,3 +158,44 @@ fn scraps_cannot_be_bought_and_compost_has_a_real_purchase_price() {
     b[COMPOST] = 1;
     assert_eq!(g.order_supplies(&serde_json::to_string(&b).unwrap()), "ok");
 }
+
+#[test]
+fn sealed_feed_and_curing_keep_their_global_storage_room_until_output_is_received() {
+    let mut g = scene(&["biodigester"]);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.circular.waste = 2.;
+        fixture(&mut v, SCRAPS, 2);
+        processes::advance(&mut v, 1.);
+        let left = economy::capacity(&v) - economy::storage(&v);
+        assert!(logistics::receive(&mut v, Owner::Camp, 0, left));
+        assert_eq!(economy::storage(&v), economy::capacity(&v));
+        v.minutes += 480.;
+        processes::advance(&mut v, 480.);
+        assert_eq!(economy::storage(&v), economy::capacity(&v));
+        assert_eq!(v.progress.compost, 0);
+        v.minutes += 1440.;
+        processes::advance(&mut v, 1440.);
+        assert_eq!(v.progress.compost, 2);
+        assert_eq!(economy::storage(&v), economy::capacity(&v));
+    }
+    checkpoint(&mut g);
+}
+#[test]
+fn a_sealed_digester_cannot_load_without_its_local_recovery_store() {
+    let mut g = scene(&["biodigester"]);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.circular.waste = 2.;
+        fixture(&mut v, SCRAPS, 2);
+        processes::advance(&mut v, 1.);
+    }
+    let saved = g.snapshot();
+    let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    bad["village"]["logistics"]["stores"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|p| p["owner"]["kind"] != "pantry");
+    assert!(!g.restore(&bad.to_string()));
+    assert_eq!(g.snapshot(), saved);
+}

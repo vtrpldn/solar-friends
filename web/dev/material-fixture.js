@@ -76,7 +76,7 @@ function restockFixtureMaterials(state,targets) {
 
 // Explicit test setup only. This is not a live-game transfer or save migration.
 export function stageFixtureMaterial(state,owner,material,n) {
-  const s=state.village.logistics,p=s.stores.find(p=>JSON.stringify(p.owner)===JSON.stringify(owner));
+  const s=state.village.logistics,p=s.stores.find(p=>p.owner.kind===owner.kind&&p.owner.id===owner.id);
   if(!p||s.shipments.length)throw Error('Stage a material fixture before any cargo starts.');
   let left=Math.max(0,n-p.items[material]);
   for(const from of s.stores){if(from===p)continue;const amount=Math.min(left,from.items[material]);from.items[material]-=amount;p.items[material]+=amount;left-=amount;}

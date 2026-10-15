@@ -1,3 +1,4 @@
+import {checkOrganicControls} from './organics-browser-checks.mjs';
 import {checkCultivationControls} from './cultivation-browser-checks.mjs';
 import {checkLandControls} from './land-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
@@ -363,6 +364,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkGatheringControls({page,saved,capture});
   await checkFreshnessControls({page,saved,capture});
   await checkProcessControls({page,saved,capture});
+  await checkOrganicControls({page,saved,capture});
   await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();

@@ -377,6 +377,8 @@ pub fn storage(v: &Village) -> u32 {
         + v.building_jobs.iter().flat_map(|j| j.returns).sum::<u32>()
         + crate::production::reserved_space(v)
         + crate::food::reserved_space(v, None)
+        + crate::organics::processing(v, SCRAPS)
+        + crate::processes::held(v, crate::processes::Kind::Curing) * 2
 }
 pub fn capacity(v: &Village) -> u32 {
     CAPACITY

@@ -286,7 +286,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             };
             worker.activity_building = Some(id);
             worker.task = task.into();
-            worker.remaining = 10.;
+            worker.remaining = if task == "compost" { 3. } else { 10. };
             worker.target_x = x;
             worker.target_y = y;
         }
@@ -484,6 +484,9 @@ pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
     r.activity_building = job.building;
     r.activity_material = job.material;
     r.activity_batch = job.batch;
+    if r.task == "compost" {
+        r.remaining = 3.;
+    }
     if let Some(id) = job.batch {
         r.remaining = production::batch(v, id).map_or(0., |b| 10. - b.work);
     }

@@ -275,3 +275,23 @@ fn malformed_cooking_recipes_workers_and_gas_promises_are_rejected_atomically() 
         assert_eq!(g.snapshot(), saved);
     }
 }
+
+#[test]
+fn a_full_kitchen_reserves_space_for_the_meals_and_their_scraps_together() {
+    let (mut g, id, r) = scene(false, 0.);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(!work(&mut v, &r, 1.));
+        let owner = Owner::Pantry(0);
+        let room = logistics::room(&v, owner);
+        assert!(logistics::receive(&mut v, owner, 0, room));
+        assert!(!logistics::receive(&mut v, owner, 0, 1));
+        assert!(work(&mut v, &r, 9.));
+        assert_eq!(batch(&v, id).unwrap().phase, Phase::Complete);
+        let p = food::pantry(&v, 0).unwrap();
+        assert_eq!(p.items[economy::MEALS], 5);
+        assert_eq!(p.items[economy::SCRAPS], 1);
+        assert_eq!(p.items.iter().sum::<u32>(), p.capacity);
+    }
+    checkpoint(&mut g);
+}

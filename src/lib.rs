@@ -395,6 +395,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "sleep" => 60.,
         "eat" => 5.,
         "sanitation" => 4.,
+        "compost" => 3.,
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
@@ -601,7 +602,7 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
                     "Gardens need planting, two water when dry, or time to grow before harvest."
                 }
                 "cook" => "We need a kitchen, three food and one water first.",
-                "compost" => "We need a compost station and two kitchen scraps first.",
+                "compost" => "Two scraps need to reach a compost station before a neighbour can turn them.",
                 "craft" => {
                     "We need an open workshop with room for a batch, eight available timber, and fewer than 25 tool uses already stored or ordered. Inputs must be delivered before crafting."
                 }

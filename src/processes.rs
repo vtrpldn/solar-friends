@@ -464,6 +464,15 @@ pub fn valid(v: &Village) -> bool {
             && (b.phase != Phase::Complete || b.remaining == 0.)
             && (b.kind != Kind::Curing || b.phase != Phase::Cancelled)
             && (b.kind != Kind::Banana || b.phase != Phase::Complete)
+            && (!b.active()
+                || b.kind != Kind::Digestion
+                || b.building.is_some_and(|id| {
+                    v.logistics.as_ref().is_some_and(|s| {
+                        s.stores
+                            .iter()
+                            .any(|p| p.owner == logistics::Owner::Pantry(id))
+                    })
+                }))
             && b.treated.is_finite()
             && b.treated >= 0.
             && b.treated <= 1e9

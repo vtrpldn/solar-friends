@@ -64,6 +64,22 @@ pub fn wants_compost(v: &Village) -> bool {
     });
     v.progress.compost.saturating_sub(staged) < 4
 }
+/// Keep small byproduct piles for direct use instead of returning every portion to camp.
+pub fn return_surplus(v: &Village, owner: Owner, i: usize, n: u32) -> bool {
+    if logistics::closing(v, owner) {
+        return true;
+    }
+    let Owner::Pantry(id) = owner else {
+        return true;
+    };
+    let kind = v
+        .buildings
+        .iter()
+        .find(|b| b.id == id)
+        .map(|b| b.kind.as_str());
+    !matches!((kind,i), (Some("kitchen"),SCRAPS) if n<12)
+        && !matches!((kind,i),(Some("compost"),COMPOST) if n<4)
+}
 pub fn can_turn(v: &Village, building: usize) -> bool {
     v.buildings
         .iter()
@@ -146,6 +162,9 @@ pub fn author_fixture(raw: &mut serde_json::Value) {
                         "received",
                         "spent",
                         "outputs",
+                        "inputs",
+                        "retired_inputs",
+                        "retired_outputs",
                         "cancelled",
                     ]
                     .contains(&key.as_str())
