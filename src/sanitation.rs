@@ -62,9 +62,22 @@ pub fn household_at(v: &mut Village, owner: water::Owner, amount: f32) {
     }
 }
 pub fn washing_ready(v: &Village, owner: water::Owner, amount: f64) -> bool {
-    water::local(v, owner, water::Class::Fresh) >= amount
-        && (v.mode == modes::Mode::Sandbox
-            || water::local_room(v, owner, water::Class::Greywater) >= amount * 0.7)
+    washing_blocker(v, owner, amount).is_none()
+}
+pub fn washing_blocker(v: &Village, owner: water::Owner, amount: f64) -> Option<&'static str> {
+    if water::local(v, owner, water::Class::Fresh) < amount {
+        Some(
+            "Waiting for fresh water delivered here. Reclaimed irrigation cannot be used for cooking or handwashing.",
+        )
+    } else if v.mode != modes::Mode::Sandbox
+        && water::local_room(v, owner, water::Class::Greywater) < amount * 0.7
+    {
+        Some(
+            "The local greywater buffer is full. Neighbours need to deliver a closed container to a reed bed or the neighbouring service point, or install a greywater line.",
+        )
+    } else {
+        None
+    }
 }
 pub fn usable_toilet(v: &Village, id: usize) -> bool {
     let owner = water::Owner::Building(id);

@@ -63,6 +63,22 @@ fn check(g: &mut Game) {
         );
     }
     let raw = g.snapshot();
+    let report = view(g.app.world().resource::<Village>());
+    assert_eq!(g.snapshot(), raw, "Liquid inspection is read-only");
+    for p in report["tanks"].as_array().unwrap() {
+        for i in 0..LIQUIDS {
+            let stored = p["water"][i].as_f64().unwrap();
+            let incoming = p["incoming"][i].as_f64().unwrap();
+            let processing = p["reserved_processing"][i].as_f64().unwrap();
+            let capacity = p["capacity"][i].as_f64().unwrap();
+            assert!(
+                (p["room"][i].as_f64().unwrap()
+                    - (capacity - stored - incoming - processing).max(0.))
+                .abs()
+                    < EPS
+            );
+        }
+    }
     let mut h = Game::new();
     assert!(h.restore(&raw));
     assert_eq!(h.snapshot(), raw);
@@ -92,6 +108,11 @@ fn washing_leaves_greywater_only_at_its_producer_and_full_local_space_blocks_mor
         let before = v.water;
         sanitation::household_at(&mut v, owner, 1.);
         assert_eq!(v.water, before);
+        assert!(
+            sanitation::washing_blocker(&v, owner, 1.)
+                .unwrap()
+                .contains("greywater buffer is full")
+        );
     }
     check(&mut g);
 }

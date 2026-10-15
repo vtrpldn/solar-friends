@@ -1,4 +1,4 @@
-//! Located fresh water and irrigation. Sealed waste is never ordinary cargo.
+//! Located liquids. Sealed waste is never ordinary materials or food cargo.
 use crate::*;
 use simulation::Id;
 pub const LOAD: f64 = 12.;
@@ -193,6 +193,7 @@ pub fn storage_capacity(v: &Village, class: Class) -> f64 {
     v.water_supply
         .tanks
         .iter()
+        .filter(|p| p.owner != Owner::Service)
         .map(|p| p.capacity[class.index()])
         .sum()
 }
@@ -1271,7 +1272,24 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         && v.circular.waste == total(v, Class::Sewage) as f32
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    serde_json::json!({"tanks":v.water_supply.tanks,"trips":v.water_supply.trips,"opening":v.water_supply.opening,"received":v.water_supply.received,"consumed":v.water_supply.consumed,"external":v.water_supply.external,"sandbox_disposed":v.water_supply.sandbox_disposed,"classes":Class::ALL,"capacities":Class::ALL.map(|class| storage_capacity(v,class)),"present":Class::ALL.map(|class| total(v,class)+processes::sealed_liquid(v,class)),"sealed":Class::ALL.map(|class| processes::sealed_liquid(v,class)),"stored_and_carried":Class::ALL.map(|class| total(v,class)),"capacity":capacity(v),"load":LOAD,"note":"Fresh water and irrigation are separate local stores. A neighbour must collect and deliver a load before its destination can use it. The manual fallback is treated water from the neighbouring farm's tap."})
+    let tanks: Vec<_> = v
+        .water_supply
+        .tanks
+        .iter()
+        .map(|p| {
+            let mut row = serde_json::to_value(p).expect("liquid container");
+            row["incoming"] = serde_json::json!(Class::ALL.map(|class| incoming(v, p.id, class)));
+            row["reserved_pickup"] =
+                serde_json::json!(Class::ALL.map(|class| claimed(v, p.id, class, None)));
+            row["reserved_processing"] = serde_json::json!(
+                Class::ALL.map(|class| processes::liquid_reservation(v, p.id, class))
+            );
+            row["room"] = serde_json::json!(Class::ALL.map(|class| room(v, p, class)));
+            row["open"] = serde_json::json!(open(v, p));
+            row
+        })
+        .collect();
+    serde_json::json!({"tanks":tanks,"trips":v.water_supply.trips,"opening":v.water_supply.opening,"received":v.water_supply.received,"consumed":v.water_supply.consumed,"external":v.water_supply.external,"sandbox_disposed":v.water_supply.sandbox_disposed,"classes":Class::ALL,"capacities":Class::ALL.map(|class| storage_capacity(v,class)),"present":Class::ALL.map(|class| total(v,class)+processes::sealed_liquid(v,class)),"sealed":Class::ALL.map(|class| processes::sealed_liquid(v,class)),"stored_and_carried":Class::ALL.map(|class| total(v,class)),"capacity":capacity(v),"load":LOAD,"note":"Fresh water, irrigation, greywater and sewage remain separate local contents. Neighbours deliver closed service containers to local treatment or the neighbouring service point; off-site handoffs return no village products. Installed compatible lines require resident work and pump power."})
 }
 #[wasm_bindgen]
 impl Game {

@@ -1,4 +1,4 @@
-//! Owned passive batches. Shared fluid stores become connected services in Stage 5.
+//! Owned passive batches with local delivered inputs and reserved recovery space.
 use crate::*;
 use simulation::Id;
 

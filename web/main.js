@@ -101,7 +101,7 @@ const tasks = {
   pickup: "Driving to collect town supplies",
   return: "Returning to the village",
   cook: "Making a shared meal",
-  water: "Carrying water to local stores",
+  water: "Moving water or closed service containers",
   utility: "Working on water lines",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
@@ -826,7 +826,7 @@ function selectPerson(id) {
       ["gather", "Forage food"],
       ["source", "Source materials"],
       ["prepare", "Prepare materials"],
-      ["water", "Fetch & deliver water"],
+      ["water", "Water & sanitation"],
       ["cook", "Make a meal"],
       ["rest", "Take a rest"],
       ["socialize", "Spend time together"],
@@ -1091,7 +1091,7 @@ function updateBuildingPanel() {
   if(b?.kind==='kitchen'&&b.progress>=100){
     const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
     const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
-    $('#building-activity').textContent=site?.paused?'Kitchen paused. Resume it in Supplies → Kitchen.':batch?`Saved pot #${batch.id}: ${batch.output} meals · ${Math.floor(batch.work/10*100)}% cooked. ${batch.phase==='awaiting_water'?'Waiting for one fresh water.':worker?worker.name+(worker.task==='haul'?' is bringing ingredients.':worker.task==='cook'?' is helping with this pot.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Supplies → Kitchen.`:'No pot queued. Ask a neighbour to cook, or set a meal reserve in Supplies → Kitchen.';
+    $('#building-activity').textContent=site?.paused?'Kitchen paused. Resume it in Supplies → Kitchen.':batch?`Saved pot #${batch.id}: ${batch.output} meals · ${Math.floor(batch.work/10*100)}% cooked. ${batch.phase==='awaiting_water'?(state.environment.economy.production.recipes.find(d=>d.site===site.id)?.service_blocker||'Waiting for fresh water and greywater space.'):worker?worker.name+(worker.task==='haul'?' is bringing ingredients.':worker.task==='cook'?' is helping with this pot.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Supplies → Kitchen.`:'No pot queued. Ask a neighbour to cook, or set a meal reserve in Supplies → Kitchen.';
   }
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
   if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
@@ -1105,17 +1105,18 @@ function inspectBuilding(id) {
   updateBuildingPanel();
 }
 function updateCircularUI(v) {
-  const c=v.circular,passive=state.environment.economy.processes,ready=kind=>v.buildings.some(b=>b.kind===kind&&b.progress>=100);
-  $('#circular-controls').hidden=!buildingUnlocked(v,'eco_toilet');
-  $('#circular-stock').textContent=`${(c.waste+(passive?.held_waste||0)).toFixed(1)} / 80 sealed waste${passive?.held_waste?` · ${passive.held_waste} held in digesters`:''} · ${(c.greywater+(passive?.held_greywater||0)).toFixed(1)} / 120 greywater${passive?.held_greywater?` · ${passive.held_greywater} filtering`:''}`;
-  $('#circular-output').textContent=`${c.reclaimed.toFixed(0)} / 60 irrigation water · ${c.biogas.toFixed(0)} / 12 cooking gas`;
-  const wetToilet=v.buildings.some(b=>b.kind==='eco_toilet'&&b.progress>=100&&!v.building_jobs.some(j=>j.building===b.id)&&v.water_supply.tanks.some(p=>p.owner.kind==='building'&&p.owner.id===b.id&&p.water[0]>=1));
-  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':!wetToilet?'Handwashing needs one fresh water delivered to an open toilet.':c.waste+(state.environment.economy.processes?.held_waste||0)+1>80?'Waste store is full. Build or resume a banana treatment bed or biodigester.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
+  const c=v.circular,passive=state.environment.economy.processes,ready=kind=>v.buildings.some(b=>b.kind===kind&&b.progress>=100),liquids=JSON.parse(game.water_report());
+  $('#circular-controls').hidden=!buildingUnlocked(v,'kitchen')&&!buildingUnlocked(v,'eco_toilet');
+  $('#circular-stock').textContent=`${liquids.present[3].toFixed(1)} sealed sewage (${liquids.sealed[3].toFixed(1)} in digesters) · ${liquids.present[2].toFixed(1)} greywater (${liquids.sealed[2].toFixed(1)} filtering). Storage and receiving space belong to each site.`;
+  $('#circular-output').textContent=`${c.reclaimed.toFixed(1)} / ${liquids.capacities[1].toFixed(0)} irrigation storage · ${c.biogas.toFixed(0)} / 12 cooking gas`;
+  const toilets=v.buildings.filter(b=>b.kind==='eco_toilet'&&b.progress>=100).map(b=>liquids.tanks.find(p=>p.owner.kind==='building'&&p.owner.id===b.id)).filter(p=>p?.open);
+  const wetToilets=toilets.filter(p=>p.water[0]-p.reserved_pickup[0]>=1),usable=wetToilets.some(p=>v.mode==='sandbox'||p.room[2]>=.7&&p.room[3]>=1);
+  $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':!toilets.length?'The toilets are closed for building work.':!wetToilets.length?'Handwashing needs one fresh water delivered to an open toilet.':!usable?'A toilet’s local greywater or sewage buffer is full. Neighbours can carry a closed container to treatment or the service point; installed lines save trips.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
   const filters=passive?.stations.filter(s=>s.kind==='filtration')||[];
   $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':filters.length===1?filters[0].reason:`${filters.length} reed beds. Each keeps its own saved batch; review its inputs and status below.`;
   const beds=v.buildings.filter(b=>b.kind==='banana_treatment'&&b.progress>=100).length;
   const operatingBeds=passive?.stations.filter(s=>s.kind==='banana'&&!s.paused&&!s.closed).length||0;
-  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment||!operatingBeds?'Banana treatment paused. Waste remains available for biogas.':`${c.waste>0 ? `Treating up to ${operatingBeds*6} waste per day.` : 'Waiting for toilet waste.'} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
+  $('#banana-status').textContent=!beds?'Build a banana treatment bed to treat sealed toilet waste.':!c.banana_treatment||!operatingBeds?'Banana treatment paused. Waste remains available for biogas.':`${passive.stations.filter(s=>s.kind==='banana').map(s=>s.reason).join(' ')} ${(c.waste_treated??0).toFixed(1)} treated so far · no water or food outlet.`;
   $('#banana-treatment').checked=c.banana_treatment??true;
   $('#banana-treatment').disabled=!beds;
   const curing=passive?.batches.filter(row=>row.batch.kind==='curing'&&['processing','paused','awaiting_output'].includes(row.batch.phase))||[];
@@ -1287,7 +1288,7 @@ function updateUI() {
     $('#person .help-order').hidden=!help;
     if(help){
       const titles={accepted:'Accepted',travelling:'On the way',working:'Working',paused:'Paused',blocked:'Waiting',complete:'Finished',cancelled:'Cancelled'};
-      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend garden',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Fetch & deliver water',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
+      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend garden',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Water & sanitation',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
       const target=help.building==null?null:v.buildings.find(b=>b.id===help.building);
       const text={'.help-phase':titles[help.phase],'.help-task':(names[help.task]||help.task)+(target?` · ${kinds[target.kind][0]} at ${target.x}, ${target.y}`:''),'.help-reason':help.reason,'.help-time':`Accepted day ${1+Math.floor(help.created/1440)} · ${String(Math.floor(help.created%1440/60)).padStart(2,'0')}:${String(Math.floor(help.created%60)).padStart(2,'0')}`};
       for(const [selector,value] of Object.entries(text)){const el=$('#person '+selector);if(el.textContent!==value)el.textContent=value;}

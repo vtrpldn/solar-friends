@@ -6,7 +6,7 @@ export function resetMaterialLocations(state) {
   state.village.restoration=[];
   delete state.village.water_supply;
   delete state.village.land;
-  state.village.processes={schema:1,batches:[],paused:[]};
+  state.village.processes={schema:2,batches:[],paused:[]};
   state.village.freshness={schema:1,expired:Array(24).fill(0)};
   Object.assign(state.village.progress,{gathering_delivery:null,gathering_until:0,invited:0,attended:0});
   for(const b of [state.village.economy.stock,...state.village.economy.projects.flatMap(p=>[p.reserved,p.consumed]),...state.village.economy.orders.map(o=>o.items),...(state.village.building_jobs||[]).map(j=>j.returns)])while(b.length<24)b.push(0);
@@ -89,6 +89,12 @@ export function stageFixtureMaterial(state,owner,material,n) {
   return state;
 }
 
+// Fixture capacity mirrors sealed input returns and filtration output ownership.
+function liquidReservation(v,p,i){
+  return v.processes.batches.filter(b=>!['complete','cancelled'].includes(b.phase)).reduce((sum,b)=>sum+
+    (b.input_tank===p.id?(b.kind==='digestion'&&i===3?2:b.kind==='filtration'&&i===2?12:0):0)+
+    (b.kind==='filtration'&&i===1&&p.owner.kind==='building'&&p.owner.id===b.building?8:0),0);
+}
 // Explicit scene authoring only. Live water moves through native resident work.
 export function restockFixtureWater(state){
   const v=state.village,s=v.water_supply;if(!s?.schema)return state;
@@ -98,18 +104,18 @@ export function restockFixtureWater(state){
     let delta=target-s.tanks.reduce((n,p)=>n+p.water[i],0);
     if(delta<0){for(const p of s.tanks){const n=Math.min(-delta,p.water[i]);p.water[i]-=n;delta+=n;}}
     else{
-      for(const p of s.tanks){const n=Math.min(delta,p.capacity[i]-p.water[i]);p.water[i]+=n;delta-=n;}
-      while(delta>1e-6){const n=Math.min(delta,i?60:75),water=[0,0];water[i]=n;s.tanks.push({id:v.simulation.next_id++,owner:{kind:'ground'},x:10.7,y:13,capacity:[...water],water});delta-=n;}
+      for(const p of s.tanks.filter(p=>p.owner.kind!=='service')){const n=Math.min(delta,Math.max(0,p.capacity[i]-p.water[i]-liquidReservation(v,p,i)));p.water[i]+=n;delta-=n;}
+      while(delta>1e-6){const n=Math.min(delta,i?60:75),water=[0,0,0,0];water[i]=n;s.tanks.push({id:v.simulation.next_id++,owner:{kind:'ground'},x:10.7,y:13,capacity:[...water],water});delta-=n;}
     }
     s.opening[i]=s.tanks.reduce((n,p)=>n+p.water[i],0);s.received[i]=0;s.consumed[i]=0;
   }
   v.water=Math.fround(s.opening[0]);v.circular.reclaimed=Math.fround(s.opening[1]);return state;
 }
 export function stageFixtureWater(state,owner,kind,n){
-  const s=state.village.water_supply,i=kind==='fresh'?0:kind==='irrigation'?1:-1;
+  const s=state.village.water_supply,i=['fresh','irrigation','greywater','sewage'].indexOf(kind);
   if(i<0||s.trips.length)throw Error('Stage a known water class before cargo starts.');
   const to=s.tanks.find(p=>p.owner.kind===owner.kind&&p.owner.id===owner.id);
-  if(!to||n>to.capacity[i])throw Error('No compatible fixture container.');
+  if(!to||n>to.capacity[i]-liquidReservation(state.village,to,i))throw Error('No compatible fixture container.');
   if(to.water[i]>=n)return state;
   let left=n-to.water[i];
   for(const p of s.tanks){if(p===to)continue;const amount=Math.min(left,p.water[i]);p.water[i]-=amount;to.water[i]+=amount;left-=amount;}

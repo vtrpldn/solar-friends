@@ -421,12 +421,12 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             return wait(
                 r,
                 Phase::Blocked,
-                if batch.material == economy::MEALS
-                    && production::building(v, batch.site).is_none_or(|id| {
-                        water::available(v, water::Owner::Building(id), water::Class::Fresh) < 1.
-                    })
-                {
-                    "The saved pot needs one fresh water before cooking can continue."
+                if batch.material == economy::MEALS {
+                    production::building(v, batch.site)
+                        .and_then(|id| {
+                            sanitation::washing_blocker(v, water::Owner::Building(id), 1.)
+                        })
+                        .unwrap_or("The saved pot is waiting for staged inputs or an open kitchen.")
                 } else {
                     "The batch is waiting for staged inputs or an open worksite. Check production and hauling."
                 },
