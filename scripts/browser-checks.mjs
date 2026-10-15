@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {checkToolControls} from './tool-browser-checks.mjs';
 import {checkFoodControls} from './food-browser-checks.mjs';
+import {checkKitchenControls} from './kitchen-browser-checks.mjs';
 export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
   context.setDefaultTimeout(30000);context.setDefaultNavigationTimeout(30000);
@@ -350,6 +351,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(!await page.getByRole('button',{name:'Pause Workshop 1',exact:true}).isEnabled(),'Closing an idle workshop updates its operating controls immediately');
   await checkToolControls({page,saved,capture});
   await checkFoodControls({page,saved,capture});
+  await checkKitchenControls({page,saved,capture});
   await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();

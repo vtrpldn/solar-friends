@@ -807,13 +807,25 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
     true
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let recipes:Vec<_>=v.production.sites.iter().map(|s|{
-        let recipes:Vec<_>=PRODUCTS.into_iter().filter_map(|i|recipe(i,s.kind,false,false).map(|(inputs,output)|serde_json::json!({"material":i,"inputs":inputs,"output":output}))).collect();
+    let recipes: Vec<_> = v.production.sites.iter().map(|s| {
+        let variants: &[(bool, bool)] = if s.kind == Kind::Kitchen {
+            &[(false, false), (true, false), (false, true), (true, true)]
+        } else {
+            &[(false, false)]
+        };
+        let recipes: Vec<_> = PRODUCTS.into_iter().flat_map(|i| {
+            variants.iter().filter_map(move |&(eggs, gas)| {
+                recipe(i, s.kind, eggs, gas).map(|(inputs, output)| serde_json::json!({
+                    "material": i, "inputs": inputs, "output": output,
+                    "fresh_water": u32::from(i == economy::MEALS), "biogas": gas
+                }))
+            })
+        }).collect();
         serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id))})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
         "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
-        "note":"Preparation inputs and outputs belong to the worksite buffer. Hauling changes their location; work consumes staged inputs once and credits outputs once."})
+        "note":"Preparation inputs and outputs belong to the worksite buffer; kitchen pots use their existing pantry. Hauling changes their location; work consumes staged inputs once and credits outputs once."})
 }
 pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a Resident>) {
     let mut retained = std::collections::HashSet::new();

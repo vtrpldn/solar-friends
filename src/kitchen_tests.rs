@@ -134,6 +134,54 @@ fn cancellation_returns_the_same_eggs_food_and_held_gas_once() {
 }
 
 #[test]
+fn a_partial_gas_pot_holds_refund_capacity_before_another_digestion_batch() {
+    let (mut g, id, r) = scene(true, 9.);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.progress.later_completed = [true; 9];
+    }
+    assert_eq!(g.place("biodigester", 12, 5), "ok");
+    let mut v = g.app.world_mut().resource_mut::<Village>();
+    logistics::fixture_finish(&mut v, 1);
+    v.circular.waste = 2.;
+    v.progress.scraps = 2;
+    assert!(!work(&mut v, &r, 4.));
+    assert_eq!(v.circular.biogas, 8.);
+    sanitation::advance(&mut v, 1.);
+    assert_eq!(v.circular.digestion, 0., "Refund room belongs to the pot");
+    assert_eq!(v.circular.waste, 2.);
+    assert!(work(&mut v, &r, 6.));
+    assert_eq!(batch(&v, id).unwrap().phase, Phase::Complete);
+    sanitation::advance(&mut v, 1.);
+    assert_eq!(v.circular.digestion, 480.);
+    sanitation::advance(&mut v, 480.);
+    assert_eq!(v.circular.biogas, 12.);
+    assert!(sanitation::valid(&v));
+}
+
+#[test]
+fn moving_a_kitchen_refunds_the_pot_and_waits_for_its_pantry_to_be_evacuated() {
+    let (mut g, id, r) = scene(true, 4.);
+    let food = g.app.world().resource::<Village>().food;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert!(!work(&mut v, &r, 4.));
+    }
+    assert_eq!(g.queue_building_work(0, "move", 16, 6), "ok");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        assert_eq!(batch(&v, id).unwrap().phase, Phase::Cancelled);
+        assert_eq!(v.food, food);
+        assert_eq!(v.circular.biogas, 4.);
+        assert!(logistics::occupied_building(&v, 0));
+        assert!(!building_work::work(&mut v, 0, 1000.));
+        assert_eq!(v.buildings[0].x, 5);
+        assert!(food::pantry(&v, 0).unwrap().items[economy::FOOD] >= 2);
+    }
+    checkpoint(&mut g);
+}
+
+#[test]
 fn recipe_switches_change_an_unstarted_pot_and_preserve_a_started_recipe() {
     let (mut g, id, _) = scene(true, 4.);
     {
