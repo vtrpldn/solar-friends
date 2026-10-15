@@ -51,7 +51,8 @@ until(moving,s=>s.village.buildings.find(b=>b.id===0).y===24,'Resident packs and
 until(moving,s=>s.village.pipes.lines.some(p=>p.id!==id&&p.plan.from===0&&p.anchors[0].y===24),'Old route dismantled and replacement installation queued');checkpoint(moving);await writeFile('artifacts/pipes/replacement.json',moving.snapshot());
 const receipts=snap(g).village.simulation.materials.received;
 assert.equal(g.remove_water_connection(id),'ok');assert.equal(line(snap(g),id).removal_work,0);checkpoint(g);await writeFile('artifacts/pipes/removing.json',g.snapshot());
-until(g,s=>line(s,id).phase==='retired','Resident dismantles the full route');checkpoint(g);await writeFile('artifacts/pipes/removed.json',g.snapshot());
+let removalObserved=false;
+until(g,s=>{for(const r of s.residents.filter(r=>r.task==='utility'&&r.activity_material===id)){removalObserved=true;assert.match(r.reason,/Dismantling/,'Resident feedback describes the work actually underway');}return line(s,id).phase==='retired';},'Resident dismantles the full route');assert(removalObserved);checkpoint(g);await writeFile('artifacts/pipes/removed.json',g.snapshot());
 for(const i of [8,9,10,14])assert.equal(snap(g).village.simulation.materials.received[i]-receipts[i],i===14?quote.parts[i]:Math.floor(quote.parts[i]/2));
 const removed=g.snapshot();assert.notEqual(g.remove_water_connection(id),'ok');assert.equal(g.snapshot(),removed);
 const bad=snap(g);bad.village.version=17;assert(!g.restore(JSON.stringify(bad)));assert.equal(g.snapshot(),removed);

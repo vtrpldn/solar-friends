@@ -220,9 +220,16 @@ pub fn assign_target(r: &mut Resident, v: &Village, id: Id) -> bool {
     r.activity_batch = None;
     r.activity_store = None;
     r.remaining = 10.;
-    r.reason = "Installing our water connection along its marked corridor.".into();
+    r.reason = work_reason(line(v, id).unwrap()).into();
     (r.target_x, r.target_y) = (q[0], q[1]);
     true
+}
+pub fn work_reason(p: &Line) -> &'static str {
+    if p.phase == Phase::Removing {
+        "Dismantling our water connection along its marked corridor."
+    } else {
+        "Installing our water connection along its marked corridor."
+    }
 }
 fn release_store(v: &mut Village, id: Id) {
     if let Some(s) = v

@@ -241,6 +241,16 @@ pub fn advance(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], 
                 return true;
             }
         };
+        if let Some(p) = r
+            .activity_material
+            .and_then(|n| u32::try_from(n).ok())
+            .and_then(|n| pipes::line(v, simulation::Id(n)))
+        {
+            let reason = pipes::work_reason(p);
+            if r.reason != reason {
+                r.reason = reason.into();
+            }
+        }
         if goal != [r.target_x, r.target_y] {
             (r.target_x, r.target_y) = (goal[0], goal[1]);
             clear(r);

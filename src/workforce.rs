@@ -517,7 +517,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             blocker,
             score: travel.map_or(-1000., |t| score(v, r, "utility", urgency, t)),
             urgency,
-            reason: "Laying pipes and commissioning our water pump.",
+            reason: pipes::work_reason(p),
         });
     }
     out.sort_by(|a, b| {

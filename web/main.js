@@ -102,7 +102,7 @@ const tasks = {
   return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Carrying water to local stores",
-  utility: "Laying water lines",
+  utility: "Working on water lines",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   restore: "Restoring the soil",
