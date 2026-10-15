@@ -40,6 +40,9 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     if material >= 5 {
         return Err("Unknown material site.");
     }
+    if !(1..MAP_SIZE - 1).contains(&x) || !(1..MAP_SIZE - 1).contains(&y) {
+        return Err("Choose an inland clearing inside the village.");
+    }
     let plot = cells(material, x, y);
     if plot.iter().any(|&(plot_x, plot_y)| {
         !(1..MAP_SIZE - 1).contains(&plot_x)
@@ -258,6 +261,8 @@ pub fn valid(v: &Village) -> bool {
     for (i, s) in v.economy.sources.iter().enumerate() {
         if !s.player_placed
             || s.material >= 5
+            || !(1..MAP_SIZE - 1).contains(&s.x)
+            || !(1..MAP_SIZE - 1).contains(&s.y)
             || if s.material < 2 {
                 s.maximum != maximum(s.material) || s.deposit.is_some()
             } else {

@@ -130,6 +130,12 @@ pub fn reseed(v: &mut Village, seed: u32) {
     v.land.revision = v.land.revision.saturating_add(1);
 }
 pub fn deposit(v: &Village, material: usize, x: i32, y: i32) -> Option<&Deposit> {
+    if !(2..5).contains(&material)
+        || !(1..MAP_SIZE - 1).contains(&x)
+        || !(1..MAP_SIZE - 1).contains(&y)
+    {
+        return None;
+    }
     let n = resource_sites::size(material);
     v.land
         .deposits
@@ -294,6 +300,54 @@ pub fn view(v: &Village) -> serde_json::Value {
 impl Game {
     pub fn land_report(&self) -> String {
         view(self.app.world().resource::<Village>()).to_string()
+    }
+    pub fn land_preview(&self, kind: &str, x: i32, y: i32) -> String {
+        let v = self.app.world().resource::<Village>();
+        if !(1..MAP_SIZE - 1).contains(&x) || !(1..MAP_SIZE - 1).contains(&y) {
+            return "{}".into();
+        }
+        let material = match kind {
+            "source_timber" => Some(0),
+            "source_bamboo" => Some(1),
+            "source_earth" => Some(2),
+            "source_stone" => Some(3),
+            "source_salvage" => Some(4),
+            _ => None,
+        };
+        let n = if kind == "road" {
+            1
+        } else if let Some(m) = material {
+            resource_sites::size(m)
+        } else if crate::economy::recipe(kind, "standard").is_some() {
+            interactions::footprint_size(kind)
+        } else {
+            return "{}".into();
+        };
+        let mut rows = vec![];
+        for a in x - n / 2..x - n / 2 + n {
+            for b in y - n / 2..y - n / 2 + n {
+                if !(1..MAP_SIZE - 1).contains(&a)
+                    || !(1..MAP_SIZE - 1).contains(&b)
+                    || river_bank(a, b)
+                {
+                    return "{}".into();
+                }
+                rows.push(ground(v, a, b));
+            }
+        }
+        let count = rows.len() as f32;
+        let soil = Ground {
+            fertility: rows.iter().map(|r| r.fertility).sum::<f32>() / count,
+            retention: rows.iter().map(|r| r.retention).sum::<f32>() / count,
+            nutrients: rows.iter().map(|r| r.nutrients).sum::<f32>() / count,
+            cover: rows.iter().map(|r| r.cover).sum::<f32>() / count,
+            disturbance: rows.iter().map(|r| r.disturbance).sum::<f32>() / count,
+        };
+        let patch = material
+            .filter(|m| *m >= 2)
+            .and_then(|m| deposit(v, m, x, y));
+        serde_json::json!({"x":x,"y":y,"cells":rows.len(),"ground":soil,"deposit":patch})
+            .to_string()
     }
 }
 #[cfg(test)]

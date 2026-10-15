@@ -178,3 +178,21 @@ fn malformed_land_and_cross_system_identity_collisions_are_rejected_atomically()
         assert_eq!(g.snapshot(), saved);
     }
 }
+
+#[test]
+fn footprint_previews_use_every_cell_and_remain_read_only() {
+    let mut g = Game::new();
+    let saved = g.snapshot();
+    let single: serde_json::Value = serde_json::from_str(&g.land_preview("road", 5, 5)).unwrap();
+    let home: serde_json::Value = serde_json::from_str(&g.land_preview("home", 5, 5)).unwrap();
+    assert_eq!(single["cells"], 1);
+    assert_eq!(home["cells"], 4);
+    assert_eq!(single["ground"], home["ground"]);
+    let quarry: serde_json::Value =
+        serde_json::from_str(&g.land_preview("source_stone", 18, 18)).unwrap();
+    assert_eq!(quarry["deposit"]["material"], 3);
+    assert_eq!(quarry["deposit"]["remaining"], quarry["deposit"]["maximum"]);
+    assert_eq!(g.land_preview("unknown", 5, 5), "{}");
+    assert_eq!(g.land_preview("home", i32::MAX, 5), "{}");
+    assert_eq!(g.snapshot(), saved);
+}

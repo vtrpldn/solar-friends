@@ -1,3 +1,4 @@
+import {installLandMap} from './land-map.js';
 import {gatheringInfo} from './gathering-ui.js';
 import {drawCarriedMaterials,drawSupplyPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
@@ -46,7 +47,7 @@ import {
 const $ = (s) => document.querySelector(s);
 const settings = loadSettings();
 const sound = new VillageAudio(settings);
-let cameraTarget = null, previousVillage = null, celebrationTimer;
+let cameraTarget = null, previousVillage = null, celebrationTimer, landMap;
 const milestoneQueue = [];
 let showingMilestone = false;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -687,6 +688,7 @@ function render() {
     const b = iso(riverCenter(y + 0.35) + offset, y + 0.35);
     line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
   }
+  landMap?.draw({tile,pointer:pointer?uniso(pointer.x,pointer.y):null,tool});
   drawPlacementGrid();
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
@@ -1407,6 +1409,7 @@ function setup() {
     if(!$('#village-book').hidden){closePanels();return;}
     showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
   };
+  landMap=installLandMap({game:()=>game,snapshot:()=>state,render:()=>{paintedState=null;render();}});
   economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
@@ -1743,6 +1746,7 @@ function setup() {
     }
     if (e.code === "Escape" && !document.querySelector("dialog[open]")) {
       e.preventDefault();
+      if(landMap?.isOpen()){landMap.close();return;}
       if (tool) setTool(null);
       else if (selected !== null) $(".close-person").click();
       else {
