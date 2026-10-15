@@ -313,6 +313,18 @@ pub fn fixture_stage(v: &mut Village, id: usize) {
         }
     }
     logistics::sync_totals(v);
+    if v.buildings
+        .iter()
+        .any(|b| b.id == id && b.kind == "kitchen")
+    {
+        let amount = f64::from(v.water.min(4.));
+        crate::water::fixture_at(
+            v,
+            crate::water::Owner::Building(id),
+            crate::water::Class::Fresh,
+            amount,
+        );
+    }
 }
 
 #[cfg(test)]

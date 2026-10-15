@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn marking_a_plot_does_not_plant_water_or_spend_its_stock() {
         let mut g = Game::new();
-        g.app.world_mut().resource_mut::<Village>().water = 0.;
+        crate::water::fixture_fresh(&mut g.app.world_mut().resource_mut::<Village>(), 0.);
         assert_eq!(g.place_source(0, 5, 5), "ok");
         let v = g.app.world().resource::<Village>();
         let s = &v.economy.sources[0];
@@ -156,6 +156,12 @@ mod tests {
             assert!(!resource_sites::finish(&mut v, 0));
             organics::fixture_transfer(&mut v, Owner::Source(0), TREE_STARTS, 4);
             assert_eq!(economy::free(&v, TREE_STARTS), 0);
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(resource_sites::finish(&mut v, 0));
             assert!(!resource_sites::finish(&mut v, 0));
             assert_eq!(v.economy.money, funds);

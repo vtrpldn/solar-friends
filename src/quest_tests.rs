@@ -26,8 +26,43 @@ fn ready_building(g: &mut Game, kind: &str, x: i32, y: i32) {
     let mut v = g.app.world_mut().resource_mut::<Village>();
     let id = v.buildings.last().unwrap().id;
     logistics::fixture_finish(&mut v, id);
+    if matches!(
+        kind,
+        "home" | "garden" | "greenhouse" | "kitchen" | "eco_toilet"
+    ) {
+        let n = v.water.min(4.) as f64;
+        water::fixture_at(&mut v, water::Owner::Building(id), water::Class::Fresh, n);
+    }
 }
 fn finish_task(g: &mut Game, id: usize, task: &str) {
+    if task == "compost" || task == "garden" {
+        // This helper stages native process inputs. Put down any owned cargo
+        // before its explicit fixture transfer, preserving the same goods.
+        let people: Vec<_> = g
+            .app
+            .world_mut()
+            .query::<&Resident>()
+            .iter(g.app.world())
+            .cloned()
+            .collect();
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let material = if task == "compost" {
+            economy::SCRAPS
+        } else {
+            economy::COMPOST
+        };
+        for r in &people {
+            if v.logistics
+                .as_ref()
+                .unwrap()
+                .shipments
+                .iter()
+                .any(|h| h.resident == r.id && h.material == material)
+            {
+                logistics::interrupt(&mut v, r);
+            }
+        }
+    }
     if task == "cook" {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let kitchen = v.buildings.iter().find(|b| b.kind == "kitchen").unwrap().id;
@@ -118,7 +153,7 @@ fn introduction_opens_paths_and_remains_complete_after_resources_are_spent() {
         progression::update(&mut v);
         assert_eq!(v.progress.completed, [true, false, false, false]);
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (0.) as u32);
-        v.water = 0.;
+        crate::water::fixture_fresh(&mut v, 0.);
         crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
     }
     assert!(g.track_quest(1));
@@ -155,6 +190,12 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
             [(0, economy::TREE_STARTS, 4), (1, economy::BAMBOO_STARTS, 1)]
         {
             organics::fixture_transfer(&mut v, logistics::Owner::Source(index), material, amount);
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(index),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(resource_sites::finish(&mut v, index));
         }
     }
@@ -514,11 +555,18 @@ fn crops_require_planting_moisture_and_time_before_harvest() {
         assert_eq!(v.buildings[0].crop.growth, 0.);
         assert_eq!(v.food, food);
     }
-    let water = g.app.world().resource::<Village>().water;
+    let water = water::available(
+        g.app.world().resource::<Village>(),
+        water::Owner::Building(0),
+        water::Class::Fresh,
+    );
     finish_task(&mut g, 0, "garden");
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        assert!(v.water < water - 2.);
+        assert_eq!(
+            water::available(&v, water::Owner::Building(0), water::Class::Fresh),
+            water - 2.
+        );
         ecology::advance(&mut v, 90.);
         assert_eq!(v.buildings[0].crop.growth, 90.);
         assert_eq!(v.harvests, 0);
@@ -537,7 +585,7 @@ fn rain_needs_completed_storage_and_dry_days_pause_crops() {
     ready_building(&mut g, "garden", 14, 10);
     let mut v = g.app.world().resource::<Village>().clone();
     v.minutes = 900.;
-    v.water = 0.;
+    crate::water::fixture_fresh(&mut v, 0.);
     v.buildings[0].crop.planted = true;
     ecology::advance(&mut v, 60.);
     assert_eq!(v.water, 0.);
@@ -547,15 +595,15 @@ fn rain_needs_completed_storage_and_dry_days_pause_crops() {
         .push(g.app.world().resource::<Village>().buildings[1].clone());
     ecology::advance(&mut v, 60.);
     assert_eq!(v.water, 18.);
-    v.water = 114.;
+    crate::water::fixture_fresh(&mut v, 114.);
     ecology::advance(&mut v, 60.);
-    assert_eq!(v.water, 115.);
+    assert_eq!(v.water, ecology::capacity(&v));
     v.minutes = 2. * 1440. + 900.;
     v.buildings[0].crop.growth = 0.;
     land::water_plot(&mut v, 2, 14, 10, 10. / 240.);
     ecology::advance(&mut v, 60.);
     assert_eq!(v.buildings[0].crop.growth, 10.);
-    assert_eq!(v.water, 115.);
+    assert_eq!(v.water, ecology::capacity(&v));
     ecology::advance(&mut v, 60.);
     assert_eq!(v.buildings[0].crop.growth, 10.);
     for minute in [839., 1020., 2880. + 900.] {
@@ -567,16 +615,57 @@ fn rain_needs_completed_storage_and_dry_days_pause_crops() {
 #[test]
 fn water_collection_works_before_cistern_and_only_after_arrival() {
     let mut g = setup();
-    g.app.world_mut().resource_mut::<Village>().minutes = 540.;
-    g.app.world_mut().resource_mut::<Village>().water = 0.;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 540.;
+        water::fixture_fresh(&mut v, 0.);
+    }
     assert!(g.request(4, "water", false).contains("Happy"));
     g.tick(0.2);
     assert_eq!(g.app.world().resource::<Village>().water, 0.);
-    finish_task(&mut g, 4, "water");
-    assert!((g.app.world().resource::<Village>().water - 18.).abs() < 0.02);
-    g.app.world_mut().resource_mut::<Village>().water = 39.;
-    finish_task(&mut g, 4, "water");
-    assert!((g.app.world().resource::<Village>().water - 40.).abs() < 0.02);
+    for _ in 0..2000 {
+        g.tick(0.25);
+        if g.app
+            .world()
+            .resource::<Village>()
+            .water_supply
+            .trips
+            .iter()
+            .any(|h| h.carrying)
+        {
+            break;
+        }
+    }
+    {
+        let v = g.app.world().resource::<Village>();
+        assert!(v.water_supply.trips.iter().any(|h| h.carrying));
+        assert_eq!(
+            water::available(v, water::Owner::Camp, water::Class::Fresh),
+            0.,
+            "Collected water remains in transit until delivery"
+        );
+    }
+    for _ in 0..3000 {
+        g.tick(0.25);
+        if water::available(
+            g.app.world().resource::<Village>(),
+            water::Owner::Camp,
+            water::Class::Fresh,
+        ) >= 10.
+        {
+            break;
+        }
+    }
+    let v = g.app.world().resource::<Village>();
+    assert!(water::available(v, water::Owner::Camp, water::Class::Fresh) >= 10.);
+    assert_eq!(
+        v.water_supply
+            .tanks
+            .iter()
+            .filter(|p| p.owner == water::Owner::Camp)
+            .count(),
+        1
+    );
 }
 
 #[test]

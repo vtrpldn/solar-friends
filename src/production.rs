@@ -191,7 +191,9 @@ fn choice(v: &Village, id: Id, material: usize) -> Option<(Bundle, u32, bool)> {
 }
 fn service_ready(v: &Village, b: &Batch) -> bool {
     b.material != economy::MEALS
-        || (v.water >= 1. && (b.committed || !b.biogas || v.circular.biogas >= 1.))
+        || (building(v, b.site).is_some_and(|id| {
+            water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1.
+        }) && (b.committed || !b.biogas || v.circular.biogas >= 1.))
 }
 fn store(v: &Village, id: Id) -> Option<&logistics::Store> {
     v.logistics
@@ -790,7 +792,7 @@ fn finish(v: &mut Village, id: Id) -> bool {
     ));
     v.production.accounting.outputs[b.material] += u64::from(b.output);
     if b.material == economy::MEALS {
-        sanitation::household_water(v, 1.);
+        sanitation::household_at(v, water::Owner::Building(building(v, b.site).unwrap()), 1.);
         v.supplies.used += b.inputs[economy::FOOD] as f32;
         v.supplies.meals_cooked += b.output;
         assert!(logistics::receive(v, owner(v, b.site), economy::SCRAPS, 1));
@@ -885,13 +887,24 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         .filter(|s| operational(v, s.id) && work_time(v.minutes))
         .map(|s| s.id)
         .collect();
+    let water_ready: Vec<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| {
+            building(v, s.id).is_some_and(|id| {
+                water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1.
+            })
+        })
+        .map(|s| s.id)
+        .collect();
     for b in v
         .production
         .batches
         .iter_mut()
         .filter(|b| b.active() && b.committed && b.work < LABOUR)
     {
-        b.phase = if b.material == economy::MEALS && v.water < 1. {
+        b.phase = if b.material == economy::MEALS && !water_ready.contains(&b.site) {
             Phase::AwaitingWater
         } else if open.contains(&b.site) && working.contains(&b.id) {
             Phase::Processing
@@ -1154,7 +1167,7 @@ mod tests {
             v.minutes = 540.;
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
             crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
-            v.water = 40.;
+            crate::water::fixture_fresh(&mut v, 40.);
         }
         assert_eq!(g.place("workshop", 6, 6), "ok");
         logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);

@@ -269,6 +269,7 @@ mod tests {
             visits: 0,
             next_visit: 0.,
         });
+        crate::water::sync(&mut v);
         v
     }
     fn concerned_village() -> Village {

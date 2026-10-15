@@ -95,8 +95,8 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
         "kitchen" if !situations::protected(v, r.id, "cook") => {
             let _ = production::order_meals(v, Some(id));
         }
-        "well" if v.water >= 1. => {
-            v.water -= 1.;
+        "well" if water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1. => {
+            water::draw(v, water::Owner::Building(id), water::Class::Fresh, 1.);
             r.energy = (r.energy + 10.).min(100.);
             r.hunger = (r.hunger - 5.).max(0.);
         }
@@ -220,6 +220,9 @@ mod tests {
             assert_eq!(g.place(kind, 5, 5), "ok");
             let mut v = g.app.world().resource::<Village>().clone();
             crate::logistics::fixture_finish(&mut v, 0);
+            if matches!(kind, "well" | "home" | "garden" | "greenhouse" | "kitchen") {
+                water::fixture_at(&mut v, water::Owner::Building(0), water::Class::Fresh, 4.);
+            }
             food::fixture_stage(&mut v, 0);
             v.buildings[0].poultry.remaining = 100.;
             crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);

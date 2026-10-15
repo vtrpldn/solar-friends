@@ -7,6 +7,7 @@ fn scene(kinds: &[&str]) -> Game {
     }
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
+        water::replenish(&mut v);
         v.mode = modes::Mode::Story;
         v.arrived = true;
         v.minutes = 540.;
@@ -65,7 +66,7 @@ fn output_capacity_is_reserved_across_competing_filters_and_inputs_are_not_overb
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.greywater = 36.;
-        v.circular.reclaimed = 44.;
+        crate::water::fixture_irrigation(&mut v, 44.);
         let fresh = v.water;
         step(&mut v, 1.);
         assert_eq!(held(&v, Kind::Filtration), 2);

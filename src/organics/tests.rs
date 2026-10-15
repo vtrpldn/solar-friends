@@ -241,7 +241,7 @@ fn a_queued_kitchen_pot_does_not_hide_an_independent_requested_harvest() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         logistics::fixture_stock(&mut v, economy::MEALS, 0);
-        v.water = 40.;
+        crate::water::fixture_fresh(&mut v, 40.);
         let source = &mut v.economy.sources[0];
         source.growth = 1.;
         source.remaining = source.maximum;

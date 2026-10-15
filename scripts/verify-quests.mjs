@@ -104,7 +104,7 @@ const b=snap().village.buildings.find(b=>b.id===lamp);
 for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
 await complete(6);
 for(const k of ['eco_toilet','wetland','banana_treatment'])build(k);await complete(7);
-build('biodigester');await complete(8);
+build('biodigester');g.configure_banana_treatment(false);await complete(8);
 for(const material of [2,3,4])source(material);
 for(let i=0;i<5;i++){
  until(s=>s.village.economy.sources[i].remaining>0,`source ${i} maturity`);

@@ -65,13 +65,7 @@ pub fn raining(minutes: f32) -> bool {
 }
 
 pub fn capacity(v: &Village) -> f32 {
-    // Arrival barrels remain useful before the first cistern is built.
-    40. + 75.
-        * v.buildings
-            .iter()
-            .filter(|b| b.kind == "well" && b.progress >= 100.)
-            .count() as f32
-        + 75. * crate::building_work::held_capacity(v, "well") as f32
+    water::capacity(v)
 }
 
 pub fn needs_tending(b: &Building, water: f32) -> bool {
@@ -83,19 +77,7 @@ pub fn needs_tending(b: &Building, water: f32) -> bool {
 }
 
 pub fn advance(v: &mut Village, minutes: f32) {
-    let rain = raining(v.minutes);
-    if rain {
-        let cisterns = v
-            .buildings
-            .iter()
-            .filter(|b| b.kind == "well" && b.progress >= 100.)
-            .count();
-        if v.water < capacity(v) {
-            let before = v.water;
-            v.water = (v.water + minutes * cisterns as f32 * 0.3).min(capacity(v));
-            v.progress.rain_caught |= v.water > before;
-        }
-    }
+    water::rain(v, minutes);
     for i in 0..v.buildings.len() {
         let b = &v.buildings[i];
         if !farm(b) || b.progress < 100. {
@@ -184,11 +166,10 @@ impl Game {
 }
 pub fn tend(v: &mut Village, r: &Resident) {
     let building = spacing::building(r, v);
-    let Some(index) = v
-        .buildings
-        .iter()
-        .position(|b| needs_tending(b, sanitation::irrigation_water(v)) && Some(b.id) == building)
-    else {
+    let Some(index) = v.buildings.iter().position(|b| {
+        needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+            && Some(b.id) == building
+    }) else {
         return;
     };
     let b = &v.buildings[index];
@@ -251,13 +232,7 @@ pub fn tend(v: &mut Village, r: &Resident) {
         food::gather(v, Some(site_id), r.x, r.y, output);
         v.supplies.gathered += output as f32;
         v.harvests += 1;
-    } else if v.circular.reclaimed >= 2. || v.water >= 2. {
-        if v.circular.reclaimed >= 2. {
-            v.circular.reclaimed -= 2.;
-            v.progress.reclaimed_irrigation = true;
-        } else {
-            v.water -= 2.;
-        }
+    } else if water::irrigate(v, water::Owner::Building(site_id)) {
         land::water_plot(v, n, x, y, 1.);
     }
     land::sync_moisture(v);
@@ -280,6 +255,12 @@ mod farming_tests {
             .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(g.place(kind, 5, 5), "ok");
         crate::logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
+        crate::water::fixture_at(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            crate::water::Owner::Building(0),
+            crate::water::Class::Fresh,
+            4.,
+        );
         let mut q = g.app.world_mut().query::<&Resident>();
         let mut r = q
             .iter(g.app.world())

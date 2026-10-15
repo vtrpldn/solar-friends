@@ -422,7 +422,7 @@ mod tests {
             v.minutes = 540.;
             v.progress.completed = [true; 4];
             v.production.targets = [0; economy::COUNT];
-            v.water = 40.;
+            crate::water::fixture_fresh(&mut v, 40.);
             logistics::fixture_stock(&mut v, economy::FOOD, 60);
             logistics::fixture_stock(&mut v, MEALS, 10);
         }
@@ -579,7 +579,7 @@ mod tests {
             v.minutes = 540.;
             v.progress.completed = [true; 4];
             v.production.targets = [0; economy::COUNT];
-            v.water = 40.;
+            crate::water::fixture_fresh(&mut v, 40.);
             logistics::fixture_stock(&mut v, MEALS, 10);
         }
         assert_eq!(g.place("kitchen", 6, 6), "ok");

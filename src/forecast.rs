@@ -152,7 +152,7 @@ mod tests {
             v.minutes = 540.;
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
             crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
-            v.water = 40.;
+            crate::water::fixture_fresh(&mut v, 40.);
         }
         for mut r in g
             .app

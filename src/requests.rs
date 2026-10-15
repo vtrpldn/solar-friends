@@ -340,9 +340,10 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
     }
     if q.task == "garden"
         && q.building.is_some_and(|id| {
-            !v.buildings
-                .iter()
-                .any(|b| b.id == id && ecology::needs_tending(b, sanitation::irrigation_water(v)))
+            !v.buildings.iter().any(|b| {
+                b.id == id
+                    && ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+            })
         })
     {
         return wait(
@@ -418,7 +419,11 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             return wait(
                 r,
                 Phase::Blocked,
-                if batch.material == economy::MEALS && v.water < 1. {
+                if batch.material == economy::MEALS
+                    && production::building(v, batch.site).is_none_or(|id| {
+                        water::available(v, water::Owner::Building(id), water::Class::Fresh) < 1.
+                    })
+                {
                     "The saved pot needs one fresh water before cooking can continue."
                 } else {
                     "The batch is waiting for staged inputs or an open worksite. Check production and hauling."
@@ -649,6 +654,7 @@ pub fn enqueue_at(
         return "The work identity limit has been reached.".into();
     };
     logistics::interrupt(v, r);
+    water::interrupt(v, r);
     let destination = building
         .and_then(|id| building_work::job(v, id))
         .and_then(|j| j.destination);
@@ -788,6 +794,7 @@ impl Game {
         let owned = owns_activity(&r);
         if owned {
             logistics::interrupt(&mut v, &r);
+            water::interrupt(&mut v, &r);
         }
         let reason = if let Some(trip) = &r.trip {
             match trip.purpose {
@@ -840,7 +847,7 @@ mod tests {
             v.minutes = 540.;
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
             crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
-            v.water = 40.;
+            crate::water::fixture_fresh(&mut v, 40.);
         }
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {

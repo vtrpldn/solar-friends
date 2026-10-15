@@ -79,16 +79,8 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     }
     Ok(())
 }
-pub fn water_available(v: &Village) -> bool {
-    crate::sanitation::irrigation_water(v) >= 2.
-}
-fn water(v: &mut Village) {
-    if v.circular.reclaimed >= 2. {
-        v.circular.reclaimed -= 2.;
-        v.progress.reclaimed_irrigation = true;
-    } else {
-        v.water -= 2.;
-    }
+pub fn water_available(v: &Village, index: usize) -> bool {
+    crate::water::irrigation(v, crate::water::Owner::Source(index)) >= 2.
 }
 pub fn care(v: &Village, index: usize) -> bool {
     let Some(s) = v.economy.sources.get(index) else {
@@ -96,7 +88,7 @@ pub fn care(v: &Village, index: usize) -> bool {
     };
     s.active
         && s.material < 2
-        && water_available(v)
+        && water_available(v, index)
         && if s.planted {
             s.growth < 1. && s.moisture < 120.
         } else {
@@ -152,7 +144,7 @@ pub fn finish(v: &mut Village, index: usize) -> bool {
             },
         );
     }
-    water(v);
+    crate::water::irrigate(v, crate::water::Owner::Source(index));
     let s = &v.economy.sources[index];
     let (n, x, y) = (size(s.material), s.x, s.y);
     crate::land::water_plot(v, n, x, y, 1.);
@@ -482,7 +474,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let soil=crate::land::condition(v,size(s.material),s.x,s.y);
         let rate=crate::land::growth(&soil);
         let status=if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
-        else if !s.planted{if s.auto_replant||s.plant_requested{if !crate::planting::ready(v,index){"Planting waits for delivered stock. Order timber seedlings or bamboo starts in Trade, then let neighbours haul them to this plot."}else if !water_available(v){"Replanting waits for two irrigation water."}else{"Planting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
+        else if !s.planted{if s.auto_replant||s.plant_requested{if !crate::planting::ready(v,index){"Planting waits for delivered stock. Order timber seedlings or bamboo starts in Trade, then let neighbours haul them to this plot."}else if !water_available(v,index){"Replanting waits for two irrigation water."}else{"Planting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
         else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot during normal work hours."};
         serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":if s.material==0{4000}else{0},"planting_stock":crate::planting::required(v,index).map(|(material,amount)|serde_json::json!({"material":material,"amount":amount,"here":crate::organics::available(v,crate::logistics::Owner::Source(index),material)})),"batch":if s.material==0{8}else{4}})
     }).collect();
@@ -532,6 +524,12 @@ mod tests {
                 economy::TREE_STARTS,
                 4,
             );
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(finish(&mut v, 0));
             advance(&mut v, 1440.);
             assert_eq!(v.economy.sources[0].growth, 0.25);
@@ -545,6 +543,12 @@ mod tests {
             advance(&mut v, 600.);
             assert_eq!(v.economy.sources[0].growth, dry_growth);
             for _ in 0..3 {
+                crate::water::fixture_at(
+                    &mut v,
+                    crate::water::Owner::Source(0),
+                    crate::water::Class::Fresh,
+                    2.,
+                );
                 assert!(finish(&mut v, 0));
                 advance(&mut v, 1440.);
             }
@@ -573,6 +577,12 @@ mod tests {
                 economy::TREE_STARTS,
                 4,
             );
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(finish(&mut v, 0));
             assert_eq!(v.economy.money, funds);
             assert!(!finish(&mut v, 0));
@@ -594,8 +604,20 @@ mod tests {
                 economy::BAMBOO_STARTS,
                 1,
             );
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(finish(&mut v, 0));
             advance(&mut v, 1440.);
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(finish(&mut v, 0));
             advance(&mut v, 1440.);
             assert_eq!(v.economy.sources[0].remaining, 24.);
@@ -606,6 +628,12 @@ mod tests {
             }
             assert!(v.economy.sources[0].planted);
             assert_eq!(v.economy.sources[0].growth, 0.);
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(finish(&mut v, 0));
             assert_eq!(v.economy.money, funds);
         }
@@ -664,6 +692,12 @@ mod tests {
                 economy::TREE_STARTS,
                 4,
             );
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
+            );
             assert!(finish(&mut v, 0));
             v.economy.sources[0].growth = 1.;
             v.economy.sources[0].remaining = 32.;
@@ -709,6 +743,12 @@ mod tests {
                 crate::logistics::Owner::Source(0),
                 economy::TREE_STARTS,
                 4,
+            );
+            crate::water::fixture_at(
+                &mut v,
+                crate::water::Owner::Source(0),
+                crate::water::Class::Fresh,
+                2.,
             );
             assert!(finish(&mut v, 0));
             v.economy.sources[0].growth = 1.;

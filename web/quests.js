@@ -34,7 +34,7 @@ export const quests = [
         "Build a cistern",
         count(v, "well"),
         1,
-        "Place a free cistern blueprint, then check Construction. Buy its pump in Town; neighbours carry river water while it is being built. Forecast the workweek to see what current supplies and schedules could achieve. You can plan homes, a garden and a kitchen while supplies arrive.",
+      "Place a free cistern blueprint, then check Construction. Buy its pump in Town. Arrival barrels hold the first fresh water; neighbours can fetch treated water from the neighbouring farm and carry loads to homes, kitchens and growing plots. Rain fills the cistern itself. Supplies shows each container and carrier. Forecast the workweek to compare current supplies and schedules.",
         "well",
       ),
       goal(
@@ -235,7 +235,7 @@ export const quests = [
     after:"Gas stretches our cooking, and cured digestate returns to the soil. Let's build our next home from local earth.",
     objectives:v=>[
       goal("Build a biodigester",count(v,"biodigester"),1,"Order its equipment and complete the sealed installation.","biodigester"),
-      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Two sealed waste and two scraps delivered to this digester take eight hours to make four gas and two digestate."),
+      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Pause banana treatment when waste is scarce so two sealed waste can reach the digester. Two delivered scraps complete its feed; digestion takes eight hours."),
       actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking. The next pot uses one gas and yields one extra meal; fresh water is still required."),
       actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Cured compost remains in a pile at that plot until neighbours collect it; its later use will not erase this milestone."),
     ],

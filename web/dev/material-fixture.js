@@ -3,6 +3,7 @@ export function resetMaterialLocations(state) {
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
   state.village.restoration=[];
+  delete state.village.water_supply;
   delete state.village.land;
   state.village.processes={schema:1,batches:[],paused:[]};
   state.village.freshness={schema:1,expired:Array(24).fill(0)};
@@ -85,4 +86,31 @@ export function stageFixtureMaterial(state,owner,material,n) {
   if(left)throw Error('Fixture input is absent.');
   if(p.items.reduce((a,b)=>a+b,0)>p.capacity)throw Error('Fixture staging is full.');
   return state;
+}
+
+// Explicit scene authoring only. Live water moves through native resident work.
+export function restockFixtureWater(state){
+  const v=state.village,s=v.water_supply;if(!s?.schema)return state;
+  if(s.trips.length)throw Error('Finish or interrupt water cargo before restaging water.');
+  for(const [i,target]of [[0,v.water],[1,v.circular.reclaimed]]){
+    if(!Number.isFinite(target)||target<0||target>150000)throw Error('Invalid fixture water stock.');
+    let delta=target-s.tanks.reduce((n,p)=>n+p.water[i],0);
+    if(delta<0){for(const p of s.tanks){const n=Math.min(-delta,p.water[i]);p.water[i]-=n;delta+=n;}}
+    else{
+      for(const p of s.tanks){const n=Math.min(delta,p.capacity[i]-p.water[i]);p.water[i]+=n;delta-=n;}
+      while(delta>1e-6){const n=Math.min(delta,i?60:75),water=[0,0];water[i]=n;s.tanks.push({id:v.simulation.next_id++,owner:{kind:'ground'},x:10.7,y:13,capacity:[...water],water});delta-=n;}
+    }
+    s.opening[i]=s.tanks.reduce((n,p)=>n+p.water[i],0);s.received[i]=0;s.consumed[i]=0;
+  }
+  v.water=Math.fround(s.opening[0]);v.circular.reclaimed=Math.fround(s.opening[1]);return state;
+}
+export function stageFixtureWater(state,owner,kind,n){
+  const s=state.village.water_supply,i=kind==='fresh'?0:kind==='irrigation'?1:-1;
+  if(i<0||s.trips.length)throw Error('Stage a known water class before cargo starts.');
+  const to=s.tanks.find(p=>p.owner.kind===owner.kind&&p.owner.id===owner.id);
+  if(!to||n>to.capacity[i])throw Error('No compatible fixture container.');
+  if(to.water[i]>=n)return state;
+  let left=n-to.water[i];
+  for(const p of s.tanks){if(p===to)continue;const amount=Math.min(left,p.water[i]);p.water[i]-=amount;to.water[i]+=amount;left-=amount;}
+  if(left>1e-6)throw Error('Stage an owned fixture water supply first.');return state;
 }

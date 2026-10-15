@@ -337,7 +337,7 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
         );
     }
     v.power.stored = v.power.stored.min(power::supply(v).capacity);
-    v.water = v.water.min(ecology::capacity(v));
+    water::sync(v);
     economy::rebalance(v);
     true
 }
@@ -706,7 +706,7 @@ mod tests {
     fn utility_storage_is_retained_until_work_finishes_or_a_move_returns() {
         let mut g = sandbox("well");
         {
-            g.app.world_mut().resource_mut::<Village>().water = 110.;
+            crate::water::fixture_fresh(&mut g.app.world_mut().resource_mut::<Village>(), 110.);
         }
         assert_eq!(g.queue_building_work(0, "move", 16, 18), "ok");
         checkpoint(&mut g);
@@ -722,7 +722,13 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             work(&mut v, 0, 18.);
-            assert_eq!(v.water, 40.);
+            assert_eq!(v.water, 110.);
+            assert!(
+                v.water_supply
+                    .tanks
+                    .iter()
+                    .any(|p| p.owner == water::Owner::Ground && p.water[0] > 0.)
+            );
         }
         checkpoint(&mut g);
     }

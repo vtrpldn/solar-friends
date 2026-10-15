@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
-import {resetMaterialLocations} from '../web/dev/material-fixture.js';
+import {resetMaterialLocations,restockFixtureWater} from '../web/dev/material-fixture.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/kitchen',{recursive:true});
 const FOOD=16,MEALS=17,EGGS=18,snap=g=>JSON.parse(g.snapshot()),person=s=>s.residents.find(r=>r.id===0);
@@ -47,7 +47,7 @@ assert.equal(snap(cancellation).village.food,foodBefore+3);assert.equal(snap(can
 assert.notEqual(cancellation.cancel_production_batch(id),'ok');checkpoint(cancellation);conserved(cancellation);
 await writeFile('artifacts/kitchen/cancelled.json',cancellation.snapshot());
 const dry=new Game(),dryState=snap(g);dryState.village.water=0;dryState.village.circular.reclaimed=20;
-assert(dry.restore(JSON.stringify(dryState)));dry.tick(.25);
+assert(dry.restore(JSON.stringify(restockFixtureWater(dryState))));dry.tick(.25);
 assert.equal(pot(snap(dry),id).work,pot(s,id).work,'Cooking cannot use reclaimed water');
 assert.equal(snap(dry).village.meals,0);checkpoint(dry);
 await writeFile('artifacts/kitchen/waiting-water.json',dry.snapshot());
