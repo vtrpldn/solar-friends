@@ -436,13 +436,19 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(!circular.village.circular.auto_feed&&!circular.village.circular.filter_water&&!circular.village.circular.use_biogas);
   assert((await page.locator('#digester-status').textContent()).includes('paused'));
   for(const control of ['auto-digest','filter-greywater','use-biogas'])await page.locator('#'+control).check();
+  const circularStart=circular.village.minutes;
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('240');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
   circular=await page.evaluate(()=>window.solarDev.snapshot());
+  // Eating includes its real trip; daily care can follow lunch rather than finish within four hours.
+  for(let slot=0;slot<16&&circular.village.circular.toilet_visits<5;slot++){
+    await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('15');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+    circular=await page.evaluate(()=>window.solarDev.snapshot());
+  }
   assert.equal(circular.village.circular.toilet_visits,5);assert.equal(circular.environment.economy.capacity,900);
   assert((await page.locator('#toilet-status').textContent()).includes('5 daily visits'));
   assert((await page.locator('#digester-status').textContent()).includes('Digesting'));
   await capture('Five private routines and active water and waste processing','circular-controls.png');
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('241');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill(String(Math.max(0,Math.ceil(circularStart+481-circular.village.minutes))));await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   assert(circular.village.circular.biogas>0&&circular.village.circular.water_reused>=8);
   assert((await page.locator('#digester-status').textContent()).includes('curing'));
