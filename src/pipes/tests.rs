@@ -608,3 +608,109 @@ fn arrival_barrels_only_refill_for_housed_neighbours_when_an_active_line_uses_th
     assert!(!uses_camp(v));
     assert!(!water::has_work(v));
 }
+
+fn sanitation_scene() -> Game {
+    let mut g = scene();
+    g.app.world_mut().resource_mut::<Village>().mode = modes::Mode::Sandbox;
+    for (kind, x, y) in [
+        ("eco_toilet", 5, 11),
+        ("biodigester", 12, 11),
+        ("wetland", 18, 11),
+        ("banana_treatment", 18, 18),
+    ] {
+        assert_eq!(g.place(kind, x, y), "ok");
+    }
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.mode = modes::Mode::Story;
+        v.circular.auto_feed = false;
+        v.circular.banana_treatment = false;
+        v.circular.filter_water = false;
+    }
+    g
+}
+#[test]
+fn installed_sewage_lines_transfer_only_owned_sealed_contents_and_stop_without_power() {
+    let mut g = sanitation_scene();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        water::fixture_liquid(&mut v, water::Class::Sewage, 6.);
+        water::fixture_at(&mut v, water::Owner::Building(3), water::Class::Sewage, 6.);
+    }
+    assert_eq!(g.queue_water_connection("sewage", 3, 4), "ok");
+    let id = g.app.world().resource::<Village>().pipes.lines[0].id;
+    install_direct(&mut g, id);
+    checkpoint(&mut g);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let fresh = v.water;
+        v.minutes += 60.;
+        advance(&mut v, 60.);
+        assert_eq!(
+            water::local(&v, water::Owner::Building(3), water::Class::Sewage),
+            0.
+        );
+        assert_eq!(
+            water::local(&v, water::Owner::Building(4), water::Class::Sewage),
+            6.
+        );
+        assert_eq!(v.water, fresh);
+        assert_eq!(v.circular.reclaimed, 0.);
+        assert_eq!(v.circular.biogas, 0.);
+        assert_eq!(line(&v, id).unwrap().transferred, 6.);
+        assert!((line(&v, id).unwrap().energy_used - 0.15).abs() < 0.00001);
+        assert_eq!(
+            water::produce(&mut v, water::Owner::Building(3), water::Class::Sewage, 2.),
+            2.
+        );
+        v.power.stored = 0.;
+        v.minutes += 60.;
+        advance(&mut v, 60.);
+        assert_eq!(line(&v, id).unwrap().transferred, 6.);
+    }
+    checkpoint(&mut g);
+    assert!(reconciled(&mut g));
+}
+#[test]
+fn a_greywater_line_supplies_its_local_reed_bed_and_cannot_be_used_as_fresh_water() {
+    let mut g = sanitation_scene();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        water::fixture_liquid(&mut v, water::Class::Greywater, 12.);
+        water::fixture_at(
+            &mut v,
+            water::Owner::Building(1),
+            water::Class::Greywater,
+            12.,
+        );
+    }
+    assert_ne!(g.queue_water_connection("fresh", 1, 5), "ok");
+    assert_eq!(g.queue_water_connection("greywater", 1, 5), "ok");
+    let id = g.app.world().resource::<Village>().pipes.lines[0].id;
+    install_direct(&mut g, id);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let fresh = v.water;
+        v.minutes += 60.;
+        advance(&mut v, 60.);
+        assert_eq!(
+            water::local(&v, water::Owner::Building(5), water::Class::Greywater),
+            12.
+        );
+        assert_eq!(
+            water::available(&v, water::Owner::Building(5), water::Class::Fresh),
+            0.
+        );
+        v.circular.filter_water = true;
+        processes::advance(&mut v, 0.);
+        assert_eq!(processes::held_greywater(&v), 12.);
+        v.minutes += 360.;
+        processes::advance(&mut v, 360.);
+        assert_eq!(v.circular.reclaimed, 8.);
+        assert_eq!(v.circular.greywater, 0.);
+        assert_eq!(v.water, fresh);
+        assert_eq!(v.water_supply.consumed[2], 12.);
+        assert_eq!(v.water_supply.received[1], 8.);
+    }
+    checkpoint(&mut g);
+}

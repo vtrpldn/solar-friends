@@ -43,6 +43,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
+pub const SAVE_VERSION: u32 = 19;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -328,12 +329,7 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
                                 && production::building(v, q.site) == Some(b.id)
                         }))
                     && (task != "sanitation"
-                        || b.next_visit <= v.minutes
-                            && water::available(
-                                v,
-                                water::Owner::Building(b.id),
-                                water::Class::Fresh,
-                            ) >= 1.)
+                        || b.next_visit <= v.minutes && sanitation::usable_toilet(v, b.id))
                     && b.kind
                         == match task {
                             "garden" => "garden",
@@ -1112,11 +1108,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 }
                 "sanitation" => {
                     sanitation::use_toilet(&mut v, &mut r);
-                    if r.last_sanitation_day < (v.minutes / 1440.) as i32
-                        && v.water >= 1.
-                        && v.circular.waste < 80.
-                        && ready(&v, "eco_toilet")
-                    {
+                    if sanitation::due(&v, &r) {
                         r.remaining = 1.;
                     }
                 }
@@ -1213,7 +1205,7 @@ impl Game {
                 pipes: pipes::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 18,
+                version: SAVE_VERSION,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1697,7 +1689,7 @@ impl Game {
         {
             return false;
         }
-        if !matches!(v.version, 3 | 18)
+        if !matches!(v.version, 3 | SAVE_VERSION)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1794,11 +1786,14 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 18;
+            save.village.version = SAVE_VERSION;
+            if !water::initialise(&mut save.village) {
+                return false;
+            }
             if !processes::initialise(&mut save.village) {
                 return false;
             }
-            if !water::initialise(&mut save.village) {
+            if !water::valid(&save.village, &save.residents) || !processes::valid(&save.village) {
                 return false;
             }
             economy::rebalance(&mut save.village);
@@ -1947,7 +1942,20 @@ mod tests {
         }
         for (i, r) in later.residents.iter().enumerate() {
             for other in &later.residents[i + 1..] {
-                assert!((r.x - other.x).hypot(r.y - other.y) >= 2.);
+                assert!(
+                    (r.x - other.x).hypot(r.y - other.y) >= 2.,
+                    "{} ({}, {}) toward ({}, {}), {} ({}, {}) toward ({}, {})",
+                    r.name,
+                    r.x,
+                    r.y,
+                    r.target_x,
+                    r.target_y,
+                    other.name,
+                    other.x,
+                    other.y,
+                    other.target_x,
+                    other.target_y
+                );
             }
         }
         assert!(
@@ -2245,7 +2253,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":18", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":19", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

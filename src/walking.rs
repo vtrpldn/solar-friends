@@ -285,6 +285,32 @@ pub fn advance(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], 
         return false;
     }
     let j = r.walking.route.as_ref().unwrap();
+    if !j.exiting
+        && let Some(point) = j.points.get(j.next)
+    {
+        let stationary: Vec<_> = neighbours
+            .iter()
+            .filter(|(id, x, y)| {
+                *id != r.id
+                    && v.workforce_peers[*id].as_ref().is_some_and(|p| {
+                        p.trip.is_none() && (p.x - p.target_x).hypot(p.y - p.target_y) <= 0.08
+                    })
+                    && (*x - r.x).hypot(*y - r.y) < 5.
+            })
+            .map(|(_, x, y)| [*x, *y])
+            .collect();
+        if (r.x - point[0]).hypot(r.y - point[1]) < 2.
+            && stationary
+                .iter()
+                .any(|p| (p[0] - point[0]).hypot(p[1] - point[1]) < spacing::PERSONAL_SPACE)
+            && let Ok(plan) = navigation::route_avoiding(v, [r.x, r.y], j.goal, &stationary)
+        {
+            let j = r.walking.route.as_mut().unwrap();
+            j.points = plan.points;
+            j.next = 1;
+        }
+    }
+    let j = r.walking.route.as_ref().unwrap();
     let Some(point) = j.points.get(j.next).copied() else {
         r.walking.route = None;
         return true;

@@ -30,7 +30,7 @@ fn remote_scraps_need_delivery_and_cancellation_returns_to_the_same_pantry_once(
     let mut g = scene(&["biodigester"]);
     let id = {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         logistics::fixture_stock(&mut v, SCRAPS, 2);
         processes::advance(&mut v, 1.);
         assert!(v.processes.batches.is_empty());
@@ -98,7 +98,7 @@ fn curing_receives_a_local_pile_once_even_after_its_digester_is_gone() {
     let mut g = scene(&["biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         fixture(&mut v, SCRAPS, 2);
         processes::advance(&mut v, 1.);
         processes::advance(&mut v, 480.);
@@ -164,7 +164,7 @@ fn sealed_feed_and_curing_keep_their_global_storage_room_until_output_is_receive
     let mut g = scene(&["biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         fixture(&mut v, SCRAPS, 2);
         processes::advance(&mut v, 1.);
         let left = economy::capacity(&v) - economy::storage(&v);
@@ -186,7 +186,7 @@ fn a_sealed_digester_cannot_load_without_its_local_recovery_store() {
     let mut g = scene(&["biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         fixture(&mut v, SCRAPS, 2);
         processes::advance(&mut v, 1.);
     }

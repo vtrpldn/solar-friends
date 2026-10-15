@@ -109,14 +109,19 @@ pub fn walk(r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) {
     let distance = dx.hypot(dy);
     let (ux, uy) = (dx / distance, dy / distance);
     let (mut sx, mut sy) = (ux, uy);
+    let comfort = if leisure::hobby(&r.task) {
+        2.0
+    } else {
+        PERSONAL_SPACE
+    };
     for &(id, x, y) in neighbours {
         if id == r.id {
             continue;
         }
         let (nx, ny) = (x - r.x, y - r.y);
         let gap = nx.hypot(ny);
-        if gap < PERSONAL_SPACE * 1.5 && nx * ux + ny * uy > -0.1 {
-            let weight = (1. - gap / (PERSONAL_SPACE * 1.5)).max(0.);
+        if gap < comfort * 1.5 && nx * ux + ny * uy > -0.1 {
+            let weight = (1. - gap / (comfort * 1.5)).max(0.);
             // Both walkers keep to their own right when approaching head-on.
             sx += uy * weight * 2.;
             sy -= ux * weight * 2.;

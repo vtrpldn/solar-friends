@@ -40,7 +40,7 @@ fn independent_digesters_keep_their_own_progress_and_pause_without_a_worker() {
     let mut g = scene(&["biodigester", "biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 4.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 4.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
         step(&mut v, 1.);
         assert_eq!(held_gas(&v), 8.);
@@ -61,19 +61,25 @@ fn independent_digesters_keep_their_own_progress_and_pause_without_a_worker() {
     checkpoint(&mut g);
 }
 #[test]
-fn output_capacity_is_reserved_across_competing_filters_and_inputs_are_not_overbooked() {
+fn filters_reserve_their_own_output_without_a_village_wide_limit() {
     let mut g = scene(&["wetland", "wetland", "wetland"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.greywater = 36.;
-        crate::water::fixture_irrigation(&mut v, 44.);
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Greywater, 36.);
+        crate::water::fixture_irrigation(&mut v, 60.);
+        water::fixture_at(
+            &mut v,
+            water::Owner::Building(0),
+            water::Class::Irrigation,
+            60.,
+        );
         let fresh = v.water;
         step(&mut v, 1.);
         assert_eq!(held(&v, Kind::Filtration), 2);
         assert_eq!(v.circular.greywater, 12.);
         assert_eq!(held_irrigation(&v), 16.);
         step(&mut v, 360.);
-        assert_eq!(v.circular.reclaimed, 60.);
+        assert_eq!(v.circular.reclaimed, 76.);
         assert_eq!(v.circular.water_reused, 16.);
         assert_eq!(v.circular.greywater, 12.);
         assert_eq!(v.water, fresh);
@@ -88,15 +94,35 @@ fn cancelling_returns_sealed_inputs_once_and_protects_room_for_their_return() {
     let mut g = scene(&["biodigester", "wetland"]);
     let (gas, water) = {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
-        v.circular.greywater = 12.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Greywater, 12.);
         step(&mut v, 1.);
         let ids = (owned(&v, 0).id, owned(&v, 1).id);
-        v.circular.waste = 78.;
-        v.circular.greywater = 108.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 6.);
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Greywater, 12.);
+        assert_eq!(
+            water::local_room(&v, water::Owner::Building(0), water::Class::Sewage),
+            0.
+        );
+        assert_eq!(
+            water::local_room(&v, water::Owner::Building(1), water::Class::Greywater),
+            0.
+        );
+        assert_eq!(
+            water::produce(
+                &mut v,
+                water::Owner::Building(1),
+                water::Class::Greywater,
+                1.
+            ),
+            0.
+        );
         sanitation::household_water(&mut v, 1.);
-        assert_eq!(v.circular.greywater, 108.);
+        assert!(
+            (v.circular.greywater - 12.7).abs() < 0.001,
+            "A different household retains its own room"
+        );
         ids
     };
     assert_eq!(g.cancel_passive_batch(gas.0), "ok");
@@ -104,9 +130,9 @@ fn cancelling_returns_sealed_inputs_once_and_protects_room_for_their_return() {
     assert_ne!(g.cancel_passive_batch(gas.0), "ok");
     {
         let v = g.app.world().resource::<Village>();
-        assert_eq!(v.circular.waste, 80.);
+        assert_eq!(v.circular.waste, 8.);
         assert_eq!(v.progress.scraps, 2);
-        assert_eq!(v.circular.greywater, 120.);
+        assert!((v.circular.greywater - 24.7).abs() < 0.001);
         assert_eq!(v.circular.biogas, 0.);
         assert_eq!(v.circular.reclaimed, 0.);
         assert!(v.processes.paused.contains(&0) && v.processes.paused.contains(&1));
@@ -118,7 +144,7 @@ fn moving_keeps_the_same_sealed_batch_and_demolition_returns_unprocessed_inputs(
     let mut g = scene(&["biodigester"]);
     let id = {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
         owned(&v, 0).id
@@ -159,7 +185,7 @@ fn detached_curing_survives_the_original_building_and_credits_compost_once() {
     let mut g = scene(&["biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
         step(&mut v, 480.);
@@ -192,9 +218,9 @@ fn passive_processes_finish_during_normal_sleep_without_creating_a_resident_job(
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.minutes = 1320.;
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
-        v.circular.greywater = 12.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Greywater, 12.);
         freshness::fixture_reseed(&mut v);
     }
     for _ in 0..650 {
@@ -214,7 +240,7 @@ fn malformed_owners_summaries_and_shared_id_collisions_fail_atomically() {
     let mut g = scene(&["biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
     }
@@ -242,7 +268,7 @@ fn adding_another_digester_never_accelerates_a_committed_batch() {
     let mut g = scene(&["biodigester"]);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 6.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 6.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 6);
         step(&mut v, 1.);
         step(&mut v, 120.);
@@ -253,6 +279,11 @@ fn adding_another_digester_never_accelerates_a_committed_batch() {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         logistics::fixture_finish(&mut v, 1);
         organics::fixture_transfer(&mut v, logistics::Owner::Pantry(1), economy::SCRAPS, 2);
+        assert_eq!(
+            water::local(&v, water::Owner::Building(1), water::Class::Sewage),
+            0.
+        );
+        water::fixture_at(&mut v, water::Owner::Building(1), water::Class::Sewage, 2.);
         step(&mut v, 1.);
         assert_eq!(owned(&v, 0).remaining, 359.);
         assert_eq!(owned(&v, 1).remaining, 480.);
@@ -262,7 +293,7 @@ fn adding_another_digester_never_accelerates_a_committed_batch() {
     checkpoint(&mut g);
 }
 #[test]
-fn daily_toilet_visits_leave_enough_sealed_space_for_process_input_recovery() {
+fn toilet_visits_use_local_space_and_preserve_process_input_returns() {
     let mut g = scene(&["eco_toilet", "biodigester"]);
     let r = g
         .app
@@ -274,12 +305,14 @@ fn daily_toilet_visits_leave_enough_sealed_space_for_process_input_recovery() {
         .clone();
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
-        v.circular.waste = 77.5;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 16.);
+        water::fixture_at(&mut v, water::Owner::Building(0), water::Class::Sewage, 16.);
         assert!(!sanitation::due(&v, &r));
-        v.circular.waste = 77.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 15.);
+        water::fixture_at(&mut v, water::Owner::Building(0), water::Class::Sewage, 15.);
         assert!(sanitation::due(&v, &r));
     }
     checkpoint(&mut g);
@@ -297,9 +330,9 @@ fn ready_process_feedback_distinguishes_staged_inputs_from_missing_inputs() {
                 .unwrap()
                 .starts_with("Waiting")
         );
-        v.circular.waste = 2.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
-        v.circular.greywater = 12.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Greywater, 12.);
         let ready = view(&v);
         assert!(
             ready["stations"][0]["reason"]

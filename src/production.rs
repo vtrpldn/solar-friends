@@ -191,9 +191,9 @@ fn choice(v: &Village, id: Id, material: usize) -> Option<(Bundle, u32, bool)> {
 }
 fn service_ready(v: &Village, b: &Batch) -> bool {
     b.material != economy::MEALS
-        || (building(v, b.site).is_some_and(|id| {
-            water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1.
-        }) && (b.committed || !b.biogas || v.circular.biogas >= 1.))
+        || (building(v, b.site)
+            .is_some_and(|id| sanitation::washing_ready(v, water::Owner::Building(id), 1.))
+            && (b.committed || !b.biogas || v.circular.biogas >= 1.))
 }
 fn store(v: &Village, id: Id) -> Option<&logistics::Store> {
     v.logistics
@@ -892,9 +892,8 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         .sites
         .iter()
         .filter(|s| {
-            building(v, s.id).is_some_and(|id| {
-                water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1.
-            })
+            building(v, s.id)
+                .is_some_and(|id| sanitation::washing_ready(v, water::Owner::Building(id), 1.))
         })
         .map(|s| s.id)
         .collect();

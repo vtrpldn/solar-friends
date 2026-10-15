@@ -554,6 +554,7 @@ pub fn matches_haul(
     r: &Resident,
     from: logistics::Owner,
     to: logistics::Owner,
+    material: usize,
 ) -> bool {
     let Some(q) = r
         .help
@@ -571,7 +572,11 @@ pub fn matches_haul(
         ("prepare" | "craft" | "cook", _) => q
             .batch
             .and_then(|id| production::batch(v, id))
-            .is_some_and(|b| to == production::owner(v, b.site)),
+            .is_some_and(|b| {
+                to == production::owner(v, b.site)
+                    && !b.committed
+                    && b.inputs.get(material).is_some_and(|n| *n > 0)
+            }),
         _ => true,
     }
 }
@@ -1080,7 +1085,7 @@ mod tests {
         crate::logistics::fixture_stock(
             &mut g.app.world_mut().resource_mut::<Village>(),
             crate::economy::FOOD,
-            (2.) as u32,
+            0,
         );
         {
             let mut query = g.app.world_mut().query::<&mut Resident>();
@@ -1089,10 +1094,12 @@ mod tests {
             }
         }
         until(&mut g, |g| {
-            person(g, 0).help.unwrap().phase == Phase::Blocked
+            let q = person(g, 0).help.unwrap();
+            q.phase == Phase::Blocked && q.reason.contains("inputs")
         });
         assert_eq!(g.app.world().resource::<Village>().supplies.meals_cooked, 0);
-        assert!(person(&mut g, 0).help.unwrap().reason.contains("inputs"));
+        let blocked = person(&mut g, 0).help.unwrap();
+        assert!(blocked.reason.contains("inputs"), "{}", blocked.reason);
         checkpoint(&mut g);
     }
     #[test]

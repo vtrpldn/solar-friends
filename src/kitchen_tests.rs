@@ -143,7 +143,7 @@ fn a_partial_gas_pot_holds_refund_capacity_before_another_digestion_batch() {
     assert_eq!(g.place("biodigester", 12, 5), "ok");
     let mut v = g.app.world_mut().resource_mut::<Village>();
     logistics::fixture_finish(&mut v, 1);
-    v.circular.waste = 2.;
+    crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 2.);
     crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
     assert!(!work(&mut v, &r, 4.));
     assert_eq!(v.circular.biogas, 8.);

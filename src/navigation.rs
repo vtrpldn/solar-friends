@@ -248,6 +248,33 @@ pub fn refresh(v: &mut Village) {
 }
 
 pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'static str> {
+    route_avoiding(v, from, to, &[])
+}
+fn crowd_clear(a: [f32; 2], b: [f32; 2], people: &[[f32; 2]]) -> bool {
+    let dx = b[0] - a[0];
+    let dy = b[1] - a[1];
+    let length = dx * dx + dy * dy;
+    people.iter().all(|p| {
+        let start = (a[0] - p[0]).hypot(a[1] - p[1]);
+        let t = if length <= 0.000001 {
+            0.
+        } else {
+            ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length
+        };
+        if start < spacing::PERSONAL_SPACE {
+            t <= 0.00001 && (b[0] - p[0]).hypot(b[1] - p[1]) >= start
+        } else {
+            let t = t.clamp(0., 1.);
+            (a[0] + t * dx - p[0]).hypot(a[1] + t * dy - p[1]) >= spacing::PERSONAL_SPACE
+        }
+    })
+}
+pub(crate) fn route_avoiding(
+    v: &Village,
+    from: [f32; 2],
+    to: [f32; 2],
+    people: &[[f32; 2]],
+) -> Result<Route, &'static str> {
     if !clear(v, from[0], from[1]) {
         return Err("The pickup approach is blocked.");
     }
@@ -263,9 +290,30 @@ pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'stati
     }
     let grid = grid(v);
     let size = grid.free.len();
-    let free = &grid.free;
-    let starts = links(v, from, free);
-    let goals = links(v, to, free);
+    let crowd_free;
+    let free = if people.is_empty() {
+        &grid.free
+    } else {
+        crowd_free = grid
+            .free
+            .iter()
+            .enumerate()
+            .map(|(i, &free)| {
+                free && people.iter().all(|p| {
+                    (point(i)[0] - p[0]).hypot(point(i)[1] - p[1]) >= spacing::PERSONAL_SPACE
+                })
+            })
+            .collect::<Vec<_>>();
+        &crowd_free
+    };
+    let starts = links(v, from, free)
+        .into_iter()
+        .filter(|&i| crowd_clear(from, point(i), people))
+        .collect::<Vec<_>>();
+    let goals = links(v, to, free)
+        .into_iter()
+        .filter(|&i| crowd_clear(point(i), to, people))
+        .collect::<Vec<_>>();
     if starts.is_empty() || goals.is_empty() {
         return Err("There is no clear approach to this route.");
     }
@@ -282,6 +330,9 @@ pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'stati
             continue;
         }
         for &(next, edge) in &grid.edges[current] {
+            if !free[next] || !crowd_clear(point(current), point(next), people) {
+                continue;
+            }
             let candidate = score + edge;
             if candidate < distances[next] {
                 distances[next] = candidate;
@@ -315,6 +366,7 @@ pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'stati
     // between two remote road endpoints.
     if (from[0] - to[0]).hypot(from[1] - to[1]) <= 1.
         && segment(v, from, to)
+        && crowd_clear(from, to, people)
         && cost(v, from, to) <= effort
     {
         points = vec![from, to];
@@ -347,6 +399,38 @@ impl Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn standing_neighbours_do_not_trap_a_route_at_an_occupied_grid_corner() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("square", 6, 6), "ok");
+        let raw = g.snapshot();
+        let v = g.app.world().resource::<Village>();
+        let from = [8., 10.];
+        let to = [8.55, 6.];
+        let people = [[7.8031225, 7.8031225], [6., 8.55]];
+        let ordinary = route(v, from, to).unwrap();
+        assert!(ordinary.points.iter().any(|p| (p[0]-people[0][0]).hypot(p[1]-people[0][1]) < spacing::PERSONAL_SPACE));
+        let detour = route_avoiding(v, from, to, &people).unwrap();
+        for leg in detour.points.windows(2) {
+            assert!(segment(v, leg[0], leg[1]));
+            for step in 0..=100 {
+                let t = step as f32 / 100.;
+                let p = [
+                    leg[0][0] + (leg[1][0] - leg[0][0]) * t,
+                    leg[0][1] + (leg[1][1] - leg[0][1]) * t,
+                ];
+                assert!(
+                    people
+                        .iter()
+                        .all(|q| (p[0] - q[0]).hypot(p[1] - q[1])
+                            >= spacing::PERSONAL_SPACE - 0.0001)
+                );
+            }
+        }
+        assert!(detour.distance < ordinary.distance + 8.);
+        assert_eq!(g.snapshot(), raw);
+    }
     #[test]
     fn derived_graph_reuse_and_invalidation_preserve_queries_and_exact_routes() {
         let mut g = Game::new();
