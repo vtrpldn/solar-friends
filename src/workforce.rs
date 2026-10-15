@@ -25,6 +25,7 @@ pub struct Claim {
     pub task: String,
     pub building: Option<usize>,
     pub material: Option<usize>,
+    pub batch: Option<simulation::Id>,
 }
 impl Claim {
     pub fn from_resident(r: &Resident) -> Option<Self> {
@@ -32,6 +33,7 @@ impl Claim {
             task: r.task.clone(),
             building: r.activity_building,
             material: r.activity_material,
+            batch: r.activity_batch,
         })
     }
 }
@@ -140,6 +142,7 @@ pub struct Offer {
     pub task: String,
     pub building: Option<usize>,
     pub material: Option<usize>,
+    pub batch: Option<simulation::Id>,
     pub destination: [f32; 2],
     pub travel_minutes: Option<f32>,
     pub blocker: Option<String>,
@@ -155,6 +158,7 @@ fn occupied(
     task: &str,
     building: Option<usize>,
     material: Option<usize>,
+    batch: Option<simulation::Id>,
 ) -> usize {
     v.activity_claims
         .iter()
@@ -162,7 +166,10 @@ fn occupied(
         .filter(|(id, c)| {
             *id != r.id
                 && c.as_ref().is_some_and(|c| {
-                    c.task == task && c.building == building && c.material == material
+                    c.task == task
+                        && c.building == building
+                        && c.material == material
+                        && c.batch == batch
                 })
         })
         .count()
@@ -176,12 +183,26 @@ pub fn claim_available(
 ) -> bool {
     !requests::work(task)
         || task == "haul"
-        || occupied(v, r, task, building, material)
-            < if matches!(task, "build" | "building_work" | "water") {
-                2
+        || occupied(
+            v,
+            r,
+            task,
+            building,
+            material,
+            if task == "prepare" {
+                r.help
+                    .as_ref()
+                    .filter(|q| q.active() && q.task == "prepare")
+                    .and_then(|q| q.batch)
+                    .or(r.activity_batch)
             } else {
-                1
-            }
+                None
+            },
+        ) < if matches!(task, "build" | "building_work" | "water") {
+            2
+        } else {
+            1
+        }
 }
 /// A neighbour already walking to eat owns one portion. Essential food should
 /// not send the whole village after the same last ingredient and interrupt all
@@ -217,9 +238,18 @@ fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f3
 }
 pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     let mut out = vec![];
-    let mut add = |task: &str, building: Option<usize>, urgency: f32, reason: &'static str| {
+    let mut add = |task: &str,
+                   building: Option<usize>,
+                   batch: Option<simulation::Id>,
+                   urgency: f32,
+                   reason: &'static str| {
         let mut worker = r.clone();
         assign(&mut worker, v, task, reason, false);
+        if let Some(id) = batch
+            && !production::assign_batch(&mut worker, v, id)
+        {
+            return;
+        }
         if worker.task != task && building.is_none() {
             return;
         }
@@ -247,6 +277,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             task,
             worker.activity_building,
             worker.activity_material,
+            worker.activity_batch,
         ) >= capacity
         {
             return;
@@ -263,6 +294,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             task: task.into(),
             building: worker.activity_building,
             material: worker.activity_material,
+            batch: worker.activity_batch,
             destination: [worker.target_x, worker.target_y],
             travel_minutes: travel,
             blocker,
@@ -275,6 +307,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         add(
             "water",
             None,
+            None,
             1100.,
             "Carrying water for our essential daily needs.",
         );
@@ -282,6 +315,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     if cooking(v, r.id) && available(v, "cook") && !situations::protected(v, r.id, "cook") {
         add(
             "cook",
+            None,
             None,
             if v.meals < 3 {
                 1000.
@@ -304,6 +338,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             add(
                 "build",
                 Some(b.id),
+                None,
                 620. + priority as f32 * 60.,
                 "Working on a supplied project during our community hours.",
             );
@@ -312,6 +347,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             add(
                 "building_work",
                 Some(b.id),
+                None,
                 650.,
                 "Making time for our queued building crew work.",
             );
@@ -320,14 +356,16 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             add(
                 "garden",
                 Some(b.id),
+                None,
                 390.,
                 "Tending our garden for the next meals.",
             );
         }
     }
-    if let Some((task, _)) = economy::local_job(v) {
+    if let Some((task, _)) = economy::local_job(v).filter(|(task, _)| task == "source") {
         add(
             &task,
+            None,
             None,
             610.,
             if task == "source" {
@@ -337,9 +375,19 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             },
         );
     }
+    for batch in production::jobs(v) {
+        add(
+            "prepare",
+            None,
+            Some(batch.id),
+            610.,
+            "Preparing a staged batch at its worksite.",
+        );
+    }
     if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
         add(
             "craft",
+            None,
             None,
             660.,
             "Making tools to help with our next shared project.",
@@ -349,6 +397,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         add(
             "compost",
             None,
+            None,
             230.,
             "Turning kitchen scraps into nourishment for our soil.",
         );
@@ -357,6 +406,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         add(
             "gather",
             None,
+            None,
             300.,
             "Gathering a little food for our next meals.",
         );
@@ -364,6 +414,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     if v.water < 70_f32.min(ecology::capacity(v) * 0.8) && available(v, "water") && v.water >= 24. {
         add(
             "water",
+            None,
             None,
             180.,
             "Keeping a useful water reserve for tomorrow.",
@@ -376,6 +427,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             task: "haul".into(),
             building: None,
             material: None,
+            batch:None,
             destination: [r.x, r.y],
             travel_minutes: quote.map(|q| q.0),
             blocker: quote.is_none().then(|| "No hauling route is ready. Check storage access, receiving space and reserved supplies.".into()),
@@ -408,6 +460,10 @@ pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
     r.reason = job.reason.into();
     r.activity_building = job.building;
     r.activity_material = job.material;
+    r.activity_batch = job.batch;
+    if let Some(id) = job.batch {
+        r.remaining = production::batch(v, id).map_or(0., |b| 10. - b.work);
+    }
     (r.target_x, r.target_y) = (job.destination[0], job.destination[1]);
     true
 }
@@ -437,7 +493,7 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
     } else {
         1
     };
-    let free = capacity - occupied(v, r, &job.task, job.building, job.material);
+    let free = capacity - occupied(v, r, &job.task, job.building, job.material, job.batch);
     let mut better = 0;
     for peer in v
         .workforce_peers
@@ -445,7 +501,9 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
         .flatten()
         .filter(|peer| peer.id != r.id && willing(v, peer, &job.task))
     {
-        let point = if let Some(id) = job.building {
+        let point = if let Some(id) = job.batch {
+            production::approach(v, id, peer.id)
+        } else if let Some(id) = job.building {
             v.buildings
                 .iter()
                 .find(|b| b.id == id)
@@ -569,6 +627,7 @@ mod tests {
             task: "gather".into(),
             building: None,
             material: None,
+            batch: None,
         });
         assert!(!offers(&v, &r).iter().any(|o| o.task == "gather"));
         v.activity_claims[1] = None;
@@ -620,6 +679,7 @@ mod tests {
                 task: "build".into(),
                 building: Some(1),
                 material: None,
+                batch: None,
             });
         }
         choose(&mut r, &v);
@@ -718,12 +778,14 @@ mod tests {
             task: "cook".into(),
             building: None,
             material: None,
+            batch: None,
         });
         assert!(cooking(&v, 1));
         v.activity_claims[1] = Some(Claim {
             task: "cook".into(),
             building: None,
             material: None,
+            batch: None,
         });
         assert!(!cooking(&v, 2));
         assert!(!urgent_food(&v, 2));
@@ -743,12 +805,14 @@ mod tests {
             task: "gather".into(),
             building: None,
             material: None,
+            batch: None,
         });
         assert!(urgent_food(&v, 1));
         v.activity_claims[1] = Some(Claim {
             task: "gather".into(),
             building: None,
             material: None,
+            batch: None,
         });
         assert!(!urgent_food(&v, 2));
         v.activity_claims[0] = None;

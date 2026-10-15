@@ -55,7 +55,19 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
     if r.task == "water" {
         return bank(v, r.id).ok_or("Leave a clear place to collect water along the village bank.");
     }
-    if matches!(r.task.as_str(), "source" | "prepare") {
+    if r.task == "prepare" {
+        let id = r
+            .activity_batch
+            .ok_or("This activity no longer has a production batch.")?;
+        let batch = production::batch(v, id).ok_or("This production batch is no longer active.")?;
+        if !production::ready(v, batch) {
+            return Err("This batch is waiting for inputs, an open worksite or output space.");
+        }
+        return production::approach(v, id, r.id)
+            .map(|p| [p.0, p.1])
+            .ok_or("Leave a clear approach to this production worksite.");
+    }
+    if r.task == "source" {
         let i = r
             .activity_material
             .ok_or("This activity no longer has a material worksite.")?;

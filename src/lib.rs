@@ -16,6 +16,7 @@ mod modes;
 mod navigation;
 mod occupations;
 mod power;
+mod production;
 mod progression;
 mod requests;
 mod resource_sites;
@@ -86,6 +87,8 @@ pub struct Resident {
     pub work_check_at: f32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub help: Option<requests::Request>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub activity_batch: Option<simulation::Id>,
     #[serde(default, skip_serializing_if = "walking::State::empty")]
     pub walking: walking::State,
     pub last_meal_slot: i32,
@@ -132,6 +135,8 @@ pub struct Village {
     pub navigation: Option<std::sync::Arc<navigation::Grid>>,
     #[serde(default)]
     pub workforce: workforce::State,
+    #[serde(default)]
+    pub production: production::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
     #[serde(skip)]
@@ -229,7 +234,8 @@ fn available(v: &Village, task: &str) -> bool {
     match task {
         "building_work" => building_work::next(v).is_some(),
         "build" => v.buildings.iter().any(|b| economy::can_build(v, b.id)),
-        "source" | "prepare" => economy::local_job(v).is_some_and(|(t, _)| t == task),
+        "source" => economy::local_job(v).is_some_and(|(t, _)| t == task),
+        "prepare" => v.production.batches.iter().any(|b| b.active()),
         "outside" => (0..5).any(|id| occupations::available(v, id)),
         "garden" => v
             .buildings
@@ -345,6 +351,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     r.trip = None;
     r.visit_building = None;
     r.activity_material = None;
+    r.activity_batch = None;
     r.activity_building = if matches!(task, "source" | "prepare" | "outside" | "haul") {
         None
     } else if matches!(task, "sleep" | "rest") {
@@ -398,7 +405,11 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     if task == "haul" {
         (r.target_x, r.target_y) = (r.x, r.y);
         r.remaining = 100.;
-    } else if matches!(task, "source" | "prepare") {
+    } else if task == "prepare" {
+        if let Some(batch) = production::jobs(v).next() {
+            production::assign_batch(r, v, batch.id);
+        }
+    } else if task == "source" {
         if let Some((_, i)) = economy::local_job(v) {
             r.activity_material = Some(i);
             if task == "source" {
@@ -824,6 +835,17 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             continue;
         }
         r.remaining = (r.remaining - dt).max(0.);
+        if r.task == "prepare" {
+            let completed = production::work(&mut v, &r, dt);
+            r.remaining = r
+                .activity_batch
+                .and_then(|id| production::batch(&v, id))
+                .filter(|b| b.active())
+                .map_or(0., |b| (10. - b.work).max(0.01));
+            if completed {
+                requests::completed_batch(&mut r, &v, true);
+            }
+        }
         match r.task.as_str() {
             "sleep" => {
                 if r.sleep.started_at.is_none() || r.sleep.last_tick.is_none() {
@@ -932,7 +954,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                         }
                     }
                 }
-                "source" | "prepare" => {
+                "source" => {
                     if let Some(i) = r.activity_material {
                         completed_batch = economy::finish_job(&mut v, &r.task, i);
                     }
@@ -1040,6 +1062,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             "Everyone has arrived. Start with a cistern and a home.",
         );
     }
+    production::prune(&mut v, people.iter());
     progression::update(&mut v);
 }
 #[wasm_bindgen]
@@ -1054,6 +1077,7 @@ impl Game {
                 logistics: None,
                 navigation: None,
                 workforce: workforce::State::default(),
+                production: production::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
                 version: 4,
@@ -1110,6 +1134,7 @@ impl Game {
                 requested: false,
                 work_check_at: 0.,
                 help: None,
+                activity_batch: None,
                 walking: walking::State::default(),
                 last_meal_slot: -1,
                 last_sanitation_day: -1,
@@ -1122,6 +1147,7 @@ impl Game {
         }
         simulation::start_materials(&mut app.world_mut().resource_mut::<Village>());
         logistics::initialise(&mut app.world_mut().resource_mut::<Village>());
+        production::sync(&mut app.world_mut().resource_mut::<Village>());
         Self { app }
     }
     pub fn tick(&mut self, seconds: f32) {
@@ -1511,6 +1537,7 @@ impl Game {
         }
         if !logistics::valid(v, &save.residents)
             || !workforce::valid(v)
+            || !production::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
             || !supplies::valid(v)
@@ -1528,6 +1555,8 @@ impl Game {
             .building_jobs
             .iter()
             .filter_map(|j| j.id)
+            .chain(v.production.sites.iter().map(|s| s.id))
+            .chain(v.production.batches.iter().map(|b| b.id))
             .chain(
                 v.logistics
                     .iter()
@@ -1604,6 +1633,11 @@ impl Game {
                     } else {
                         i >= economy::COUNT
                     }
+                })
+                || r.activity_batch.is_some_and(|id| {
+                    production::batch(v, id).is_none_or(|b| {
+                        r.task != "prepare" || Some(b.material) != r.activity_material
+                    })
                 })
                 || r.last_sanitation_day < -1
                 || r.last_sanitation_day > (v.minutes / 1440.) as i32
