@@ -15,8 +15,10 @@ export async function checkGatheringControls({page,saved,capture}){
   assert((await page.locator('#gathering-status').textContent()).includes('0/5 meals delivered'));
   await capture('Planning reserves five meals while neighbours prepare delivery','gathering-planned.png');
   await page.locator('[data-hud-resource="food"]').click();
+  await page.getByRole('tab',{name:'Stores',exact:true}).click();
   if(!await page.locator('#material-inventory').isVisible())await page.getByText('Stored supplies',{exact:true}).click();
   assert((await page.locator('.material-slot[data-item="17"]').textContent()).includes('5 free · 5 reserved'));
+  await page.getByRole('tab',{name:'Pantry',exact:true}).click();
   await page.locator('#shared-table').scrollIntoViewIfNeeded();
   assert(await page.getByRole('button',{name:'Cancel gathering from Supplies',exact:true}).isVisible());
   await load('cargo');await page.locator('[data-hud-resource="food"]').click();
