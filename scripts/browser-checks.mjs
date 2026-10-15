@@ -387,7 +387,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const inspectionBefore=JSON.stringify(observed);
   await page.locator('#dev-inspect').click();
   assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
-  await page.locator('#dev-inspection details summary').click();
+  await page.locator('#dev-inspection details summary').filter({hasText:'Material accounting · seed'}).click();
   const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
   assert.equal(balances.length,15);assert(balances.every(text=>text==='0'));
   await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
