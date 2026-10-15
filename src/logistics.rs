@@ -13,6 +13,7 @@ pub enum Owner {
     Site(usize),
     Production(Id),
     Pantry(usize),
+    Restoration(Id),
     Ground,
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -79,7 +80,7 @@ pub(crate) fn closing(v: &Village, owner: Owner) -> bool {
     }
 }
 fn general(owner: Owner) -> bool {
-    !matches!(owner, Owner::Site(_))
+    !matches!(owner, Owner::Site(_) | Owner::Restoration(_))
 }
 pub fn total(v: &Village, i: usize) -> u32 {
     let s = v.logistics.as_ref().unwrap();
@@ -122,7 +123,8 @@ fn usable(v: &Village, p: &Store, i: usize) -> u32 {
         pickup_reserved(v, p.id, i)
             + production::held(v, p.owner, i)
             + crate::food::held(v, p.id, i, None)
-            + gatherings::held(v, p.id, i),
+            + gatherings::held(v, p.id, i)
+            + restoration::held(v, p.owner, i),
     )
 }
 fn arriving(s: &State, id: Id) -> u32 {
@@ -141,7 +143,7 @@ pub fn free(v: &Village, i: usize) -> u32 {
             .filter(|p| !closing(v, p.owner))
             .map(|p| usable(v, p, i))
             .sum::<u32>()
-            .saturating_sub(production::unclaimed(v, i));
+            .saturating_sub(production::unclaimed(v, i) + restoration::unclaimed(v, i));
     }
     let accessible = s
         .stores
@@ -297,6 +299,12 @@ pub fn sync(v: &mut Village) {
                         .is_none_or(|id| v.buildings.iter().any(|b| b.id == id))
             })
             .map(|s| (Owner::Production(s.id), s.x, s.y, production::BUFFER)),
+    );
+    wanted.extend(
+        v.restoration
+            .iter()
+            .filter(|j| j.active())
+            .map(|j| (Owner::Restoration(j.id), j.x as f32, j.y as f32, 12)),
     );
     for &(owner, x, y, capacity) in &wanted {
         if !v
@@ -572,6 +580,11 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
             .unwrap_or([0; COUNT]),
         Owner::Production(id) => production::needs(v, id),
         Owner::Pantry(id) => crate::food::needs(v, id),
+        Owner::Restoration(id) => {
+            let mut n = [0; COUNT];
+            n[economy::COMPOST] = restoration::held(v, Owner::Restoration(id), economy::COMPOST);
+            n
+        }
         _ => [0; COUNT],
     };
     if let Owner::Site(id) = owner
@@ -613,12 +626,17 @@ pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> 
         Owner::Warehouse(b) | Owner::Site(b) | Owner::Pantry(b) => {
             spacing::approach(v, v.buildings.iter().find(|p| p.id == b)?, id)?
         }
+        Owner::Restoration(job) if restoration::job(v, job).and_then(|j| j.building).is_some() => {
+            let b = restoration::job(v, job).unwrap().building.unwrap();
+            spacing::approach(v, v.buildings.iter().find(|p| p.id == b)?, id)?
+        }
         Owner::Production(site) if production::building(v, site).is_some() => {
             let b = production::building(v, site).unwrap();
             spacing::approach(v, v.buildings.iter().find(|p| p.id == b)?, id)?
         }
         _ => {
             let radius = match p.owner {
+                Owner::Restoration(job) => restoration::job(v, job)?.size as f32 / 2. + 0.6,
                 Owner::Source(i) => {
                     resource_sites::size(v.economy.sources.get(i)?.material) as f32 / 2. + 0.6
                 }
@@ -666,13 +684,14 @@ fn doorway(v: &Village, p: &Store, to: [f32; 2]) -> bool {
             && v.buildings
                 .iter()
                 .filter(|b| !matches!(p.owner,Owner::Site(id)|Owner::Warehouse(id)|Owner::Pantry(id) if id==b.id)
-                    && !matches!(p.owner,Owner::Production(id) if production::building(v,id)==Some(b.id)))
+                    && !matches!(p.owner,Owner::Production(id) if production::building(v,id)==Some(b.id))
+                    && !matches!(p.owner,Owner::Restoration(id) if restoration::job(v,id).and_then(|j|j.building)==Some(b.id)))
                 .all(|b| spacing::clear_plot(b, x, y))
             && v.economy
                 .sources
                 .iter()
                 .enumerate()
-                .filter(|(index, s)| s.active && p.owner != Owner::Source(*index))
+                .filter(|(index, s)| s.active && p.owner != Owner::Source(*index) && !matches!(p.owner,Owner::Restoration(id) if restoration::job(v,id).and_then(|j|j.source)==Some(*index)))
                 .all(|(_, s)| {
                     let n = resource_sites::size(s.material);
                     let left = (s.x - n / 2) as f32 - 0.5;
@@ -693,6 +712,9 @@ struct Candidate {
     rank: (u32, u32, u32),
 }
 fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
+    if matches!(to, Owner::Restoration(_)) {
+        return 1;
+    }
     let kind = match to {
         Owner::Pantry(id) => v
             .buildings
@@ -728,7 +750,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 continue;
             }
             let excess = match from.owner {
-                Owner::Site(_) | Owner::Pantry(_) => {
+                Owner::Site(_) | Owner::Pantry(_) | Owner::Restoration(_) => {
                     available.saturating_sub(needs(v, from.owner)[i])
                 }
                 Owner::Warehouse(_) if from.managed && !closing(v, from.owner) => {
@@ -743,6 +765,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                     | Owner::Ground
                     | Owner::Production(_)
                     | Owner::Pantry(_)
+                    | Owner::Restoration(_)
             ) || closing(v, from.owner)
                 || (matches!(from.owner, Owner::Warehouse(_)) && from.managed);
             if returning && excess > 0 && organics::return_surplus(v, from.owner, i, excess) {
@@ -853,7 +876,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
     for to in s.stores.iter().filter(|p| {
         matches!(
             p.owner,
-            Owner::Pantry(_) | Owner::Site(_) | Owner::Source(_)
+            Owner::Pantry(_) | Owner::Site(_) | Owner::Source(_) | Owner::Restoration(_)
         ) && !closing(v, p.owner)
     }) {
         let required = needs(v, to.owner);
@@ -873,7 +896,13 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 .iter()
                 .filter(|p| p.id != to.id && !closing(v, p.owner))
             {
-                let excess = usable(v, from, i).saturating_sub(needs(v, from.owner)[i]);
+                let excess = usable(v, from, i).saturating_sub(
+                    if matches!(to.owner, Owner::Restoration(_)) {
+                        0
+                    } else {
+                        needs(v, from.owner)[i]
+                    },
+                );
                 let amount = missing.min(excess).min(room(v, to.owner)).min(LOAD);
                 if amount > 0 {
                     out.push(Candidate {
@@ -1115,6 +1144,15 @@ fn valid_destination(v: &Village, h: &Shipment) -> bool {
             needs(v, to.owner)[h.material]
                 >= project_items(v, id)[h.material] + travelling(v, id, h.material)
         }
+        Owner::Restoration(_) => {
+            let incoming: u32 = s
+                .shipments
+                .iter()
+                .filter(|p| p.to == h.to && p.material == h.material)
+                .map(|p| p.amount)
+                .sum();
+            needs(v, to.owner)[h.material] >= to.items[h.material] + incoming
+        }
         Owner::Ground => false,
         Owner::Pantry(_) => {
             let incoming = s
@@ -1343,7 +1381,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 13
+    if v.version != 14
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1431,6 +1469,11 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                         .sources
                         .get(i)
                         .is_some_and(|s| s.active && (p.x, p.y) == (s.x as f32, s.y as f32))
+            }
+            Owner::Restoration(id) => {
+                p.capacity == 12
+                    && restoration::job(v, id)
+                        .is_some_and(|j| j.active() && (p.x, p.y) == (j.x as f32, j.y as f32))
             }
             Owner::Ground => p.capacity <= 300,
             Owner::Production(id) => {

@@ -65,6 +65,7 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     if plot.iter().any(|&(plot_x, plot_y)| {
         ((plot_x as f32 - CAMP.0).abs() < 1.5 && (plot_y as f32 - CAMP.1).abs() < 1.5)
             || crate::building_work::reserved(v, plot_x, plot_y, None)
+            || crate::restoration::reserved(v, plot_x, plot_y)
             || v.roads.contains(&(plot_x, plot_y))
             || v.buildings
                 .iter()
@@ -184,15 +185,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if !s.active || s.material >= 2 {
             continue;
         }
-        let (n, x, y, material, planted, growth, restored) = (
-            size(s.material),
-            s.x,
-            s.y,
-            s.material,
-            s.planted,
-            s.growth,
-            s.restored,
-        );
+        let (n, x, y, material, planted, growth) =
+            (size(s.material), s.x, s.y, s.material, s.planted, s.growth);
         let condition = crate::land::condition(v, n, x, y);
         let wet = crate::land::plot_water(
             v,
@@ -211,9 +205,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         }
         let s = &mut v.economy.sources[i];
         s.growth = (s.growth
-            + wet / (if material == 0 { 5760. } else { 2880. })
-                * crate::land::growth(&condition)
-                * if restored { 1.25 } else { 1. })
+            + wet / (if material == 0 { 5760. } else { 2880. }) * crate::land::growth(&condition))
         .min(1.);
         if s.growth >= 1. {
             s.remaining = s.maximum;
@@ -450,6 +442,7 @@ impl Game {
             s.planted = false;
             s.harvest_requested = false;
             s.plant_requested = false;
+            crate::restoration::reconcile(&mut v);
             crate::logistics::sync(&mut v);
         }
         let mut q = self.app.world_mut().query::<&mut Resident>();
@@ -466,6 +459,7 @@ impl Game {
             }
         }
         self.sync_help();
+        self.sync_restoration_activities();
         "ok".into()
     }
 }
@@ -492,7 +486,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let status=if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
         else if !s.planted{if s.auto_replant||s.plant_requested{if v.economy.money<replant_cost(s.material){"Replanting waits for seedling funds."}else if !water_available(v){"Replanting waits for two irrigation water."}else{"Replanting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
         else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot during normal work hours."};
-        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/if s.restored{1.25}else{1.}/rate).ceil(),"replant_cost":replant_cost(s.material),"batch":if s.material==0{8}else{4}})
+        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":replant_cost(s.material),"batch":if s.material==0{8}else{4}})
     }).collect();
     serde_json::json!(rows)
 }

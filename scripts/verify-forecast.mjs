@@ -33,6 +33,13 @@ assert.equal(g.project_forecast(0),JSON.stringify({error:'Choose a forecast wind
 
 const changedFood=JSON.parse(before);changedFood.village.supplies.feed_hens=!changedFood.village.supplies.feed_hens;
 assert.notEqual(forecastPlan(changedFood),forecastPlan(JSON.parse(before)),'Food preferences change the real work queue and must invalidate its forecast');
+const soilPlan=JSON.parse(before),originalPlan=forecastPlan(soilPlan);
+soilPlan.village.restoration.push({id:999,x:18,y:18,size:2,cancelled:false,work:0,finished:null});
+assert.notEqual(forecastPlan(soilPlan),originalPlan,'Queued soil work changes the shared workload');
+const queuedPlan=forecastPlan(soilPlan);soilPlan.village.restoration[0].work=32;soilPlan.village.restoration[0].finished=600;
+assert.equal(forecastPlan(soilPlan),queuedPlan,'Ordinary restoration progress and completion are already in the conditional replay');
+soilPlan.village.restoration[0].cancelled=true;
+assert.notEqual(forecastPlan(soilPlan),queuedPlan,'Cancelling soil work changes the shared workload');
 
 // A cancelled or superseded background replay cannot overwrite a newer result.
 const previousWorker=globalThis.Worker,workers=[];

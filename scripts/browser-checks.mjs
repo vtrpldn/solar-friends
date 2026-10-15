@@ -1,6 +1,7 @@
 import {checkOrganicControls} from './organics-browser-checks.mjs';
 import {checkCultivationControls} from './cultivation-browser-checks.mjs';
 import {checkLandControls} from './land-browser-checks.mjs';
+import {checkRestorationControls} from './restoration-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
 import assert from 'node:assert/strict';
@@ -63,6 +64,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   assert.equal(original.village.economy.sources.length,0,'New villages start without fixed resource sites');
   await checkLandControls({page,saved,capture});
+  await checkRestorationControls({page,saved,capture});
   await checkCultivationControls({page,saved,capture});
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){

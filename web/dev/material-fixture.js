@@ -2,6 +2,7 @@
 export function resetMaterialLocations(state) {
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
+  state.village.restoration=[];
   delete state.village.land;
   state.village.processes={schema:1,batches:[],paused:[]};
   state.village.freshness={schema:1,expired:Array(21).fill(0)};
@@ -17,7 +18,7 @@ export function resetMaterialLocations(state) {
   state.village.production={schema:1,sites:[],batches:[],targets:Array.from({length:21},(_,i)=>i===17?8:0)};
   for(const r of state.residents||[]){
     r.activity_batch=null;r.activity_store=null;
-    if(r.task==='prepare'){r.task='idle';r.remaining=0;r.activity_material=null;r.activity_building=null;r.target_x=r.x;r.target_y=r.y;r.requested=false;}
+    if(['prepare','restore'].includes(r.task)){r.task='idle';r.remaining=0;r.activity_material=null;r.activity_building=null;r.target_x=r.x;r.target_y=r.y;r.requested=false;}
     if(r.help?.task==='prepare'&&r.help.finished==null){r.help.phase='cancelled';r.help.finished=state.village.minutes;r.help.reason='The material fixture was restaged.';}
   }
   if(state.village.simulation)state.village.simulation.materials=null;

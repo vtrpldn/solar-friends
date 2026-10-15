@@ -1408,7 +1408,7 @@ function setup() {
     if(!$('#village-book').hidden){closePanels();return;}
     showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
   };
-  landMap=installLandMap({game:()=>game,snapshot:()=>state,render:()=>{paintedState=null;render();}});
+  landMap=installLandMap({game:()=>game,snapshot:()=>state,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,render:()=>{paintedState=null;render();}});
   economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
@@ -1691,6 +1691,7 @@ function setup() {
       x = e.clientX - rect.left,
       y = e.clientY - rect.top;
     pointer = { x, y };
+    if(landMap.pin(uniso(x,y),tool)){render();return;}
     if (tool) {
       const p = uniso(x, y),
         result = movingBuilding!==null?game.queue_building_work(movingBuilding,"move",p.x,p.y):tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
