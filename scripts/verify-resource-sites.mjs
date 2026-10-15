@@ -20,6 +20,6 @@ for(let material=0;material<5;material++)for(let x=1;x<=26;x++)for(let y=1;y<=26
  assert(h.restore(baseline));const v=JSON.parse(baseline).village,allowed=!placementReason(v,sourceKinds[material],x,y);
  assert.equal(h.place_source(material,x,y)==='ok',allowed,`Plot hover/native mismatch ${material} ${x},${y}`);if(allowed){plots++;assert(h.restore(h.snapshot()));}
 }
-assert(h.restore(baseline));assert.equal(h.place_source(3,18,18),'ok');assert.equal(h.place_source(3,21,22),'ok');assert.equal(h.harvest_source(0),'ok');
-const placed=JSON.parse(h.snapshot());assert.equal(placed.village.economy.land[1],96);assert.equal(h.clear_source(0),'ok');assert.equal(h.place_source(3,18,18),'ok');assert.equal(JSON.parse(h.snapshot()).village.economy.sources[2].remaining,96);
+assert(h.restore(baseline));assert.equal(h.place_source(3,18,18),'ok');assert.equal(h.place_source(3,23,23),'ok');assert.equal(h.harvest_source(0),'ok');
+const placed=JSON.parse(h.snapshot());assert.equal(placed.village.economy.land[1],96);assert.equal(h.clear_source(0),'ok');assert.equal(h.place_source(3,18,18),'ok');assert.equal(JSON.parse(h.snapshot()).village.economy.sources[2].remaining,placed.village.economy.sources[0].remaining);
 g.free();h.free();console.log(`PASS: empty new villages, retired fixed props, resident-tended growth, whole-tree harvest, saved settings, finite reserve placement, stable clear/replant, and ${plots} valid placements across all 3380 plot previews.`);

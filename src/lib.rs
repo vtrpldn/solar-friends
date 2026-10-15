@@ -12,6 +12,7 @@ mod forecast;
 mod freshness;
 mod gatherings;
 mod interactions;
+mod land;
 mod leisure;
 mod logistics;
 mod mobility;
@@ -147,6 +148,8 @@ pub struct Village {
     pub freshness: freshness::State,
     #[serde(default)]
     pub processes: processes::State,
+    #[serde(default)]
+    pub land: land::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
     #[serde(skip)]
@@ -1128,9 +1131,10 @@ impl Game {
                 production: production::State::default(),
                 freshness: freshness::State::default(),
                 processes: processes::State::default(),
+                land: land::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 10,
+                version: 11,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1197,6 +1201,9 @@ impl Game {
             });
         }
         simulation::start_materials(&mut app.world_mut().resource_mut::<Village>());
+        assert!(land::initialise(
+            &mut app.world_mut().resource_mut::<Village>()
+        ));
         logistics::initialise(&mut app.world_mut().resource_mut::<Village>());
         production::sync(&mut app.world_mut().resource_mut::<Village>());
         Self { app }
@@ -1417,6 +1424,7 @@ impl Game {
             economy::rebalance(&mut v);
         }
         if v.mode == modes::Mode::Sandbox {
+            land::disturb(&mut v, kind, x, y);
             v.buildings.last_mut().unwrap().progress = 100.;
             let stages = economy::recipe(kind, variant).unwrap().len();
             let project = v.economy.projects.last_mut().unwrap();
@@ -1501,6 +1509,9 @@ impl Game {
         }
         occupations::migrate(&mut save);
         resource_sites::retire_legacy(&mut save.village, &mut save.residents);
+        if save.village.version == 3 && !land::initialise(&mut save.village) {
+            return false;
+        }
         let v = &save.village;
         let mut road_tiles = std::collections::HashSet::new();
         if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1518,6 +1529,7 @@ impl Game {
             || !production::valid(v)
             || !freshness::valid(v)
             || !processes::valid(v)
+            || !land::valid(v)
             || !gatherings::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
@@ -1550,6 +1562,7 @@ impl Game {
             )
             .chain(v.progress.gathering_delivery.iter().map(|p| p.id))
             .chain(v.processes.batches.iter().map(|p| p.id))
+            .chain(v.land.deposits.iter().map(|d| d.id))
             .chain(
                 save.residents
                     .iter()
@@ -1580,7 +1593,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 10)
+            || !matches!(v.version, 3 | 11)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1667,7 +1680,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 10;
+            save.village.version = 11;
             if !processes::initialise(&mut save.village) {
                 return false;
             }
@@ -2114,7 +2127,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":10", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":11", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

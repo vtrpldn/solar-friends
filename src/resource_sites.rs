@@ -51,6 +51,16 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     if material == 3 && (x < 17 || y < 17) {
         return Err("Stone-bearing ground is in the southeast of the property.");
     }
+    if material >= 2 {
+        let Some(deposit) = crate::land::deposit(v, material, x, y) else {
+            return Err("No matching deposit here. Check the land map for another patch.");
+        };
+        if deposit.remaining == 0 {
+            return Err(
+                "This local deposit is exhausted. Choose another patch or buy supplies in town.",
+            );
+        }
+    }
     if plot.iter().any(|&(plot_x, plot_y)| {
         ((plot_x as f32 - CAMP.0).abs() < 1.5 && (plot_y as f32 - CAMP.1).abs() < 1.5)
             || crate::building_work::reserved(v, plot_x, plot_y, None)
@@ -149,12 +159,10 @@ pub fn harvested(v: &mut Village, index: usize, amount: u32) {
     v.economy.sources[index].harvest_requested = false;
     v.economy.sources[index].harvests = v.economy.sources[index].harvests.saturating_add(1);
     if material >= 2 {
-        v.economy.land[material - 2] -= amount as f32;
-        for s in &mut v.economy.sources {
-            if s.active && s.material == material {
-                s.remaining = v.economy.land[material - 2];
-            }
-        }
+        let id = v.economy.sources[index]
+            .deposit
+            .expect("finite site has a local deposit");
+        crate::land::extract(v, id, amount);
     } else {
         let s = &mut v.economy.sources[index];
         s.remaining -= amount as f32;
@@ -250,7 +258,15 @@ pub fn valid(v: &Village) -> bool {
     for (i, s) in v.economy.sources.iter().enumerate() {
         if !s.player_placed
             || s.material >= 5
-            || s.maximum != maximum(s.material)
+            || if s.material < 2 {
+                s.maximum != maximum(s.material) || s.deposit.is_some()
+            } else {
+                crate::land::deposit(v, s.material, s.x, s.y).is_none_or(|d| {
+                    s.deposit != Some(d.id)
+                        || s.maximum != d.maximum as f32
+                        || s.active && s.remaining != d.remaining as f32
+                })
+            }
             || !s.remaining.is_finite()
             || s.remaining < 0.
             || s.remaining > s.maximum
@@ -262,12 +278,7 @@ pub fn valid(v: &Village) -> bool {
         {
             return false;
         }
-        if s.material >= 2
-            && (s.planted
-                || s.restored
-                || s.growth != 1.
-                || s.active && s.remaining != v.economy.land[s.material - 2])
-        {
+        if s.material >= 2 && (s.planted || s.restored || s.growth != 1.) {
             return false;
         }
         if s.material < 2
@@ -317,9 +328,6 @@ impl Game {
         if v.logistics.is_some() && v.simulation.next_id.checked_add(1).is_none() {
             return "Material location identity limit reached.".into();
         }
-        if material >= 2 && v.economy.land[material - 2] <= 0. {
-            return "This property’s reserve has been exhausted. Buy supplies in town.".into();
-        }
         let cost = if v.mode == crate::modes::Mode::Sandbox {
             0
         } else {
@@ -335,17 +343,19 @@ impl Game {
         if material < 2 {
             water(&mut v);
         }
-        let remaining = if material < 2 {
-            0.
-        } else {
-            v.economy.land[material - 2]
-        };
+        let deposit =
+            (material >= 2).then(|| crate::land::deposit(&v, material, x, y).unwrap().clone());
+        let remaining = deposit.as_ref().map_or(0., |d| d.remaining as f32);
+        let maximum = deposit
+            .as_ref()
+            .map_or_else(|| maximum(material), |d| d.maximum as f32);
         v.economy.sources.push(economy::Source {
+            deposit: deposit.as_ref().map(|d| d.id),
             material,
             x,
             y,
             remaining,
-            maximum: maximum(material),
+            maximum,
             restored: false,
             player_placed: true,
             active: true,
@@ -430,9 +440,9 @@ pub fn options() -> serde_json::Value {
     serde_json::json!([
         {"material":0,"key":"source_timber","name":"Timber trees","cost":8000,"size":3,"days":4,"description":"Plant four timber trees · harvest whole trees · replant renewably"},
         {"material":1,"key":"source_bamboo","name":"Bamboo plot","cost":3000,"size":2,"days":2,"description":"Cultivate bamboo · shoots regrow after cutting"},
-        {"material":2,"key":"source_earth","name":"Earth digging","cost":1500,"size":2,"days":0,"description":"Choose an earth extraction area · finite property reserve"},
-        {"material":3,"key":"source_stone","name":"Stone quarry","cost":2500,"size":2,"days":0,"description":"Place on stony southeast ground · finite shared stone reserve"},
-        {"material":4,"key":"source_salvage","name":"Salvage recovery","cost":1500,"size":2,"days":0,"description":"Sort reclaimed material from the property · finite shared reserve"}
+        {"material":2,"key":"source_earth","name":"Earth digging","cost":1500,"size":2,"days":0,"description":"Choose an earth extraction area · finite local deposit"},
+        {"material":3,"key":"source_stone","name":"Stone quarry","cost":2500,"size":2,"days":0,"description":"Place on stony southeast ground · finite local stone deposit"},
+        {"material":4,"key":"source_salvage","name":"Salvage recovery","cost":1500,"size":2,"days":0,"description":"Sort reclaimed material from the property · finite local deposit"}
     ])
 }
 pub fn view(v: &Village) -> serde_json::Value {
@@ -444,10 +454,10 @@ pub fn view(v: &Village) -> serde_json::Value {
         "Salvage recovery",
     ];
     let rows:Vec<_>=v.economy.sources.iter().enumerate().filter(|(_,s)|s.active).map(|(index,s)|{
-        let status=if s.material>=2{if s.remaining>0.{"Finite reserve shared by all sites on this property."}else{"Property reserve exhausted · purchase material in town."}}
+        let status=if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
         else if !s.planted{if s.auto_replant||s.plant_requested{if v.economy.money<replant_cost(s.material){"Replanting waits for seedling funds."}else if !water_available(v){"Replanting waits for two irrigation water."}else{"Replanting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
         else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot during normal work hours."};
-        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"growth_percent":(s.growth*100.).floor(),"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/if s.restored{1.25}else{1.}).ceil(),"replant_cost":replant_cost(s.material),"batch":if s.material==0{8}else{4}})
+        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/if s.restored{1.25}else{1.}).ceil(),"replant_cost":replant_cost(s.material),"batch":if s.material==0{8}else{4}})
     }).collect();
     serde_json::json!(rows)
 }
@@ -548,10 +558,12 @@ mod tests {
         assert!(g.restore(&checkpoint));
     }
     #[test]
-    fn multiple_quarries_share_reserves_and_relocation_cannot_duplicate_stone() {
+    fn quarries_only_share_their_own_patch_and_relocation_cannot_duplicate_stone() {
         let mut g = Game::new();
         assert_eq!(g.place_source(3, 18, 18), "ok");
-        assert_eq!(g.place_source(3, 21, 22), "ok");
+        assert_eq!(g.place_source(3, 23, 23), "ok");
+        let first = g.app.world().resource::<Village>().economy.sources[0].remaining;
+        let second = g.app.world().resource::<Village>().economy.sources[1].remaining;
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.economy.sources[0].harvest_requested = true;
@@ -559,13 +571,14 @@ mod tests {
             economy::finish_job(&mut v, "source", 0);
             assert_eq!(economy::quantity(&v, 3), before + 4);
             assert_eq!(v.economy.land[1], 92.);
-            assert!(v.economy.sources.iter().all(|s| s.remaining == 92.));
+            assert_eq!(v.economy.sources[0].remaining, first - 4.);
+            assert_eq!(v.economy.sources[1].remaining, second);
         }
         assert_eq!(g.clear_source(0), "ok");
         assert_eq!(g.place_source(3, 18, 18), "ok");
         assert_eq!(
             g.app.world().resource::<Village>().economy.sources[2].remaining,
-            92.
+            first - 4.
         );
         let checkpoint = g.snapshot();
         assert!(g.restore(&checkpoint));
