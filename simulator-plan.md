@@ -17,6 +17,7 @@ Give layout, resource choices, and community time lasting consequences. A wareho
 ## Contents
 
 - [Six-system roadmap](#six-system-roadmap)
+- [Delivery checklist for all six systems](#delivery-checklist-for-all-six-systems)
 - [Design rules](#design-rules)
 - [Existing systems and proposed extensions](#existing-systems-and-proposed-extensions)
 - [Implementation order](#implementation-order)
@@ -50,6 +51,56 @@ Build and release them in that order. Within production, finish construction mat
 For each release, provide the simulation rules, player controls, visible feedback, a protected dev scenario, and evidence for its completion check. A working subsystem does not complete the whole roadmap. Existing partial delivery is recorded under [Implementation progress](#implementation-progress).
 
 One integrated playtest should follow a housing expansion: compare buying tiles with producing them locally, choose storage and hauling routes, retain enough resident time for food and outside income, protect productive soil, connect the new home, then maintain those services through a dry period. Run the same starting village with alternative decisions and compare time, funds, resource use and leisure. Use those results to tune the game before requiring the sequence in Story.
+
+## Delivery checklist for all six systems
+
+This checklist defines the intended deliveries, rather than claiming that each system is finished. Use the implementation progress below to distinguish delivered work from unfinished work.
+
+### 1. Physical resources and hauling
+
+1. Establish located inventories, ownership and reservations, with explicit accounts for purchases, consumption, loss and salvage.
+2. Route actual collection, cargo and delivery between arrival, storage, extraction, production and construction sites. Keep stock summaries derived from these locations.
+3. Add priorities, road benefits, blocked-access feedback and recovery when storage moves or a trip is interrupted.
+4. Release after paired layouts demonstrate a useful storage or road decision and every interrupted trip preserves its goods through saving and reloading.
+
+### 2. Resident time and autonomous work
+
+1. Account for travel, village work, outside shifts, meals, sleep and leisure using the same game clock.
+2. Offer reachable jobs through a shared queue, respecting individual preferences, workload, outside commitments and essential needs.
+3. Show helping requests progressing through acceptance, travel, work, waiting and completion. Forecast projects using actual supplies and available working time.
+4. Release after changing work preferences produces a measurable income-versus-completion tradeoff, requests visibly finish, and a stable village leaves residents time for hobbies.
+
+### 3. Building production
+
+1. Convert camp and workshop recipes into saved batches with delivered inputs, attended labour and local outputs; retain purchasing as an alternative.
+2. Apply the same ownership rules to tools, kitchen supplies, cooked meals and gathering food. Preserve food dates while it moves or returns from cancelled work.
+3. Integrate passive growth, curing, digestion and treatment. Bound production by useful reserve targets, output space and operating requirements.
+4. Release after buying and local production both support a housing project, and interruption, spoilage, cancellation or relocation cannot duplicate inputs or outputs.
+
+### 4. Living land
+
+1. Seed persistent soil, moisture, shade and separate finite deposits. Guarantee a viable arrival clearing.
+2. Tie actual planting, extraction and yields to their location. Timber and bamboo require planting and renewable management; exhausted deposits stay exhausted.
+3. Add attended restoration with delivered compost, plus land overlays and placement previews that explain the consequences before building.
+4. Release after paired plots show a useful suitability difference, ground changes survive demolition and reload, and depleted or poorly placed villages have a practical recovery path.
+
+### 5. Connected utilities
+
+1. Locate fresh water and irrigation supplies, then provide carrying and installed water routes with real equipment and resident labour.
+2. Locate greywater and sealed sewage, connect compatible treatment buildings, and preserve class separation through transport, processing and recovery.
+3. Finish owned electrical storage and installed cable circuits. Connect pumps, shared lighting and optional powered workshop operation while retaining starter manual work and private rooftop systems.
+4. Add planning, local capacity, priorities, metering and outage feedback to the normal game controls. Moving equipment requires disconnection and resident reconnection work.
+5. Release after disconnected consumers receive no remote supply, outages preserve committed batches, and installed routes survive interruption, removal and relocation without free equipment or energy.
+
+### 6. Long-term change
+
+1. Add seeded wet and dry periods, forecasts and saved future conditions. Apply the same weather to soil, crops, solar output and river generation.
+2. Track equipment condition from use and exposure. Offer scheduled maintenance using spare parts and attended work, with warnings before recoverable service failures.
+3. Award bounded skills for completed useful work. Improve efficiency gradually while keeping ordinary jobs available to every resident.
+4. Add predictable supplier variation and limited seasonal offers. Confirmed prices remain fixed; essential purchases retain an accessible recovery route.
+5. Release after repeated seasonal cycles demonstrate preparation, maintenance and purchase decisions, with valid accounts and substantial resident leisure.
+
+Complete each system with its controls, player feedback, protected dev scenes, save checks and desktop artwork review. Teach new dependencies as they arrive. Finish with the integrated Story campaign, optional Sandbox constraints and the paired housing-expansion playtest described above. Completion means all six systems pass their checks together, including recovery from shortages and poorly planned layouts.
 
 ## Design rules
 
@@ -220,6 +271,8 @@ The dev report should expose material conservation, travelling cargo, route fail
 Completion requires all six systems, the redesigned Story introductions, configurable Sandbox constraints, and repeated seasonal operation to meet their acceptance checks. Record unresolved performance or balance limits alongside the corresponding result. Update this plan as stages are delivered, and preserve incremental review and commits.
 
 ## Implementation progress
+
+- Stage 5 cable installation now uses paid located kits, actual resident hauling, successive corridor work and commissioning. Cables connect saved source, consumer, pump and recovered-bank identities, with bounded local transfer and separately metered consumption. Rooftop storage remains private. A moved cistern preserves its pump port while crews dismantle and rebuild water and electrical routes; longer corridors require additional paid wiring. Focused resident replays cover delivery, partial installation checkpoints, lighting, pump operation, pausing, dismantling, relocation and exact saves. Rainy hydro generation accepts floating-point rounding at its rated maximum, and pumped volume is capped at the available liquid to prevent rounding from creating negative source contents. All 363 native tests, strict all-target lint and WebAssembly target type checking pass. Player controls, powered workshop operation, recovered-bank management and new-build browser/campaign checks remain required. The browser still runs the verified sanitation build.
 
 - Stage 5 connected electricity is in progress. The first native model owns charge per source or recovered battery, keeps rooftop energy private, meters energy through individual cable limits and accounts separately for generation, consumption and curtailed surplus. A disposable frame lets gameplay apply actual operating demand before lighting, then stores unused generation without losing the energy used directly while a battery is full. Focused native checks cover isolated circuits, cable bottlenecks, alternative routes, private roofs, closed endpoints, conserved charge and equivalent small or large intervals. The native village now owns source, rooftop, consumer and pump nodes in save version 20. Shared stored energy is a derived report; private roofs spend their own charge, disconnected lamps receive none, and pumps cannot spend a distant shared total. Actual resident generator relocation preserves its bank identity and charge; removal leaves an owned recoverable battery. Thirteen focused electrical checks, the adapted agreement-save check and the existing attended dismantling check pass. River-generator removal places its preserved battery on reachable bank ground; a forged recovered bank in the river is rejected atomically. Switched-off lights no longer appear as unmet lighting demand. Strict all-target lint and WebAssembly target type checking pass. The full regression is not yet passing while cable installation and scene updates remain in progress. Player controls, artwork evidence and campaign regressions remain pending; the verified sanitation build remains the current browser build.
 

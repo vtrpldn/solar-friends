@@ -161,14 +161,24 @@ mod tests {
         assert_eq!(g.place("home", 12, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.power.stored = 20.;
+            crate::power::fixtures::charge(&mut v, 20.);
         }
         assert!(g.remove_sandbox_building(0));
         assert_eq!(g.app.world().resource::<Village>().power.stored, 20.);
         let queued = g.snapshot();
         assert!(g.restore(&queued));
         crate::building_work::work(&mut g.app.world_mut().resource_mut::<Village>(), 0, 18.);
-        assert_eq!(g.app.world().resource::<Village>().power.stored, 0.);
+        assert_eq!(g.app.world().resource::<Village>().power.stored, 20.);
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .power
+                .network
+                .nodes
+                .iter()
+                .any(|n| n.owner == crate::electricity::Owner::Ground && n.charge == 20.)
+        );
         let mut q = g.app.world_mut().query::<&mut Resident>();
         let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
         r.visit_building = Some(1);

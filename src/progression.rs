@@ -362,16 +362,24 @@ mod tests {
             assert!(v.progress.rain_caught);
             v.minutes = 1320.;
             crate::power::advance(&mut v, 1.);
+            crate::power::finish_frame(&mut v, 1.);
             assert!(!v.progress.night_lights);
         }
         assert_eq!(g.place("solar_farm", 13, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.power.stored = 12.;
+        crate::power::fixtures::connect(
+            &mut v,
+            crate::electricity::Owner::Building(2),
+            crate::electricity::Owner::Building(1),
+        );
+        crate::power::fixtures::charge(&mut v, 12.);
         v.power.disabled.push(1);
         crate::power::advance(&mut v, 1.);
+        crate::power::finish_frame(&mut v, 1.);
         assert!(!v.progress.night_lights);
         v.power.disabled.clear();
         crate::power::advance(&mut v, 1.);
+        crate::power::finish_frame(&mut v, 1.);
         assert!(v.progress.night_lights);
     }
 

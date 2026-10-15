@@ -187,12 +187,12 @@ impl State {
             if !seen.insert(id.0)
                 || !rate.is_finite()
                 || rate < 0.
-                || rate > self.nodes[i].peak()
+                || rate > self.nodes[i].peak() + EPS
                 || rate > 0. && !opened[i]
             {
                 return Err("Invalid or closed generator.");
             }
-            let amount = rate * minutes / 60.;
+            let amount = rate.min(self.nodes[i].peak()) * minutes / 60.;
             pools[i] += amount;
             state.account.generated += amount;
         }
@@ -239,6 +239,17 @@ impl State {
     }
 }
 impl Frame {
+    /// A moved pipe keeps its pump equipment, but cannot operate during rebuilding.
+    pub(crate) fn relocate_pump(&mut self, id: Id, owner: Owner, x: i32, y: i32) {
+        let i = self.state.nodes.iter().position(|n| n.id == id).unwrap();
+        let n = &mut self.state.nodes[i];
+        assert_eq!(n.kind, Kind::Pump);
+        assert!(matches!(owner, Owner::Pump(_)));
+        n.owner = owner;
+        n.x = x;
+        n.y = y;
+        self.open[i] = false;
+    }
     fn index(&self, id: Id) -> Option<usize> {
         self.state.nodes.iter().position(|n| n.id == id)
     }
@@ -316,7 +327,10 @@ impl Frame {
     }
     /// Store unused generation locally, then through remaining cable capacity.
     /// Only energy that cannot be used or stored is curtailed.
-    pub fn finish(mut self) -> State {
+    pub fn finish(self) -> State {
+        self.finish_with_flows().0
+    }
+    pub fn finish_with_flows(mut self) -> (State, Vec<(Id, f64)>) {
         for source in 0..self.pools.len() {
             while self.pools[source] - self.state.nodes[source].capacity > EPS {
                 let Some((target, path)) = self.route(source, |i| {
@@ -341,7 +355,13 @@ impl Frame {
             n.charge = pool.min(n.capacity);
             self.state.account.curtailed += (pool - n.charge).max(0.);
         }
-        self.state
+        let flows = self
+            .wires
+            .iter()
+            .enumerate()
+            .map(|(i, w)| (w.id, self.limits[i] - self.remaining[i]))
+            .collect();
+        (self.state, flows)
     }
     pub fn available(&self, node: Id) -> f64 {
         self.clone().spend(node, 1e9)

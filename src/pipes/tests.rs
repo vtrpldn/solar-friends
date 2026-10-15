@@ -15,7 +15,7 @@ fn scene() -> Game {
         v.mode = modes::Mode::Story;
         v.arrived = true;
         v.minutes = 540.;
-        v.power.stored = 10.;
+        power::fixtures::charge(&mut v, 10.);
         v.progress.completed = [true; 4];
         v.progress.later_completed = [true; 9];
         v.production.targets[economy::MEALS] = 0;
@@ -199,6 +199,7 @@ fn pumping_conserves_water_and_spends_energy_with_real_flow_and_capacity_limits(
     let mut g = scene();
     let id = queued(&mut g);
     install_direct(&mut g, id);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), id);
     let mut v = g.app.world().resource::<Village>().clone();
     let owners: Vec<_> = v.water_supply.tanks.iter().map(|t| t.owner).collect();
     for owner in owners {
@@ -208,21 +209,21 @@ fn pumping_conserves_water_and_spends_energy_with_real_flow_and_capacity_limits(
     water::add(&mut v, water::Owner::Camp, water::Class::Fresh, 40.);
     let destination = water::Owner::Building(1);
     water::draw(&mut v, destination, water::Class::Fresh, 6.);
-    v.power.stored = 1.;
+    power::fixtures::charge(&mut v, 1.);
     let total = water::total(&v, water::Class::Fresh);
-    advance(&mut v, 10.);
+    pump_interval(&mut v, 10.);
     assert!((water::available(&v, destination, water::Class::Fresh) - 2.).abs() < 1e-8);
     assert!((v.power.stored - 0.95).abs() < 1e-6);
     assert!((water::total(&v, water::Class::Fresh) - total).abs() < 1e-8);
-    advance(&mut v, 100.);
+    pump_interval(&mut v, 100.);
     assert_eq!(water::available(&v, destination, water::Class::Fresh), 6.);
     water::draw(&mut v, destination, water::Class::Fresh, 6.);
-    v.power.stored = 0.025;
-    advance(&mut v, 100.);
+    power::fixtures::charge(&mut v, 0.025);
+    pump_interval(&mut v, 100.);
     assert!((water::available(&v, destination, water::Class::Fresh) - 1.).abs() < 1e-6);
     assert_eq!(v.power.stored, 0.);
     let before = water::available(&v, destination, water::Class::Fresh);
-    advance(&mut v, 100.);
+    pump_interval(&mut v, 100.);
     assert_eq!(
         water::available(&v, destination, water::Class::Fresh),
         before
@@ -324,11 +325,11 @@ fn pumps_respect_pickup_and_receiver_reservations_owned_by_real_carriers() {
     r.remaining = 10.;
     water::advance(&mut v, &mut r, &[], 0.25);
     let trip = &v.water_supply.trips[0];
-    assert_eq!(trip.to, line(&v, id).unwrap().anchors[1].tank);
+    assert_eq!(trip.to, line(&v, id).unwrap().anchors[1].endpoint);
     assert_eq!(trip.amount, 6.);
     let from = water::available(&v, water::Owner::Building(0), water::Class::Fresh);
     let energy = v.power.stored;
-    advance(&mut v, 60.);
+    pump_interval(&mut v, 60.);
     assert_eq!(
         water::available(&v, water::Owner::Building(1), water::Class::Fresh),
         0.
@@ -345,6 +346,7 @@ fn competing_pumps_use_player_priority_without_duplicating_the_source() {
     let home = add_ready(&mut g, "home", 18, 10);
     let first = queued(&mut g);
     install_direct(&mut g, first);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), first);
     assert_eq!(g.queue_water_connection("fresh", 0, home as i32), "ok");
     let second = g
         .app
@@ -356,14 +358,15 @@ fn competing_pumps_use_player_priority_without_duplicating_the_source() {
         .unwrap()
         .id;
     install_direct(&mut g, second);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), second);
     assert_eq!(g.configure_water_connection(first.0, 0, false), "ok");
     assert_eq!(g.configure_water_connection(second.0, 3, false), "ok");
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         empty_fresh(&mut v);
         water::add(&mut v, water::Owner::Building(0), water::Class::Fresh, 1.);
-        v.power.stored = 10.;
-        advance(&mut v, 10.);
+        power::fixtures::charge(&mut v, 10.);
+        pump_interval(&mut v, 10.);
         assert_eq!(
             water::available(&v, water::Owner::Building(home), water::Class::Fresh),
             1.
@@ -391,6 +394,7 @@ fn irrigation_lines_cannot_supply_a_kitchen_and_never_credit_fresh_water() {
     );
     let id = g.app.world().resource::<Village>().pipes.lines[0].id;
     install_direct(&mut g, id);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), id);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         water::add(
@@ -400,7 +404,7 @@ fn irrigation_lines_cannot_supply_a_kitchen_and_never_credit_fresh_water() {
             8.,
         );
         let before = v.water;
-        advance(&mut v, 20.);
+        pump_interval(&mut v, 20.);
         assert_eq!(
             water::available(&v, water::Owner::Building(garden), water::Class::Irrigation),
             4.
@@ -640,12 +644,13 @@ fn installed_sewage_lines_transfer_only_owned_sealed_contents_and_stop_without_p
     assert_eq!(g.queue_water_connection("sewage", 3, 4), "ok");
     let id = g.app.world().resource::<Village>().pipes.lines[0].id;
     install_direct(&mut g, id);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), id);
     checkpoint(&mut g);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let fresh = v.water;
         v.minutes += 60.;
-        advance(&mut v, 60.);
+        pump_interval(&mut v, 60.);
         assert_eq!(
             water::local(&v, water::Owner::Building(3), water::Class::Sewage),
             0.
@@ -663,9 +668,9 @@ fn installed_sewage_lines_transfer_only_owned_sealed_contents_and_stop_without_p
             water::produce(&mut v, water::Owner::Building(3), water::Class::Sewage, 2.),
             2.
         );
-        v.power.stored = 0.;
+        power::fixtures::charge(&mut v, 0.);
         v.minutes += 60.;
-        advance(&mut v, 60.);
+        pump_interval(&mut v, 60.);
         assert_eq!(line(&v, id).unwrap().transferred, 6.);
     }
     checkpoint(&mut g);
@@ -688,11 +693,12 @@ fn a_greywater_line_supplies_its_local_reed_bed_and_cannot_be_used_as_fresh_wate
     assert_eq!(g.queue_water_connection("greywater", 1, 5), "ok");
     let id = g.app.world().resource::<Village>().pipes.lines[0].id;
     install_direct(&mut g, id);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), id);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let fresh = v.water;
         v.minutes += 60.;
-        advance(&mut v, 60.);
+        pump_interval(&mut v, 60.);
         assert_eq!(
             water::local(&v, water::Owner::Building(5), water::Class::Greywater),
             12.
@@ -713,4 +719,15 @@ fn a_greywater_line_supplies_its_local_reed_bed_and_cannot_be_used_as_fresh_wate
         assert_eq!(v.water_supply.received[1], 8.);
     }
     checkpoint(&mut g);
+}
+
+fn pump_interval(v: &mut Village, minutes: f32) {
+    // A night interval isolates actual pumping from solar generation.
+    if v.minutes < 1260. {
+        v.minutes = 1260.;
+    }
+    v.minutes += minutes;
+    power::advance(v, minutes);
+    advance(v, minutes);
+    power::finish_frame(v, minutes);
 }

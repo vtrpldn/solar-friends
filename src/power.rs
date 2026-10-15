@@ -1,6 +1,9 @@
 //! Owned solar, river and rooftop batteries with connected electrical demand.
 use super::*;
 mod network;
+pub(crate) fn replace_pump(v: &mut Village, previous: simulation::Id, next: simulation::Id) {
+    network::replace_pump(v, previous, next);
+}
 use crate::electricity::{Frame, Owner};
 
 #[derive(Clone, Default, Serialize, Deserialize)]
@@ -207,7 +210,7 @@ pub fn valid(v: &Village) -> bool {
 impl Game {
     pub fn electricity_report(&self) -> String {
         let v = self.app.world().resource::<Village>();
-        serde_json::json!({"network":v.power.network,"supply":supply(v),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment."}).to_string()
+        serde_json::json!({"network":v.power.network,"supply":supply(v),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment."}).to_string()
     }
 }
 
@@ -235,6 +238,7 @@ mod tests {
         }
         crate::logistics::sync(&mut v);
         v.minutes = 360.;
+        fixtures::connect(&mut v, Owner::Building(0), Owner::Building(1));
         freshness::fixture_reseed(&mut v);
         v.economy.ledger.clear();
         v
@@ -243,6 +247,7 @@ mod tests {
         for _ in 0..minutes {
             v.minutes += 1.;
             advance(v, 1.);
+            finish_frame(v, 1.);
         }
     }
     #[test]
@@ -261,6 +266,14 @@ mod tests {
     fn unfinished_farms_empty_batteries_and_rooftop_independence() {
         let mut v = village();
         v.buildings[0].progress = 99.;
+        v.pipes = pipes::State::default();
+        v.logistics
+            .as_mut()
+            .unwrap()
+            .stores
+            .retain(|s| !matches!(s.owner, logistics::Owner::Utility(_)));
+        v.power.network = electricity::State::default();
+        network::sync(&mut v);
         run(&mut v, 720);
         v.minutes = 1260.;
         let p = supply(&v);
@@ -269,7 +282,8 @@ mod tests {
         assert_eq!(p.connections[2].source, "roof");
         assert_eq!(p.connections[2].light_level, 1.);
         crate::logistics::fixture_finish(&mut v, 0);
-        v.power.stored = 0.0005;
+        fixtures::connect(&mut v, Owner::Building(0), Owner::Building(1));
+        fixtures::charge(&mut v, 0.0005);
         assert!(supply(&v).grid_level > 0. && supply(&v).grid_level < 1.);
         run(&mut v, 1);
         assert_eq!(v.power.stored, 0.);
@@ -277,7 +291,7 @@ mod tests {
     #[test]
     fn switching_loads_off_preserves_charge_and_multiple_farms_add_capacity() {
         let mut v = village();
-        v.power.stored = 10.;
+        fixtures::charge(&mut v, 10.);
         v.minutes = 1260.;
         v.power.disabled.push(1);
         run(&mut v, 60);
@@ -287,6 +301,7 @@ mod tests {
         second.id = v.buildings.len();
         second.x = 20;
         v.buildings.push(second);
+        network::sync(&mut v);
         v.minutes = 720.;
         assert_eq!(supply(&v).capacity, 72.);
         let expected: f32 = v
@@ -299,10 +314,10 @@ mod tests {
         assert!(expected > 6. && expected <= 12.);
     }
     #[test]
-    fn save_migration_round_trip_and_corrupt_power_are_checked() {
+    fn owned_save_round_trip_and_missing_or_corrupt_power_are_checked() {
         let mut game = Game::new();
         let mut v = village();
-        v.power.stored = 12.;
+        fixtures::charge(&mut v, 12.);
         v.power.disabled.push(1);
         game.app.insert_resource(v);
         let save = game.snapshot();
@@ -311,8 +326,8 @@ mod tests {
         assert_eq!(restored.snapshot(), save);
         let mut old: serde_json::Value = serde_json::from_str(&save).unwrap();
         old["village"].as_object_mut().unwrap().remove("power");
-        assert!(restored.restore(&old.to_string()));
-        assert_eq!(restored.app.world().resource::<Village>().power.stored, 0.);
+        assert!(!restored.restore(&old.to_string()));
+        assert_eq!(restored.snapshot(), save);
         for bad in [
             serde_json::json!({"stored":-1}),
             serde_json::json!({"stored":37}),
@@ -337,8 +352,8 @@ mod hydro_tests {
         assert_eq!(g.place("hydro", 26, 5), "ok");
         assert_eq!(g.place("streetlight", 20, 5), "ok");
         let mut v = g.app.world().resource::<Village>().clone();
+        fixtures::connect(&mut v, Owner::Building(0), Owner::Building(1));
         v.minutes = 2. * 1440. + 1260.;
-        v.power.stored = 0.;
         let p = supply(&v);
         assert_eq!(p.hydros, 1);
         assert_eq!(p.farms, 0);
@@ -346,6 +361,7 @@ mod hydro_tests {
         assert!((p.generation - 1.17).abs() < 0.001);
         assert_eq!(p.grid_level, 1.);
         advance(&mut v, 60.);
+        finish_frame(&mut v, 60.);
         assert!(v.power.stored > 1.);
         for id in 0..5 {
             assert!(spacing::approach(&v, &v.buildings[0], id).is_some());
@@ -354,3 +370,70 @@ mod hydro_tests {
         assert!(restored.restore(&g.snapshot()));
     }
 }
+
+pub fn endpoints(v: &Village) -> Vec<utilities::Endpoint> {
+    v.power
+        .network
+        .nodes
+        .iter()
+        .filter(|n| n.kind != electricity::Kind::Roof)
+        .filter_map(|n| {
+            let kind = match n.owner {
+                Owner::Building(id) => v.buildings.iter().find(|b| b.id == id)?.kind.clone(),
+                Owner::Pump(_) => "pump".into(),
+                Owner::Ground => "battery".into(),
+            };
+            let ports = if kind == "hydro" {
+                utilities::hydro_ports(
+                    v,
+                    v.buildings
+                        .iter()
+                        .find(|b| matches!(n.owner,Owner::Building(id) if b.id==id))?,
+                )
+            } else if kind == "pump" {
+                vec![utilities::Port {
+                    edge: [n.x as f32, n.y as f32],
+                    cell: [n.x, n.y],
+                    bank_lead: false,
+                }]
+            } else {
+                utilities::ports(v, n.size, n.x, n.y)
+            };
+            Some(utilities::Endpoint {
+                id: i64::from(n.id.0),
+                kind,
+                x: n.x,
+                y: n.y,
+                size: n.size,
+                supply: true,
+                receive: true,
+                ready: match n.owner {
+                    Owner::Pump(id) => pipes::line(v, id)
+                        .is_some_and(|p| p.live() && p.phase != pipes::Phase::Removing),
+                    _ => network::open(v, n),
+                },
+                ports,
+            })
+        })
+        .collect()
+}
+pub fn electrical_node(v: &Village, id: i64) -> Option<&electricity::Node> {
+    let id = u32::try_from(id).ok()?;
+    v.power
+        .network
+        .nodes
+        .iter()
+        .find(|n| n.id == simulation::Id(id))
+}
+pub fn electrical_open(v: &Village, id: i64) -> bool {
+    electrical_node(v, id).is_some_and(|n| network::open(v, n))
+}
+pub fn shared_kind(kind: &str) -> bool {
+    matches!(kind, "solar_farm" | "hydro" | "pump" | "battery") || load(kind) > 0.
+}
+
+#[cfg(test)]
+mod cable_tests;
+
+#[cfg(test)]
+pub(crate) mod fixtures;

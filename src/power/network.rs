@@ -1,6 +1,6 @@
 //! Village ownership and lifecycle around the electrical flow model.
 use super::*;
-use crate::electricity::{self, Kind as NodeKind, Node, Owner, State, Wire};
+use crate::electricity::{self, Id, Kind as NodeKind, Node, Owner, State, Wire};
 
 fn building_kind(kind: &str) -> Option<(NodeKind, f64)> {
     match kind {
@@ -33,7 +33,7 @@ fn wanted(v: &Village) -> Vec<(Owner, NodeKind, i32, i32, i32, f64)> {
         v.pipes
             .lines
             .iter()
-            .filter(|p| p.live() && p.plan.kind != utilities::Kind::Electricity)
+            .filter(|p| (p.live() || p.replacement) && p.plan.kind != utilities::Kind::Electricity)
             .map(|p| {
                 (
                     Owner::Pump(p.id),
@@ -67,6 +67,31 @@ pub fn capacity(v: &Village) -> f64 {
 }
 pub fn summaries(v: &mut Village) {
     v.power.stored = stored(v) as f32;
+}
+pub(crate) fn replace_pump(v: &mut Village, previous: Id, next: Id) {
+    let Some(n) = v
+        .power
+        .network
+        .nodes
+        .iter_mut()
+        .find(|n| n.owner == Owner::Pump(previous))
+    else {
+        return;
+    };
+    let cell = v
+        .pipes
+        .lines
+        .iter()
+        .find(|p| p.id == next)
+        .unwrap()
+        .plan
+        .cells[0];
+    n.owner = Owner::Pump(next);
+    n.x = cell[0];
+    n.y = cell[1];
+    if let Some(f) = &mut v.power.frame {
+        f.relocate_pump(n.id, n.owner, n.x, n.y);
+    }
 }
 pub fn sync(v: &mut Village) {
     if v.version == 3 || v.power.frame.is_some() {
@@ -164,7 +189,6 @@ pub fn open(v: &Village, n: &Node) -> bool {
         }
         Owner::Pump(id) => pipes::line(v, id).is_some_and(|p| {
             p.phase == pipes::Phase::Active
-                && !p.paused
                 && p.plan.kind != utilities::Kind::Electricity
                 && p.plan.cells[0] == [n.x, n.y]
         }),
@@ -209,8 +233,8 @@ pub fn wires(v: &Village) -> Vec<Wire> {
         })
         .map(|p| Wire {
             id: p.id,
-            from: p.anchors[0].tank,
-            to: p.anchors[1].tank,
+            from: p.anchors[0].endpoint,
+            to: p.anchors[1].endpoint,
             capacity_per_hour: 12.,
         })
         .collect()
@@ -306,7 +330,13 @@ pub fn finish(v: &mut Village, minutes: f32) {
                 v.progress.river_night = true;
             }
         }
-        v.power.network = f.finish();
+        let (state, flows) = f.finish_with_flows();
+        v.power.network = state;
+        for (id, energy) in flows {
+            if let Some(p) = v.pipes.lines.iter_mut().find(|p| p.id == id) {
+                p.transferred += energy;
+            }
+        }
     }
     sync(v);
     pipes::reconcile(v);
@@ -366,6 +396,25 @@ mod tests {
         let mut h = Game::new();
         assert!(h.restore(&raw));
         assert_eq!(h.snapshot(), raw);
+    }
+    #[test]
+    fn rainy_river_generation_is_a_valid_electrical_frame() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        let (x, y) = (26, 5);
+        assert_eq!(g.place("hydro", x, y), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 900.;
+        assert!(ecology::raining(v.minutes));
+        let before = v.power.network.account.generated;
+        begin(&mut v, 1.);
+        assert!(
+            v.power.frame.is_some(),
+            "Rain must not disable the circuit frame"
+        );
+        finish(&mut v, 1.);
+        assert!(v.power.network.account.generated > before);
+        assert!(valid(&v));
     }
     #[test]
     fn native_sources_and_roofs_own_their_energy_but_a_distant_lamp_stays_unpowered() {
