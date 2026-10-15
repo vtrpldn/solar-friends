@@ -6,6 +6,8 @@ use simulation::Id;
 
 pub const BUFFER: u32 = 60;
 const LABOUR: f32 = 10.;
+pub const POWERED_SPEED: f32 = 2.;
+pub const WORKSHOP_ENERGY_PER_HOUR: f64 = 1.2;
 const PRODUCTS: [usize; 6] = [5, 6, 7, economy::TOOLS, 8, economy::MEALS];
 pub fn task(material: usize) -> &'static str {
     if material == economy::MEALS {
@@ -28,6 +30,7 @@ pub enum Phase {
     Processing,
     AwaitingOutput,
     AwaitingWater,
+    AwaitingPower,
     Paused,
     Complete,
     Cancelled,
@@ -47,6 +50,10 @@ pub struct Site {
     pub x: f32,
     pub y: f32,
     pub paused: bool,
+    #[serde(default)]
+    pub powered: bool,
+    #[serde(default)]
+    pub energy_used: f64,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Batch {
@@ -194,6 +201,19 @@ fn service_ready(v: &Village, b: &Batch) -> bool {
         || (building(v, b.site)
             .is_some_and(|id| sanitation::washing_ready(v, water::Owner::Building(id), 1.))
             && (b.committed || !b.biogas || v.circular.biogas >= 1.))
+}
+pub fn power_blocker(v: &Village, id: Id) -> Option<&'static str> {
+    let s = site(v, id).filter(|s| s.powered)?;
+    let owner = crate::electricity::Owner::Building(s.building?);
+    if !power::workshop_connected(v, owner) {
+        Some("Connect this workshop to a local circuit, or switch to hand tools.")
+    } else if power::workshop_available(v, owner) <= 0.000001 {
+        Some(
+            "The workshop circuit has no available energy or cable capacity. Wait for generation or switch to hand tools.",
+        )
+    } else {
+        None
+    }
 }
 fn store(v: &Village, id: Id) -> Option<&logistics::Store> {
     v.logistics
@@ -381,6 +401,8 @@ pub fn sync(v: &mut Village) {
                 x,
                 y,
                 paused: false,
+                powered: false,
+                energy_used: 0.,
             });
         }
     }
@@ -454,6 +476,11 @@ pub fn sync(v: &mut Village) {
         .map(|b| {
             let phase = if !operational(v, b.site) || !work_time(v.minutes) {
                 Phase::Paused
+            } else if power_blocker(v, b.site).is_some()
+                && b.work < LABOUR
+                && (b.committed || inputs_ready(v, b))
+            {
+                Phase::AwaitingPower
             } else if !service_ready(v, b)
                 && (b.committed || (0..COUNT).all(|i| present(v, b.site, i) >= b.inputs[i]))
             {
@@ -667,6 +694,7 @@ pub fn ready(v: &Village, b: &Batch) -> bool {
         && operational(v, b.site)
         && b.work < LABOUR
         && service_ready(v, b)
+        && power_blocker(v, b.site).is_none()
         && (b.committed || (0..COUNT).all(|i| present(v, b.site, i) >= b.inputs[i]))
 }
 pub fn jobs(v: &Village) -> impl Iterator<Item = &Batch> {
@@ -720,6 +748,27 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
     {
         return false;
     }
+    let powered = s.powered;
+    let speed = if powered { POWERED_SPEED } else { 1. };
+    let requested = seconds.min((LABOUR - b.work) / speed);
+    let work = if powered {
+        let owner = crate::electricity::Owner::Building(s.building.unwrap());
+        let per_second = WORKSHOP_ENERGY_PER_HOUR * f64::from(MINUTES_PER_SECOND) / 60.;
+        let delivered = power::spend_workshop(v, owner, f64::from(requested) * per_second);
+        if delivered <= 0. {
+            return false;
+        }
+        v.production
+            .sites
+            .iter_mut()
+            .find(|s| s.id == b.site)
+            .unwrap()
+            .energy_used += delivered;
+        (delivered / per_second) as f32 * speed
+    } else {
+        requested
+    }
+    .min(LABOUR - b.work);
     if !b.committed {
         if b.biogas {
             v.circular.biogas -= 1.;
@@ -752,7 +801,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         .iter_mut()
         .find(|b| b.id == id)
         .unwrap();
-    b.work = (b.work + seconds).min(LABOUR);
+    b.work = (b.work + work).min(LABOUR);
     b.last_worker = Some(r.id);
     b.phase = Phase::Processing;
     finish(v, id)
@@ -857,10 +906,10 @@ pub fn view(v: &Village) -> serde_json::Value {
                 }))
             })
         }).collect();
-        let service_blocker = (s.kind == Kind::Kitchen).then(|| {
+        let service_blocker = power_blocker(v, s.id).or_else(|| (s.kind == Kind::Kitchen).then(|| {
             s.building.and_then(|id| sanitation::washing_blocker(v,water::Owner::Building(id),1.))
-        }).flatten();
-        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker})
+        }).flatten());
+        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker,"work_speed":if s.powered {POWERED_SPEED}else{1.},"energy_per_hour":if s.powered{WORKSHOP_ENERGY_PER_HOUR}else{0.}})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
         "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
@@ -900,13 +949,22 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         })
         .map(|s| s.id)
         .collect();
+    let no_power: std::collections::HashSet<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| power_blocker(v, s.id).is_some())
+        .map(|s| s.id)
+        .collect();
     for b in v
         .production
         .batches
         .iter_mut()
         .filter(|b| b.active() && b.committed && b.work < LABOUR)
     {
-        b.phase = if b.material == economy::MEALS && !water_ready.contains(&b.site) {
+        b.phase = if no_power.contains(&b.site) {
+            Phase::AwaitingPower
+        } else if b.material == economy::MEALS && !water_ready.contains(&b.site) {
             Phase::AwaitingWater
         } else if open.contains(&b.site) && working.contains(&b.id) {
             Phase::Processing
@@ -970,6 +1028,9 @@ pub fn valid(v: &Village) -> bool {
         !sites.insert(s.id)
             || !places.insert(s.building)
             || (s.kind == Kind::Camp) != s.building.is_none()
+            || (s.kind != Kind::Workshop && (s.powered || s.energy_used != 0.))
+            || !s.energy_used.is_finite()
+            || !(0. ..=1e9).contains(&s.energy_used)
             || s.id.0 == 0
             || s.id.0 >= v.simulation.next_id
             || ![s.x, s.y]
@@ -988,6 +1049,11 @@ pub fn valid(v: &Village) -> bool {
             || (!closing(v, s.id) && store(v, s.id).is_none())
             || s.building.is_none() && (s.x, s.y) != CAMP
     }) {
+        return false;
+    }
+    if p.sites.iter().map(|s| s.energy_used).sum::<f64>()
+        > v.power.network.account.consumed + 0.000001
+    {
         return false;
     }
     let mut ids = std::collections::HashSet::new();
@@ -1027,6 +1093,12 @@ pub fn valid(v: &Village) -> bool {
                 Phase::AwaitingWater => {
                     b.material == economy::MEALS && (b.committed || b.work == 0.)
                 }
+                Phase::AwaitingPower => {
+                    s.kind == Kind::Workshop
+                        && s.powered
+                        && b.work < LABOUR
+                        && (b.committed || b.work == 0.)
+                }
                 Phase::Processing => b.committed && b.work < LABOUR,
                 Phase::AwaitingOutput => b.committed && b.work == LABOUR,
                 Phase::Complete => b.committed && b.work == LABOUR,
@@ -1059,6 +1131,33 @@ pub fn valid(v: &Village) -> bool {
 
 #[wasm_bindgen]
 impl Game {
+    pub fn set_workshop_powered(&mut self, id: u32, enabled: bool) -> String {
+        {
+            let mut v = self.app.world_mut().resource_mut::<Village>();
+            let Some(s) = site(&v, Id(id)).filter(|s| s.kind == Kind::Workshop) else {
+                return "Choose a workshop; camp preparation and cooking use manual tools.".into();
+            };
+            if enabled
+                && (closing(&v, s.id)
+                    || !power::workshop_connected(
+                        &v,
+                        crate::electricity::Owner::Building(s.building.unwrap()),
+                    ))
+            {
+                return "Install a cable from a local generator or battery before using powered tools.".into();
+            }
+            v.production
+                .sites
+                .iter_mut()
+                .find(|s| s.id == Id(id))
+                .unwrap()
+                .powered = enabled;
+            economy::rebalance(&mut v);
+        }
+        self.sync_help();
+        self.sync_production_activities();
+        "ok".into()
+    }
     pub fn production_report(&self) -> String {
         view(self.app.world().resource::<Village>()).to_string()
     }
@@ -1830,3 +1929,7 @@ mod tests {
         assert_eq!(g.snapshot(), before);
     }
 }
+
+#[cfg(test)]
+#[path = "production_power_tests.rs"]
+mod power_tests;

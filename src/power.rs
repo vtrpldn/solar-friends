@@ -170,6 +170,15 @@ pub fn pump_available(v: &Village, id: simulation::Id) -> f64 {
 pub fn pump_connected(v: &Village, id: simulation::Id) -> bool {
     network::connected(v, Owner::Pump(id))
 }
+pub(crate) fn workshop_available(v: &Village, owner: Owner) -> f64 {
+    network::available(v, owner)
+}
+pub(crate) fn workshop_connected(v: &Village, owner: Owner) -> bool {
+    network::connected(v, owner)
+}
+pub(crate) fn spend_workshop(v: &mut Village, owner: Owner, amount: f64) -> f64 {
+    network::spend(v, owner, amount)
+}
 pub fn spend_pump(v: &mut Village, id: simulation::Id, energy: f64) -> f64 {
     network::spend(v, Owner::Pump(id), energy)
 }

@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+export async function checkWorkshopPowerControls({page,saved,capture}) {
+  const snapshot=()=>page.evaluate(()=>window.solarDev.snapshot());
+  if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/electricity/workshop-outage.json');
+  await page.waitForFunction(()=>window.solarDev.snapshot().village.production.batches.some(b=>b.phase==='awaiting_power'));
+  await page.locator('#dev-close').click();
+  if(!await page.locator('#village-book').isVisible())await page.locator('#open-village').click();
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  if(!await page.locator('#preparation-recipes').isVisible())await page.getByText('Preparing materials',{exact:true}).click();
+  const before=await snapshot(),batch=before.village.production.batches.find(b=>b.phase==='awaiting_power');
+  const station=before.village.production.sites.find(s=>s.id===batch.site);
+  assert(station.powered&&batch.committed&&batch.work>0&&batch.work<10);
+  assert.match(await page.locator('#preparation-recipes').innerText(),/switch to hand tools/);
+  await page.getByRole('button',{name:'Use hand tools at Workshop 2',exact:true}).scrollIntoViewIfNeeded();
+  await capture('Interrupted powered tools keep their committed batch','workshop-power-outage.png');
+  await page.getByRole('button',{name:'Use hand tools at Workshop 2',exact:true}).click();
+  assert.equal((await snapshot()).village.production.sites.find(s=>s.id===batch.site).powered,false);
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('300');
+  await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  const after=await snapshot();
+  assert.equal(after.village.production.batches.find(b=>b.id===batch.id).phase,'complete');
+  assert.equal(after.village.production.sites.find(s=>s.id===batch.site).energy_used,station.energy_used);
+  assert.equal(after.village.production.accounting.outputs[7],2);
+  assert.equal(after.residents.find(r=>r.id===0).help.phase,'complete');
+  assert.match(await page.locator('#preparation-recipes').innerText(),/Last batch finished: 2 roof tiles/);
+  await page.getByRole('button',{name:'Use powered tools at Workshop 2',exact:true}).scrollIntoViewIfNeeded();
+  await capture('Hand tools finish the same batch without more electrical consumption','workshop-power-fallback.png');
+  const raw=JSON.stringify(after.village.production);
+  await page.getByRole('button',{name:'Use powered tools at Workshop 2',exact:true}).click();
+  assert.equal(JSON.stringify((await snapshot()).village.production),raw,'A paused cable cannot enable powered work');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+}

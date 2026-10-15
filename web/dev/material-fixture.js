@@ -2,6 +2,7 @@
 export function resetMaterialLocations(state) {
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
+  if(state.village.power)delete state.village.power.network;
   state.village.pipes={schema:1,lines:[]};
   state.village.restoration=[];
   delete state.village.water_supply;
