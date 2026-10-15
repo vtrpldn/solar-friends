@@ -812,7 +812,7 @@ function closePanels() {
     button.setAttribute("aria-expanded", "false");
   }
 }
-function showPanel(id) {
+function showPanel(id,supplyPage) {
   closePanels();
   selected = null;
   $("#person").hidden = true;
@@ -824,6 +824,7 @@ function showPanel(id) {
     lastVillagePanel = id;
   }
   $(`[data-panel="${id}"]`).setAttribute("aria-expanded", "true");
+  if(id==='supplies-panel'&&supplyPage)gameUI.selectSupplyPage(supplyPage);
   $("#" + id).querySelector("button").focus();
   updateUI();
 }
@@ -838,7 +839,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -855,7 +856,7 @@ function selectPerson(id) {
       .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
       .join(
         "",
-      )}</div><p class="friendship-note"></p>`;
+      )}</div><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="friendship-note"></p>`;
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
@@ -984,7 +985,7 @@ function updateQuests() {
     onClick=()=>{showPanel(panel);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
   }
   if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
-  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
+  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
   action.hidden=!route;action.textContent=label;action.onclick=onClick;
   shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
   $("#open-journal").textContent =
@@ -1605,7 +1606,7 @@ function setup() {
     state=JSON.parse(game.snapshot());updateUI();render();save();
   };
   $('#weather-open').onclick=()=>{
-    showPanel('supplies-panel');
+    showPanel('supplies-panel','water');
     const forecast=$('#weather-forecast');forecast.open=true;forecast.scrollIntoView({block:'start'});forecast.querySelector('summary').focus({preventScroll:true});
   };
   $("#pause").onclick = togglePause;

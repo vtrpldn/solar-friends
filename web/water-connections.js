@@ -3,7 +3,7 @@ const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const names={camp:'Arrival barrels',well:'Cistern',home:'Home',kitchen:'Kitchen',garden:'Garden',greenhouse:'Greenhouse',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',banana_treatment:'Banana treatment bed',source_timber:'Timber plot',source_bamboo:'Bamboo patch'};
 const number=n=>Number(n.toFixed(n>0&&n<.1?3:1)).toLocaleString('en');
 let preview=null,previewKey='',revision=0;
-const previewVisible=()=>!!preview&&!document.getElementById('supplies-panel')?.hidden&&!!document.getElementById('water-networks')?.open&&!!document.getElementById('water-line-planner')?.open;
+const previewVisible=()=>!!preview&&!document.getElementById('supply-water')?.hidden&&!document.getElementById('supplies-panel')?.hidden&&!!document.getElementById('water-networks')?.open&&!!document.getElementById('water-line-planner')?.open;
 export const waterOverlayRevision=()=>`${revision}:${previewVisible()}`;
 export function installWaterConnections({game,snapshot,transact,openTown}){
   const $=id=>document.getElementById(id),kind=$('pipe-kind'),from=$('pipe-from'),to=$('pipe-to'),rows=$('water-lines');
