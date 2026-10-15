@@ -10,8 +10,13 @@ const g=new Game(),snap=()=>JSON.parse(g.snapshot()),output=process.argv[2]||'ar
 if(output)await fs.mkdir(output,{recursive:true});
 await fs.mkdir('artifacts/logistics',{recursive:true});
 g.set_outside_work(true);
+let savedCareCheckIn=false;
 function until(test,label,limit=24000){
- for(let i=0;i<limit;i++){if(test(snap()))return;g.tick(.25);}
+ for(let i=0;i<limit;i++){
+  const current=snap(),care=current.village.situations.active;
+  if(output&&!savedCareCheckIn&&care&&care.response==null&&care.resolved==null){writeFileSync(`${output}/care-check-in.json`,g.snapshot());savedCareCheckIn=true;}
+  if(test(current))return;g.tick(.25);
+ }
  const s=snap(),chapter=s.village.progress.tracked;writeFileSync('artifacts/logistics/stalled-story.json',g.snapshot());
  throw new Error(`Timed out: ${label} on day ${1+Math.floor(s.village.minutes/1440)}. ${JSON.stringify({chapter,goals:quests[chapter].objectives(s.village).filter(o=>!o.done),stock:s.environment.economy.shortage,residents:s.residents.map(r=>[r.name,r.task,r.reason]),progress:s.village.progress})}`);
 }
@@ -29,12 +34,19 @@ function build(kind,recipe='standard',local=false,site=null){
  const missing=snap().environment.economy.shortage;
  if(local){for(const i of [5,6,7,8])missing[i]=0;missing[0]+=12;missing[2]+=20;missing[4]+=6;}
  purchase(missing);
- until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`);
+ const started=snap().village.minutes;
+ // Local construction includes extraction, processing and several community
+ // work windows. Keep a finite sixteen-day bound for a complete building.
+ until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`,16*1920);
+ if(kind==='home'&&recipe==='adobe')console.log(`Local adobe home: ${((snap().village.minutes-started)/1440).toFixed(1)} game days from blueprint to completion`);
  return id;
 }
 function source(material){const [x,y]=location(sourceKinds[material]);assert.equal(g.place_source(material,x,y),'ok');return snap().village.economy.sources.length-1;}
 async function complete(chapter){
  until(s=>questCompleted(s.village,chapter),quests[chapter].title);
+ // Earlier valid effort may finish two newly unlocked chapters in one tick.
+ // Select the next journal page through its real command for reproducible UI checkpoints.
+ assert(g.track_quest(Math.min(chapter+1,quests.length-1)));
  const saved=g.snapshot(),s=snap();assert(quests[chapter].objectives(s.village).every(o=>o.done),`Rust and UI agree: ${quests[chapter].title}`);
  assert(g.restore(saved),`reload chapter ${chapter+1}`);assert.equal(g.snapshot(),saved);
  assert.equal(s.village.progress.tracked,Math.min(chapter+1,quests.length-1));

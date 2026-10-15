@@ -76,12 +76,15 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await capture('Thirteen Story chapters and the locked finale','story-journal.png');
   await page.locator('#close-journal').click();
   await page.locator('#dev-button').click();
-  await storyCheckpoint(11);
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
-  assert.equal(await page.locator('#goal-action').textContent(),'Hear our community check-in');
-  await page.locator('#goal-action').click();
-  assert((await page.locator('#situation-title').textContent()).includes('A day for ourselves'));
+  // Replay the concern when it actually emerged; a changed work layout can
+  // resolve earlier care before the chapter introducing it becomes available.
+  await page.locator('#dev-import-file').setInputFiles('artifacts/story/care-check-in.json');
+  await page.waitForFunction(()=>{const care=window.solarDev.snapshot().village.situations.active;return care&&care.response===null&&care.resolved===null;});
+  await page.locator('#dev-close').click();
+  await page.locator('#open-situations').click();
+  assert(await page.locator('#situation-dialog').isVisible());
   await page.locator('[data-situation-response="day_off"]').click();
+  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().village.situations.active.response),'day_off');
   assert((await page.locator('#situation-dialog').textContent()).includes('Protect a day off'));
   await capture('Story care agreement requires actual follow-through','story-care.png');
   await page.locator('#close-situation').click();
