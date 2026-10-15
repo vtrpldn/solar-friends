@@ -52,6 +52,7 @@ export async function checkInterfaceControls({page,saved,capture}){
     for(const [name,id]of [['Trade','town-panel'],['Construction','projects-panel'],['Power','power-panel']]){
       await page.getByRole('button',{name,exact:true}).click();await fit('#'+id);
       await capture(`${name} shares the village control spacing at ${key}`,`interface-${key}-${id}.png`);
+      if(id==='town-panel'){const orders=page.getByText('Orders & deliveries',{exact:true});await orders.click();assert(await orders.evaluate(el=>el.parentElement.open));await orders.click();}
     }
     await page.getByRole('button',{name:'People',exact:true}).click();await fit('#community-panel');
     await capture(`Resident roster and gathering action at ${key}`,`interface-${key}-residents.png`);
@@ -67,6 +68,7 @@ export async function checkInterfaceControls({page,saved,capture}){
     await capture(`Game settings retain keyboard-operable toggles at ${key}`,`interface-${key}-settings.png`);
     await page.getByRole('button',{name:'Close settings',exact:true}).click();
     await page.getByRole('button',{name:'How to play',exact:true}).click();await fit('#help-dialog');
+    assert(await page.locator('#help-title').evaluate(el=>{const r=el.getBoundingClientRect(),d=el.closest('dialog').getBoundingClientRect();return r.top>=d.top&&r.bottom<=d.bottom;}),'The field guide should open at its title');
     await capture(`Field guide and key bindings at ${key}`,`interface-${key}-help.png`);
     await page.getByRole('button',{name:'Close help',exact:true}).click();
     await page.locator('#dev-button').click();await fit('#dev-dialog');
@@ -89,7 +91,7 @@ export async function checkArtworkInterface({browser,base,output,screenshots,err
       await page.setViewportSize(viewport);const width=viewport.width;
       await page.goto(new URL('/artwork/',base).href);await page.locator('#cards .pick').first().waitFor();
       assert(await page.locator('#art-library').isVisible());assert(!await page.locator('#art-workbench').isVisible());await fits();
-      await page.locator('#search').fill('coop');assert(await page.locator('#cards .pick').count()>0);
+      await page.locator('#search').fill('coop');assert(await page.locator('#cards .pick').count()>0);await page.locator('#cards .pick').first().click();assert.match(await page.locator('#selected-name').textContent(),/Chicken coop/);
       await capture(`Framed sprite inventory with its own scroll area at ${width}`,`interface-${width}-sprite-library.png`);
       await page.getByRole('button',{name:'Editing bench',exact:true}).click();
       assert(!await page.locator('#art-library').isVisible());await page.locator('#workbench-sprite').selectOption('coop');await fits();

@@ -159,9 +159,11 @@
         <span class="eyebrow">FROM OUR LAND, FROM OUR NEIGHBOURS</span><h2>Town trader</h2>
         <div class="town-account"><span>Shared fund<b id="town-fund"></b></span><small id="jobs-outlook"></small></div>
         <details class="economy-section outside-jobs"><summary>Outside occupations</summary><p>Choose who works a 09:00–17:00 shift. Each contribution reaches the shared fund on return; lunch is provided off-site. Keep some neighbours home for building, meals and town pickups.</p><div id="outside-jobs"></div><small>Turning a schedule off stops future shifts. A shift already started finishes normally; rest, meals and agreed days off still come first.</small></details>
+        <section class="town-shopping" aria-label="Town supplies and order">
         <div class="town-list-heading"><h3>Town supplies</h3><div><button id="town-shortages">Add village needs</button><button id="town-clear">Clear</button></div></div>
         <fieldset class="transport-choice"><legend>Bring supplies home</legend><label><input type="radio" name="town-transport" value="delivery" checked> Town delivery <small>R$ 60 · next scheduled delivery</small></label><label><input type="radio" name="town-transport" value="pickup"> Drive to collect <small>R$ 20 fuel · up to 40 units · about 2 hours away</small></label><div id="pickup-controls" hidden><label for="pickup-driver">Driver</label><select id="pickup-driver"></select><small id="pickup-driver-note"></small></div></fieldset>
         <div id="town-catalog"></div><div class="town-checkout"><div><b id="town-total"></b><p id="town-delivery"></p><small id="town-basket-status" role="status"></small><small id="town-pickup-status" role="status"></small></div><button id="town-order" class="primary">Buy supplies</button></div>
+        </section>
         <details class="economy-section"><summary>Orders & deliveries</summary><div id="town-orders"></div></details>
         <details class="economy-section"><summary>Surplus & neighbour exchange</summary><p>Keep 36 ingredients for household meals. Our neighbour can exchange two spare fittings for four surplus ingredients once each day.</p><button id="sell-surplus"></button><button id="exchange-parts">Exchange 4 surplus food → 2 fittings</button></details>
         <details class="economy-section"><summary>Spare materials & receiving space</summary><p>Sell stored, unreserved materials at half their town price to free space. Future stages may need them again; incoming supplies and current reservations stay protected.</p><div class="spare-sale"><label>Material<select id="spare-material"></select></label><label>Units<input id="spare-quantity" type="number" min="1" max="20" step="1" value="5"></label><button id="sell-material">Sell spare materials</button></div><p id="spare-quote" role="status"></p></details>
@@ -328,7 +330,6 @@
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
       <h2 id="help-title">How to play</h2><p id="help-intro">Choose Story to follow thirteen chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
-      <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li id="help-start">
           <b>Start with the essentials.</b> Open Journal and follow A Shared Beginning in the
@@ -337,23 +338,21 @@
           during working hours.
         </li>
         <li>
-          <b>Get to know your neighbours.</b> Open People or select a resident to see their
+          <details class="guide-tip"><summary>Get to know your neighbours</summary><p>Open People or select a resident to see their
           needs and request help. Explain why it matters if they hesitate;
-          exhausted people still need rest.
+          exhausted people still need rest.</p></details>
         </li>
         <li>
-          <b>Find your balance.</b> Plant gardens, water their soil, and let
+          <details class="guide-tip"><summary>Find your balance</summary><p>Plant gardens, water their soil, and let
           crops grow before harvesting. Cisterns catch afternoon rain;
           neighbours fetch treated water during dry spells. Plan construction in Village → Construction,
           source local materials, and combine purchases in Trade. Residents choose work, meals, rest and company for
           themselves. Each home has three beds. Breakfast is at 06:30, lunch at
-          noon, and dinner at 18:00. Neighbours choose their own bedtime and sleep for 6–9 hours, depending on their energy.
+          noon, and dinner at 18:00. Neighbours choose their own bedtime and sleep for 6–9 hours, depending on their energy.</p></details>
         </li>
       </ol>
       <p class="hint">
-        <span class="help-time-note">A full day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site, then returns to your chosen speed. Pause and change speed at the
-        bottom left.</span> Your village autosaves locally; open
-        Settings to save immediately or start a new village.
+        A day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site. The village pauses while you read and autosaves on this device.
       </p>
       <div class="control-guide" aria-label="Game controls"><span><kbd>B</kbd>Build</span><span><kbd>V</kbd>Village</span><span><kbd>J</kbd>Journal</span><span><kbd>P</kbd>People</span><span><kbd>I</kbd>Supplies</span><span><kbd>M</kbd>Map</span><span><kbd>Space</kbd>Pause time</span><span><kbd>Esc</kbd>Close / menu</span></div>
       <details class="dev-tools">

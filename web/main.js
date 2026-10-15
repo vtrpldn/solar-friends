@@ -355,7 +355,7 @@ function installMenu() {
   $('#open-main-menu').onclick=openMainMenu;
   $('.brand').onclick=event=>{if(!artworkPreview&&!directScenario){event.preventDefault();openMainMenu();}};
   $('#menu-settings').onclick=()=>$('#settings').click();
-  $('#menu-help').onclick=()=>$('#help-dialog').showModal();
+  $('#menu-help').onclick=openHelp;
 }
 function setZoom(value) {
   zoom=clampZoom(width,height,value);
@@ -812,6 +812,7 @@ function closePanels() {
     button.setAttribute("aria-expanded", "false");
   }
 }
+function openHelp(){const dialog=$("#help-dialog");dialog.showModal();dialog.scrollTop=0;}
 function showPanel(id,supplyPage) {
   closePanels();
   selected = null;
@@ -1197,7 +1198,7 @@ function updateUI() {
   $('[data-panel="town-panel"]').hidden=free;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
-  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows thirteen chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
   replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
@@ -1699,7 +1700,7 @@ function setup() {
       ? "Saved on this device."
       : "Applied for this session. Device storage is unavailable.";
   };
-  $("#help").onclick = () => $("#help-dialog").showModal();
+  $("#help").onclick = openHelp;
   $("#close-help").onclick = $("#start-playing").onclick = () =>
     $("#help-dialog").close();
   $("#zoom-in").onclick = () => {setZoom(zoom + 0.15);render();};

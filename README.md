@@ -108,7 +108,7 @@ The developer scenarios **Stored sunshine** and **Empty battery** provide matchi
 
 Why: household water and waste can support village resources without entering drinking supplies. Build an **ecological toilet**, **reed bed** and **biodigester** as their Story chapters unlock, or immediately in Sandbox. Residents visit the toilet privately once per day while awake; each visit uses one fresh water for handwashing and adds sealed waste. Household water use also produces greywater.
 
-Manage processing in **Village → Supplies → Water & waste**. A reed bed turns 12 greywater into 8 irrigation water over six game hours. Gardens use reclaimed water first; cooking, drinking and handwashing always use fresh water. A biodigester consumes two sealed waste and two kitchen scraps over eight hours, producing four cooking gas and two digestate. Digestate cures for a full game day before becoming compost. One gas adds one meal to a cooked pot without replacing its ingredients.
+Manage processing in **Village → Supplies → Ecology**. A reed bed turns 12 greywater into 8 irrigation water over six game hours. Gardens use reclaimed water first; cooking, drinking and handwashing always use fresh water. A biodigester consumes two sealed waste and two kitchen scraps over eight hours, producing four cooking gas and two digestate. Digestate cures for a full game day before becoming compost. One gas adds one meal to a cooked pot without replacing its ingredients.
 
 Filtration and digestion can be paused; full output stores stop new batches. Curing continues in sealed storage. Processing timers, settings and stocks survive saves without duplicating outputs. These simplified cycles are game rules. The **Closing the loop** and **Circular village at night** development scenes exercise the complete system and its artwork.
 
@@ -150,9 +150,9 @@ Empty, unstarted blueprints still cancel immediately in Construction. Cancelling
 
 ## Village supplies
 
-Open **Supplies** for ingredients, eggs, prepared meals, today's production and use, and the weather outlook. Gardens and foraging share the ingredient stock. The pantry estimates food days at fifteen portions per day for five residents; cooking gains, hen feed, future harvests, and extra hunger are excluded from that estimate.
+Open **Supplies** for four field-book pages: **Pantry** holds food, cooking and hens; **Stores** holds materials, delivery locations and tool settings; **Water** holds forecasts, containers and pipe planning; **Ecology** holds sanitation, compost and growing plots. Resource-bar shortcuts open the corresponding page. Arrow keys move between supply tabs. Gardens and foraging share the ingredient stock. The pantry estimates food days at fifteen portions per day for five residents; cooking gains, hen feed, future harvests, and extra hunger are excluded from that estimate.
 
-Kitchens make five meals from three ingredients and one water. With egg cooking enabled and eggs available, they make seven meals from two ingredients, two eggs, and one water. Simple meals remain the fallback. Both recipes produce compost scraps. Turn egg cooking or automatic hen feeding off in Supplies to conserve resources. Already-fed coops finish their current batch.
+Kitchens make five meals from three ingredients and one water. With egg cooking enabled and eggs available, they make seven meals from two ingredients, two eggs, and one water. Simple meals remain the fallback. Both recipes produce compost scraps. Turn egg cooking or automatic hen feeding off in **Supplies → Pantry** to conserve resources. Already-fed coops finish their current batch.
 
 When ingredients and meals run low, residents prioritize gathering wild food even without a food forest. Water remains available from the river. Shortages pause hen production and crop growth without killing hens or crops.
 
@@ -203,7 +203,7 @@ Run `node scripts/verify-situations.mjs` after building to trigger a concern fro
 
 ## Development tools
 
-Open **Dev Tools** in the game header. The desktop workbench contains simulation tools, artwork links, captures, and the local check report.
+Open **How to play (?) → Debug & development tools → Dev Tools**. A header shortcut appears during development sessions. The desktop workbench contains simulation tools, artwork links, captures, and the local check report.
 
 ### Why
 
@@ -223,7 +223,7 @@ Resident diagnostics show the current task and destination, the real chooser's p
 
 ### Artwork workbench
 
-The **Artwork** tab opens the existing studio with three additional tools:
+The **Artwork** tab links to the studio. **Sprite library** provides browsing and comparison in separate scrolling panes. **Editing bench** provides three tools, and its selected tool survives reloading through the URL:
 
 - **Calibrate** adjusts width, vertical ground anchor, and building camera slopes. Drag the anchor marker or use the numeric fields. Compare against a home and Iara with game-scale and lighting controls; export configuration for a source change. Building drafts can open in the real village renderer.
 - **Review replacement** accepts a complete PNG source image, including all cells when replacing an atlas. Compare at game size, overlay silhouettes, inspect pixel differences, and open the candidate in a separate game preview. Alpha checks flag dimension changes, empty or clipped cells, tight gutters, silhouette changes, and animation baseline spread. Pixel measurements are sampled at 256 pixels per cell; pose changes and artistic quality require visual review.
@@ -276,7 +276,7 @@ Artwork was generated with OpenAI's built-in image generation tool using the use
 
 ## Artwork studio
 
-Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse 47 artwork files as 75 sprite entries (74 active and one retained reference), including atlas cells, resident animations, and the game's painted chickens.
+Open [the artwork studio](http://127.0.0.1:4173/artwork/) on the same local server. It works without a WebAssembly build. Browse source sprites, atlas cells, resident animations and the game's painted chickens in the **Sprite library** workspace.
 
 Select a sprite, pin up to three comparisons, and inspect transparency, palette, ground alignment, and relative game scale. Use the action and frame controls to compare resident poses. Reviews and notes are saved in this browser separately from village saves; **Export review** downloads a JSON handoff. This is a review tool: it does not alter artwork or renderer settings.
 
@@ -300,7 +300,7 @@ Use the compact, dispersed, empty-fund, enclosed-storage and established simulat
 
 Construction materials live in camp storage, individual storage houses, material-plot output piles and project staging. The materials total includes carried loads. Residents collect up to 12 units per trip; a construction stage starts after its inputs reach the site. Roads speed up hauling, while occupied plots and the river block routes. Residents retain meals, sleep, outside jobs and community work hours. Existing cooking and foraging work covers the expected food deficit before more neighbours join it, leaving other people free to help with projects.
 
-Open **Supplies → Construction materials → Where supplies are** to inspect locations and deliveries. A storage house reserve queues local hauling. Lowering a reserve queues returns; changing a target never transfers goods immediately. Town deliveries and resident pickups unload at camp. Keep room there for incoming orders.
+Open **Supplies → Stores → Stored supplies** to inspect locations and deliveries. A storage house reserve queues local hauling. Lowering a reserve queues returns; changing a target never transfers goods immediately. Town deliveries and resident pickups unload at camp. Keep room there for incoming orders.
 
 Interrupted loads remain recoverable where they are put down. Cancelled staging and salvage stay at their plot until collected. Storage houses must empty before a resident crew can pack or dismantle them. Blocked access appears in construction and storage details. Save version 4 validates location ownership and cargo; older aggregate fixtures establish located storage once when imported. Protected dev scenes remain separate from saved villages.
 

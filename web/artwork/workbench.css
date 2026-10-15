@@ -12,3 +12,5 @@
 #art-workbench [hidden]{display:none}#workbench-status{min-height:20px}
 
 .workbench-form :is(input,select){min-width:0;width:100%}.workbench-tabs{flex-wrap:wrap}.workbench-heading>div{min-width:0}.workbench-heading h2{font-size:25px}.workbench-layout>div{min-width:0}
+
+#art-workbench .eyebrow{color:#7b633b}
