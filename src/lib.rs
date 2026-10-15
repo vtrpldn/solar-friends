@@ -35,6 +35,7 @@ mod sleep;
 mod spacing;
 mod supplies;
 mod town_pickup;
+mod utilities;
 mod walking;
 mod workforce;
 use progression::Progress;
