@@ -741,7 +741,7 @@ fn plan(v: &Village, r: &Resident) -> Option<Plan> {
         let s = v.logistics.as_ref().unwrap();
         let from = s.stores.iter().find(|p| p.id == c.from).unwrap();
         let to = s.stores.iter().find(|p| p.id == c.to).unwrap();
-        if !requests::matches_haul(r, from.owner, to.owner) {
+        if !requests::matches_haul(v, r, from.owner, to.owner) {
             continue;
         }
         let Some(a) = approaches(v, from, r.id) else {

@@ -58,11 +58,15 @@ pub fn pending(r: &Resident, task: &str) -> bool {
 fn continuous(task: &str) -> bool {
     matches!(task, "build" | "building_work" | "outside")
 }
+pub(crate) fn related(task: &str, requested: &str) -> bool {
+    task == requested
+        || (task == "haul" && matches!(requested, "build" | "building_work" | "prepare"))
+}
 fn owns_activity(r: &Resident) -> bool {
     r.requested
-        && r.help.as_ref().is_some_and(|q| {
-            q.active() && (r.task == q.task || (r.task == "haul" && continuous(&q.task)))
-        })
+        && r.help
+            .as_ref()
+            .is_some_and(|q| q.active() && related(&r.task, &q.task))
 }
 fn finish(r: &mut Resident, v: &Village, phase: Phase, reason: &str) {
     let owned = owns_activity(r);
@@ -173,7 +177,7 @@ pub fn observe(r: &mut Resident, v: &Village) {
         );
         return;
     }
-    let matching = r.requested && (r.task == q.task || (r.task == "haul" && continuous(&q.task)));
+    let matching = r.requested && related(&r.task, &q.task);
     if matching {
         let away = r
             .trip
@@ -360,9 +364,15 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         } else {
             "haul"
         }
-    } else if q.task == "building_work"
-        && q.building
-            .is_some_and(|id| logistics::occupied_building(v, id))
+    } else if (q.task == "prepare"
+        && q.batch
+            .and_then(|id| production::batch(v, id))
+            .is_some_and(|b| {
+                !b.committed && !production::ready(v, b) && production::operational(v, b.site)
+            }))
+        || (q.task == "building_work"
+            && q.building
+                .is_some_and(|id| logistics::occupied_building(v, id)))
     {
         "haul"
     } else {
@@ -373,7 +383,9 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         worker.task = "haul".into();
         worker.requested = true;
         if logistics::quote(v, &worker).is_none() {
-            let reason = if q.task == "build" {
+            let reason = if q.task == "prepare" {
+                "The batch inputs need a clear route to the production worksite. Check access and reserved supplies.".into()
+            } else if q.task == "build" {
                 supply_wait(v, q.building.unwrap())
             } else {
                 "The storage contents need an accessible receiving store and a clear route before packing can start.".into()
@@ -508,7 +520,12 @@ pub fn completed_batch(r: &mut Resident, v: &Village, completed: bool) {
         );
     }
 }
-pub fn matches_haul(r: &Resident, from: logistics::Owner, to: logistics::Owner) -> bool {
+pub fn matches_haul(
+    v: &Village,
+    r: &Resident,
+    from: logistics::Owner,
+    to: logistics::Owner,
+) -> bool {
     let Some(q) = r
         .help
         .as_ref()
@@ -520,7 +537,12 @@ pub fn matches_haul(r: &Resident, from: logistics::Owner, to: logistics::Owner) 
         ("build", Some(id)) => to == logistics::Owner::Site(id),
         ("building_work", Some(id)) => {
             matches!(from,logistics::Owner::Warehouse(b)|logistics::Owner::Site(b) if b==id)
+                || matches!(from,logistics::Owner::Production(site) if production::building(v,site)==Some(id))
         }
+        ("prepare", _) => q
+            .batch
+            .and_then(|id| production::batch(v, id))
+            .is_some_and(|b| to == logistics::Owner::Production(b.site)),
         _ => true,
     }
 }

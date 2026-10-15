@@ -506,6 +506,13 @@ pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
     v.buildings[bindex].progress >= 100.
 }
 pub fn shortage(v: &Village) -> Bundle {
+    let mut needs = gross_needs(v);
+    for (i, n) in needs.iter_mut().enumerate() {
+        *n = n.saturating_sub(quantity(v, i) + incoming(v, i) + crate::production::future(v, i));
+    }
+    needs
+}
+pub(crate) fn gross_needs(v: &Village) -> Bundle {
     let mut needs = [0; COUNT];
     for p in &v.economy.projects {
         let Some(b) = v
@@ -532,8 +539,7 @@ pub fn shortage(v: &Village) -> Bundle {
     for (i, n) in needs.iter_mut().enumerate() {
         *n = n
             .saturating_add(crate::production::input_demand(v, i))
-            .saturating_add(v.production.targets[i])
-            .saturating_sub(quantity(v, i) + incoming(v, i) + crate::production::future(v, i));
+            .saturating_add(v.production.targets[i]);
     }
     needs
 }
@@ -686,7 +692,7 @@ fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     Ok(total)
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i),"available":free(v,i),"incoming":incoming(v,i)})).collect();
+    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i),"processing":v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
     let projects:Vec<_>=v.economy.projects.iter().filter_map(|p|{
         let b=v.buildings.iter().find(|b|b.id==p.building)?;if b.progress>=100.{return None;}
         let stages=recipe(&b.kind,&p.recipe)?;let s=stages.get(p.stage)?;

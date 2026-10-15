@@ -195,19 +195,37 @@ pub fn site_space(v: &Village, owner: Owner) -> u32 {
     }
 }
 pub fn demand(v: &Village) -> Bundle {
-    let mut need = economy::shortage(v);
+    expanded_demand(v, None)
+}
+fn expanded_demand(v: &Village, ignore_queued: Option<usize>) -> Bundle {
+    let mut gross = economy::gross_needs(v);
     let workshop = v
         .production
         .sites
         .iter()
         .any(|s| s.building.is_some() && operational(v, s.id));
+    let supplied = |i| {
+        economy::quantity(v, i)
+            + economy::incoming(v, i)
+            + if ignore_queued == Some(i) {
+                0
+            } else {
+                future(v, i)
+            }
+    };
+    let mut need = [0; COUNT];
+    // Prepared goods precede their fitting dependency; each owned or queued
+    // input is credited once after all upstream requirements have been added.
     for i in [5, 6, 7, 8] {
+        need[i] = gross[i].saturating_sub(supplied(i));
         if let Some((inputs, output)) = recipe(i, workshop) {
             for j in 0..COUNT {
-                need[j] +=
-                    (inputs[j] * need[i].div_ceil(output)).saturating_sub(economy::free(v, j));
+                gross[j] = gross[j].saturating_add(inputs[j] * need[i].div_ceil(output));
             }
         }
+    }
+    for i in (0..COUNT).filter(|i| !(5..=8).contains(i)) {
+        need[i] = gross[i].saturating_sub(supplied(i));
     }
     need
 }
@@ -254,6 +272,40 @@ pub fn sync(v: &mut Village) {
         .collect();
     for id in cancel {
         cancel_batch(v, id);
+    }
+    // Unstarted batches release their promises when demand disappears. Keep
+    // committed work, and allow at most one final recipe-sized surplus.
+    for _ in 0..3 {
+        let mut cancel = vec![];
+        for material in [5, 6, 7, 8] {
+            let committed: u32 = v
+                .production
+                .batches
+                .iter()
+                .filter(|b| b.active() && b.committed && b.material == material)
+                .map(|b| b.output)
+                .sum();
+            let mut remaining =
+                expanded_demand(v, Some(material))[material].saturating_sub(committed);
+            for b in v
+                .production
+                .batches
+                .iter()
+                .filter(|b| b.active() && !b.committed && b.material == material)
+            {
+                if remaining == 0 {
+                    cancel.push(b.id);
+                } else {
+                    remaining = remaining.saturating_sub(b.output);
+                }
+            }
+        }
+        if cancel.is_empty() {
+            break;
+        }
+        for id in cancel {
+            cancel_batch(v, id);
+        }
     }
     let updates: Vec<_> = v
         .production
@@ -302,7 +354,8 @@ pub fn dispatch(v: &mut Village) {
     if v.logistics.is_none() {
         return;
     }
-    let sites: Vec<_> = v.production.sites.iter().map(|s| s.id).collect();
+    let mut sites: Vec<_> = v.production.sites.iter().map(|s| s.id).collect();
+    sites.sort_by_key(|id| building(v, *id).is_none());
     for id in sites {
         if !operational(v, id) || pending(v, id).is_some() {
             continue;
@@ -326,6 +379,11 @@ pub fn dispatch(v: &mut Village) {
             let Some(batch_id) = v.simulation.allocate() else {
                 return;
             };
+            let phase = if (0..COUNT).all(|i| present(v, id, i) >= inputs[i]) {
+                Phase::Ready
+            } else {
+                Phase::AwaitingInputs
+            };
             v.production.batches.push(Batch {
                 id: batch_id,
                 site: id,
@@ -334,10 +392,11 @@ pub fn dispatch(v: &mut Village) {
                 output,
                 work: 0.,
                 committed: false,
-                phase: Phase::AwaitingInputs,
+                phase,
                 created: v.minutes,
                 finished: None,
             });
+            v.logistics.as_mut().unwrap().retry_after = [0.; 5];
             break;
         }
     }
@@ -476,16 +535,50 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
     true
 }
 pub fn view(v: &Village) -> serde_json::Value {
+    let recipes:Vec<_>=v.production.sites.iter().map(|s|{
+        let recipes:Vec<_>=[5,6,7,8].into_iter().filter_map(|i|recipe(i,s.building.is_some()).map(|(inputs,output)|serde_json::json!({"material":i,"inputs":inputs,"output":output}))).collect();
+        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,Owner::Production(s.id))})
+    }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
-        "buffer_capacity":BUFFER,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
+        "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
         "note":"Preparation inputs and outputs belong to the worksite buffer. Hauling changes their location; work consumes staged inputs once and credits outputs once."})
 }
-pub fn prune<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a Resident>) {
-    let retained: std::collections::HashSet<_> = residents
-        .into_iter()
-        .flat_map(|r| [r.activity_batch, r.help.as_ref().and_then(|q| q.batch)])
-        .flatten()
+pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a Resident>) {
+    let mut retained = std::collections::HashSet::new();
+    let mut working = std::collections::HashSet::new();
+    for r in residents {
+        retained.extend(
+            [r.activity_batch, r.help.as_ref().and_then(|q| q.batch)]
+                .into_iter()
+                .flatten(),
+        );
+        if r.task == "prepare"
+            && r.trip.is_none()
+            && r.remaining > 0.
+            && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
+        {
+            working.extend(r.activity_batch);
+        }
+    }
+    let open: std::collections::HashSet<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| operational(v, s.id) && work_time(v.minutes))
+        .map(|s| s.id)
         .collect();
+    for b in v
+        .production
+        .batches
+        .iter_mut()
+        .filter(|b| b.active() && b.committed && b.work < LABOUR)
+    {
+        b.phase = if open.contains(&b.site) && working.contains(&b.id) {
+            Phase::Processing
+        } else {
+            Phase::Paused
+        };
+    }
     let recent: std::collections::HashSet<_> = v
         .production
         .batches
@@ -619,12 +712,15 @@ impl Game {
         "ok".into()
     }
     pub fn set_production_paused(&mut self, id: u32, paused: bool) -> String {
-        let mut v = self.app.world_mut().resource_mut::<Village>();
-        let Some(site) = v.production.sites.iter_mut().find(|s| s.id == Id(id)) else {
-            return "Production worksite not found.".into();
-        };
-        site.paused = paused;
-        economy::rebalance(&mut v);
+        {
+            let mut v = self.app.world_mut().resource_mut::<Village>();
+            let Some(site) = v.production.sites.iter_mut().find(|s| s.id == Id(id)) else {
+                return "Production worksite not found.".into();
+            };
+            site.paused = paused;
+            economy::rebalance(&mut v);
+        }
+        self.sync_production_activities();
         "ok".into()
     }
     pub fn cancel_production_batch(&mut self, id: u32) -> String {
@@ -643,7 +739,32 @@ impl Game {
             economy::rebalance(&mut v);
         }
         self.sync_help();
+        self.sync_production_activities();
         "ok".into()
+    }
+}
+impl Game {
+    pub(crate) fn sync_production_activities(&mut self) {
+        let v = self.app.world().resource::<Village>().clone();
+        for mut r in self
+            .app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(self.app.world_mut())
+        {
+            if r.activity_batch
+                .is_some_and(|id| batch(&v, id).is_none_or(|b| !ready(&v, b)))
+            {
+                assign(
+                    &mut r,
+                    &v,
+                    "idle",
+                    "The batch is waiting. Taking a break where there is room.",
+                    false,
+                );
+                requests::observe(&mut r, &v);
+            }
+        }
     }
 }
 
@@ -872,5 +993,333 @@ mod tests {
         s["village"]["production"]["batches"][0]["site"] = serde_json::json!(u32::MAX - 1);
         assert!(!g.restore(&s.to_string()));
         assert_eq!(g.snapshot(), before);
+    }
+    #[test]
+    fn dependent_fitting_batches_are_credited_once_and_unstarted_work_releases_its_inputs() {
+        let mut g = scene();
+        assert_eq!(g.set_production_target(7, 0), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            logistics::fixture_stock(&mut v, 5, 0);
+            logistics::fixture_stock(&mut v, 8, 0);
+        }
+        assert_eq!(g.set_production_target(5, 1), "ok");
+        let v = g.app.world().resource::<Village>();
+        let fitting: Vec<_> = v
+            .production
+            .batches
+            .iter()
+            .filter(|b| b.active() && b.material == 8)
+            .collect();
+        assert_eq!(fitting.len(), 1);
+        assert_eq!(fitting[0].output, 2);
+        assert_eq!(
+            demand(v)[8],
+            0,
+            "Queued fittings already cover the frame dependency"
+        );
+        assert_eq!(g.set_production_target(5, 0), "ok");
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .production
+                .batches
+                .iter()
+                .all(|b| !b.active())
+        );
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .production
+                .accounting
+                .inputs,
+            [0; COUNT]
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn pausing_a_station_releases_its_worker_and_preserves_partial_labour() {
+        let mut g = scene();
+        let mut r = worker(&mut g);
+        let (id, site_id) = {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let id = v.production.batches[0].id;
+            fixture_inputs(&mut v, id);
+            assert!(assign_batch(&mut r, &v, id));
+            (r.x, r.y) = (r.target_x, r.target_y);
+            assert!(!work(&mut v, &r, 3.));
+            (id, batch(&v, id).unwrap().site)
+        };
+        *g.app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(g.app.world_mut())
+            .find(|p| p.id == 0)
+            .unwrap() = r;
+        assert_eq!(g.set_production_paused(site_id.0, true), "ok");
+        assert_ne!(worker(&mut g).task, "prepare");
+        for _ in 0..80 {
+            g.tick(0.25);
+        }
+        assert_eq!(
+            batch(g.app.world().resource::<Village>(), id).unwrap().work,
+            3.
+        );
+        checkpoint(&mut g);
+        assert_eq!(g.set_production_paused(site_id.0, false), "ok");
+        for _ in 0..3000 {
+            if !batch(g.app.world().resource::<Village>(), id)
+                .unwrap()
+                .active()
+            {
+                break;
+            }
+            g.tick(0.25);
+        }
+        assert_eq!(
+            batch(g.app.world().resource::<Village>(), id)
+                .unwrap()
+                .phase,
+            Phase::Complete
+        );
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .production
+                .accounting
+                .outputs[7],
+            2
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn moving_a_workshop_refunds_and_evacuates_contents_before_packing() {
+        let mut g = scene();
+        let mut r = worker(&mut g);
+        let id = {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let id = v.production.batches[0].id;
+            fixture_inputs(&mut v, id);
+            assert!(assign_batch(&mut r, &v, id));
+            (r.x, r.y) = (r.target_x, r.target_y);
+            assert!(!work(&mut v, &r, 2.));
+            id
+        };
+        assert_eq!(g.queue_building_work(0, "move", 16, 6), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            assert_eq!(batch(&v, id).unwrap().phase, Phase::Cancelled);
+            assert!(logistics::occupied_building(&v, 0));
+            assert!(!building_work::work(&mut v, 0, 1000.));
+            assert_eq!(v.buildings[0].x, 6);
+        }
+        checkpoint(&mut g);
+        assert!(g.request(0, "building_work", false).contains("Happy"));
+        assert_eq!(
+            worker(&mut g).task,
+            "haul",
+            "The requested crew member helps evacuate this workshop's buffer"
+        );
+        for frame in 0..7000 {
+            if g.app.world().resource::<Village>().building_jobs.is_empty() {
+                break;
+            }
+            g.tick(0.25);
+            if frame % 40 == 0 {
+                checkpoint(&mut g);
+            }
+        }
+        let v = g.app.world().resource::<Village>();
+        assert!(v.building_jobs.is_empty());
+        assert_eq!(v.buildings[0].x, 16);
+        assert!(
+            v.production
+                .sites
+                .iter()
+                .find(|s| s.building == Some(0))
+                .is_some_and(|s| s.x == 16.)
+        );
+        assert!(
+            simulation::view(v)["materials"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|m| m["difference"] == 0.)
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_preparation_request_brings_its_own_inputs_and_finishes_the_same_batch_after_rest() {
+        let mut g = scene();
+        for id in 1..5 {
+            assert!(g.set_resident_job(id, true));
+        }
+        let batch_id = g.app.world().resource::<Village>().production.batches[0].id;
+        assert!(g.request(0, "prepare", false).contains("Happy"));
+        assert_eq!(worker(&mut g).help.unwrap().batch, Some(batch_id));
+        assert_eq!(worker(&mut g).task, "haul");
+        for _ in 0..3000 {
+            g.tick(0.25);
+            if batch(g.app.world().resource::<Village>(), batch_id)
+                .unwrap()
+                .work
+                > 1.
+            {
+                break;
+            }
+        }
+        let progress = batch(g.app.world().resource::<Village>(), batch_id)
+            .unwrap()
+            .work;
+        assert!(progress > 1. && progress < 10.);
+        g.app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(g.app.world_mut())
+            .find(|r| r.id == 0)
+            .unwrap()
+            .energy = 20.;
+        g.tick(0.25);
+        assert_eq!(worker(&mut g).task, "rest");
+        checkpoint(&mut g);
+        for _ in 0..10000 {
+            if worker(&mut g).help.as_ref().unwrap().phase == requests::Phase::Complete {
+                break;
+            }
+            g.tick(0.25);
+        }
+        assert_eq!(
+            worker(&mut g).help.unwrap().phase,
+            requests::Phase::Complete
+        );
+        assert_eq!(
+            batch(g.app.world().resource::<Village>(), batch_id)
+                .unwrap()
+                .phase,
+            Phase::Complete
+        );
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .production
+                .accounting
+                .outputs[7],
+            2
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_forged_commit_cannot_skip_spending_inputs() {
+        let mut g = scene();
+        let before = g.snapshot();
+        let mut bad: serde_json::Value = serde_json::from_str(&before).unwrap();
+        let b = &mut bad["village"]["production"]["batches"][0];
+        b["committed"] = true.into();
+        b["work"] = 1.into();
+        b["phase"] = "processing".into();
+        assert!(!g.restore(&bad.to_string()));
+        assert_eq!(g.snapshot(), before);
+    }
+    #[test]
+    fn a_full_output_pile_stops_the_next_batch_without_spending_inputs() {
+        let mut g = scene();
+        let site_id = g.app.world().resource::<Village>().production.batches[0].site;
+        assert_eq!(g.set_production_target(7, 0), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            logistics::fixture_stock(&mut v, 5, 60);
+            let s = v.logistics.as_mut().unwrap();
+            let camp = s
+                .stores
+                .iter()
+                .position(|s| s.owner == Owner::Camp)
+                .unwrap();
+            let pile = s
+                .stores
+                .iter()
+                .position(|s| s.owner == Owner::Production(site_id))
+                .unwrap();
+            s.stores[camp].items[5] -= 60;
+            s.stores[pile].items[5] += 60;
+            logistics::sync_totals(&mut v);
+        }
+        let wood = g.app.world().resource::<Village>().wood;
+        assert_eq!(g.set_production_target(7, 2), "ok");
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .production
+                .batches
+                .iter()
+                .all(|b| !b.active())
+        );
+        assert_eq!(g.app.world().resource::<Village>().wood, wood);
+        checkpoint(&mut g);
+        for _ in 0..2500 {
+            let v = g.app.world().resource::<Village>();
+            assert!(
+                v.logistics
+                    .as_ref()
+                    .unwrap()
+                    .stores
+                    .iter()
+                    .all(|p| p.items.iter().sum::<u32>() + site_space(v, p.owner) <= p.capacity)
+            );
+            if v.production.accounting.outputs[7] > 0 {
+                break;
+            }
+            g.tick(0.25);
+        }
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .production
+                .accounting
+                .outputs[7],
+            2
+        );
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn several_stations_cannot_promise_the_same_last_inputs() {
+        let mut g = scene();
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            logistics::fixture_stock(&mut v, 0, 2);
+            logistics::fixture_stock(&mut v, 2, 4);
+        }
+        for (x, y) in [(15, 6), (20, 6)] {
+            assert_eq!(g.place("workshop", x, y), "ok");
+            let id = g
+                .app
+                .world()
+                .resource::<Village>()
+                .buildings
+                .last()
+                .unwrap()
+                .id;
+            logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), id);
+            assert_eq!(g.set_production_target(7, 6), "ok");
+        }
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(
+            v.production
+                .batches
+                .iter()
+                .filter(|b| b.active() && b.material == 7)
+                .count(),
+            2
+        );
+        assert_eq!(input_demand(v, 0), 2);
+        assert_eq!(input_demand(v, 2), 4);
+        assert_eq!(economy::free(v, 0), 0);
+        assert_eq!(economy::free(v, 2), 0);
+        checkpoint(&mut g);
     }
 }

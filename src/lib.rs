@@ -337,11 +337,9 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
     walking::clear(r);
     if r.requested
-        && r.help.as_ref().is_some_and(|q| {
-            q.active()
-                && task != q.task
-                && !(task == "haul" && matches!(q.task.as_str(), "build" | "building_work"))
-        })
+        && r.help
+            .as_ref()
+            .is_some_and(|q| q.active() && !requests::related(task, &q.task))
     {
         requests::pause(r);
     }
@@ -705,6 +703,17 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         navigation::refresh(&mut v);
         requests::observe(&mut r, &v);
         building_work::sync(&mut r, &v);
+        if r.activity_batch
+            .is_some_and(|id| production::batch(&v, id).is_none_or(|b| !production::ready(&v, b)))
+        {
+            assign(
+                &mut r,
+                &v,
+                "idle",
+                "The production batch is waiting. Making room for other village life.",
+                false,
+            );
+        }
         if r.activity_building
             .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
             || r.visit_building
@@ -1062,7 +1071,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             "Everyone has arrived. Start with a cistern and a home.",
         );
     }
-    production::prune(&mut v, people.iter());
+    production::finish_frame(&mut v, people.iter());
     progression::update(&mut v);
 }
 #[wasm_bindgen]
