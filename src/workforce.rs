@@ -354,14 +354,24 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                 "Making time for our queued building crew work.",
             );
         }
-        if (ingredients(v, r.id) || agriculture::wanted(v, b.id))
-            && ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
+        let feed_crop = b.crop.kind == "fodder" || !b.crop.planted && b.crop.next_kind == "fodder";
+        if (if feed_crop {
+            agriculture::wanted(v, b.id)
+        } else {
+            ingredients(v, r.id) || agriculture::wanted(v, b.id)
+        }) && ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
         {
             add(
                 "garden",
                 Some(b.id),
                 None,
-                390.,
+                if b.kind == "goat_pasture" && b.agriculture.cared_until <= v.minutes {
+                    760.
+                } else if b.kind == "apiary" && b.agriculture.cared_until <= v.minutes {
+                    520.
+                } else {
+                    390.
+                },
                 "Tending our crops, fruit trees and animals during community hours.",
             );
         }

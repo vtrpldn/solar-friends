@@ -1,0 +1,36 @@
+{
+  "generator": "Built-in image_gen.imagegen; genuine transparent output. Originals retained in Codex generated_images; final sprites copied into web/art.",
+  "date": "2026-10-15",
+  "assets": [
+    {
+      "file": "web/art/goat-pasture.png",
+      "references": [
+        "web/art/coop-isometric.png",
+        "web/art/garden-simple-isometric.png"
+      ],
+      "prompt": "Use case: stylized-concept. Create one game BUILDING SPRITE for Solar Friends: a small Brazilian countryside two-goat shelter and fenced grassy paddock, two tiny cream/brown goats standing at realistic scale within the paddock, drinking trough and a little hay rack. Reference images specify the established warm detailed painted game art and exact elevated 2:1 orthographic camera, vertical posts vertical, ground axes slopes +/-0.5, roof ridge and eaves parallel to matching fence edges. Shelter at back corner occupies less than half of square grass paddock; low bamboo fences form a tidy diamond footprint, gate at front. Shelter terracotta roof, cream adobe short walls, natural bamboo. Like references, upper-left sunlight, restrained colors, clean readable silhouette at small game size. Entire object including roof, foliage and shadows inside square canvas with transparent gutters. Ground is sparse irregular grass under fence, absolutely NO solid foundation slab or gray/brown platform, no scenic backdrop or large bare soil island, no text, no labels. Genuinely transparent background. One asset centered, no atlas."
+    },
+    {
+      "file": "web/art/apiary.png",
+      "references": [
+        "web/art/coop-isometric.png"
+      ],
+      "prompt": "Use case: stylized-concept. One Solar Friends building sprite for a small Brazilian stingless bee apiary: two knee-high honey-colored wooden hive boxes standing on slim natural timber legs below a simple narrow terracotta tile canopy, tiny flower patches and tufts only at the feet. No enclosing house, no walls. Match the reference's warm detailed hand-painted game art, cream terracotta bamboo palette and exact elevated 2:1 orthographic camera, vertical legs vertical, hive edges and roof eaves aligned to parallel ground axes slopes +0.5/-0.5. Like reference upper-left sunlight. Compact footprint only one game tile; two hives large enough to read but not gigantic relative to the shelter. Complete object within transparent canvas with gutters. NO platform, NO full soil/grass base, no backdrop, no text or bees drawn giant. Transparent background."
+    },
+    {
+      "file": "web/art/orchard.png",
+      "references": [
+        "Previous generated orchard, with the same four trees and disconnected mulch rings"
+      ],
+      "prompt": "Precise object edit: keep these same four warm painted guava/citrus trees and small separate mulch circles, transparent background, no platform. Correct the PLACEMENT of trees to an isometric DIAMOND rather than screen rectangle. Important geometry: the four trunk ROOT CONTACT POINTS must be approximately back tree (640,520), left tree (300,690), right tree (980,690), front tree (640,860) on a 1280 square canvas. These root positions form a diamond with ground axes +/-0.5. Canopies extend vertically UP from these roots, with some natural occlusion of back tree foliage. Trunks stay vertical, top-left lighting preserved. Four individual trees only, same species same painted style. No wooden edging or solid soil plot. Need more transparent gaps around separate mulch patches, complete silhouettes inside square with generous gutters. This is an elevated 2:1 orthographic village game sprite."
+    },
+    {
+      "file": "web/art/field-crops.png",
+      "references": [
+        "web/art/crops.png"
+      ],
+      "prompt": "Use case stylized-concept. Create ONE transparent 3-column by 3-row crop sprite atlas, same painted art style, upper-left light, elevated orthographic camera and generous transparent gutters as reference. Replace the species: left column MAIZE with slender long corn leaves, center column CASSAVA with palmate leaves on branching stalks, right column FODDER GRASS dense modest tuft. Row 1: small seedling. Row 2: halfway grown plant. Row 3: mature harvestable plant (maize has two small yellow ears and a tassel; cassava leaves only, roots remain underground; fodder grass tall tuft). Exactly nine isolated plant sprites, one centered in each equal square cell, row-major positions. Each plant feet/root baseline at 90% of its cell height, full plant inside cell, large gutters. Each crop recognizable from its leaves and silhouette at tiny game scale. No dirt, no pots, no roots, no background, no letters, no grid lines. Transparent background."
+    }
+  ],
+  "review": "Actual renderer and normalized connected-component crop frames checked at desktop game scale. Orchard was revised twice to remove the solid bed and align its roots as a diamond. Architectural axes are traced in web/building-projection.js. Unlit outdoor night appearances use a shared runtime tint and exactly the same alpha geometry."
+}

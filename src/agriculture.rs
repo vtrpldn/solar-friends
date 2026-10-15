@@ -35,7 +35,7 @@ pub fn kind(b: &Building) -> bool {
     matches!(b.kind.as_str(), "orchard" | "goat_pasture" | "apiary")
 }
 fn open(v: &Village, b: &Building) -> bool {
-    b.progress >= 100. && b.agriculture.enabled && building_work::job(v, b.id).is_none()
+    b.progress >= 100. && building_work::job(v, b.id).is_none()
 }
 pub fn flowers(v: &Village, b: &Building) -> usize {
     v.buildings
@@ -55,6 +55,7 @@ pub fn flowers(v: &Village, b: &Building) -> usize {
 pub fn pollinated(v: &Village, b: &Building) -> bool {
     v.buildings.iter().any(|h| {
         h.kind == "apiary"
+            && h.agriculture.enabled
             && open(v, h)
             && h.agriculture.cared_until > v.minutes
             && flowers(v, h) > 0
@@ -75,20 +76,25 @@ pub fn wanted(v: &Village, id: usize) -> bool {
         return false;
     }
     match b.kind.as_str() {
-        "goat_pasture" => economy::quantity(v, MILK) < 8 || b.agriculture.cared_until <= v.minutes,
-        "apiary" => economy::quantity(v, HONEY) < 8 || b.agriculture.cared_until <= v.minutes,
-        _ => supplies::needs_ingredients(v) || !b.agriculture.fruiting,
+        "goat_pasture" => {
+            b.agriculture.cared_until <= v.minutes
+                || b.agriculture.enabled && economy::quantity(v, MILK) < 8
+        }
+        "apiary" => {
+            b.agriculture.enabled
+                && (economy::quantity(v, HONEY) < 8 || b.agriculture.cared_until <= v.minutes)
+        }
+        _ => b.agriculture.enabled && (supplies::needs_ingredients(v) || !b.agriculture.fruiting),
     }
 }
 pub fn needs(v: &Village, owner: Owner, items: &mut economy::Bundle) {
     if let Owner::Pantry(id) = owner
-        && let Some(b) = v
+        && let Some(_) = v
             .buildings
             .iter()
             .find(|b| b.id == id && b.kind == "goat_pasture" && open(v, b))
-        && b.agriculture.cared_until <= v.minutes
     {
-        items[FODDER] = 2;
+        items[FODDER] = 6;
     }
 }
 pub fn ready(v: &Village, b: &Building) -> bool {
@@ -105,6 +111,9 @@ pub fn ready(v: &Village, b: &Building) -> bool {
         return true;
     }
     if p.pending > 0 {
+        if !p.enabled {
+            return false;
+        }
         let below_target = match b.kind.as_str() {
             "goat_pasture" => economy::quantity(v, MILK) < 8,
             "apiary" => economy::quantity(v, HONEY) < 8,
@@ -191,7 +200,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     let sun = (daylight(v.minutes) - daylight(start)).max(0.);
     for index in 0..v.buildings.len() {
         let b = v.buildings[index].clone();
-        if !kind(&b) || !open(v, &b) {
+        if !kind(&b) || !open(v, &b) || (!b.agriculture.enabled && b.kind != "goat_pasture") {
             continue;
         }
         let p = &b.agriculture;
@@ -227,7 +236,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
             "goat_pasture" => {
                 let attended = (p.cared_until - start).clamp(0., minutes);
                 let expired = minutes - attended;
-                let can_produce = economy::quantity(v, MILK) < 8;
+                let can_produce = p.enabled && economy::quantity(v, MILK) < 8;
                 let p = &mut v.buildings[index].agriculture;
                 p.welfare = (p.welfare - expired * 0.015).max(0.);
                 if p.pending == 0 && attended > 0. && can_produce {
@@ -277,15 +286,100 @@ pub fn rotation(v: &mut Village, id: usize, crop: &str) {
 }
 pub fn valid(v: &Village, b: &Building) -> bool {
     let p = &b.agriculture;
+    let duration = match b.kind.as_str() {
+        "orchard" => {
+            if p.fruiting {
+                2880.
+            } else {
+                8640.
+            }
+        }
+        "goat_pasture" => 1440.,
+        "apiary" => 720.,
+        _ => 0.,
+    };
+    let output = match b.kind.as_str() {
+        "orchard" => 10,
+        "goat_pasture" => 4,
+        "apiary" => 3,
+        _ => 0,
+    };
     p.growth.is_finite()
-        && (0.0..=8640.).contains(&p.growth)
+        && (0.0..=duration).contains(&p.growth)
         && p.cared_until.is_finite()
         && (0.0..=v.minutes + 2880.).contains(&p.cared_until)
         && p.welfare.is_finite()
         && (0.0..=100.).contains(&p.welfare)
-        && p.pending <= 10
+        && p.pending <= output
+        && (p.pending == 0 || p.growth == 0.)
+        && (!p.fruiting || b.kind == "orchard")
         && (p.previous_crop.is_empty() || ecology::crop_kind(&p.previous_crop))
         && (kind(b) || (p.pending == 0 && p.growth == 0. && p.cared_until == 0. && !p.fruiting))
+}
+fn status(v: &Village, b: &Building) -> &'static str {
+    let p = &b.agriculture;
+    if building_work::job(v, b.id).is_some() {
+        return "Closed for crew work";
+    }
+    if b.progress < 100. {
+        return "Under construction";
+    }
+    if b.kind == "goat_pasture" && p.cared_until <= v.minutes {
+        if organics::available(v, Owner::Pantry(b.id), FODDER) < 2 {
+            return "Waiting for two delivered fodder";
+        }
+        if water::available(v, water::Owner::Building(b.id), water::Class::Fresh) < 2. {
+            return "Waiting for two fresh drinking water";
+        }
+        return "Needs a resident to feed and check the goats";
+    }
+    if !p.enabled {
+        return if b.kind == "goat_pasture" {
+            "Milk production paused; daily feed and care continue"
+        } else {
+            "Production paused"
+        };
+    }
+    if b.kind == "apiary" && p.cared_until <= v.minutes {
+        return "Needs a resident to inspect the hive";
+    }
+    if p.pending > 0 {
+        if ready(v, b) {
+            return "Ready for a resident to collect";
+        }
+        let enough = match b.kind.as_str() {
+            "goat_pasture" => economy::quantity(v, MILK) >= 8,
+            "apiary" => economy::quantity(v, HONEY) >= 8,
+            _ => !supplies::needs_ingredients(v),
+        };
+        return if enough {
+            "Enough produce stored; collection waits"
+        } else {
+            "Waiting for storage space"
+        };
+    }
+    if b.kind == "orchard" {
+        if land::condition(v, 3, b.x, b.y).moisture <= 0. {
+            return "Growth paused: dry roots";
+        }
+        return if p.fruiting {
+            "Fruit is growing"
+        } else {
+            "Fruit trees are establishing"
+        };
+    }
+    if b.kind == "apiary" {
+        if flowers(v, b) == 0 {
+            return "No flowering garden, grove or orchard within six tiles";
+        }
+        if economy::quantity(v, HONEY) >= 8 {
+            return "Enough honey stored";
+        }
+    }
+    if b.kind == "goat_pasture" && economy::quantity(v, MILK) >= 8 {
+        return "Enough milk stored; care continues";
+    }
+    "Growing the next batch"
 }
 #[wasm_bindgen]
 impl Game {
@@ -301,17 +395,12 @@ impl Game {
         let v = self.app.world().resource::<Village>();
         let plots:Vec<_>=v.buildings.iter().filter(|b|kind(b)).map(|b|{
             let p=&b.agriculture;
-            let status=if building_work::job(v,b.id).is_some(){"Closed for crew work"}
-                else if b.progress<100.{"Under construction"}else if !p.enabled{"Care paused"}
-                else if p.pending>0 {if ready(v,b){"Ready for a resident to collect"}else if b.kind=="goat_pasture" && economy::quantity(v,MILK)>=8 || b.kind=="apiary" && economy::quantity(v,HONEY)>=8 || b.kind=="orchard" && !supplies::needs_ingredients(v){"Enough produce stored; collection waits"}else{"Waiting for care, supplies or storage space"}}
-                else if b.kind=="orchard" {if land::condition(v,3,b.x,b.y).moisture<=0.{"Growth paused: dry roots"}else if p.fruiting{"Fruit is growing"}else{"Fruit trees are establishing"}}
-                else if p.cared_until<=v.minutes {if b.kind=="apiary"{"Needs a resident to inspect the hive"}else if organics::available(v,Owner::Pantry(b.id),FODDER)<2{"Waiting for two delivered fodder"}else if water::available(v,water::Owner::Building(b.id),water::Class::Fresh)<2.{"Waiting for two fresh drinking water"}else{"Needs a resident to feed and check the goats"}}
-                else if b.kind=="apiary" && flowers(v,b)==0{"No flowering garden, grove or orchard within six tiles"}
-                else if b.kind=="apiary" && economy::quantity(v,HONEY)>=8{"Enough honey stored"}
-                else if b.kind=="goat_pasture" && economy::quantity(v,MILK)>=8{"Enough milk stored; care continues"}
-                else{"Growing the next batch"};
+            let status=status(v,b);
             serde_json::json!({"building":b.id,"status":status,"ready":ready(v,b),"flowers":flowers(v,b),"pollinated":pollinated(v,b),"fodder_here":organics::available(v,Owner::Pantry(b.id),FODDER),"fresh_water_here":water::available(v,water::Owner::Building(b.id),water::Class::Fresh),"duration":if b.kind=="orchard"{if p.fruiting{2880.}else{8640.}}else if b.kind=="apiary"{720.}else{1440.}})
         }).collect();
         serde_json::json!({"plots":plots,"fodder":economy::quantity(v,FODDER),"milk":economy::quantity(v,MILK),"honey":economy::quantity(v,HONEY)}).to_string()
     }
 }
+
+#[cfg(test)]
+mod tests;

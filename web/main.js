@@ -22,6 +22,7 @@ import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
 import { RESIDENT_WIDTH, preparedFrames } from './sprite-frames.js';
+import {farmNames,farmNotes,updateAgricultureUI} from './agriculture-ui.js';
 import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
 import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
@@ -65,6 +66,7 @@ let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
 const kinds = {
+  ...Object.fromEntries(Object.entries(farmNames).map(([k,n])=>[k,[n,farmNotes[k]]])),
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
   eco_toilet:['Ecological toilet','Private dry toilet · sealed waste collection · handwash'],
   banana_treatment:['Banana treatment bed','Treat sewage in a sealed banana basin'],
@@ -484,7 +486,7 @@ function sprite(kind, x, y, alpha = 1, id) {
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
   const level=buildingLighting(state.environment.power,id,kind,complete);
   for(const layer of lightingLayers(night,level,alpha)){
-    ctx.save();ctx.filter=layer.filter;
+    ctx.save();ctx.filter=layer.source==='night'&&art.nightTint?art.nightTint:layer.filter;
     drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
     ctx.restore();
   }
@@ -1042,6 +1044,9 @@ function updateQuests() {
     : p.gathering_day === Math.floor(v.minutes / 1440) ? "Next gathering tomorrow" : "Host a gathering";
 }
 const buildingPurposes = {
+  orchard:'Establish a lasting source of fruit for the village.',
+  goat_pasture:'Keep a small dairy herd fed, watered and cared for.',
+  apiary:'Produce honey and help nearby flowering crops.' ,
   hydro:'Produces 1.8 energy/hour day and night (less on dry days, more during rain). Adds 18 battery capacity. Workers approach from land.',
   eco_toilet:'Residents use this private toilet once a day and wash their hands with one fresh water. Waste stays sealed until processed.',
   banana_treatment:'A sealed banana evapotranspiration bed treats one toilet waste every four game hours (six per day). It produces no water or food. Open Water & waste to pause it and reserve waste for biogas.',
@@ -1087,14 +1092,15 @@ function updateBuildingPanel() {
     $('#building-purpose').textContent=`${tools} tool uses owned across the village. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'A saved batch needs eight timber delivered here. Follow its progress in Construction → Preparing materials.'}`;
   }
   $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
+  updateAgricultureUI(game,state,inspectBuilding);
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
   $("#crop-controls").hidden = !farming;
   if (farming) {
     const c = b.crop, outlook=JSON.parse(game.crop_outlook(b.id)), spec = cropTypes[outlook.crop];
     $("#next-crop").value = c.next_kind;
     $("#replant-crop").checked = c.replant;
-    $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. At current soil and supplies: ${outlook.harvest_min}–${outlook.harvest_max} food.`;
-    $("#crop-details").textContent = `Root-zone wetness ${Math.round(outlook.soil.moisture*100)}% · retention ×${outlook.soil.retention.toFixed(2)} · tree shade ${Math.round(outlook.soil.shade*100)}%. Growth ×${outlook.growth_multiplier.toFixed(2)}. Harvest size depends on the gardener. ${spec.note}.`;
+    $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. At current soil and supplies: ${outlook.harvest_min}–${outlook.harvest_max} ${outlook.product}.`;
+    $("#crop-details").textContent = `Root-zone wetness ${Math.round(outlook.soil.moisture*100)}% · retention ×${outlook.soil.retention.toFixed(2)} · tree shade ${Math.round(outlook.soil.shade*100)}%. Growth ×${outlook.growth_multiplier.toFixed(2)}. Harvest size depends on the gardener. ${spec.note}. ${outlook.pollinated?"Bees improve this harvest. ":""}${outlook.rotations} soil-building rotations. ${outlook.previous_crop?"Last harvested: "+cropTypes[outlook.previous_crop].name+".":""}`;
     $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per ${(outlook.nursery_minutes/60).toFixed(1)} moist growing hours at current soil and light · ${outlook.seedlings_here} vegetable seedlings at this greenhouse · ${state.village.seedlings} across the village. Seedlings stay at this greenhouse until neighbours carry them to outdoor beds for a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water. Covered soil dries more slowly; rain cannot water this bed.` : `${outlook.seedlings_here} vegetable seedlings at this garden · ${state.village.seedlings} across the village. Only a delivered seedling gives this bed a 25% head start.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
@@ -1103,7 +1109,7 @@ function updateBuildingPanel() {
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
   const utility = b && ["solar_farm", "streetlight", "hydro", "banana_treatment", "wetland", "biodigester", "warehouse"].includes(b.kind);
   $("#building-visits").hidden = utility;
-  $('#building-visits h3').textContent=b?.kind==='kitchen'?'Ask a neighbour to cook':b?.kind==='workshop'?'Ask a neighbour to craft':'Ask a neighbour to visit';
+  $('#building-visits h3').textContent=farmNames[b?.kind]?'Ask a neighbour to tend this plot':b?.kind==='kitchen'?'Ask a neighbour to cook':b?.kind==='workshop'?'Ask a neighbour to craft':'Ask a neighbour to visit';
   if(b?.kind==='workshop'&&b.progress>=100){
     const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
     const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
@@ -1156,7 +1162,7 @@ function updateSupplies(v) {
   const shared=v.progress.gathering_delivery;
   const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
   const days = (v.food + v.meals-sharedReserve) / 15;
-  replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
+  replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"],["milk",state.environment.economy.materials[25].stored,"Fresh milk"],["honey",state.environment.economy.materials[26].stored,"Honey"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
   $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food. Cooking, hen feed and spoilage can change this estimate.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
@@ -1456,6 +1462,7 @@ function setup() {
       $("#settings-status").textContent = saveSettings(settings) ? "Saved on this device." : "Applied for this session. Device storage is unavailable.";
     };
   }
+  $("#farm-active").onchange=()=>{game.configure_agriculture(Number($("#building-choice").value),$("#farm-active").checked);state=JSON.parse(game.snapshot());save();updateUI();};
   for (const id of ["next-crop", "replant-crop"]) $("#"+id).onchange = () => {
     game.configure_crop(Number($("#building-choice").value), $("#next-crop").value, $("#replant-crop").checked);
     state = JSON.parse(game.snapshot()); updateUI(); save();

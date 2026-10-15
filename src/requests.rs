@@ -608,6 +608,8 @@ pub fn enqueue_at(
     };
     let building = if let Some(id) = tools {
         production::batch(v, id).and_then(|b| production::building(v, b.site))
+    } else if task == "garden" && at.is_some() {
+        at
     } else if task == "build" {
         v.economy
             .projects

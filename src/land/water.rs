@@ -113,7 +113,7 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
         }
         for (x, y) in cells(interactions::footprint_size(&b.kind), b.x, b.y) {
             let i = (y * MAP_SIZE + x) as usize;
-            tended[i] = ecology::farm(b);
+            tended[i] = ecology::farm(b) || b.kind == "orchard";
             covered[i] = !matches!(
                 b.kind.as_str(),
                 "garden" | "grove" | "orchard" | "banana_treatment" | "compost"

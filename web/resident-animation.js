@@ -40,7 +40,7 @@ export function residentActivity(r, minutes) {
     if (r.visitingKind === 'kitchen') return 'cook';
     if (r.visitingKind === 'coop') return 'feed';
     if (r.visitingKind === 'well') return 'water';
-    if (['compost', 'garden', 'greenhouse', 'grove'].includes(r.visitingKind)) return 'tend';
+    if (['compost', 'garden', 'greenhouse', 'grove', 'orchard', 'goat_pasture', 'apiary'].includes(r.visitingKind)) return 'tend';
     if (['home', 'square'].includes(r.visitingKind)) return 'sit';
   }
   const slot = Math.floor((minutes + r.id * 29) / 24);

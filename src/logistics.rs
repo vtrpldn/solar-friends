@@ -790,6 +790,12 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if kind == Some("biodigester") && material == economy::SCRAPS && v.circular.waste >= 4. {
         return 1;
     }
+    if kind == Some("kitchen") && matches!(material, economy::FOOD | economy::EGGS) && v.meals < 3 {
+        return 0;
+    }
+    if kind == Some("goat_pasture") && material == economy::FODDER {
+        return 1;
+    }
     if kind == Some("coop") {
         return if v.food >= 18. { 1 } else { 3 };
     }

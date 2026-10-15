@@ -9,9 +9,9 @@ export function resetMaterialLocations(state) {
   delete state.village.water_supply;
   delete state.village.land;
   state.village.processes={schema:2,batches:[],paused:[]};
-  state.village.freshness={schema:1,expired:Array(24).fill(0)};
+  state.village.freshness={schema:1,expired:Array(state.environment.economy.materials.length).fill(0)};
   Object.assign(state.village.progress,{gathering_delivery:null,gathering_until:0,invited:0,attended:0});
-  for(const b of [state.village.economy.stock,...state.village.economy.projects.flatMap(p=>[p.reserved,p.consumed]),...state.village.economy.orders.map(o=>o.items),...(state.village.building_jobs||[]).map(j=>j.returns)])while(b.length<24)b.push(0);
+  for(const b of [state.village.economy.stock,...state.village.economy.projects.flatMap(p=>[p.reserved,p.consumed]),...state.village.economy.orders.map(o=>o.items),...(state.village.building_jobs||[]).map(j=>j.returns)])while(b.length<state.environment.economy.materials.length)b.push(0);
   state.village.economy.stock[16]=state.village.food;
   state.village.economy.stock[17]=state.village.meals;
   state.village.economy.stock[18]=state.village.supplies.eggs;
@@ -20,7 +20,7 @@ export function resetMaterialLocations(state) {
   state.village.economy.stock[21]=state.village.seedlings||0;
   state.village.economy.stock[15]=state.village.progress.tool_uses||0;
   state.village.logistics=null;
-  state.village.production={schema:1,sites:[],batches:[],targets:Array.from({length:24},(_,i)=>i===17?8:0)};
+  state.village.production={schema:1,sites:[],batches:[],targets:Array.from({length:state.environment.economy.materials.length},(_,i)=>i===17?8:0)};
   for(const r of state.residents||[]){
     r.activity_batch=null;r.activity_store=null;
     if(['prepare','restore'].includes(r.task)){r.task='idle';r.remaining=0;r.activity_material=null;r.activity_building=null;r.target_x=r.x;r.target_y=r.y;r.requested=false;}
@@ -73,7 +73,7 @@ function restockFixtureMaterials(state,targets) {
       if(remove)throw new Error('Finish food cargo before reducing this fixture reserve.');
     }
     if(i<19)alignFoodLots(state,i);
-    v.freshness??={schema:1,expired:Array(24).fill(0)};v.freshness.expired[i]=0;
+    v.freshness??={schema:1,expired:Array(state.environment.economy.materials.length).fill(0)};v.freshness.expired[i]=0;
     v.economy.stock[i]=target;
     if(v.simulation.materials){v.simulation.materials.opening[i]=target;v.simulation.materials.received[i]=0;v.simulation.materials.spent[i]=0;}
   }

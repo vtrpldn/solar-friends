@@ -1,5 +1,5 @@
 // Text and objective views; Rust owns permanent completion and unlocks.
-export const storyBuildingKinds = ["home","garden","well","kitchen","grove","warehouse","compost","square","workshop","greenhouse","coop","solar_farm","streetlight","eco_toilet","wetland","banana_treatment","biodigester","hydro"];
+export const storyBuildingKinds = ["home","garden","well","kitchen","grove","warehouse","compost","square","workshop","greenhouse","coop","solar_farm","streetlight","eco_toilet","wetland","banana_treatment","biodigester","hydro","orchard","goat_pasture","apiary"];
 const actionGoal = (action, label, value, target, hint, page) => ({...goal(label,value,target,hint),action,...(page?{page}:{})});
 const count = (v, kind) =>
   v.buildings.filter((b) => b.kind === kind && b.progress >= 100).length;
@@ -187,7 +187,7 @@ export const quests = [
       goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Keep the kitchen, compost station and gardens connected by short paths. Neighbours carry scraps for composting and deliver mature compost to the plot before its harvest.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
       actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds.","ecology"),
-      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Neighbours haul a vegetable seedling from the greenhouse store to this garden. Its next attended planting uses that delivered seedling for a growth head start. Choose beans, lettuce or tomatoes in Buildings → Growing plan.","ecology"),
+      actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Neighbours haul a vegetable seedling from the greenhouse store to this garden. Its next attended planting uses that delivered seedling for a growth head start. Choose lettuce, beans, tomatoes, maize, cassava or fodder in Buildings → Growing plan.","ecology"),
     ],
   },
   {
@@ -196,6 +196,11 @@ export const quests = [
     story: "“A few hens, a little care, and fresh eggs for everyone. We can grow without rushing.”",
     after: "Our table is more varied. Now collect sunshine to keep our shared buildings and paths lit after dusk.",
     objectives: v => [
+      goal("Establish a fruit orchard",count(v,"orchard"),1,"An orchard needs four delivered tree seedlings and two compost to build. Keep its roots moist; its first fruit takes six growing days. Mature trees fruit every two growing days.","orchard"),
+      goal("Harvest orchard fruit",v.progress.orchard_fruit||0,1,"Neighbours water and harvest fruit trees during community hours when ingredients are needed. The trees remain planted. Place a tended apiary within six tiles for a larger harvest.","orchard"),
+      goal("Rotate after beans",v.progress.crop_rotations||0,1,"Harvest beans in a garden, then change its next crop to lettuce, tomatoes, maize or cassava. Harvesting the following crop improves soil nutrients and cover. Fodder grass feeds livestock; cassava and beans dry half as quickly as lettuce.","garden"),
+      goal("Care for dairy goats",v.progress.milk_collected||0,1,"Build a goat pasture. Buy a dairy goat pair for its final stage in Trade. Grow fodder grass or buy feed. Residents bring two fodder and two fresh drinking water, feed the goats and return the next day to collect milk. Keep care enabled.","goat_pasture"),
+      goal("Collect stingless bee honey",v.progress.honey_collected||0,1,"Build an apiary and buy a stingless bee colony for its final stage. Place it within six tiles of an orchard, food forest or planted bean/tomato garden. A resident inspects the hive; honey grows over twelve daylight hours and must be collected.","apiary"),
       goal("Build a chicken coop",count(v,"coop"),1,"Finish a coop and keep at least nine ingredients in the pantry.","coop"),
       actionGoal("supplies", "Cook with our eggs",+v.progress.egg_meal,1,"Enable cooking with eggs in Supplies. Two eggs, two ingredients and one fresh water make seven meals when a neighbour cooks.","pantry"),
       {...goal("Collect our first three eggs",v.progress.eggs_collected||0,3,"Enable hen feeding in Supplies. Three ingredients feed a batch; eggs arrive after twelve daylight hours.","coop"),buildTarget:1},
@@ -285,7 +290,7 @@ export const quests = [
   },
 
 ];
-export const unlockQuest = { grove:0, warehouse:0, compost:1, eco_toilet:6, square:1, workshop:3, greenhouse:3, wetland:6, banana_treatment:6, coop:4, biodigester:7, solar_farm:5, hydro:9, streetlight:5 };
+export const unlockQuest = { grove:0, warehouse:0, orchard:0, goat_pasture:4, apiary:4, compost:1, eco_toilet:6, square:1, workshop:3, greenhouse:3, wetland:6, banana_treatment:6, coop:4, biodigester:7, solar_farm:5, hydro:9, streetlight:5 };
 export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[])[id-4] || false;
 export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
 export const completedQuests = v => quests.map((_,i)=>questCompleted(v,i));

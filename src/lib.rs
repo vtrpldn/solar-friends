@@ -637,7 +637,7 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
                 "building_work" => "Queue a building job in Buildings and leave a clear worksite for residents.",
                 "build" => "No stage is ready. Check project supplies, incoming deliveries, or paused projects.",
                 "garden" => {
-                    "Gardens need planting, two water when dry, or time to grow before harvest."
+                    "Crops or animals need supplies, time or storage before tending. Check the selected plot in Buildings."
                 }
                 "cook" => "We need a kitchen, three food and one water first.",
                 "compost" => "Two scraps need to reach a compost station before a neighbour can turn them.",
@@ -1396,6 +1396,9 @@ impl Game {
         if b.progress < 100. {
             return "Finish construction before using this building.".into();
         }
+        if agriculture::kind(b) {
+            return self.request_at(resident, "garden", false, Some(building));
+        }
         if matches!(b.kind.as_str(), "workshop" | "kitchen") {
             return self.request_at(
                 resident,
@@ -1878,8 +1881,13 @@ impl Game {
             if let Some(q) = r.help.as_ref().filter(|q| q.active() && q.task == task) {
                 if at.is_some_and(|id| q.building != Some(id)) {
                     return format!(
-                        "{}: I am already helping at workshop {}. Cancel that request before choosing another worksite.",
+                        "{}: I am already helping at {} {}. Cancel that request before choosing another worksite.",
                         r.name,
+                        if task == "craft" {
+                            "workshop"
+                        } else {
+                            "worksite"
+                        },
                         q.building.unwrap_or(0) + 1
                     );
                 }

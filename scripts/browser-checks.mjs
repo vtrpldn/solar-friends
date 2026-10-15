@@ -1,3 +1,4 @@
+import {checkFarmingControls} from './farming-browser-checks.mjs';
 import {checkInterfaceControls,checkArtworkInterface} from './interface-browser-checks.mjs';
 import {checkWorkshopPowerControls,checkElectricalControls} from './electricity-browser-checks.mjs';
 import {checkOrganicControls} from './organics-browser-checks.mjs';
@@ -80,6 +81,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkPlantingControls({page,saved,capture});
   await checkLivingLandControls({page,saved,capture});
   await checkClimateControls({page,saved,capture});
+  await checkFarmingControls({page,saved,capture});
   await checkUtilityRoutes({page,saved,capture});
   await checkWaterControls({page,saved,capture});
   await checkPipeControls({page,saved,capture});

@@ -48,4 +48,4 @@ assert(game.restore(JSON.stringify(resetMaterialLocations(base))));assert.equal(
 const legacy=JSON.parse(game.snapshot());legacy.village.roads=[[7,8]];
 assert(game.restore(JSON.stringify(legacy)));assert.equal(game.toggle_road(7,8),'ok');
 game.free();
-console.log('PASS: all 23 occupied plots on tile boundaries, road adjacency at four zooms, full-plot road exclusion, building/road conflicts and legacy saves.');
+console.log(`PASS: all ${Object.keys(allBuildingArt).length} occupied plots on tile boundaries, road adjacency at four zooms, full-plot road exclusion, building/road conflicts and legacy saves.`);

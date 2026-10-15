@@ -24,7 +24,7 @@ for(let i=0;i<workshopDay.alpha.length;i++){const day=workshopDay.alpha[i]>=32,n
 assert(intersection/union>.99,'Workshop lighting must preserve its silhouette without a visible day/night position jump');
 for(const[key,art]of Object.entries(allBuildingArt)){
   const measurement=buildingProjection[key];
-  if(key==='grove'){assert(!measurement && !art.axes,'Organic grove has no architectural axes');continue;}
+  if(['grove','orchard'].includes(key)){assert(!measurement && !art.axes,'Organic grove has no architectural axes');continue;}
   assert(measurement,`Missing measured structure: ${key}`);
   const {vertical,shear}=cameraCalibration(art);
   const project=(x,y)=>{const[u,v]=meshPoint(art.mesh,[x,y]);return[u,vertical*v+shear*u];};

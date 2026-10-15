@@ -103,7 +103,9 @@
           <button id="supply-tab-ecology" role="tab" data-supply-tab="ecology" aria-controls="supply-ecology" aria-selected="false" tabindex="-1">Ecology</button>
         </nav>
         <section id="supply-pantry" class="supply-page" role="tabpanel" aria-labelledby="supply-tab-pantry">
+
         <div id="pantry-stock" class="pantry-stacks" role="group" aria-label="Pantry stores"></div>
+        <section id="farm-overview" hidden><h3>Farm &amp; animals</h3><p id="farm-reserves"></p><div id="farm-plots"></div></section>
         <p id="pantry-outlook" role="status"></p>
         <p id="food-freshness-warning" role="status" hidden></p>
         <details class="economy-section"><summary>Keeping food fresh</summary><div id="food-freshness"></div></details>
@@ -117,7 +119,7 @@
         <section id="shared-table" hidden><h3>Our shared table</h3><p id="shared-table-status" role="status"></p><button data-cancel-gathering aria-label="Cancel gathering from Supplies" hidden>Cancel gathering</button></section>
         <section id="hen-controls"><h3>Chicken coops</h3>
         <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
-        <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
+        <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 2 fodder, or 3 ingredients when fodder is unavailable, for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
         <p id="coop-status"></p></section>
         <details><summary>How the pantry works</summary><p>Harvests stay at their garden or forest plot. Residents carry ingredients and eggs to kitchen pantries and hen feed to coops. Meals stay at the kitchen; neighbours walk to an available stored portion before eating. Town food purchases unload at the arrival store. A food forest yields six ingredients per gathering batch; wild foraging yields two. Residents stop routine gathering when reserves are healthy. Hungry hens wait safely; crops wait for water.</p></details>
         </section>
@@ -203,26 +205,27 @@
         <select id="building-choice"></select>
         <p id="building-purpose"></p>
         <p id="building-power"></p>
-        <section id="crop-controls" hidden>
+        <section id="farm-controls" hidden><h3>Care &amp; harvest</h3><label><input id="farm-active" type="checkbox"> <span id="farm-active-label">Production enabled</span></label><p id="farm-status" role="status"></p><progress id="farm-progress" max="100" value="0"></progress><p id="farm-detail"></p><p id="farm-worker"></p><details><summary>How this plot works</summary><p id="farm-notes"></p></details></section><section id="crop-controls" hidden>
           <h3>Growing plan</h3>
           <label for="next-crop">Next crop</label>
-          <select id="next-crop"><option value="lettuce">Lettuce · quick harvest</option><option value="beans">Beans · larger, drought-tolerant</option><option value="tomatoes">Tomatoes · three harvests</option></select>
+          <select id="next-crop"><option value="lettuce">Lettuce · quick harvest</option><option value="beans">Beans · larger, drought-tolerant</option><option value="tomatoes">Tomatoes · three harvests</option><option value="maize">Maize</option><option value="cassava">Cassava</option><option value="fodder">Fodder grass</option></select>
           <label><input id="replant-crop" type="checkbox" /> Replant after this crop finishes</label>
           <p id="crop-status"></p>
           <p id="nursery-status"></p>
           <details><summary>Growing details</summary><p id="crop-details"></p><p>Changes apply to the next planting. Pausing replanting lets the current crop finish, including all three tomato harvests.</p></details>
         </section>
         <p id="building-activity" role="status"></p>
+        <div id="building-visits"><h3>Ask a neighbour to visit</h3>
+        <div id="building-neighbours" class="requests"></div>
+        <p id="building-response" role="status"></p>
+        <details><summary>How visits work</summary><p>Invite a neighbour to use this building. Work needs its usual supplies; tired or hungry neighbours need care first. Left to themselves, neighbours spend their free time on hobbies and company.</p></details></div>
         <section id="building-work-controls" hidden>
           <h3>Change this building</h3><p id="building-work-status" role="status"></p>
           <div id="building-work-actions" class="building-work-actions"><button data-building-work="demolish">Demolish · faster</button><button data-building-work="salvage">Salvage · recover materials</button><button data-building-work="move">Move building</button></div>
           <button id="cancel-building-work" hidden>Cancel crew job</button>
           <p class="hint">Residents do the work during 09:00–12:00 and 15:00–16:00. Food, rest and sleep come first. The building is unavailable while the crew works.</p>
         </section>
-        <button id="plan-first-building" hidden>Choose a blueprint</button><div id="building-visits"><h3>Ask a neighbour to visit</h3>
-        <div id="building-neighbours" class="requests"></div>
-        <p id="building-response" role="status"></p>
-        <details><summary>How visits work</summary><p>Invite a neighbour to use this building. Work needs its usual supplies; tired or hungry neighbours need care first. Left to themselves, neighbours spend their free time on hobbies and company.</p></details></div>
+        <button id="plan-first-building" hidden>Choose a blueprint</button>
       </aside>
       </section>
       <section id="person" class="person panel" hidden></section>

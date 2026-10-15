@@ -20,7 +20,7 @@ function render(){
     for(let offset=-360;offset<=360;offset+=36)for(const slope of [-.5,.5]){
       ctx.beginPath();ctx.moveTo(0,260+offset-200*slope);ctx.lineTo(400,260+offset+200*slope);ctx.stroke();
     }
-    drawBuildingArt(ctx,images.get(night?art.nightFile:art.file),config,200,260,1.85);
+    drawBuildingArt(ctx,images.get(night?art.nightFile:art.file),{...config,renderFilter:night?art.nightTint:undefined},200,260,1.85);
     let error=0;
     if(m){
       const point=(x,y)=>{const [u,v]=meshPoint(config.mesh,[x,y]);return [200+(u/m.size-.5)*w,260+((v/m.size-art.anchor)*vertical+(u/m.size-.5)*shear)*w];};
