@@ -131,7 +131,11 @@ until(s=>{
  return false;
 },'resident tending with reclaimed irrigation');
 await complete(7);
-build('biodigester');g.configure_banana_treatment(false);await complete(8);
+build('biodigester');g.configure_banana_treatment(false);
+// Demonstrate a vegetable pot with cooking gas. Optional eggs can be waiting
+// for a hen batch; use the normal preference control rather than idle for them.
+g.set_food_preferences(snap().village.supplies.feed_hens,false);
+await complete(8);
 for(const material of [2,3,4])source(material);
 for(let i=0;i<5;i++){
  until(s=>s.village.economy.sources[i].remaining>0,`source ${i} maturity`);

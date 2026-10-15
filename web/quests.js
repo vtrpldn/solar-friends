@@ -236,7 +236,7 @@ export const quests = [
     objectives:v=>[
       goal("Build a biodigester",count(v,"biodigester"),1,"Order its equipment and complete the sealed installation.","biodigester"),
       actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Pause banana treatment when waste is scarce so two sealed waste can reach the digester. Two delivered scraps complete its feed; digestion takes eight hours."),
-      actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking. The next pot uses one gas and yields one extra meal; fresh water is still required."),
+      actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking for an extra meal per pot. If a pot waits for eggs, buy them or switch off eggs in Supplies. Fresh water is still required."),
       actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Cured compost remains in a pile at that plot until neighbours collect it; its later use will not erase this milestone."),
     ],
   },

@@ -33,6 +33,10 @@ for (const [kind, x, y, cost] of [
 }
 // Building visits now share cooking naturally. Deliberately assign repeated
 // kitchen work to one resident to exercise the unequal-work concern.
+// Use actual work preferences and clear service roads to sustain that workload;
+// a village sharing a few slow pots does not meet the concern's threshold.
+for(let id=0;id<5;id++)assert.equal(game.set_work_preference(id,'food',id===2?2:0),'ok');
+for(const [x,y]of [[6,11],[7,11],[8,11],[9,11],[10,11],[11,11],[12,11],[13,11],[14,11],[10,12],[10,13],[9,12],[8,12],[7,12],[6,12],[5,12],[4,12],[3,12],[2,12],[1,12],[1,13]])assert.equal(game.toggle_road(x,y),'ok');
 // Stock the scenario; all cooking records still come from completed tasks.
 const stocked = JSON.parse(game.snapshot());
 stocked.village.food = 300;
