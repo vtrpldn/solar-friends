@@ -415,6 +415,25 @@ mod tests {
         assert!(!v.progress.night_lights);
     }
     #[test]
+    fn switching_a_light_off_removes_its_unmet_demand_without_spending_charge() {
+        let mut g = scene();
+        let before = super::super::supply(g.app.world().resource::<Village>());
+        assert!((before.demand - 0.1).abs() < 0.0001);
+        assert!(g.set_power_enabled(2, false));
+        let after = super::super::supply(g.app.world().resource::<Village>());
+        assert_eq!(after.demand, 0.);
+        assert!(
+            !after
+                .connections
+                .iter()
+                .find(|c| c.id == 2)
+                .unwrap()
+                .enabled
+        );
+        assert_eq!(after.stored, 10.);
+        check(&mut g);
+    }
+    #[test]
     fn real_generator_relocation_and_removal_preserve_the_owned_battery() {
         let mut g = scene();
         let original = g

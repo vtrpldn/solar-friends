@@ -91,12 +91,11 @@ pub fn supply(v: &Village) -> Supply {
             let enabled = b.progress >= 100.
                 && !v.power.disabled.contains(&b.id)
                 && building_work::job(v, b.id).is_none();
-            let connected = enabled
-                && node.is_some_and(|n| {
-                    forecast
-                        .as_ref()
-                        .is_some_and(|f| f.connected_to_storage(n.id))
-                });
+            let connected = node.is_some_and(|n| {
+                forecast
+                    .as_ref()
+                    .is_some_and(|f| f.connected_to_storage(n.id))
+            });
             let need = node.map_or(0., |n| network::light_load(v, n) * f64::from(dark) / 60.);
             let delivered = if enabled {
                 node.and_then(|n| forecast.as_mut().map(|f| f.spend(n.id, need)))
@@ -104,7 +103,7 @@ pub fn supply(v: &Village) -> Supply {
             } else {
                 0.
             };
-            if source == "grid" {
+            if source == "grid" && enabled {
                 grid_demand += load(&b.kind) * dark;
                 delivered_lighting += delivered as f32 * 60.;
             }
@@ -114,7 +113,7 @@ pub fn supply(v: &Village) -> Supply {
                 enabled,
                 connected,
                 load: load(&b.kind),
-                light_level: if !connected {
+                light_level: if !enabled || !connected {
                     0.
                 } else if need <= 0. {
                     1.
