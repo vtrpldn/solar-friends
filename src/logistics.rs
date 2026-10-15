@@ -884,7 +884,9 @@ fn walk(
     if (r.x - target[0]).hypot(r.y - target[1]) > 0.001 {
         spacing::walk(r, neighbours, dt * speed);
     }
-    if !navigation::segment(v, [old.0, old.1], [r.x, r.y]) {
+    if !navigation::segment(v, [old.0, old.1], [r.x, r.y])
+        || !navigation::segment(v, [r.x, r.y], target)
+    {
         (r.x, r.y) = old;
         let dx = target[0] - r.x;
         let dy = target[1] - r.y;
@@ -892,7 +894,9 @@ fn walk(
         let step = (dt * speed * 0.7).min(distance);
         if distance > 0.001 {
             let p = (r.x + dx / distance * step, r.y + dy / distance * step);
-            if navigation::segment(v, [r.x, r.y], [p.0, p.1]) {
+            if navigation::segment(v, [r.x, r.y], [p.0, p.1])
+                && navigation::segment(v, [p.0, p.1], target)
+            {
                 (r.x, r.y) = p;
             }
         }
@@ -1848,5 +1852,29 @@ mod tests {
             assert!(!g.restore(&bad.to_string()));
             assert_eq!(g.snapshot(), saved);
         }
+    }
+    #[test]
+    fn hauling_at_a_crowded_corner_keeps_the_next_waypoint_reachable() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("garden", 13, 10), "ok");
+        let v = g.app.world().resource::<Village>().clone();
+        let mut r = g
+            .app
+            .world_mut()
+            .query::<&Resident>()
+            .iter(g.app.world())
+            .next()
+            .unwrap()
+            .clone();
+        (r.x, r.y) = (11.15, 10.75);
+        (r.target_x, r.target_y) = (12., 11.);
+        let point = [12., 11.];
+        assert!(navigation::segment(&v, [r.x, r.y], point));
+        walk(&v, &mut r, &[(1, 11.4, 11.2)], point, 0.25);
+        assert!(
+            navigation::segment(&v, [r.x, r.y], point),
+            "Avoiding a neighbour cannot strand cargo behind a plot corner"
+        );
     }
 }

@@ -192,9 +192,9 @@ fn step(
     };
     let allowed = |to| {
         if exiting {
-            navigation::departure_step(v, origin, to)
+            navigation::departure_turn(v, origin, to, point)
         } else {
-            navigation::segment(v, old, to)
+            navigation::segment(v, old, to) && navigation::segment(v, to, point)
         }
     };
     if (r.x - point[0]).hypot(r.y - point[1]) > 0.001 {
@@ -358,7 +358,15 @@ mod tests {
             );
             assert!(valid(v, r));
         }
-        panic!("Resident did not arrive: {}", r.reason);
+        panic!(
+            "Resident did not arrive: {} at ({}, {}) toward ({}, {}): {}",
+            r.reason,
+            r.x,
+            r.y,
+            r.target_x,
+            r.target_y,
+            serde_json::to_string(&r.walking).unwrap()
+        );
     }
     #[test]
     fn work_and_visits_detour_around_foundations_and_can_leave_an_occupied_origin() {
@@ -593,6 +601,25 @@ mod tests {
         assert!(
             paved < plain * 9 / 10,
             "{paved} paved frames vs {plain} plain frames"
+        );
+    }
+    #[test]
+    fn steering_at_a_crowded_corner_keeps_the_next_waypoint_reachable() {
+        let (_, mut v, mut r) = scene();
+        let mut b = v.buildings[0].clone();
+        b.kind = "garden".into();
+        b.x = 13;
+        b.y = 10;
+        v.buildings = vec![b];
+        navigation::refresh(&mut v);
+        (r.x, r.y) = (11.15, 10.75);
+        (r.target_x, r.target_y) = (12., 11.);
+        let point = [12., 11.];
+        assert!(navigation::segment(&v, [r.x, r.y], point));
+        step(&v, &mut r, &[(1, 11.4, 11.2)], point, 0.25, false);
+        assert!(
+            navigation::segment(&v, [r.x, r.y], point),
+            "Avoiding a neighbour cannot strand a walker behind a plot corner"
         );
     }
 }
