@@ -59,6 +59,15 @@ fn finish_task(g: &mut Game, id: usize, task: &str) {
     }
 }
 
+fn finish_gathering(g: &mut Game) {
+    for _ in 0..2400 {
+        if g.app.world().resource::<Village>().progress.gatherings > 0 {
+            return;
+        }
+        g.tick(0.25);
+    }
+    panic!("shared table did not finish: {}", g.snapshot());
+}
 fn unlock(g: &mut Game) {
     g.app
         .world_mut()
@@ -270,14 +279,47 @@ fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
     assert_ne!(g.host_gathering(), "ok");
     assert_eq!(g.snapshot(), before);
     assert_eq!(g.app.world().resource::<Village>().progress.gatherings, 0);
-    advance(&mut g, 41.);
+    finish_gathering(&mut g);
     let v = g.app.world().resource::<Village>();
     assert_eq!(v.progress.gatherings, 1);
     assert!(v.progress.welcome_supper);
-    assert!(v.progress.completed[2]);
-    assert_eq!(v.progress.friendships[1], 1);
-    assert_eq!(v.progress.friendships[5], 1);
-    assert_eq!(v.progress.friendships[0], 0);
+    let attended = v.progress.gathering_delivery.as_ref().unwrap().attended;
+    assert!(attended.count_ones() >= 3);
+    for i in 0..5 {
+        for j in 0..5 {
+            assert_eq!(
+                v.progress.friendships[i * 5 + j],
+                u32::from(i != j && attended & (1 << i) != 0 && attended & (1 << j) != 0)
+            );
+        }
+    }
+    // A three-person supper is valid. The chapter separately teaches five
+    // cooked meals; neighbours who missed supper can eat normal stored portions.
+    for id in 0..5 {
+        if attended & (1 << id) == 0 {
+            for mut r in g
+                .app
+                .world_mut()
+                .query::<&mut Resident>()
+                .iter_mut(g.app.world_mut())
+            {
+                if r.id == id {
+                    r.hunger = 80.;
+                }
+            }
+            assert!(g.request(id, "eat", false).contains("Happy"));
+        }
+    }
+    for _ in 0..2400 {
+        if g.app.world().resource::<Village>().progress.completed[2] {
+            return;
+        }
+        g.tick(0.25);
+    }
+    panic!(
+        "five cooked meals did not complete the chapter: {}",
+        g.snapshot()
+    );
 }
 #[test]
 fn failed_gathering_preconditions_do_not_spend_meals() {
@@ -344,7 +386,7 @@ fn a_running_gathering_survives_save_and_reload() {
     advance(&mut g, 10.);
     let mut restored = Game::new();
     assert!(restored.restore(&g.snapshot()));
-    advance(&mut restored, 31.);
+    finish_gathering(&mut restored);
     assert_eq!(
         restored
             .app
@@ -410,6 +452,19 @@ fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
         5,
     );
     assert_eq!(g.host_gathering(), "ok");
+    gatherings::fixture_table(&mut g.app.world_mut().resource_mut::<Village>());
+    g.tick(0.25);
+    assert_eq!(
+        g.app
+            .world()
+            .resource::<Village>()
+            .progress
+            .gathering_delivery
+            .as_ref()
+            .unwrap()
+            .phase,
+        gatherings::Phase::Serving
+    );
     let mut q = g.app.world_mut().query::<&mut Resident>();
     for mut r in q.iter_mut(g.app.world_mut()) {
         r.x = 27.;
@@ -420,6 +475,11 @@ fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
     assert_eq!(v.progress.gatherings, 0);
     assert!(!v.progress.welcome_supper);
     assert_eq!(v.progress.friendships, [0; 25]);
+    assert_eq!(
+        v.progress.gathering_delivery.as_ref().unwrap().phase,
+        gatherings::Phase::Failed
+    );
+    assert_eq!(v.meals, 5, "Unserved meals remain at the shared table");
 }
 
 #[test]

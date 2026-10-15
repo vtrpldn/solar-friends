@@ -58,7 +58,7 @@ export function makeScenario(id, fresh, established) {
     const layout=id==='sim-spread'?dispersed:id==='sim-balanced'?balanced:id==='sim-blocked'?enclosed:compact;
     v.economy=structuredClone(fresh.village.economy);v.economy.next_building=layout.length;
     v.building_jobs=[];v.roads=[];v.circular=structuredClone(fresh.village.circular);
-    v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress.gathering_until=0;v.progress.invited=0;v.progress.attended=0;
+    v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress.gathering_delivery=null;v.progress.gathering_until=0;v.progress.invited=0;v.progress.attended=0;
     v.buildings=layout.map(([kind,x,y],id)=>({...structuredClone(established.village.buildings[0]),id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,poultry:{remaining:0}}));
     v.economy.projects=v.buildings.map(b=>({building:b.id,recipe:'standard',appearance:b.kind==='home'?b.id%4:0,priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===b.kind).standard.length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)}));
     v.power={stored:id==='sim-balanced'?30:0,disabled:[]};v.food=36;v.meals=10;v.water=80;v.minutes=1440+540;
