@@ -13,9 +13,14 @@ g.set_outside_work(true);
 let savedCareCheckIn=false;
 function until(test,label,limit=24000){
  for(let i=0;i<limit;i++){
-  const current=snap(),care=current.village.situations.active;
-  if(output&&!savedCareCheckIn&&care&&care.response==null&&care.resolved==null){writeFileSync(`${output}/care-check-in.json`,g.snapshot());savedCareCheckIn=true;}
-  if(test(current))return;g.tick(.25);
+  // Keep every quarter-second simulation step. Poll the full UI snapshot every
+  // three game minutes; chapter waits do not need a render snapshot each tick.
+  if(i%4===0||i===limit-1){
+   const current=snap(),care=current.village.situations.active;
+   if(output&&!savedCareCheckIn&&care&&care.response==null&&care.resolved==null){writeFileSync(`${output}/care-check-in.json`,g.snapshot());savedCareCheckIn=true;}
+   if(test(current))return;
+  }
+  g.tick(.25);
  }
  const s=snap(),chapter=s.village.progress.tracked;writeFileSync('artifacts/logistics/stalled-story.json',g.snapshot());
  throw new Error(`Timed out: ${label} on day ${1+Math.floor(s.village.minutes/1440)}. ${JSON.stringify({chapter,goals:quests[chapter].objectives(s.village).filter(o=>!o.done),stock:s.environment.economy.shortage,residents:s.residents.map(r=>[r.name,r.task,r.reason]),progress:s.village.progress})}`);
