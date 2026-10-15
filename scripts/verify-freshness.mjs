@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
 import {resetMaterialLocations} from '../web/dev/material-fixture.js';
-import {freshnessMarkup} from '../web/freshness-ui.js';
+import {freshnessMarkup,freshnessWarning} from '../web/freshness-ui.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/freshness',{recursive:true});
 const FOOD=16,MEALS=17,EGGS=18,life={16:5760,17:4320,18:11520},snap=g=>JSON.parse(g.snapshot());
@@ -50,8 +50,8 @@ s=snap(fifo);assert.equal(s.village.freshness.expired[FOOD],0);assert(!allLots(s
 // Store expiry makes space and cannot be reversed by a reload.
 const waste=scene(false),old=epoch(snap(waste)),pile=old.village.logistics.stores.find(p=>p.items[FOOD]);
 pile.food_lots=[aged(FOOD,pile.items[FOOD],6300.5)];assert(waste.restore(JSON.stringify(old)));
-assert.match(freshnessMarkup(snap(waste)),/36 to use within a day/);await writeFile('artifacts/freshness/use-soon.json',waste.snapshot());
-waste.tick(.25);s=snap(waste);assert.equal(s.village.food,0);assert.equal(s.village.freshness.expired[FOOD],36);assert.match(freshnessMarkup(s),/Spoiled so far: 36 ingredients/);checkpoint(waste);conserved(waste);
+assert.match(freshnessMarkup(snap(waste)),/36 to use within a day/);assert.match(freshnessWarning(snap(waste)),/Use within a day: 36 ingredients/);await writeFile('artifacts/freshness/use-soon.json',waste.snapshot());
+waste.tick(.25);s=snap(waste);assert.equal(s.village.food,0);assert.equal(s.village.freshness.expired[FOOD],36);assert.match(freshnessMarkup(s),/Spoiled so far: 36 ingredients/);assert.equal(freshnessWarning(s),'');checkpoint(waste);conserved(waste);
 await writeFile('artifacts/freshness/spoiled.json',waste.snapshot());
 until(waste,s=>s.village.food>0,'Recover a pantry after spoilage');checkpoint(waste);conserved(waste);
 // An interrupted egg pot returns fresh eggs and gas, never spoiled ingredients.

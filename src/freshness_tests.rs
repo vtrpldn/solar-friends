@@ -358,3 +358,49 @@ fn invalid_food_dates_amounts_and_summary_edits_are_rejected_atomically() {
         assert_eq!(g.snapshot(), before);
     }
 }
+
+#[test]
+fn gathered_neighbours_cannot_serve_expired_portions_or_receive_shared_meal_rewards() {
+    let mut g = empty();
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 6300.;
+        assert!(logistics::receive(&mut v, Owner::Camp, MEALS, 5));
+    }
+    assert_eq!(g.place("square", 6, 6), "ok");
+    logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
+    assert_eq!(g.host_gathering(), "ok");
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        gatherings::fixture_table(&mut v);
+        let table = v.progress.gathering_delivery.as_ref().unwrap().store;
+        let lot = &mut v
+            .logistics
+            .as_mut()
+            .unwrap()
+            .stores
+            .iter_mut()
+            .find(|p| p.id == table)
+            .unwrap()
+            .food_lots[0];
+        lot.produced = 1980.5;
+        lot.expires = 6300.5;
+        assert!(gatherings::advance(&mut v, 31));
+        v.minutes = 6300.75;
+        advance(&mut v);
+        v.progress.attended = 0b00111;
+        gatherings::advance(&mut v, 31);
+        assert!(!gatherings::served(&v));
+        assert_eq!(v.meals, 0);
+        assert_eq!(v.supplies.portions_eaten, 0);
+        assert_eq!(v.freshness.expired[MEALS], 5);
+        gatherings::finish(&mut v, false);
+        let p = v.progress.gathering_delivery.as_ref().unwrap();
+        assert_eq!(p.phase, gatherings::Phase::Failed);
+        assert_eq!(p.attended.count_ones(), 3);
+        assert_eq!(v.progress.gatherings, 0);
+        assert!(v.progress.friendships.iter().all(|n| *n == 0));
+        conserved(&v);
+    }
+    checkpoint(&mut g);
+}

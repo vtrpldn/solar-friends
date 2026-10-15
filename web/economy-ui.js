@@ -1,4 +1,4 @@
-import {freshnessMarkup,expiryNote} from './freshness-ui.js';
+import {freshnessMarkup,freshnessWarning,expiryNote} from './freshness-ui.js';
 import {itemIcon,materialIcons} from './game-ui.js';
 import {createProjectForecasts} from './forecasts.js';
 import {installProductionUI,productionSiteName} from './production-ui.js';
@@ -125,7 +125,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#project-forecast-assumptions').textContent=outlook.assumptions;
     $('#property-description').textContent=e.property;
     productionUI.update(s);
-    const freshnessKey=JSON.stringify(e.freshness);if(freshnessKey!==lastFreshness){lastFreshness=freshnessKey;$('#food-freshness').innerHTML=freshnessMarkup(s);}
+    const freshnessKey=JSON.stringify(e.freshness);if(freshnessKey!==lastFreshness){lastFreshness=freshnessKey;$('#food-freshness').innerHTML=freshnessMarkup(s);const warning=freshnessWarning(s);$('#food-freshness-warning').textContent=warning;$('#food-freshness-warning').hidden=!warning;}
     const locations=v.logistics?.stores||[],shipments=v.logistics?.shipments||[],locationKey=JSON.stringify({locations,shipments:shipments.map(h=>[h.resident,h.material,h.amount,h.carrying])});
     if(locationKey!==lastLocations&&!$('#storage-locations').contains(document.activeElement)){
       lastLocations=locationKey;

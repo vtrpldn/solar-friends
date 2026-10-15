@@ -7,6 +7,7 @@ export async function checkFreshnessControls({page,saved,capture}){
     await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();
   }
   await load('use-soon',()=>{const v=window.solarDev.snapshot().village;return v.minutes===6300&&v.food===36;});
+  assert.match(await page.locator('#food-freshness-warning').textContent(),/Use within a day: 36 ingredients/);
   await page.getByText('Keeping food fresh',{exact:true}).click();
   assert.match(await page.locator('#food-freshness').textContent(),/36 to use within a day/);
   assert.match(await page.locator('#food-freshness').textContent(),/No food has spoiled/);
@@ -18,6 +19,7 @@ export async function checkFreshnessControls({page,saved,capture}){
   if(!await page.locator('#food-freshness').isVisible())await page.getByText('Keeping food fresh',{exact:true}).click();
   assert.match(await page.locator('#food-freshness').textContent(),/Spoiled so far: 36 ingredients/);
   assert(!/36 to use within a day/.test(await page.locator('#food-freshness').textContent()));
+  assert(!await page.locator('#food-freshness-warning').isVisible());
   await capture('Spoilage removes real portions and reports the loss','freshness-spoiled.png');
   await load('pot-spoiled',()=>window.solarDev.snapshot().village.production.batches.some(b=>b.spoiled));
   assert.match(await page.locator('#kitchen-batches').textContent(),/Previous pot spoiled. Fresh inputs and held gas were recovered/);

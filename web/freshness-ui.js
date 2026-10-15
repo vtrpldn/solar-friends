@@ -4,6 +4,11 @@ export function expiryNote(lots,enabled){
   if(!enabled||!lots?.length)return '';
   return `Next food expires ${time(Math.min(...lots.map(l=>l.expires)))}`;
 }
+export function freshnessWarning(s){
+  const f=s.environment.economy.freshness;if(!f?.enabled)return '';
+  const due=f.due_within_day.map((n,i)=>n?`${n} ${s.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean);
+  return due.length?`Use within a day: ${due.join(' · ')}. Open Keeping food fresh for dates.`:'';
+}
 export function freshnessMarkup(s){
   const f=s.environment.economy.freshness;if(!f)return '';
   if(!f.enabled)return '<p>Food does not spoil in Sandbox. Neighbours still use older portions first.</p>';
