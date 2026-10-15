@@ -277,6 +277,27 @@ fn malformed_cooking_recipes_workers_and_gas_promises_are_rejected_atomically() 
 }
 
 #[test]
+fn a_queued_pot_reserves_output_room_before_a_pantry_top_up() {
+    let (mut g, id, r) = scene(false, 0.);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let owner = Owner::Pantry(0);
+        let room = logistics::room(&v, owner);
+        assert!(logistics::receive(&mut v, owner, 0, room));
+        assert!(!work(&mut v, &r, 1.));
+        let p = food::pantry(&v, 0).unwrap();
+        assert!(p.items.iter().sum::<u32>() + site_space(&v, owner) <= p.capacity);
+        assert!(work(&mut v, &r, 9.));
+        assert_eq!(batch(&v, id).unwrap().phase, Phase::Complete);
+        let p = food::pantry(&v, 0).unwrap();
+        assert_eq!(p.items[economy::MEALS], 5);
+        assert_eq!(p.items[economy::SCRAPS], 1);
+        assert_eq!(p.items.iter().sum::<u32>(), p.capacity);
+    }
+    checkpoint(&mut g);
+}
+
+#[test]
 fn a_full_kitchen_reserves_space_for_the_meals_and_their_scraps_together() {
     let (mut g, id, r) = scene(false, 0.);
     {

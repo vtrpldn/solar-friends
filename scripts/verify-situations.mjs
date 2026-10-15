@@ -1,11 +1,13 @@
 import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import fs from 'node:fs/promises';
+import {writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import init, { Game } from '../web/pkg/solar_friends.js';
 import { situationView } from '../web/situations.js';
 await init({ module_or_path: await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm', import.meta.url)) });
 const output = process.argv[2];
-if (output) await fs.mkdir(output, { recursive: true });
+const failureOutput=output||'artifacts/situations';
+await fs.mkdir(failureOutput, { recursive: true });
 const snapshot = g => JSON.parse(g.snapshot());
 function until(g, predicate, label, limit = 25000, beforeTick = () => {}) {
   for (let i = 0; i < limit; i++) {
@@ -13,7 +15,9 @@ function until(g, predicate, label, limit = 25000, beforeTick = () => {}) {
     beforeTick(g);
     g.tick(0.25);
   }
-  throw new Error(`${label}: ${g.snapshot()}`);
+  const checkpoint=`${failureOutput}/stalled.json`;
+  writeFileSync(checkpoint,g.snapshot());
+  throw new Error(`${label}: see ${checkpoint}`);
 }
 const game = new Game();
 assert.match(situationView(snapshot(game).village, snapshot(game).residents).markup, /no one has raised a concern/);

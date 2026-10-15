@@ -286,10 +286,11 @@ pub fn reserved_space(v: &Village) -> u32 {
         .filter(|b| b.active())
         .map(|b| {
             let inputs = b.inputs.iter().sum::<u32>();
+            let outputs = b.output + u32::from(b.material == economy::MEALS);
             if b.committed {
-                inputs.max(b.output)
+                inputs.max(outputs)
             } else {
-                b.output.saturating_sub(inputs)
+                outputs.saturating_sub(inputs)
             }
         })
         .sum()
@@ -308,11 +309,16 @@ pub fn site_space(v: &Village, owner: Owner) -> u32 {
         Owner::Pantry(b) => pantry_site(v, b),
         _ => None,
     } {
-        pending(v, id).filter(|b| b.committed).map_or(0, |b| {
-            b.inputs
-                .iter()
-                .sum::<u32>()
-                .max(b.output + u32::from(b.material == economy::MEALS))
+        pending(v, id).map_or(0, |b| {
+            let inputs = b.inputs.iter().sum::<u32>();
+            let outputs = b.output + u32::from(b.material == economy::MEALS);
+            if b.committed {
+                inputs.max(outputs)
+            } else {
+                // A pantry top-up must leave room for this pot's net output
+                // before a resident starts cooking, including its scraps.
+                outputs.saturating_sub(inputs)
+            }
         })
     } else {
         0

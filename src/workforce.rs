@@ -124,7 +124,9 @@ fn projected(v: &Village, id: usize) -> (f32, f32) {
         .sum::<u32>() as f32;
     let meals = pots
         .iter()
-        .filter(|b| production::ready(v, b))
+        // An unfinished pot cannot feed breakfast or a meal break while cooks
+        // are off duty. Keep a small edible reserve until work can resume.
+        .filter(|b| work_time(v.minutes) && production::ready(v, b))
         .map(|b| b.output)
         .sum::<u32>() as f32;
     let gathered = v
@@ -868,10 +870,37 @@ mod tests {
         assert!(!valid(&v));
     }
     #[test]
+    fn a_pot_waiting_for_community_hours_cannot_replace_an_edible_reserve() {
+        let mut g = Game::new();
+        assert_eq!(g.place("kitchen", 5, 5), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_finish(&mut v, 0);
+        logistics::fixture_stock(&mut v, economy::FOOD, 6);
+        food::fixture_stage(&mut v, 0);
+        economy::rebalance(&mut v);
+        assert!(production::jobs(&v).any(|b| b.material == economy::MEALS));
+        v.minutes = 480.;
+        assert!(
+            urgent_food(&v, 4),
+            "Breakfast needs edible portions before cooking resumes"
+        );
+        v.minutes = 540.;
+        assert!(
+            !urgent_food(&v, 4),
+            "The available pot can be cooked during community hours"
+        );
+        v.minutes = 780.;
+        assert!(
+            urgent_food(&v, 4),
+            "The lunch break must retain actual food as well"
+        );
+    }
+    #[test]
     fn cooking_projection_counts_a_saved_pot_once_even_when_workers_share_it() {
         let mut g = Game::new();
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 540.;
         logistics::fixture_finish(&mut v, 0);
         logistics::fixture_stock(&mut v, economy::FOOD, 6);
         food::fixture_stage(&mut v, 0);
