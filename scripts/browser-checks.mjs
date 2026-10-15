@@ -4,6 +4,7 @@ import {checkLandControls} from './land-browser-checks.mjs';
 import {checkRestorationControls} from './restoration-browser-checks.mjs';
 import {checkPlantingControls} from './planting-browser-checks.mjs';
 import {checkLivingLandControls} from './living-land-browser-checks.mjs';
+import {checkUtilityRoutes} from './utility-routes-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
 import assert from 'node:assert/strict';
@@ -70,6 +71,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkCultivationControls({page,saved,capture});
   await checkPlantingControls({page,saved,capture});
   await checkLivingLandControls({page,saved,capture});
+  await checkUtilityRoutes({page,saved,capture});
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){
     await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);

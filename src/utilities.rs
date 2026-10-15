@@ -57,7 +57,8 @@ pub struct Port {
 }
 #[derive(Clone, Debug, Serialize)]
 pub struct Endpoint {
-    /// -1 is the arrival camp; non-negative identities are saved building IDs.
+    /// -1 is camp; -2-index identifies a persistent material plot; non-negative
+    /// identities are saved building IDs. Preview identities allocate no state.
     pub id: i32,
     pub kind: String,
     pub x: i32,
@@ -174,6 +175,29 @@ pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
             },
         })
     }));
+    if matches!(kind, Kind::Fresh | Kind::Irrigation) {
+        result.extend(v.economy.sources.iter().enumerate().filter_map(|(i, s)| {
+            if !s.active || s.material >= 2 {
+                return None;
+            }
+            Some(Endpoint {
+                id: i32::try_from(i).ok()?.checked_add(2)?.checked_neg()?,
+                kind: if s.material == 0 {
+                    "source_timber"
+                } else {
+                    "source_bamboo"
+                }
+                .into(),
+                x: s.x,
+                y: s.y,
+                size: resource_sites::size(s.material),
+                supply: false,
+                receive: true,
+                ready: true,
+                ports: ports(v, resource_sites::size(s.material), s.x, s.y),
+            })
+        }));
+    }
     result
 }
 

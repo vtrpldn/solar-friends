@@ -1772,6 +1772,8 @@ function refreshDevScene() {
   updateUI(); render();
 }
 const devAPI = {
+  utilityEndpoints: kind=>JSON.parse(game.utility_endpoints(kind)),
+  utilityPreview: (kind,from,to)=>JSON.parse(game.utility_preview(kind,from,to)),
   snapshot: () => JSON.parse(game.snapshot()),
   inspect: () => JSON.parse(game.dev_inspect()),
   observe: () => game.dev_observe(true),

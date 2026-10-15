@@ -237,3 +237,20 @@ fn previews_are_read_only_repeatable_and_recompute_after_real_moves() {
     assert_eq!(g.cancel_building_work(0), "ok");
     assert_eq!(g.utility_preview("fresh", 0, 1), preview);
 }
+
+#[test]
+fn renewable_plots_have_separate_compatible_ports_and_keep_their_identities() {
+    let mut g = scene();
+    assert_eq!(g.place_source(0, 5, 24), "ok");
+    assert_eq!(g.place_source(1, 12, 24), "ok");
+    assert_eq!(g.place_source(3, 18, 24), "ok");
+    let v = g.app.world().resource::<Village>();
+    assert_path(v, &plan(v, Kind::Fresh, 0, -2).unwrap());
+    assert_path(v, &plan(v, Kind::Irrigation, 3, -3).unwrap());
+    assert!(plan(v, Kind::Greywater, 2, -2).is_err());
+    assert!(plan(v, Kind::Fresh, 0, -4).is_err());
+    assert_eq!(g.clear_source(0), "ok");
+    let v = g.app.world().resource::<Village>();
+    assert!(plan(v, Kind::Fresh, 0, -2).is_err());
+    assert_path(v, &plan(v, Kind::Fresh, 0, -3).unwrap());
+}
