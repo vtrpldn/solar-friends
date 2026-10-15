@@ -49,7 +49,8 @@ impl Default for Circular {
 pub fn household_water(v: &mut Village, amount: f32) {
     let used = amount.min(v.water);
     v.water -= used;
-    v.circular.greywater = (v.circular.greywater + used * 0.7).min(120.);
+    v.circular.greywater =
+        (v.circular.greywater + used * 0.7).min(120. - processes::held_greywater(v));
 }
 pub fn irrigation_water(v: &Village) -> f32 {
     if v.circular.reclaimed >= 2. {
@@ -64,7 +65,7 @@ pub fn due(v: &Village, r: &Resident) -> bool {
         .any(|b| b.kind == "eco_toilet" && b.progress >= 100. && b.next_visit <= v.minutes)
         && v.minutes.rem_euclid(1440.) >= 450. + r.id as f32 * 45.
         && r.last_sanitation_day < (v.minutes / 1440.) as i32
-        && v.circular.waste < 80.
+        && v.circular.waste + processes::held_waste(v) + 1. <= 80.
         && v.water >= 1.
 }
 pub fn use_toilet(v: &mut Village, r: &mut Resident) {
@@ -87,73 +88,8 @@ pub fn use_toilet(v: &mut Village, r: &mut Resident) {
     v.buildings[index].visits = v.buildings[index].visits.saturating_add(1);
     household_water(v, 1.);
 }
-fn count(v: &Village, kind: &str) -> f32 {
-    v.buildings
-        .iter()
-        .filter(|b| b.kind == kind && b.progress >= 100.)
-        .count() as f32
-}
 pub fn advance(v: &mut Village, minutes: f32) {
-    // Curing continues in a sealed store even if the digester is removed.
-    if v.circular.pending_compost > 0 {
-        v.circular.curing = (v.circular.curing - minutes).max(0.);
-        if v.circular.curing == 0. {
-            v.progress.compost = v
-                .progress
-                .compost
-                .saturating_add(v.circular.pending_compost);
-            v.progress.digestate_cured = true;
-            v.circular.pending_compost = 0;
-            event(
-                v,
-                "Digestate has finished curing. Two compost are ready for the soil.",
-            );
-        }
-    }
-    let digesters = count(v, "biodigester");
-    if digesters > 0. && v.circular.auto_feed {
-        if v.circular.digestion > 0. {
-            v.circular.digestion = (v.circular.digestion - minutes * digesters).max(0.);
-            if v.circular.digestion == 0. {
-                v.circular.biogas += 4.;
-                v.circular.pending_compost = 2;
-                v.circular.curing = 1440.;
-                v.circular.batches = v.circular.batches.saturating_add(1);
-                event(
-                    v,
-                    "The biodigester made cooking gas. Its digestate now needs a full day to cure.",
-                );
-            }
-        } else if v.circular.waste >= 2.
-            && v.progress.scraps >= 2
-            && v.circular.biogas + production::held_biogas(v) as f32 <= 8.
-            && v.circular.pending_compost == 0
-        {
-            v.circular.waste -= 2.;
-            v.progress.scraps -= 2;
-            v.circular.digestion = 480.;
-        }
-    }
-    let wetlands = count(v, "wetland");
-    if wetlands > 0. && v.circular.filter_water {
-        if v.circular.filtration > 0. {
-            v.circular.filtration = (v.circular.filtration - minutes * wetlands).max(0.);
-            if v.circular.filtration == 0. {
-                v.circular.reclaimed += 8.;
-                v.circular.water_reused += 8.;
-            }
-        } else if v.circular.greywater >= 12. && v.circular.reclaimed <= 52. {
-            v.circular.greywater -= 12.;
-            v.circular.filtration = 360.;
-        }
-    }
-    // The sealed banana bed consumes waste; it has no water or food outlet.
-    // Digesters take their feedstock first, so both systems conserve one store.
-    if v.circular.banana_treatment {
-        let treated = (minutes * count(v, "banana_treatment") / 240.).min(v.circular.waste);
-        v.circular.waste -= treated;
-        v.circular.waste_treated += treated;
-    }
+    processes::advance(v, minutes);
 }
 pub fn valid(v: &Village) -> bool {
     let c = &v.circular;
@@ -175,11 +111,8 @@ pub fn valid(v: &Village) -> bool {
         && c.water_reused >= 0.
         && c.waste_treated.is_finite()
         && c.waste_treated >= 0.
-        && matches!(c.pending_compost, 0 | 2)
-        && ((c.pending_compost == 0 && c.curing == 0.) || (c.pending_compost == 2 && c.curing > 0.))
-        && (c.digestion == 0.
-            || (c.pending_compost == 0 && c.biogas + production::held_biogas(v) as f32 <= 8.))
-        && (c.filtration == 0. || c.reclaimed <= 52.)
+        && c.pending_compost <= 512
+        && ((c.pending_compost == 0 && c.curing == 0.) || (c.pending_compost > 0 && c.curing > 0.))
 }
 #[wasm_bindgen]
 impl Game {
@@ -264,6 +197,7 @@ mod tests {
         assert_eq!(v.circular.biogas, 4.);
         assert_eq!(v.progress.compost, 0);
         assert_eq!(v.circular.pending_compost, 2);
+        v.circular.auto_feed = false; // Curing is independent of new digester feed.
         advance(&mut v, 1439.);
         assert_eq!(v.progress.compost, 0);
         advance(&mut v, 1.);
