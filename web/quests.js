@@ -34,7 +34,7 @@ export const quests = [
         "Build a cistern",
         count(v, "well"),
         1,
-        "Place a free cistern blueprint, then check Projects. Buy its pump in Town; neighbours carry river water while it is being built. You can plan homes, a garden and a kitchen while supplies arrive.",
+        "Place a free cistern blueprint, then check Construction. Buy its pump in Town; neighbours carry river water while it is being built. Forecast the workweek to see what current supplies and schedules could achieve. You can plan homes, a garden and a kitchen while supplies arrive.",
         "well",
       ),
       goal(

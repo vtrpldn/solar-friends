@@ -258,6 +258,33 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   }
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/forecasts/project.json');
+  await page.waitForFunction(()=>window.solarDev.snapshot().village.buildings.length===1&&window.solarDev.snapshot().village.buildings[0].kind==='garden');
+  await page.locator('#dev-close').click();
+  if(!await page.locator('#village-book').isVisible())await page.getByRole('button',{name:'Village',exact:true}).click();
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  const forecastBefore=await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
+  await page.getByRole('button',{name:'Forecast workweek',exact:true}).click();
+  await page.locator('#project-forecast-status').filter({hasText:'Projected shared fund'}).waitFor({timeout:30000});
+  assert((await page.locator('.project-forecast-result').textContent()).includes('If current plans hold'));
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),forecastBefore,'Forecast controls never advance the live village');
+  await capture('Conditional workweek forecast with unchanged live project','workweek-forecast.png');
+  await page.locator('[data-project="0"][data-action="pause"]').click();
+  assert((await page.locator('#project-forecast-status').textContent()).includes('Plans changed'));
+  assert.equal(await page.locator('.project-forecast-result').count(),0,'A plan change removes old completion dates');
+  await page.getByRole('button',{name:'Recalculate forecast',exact:true}).click();
+  await page.locator('#project-forecast-status').filter({hasText:'Projected shared fund'}).waitFor({timeout:30000});
+  assert((await page.locator('.project-forecast-result').textContent()).includes('paused'));
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/forecasts/project.json');
+  await page.waitForFunction(()=>!window.solarDev.snapshot().village.economy.projects[0].paused);
+  await page.locator('#dev-close').click();
+  await page.getByRole('button',{name:'Village',exact:true}).click();
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  assert(await page.getByRole('button',{name:'Forecast workweek',exact:true}).isVisible());
+  assert.equal(await page.locator('.project-forecast-result').count(),0,'Imported villages cannot inherit the previous scene forecast');
+  await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);

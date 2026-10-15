@@ -31,8 +31,19 @@ fn waiting(v: &Village, id: usize) -> String {
         return reason.clone();
     }
     let b = v.buildings.iter().find(|b| b.id == id).unwrap();
-    if !economy::can_build(v, id) {
+    let missing = !p.committed
+        && economy::recipe(&b.kind, &p.recipe)
+            .unwrap()
+            .get(p.stage)
+            .is_some_and(|s| s.items.iter().enumerate().any(|(i, n)| *n > p.reserved[i]));
+    if missing {
         return requests::supply_wait(v, id);
+    }
+    if v.economy.outside_jobs.iter().all(|enabled| *enabled) {
+        return "All five neighbours have outside shifts. Keep someone available during community hours for hauling and construction.".into();
+    }
+    if !economy::can_build(v, id) {
+        return "Reserved supplies did not reach the site within this window. Review outside shifts, helping requests, storage access and receiving room.".into();
     }
     if !v.workforce_peers.iter().flatten().any(|r| {
         spacing::approach(v, b, r.id)
@@ -223,6 +234,11 @@ mod tests {
             away["funds_projected"].as_i64().unwrap() > local["funds_projected"].as_i64().unwrap()
         );
         assert_eq!(away["through"], local["through"]);
+        assert!(
+            away["projects"][0]["blocker"]
+                .as_str()
+                .is_some_and(|s| s.contains("outside shifts"))
+        );
     }
     #[test]
     fn paused_and_unfunded_projects_report_blockers_and_invalid_windows_are_atomic() {

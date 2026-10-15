@@ -1,4 +1,5 @@
 import {itemIcon,materialIcons} from './game-ui.js';
+import {createProjectForecasts} from './forecasts.js';
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:n%100?2:0,maximumFractionDigits:2}).format(n/100);
 const time=t=>`Day ${Math.floor(t/1440)+1} · ${String(Math.floor(t%1440/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -11,7 +12,10 @@ export function recipeSummary(state,kind,variant='standard'){
 }
 export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,planSource,avatar,paintPortraits}){
   const $=s=>document.querySelector(s);let lastProjects='',lastInventory='',lastOrders='',lastLand='',lastLocations='',pickupNoticeOrder=null;
-  const transact=result=>{if(result!=='ok')notify(result);else{changed();update();}};
+  const forecasts=createProjectForecasts({checkpoint:()=>game().snapshot(),refresh:()=>{lastProjects='';update();}});
+  $('#project-forecast-run').onclick=forecasts.start;
+  $('#project-forecast-cancel').onclick=forecasts.cancel;
+  const transact=result=>{if(result!=='ok')notify(result);else{forecasts.invalidate();lastProjects='';changed();update();}};
   const materials=snapshot().environment.economy.materials;
   $('#town-catalog').innerHTML=materials.map(m=>`<article class="town-item"><div class="trade-item-art">${itemIcon(materialIcons[m.id])}</div><label for="buy-${m.id}">${m.name}</label><small class="trade-price">${money(m.price)}</small><div class="trade-quantity"><button type="button" data-adjust="-1" aria-label="Remove one ${m.name.toLowerCase()}">−</button><input id="buy-${m.id}" type="number" min="0" max="100" step="1" value="0" aria-label="Order ${m.name}" data-material="${m.id}"><button type="button" data-adjust="1" aria-label="Add one ${m.name.toLowerCase()}">+</button></div></article>`).join('');
   $('#spare-material').innerHTML=materials.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
@@ -95,6 +99,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   $('#storage-locations').addEventListener('focusout',()=>queueMicrotask(update));
   function update(){
     const s=snapshot(),e=s.environment.economy,v=s.village;
+    if(forecasts.observe(s))lastProjects='';
     $('#fund').textContent=money(e.money);$('#town-fund').textContent=money(e.money);
     const enabled=e.jobs.filter(j=>j.enabled),away=s.residents.filter(r=>r.trip?.purpose==='work'&&r.trip.phase==='away');
     $('#jobs-outlook').textContent=enabled.length?`${enabled.length} optional ${enabled.length===1?'shift':'shifts'} · up to ${money(enabled.reduce((sum,j)=>sum+j.income,0))} per day${away.length?' · '+away.length+' working off-site':''}`:'Outside shifts are optional. Open occupations to choose who works.';
@@ -107,6 +112,14 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
     $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}`;
     $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
+    const outlook=forecasts.summary();
+    $('#project-forecast').hidden=!e.projects.length;
+    $('#project-forecast-run').disabled=outlook.pending;
+    $('#project-forecast-run').textContent=outlook.label;
+    $('#project-forecast-cancel').hidden=!outlook.pending;
+    if($('#project-forecast-status').textContent!==outlook.status)$('#project-forecast-status').textContent=outlook.status;
+    $('#project-forecast-assumptions').hidden=!outlook.assumptions;
+    $('#project-forecast-assumptions').textContent=outlook.assumptions;
     $('#property-description').textContent=e.property;
     $('#preparation-recipes').innerHTML=`<p>${e.workshop?'Workshop preparation includes roof tiles and efficient salvage recovery.':'Residents prepare frames, wall material and fittings at the camp. A workshop adds roof tiles and more efficient salvage recovery.'}</p>`+e.preparation.map(r=>`<p class="recipe-stage"><b>${r.yield} ${e.materials[r.material].name.toLowerCase()}</b>${r.inputs.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('');
     const locations=v.logistics?.stores||[],shipments=v.logistics?.shipments||[],locationKey=JSON.stringify({locations,shipments:shipments.map(h=>[h.resident,h.material,h.amount,h.carrying])});
@@ -122,7 +135,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
         const missing=p.missing.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean),inTransit=p.missing.some((n,i)=>n&&e.materials[i].incoming),hasConsumed=p.consumed.some(n=>n),r=e.recipes.find(r=>r.kind===p.kind),alternative=!!r.adobe||JSON.stringify(r.standard)!==JSON.stringify(r.local);
         const awaitingHaul=!p.missing.some(n=>n)&&!p.ready;
         const status=p.hauling_blocker|| (p.paused?'Paused · staged supplies await collection':p.ready?`Ready for community work · ${Math.ceil(p.work-p.labour)} labour left`:inTransit?'Waiting for incoming supplies':awaitingHaul?'Supplies reserved · residents must bring them to the site':`Source, prepare or purchase: ${missing.join(', ')}`);
-        return `<article class="project-card"><div class="project-title"><h3>${names[p.kind]} <small>${p.building+1}</small></h3><button data-project="${p.building}" data-action="locate">Locate</button></div><div class="project-stage"><b>${p.stage}</b><span>${Math.floor(p.progress)}%</span></div><progress value="${p.progress}" max="100" aria-label="${names[p.kind]} construction"></progress><p>${status}</p>${!p.paused&&!p.ready&&!awaitingHaul?`<button class="project-supply-link" data-project="${p.building}" data-action="supplies">Review town supplies</button>`:''}<details><summary>Stages & materials</summary>${p.stages.map((s,i)=>`<p class="recipe-stage"><b>${i<p.stage_index?'✓ ':''}${s.name}</b>${s.items.map((n,j)=>n?`${n} ${e.materials[j].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('')}</details><div class="project-actions"><label>Priority<select data-project="${p.building}" data-action="priority">${[0,1,2,3].map((n)=>`<option value="${n}" ${n===p.priority?'selected':''}>${['Low','Normal','High','First'][n]}</option>`).join('')}</select></label><label>Method<select data-project="${p.building}" data-action="recipe" ${hasConsumed||!alternative?'disabled':''}><option value="standard" ${p.recipe==='standard'?'selected':''}>Prepared materials</option><option value="local" ${p.recipe==='local'?'selected':''}>Local materials</option>${r.adobe?`<option value="adobe" ${p.recipe==='adobe'?'selected':''}>Adobe bricks & bamboo</option>`:''}</select></label><button data-project="${p.building}" data-action="pause">${p.paused?'Resume':'Pause'}</button><button data-project="${p.building}" data-action="cancel">Cancel</button></div></article>`;
+        return `<article class="project-card"><div class="project-title"><h3>${names[p.kind]} <small>${p.building+1}</small></h3><button data-project="${p.building}" data-action="locate">Locate</button></div><div class="project-stage"><b>${p.stage}</b><span>${Math.floor(p.progress)}%</span></div><progress value="${p.progress}" max="100" aria-label="${names[p.kind]} construction"></progress><p>${status}</p>${!p.paused&&!p.ready&&!awaitingHaul?`<button class="project-supply-link" data-project="${p.building}" data-action="supplies">Review town supplies</button>`:''}<details><summary>Stages & materials</summary>${p.stages.map((s,i)=>`<p class="recipe-stage"><b>${i<p.stage_index?'✓ ':''}${s.name}</b>${s.items.map((n,j)=>n?`${n} ${e.materials[j].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('')}</details>${forecasts.render(p)}<div class="project-actions"><label>Priority<select data-project="${p.building}" data-action="priority">${[0,1,2,3].map((n)=>`<option value="${n}" ${n===p.priority?'selected':''}>${['Low','Normal','High','First'][n]}</option>`).join('')}</select></label><label>Method<select data-project="${p.building}" data-action="recipe" ${hasConsumed||!alternative?'disabled':''}><option value="standard" ${p.recipe==='standard'?'selected':''}>Prepared materials</option><option value="local" ${p.recipe==='local'?'selected':''}>Local materials</option>${r.adobe?`<option value="adobe" ${p.recipe==='adobe'?'selected':''}>Adobe bricks & bamboo</option>`:''}</select></label><button data-project="${p.building}" data-action="pause">${p.paused?'Resume':'Pause'}</button><button data-project="${p.building}" data-action="cancel">Cancel</button></div></article>`;
       }).join('')||'<div class="economy-empty">Every journey starts with a blueprint.<p>Open Build and choose a clearing. Projects reserve the next stage’s materials.</p></div>';
       if(focused?.id){const target=$(`#project-list [data-project="${focused.id}"][data-action="${focused.action}"]`);(target||$('#projects-panel [data-close-panel]')).focus({preventScroll:true});}
       for(const id of expanded){const card=$(`#project-list [data-project="${id}"]`)?.closest('.project-card');if(card)card.querySelector('details').open=true;}
@@ -154,5 +167,5 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#town-pickup-status').textContent=!notice?'':notice.status==='delivered'?`${driver.name} brought our supplies home. They await local distribution at camp.`:driver.trip?.phase==='away'?`${driver.name} is driving to collect supplies · back ${time(notice.arrival)}`:pickupMessage(driver.name);
     quote();spareQuote();
   }
-  update();return {update};
+  update();return {update,resetForecast(){forecasts.reset();lastProjects='';}};
 }
