@@ -5,8 +5,8 @@ import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/production',{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),person=(s,id=0)=>s.residents.find(r=>r.id===id);
-function scene(){
- const g=new Game();g.start_mode('sandbox');assert.equal(g.place('workshop',6,6),'ok');
+function scene(x=6,y=6){
+ const g=new Game();g.start_mode('sandbox');assert.equal(g.place('workshop',x,y),'ok');
  const s=snap(g);Object.assign(s.village,{mode:'story',arrived:true,minutes:540,food:80,meals:10,water:40});
  s.village.progress.completed=Array(4).fill(true);s.village.progress.later_completed=Array(9).fill(true);
  s.village.economy.stock[7]=0;s.village.economy.outside_jobs=Array(5).fill(false);
@@ -56,5 +56,23 @@ assert.deepEqual(snap(cancellation).environment.economy.materials.map(m=>m.store
 assert.notEqual(cancellation.cancel_production_batch(id),'ok');checkpoint(cancellation);
 assert(JSON.parse(cancellation.simulation_report()).materials.every(m=>m.difference===0));
 const atomic=g.snapshot();assert.notEqual(g.set_production_target(7,31),'ok');assert.equal(g.snapshot(),atomic);
+// Identical resources and one available resident isolate the worksite layout.
+const comparison=[];
+for(const [name,x,y] of [['near',8,10],['distant',3,3]]){
+ const village=scene(x,y);for(let id=1;id<5;id++)village.set_resident_job(id,true);
+ village.set_production_target(7,2);assert.match(village.request(0,'prepare',false),/Happy/);
+ let result;
+ for(let frame=0;frame<8000;frame++){
+  village.tick(.25);const state=snap(village);
+  if(state.village.production.accounting.outputs[7]===2){
+   result={name,x,y,finished:state.village.minutes,elapsed:state.village.minutes-540,inputs:state.village.production.accounting.inputs,output:state.village.production.accounting.outputs[7]};
+   checkpoint(village);assert(JSON.parse(village.simulation_report()).materials.every(m=>m.difference===0));break;
+  }
+ }
+ assert(result,`${name} workshop must finish through real hauling and attendance`);comparison.push(result);village.free();
+}
+assert(comparison[0].elapsed<comparison[1].elapsed,'A nearby worksite must complete the same supplied batch sooner');
+assert.deepEqual(comparison[0].inputs,comparison[1].inputs,'Placement changes time, never recipe consumption');
+await writeFile('artifacts/production/layout-comparison.json',JSON.stringify(comparison,null,2));
 for(const game of [g,copy,cancellation])game.free();
-console.log('PASS: real worksite input hauling, bounded work positions, saved helping batches, attended production through rest and exact replay, local output, once-only cancellation recovery and read-only batch diagnostics.');
+console.log('PASS: real worksite input hauling, bounded work positions, saved helping batches, attended production through rest and exact replay, local output, once-only cancellation recovery, read-only batch diagnostics and faster production at a nearby worksite.');
