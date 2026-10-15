@@ -616,5 +616,5 @@ pub fn clear_at(v: &Village, x: f32, y: f32) -> bool {
         .all(|n| clear_bank(n, x, y))
 }
 pub fn clear_bank(n: &Node, x: f32, y: f32) -> bool {
-    (n.x as f32 - x).abs() >= 0.7 || (n.y as f32 - y).abs() >= 0.7
+    x <= n.x as f32 - 0.7 || x >= n.x as f32 + 0.7 || y <= n.y as f32 - 0.7 || y >= n.y as f32 + 0.7
 }

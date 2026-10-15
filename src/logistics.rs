@@ -1385,7 +1385,7 @@ pub fn advance(
     if h.layout != v.logistics.as_ref().unwrap().layout
         || h.route
             .get(h.next)
-            .is_some_and(|p| !navigation::clear(v, p[0], p[1]))
+            .is_some_and(|p| !navigation::segment(v, [r.x, r.y], *p))
     {
         let Ok(path) = navigation::route(v, [r.x, r.y], target) else {
             interrupt(v, r);

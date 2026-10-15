@@ -1,6 +1,7 @@
 //! Shared geometry and read-only cost estimates for hauling and village work.
 use crate::*;
 use std::{cmp::Reverse, collections::BinaryHeap, sync::Arc};
+mod geometry;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Route {
@@ -50,62 +51,22 @@ fn departure_path(v: &Village, path: &[[f32; 2]]) -> bool {
     {
         return false;
     }
-    let sources: Vec<_> = v.economy.sources.iter().filter(|s| s.active).collect();
-    let mut buildings_out: Vec<_> = v
-        .buildings
-        .iter()
-        .map(|b| spacing::clear_plot(b, from[0], from[1]))
-        .collect();
-    let mut sources_out: Vec<_> = sources
-        .iter()
-        .map(|s| source_clear(s, from[0], from[1]))
-        .collect();
-    let banks: Vec<_> = v
-        .power
-        .network
-        .nodes
-        .iter()
-        .filter(|n| n.owner == crate::electricity::Owner::Ground)
-        .collect();
-    let mut banks_out: Vec<_> = banks
-        .iter()
-        .map(|n| power::batteries::clear_bank(n, from[0], from[1]))
-        .collect();
+    let obstacles: Vec<_> = geometry::obstacles(v).collect();
+    let mut outside: Vec<_> = obstacles.iter().map(|b| !b.contains(from)).collect();
     for leg in path.windows(2) {
         let from = leg[0];
         let to = leg[1];
-        let steps = ((from[0] - to[0]).hypot(from[1] - to[1]) / 0.1)
-            .ceil()
-            .max(1.) as u32;
-        for i in 0..=steps {
-            let t = i as f32 / steps as f32;
-            let x = from[0] + (to[0] - from[0]) * t;
-            let y = from[1] + (to[1] - from[1]) * t;
+        for (bounds, out) in obstacles.iter().zip(&mut outside) {
+            if *out && bounds.intersects(from, to) {
+                return false;
+            }
+            *out |= !bounds.contains(to);
+        }
+        for [x, y] in geometry::land_points(from, to) {
             if spacing::land(x, y) {
                 land = true;
             } else if land {
                 return false;
-            }
-            for (j, b) in v.buildings.iter().enumerate() {
-                if spacing::clear_plot(b, x, y) {
-                    buildings_out[j] = true;
-                } else if buildings_out[j] {
-                    return false;
-                }
-            }
-            for (j, n) in banks.iter().enumerate() {
-                if power::batteries::clear_bank(n, x, y) {
-                    banks_out[j] = true;
-                } else if banks_out[j] {
-                    return false;
-                }
-            }
-            for (j, s) in sources.iter().enumerate() {
-                if source_clear(s, x, y) {
-                    sources_out[j] = true;
-                } else if sources_out[j] {
-                    return false;
-                }
             }
         }
     }
@@ -157,12 +118,13 @@ pub fn work_route(
         .ok_or("There is no clear way out to this worksite.")
 }
 pub(crate) fn segment(v: &Village, a: [f32; 2], b: [f32; 2]) -> bool {
-    let distance = (b[0] - a[0]).hypot(b[1] - a[1]);
-    let steps = (distance / 0.1).ceil().max(1.) as u32;
-    (0..=steps).all(|i| {
-        let t = i as f32 / steps as f32;
-        clear(v, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
-    })
+    a.iter().chain(&b).all(|n| n.is_finite())
+        && clear(v, a[0], a[1])
+        && clear(v, b[0], b[1])
+        && geometry::obstacles(v).all(|bounds| !bounds.intersects(a, b))
+        && geometry::land_points(a, b)
+            .into_iter()
+            .all(|p| spacing::land(p[0], p[1]))
 }
 fn point(cell: usize) -> [f32; 2] {
     [
@@ -418,6 +380,36 @@ impl Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn a_fractional_route_cannot_clip_a_cistern_corner_between_samples() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("well", 6, 10), "ok");
+        let v = g.app.world().resource::<Village>();
+        for x in [-1., 1.] {
+            for y in [-1., 1.] {
+                let from = [6. + x * 0.9463263, 10. + y * 0.592515];
+                let to = [6., 10. + y];
+                assert!(clear(v, from[0], from[1]) && clear(v, to[0], to[1]));
+                assert!(
+                    !segment(v, from, to),
+                    "The short line cuts through the cistern's clearance corner"
+                );
+                let route = route(v, from, to).unwrap();
+                assert!(route.points.len() > 2);
+                for leg in route.points.windows(2) {
+                    for step in 0..=1000 {
+                        let t = step as f32 / 1000.;
+                        assert!(clear(
+                            v,
+                            leg[0][0] + (leg[1][0] - leg[0][0]) * t,
+                            leg[0][1] + (leg[1][1] - leg[0][1]) * t
+                        ));
+                    }
+                }
+            }
+        }
+    }
     #[test]
     fn standing_neighbours_do_not_trap_a_route_at_an_occupied_grid_corner() {
         let mut g = Game::new();
