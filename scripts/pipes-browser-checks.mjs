@@ -48,6 +48,13 @@ export async function checkPipeControls({page,saved,capture}){
   const delivery=carrying.village.logistics.shipments.find(h=>h.carrying&&carrying.village.logistics.stores.some(p=>p.id===h.to&&p.owner.kind==='utility'));
   assert(delivery);assert.match(await page.locator('#water-lines').textContent(),new RegExp(`${carrying.residents.find(r=>r.id===delivery.resident).name} is carrying`));
   await page.locator('#water-lines').scrollIntoViewIfNeeded();await capture('Named resident bringing parts to the route','pipes-kit-delivery.png');
+  const dismantling=await load('dismantling'),crew=dismantling.residents.find(r=>r.task==='utility');assert(crew);
+  await page.getByRole('button',{name:'Close supplies',exact:true}).click();
+  await page.getByRole('button',{name:new RegExp(`^Select ${crew.name}\\.`)}).click();
+  assert.match(await page.locator('#person .quote').textContent(),/Dismantling/);
+  assert.equal(await page.locator('#person .person-activity').textContent(),'Working on water lines');
+  await capture('An existing installer reports the switch to resident dismantling','pipes-resident-work.png');
+  await page.getByRole('button',{name:'Close resident details',exact:true}).click();
   const partial=await load('installing');id=partial.village.pipes.lines[0].id;
   await page.getByRole('button',{name:'Pause water line',exact:true}).click();
   await advance(60);s=await snapshot();assert.equal(s.village.pipes.lines[0].work,partial.village.pipes.lines[0].work);assert(s.village.pipes.lines[0].paused);

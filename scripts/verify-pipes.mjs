@@ -28,6 +28,11 @@ assert.equal(g.order_supplies_pickup(JSON.stringify(quote.parts),4),'ok');
 until(g,s=>s.village.economy.orders.some(o=>o.status==='delivered'),'Resident drives to collect the pipe kit');checkpoint(g);
 until(g,s=>s.village.logistics.shipments.some(h=>h.carrying&&s.village.logistics.stores.some(p=>p.id===h.to&&p.owner.kind==='utility'&&p.owner.id===id)),'Resident carries imported parts to the route');checkpoint(g);await writeFile('artifacts/pipes/kit-carrying.json',g.snapshot());
 until(g,s=>line(s,id).phase==='installing','Resident starts laying the route');checkpoint(g);await writeFile('artifacts/pipes/installing.json',g.snapshot());
+// A crew already at the first cell must change its action when installation
+// is cancelled, without waiting for an unrelated task to expire.
+const interrupted=new Game();assert(interrupted.restore(g.snapshot()));assert.equal(interrupted.remove_water_connection(id),'ok');interrupted.tick(.25);
+assert(snap(interrupted).residents.some(r=>r.task==='utility'&&r.activity_material===id&&/Dismantling/.test(r.reason)));
+checkpoint(interrupted);await writeFile('artifacts/pipes/dismantling.json',interrupted.snapshot());interrupted.free();
 const partial=line(snap(g),id).work;assert.equal(g.configure_water_connection(id,1,true),'ok');checkpoint(g);await writeFile('artifacts/pipes/installation-paused.json',g.snapshot());
 for(let frame=0;frame<120;frame++)g.tick(.25);assert.equal(line(snap(g),id).work,partial,'A pause preserves partial corridor work');assert.equal(g.configure_water_connection(id,1,false),'ok');checkpoint(g);
 let previousWork=line(snap(g),id).work;const observed=new Set([0]);
