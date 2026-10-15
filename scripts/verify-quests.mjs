@@ -52,7 +52,11 @@ async function complete(chapter){
  assert.equal(s.village.progress.tracked,Math.min(chapter+1,quests.length-1));
  if(output)await fs.writeFile(`${output}/solar-${chapter===0?'intro':chapter===12?'complete':`chapter-${chapter+1}`}.json`,saved);
  console.log(`Chapter ${chapter+1}/${quests.length}: ${quests[chapter].title} · day ${1+Math.floor(s.village.minutes/1440)}`);
- if(chapter<quests.length-2)assert(!g.track_quest(chapter+2),'cannot skip a chapter');
+ if(chapter<quests.length-2){
+  const earned=quests.slice(0,chapter+2).every((_,i)=>questCompleted(s.village,i));
+  assert.equal(g.track_quest(chapter+2),earned,'journal access follows completed prerequisites, including earlier valid effort');
+  assert(g.track_quest(chapter+1));
+ }
 }
 until(s=>s.village.arrived,'arrival');
 // Keep daily food and shelter near the arrival store, then expand along corridors.
