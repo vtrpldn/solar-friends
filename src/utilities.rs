@@ -2,7 +2,7 @@
 use crate::*;
 use std::collections::VecDeque;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Kind {
     Fresh,
@@ -12,7 +12,7 @@ pub enum Kind {
     Electricity,
 }
 impl Kind {
-    fn parse(key: &str) -> Option<Self> {
+    pub(crate) fn parse(key: &str) -> Option<Self> {
         match key {
             "fresh" => Some(Self::Fresh),
             "irrigation" => Some(Self::Irrigation),
@@ -45,7 +45,7 @@ impl Kind {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Port {
     /// Exact footprint edge, on the same half-tile lattice as foundations.
     pub edge: [f32; 2],
@@ -88,7 +88,7 @@ fn unoccupied(v: &Village, x: i32, y: i32) -> bool {
         && !building_work::reserved(v, x, y, None)
         && !restoration::reserved(v, x, y)
 }
-fn ports(v: &Village, n: i32, x: i32, y: i32) -> Vec<Port> {
+pub(crate) fn ports(v: &Village, n: i32, x: i32, y: i32) -> Vec<Port> {
     let left = x - n / 2;
     let back = y - n / 2;
     let mut result = vec![];
@@ -201,7 +201,7 @@ pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
     result
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Plan {
     pub kind: Kind,
     pub from: i32,

@@ -39,6 +39,15 @@ pub fn clear(r: &mut Resident) {
 }
 
 pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
+    if r.task == "utility" {
+        let id = r
+            .activity_material
+            .and_then(|n| u32::try_from(n).ok())
+            .map(simulation::Id)
+            .ok_or("This utility work has ended.")?;
+        return pipes::approach(v, id, r.id)
+            .ok_or("This water line needs delivered parts and a clear work corridor.");
+    }
     if r.task == "restore" {
         let id = r
             .activity_material
@@ -222,6 +231,21 @@ fn step(
 /// True consumes this frame in travel or a safe handoff. Production only runs
 /// after a later frame observes arrival at the actual work approach.
 pub fn advance(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) -> bool {
+    // Utility crews work along a corridor. Finishing a cell changes the next
+    // attended position without ending the resident's whole activity.
+    if r.task == "utility" {
+        let goal = match target(v, r) {
+            Ok(goal) => goal,
+            Err(reason) => {
+                block(v, r, reason);
+                return true;
+            }
+        };
+        if goal != [r.target_x, r.target_y] {
+            (r.target_x, r.target_y) = (goal[0], goal[1]);
+            clear(r);
+        }
+    }
     let layout = logistics::layout(v);
     if r.walking
         .route
@@ -310,6 +334,11 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
             && b.material.is_none_or(|i| {
                 if b.task == "source" {
                     i < v.economy.sources.len()
+                } else if matches!(b.task.as_str(), "utility" | "restore") {
+                    // A blocker is a historical message. Its work identity
+                    // may outlive a cancelled or pruned order; active resident
+                    // references are checked separately by save validation.
+                    u32::try_from(i).is_ok_and(|id| id > 0 && id < v.simulation.next_id)
                 } else {
                     i < economy::COUNT
                 }

@@ -137,6 +137,9 @@ pub fn placement(
             if restoration::reserved(v, px, py) {
                 return Err("That ground is reserved for soil restoration.");
             }
+            if pipes::reserved(v, px, py) {
+                return Err("Remove the water line on this plot before building here.");
+            }
             if reserved(v, px, py, ignore) {
                 return Err("That plot is reserved for a building move.");
             }
