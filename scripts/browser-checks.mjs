@@ -284,6 +284,60 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.getByRole('button',{name:'Construction',exact:true}).click();
   assert(await page.getByRole('button',{name:'Forecast workweek',exact:true}).isVisible());
   assert.equal(await page.locator('.project-forecast-result').count(),0,'Imported villages cannot inherit the previous scene forecast');
+  // Production controls manage located batches through real player commands.
+  async function showPreparation(){
+    await page.locator('#dev-close').click();
+    if(!await page.locator('#village-book').isVisible())await page.getByRole('button',{name:'Village',exact:true}).click();
+    await page.getByRole('button',{name:'Construction',exact:true}).click();
+    if(!await page.locator('#preparation-recipes').isVisible())await page.getByText('Preparing materials',{exact:true}).click();
+  }
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/production/start.json');
+  await page.waitForFunction(()=>window.solarDev.snapshot().village.buildings[0]?.kind==='workshop');
+  await showPreparation();
+  await page.getByRole('spinbutton',{name:'Roof tiles reserve',exact:true}).fill('2');
+  await page.getByRole('button',{name:'Set roof tiles reserve',exact:true}).click();
+  let production=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(production.village.production.targets[7],2);
+  assert(production.village.production.batches.some(b=>b.material===7&&b.phase==='awaiting_inputs'));
+  assert((await page.locator('.production-worksite').filter({hasText:'Workshop 1'}).textContent()).includes('Waiting for inputs'));
+  await page.getByRole('spinbutton',{name:'Roof tiles reserve',exact:true}).fill('31');
+  await page.getByRole('button',{name:'Set roof tiles reserve',exact:true}).click();
+  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().village.production.targets[7]),2,'An invalid reserve leaves the native plan unchanged');
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/production/working.json');
+  await page.waitForFunction(()=>window.solarDev.snapshot().village.production.batches.some(b=>b.material===7&&b.work>0));
+  await showPreparation();
+  production=await page.evaluate(()=>window.solarDev.snapshot());
+  const roofBatch=production.village.production.batches.find(b=>b.material===7&&b.work>0),roofSite=roofBatch.site;
+  const workshop=page.locator('.production-worksite').filter({hasText:'Workshop 1'});
+  await page.getByRole('button',{name:'Pause Workshop 1',exact:true}).click();
+  assert((await workshop.textContent()).includes('Worksite paused'));
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('10');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert.equal(await page.evaluate(id=>window.solarDev.snapshot().village.production.batches.find(b=>b.id===id).work,roofBatch.id),roofBatch.work,'A paused worksite preserves partial labour');
+  await capture('Paused preparation keeps committed inputs and partial labour','production-paused.png');
+  await page.getByRole('button',{name:'Cancel batch at Workshop 1',exact:true}).click();
+  const cancelledProduction=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(cancelledProduction.village.production.batches.find(b=>b.id===roofBatch.id).phase,'cancelled');
+  const recovered=cancelledProduction.village.logistics.stores.find(p=>p.owner.kind==='production'&&p.owner.id===roofSite);
+  for(let i=0;i<roofBatch.inputs.length;i++)assert(recovered.items[i]>=roofBatch.inputs[i],'Cancelling returns committed inputs to the worksite');
+  assert(await page.getByRole('button',{name:'Resume Workshop 1',exact:true}).isVisible());
+  await page.getByRole('button',{name:'Resume Workshop 1',exact:true}).click();
+  // The earned batch starts near midday. Honour the lunch break, outside
+  // commitments and the next community window instead of assuming two hours.
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1440');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  production=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(production.village.production.accounting.outputs[7],2,'Resumed station credits exactly one target batch');
+  assert.equal(production.environment.economy.materials[7].stored,2);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await capture('Finished workshop preparation and bounded village reserve','production-finished.png');
+  await page.getByRole('button',{name:'Buildings',exact:true}).click();
+  await page.locator('#building-choice').selectOption('0');
+  await page.locator('[data-building-work="demolish"]').click();
+  await page.locator('#building-work-confirm').click();
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  assert((await workshop.textContent()).includes('Closed while residents change this building'));
+  assert(!await page.getByRole('button',{name:'Pause Workshop 1',exact:true}).isEnabled(),'Closing an idle workshop updates its operating controls immediately');
   await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
