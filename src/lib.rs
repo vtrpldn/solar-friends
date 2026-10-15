@@ -703,7 +703,11 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         } else {
             event(
                 &mut v,
-                "Too few neighbours made it to the square. Try gathering closer to home tomorrow.",
+                if attended.count_ones() >= 3 {
+                    "Neighbours reached the shared table, but five fresh meals were no longer available. Prepare fresh portions for another day."
+                } else {
+                    "Too few neighbours made it to the square. Try gathering closer to home tomorrow."
+                },
             );
         }
         gatherings::finish(&mut v, success);
