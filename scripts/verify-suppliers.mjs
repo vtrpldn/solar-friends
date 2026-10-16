@@ -53,6 +53,9 @@ for(let tick=0;tick<3*1920;tick++){
  if(order.status==='delivered')break;
 }
 assert(observedWait);assert.equal(snap(freight).village.economy.orders.at(-1).status,'delivered');await writeFile(output+'/freight-after.json',freight.snapshot());
+const rollover=makeScenario('suppliers',fresh,established);rollover.village.minutes=27*1440+1437;rollover.village.market.enabled=false;
+const rolloverFixture=resetMaterialLocations(rollover);rolloverFixture.village.market.enabled=true;
+const rolloverGame=new Game();assert(rolloverGame.restore(JSON.stringify(rolloverFixture)));await writeFile(output+'/weekly-rollover.json',rolloverGame.snapshot());rolloverGame.free();
 let baselineMinutes=0;
 if(process.env.SOLAR_SUPPLIER_BASELINE){
  const folder=pathToFileURL(path.resolve(process.env.SOLAR_SUPPLIER_BASELINE)+'/'),{default:oldInit,Game:Old}=await import(new URL('solar_friends.js',folder));await oldInit({module_or_path:await readFile(new URL('solar_friends_bg.wasm',folder))});
