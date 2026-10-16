@@ -1,17 +1,39 @@
 import {allBuildingArt,drawBuildingArt,cameraCalibration} from '../building-art.js';
 import {buildingProjection} from '../building-projection.js';
-import {placementArt,footprintSize} from '../building-footprints.js';
+import {placementArt,footprintSize,footprint} from '../building-footprints.js';
+import {paintTerrain,GROUND_START,GROUND_SIZE} from '../terrain.js';
+import {drawPreparedFrame,RESIDENT_WIDTH} from '../sprite-frames.js';
 const $=id=>document.getElementById(id),images=new Map(),cards=[];
-let focus,proposal;
+let focus,proposal,proposals;
+const grounds=new Map();
+function contextGround(ctx,key,cx,cy,scale,night){
+ const n=footprintSize(key);
+ if(!grounds.has(n)){
+  const f=footprint(key,0,0),roads=Array.from({length:n},(_,i)=>[10+Math.ceil(f.minX)+i,10+f.maxY+.5]);
+  grounds.set(n,paintTerrain(images.get('terrain-atlas.png'),roads));
+ }
+ ctx.save();ctx.transform(34*scale,17*scale,-34*scale,17*scale,cx,cy);
+ ctx.drawImage(grounds.get(n),GROUND_START-10,GROUND_START-10,GROUND_SIZE,GROUND_SIZE);ctx.restore();
+ if(night){ctx.fillStyle='#11243b88';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);}
+}
+function contextNeighbors(ctx,cx,cy,scale,night){
+ const art=allBuildingArt['home-gable'],registration=placementArt('home-gable',art),x=cx-200*scale;
+ drawBuildingArt(ctx,images.get(night?art.nightFile:art.file),art,x+registration.x*scale,cy+registration.y*scale,scale*registration.scale);
+ drawPreparedFrame(ctx,images.get('animations/iara.png'),8,x+75*scale,cy+50*scale,RESIDENT_WIDTH*scale,{referenceRow:2},night?'brightness(.6) saturate(.72)':'none');
+ ctx.fillStyle=night?'#fff6dc':'#263b31';ctx.font=`${12*scale}px sans-serif`;ctx.fillText('Reference home + Iara',x-60*scale,cy+85*scale);
+}
 function draw({key,art:originalArt,canvas,caption},large=false){
- const proposed=$('proposal').checked&&key==='shed',art=proposed?proposal.art:originalArt;
+ const proposed=$('proposal').checked&&key===proposal.key,art=proposed?proposal.art:originalArt;
  const night=$('light').value==='night',corrected=$('camera').value==='corrected',guides=$('guides').checked;
  const config=corrected?art:{...art,axes:undefined},m=proposed?proposal.measurement:buildingProjection[key],ctx=canvas.getContext('2d');
- const scale=large?3.9:1.65,width=large?1000:400,height=large?920:430,cx=width/2,cy=height*.76;
+ const context=$('context').checked;
+ const scale=context?(large?2.5:1.8):(large?3.9:1.65),width=context?(large?1200:800):(large?1000:400),height=context?(large?850:600):(large?920:430),cx=context?width*.67:width/2,cy=height*(context ? .72 : .76);
  canvas.width=width*2;canvas.height=height*2;ctx.scale(2,2);
  ctx.fillStyle=night?'#233947':'#e3e8d3';ctx.fillRect(0,0,width,height);
+ if(context)contextGround(ctx,key,cx,cy,scale,night);
  ctx.strokeStyle=night?'#38505a':'#c4cdb7';ctx.lineWidth=.6;
- for(let offset=-width;offset<=width;offset+=34*scale)for(const slope of [-.5,.5]){ctx.beginPath();ctx.moveTo(0,cy+offset-cx*slope);ctx.lineTo(width,cy+offset+cx*slope);ctx.stroke();}
+ if(!context||guides)for(let offset=-width;offset<=width;offset+=34*scale)for(const slope of [-.5,.5]){ctx.beginPath();ctx.moveTo(0,cy+offset-cx*slope);ctx.lineTo(width,cy+offset+cx*slope);ctx.stroke();}
+ if(context)contextNeighbors(ctx,cx,cy,scale,night);
  const registration=proposed?proposal.placement:placementArt(key,config),origin=[cx+registration.x*scale,cy+registration.y*scale];
  // Match the game: full painted silhouette fits the same plot boundary.
  ctx.strokeStyle='#af7141';ctx.lineWidth=1.3;const n=footprintSize(key),center=((n-1)/2-Math.floor(n/2))*34*scale;
@@ -41,12 +63,13 @@ function draw({key,art:originalArt,canvas,caption},large=false){
  return error;
 }
 function render(){
+ proposal=proposals.find(p=>p.id===$('candidate').value);
  $('camera').disabled=$('proposal').checked;
  if($('proposal').checked)$('camera').value='corrected';
  let maximum=0;
  for(const card of cards)maximum=Math.max(maximum,draw(card));
  if(focus)draw({...focus,canvas:$('focus-canvas'),caption:$('focus-caption')},true);
- $('status').textContent=`${cards.length} variants · 25 architectural structures + 2 organic plantings. ${$('camera').value==='corrected'?'Registered game projection':'Uncorrected source'}. Maximum traced-axis drift: ${maximum.toFixed(3)} px. Local texture warps removed. The shed uses painted artwork matched to the house reference; variants retain measured source cameras. Visual review remains required for every sprite.`;
+ $('status').textContent=`${cards.length} variants · 25 architectural structures + 2 organic plantings. ${$('camera').value==='corrected'?'Registered game projection':'Uncorrected source'}. Maximum traced-axis drift: ${maximum.toFixed(3)} px. Local texture warps removed. ${$('context').checked?'Reference home, resident and adjoining road use gameplay sizes and placement. ':''}Visual review remains required for every sprite.`;
  if($('proposal').checked)$('status').textContent+=' Candidate comparison only: the game keeps the established source. '+proposal.issue;
  $('status').dataset.drift=String(maximum);
 }
@@ -58,11 +81,12 @@ for(const [key,art]of Object.entries(allBuildingArt)){
 }
 $('focus-close').onclick=()=>{$('focus').close();focus=null;};
 $('export').onclick=()=>{
- const blob=new Blob([JSON.stringify({lighting:$('light').value,camera:$('camera').value,structures:buildingProjection,variants:Object.keys(allBuildingArt)},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='building-geometry-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ const blob=new Blob([JSON.stringify({lighting:$('light').value,camera:$('camera').value,context:$('context').checked,structures:buildingProjection,variants:Object.keys(allBuildingArt)},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='building-geometry-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 try{
- proposal=await fetch('./shed-proposal.json').then(response=>response.json());
- const candidate=new Image();candidate.src='../art/'+proposal.art.file;await candidate.decode();images.set(proposal.art.file,candidate);
- await Promise.all([...new Set(Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]))].map(async file=>{const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}));
- for(const id of ['light','camera','guides','proposal'])$(id).addEventListener('change',render);render();
+ proposals=await fetch('./finishing-candidates.json').then(response=>response.json());
+ $('candidate').replaceChildren(...proposals.map(p=>{const option=document.createElement('option');option.value=p.id;option.textContent=p.label;return option;}));
+ for(const p of proposals){const image=new Image();image.src='../art/'+p.art.file;await image.decode();images.set(p.art.file,image);}
+ await Promise.all([...new Set([...Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]),'terrain-atlas.png','animations/iara.png'])].map(async file=>{const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}));
+ for(const id of ['light','camera','guides','proposal','context','candidate'])$(id).addEventListener('change',render);render();
 }catch(error){$('status').textContent='Projection review failed: '+error.message;console.error(error);}

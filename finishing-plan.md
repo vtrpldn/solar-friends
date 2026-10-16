@@ -32,8 +32,8 @@ Keep screenshots, recordings, measurements and the finding list together under `
 
 Review the active art against the existing illustrated houses and residents. An installed asset or an earlier agent-written acceptance record does not establish that its style is right.
 
-- [ ] Inventory all active building variants and their associated props, crops and resident interactions from the runtime registries. Keep rejected candidates clearly separated in the art tools.
-- [ ] Compare each building at normal and close gameplay zoom beside a resident, an established home and an adjacent road. Check doors, headroom, seats, worktops, tools, roof tiles and vegetation as well as overall size.
+- [x] Inventory all active building variants and their associated props, crops and resident interactions from the runtime registries. Keep rejected candidates clearly separated in the art tools.
+- [x] Compare each building at normal and close gameplay zoom beside a resident, an established home and an adjacent road. Check doors, headroom, seats, worktops, tools, roof tiles and vegetation as well as overall size.
 - [ ] Inspect actual roof, wall, frame and furniture geometry. Include structural edges that were not used to calibrate the sprite. Check upright posts, centered gables, consistent overhangs and supported furniture.
 - [ ] Inspect ground contact, road joins, placement ghosts, selection, construction, working and removal states where applicable. Include crop growth and resident carrying/working poses around the changed assets.
 - [ ] Check day/night continuity and powered/unpowered lighting. Repair source artwork only where a visible defect is identified, then recheck the installed result in the village.

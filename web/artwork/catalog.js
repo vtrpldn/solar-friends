@@ -41,3 +41,6 @@ add('shed-original','Original shed · archived perspective','starter-shed.png','
 
 add('shed-rejected-model','Shed model · rejected art style','starter-shed-model.png','References',{usage:'Rejected prototype',width:185,anchor:.8});
 add('shed-rejected-model-night','Shed model · rejected night style','starter-shed-model-night.png','References',{usage:'Rejected prototype',width:185,anchor:.8});
+add('shed-tile-candidate','Shed · tile-scale candidate','starter-shed-refined.png','References',{usage:'Unapproved candidate',width:185,anchor:.8});
+add('toilet-headroom-candidate','Ecological toilet · headroom candidate','eco-toilet-tall.png','References',{usage:'Unapproved candidate',width:100,anchor:.88});
+add('toilet-headroom-candidate-night','Ecological toilet · headroom night candidate','eco-toilet-tall-night.png','References',{usage:'Unapproved candidate',width:100,anchor:.88});

@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-16",
+  "tool": "Built-in image_gen",
+  "key": "finishing-shed",
+  "paths": [
+    "/Users/paladini/Documents/veeware/solar-friends/web/art/starter-shed-painted.png",
+    "/Users/paladini/Documents/veeware/solar-friends/web/art/home-gable.png"
+  ],
+  "prompt": "Use case: precise-object-edit. Image 1 is the edit target, an illustrated open shelter. Image 2 is the authoritative style/material reference house. Change ONLY the shelter's terracotta tile layout: the current tiles are oversized relative to the adjacent house when this 3-cell shelter is placed next to a 2-cell home. Keep the shelter's roof shape, ridge/eave positions, timber frame, posts, supported bench, grass tufts, camera, footprint, silhouette and sunny lighting unchanged. Retile the same large roof plane with about FOURTEEN columns of smaller individually painted curved barrel tiles and SEVEN courses; increase ridge-cap count proportionally. Match the house's exact warm illustrated edge treatment, clay colors and readable simplified highlights. Keep the roof ridge parallel with its long eaves and the frame below; all horizontal architecture shares one 2:1 orthographic camera. Do not add objects or alter the structural proportions. No photoreal textures, procedural grain, CAD shading, speckle, ground slab, grid or text. True transparent background and internal gaps, full silhouette with margin.",
+  "status": "candidate-under-review"
+}
