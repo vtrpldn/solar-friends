@@ -275,7 +275,7 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
         ],
         "square" => vec![
             stage("Paving", &[(3, 10), (2, 4)], 18.),
-            stage("Pergola & benches", &[frame, (0, 4), (8, 2)], 24.),
+            stage("Benches & gathering space", &[frame, (0, 4), (8, 2)], 24.),
         ],
         "workshop" => vec![
             stage("Foundation", &[(3, 6), (2, 4)], 14.),
@@ -1229,6 +1229,7 @@ impl Game {
         }
         v.economy.projects.remove(index);
         v.buildings.retain(|b| b.id != id);
+        crate::outcomes::cancel_housing(&mut v, id);
         for (i, &n) in salvage.iter().enumerate() {
             add(&mut v, i, n);
         }

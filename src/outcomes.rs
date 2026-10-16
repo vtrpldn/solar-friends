@@ -80,6 +80,12 @@ pub fn start_housing(v: &mut Village, building: usize) {
         spending: s.net_spending,
     });
 }
+pub fn cancel_housing(v: &mut Village, building: usize) {
+    v.progress
+        .outcomes
+        .housing
+        .retain(|h| h.building != building);
+}
 pub fn delivered(v: &mut Village, owner: logistics::Owner, material: usize, started: Option<f32>) {
     if v.mode != modes::Mode::Story || material > economy::TOOLS {
         return;
@@ -582,5 +588,145 @@ mod tests {
         assert!(v.progress.outcomes.shortest_delivery.is_none());
         delivered(&mut v, logistics::Owner::Site(3), 0, Some(580.));
         assert_eq!(v.progress.outcomes.shortest_delivery, Some(20.));
+    }
+    #[test]
+    fn switching_a_paid_delivery_to_pickup_refunds_only_the_fee_difference() {
+        let (mut g, v, people) = scene();
+        install(&mut g, v, people);
+        let mut basket = [0; economy::COUNT];
+        basket[0] = 1;
+        assert_eq!(
+            g.order_supplies(&serde_json::to_string(&basket).unwrap()),
+            "ok"
+        );
+        let order = g
+            .app
+            .world()
+            .resource::<Village>()
+            .economy
+            .orders
+            .last()
+            .unwrap()
+            .clone();
+        assert_eq!(g.collect_order(order.id, 0), "ok");
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .outcomes
+                .net_spending,
+            order.paid - 4000
+        );
+        let saved = g.snapshot();
+        assert_ne!(g.collect_order(order.id, 1), "ok");
+        assert_eq!(g.snapshot(), saved);
+        let mut copy = Game::new();
+        assert!(copy.restore(&saved));
+        assert_eq!(copy.snapshot(), saved);
+    }
+    #[test]
+    fn actual_cargo_earns_credit_only_on_arrival_and_rejects_future_timestamps() {
+        let (mut g, v, mut people) = scene();
+        install(&mut g, v, people.clone());
+        assert_eq!(g.place("garden", 13, 15), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        let mut r = people[0].clone();
+        assign(&mut r, &v, "haul", "Carrying our project supplies.", false);
+        for _ in 0..1000 {
+            v.minutes += 0.75;
+            logistics::advance(&mut v, &mut r, &[], 0.25);
+            if v.logistics
+                .as_ref()
+                .unwrap()
+                .shipments
+                .iter()
+                .any(|h| h.resident == r.id && h.carrying)
+            {
+                break;
+            }
+        }
+        assert!(
+            v.logistics
+                .as_ref()
+                .unwrap()
+                .shipments
+                .iter()
+                .any(|h| h.resident == r.id && h.carrying && h.delivery_started.is_some())
+        );
+        assert!(
+            v.progress.outcomes.shortest_delivery.is_none(),
+            "Collecting goods is not completing the delivery"
+        );
+        people[0] = r;
+        install(&mut g, v, people);
+        let saved = g.snapshot();
+        let mut copy = Game::new();
+        assert!(copy.restore(&saved));
+        assert_eq!(copy.snapshot(), saved);
+        let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        bad["village"]["logistics"]["shipments"][0]["delivery_started"] =
+            serde_json::json!(bad["village"]["minutes"].as_f64().unwrap() + 1.);
+        assert!(!copy.restore(&bad.to_string()));
+        assert_eq!(copy.snapshot(), saved);
+        for _ in 0..1000 {
+            g.tick(0.25);
+            copy.tick(0.25);
+            if g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .outcomes
+                .shortest_delivery
+                .is_some()
+            {
+                break;
+            }
+        }
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .outcomes
+                .shortest_delivery
+                .is_some()
+        );
+        assert_eq!(
+            g.snapshot(),
+            copy.snapshot(),
+            "The arrival and its earned time continue exactly"
+        );
+    }
+    #[test]
+    fn cancelling_an_expansion_keeps_the_paused_save_valid_without_a_tick() {
+        let mut g = Game::new();
+        assert_eq!(g.place("home", 8, 8), "ok");
+        logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
+        assert_eq!(g.place("home", 12, 7), "ok");
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .outcomes
+                .housing
+                .len(),
+            1
+        );
+        assert_eq!(g.cancel_project(1), "ok");
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .outcomes
+                .housing
+                .is_empty()
+        );
+        let saved = g.snapshot();
+        let mut copy = Game::new();
+        assert!(copy.restore(&saved));
+        assert_eq!(copy.snapshot(), saved);
     }
 }
