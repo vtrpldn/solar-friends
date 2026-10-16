@@ -618,6 +618,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-dev-tab="checks"]').click();
   const download=page.waitForEvent('download');await page.locator('#dev-bundle').click();
   const diagnostic=await download;await diagnostic.saveAs(path.join(output,'diagnostic.json'));
+  await checkSceneExport({page,output});
+  screenshots.push({label:'Game canvas exported through its own capture control',file:'native-scene.png'});
   assert(JSON.parse(await readFile(path.join(output,'diagnostic.json'),'utf8')).diagnostics.residents.length===5);
   await page.locator('#dev-close').click();
   await page.evaluate(()=>window.solarDev.loadScenario('village'));
@@ -700,4 +702,17 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkSandboxRules({browser,base,output,screenshots,errors});
   await checkArtworkInterface({browser,base,output,screenshots,errors});
   assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
+}
+
+export async function checkSceneExport({page,output}) {
+  const before=await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
+  const pending=page.waitForEvent('download');
+  await page.locator('#dev-capture').click();
+  const download=await pending;assert.equal(download.suggestedFilename(),'solar-friends-scene.png');
+  const file=path.join(output,'native-scene.png');await download.saveAs(file);
+  const bytes=await readFile(file),size=await page.locator('#world').evaluate(el=>[el.width,el.height]);
+  assert.deepEqual(bytes.subarray(0,8),Buffer.from([137,80,78,71,13,10,26,10]),'The capture is a real PNG');
+  assert.deepEqual([bytes.readUInt32BE(16),bytes.readUInt32BE(20)],size,'Export the full game canvas at its real resolution');
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),before,'Capturing never advances or changes the village');
+  console.log('PASS: native scene PNG download, full canvas dimensions and unchanged village state.');
 }

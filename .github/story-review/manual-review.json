@@ -59,7 +59,19 @@
       ],
       "status": "PASS",
       "observed": "Reviewed at normal game scale and two zoom-out steps for the complete lineup. Painted proportions, grounded bases, open square, greenhouse planting, private roof lighting and the streetlight lamp emission remain coherent."
+    },
+    {
+      "name": "Native PNG export",
+      "status": "PASS",
+      "observed": "The browser downloads a real PNG with the full canvas dimensions, and the complete village snapshot remains unchanged."
     }
   ],
-  "fullReleaseEvidence": "Pending completion of the corrected 67-verifier and desktop run."
+  "fullReleaseEvidence": "Pending completion of the corrected 67-verifier and desktop run.",
+  "capture": {
+    "file": ".github/story-review/native-scene.png",
+    "method": "Game Dev Tools → Download scene PNG, exercised by an isolated browser check",
+    "width": 1600,
+    "height": 900,
+    "sha256": "fee82a058cddf90441d1b933334421f65c45dcf586f95f44abd9a34ebfcc31fa"
+  }
 }
