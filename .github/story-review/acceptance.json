@@ -1,0 +1,235 @@
+{
+  "objective": "Implement simulator-plan.md in full, including Stage 7",
+  "status": "awaiting_corrected_release",
+  "plan": "simulator-plan.md",
+  "correctedEngineCommit": "2f62e43",
+  "releaseHarnessCommit": "3ca164e",
+  "requiredFinalRun": "node scripts/dev-check.mjs",
+  "pipelineSession": 4378,
+  "pipelineLog": "/private/tmp/solar-story-final-check.txt",
+  "groups": [
+    {
+      "system": "foundations",
+      "requirements": [
+        "Stable saved identities for inventory, shipments, work, batches and connections; cancelled identities are not reused.",
+        "One game clock and complete resident time accounts.",
+        "Read-only diagnostics, exact continuation, seeded repeatability and atomic malformed-save rejection.",
+        "Compact, dispersed, empty-fund, blocked-access and established protected baselines."
+      ],
+      "publicEvidence": [
+        "scripts/verify-simulation.mjs",
+        "scripts/verify-dev-tools.mjs",
+        "scripts/verify-storage.mjs",
+        "scripts/verify-time-balance.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/simulation.rs",
+        "src/lib.rs"
+      ]
+    },
+    {
+      "system": "physical_resources",
+      "requirements": [
+        "Arrival, extraction, warehouse, worksite and project stores own their actual goods; summaries distinguish available, reserved, committed and travelling supplies.",
+        "Residents collect and deliver along clear paths, with bounded cargo, reserved receiving room and attendance before construction.",
+        "Near storage and useful roads reduce actual completion time; priorities and recent workload govern competing jobs.",
+        "Interruptions, blocked paths, full stores, cancellation, salvage, warehouse closure and relocation preserve ownership and capacity."
+      ],
+      "publicEvidence": [
+        "scripts/verify-logistics.mjs",
+        "scripts/verify-navigation.mjs",
+        "scripts/verify-work-routes.mjs",
+        "scripts/verify-building-work.mjs",
+        "scripts/verify-economy.mjs",
+        "scripts/verify-production.mjs",
+        "scripts/verify-requests.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/logistics.rs",
+        "src/navigation.rs",
+        "src/building_work.rs"
+      ]
+    },
+    {
+      "system": "resident_time",
+      "requirements": [
+        "Travel, outside shifts, village work, meals, sleep and leisure use the same clock.",
+        "Shared reachable jobs respect needs, preferences, workload, agreements, useful working time and limited work positions.",
+        "Helping requests visibly accept, travel, wait, work, pause, finish or cancel without duplicate inputs or labour.",
+        "Conditional project and fund forecasts use the real simulation and invalidate when player plans change.",
+        "Hunger interrupts work, existing crops and overdue animals receive care, and balanced villages preserve individual sleep and substantial leisure."
+      ],
+      "publicEvidence": [
+        "scripts/verify-workforce.mjs",
+        "scripts/verify-forecast.mjs",
+        "scripts/verify-requests.mjs",
+        "scripts/verify-autonomy.mjs",
+        "scripts/verify-leisure.mjs",
+        "scripts/verify-away-routines.mjs",
+        "scripts/verify-occupations.mjs",
+        "scripts/verify-sleep-speed.mjs",
+        "scripts/verify-farming.mjs",
+        "scripts/verify-time-balance.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/workforce.rs",
+        "src/requests.rs",
+        "src/autonomy.rs",
+        "src/forecast.rs",
+        "src/sleep.rs"
+      ]
+    },
+    {
+      "system": "production",
+      "requirements": [
+        "Located saved batches use delivered inputs, labour, passive duration, targets and bounded output space.",
+        "Local camp/workshop manufacture and purchasing both support an actual housing expansion.",
+        "Kitchen pots, tools and shared meals use the same located ownership and real attendance.",
+        "Food dates survive carriage, refunds and cancellations; expiry is once-only and recovery remains possible.",
+        "Growth, digestion, filtration, banana treatment and curing progress independently when their conditions permit; interruptions preserve ownership."
+      ],
+      "publicEvidence": [
+        "scripts/verify-production.mjs",
+        "scripts/verify-housing-balance.mjs",
+        "scripts/verify-tools.mjs",
+        "scripts/verify-food.mjs",
+        "scripts/verify-kitchen-batches.mjs",
+        "scripts/verify-gatherings.mjs",
+        "scripts/verify-freshness.mjs",
+        "scripts/verify-organics.mjs",
+        "scripts/verify-passive-processes.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/production.rs",
+        "src/food.rs",
+        "src/freshness.rs",
+        "src/processes.rs"
+      ]
+    },
+    {
+      "system": "living_land",
+      "requirements": [
+        "Seeded fertility, retention, moisture, nutrients, shade, vegetation and finite local deposits persist.",
+        "Player-placed extraction depletes its own deposit; planted timber and bamboo grow and can be harvested and replanted.",
+        "Suitability changes real growth and yield; construction, roads, extraction and canopy have lasting local effects.",
+        "Delivered compost and attended restoration recover soil; depleted deposits and poor layouts retain practical recovery routes.",
+        "Grid overlays and placement previews explain the land before commitment without changing the world."
+      ],
+      "publicEvidence": [
+        "scripts/verify-land.mjs",
+        "scripts/verify-cultivation.mjs",
+        "scripts/verify-resource-sites.mjs",
+        "scripts/verify-planting.mjs",
+        "scripts/verify-living-land.mjs",
+        "scripts/verify-restoration.mjs",
+        "scripts/verify-housing-balance.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/land.rs",
+        "src/resource_sites.rs",
+        "src/planting.rs",
+        "src/restoration.rs"
+      ]
+    },
+    {
+      "system": "utilities",
+      "requirements": [
+        "Fresh water, greywater, sealed sewage and reclaimed irrigation have separate located contents, compatible ports and owned process inputs.",
+        "Residents carry bounded, class-appropriate loads along actual routes; manual treated-water and sealed-service alternatives prevent dead ends.",
+        "Paid kits, local delivery and resident corridor work precede commissioned flow; priorities, capacity, pausing, dismantling and replacement preserve equipment and contents.",
+        "Connected circuits own generation, stored charge, consumption, curtailment and discharge; unconnected consumers cannot use distant supply and rooftop storage stays private.",
+        "Pumps need their actual cable connection; optional powered workshop work pauses safely on outage while manual starter work remains available.",
+        "Recovered batteries have visible locations, occupied plots, resident transport, safe interruption, charged ownership and once-only material salvage."
+      ],
+      "publicEvidence": [
+        "scripts/verify-water.mjs",
+        "scripts/verify-sanitation.mjs",
+        "scripts/verify-pipes.mjs",
+        "scripts/verify-utility-routes.mjs",
+        "scripts/verify-electricity.mjs",
+        "scripts/verify-batteries.mjs",
+        "scripts/verify-electrical-fixtures.mjs",
+        "scripts/verify-utility-balance.mjs",
+        "scripts/verify-housing-balance.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/water.rs",
+        "src/pipes.rs",
+        "src/power.rs",
+        "src/electricity.rs",
+        "src/power/batteries.rs"
+      ]
+    },
+    {
+      "system": "long_term",
+      "requirements": [
+        "Saved seeded wet/dry conditions and forecasts consistently affect roots, rain capture, solar output and river generation.",
+        "Use and exposure wear owned equipment; warnings, spare parts, delivered kits and attended service allow recovery from failure.",
+        "Bounded useful practice grants gradual skills, including paid occupations, while novices retain ordinary work.",
+        "Supplier prices, finite offers and freight changes are predictable; confirmed receipts remain firm and essential goods remain available.",
+        "The completed village operates across repeated seasons with paid maintenance, healthy reserves, exact saves, valid accounts and majority waking village leisure."
+      ],
+      "publicEvidence": [
+        "scripts/verify-climate.mjs",
+        "scripts/verify-weather.mjs",
+        "scripts/verify-maintenance.mjs",
+        "scripts/verify-skills.mjs",
+        "scripts/verify-suppliers.mjs",
+        "scripts/verify-seasonal-balance.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/climate.rs",
+        "src/maintenance.rs",
+        "src/skills.rs",
+        "src/market.rs"
+      ]
+    },
+    {
+      "system": "story_and_release",
+      "requirements": [
+        "Thirteen linear chapters teach all six systems through meaningful outcomes; earlier valid work counts and all twenty-one buildings have actionable introductions.",
+        "Primary goals are separate from 47 optional measurable lessons and seven reference guides; every building is not required for campaign completion.",
+        "Saved observation windows use reachable, unclaimed edible food, actual needs, household services, powered nights, leisure and dry-period comfort; spending and delivery challenges use actual transactions.",
+        "Both fresh minimal and complete optional campaigns finish through player commands, paid supplies, resident work, care and gatherings, with exact chapter checkpoints.",
+        "Five independent copies of one earned one-home village compare layout, method, outside work and preferences; each supports occupied housing, paid services, dry-weather operation and leisure.",
+        "A poorly placed home recovers through actual resident relocation and restored metered services.",
+        "First-fifteen-minute and first-week pacing are recorded; these are 1x clock equivalents, excluding reading time and automatic acceleration.",
+        "Sandbox retains free placement and comfortable defaults, with independently saved construction/supply, living-land and utility constraints; rules preserve existing property and orders.",
+        "Desktop controls, day/night artwork, cargo, overlays, blocked-work feedback, read-only panels and protected-save isolation pass rendered review.",
+        "Formatting, all native tests, strict all-target lint, WebAssembly, script syntax and every public verifier pass on the final engine."
+      ],
+      "publicEvidence": [
+        "scripts/verify-story-objectives.mjs",
+        "scripts/verify-quests.mjs",
+        "scripts/verify-planning-paths.mjs",
+        "scripts/verify-housing-balance.mjs",
+        "scripts/verify-sandbox-rules.mjs",
+        "scripts/verify-modes.mjs",
+        "scripts/verify-art-preview.mjs",
+        "scripts/verify-artwork.mjs",
+        "scripts/verify-sprite-grid-fit.mjs",
+        "scripts/verify-time-balance.mjs"
+      ],
+      "status": "pending_matching_release",
+      "implementationSources": [
+        "src/progression.rs",
+        "src/outcomes.rs",
+        "web/quests.js",
+        "web/main.js"
+      ]
+    }
+  ],
+  "limits": [
+    "A completed local release does not authorize merging any pull request.",
+    "Hosted checks previously could not start because of account billing; recheck and record their actual final state.",
+    "The pre-pickup-fix pipeline and its artifacts are baseline evidence, not the final corrected release.",
+    "Scripted pacing and housing results describe the declared choices, not minimum possible player completion times."
+  ]
+}
