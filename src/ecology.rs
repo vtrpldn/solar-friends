@@ -197,7 +197,9 @@ pub fn tend(v: &mut Village, r: &Resident) {
             .iter()
             .any(|b| b.id == *id && agriculture::kind(b))
     }) {
-        agriculture::tend(v, id);
+        if agriculture::tend(v, id) {
+            skills::award(v, r.id, skills::Skill::Farming, 2);
+        }
         return;
     }
     let Some(index) = v.buildings.iter().position(|b| {
@@ -238,8 +240,10 @@ pub fn tend(v: &mut Village, r: &Resident) {
         );
         v.progress.seedlings_used = v.progress.seedlings_used.saturating_add(1);
     }
+    let mut learned = false;
     let crop = &mut v.buildings[index].crop;
     if !crop.planted {
+        learned = true;
         crop.planted = true;
         crop.kind = crop.next_kind.clone();
         crop.harvests = 0;
@@ -280,8 +284,18 @@ pub fn tend(v: &mut Village, r: &Resident) {
             v.supplies.gathered += output as f32;
         }
         v.harvests += 1;
+        learned = true;
     } else if water::irrigate(v, water::Owner::Building(site_id)) {
         land::water_plot(v, n, x, y, 1.);
+        learned = true;
+    }
+    if learned {
+        skills::award(
+            v,
+            r.id,
+            skills::Skill::Farming,
+            if harvesting { 3 } else { 1 },
+        );
     }
     land::sync_moisture(v);
 }

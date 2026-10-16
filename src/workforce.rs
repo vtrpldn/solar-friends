@@ -254,7 +254,8 @@ fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f3
         .take(2)
         .map(|d| d.residents[r.id][0] + d.residents[r.id][1])
         .sum();
-    urgency + preference * 160. + if r.favorite == task { 35. } else { 0. }
+    let experience = skills::task(task).map_or(0., |s| (skills::factor(v, r.id, s) - 1.) * 200.);
+    urgency + preference * 160. + experience + if r.favorite == task { 35. } else { 0. }
         - travel * 1.5
         - recent.min(400.) as f32 * 0.3
         - total.min(800.) as f32 * 0.05

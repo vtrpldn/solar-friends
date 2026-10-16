@@ -191,6 +191,11 @@ fn step(
     dt: f32,
     exiting: bool,
 ) {
+    let dt = if r.task == "water" {
+        dt * skills::factor(v, r.id, skills::Skill::Logistics)
+    } else {
+        dt
+    };
     let final_goal = (r.target_x, r.target_y);
     (r.target_x, r.target_y) = (point[0], point[1]);
     let old = [r.x, r.y];

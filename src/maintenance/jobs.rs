@@ -250,7 +250,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         row.spent = Some(receipt);
         row.gain = 100. - condition;
     }
-    let amount = minutes.min(j.labour() - j.work);
+    let amount = (minutes * skills::factor(v, r.id, skills::Skill::Care)).min(j.labour() - j.work);
     let gain = job(v, id).unwrap().gain;
     let row = v
         .maintenance
@@ -263,6 +263,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
     row.work = (row.work + amount).min(j.labour());
     if row.work >= j.labour() {
         row.finished = Some(v.minutes);
+        skills::award(v, r.id, skills::Skill::Care, 4);
         v.maintenance
             .records
             .iter_mut()

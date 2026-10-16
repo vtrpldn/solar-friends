@@ -37,6 +37,7 @@ mod restoration;
 mod sanitation;
 mod simulation;
 mod situations;
+mod skills;
 mod sleep;
 mod spacing;
 mod supplies;
@@ -48,7 +49,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 23;
+pub const SAVE_VERSION: u32 = 24;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -162,6 +163,8 @@ pub struct Village {
     pub navigation: Option<std::sync::Arc<navigation::Grid>>,
     #[serde(default)]
     pub workforce: workforce::State,
+    #[serde(default)]
+    pub skills: skills::State,
     #[serde(default)]
     pub production: production::State,
     #[serde(default)]
@@ -988,7 +991,12 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             choose(&mut r, &v);
             continue;
         }
-        r.remaining = (r.remaining - dt).max(0.);
+        let pace = if matches!(r.task.as_str(), "garden" | "gather" | "source" | "compost") {
+            skills::task(&r.task).map_or(1., |skill| skills::factor(&v, r.id, skill))
+        } else {
+            1.
+        };
+        r.remaining = (r.remaining - dt * pace).max(0.);
         if matches!(r.task.as_str(), "prepare" | "craft" | "cook") {
             let completed = production::work(&mut v, &r, dt);
             r.remaining = r
@@ -1037,13 +1045,15 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task == "utility" && utilities::crew_work(&mut v, &r, dt * MINUTES_PER_SECOND) {
             r.remaining = 0.;
         }
+        let building_pace = skills::factor(&v, r.id, skills::Skill::Building);
         if r.task == "building_work" {
             if let Some(id) = r.activity_building {
                 if building_work::work(
                     &mut v,
                     id,
-                    dt * if r.favorite == "build" { 2.5 } else { 1.5 },
+                    dt * if r.favorite == "build" { 2.5 } else { 1.5 } * building_pace,
                 ) {
+                    skills::award(&mut v, r.id, skills::Skill::Building, 2);
                     r.remaining = 0.;
                 }
             } else {
@@ -1069,14 +1079,21 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     id,
                     dt * if r.favorite == "build" { 2.5 } else { 1.5 }
                         * if helpers > 1 { 1.2 } else { 1. }
-                        * tool_bonus,
+                        * tool_bonus
+                        * building_pace,
                 );
                 if completed {
                     let b = v.buildings.iter().find(|b| b.id == id).unwrap();
                     let shared = b.contributors.count_ones() >= 2;
                     let label = b.kind.clone();
+                    let contributors = b.contributors;
                     if shared {
                         v.progress.shared_builds += 1;
+                    }
+                    for person in 0..5 {
+                        if contributors & (1 << person) != 0 {
+                            skills::award(&mut v, person, skills::Skill::Building, 6);
+                        }
                     }
                     event(&mut v, format!("Our {label} is ready. Built together!"));
                 }
@@ -1112,6 +1129,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     {
                         let gathered = food::forage(&mut v, &mut r);
                         completed_batch = gathered > 0;
+                        if completed_batch {
+                            skills::award(&mut v, r.id, skills::Skill::Farming, 1);
+                        }
                         v.supplies.gathered += gathered as f32;
                         if v.buildings.iter().any(|b| {
                             Some(b.id) == r.activity_building
@@ -1125,6 +1145,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 "source" => {
                     if let Some(i) = r.activity_material {
                         completed_batch = economy::finish_job(&mut v, &r.task, i);
+                        if completed_batch {
+                            skills::award(&mut v, r.id, skills::Skill::Craft, 2);
+                        }
                     }
                 }
                 "garden"
@@ -1152,6 +1175,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     completed_batch = r
                         .activity_building
                         .is_some_and(|id| organics::turn(&mut v, id));
+                    if completed_batch {
+                        skills::award(&mut v, r.id, skills::Skill::Farming, 1);
+                    }
                 }
                 "rest" => {
                     completed_batch = true;
@@ -1240,6 +1266,7 @@ impl Game {
                 logistics: None,
                 navigation: None,
                 workforce: workforce::State::default(),
+                skills: skills::State::default(),
                 production: production::State::default(),
                 freshness: freshness::State::default(),
                 processes: processes::State::default(),
@@ -1373,6 +1400,7 @@ impl Game {
         economy["pickup_fee"] = 2000.into();
         serde_json::json!({
             "environment": {
+                "skills": skills::view(&village),
                 "raining": climate::at(&village,village.minutes).raining,
                 "weather": climate::view(&village),
                 "water_capacity": ecology::capacity(&village),
@@ -1641,6 +1669,16 @@ impl Game {
         let Ok(mut raw) = serde_json::from_str::<serde_json::Value>(data) else {
             return false;
         };
+        if raw["village"]["version"] == 23 {
+            raw["village"]["version"] = SAVE_VERSION.into();
+            if raw["village"]["skills"].is_null() && raw["village"]["mode"] == "sandbox" {
+                raw["village"]["skills"] = serde_json::to_value(skills::State {
+                    enabled: false,
+                    ..Default::default()
+                })
+                .unwrap();
+            }
+        }
         if raw["village"]["version"] == 3 {
             organics::author_fixture(&mut raw);
         }
@@ -1671,6 +1709,7 @@ impl Game {
         }
         if !logistics::valid(v, &save.residents)
             || !workforce::valid(v)
+            || !skills::valid(v)
             || !production::valid(v)
             || !freshness::valid(v)
             || !processes::valid(v)

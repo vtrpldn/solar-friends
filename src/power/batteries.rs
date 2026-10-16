@@ -290,13 +290,14 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         row.work = 0.;
         return false;
     }
+    let pace = skills::factor(v, r.id, skills::Skill::Care);
     let row = v
         .power
         .battery_jobs
         .iter_mut()
         .find(|p| p.id == j.id)
         .unwrap();
-    row.work = (row.work + minutes).min(total(&j));
+    row.work = (row.work + minutes * pace).min(total(&j));
     if row.work < total(&j) {
         return false;
     }
@@ -309,6 +310,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
     } else if j.phase == Phase::Installing {
         row.phase = Phase::Complete;
         row.finished = Some(v.minutes);
+        skills::award(v, r.id, skills::Skill::Care, 4);
         event(
             v,
             "Our battery is installed. Neighbours can reconnect its cables.",
