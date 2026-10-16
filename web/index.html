@@ -405,6 +405,15 @@
           />
         </label>
       </section>
+      <section id="sandbox-rules" class="settings-section" aria-labelledby="sandbox-rules-title" hidden>
+        <h3 id="sandbox-rules-title">Make Sandbox your own</h3>
+        <p>All buildings stay unlocked. Change one rule at a time; existing buildings, paid orders and work in progress remain.</p>
+        <label class="setting-row" for="sandbox-logistics"><span><b id="sandbox-logistics-title">Construction &amp; supplies</b><small id="sandbox-logistics-description">New buildings need delivered materials and resident work. Funds and pantry stop replenishing; food keeps its original expiry dates.</small></span><input id="sandbox-logistics" type="checkbox" role="switch" aria-labelledby="sandbox-logistics-title" aria-describedby="sandbox-logistics-description"></label>
+        <label class="setting-row" for="sandbox-land"><span><b id="sandbox-land-title">Living land</b><small id="sandbox-land-description">Soil, moisture and tree shade affect growth. Extraction depletes local deposits. Off preserves those reserves and soil history, with neutral growth.</small></span><input id="sandbox-land" type="checkbox" role="switch" aria-labelledby="sandbox-land-title" aria-describedby="sandbox-land-description"></label>
+        <label class="setting-row" for="sandbox-utilities"><span><b id="sandbox-utilities-title">Local utilities</b><small id="sandbox-utilities-description">Deliver fresh water, handle separate waste buffers and connect operating power. Off keeps water comfortable and supplies free power separately from owned batteries.</small></span><input id="sandbox-utilities" type="checkbox" role="switch" aria-labelledby="sandbox-utilities-title" aria-describedby="sandbox-utilities-description"></label>
+        <small id="sandbox-rule-status" role="status"></small>
+        <small>Seasons, equipment wear, learning and town suppliers have separate controls in their village pages.</small>
+      </section>
       <section class="settings-section" aria-labelledby="sound-settings">
         <h3 id="sound-settings">Sounds of the village</h3>
         <label class="volume-control" for="ambience-volume">River, rain &amp; birds <output id="ambience-volume-value" for="ambience-volume"></output><input id="ambience-volume" type="range" min="0" max="100" step="1" /></label>

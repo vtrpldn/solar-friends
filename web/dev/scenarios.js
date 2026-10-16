@@ -1,3 +1,4 @@
+import {sandboxPlanningScene} from './sandbox-fixture.js';
 import {withAutonomyScene} from './autonomy-fixture.js';
 import {withMaintenanceScene} from './maintenance-fixture.js';
 import {resetMaterialLocations} from './material-fixture.js';
@@ -7,6 +8,7 @@ import {makeArtPreview} from './art-preview.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 import {withSeasonalWeather} from './climate-fixture.js';
 export const scenarios = [
+  {id:'sandbox-planning',name:'Sandbox planning rules',detail:'A free starter layout followed by real resident construction, living land and local utilities. All buildings are unlocked. Change each rule independently in Settings; your saved village stays protected.'},
   {id:'suppliers',name:'Town offers & freight',detail:'A protected day-fifteen village with seasonal prices, a limited offer and a saved freight calendar. Confirm baskets, use a resident pickup, or compare the next restock without changing your village.'},
   {id:'learning',name:'Learning through useful work',detail:'A staged experienced grower and cook beside novice neighbours. Ordinary jobs remain open to everyone; useful completed work earns bounded practice. Saved villages stay protected.'},
   {id:'autonomy',name:'Residents & competing needs',detail:'Iara needs rest, Bento needs food, Luz needs company, Cauã can help the village, and Nina has an outside shift. Follow their recovery and a new garden project; your saved village stays protected.'},
@@ -48,6 +50,7 @@ export const scenarios = [
 // Fixtures are deliberately staged. Real ticks, requests, and systems run after loading.
 export function makeScenario(id, fresh, established) {
   if (!scenarios.some(s => s.id === id)) throw new Error('Unknown scenario');
+  if (id === 'sandbox-planning') return sandboxPlanningScene();
   if (id === 'arrival') return structuredClone(fresh);
   if(id==='art'||id==='art-night')return makeArtPreview(fresh,established,{night:id==='art-night'});
   const state = id==='grid'?makeArtPreview(fresh,established):structuredClone(established), v = state.village;

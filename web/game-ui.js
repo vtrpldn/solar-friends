@@ -1,3 +1,4 @@
+import {usesLogistics} from './sandbox-rules.js';
 import {paintIcon} from './build-menu.js';
 import {allBuildingArt,buildingArtKey} from './building-art.js';
 import {riverBank,MAP_SIZE} from './terrain.js';
@@ -71,7 +72,8 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
   function update(state,developer,selected){
     document.body.classList.toggle('developer-session',developer);
     document.body.classList.toggle('sandbox-mode',state.village.mode==='sandbox');
-    $('#material-total').textContent=state.village.mode==='sandbox'?'∞':state.environment.economy.materials.reduce((sum,m)=>sum+m.stored,0);
+    document.body.classList.toggle('unlimited-supplies',!usesLogistics(state.village));
+    $('#material-total').textContent=state.environment.economy.materials.reduce((sum,m)=>sum+m.stored,0);
     for(const r of state.residents){
       let button=portraits.get(r.id);
       if(!button){button=document.createElement('button');button.dataset.citizen=r.id;button.innerHTML=`${avatar(r.id)}<span class="citizen-status" aria-hidden="true"></span>`;button.onclick=()=>selectPerson(r.id);$('#resident-strip').append(button);portraits.set(r.id,button);paintPortraits();}

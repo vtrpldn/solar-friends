@@ -1,3 +1,4 @@
+import {checkSandboxRules} from './sandbox-browser-checks.mjs';
 import {checkSupplierControls,checkSupplierSandboxSave} from './supplier-browser-checks.mjs';
 import {checkMaintenanceControls,checkMaintenanceSandboxSave} from './maintenance-browser-checks.mjs';
 import {checkSkillControls,checkSkillSandboxSave} from './skills-browser-checks.mjs';
@@ -691,6 +692,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkMaintenanceSandboxSave({browser,base,output,screenshots,errors});
   await checkSkillSandboxSave({browser,base,output,screenshots,errors});
   await checkSupplierSandboxSave({browser,base,output,screenshots,errors});
+  await checkSandboxRules({browser,base,output,screenshots,errors});
   await checkArtworkInterface({browser,base,output,screenshots,errors});
   assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
 }
