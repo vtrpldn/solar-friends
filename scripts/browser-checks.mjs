@@ -257,7 +257,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Trade',exact:true}).click();
   await page.locator('[name="town-transport"][value="delivery"]').check();await page.locator('#buy-10').fill('1');await page.locator('#town-order').click();
   const deliveryFunds=await page.evaluate(()=>window.solarDev.snapshot().village.economy.money);
-  await page.getByText('Orders & deliveries',{exact:true}).click();await page.locator('[data-collect-order="0"]').click();
+  const deliveries=page.locator('details').filter({has:page.locator('#town-orders')});if(!await deliveries.evaluate(el=>el.open))await deliveries.locator('summary').click();await page.locator('[data-collect-order="0"]').click();
   await page.locator('#pickup-order-driver').selectOption('1');
   assert((await page.locator('#pickup-order-summary').textContent()).includes('R$ 40'));
   await capture('Choose a driver for same-day town pickup','town-pickup.png');

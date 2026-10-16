@@ -191,5 +191,10 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#town-pickup-status').textContent=!notice?'':notice.status==='delivered'?`${driver.name} brought our supplies home. They await local distribution at camp.`:driver.trip?.phase==='away'?`${driver.name} is driving to collect supplies · back ${time(notice.arrival)}`:pickupMessage(driver.name);
     quote();spareQuote();
   }
-  update();return {update,resetForecast(){forecasts.reset();lastProjects='';}};
+  update();return {update,resetForVillage(){
+    forecasts.reset();lastProjects='';pickupNoticeOrder=null;currentQuote=null;
+    for(const input of $('#town-catalog').querySelectorAll('input'))input.value=0;
+    $('[name="town-transport"][value="delivery"]').checked=true;
+    $('#town-pickup-status').textContent='';if($('#pickup-dialog').open)$('#pickup-dialog').close();
+  }};
 }

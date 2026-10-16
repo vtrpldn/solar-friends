@@ -4,9 +4,11 @@ import path from 'node:path';
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:n%100?2:0,maximumFractionDigits:2}).format(n/100);
 export async function checkSupplierControls({page,saved,capture}){
   const snap=()=>page.evaluate(()=>window.solarDev.snapshot());
-  if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
-  await page.locator('[data-dev-tab="simulation"]').click();await page.locator('#dev-scenario').selectOption('suppliers');await page.locator('#dev-load').click();
+  if(await page.locator('#dev-dialog').isVisible())await page.locator('#dev-close').click();
+  await page.locator('[data-hud-resource="fund"]').click();await page.locator('#buy-0').fill('2');await page.locator('[name="town-transport"][value="pickup"]').check();
+  await page.locator('#dev-button').click();await page.locator('[data-dev-tab="simulation"]').click();await page.locator('#dev-scenario').selectOption('suppliers');await page.locator('#dev-load').click();
   await page.waitForFunction(()=>window.solarDev.scenario()==='suppliers');await page.locator('#dev-close').click();await page.locator('[data-hud-resource="fund"]').click();
+  assert.equal(await page.locator('#buy-0').inputValue(),'0','Changing villages clears the previous shopping list');assert(await page.locator('[name="town-transport"][value="delivery"]').isChecked());
   const original=await snap(),offer=original.environment.economy.market.current.offer,regular=original.environment.economy.materials[offer.material].price;
   assert(!await page.locator('#supplier-option').isVisible());assert.match(await page.locator('#supplier-offer-stock').textContent(),/offer units left/);
   for(const viewport of [{width:1600,height:900},{width:1280,height:800}]){

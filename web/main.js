@@ -550,7 +550,7 @@ function announceMilestones() {
   }
 }
 function resetPolish() {
-  economyUI?.resetForecast();
+  economyUI?.resetForVillage();
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   movingBuilding = null; movingBattery = null; pendingRemoval = null;
@@ -1842,7 +1842,7 @@ function setup() {
 // Both the workbench and automated checks use this interface. Mutations require
 // a sandbox; the original Game object stays untouched until it is restored.
 function refreshDevScene() {
-  economyUI?.resetForecast();
+  economyUI?.resetForVillage();
   setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; movingBattery = null; pendingRemoval = null;
