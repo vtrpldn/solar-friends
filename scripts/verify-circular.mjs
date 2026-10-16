@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -31,7 +32,7 @@ assert(s.village.circular.water_reused>=8);assert(s.environment.power.generation
 g.configure_sanitation(false,false,false);const before=snap().village.circular;
 advanceGame(g,30);s=snap();assert.equal(s.village.circular.biogas,before.biogas);assert.equal(s.village.circular.batches,before.batches);assert.equal(s.village.circular.filtration,before.filtration);
 // Every hover decision agrees with native river placement, across the lot.
-const h=new Game();h.start_mode('sandbox');const base=h.snapshot();
+const h=new Game();startEmptySandbox(h);const base=h.snapshot();
 let sites=0;
 for(let x=1;x<=26;x++)for(let y=1;y<=26;y++){
  assert(h.restore(base));const v=JSON.parse(base).village;

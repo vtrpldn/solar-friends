@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
@@ -8,7 +9,7 @@ import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const output='artifacts/suppliers';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),raw=(material,n)=>JSON.stringify(Array.from({length:29},(_,i)=>i===material?n:0));
-const base=new Game(),fresh=snap(base);assert.equal(fresh.village.version,27);assert(fresh.village.market.enabled&&!fresh.environment.economy.market.active);
+const base=new Game(),fresh=snap(base);assert.equal(fresh.village.version,28);assert(fresh.village.market.enabled&&!fresh.environment.economy.market.active);
 assert(base.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));const established=snap(base);
 const g=new Game();assert(g.restore(JSON.stringify(makeScenario('suppliers',fresh,established))));
 const before=g.snapshot(),e=snap(g).environment.economy,offer=e.market.current.offer,data=raw(offer.material,1);
@@ -59,7 +60,7 @@ const rolloverGame=new Game();assert(rolloverGame.restore(JSON.stringify(rollove
 let baselineMinutes=0;
 if(process.env.SOLAR_SUPPLIER_BASELINE){
  const folder=pathToFileURL(path.resolve(process.env.SOLAR_SUPPLIER_BASELINE)+'/'),{default:oldInit,Game:Old}=await import(new URL('solar_friends.js',folder));await oldInit({module_or_path:await readFile(new URL('solar_friends_bg.wasm',folder))});
- const old=new Old(),now=new Game();old.start_mode('sandbox');now.start_mode('sandbox');
+ const old=new Old(),now=new Game();startEmptySandbox(old);startEmptySandbox(now);
  for(const [kind,x,y]of [['home',6,6],['solar_farm',12,6],['workshop',18,12]]){assert.equal(old.place(kind,x,y),'ok');assert.equal(now.place(kind,x,y),'ok');}
  for(let tick=0;tick<1920;tick++){old.tick(.25);now.tick(.25);}
  const a=JSON.parse(old.snapshot()),b=snap(now);delete b.village.market;delete b.environment.economy.market;for(const m of b.environment.economy.materials)delete m.sell_price;for(const o of b.village.economy.orders)delete o.terms;b.village.version=a.village.version;

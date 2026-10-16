@@ -367,7 +367,16 @@ function installMenu() {
   $('#menu-help').onclick=openHelp;
 }
 function setZoom(value) {
+  const limitsBefore=zoomLimits(width,height),previousScale=Math.max(.18,limitsBefore.base*zoom);
   zoom=clampZoom(width,height,value);
+  const ratio=Math.max(.18,limitsBefore.base*zoom)/previousScale;
+  // Preserve the same world point at the viewing centre, including a minimap
+  // flight that has not finished yet. Larger zoom ranges must not lose the map.
+  const anchor={x:width*.01,y:-height*.05};
+  for(const point of [pan,cameraTarget].filter(Boolean)){
+    point.x=anchor.x+(point.x-anchor.x)*ratio;
+    point.y=anchor.y+(point.y-anchor.y)*ratio;
+  }
   const limits=zoomLimits(width,height);
   $('#zoom-out').disabled=zoom<=limits.min+1e-6;$('#zoom-in').disabled=zoom>=limits.max-1e-6;
 }
@@ -566,7 +575,7 @@ function resetPolish() {
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   movingBuilding = null; movingBattery = null; pendingRemoval = null;
-  cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; setZoom(1.3);
+  cameraTarget = null; pointer = null; setZoom(1.3); pan = { x: 0, y: 0 };
 }
 
 function building(b) {
@@ -1474,7 +1483,7 @@ function frame(stamp) {
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
-    render(); paintedState = state; paintedView = viewKey;
+    render(); gameUI?.drawMap(state,selected); paintedState = state; paintedView = viewKey;
   }
   uiElapsed += dt;
   saveElapsed += elapsed;
@@ -1914,6 +1923,7 @@ const devAPI = {
       let raw;
       if (id === 'copy') raw = game.snapshot();
       else {
+        candidate.start_mode('story');
         const fresh = JSON.parse(candidate.snapshot());
         const response = await fetch('./artwork/village-preview.json');
         if (!response.ok || !candidate.restore(await response.text())) throw new Error('Could not load the village fixture.');

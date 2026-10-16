@@ -736,6 +736,8 @@ pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> 
                         p.y + (radius + extra) * a.sin(),
                     );
                     if navigation::clear(v, q.0, q.1)
+                        && spacing::free_spot(v, q, id)
+                        && doorway(v, p, [q.0, q.1])
                         && spots
                             .iter()
                             .all(|r| (q.0 - r.0).hypot(q.1 - r.1) >= spacing::PERSONAL_SPACE)

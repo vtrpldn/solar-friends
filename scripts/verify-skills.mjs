@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
@@ -7,7 +8,7 @@ import {makeScenario} from '../web/dev/scenarios.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const output='artifacts/skills';await mkdir(output,{recursive:true});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot()),fresh=snap();
-assert.equal(fresh.village.version,27);assert(fresh.village.skills.enabled);
+assert.equal(fresh.village.version,28);assert(fresh.village.skills.enabled);
 assert(g.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));
 assert(g.restore(JSON.stringify(makeScenario('farming',fresh,snap()))));g.set_resident_learning(true);
 assert.equal(g.place('garden',20,15),'ok');assert.equal(g.set_production_target(6,snap().environment.economy.materials[6].stored+2),'ok');assert(g.set_resident_job(4,true));
@@ -35,7 +36,7 @@ g.set_resident_learning(true);assert.deepEqual(snap().village.skills.people.map(
 let baselineMinutes=0;
 if(process.env.SOLAR_SKILLS_BASELINE){
  const base=pathToFileURL(path.resolve(process.env.SOLAR_SKILLS_BASELINE)+'/');const {default:oldInit,Game:OldGame}=await import(new URL('solar_friends.js',base));await oldInit({module_or_path:await readFile(new URL('solar_friends_bg.wasm',base))});
- const old=new OldGame(),current=new Game();old.start_mode('sandbox');current.start_mode('sandbox');
+ const old=new OldGame(),current=new Game();startEmptySandbox(old);startEmptySandbox(current);
  for(const [kind,x,y]of [['home',6,6],['solar_farm',12,6],['workshop',18,12]]){assert.equal(old.place(kind,x,y),'ok');assert.equal(current.place(kind,x,y),'ok');}
  for(let tick=0;tick<1920;tick++){old.tick(.25);current.tick(.25);}
  const previous=JSON.parse(old.snapshot()),now=JSON.parse(current.snapshot());delete now.village.skills;delete now.environment.skills;delete now.village.market;delete now.environment.economy.market;for(const m of now.environment.economy.materials)delete m.sell_price;for(const o of now.village.economy.orders)delete o.terms;for(const b of now.village.production.batches)delete b.contributors;now.village.version=previous.village.version;

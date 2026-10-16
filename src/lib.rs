@@ -579,6 +579,14 @@ fn choose(r: &mut Resident, v: &Village) {
             "rest",
             "Taking a proper rest until I feel ready to help again.",
         )
+    } else if !v.arrived
+        && (r.task == "arrive"
+            || v.workforce_peers
+                .iter()
+                .flatten()
+                .any(|p| p.task == "arrive"))
+    {
+        leisure::choose(r, v)
     } else if v.progress.gathering_until > v.minutes && v.progress.invited & (1 << r.id) != 0 {
         (
             "gathering",
@@ -2350,12 +2358,11 @@ mod tests {
             "ok"
         );
         for _ in 0..(16 * 1920) {
-            if g.app
-                .world()
-                .resource::<Village>()
-                .buildings
-                .iter()
-                .all(|b| b.progress >= 100.)
+            let v = g.app.world().resource::<Village>();
+            if v.buildings.iter().all(|b| b.progress >= 100.)
+                && v.harvests > 0
+                && v.meals_served > 0
+                && v.mornings > 0
             {
                 break;
             }

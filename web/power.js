@@ -6,6 +6,7 @@ export function buildingLighting(power, id, kind, complete = true) {
   return connection?.source==='grid' || connection?.source==='roof' ? connection.light_level : kind==='streetlight'?0:1;
 }
 export function unlitFilter(night=1, saturation=1) {
+  if(night<=0&&saturation===1)return 'none';
   return `brightness(${1-night*.35}) saturate(${(1-night*.28)*saturation})`;
 }
 export function lightingLayers(night, level, alpha=1) {

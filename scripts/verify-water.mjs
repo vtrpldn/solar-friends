@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -9,7 +10,7 @@ function checkpoint(g){const raw=g.snapshot(),h=new Game();assert(h.restore(raw)
 function account(g){const r=report(g);for(let i=0;i<2;i++)assert(Math.abs(r.opening[i]+r.received[i]-r.consumed[i]-r.present[i])<.001);assert.equal(snap(g).village.water,Math.fround(r.present[0]));assert.equal(snap(g).village.circular.reclaimed,Math.fround(r.present[1]));}
 function until(g,test,label,limit=4*1920){for(let frame=0;frame<limit;frame++){if(test(snap(g)))return;g.tick(.25);}throw Error(label+' · '+g.water_report());}
 function scene(fresh=0,irrigation=0){
-  const g=new Game();g.start_mode('sandbox');
+  const g=new Game();startEmptySandbox(g);
   for(const [kind,x,y]of [['well',5,5],['kitchen',12,5],['garden',18,5],['wetland',5,18],['eco_toilet',12,18]])assert.equal(g.place(kind,x,y),'ok');
   const f=snap(g),v=f.village;Object.assign(v,{mode:'story',arrived:true,minutes:540,water:fresh});v.circular.reclaimed=irrigation;v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.production.targets[17]=0;
   for(const r of f.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,trip:null,help:null,energy:90,hunger:0,social:90,last_meal_slot:0,activity_building:null,activity_material:null,activity_store:null,activity_batch:null,walking:{},x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});

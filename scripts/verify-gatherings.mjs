@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -12,7 +13,7 @@ function until(g,test,label,limit=5000){
   for(let frame=0;frame<limit;frame++){const s=snap(g);if(test(s))return s;g.tick(.25);}
   throw Error(label+': '+JSON.stringify({plan:plan(snap(g)),residents:snap(g).residents.map(r=>[r.name,r.task,r.reason])}));
 }
-const g=new Game();g.start_mode('sandbox');
+const g=new Game();startEmptySandbox(g);
 assert.equal(g.place('square',6,6),'ok');assert.equal(g.place('kitchen',14,6),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',arrived:true,minutes:540,food:60,meals:10,water:40});
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),use_tools:false});
@@ -59,8 +60,8 @@ assert(dusk.restore(JSON.stringify(late)));dusk.tick(.25);assert.equal(plan(snap
 const evening=new Game(),eveningState=JSON.parse(await readFile('artifacts/gathering/start.json','utf8'));eveningState.village.minutes=945;
 assert(evening.restore(JSON.stringify(eveningState)));assert.equal(evening.host_gathering(),'ok');
 let restedOvernight=false;
-s=until(evening,s=>{restedOvernight||=s.village.minutes>=1440&&plan(s).phase==='preparing';return plan(s).phase==='complete';},'Deliver a late plan during the next community working day',6000);
-assert(restedOvernight);assert.equal(Math.floor(plan(s).started/1440),1);assert.equal(s.village.progress.gathering_day,1);assert.notEqual(evening.host_gathering(),'ok');checkpoint(evening);conserved(evening);
+s=until(evening,s=>{restedOvernight||=s.village.minutes>=1440&&plan(s).phase==='preparing';return plan(s).phase==='complete';},'Energetic neighbours prepare an afternoon plan',6000);
+assert(!restedOvernight);assert.equal(Math.floor(plan(s).started/1440),0);assert.equal(s.village.progress.gathering_day,0);assert.notEqual(evening.host_gathering(),'ok');checkpoint(evening);conserved(evening);
 await writeFile('artifacts/gathering/overnight.json',evening.snapshot());
 const before=g.snapshot(),bad=snap(g);bad.village.progress.gathering_delivery.spent_after=Number.MAX_SAFE_INTEGER;
 assert(!g.restore(JSON.stringify(bad)));assert.equal(g.snapshot(),before);

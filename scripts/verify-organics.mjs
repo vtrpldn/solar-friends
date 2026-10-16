@@ -1,10 +1,11 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
 import {resetMaterialLocations,stageFixtureMaterial} from '../web/dev/material-fixture.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/organics',{recursive:true});
-const snap=g=>JSON.parse(g.snapshot()),g=new Game();g.start_mode('sandbox');
+const snap=g=>JSON.parse(g.snapshot()),g=new Game();startEmptySandbox(g);
 for(const [kind,x,y] of [['compost',8,8],['garden',12,8],['kitchen',5,11]])assert.equal(g.place(kind,x,y),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',minutes:540,arrived:true,food:36,meals:16,water:40});
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),compost:0,scraps:2,use_tools:false});

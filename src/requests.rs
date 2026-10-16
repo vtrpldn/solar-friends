@@ -1115,8 +1115,7 @@ mod tests {
             }
         }
         assert_eq!(g.place("garden", 18, 18), "ok");
-        eprintln!("REQUEST {}",g.request(0, "build", false));
-        for step in 0..250 {if step%10==0{let r=person(&mut g,0);let v=g.app.world().resource::<Village>();eprintln!("STEP {step} {} {:?} {:?}",r.task,r.help.as_ref().map(|q|(q.phase,q.reason.clone())),v.logistics.as_ref().unwrap().shipments.iter().map(|h|(h.resident,h.carrying)).collect::<Vec<_>>());}g.tick(0.25);}
+        assert!(g.request(0, "build", false).contains("Happy"));
         until(&mut g, |g| {
             g.app
                 .world()

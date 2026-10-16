@@ -19,7 +19,7 @@ for(const scenario of scenarios) {
   assert.equal(after.village.minutes,minute+.75);
   if(scenario.id==='cook') assert.equal(after.village.situations.active.resident,2);
   if(scenario.id==='coop') assert.equal(after.village.supplies.eggs,3);
-  if(scenario.id==='leisure') assert(after.residents.every(r=>['nature_walk','birdwatch','stretch','daydream'].includes(r.task)));
+  if(scenario.id==='leisure') assert(after.residents.some(r=>['haul','water','garden','cook','gather','craft','prepare','source','utility','restore','build'].includes(r.task)),'Energetic neighbours can take needed afternoon work without a fixed community break');
   assert(g.restore(g.snapshot()),'scenario must remain save-valid');
 }
 const before = g.snapshot();

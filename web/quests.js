@@ -347,7 +347,7 @@ const primary=[
 ];
 const guide=(action,label,hint,page)=>({...actionGoal(action,label,0,1,hint,page),guide:true});
 const extras=[
- v=>lessons[0].objectives(v).slice(5),
+ v=>[...lessons[0].objectives(v).slice(5),goal('Keep a shared shelter',count(v,'shed'),1,'Our starting shed keeps quiet breaks and rest beneath a roof in rain and strong sun. Each neighbour has a separate spot. It has no beds; homes provide overnight sleep. Neighbours take useful work whenever their energy allows, with meals, rest, company and personal commitments first.','shed')],
  v=>[...lessons[1].objectives(v).slice(2),...lessons[5].objectives(v).slice(0,2)],
  v=>lessons[2].objectives(v).slice(1,3),
  v=>[...lessons[3].objectives(v).filter(o=>o.label!=='Receive a town delivery'),

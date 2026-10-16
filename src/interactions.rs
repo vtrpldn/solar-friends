@@ -28,7 +28,12 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     let Some(b) = v.buildings.iter().find(|b| b.id == index) else {
         return;
     };
-    let Some(point) = spacing::approach(v, b, r.id) else {
+    let point = if b.kind == "shed" {
+        founding::quiet_spot_at(v, b, r.id)
+    } else {
+        spacing::approach(v, b, r.id)
+    };
+    let Some(point) = point else {
         assign(
             r,
             v,
@@ -50,6 +55,7 @@ pub fn start(r: &mut Resident, v: &Village, index: usize, requested: bool) {
     (r.target_x, r.target_y) = point;
     r.reason = match b.kind.as_str() {
         "home" => "Resting on the porch.",
+        "shed" => "Taking a quiet break beneath the shared roof.",
         "eco_toilet" => "Using the ecological toilet and washing my hands.",
         "garden" | "greenhouse" => "Checking and tending this garden.",
         "kitchen" => "Preparing a pot in this kitchen.",
@@ -78,7 +84,12 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
     }
     let kind = b.kind.clone();
     // Shared production cooldown prevents five simultaneous visitors multiplying output.
-    if kind != "home" && kind != "square" && kind != "eco_toilet" && b.next_visit > v.minutes {
+    if kind != "home"
+        && kind != "shed"
+        && kind != "square"
+        && kind != "eco_toilet"
+        && b.next_visit > v.minutes
+    {
         return;
     }
     if kind == "eco_toilet" {
@@ -88,7 +99,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
     v.buildings[index].visits = v.buildings[index].visits.saturating_add(1);
     v.buildings[index].next_visit = v.minutes + 60.;
     match kind.as_str() {
-        "home" => r.energy = (r.energy + 18.).min(100.),
+        "home" | "shed" => r.energy = (r.energy + 18.).min(100.),
         "square" => {
             r.social = (r.social + 25.).min(100.);
             r.energy = (r.energy + 8.).min(100.);
@@ -132,6 +143,7 @@ mod tests {
     #[test]
     fn every_building_supports_a_targeted_visit_only_after_arrival() {
         for kind in [
+            "shed",
             "home",
             "garden",
             "greenhouse",
@@ -283,7 +295,7 @@ mod tests {
                 }
                 _ => unreachable!(),
             }
-            if kind != "home" && kind != "square" {
+            if kind != "home" && kind != "shed" && kind != "square" {
                 finish(&mut v, &mut r);
                 assert_eq!(v.buildings[0].visits, 1);
             }

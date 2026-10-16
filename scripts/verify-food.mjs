@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -10,7 +11,7 @@ const pantry=s=>s.village.logistics.stores.find(p=>p.owner.kind==='pantry'&&p.ow
 function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();}
 function conserved(g){assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));}
 function until(g,test,label,limit=12000){for(let frame=0;frame<limit;frame++){const s=snap(g);if(test(s))return s;g.tick(.25);}throw Error(label+': '+JSON.stringify(snap(g).residents.map(r=>[r.name,r.task,r.reason])));}
-const g=new Game();g.start_mode('sandbox');assert.equal(g.place('kitchen',6,6),'ok');
+const g=new Game();startEmptySandbox(g);assert.equal(g.place('kitchen',6,6),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',arrived:true,minutes:540,food:36,meals:0,water:40});
 fixture.village.supplies.eggs=0;fixture.village.supplies.use_eggs=false;fixture.village.supplies.feed_hens=false;
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});

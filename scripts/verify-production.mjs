@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -6,7 +7,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 await mkdir('artifacts/production',{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),person=(s,id=0)=>s.residents.find(r=>r.id===id);
 function scene(x=6,y=6){
- const g=new Game();g.start_mode('sandbox');assert.equal(g.place('workshop',x,y),'ok');
+ const g=new Game();startEmptySandbox(g);assert.equal(g.place('workshop',x,y),'ok');
  const s=snap(g);Object.assign(s.village,{mode:'story',arrived:true,minutes:540,food:80,meals:10,water:40});
  s.village.progress.completed=Array(4).fill(true);s.village.progress.later_completed=Array(9).fill(true);
  s.village.economy.stock[7]=0;s.village.economy.outside_jobs=Array(5).fill(false);

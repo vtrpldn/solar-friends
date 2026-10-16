@@ -43,8 +43,8 @@ fn perimeter_trees_and_cached_shade_are_seeded_and_queries_leave_them_unchanged(
     );
     let mut uncached = v.clone();
     uncached.land.natural_light.clear();
-    for y in 0..28 {
-        for x in 0..28 {
+    for y in 0..MAP_SIZE {
+        for x in 0..MAP_SIZE {
             assert_eq!(ground(v, x, y), ground(&uncached, x, y));
         }
     }

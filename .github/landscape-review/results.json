@@ -1,0 +1,145 @@
+{
+  "scope": "64 × 64 living landscape, personal work availability, and founding shelter/storage",
+  "engineSha256": "2e9f134729d957cff45403a9d34f21c33041cacec7f9a709902fe8b522f55558",
+  "native": {
+    "passed": 510,
+    "failed": 0,
+    "additional": "Full-property cached shade equals uncached shade at every cell"
+  },
+  "publicChecks": [
+    "verify-landscape",
+    "verify-modes",
+    "verify-autonomy",
+    "verify-building-work",
+    "verify-sandbox-rules",
+    "verify-cultivation",
+    "verify-dev-tools",
+    "verify-art-preview",
+    "verify-artwork",
+    "verify-building-projection",
+    "verify-weather",
+    "verify-story-objectives",
+    "verify-gatherings",
+    "verify-utility-routes",
+    "verify-land"
+  ],
+  "javascriptSyntaxFiles": 179,
+  "landscape": {
+    "map": 64,
+    "modes": [
+      {
+        "mode": "story",
+        "startingFood": 36,
+        "indoorFood": 36,
+        "plants": 1361
+      },
+      {
+        "mode": "sandbox",
+        "startingFood": 80,
+        "indoorFood": 80,
+        "plants": 1361
+      }
+    ],
+    "habitats": [
+      "Flower meadow",
+      "Dry woodland",
+      "Rocky woodland",
+      "River meadow",
+      "Atlantic forest",
+      "Clay terraces"
+    ],
+    "species": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "work": [
+      {
+        "started": 450,
+        "workedAt": 528,
+        "progress": 3.90625
+      },
+      {
+        "started": 800,
+        "workedAt": 877.25,
+        "progress": 3.90625
+      },
+      {
+        "started": 1100,
+        "workedAt": 1175,
+        "progress": 3.90625
+      }
+    ],
+    "shelter": [
+      {
+        "weather": "sun",
+        "residents": 5,
+        "energy": [
+          19.742525100708008,
+          19.4000244140625,
+          19.913774490356445,
+          21.455028533935547,
+          15.632516860961914
+        ]
+      },
+      {
+        "weather": "rain",
+        "residents": 5,
+        "energy": [
+          19.742525100708008,
+          19.4000244140625,
+          19.913774490356445,
+          21.455028533935547,
+          15.632516860961914
+        ]
+      }
+    ],
+    "checks": [
+      "64-cell native/frontend boundaries",
+      "six matching habitat regions",
+      "twelve plant/outcrop species",
+      "far-property construction and river power",
+      "owned starter supplies and exact saves",
+      "resident-attended work outside former windows",
+      "rain and sun shelter with personal space",
+      "one day of needs, material conservation and checkpoints"
+    ],
+    "dayReplaySeconds": 1.9348510840000002
+  },
+  "desktop": {
+    "viewport": [
+      1600,
+      1000
+    ],
+    "errors": [],
+    "captures": [
+      "new-village",
+      "property-overview",
+      "shade-shelter",
+      "rain-shelter",
+      "habitats",
+      "art",
+      "art-night",
+      "story-planning",
+      "sandbox-planning",
+      "art-studio"
+    ],
+    "overviewColors": 179
+  },
+  "limits": "The focused checks listed here passed; the full development/endurance suite was not rerun.",
+  "developerScenarios": 39,
+  "hostedCI": {
+    "run": "https://github.com/vtrpldn/solar-friends/actions/runs/38921044235",
+    "status": "Not started",
+    "reason": "Recent account payments failed or the account spending limit needs to be increased."
+  }
+}

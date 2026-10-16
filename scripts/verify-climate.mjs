@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -34,7 +35,7 @@ for(const name of ['climate-wet','climate-dry']){
 }
 assert(results[0].river_generation>results[1].river_generation,'Wet and dry scenes use the same river generator with different actual flow');
 assert(results[0].solar_generation<results[1].solar_generation,'Seeded cloud cover reduces actual solar output');
-game.start_mode('sandbox');assert(game.configure_sandbox_rules(false,true,true));assert.equal(snap().village.climate.enabled,false);assert(game.set_seasons_enabled(true));
+startEmptySandbox(game);assert(game.configure_sandbox_rules(false,true,true));assert.equal(snap().village.climate.enabled,false);assert(game.set_seasons_enabled(true));
 const selected=game.snapshot();assert(game.restore(selected));assert.equal(game.snapshot(),selected);assert(game.set_seasons_enabled(false));
 await writeFile(output+'/sandbox-seasons.json',selected);
 await writeFile(output+'/report.json',JSON.stringify({passed:true,results},null,2));game.free();

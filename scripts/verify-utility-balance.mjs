@@ -13,7 +13,7 @@ const output='artifacts/utility-balance';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),line=(s,id)=>s.village.pipes.lines.find(p=>p.id===id);
 const raw=await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story-optional/solar-complete.json','utf8');
 const connected=new Game(),manual=new Game();assert(connected.restore(raw));assert(manual.restore(raw));
-assert.equal(snap(connected).village.version,27);assert(snap(connected).village.progress.later_completed.every(Boolean),'Use the earned completed Story village');
+assert.equal(snap(connected).village.version,28);assert(snap(connected).village.progress.later_completed.every(Boolean),'Use the earned completed Story village');
 function checkpoint(g){
   const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();
   assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));

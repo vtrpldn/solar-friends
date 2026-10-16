@@ -1,3 +1,4 @@
+import {hydroCell} from '../web/terrain.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -20,7 +21,7 @@ for(let chapter=0;chapter<quests.length;chapter++) {
     const g=new Game();assert(g.restore(story.snapshot()));
     const allowed=unlockQuest[kind]===undefined || unlockQuest[kind]<chapter;
     assert.equal(buildingUnlocked(v,kind),allowed);
-    const before=g.snapshot(),result=g.place(kind,kind==='hydro'?26:5,5);
+    const before=g.snapshot(),result=g.place(kind,kind==='hydro'?hydroCell(5):5,5);
     assert.equal(result==='ok',allowed,`${kind} at chapter ${chapter+1}`);
     if(!allowed)assert.equal(g.snapshot(),before,'locked placement cannot mutate village');
     else assert.equal(snap(g).village.buildings[0].progress,0,'Story requires construction');
@@ -30,9 +31,9 @@ for(let chapter=0;chapter<quests.length;chapter++) {
 for(const kind of buildings) {
   const g=new Game();assert(g.start_mode('sandbox'));
   const before=snap(g);
-  assert.equal(g.place(kind,kind==='hydro'?26:5,5),'ok',kind);
+  assert.equal(g.place(kind,kind==='hydro'?hydroCell(5):5,5),'ok',kind);
   const after=snap(g);
-  assert.equal(after.village.buildings[0].progress,100);
+  assert.equal(after.village.buildings.at(-1).progress,100);
   assert.equal(after.environment.economy.projects.length,0);
   assert.equal(after.village.wood,before.village.wood);
   assert.equal(after.village.economy.money,before.village.economy.money);
@@ -41,23 +42,23 @@ for(const kind of buildings) {
   const saved=g.snapshot(),restore=new Game();assert(restore.restore(saved));assert.equal(restore.snapshot(),saved);
   const invalid=JSON.parse(saved);invalid.village.mode='unknown';assert(!restore.restore(JSON.stringify(invalid)));assert.equal(restore.snapshot(),saved);
   assert(!restore.start_mode('unknown'));assert.equal(restore.snapshot(),saved);
-  assert(restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,1);
+  assert(restore.remove_sandbox_building(2));assert.equal(snap(restore).village.buildings.length,3);
   for(let tick=0;tick<4000&&snap(restore).village.building_jobs.length;tick++)restore.tick(.25);
-  assert.equal(snap(restore).village.buildings.length,0,'Sandbox removal also needs resident work');
+  assert.equal(snap(restore).village.buildings.length,2,'Resident removal preserves both founding buildings');
   assert(restore.restore(restore.snapshot()));
-  const cleared=restore.place(kind,kind==='hydro'?26:5,5);
+  const cleared=restore.place(kind,kind==='hydro'?hydroCell(5):5,5);
   if(cleared!=='ok'){
     assert.match(cleared,/recovered battery/,'Only retained owned equipment can block rebuilding on the cleared plot');
     const banks=snap(restore).village.power.network.nodes.filter(n=>n.owner.kind==='ground');assert(banks.length>0);
     for(const bank of banks)assert.equal(restore.queue_battery_work(bank.id,'salvage',0,0),'ok');
     for(let tick=0;tick<6000&&snap(restore).village.power.network.nodes.some(n=>n.owner.kind==='ground');tick++)restore.tick(.25);
-    assert.equal(restore.place(kind,kind==='hydro'?26:5,5),'ok','Resident equipment salvage frees the original plot');
+    assert.equal(restore.place(kind,kind==='hydro'?hydroCell(5):5,5),'ok','Resident equipment salvage frees the original plot');
     assert.equal(snap(restore).village.power.salvaged_equipment,0,'Free Sandbox buildings cannot yield purchased batteries');
   }
-  assert(restore.start_mode('story'));assert(!restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,0);assert.equal(snap(restore).village.mode,'story');
+  assert(restore.start_mode('story'));assert(!restore.remove_sandbox_building(2));assert.equal(snap(restore).village.buildings.length,2);assert.equal(snap(restore).village.mode,'story');
   g.free();restore.free();
 }
 const g=new Game();assert.equal(g.host_gathering().includes('Roots for Tomorrow'),true);assert.equal(g.contribute_tool_library().includes('A Place to Gather'),true);
 assert.equal(goalRoute({village:{buildings:[{id:0,kind:'coop',progress:100}]},environment:{economy:{projects:[]}}},{build:'coop',target:3,buildTarget:1}).type,'visit');
 g.free();story.free();
-console.log('PASS: all 18 buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.');
+console.log(`PASS: all ${buildings.length} buildings across thirteen Story chapters, Rust/UI unlock agreement, atomic locked actions, free instant Sandbox construction, mode saves, invalid modes and fresh restarts.`);

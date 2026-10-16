@@ -47,7 +47,7 @@ export const scenarios = [
   { id: 'dry-afternoon', name: 'A dry afternoon', detail: '15:00 on a dry day. Compare clear light with the rainy scene.' },
   {id:'climate-wet',name:'Wet season rain',detail:'Actual seeded rain after the arrival period. Compare cistern collection, moist soil, cloud-reduced solar output and river generation with the dry-season scene.'},
   {id:'climate-dry',name:'First dry season',detail:'The same property under its seeded dry-season forecast. Soil dries faster and the river produces less; inspect the seven-day forecast in Supplies.'},
-  { id: 'leisure', name: 'A relaxed afternoon', detail: 'A modest pantry and content neighbours. Advance to see their hobbies, then evening stargazing.' },
+  { id: 'leisure', name: 'An afternoon at our own pace', detail: 'A modest pantry and content neighbours. Useful errands follow personal energy and needs; free neighbours choose hobbies, then evening stargazing.' },
 ];
 // Fixtures are deliberately staged. Real ticks, requests, and systems run after loading.
 export function makeScenario(id, fresh, established) {

@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
@@ -7,7 +8,7 @@ const {default:init,Game}=await import(new URL('solar_friends.js',pkg));
 await init({module_or_path:await readFile(new URL('solar_friends_bg.wasm',pkg))});
 const output='artifacts/maintenance';await mkdir(output,{recursive:true});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot());
-assert(g.start_mode('sandbox'));
+assert(startEmptySandbox(g));
 for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',18,12]])assert.equal(g.place(kind,x,y),'ok');
 g.tick(.25);
 const before=g.snapshot(),report=JSON.parse(g.maintenance_report());
@@ -40,10 +41,10 @@ if(process.env.SOLAR_CONDITION_BASELINE){
   const baseline=pathToFileURL(path.resolve(process.env.SOLAR_CONDITION_BASELINE)+'/');
   const {default:oldInit,Game:OldGame}=await import(new URL('solar_friends.js',baseline));
   await oldInit({module_or_path:await readFile(new URL('solar_friends_bg.wasm',baseline))});
-  const old=new OldGame(),fresh=new Game();old.start_mode('sandbox');fresh.start_mode('sandbox');
+  const old=new OldGame(),fresh=new Game();startEmptySandbox(old);startEmptySandbox(fresh);
   for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',18,12]]){assert.equal(old.place(kind,x,y),'ok');assert.equal(fresh.place(kind,x,y),'ok');}
   for(let tick=0;tick<1920;tick++){old.tick(.25);fresh.tick(.25);}
-  const current=JSON.parse(fresh.snapshot());assert.equal(current.village.version,27);delete current.village.maintenance;delete current.environment.economy.pickup_minutes;current.village.version=JSON.parse(old.snapshot()).village.version;
+  const current=JSON.parse(fresh.snapshot());assert.equal(current.village.version,28);delete current.village.maintenance;delete current.environment.economy.pickup_minutes;current.village.version=JSON.parse(old.snapshot()).village.version;
   assert.deepEqual(current,JSON.parse(old.snapshot()),'Disabled groundwork preserves the released farming simulation');
   baselineMinutes=1440;old.free();fresh.free();
 }
@@ -54,7 +55,7 @@ console.log(`PASS: four days of owned equipment condition, read-only diagnostics
 // Authored worn equipment establishes service demand; purchases, carriage and
 // attended repair below use the real public game commands and resident queue.
 const {resetMaterialLocations}=await import('../web/dev/material-fixture.js');
-const repair=new Game();repair.start_mode('sandbox');
+const repair=new Game();startEmptySandbox(repair);
 for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',8,16]])assert.equal(repair.place(kind,x,y),'ok');
 repair.tick(.25);
 const fixture=JSON.parse(repair.snapshot()),v=fixture.village;

@@ -109,7 +109,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
     const ground=y+height*draft.anchor; ctx.strokeStyle='#b65236';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+size,ground);ctx.stroke();ctx.beginPath();ctx.arc(w/2,ground,7,0,Math.PI*2);ctx.fillStyle='#b65236';ctx.fill();
   }
   function anchorDimensions(w,h){
-    const aspect=selected.group==='Land & supplies'?selected.aspect:1;
+    const aspect=selected.aspect||1;
     const width=Math.min(280,w-40,(h-40)/aspect);
     return {width,height:width*aspect};
   }

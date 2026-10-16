@@ -1,9 +1,10 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const g=new Game();
-g.start_mode('sandbox');
+startEmptySandbox(g);
 const quote=(...p)=>JSON.parse(g.route_quote(...p));
 const original=g.snapshot();
 const open=quote(3,3,13,3);
@@ -37,7 +38,7 @@ assert(short.route.distance<.15,'Nearby fractional approaches do not detour to a
 const stable=g.snapshot();
 for(let n=0;n<10;n++)assert.deepEqual(quote(4,8,12,8),detour);
 assert.equal(g.snapshot(),stable,'Repeated and rejected quotes remain read-only');
-const corner=new Game();corner.start_mode('sandbox');
+const corner=new Game();startEmptySandbox(corner);
 assert.equal(corner.place('well',6,10),'ok');
 const cornerBefore=corner.snapshot();
 for(const x of [-1,1])for(const y of [-1,1]){

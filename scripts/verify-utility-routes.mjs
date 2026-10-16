@@ -1,10 +1,12 @@
+import {hydroCell} from '../web/terrain.js';
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/utility-routes',{recursive:true});
-const g=new Game();g.start_mode('sandbox');
-for(const [kind,x,y]of [['well',5,5],['garden',12,5],['kitchen',16,5],['wetland',5,18],['eco_toilet',12,18],['banana_treatment',17,18],['biodigester',20,12],['solar_farm',6,9],['streetlight',18,9],['hydro',26,5]])assert.equal(g.place(kind,x,y),'ok',kind);
+const g=new Game();startEmptySandbox(g);
+for(const [kind,x,y]of [['well',5,5],['garden',12,5],['kitchen',16,5],['wetland',5,18],['eco_toilet',12,18],['banana_treatment',17,18],['biodigester',20,12],['solar_farm',6,9],['streetlight',18,9],['hydro',hydroCell(5),5]])assert.equal(g.place(kind,x,y),'ok',kind);
 assert.equal(g.place_source(0,5,24),'ok');assert.equal(g.place_source(1,12,24),'ok');
 const original=g.snapshot(),reports=[];
 // An independent distance calculation checks optimality from the published
@@ -41,9 +43,9 @@ await writeFile('artifacts/utility-routes/moving.json',g.snapshot());assert.equa
 // Blueprint ports remain inspectable but cannot promise a usable connection.
 const story=new Game();assert.equal(story.place('well',5,5),'ok');assert.equal(story.place('garden',12,5),'ok');assert.match(JSON.parse(story.utility_preview('fresh',0,1)).reason,/Finish building work/);
 await writeFile('artifacts/utility-routes/blueprints.json',story.snapshot());
-const adjacent=new Game();adjacent.start_mode('sandbox');assert.equal(adjacent.place('well',5,5),'ok');assert.equal(adjacent.place('eco_toilet',7,5),'ok');
+const adjacent=new Game();startEmptySandbox(adjacent);assert.equal(adjacent.place('well',5,5),'ok');assert.equal(adjacent.place('eco_toilet',7,5),'ok');
 const short=JSON.parse(adjacent.utility_preview('fresh',0,1));assert(short.allowed);assert.deepEqual(short.plan.cells,[[6,5]]);assert.notDeepEqual(short.plan.start.edge,short.plan.end.edge);
-const noSupply=new Game();noSupply.start_mode('sandbox');assert.equal(noSupply.place('garden',5,5),'ok');assert.equal(JSON.parse(noSupply.utility_endpoints('irrigation')).endpoints.filter(e=>e.supply).length,0);
+const noSupply=new Game();startEmptySandbox(noSupply);assert.equal(noSupply.place('garden',5,5),'ok');assert.equal(JSON.parse(noSupply.utility_endpoints('irrigation')).endpoints.filter(e=>e.supply).length,0);
 await writeFile('artifacts/utility-routes/no-supply.json',noSupply.snapshot());
 for(const game of [g,story,adjacent,noSupply])game.free();
 console.log('PASS: ten native routes across five separate utility classes, renewable plots, exact footprint ports, river-generator bank lead, road corridors, incompatible classes, blueprints, moving, exact saves and read-only queries. Previews install no service.');

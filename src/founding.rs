@@ -73,6 +73,12 @@ pub fn weather_shelter(v: &Village) -> bool {
     weather.raining || (660.0..960.).contains(&v.minutes.rem_euclid(1440.)) && weather.clouds < 0.55
 }
 pub fn quiet_spot(v: &Village, id: usize) -> Option<(f32, f32)> {
+    v.buildings
+        .iter()
+        .filter(|b| b.kind == "shed" && b.progress >= 100.)
+        .find_map(|b| quiet_spot_at(v, b, id))
+}
+pub fn quiet_spot_at(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
     const SPOTS: [(f32, f32); 5] = [
         (-0.85, -0.85),
         (0.85, -0.85),
@@ -80,14 +86,10 @@ pub fn quiet_spot(v: &Village, id: usize) -> Option<(f32, f32)> {
         (0.85, 0.85),
         (0., 0.),
     ];
-    v.buildings
-        .iter()
-        .filter(|b| b.kind == "shed" && b.progress >= 100.)
-        .flat_map(|b| {
-            (0..5).map(move |n| {
-                let (x, y) = SPOTS[(n + id) % 5];
-                (b.x as f32 + x, b.y as f32 + y)
-            })
+    (0..5)
+        .map(|n| {
+            let (x, y) = SPOTS[(n + id) % 5];
+            (b.x as f32 + x, b.y as f32 + y)
         })
         .find(|p| navigation::clear(v, p.0, p.1) && spacing::free_spot(v, *p, id))
 }
