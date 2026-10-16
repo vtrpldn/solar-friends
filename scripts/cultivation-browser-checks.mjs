@@ -4,11 +4,11 @@ export async function checkCultivationControls({page,saved,capture}){
   async function load(name){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/cultivation/${name}.json`);
-    await page.waitForFunction(name=>{const v=window.solarDev.snapshot().village;return v.version===28&&(name==='shade'?v.buildings.some(b=>b.kind==='solar_farm')&&v.buildings.some(b=>b.kind==='grove'):v.buildings.some(b=>b.kind==='garden'&&b.crop.planted)&&v.land.soil.some(s=>s.nutrients<.5));},name);
+    await page.waitForFunction(name=>{const v=window.solarDev.snapshot().village;return v.version===29&&(name==='shade'?v.buildings.some(b=>b.kind==='solar_farm')&&v.buildings.some(b=>b.kind==='grove'):v.buildings.some(b=>b.kind==='garden'&&b.crop.planted)&&v.land.soil.some(s=>s.nutrients<.5));},name);
     await page.locator('#dev-close').click();
     await page.locator('#center').click();
   }
-  async function point(x,y){const r=await page.locator('#world').boundingBox(),scale=Math.max(.45,Math.min(r.width/1900,r.height/1050)*1.3),p=project(x,y,{x:r.width*.49,y:r.height*.5-459*scale},scale);await page.mouse.move(r.x+p.x,r.y+p.y);await page.waitForFunction(({x,y})=>document.querySelector('#land-hover').textContent.startsWith(`Plot ${x}, ${y} ·`),{x,y});}
+  async function point(x,y){const r=await page.locator('#world').boundingBox(),scale=Math.max(.45,Math.min(r.width/1900,r.height/1050)*1.3),p=project(x,y,{x:r.width*.49,y:r.height*.5-459*scale},scale);await page.mouse.move(r.x+p.x,r.y+p.y);await page.waitForFunction(({x,y})=>document.querySelector('#land-hover').textContent.includes(`Plot ${x}, ${y} ·`),{x,y});}
   await load('depleted-growing');
   await page.locator('#open-village').click();if(!await page.locator('#building-panel').isVisible())await page.getByRole('button',{name:'Buildings',exact:true}).click();await page.locator('#building-choice').selectOption('0');
   assert.match(await page.locator('#crop-status').textContent(),/At current soil and supplies: \d+–\d+ food/);
@@ -21,7 +21,7 @@ export async function checkCultivationControls({page,saved,capture}){
   await page.getByRole('button',{name:'Close supplies',exact:true}).click();
   const before=await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
   await page.getByRole('button',{name:'Land views',exact:true}).click();await page.getByLabel('Land view',{exact:true}).selectOption('moisture');await point(5,5);
-  const v=await page.evaluate(()=>window.solarDev.snapshot().village),moisture=Math.round(v.land.water[5*28+5]*100);
+  const v=await page.evaluate(()=>window.solarDev.snapshot().village),moisture=Math.round(v.land.water[5*v.map_size+5]*100);
   assert((await page.locator('#land-hover').textContent()).includes(`Moisture ${moisture}%`));
   assert.match(await page.locator('#land-hover').textContent(),/Crop growth ×0\./);
   await capture('Saved root-zone water and crop potential are inspectable on the actual plot','cultivation-moisture.png');

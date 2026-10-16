@@ -28,7 +28,7 @@ await writeFile('artifacts/requests/rest.json',g.snapshot());checkpoint(g);
 until(g,s=>s.residents[0].help.phase==='complete');assert.equal(person(g).help.id,id);assert.equal(snap(g).village.supplies.gathered,2);
 await writeFile('artifacts/requests/complete.json',g.snapshot());checkpoint(g);
 const cancelled=scene();cancelled.request(0,'gather',false);assert.equal(cancelled.cancel_help(0),'ok');assert.equal(person(cancelled).help.phase,'cancelled');checkpoint(cancelled);
-const build=scene();assert.equal(build.place('garden',18,18),'ok');assert.match(build.request(0,'build',false),/Happy/);
+const build=scene();build.set_resident_job(0,false);for(let id=1;id<5;id++)build.set_resident_job(id,true);build.tick(.25);assert.equal(build.place('garden',18,18),'ok');assert.match(build.request(0,'build',false),/Happy/);
 until(build,s=>s.village.logistics.shipments.some(h=>h.resident===0&&h.carrying));
 assert(person(build).requested);checkpoint(build);
 const owned=snap(build).environment.economy.materials.map(m=>m.stored);

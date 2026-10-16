@@ -53,7 +53,7 @@ assert(Math.abs(line(snap(g),id).energy_used-line(snap(g),id).transferred*.025)<
 assert.equal(g.configure_water_connection(id,3,true),'ok');const transferred=line(snap(g),id).transferred;
 for(let frame=0;frame<80;frame++)g.tick(.25);assert.equal(line(snap(g),id).transferred,transferred);checkpoint(g);await writeFile('artifacts/pipes/paused.json',g.snapshot());
 assert.equal(g.configure_water_connection(id,3,false),'ok');const active=g.snapshot();
-const night=new Game();assert(night.restore(active));until(night,s=>s.village.minutes%1440>=1260,'Actual evening for line-art review',2*1920);checkpoint(night);await writeFile('artifacts/pipes/night.json',night.snapshot());
+const night=new Game();assert(night.restore(active));until(night,s=>s.village.minutes%1440>=1260&&s.village.water_supply.trips.length===0,'Evening with no resident water cargo for the controlled outage',2*1920);checkpoint(night);await writeFile('artifacts/pipes/night.json',night.snapshot());
 // Controlled outage fixture: keep the real installation and water accounts,
 // empty the night battery, and move owned kitchen water into another buffer.
 const outage=new Game(),dark=snap(night),source=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===0),target=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===1);

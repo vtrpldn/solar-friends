@@ -23,7 +23,7 @@ startEmptySandbox(g);assert(g.configure_sandbox_rules(false,true,true));
 // Isolate deposit exhaustion from full arrival storage. Planting stock also
 // occupies real shelves; a storage house provides receiving room for the stone.
 assert.equal(g.place('warehouse',6,13),'ok');
-assert.equal(g.place_source(3,18,18),'ok');assert.equal(g.place_source(3,18,21),'ok');assert.equal(g.place_source(3,40,23),'ok');
+assert.equal(g.place_source(3,18,18),'ok');assert.equal(g.place_source(3,18,21),'ok');assert.equal(g.place_source(3,24,23),'ok');
 for(let i=0;i<3;i++)assert.equal(g.configure_source(i,false,false),'ok');
 const before=snap(),patch=before.village.economy.sources[0].deposit,other=before.village.economy.sources[2].remaining;
 assert.equal(before.village.economy.sources[1].deposit,patch);assert.notEqual(before.village.economy.sources[2].deposit,patch);

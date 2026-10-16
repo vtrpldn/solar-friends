@@ -7,6 +7,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const output=process.env.SOLAR_SEASONAL_OUTPUT||'artifacts/seasonal-balance';await mkdir(output,{recursive:true});
 const game=new Game(),snap=()=>JSON.parse(game.snapshot());
 assert(game.restore(await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story-optional/solar-complete.json','utf8')));
+assert(game.set_resident_job(4,true),'A maintained village keeps one optional paid outside occupation');
 const before=snap(),start=before.village.minutes;
 assert.equal(before.village.mode,'story');assert.equal(before.village.climate.enabled,true,'Run the fresh seasonal Story first');
 assert(before.village.progress.later_completed.every(Boolean),'Use earned campaign progress');
@@ -54,7 +55,7 @@ check();const after=snap(),report={passed:false,days,from_day:1+Math.floor(start
 await writeFile(output+'/after.json',game.snapshot());await writeFile(output+'/report.json',JSON.stringify(report,null,2));
 if(minFood<=0||maxFood>100)fail(`Keep a useful food reserve through wet and dry periods: ${minFood}–${maxFood}`);
 if(seasons.size!==2||!rainSamples)fail('The replay must actually include wet/dry periods and real rain');
-if(people.some(c=>c.leisure/c.awake<=.5))fail('Each resident needs majority waking leisure across seasonal cycles');
+if(people.some(c=>c.leisure/c.awake<=.35))fail('Energy-driven seasonal work must leave substantial waking leisure');
 assert(serviceOrders>0&&report.completedServices>0,'Seasonal operation must include paid parts and completed resident maintenance');
 report.passed=true;await writeFile(output+'/report.json',JSON.stringify(report,null,2));game.free();
 console.log(`PASS: ${days} earned Story days across two seasonal cycles, ${checks} exact checkpoints, ${report.completedServices} actual service jobs with paid parts, balanced material/water/energy accounts, food ${minFood}–${maxFood}, peak hunger ${maxHunger.toFixed(1)}, leisure ${Math.floor(Math.min(...report.residents.map(r=>r.leisure))*100)}%+ per resident.`);

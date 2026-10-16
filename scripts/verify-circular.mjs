@@ -1,3 +1,4 @@
+import {MAP_SIZE} from '../web/terrain.js';
 import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -34,7 +35,7 @@ advanceGame(g,30);s=snap();assert.equal(s.village.circular.biogas,before.biogas)
 // Every hover decision agrees with native river placement, across the lot.
 const h=new Game();startEmptySandbox(h);const base=h.snapshot();
 let sites=0;
-for(let x=1;x<=26;x++)for(let y=1;y<=26;y++){
+for(let x=1;x<MAP_SIZE-1;x++)for(let y=1;y<MAP_SIZE-1;y++){
  assert(h.restore(base));const v=JSON.parse(base).village;
  const allowed=!placementReason(v,'hydro',x,y);
  assert.equal(h.place('hydro',x,y)==='ok',allowed,`Hydro preview mismatch ${x},${y}`);
@@ -44,4 +45,4 @@ assert(sites>=20);
 assert(h.restore(base));assert.equal(h.place_with_recipe('home',5,5,'adobe'),'ok');
 const adobe=JSON.parse(h.snapshot());assert.equal(adobe.village.buildings[0].progress,100);assert.equal(adobe.village.economy.projects[0].recipe,'adobe');assert(h.restore(h.snapshot()));
 h.free();g.free();
-console.log('PASS: five independent toilet routines, real digestion and filtration timers, pause/reload conservation, storage capacity, adobe Sandbox placement, and river hover/native parity across all 676 plots.');
+console.log('PASS: five independent toilet routines, real digestion and filtration timers, pause/reload conservation, storage capacity, adobe Sandbox placement, and river hover/native parity across the whole property.');

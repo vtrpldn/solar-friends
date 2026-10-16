@@ -143,7 +143,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   e.scale(RESOLUTION, RESOLUTION);
   e.fillStyle = "white";
   e.beginPath();
-  // Dissolve only the margin outside the complete 64-cell property.
+  // Dissolve only the margin outside the complete property.
   const inset=.018;
   e.roundRect(inset,inset,1-2*inset,1-2*inset,.025);
   e.fill();

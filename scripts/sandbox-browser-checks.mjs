@@ -20,7 +20,7 @@ export async function checkSandboxRules({browser,base,output,screenshots,errors}
   for(const key of ['logistics','land','utilities'])assert(!await page.locator('#sandbox-'+key).isChecked());
   assert.match(await page.locator('#sandbox-rule-status').textContent(),/Free instant buildings/);
   await page.locator('#sandbox-logistics').focus();await page.keyboard.press('Space');assert(await page.locator('#sandbox-logistics').isChecked(),'Sandbox rules remain keyboard-operable');await page.locator('#sandbox-land').check();await page.locator('#sandbox-utilities').check();
-  const enabled=await snapshot();assert(enabled.village.sandbox_rules.logistics&&enabled.village.sandbox_rules.land&&enabled.village.sandbox_rules.utilities);
+  const enabled=await snapshot(),founding=enabled.village.buildings.length;assert.deepEqual(enabled.village.buildings.map(b=>b.kind),['shed','warehouse']);assert(enabled.village.sandbox_rules.logistics&&enabled.village.sandbox_rules.land&&enabled.village.sandbox_rules.utilities);
   for(const viewport of [{width:1600,height:900},{width:1280,height:800}]){
    await page.setViewportSize(viewport);await page.locator('#sandbox-rules-title').scrollIntoViewIfNeeded();
    assert.equal(await page.locator('#settings-dialog').evaluate(el=>el.scrollWidth>el.clientWidth+1),false);
@@ -28,15 +28,15 @@ export async function checkSandboxRules({browser,base,output,screenshots,errors}
   }
   await close();await page.setViewportSize({width:1600,height:900});
   assert(await page.locator('[data-hud-resource="fund"]').isVisible());assert.notEqual(await page.locator('#material-total').textContent(),'∞');
-  await place(5,5);const planned=await snapshot();assert.equal(planned.village.buildings.length,1);assert.equal(planned.village.buildings[0].progress,0);assert.match(await page.locator('.build-tool[data-kind="garden"]').getAttribute('aria-label'),/free blueprint/);
+  await place(5,5);const planned=await snapshot();assert.equal(planned.village.buildings.length,founding+1);assert.equal(planned.village.buildings[founding].progress,0);assert.match(await page.locator('.build-tool[data-kind="garden"]').getAttribute('aria-label'),/free blueprint/);
   await settings();await page.locator('#sandbox-logistics').uncheck();await close();
-  assert.equal((await snapshot()).village.buildings[0].progress,0,'Disabling supplies cannot instantly finish an existing project');
+  assert.equal((await snapshot()).village.buildings[founding].progress,0,'Disabling supplies cannot instantly finish an existing project');
   await page.locator('#open-village').click();assert(await page.locator('[data-panel="projects-panel"]').isVisible(),'Existing work and land controls remain accessible during free building');
   await page.getByRole('button',{name:'Construction',exact:true}).click();assert(await page.locator('#projects-panel').isVisible());await page.getByRole('button',{name:'Close projects',exact:true}).click();
   assert.notEqual(await page.locator('#material-total').textContent(),'∞','Stored supplies remain real amounts during free construction');
-  await place(13,10);const free=await snapshot();assert.equal(free.village.buildings[1].progress,100);assert.equal(free.village.buildings[0].progress,0);
+  await place(13,14);const free=await snapshot();assert.equal(free.village.buildings[founding+1].progress,100);assert.equal(free.village.buildings[founding].progress,0);
   await settings();await page.locator('#sandbox-logistics').check();await close();
-  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('solar-friends-v3-sandbox')));assert(stored.village.sandbox_rules.logistics&&stored.village.sandbox_rules.land&&stored.village.sandbox_rules.utilities);assert.equal(stored.village.buildings[0].progress,0);assert.equal(stored.village.buildings[1].progress,100);
+  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('solar-friends-v3-sandbox')));assert(stored.village.sandbox_rules.logistics&&stored.village.sandbox_rules.land&&stored.village.sandbox_rules.utilities);assert.equal(stored.village.buildings[founding].progress,0);assert.equal(stored.village.buildings[founding+1].progress,100);
   await page.reload();await page.locator('[data-continue="sandbox"]').click();await page.locator('#main-menu').waitFor({state:'hidden'});await page.locator('#pause').click();await settings();
   for(const key of ['logistics','land','utilities'])assert(await page.locator('#sandbox-'+key).isChecked());
   await page.locator('#sandbox-rules-title').scrollIntoViewIfNeeded();await capture('All Sandbox rules and mixed construction states survive Continue sandbox','sandbox-rules-reload.png');await close();
