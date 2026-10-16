@@ -15,11 +15,12 @@ pub fn free_time(r: &Resident) -> bool {
 }
 
 /// Eat or recover before accepting a journey that would predictably force an
-/// interruption. Rates match the resident tick, in game minutes.
+/// interruption. Conservatively allow for cargo walking and active work,
+/// converting the resident tick rates into game minutes.
 pub fn preparation(v: &Village, r: &Resident, travel: f32, work: f32) -> Option<&'static str> {
     if r.hunger + (travel + work) * 0.13 / MINUTES_PER_SECOND > 60. && workforce::eating(v, r.id) {
         Some("eat")
-    } else if r.energy - (travel * 0.035 + work * 0.11) / MINUTES_PER_SECOND < 28. {
+    } else if r.energy - (travel * 0.06 + work * 0.11) / MINUTES_PER_SECOND < 28. {
         Some("rest")
     } else {
         None
@@ -300,6 +301,37 @@ mod tests {
         let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
         assert_eq!(s.residents[0].task, "garden");
         assert_eq!(s.residents[0].activity_building, Some(0));
+    }
+    #[test]
+    fn a_worker_who_cannot_fit_a_batch_does_not_hold_the_position_for_others() {
+        let (_, mut v, mut near) = scene();
+        logistics::fixture_stock(&mut v, economy::FOOD, 12);
+        v.minutes = 685.;
+        let job = workforce::offers(&v, &near)
+            .into_iter()
+            .find(|o| o.task == "gather")
+            .unwrap();
+        near.x = job.destination[0];
+        near.y = job.destination[1];
+        let mut far = near.clone();
+        far.id = 1;
+        far.x += 2.5;
+        v.workforce.preferences[0][2] = 0;
+        v.workforce.preferences[1][2] = 2;
+        workforce::refresh(&mut v, [&near, &far]);
+        let remote = workforce::offers(&v, &far)
+            .into_iter()
+            .find(|o| o.task == "gather")
+            .unwrap();
+        assert!(
+            remote.blocker.is_some(),
+            "The favourite worker cannot fit the journey plus batch"
+        );
+        choose(&mut near, &v);
+        assert_eq!(
+            near.task, "gather",
+            "A neighbour who can finish should take the available position"
+        );
     }
     #[test]
     fn late_offers_explain_why_a_long_errand_should_wait() {

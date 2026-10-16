@@ -542,14 +542,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         }
         // Haul and water quotes already include both legs. Continuous crew
         // work needs a useful six minutes; indivisible batches need their rest.
-        let work = if matches!(
-            offer.task.as_str(),
-            "build" | "building_work" | "utility" | "restore"
-        ) {
-            6.
-        } else {
-            work_minutes(v, offer)
-        };
+        let work = minimum_work_minutes(v, offer);
         if offer.blocker.is_none()
             && offer
                 .travel_minutes
@@ -578,6 +571,16 @@ fn work_minutes(v: &Village, job: &Offer) -> f32 {
         3. * MINUTES_PER_SECOND
     } else {
         10. * MINUTES_PER_SECOND
+    }
+}
+fn minimum_work_minutes(v: &Village, job: &Offer) -> f32 {
+    if matches!(
+        job.task.as_str(),
+        "build" | "building_work" | "utility" | "restore"
+    ) {
+        6.
+    } else {
+        work_minutes(v, job)
     }
 }
 pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
@@ -702,7 +705,7 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
             continue;
         };
         let travel = route.minutes;
-        if !autonomy::fits_before_break(v, travel, work_minutes(v, job).min(6.))
+        if !autonomy::fits_before_break(v, travel, minimum_work_minutes(v, job))
             || autonomy::preparation(v, peer, travel, work_minutes(v, job)).is_some()
         {
             continue;
