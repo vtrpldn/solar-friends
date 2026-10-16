@@ -1,0 +1,501 @@
+{
+  "why": "Experience should make useful work and village planning evolve while everyone keeps access to ordinary jobs, recovery and leisure.",
+  "engineSourceCommit": "ea451a3fd110e5bf4a38ceda06c31a78d8e252b8",
+  "frontendSourceCommit": "7a728d4",
+  "wasmSha256": "e90e63f2e1d25bd7074b5503844b70d60428cdc5e7d08222a5e823bc382ff74a",
+  "completedAt": "2026-10-16T06:33:21.189Z",
+  "nativeTests": 455,
+  "strictAllTargetLint": "PASS",
+  "javascriptSyntaxChecks": 159,
+  "publicVerifiers": [
+    {
+      "name": "verify-art-preview.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-artwork.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-autonomy.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-away-routines.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-banana-treatment.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-batteries.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-building-projection.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-building-work.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-chickens.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-circular.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-climate.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-cultivation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-dev-tools.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-economy.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-electrical-fixtures.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-electricity.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-farming.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-food.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-forecast.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-freshness.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-gatherings.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-grid-foundations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-kitchen-batches.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-land.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-leisure.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-living-land.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-logistics.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-maintenance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-modes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-navigation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-night-lighting.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-occupations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-organics.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-passive-processes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-pipes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-planting.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-playtest.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-polish.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-power.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-production.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-quests.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-requests.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-resident-animation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-resource-sites.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-restoration.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sanitation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-seasonal-balance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-simulation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-situations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-skills.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sleep-speed.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sprite-frames.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sprite-grid-fit.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-storage.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-tools.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-utility-balance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-utility-routes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-water.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-weather.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-work-routes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-workforce.mjs",
+      "status": "PASS"
+    }
+  ],
+  "skills": {
+    "earnedDays": 14,
+    "experience": [
+      [
+        0,
+        54,
+        25,
+        21,
+        0,
+        0
+      ],
+      [
+        0,
+        41,
+        32,
+        18,
+        0,
+        0
+      ],
+      [
+        0,
+        44,
+        27,
+        21,
+        3,
+        0
+      ],
+      [
+        6,
+        54,
+        25,
+        6,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        28
+      ]
+    ],
+    "allSixDomainsEarned": true,
+    "dailyLimitsChecked": true,
+    "pausedExperiencePreserved": true,
+    "exactDailyContinuations": true,
+    "disabledSandboxParentParityMinutes": 1440
+  },
+  "story": {
+    "chapters": 13,
+    "completedDay": 109,
+    "buildingKinds": 21,
+    "localAdobeHomeDays": 12.9,
+    "exactChapterReloads": 13
+  },
+  "browser": {
+    "fullCaptures": 182,
+    "fullSourceAndBuildHash": "1e66451697d82ab732b922aef72ca06c31441ab09a9271ae4ad7bd7d76021684",
+    "errors": [],
+    "focused": [
+      {
+        "label": "Resident field notes show earned experience at 1600px",
+        "file": "learning-1600.png"
+      },
+      {
+        "label": "Resident field notes show earned experience at 1280px",
+        "file": "learning-1280.png"
+      },
+      {
+        "label": "Field notes replay experience earned through fourteen days of useful work",
+        "file": "learning-earned.png"
+      },
+      {
+        "label": "Sandbox learning survives Continue sandbox",
+        "file": "learning-sandbox-reload.png"
+      }
+    ],
+    "focusedErrors": [],
+    "scope": "Full desktop regression plus a separately checked earned-file replay added afterward. Player saves protected."
+  },
+  "seasonal": {
+    "passed": true,
+    "days": 84,
+    "from_day": 109,
+    "to_day": 193,
+    "seasons": [
+      "dry",
+      "wet"
+    ],
+    "rainSamples": 308,
+    "minFood": 3,
+    "maxFood": 49,
+    "maxHunger": 72.71766662597656,
+    "minEnergy": 90.45791625976562,
+    "exact_checkpoints": 85,
+    "serviceOrders": 7,
+    "serviceSpending": 81400,
+    "completedServices": 7,
+    "pendingServices": 0,
+    "residents": [
+      {
+        "work": 0.18408134642356241,
+        "leisure": 0.585203366058906
+      },
+      {
+        "work": 0.1850297306750612,
+        "leisure": 0.5989856593214411
+      },
+      {
+        "work": 0.16577169582539408,
+        "leisure": 0.5676424735839252
+      },
+      {
+        "work": 0.1741017184516577,
+        "leisure": 0.6073598333622635
+      },
+      {
+        "work": 0.17228204237582495,
+        "leisure": 0.5894407780479333
+      }
+    ]
+  },
+  "utilities": {
+    "wasm_sha256": "e90e63f2e1d25bd7074b5503844b70d60428cdc5e7d08222a5e823bc382ff74a",
+    "continuedFromEarnedInstallation": false,
+    "installation_days": 25.029166666666665,
+    "installation_spending": 374000,
+    "results": [
+      {
+        "name": "manual",
+        "from_day": 134,
+        "days": 24,
+        "fund": 1225850,
+        "lowestFood": 5,
+        "highestFood": 44,
+        "peakHunger": 45.17594528198242,
+        "workshop_energy": 0,
+        "residents": [
+          {
+            "work": 0.17478684531059682,
+            "leisure": 0.6504263093788063
+          },
+          {
+            "work": 0.1596130592503023,
+            "leisure": 0.6299879081015719
+          },
+          {
+            "work": 0.16177351707609347,
+            "leisure": 0.6087477531455961
+          },
+          {
+            "work": 0.16365824308062576,
+            "leisure": 0.6323706377858003
+          },
+          {
+            "work": 0.16336336336336335,
+            "leisure": 0.6474474474474474
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "greywater",
+            "water": 0
+          },
+          {
+            "kind": "sewage",
+            "water": 0
+          },
+          {
+            "kind": "irrigation",
+            "water": 0
+          }
+        ]
+      },
+      {
+        "name": "connected",
+        "from_day": 134,
+        "days": 24,
+        "fund": 886350,
+        "lowestFood": 3,
+        "highestFood": 43,
+        "peakHunger": 24.99470329284668,
+        "workshop_energy": 0.595194158256054,
+        "residents": [
+          {
+            "work": 0.16070345664038813,
+            "leisure": 0.6367495451788963
+          },
+          {
+            "work": 0.14328899637243048,
+            "leisure": 0.654776299879081
+          },
+          {
+            "work": 0.13883901855176542,
+            "leisure": 0.6241771394374626
+          },
+          {
+            "work": 0.1649608669476219,
+            "leisure": 0.633955448524985
+          },
+          {
+            "work": 0.18340348767288034,
+            "leisure": 0.6343956704750451
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 55.95442700774687
+          },
+          {
+            "kind": "fresh",
+            "water": 228.15253706209262
+          },
+          {
+            "kind": "greywater",
+            "water": 59.69999999999955
+          },
+          {
+            "kind": "sewage",
+            "water": 35.99999999999978
+          },
+          {
+            "kind": "irrigation",
+            "water": 10.000000000000018
+          }
+        ]
+      }
+    ]
+  },
+  "reviewImage": {
+    "file": "residents.png",
+    "context": "Experience earned during fourteen days of resident work from a protected authored farming layout. No experience was authored in that replay."
+  },
+  "hostedCheck": "Blocked before starting by GitHub account billing/spending limit; PR remains draft and unmerged."
+}
