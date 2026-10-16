@@ -661,7 +661,7 @@ mod tests {
     fn quarries_only_share_their_own_patch_and_relocation_cannot_duplicate_stone() {
         let mut g = Game::new();
         assert_eq!(g.place_source(3, 18, 18), "ok");
-        assert_eq!(g.place_source(3, 40, 23), "ok");
+        assert_eq!(g.place_source(3, 24, 23), "ok");
         let first = g.app.world().resource::<Village>().economy.sources[0].remaining;
         let second = g.app.world().resource::<Village>().economy.sources[1].remaining;
         {

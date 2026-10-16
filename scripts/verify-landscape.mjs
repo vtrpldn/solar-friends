@@ -9,16 +9,16 @@ const snap=g=>JSON.parse(g.snapshot());
 function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();}
 function readyState(g,minute){const s=snap(g);s.village.minutes=minute;s.village.arrived=true;s.village.economy.outside_jobs.fill(false);for(const r of s.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,energy:90,hunger:5,social:90,last_meal_slot:-1,x:7.5+r.id*1.25,y:15,target_x:7.5+r.id*1.25,target_y:15});return s;}
 const report={map:MAP_SIZE,modes:[],habitats:[],species:[],work:[],shelter:[],checks:[]};
-assert.equal(MAP_SIZE,64);
+assert.equal(MAP_SIZE,32);
 for(const mode of ['story','sandbox']){
  const g=new Game();assert(g.start_mode(mode));const s=snap(g),v=s.village;
- assert.equal(v.map_size,64);assert.equal(v.land.water.length,4096);assert.deepEqual(v.buildings.map(b=>b.kind),['shed','warehouse']);assert(v.buildings.every(b=>b.progress===100));
+ assert.equal(v.map_size,32);assert.equal(v.land.water.length,1024);assert.deepEqual(v.buildings.map(b=>b.kind),['shed','warehouse']);assert(v.buildings.every(b=>b.progress===100));
  const store=v.logistics.stores.find(p=>p.owner.kind==='warehouse');assert(store.items[16]>0);assert(store.items.reduce((a,b)=>a+b,0)<=store.capacity);
- const land=JSON.parse(g.land_report());assert(land.cells.length>3400);assert.equal(land.cells.filter(c=>c.x>=28||c.y>=28).length>2500,true);
+ const land=JSON.parse(g.land_report());assert(land.cells.length>800);assert.equal(land.cells.filter(c=>c.x>=28||c.y>=28).length>80,true);
  for(const c of land.cells)assert.equal(c.ground.biome,habitatAt(v.land.seed,c.x,c.y));
  report.habitats=[...new Set(land.cells.map(c=>c.ground.biome))];report.species=[...new Set(v.land.vegetation.map(t=>t.species))].sort((a,b)=>a-b);assert.equal(report.habitats.length,6);assert.equal(report.species.length,12);
  if(mode==='sandbox'){
-   assert.equal(g.place('home',42,54),'ok');assert.equal(g.place('garden',47,54),'ok');assert.equal(g.toggle_road(44,54),'ok');assert.equal(g.place('hydro',hydroCell(45),45),'ok');assert.notEqual(g.place('home',62,54),'ok');
+   assert.equal(g.place('home',22,28),'ok');assert.equal(g.place('garden',26,28),'ok');assert.equal(g.toggle_road(24,28),'ok');assert.equal(g.place('hydro',hydroCell(5),5),'ok');assert.notEqual(g.place('home',30,28),'ok');
    const far=snap(g);assert(far.village.land.vegetation.some(t=>t.cleared));
  }
  checkpoint(g);report.modes.push({mode,startingFood:v.food,indoorFood:store.items[16],plants:v.land.vegetation.length});g.free();
@@ -39,5 +39,5 @@ for(const minute of [720,900]){
 }
 const g=new Game();g.start_mode('story');let arrived=false;const started=performance.now();
 for(let frame=0;frame<1920;frame++){g.tick(.25);if(frame%80===0){checkpoint(g);const s=snap(g);arrived ||= s.village.arrived;assert(s.residents.every(r=>Number.isFinite(r.energy)&&r.energy>=0&&r.energy<=100));assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));}}
-assert(arrived,'The group must finish its arrival without being blocked by early chores');report.dayReplaySeconds=(performance.now()-started)/1000;report.checks=['64-cell native/frontend boundaries','six matching habitat regions','twelve plant/outcrop species','far-property construction and river power','owned starter supplies and exact saves','resident-attended work outside former windows','rain and sun shelter with personal space','one day of needs, material conservation and checkpoints'];g.free();
+assert(arrived,'The group must finish its arrival without being blocked by early chores');report.dayReplaySeconds=(performance.now()-started)/1000;report.checks=['32-cell native/frontend boundaries','six matching habitat regions','twelve plant/outcrop species','far-property construction and river power','owned starter supplies and exact saves','resident-attended work outside former windows','rain and sun shelter with personal space','one day of needs, material conservation and checkpoints'];g.free();
 await writeFile(`${output}/results.json`,JSON.stringify(report,null,2)+'\n');console.log('PASS: '+report.checks.join('; ')+'.');console.log(JSON.stringify(report.work));

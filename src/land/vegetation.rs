@@ -10,7 +10,7 @@ pub struct Tree {
     pub cleared: bool,
 }
 pub fn generate(seed: u32) -> Vec<Tree> {
-    (0..1800)
+    (0..(1800 * MAP_SIZE * MAP_SIZE / 4096) as u32)
         .filter_map(|index| {
             let sample = |domain| simulation::sample(seed, domain, index) as f64 / u32::MAX as f64;
             let x = (sample(71) * (MAP_SIZE + 4) as f64 - 2.) as f32;

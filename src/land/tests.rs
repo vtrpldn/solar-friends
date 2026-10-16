@@ -31,7 +31,7 @@ fn seeded_ground_is_repeatable_and_arrival_land_is_viable() {
 #[test]
 fn sites_on_one_patch_share_depletion_but_other_patches_survive() {
     let mut g = Game::new();
-    for (x, y) in [(18, 18), (18, 21), (40, 23)] {
+    for (x, y) in [(18, 18), (18, 21), (24, 23)] {
         assert_eq!(g.place_source(3, x, y), "ok");
     }
     let v = g.app.world().resource::<Village>();

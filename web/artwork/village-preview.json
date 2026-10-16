@@ -350,7 +350,7 @@
     ],
     "food": 132,
     "harvests": 10,
-    "map_size": 64,
+    "map_size": 32,
     "meals": 5,
     "meals_served": 45,
     "minutes": 7800,

@@ -2,12 +2,12 @@ import {habitatAt,habitatColors} from "./habitats.js";
 // Paint terrain once per village layout. Frames reuse this texture while panning
 // and zooming; the simulation's isometric coordinates stay unchanged.
 export const GROUND_START = -2.5;
-export const GROUND_SIZE = 69;
-const RESOLUTION = 4096;
+export const GROUND_SIZE = 37;
+const RESOLUTION = 2560;
 
-export const MAP_SIZE = 64;
+export const MAP_SIZE = 32;
 export function riverCenter(y) {
-  return 57.8 + Math.sin(y * 0.11) * 1.5 + Math.sin(y * 0.32) * 0.65;
+  return 29.8 + Math.sin(y * 0.22) * 0.65;
 }
 export function hydroCell(y){return Math.ceil(riverCenter(y)-1.35);}
 export function riverBank(x, y) {
