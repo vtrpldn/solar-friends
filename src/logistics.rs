@@ -824,6 +824,11 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if kind == Some("biodigester") && material == economy::SCRAPS && v.circular.waste >= 4. {
         return 1;
     }
+    // A bounded compost reserve supplies growing beds and queued soil work.
+    // Its next two-scrap kit must not wait behind optional pantry top-ups.
+    if kind == Some("compost") && material == economy::SCRAPS && organics::wants_compost(v) {
+        return 1;
+    }
     if kind == Some("kitchen")
         && v.meals < 3
         && let Owner::Pantry(id) = to
@@ -1956,6 +1961,46 @@ mod tests {
             }
         }
         panic!("supplied starter garden did not complete: {}", g.snapshot());
+    }
+    #[test]
+    fn bounded_compost_inputs_arrive_before_optional_pantry_topups() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("kitchen", 5, 5), "ok");
+        assert_eq!(g.place("compost", 17, 9), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.mode = modes::Mode::Story;
+        v.minutes = 570.;
+        fixture_stock(&mut v, economy::FOOD, 60);
+        fixture_stock(&mut v, economy::MEALS, 12);
+        fixture_stock(&mut v, economy::SCRAPS, 16);
+        fixture_stock(&mut v, economy::COMPOST, 0);
+        let saved: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        let mut r = saved.residents[0].clone();
+        r.x = CAMP.0;
+        r.y = CAMP.1;
+        assign(&mut r, &v, "haul", "Supplying useful work.", false);
+        assert!(advance(&mut v, &mut r, &[], 0.25));
+        let load = v
+            .logistics
+            .as_ref()
+            .unwrap()
+            .shipments
+            .iter()
+            .find(|h| h.resident == r.id)
+            .unwrap();
+        assert_eq!(load.material, economy::SCRAPS);
+        assert_eq!(
+            v.logistics
+                .as_ref()
+                .unwrap()
+                .stores
+                .iter()
+                .find(|p| p.id == load.to)
+                .unwrap()
+                .owner,
+            Owner::Pantry(1)
+        );
     }
     #[test]
     fn construction_waits_for_located_inputs_and_real_residents_deliver_them() {
