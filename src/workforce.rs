@@ -143,7 +143,7 @@ fn projected(v: &Village, id: usize) -> (f32, f32) {
     };
     (
         v.food + gathered - inputs,
-        (v.meals as f32 + meals - shared).max(0.),
+        (v.meals as f32 + food::other_portions(v) as f32 + meals - shared).max(0.),
     )
 }
 pub fn urgent_food(v: &Village, id: usize) -> bool {
@@ -167,7 +167,6 @@ pub struct Offer {
     pub score: f32,
     #[serde(skip)]
     urgency: f32,
-    #[serde(skip)]
     reason: &'static str,
 }
 fn occupied(
@@ -231,7 +230,7 @@ pub fn eating(v: &Village, id: usize) -> bool {
     if let Some(r) = v.workforce_peers.get(id).and_then(Option::as_ref) {
         return food::meal(v, r).is_some();
     }
-    v.food.floor() + v.meals as f32 > count(v, id, "eat")
+    v.food.floor() + (v.meals + food::other_portions(v)) as f32 > count(v, id, "eat")
 }
 fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f32 {
     let c = category(task).unwrap();
@@ -314,6 +313,14 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             }
             Err(reason) => (None, Some(reason.to_owned())),
         };
+        let blocker = blocker.or_else(|| {
+            (task == "garden")
+                .then_some(worker.activity_building)
+                .flatten()
+                .and_then(|id| v.buildings.iter().find(|b| b.id == id))
+                .and_then(|b| ecology::harvest_blocker(v, b, r))
+                .map(str::to_owned)
+        });
         out.push(Offer {
             task: task.into(),
             building: worker.activity_building,
@@ -363,14 +370,8 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                 "garden",
                 Some(b.id),
                 None,
-                if b.kind == "goat_pasture" && b.agriculture.cared_until <= v.minutes {
-                    760.
-                } else if b.kind == "apiary" && b.agriculture.cared_until <= v.minutes {
-                    520.
-                } else {
-                    390.
-                },
-                "Tending our crops, fruit trees and animals during community hours.",
+                garden_priority(v, b, r.id).0,
+                garden_priority(v, b, r.id).1,
             );
         }
     }
@@ -563,6 +564,49 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     });
     out
 }
+/// Existing living systems get attention before optional expansion. Routine
+/// planting and pantry top-ups retain their lower priority and bounded demand.
+fn garden_priority(v: &Village, b: &Building, resident: usize) -> (f32, &'static str) {
+    if b.kind == "goat_pasture" && b.agriculture.cared_until <= v.minutes {
+        (
+            960.,
+            "Feeding and checking our goats before starting more construction.",
+        )
+    } else if b.kind == "apiary" && b.agriculture.cared_until <= v.minutes {
+        (
+            820.,
+            "Checking the overdue hive before starting more construction.",
+        )
+    } else if ecology::farm(b)
+        && b.crop.planted
+        && b.crop.growth < ecology::duration(&b.crop)
+        && b.crop.moisture <= 45.
+    {
+        (
+            900.,
+            "Watering the drying crop before taking on another project.",
+        )
+    } else if b.kind == "orchard"
+        && b.agriculture.pending == 0
+        && land::condition(v, 3, b.x, b.y).moisture <= 0.15
+    {
+        (
+            900.,
+            "Watering our dry fruit trees before taking on another project.",
+        )
+    } else if urgent_food(v, resident) {
+        (
+            920.,
+            "Collecting food from our plots while the pantry is running low.",
+        )
+    } else {
+        (
+            390.,
+            "Tending our crops, fruit trees and animals during community hours.",
+        )
+    }
+}
+
 fn work_minutes(v: &Village, job: &Offer) -> f32 {
     if matches!(job.task.as_str(), "haul" | "water") {
         0. // These quotes include both legs.
@@ -596,6 +640,32 @@ pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
     else {
         return false;
     };
+    take_offer(r, v, job)
+}
+/// Prefer a ready, reachable harvest over sending hungry neighbours past their
+/// own food plots to forage. Claims still cap the crew on each plot.
+pub fn choose_harvest(r: &mut Resident, v: &Village) -> bool {
+    let Some(job) = offers(v, r).into_iter().find(|o| {
+        o.task == "garden"
+            && o.blocker.is_none()
+            && assigned_to(v, r, o)
+            && o.building
+                .and_then(|id| v.buildings.iter().find(|b| b.id == id))
+                .is_some_and(|b| {
+                    (ecology::farm(b)
+                        && b.crop.planted
+                        && b.crop.kind != "fodder"
+                        && b.crop.growth >= ecology::duration(&b.crop))
+                        || agriculture::kind(b)
+                            && b.agriculture.pending > 0
+                            && (b.kind != "goat_pasture" || b.agriculture.cared_until > v.minutes)
+                })
+    }) else {
+        return false;
+    };
+    take_offer(r, v, job)
+}
+fn take_offer(r: &mut Resident, v: &Village, job: Offer) -> bool {
     if let Some(need) = autonomy::preparation(
         v,
         r,

@@ -299,7 +299,9 @@ fn available(v: &Village, task: &str) -> bool {
         "restore" => v.restoration.iter().any(|j| restoration::ready(v, j)),
         "utility" => (0..5).any(|id| !utilities::crew_jobs(v, id).is_empty()),
         "craft" => production::can_order_tools(v),
-        "eat" => v.food >= 1. || v.meals > 0,
+        "eat" => food::EDIBLE
+            .into_iter()
+            .any(|m| economy::quantity(v, m) > 0),
         "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
         _ => false,
     }
@@ -556,7 +558,7 @@ fn choose(r: &mut Resident, v: &Village) {
             if v.meals > 0 {
                 "Sitting down for a cooked meal."
             } else {
-                "Eating available ingredients while we wait for a cooked meal."
+                "Eating an available portion from our pantry."
             },
         )
     } else if autonomy::recovering(r) {
@@ -574,7 +576,15 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if situations::apply_agreement(r, v) {
         return;
+    } else if occupations::available(v, r.id) && r.hunger <= 75. {
+        (
+            "outside",
+            "Leaving for my outside shift. My village chores can wait until I return.",
+        )
     } else if autonomy::foraging(v, r) {
+        if r.hunger <= 60. && work_time(v.minutes) && workforce::choose_harvest(r, v) {
+            return;
+        }
         if requests::pending(r, "gather") && requests::resume(r, v) {
             return;
         }
@@ -583,11 +593,6 @@ fn choose(r: &mut Resident, v: &Village) {
         (
             "sanitation",
             "Taking a private moment at the ecological toilet.",
-        )
-    } else if occupations::available(v, r.id) {
-        (
-            "outside",
-            "Leaving for my job at a neighbouring farm until 17:00.",
         )
     } else if autonomy::company(r) {
         (
@@ -649,6 +654,9 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
         && v.buildings
             .iter()
             .any(|b| b.progress < 100. && building_work::job(v, b.id).is_none());
+    if task == "eat" && food::meal(v, r).is_none() {
+        return Some("I need a reachable, unclaimed portion that will stay fresh until I arrive. Bring food, meals, milk or honey along a clear path; eggs need cooking first.".into());
+    }
     if !available(v, task)
         && !hauling_for_build
         && !(task == "building_work" && !v.building_jobs.is_empty())
@@ -938,10 +946,14 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     && !(r.task == "gather"
                         && (supplies::urgent(&v)
                             || r.hunger > 60. && !workforce::eating(&v, r.id))))
+                || (occupations::available(&v, r.id)
+                    && autonomy::free_time(&r)
+                    && !matches!(r.task.as_str(), "rest"))
                 || chores_finished
                 || chores_start)
             || (requests::work(&r.task) || r.task == "haul")
                 && (r.energy < 28.
+                    || autonomy::food_interrupt(&v, &r)
                     || (r.social < 35. && !(r.task == "gather" && autonomy::foraging(&v, &r)))
                     || (workforce::eating(&v, r.id)
                         && autonomy::meal_due(&r, v.minutes)

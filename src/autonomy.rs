@@ -8,7 +8,21 @@ pub fn company(r: &Resident) -> bool {
     r.social < 35. || (r.task == "socialize" && r.social < 75.)
 }
 pub fn meal_due(r: &Resident, now: f32) -> bool {
-    r.hunger > 60. || meal_slot(now).is_some_and(|slot| slot != r.last_meal_slot)
+    r.hunger > 60. || r.hunger >= 20. && meal_slot(now).is_some_and(|slot| slot != r.last_meal_slot)
+}
+/// Reconsider work when personal hunger is serious, even if all existing food
+/// is unreachable. Otherwise a worker waits for the activity timer to expire.
+/// Community shortages can recruit a bounded number of foragers through the
+/// existing claims, without abandoning an already useful food job.
+pub fn food_interrupt(v: &Village, r: &Resident) -> bool {
+    if r.task == "gather" || r.task == "eat" {
+        return false;
+    }
+    r.hunger > 75.
+        || work_time(v.minutes)
+            && !matches!(r.task.as_str(), "cook" | "haul" | "water" | "garden")
+            && workforce::urgent_food(v, r.id)
+            && !occupations::available(v, r.id)
 }
 pub fn foraging(v: &Village, r: &Resident) -> bool {
     workforce::urgent_food(v, r.id) || (r.hunger > 60. && !workforce::eating(v, r.id))
@@ -458,5 +472,266 @@ mod tests {
         let mut person = r;
         choose(&mut person, &v);
         assert!(leisure::hobby(&person.task));
+    }
+    fn install(g: &mut Game, v: Village, r: Resident) {
+        *g.app.world_mut().resource_mut::<Village>() = v;
+        let id = r.id;
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        *q.iter_mut(g.app.world_mut()).find(|p| p.id == id).unwrap() = r;
+    }
+    #[test]
+    fn a_clock_mealtime_does_not_force_a_second_breakfast() {
+        let (_, mut v, mut r) = scene();
+        v.minutes = 450.;
+        r.last_meal_slot = -1;
+        r.hunger = 5.;
+        r.energy = 20.;
+        choose(&mut r, &v);
+        assert_eq!(
+            r.task, "rest",
+            "A full resident should recover instead of walking to food"
+        );
+        r.hunger = 25.;
+        choose(&mut r, &v);
+        assert_eq!(
+            r.task, "eat",
+            "A hungry resident still keeps a normal breakfast"
+        );
+    }
+    #[test]
+    fn urgent_personal_hunger_interrupts_construction_without_reachable_food() {
+        let (mut g, mut v, mut r) = scene();
+        logistics::fixture_stock(&mut v, economy::FOOD, 0);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        r.task = "build".into();
+        r.remaining = 100.;
+        r.hunger = 85.;
+        install(&mut g, v, r);
+        g.tick(0.1);
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert_eq!(
+            s.residents[0].task, "gather",
+            "Do not wait out a building timer when there is nothing to eat"
+        );
+    }
+    #[test]
+    fn urgent_food_never_restarts_the_foraging_timer() {
+        let (mut g, mut v, mut r) = scene();
+        logistics::fixture_stock(&mut v, economy::FOOD, 0);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        r.hunger = 85.;
+        assign(&mut r, &v, "gather", "Finding food.", false);
+        r.x = r.target_x;
+        r.y = r.target_y;
+        install(&mut g, v, r);
+        g.tick(0.1);
+        g.tick(0.1);
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert_eq!(s.residents[0].task, "gather");
+        assert!(s.residents[0].remaining < 9.85);
+    }
+    #[test]
+    fn outside_commitments_interrupt_a_long_lonely_leisure_activity() {
+        let (mut g, mut v, mut r) = scene();
+        v.economy.outside_jobs[0] = true;
+        r.task = "socialize".into();
+        r.social = 20.;
+        r.remaining = 100.;
+        install(&mut g, v, r);
+        g.tick(0.1);
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert_eq!(s.residents[0].task, "outside");
+        assert!(s.residents[0].trip.is_some());
+    }
+    #[test]
+    fn a_community_pantry_shortage_does_not_cancel_a_paid_shift() {
+        let (_, mut v, mut r) = scene();
+        logistics::fixture_stock(&mut v, economy::FOOD, 0);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        v.economy.outside_jobs[0] = true;
+        choose(&mut r, &v);
+        assert_eq!(r.task, "outside");
+        r.trip = None;
+        r.hunger = 85.;
+        choose(&mut r, &v);
+        assert_eq!(
+            r.task, "gather",
+            "Personal hunger still needs attention before a shift"
+        );
+    }
+    #[test]
+    fn a_full_pantry_still_allows_care_for_an_existing_drying_crop() {
+        let (mut g, _, mut r) = scene();
+        assert_eq!(g.place("garden", 13, 15), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.minutes = 570.;
+        v.arrived = true;
+        logistics::fixture_finish(&mut v, 0);
+        logistics::fixture_stock(&mut v, economy::FOOD, 40);
+        logistics::fixture_stock(&mut v, economy::MEALS, 8);
+        water::fixture_fresh(&mut v, 40.);
+        water::fixture_at(&mut v, water::Owner::Building(0), water::Class::Fresh, 4.);
+        v.buildings[0].crop.planted = true;
+        v.buildings[0].crop.moisture = 0.;
+        v.buildings[0].crop.growth = 30.;
+        assert!(agriculture::wanted(&v, 0));
+        assert!(
+            workforce::offers(&v, &r)
+                .iter()
+                .any(|o| o.task == "garden" && o.building == Some(0) && o.blocker.is_none())
+        );
+        assign(&mut r, &v, "garden", "Watering the drying crop.", false);
+        r.x = r.target_x;
+        r.y = r.target_y;
+        r.remaining = 0.05;
+        install(&mut g, v, r);
+        g.tick(0.1);
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert!(
+            s.village.buildings[0].crop.moisture > 0.,
+            "The selected care must actually consume local water and wet the soil"
+        );
+        assert_eq!(
+            s.village.harvests, 0,
+            "Care is not permission to hoard food"
+        );
+    }
+    #[test]
+    fn dry_crop_care_and_a_ready_harvest_precede_optional_expansion() {
+        let (mut g, _, mut r) = scene();
+        assert_eq!(g.place("garden", 13, 15), "ok");
+        assert_eq!(g.place("garden", 13, 18), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.minutes = 570.;
+        v.arrived = true;
+        logistics::fixture_finish(&mut v, 0);
+        logistics::fixture_stage(&mut v, 1);
+        logistics::fixture_stock(&mut v, economy::FOOD, 8);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        water::fixture_fresh(&mut v, 40.);
+        water::fixture_at(&mut v, water::Owner::Building(0), water::Class::Fresh, 4.);
+        v.buildings[0].crop.planted = true;
+        v.buildings[0].crop.moisture = 0.;
+        v.buildings[0].crop.growth = 30.;
+        choose(&mut r, &v);
+        assert_eq!(r.task, "garden");
+        assert_eq!(r.activity_building, Some(0));
+        assert!(r.reason.contains("drying crop"));
+        r.remaining = 0.;
+        v.buildings[0].crop.growth = ecology::duration(&v.buildings[0].crop);
+        logistics::fixture_stock(&mut v, economy::FOOD, 0);
+        choose(&mut r, &v);
+        assert_eq!(
+            r.task, "garden",
+            "Collect the reachable ripe crop before wild foraging"
+        );
+        assert_eq!(r.activity_building, Some(0));
+    }
+    #[test]
+    fn dairy_and_honey_prevent_false_food_emergencies_and_accept_real_meal_requests() {
+        for material in [economy::MILK, economy::HONEY] {
+            let (mut g, mut v, mut r) = scene();
+            logistics::fixture_stock(&mut v, economy::FOOD, 0);
+            logistics::fixture_stock(&mut v, economy::MEALS, 0);
+            logistics::fixture_stock(&mut v, material, 6);
+            assert!(!supplies::urgent(&v));
+            assert!(!workforce::urgent_food(&v, 0));
+            r.hunger = 80.;
+            install(&mut g, v, r);
+            assert!(g.request(0, "eat", false).contains("Happy"));
+            let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+            assert_eq!(s.residents[0].activity_material, Some(material));
+            for _ in 0..200 {
+                g.tick(0.25);
+            }
+            let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+            assert_eq!(
+                s.residents[0].help.as_ref().unwrap().phase,
+                requests::Phase::Complete
+            );
+            assert!(s.residents[0].hunger < 60.);
+        }
+    }
+    #[test]
+    fn eggs_do_not_masquerade_as_edible_portions() {
+        let (mut g, mut v, mut r) = scene();
+        logistics::fixture_stock(&mut v, economy::FOOD, 0);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        logistics::fixture_stock(&mut v, economy::EGGS, 6);
+        assert!(supplies::urgent(&v));
+        r.hunger = 80.;
+        install(&mut g, v, r);
+        let before = g.snapshot();
+        assert!(g.request(0, "eat", false).contains("eggs need cooking"));
+        assert_eq!(g.snapshot(), before);
+    }
+    #[test]
+    fn overdue_goats_get_one_caregiver_before_new_construction() {
+        let (mut g, _, mut r) = scene();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("goat_pasture", 13, 15), "ok");
+        assert_eq!(g.place("garden", 13, 20), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.mode = modes::Mode::Story;
+        v.minutes = 570.;
+        v.arrived = true;
+        v.buildings[1].progress = 0.;
+        economy::plan(&mut v, 1);
+        logistics::fixture_stage(&mut v, 1);
+        logistics::fixture_stock(&mut v, economy::FOOD, 40);
+        logistics::fixture_stock(&mut v, economy::MEALS, 8);
+        water::fixture_fresh(&mut v, 40.);
+        water::fixture_at(&mut v, water::Owner::Building(0), water::Class::Fresh, 4.);
+        assert!(logistics::receive(
+            &mut v,
+            logistics::Owner::Pantry(0),
+            economy::FODDER,
+            2
+        ));
+        choose(&mut r, &v);
+        assert_eq!(r.task, "garden");
+        assert_eq!(r.activity_building, Some(0));
+        assert!(r.reason.contains("goats"));
+        v.activity_claims[1] = Some(workforce::Claim {
+            task: "garden".into(),
+            building: Some(0),
+            material: None,
+            batch: None,
+        });
+        r.remaining = 0.;
+        choose(&mut r, &v);
+        assert_ne!(
+            r.activity_building,
+            Some(0),
+            "One caregiver is enough; another neighbour should do something else"
+        );
+    }
+    #[test]
+    fn a_full_harvest_store_is_reported_instead_of_repeatedly_worked() {
+        let (mut g, _, r) = scene();
+        assert_eq!(g.place("garden", 13, 15), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.minutes = 570.;
+        logistics::fixture_finish(&mut v, 0);
+        logistics::fixture_stock(&mut v, economy::FOOD, 8);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        v.buildings[0].crop.planted = true;
+        v.buildings[0].crop.growth = ecology::duration(&v.buildings[0].crop);
+        let p = v
+            .logistics
+            .as_mut()
+            .unwrap()
+            .stores
+            .iter_mut()
+            .find(|p| p.owner == logistics::Owner::Site(0))
+            .unwrap();
+        p.items[0] = p.capacity;
+        let offer = workforce::offers(&v, &r)
+            .into_iter()
+            .find(|o| o.task == "garden" && o.building == Some(0))
+            .unwrap();
+        assert!(offer.blocker.unwrap().contains("harvest needs room"));
+        let mut worker = r;
+        assert!(!workforce::choose_harvest(&mut worker, &v));
     }
 }
