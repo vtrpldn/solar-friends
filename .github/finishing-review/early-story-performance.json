@@ -1,0 +1,321 @@
+{
+  "windowMs": 300000,
+  "completed": [
+    {
+      "startedAt": "2026-10-16T21:18:34.039Z",
+      "activeMs": 300006.9,
+      "samples": 35875,
+      "median": 9,
+      "p95": 10,
+      "max": 83.30000000000018,
+      "over100": 0,
+      "start": {
+        "at": "2026-10-16T21:18:34.039Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 39,
+          "bytes": 7201280,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 10135022,
+          "total": 28038270
+        }
+      },
+      "end": {
+        "at": "2026-10-16T21:23:33.931Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 410,
+          "bytes": 30121984,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 27623049,
+          "total": 73065121
+        }
+      }
+    },
+    {
+      "startedAt": "2026-10-16T21:23:33.940Z",
+      "activeMs": 300005.70000000007,
+      "samples": 35968,
+      "median": 9,
+      "p95": 10,
+      "max": 26,
+      "over100": 0,
+      "start": {
+        "at": "2026-10-16T21:23:33.940Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 410,
+          "bytes": 30121984,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 27623049,
+          "total": 73065121
+        }
+      },
+      "end": {
+        "at": "2026-10-16T21:28:33.935Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 411,
+          "bytes": 30144512,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 19330406,
+          "total": 73412278
+        }
+      }
+    },
+    {
+      "startedAt": "2026-10-16T21:28:33.939Z",
+      "activeMs": 300001.19999999995,
+      "samples": 36066,
+      "median": 9,
+      "p95": 10,
+      "max": 33.199999999953434,
+      "over100": 0,
+      "start": {
+        "at": "2026-10-16T21:28:33.939Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 411,
+          "bytes": 30144512,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 19330406,
+          "total": 73412278
+        }
+      },
+      "end": {
+        "at": "2026-10-16T21:33:33.937Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 419,
+          "bytes": 30324736,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 15190115,
+          "total": 72034127
+        }
+      }
+    },
+    {
+      "startedAt": "2026-10-16T21:33:33.944Z",
+      "activeMs": 300007.80000000005,
+      "samples": 36095,
+      "median": 9,
+      "p95": 10,
+      "max": 39.800000000046566,
+      "over100": 0,
+      "start": {
+        "at": "2026-10-16T21:33:33.944Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 419,
+          "bytes": 30324736,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 15190115,
+          "total": 72034127
+        }
+      },
+      "end": {
+        "at": "2026-10-16T21:38:33.939Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 483,
+          "bytes": 32487424,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 25267618,
+          "total": 73986290
+        }
+      }
+    },
+    {
+      "startedAt": "2026-10-16T21:38:33.947Z",
+      "activeMs": 300004,
+      "samples": 36028,
+      "median": 9,
+      "p95": 10,
+      "max": 31.699999999953434,
+      "over100": 0,
+      "start": {
+        "at": "2026-10-16T21:38:33.947Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 483,
+          "bytes": 32487424,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 25267618,
+          "total": 73986290
+        }
+      },
+      "end": {
+        "at": "2026-10-16T21:43:34.006Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 483,
+          "bytes": 32487424,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 22122987,
+          "total": 73674587
+        }
+      }
+    },
+    {
+      "startedAt": "2026-10-16T21:43:34.014Z",
+      "activeMs": 300007.09999999986,
+      "samples": 36047,
+      "median": 9,
+      "p95": 10,
+      "max": 20.0999999998603,
+      "over100": 0,
+      "start": {
+        "at": "2026-10-16T21:43:34.014Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 483,
+          "bytes": 32487424,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 22122987,
+          "total": 73674587
+        }
+      },
+      "end": {
+        "at": "2026-10-16T21:48:34.015Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 483,
+          "bytes": 32487424,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 28652173,
+          "total": 77185905
+        }
+      }
+    }
+  ],
+  "current": {
+    "startedAt": "2026-10-16T21:48:34.024Z",
+    "activeMs": 217136.90000000014,
+    "samples": 26039,
+    "median": 9,
+    "p95": 10,
+    "max": 27,
+    "over100": 0,
+    "start": {
+      "at": "2026-10-16T21:48:34.024Z",
+      "visibility": "visible",
+      "viewport": {
+        "width": 1600,
+        "height": 900,
+        "dpr": 1.600000023841858
+      },
+      "cache": {
+        "entries": 483,
+        "bytes": 32487424,
+        "budget": 50331648
+      },
+      "heap": {
+        "used": 28652173,
+        "total": 77185905
+      }
+    },
+    "end": {
+      "at": "2026-10-16T21:52:11.155Z",
+      "visibility": "visible",
+      "viewport": {
+        "width": 1600,
+        "height": 900,
+        "dpr": 1.600000023841858
+      },
+      "cache": {
+        "entries": 503,
+        "bytes": 32937984,
+        "budget": 50331648
+      },
+      "heap": {
+        "used": 31741227,
+        "total": 74640043
+      }
+    }
+  },
+  "scope": "Unattended early Story baseline during a stalled browser call; not dense stress acceptance."
+}

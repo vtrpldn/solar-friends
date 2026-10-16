@@ -36,3 +36,6 @@ export function paintProcedural(ctx,key,bounds,x,y,scale,draw) {
  }
  ctx.drawImage(image,x+left*scale,y+top*scale,w*scale,h*scale);
 }
+
+// Read-only diagnostics for the opt-in sustained performance recorder.
+export function paintCacheStats(){return {entries:cache.size,bytes,budget};}
