@@ -1,0 +1,21 @@
+{
+  "scene": "night",
+  "viewport": "1440x1000",
+  "scope": "JavaScript canvas work, not a claim about compositor frame rate",
+  "before": {
+    "measurement": "Full-screen light canvas copied into world canvas",
+    "paint_median_ms": 146.6,
+    "paint_p95_ms": 150.2,
+    "screen_blend_total_ms": 3728.9,
+    "screen_blend_calls": 27
+  },
+  "after": {
+    "measurement": "DOM light canvas with screen blend handled by browser compositor",
+    "samples": 61,
+    "paint_median_ms": 8.6,
+    "paint_p95_ms": 10.8,
+    "total_median_ms": 19.7,
+    "total_p95_ms": 27.6
+  },
+  "remaining_issue": "The longer night probe stops accumulating samples around minute 2760 despite visible page, no open dialogs and no recorded browser errors. The same stopping point existed before this optimization; it remains under investigation."
+}

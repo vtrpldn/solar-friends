@@ -1,0 +1,38 @@
+[
+  {
+    "scene": "night-preview",
+    "changed": 252,
+    "over_two": 16,
+    "maximum": 9,
+    "box": [
+      99,
+      37,
+      195,
+      53
+    ]
+  },
+  {
+    "scene": "dev-scenario-night",
+    "changed": 0,
+    "over_two": 0,
+    "maximum": 0,
+    "box": [
+      1440,
+      1000,
+      0,
+      0
+    ]
+  },
+  {
+    "scene": "dev-scenario-climate-wet",
+    "changed": 0,
+    "over_two": 0,
+    "maximum": 0,
+    "box": [
+      1440,
+      1000,
+      0,
+      0
+    ]
+  }
+]

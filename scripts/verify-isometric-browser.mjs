@@ -1,6 +1,6 @@
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {serve} from './serve.mjs';
 const output='artifacts/isometric';await mkdir(output,{recursive:true});
 const server=await serve(),base=`http://127.0.0.1:${server.address().port}`,browser=await chromium.launch({headless:true});
@@ -41,8 +41,14 @@ try{
  for(const mode of ['artwork-preview','night-preview']){
   await page.goto(base+'/?'+mode);await page.waitForFunction(()=>window.solarDevReloadReady);
   assert.equal((await page.evaluate(()=>window.solarDev.snapshot())).village.buildings.length,27);
+  assert.equal(await page.locator('#night-lights').evaluate(el=>getComputedStyle(el).pointerEvents),'none');
+  assert.equal(await page.locator('#night-lights').evaluate(el=>el.hidden),mode==='artwork-preview');
   await page.screenshot({path:`${output}/${mode}-game.png`});screenshots.push(`${output}/${mode}-game.png`);
  }
+ await page.locator('#dev-button').click();await page.locator('[data-dev-tab=checks]').click();
+ const downloaded=page.waitForEvent('download');await page.locator('#dev-capture').click();const download=await downloaded;
+ const expected=await page.evaluate(()=>{const world=document.querySelector('#world'),lights=document.querySelector('#night-lights'),capture=document.createElement('canvas');capture.width=world.width;capture.height=world.height;const ctx=capture.getContext('2d');ctx.drawImage(world,0,0);if(!lights.hidden){ctx.globalCompositeOperation='screen';ctx.drawImage(lights,0,0);}return capture.toDataURL('image/png').split(',')[1];});
+ assert.deepEqual(await readFile(await download.path()),Buffer.from(expected,'base64'),'Downloaded scene must include the composited night lights');
  assert.deepEqual(errors,[]);
  await writeFile(`${output}/browser-review.json`,JSON.stringify({variants:27,views:54,status:'captures-only-not-visual-approval',occlusion,errors,screenshots},null,2));
  console.log('PASS: captured all 54 renderer views, exercised enlarged guides and planted day/night previews, checked light occlusion; no browser errors. Visual quality is not certified by this test.');

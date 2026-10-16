@@ -75,6 +75,9 @@ let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world");
 let ctx = canvas.getContext("2d");
 const lightLayer=document.createElement('canvas'),lightContext=lightLayer.getContext('2d');
+lightLayer.id='night-lights';lightLayer.setAttribute('aria-hidden','true');
+lightLayer.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen';
+canvas.after(lightLayer);
 const kinds = {
   ...Object.fromEntries(Object.entries(farmNames).map(([k,n])=>[k,[n,farmNotes[k]]])),
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
@@ -743,6 +746,7 @@ function render() {
   drawWaterConnections(ctx,iso,scale,state);
   drawElectricalConnections(ctx,iso,scale,state);
   const darkness = nightAmount(state.village.minutes);
+  lightLayer.hidden=darkness<=0;
   if(darkness>0){
     if(lightLayer.width!==canvas.width||lightLayer.height!==canvas.height){lightLayer.width=canvas.width;lightLayer.height=canvas.height;}
     lightContext.resetTransform();lightContext.clearRect(0,0,lightLayer.width,lightLayer.height);lightContext.setTransform(ctx.getTransform());
@@ -834,7 +838,8 @@ function render() {
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
   ctx.fillRect(0, 0, width, height);
-  if(darkness>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(lightLayer,0,0,lightLayer.width,lightLayer.height,0,0,width,height);ctx.restore();}
+  // The compositor blends the light surface directly, avoiding a synchronous
+  // full-canvas transfer back into the world drawing context.
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
@@ -2013,7 +2018,10 @@ const devAPI = {
   },
   capture() {
     devAPI.fixedView();
-    const a = document.createElement('a'); a.download = 'solar-friends-scene.png'; a.href = canvas.toDataURL('image/png'); a.click();
+    const capture=document.createElement('canvas');capture.width=canvas.width;capture.height=canvas.height;
+    const surface=capture.getContext('2d');surface.drawImage(canvas,0,0);
+    if(!lightLayer.hidden){surface.globalCompositeOperation='screen';surface.drawImage(lightLayer,0,0);}
+    const a = document.createElement('a'); a.download = 'solar-friends-scene.png'; a.href = capture.toDataURL('image/png'); a.click();
   },
 };
 try {
