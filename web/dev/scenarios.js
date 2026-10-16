@@ -7,6 +7,7 @@ import {makeArtPreview} from './art-preview.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 import {withSeasonalWeather} from './climate-fixture.js';
 export const scenarios = [
+  {id:'suppliers',name:'Town offers & freight',detail:'A protected day-fifteen village with seasonal prices, a limited offer and a saved freight calendar. Confirm baskets, use a resident pickup, or compare the next restock without changing your village.'},
   {id:'learning',name:'Learning through useful work',detail:'A staged experienced grower and cook beside novice neighbours. Ordinary jobs remain open to everyone; useful completed work earns bounded practice. Saved villages stay protected.'},
   {id:'autonomy',name:'Residents & competing needs',detail:'Iara needs rest, Bento needs food, Luz needs company, Cauã can help the village, and Nina has an outside shift. Follow their recovery and a new garden project; your saved village stays protected.'},
   {id:'maintenance',name:'Equipment service',detail:'Worn tools, pump, battery and pickup. Buy spare parts, follow local delivery and resident service, pause or cancel saved jobs. Your village stays protected.'},
@@ -61,7 +62,7 @@ export function makeScenario(id, fresh, established) {
     r.requested = false; r.visit_building = null; r.last_meal_slot = 3;
     r.target_x = r.x; r.target_y = r.y;
   }
-  if(id.startsWith('sim-')) {
+  if(id.startsWith('sim-')||id==='suppliers') {
     const compact=[['home',9,9],['home',12,9],['warehouse',6,13],['garden',12,13],['kitchen',15,13],['well',15,9]];
     const dispersed=[['home',4,5],['home',12,5],['warehouse',5,19],['garden',19,19],['kitchen',19,6],['well',5,10]];
     const balanced=[['home',6,8],['home',10,8],['warehouse',18,13],['garden',14,17],['greenhouse',12,12],['kitchen',18,8],['well',18,17],['coop',6,13],['compost',6,17],['grove',10,17],['solar_farm',18,22],['streetlight',14,21]];
@@ -156,7 +157,9 @@ export function makeScenario(id, fresh, established) {
   }
   if(id.startsWith('maintenance')){for(const i of [4,8,9,10,15])v.economy.stock[i]=0;v.progress.tool_uses=0;}
   if(id==='learning')v.minutes=40*1440+540;
+  if(id==='suppliers')v.minutes=14*1440+540;
   const prepared=resetMaterialLocations(state);
+  if(id==='suppliers'){prepared.village.market.enabled=true;return prepared;}
   if(id==='learning'){prepared.village.skills.enabled=true;prepared.village.skills.people[0].experience[2]=100;prepared.village.skills.people[2].experience[3]=60;return prepared;}
   if(id==='autonomy')return withAutonomyScene(prepared);
   if(id.startsWith('maintenance'))return withMaintenanceScene(prepared,{outage:id==='maintenance-outage'});

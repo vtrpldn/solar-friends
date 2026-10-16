@@ -20,6 +20,7 @@ mod land;
 mod leisure;
 mod logistics;
 mod maintenance;
+mod market;
 mod mobility;
 mod modes;
 mod navigation;
@@ -49,7 +50,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 24;
+pub const SAVE_VERSION: u32 = 25;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -165,6 +166,8 @@ pub struct Village {
     pub workforce: workforce::State,
     #[serde(default)]
     pub skills: skills::State,
+    #[serde(default)]
+    pub market: market::State,
     #[serde(default)]
     pub production: production::State,
     #[serde(default)]
@@ -1267,6 +1270,7 @@ impl Game {
                 navigation: None,
                 workforce: workforce::State::default(),
                 skills: skills::State::default(),
+                market: market::State::default(),
                 production: production::State::default(),
                 freshness: freshness::State::default(),
                 processes: processes::State::default(),
@@ -1679,6 +1683,16 @@ impl Game {
                 .unwrap();
             }
         }
+        if raw["village"]["version"] == 24 {
+            raw["village"]["version"] = SAVE_VERSION.into();
+        }
+        if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
+            raw["village"]["market"] = serde_json::to_value(market::State {
+                enabled: false,
+                ..Default::default()
+            })
+            .unwrap();
+        }
         if raw["village"]["version"] == 3 {
             organics::author_fixture(&mut raw);
         }
@@ -1710,6 +1724,7 @@ impl Game {
         if !logistics::valid(v, &save.residents)
             || !workforce::valid(v)
             || !skills::valid(v)
+            || !market::valid(v)
             || !production::valid(v)
             || !freshness::valid(v)
             || !processes::valid(v)

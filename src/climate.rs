@@ -40,11 +40,14 @@ fn wet_season(day: u32) -> bool {
 fn seasonal(v: &Village, day: u32) -> bool {
     v.climate.enabled && (v.mode == modes::Mode::Sandbox || day >= INTRO_DAYS)
 }
+pub fn seasonal_rain(seed: u32, day: u32) -> bool {
+    simulation::sample(seed, 40, day) % 100 < if wet_season(day) { 70 } else { 18 }
+}
 fn rainy_day(v: &Village, day: u32) -> bool {
     if !seasonal(v, day) {
         return day % 3 != 2;
     }
-    simulation::sample(v.simulation.seed, 40, day) % 100 < if wet_season(day) { 70 } else { 18 }
+    seasonal_rain(v.simulation.seed, day)
 }
 pub fn day(v: &Village, day: u32) -> Day {
     let seasonal = seasonal(v, day);

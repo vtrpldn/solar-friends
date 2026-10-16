@@ -170,6 +170,10 @@ impl Game {
             o.pickup_by = Some(resident);
             o.status = "collecting".into();
             o.paid -= 4000;
+            if let Some(t) = &mut o.terms {
+                t.fee = 2000;
+                t.arrival = None;
+            }
             o.dispatch = now;
             o.arrival = now + duration;
             o.pickup_minutes = Some(duration);

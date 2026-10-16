@@ -267,6 +267,7 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         v.economy.orders.push(economy::Order {
             pickup_by: Some(4),
             pickup_minutes: Some(120.),
+            terms: None,
             id: 0,
             items: std::array::from_fn(|i| u32::from(i == 0)),
             paid: 6700,
