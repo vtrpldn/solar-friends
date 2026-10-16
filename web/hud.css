@@ -222,7 +222,7 @@ footer .resources b[hidden]{display:none!important}
 
 /* Character actions and pause dialogs use game controls, with clear hit areas. */
 .person .person-heading .traits{margin:6px 0 0}.person .person-activity{margin-top:0}.person .requests button{display:flex;align-items:center;gap:7px;text-align:left;padding:8px;min-height:44px}.person .requests .item-icon{width:23px;height:23px}.person .requests span{min-width:0;font-size:12px;line-height:1.35}
-.person .close-person{position:sticky;top:0;float:right;z-index:4;margin:-10px -8px 0 0}
+.person .resident-book-tools{position:sticky;top:-22px;z-index:4;display:flex;align-items:center;justify-content:space-between;min-height:44px;margin:-22px -20px 14px;padding:8px 12px;background:var(--paper);border-bottom:1px solid #b7a16d}.person .resident-book-tools>b{font-size:13px}.person .close-person{position:static;float:none;margin:0}
 .community .panel-heading .panel-close{top:-8px;right:-8px}.community .panel-heading{gap:12px;padding-right:32px}.community .panel-heading .count{flex:none}.community .panel-heading h2{flex:1}
 .panel .resident{gap:12px;padding:12px 0;min-height:76px}.resident b{font-size:15px}.resident small{font-size:12px}.community-footer{font-size:11px}
 #host-gathering{min-height:36px;font:700 12px "Trebuchet MS",Verdana,sans-serif}

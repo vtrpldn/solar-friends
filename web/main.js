@@ -1,3 +1,4 @@
+import {renderResidentSkills} from './resident-skills.js';
 import {drawElectricalConnections,electricalOverlayRevision} from './electricity-ui.js';
 import {drawBattery} from './battery-art.js';
 import {drawWaterConnections,waterOverlayRevision} from './water-connections.js';
@@ -849,7 +850,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -866,13 +867,14 @@ function selectPerson(id) {
       .map(([t, n]) => `<button data-task="${t}">${itemIcon(({garden:"food",build:"frames",building_work:"frames",gather:"food",source:"timber",prepare:"walls",water:"water",cook:"meals",rest:"journal",socialize:"heart",compost:"compost",craft:"tools"})[t])}<span>${n}</span></button>`)
       .join(
         "",
-      )}</div><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="friendship-note"></p>`;
+      )}</div><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="resident-learning"><summary>Learning by doing</summary><div class="skill-journal"></div><label class="sandbox-learning"><input class="learning-toggle" type="checkbox"> Residents learn through useful work</label></details><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="friendship-note"></p>`;
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
     updateUI();
     $(`[data-citizen="${id}"]`).focus();
   };
+  $('#person .learning-toggle').onchange=event=>{game.set_resident_learning(event.target.checked);state=JSON.parse(game.snapshot());updateUI();save();};
   $('#person .occupation-toggle').onchange=event=>{game.set_resident_job(id,event.target.checked);state=JSON.parse(game.snapshot());updateUI();save();};
   $('#person .work-preferences').onchange=event=>{
     const input=event.target.closest('[data-work-preference]');
@@ -1297,6 +1299,9 @@ function updateUI() {
     for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
     $("#person .quote").hidden = r.task === "idle" || (!!response && r.requested && response.endsWith(r.reason));
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
+    renderResidentSkills($('#person .skill-journal'),state,r.id,escapeHtml);
+    $('#person .sandbox-learning').hidden=v.mode!=='sandbox';
+    $('#person .learning-toggle').checked=state.environment.skills.enabled;
     const stats = {
       Energy: r.energy,
       Fullness: 100 - r.hunger,
