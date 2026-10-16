@@ -416,7 +416,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     const state=await page.evaluate(()=>window.solarDev.snapshot());
     if(expected)assert(state.residents.some(r=>r.task===expected),`${id}: expected ${expected}`);
     if(id==='autonomy'){
-      assert.deepEqual(state.residents.map(r=>r.task),['rest','eat','socialize','haul','outside']);
+      assert.deepEqual(state.residents.map(r=>r.task),['rest','eat','socialize','garden','outside']);
+      assert.match(state.residents[3].reason,/dry fruit trees/,'Existing dry fruit trees receive care before expansion');
     }
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
