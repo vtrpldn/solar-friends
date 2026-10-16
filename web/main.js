@@ -1,3 +1,6 @@
+import {paintImage} from './paint-cache.js';
+import { performanceMeter } from './dev/performance.js';
+import { sampleFrame } from './frame-state.js';
 import {natureArt as natureDetails} from './nature-art.js';
 import {usesLogistics,usesUtilities,installSandboxRulesUI} from './sandbox-rules.js';
 import {renderResidentSkills} from './resident-skills.js';
@@ -62,6 +65,7 @@ const milestoneQueue = [];
 let showingMilestone = false;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const previewParams = new URLSearchParams(location.search);
+const meter=performanceMeter(previewParams.has('performance'));
 const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
 const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
@@ -469,7 +473,7 @@ function tree(x, y, s = 1, species = 0) {
     if(!natureArt.complete||!natureArt.naturalWidth)return;
     const art=natureDetails[species-4];if(!art)return;
     const [cx,cy,cw,ch]=art.cell,w=art.width*s*scale,h=w*art.aspect;
-    ctx.save();ctx.filter=unlitFilter(nightAmount(state.village.minutes));ctx.drawImage(natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h);ctx.restore();return;
+    ctx.save();ctx.filter=unlitFilter(nightAmount(state.village.minutes));paintImage(ctx,natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h);ctx.restore();return;
   }
   const w = forestSpecies[species].width * s * scale;
   const cell = forestArt.width / 2;
@@ -488,7 +492,7 @@ function tree(x, y, s = 1, species = 0) {
 }
 function materialSite(site,alpha=1){
   if(!site.active)return;
-  ctx.save();ctx.globalAlpha*=alpha;ctx.filter=unlitFilter(nightAmount(state.village.minutes));
+  ctx.save();ctx.globalAlpha*=alpha;
   if(site.material<2&&!site.planted&&site.harvests===0){
     const n=site.material===0?3:2;for(const [dx,dy]of [[-.5,-.5],[.5,-.5],[-.5,.5],[.5,.5]]){const p=iso(site.x+dx*(n-1),site.y+dy*(n-1));ctx.strokeStyle='#765438';ctx.lineWidth=2*scale;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y-8*scale);ctx.stroke();ctx.fillStyle='#dbc28a';ctx.fillRect(p.x-3*scale,p.y-9*scale,6*scale,3*scale);}
   }else if(site.material===0){
@@ -674,6 +678,7 @@ function resident(r) {
     ctx.fillText("z", p.x + 8 * s, py - 30 * s);
   }
 }
+let terrainSample;
 function render() {
   $('#relocation-guidance').hidden=!tool||(movingBattery===null&&movingBuilding===null);
   if(!$('#relocation-guidance').hidden)$('#relocation-guidance').textContent=$('#placement').textContent;
@@ -694,8 +699,11 @@ function render() {
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
   const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
-  const soil=soilAppearance(state.village.land.soil);
-  const standingTrees=state.village.land.vegetation.filter(t=>!t.cleared);
+  if(terrainSample?.land!==state.village.land)terrainSample={land:state.village.land,soil:soilAppearance(state.village.land.soil),trees:state.village.land.vegetation.filter(t=>!t.cleared)};
+  const soil=terrainSample.soil;
+  // Conservative screen bounds include tall crowns and their shadows.
+  const standingTrees=terrainSample.trees;
+  const onScreenTree=f=>{const p=iso(f.x,f.y),margin=220*scale;return p.x>=-margin&&p.x<=width+margin&&p.y>=-margin&&p.y<=height+margin;};
   for(const [key,value] of Object.entries({forestSeed:state.village.land.seed,forestCount:standingTrees.length,soilCells:soil.length}))if(canvas.dataset[key]!==String(value))canvas.dataset[key]=String(value);
   const key = JSON.stringify([state.village.land.seed,visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
   if (groundKey !== key) {
@@ -738,7 +746,7 @@ function render() {
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
     ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
-    ...standingTrees.map((f) => ({
+    ...standingTrees.filter(onScreenTree).map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),
@@ -1464,8 +1472,9 @@ function togglePause() {
   );
   $("#pause").classList.toggle("active", paused);
 }
-let paintedState = null, paintedView = "";
+let paintedState = null, paintedView = "", reportElapsed = Infinity;
 function frame(stamp) {
+  meter.start();
   if (!last) last = stamp;
   const elapsed = Math.max(0, (stamp - last) / 1000);
   const dt = Math.min(elapsed, 0.1);
@@ -1478,13 +1487,18 @@ function frame(stamp) {
   if (running) {
     if(!reducedMotion.matches)weatherTime += dt;
     time += advanceSimulation(game, Math.min(elapsed, 1), speed);
-    state = JSON.parse(game.snapshot());
+    meter.mark('simulation');
+    reportElapsed += elapsed;
+    state = sampleFrame(game, state, reportElapsed >= .25);
+    if (reportElapsed >= .25) reportElapsed = 0;
   }
+  meter.mark('sample');
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
     render(); gameUI?.drawMap(state,selected); paintedState = state; paintedView = viewKey;
   }
+  meter.mark('paint');
   uiElapsed += dt;
   saveElapsed += elapsed;
   if (uiElapsed > 0.3) {
@@ -1495,6 +1509,7 @@ function frame(stamp) {
     save();
     saveElapsed = 0;
   }
+  meter.finish(running);
   requestAnimationFrame(frame);
 }
 function setup() {
@@ -1883,6 +1898,14 @@ function setup() {
     }
   });
   window.addEventListener("resize", resize);
+  window.addEventListener('solar:dev-reload', event => {
+    try {
+      sessionStorage.setItem('solar-dev-reload', JSON.stringify({
+        url:location.href, raw:game.snapshot(), active:gameActive, paused, speed, zoom, pan,
+        scene:sandboxName, parent:sandbox ? {...sandbox, game:undefined, raw:sandbox.game.snapshot()} : null,
+      }));
+    } catch { event.preventDefault(); toast('Reload paused: export your checkpoint before refreshing.'); }
+  });
   window.addEventListener("pagehide", () => save());
   document.addEventListener("visibilitychange", () => {
     last = 0;
@@ -2048,6 +2071,26 @@ try {
     togglePause();
     save();
   }
+  // Dev-server reloads preserve the test scene separately from playable saves.
+  const resumeRaw=sessionStorage.getItem('solar-dev-reload');
+  if(resumeRaw){
+    const resume=JSON.parse(resumeRaw);
+    if(resume.url===location.href && game.restore(resume.raw)){
+      if(resume.parent){
+        const parent=new Game();
+        if(!parent.restore(resume.parent.raw)){parent.free();throw new Error('Dev reload parent checkpoint needs recovery');}
+        sandbox?.game.free();sandbox={...resume.parent,game:parent};sandboxName=resume.scene;
+      }
+      ({zoom,pan,speed}=resume);gameActive=resume.active;
+      storage=modeStores[JSON.parse(resume.raw).village.mode||'story'];
+      if(gameActive)$('#main-menu').close();
+      if(paused!==resume.paused)togglePause();
+      refreshDevScene();devTools.refresh();
+    }
+    sessionStorage.removeItem('solar-dev-reload');
+  }
+
+  window.solarDevReloadReady=true;window.dispatchEvent(new Event('solar:dev-ready'));
 } catch (error) {
   console.error(error);
   $("#load-status").textContent =

@@ -18,3 +18,10 @@ lto = true
 opt-level = "s"
 codegen-units = 1
 strip = true
+
+# Native/WASM iteration keeps optimization without the release link-time pass.
+[profile.iteration]
+inherits = "dev"
+opt-level = 1
+debug = 0
+incremental = true

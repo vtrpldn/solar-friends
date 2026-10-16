@@ -1,0 +1,25 @@
+{
+  "profile": "iteration",
+  "frame": {
+    "samples": 90,
+    "simulation": {
+      "median": 1,
+      "p95": 1.3000000715255737
+    },
+    "sample": {
+      "median": 1.5,
+      "p95": 1.899999976158142
+    },
+    "paint": {
+      "median": 7.900000095367432,
+      "p95": 8.899999976158142
+    },
+    "total": {
+      "median": 10.5,
+      "p95": 16.399999976158142
+    }
+  },
+  "editToReadyMs": 5089,
+  "checkpoint": true,
+  "browserErrors": []
+}

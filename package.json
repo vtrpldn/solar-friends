@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "benchmark": "node scripts/benchmark-engine.mjs",
     "dev:check": "node scripts/dev-check.mjs",
     "dev:browser": "node scripts/dev-check.mjs --browser-only",
     "dev:serve": "node scripts/serve.mjs"

@@ -1391,6 +1391,33 @@ impl Game {
                     && r.sleep.slept_minutes < r.sleep.duration_minutes
             })
     }
+    /// A read-only animation render sample. Full reports and static land stay in snapshot().
+    /// Never use this partial view as a save file.
+    pub fn frame_state(&mut self) -> String {
+        let mut query = self.app.world_mut().query::<&Resident>();
+        let world = self.app.world();
+        let v = world.resource::<Village>();
+        let residents: Vec<_> = query.iter(world).collect();
+        serde_json::json!({
+            "village": {
+                "minutes": v.minutes,
+                "buildings": v.buildings,
+                "building_jobs": v.building_jobs,
+                "power": v.power,
+                "water_supply": v.water_supply,
+                "logistics": v.logistics,
+                "roads": v.roads,
+                "economy": { "sources": v.economy.sources },
+            },
+            "residents": residents,
+            "environment": {
+                "raining": climate::at(v, v.minutes).raining,
+                "weather": { "current": climate::at(v, v.minutes) },
+                "power": power::supply(v),
+            },
+        })
+        .to_string()
+    }
     pub fn snapshot(&mut self) -> String {
         let mut village = self.app.world().resource::<Village>().clone();
         let residents: Vec<_> = self

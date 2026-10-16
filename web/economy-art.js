@@ -1,3 +1,4 @@
+import {paintImage} from './paint-cache.js';
 import { unlitFilter } from './power.js';
 export const economyAtlasFile='economy-atlas-v2.png';
 export const economyAtlasSize=[1536,1024];
@@ -19,11 +20,11 @@ export function drawEconomySprite(ctx,image,art,x,y,scale=1){
   if(!image?.naturalWidth)return;
   const [u,v,cw,ch]=art.cell,w=art.width*scale;
   const sw=cw*image.naturalWidth,sh=ch*image.naturalHeight,h=w*sh/sw;
-  ctx.save();ctx.translate(x,y-3*scale);ctx.scale(w*.34,w*.17);
+  ctx.save();ctx.filter='none';ctx.translate(x,y-3*scale);ctx.scale(w*.34,w*.17);
   const shade=ctx.createRadialGradient(0,0,.05,0,0,1);
   shade.addColorStop(0,'#34452b20');shade.addColorStop(1,'#34452b00');
   ctx.fillStyle=shade;ctx.fillRect(-1,-1,2,2);ctx.restore();
-  ctx.drawImage(image,u*image.naturalWidth,v*image.naturalHeight,sw,sh,x-w/2,y-h*art.anchor,w,h);
+  paintImage(ctx,image,u*image.naturalWidth,v*image.naturalHeight,sw,sh,x-w/2,y-h*art.anchor,w,h);
 }
 export function drawEconomyArt(ctx,index,x,y,scale,night=0,remaining=1){
   if(!economyImage?.complete||!economyImage.naturalWidth)return;

@@ -1,3 +1,4 @@
+import {paintImage} from './paint-cache.js';
 // Canonical runtime sizes and measured ground-axis slopes for the painted assets.
 // Width is the full source-cell width at zoom 1, including transparent padding.
 // Axis calibration keeps verticals vertical and maps the two measured ground
@@ -87,7 +88,7 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   if(art.renderFilter)ctx.filter=(ctx.filter==='none'?'':ctx.filter+' ')+art.renderFilter;
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
-  ctx.drawImage(buildingTexture(image, art.mesh), cx * sourceWidth, cy * sourceHeight,
+  paintImage(ctx,buildingTexture(image, art.mesh), cx * sourceWidth, cy * sourceHeight,
     cw * sourceWidth, ch * sourceHeight,
     -w / 2, -w * (art.aspect||1) * art.anchor, w, w * (art.aspect||1));
   ctx.restore();

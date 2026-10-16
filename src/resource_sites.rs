@@ -547,13 +547,15 @@ mod tests {
                 2.,
             );
             assert!(finish(&mut v, 0));
+            // This test isolates irrigation, independent of the seeded forest.
+            v.land.natural_light.fill(1.);
             advance(&mut v, 1440.);
             assert_eq!(v.economy.sources[0].growth, 0.25);
             let growth = v.economy.sources[0].growth;
             advance(&mut v, 600.);
-            assert!(
-                v.economy.sources[0].growth > growth,
-                "Visible perimeter shade keeps a little water after the unshaded day"
+            assert_eq!(
+                v.economy.sources[0].growth, growth,
+                "Dry trees stop growing"
             );
             let dry_growth = v.economy.sources[0].growth;
             advance(&mut v, 600.);
