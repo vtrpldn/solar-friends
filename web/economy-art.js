@@ -16,7 +16,7 @@ economyArt.forEach(art=>{art.aspect=art.cell[3]*economyAtlasSize[1]/(art.cell[2]
 export const economyImage = typeof Image==='undefined'?null:new Image();
 if(economyImage)economyImage.src=new URL(`./art/${economyAtlasFile}`,import.meta.url).href;
 // Runtime and artwork tools share actual crop geometry, including rectangular atlases.
-export function drawEconomySprite(ctx,image,art,x,y,scale=1){
+export function drawEconomySprite(ctx,image,art,x,y,scale=1,filter=ctx.filter){
   if(!image?.naturalWidth)return;
   const [u,v,cw,ch]=art.cell,w=art.width*scale;
   const sw=cw*image.naturalWidth,sh=ch*image.naturalHeight,h=w*sh/sw;
@@ -24,11 +24,11 @@ export function drawEconomySprite(ctx,image,art,x,y,scale=1){
   const shade=ctx.createRadialGradient(0,0,.05,0,0,1);
   shade.addColorStop(0,'#34452b20');shade.addColorStop(1,'#34452b00');
   ctx.fillStyle=shade;ctx.fillRect(-1,-1,2,2);ctx.restore();
-  paintImage(ctx,image,u*image.naturalWidth,v*image.naturalHeight,sw,sh,x-w/2,y-h*art.anchor,w,h);
+  paintImage(ctx,image,u*image.naturalWidth,v*image.naturalHeight,sw,sh,x-w/2,y-h*art.anchor,w,h,filter);
 }
 export function drawEconomyArt(ctx,index,x,y,scale,night=0,remaining=1){
   if(!economyImage?.complete||!economyImage.naturalWidth)return;
-  ctx.save();ctx.filter=unlitFilter(night,remaining<.03?.25:1);
+  ctx.save();const filter=unlitFilter(night,remaining<.03?.25:1);
   ctx.globalAlpha*=remaining<.03 ? .55 : 1;
-  drawEconomySprite(ctx,economyImage,economyArt[index],x,y,scale);ctx.restore();
+  drawEconomySprite(ctx,economyImage,economyArt[index],x,y,scale,filter);ctx.restore();
 }

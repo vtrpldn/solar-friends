@@ -6,6 +6,7 @@ const output='artifacts/isometric';await mkdir(output,{recursive:true});
 const server=await serve(),base=`http://127.0.0.1:${server.address().port}`,browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1500,height:1050}}),errors=[],screenshots=[];
 page.on('pageerror',e=>errors.push(e.message));
+await page.addInitScript(()=>{window.worldFilters=[];const proto=CanvasRenderingContext2D.prototype,descriptor=Object.getOwnPropertyDescriptor(proto,'filter');Object.defineProperty(proto,'filter',{...descriptor,set(value){if(this.canvas.id==='world'&&value!=='none')window.worldFilters.push(value);descriptor.set.call(this,value);}});});
 try{
  await page.goto(base+'/artwork/projection.html');
  await page.waitForFunction(()=>document.querySelector('#status')?.dataset.drift);
@@ -41,14 +42,13 @@ try{
  for(const mode of ['artwork-preview','night-preview']){
   await page.goto(base+'/?'+mode);await page.waitForFunction(()=>window.solarDevReloadReady);
   assert.equal((await page.evaluate(()=>window.solarDev.snapshot())).village.buildings.length,27);
-  assert.equal(await page.locator('#night-lights').evaluate(el=>getComputedStyle(el).pointerEvents),'none');
-  assert.equal(await page.locator('#night-lights').evaluate(el=>el.hidden),mode==='artwork-preview');
+  assert.deepEqual(await page.evaluate(()=>window.worldFilters),[],'World-sized filter layers must not return; filter small cached sprite surfaces instead');
   await page.screenshot({path:`${output}/${mode}-game.png`});screenshots.push(`${output}/${mode}-game.png`);
  }
  await page.locator('#dev-button').click();await page.locator('[data-dev-tab=checks]').click();
  const downloaded=page.waitForEvent('download');await page.locator('#dev-capture').click();const download=await downloaded;
- const expected=await page.evaluate(()=>{const world=document.querySelector('#world'),lights=document.querySelector('#night-lights'),capture=document.createElement('canvas');capture.width=world.width;capture.height=world.height;const ctx=capture.getContext('2d');ctx.drawImage(world,0,0);if(!lights.hidden){ctx.globalCompositeOperation='screen';ctx.drawImage(lights,0,0);}return capture.toDataURL('image/png').split(',')[1];});
- assert.deepEqual(await readFile(await download.path()),Buffer.from(expected,'base64'),'Downloaded scene must include the composited night lights');
+ const expected=await page.evaluate(()=>document.querySelector('#world').toDataURL('image/png').split(',')[1]);
+ assert.deepEqual(await readFile(await download.path()),Buffer.from(expected,'base64'),'Downloaded scene must match the visible night world');
  assert.deepEqual(errors,[]);
  await writeFile(`${output}/browser-review.json`,JSON.stringify({variants:27,views:54,status:'captures-only-not-visual-approval',occlusion,errors,screenshots},null,2));
  console.log('PASS: captured all 54 renderer views, exercised enlarged guides and planted day/night previews, checked light occlusion; no browser errors. Visual quality is not certified by this test.');

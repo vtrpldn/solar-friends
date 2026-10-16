@@ -1,0 +1,49 @@
+{
+  "baseline": "66fef4b",
+  "scope": "Complete static desktop screenshots before and after the resource-filter cache fix",
+  "source_artwork": "Canonical building PNGs, camera calibration, placement and proportions unchanged",
+  "observations": "Village night and wet-climate screenshots are pixel-identical. The artwork gallery differs only around one small resource icon at x573\u2013598, y440\u2013461; cached vector anti-aliasing changes, maximum channel difference 20. No building sprite changes.",
+  "results": [
+    {
+      "scene": "night-preview",
+      "changed": 360,
+      "over_two": 165,
+      "maximum": 20,
+      "box": [
+        573,
+        440,
+        598,
+        461
+      ],
+      "tiles": {
+        "(500, 400)": 165
+      }
+    },
+    {
+      "scene": "dev-scenario-night",
+      "changed": 0,
+      "over_two": 0,
+      "maximum": 0,
+      "box": [
+        1440,
+        1000,
+        0,
+        0
+      ],
+      "tiles": {}
+    },
+    {
+      "scene": "dev-scenario-climate-wet",
+      "changed": 0,
+      "over_two": 0,
+      "maximum": 0,
+      "box": [
+        1440,
+        1000,
+        0,
+        0
+      ],
+      "tiles": {}
+    }
+  ]
+}

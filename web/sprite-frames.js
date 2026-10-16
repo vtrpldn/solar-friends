@@ -79,8 +79,8 @@ export function preparedFrames(image, {columns=4,rows=4,referenceRow=0} = {}) {
   });
   cache.set(image,{key,frames});return frames;
 }
-export function drawPreparedFrame(ctx,image,index,x,y,width,options) {
+export function drawPreparedFrame(ctx,image,index,x,y,width,options,filter=ctx.filter) {
   const frame=preparedFrames(image,options)?.[index];
-  if(frame)paintImage(ctx,frame,0,0,frame.width,frame.height,x-width/2,y-width*FRAME_ANCHOR,width,width);
+  if(frame)paintImage(ctx,frame,0,0,frame.width,frame.height,x-width/2,y-width*FRAME_ANCHOR,width,width,filter);
 }
 export function animationFrameOptions(sprite) { return {referenceRow: sprite.idleAnimation || sprite.activityAnimation ? 0 : 2}; }

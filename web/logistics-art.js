@@ -1,5 +1,6 @@
+import {paintProcedural} from './paint-cache.js';
 // Small crates share the village's orthographic axes and warm wood palette.
-function crate(ctx,x,y,s,night=0){
+function paintCrate(ctx,x,y,s,night=0){
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.filter=`brightness(${1-night*.45})`;
   ctx.fillStyle=`rgba(43,47,28,${.2+night*.08})`;ctx.beginPath();ctx.ellipse(0,3,9,4,0,0,Math.PI*2);ctx.fill();
   const face=(points,a,b)=>{const color=ctx.createLinearGradient(0,-10,0,3);color.addColorStop(0,a);color.addColorStop(1,b);ctx.fillStyle=color;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
@@ -16,7 +17,7 @@ export function drawSupplyPile(ctx,p,scale,units,night){
   const count=Math.min(3,Math.ceil(units/12));
   for(let i=0;i<count;i++)crate(ctx,p.x+(i%2?7:-5)*scale,p.y+(i>1?-7:0)*scale,scale*.8,night);
 }
-function pail(ctx,x,y,s,kind,night){
+function paintPail(ctx,x,y,s,kind,night){
   const sealed=kind==='greywater'||kind==='sewage',band={fresh:'#4d8297',irrigation:'#607849',greywater:'#806581',sewage:'#9d673c'}[kind];
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.filter=`brightness(${1-night*.45})`;
   ctx.fillStyle='#283c2c33';ctx.beginPath();ctx.ellipse(0,2.5,6,2.5,0,0,Math.PI*2);ctx.fill();
@@ -35,3 +36,12 @@ function pail(ctx,x,y,s,kind,night){
 }
 export function drawCarriedWater(ctx,p,scale,facing,kind,night){pail(ctx,p.x+facing*9*scale,p.y-15*scale,scale*.8,kind,night);}
 export function drawWaterPile(ctx,p,scale,tank,night){let slot=0;for(const [i,kind]of ['fresh','irrigation','greywater','sewage'].entries())for(let n=0;n<Math.min(2,Math.ceil(tank.water[i]/12));n++){pail(ctx,p.x+(slot%3-1)*8*scale,p.y-Math.floor(slot/3)*6*scale,scale,kind,night);slot++;}}
+
+function crate(ctx,x,y,scale,night=0){
+ const shade=Math.round(night*64)/64;
+ paintProcedural(ctx,'crate:'+shade,[-11,-14,22,24],x,y,scale,local=>paintCrate(local,0,0,1,shade));
+}
+function pail(ctx,x,y,scale,kind,night=0){
+ const shade=Math.round(night*64)/64;
+ paintProcedural(ctx,'pail:'+kind+':'+shade,[-8,-14,16,22],x,y,scale,local=>paintPail(local,0,0,1,kind,shade));
+}

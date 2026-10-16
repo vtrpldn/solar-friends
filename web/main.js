@@ -75,9 +75,6 @@ let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world");
 let ctx = canvas.getContext("2d");
 const lightLayer=document.createElement('canvas'),lightContext=lightLayer.getContext('2d');
-lightLayer.id='night-lights';lightLayer.setAttribute('aria-hidden','true');
-lightLayer.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen';
-canvas.after(lightLayer);
 const kinds = {
   ...Object.fromEntries(Object.entries(farmNames).map(([k,n])=>[k,[n,farmNotes[k]]])),
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
@@ -477,7 +474,7 @@ function tree(x, y, s = 1, species = 0) {
     if(!natureArt.complete||!natureArt.naturalWidth)return;
     const art=natureDetails[species-4];if(!art)return;
     const [cx,cy,cw,ch]=art.cell,w=art.width*s*scale,h=w*art.aspect;
-    ctx.save();ctx.filter=unlitFilter(nightAmount(state.village.minutes));paintImage(ctx,natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h);ctx.restore();return;
+    ctx.save();paintImage(ctx,natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h,unlitFilter(nightAmount(state.village.minutes)));ctx.restore();return;
   }
   const w = forestSpecies[species].width * s * scale;
   const cell = forestArt.width / 2;
@@ -517,8 +514,8 @@ function sprite(kind, x, y, alpha = 1, id) {
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
   const level=buildingLighting(state.environment.power,id,kind,complete);
   for(const layer of lightingLayers(night,level,alpha)){
-    ctx.save();ctx.filter=layer.source==='night'&&art.nightTint?art.nightTint:layer.filter;
-    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
+    ctx.save();const filteredArt={...art,renderFilter:layer.source==='night'&&art.nightTint?art.nightTint:layer.filter};
+    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],filteredArt,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
     ctx.restore();
   }
 }
@@ -746,7 +743,6 @@ function render() {
   drawWaterConnections(ctx,iso,scale,state);
   drawElectricalConnections(ctx,iso,scale,state);
   const darkness = nightAmount(state.village.minutes);
-  lightLayer.hidden=darkness<=0;
   if(darkness>0){
     if(lightLayer.width!==canvas.width||lightLayer.height!==canvas.height){lightLayer.width=canvas.width;lightLayer.height=canvas.height;}
     lightContext.resetTransform();lightContext.clearRect(0,0,lightLayer.width,lightLayer.height);lightContext.setTransform(ctx.getTransform());
@@ -838,8 +834,7 @@ function render() {
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
   ctx.fillRect(0, 0, width, height);
-  // The compositor blends the light surface directly, avoiding a synchronous
-  // full-canvas transfer back into the world drawing context.
+  if(darkness>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(lightLayer,0,0,lightLayer.width,lightLayer.height,0,0,width,height);ctx.restore();}
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
@@ -1492,7 +1487,7 @@ function togglePause() {
 }
 let paintedState = null, paintedView = "", reportElapsed = Infinity;
 function frame(stamp) {
-  meter.start();
+  meter.start(stamp);
   if (!last) last = stamp;
   const elapsed = Math.max(0, (stamp - last) / 1000);
   const dt = Math.min(elapsed, 0.1);
@@ -2018,10 +2013,7 @@ const devAPI = {
   },
   capture() {
     devAPI.fixedView();
-    const capture=document.createElement('canvas');capture.width=canvas.width;capture.height=canvas.height;
-    const surface=capture.getContext('2d');surface.drawImage(canvas,0,0);
-    if(!lightLayer.hidden){surface.globalCompositeOperation='screen';surface.drawImage(lightLayer,0,0);}
-    const a = document.createElement('a'); a.download = 'solar-friends-scene.png'; a.href = capture.toDataURL('image/png'); a.click();
+    const a = document.createElement('a'); a.download = 'solar-friends-scene.png'; a.href = canvas.toDataURL('image/png'); a.click();
   },
 };
 try {

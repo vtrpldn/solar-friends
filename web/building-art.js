@@ -84,11 +84,11 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   const { vertical, shear } = cameraCalibration(art);
   ctx.save();
   ctx.globalAlpha *= alpha;
-  if(art.renderFilter)ctx.filter=(ctx.filter==='none'?'':ctx.filter+' ')+art.renderFilter;
+  const filter=[ctx.filter==='none'?'':ctx.filter,art.renderFilter].filter(Boolean).join(' ')||'none';
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
   paintImage(ctx,image, cx * sourceWidth, cy * sourceHeight,
     cw * sourceWidth, ch * sourceHeight,
-    -w / 2, -w * (art.aspect||1) * art.anchor, w, w * (art.aspect||1));
+    -w / 2, -w * (art.aspect||1) * art.anchor, w, w * (art.aspect||1), filter);
   ctx.restore();
 }

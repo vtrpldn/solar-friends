@@ -9,6 +9,7 @@ try{
  await page.locator('#dev-close').click();await page.evaluate(()=>window.solarDev.run());
  await page.waitForFunction(()=>window.solarPerformance.report().samples>=90,null,{timeout:60000});
  const perf=await page.evaluate(()=>window.solarPerformance.report());
+ assert(perf.frameInterval.median>0&&perf.frameInterval.median<100,'The real frame cadence must remain responsive, including time outside JavaScript');
  const runningAt=await page.evaluate(()=>window.solarDev.snapshot().village.minutes);
  const runningLoad=page.waitForEvent('load');await writeFile(jsFile,jsSource+'\n// Running-scene reload probe.\n');await runningLoad;await page.waitForFunction(()=>window.solarDevReloadReady);
  assert.equal(await page.locator('#dev-dialog').evaluate(el=>el.open),false,'A running scene must not reopen a blocking developer dialog');
