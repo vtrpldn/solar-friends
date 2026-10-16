@@ -154,9 +154,6 @@ pub fn ingredients(v: &Village, id: usize) -> bool {
     let (food, meals) = projected(v, id);
     food < 18. && food + meals < 30.
 }
-pub fn cooking(v: &Village, _id: usize) -> bool {
-    production::jobs(v).any(|b| b.material == economy::MEALS)
-}
 
 #[derive(Serialize)]
 pub struct Offer {
@@ -532,6 +529,38 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             reason: utilities::crew_reason(v, id).unwrap(),
         });
     }
+    for offer in &mut out {
+        // A small continuity bonus favours the same useful project after a
+        // work interval, but a higher project priority still wins.
+        if (offer.building.is_some() || offer.batch.is_some() || offer.task == "source")
+            && offer.task == r.task
+            && offer.building == r.activity_building
+            && offer.material == r.activity_material
+            && offer.batch == r.activity_batch
+        {
+            offer.score += 45.;
+        }
+        // Haul and water quotes already include both legs. Continuous crew
+        // work needs a useful six minutes; indivisible batches need their rest.
+        let work = if matches!(
+            offer.task.as_str(),
+            "build" | "building_work" | "utility" | "restore"
+        ) {
+            6.
+        } else {
+            work_minutes(v, offer)
+        };
+        if offer.blocker.is_none()
+            && offer
+                .travel_minutes
+                .is_some_and(|travel| !autonomy::fits_before_break(v, travel, work))
+        {
+            offer.blocker = Some(
+                "There is not enough time for this journey and useful work before our next break."
+                    .into(),
+            );
+        }
+    }
     out.sort_by(|a, b| {
         b.score
             .total_cmp(&a.score)
@@ -540,15 +569,48 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     });
     out
 }
+fn work_minutes(v: &Village, job: &Offer) -> f32 {
+    if matches!(job.task.as_str(), "haul" | "water") {
+        0. // These quotes include both legs.
+    } else if let Some(id) = job.batch {
+        production::batch(v, id).map_or(30., |b| (10. - b.work).max(0.) * MINUTES_PER_SECOND)
+    } else if job.task == "compost" {
+        3. * MINUTES_PER_SECOND
+    } else {
+        10. * MINUTES_PER_SECOND
+    }
+}
 pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
     let Some(job) = offers(v, r)
         .into_iter()
-        // A final hauling attempt records the specific store blocker and
-        // releases the worker immediately; it cannot reserve an invalid trip.
-        .find(|job| (job.blocker.is_none() || job.task == "haul") && assigned_to(v, r, job))
+        // An unreachable hauling attempt records its store blocker once and
+        // releases the worker. A timed-out offer must wait for the next shift.
+        .find(|job| {
+            (job.blocker.is_none() || (job.task == "haul" && job.travel_minutes.is_none()))
+                && assigned_to(v, r, job)
+        })
     else {
         return false;
     };
+    if let Some(need) = autonomy::preparation(
+        v,
+        r,
+        job.travel_minutes.unwrap_or(0.),
+        work_minutes(v, &job),
+    ) {
+        assign(
+            r,
+            v,
+            need,
+            if need == "eat" {
+                "Eating before a long errand so I can see it through."
+            } else {
+                "Resting before a long errand so I can see it through."
+            },
+            false,
+        );
+        return true;
+    }
     assign(r, v, &job.task, job.reason, false);
     // The offer owns its target; the legacy task fallback must not select a
     // different project or occupied plot after the shared queue chose this one.
@@ -576,11 +638,15 @@ pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
 fn willing(v: &Village, r: &Resident, task: &str) -> bool {
     r.trip.is_none()
         && !r.requested
-        && r.energy >= 28.
+        && !autonomy::recovering(r)
+        && !autonomy::company(r)
         && r.hunger <= 60.
         && !sleeping_time(v.minutes, r)
         && !occupations::available(v, r.id)
-        && !meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot)
+        && !(eating(v, r.id)
+            && (autonomy::meal_due(r, v.minutes) || (v.meals > 0 && r.hunger > 30.)))
+        && !sanitation::due(v, r)
+        && !urgent_food(v, r.id)
         && !situations::protected(v, r.id, task)
         && (r.remaining <= 0.
             || leisure::hobby(&r.task)
@@ -636,7 +702,22 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
             continue;
         };
         let travel = route.minutes;
-        let s = score(v, peer, &job.task, job.urgency, travel);
+        if !autonomy::fits_before_break(v, travel, work_minutes(v, job).min(6.))
+            || autonomy::preparation(v, peer, travel, work_minutes(v, job)).is_some()
+        {
+            continue;
+        }
+        let continuity = if (job.building.is_some() || job.batch.is_some() || job.task == "source")
+            && peer.task == job.task
+            && peer.activity_building == job.building
+            && peer.activity_material == job.material
+            && peer.activity_batch == job.batch
+        {
+            45.
+        } else {
+            0.
+        };
+        let s = score(v, peer, &job.task, job.urgency, travel) + continuity;
         if s > job.score || (s == job.score && peer.id < r.id) {
             better += 1;
         }
@@ -923,7 +1004,7 @@ mod tests {
             .find(|b| b.material == economy::MEALS)
             .unwrap()
             .id;
-        assert!(cooking(&v, 0));
+        assert!(production::jobs(&v).any(|b| b.material == economy::MEALS));
         assert_eq!(projected(&v, 4), (3., 5.));
         for id in 0..2 {
             v.activity_claims[id] = Some(Claim {
