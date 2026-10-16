@@ -4,6 +4,19 @@ export async function checkMaintenanceControls({page,saved,capture}){
   const snap=()=>page.evaluate(()=>window.solarDev.snapshot());
   async function load(id){if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();await page.locator('[data-dev-tab="simulation"]').click();await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();await page.waitForFunction(id=>window.solarDev.scenario()===id,id);await page.locator('#dev-close').click();await page.locator('#maintenance-alert').click();}
   async function advance(minutes){const start=(await snap()).village.minutes;await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill(String(minutes));await page.locator('#dev-advance').click();await page.waitForFunction(t=>window.solarDev.snapshot().village.minutes>=t,start+minutes);await page.locator('#dev-close').click();}
+  async function untilService(test,days){
+    const deadline=(await snap()).village.minutes+days*1440;
+    while((await snap()).village.minutes<deadline){
+      const s=await snap();if(test(s))return true;
+      const clock=s.village.minutes%1440;
+      const working=clock>=540&&clock<720||clock>=900&&clock<960;
+      const next=clock<540?540:clock<900?900:1980;
+      // Sample attended work closely; skip off-duty time only up to the next
+      // work window, so a complete repair cannot hide a partial-work check.
+      await advance(working?5:Math.min(60,next-clock));
+    }
+    return test(await snap());
+  }
   await load('maintenance');
   const workshop=page.locator('.service-record[data-equipment-kind="workshop"]');
   for(const viewport of [{width:1600,height:900},{width:1280,height:800}]){
@@ -18,19 +31,18 @@ export async function checkMaintenanceControls({page,saved,capture}){
   await capture('The service kit enters the normal town basket','upkeep-spares.png');
   await page.locator('#town-order').click();assert.equal((await snap()).village.economy.orders.at(-1).status,'confirmed');
   await page.locator('#maintenance-alert').click();await advance(1440);
-  let partial=false;
-  for(let t=0;t<24;t++){
-    const j=(await snap()).village.maintenance.jobs.find(j=>j.id===job.id);
-    if(j.work>0&&j.finished==null){partial=true;break;}await advance(5);
-  }
-  assert(partial,'Actual local delivery leads to attended workshop service');
+  const partial=await untilService(s=>{
+    const j=s.village.maintenance.jobs.find(j=>j.id===job.id);
+    return j.work>0&&j.finished==null;
+  },3);
+  assert(partial,'Actual local delivery and normal community hours lead to attended workshop service');
   const before=(await snap()).village.maintenance.jobs.find(j=>j.id===job.id);
   await workshop.getByRole('button',{name:'Pause service',exact:true}).click();await advance(30);
   assert.equal((await snap()).village.maintenance.jobs.find(j=>j.id===job.id).work,before.work);
   await workshop.scrollIntoViewIfNeeded();
   await capture('Paused service retains its consumed kit and partial work','upkeep-paused.png');
   await workshop.getByRole('button',{name:'Resume service',exact:true}).click();
-  for(let t=0;t<8&&(await snap()).village.maintenance.jobs.find(j=>j.id===job.id).finished==null;t++)await advance(60);
+  assert(await untilService(s=>s.village.maintenance.jobs.find(j=>j.id===job.id).finished!=null,2));
   const done=(await snap()).village.maintenance.jobs.find(j=>j.id===job.id);assert(done.finished!=null&&!done.cancelled);
   assert((await snap()).village.maintenance.records.find(r=>r.equipment.kind==='workshop').condition>99);
   assert.equal(done.spent[8][1]-done.spent[8][0],1);assert.equal(done.spent[15][1]-done.spent[15][0],2);

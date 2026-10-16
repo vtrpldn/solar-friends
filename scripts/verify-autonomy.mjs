@@ -9,11 +9,15 @@ assert(game.restore(await readFile(new URL('../web/artwork/village-preview.json'
 assert(game.restore(JSON.stringify(makeScenario('autonomy',fresh,snap()))));
 const project=snap().village.buildings.at(-1).id;
 await writeFile(`${output}/before.json`,game.snapshot());
+assert.match(game.request(2,'gather',false),/Happy/);
+const request=snap().residents[2].help.id;
 game.tick(.1);
 const first=snap();
 assert.equal(first.residents[0].task,'rest');
 assert.equal(first.residents[1].task,'eat');
 assert.equal(first.residents[2].task,'socialize');
+assert.equal(first.residents[2].help.phase,'paused');
+assert.match(first.residents[2].help.reason,/catch up with neighbours/);
 assert.equal(first.residents[4].task,'outside');
 const days=[],activities=Array.from({length:5},()=>new Set());
 let rested=false,ate=false,connected=false,worked=false,completedAt=null;
@@ -41,9 +45,11 @@ for(let frame=0;frame<4*1920;frame++){
 assert(rested&&ate&&connected,'Residents recover the needs they started with');
 assert(worked&&completedAt,'Self care leaves room for the approved village project');
 const end=snap(),leisure=end.village.simulation.days.slice(1,-1).reduce((totals,d)=>{d.residents.forEach((r,i)=>r.forEach((n,j)=>totals[i][j]+=n));return totals;},Array.from({length:5},()=>Array(8).fill(0))).map(r=>(r[4]+r[5]+r[6])/r.reduce((sum,n,i)=>sum+([0,1,3,4,5,6].includes(i)?n:0),0));
+assert.equal(end.residents[2].help.id,request);
+assert.equal(end.residents[2].help.phase,'complete','An accepted request resumes after social recovery and finishes');
 console.log('Observed leisure ratios',leisure);
 assert(leisure.every(n=>n>.5),'Every resident keeps a majority of waking village time for their own life');
 await writeFile(`${output}/after.json`,game.snapshot());
-await writeFile(`${output}/report.json`,JSON.stringify({first:first.residents.map(r=>({name:r.name,task:r.task,reason:r.reason})),rested,ate,connected,worked,completedAt,days,leisure,activities:activities.map(s=>[...s])},null,2));
+await writeFile(`${output}/report.json`,JSON.stringify({first:first.residents.map(r=>({name:r.name,task:r.task,reason:r.reason})),rested,ate,connected,worked,completedAt,request:end.residents[2].help,days,leisure,activities:activities.map(s=>[...s])},null,2));
 game.free();
 console.log('PASS: individual rest, meals, social recovery, outside commitments, autonomous project completion, four exact daily continuations and balanced material/liquid accounts; most waking village time remains free.');
