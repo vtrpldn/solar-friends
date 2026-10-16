@@ -1,3 +1,7 @@
+---
+description: Resident needs, farm care, outside commitments and useful autonomous project work, with focused and long-running evidence.
+---
+
 # Everyday resident decisions
 
 Why: personal needs, existing food production and commitments should make residents reconsider work sensibly, while keeping time for hobbies and the village projects the player approved.
