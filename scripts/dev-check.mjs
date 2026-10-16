@@ -41,7 +41,7 @@ try {
   if(!process.argv.includes('--browser-only')) {
     await command('Rust formatting','cargo',['fmt','--check']);
     await command('Rust behavior','cargo',['test','--locked']);
-    await command('Rust lint','cargo',['clippy','--locked','--','-D','warnings']);
+    await command('Rust lint','cargo',['clippy','--locked','--all-targets','--','-D','warnings']);
     await command('Build WebAssembly','bash',['scripts/build.sh']);
     for(const file of [...await jsFiles('web'), ...await jsFiles('scripts')]) await command(`Syntax: ${file}`,process.execPath,['--check',file]);
     for(const file of (await readdir('scripts')).filter(s=>/^verify-.*\.mjs$/.test(s)).sort()) await command(file,process.execPath,[`scripts/${file}`]);
