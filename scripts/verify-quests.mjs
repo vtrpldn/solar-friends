@@ -41,6 +41,7 @@ function purchase(items){if(!items.some(Boolean))return;until(s=>s.environment.e
 function build(kind,recipe='standard',local=false,site=null){
  const [x,y]=site||location(kind);assert.equal(g.place_with_recipe(kind,x,y,recipe),'ok',`${kind} placement`);
  const id=snap().village.buildings.at(-1).id;
+ if(local)assert.equal(g.configure_project(id,3,false,recipe),'ok','Prioritise this locally supplied housing project');
  const missing=snap().environment.economy.shortage;
  if(local){for(const i of [5,6,7,8])missing[i]=0;missing[0]+=12;missing[2]+=20;missing[4]+=6;}
  purchase(missing);

@@ -829,8 +829,21 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
         && let Owner::Pantry(id) = to
         && let Some(p) = food::pantry(v, id)
         && match material {
-            economy::FOOD => p.items[economy::FOOD] < 3,
-            economy::EGGS => p.items[economy::EGGS] < 2,
+            economy::FOOD | economy::EGGS => {
+                // One saved inbound kit already enables the next pot. Keep
+                // essential shortages urgent, but do not turn its optional
+                // pantry top-up into a second emergency carrier assignment.
+                let inbound: u32 = v
+                    .logistics
+                    .as_ref()
+                    .unwrap()
+                    .shipments
+                    .iter()
+                    .filter(|h| h.to == p.id && h.material == material)
+                    .map(|h| h.amount)
+                    .sum();
+                p.items[material] + inbound < if material == economy::FOOD { 3 } else { 2 }
+            }
             _ => false,
         }
     {
@@ -2340,6 +2353,53 @@ mod tests {
         assert!(
             !doorway(v, &p, [14.4, 10.]),
             "Recovery cannot cross an unrelated home"
+        );
+    }
+    #[test]
+    fn an_incoming_pot_kit_leaves_other_haulers_available_for_construction() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("kitchen", 8, 8), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.arrived = true;
+            v.minutes = 540.;
+            v.supplies.use_eggs = false;
+            fixture_stock(&mut v, economy::FOOD, 4);
+            fixture_stock(&mut v, economy::MEALS, 0);
+            food::gather(&mut v, None, 17., 17., 8);
+        }
+        assert_eq!(g.place("garden", 16, 13), "ok");
+        let world = g.app.world_mut();
+        let mut people: Vec<_> = world.query::<&Resident>().iter(world).cloned().collect();
+        for r in &mut people {
+            r.x = CAMP.0;
+            r.y = CAMP.1;
+            r.task = "idle".into();
+        }
+        let mut v = world.resource_mut::<Village>();
+        assert!(!supplies::urgent(&v));
+        assert!(claim(&mut v, &mut people[0]));
+        let first = v.logistics.as_ref().unwrap().shipments.last().unwrap();
+        assert_eq!(first.material, economy::FOOD);
+        assert_eq!(
+            first.amount, 4,
+            "The first carrier already covers a three-ingredient pot"
+        );
+        let (next, ..) = plan(&v, &people[1]).expect("Another neighbour can supply the project");
+        let receiver = v
+            .logistics
+            .as_ref()
+            .unwrap()
+            .stores
+            .iter()
+            .find(|p| p.id == next.to)
+            .unwrap();
+        assert_eq!(
+            receiver.owner,
+            Owner::Site(1),
+            "An optional kitchen top-up must not recruit every carrier"
         );
     }
     #[test]
