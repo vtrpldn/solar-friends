@@ -19,10 +19,10 @@ impl Equipment {
     fn rates(self) -> (f64, f64) {
         // Fictional balance: exposure per day, then damage per unit of actual use.
         match self {
-            Self::Pump(_) => (0.20, 0.012),
-            Self::Workshop(_) => (0.12, 0.004),
-            Self::Battery(_) => (0.10, 0.015),
-            Self::Truck => (0.08, 0.015),
+            Self::Pump(_) => (0.50, 0.012),
+            Self::Workshop(_) => (0.60, 0.004),
+            Self::Battery(_) => (0.45, 0.015),
+            Self::Truck => (0.45, 0.015),
         }
     }
     fn label(self) -> &'static str {

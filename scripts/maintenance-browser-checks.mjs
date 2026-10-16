@@ -27,12 +27,14 @@ export async function checkMaintenanceControls({page,saved,capture}){
   const before=(await snap()).village.maintenance.jobs.find(j=>j.id===job.id);
   await workshop.getByRole('button',{name:'Pause service',exact:true}).click();await advance(30);
   assert.equal((await snap()).village.maintenance.jobs.find(j=>j.id===job.id).work,before.work);
+  await workshop.scrollIntoViewIfNeeded();
   await capture('Paused service retains its consumed kit and partial work','upkeep-paused.png');
   await workshop.getByRole('button',{name:'Resume service',exact:true}).click();
   for(let t=0;t<8&&(await snap()).village.maintenance.jobs.find(j=>j.id===job.id).finished==null;t++)await advance(60);
   const done=(await snap()).village.maintenance.jobs.find(j=>j.id===job.id);assert(done.finished!=null&&!done.cancelled);
   assert((await snap()).village.maintenance.records.find(r=>r.equipment.kind==='workshop').condition>99);
   assert.equal(done.spent[8][1]-done.spent[8][0],1);assert.equal(done.spent[15][1]-done.spent[15][0],2);
+  await workshop.scrollIntoViewIfNeeded();
   await capture('Resident work restores workshop condition through the real controls','upkeep-finished.png');
   await load('maintenance-outage');
   const beforeCharge=(await snap()).village.power.stored;await advance(60);assert.equal((await snap()).village.power.stored,beforeCharge,'Failed shared storage retains its energy');

@@ -1,3 +1,4 @@
+import {buyServiceParts} from './upkeep-playtest.mjs';
 import {writeFileSync} from 'node:fs';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
@@ -10,13 +11,17 @@ const g=new Game(),snap=()=>JSON.parse(g.snapshot()),output=process.argv[2]||'ar
 if(output)await fs.mkdir(output,{recursive:true});
 await fs.mkdir('artifacts/logistics',{recursive:true});
 g.set_outside_work(true);
-let savedCareCheckIn=false;
+let savedCareCheckIn=false,upkeepChecked=-Infinity,serviceOrders=0,serviceSpending=0;
 function until(test,label,limit=24000){
  for(let i=0;i<limit;i++){
   // Keep every quarter-second simulation step. Poll the full UI snapshot every
   // three game minutes; chapter waits do not need a render snapshot each tick.
   if(i%4===0||i===limit-1){
    const current=snap(),care=current.village.situations.active;
+   if(current.village.minutes-upkeepChecked>=1440){
+    upkeepChecked=current.village.minutes;const order=buyServiceParts(g,current);
+    if(order){serviceOrders++;serviceSpending+=order.paid;}
+   }
    if(output&&!savedCareCheckIn&&care&&care.response==null&&care.resolved==null){writeFileSync(`${output}/care-check-in.json`,g.snapshot());savedCareCheckIn=true;}
    if(test(current))return;
   }
@@ -189,4 +194,5 @@ gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);
 const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
 for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
 assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
+console.log(`Upkeep: ${serviceOrders} paid spare-part deliveries, R$ ${(serviceSpending/100).toFixed(2)}`);
 g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 21 building kinds taught.');

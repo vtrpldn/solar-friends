@@ -15,6 +15,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Village simulation plan](simulator-plan.md)
 - [Completed gameplay and artwork playtest](playtest.md)
 - [Farming and animal care](#farming-and-animal-care)
+- [Equipment upkeep](#equipment-upkeep)
 - [Village quests](#village-quests)
 - [Village situations](#village-situations)
 - [Development tools](#development-tools)
