@@ -6,7 +6,7 @@ import init,{Game} from '../web/pkg/solar_friends.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const output=process.env.SOLAR_SEASONAL_OUTPUT||'artifacts/seasonal-balance';await mkdir(output,{recursive:true});
 const game=new Game(),snap=()=>JSON.parse(game.snapshot());
-assert(game.restore(await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story/solar-complete.json','utf8')));
+assert(game.restore(await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story-optional/solar-complete.json','utf8')));
 const before=snap(),start=before.village.minutes;
 assert.equal(before.village.mode,'story');assert.equal(before.village.climate.enabled,true,'Run the fresh seasonal Story first');
 assert(before.village.progress.later_completed.every(Boolean),'Use earned campaign progress');

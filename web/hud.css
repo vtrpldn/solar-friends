@@ -272,3 +272,6 @@ dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -1
 .town-account #jobs-outlook{max-width:260px;min-height:34px;font-size:11px;text-align:left;line-height:1.5}
 
 #settings-dialog #sandbox-rules .setting-row{align-items:flex-start;margin:16px 0}#sandbox-rules .setting-row input{margin-top:2px;flex-shrink:0}
+
+.journal-options{margin:18px 0 8px;border-top:1px solid #ccb782;padding-top:12px}.journal-options>summary{font-weight:700;color:#5d653d;cursor:pointer}.journal-options>p{font-size:12px}.journal-option{display:flex;gap:10px;padding:13px 0;border-bottom:1px solid #d8c797}.journal-option>span{color:#788848;flex:0 0 18px}.journal-option>div{flex:1;min-width:0}.journal-option b{font-size:13px}.journal-option small{float:right;font-size:11px;color:var(--muted)}.journal-option p{font-size:12px;line-height:1.5;margin:7px 0 10px}.journal-option button{font-size:12px;padding:7px 12px}.journal-option.done>span{color:#637941}
+.journal-option>div{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px}.journal-option b{grid-column:1;grid-row:1}.journal-option small{grid-column:2;grid-row:1;float:none;align-self:center;white-space:nowrap;margin:0}.journal-option p,.journal-option button{grid-column:1/-1}

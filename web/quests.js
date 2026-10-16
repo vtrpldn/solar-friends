@@ -11,7 +11,7 @@ const goal = (label, value, target, hint, build = null) => ({
   hint,
   build,
 });
-export const quests = [
+const lessons = [
   {
     title: "A Shared Beginning",
     person: "Our founding five",
@@ -48,7 +48,7 @@ export const quests = [
         "Bring in our first harvest",
         v.harvests,
         1,
-        "Build a garden and ask Iara to tend it. Plant first and water for two water. Lettuce takes about three moist growing hours on suitable soil. Open Land views beside the minimap to compare fertility and moisture before choosing a clearing.",
+        "Build a garden and ask Iara to tend it. A helping request covers one work session: plant first, then let neighbours water the growing crop. Lettuce takes about three moist growing hours on suitable soil. If the pantry is already healthy, return to the ripe bed and request its harvest. Open Land views beside the minimap to compare fertility and moisture before choosing a clearing.",
         "garden",
       ),
       goal(
@@ -96,7 +96,7 @@ export const quests = [
         "Gather fruit",
         v.progress.fruit,
         6,
-        "Ask a neighbour to forage food. Their saved request in People shows travel, breaks and completion. With a finished food forest, each trip also brings two fruit.",
+        "Ask a neighbour to forage food. Their saved request in People shows travel, breaks and completion. With a finished food forest, each forest trip brings six ingredients.",
       ),
       actionGoal("land", "Plant timber trees", +v.economy.sources.some(s=>s.material===0&&(s.planted||s.harvests>0)), 1, "Mark a timber plot in Construction. Neighbours must deliver four timber seedlings from the arrival store, then spend a community work session planting and watering. The first stock comes with the village; order more in Trade for replanting. Trees need about four moist growing days on suitable soil before whole trees can be harvested; start early."),
       actionGoal("land", "Cultivate bamboo", +v.economy.sources.some(s=>s.material===1&&(s.planted||s.harvests>0)), 1, "Mark a bamboo plot. A neighbour delivers one bamboo start and plants it using two irrigation water; the arrival store carries the first start. Moist growth takes about two days on suitable soil; shoots regrow after cutting. Poor soil and heavy tree shade slow growth. Town purchases can bridge the wait."),
@@ -251,7 +251,7 @@ export const quests = [
     after:"Our adobe home brings local earth into everyday life. Next, meet the river that keeps moving after sunset.",
     objectives:v=>[
       actionGoal("land","Harvest the five local materials",[0,1,2,3,4].filter(m=>v.economy.sources.some(s=>s.material===m&&s.harvests>0)).length,5,"Open Land and request a mature harvest batch for timber and bamboo. Place earth, stone and salvage extraction sites and request their batches too; stone belongs on southeast ground. Residents work 09:00–12:00 and 15:00–16:00. Extraction reserves are finite; clearing a site does not refill them. Missing: "+["timber","bamboo","earth","stone","salvage"].filter((_,m)=>!v.economy.sources.some(s=>s.material===m&&s.harvests>0)).join(", ")+"."),
-      actionGoal("land","Replant a harvested timber plot",+v.progress.timber_replanted,1,"Harvest all four whole trees, then enable replanting or request it. A resident plants the next crop using R$ 40 and two irrigation water."),
+      actionGoal("land","Replant a harvested timber plot",+v.progress.timber_replanted,1,"Harvest all four whole trees, then enable replanting or request it. Four timber seedlings must reach the plot, then a resident replants with two irrigation water. Buy starts in Trade or use our remaining planting stock."),
       actionGoal("preparation","Prepare building materials locally",v.progress.prepared_batches||0,1,"Choose Local or Adobe for an unfinished project before materials are committed. Supply raw earth, timber and salvage. Neighbours bring inputs to camp or a workshop, then prepare materials there during community hours. Follow each saved batch in Preparing materials; zero reserve makes only what projects need."),
       {...goal("Complete an adobe home",+v.economy.projects.some(p=>p.recipe==="adobe"&&v.buildings.some(b=>b.id===p.building&&b.kind==="home"&&b.progress>=100)),1,"Plan a home, choose Adobe before building starts, then connect it to stores and workshops with roads. Set its priority in Projects to keep deliveries moving alongside daily care. Imported fittings and roofing still matter.","home"),recipe:"adobe"},
       actionGoal("town","Sell genuine surplus",+v.progress.surplus_sold,1,"Ask for extra garden harvests or gathering in People until you have at least 37 ingredients, then sell one in Town. Normal chores keep a smaller healthy pantry; this one-off sale must leave the protected 36-ingredient reserve."),
@@ -290,6 +290,98 @@ export const quests = [
   },
 
 ];
+// Required planning outcomes and optional lessons have separate progress.
+const lesson=(v,chapter,label)=>{const found=lessons[chapter].objectives(v).find(o=>o.label===label);if(!found)throw Error('Missing Story lesson: '+label);return found;};
+const observed=(v,index,label,hours,hint,action='supplies',page='pantry')=>{
+ const s=v.progress.outcomes||{},best=s.best?.[index]||0,current=s.current?.[index]||0;
+ const detail=s.last_sample==null?' The first observation appears after the simulation advances.':index===0||index===1||index===4?` Last observation: ${s.food_at_stores||0} reachable, unclaimed portions${s.food_access?'':'; at least one neighbour lacks food access'}.`:'';
+ return {...actionGoal(action,label,Math.floor(best/6)/10,hours,`${hint} The journal checks every fifteen game minutes. A lapse restarts the current period; earlier success still counts. Current: ${(current/60).toFixed(1)} h; best: ${(best/60).toFixed(1)} h.${detail}`,page),unit:'h'};
+};
+const primary=[
+ v=>lessons[0].objectives(v).slice(0,5),
+ v=>[
+  goal('Establish a perennial food source',+(count(v,'grove')>0||count(v,'orchard')>0),1,'Choose a food forest for regular gathering, or an orchard for slower, lasting fruit. Leave access for harvesting and water.', v.buildings.some(b=>b.kind==='orchard')&&!v.buildings.some(b=>b.kind==='grove')?'orchard':'grove'),
+  actionGoal('people','Gather fruit from our perennial plants',+(v.progress.fruit>=6||v.progress.orchard_fruit>0),1,'A food forest supplies fruit during gathering. If the pantry is healthy, ask a neighbour for one gathering batch in People. Orchard trees need time and water before their first harvest. Choose the cycle that fits our plans.'),
+  actionGoal('land','Plant a renewable material crop',+v.economy.sources.some(s=>s.material<2&&(s.planted||s.harvests>0)),1,'Choose timber trees or bamboo. Mark a plot near its future users and let neighbours deliver starts, plant and water. You can buy construction supplies while it grows.'),
+  observed(v,0,'Keep twelve edible portions for six hours',6,'Ingredients, prepared meals, milk and honey count when neighbours can reach them before spoilage. Cargo and cooking inputs do not. Keep hunger at 65 or less and energy at least 25.'),
+ ],
+ v=>['Build our community square','Host a welcome supper'].map(label=>lesson(v,2,label)),
+ v=>[
+  actionGoal('town','Receive an order from town',+!!v.progress.outcomes?.order_received,1,'Choose delivery or a resident pickup. Confirmed prices and arrival terms stay agreed. Combine project needs to save fees, or spend a neighbour’s time bringing a small basket home sooner.'),
+  actionGoal('preparation','Complete a short project delivery',+(v.progress.outcomes?.shortest_delivery!=null&&v.progress.outcomes.shortest_delivery<=30),1,'Deliver construction supplies from pickup to an unfinished building in at most thirty game minutes. Nearby stores and useful roads shorten the trip; the workweek forecast compares actual routes and schedules.'+(v.progress.outcomes?.shortest_delivery==null?'':` Best completed delivery: ${v.progress.outcomes.shortest_delivery.toFixed(1)} minutes.`)),
+  actionGoal('town','Bring in a contribution or resource trade',+(v.economy.work_day.some(d=>d>=0)||v.progress.surplus_sold||v.progress.parts_exchanged||v.progress.outcomes?.resources_sold),1,'Enable a personal outside shift, sell genuinely spare materials, or trade food above the household reserve. Outside income costs village working time; local production keeps people here.'),
+ ],
+ v=>[
+  actionGoal(count(v,'workshop')?'preparation':'town','Make tools or put bought tools to use',+(v.progress.tools_crafted>0||(v.simulation.materials?.spent?.[15]||0)>0),1,'Build a workshop and deliver timber to craft tools, or buy tools and let them reach construction or a harvest. Everyone can still do ordinary work without them.'),
+  actionGoal('supplies','Improve a growing plot',+(v.progress.enriched_harvests>0||v.progress.outcomes?.soil_improved),1,'Use delivered compost before a harvest, or restore a plot through Land views. Compost can be turned from scraps or bought. Compare soil and walking distances before adding more beds.','ecology'),
+ ],
+ v=>[
+  actionGoal('supplies','Add a different local food cycle',+(v.progress.eggs_collected>=3||v.progress.milk_collected>0||v.progress.honey_collected>0||v.progress.orchard_fruit>0||v.progress.crop_rotations>0),1,'Choose hens, goats, bees, orchard fruit, or a bean rotation followed by another crop. Each needs different land, supplies and resident time. Bought produce helps the pantry but does not establish a local cycle.','ecology'),
+  observed(v,1,'Keep eight edible portions for a day',24,'Let the food plan support daily life: eight reachable, unclaimed portions, hunger no higher than 65 and energy at least 25. Buy a reserve or improve local growing and delivery.'),
+ ],
+ v=>['Build a solar farm','Light a village path','Light a path after dusk'].map(label=>lesson(v,6,label)),
+ v=>[
+  ...['Build an ecological toilet','Build a lined reed bed','Five private toilet visits','Filter eight irrigation water','Use reclaimed irrigation'].map(label=>lesson(v,7,label)),
+  observed(v,2,'Keep household services ready for twelve hours',12,'Occupied homes and kitchens need fresh water and room for washing greywater; completed toilets need handwashing water and sewage room. Short manual trips or installed, powered lines can both work. Keep hunger at 65 or less and energy at least 25.','supplies','water'),
+ ],
+ v=>['Build a biodigester','Complete a digestion batch','Cook a meal with biogas'].map(label=>lesson(v,8,label)),
+ v=>[
+  goal('Give everyone a village bed',count(v,'home'),2,'Finish a second home. Choose prepared materials, local bamboo or adobe before materials are committed. Compare outside purchases, local preparation and the working week; earlier homes count.','home'),
+  actionGoal('town','Keep R$ 100 for the next need',Math.min(100,Math.floor(v.economy.money/100)),100,'Keep a small emergency fund after housing. Outside jobs and genuine surplus can rebuild it. Existing stock reduces new purchases; local preparation costs resident time.',null),
+ ],
+ v=>[
+  observed(v,3,'Supply a village light for four night hours',4,'Use stored sunshine or add a river generator. An enabled street light needs an actual connected supply after dusk; rooftop batteries stay private. Earlier successful evenings count.','power'),
+  observed(v,2,'Keep local services ready for twelve hours',12,'Manual carrying and installed lines are alternatives. Water and waste buffers must remain usable while neighbours eat, rest and work. Check equipment condition before a pump or battery needs service.','supplies','water'),
+ ],
+ v=>[
+  ...lessons[11].objectives(v),
+  actionGoal('people','Leave a full day with majority leisure',+!!v.progress.outcomes?.leisure_day,1,'Observe a complete game day with more than half of each neighbour’s waking village time for rest, company and hobbies. Outside shifts and sleep are separate. Reduce repeated requests or shorten service trips if work crowds it out.'),
+ ],
+ v=>[
+  goal('Keep beds for everyone',count(v,'home'),2,'Keep two completed homes so all five neighbours can sleep here.','home'),
+  observed(v,4,'Keep the village comfortable for twelve dry hours',12,'Check the actual season forecast. Keep six reachable, unclaimed portions, beds for everyone and usable household water/waste buffers through a dry period. Hunger stays at most 65, energy at least 25 and company at least 25. Soil, irrigation, crop choices or a purchased reserve can bridge dry weather.'),
+  observed(v,2,'Keep local services ready for twelve hours',12,'Continue fresh-water delivery and safe waste handling. Use the service forecast and local buffers to decide whether pipes are worth the equipment and resident installation.','supplies','water'),
+  actionGoal('people','Keep a day with majority leisure',+!!v.progress.outcomes?.leisure_day,1,'A full observed day should leave each neighbour more time for rest, company and hobbies than chores, travel and meals. Earlier success counts.'),
+  lesson(v,12,'Meet again at our square'),
+ ],
+];
+const guide=(action,label,hint,page)=>({...actionGoal(action,label,0,1,hint,page),guide:true});
+const extras=[
+ v=>lessons[0].objectives(v).slice(5),
+ v=>[...lessons[1].objectives(v).slice(2),...lessons[5].objectives(v).slice(0,2)],
+ v=>lessons[2].objectives(v).slice(1,3),
+ v=>[...lessons[3].objectives(v).filter(o=>o.label!=='Receive a town delivery'),
+  actionGoal('people','Set a broad work preference',+v.workforce.preferences.some(row=>row.some(n=>n!==1)),1,'Open a neighbour in People and choose Often, As needed or Avoid for building, hauling, food, materials or care. These guide shared jobs; needs, sleep, agreements and outside shifts still come first. Watch who takes the next available job.'),
+  guide('preparation','Compare the next working week','Use Forecast workweek in Construction before committing more projects. It replays actual supplied work, routes, needs and outside shifts on a copy. The result is conditional: future purchases or changed plans require another forecast.'),
+ ],
+ v=>[...lessons[4].objectives(v),
+  guide('preparation','Manage saved production batches','Preparing materials shows each worksite, delivered inputs, held batches and reserved output room. A zero reserve makes only what projects need. Pause a station to retain its work; cancelling a batch returns its available inputs once. Full stores can block output.'),
+  guide('preparation','Choose hand tools or powered workshop tools','A workshop can keep its hand bench, or use powered tools for faster attended work. Select its operating mode in Construction and install a paid electrical connection in Power. An outage preserves the saved batch; switch back to hand work if that suits the village.'),
+ ],
+ v=>lessons[5].objectives(v),
+ v=>[lesson(v,6,'Store twelve energy')],
+ v=>[...['Build a banana treatment bed','Treat five toilet waste','Catch rain in our cistern'].map(label=>lesson(v,7,label)),
+  guide('supplies','Compare carrying with fresh-water pipes','Water → Pipes & pumps compares actual ports, route length and the installation kit. Queue a line, buy its missing parts and let neighbours deliver and install it. Pumps need their own electrical supply. Carrying remains a viable alternative; a distant cistern is not a remote shared tank.','water'),
+  guide('supplies','Keep water and waste routes separate','Fresh water, reclaimed irrigation, greywater and sealed sewage use compatible ports and local buffers. Plan greywater from a kitchen or home to a reed bed; route toilet sewage to a digester or banana bed. Pausing or dismantling a line preserves owned contents and requires resident work.','water'),
+ ],
+ v=>[lesson(v,8,'Finish curing digestate')],
+ v=>[...lessons[9].objectives(v),guide('land_map','Read the land before expanding','Use Land views to compare fertility, moisture, retention, shade and disturbance. Protect good growing soil when placing homes. Roads and foundations leave lasting marks; two delivered compost and attended restoration can recover soil without refilling a depleted stone or earth patch.'),actionGoal('preparation','Complete an expansion within R$ 1.200 of external spending',+(v.progress.outcomes?.best_housing_spend!=null&&v.progress.outcomes.best_housing_spend<=120000),1,'Optional: net external spending while a second or later home is built must stay at most R$ 1.200. Salaries and sales do not hide purchases; refunds reduce spending. Existing materials and local work can save cash. Other purchases during construction count too.'+(v.progress.outcomes?.best_housing_spend==null?'':` Best completed expansion: R$ ${(v.progress.outcomes.best_housing_spend/100).toFixed(2)}.`))],
+ v=>[...lessons[10].objectives(v),guide('weather','Prepare for wet and dry periods','Open the seven-day forecast from the clock. The calendar alternates twenty-one-day wet and dry periods; the first two weeks keep familiar arrival weather. The same conditions affect roots, rain collection, solar output and river flow. Choose modest food and energy reserves, irrigation or purchases before a shortage.'),actionGoal('supplies','Complete real equipment service',v.maintenance.jobs.filter(j=>j.finished!=null&&!j.cancelled).length,1,'Equipment can be serviced at 70% condition. Follow its warnings, buy or reserve spare parts and let a neighbour deliver and fit them. You can prepare while healthy; waiting for wear is optional.','ecology'),actionGoal('town','Use a firm seasonal purchase',+v.economy.orders.some(o=>o.status==='delivered'&&o.terms?.active),1,'After the arrival period, compare regular prices, limited weekly offers and the freight forecast. Buy supplies you need; confirmed terms survive later price changes.')],
+ v=>[actionGoal('people','Learn through useful work',+v.skills.people.some(p=>p.experience.some(n=>n>=12)),1,'People → Field notes shows six skills learned through completed work and paid outside shifts. Small bonuses grow gradually, with daily practice limits; ordinary jobs stay open to everyone. Match preferences to growing experience while keeping time for hobbies.')],
+ v=>[actionGoal('build','Explore every building at your own pace',storyBuildingKinds.filter(k=>count(v,k)>0).length,storyBuildingKinds.length,'The remaining building types are optional. Revisit earlier chapters to compare local food, material, water and power paths without blocking our story.')],
+];
+const revised={
+ 0:{after:'Our first daily routines are taking shape. Next, choose how food and renewable materials will grow.'},
+ 3:{after:'Good supplies and short trips give us time back. A workshop can replace bought tools; a greenhouse can raise seedlings. Choose the investments our plans need.'},
+ 4:{after:'Improved soil and useful tools make room for another food cycle. Choose hens, fruit, goats, bees or a rotation.'},
+ 5:{story:'“Fruit, hens, goats and bees offer different ways to fill the table. We can choose a rhythm we have time to care for.”'},
+ 8:{after:'Gas stretches our cooking. Digestate still needs a day of curing before it feeds the soil. Now make room for everyone with a housing plan we can support.'},
+ 9:{story:'“Earth, bamboo and prepared parts all have a cost. Match our next home to the materials, money and time we can spare.”',after:'Everyone has a bed and a small fund remains. Next, make our evening light and household services dependable.'},
+ 10:{title:'Power Through the Evening',theme:'WORKING SERVICES',story:'“Stored sunshine, river power and shorter service trips can each make daily life easier. Choose what earns its place here.”',after:'Reliable services give us time back. Let us protect that time for the people who care for this village.'},
+ 12:{after:'Our thirteen chapters are complete. Keep shaping Vila Aurora at your own pace; the journal’s optional paths remain open.'},
+};
+export const quests=lessons.map((q,index)=>({...q,...revised[index],objectives:primary[index],options:extras[index]}));
+
 export const unlockQuest = { grove:0, warehouse:0, orchard:0, goat_pasture:4, apiary:4, compost:1, eco_toilet:6, square:1, workshop:3, greenhouse:3, wetland:6, banana_treatment:6, coop:4, biodigester:7, solar_farm:5, hydro:9, streetlight:5 };
 export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.progress.later_completed||[])[id-4] || false;
 export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
@@ -314,9 +406,10 @@ export function goalRoute(state, objective) {
     const project=state.environment.economy.projects.find(p=>p.kind===objective.build&&p.recipe===objective.recipe);
     return project?{type:"project",id:project.building,project}:{type:"plan",kind:objective.build,recipe:objective.recipe};
   }
-  if(!objective?.build)return null;
-  const kind=objective.build, buildings=state.village.buildings.filter(b=>b.kind===kind);
-  const project=state.environment.economy.projects.find(p=>p.kind===kind&&!p.paused)||state.environment.economy.projects.find(p=>p.kind===kind);
+  if(!objective?.build)return objective?{type:"people"}:null;
+  const kind=objective.build, buildings=state.village.buildings.filter(b=>b.kind===kind&&(!objective.recipe||state.village.economy.projects.some(p=>p.building===b.id&&p.recipe===objective.recipe)));
+  const matches=p=>p.kind===kind&&(!objective.recipe||p.recipe===objective.recipe);
+  const project=state.environment.economy.projects.find(p=>matches(p)&&!p.paused)||state.environment.economy.projects.find(matches);
   if(project)return {type:'project',id:project.building,project};
   if(buildings.filter(b=>b.progress>=100).length>=(objective.buildTarget??objective.target))return {type:'visit',id:buildings.find(b=>b.progress>=100).id};
   return {type:'plan',kind};
