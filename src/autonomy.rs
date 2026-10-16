@@ -2,13 +2,16 @@
 use crate::*;
 
 pub fn recovering(r: &Resident) -> bool {
-    r.energy < 28. || (r.task == "rest" && r.energy < 60.)
+    r.energy < 28. || (r.task == "rest" && r.energy < 60. && r.hunger < 75.)
 }
 pub fn company(r: &Resident) -> bool {
     r.social < 35. || (r.task == "socialize" && r.social < 75.)
 }
 pub fn meal_due(r: &Resident, now: f32) -> bool {
     r.hunger > 60. || meal_slot(now).is_some_and(|slot| slot != r.last_meal_slot)
+}
+pub fn foraging(v: &Village, r: &Resident) -> bool {
+    workforce::urgent_food(v, r.id) || (r.hunger > 60. && !workforce::eating(v, r.id))
 }
 pub fn free_time(r: &Resident) -> bool {
     leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize" | "rest")
@@ -390,6 +393,58 @@ mod tests {
         assert_eq!(
             near.task, "gather",
             "A neighbour who can finish should take the available position"
+        );
+    }
+    #[test]
+    fn hunger_relief_keeps_making_progress_even_when_lonely() {
+        let (mut g, mut v, mut r) = scene();
+        v.mode = modes::Mode::Story;
+        logistics::fixture_stock(&mut v, economy::FOOD, 12);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        for store in &mut v.logistics.as_mut().unwrap().stores {
+            for lot in &mut store.food_lots {
+                lot.expires = v.minutes + 1.;
+            }
+        }
+        r.hunger = 80.;
+        r.social = 20.;
+        workforce::refresh(&mut v, [&r]);
+        // Existing food will expire before anyone can sit down to eat it.
+        assert!(!workforce::eating(&v, r.id));
+        assert!(!workforce::urgent_food(&v, r.id));
+        assign(&mut r, &v, "gather", "Finding something I can eat.", false);
+        r.x = r.target_x;
+        r.y = r.target_y;
+        *g.app.world_mut().resource_mut::<Village>() = v;
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        *q.iter_mut(g.app.world_mut()).find(|p| p.id == 0).unwrap() = r;
+        g.tick(0.1);
+        g.tick(0.1);
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert_eq!(s.residents[0].task, "gather");
+        assert!(
+            s.residents[0].remaining < 9.85,
+            "Loneliness must not keep restarting urgent food work"
+        );
+    }
+    #[test]
+    fn serious_hunger_can_end_an_extended_rest_once_the_resident_can_walk() {
+        let (_, mut v, mut r) = scene();
+        logistics::fixture_stock(&mut v, economy::FOOD, 0);
+        logistics::fixture_stock(&mut v, economy::MEALS, 0);
+        r.task = "rest".into();
+        r.energy = 40.;
+        r.hunger = 85.;
+        choose(&mut r, &v);
+        assert_eq!(
+            r.task, "gather",
+            "Recovering to full readiness cannot come before finding food"
+        );
+        r.energy = 20.;
+        choose(&mut r, &v);
+        assert_eq!(
+            r.task, "rest",
+            "An exhausted resident still needs enough energy to move safely"
         );
     }
     #[test]

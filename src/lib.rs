@@ -565,7 +565,7 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if situations::apply_agreement(r, v) {
         return;
-    } else if workforce::urgent_food(v, r.id) || (r.hunger > 60. && !workforce::eating(v, r.id)) {
+    } else if autonomy::foraging(v, r) {
         if requests::pending(r, "gather") && requests::resume(r, v) {
             return;
         }
@@ -933,8 +933,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 || chores_start)
             || (requests::work(&r.task) || r.task == "haul")
                 && (r.energy < 28.
-                    || (r.social < 35.
-                        && !(r.task == "gather" && workforce::urgent_food(&v, r.id)))
+                    || (r.social < 35. && !(r.task == "gather" && autonomy::foraging(&v, &r)))
                     || (workforce::eating(&v, r.id)
                         && autonomy::meal_due(&r, v.minutes)
                         && !autonomy::finishing(&v, &r)))
