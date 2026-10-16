@@ -49,12 +49,15 @@ pub struct Record {
     pub condition: f64,
     pub exposure_minutes: f64,
     pub use_units: f64,
+    #[serde(default)]
+    pub automatic_deferred: bool,
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct State {
     pub schema: u32,
     pub enabled: bool,
+    pub automatic: bool,
     pub records: Vec<Record>,
     pub jobs: Vec<jobs::Job>,
 }
@@ -63,6 +66,7 @@ impl Default for State {
         Self {
             schema: 1,
             enabled: false,
+            automatic: false,
             records: vec![],
             jobs: vec![],
         }
@@ -114,8 +118,7 @@ pub fn sync(v: &mut Village) {
     if !v.maintenance.enabled && v.maintenance.records.is_empty() && v.maintenance.jobs.is_empty() {
         return;
     }
-    // The condition model is staged behind an explicit switch until attended
-    // repairs and player controls are delivered. Existing play keeps its rules.
+    // Disabled Sandbox equipment retains its saved condition without aging.
     jobs::reconcile(v);
     let wanted = assets(v);
     v.maintenance
@@ -137,6 +140,7 @@ pub fn sync(v: &mut Village) {
                 condition: 100.,
                 exposure_minutes: 0.,
                 use_units: 0.,
+                automatic_deferred: false,
             });
         }
     }
@@ -162,6 +166,22 @@ pub fn advance(v: &mut Village, minutes: f32) {
             };
         r.exposure_minutes += exposure;
         r.condition = (r.condition - exposure / 1440. * r.equipment.rates().0).max(0.);
+    }
+    if v.maintenance.automatic {
+        let due: Vec<_> = v
+            .maintenance
+            .records
+            .iter()
+            .filter(|r| {
+                r.condition <= SERVICE_AT
+                    && !r.automatic_deferred
+                    && !jobs::in_service(v, r.equipment)
+            })
+            .map(|r| r.equipment)
+            .collect();
+        for equipment in due {
+            let _ = jobs::queue(v, equipment);
+        }
     }
 }
 pub fn used(v: &mut Village, equipment: Equipment, units: f64) {
@@ -204,6 +224,34 @@ pub fn factor(condition: f64) -> f64 {
         0.5 + 0.5 * (condition - FAILURE_AT) / (SERVICE_AT - FAILURE_AT)
     }
 }
+pub fn servicing(v: &Village, equipment: Equipment) -> bool {
+    v.maintenance.enabled
+        && v.maintenance
+            .jobs
+            .iter()
+            .any(|j| j.equipment == equipment && j.active() && j.spent.is_some())
+}
+pub fn performance(v: &Village, equipment: Equipment) -> f64 {
+    if !v.maintenance.enabled {
+        return 1.;
+    }
+    if servicing(v, equipment) {
+        return 0.;
+    }
+    v.maintenance
+        .records
+        .iter()
+        .find(|r| r.equipment == equipment)
+        .map_or(1., |r| factor(r.condition))
+}
+pub fn pump_performance(v: &Village, line: Id) -> f64 {
+    v.power
+        .network
+        .nodes
+        .iter()
+        .find(|n| n.owner == electricity::Owner::Pump(line))
+        .map_or(1., |n| performance(v, Equipment::Pump(n.id)))
+}
 pub fn valid(v: &Village) -> bool {
     let wanted = assets(v);
     let records = &v.maintenance.records;
@@ -227,16 +275,28 @@ pub fn report(v: &Village) -> serde_json::Value {
     let rows: Vec<_> = assets(v).iter().map(|a| {
         let r = v.maintenance.records.iter().find(|r| r.equipment == a.equipment);
         let condition = r.map_or(100., |r| r.condition);
+        let estimate=r.and_then(|r| {
+            let elapsed=f64::from(v.minutes-r.commissioned)/1440.;
+            let rates=a.equipment.rates();let wear=r.exposure_minutes/1440.*rates.0+r.use_units*rates.1;
+            (elapsed>=1.&&wear>0.).then(||((condition-SERVICE_AT).max(0.)/(wear/elapsed)).ceil())
+        });
         serde_json::json!({"equipment":a.equipment,"name":a.equipment.label(),"location":a.location,
             "condition":condition,"service_due":condition<=SERVICE_AT,"failed":condition<=FAILURE_AT,
-            "condition_factor":factor(condition),"use_units":r.map_or(0.,|r|r.use_units),"unit":a.equipment.units(),
-            "service_kit":jobs::kit(a.equipment),"exposure_minutes":r.map_or(0.,|r|r.exposure_minutes)})
+            "condition_factor":performance(v,a.equipment),"in_service":servicing(v,a.equipment),"use_units":r.map_or(0.,|r|r.use_units),"unit":a.equipment.units(),
+            "estimated_days_to_service":estimate,"service_kit":jobs::kit(a.equipment),"automatic_deferred":r.is_some_and(|r|r.automatic_deferred),"exposure_minutes":r.map_or(0.,|r|r.exposure_minutes)})
     }).collect();
-    serde_json::json!({"schema":v.maintenance.schema,"enabled":v.maintenance.enabled,"service_at":SERVICE_AT,"failure_at":FAILURE_AT,
-        "operating_penalties_active":false,"equipment":rows,"jobs":jobs::view(v)})
+    serde_json::json!({"schema":v.maintenance.schema,"enabled":v.maintenance.enabled,"automatic":v.maintenance.automatic,"service_at":SERVICE_AT,"failure_at":FAILURE_AT,
+        "operating_penalties_active":v.maintenance.enabled,"equipment":rows,"jobs":jobs::view(v)})
 }
 #[wasm_bindgen]
 impl Game {
+    pub fn set_automatic_service(&mut self, enabled: bool) {
+        self.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .maintenance
+            .automatic = enabled;
+    }
     pub fn queue_equipment_service(&mut self, data: &str) -> String {
         let Ok(key) = serde_json::from_str::<Equipment>(data) else {
             return "Choose existing equipment.".into();

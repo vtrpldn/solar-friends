@@ -215,6 +215,9 @@ pub fn initialise(v: &mut Village) -> bool {
     valid(v)
 }
 pub fn open(v: &Village, n: &Node) -> bool {
+    if n.capacity > 0. && maintenance::performance(v, maintenance::Equipment::Battery(n.id)) <= 0. {
+        return false;
+    }
     match n.owner {
         Owner::Building(id) => {
             v.buildings
@@ -244,12 +247,13 @@ pub fn generation(v: &Village, n: &Node, minutes: f32) -> f64 {
         .max(0.);
     let sun = || f64::from(land::solar_exposure(v, n.size, n.x, n.y));
     let weather = climate::at(v, minutes);
-    match n.kind {
+    let generated = match n.kind {
         NodeKind::Solar => 6. * altitude * sun() * f64::from(weather.solar_factor),
         NodeKind::Roof => 0.6 * altitude * sun() * f64::from(weather.solar_factor),
         NodeKind::Hydro => 1.8 * f64::from(weather.river_factor),
         _ => 0.,
-    }
+    };
+    generated * maintenance::performance(v, maintenance::Equipment::Battery(n.id))
 }
 pub fn wires(v: &Village) -> Vec<Wire> {
     v.pipes
@@ -264,7 +268,20 @@ pub fn wires(v: &Village) -> Vec<Wire> {
             id: p.id,
             from: p.anchors[0].endpoint,
             to: p.anchors[1].endpoint,
-            capacity_per_hour: 12.,
+            capacity_per_hour: 12.
+                * [p.anchors[0].endpoint, p.anchors[1].endpoint]
+                    .iter()
+                    .filter_map(|id| {
+                        v.power
+                            .network
+                            .nodes
+                            .iter()
+                            .find(|n| n.id == *id && n.capacity > 0.)
+                    })
+                    .map(|n| {
+                        maintenance::performance(v, maintenance::Equipment::Battery(n.id)).max(0.5)
+                    })
+                    .fold(1., f64::min),
         })
         .collect()
 }

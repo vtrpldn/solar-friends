@@ -263,3 +263,51 @@ fn new_equipment_can_be_saved_immediately_after_free_placement() {
     g.tick(0.25);
     checkpoint(&mut g);
 }
+
+#[test]
+fn automatic_service_books_once_and_explicit_cancellation_defers_rebooking() {
+    let mut g = scene();
+    g.set_equipment_condition(true);
+    g.set_automatic_service(true);
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .maintenance
+        .records
+        .iter_mut()
+        .find(|r| r.equipment == Equipment::Workshop(0))
+        .unwrap()
+        .condition = 69.;
+    g.tick(0.25);
+    let id = g.app.world().resource::<Village>().maintenance.jobs[0].id;
+    assert!(g.cancel_equipment_service(id.0));
+    for _ in 0..20 {
+        g.tick(0.25);
+    }
+    assert!(
+        g.app
+            .world()
+            .resource::<Village>()
+            .maintenance
+            .jobs
+            .iter()
+            .all(|j| !j.active())
+    );
+    checkpoint(&mut g);
+    assert_eq!(
+        g.queue_equipment_service("{\"kind\":\"workshop\",\"id\":0}"),
+        "ok"
+    );
+    assert!(
+        !g.app
+            .world()
+            .resource::<Village>()
+            .maintenance
+            .records
+            .iter()
+            .find(|r| r.equipment == Equipment::Workshop(0))
+            .unwrap()
+            .automatic_deferred
+    );
+    checkpoint(&mut g);
+}

@@ -894,3 +894,41 @@ fn a_planned_pump_port_does_not_age_equipment_before_parts_are_committed() {
     );
     checkpoint(&mut g);
 }
+
+#[test]
+fn worn_pumps_reduce_actual_flow_and_failed_pumps_leave_contents_owned() {
+    for (condition, expected) in [(100., 4.), (40., 3.), (10., 0.)] {
+        let mut g = scene();
+        g.set_equipment_condition(true);
+        let id = queued(&mut g);
+        install_direct(&mut g, id);
+        power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), id);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        empty_fresh(&mut v);
+        water::add(&mut v, water::Owner::Building(0), water::Class::Fresh, 20.);
+        let key = maintenance::Equipment::Pump(
+            v.power
+                .network
+                .nodes
+                .iter()
+                .find(|n| n.owner == electricity::Owner::Pump(id))
+                .unwrap()
+                .id,
+        );
+        v.maintenance
+            .records
+            .iter_mut()
+            .find(|r| r.equipment == key)
+            .unwrap()
+            .condition = condition;
+        power::advance(&mut v, 20.);
+        advance(&mut v, 20.);
+        power::finish_frame(&mut v, 20.);
+        assert!(
+            (line(&v, id).unwrap().transferred - expected).abs() < 1e-6,
+            "condition {condition}: {} vs {expected}",
+            line(&v, id).unwrap().transferred
+        );
+        assert!((v.water_supply.tanks.iter().map(|t| t.water[0]).sum::<f64>() - 20.).abs() < 1e-6);
+    }
+}

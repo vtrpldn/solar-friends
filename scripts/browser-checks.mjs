@@ -1,3 +1,4 @@
+import {checkMaintenanceControls,checkMaintenanceSandboxSave} from './maintenance-browser-checks.mjs';
 import {checkFarmingControls} from './farming-browser-checks.mjs';
 import {checkInterfaceControls,checkArtworkInterface} from './interface-browser-checks.mjs';
 import {checkWorkshopPowerControls,checkElectricalControls} from './electricity-browser-checks.mjs';
@@ -82,6 +83,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkLivingLandControls({page,saved,capture});
   await checkClimateControls({page,saved,capture});
   await checkFarmingControls({page,saved,capture});
+  await checkMaintenanceControls({page,saved,capture});
   await checkUtilityRoutes({page,saved,capture});
   await checkWaterControls({page,saved,capture});
   await checkPipeControls({page,saved,capture});
@@ -672,6 +674,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.deepEqual(errors,[],'Browser errors must be resolved');
   await context.close();
   await checkClimateSandboxSave({browser,base,output,screenshots,errors});
+  await checkMaintenanceSandboxSave({browser,base,output,screenshots,errors});
   await checkArtworkInterface({browser,base,output,screenshots,errors});
   assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
 }

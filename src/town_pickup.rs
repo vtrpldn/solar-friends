@@ -3,12 +3,25 @@ use crate::*;
 
 pub const CAPACITY: u32 = 40;
 pub const DRIVE_MINUTES: f32 = 120.;
+pub fn drive_minutes(v: &Village) -> f32 {
+    DRIVE_MINUTES / maintenance::performance(v, maintenance::Equipment::Truck).max(0.5) as f32
+}
+pub fn ordered_minutes(v: &Village, id: u32) -> f32 {
+    v.economy
+        .orders
+        .iter()
+        .find(|o| o.id == id)
+        .and_then(|o| o.pickup_minutes)
+        .unwrap_or(DRIVE_MINUTES)
+}
 
 pub fn blocker(v: &Village, r: &Resident) -> Option<String> {
     let reason = if !v.arrived || r.task == "arrive" {
         "Wait until everyone has reached the village."
     } else if !(480.0..960.).contains(&v.minutes.rem_euclid(1440.)) {
         "Town pickups leave between 08:00 and 16:00."
+    } else if maintenance::performance(v, maintenance::Equipment::Truck) <= 0. {
+        "The pickup needs repair. Order a delivery or arrange its service first."
     } else if maintenance::jobs::in_service(v, maintenance::Equipment::Truck) {
         "The pickup is booked for service. Finish or cancel its maintenance first."
     } else if r.trip.is_some() {
@@ -55,7 +68,8 @@ pub fn finish(v: &mut Village, order: u32, driver: usize) {
     };
     let items = v.economy.orders[i].items;
     v.economy.orders[i].status = "delivered".into();
-    maintenance::used(v, maintenance::Equipment::Truck, f64::from(DRIVE_MINUTES));
+    let duration = v.economy.orders[i].pickup_minutes.unwrap_or(DRIVE_MINUTES);
+    maintenance::used(v, maintenance::Equipment::Truck, f64::from(duration));
     for (material, quantity) in items.into_iter().enumerate() {
         economy::add(v, material, quantity);
     }
@@ -146,6 +160,7 @@ impl Game {
         {
             let mut village = self.app.world_mut().resource_mut::<Village>();
             let now = village.minutes;
+            let duration = drive_minutes(&village);
             let o = village
                 .economy
                 .orders
@@ -156,7 +171,8 @@ impl Game {
             o.status = "collecting".into();
             o.paid -= 4000;
             o.dispatch = now;
-            o.arrival = now + DRIVE_MINUTES;
+            o.arrival = now + duration;
+            o.pickup_minutes = Some(duration);
             economy::contribute(
                 &mut village,
                 -4000,
@@ -411,5 +427,57 @@ mod tests {
         let before = dispatched.snapshot();
         assert_ne!(dispatched.collect_order(0, 0), "ok");
         assert_eq!(dispatched.snapshot(), before);
+    }
+    #[test]
+    fn a_worn_pickup_fixes_its_duration_at_confirmation_and_returns_despite_later_wear() {
+        let mut g = healthy();
+        g.set_equipment_condition(true);
+        g.set_automatic_service(false);
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .maintenance
+            .records
+            .iter_mut()
+            .find(|r| r.equipment == maintenance::Equipment::Truck)
+            .unwrap()
+            .condition = 40.;
+        assert_eq!(g.order_supplies_pickup(&bundle(), 0), "ok");
+        assert_eq!(
+            state(&mut g).village.economy.orders[0].pickup_minutes,
+            Some(160.)
+        );
+        until(&mut g, |s| {
+            s.residents[0]
+                .trip
+                .as_ref()
+                .is_some_and(|t| t.phase == mobility::Phase::Away)
+        });
+        g.app
+            .world_mut()
+            .resource_mut::<Village>()
+            .maintenance
+            .records
+            .iter_mut()
+            .find(|r| r.equipment == maintenance::Equipment::Truck)
+            .unwrap()
+            .condition = 10.;
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        until(&mut g, |s| {
+            s.village.economy.orders[0].status == "delivered"
+        });
+        let s = state(&mut g);
+        assert_eq!(
+            s.village
+                .maintenance
+                .records
+                .iter()
+                .find(|r| r.equipment == maintenance::Equipment::Truck)
+                .unwrap()
+                .use_units,
+            160.
+        );
+        assert_eq!(s.village.economy.orders[0].pickup_minutes, Some(160.));
     }
 }

@@ -221,6 +221,7 @@ mod tests {
         assert_eq!(game.place("coop", 5, 5), "ok");
         let mut v = game.app.world().resource::<Village>().clone();
         crate::logistics::fixture_finish(&mut v, 0);
+        v.maintenance = maintenance::State::default();
         v.minutes = 360.;
         freshness::fixture_reseed(&mut v);
         v.economy.ledger.clear();

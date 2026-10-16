@@ -337,6 +337,12 @@ pub fn queue(v: &mut Village, equipment: Equipment) -> Result<Id, &'static str> 
     if v.simulation.next_id > u32::MAX - 2 {
         return Err("No service-order identities remain.");
     }
+    v.maintenance
+        .records
+        .iter_mut()
+        .find(|r| r.equipment == equipment)
+        .unwrap()
+        .automatic_deferred = false;
     let id = v.simulation.allocate().unwrap();
     let referenced: Vec<_> = v
         .workforce_peers
@@ -383,6 +389,15 @@ pub fn cancel(v: &mut Village, id: Id) -> bool {
     };
     row.finished = Some(v.minutes);
     row.cancelled = true;
+    let key = row.equipment;
+    if let Some(r) = v
+        .maintenance
+        .records
+        .iter_mut()
+        .find(|r| r.equipment == key)
+    {
+        r.automatic_deferred = true;
+    }
     logistics::sync(v);
     true
 }

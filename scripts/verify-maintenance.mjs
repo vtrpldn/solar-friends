@@ -12,7 +12,7 @@ for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',18,12]])as
 g.tick(.25);
 const before=g.snapshot(),report=JSON.parse(g.maintenance_report());
 assert.equal(g.snapshot(),before,'Equipment inspection is read-only');
-assert.equal(report.enabled,false);assert.equal(report.operating_penalties_active,false,'No failure without a completed repair path');
+assert.equal(report.enabled,false);assert.equal(report.operating_penalties_active,false,'Sandbox starts without operating penalties');
 assert.equal(report.equipment.length,4);
 g.set_equipment_condition(true);
 function checkpoint(){const raw=g.snapshot(),copy=new Game();assert(copy.restore(raw));assert.equal(copy.snapshot(),raw);copy.free();}
@@ -43,13 +43,13 @@ if(process.env.SOLAR_CONDITION_BASELINE){
   const old=new OldGame(),fresh=new Game();old.start_mode('sandbox');fresh.start_mode('sandbox');
   for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',18,12]]){assert.equal(old.place(kind,x,y),'ok');assert.equal(fresh.place(kind,x,y),'ok');}
   for(let tick=0;tick<1920;tick++){old.tick(.25);fresh.tick(.25);}
-  const current=JSON.parse(fresh.snapshot());delete current.village.maintenance;
+  const current=JSON.parse(fresh.snapshot());assert.equal(current.village.version,23);delete current.village.maintenance;delete current.environment.economy.pickup_minutes;current.village.version=JSON.parse(old.snapshot()).village.version;
   assert.deepEqual(current,JSON.parse(old.snapshot()),'Disabled groundwork preserves the released farming simulation');
   baselineMinutes=1440;old.free();fresh.free();
 }
 await writeFile(output+'/before.json',JSON.stringify(initial));await writeFile(output+'/after.json',g.snapshot());
 await writeFile(output+'/report.json',JSON.stringify({days:4,exactCheckpoints:5,baselineMinutes,equipment:JSON.parse(g.maintenance_report())},null,2));g.free();
-console.log(`PASS: four days of owned equipment condition, read-only diagnostics, real battery use, exact checkpoints, frozen wear and invalid-save rejection${baselineMinutes?'; released-build parity over one day':''}. Operating penalties and player controls remain in progress.`);
+console.log(`PASS: four days of owned equipment condition, read-only diagnostics, real battery use, exact checkpoints, frozen wear and invalid-save rejection${baselineMinutes?'; released-build parity over one day':''}. Wear and service can be enabled independently of seasonal weather.`);
 
 // Authored worn equipment establishes service demand; purchases, carriage and
 // attended repair below use the real public game commands and resident queue.

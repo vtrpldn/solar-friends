@@ -18,6 +18,7 @@ export function forecastPlan(s){
     orders:v.economy.orders.map(o=>[o.id,o.items,o.pickup_by,o.status==='cancelled']),
     targets:v.logistics?.stores.filter(p=>p.owner.kind==='warehouse'&&p.target.some(Boolean)).map(p=>[p.owner.id,p.target]),
     food:[v.supplies.feed_hens,v.supplies.use_eggs,v.circular.use_biogas],
+    maintenance:[v.maintenance?.enabled,v.maintenance?.automatic,v.maintenance?.jobs.map(j=>[j.id,j.paused,j.cancelled])],
     tools:v.progress.use_tools,agreements:[v.situations.active?.resident,v.situations.active?.opened,v.situations.active?.response,v.situations.active?.agreed],
   });
 }

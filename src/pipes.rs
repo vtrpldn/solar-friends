@@ -677,10 +677,11 @@ pub fn advance(v: &mut Village, minutes: f32) {
         let i = c.index();
         let source = water::tank(v, p.anchors[0].endpoint).unwrap();
         let target = water::tank(v, p.anchors[1].endpoint).unwrap();
-        let amount = (f64::from(minutes) * FLOW_PER_MINUTE)
-            .min(water::free(v, source, c, None))
-            .min(water::room(v, target, c))
-            .min(power::pump_available(v, p.id) / ENERGY_PER_WATER);
+        let amount =
+            (f64::from(minutes) * FLOW_PER_MINUTE * maintenance::pump_performance(v, p.id))
+                .min(water::free(v, source, c, None))
+                .min(water::room(v, target, c))
+                .min(power::pump_available(v, p.id) / ENERGY_PER_WATER);
         if amount <= 0. {
             continue;
         }

@@ -47,7 +47,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 22;
+pub const SAVE_VERSION: u32 = 23;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -1213,7 +1213,11 @@ impl Game {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
                 climate: climate::State { enabled: true },
-                maintenance: maintenance::State::default(),
+                maintenance: maintenance::State {
+                    enabled: true,
+                    automatic: true,
+                    ..Default::default()
+                },
                 logistics: None,
                 navigation: None,
                 workforce: workforce::State::default(),
@@ -1301,6 +1305,7 @@ impl Game {
         assert!(water::initialise(
             &mut app.world_mut().resource_mut::<Village>()
         ));
+        maintenance::sync(&mut app.world_mut().resource_mut::<Village>());
         Self { app }
     }
     pub fn tick(&mut self, seconds: f32) {
@@ -1345,6 +1350,7 @@ impl Game {
         let mut economy = economy::view(&village);
         economy["pickup_drivers"] = serde_json::json!(residents.iter().map(|r| serde_json::json!({"id":r.id,"name":r.name,"blocker":town_pickup::blocker(&village,r)})).collect::<Vec<_>>());
         economy["pickup_capacity"] = town_pickup::CAPACITY.into();
+        economy["pickup_minutes"] = town_pickup::drive_minutes(&village).into();
         economy["pickup_fee"] = 2000.into();
         serde_json::json!({
             "environment": {

@@ -244,3 +244,60 @@ fn workshop_condition_counts_actual_attendance_and_not_blocked_or_remote_work() 
     assert_eq!(read(&g), 15.);
     checkpoint(&mut g);
 }
+
+#[test]
+fn failed_powered_tools_preserve_batches_and_slow_hand_tools_can_finish() {
+    let (mut g, site, batch) = scene(true);
+    g.set_equipment_condition(true);
+    assert_eq!(g.set_workshop_powered(site.0, true), "ok");
+    let r = worker(&mut g, batch);
+    let key = maintenance::Equipment::Workshop(
+        self::site(g.app.world().resource::<Village>(), site)
+            .unwrap()
+            .building
+            .unwrap(),
+    );
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .maintenance
+        .records
+        .iter_mut()
+        .find(|r| r.equipment == key)
+        .unwrap()
+        .condition = 10.;
+    let before = g
+        .app
+        .world()
+        .resource::<Village>()
+        .production
+        .accounting
+        .inputs;
+    assert!(!work_for(&mut g, &r, 2.));
+    assert_eq!(
+        g.app
+            .world()
+            .resource::<Village>()
+            .production
+            .accounting
+            .inputs,
+        before
+    );
+    assert_eq!(
+        self::batch(g.app.world().resource::<Village>(), batch)
+            .unwrap()
+            .work,
+        0.
+    );
+    checkpoint(&mut g);
+    assert_eq!(g.set_workshop_powered(site.0, false), "ok");
+    assert!(!work_for(&mut g, &r, 2.));
+    assert_eq!(
+        self::batch(g.app.world().resource::<Village>(), batch)
+            .unwrap()
+            .work,
+        1.
+    );
+    assert!(work_for(&mut g, &r, 18.));
+    checkpoint(&mut g);
+}

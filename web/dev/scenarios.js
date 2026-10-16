@@ -1,3 +1,4 @@
+import {withMaintenanceScene} from './maintenance-fixture.js';
 import {resetMaterialLocations} from './material-fixture.js';
 import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
@@ -5,6 +6,8 @@ import {makeArtPreview} from './art-preview.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 import {withSeasonalWeather} from './climate-fixture.js';
 export const scenarios = [
+  {id:'maintenance',name:'Equipment service',detail:'Worn tools, pump, battery and pickup. Buy spare parts, follow local delivery and resident service, pause or cancel saved jobs. Your village stays protected.'},
+  {id:'maintenance-outage',name:'Equipment failure & recovery',detail:'Failed equipment retains its contents and charge. Use hand tools and town delivery while neighbours restore services with actual spare parts.'},
   {id:'farming',name:'Farming & animal care',detail:'Fodder, beans, a young orchard, dairy goats and stingless bees. Actual resident care, hauling, fresh drinking water, crop rotation and local produce stores.'},
   {id:'sim-compact',name:'Simulation baseline · compact',detail:'Homes, food and storage grouped together. Compare observed travel with the dispersed layout using the same starting supplies and seed.'},
   {id:'sim-spread',name:'Simulation baseline · dispersed',detail:'The same homes and services spread across the property. A paired baseline for transport, travel budgets and later completion forecasts.'},
@@ -148,7 +151,9 @@ export function makeScenario(id, fresh, established) {
     v.buildings.push({...structuredClone(v.buildings[0]),id,kind,x:26,y:5,progress:100,contributors:0,next_visit:0,visits:0});
     v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)});
   }
+  if(id.startsWith('maintenance')){for(const i of [4,8,9,10,15])v.economy.stock[i]=0;v.progress.tool_uses=0;}
   const prepared=resetMaterialLocations(state);
+  if(id.startsWith('maintenance'))return withMaintenanceScene(prepared,{outage:id==='maintenance-outage'});
   if(id.startsWith('climate-'))return withAuthoredElectricalCircuits(withSeasonalWeather(prepared,{dry:id==='climate-dry'}));
   return ['night','power','power-outage','circular-night'].includes(id)?withAuthoredElectricalCircuits(prepared):prepared;
 }

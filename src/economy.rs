@@ -110,6 +110,8 @@ pub struct Order {
     pub status: String,
     #[serde(default)]
     pub pickup_by: Option<usize>,
+    #[serde(default)]
+    pub pickup_minutes: Option<f32>,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -928,6 +930,9 @@ pub fn valid(v: &Village) -> bool {
                     .map(|(&n, p)| n as i64 * p)
                     .sum::<i64>()
                     + if o.pickup_by.is_some() { 2000 } else { 6000 }
+            || o.pickup_minutes
+                .is_some_and(|n| !n.is_finite() || !(120.0..=240.).contains(&n))
+            || o.pickup_minutes.is_some() != o.pickup_by.is_some()
             || o.pickup_by.is_some_and(|id| id >= 5)
             || (o.pickup_by.is_some()
                 && (!matches!(o.status.as_str(), "collecting" | "delivered")
@@ -994,7 +999,7 @@ pub(crate) fn place_order(
     v.economy.next_order = next_order;
     let dispatch = v.minutes + if pickup_by.is_some() { 0. } else { 120. };
     let arrival = if pickup_by.is_some() {
-        v.minutes + 120.
+        v.minutes + crate::town_pickup::drive_minutes(v)
     } else {
         (dispatch / 1440.).floor() * 1440. + if dispatch % 1440. < 600. { 600. } else { 2040. }
     };
@@ -1011,6 +1016,7 @@ pub(crate) fn place_order(
         }
         .into(),
         pickup_by,
+        pickup_minutes: pickup_by.map(|_| crate::town_pickup::drive_minutes(v)),
     });
     ledger(
         v,

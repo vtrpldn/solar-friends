@@ -31,6 +31,7 @@ pub enum Phase {
     AwaitingOutput,
     AwaitingWater,
     AwaitingPower,
+    AwaitingService,
     Paused,
     Complete,
     Cancelled,
@@ -203,7 +204,25 @@ fn service_ready(v: &Village, b: &Batch) -> bool {
             && (b.committed || !b.biogas || v.circular.biogas >= 1.))
 }
 pub fn power_blocker(v: &Village, id: Id) -> Option<&'static str> {
-    let s = site(v, id).filter(|s| s.powered)?;
+    let s = site(v, id)?;
+    if s.kind == Kind::Workshop
+        && s.building
+            .is_some_and(|id| maintenance::servicing(v, maintenance::Equipment::Workshop(id)))
+    {
+        return Some(
+            "The workshop is being serviced. Its saved batches resume after service or cancellation.",
+        );
+    }
+    if !s.powered {
+        return None;
+    }
+    if s.building
+        .is_some_and(|id| maintenance::performance(v, maintenance::Equipment::Workshop(id)) <= 0.)
+    {
+        return Some(
+            "Powered tools need service. Switch to hand tools or arrange spare parts and resident repair.",
+        );
+    }
     let owner = crate::electricity::Owner::Building(s.building?);
     if !power::workshop_connected(v, owner) {
         Some("Connect this workshop to a local circuit, or switch to hand tools.")
@@ -482,6 +501,15 @@ pub fn sync(v: &mut Village) {
         .map(|b| {
             let phase = if !operational(v, b.site) || !work_time(v.minutes) {
                 Phase::Paused
+            } else if site(v, b.site).is_some_and(|s| {
+                s.kind == Kind::Workshop
+                    && s.building.is_some_and(|id| {
+                        maintenance::servicing(v, maintenance::Equipment::Workshop(id))
+                    })
+            }) && b.work < LABOUR
+                && (b.committed || inputs_ready(v, b))
+            {
+                Phase::AwaitingService
             } else if power_blocker(v, b.site).is_some()
                 && b.work < LABOUR
                 && (b.committed || inputs_ready(v, b))
@@ -732,6 +760,19 @@ pub fn assign_batch(r: &mut Resident, v: &Village, id: Id) -> bool {
     r.remaining = LABOUR - b.work;
     true
 }
+fn work_speed(v: &Village, s: &Site) -> f32 {
+    let factor = s
+        .building
+        .filter(|_| s.kind == Kind::Workshop)
+        .map_or(1., |id| {
+            maintenance::performance(v, maintenance::Equipment::Workshop(id))
+        }) as f32;
+    if s.powered {
+        POWERED_SPEED * factor
+    } else {
+        0.5 + 0.5 * factor
+    }
+}
 pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
     let Some(id) = r.activity_batch else {
         return false;
@@ -756,7 +797,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
     }
     let equipment = s.building.filter(|_| s.kind == Kind::Workshop);
     let powered = s.powered;
-    let speed = if powered { POWERED_SPEED } else { 1. };
+    let speed = work_speed(v, s);
     let requested = seconds.min((LABOUR - b.work) / speed);
     let work = if powered {
         let owner = crate::electricity::Owner::Building(s.building.unwrap());
@@ -773,14 +814,14 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
             .energy_used += delivered;
         (delivered / per_second) as f32 * speed
     } else {
-        requested
+        requested * speed
     }
     .min(LABOUR - b.work);
     if let Some(id) = equipment {
         maintenance::used(
             v,
             maintenance::Equipment::Workshop(id),
-            f64::from(work / if powered { POWERED_SPEED } else { 1. } * MINUTES_PER_SECOND),
+            f64::from(work / speed * MINUTES_PER_SECOND),
         );
     }
     if !b.committed {
@@ -923,7 +964,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let service_blocker = power_blocker(v, s.id).or_else(|| (s.kind == Kind::Kitchen).then(|| {
             s.building.and_then(|id| sanitation::washing_blocker(v,water::Owner::Building(id),1.))
         }).flatten());
-        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker,"work_speed":if s.powered {POWERED_SPEED}else{1.},"energy_per_hour":if s.powered{WORKSHOP_ENERGY_PER_HOUR}else{0.}})
+        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker,"work_speed":work_speed(v,s),"energy_per_hour":if s.powered{WORKSHOP_ENERGY_PER_HOUR}else{0.}})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
         "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
@@ -963,6 +1004,18 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         })
         .map(|s| s.id)
         .collect();
+    let no_service: std::collections::HashSet<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| {
+            s.kind == Kind::Workshop
+                && s.building.is_some_and(|id| {
+                    maintenance::servicing(v, maintenance::Equipment::Workshop(id))
+                })
+        })
+        .map(|s| s.id)
+        .collect();
     let no_power: std::collections::HashSet<_> = v
         .production
         .sites
@@ -976,7 +1029,9 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         .iter_mut()
         .filter(|b| b.active() && b.committed && b.work < LABOUR)
     {
-        b.phase = if no_power.contains(&b.site) {
+        b.phase = if no_service.contains(&b.site) {
+            Phase::AwaitingService
+        } else if no_power.contains(&b.site) {
             Phase::AwaitingPower
         } else if b.material == economy::MEALS && !water_ready.contains(&b.site) {
             Phase::AwaitingWater
@@ -1106,6 +1161,9 @@ pub fn valid(v: &Village) -> bool {
                 }
                 Phase::AwaitingWater => {
                     b.material == economy::MEALS && (b.committed || b.work == 0.)
+                }
+                Phase::AwaitingService => {
+                    s.kind == Kind::Workshop && b.work < LABOUR && (b.committed || b.work == 0.)
                 }
                 Phase::AwaitingPower => {
                     s.kind == Kind::Workshop

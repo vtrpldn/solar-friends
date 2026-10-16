@@ -45,7 +45,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   function quote(){
     const s=snapshot(),e=s.environment.economy,items=basket(),valid=items.every(n=>Number.isInteger(n)&&n>=0&&n<=100),quantity=items.reduce((a,b)=>a+b,0),pickup=pickupMode(),driver=e.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),fee=pickup?e.pickup_fee:6000,total=items.reduce((a,n,i)=>a+n*e.materials[i].price,0)+(quantity?fee:0);
     $('#pickup-controls').hidden=!pickup;
-    $('#pickup-driver-note').textContent=driver?.blocker||'Two hours driving and loading, plus the walk to the truck. The resident is unavailable for village chores during the trip.';
+    $('#pickup-driver-note').textContent=driver?.blocker||`${Math.round(e.pickup_minutes||120)} game minutes driving and loading, plus the walk to the truck. This duration is fixed when the order is confirmed.`;
     $('#town-total').textContent=money(total);
     $('#town-delivery').textContent=pickup?'Includes R$ 20 fuel. Supplies enter our stores when the driver returns.':quantity?'Includes R$ 60 delivery · dispatch in two game hours, arrival at 10:00 after dispatch.':'Combine purchases for several projects in one delivery.';
     const blocked=pickup&&(quantity>e.pickup_capacity||!driver||driver.blocker);
