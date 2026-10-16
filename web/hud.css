@@ -179,7 +179,14 @@ footer .resources b[hidden]{display:none!important}
 .source-plans,.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.source-row label{display:block;margin:8px 0}.source-row p{margin:8px 0}.source-row{display:block}
 
 /* Keep the extended story contents beside the current journal page. */
-#journal-chapters{max-height:64vh;overflow-y:auto;overscroll-behavior:contain}
+#quest-dialog{height:min(860px,calc(100dvh - 60px));overflow:hidden}
+#quest-dialog[open]{display:flex;flex-direction:column}
+#quest-dialog>:not(.journal-spread){flex-shrink:0}
+#quest-dialog>.dialog-close{position:absolute;top:20px;right:20px;margin:0;float:none}
+#quest-dialog>.hint{margin:14px 0 0}
+#quest-dialog .journal-spread{flex:1 1 auto;min-height:0;overflow:hidden}
+#quest-dialog #journal-chapters,#quest-dialog #quest-list{max-height:none;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+#quest-dialog #quest-list{padding-right:10px;scrollbar-gutter:stable}
 
 .quest-card-art canvas{width:94px;height:60px;object-fit:contain}
 

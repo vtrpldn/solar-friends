@@ -10,10 +10,24 @@ export async function checkStoryControls({page,saved,capture}){
  await page.locator('#dev-close').click();await page.keyboard.press('j');
  const card=page.locator('.quest-card:not([hidden])');
  assert.equal(await card.locator('.objective').count(),4,'Optional paths never inflate the primary goal');
- await card.locator('.journal-options summary').click();
+ async function openOptions(){
+  const choices=card.locator('.journal-options');
+  if(!await choices.evaluate(el=>el.open))await choices.locator('summary').click();
+ }
+ await openOptions();
  for(const viewport of [{width:1600,height:900},{width:1280,height:800}]){
   await page.setViewportSize(viewport);
   const option=card.locator('.journal-option').first();await option.scrollIntoViewIfNeeded();
+  for(const target of [card.locator('.journal-option').last(),option]){
+   await target.scrollIntoViewIfNeeded();
+   const header=await page.locator('#quest-dialog').evaluate(dialog=>{
+    const book=dialog.getBoundingClientRect(),title=document.querySelector('#journal-title').getBoundingClientRect(),close=document.querySelector('#close-journal').getBoundingClientRect();
+    return {scroll:dialog.scrollTop,bookTop:book.top,bookBottom:book.bottom,titleTop:title.top,titleBottom:title.bottom,closeTop:close.top,closeBottom:close.bottom};
+   });
+   assert.equal(header.scroll,0,'Reading long optional paths scrolls the page inside the book, preserving its header');
+   assert(header.titleTop>=header.bookTop+8&&header.titleBottom<header.bookBottom,'Keep the journal title visible');
+   assert(header.closeTop>=header.bookTop&&header.closeBottom<=header.bookBottom,'Keep the close control visible');
+  }
   const boxes=await option.locator('b,small').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom};}));
   assert(boxes[0].top<boxes[1].bottom&&boxes[1].top<boxes[0].bottom,'Option progress shares the label row');
   assert.equal(await page.locator('#quest-dialog').evaluate(el=>el.scrollWidth>el.clientWidth+1),false);
@@ -34,10 +48,10 @@ export async function checkStoryControls({page,saved,capture}){
  await page.locator('#dev-import-file').setInputFiles('artifacts/story-optional/solar-complete.json');
  await page.waitForFunction(minutes=>window.solarDev.snapshot().village.minutes===minutes,complete.village.minutes);
  await page.locator('#dev-close').click();await page.keyboard.press('j');await page.locator('[data-chapter="9"]').click();
- await card.locator('.journal-options summary').click();
+ await openOptions();
  await card.locator('.journal-option').filter({hasText:'Read the land before expanding'}).getByRole('button').click();
  assert.equal(await page.locator('#land-map-toggle').getAttribute('aria-expanded'),'true');
- await page.keyboard.press('j');await page.locator('[data-chapter="10"]').click();await card.locator('.journal-options summary').click();
+ await page.keyboard.press('j');await page.locator('[data-chapter="10"]').click();await openOptions();
  await card.locator('.journal-option').filter({hasText:'Prepare for wet and dry periods'}).getByRole('button').click();
  assert(await page.locator('#supplies-panel').isVisible());assert(await page.locator('#weather-forecast').evaluate(el=>el.open));
  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved,'Story teaching scenes and imported achievements protect the playable save');

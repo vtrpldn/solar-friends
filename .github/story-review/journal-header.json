@@ -1,0 +1,28 @@
+{
+  "before": {
+    "scrollTop": 39,
+    "titleTop": 22,
+    "dialogTop": 30,
+    "verdict": "FAIL: optional-path reading scrolled the title above the dialog edge"
+  },
+  "after": {
+    "passed": true,
+    "viewports": [
+      [
+        1600,
+        900
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "checks": [
+      "First and last optional paths retain the title and close control",
+      "Only chapter contents scroll",
+      "Guide actions select actual land, building and weather controls",
+      "Protected saved village remains unchanged"
+    ]
+  },
+  "scope": "Rendered protected Story scene; same engine and quests. Only the book scroll containers changed. A separate browser-test toggle was made conditional because chapter expansion state is intentionally retained."
+}

@@ -105,7 +105,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.keyboard.press('j');
   assert.equal(await page.locator('[data-chapter]').count(),13);
   assert.equal(await page.locator('.quest-card:not([hidden]) [data-quest-art]').getAttribute('data-quest-art'),'adobe-gable');
-  await page.locator('.quest-card:not([hidden]) .journal-options summary').click();
+  const materialChoices=page.locator('.quest-card:not([hidden]) .journal-options');
+  if(!await materialChoices.evaluate(el=>el.open))await materialChoices.locator('summary').click();
   const materialPath=page.locator('.quest-card:not([hidden]) .journal-option').filter({hasText:'Harvest the five local materials'});
   assert(await materialPath.isVisible());
   await materialPath.getByRole('button').click();
