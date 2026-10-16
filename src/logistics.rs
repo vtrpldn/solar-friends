@@ -45,6 +45,8 @@ pub struct Shipment {
     pub amount: u32,
     pub carrying: bool,
     #[serde(default)]
+    pub delivery_started: Option<f32>,
+    #[serde(default)]
     pub food_lots: Vec<freshness::Lot>,
     pub pickup: [f32; 2],
     pub dropoff: [f32; 2],
@@ -1347,6 +1349,7 @@ fn claim(v: &mut Village, r: &mut Resident) -> bool {
         material: c.material,
         amount: c.amount,
         carrying: false,
+        delivery_started: None,
         food_lots: vec![],
         pickup: a,
         dropoff: b,
@@ -1563,6 +1566,7 @@ pub fn advance(
         let h = &mut s.shipments[index];
         h.food_lots = food_lots;
         h.carrying = true;
+        h.delivery_started = Some(v.minutes);
         h.route = path.points;
         h.next = 1;
         (r.target_x, r.target_y) = (h.dropoff[0], h.dropoff[1]);
@@ -1576,11 +1580,13 @@ pub fn advance(
         let target = s.stores.iter_mut().find(|p| p.id == h.to).unwrap();
         target.items[h.material] += h.amount;
         freshness::merge(&mut target.food_lots, h.food_lots);
+        let owner = target.owner;
         let useful = !matches!(
             target.owner,
             Owner::Camp | Owner::Warehouse(_) | Owner::Ground
         );
         s.shipments.remove(index);
+        outcomes::delivered(v, owner, h.material, h.delivery_started);
         if useful {
             skills::award(v, r.id, skills::Skill::Logistics, h.amount.min(3) as u8);
         }
@@ -1790,6 +1796,8 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || h.material >= COUNT
             || h.amount == 0
             || h.amount > LOAD
+            || h.delivery_started
+                .is_some_and(|n| !h.carrying || !n.is_finite() || n < 0. || n > v.minutes)
             || h.from == h.to
             || h.route.len() > 1024
             || h.route.is_empty()

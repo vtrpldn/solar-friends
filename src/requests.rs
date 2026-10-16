@@ -308,7 +308,7 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         || (q.task == "eat"
             && (r.hunger > 60.
                 || (v.meals > 0 && r.hunger > 30.)
-                || meal_slot(v.minutes).is_some_and(|slot| slot != r.last_meal_slot)))
+                || autonomy::meal_due(r, v.minutes)))
         || (q.task == "gather" && supplies::urgent(v));
     if q.task != "outside" && occupations::available(v, r.id) && !essential {
         return wait(

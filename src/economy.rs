@@ -434,6 +434,9 @@ pub fn capacity(v: &Village) -> u32 {
         + 300 * crate::building_work::moving_storage(v)
 }
 fn ledger(v: &mut Village, amount: i64, note: String) {
+    if amount < 0 {
+        crate::outcomes::payment(v, -amount);
+    }
     v.economy.money += amount;
     v.economy.ledger.push(Entry {
         minute: v.minutes,
@@ -812,7 +815,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         })
         .collect();
     let day = (v.minutes / 1440.) as i32;
-    serde_json::json!({"market":crate::market::view(v),"production":crate::production::view(v),"freshness":crate::freshness::view(v),"processes":crate::processes::view(v),"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"salvage_reserved":v.building_jobs.iter().flat_map(|j|j.returns).sum::<u32>(),"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":((v.food-36.).max(0.).floor() as u32).min(free(v,FOOD)),"next_delivery":crate::market::delivery(v,v.minutes+120.,crate::market::active(v,crate::market::today(v))),"property":"Player-managed land · planted timber, cultivated bamboo and finite earth, stone and reclaimed reserves","source_options":crate::resource_sites::options(),"source_status":crate::resource_sites::view(v)})
+    serde_json::json!({"food_reserve":crate::food::summary(v),"market":crate::market::view(v),"production":crate::production::view(v),"freshness":crate::freshness::view(v),"processes":crate::processes::view(v),"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"salvage_reserved":v.building_jobs.iter().flat_map(|j|j.returns).sum::<u32>(),"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":((v.food-36.).max(0.).floor() as u32).min(free(v,FOOD)),"next_delivery":crate::market::delivery(v,v.minutes+120.,crate::market::active(v,crate::market::today(v))),"property":"Player-managed land · planted timber, cultivated bamboo and finite earth, stone and reclaimed reserves","source_options":crate::resource_sites::options(),"source_status":crate::resource_sites::view(v)})
 }
 pub fn valid(v: &Village) -> bool {
     let e = &v.economy;
@@ -1062,6 +1065,7 @@ impl Game {
         let terms = v.economy.orders[i].terms.clone();
         crate::market::release(&mut v, terms.as_ref());
         v.economy.orders[i].status = "cancelled".into();
+        crate::outcomes::refund(&mut v, paid);
         ledger(&mut v, paid, format!("Refund for order {}", id + 1));
         "ok".into()
     }
@@ -1092,6 +1096,9 @@ impl Game {
             return "Sell 1–20 stored, unreserved units. Project reservations and incoming orders cannot be sold.".into();
         }
         remove(&mut v, material, n);
+        if v.mode == crate::modes::Mode::Story {
+            v.progress.outcomes.resources_sold = true;
+        }
         ledger(
             &mut v,
             n as i64 * PRICES[material] / 2,
@@ -1277,6 +1284,9 @@ pub fn finish_outside(v: &mut Village, id: usize) {
 }
 
 pub fn contribute(v: &mut Village, n: i64, note: &str) {
+    if n < 0 {
+        crate::outcomes::refund(v, -n);
+    }
     ledger(v, -n, note.into());
 }
 

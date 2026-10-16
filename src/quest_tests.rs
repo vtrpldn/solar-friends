@@ -202,6 +202,13 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
     for _ in 0..3 {
         finish_task(&mut g, 3, "gather");
     }
+    // This recipe fixture isolates compost and harvest transitions. Observation
+    // windows are exercised through the actual sampler in outcomes tests.
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.progress.outcomes.best[outcomes::PANTRY] = outcomes::TARGETS[outcomes::PANTRY];
+        progression::update(&mut v);
+    }
     assert!(g.app.world().resource::<Village>().progress.completed[1]);
     ready_building(&mut g, "compost", 12, 8);
     ready_building(&mut g, "kitchen", 6, 10);
@@ -230,7 +237,7 @@ fn fruit_unlocks_compost_and_scraps_enrich_actual_harvests() {
     assert_eq!(v.progress.enriched_harvests, 1);
 }
 #[test]
-fn shared_construction_and_contribution_unlock_workshop_once() {
+fn logistics_outcomes_unlock_workshop_and_tool_contribution_is_once_only() {
     let mut g = setup();
     g.app
         .world_mut()
@@ -277,6 +284,10 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         });
         v.economy.next_order = 1;
         v.economy.work_day[4] = 0;
+        // Stage the independent observed logistics milestones; this fixture
+        // verifies construction collaboration and the once-only contribution.
+        v.progress.outcomes.order_received = true;
+        v.progress.outcomes.shortest_delivery = Some(20.);
     }
     ready_building(&mut g, "warehouse", 18, 18);
     let funds = g.app.world().resource::<Village>().economy.money;
