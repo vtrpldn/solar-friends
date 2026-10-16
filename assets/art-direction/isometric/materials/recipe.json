@@ -1,0 +1,8 @@
+{
+  "tool": "Built-in image generation",
+  "date": "2026-10-16",
+  "prompt": "Use case: precise-object-edit / material extraction. Derive a flat hand-painted MATERIAL TEXTURE ATLAS from the attached Solar Friends house reference. This is for an accurately constructed isometric 3D shelter; do not draw any building or perspective. One opaque square image divided into four equal edge-to-edge square quadrants, no gaps, frames or labels. Upper-left quadrant: the house's warm orange terracotta clay material, subtly mottled brushwork, entirely flat diffuse texture, no tile outlines or shapes. Upper-right quadrant: the house's warm honey-brown timber, fine long wood grain running horizontally across the entire quadrant, subtle hand-painted variations, no individual boards or seams. Lower-left quadrant: the house's warm cream adobe plaster, soft finely mottled painted diffuse texture. Lower-right quadrant: darker warm brown end-grain wood, fine organic concentric grain and subtle knots, a flat surface. Match the reference's rich but natural colors and painted game-art finish. These swatches will be applied to rigid geometry; keep lighting neutral and even with no baked highlights, directional shadows, bevels, perspective, objects, roof tiles, planks, text or background. Fill every quadrant completely and keep material boundaries exactly halfway horizontally and vertically.",
+  "reference": "web/art/home-gable.png",
+  "asset": "assets/art-direction/isometric/materials/building-materials.png",
+  "use": "Flat painted material swatches for authored building geometry; not a complete sprite or runtime replacement."
+}

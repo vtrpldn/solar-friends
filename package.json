@@ -8,7 +8,9 @@
     "dev:check": "node scripts/dev-check.mjs",
     "dev:browser": "node scripts/dev-check.mjs --browser-only",
     "dev:serve": "node scripts/serve.mjs",
-    "dev:check-iteration": "node scripts/check-iteration.mjs"
+    "dev:check-iteration": "node scripts/check-iteration.mjs",
+    "art:shed": "node scripts/render-shed-model.mjs",
+    "art:shed:preview": "node scripts/preview-shed-model.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-16",
+  "method": "Rigid authored 3D geometry with painted material textures; depth-buffered orthographic bake, not a warp of an existing building sprite.",
+  "geometry": "Shared 2:1 camera, equal upright posts, parallel roof ridge/eaves and centered front gable.",
+  "style_review": "Compared at 1500x1050 on actual day/night village terrain and enlarged in the shared projection inspector. Warm clay and timber material palette derived from the existing house; foliage reuses the village fern atlas.",
+  "source": "scripts/art-models/shed.js",
+  "materials": "assets/art-direction/isometric/materials/building-materials.png",
+  "material_recipe": "assets/art-direction/isometric/materials/recipe.json",
+  "foliage": "web/art/landscape-details.png",
+  "outputs": [
+    "web/art/starter-shed-model.png",
+    "web/art/starter-shed-model-night.png"
+  ],
+  "scope": "Shed only; does not certify the other building artwork."
+}
