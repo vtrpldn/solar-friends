@@ -11,7 +11,7 @@ Construction should combine materials available on a Brazilian countryside prope
 - Starting property: a fictional southeastern countryside site with suitable building earth, managed bamboo/timber, a finite stone deposit and an old salvage area. These are game assumptions, not a universal Brazilian resource profile.
 - Keep exact tile foundations, resident spacing, desktop presentation and the existing painted art direction.
 - Prices are game balance values in reais, stored as integer centavos. No real purchases or external financial services.
-- Local collection and preparation follow normal work hours; projects never extend autonomous shifts.
+- Local collection and preparation follow resident energy and immediate needs; there is no shared village shift window.
 - Blueprint placement is free. Material shortages block stages rather than placement.
 - Rust owns recipes, inventories, transactions, reservations and scheduling; JavaScript presents the snapshot.
 - Essential prepared materials are also purchasable, avoiding circular workshop dependencies.
@@ -26,7 +26,7 @@ Construction should combine materials available on a Brazilian countryside prope
 4. [x] Add town supplier, basket quotes, combined orders, starting savings and limited outside-work income. Confirmed orders debit atomically; recovery from zero money needs no expensive prerequisite. Catalogue contains essentials and equipment.
 5. [x] Add scheduled dispatch/delivery, fees, receiving capacity and visible delivery events. Save/reload and large time steps never duplicate arrivals or refunds. Orders cannot exceed future storage capacity.
 6. [x] Place finite resource sites on the map with spaced access points, regeneration for managed resources, visible depletion and restoration. Food foraging stays separate from structural-material collection.
-7. [x] Add camp preparation, advanced workshop recipes, project-driven job choice and worker limits. Residents stop collecting at project demand and one small tool-making batch, leaving only small batch remainders; jobs obey work hours and urgent food/rest needs.
+7. [x] Add camp preparation, advanced workshop recipes, project-driven job choice and worker limits. Residents stop collecting at project demand and one small tool-making batch, leaving only small batch remainders; jobs obey urgent food/rest needs and individual outside commitments.
 8. [x] Implement visible foundation/structure/finishing/installation stages and connect completion to beds, food, workshop and power. Waiting projects release workers. All painted/procedural props align with the grid and existing scene.
 9. [x] Complete build costs, project board, inventory, Town, shared fund, order history, resident requests and actionable blocker messages. Rewrite tutorial, quests and timber-only copy; make the full loop understandable in the desktop game.
 10. [x] Add recipe choices with visible appearance differences, finite neighbour exchange, surplus sales protected by food reserves, and half-price resale of unreserved materials for storage recovery. Persist recipe selection; prevent free conversions after materials are committed.
@@ -47,7 +47,7 @@ Construction should combine materials available on a Brazilian countryside prope
 - Storage includes incoming orders and production reservations; nothing silently disappears.
 - Essential buildings can be completed without advanced buildings that depend on them.
 - Food retains a healthy reserve; sales and construction do not override household needs.
-- Residents retain substantial waking leisure, respect work hours and stand apart at sites.
+- Residents retain substantial waking leisure, take recovery breaks and stand apart at sites.
 - Foundations, construction props and delivered equipment preserve proportions and road joins.
 - Fresh gameplay, developer fixtures and new-version export/import work; old villages receive a clear fresh-start notice.
 - Rust format/tests/lint, WebAssembly build, JavaScript checks and desktop browser interactions pass.
@@ -115,7 +115,7 @@ The public game API completed all thirteen chapters on day 47, with each earned 
 Why: changing the village layout should take real resident effort and offer a choice between speed and recovering materials.
 
 - [x] Add queued demolition, careful salvage and two-stage relocation, with saved progress and cancellation before packing finishes.
-- [x] Require residents to reach the worksite and work during normal community hours in both modes. Keep food, rest and sleep ahead of these jobs.
+- [x] Require residents to reach the worksite and work when their energy and needs allow in both modes. Keep food, rest and sleep ahead of these jobs.
 - [x] Reserve relocation destinations against buildings, roads and material plots; retain identities, recipes, crops and equipment when moving.
 - [x] Recover half of actually consumed materials only after salvage finishes, reserve receiving space, and keep utility/bed/storage transitions consistent.
 - [x] Add building-management controls, job feedback and destination previews using the existing game interface and artwork.

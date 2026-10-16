@@ -9,7 +9,7 @@ Give village planning more choices about land, water, food, livestock feed and c
 - [x] Expand garden crops with maize, cassava and fodder. Give rotations a visible soil benefit and retain the existing rain, local irrigation, compost and crop controls.
 - [x] Add a perennial orchard, a two-goat pasture and an apiary, with construction recipes, delivered planting/animal stock and consistent painted artwork.
 - [x] Keep fodder, milk and honey in actual local stores and carried shipments. Respect expiry, storage, production limits and material/water accounts.
-- [x] Let residents tend animals and collect products during community work hours. Require delivered feed and fresh drinking water; pause production when care or supplies are missing. Bees need nearby flowering plots.
+- [x] Let residents tend animals and collect products when their energy and needs allow. Require delivered feed and fresh drinking water; pause production when care or supplies are missing. Bees need nearby flowering plots.
 - [x] Integrate readable building controls, pantry and town supplies, Story introductions, Sandbox and a protected farming development scene.
 - [x] Check actual resident work, dry/wet conditions, overcrowding, moving/removal, invalid saves and exact save round trips. Play through the new controls and visually inspect every new sprite against existing buildings and terrain.
 
@@ -25,4 +25,4 @@ The 18-day farming run collects 24 milk, nine honey and 60 orchard fruit, comple
 
 The full desktop walkthrough passes 169 captures without browser errors. A separate 13-capture farming and artwork walkthrough passes at 1600×900 and 1280×800, including targeted resident care and actual production. All 108 artwork entries pass the live checks; all 26 building variants appear in the game previews and day/night grid tools.
 
-Playtests exposed overdue feed, optional hauling delaying essential cooking, crowded kitchen residues blocking inputs and a stale meal reservation when sending an eating resident on a town pickup. The fixes preserve actual local ownership and ordinary work hours. Farm inspectors now update their title and portrait while paused, and care warnings replace irrelevant visit messages. The standard local game package has been rebuilt with the same tested engine as the protected farming preview.
+Playtests exposed overdue feed, optional hauling delaying essential cooking, crowded kitchen residues blocking inputs and a stale meal reservation when sending an eating resident on a town pickup. The fixes preserved actual local ownership and the work schedule in that tested build. The current build uses resident energy and needs instead of shared work hours. Farm inspectors now update their title and portrait while paused, and care warnings replace irrelevant visit messages. The standard local game package has been rebuilt with the same tested engine as the protected farming preview.

@@ -47,4 +47,4 @@ The local report and screenshots are in `artifacts/playtest-2026-10-08/`; Dev To
 
 ## Scope limits
 
-This covers every shipped building kind and major mechanic in bounded playthroughs and scenarios, not every possible layout or a full-year economy. Movement still uses direct paths with pedestrian steering rather than full obstacle routing. Completed buildings cannot yet be moved or demolished. These remain prototype design work; source/visit destinations now stay clear of plots. No phone layouts or device-specific checks were added.
+This covers every shipped building kind and major mechanic in bounded playthroughs and scenarios, not every possible layout or a full-year economy. This is historical evidence for the build tested then. Later builds added obstacle routing and resident demolition, salvage and relocation work; those changes need their own matching-build evidence. No phone layouts or device-specific checks were added.

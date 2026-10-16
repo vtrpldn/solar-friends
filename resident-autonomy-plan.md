@@ -8,7 +8,7 @@ Why: residents should make understandable choices about their own needs and the 
 - [x] Explain decisions through existing resident activity text and work offers.
 - [x] Verify competing needs, project progress, interruptions, saved continuation, and desktop gameplay.
 
-Builds on the equipment-upkeep branch. Keep community leisure time and the existing material, food, water, and energy accounting intact.
+Builds on the equipment-upkeep branch. Keep individual recovery and leisure, and the existing material, food, water, and energy accounting intact.
 
 ## Delivered behavior
 
