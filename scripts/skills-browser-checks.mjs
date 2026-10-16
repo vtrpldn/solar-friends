@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import {readFile} from 'node:fs/promises';
 
 export async function checkSkillControls({page,saved,capture}){
   if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
@@ -31,6 +32,15 @@ export async function checkSkillControls({page,saved,capture}){
   }));
   assert.equal(mutations,0,'Paused field notes remain stable');
   assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),before,'Inspecting skills never grants experience or changes the world');
+  await page.locator('.close-person').click();await page.locator('#dev-button').click();
+  const earned=JSON.parse(await readFile('artifacts/skills/earned.json','utf8'));
+  await page.locator('#dev-import-file').setInputFiles('artifacts/skills/earned.json');
+  await page.waitForFunction(minutes=>window.solarDev.snapshot().village.minutes===minutes,earned.village.minutes);
+  await page.locator('#dev-close').click();await page.locator('#resident-strip [data-citizen="0"]').click();
+  await page.locator('.resident-learning summary').click();
+  for(let i=0;i<6;i++)assert.equal(Number(await page.locator('.skill-entry progress').nth(i).getAttribute('value')),earned.village.skills.people[0].experience[i]);
+  await page.locator('.skill-journal>small').scrollIntoViewIfNeeded();
+  await capture('Field notes replay experience earned through fourteen days of useful work','learning-earned.png');
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved,'Learning fixtures protect the saved village');
   await page.locator('.close-person').click();await page.locator('#dev-button').click();
 }

@@ -40,6 +40,11 @@ const queuedPlan=forecastPlan(soilPlan);soilPlan.village.restoration[0].work=32;
 assert.equal(forecastPlan(soilPlan),queuedPlan,'Ordinary restoration progress and completion are already in the conditional replay');
 soilPlan.village.restoration[0].cancelled=true;
 assert.notEqual(forecastPlan(soilPlan),queuedPlan,'Cancelling soil work changes the shared workload');
+const learningPlan=JSON.parse(before),learningBefore=forecastPlan(learningPlan);
+learningPlan.village.skills.people[0].experience[0]+=1;
+assert.equal(forecastPlan(learningPlan),learningBefore,'Ordinary earned practice is already part of the conditional replay');
+learningPlan.village.skills.enabled=!learningPlan.village.skills.enabled;
+assert.notEqual(forecastPlan(learningPlan),learningBefore,'Pausing skill benefits changes work pace and must invalidate the forecast');
 
 // A cancelled or superseded background replay cannot overwrite a newer result.
 const previousWorker=globalThis.Worker,workers=[];
