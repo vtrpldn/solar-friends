@@ -1,0 +1,407 @@
+{
+  "passed": true,
+  "generatedAt": "2026-10-16T02:20:23.708Z",
+  "sourceCommit": "1529fe0",
+  "saveVersion": 23,
+  "wasmSha": "dcd029230915629b0890fbc0bc51e5ba89cb9fe511f8205552d712254762f29a",
+  "nativeTests": 432,
+  "publicChecks": 59,
+  "javascriptSyntaxFiles": 154,
+  "desktopCaptures": 177,
+  "browserErrors": [],
+  "campaign": {
+    "completedDay": 142,
+    "chapters": 13,
+    "buildingKinds": 21,
+    "localAdobeHomeDays": 14,
+    "source": "Fresh earned chapters 1\u20139, then an exact checkpoint continuation through chapters 10\u201313 with the supply-chain priority correction."
+  },
+  "seasonal": {
+    "passed": true,
+    "days": 84,
+    "from_day": 142,
+    "to_day": 226,
+    "seasons": [
+      "wet",
+      "dry"
+    ],
+    "rainSamples": 328,
+    "minFood": 1,
+    "maxFood": 48,
+    "maxHunger": 51.690216064453125,
+    "minEnergy": 79.42078399658203,
+    "exact_checkpoints": 85,
+    "serviceOrders": 4,
+    "serviceSpending": 41800,
+    "completedServices": 4,
+    "pendingServices": 0,
+    "residents": [
+      {
+        "work": 0.2265719729776546,
+        "leisure": 0.5775160228650615
+      },
+      {
+        "work": 0.20810439560439561,
+        "leisure": 0.5848214285714286
+      },
+      {
+        "work": 0.2184143222506394,
+        "leisure": 0.5872122762148337
+      },
+      {
+        "work": 0.2109053497942387,
+        "leisure": 0.6008230452674898
+      },
+      {
+        "work": 0.22304005477576172,
+        "leisure": 0.5694967476891476
+      }
+    ]
+  },
+  "utilities": {
+    "installation_days": 25.079166666666666,
+    "installation_spending": 340400,
+    "results": [
+      {
+        "name": "manual",
+        "from_day": 167,
+        "days": 24,
+        "fund": 1926150,
+        "lowestFood": 3,
+        "highestFood": 37,
+        "peakHunger": 46.14387130737305,
+        "workshop_energy": 0,
+        "residents": [
+          {
+            "work": 0.21683827983040582,
+            "leisure": 0.5766202301635373
+          },
+          {
+            "work": 0.21068609593199758,
+            "leisure": 0.5840922890103218
+          },
+          {
+            "work": 0.22580645161290322,
+            "leisure": 0.5633213859020311
+          },
+          {
+            "work": 0.2014475271411339,
+            "leisure": 0.6182147165259348
+          },
+          {
+            "work": 0.21960072595281308,
+            "leisure": 0.5753176043557169
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "greywater",
+            "water": 0
+          },
+          {
+            "kind": "sewage",
+            "water": 0
+          },
+          {
+            "kind": "irrigation",
+            "water": 0
+          }
+        ]
+      },
+      {
+        "name": "connected",
+        "from_day": 167,
+        "days": 24,
+        "fund": 1585750,
+        "lowestFood": 1,
+        "highestFood": 39,
+        "peakHunger": 42.92625045776367,
+        "workshop_energy": 0.29999999999999993,
+        "residents": [
+          {
+            "work": 0.1870066788099575,
+            "leisure": 0.5634486945962356
+          },
+          {
+            "work": 0.19247115968427445,
+            "leisure": 0.5944140862173649
+          },
+          {
+            "work": 0.1953125,
+            "leisure": 0.5793269230769231
+          },
+          {
+            "work": 0.20241691842900303,
+            "leisure": 0.5891238670694864
+          },
+          {
+            "work": 0.24,
+            "leisure": 0.56
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 53.49396420004537
+          },
+          {
+            "kind": "fresh",
+            "water": 209.47978391151892
+          },
+          {
+            "kind": "greywater",
+            "water": 40.5047249997386
+          },
+          {
+            "kind": "sewage",
+            "water": 27.99999999999988
+          },
+          {
+            "kind": "irrigation",
+            "water": 6.000000000000007
+          }
+        ]
+      }
+    ]
+  },
+  "checks": [
+    {
+      "file": "verify-art-preview.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-artwork.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-away-routines.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-banana-treatment.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-batteries.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-building-projection.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-building-work.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-chickens.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-circular.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-climate.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-cultivation.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-dev-tools.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-economy.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-electrical-fixtures.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-electricity.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-farming.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-food.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-forecast.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-freshness.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-gatherings.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-grid-foundations.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-kitchen-batches.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-land.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-leisure.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-living-land.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-logistics.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-maintenance.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-modes.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-navigation.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-night-lighting.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-occupations.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-organics.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-passive-processes.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-pipes.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-planting.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-playtest.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-polish.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-power.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-production.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-requests.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-resident-animation.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-resource-sites.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-restoration.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-sanitation.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-simulation.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-situations.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-sleep-speed.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-sprite-frames.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-sprite-grid-fit.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-storage.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-tools.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-utility-routes.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-water.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-weather.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-work-routes.mjs",
+      "code": 0
+    },
+    {
+      "file": "verify-workforce.mjs",
+      "code": 0
+    }
+  ],
+  "remainingRoadmap": [
+    "Resident skills",
+    "Supplier variation",
+    "Outcome-based campaign and optional Sandbox constraints",
+    "Final integrated housing tradeoff balance"
+  ]
+}
