@@ -1,0 +1,21 @@
+---
+description: Outcome-based Story progression with linear introductions, optional building paths and evidence from real village play.
+---
+
+# Story planning outcomes
+
+## Why
+
+Story should teach a working village rather than require a collection of every building. Keep thirteen linear chapters and their unlocks, but let players choose farming, construction methods and service layouts.
+
+- [ ] Unify food readiness with the real eater: ingredients, meals, milk and honey; exclude committed cooking inputs, cargo and inaccessible stock from observed pantry achievements. Requests and pantry feedback use the same food kinds.
+- [ ] Record quarter-hour observations of useful pantry reserves, dry-period reserves, local services and powered evenings. Preserve current and best durations in saves; queries never advance them. Observe actual resident needs and a complete day with majority village leisure.
+- [ ] Credit short completed construction deliveries and actual housing expenditure. Keep net external spending distinct from outside income, refunds and owned starting materials. Budget challenges remain optional and earlier valid work counts.
+- [ ] Rewrite required objectives around shelter, food, shared life, supplying projects, improved soil, varied production, working energy/water cycles, housing and sustained care. Retain linear introductions to all mechanics and buildings as actionable optional journal choices.
+- [ ] Keep optional choices separate from chapter completion and the main goal tracker. Explain current conditions, measured time, alternatives and next steps in the existing illustrated journal.
+- [ ] Verify competing food claims, routes, unmet needs, observations, spending/refunds, interruptions and exact continuation. Complete a fresh campaign through real purchases, work and player commands without building every type; retain a complete optional-path replay.
+- [ ] Review desktop controls and artwork, then record measured pacing for the first fifteen minutes and first week. Preserve Story/Sandbox and protected-scene isolation.
+
+Observation intervals are game balance rules. A successful period requires qualifying consecutive observations; gaps cannot manufacture credit. A lapse resets the current period, while the best earned period remains. Food access and actual hunger are separate checks. Housing budgets measure net external spending while a second or later home is built; salaries and sales cannot hide those purchases. An over-budget optional challenge never blocks the campaign.
+
+This continues Stage 7 of [the simulator plan](simulator-plan.md). The final paired housing comparison across layouts, work preferences and material methods remains required after Story integration.
