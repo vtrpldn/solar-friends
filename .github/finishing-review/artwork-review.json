@@ -1,7 +1,7 @@
 {
   "startedAt": "2026-10-16T20:58:03.360Z",
   "baselineCommit": "ccca832b6b63a919e195dabfd0b3dc989fa2fe87",
-  "scope": "All 27 day/night context views inspected in actual in-app browser at 1600x900. Applicable activity/construction/removal and planted/carrying states remain to review.",
+  "scope": "All 27 day/night context views inspected in the in-app browser; viewport changed during review, so screenshots are authoritative for dimensions. Applicable activity/construction/removal and planted/carrying states remain to review.",
   "browser": "Codex in-app browser",
   "build": "iteration via live server 4187",
   "findings": [
@@ -10,32 +10,32 @@
       "kind": "shed",
       "severity": "polish",
       "issue": "Oversized roof tile detail",
-      "status": "candidate-under-review"
+      "status": "installed-context-verified"
     },
     {
       "id": "ART-02",
       "kind": "eco_toilet",
       "severity": "proportion",
       "issue": "Doorway shorter than resident",
-      "status": "candidate-under-review"
+      "status": "installed-context-verified"
     }
   ],
   "buildings": [
     {
       "kind": "shed",
       "name": "Community shed",
-      "file": "starter-shed-painted.png",
-      "nightFile": "starter-shed-painted.png",
-      "status": "correction-in-progress",
-      "sourceHash": "ca06d1412a02251ef110e2aebb3f42c74fe08db549d6cb77a4fcb4fbaa9045b1",
+      "file": "starter-shed-refined.png",
+      "nightFile": "starter-shed-refined.png",
+      "status": "installed-context-reviewed",
+      "sourceHash": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
       "context": {
         "day": "context-day-0.png",
         "night": "context-night-0.png"
       },
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
-      "proportions": "needs correction",
-      "notes": "Oversized tile detail compared with home; painted refinement pending."
+      "proportions": "reviewed",
+      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review."
     },
     {
       "kind": "orchard",
@@ -104,18 +104,18 @@
     {
       "kind": "eco_toilet",
       "name": "Ecological toilet",
-      "file": "eco-toilet.png",
-      "nightFile": "eco-toilet-night.png",
-      "status": "correction-in-progress",
-      "sourceHash": "057263ac0ebc03804d83cf60e374abb2e2b337221ac670f9cd79265562d4e2ec",
+      "file": "eco-toilet-tall.png",
+      "nightFile": "eco-toilet-tall-night.png",
+      "status": "installed-context-reviewed",
+      "sourceHash": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
       "context": {
         "day": "context-day-5.png",
         "night": "context-night-5.png"
       },
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
-      "proportions": "needs correction",
-      "notes": "Doorway too short relative to resident; taller painted candidate pending."
+      "proportions": "reviewed",
+      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review."
     },
     {
       "kind": "banana_treatment",
@@ -375,7 +375,7 @@
     },
     {
       "kind": "home-veranda",
-      "name": "Home · veranda",
+      "name": "Home \u00b7 veranda",
       "file": "home-veranda.png",
       "nightFile": "home-veranda-night.png",
       "status": "context-review-complete",
@@ -391,7 +391,7 @@
     },
     {
       "kind": "home-gable",
-      "name": "Home · gable",
+      "name": "Home \u00b7 gable",
       "file": "home-gable.png",
       "nightFile": "home-gable-night.png",
       "status": "context-review-complete",
@@ -407,7 +407,7 @@
     },
     {
       "kind": "home-courtyard",
-      "name": "Home · entry terrace",
+      "name": "Home \u00b7 entry terrace",
       "file": "home-courtyard.png",
       "nightFile": "home-courtyard-night.png",
       "status": "context-review-complete",
@@ -423,7 +423,7 @@
     },
     {
       "kind": "adobe-gable",
-      "name": "Adobe home · gable",
+      "name": "Adobe home \u00b7 gable",
       "file": "adobe-gable.png",
       "nightFile": "adobe-gable-night.png",
       "status": "context-review-complete",
@@ -439,7 +439,7 @@
     },
     {
       "kind": "adobe-veranda",
-      "name": "Adobe home · veranda",
+      "name": "Adobe home \u00b7 veranda",
       "file": "adobe-veranda.png",
       "nightFile": "adobe-veranda-night.png",
       "status": "context-review-complete",

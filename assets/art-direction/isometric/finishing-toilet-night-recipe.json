@@ -5,6 +5,6 @@
     "web/art/home-gable-night.png"
   ],
   "tool": "Built-in image_gen",
-  "status": "candidate-under-review",
+  "status": "installed-after-candidate-review",
   "output": "web/art/eco-toilet-tall-night.png"
 }

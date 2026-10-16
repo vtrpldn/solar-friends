@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {allBuildingArt,cameraCalibration} from '../web/building-art.js';
 import {buildingSilhouettes} from '../web/building-silhouettes.js';
 const art=allBuildingArt.shed;
-assert.equal(art.file,'starter-shed-painted.png','Keep the rejected model bake out of the game');
+assert.equal(art.file,'starter-shed-refined.png','Keep the rejected model bake out of the game');
 assert.equal(art.nightFile,art.file,'Outdoor shed retains exactly the same geometry at night');
 assert.equal(art.nightTint,'brightness(.6) saturate(.72)','Use the established outdoor building night treatment');
 assert.equal(art.mesh,undefined,'Do not warp the painted asset');

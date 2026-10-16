@@ -38,15 +38,17 @@ function draw({key,art:originalArt,canvas,caption},large=false){
  // Match the game: full painted silhouette fits the same plot boundary.
  ctx.strokeStyle='#af7141';ctx.lineWidth=1.3;const n=footprintSize(key),center=((n-1)/2-Math.floor(n/2))*34*scale;
  ctx.beginPath();[[0,-n*17],[n*34,0],[0,n*17],[-n*34,0]].forEach(([x,y],i)=>i?ctx.lineTo(cx+x*scale,cy+center+y*scale):ctx.moveTo(cx+x*scale,cy+center+y*scale));ctx.closePath();ctx.stroke();
- drawBuildingArt(ctx,images.get(night?art.nightFile:art.file),{...config,renderFilter:night?art.nightTint:undefined},...origin,scale*registration.scale);
+ const source=night?art.nightFile:art.file;
+ canvas.dataset.source=source;
+ drawBuildingArt(ctx,images.get(source),{...config,renderFilter:night?art.nightTint:undefined},...origin,scale*registration.scale);
  let error=0;
  if(m){
   const {vertical,shear}=cameraCalibration(config),w=art.width*scale*registration.scale;
   const point=p=>{const [u,v]=p;return[origin[0]+(u/m.size-.5)*w,origin[1]+((v/m.size-art.anchor*(art.aspect||1))*vertical+(u/m.size-.5)*shear)*w];};
-  for(const [direction,target]of [['right',.5],['left',-.5]])for(const [index,e]of m[direction].entries()){
+  for(const [direction,target]of [['right',.5],['left',-.5]])for(const [index,e]of [...m[direction],...(m.heldOut?.[direction]||[])].entries()){
    const p=point(e.slice(0,2)),q=point(e.slice(2)),ideal=[q[0],p[1]+target*(q[0]-p[0])];
    error=Math.max(error,Math.abs(q[1]-ideal[1])/scale);
-   if(guides){ctx.lineWidth=1.6;ctx.strokeStyle='#50e1ce';ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...ideal);ctx.stroke();ctx.lineWidth=1.1;ctx.strokeStyle='#f4a44c';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();ctx.setLineDash([]);if(large){ctx.font='11px sans-serif';ctx.fillStyle=night?'#fff6dc':'#263b31';ctx.fillText((m[direction+'Labels']?.[index]||direction+' edge '+(index+1)),p[0]+4,p[1]-5);}}
+   if(guides){ctx.lineWidth=1.6;ctx.strokeStyle='#50e1ce';ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...ideal);ctx.stroke();ctx.lineWidth=1.1;ctx.strokeStyle='#f4a44c';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();ctx.setLineDash([]);if(large){ctx.font='11px sans-serif';ctx.fillStyle=night?'#fff6dc':'#263b31';ctx.fillText((index>=m[direction].length?'Independent roof edge':m[direction+'Labels']?.[index]||direction+' edge '+(index+1)),p[0]+4,p[1]-5);}}
   }
   if(guides){
    ctx.strokeStyle='#93b5ff';ctx.lineWidth=1.2;
@@ -86,7 +88,7 @@ $('export').onclick=()=>{
 try{
  proposals=await fetch('./finishing-candidates.json').then(response=>response.json());
  $('candidate').replaceChildren(...proposals.map(p=>{const option=document.createElement('option');option.value=p.id;option.textContent=p.label;return option;}));
- for(const p of proposals){const image=new Image();image.src='../art/'+p.art.file;await image.decode();images.set(p.art.file,image);}
+ for(const file of new Set(proposals.flatMap(p=>[p.art.file,p.art.nightFile]))){const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}
  await Promise.all([...new Set([...Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]),'terrain-atlas.png','animations/iara.png'])].map(async file=>{const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}));
  for(const id of ['light','camera','guides','proposal','context','candidate'])$(id).addEventListener('change',render);render();
 }catch(error){$('status').textContent='Projection review failed: '+error.message;console.error(error);}

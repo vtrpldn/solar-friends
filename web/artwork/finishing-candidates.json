@@ -67,44 +67,5 @@
     "key": "shed",
     "id": "archived-shed",
     "label": "Archived shed trial"
-  },
-  {
-    "id": "shed-tiles",
-    "label": "Shed · tile scale",
-    "key": "shed",
-    "art": {
-      "name": "Community shed",
-      "file": "starter-shed-refined.png",
-      "nightFile": "starter-shed-refined.png",
-      "nightTint": "brightness(.6) saturate(.72)",
-      "width": 185,
-      "anchor": 0.8
-    },
-    "measurement": null,
-    "placement": {
-      "scale": 1.245756032087649,
-      "x": 0,
-      "y": 19.977297244975546
-    },
-    "issue": "UNMEASURED candidate: review style and proportions before structural tracing; excluded from gameplay."
-  },
-  {
-    "id": "toilet-headroom",
-    "label": "Ecological toilet · headroom",
-    "key": "eco_toilet",
-    "art": {
-      "name": "Ecological toilet",
-      "file": "eco-toilet-tall.png",
-      "width": 100,
-      "anchor": 0.88,
-      "nightFile": "eco-toilet-tall-night.png"
-    },
-    "measurement": null,
-    "placement": {
-      "scale": 0.8994936723662554,
-      "x": 0,
-      "y": 4.592152214012405
-    },
-    "issue": "UNMEASURED candidate: review style and proportions before structural tracing; excluded from gameplay."
   }
 ]

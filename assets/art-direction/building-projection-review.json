@@ -1,6 +1,6 @@
 {
   "scope": "27 building variants manually inspected in day and night through the actual renderer, plus enlarged structural guides and planted village scenes. Fingerprints bind this review to the installed sources.",
-  "method": "Broad texture warps remain removed. Painted shed repainted against the existing house asset; other buildings unchanged.",
+  "method": "Painted artwork and shared measured source cameras; no local texture warps. Changed shed and toilet include independent roof traces excluded from camera fitting.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
     "cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
@@ -30,8 +30,6 @@
     "streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
     "hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
     "hydro-night.png": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
-    "eco-toilet.png": "057263ac0ebc03804d83cf60e374abb2e2b337221ac670f9cd79265562d4e2ec",
-    "eco-toilet-night.png": "6897f45456fafd0357e6043007c44a29baac4a0064636a37af3f8b157dd474fb",
     "wetland.png": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
     "wetland-night.png": "e81b8e41cc5c2d4bc920ede7b62b34d90f0f94b6183b662950d14d7d0c6ebf8b",
     "biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
@@ -47,7 +45,9 @@
     "apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
     "goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
     "orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
-    "starter-shed-painted.png": "ca06d1412a02251ef110e2aebb3f42c74fe08db549d6cb77a4fcb4fbaa9045b1"
+    "starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "eco-toilet-tall-night.png": "faa4b2a5f11f6e579e4bedadec583b946494b8514c2adde2c8fb8047812c8880"
   },
   "banana_treatment_review": {
     "date": "2026-10-14",
@@ -59,11 +59,15 @@
     "notes": "New pasture and hive roof, fence and box edges traced in building-projection.js. New orchard trees arranged along a diamond, with disconnected mulch rings and no platform. These three unlit outdoor plots share their daytime alpha geometry and use a runtime night tint; no duplicated night PNGs."
   },
   "style": "Target: warm painted timber, terracotta, cream/adobe walls, blue/turquoise fixtures and leafy greens. Proportions and ground contact require visual inspection.",
-  "status": "shed-repaint-reviewed-in-context",
+  "status": "finishing-review-in-progress",
   "shed_review": {
     "date": "2026-10-16",
-    "status": "reviewed-in-game-context",
-    "source": "web/art/starter-shed-painted.png",
-    "notes": "Previous model rejected by the user for inconsistent rendering style. New painted sprite uses the existing house as its style reference; day/night share the same alpha with the existing outdoor night tint. Compared beside homes on real day/night terrain. Shared illustrated tile/wood treatment; no claim of stylistic approval on the users behalf."
+    "source": "web/art/starter-shed-refined.png",
+    "notes": "Smaller painted tiles align with home detail scale; coherent roof/frame and usable bench reviewed in the in-app browser. Independent ridge trace excluded from calibration. Installed scene verification follows."
+  },
+  "toilet_review": {
+    "date": "2026-10-16",
+    "source": "web/art/eco-toilet-tall.png",
+    "notes": "Taller door/walls provide adult headroom within unchanged one-cell footprint. Day/night context and independent roof traces reviewed. Day/night alpha IoU 0.9922; installed scene verification follows."
   }
 }
