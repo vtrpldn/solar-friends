@@ -49,7 +49,7 @@ impl Default for Circular {
 pub fn household_at(v: &mut Village, owner: water::Owner, amount: f32) {
     let amount = f64::from(amount.max(0.));
     let room = water::local_room(v, owner, water::Class::Greywater);
-    let allowed = if v.mode == modes::Mode::Sandbox {
+    let allowed = if !sandbox::utilities(v) {
         amount
     } else {
         amount.min(room / 0.7)
@@ -57,7 +57,7 @@ pub fn household_at(v: &mut Village, owner: water::Owner, amount: f32) {
     let used = water::draw(v, owner, water::Class::Fresh, allowed);
     let created = used * 0.7;
     let delivered = water::produce(v, owner, water::Class::Greywater, created);
-    if v.mode == modes::Mode::Sandbox && created > delivered {
+    if !sandbox::utilities(v) && created > delivered {
         water::sandbox_excess(v, water::Class::Greywater, created - delivered);
     }
 }
@@ -69,7 +69,7 @@ pub fn washing_blocker(v: &Village, owner: water::Owner, amount: f64) -> Option<
         Some(
             "Waiting for fresh water delivered here. Reclaimed irrigation cannot be used for cooking or handwashing.",
         )
-    } else if v.mode != modes::Mode::Sandbox
+    } else if sandbox::utilities(v)
         && water::local_room(v, owner, water::Class::Greywater) < amount * 0.7
     {
         Some(
@@ -82,8 +82,7 @@ pub fn washing_blocker(v: &Village, owner: water::Owner, amount: f64) -> Option<
 pub fn usable_toilet(v: &Village, id: usize) -> bool {
     let owner = water::Owner::Building(id);
     washing_ready(v, owner, 1.)
-        && (v.mode == modes::Mode::Sandbox
-            || water::local_room(v, owner, water::Class::Sewage) >= 1.)
+        && (!sandbox::utilities(v) || water::local_room(v, owner, water::Class::Sewage) >= 1.)
 }
 #[cfg(test)]
 pub fn household_water(v: &mut Village, amount: f32) {
@@ -116,7 +115,7 @@ pub fn use_toilet(v: &mut Village, r: &mut Resident) {
     r.last_sanitation_day = (v.minutes / 1440.) as i32;
     let owner = water::Owner::Building(v.buildings[index].id);
     let stored = water::produce(v, owner, water::Class::Sewage, 1.);
-    if v.mode == modes::Mode::Sandbox && stored < 1. {
+    if !sandbox::utilities(v) && stored < 1. {
         water::sandbox_excess(v, water::Class::Sewage, 1. - stored);
     }
     v.circular.toilet_visits = v.circular.toilet_visits.saturating_add(1);
@@ -179,6 +178,7 @@ mod tests {
     fn setup() -> Game {
         let mut g = Game::new();
         g.start_mode("sandbox");
+        assert!(g.configure_sandbox_rules(false, true, true));
         for (kind, x, y) in [
             ("eco_toilet", 5, 5),
             ("biodigester", 8, 5),

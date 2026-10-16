@@ -94,6 +94,9 @@ fn step_cell(
     wet
 }
 pub fn plot_water(v: &mut Village, n: i32, x: i32, y: i32, minutes: f32, profile: RootZone) -> f32 {
+    if !crate::sandbox::land(v) {
+        return minutes;
+    }
     let mut wet = 0.;
     let mut count = 0;
     let weather = crate::climate::at(v, v.minutes);
@@ -104,6 +107,9 @@ pub fn plot_water(v: &mut Village, n: i32, x: i32, y: i32, minutes: f32, profile
     if count == 0 { 0. } else { wet / count as f32 }
 }
 pub fn advance_fallow(v: &mut Village, minutes: f32) {
+    if !crate::sandbox::land(v) {
+        return;
+    }
     let weather = crate::climate::at(v, v.minutes);
     let mut tended = [false; (MAP_SIZE * MAP_SIZE) as usize];
     let mut covered = [false; (MAP_SIZE * MAP_SIZE) as usize];
@@ -189,6 +195,17 @@ pub fn moisture_valid(v: &Village) -> bool {
             })
 }
 pub fn condition(v: &Village, n: i32, x: i32, y: i32) -> Ground {
+    if !crate::sandbox::land(v) {
+        return Ground {
+            fertility: 0.72,
+            retention: 1.,
+            cover: 0.35,
+            nutrients: 1.,
+            disturbance: 0.,
+            moisture: 1.,
+            shade: 0.,
+        };
+    }
     let mut out = Ground {
         fertility: 0.,
         retention: 0.,
@@ -272,6 +289,9 @@ pub fn shade(v: &Village, x: i32, y: i32) -> f32 {
     (1. - exposure).clamp(0., 0.85)
 }
 pub fn harvest_soil(v: &mut Village, n: i32, x: i32, y: i32, compost: bool) {
+    if !crate::sandbox::land(v) {
+        return;
+    }
     for (a, b) in cells(n, x, y) {
         if !v.land.soil.iter().any(|s| s.x == a && s.y == b) {
             let g = ground(v, a, b);

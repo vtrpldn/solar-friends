@@ -35,6 +35,7 @@ mod progression;
 mod requests;
 mod resource_sites;
 mod restoration;
+mod sandbox;
 mod sanitation;
 mod simulation;
 mod situations;
@@ -50,7 +51,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 25;
+pub const SAVE_VERSION: u32 = 26;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -152,6 +153,8 @@ pub struct Building {
 pub struct Village {
     #[serde(default)]
     pub mode: modes::Mode,
+    #[serde(default = "sandbox::legacy")]
+    pub sandbox_rules: sandbox::Rules,
     #[serde(default)]
     pub simulation: simulation::State,
     #[serde(default)]
@@ -1259,6 +1262,7 @@ impl Game {
         app.insert_resource(Step::default())
             .insert_resource(Village {
                 mode: modes::Mode::Story,
+                sandbox_rules: sandbox::Rules::default(),
                 simulation: simulation::State::default(),
                 climate: climate::State { enabled: true },
                 maintenance: maintenance::State {
@@ -1593,7 +1597,7 @@ impl Game {
             }
             economy::rebalance(&mut v);
         }
-        if v.mode == modes::Mode::Sandbox {
+        if !sandbox::logistics(&v) {
             land::disturb(&mut v, kind, x, y);
             v.buildings.last_mut().unwrap().progress = 100.;
             let stages = economy::recipe(kind, variant).unwrap().len();
@@ -1683,7 +1687,7 @@ impl Game {
                 .unwrap();
             }
         }
-        if raw["village"]["version"] == 24 {
+        if matches!(raw["village"]["version"].as_u64(), Some(24 | 25)) {
             raw["village"]["version"] = SAVE_VERSION.into();
         }
         if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -1802,7 +1806,8 @@ impl Game {
         {
             return false;
         }
-        if !matches!(v.version, 3 | SAVE_VERSION)
+        if !sandbox::valid(v)
+            || !matches!(v.version, 3 | SAVE_VERSION)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize

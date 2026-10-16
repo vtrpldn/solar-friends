@@ -515,7 +515,7 @@ pub fn produce(v: &mut Village, owner: Owner, class: Class, amount: f64) -> f64 
 /// Sandbox can ignore excess household waste, like its free fresh-water refill.
 /// These explicit mode-only conversions remain visible in the liquid account.
 pub fn sandbox_excess(v: &mut Village, class: Class, amount: f64) {
-    assert!(v.mode == modes::Mode::Sandbox && class.sealed() && amount >= 0.);
+    assert!(!sandbox::utilities(v) && class.sealed() && amount >= 0.);
     v.water_supply.received[class.index()] += amount;
     v.water_supply.consumed[class.index()] += amount;
     v.water_supply.sandbox_disposed[class.index()] += amount;

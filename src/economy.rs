@@ -694,7 +694,7 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) -> bool {
         }
         let i = v.economy.sources[index].material;
         let mut n = (if i == 0 { 8 } else { 4 })
-            .min(v.economy.sources[index].remaining.floor() as u32)
+            .min(crate::resource_sites::available(v, index).floor() as u32)
             .min(capacity(v) - storage(v));
         if v.logistics.is_some() {
             n = n.min(crate::logistics::source_space(v, index));

@@ -16,6 +16,7 @@ fn arrival_weather_stays_viable_and_sandbox_seasons_are_optional() {
     assert!(!g.set_seasons_enabled(false));
     assert_eq!(g.snapshot(), before);
     assert!(g.start_mode("sandbox"));
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert!(!g.app.world().resource::<Village>().climate.enabled);
     assert!(g.set_seasons_enabled(true));
     assert!(g.app.world().resource::<Village>().climate.enabled);
@@ -64,6 +65,7 @@ fn seeded_forecasts_survive_reload_without_drawing_random_events() {
 fn dry_periods_reduce_river_supply_and_dry_soil_faster() {
     let mut g = Game::new();
     assert!(g.start_mode("sandbox"));
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("hydro", 26, 5), "ok");
     assert_eq!(g.place("garden", 5, 5), "ok");
     assert!(g.set_seasons_enabled(true));
@@ -94,6 +96,7 @@ fn dry_periods_reduce_river_supply_and_dry_soil_faster() {
 fn forecast_rain_fills_only_cisterns_wets_open_soil_and_reduces_sunshine() {
     let mut g = Game::new();
     assert!(g.start_mode("sandbox"));
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("well", 9, 5), "ok");
     assert_eq!(g.place("solar_farm", 13, 5), "ok");
     assert!(g.set_seasons_enabled(true));

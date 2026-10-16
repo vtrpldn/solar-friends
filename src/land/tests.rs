@@ -123,6 +123,7 @@ fn construction_changes_soil_when_work_starts_and_removal_keeps_it() {
 fn moving_only_disturbs_destination_when_rebuilding_is_attended() {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("home", 5, 5), "ok");
     assert_eq!(g.queue_building_work(0, "move", 18, 18), "ok");
     {

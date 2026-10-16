@@ -558,6 +558,7 @@ mod tests {
     fn sandbox(kind: &str) -> Game {
         let mut g = Game::new();
         g.start_mode("sandbox");
+        assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place(kind, 5, 5), "ok");
         g
     }

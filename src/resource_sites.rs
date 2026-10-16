@@ -56,7 +56,7 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
         let Some(deposit) = crate::land::deposit(v, material, x, y) else {
             return Err("No matching deposit here. Check the land map for another patch.");
         };
-        if deposit.remaining == 0 {
+        if crate::sandbox::land(v) && deposit.remaining == 0 {
             return Err(
                 "This local deposit is exhausted. Choose another patch or buy supplies in town.",
             );
@@ -92,7 +92,7 @@ pub fn care(v: &Village, index: usize) -> bool {
         && s.material < 2
         && water_available(v, index)
         && if s.planted {
-            s.growth < 1. && s.moisture < 120.
+            crate::sandbox::land(v) && s.growth < 1. && s.moisture < 120.
         } else {
             (s.auto_replant || s.plant_requested) && crate::planting::ready(v, index)
         }
@@ -112,12 +112,20 @@ pub fn reason(v: &Village, index: usize) -> &'static str {
         "Harvesting materials from our chosen plot."
     }
 }
+pub fn available(v: &Village, index: usize) -> f32 {
+    let s = &v.economy.sources[index];
+    if s.material >= 2 && !crate::sandbox::land(v) {
+        s.maximum
+    } else {
+        s.remaining
+    }
+}
 pub fn wanted(v: &Village, index: usize, needs: &economy::Bundle) -> bool {
     let s = &v.economy.sources[index];
     s.active
         && (care(v, index)
             || ((s.auto_harvest && needs[s.material] > 0 || s.harvest_requested)
-                && s.remaining >= if s.material == 0 { 8. } else { 1. }
+                && available(v, index) >= if s.material == 0 { 8. } else { 1. }
                 && economy::capacity(v) - economy::storage(v)
                     >= if s.material == 0 { 8 } else { 1 }))
 }
@@ -350,7 +358,7 @@ impl Game {
         if v.logistics.is_some() && v.simulation.next_id.checked_add(1).is_none() {
             return "Material location identity limit reached.".into();
         }
-        let cost = if v.mode == crate::modes::Mode::Sandbox {
+        let cost = if !crate::sandbox::logistics(&v) {
             0
         } else {
             [4000, 1000, 1500, 2500, 1500][material]
@@ -399,10 +407,16 @@ impl Game {
     }
     pub fn harvest_source(&mut self, index: usize) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
+        let limited = crate::sandbox::land(&v);
         let Some(s) = v.economy.sources.get_mut(index).filter(|s| s.active) else {
             return "Site not found.".into();
         };
-        if s.remaining < if s.material == 0 { 8. } else { 1. } {
+        if (if s.material >= 2 && !limited {
+            s.maximum
+        } else {
+            s.remaining
+        }) < if s.material == 0 { 8. } else { 1. }
+        {
             return "This plot is not ready to harvest. Check growth or remaining reserves.".into();
         }
         s.harvest_requested = true;
@@ -475,10 +489,10 @@ pub fn view(v: &Village) -> serde_json::Value {
     let rows:Vec<_>=v.economy.sources.iter().enumerate().filter(|(_,s)|s.active).map(|(index,s)|{
         let soil=crate::land::condition(v,size(s.material),s.x,s.y);
         let rate=crate::land::growth(&soil);
-        let status=if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
+        let status=if s.material>=2&&!crate::sandbox::land(v){"Sandbox extraction does not deplete this patch; its saved reserve is preserved."}else if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
         else if !s.planted{if s.auto_replant||s.plant_requested{if !crate::planting::ready(v,index){"Planting waits for delivered stock. Order timber seedlings or bamboo starts in Trade, then let neighbours haul them to this plot."}else if !water_available(v,index){"Replanting waits for two irrigation water."}else{"Planting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
         else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot during normal work hours."};
-        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":if s.material==0{4000}else{0},"planting_stock":crate::planting::required(v,index).map(|(material,amount)|serde_json::json!({"material":material,"amount":amount,"here":crate::organics::available(v,crate::logistics::Owner::Source(index),material)})),"batch":if s.material==0{8}else{4}})
+        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":available(v,index)>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"unlimited":s.material>=2&&!crate::sandbox::land(v),"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":if s.material==0{4000}else{0},"planting_stock":crate::planting::required(v,index).map(|(material,amount)|serde_json::json!({"material":material,"amount":amount,"here":crate::organics::available(v,crate::logistics::Owner::Source(index),material)})),"batch":if s.material==0{8}else{4}})
     }).collect();
     serde_json::json!(rows)
 }

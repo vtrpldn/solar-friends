@@ -31,6 +31,7 @@ pub struct Connection {
 }
 #[derive(Serialize)]
 pub struct Supply {
+    pub comfortable: bool,
     pub farms: usize,
     pub hydros: usize,
     pub solar_generation: f32,
@@ -76,6 +77,9 @@ pub fn supply(v: &Village) -> Supply {
     let pumps = pipes::pump_loads(v, 1.);
     let pump_demand = pipes::pump_demand(v);
     for (id, need) in pumps {
+        if !sandbox::utilities(v) {
+            continue;
+        }
         if let Some(node) = network::node(v, Owner::Pump(id))
             && let Some(f) = forecast.as_mut()
         {
@@ -100,12 +104,17 @@ pub fn supply(v: &Village) -> Supply {
                 && !v.power.disabled.contains(&b.id)
                 && building_work::job(v, b.id).is_none();
             let connected = node.is_some_and(|n| {
+                if !sandbox::utilities(v) {
+                    return network::open(v, n);
+                }
                 forecast
                     .as_ref()
                     .is_some_and(|f| f.connected_to_storage(n.id))
             });
             let need = node.map_or(0., |n| network::light_load(v, n) * f64::from(dark) / 60.);
-            let delivered = if enabled {
+            let delivered = if enabled && !sandbox::utilities(v) {
+                if connected { need } else { 0. }
+            } else if enabled {
                 node.and_then(|n| forecast.as_mut().map(|f| f.spend(n.id, need)))
                     .unwrap_or(0.)
             } else {
@@ -143,6 +152,7 @@ pub fn supply(v: &Village) -> Supply {
     let solar_generation = generated(electricity::Kind::Solar);
     let hydro_generation = generated(electricity::Kind::Hydro);
     Supply {
+        comfortable: !sandbox::utilities(v),
         farms: active("solar_farm"),
         hydros: active("hydro"),
         solar_generation,
@@ -227,7 +237,7 @@ pub fn valid(v: &Village) -> bool {
     network::valid(v) && batteries::valid(v)
 }
 pub fn report(v: &Village) -> serde_json::Value {
-    serde_json::json!({"network":v.power.network,"supply":supply(v),"circuits":network::circuit_report(v),"frame_error":network::frame(v,1.,v.minutes).err(),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"batteries":batteries::view(v),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment. Crossed corridors only join at connected ports; pumps run before attended tools and lighting."})
+    serde_json::json!({"network":v.power.network,"sandbox_supplied":v.sandbox_rules.supplied_energy,"utility_constraints":sandbox::utilities(v),"supply":supply(v),"circuits":network::circuit_report(v),"frame_error":network::frame(v,1.,v.minutes).err(),"endpoints":endpoints(v),"connections":pipes::view_filtered(v,Some(true)),"batteries":batteries::view(v),"note":"Charge belongs to each source or recovered battery. Installed cables limit local flow; private roof batteries do not supply shared equipment. Crossed corridors only join at connected ports; pumps run before attended tools and lighting."})
 }
 #[wasm_bindgen]
 impl Game {

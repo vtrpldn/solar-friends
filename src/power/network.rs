@@ -338,12 +338,27 @@ pub fn begin(v: &mut Village, minutes: f32) {
     v.power.frame = frame(v, f64::from(minutes), v.minutes - minutes / 2.).ok();
 }
 pub fn spend(v: &mut Village, owner: Owner, amount: f64) -> f64 {
+    if !sandbox::utilities(v) {
+        if !amount.is_finite() || amount < 0. || !node(v, owner).is_some_and(|n| open(v, n)) {
+            return 0.;
+        }
+        let supplied = amount.min(1e9 - v.sandbox_rules.supplied_energy);
+        v.sandbox_rules.supplied_energy += supplied;
+        return supplied;
+    }
     let Some(id) = node(v, owner).map(|n| n.id) else {
         return 0.;
     };
     v.power.frame.as_mut().map_or(0., |f| f.spend(id, amount))
 }
 pub fn available(v: &Village, owner: Owner) -> f64 {
+    if !sandbox::utilities(v) {
+        return if node(v, owner).is_some_and(|n| open(v, n)) {
+            1e9 - v.sandbox_rules.supplied_energy
+        } else {
+            0.
+        };
+    }
     let Some(id) = node(v, owner).map(|n| n.id) else {
         return 0.;
     };
@@ -353,6 +368,9 @@ pub fn available(v: &Village, owner: Owner) -> f64 {
     )
 }
 pub fn connected(v: &Village, owner: Owner) -> bool {
+    if !sandbox::utilities(v) {
+        return node(v, owner).is_some_and(|n| open(v, n));
+    }
     let Some(id) = node(v, owner).map(|n| n.id) else {
         return false;
     };
@@ -378,9 +396,21 @@ pub fn light_load(v: &Village, n: &Node) -> f64 {
 pub fn finish(v: &mut Village, minutes: f32) {
     if let Some(mut f) = v.power.frame.take() {
         let darkness = f64::from(super::darkness(v.minutes - minutes / 2.));
+        let comfortable = !sandbox::utilities(v);
+        let mut supplied = 0.;
         for n in &v.power.network.nodes {
             let need = light_load(v, n) * darkness * f64::from(minutes) / 60.;
-            let delivered = f.spend(n.id, need);
+            let delivered = if comfortable {
+                if open(v, n) {
+                    let amount = need.min(1e9 - v.sandbox_rules.supplied_energy - supplied);
+                    supplied += amount;
+                    amount
+                } else {
+                    0.
+                }
+            } else {
+                f.spend(n.id, need)
+            };
             if delivered > 0.
                 && darkness > 0.5
                 && matches!(n.owner,Owner::Building(id) if v.buildings.iter().any(|b|b.id==id&&b.kind=="streetlight"))
@@ -394,6 +424,7 @@ pub fn finish(v: &mut Village, minutes: f32) {
                 v.progress.river_night = true;
             }
         }
+        v.sandbox_rules.supplied_energy += supplied;
         let (state, flows) = f.finish_with_flows();
         if v.maintenance.enabled {
             let movements: Vec<_> = state
@@ -456,6 +487,7 @@ mod tests {
     fn scene() -> Game {
         let mut g = Game::new();
         g.start_mode("sandbox");
+        assert!(g.configure_sandbox_rules(false, true, true));
         for (kind, x, y) in [
             ("solar_farm", 5, 5),
             ("home", 12, 5),
@@ -492,6 +524,7 @@ mod tests {
     fn simultaneous_source_recovery_reserves_distinct_clear_ground_for_each_bank() {
         let mut g = Game::new();
         g.start_mode("sandbox");
+        assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("solar_farm", 5, 5), "ok");
         assert_eq!(g.place("solar_farm", 10, 5), "ok");
         {
@@ -529,6 +562,7 @@ mod tests {
     fn rainy_river_generation_is_a_valid_electrical_frame() {
         let mut g = Game::new();
         g.start_mode("sandbox");
+        assert!(g.configure_sandbox_rules(false, true, true));
         let (x, y) = (26, 5);
         assert_eq!(g.place("hydro", x, y), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -677,6 +711,7 @@ mod tests {
     fn river_generator_removal_keeps_its_charge_on_the_accessible_bank() {
         let mut g = Game::new();
         g.start_mode("sandbox");
+        assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("hydro", 26, 5), "ok");
         let id;
         {
