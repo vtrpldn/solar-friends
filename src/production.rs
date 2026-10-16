@@ -203,6 +203,27 @@ fn service_ready(v: &Village, b: &Batch) -> bool {
             .is_some_and(|id| sanitation::washing_ready(v, water::Owner::Building(id), 1.))
             && (b.committed || !b.biogas || v.circular.biogas >= 1.))
 }
+/// Preparation and its input carriage inherit the project that still needs
+/// this output. Ordinary stock targets keep their normal queue position.
+pub fn project_priority(v: &Village, material: usize) -> Option<u32> {
+    v.economy
+        .projects
+        .iter()
+        .filter(|p| !p.paused)
+        .filter_map(|p| {
+            let b = v
+                .buildings
+                .iter()
+                .find(|b| b.id == p.building && b.progress < 100.)?;
+            let remaining: u32 = economy::recipe(&b.kind, &p.recipe)?
+                .iter()
+                .skip(p.stage + usize::from(p.committed))
+                .map(|s| s.items[material])
+                .sum();
+            (remaining > economy::quantity(v, material)).then_some(p.priority)
+        })
+        .max()
+}
 pub fn power_blocker(v: &Village, id: Id) -> Option<&'static str> {
     let s = site(v, id)?;
     if s.kind == Kind::Workshop
@@ -1380,6 +1401,44 @@ mod tests {
         let s = g.snapshot();
         assert!(g.restore(&s));
         assert_eq!(g.snapshot(), s);
+    }
+    #[test]
+    fn project_priority_reaches_preparation_offers_and_releases_them_when_paused() {
+        let mut g = scene();
+        assert_eq!(g.place("home", 13, 13), "ok");
+        let id = {
+            let v = g.app.world().resource::<Village>();
+            v.production
+                .batches
+                .iter()
+                .find(|b| b.material == 7 && b.active())
+                .unwrap()
+                .id
+        };
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            fixture_inputs(&mut v, id);
+        }
+        let r = worker(&mut g);
+        let score = |g: &Game| {
+            workforce::offers(g.app.world().resource::<Village>(), &r)
+                .into_iter()
+                .find(|o| o.batch == Some(id))
+                .expect("A real roof batch is ready for attendance")
+                .score
+        };
+        let ordinary = score(&g);
+        assert_eq!(g.configure_project(1, 3, false, "standard"), "ok");
+        assert!(
+            score(&g) > ordinary,
+            "Prioritising housing must also prioritise its ready roof preparation"
+        );
+        assert_eq!(g.configure_project(1, 3, true, "standard"), "ok");
+        assert_eq!(
+            score(&g),
+            ordinary,
+            "Paused construction must not prioritise ordinary reserve production"
+        );
     }
     #[test]
     fn work_requires_staged_inputs_and_attendance_and_credits_output_once_at_the_workshop() {

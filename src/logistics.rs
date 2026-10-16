@@ -1120,7 +1120,11 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         to: to.id,
                         material: i,
                         amount,
-                        rank: (1, 4, b.id.0),
+                        rank: (
+                            1,
+                            production::project_priority(v, b.material).map_or(4, |p| 3 - p),
+                            b.id.0,
+                        ),
                     });
                 }
             }

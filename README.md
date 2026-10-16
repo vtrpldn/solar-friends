@@ -327,3 +327,5 @@ Story equipment ages from actual use and weather. Pumps, workshop tools, batteri
 Worn pumps move less water; battery charging and transmission slow without deleting stored charge. Failed powered tools can use slower hand work. Pickup travel takes 120–240 game minutes depending on condition, fixed when the order is confirmed. A failed or booked pickup cannot start another trip, while town delivery remains available. Equipment stops once servicing starts. Sandbox starts with wear off and can enable it independently of seasons.
 
 Protected `maintenance` and `maintenance-outage` scenes provide worn and failed equipment without changing saved villages.
+
+Project priority also applies to the local batches still needed by that project and to hauling their inputs. Prioritising a home moves its missing frames, fittings and roofing forward alongside direct site deliveries. Paused or fully supplied projects stop boosting preparation; normal stock targets keep ordinary priority. Essential needs and community work hours still take precedence.

@@ -406,7 +406,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                     450.
                 }
             } else {
-                610.
+                520. + production::project_priority(v, batch.material).unwrap_or(1) as f32 * 90.
             },
             if batch.material == economy::MEALS {
                 "Preparing a saved pot at the kitchen."
