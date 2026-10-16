@@ -236,6 +236,12 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert(!await page.locator('#town-order').isEnabled());
   assert((await page.locator('#town-basket-status').textContent()).includes('40 units'));
   await page.locator('#buy-0').fill('0');await page.locator('#buy-12').fill('2');
+  await page.locator('#town-catalog-scope').click();
+  assert.equal(await page.locator('#buy-12').inputValue(),'2','Focusing needs must preserve the basket');
+  assert(await page.locator('#buy-12').isVisible(),'Selected supplies remain available in focused view');
+  assert(!await page.locator('#buy-27').isVisible(),'Unneeded late-game livestock stays out of a focused purchase');
+  await page.locator('#town-catalog-scope').click();
+  assert(await page.locator('#buy-27').isVisible(),'The full supplier catalog remains reachable');
   await page.locator('#pickup-driver').selectOption('0');
   assert((await page.locator('#town-total').textContent()).includes('580'));
   await page.locator('#town-order').click();
