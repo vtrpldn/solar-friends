@@ -38,3 +38,6 @@ natureArt.forEach((art,i)=>add(`landscape-${i}`,art.name,art.file,i<4?'Vegetatio
 add('shed-proposal','Shed proposal · geometry correction needed','starter-shed-isometric.png','References',{usage:'Unapproved candidate',width:185,anchor:.8});
 
 add('shed-original','Original shed · archived perspective','starter-shed.png','References',{usage:'Reference',width:185,anchor:.8});
+
+add('shed-rejected-model','Shed model · rejected art style','starter-shed-model.png','References',{usage:'Rejected prototype',width:185,anchor:.8});
+add('shed-rejected-model-night','Shed model · rejected night style','starter-shed-model-night.png','References',{usage:'Rejected prototype',width:185,anchor:.8});

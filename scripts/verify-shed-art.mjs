@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {allBuildingArt,cameraCalibration} from '../web/building-art.js';
+import {buildingSilhouettes} from '../web/building-silhouettes.js';
+const art=allBuildingArt.shed;
+assert.equal(art.file,'starter-shed-painted.png','Keep the rejected model bake out of the game');
+assert.equal(art.nightFile,art.file,'Outdoor shed retains exactly the same geometry at night');
+assert.equal(art.nightTint,'brightness(.6) saturate(.72)','Use the established outdoor building night treatment');
+assert.equal(art.mesh,undefined,'Do not warp the painted asset');
+const {vertical,shear}=cameraCalibration(art);
+assert(Math.abs(vertical-1)<.05&&Math.abs(shear)<.03,'Camera calibration must not stretch or skew the painted shed');
+const digest=createHash('sha256').update(readFileSync(new URL('../web/art/'+art.file,import.meta.url))).digest('hex');
+assert.equal(buildingSilhouettes.shed.day,digest);
+assert.equal(buildingSilhouettes.shed.night,digest);
+console.log('PASS: painted shed installed, rejected model excluded, shared day/night silhouette and limited camera calibration.');

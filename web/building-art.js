@@ -7,7 +7,7 @@ import { TILE_HALF_HEIGHT, TILE_HALF_WIDTH } from './projection.js';
 import { measuredAxes } from './building-projection.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
-  shed:{name:'Community shed',file:'starter-shed-model.png',nightFile:'starter-shed-model-night.png',width:185,anchor:.8},
+  shed:{name:'Community shed',file:'starter-shed-painted.png',nightFile:'starter-shed-painted.png',nightTint:'brightness(.6) saturate(.72)',width:185,anchor:.8},
   orchard: {name:'Fruit orchard',file:'orchard.png',nightFile:'orchard.png',nightTint:'brightness(.6) saturate(.72)',width:210,anchor:.83},
   goat_pasture: {name:'Goat pasture',file:'goat-pasture.png',nightFile:'goat-pasture.png',nightTint:'brightness(.6) saturate(.72)',width:218,anchor:.83},
   apiary: {name:'Stingless bee apiary',file:'apiary.png',nightFile:'apiary.png',nightTint:'brightness(.6) saturate(.72)',width:84,anchor:.84},

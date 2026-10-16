@@ -1,5 +1,4 @@
-// Structural landmarks: model-derived for the shed, hand-traced for other
-// buildings, in a 1280 px reference view (640 for atlas
+// Hand-traced structural edges, in a 1280 px reference view (640 for atlas
 // cells, or the actual source size for replaced sprites). Sloping roof pitches,
 // foliage, bunting and curved tank rims are not ground axes; roof ridges and
 // horizontal eaves are, and must agree with the walls and foundation.
@@ -7,7 +6,7 @@
 // Keep these landmarks visible in the projection review; do not infer a pass
 // merely from the requested camera in an image-generation prompt.
 export const buildingProjection = {
-  shed:{"size":1280,"right":[[240,900,640,1100],[411.20000000000005,337.6,868.8,566.4000000000001],[182.39999999999998,635.0400000000001,640,863.84],[640,406.24000000000007,1097.6,635.04]],"left":[[640,1100,1040,900],[1040,636,640,836]],"upright":[640,836,640,1100],"uprights":[[1040,636,1040,900],[640,836,640,1100],[240,636,240,900]],"gables":[[[840,560],[1040,636],[640,836]]],"rightLabels":["Left/front feet","Roof ridge axis","Near eave","Far eave"],"leftLabels":["Front/right feet","Front crossbeam"],"model":"scripts/art-models/shed.js"},
+  shed:{"size":1254,"right":[[193,865,635,1082],[390,218,881,464],[105,544,623,804]],"left":[[635,1082,1061,884],[659,763,1070,563]],"upright":[635,802,635,1082],"rightLabels":["Left/front post feet","Roof ridge","Near roof eave"],"leftLabels":["Front/right post feet","Front crossbeam"]},
   goat_pasture:{size:1280,right:[[156,704,505,899],[518,372,854,555]],left:[[749,918,1107,743],[906,548,1075,461]],upright:[855,580,855,730]},
   apiary:{size:1280,right:[[273,312,692,538],[461,176,889,404]],left:[[697,834,850,754],[414,591,535,529]],upright:[704,854,704,1036]},
   hydro:{size:1280,right:[[304,744,566,873],[359,685,629,819]],left:[[563,872,740,792],[650,787,826,707]],upright:[620,584,620,818]},

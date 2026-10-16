@@ -46,7 +46,7 @@ function render(){
  let maximum=0;
  for(const card of cards)maximum=Math.max(maximum,draw(card));
  if(focus)draw({...focus,canvas:$('focus-canvas'),caption:$('focus-caption')},true);
- $('status').textContent=`${cards.length} variants · 25 architectural structures + 2 organic plantings. ${$('camera').value==='corrected'?'Registered game projection':'Uncorrected source'}. Maximum traced-axis drift: ${maximum.toFixed(3)} px. Local texture warps removed. The shed uses authored geometry; other variants retain their measured source camera. Visual review remains required for every sprite.`;
+ $('status').textContent=`${cards.length} variants · 25 architectural structures + 2 organic plantings. ${$('camera').value==='corrected'?'Registered game projection':'Uncorrected source'}. Maximum traced-axis drift: ${maximum.toFixed(3)} px. Local texture warps removed. The shed uses painted artwork matched to the house reference; variants retain measured source cameras. Visual review remains required for every sprite.`;
  if($('proposal').checked)$('status').textContent+=' Candidate comparison only: the game keeps the established source. '+proposal.issue;
  $('status').dataset.drift=String(maximum);
 }

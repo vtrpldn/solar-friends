@@ -2,7 +2,7 @@
   "date": "2026-10-16",
   "method": "Rigid authored 3D geometry with painted material textures; depth-buffered orthographic bake, not a warp of an existing building sprite.",
   "geometry": "Shared 2:1 camera, equal upright posts, parallel roof ridge/eaves and centered front gable.",
-  "style_review": "Compared at 1500x1050 on actual day/night village terrain and enlarged in the shared projection inspector. Warm clay and timber material palette derived from the existing house; foliage reuses the village fern atlas.",
+  "style_review": "Rejected by user on 2026-10-16: mechanically rendered tiles, materials and edges inconsistent with the illustrated game assets. Earlier acceptance was incorrect.",
   "source": "scripts/art-models/shed.js",
   "materials": "assets/art-direction/isometric/materials/building-materials.png",
   "material_recipe": "assets/art-direction/isometric/materials/recipe.json",
@@ -11,13 +11,6 @@
     "web/art/starter-shed-model.png",
     "web/art/starter-shed-model-night.png"
   ],
-  "scope": "Shed only; does not certify the other building artwork.",
-  "fingerprints": {
-    "scripts/art-models/shed.js": "0ee1de0f6d28b67c9db8cdef8d4342cba18a58e2281e639752d4af8d01d86132",
-    "scripts/render-shed-model.mjs": "6cfe4f5e711f8a0a7ea4f0b75bd691646b76d7b56f18c7e6bd32a9df4580fd5e",
-    "assets/art-direction/isometric/materials/building-materials.png": "5687be26bf13e9ebaede4fbc0b7b95a1e3218138fb921ee13674dc4db9e68f49",
-    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
-    "web/art/starter-shed-model.png": "0c8dbb9862a9e62e044f985ec0f108538ee694d2ed99ae29923c42360f52e67e",
-    "web/art/starter-shed-model-night.png": "31c9f26e4821752f8efcc408974dda500db327e9cc6e376832430cdb6336a752"
-  }
+  "scope": "Archived rejected prototype, never use as runtime art. Source model tools removed; available in Git history.",
+  "status": "rejected-by-user"
 }
