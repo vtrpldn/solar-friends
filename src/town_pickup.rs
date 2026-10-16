@@ -53,6 +53,7 @@ pub fn finish(v: &mut Village, order: u32, driver: usize) {
     };
     let items = v.economy.orders[i].items;
     v.economy.orders[i].status = "delivered".into();
+    maintenance::used(v, maintenance::Equipment::Truck, f64::from(DRIVE_MINUTES));
     for (material, quantity) in items.into_iter().enumerate() {
         economy::add(v, material, quantity);
     }
@@ -211,6 +212,7 @@ mod tests {
     #[test]
     fn pickup_returns_same_day_once_and_survives_each_trip_phase() {
         let mut g = healthy();
+        g.set_equipment_condition(true);
         let before = state(&mut g);
         assert_eq!(g.order_supplies_pickup(&bundle(), 0), "ok");
         let leaving = state(&mut g);
@@ -262,6 +264,17 @@ mod tests {
         assert!(g.restore(&saved));
         until(&mut g, |s| s.residents[0].trip.is_none());
         finish(&mut g.app.world_mut().resource_mut::<Village>(), 0, 0);
+        assert_eq!(
+            state(&mut g)
+                .village
+                .maintenance
+                .records
+                .iter()
+                .find(|r| r.equipment == maintenance::Equipment::Truck)
+                .unwrap()
+                .use_units,
+            f64::from(DRIVE_MINUTES)
+        );
         assert_eq!(
             economy::quantity(&state(&mut g).village, 12),
             2,

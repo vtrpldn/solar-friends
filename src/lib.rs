@@ -18,6 +18,7 @@ mod interactions;
 mod land;
 mod leisure;
 mod logistics;
+mod maintenance;
 mod mobility;
 mod modes;
 mod navigation;
@@ -152,6 +153,8 @@ pub struct Village {
     pub simulation: simulation::State,
     #[serde(default)]
     pub climate: climate::State,
+    #[serde(default)]
+    pub maintenance: maintenance::State,
     #[serde(default)]
     pub logistics: Option<logistics::State>,
     #[serde(skip)]
@@ -685,6 +688,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     modes::replenish(&mut v);
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    maintenance::advance(&mut v, dt * MINUTES_PER_SECOND);
     freshness::advance(&mut v);
     let activities: Vec<_> = people
         .iter()
@@ -1196,6 +1200,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     let residents: Vec<_> = people.iter().cloned().collect();
     pipes::prune(&mut v, &residents);
     power::batteries::prune(&mut v, &residents);
+    maintenance::sync(&mut v);
     progression::update(&mut v);
 }
 #[wasm_bindgen]
@@ -1208,6 +1213,7 @@ impl Game {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
                 climate: climate::State { enabled: true },
+                maintenance: maintenance::State::default(),
                 logistics: None,
                 navigation: None,
                 workforce: workforce::State::default(),
@@ -1539,6 +1545,7 @@ impl Game {
             project.reserved = [0; economy::COUNT];
             economy::rebalance(&mut v);
         }
+        maintenance::sync(&mut v);
         event(
             &mut v,
             format!("A new {kind} is planned. Residents can help build it."),
@@ -1653,6 +1660,7 @@ impl Game {
             || !power::valid(v)
             || !economy::valid(v)
             || !sanitation::valid(v)
+            || !maintenance::valid(v)
         {
             return false;
         }

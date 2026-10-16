@@ -731,3 +731,52 @@ fn pump_interval(v: &mut Village, minutes: f32) {
     advance(v, minutes);
     power::finish_frame(v, minutes);
 }
+
+#[test]
+fn pump_condition_counts_only_water_that_reaches_the_receiving_tank() {
+    let mut g = scene();
+    g.set_equipment_condition(true);
+    let id = queued(&mut g);
+    install_direct(&mut g, id);
+    power::fixtures::pump(&mut g.app.world_mut().resource_mut::<Village>(), id);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        empty_fresh(&mut v);
+        water::add(&mut v, water::Owner::Building(0), water::Class::Fresh, 20.);
+        let node = v
+            .power
+            .network
+            .nodes
+            .iter()
+            .find(|n| n.owner == electricity::Owner::Pump(id))
+            .unwrap()
+            .id;
+        let key = maintenance::Equipment::Pump(node);
+        let used = |v: &Village| {
+            v.maintenance
+                .records
+                .iter()
+                .find(|r| r.equipment == key)
+                .unwrap()
+                .use_units
+        };
+        assert_eq!(used(&v), 0.);
+        power::advance(&mut v, 60.);
+        advance(&mut v, 60.);
+        power::finish_frame(&mut v, 60.);
+        assert!(line(&v, id).unwrap().transferred > 0.);
+        assert!((used(&v) - line(&v, id).unwrap().transferred).abs() < 1e-9);
+        v.pipes
+            .lines
+            .iter_mut()
+            .find(|p| p.id == id)
+            .unwrap()
+            .paused = true;
+        let before = used(&v);
+        power::advance(&mut v, 60.);
+        advance(&mut v, 60.);
+        power::finish_frame(&mut v, 60.);
+        assert_eq!(used(&v), before);
+    }
+    checkpoint(&mut g);
+}

@@ -208,3 +208,39 @@ fn power_modes_require_a_workshop_circuit_and_forged_energy_is_rejected_atomical
         assert_eq!(g.snapshot(), raw);
     }
 }
+
+#[test]
+fn workshop_condition_counts_actual_attendance_and_not_blocked_or_remote_work() {
+    let (mut g, site, batch) = scene(true);
+    g.set_equipment_condition(true);
+    assert_eq!(g.set_workshop_powered(site.0, true), "ok");
+    let mut r = worker(&mut g, batch);
+    let key = maintenance::Equipment::Workshop(
+        self::site(g.app.world().resource::<Village>(), site)
+            .unwrap()
+            .building
+            .unwrap(),
+    );
+    let read = |g: &Game| {
+        g.app
+            .world()
+            .resource::<Village>()
+            .maintenance
+            .records
+            .iter()
+            .find(|r| r.equipment == key)
+            .unwrap()
+            .use_units
+    };
+    r.x += 1.;
+    assert!(!work_for(&mut g, &r, 2.));
+    assert_eq!(read(&g), 0.);
+    r.x = r.target_x;
+    assert!(!work_for(&mut g, &r, 2.));
+    assert_eq!(read(&g), 6.);
+    assert!(work_for(&mut g, &r, 3.));
+    assert_eq!(read(&g), 15.);
+    assert!(!work_for(&mut g, &r, 3.));
+    assert_eq!(read(&g), 15.);
+    checkpoint(&mut g);
+}

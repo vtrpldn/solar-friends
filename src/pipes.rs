@@ -688,6 +688,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if amount <= 0. {
             continue;
         }
+        maintenance::pump_used(v, p.id, amount);
         v.water_supply
             .tanks
             .iter_mut()

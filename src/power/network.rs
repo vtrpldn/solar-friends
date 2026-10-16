@@ -180,6 +180,7 @@ pub fn sync(v: &mut Village) {
         });
     }
     summaries(v);
+    maintenance::sync(v);
 }
 pub fn initialise(v: &mut Village) -> bool {
     let inherited = f64::from(v.power.stored);
@@ -377,6 +378,24 @@ pub fn finish(v: &mut Village, minutes: f32) {
             }
         }
         let (state, flows) = f.finish_with_flows();
+        if v.maintenance.enabled {
+            let movements: Vec<_> = state
+                .nodes
+                .iter()
+                .filter(|n| n.capacity > 0.)
+                .filter_map(|n| {
+                    v.power
+                        .network
+                        .nodes
+                        .iter()
+                        .find(|p| p.id == n.id)
+                        .map(|p| (n.id, (n.charge - p.charge).abs()))
+                })
+                .collect();
+            for (id, amount) in movements {
+                maintenance::used(v, maintenance::Equipment::Battery(id), amount);
+            }
+        }
         v.power.network = state;
         for (id, energy) in flows {
             if let Some(p) = v.pipes.lines.iter_mut().find(|p| p.id == id) {

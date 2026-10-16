@@ -754,6 +754,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
     {
         return false;
     }
+    let equipment = s.building.filter(|_| s.kind == Kind::Workshop);
     let powered = s.powered;
     let speed = if powered { POWERED_SPEED } else { 1. };
     let requested = seconds.min((LABOUR - b.work) / speed);
@@ -775,6 +776,13 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         requested
     }
     .min(LABOUR - b.work);
+    if let Some(id) = equipment {
+        maintenance::used(
+            v,
+            maintenance::Equipment::Workshop(id),
+            f64::from(work / if powered { POWERED_SPEED } else { 1. } * MINUTES_PER_SECOND),
+        );
+    }
     if !b.committed {
         if b.biogas {
             v.circular.biogas -= 1.;
