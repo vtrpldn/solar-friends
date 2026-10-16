@@ -146,7 +146,7 @@ export function makeScenario(id, fresh, established) {
   if(id.startsWith('climate-')&&!v.buildings.some(b=>b.kind==='hydro')){
     const id=v.economy.next_building++,kind='hydro';
     v.buildings.push({...structuredClone(v.buildings[0]),id,kind,x:26,y:5,progress:100,contributors:0,next_visit:0,visits:0});
-    v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(24).fill(0),consumed:Array(24).fill(0)});
+    v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)});
   }
   const prepared=resetMaterialLocations(state);
   if(id.startsWith('climate-'))return withAuthoredElectricalCircuits(withSeasonalWeather(prepared,{dry:id==='climate-dry'}));

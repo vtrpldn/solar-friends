@@ -1,7 +1,7 @@
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function plantingMarkup(s){
   const v=s.village,stores=v.logistics?.stores||[],materials=s.environment.economy.materials;
-  const rows=stores.filter(p=>p.items.slice(21,24).some(Boolean)),cargo=(v.logistics?.shipments||[]).filter(h=>h.carrying&&h.material>=21);
+  const rows=stores.filter(p=>p.items.slice(21,24).some(Boolean)),cargo=(v.logistics?.shipments||[]).filter(h=>h.carrying&&h.material>=21&&h.material<24);
   if(!rows.length&&!cargo.length&&!v.buildings.some(b=>b.kind==='greenhouse'&&b.progress>=100))return '';
   const amount=(n,i)=>`${n} ${(n===1?materials[i].name.replace(/s$/,''):materials[i].name).toLowerCase()}`;
   const name=p=>p.owner.kind==='camp'?'Arrival store':p.owner.kind==='warehouse'?`Storage house ${p.owner.id+1}`:p.owner.kind==='source'?`Material plot ${p.owner.id+1}`:p.owner.kind==='site'?`${v.buildings.find(b=>b.id===p.owner.id)?.kind==='greenhouse'?'Greenhouse':'Garden'} ${p.owner.id+1}`:'Recoverable pile';

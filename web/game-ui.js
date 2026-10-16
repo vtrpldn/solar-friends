@@ -59,6 +59,15 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
   map.onclick=event=>{const rect=map.getBoundingClientRect();mapCentre={x:(event.clientX-rect.left)/rect.width*MAP_SIZE,y:(event.clientY-rect.top)/rect.height*MAP_SIZE};focusAt(mapCentre.x,mapCentre.y);};
   map.onkeydown=event=>{const delta={ArrowLeft:[-2,0],ArrowRight:[2,0],ArrowUp:[0,-2],ArrowDown:[0,2]}[event.key];if(!delta)return;event.preventDefault();event.stopPropagation();mapCentre={x:Math.max(0,Math.min(MAP_SIZE,mapCentre.x+delta[0])),y:Math.max(0,Math.min(MAP_SIZE,mapCentre.y+delta[1]))};focusAt(mapCentre.x,mapCentre.y);};
   const portraits=new Map();
+  function updateBuilding(state){
+    const b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));
+    const key=b?buildingArtKey(b,state.village.buildings,state.village.economy.projects):'';
+    $('#building-name').textContent=b?`${buildingNames[b.kind]} ${b.id+1}`:'Buildings';
+    $('#building-portrait').hidden=!b;
+    $('#building-visits').hidden=!b||['solar_farm','streetlight','hydro','banana_treatment','wetland','biodigester','warehouse'].includes(b.kind);
+    $('#plan-first-building').hidden=!!b;
+    if(key&&key!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[key],allBuildingArt[key]);buildingKey=key;}
+  }
   function update(state,developer,selected){
     document.body.classList.toggle('developer-session',developer);
     document.body.classList.toggle('sandbox-mode',state.village.mode==='sandbox');
@@ -75,13 +84,6 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
       button.dataset.condition=condition;
       button.querySelector('.citizen-status').textContent=away&&r.trip.purpose==='pickup'?'⇄':away&&r.trip.purpose==='work'?'↗':asleep?'z':r.trip?'↔':r.hunger>75||r.energy<25?'!':'';
     }
-    const b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));
-    const key=b?buildingArtKey(b,state.village.buildings,state.village.economy.projects):'';
-    $('#building-name').textContent=b?`${buildingNames[b.kind]} ${b.id+1}`:'Buildings';
-    $('#building-portrait').hidden=!b;
-    $('#building-visits').hidden=!b||['solar_farm','streetlight','hydro','banana_treatment','wetland','biodigester','warehouse'].includes(b.kind);
-    $('#plan-first-building').hidden=!!b;
-    if(key&&key!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[key],allBuildingArt[key]);buildingKey=key;}
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
     ctx.fillStyle='#87965b';ctx.fillRect(0,0,MAP_SIZE,MAP_SIZE);
     for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ctx.fillStyle=riverBank(x,y)?'#74a7a0':(x+y)%7===0?'#a9aa6c':'#87965b';ctx.fillRect(x,y,1,1);}
@@ -91,5 +93,5 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     ctx.strokeStyle='#fff5cd';ctx.lineWidth=.3;ctx.beginPath();worldView().forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();ctx.restore();
   }
   paintPortraits();
-  return {update,selectSupplyPage};
+  return {update,updateBuilding,selectSupplyPage};
 }

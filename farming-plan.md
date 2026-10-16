@@ -11,16 +11,18 @@ Give village planning more choices about land, water, food, livestock feed and c
 - [x] Keep fodder, milk and honey in actual local stores and carried shipments. Respect expiry, storage, production limits and material/water accounts.
 - [x] Let residents tend animals and collect products during community work hours. Require delivered feed and fresh drinking water; pause production when care or supplies are missing. Bees need nearby flowering plots.
 - [x] Integrate readable building controls, pantry and town supplies, Story introductions, Sandbox and a protected farming development scene.
-- [ ] Check actual resident work, dry/wet conditions, overcrowding, moving/removal, invalid saves and exact save round trips. Play through the new controls and visually inspect every new sprite against existing buildings and terrain.
+- [x] Check actual resident work, dry/wet conditions, overcrowding, moving/removal, invalid saves and exact save round trips. Play through the new controls and visually inspect every new sprite against existing buildings and terrain.
 
 ## Review
 
 This branch builds on the interface polish in PR #56. Keep the implementation in incremental commits and a draft pull request; do not merge it without individual approval.
 
-## Evidence in progress
+## Evidence
 
-All 400 native tests, strict all-target lint and 55 public regression checks pass. An 18-day farming run produced fruit, milk and honey through actual resident work, completed a bean rotation, kept every material and liquid account balanced and restored exactly at every daily checkpoint. Each resident retained more than half their waking time for rest, hobbies and social life. The desktop walkthrough passes 13 captures including all 108 artwork entries. All 13 Story chapters completed through earned saved checkpoints; the final uninterrupted replay and broad desktop walkthrough are in progress. A further 84-day seasonal run kept food and all resource accounts healthy, with at least 58% leisure for every resident.
+All 400 native tests, strict all-target lint, 149 JavaScript syntax checks and 58 public regression scripts pass. The fresh Story completes all 13 chapters on day 148 through actual placement, purchases, resident work and gatherings; every chapter restores exactly, and all 21 building kinds are introduced.
 
-Longer playtests exposed overdue feed deliveries and kitchen ingredients losing priority to optional hauling. Pastures now hold six feed, overdue animal care receives attention during normal work windows, and an empty kitchen receives ingredients before optional feed or compost trips.
+The 18-day farming run collects 24 milk, nine honey and 60 orchard fruit, completes a bean rotation, keeps every material and liquid account balanced and restores exactly at all 18 daily checkpoints. Each resident retains more than half their waking time for rest, hobbies and social life. Another 84 earned Story days across two seasonal cycles, plus a 24-day manual/connected utility comparison, preserve healthy reserves, exact checkpoints and residents' leisure.
 
-Crowded kitchens now send organic residues to available storage before they block cooking inputs. The final Story replay also caught and fixed a stale meal reservation when sending an eating resident on a town pickup; regression coverage saves and restores every trip phase.
+The full desktop walkthrough passes 169 captures without browser errors. A separate 13-capture farming and artwork walkthrough passes at 1600×900 and 1280×800, including targeted resident care and actual production. All 108 artwork entries pass the live checks; all 26 building variants appear in the game previews and day/night grid tools.
+
+Playtests exposed overdue feed, optional hauling delaying essential cooking, crowded kitchen residues blocking inputs and a stale meal reservation when sending an eating resident on a town pickup. The fixes preserve actual local ownership and ordinary work hours. Farm inspectors now update their title and portrait while paused, and care warnings replace irrelevant visit messages. The standard local game package has been rebuilt with the same tested engine as the protected farming preview.

@@ -11,6 +11,7 @@ export async function checkFarmingControls({page,saved,capture}){
     await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Buildings',exact:true}).click();
     await page.locator('#building-choice').selectOption('9');
     assert(await page.locator('#farm-controls').isVisible());
+    assert.equal(await page.locator('#building-name').textContent(),'Goat pasture 10','The paused inspector heading follows the selected building');
     assert.match(await page.locator('#farm-notes').textContent(),/fresh drinking water/);
     assert.match(await page.locator('#farm-detail').textContent(),/Wellbeing 70%/);
     await capture(`Readable goat care and local supplies at ${viewport.width}px` ,`farming-goats-${viewport.width}.png`);
@@ -21,6 +22,7 @@ export async function checkFarmingControls({page,saved,capture}){
     assert.equal(await page.evaluate(()=>window.solarDev.snapshot().village.buildings.find(b=>b.id===9).agriculture.enabled),true);
     await page.locator('#building-choice').selectOption('10');
     assert.match(await page.locator('#farm-detail').textContent(),/nearby flowering plots/);
+    assert.equal(await page.locator('#building-name').textContent(),'Stingless bee apiary 11');
     await capture(`Hive forage and inspection controls at ${viewport.width}px`,`farming-bees-${viewport.width}.png`);
     await page.locator('#building-choice').selectOption('8');
     assert.match(await page.locator('#farm-detail').textContent(),/Young fruit trees/);
@@ -37,6 +39,7 @@ export async function checkFarmingControls({page,saved,capture}){
     const overflow=await page.locator('#supplies-panel').evaluate(el=>el.scrollWidth>el.clientWidth+1);assert.equal(overflow,false);
     await capture(`Milk, honey and farm records inside the pantry book at ${viewport.width}px`,`farming-pantry-${viewport.width}.png`);
     await page.locator('[data-farm="9"]').click();assert.equal(await page.locator('#building-choice').inputValue(),'9');
+    assert.equal(await page.locator('#building-name').textContent(),'Goat pasture 10');
     await page.getByRole('button',{name:'Close buildings',exact:true}).click();
   }
   assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),before,'Reversible crop and production controls restore the exact paused scene');

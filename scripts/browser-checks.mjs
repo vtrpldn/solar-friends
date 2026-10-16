@@ -664,8 +664,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert((await page.locator('#recipe-history').textContent()).includes('Browser check:'));
   await capture('Recipe cards with saved revision history','recipes.png');
   await page.goto(new URL('/artwork/grid-fit.html',base).href);
-  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('23 variants'));
-  assert.equal(await page.locator('#cards figure').count(),23);
+  await page.waitForFunction(count=>document.querySelector('#status').textContent.startsWith(`${count} variants`),expectedVariants);
+  assert.equal(await page.locator('#cards figure').count(),expectedVariants);
   await capture('All painted building sprites on their actual grid cells','sprite-grid-day.png');
   await page.locator('#lighting').selectOption('night');
   await capture('Shared full-sprite grid fit at night','sprite-grid-night.png');

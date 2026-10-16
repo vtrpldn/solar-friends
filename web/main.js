@@ -1099,6 +1099,8 @@ function updateBuildingPanel() {
   }
   $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
   updateAgricultureUI(game,state,inspectBuilding);
+  $("#building-activity").hidden=!!farmNames[b?.kind];
+  $("#building-visits details").hidden=!!farmNames[b?.kind];
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
   $("#crop-controls").hidden = !farming;
   if (farming) {
@@ -1128,6 +1130,7 @@ function updateBuildingPanel() {
   }
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
   if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
+  gameUI?.updateBuilding(state);
   for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100 || !!state.residents.find(r=>r.id===Number(button.dataset.visitor))?.trip;
 }
 function inspectBuilding(id) {
