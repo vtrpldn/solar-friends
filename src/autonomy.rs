@@ -57,8 +57,15 @@ pub fn finishing(v: &Village, r: &Resident) -> bool {
             })
         });
     }
+    if r.task == "water" {
+        return v.water_supply.trips.iter().any(|h| {
+            h.resident == r.id
+                && h.carrying
+                && navigation::work_route(v, [r.x, r.y], h.dropoff)
+                    .is_ok_and(|(route, _)| route.minutes + h.handling <= 15.)
+        });
+    }
     requests::work(&r.task)
-        && r.task != "water"
         && r.remaining > 0.
         && r.remaining <= 5.
         && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
@@ -262,6 +269,58 @@ mod tests {
             assert!(g.restore(&checkpoint));
             assert_eq!(g.snapshot(), checkpoint);
         }
+    }
+    #[test]
+    fn a_carried_water_container_reaches_its_tank_before_lunch() {
+        let (mut g, _, mut r) = scene();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("home", 7, 10), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.arrived = true;
+        v.minutes = 570.;
+        logistics::fixture_stock(&mut v, economy::FOOD, 40);
+        logistics::fixture_stock(&mut v, economy::MEALS, 8);
+        water::fixture_fresh(&mut v, 0.);
+        water::add(&mut v, water::Owner::Camp, water::Class::Fresh, 40.);
+        water::sync(&mut v);
+        assign(&mut r, &v, "water", "Bringing water home.", false);
+        let mut carried = None;
+        for _ in 0..600 {
+            water::advance(&mut v, &mut r, &[], 0.25);
+            if let Some(h) = v
+                .water_supply
+                .trips
+                .iter()
+                .find(|h| h.resident == r.id && h.carrying)
+                && (r.x - h.dropoff[0]).hypot(r.y - h.dropoff[1]) < 1.
+            {
+                carried = Some(h.clone());
+                break;
+            }
+        }
+        let carried = carried.expect("The resident must physically collect the water");
+        v.minutes = 719.9;
+        *g.app.world_mut().resource_mut::<Village>() = v;
+        let mut q = g.app.world_mut().query::<&mut Resident>();
+        *q.iter_mut(g.app.world_mut()).find(|p| p.id == 0).unwrap() = r;
+        g.tick(0.1);
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert_eq!(s.residents[0].task, "water");
+        for _ in 0..40 {
+            g.tick(0.25);
+        }
+        let s: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert!(
+            !s.village
+                .water_supply
+                .trips
+                .iter()
+                .any(|h| h.id == carried.id)
+        );
+        assert!(water::tank(&s.village, carried.to).unwrap().water[carried.class.index()] > 0.);
+        let checkpoint = g.snapshot();
+        assert!(g.restore(&checkpoint));
+        assert_eq!(g.snapshot(), checkpoint);
     }
     #[test]
     fn residents_prepare_for_a_long_errand_before_starting_it() {
