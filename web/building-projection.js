@@ -26,96 +26,12 @@ export const buildingProjection = {
   well: { size:1280, right:[[337,950,505,1040],[218,944,475,1086]], left:[[785,1001,1026,869],[790,1091,1040,953]], upright:[961,343,961,684] },
   compost: { size:1280, right:[[550,307,747,415],[538,657,735,773]], left:[[247,441,484,299],[540,598,754,464]], upright:[781,805,781,1075] },
   square: { size:1280, right:[[460,851,598,911],[649,752,786,810]], left:[[310,733,541,611],[752,898,994,764]], upright:[599,919,599,966] },
-  workshop: { size:1254, right:[[118,917,553,1145],[152,522,505,708],[471,185,828,374]], left:[[553,1145,1131,981],[594,640,1007,531],[637,867,876,806]], upright:[558,746,558,1002], rightLabels:['Side foundation','Side eave','Roof ridge'], leftLabels:['Front foundation','Front lintel','Workbench front'] },
+  workshop: { size:1254, right:[[118,917,548,1145],[152,522,505,708],[471,185,828,374]], left:[[553,1145,1131,981],[594,640,1007,531],[637,867,876,806]], upright:[558,746,558,1002], rightLabels:['Side foundation','Side eave','Roof ridge'], leftLabels:['Front foundation','Front lintel','Workbench front'] },
   coop: { size:1280, right:[[355,753,591,884],[277,486,579,657]], left:[[665,648,921,547],[661,886,746,853]], upright:[634,709,634,994] },
   'home-veranda': { size:1280, right:[[100,852,574,1098],[350,612,445,658]], left:[[574,1098,1156,852],[636,699,1102,503]], upright:[571,731,571,1065] },
   'home-gable': { size:1280, right:[[151,797,650,1061],[200,484,603,699]], left:[[650,1061,1140,841],[897,757,970,724]], upright:[674,719,674,1020] },
   'home-courtyard': { size:1280, right:[[84,852,584,1097],[277,604,416,673]], left:[[584,1097,1173,853],[600,720,1100,510]], upright:[550,745,550,1029] },
 };
-
-// Long roof, frame and ground controls are separate: matching feet alone is
-// insufficient. These traces also drive the rectification mesh and review UI.
-Object.assign(buildingProjection.shed,{
- right:[[240,890,550,1020],[240,560,550,710],[155,500,495,690],[580,245,850,430],[630,770,970,900]],
- left:[[550,1020,1050,930],[550,710,1050,580]],
- rightLabels:['Left/front feet','Side frame','Side eave','Roof ridge','Bench seat'],leftLabels:['Front/right feet','Front frame'],
- upright:[550,710,550,1020],uprights:[[240,560,240,890],[550,710,550,1020],[1050,580,1050,930]],
- gables:[[[850,430],[495,690],[1170,540]]],equalPosts:true,
-});
-const roofs={
- goat_pasture:{right:[[665,205,895,350],[540,335,805,480]],left:[[835,505,1010,432]],gables:[[[895,350],[805,480],[1060,405]]]},
- apiary:{right:[[410,230,890,510],[250,415,720,680]],left:[[750,690,1020,570]],gables:[[[890,510],[720,680],[1070,550]]]},
- hydro:{right:[[468,263,773,438],[300,457,580,618]],left:[[628,650,875,539]],gables:[[[773,438],[580,618],[975,502]]]},
- eco_toilet:{right:[[525,204,800,366],[318,446,595,605]],left:[[655,620,927,499]],gables:[[[800,366],[595,605],[1000,462]]]},
- biodigester:{left:[[851,525,1062,427],[984,667,1200,565]],gables:[[[851,525],[800,550],[984,667]]]},
- warehouse:{right:[[400,230,980,510],[150,470,775,710]],left:[[775,710,1180,550]],gables:[[[980,510],[775,710],[1210,550]]]},
- home:{left:[[161,237,358,135],[290,375,530,273]],right:[[110,289,274,371]]},
- kitchen:{right:[[258,132,477,256],[86,257,324,382]],left:[[370,376,517,305]],gables:[[[477,256],[324,382],[548,283]]]},
- greenhouse:{right:[[493,135,826,381],[245,414,599,660]],left:[[610,673,1030,463]],gables:[[[826,381],[599,660],[1030,463]]]},
- workshop:{gables:[[[828,374],[505,708],[1130,496]]]},
- coop:{right:[[492,207,810,410],[240,468,592,684]],left:[[655,700,945,549]],gables:[[[810,410],[592,684],[1050,499]]]},
- 'home-veranda':{left:[[318,420,795,170],[600,710,1155,480]],gables:[[[318,420],[145,470],[600,710]]]},
- 'home-gable':{right:[[465,180,906,423],[165,473,640,720]],gables:[[[906,423],[640,720],[1100,493]]]},
- 'home-courtyard':{left:[[318,420,795,170],[600,710,1155,480]],gables:[[[318,420],[145,470],[600,710]]]},
- 'adobe-gable':{right:[[432,143,920,420],[135,460,639,702]],left:[[665,715,1110,502]],gables:[[[920,420],[639,702],[1160,505]]]},
- 'adobe-veranda':{right:[[432,143,920,420],[135,460,639,702]],left:[[665,715,1110,502]],gables:[[[920,420],[639,702],[1160,505]]]},
-};
-for(const [key,roof]of Object.entries(roofs)){
- const m=buildingProjection[key];
- for(const direction of ['right','left']){
-  const added=roof[direction]||[];
-  m[direction+'Labels']||=m[direction].map((_,i)=>i===0?'Ground/frame':'Independent frame');
-  m[direction+'Labels'].push(...added.map((_,i)=>i===0?'Roof ridge / eave':'Parallel eave'));
-  m[direction].push(...added);
- }
- if(roof.gables)m.gables=roof.gables;
- m.structure='roofed';
-}
-for(const [key,m]of Object.entries(buildingProjection)){
- m.structure||=key==='shed'?'roofed':key==='well'?'cylindrical':'open';
- m.rightLabels||=m.right.map((_,i)=>i===0?'Ground contact':'Upper frame');
- m.leftLabels||=m.left.map((_,i)=>i===0?'Ground contact':'Upper frame');
-}
-
-// Equal roof spans prevent parallel-but-converging roofs. The back shed foot
-// must close the same parallelogram as the other three posts.
-buildingProjection.shed.postBands=[
- {axis:[240,560,240,890],bounds:[207,273,590,860]},
- {axis:[550,710,550,1020],bounds:[518,582,735,988]},
- {axis:[1050,580,1050,930],bounds:[1018,1082,610,900]},
- {axis:[660,700,660,820],bounds:[638,682,720,804]},
-];
-buildingProjection.shed.partialUprights=[[660,700,660,820]];
-buildingProjection.shed.parallelograms=[[[240,890],[550,1020],[1050,930],[660,820]]];
-buildingProjection.home.gables=[[[161,237],[84,263],[290,375]]];
-const roofSpans={
- shed:[[155,500,495,690],[580,245,850,430]],
- goat_pasture:[[665,205,895,350],[540,335,805,480]],
- apiary:[[410,230,890,510],[250,415,720,680]],
- hydro:[[468,263,773,438],[300,457,580,618]],
- eco_toilet:[[525,204,800,366],[318,446,595,605]],
- biodigester:[[851,525,1062,427],[984,667,1200,565]],
- warehouse:[[400,230,980,510],[150,470,775,710]],
- home:[[161,237,358,135],[290,375,530,273]],
- kitchen:[[258,132,477,256],[86,257,324,382]],
- greenhouse:[[493,135,826,381],[245,414,599,660]],
- workshop:[[152,522,505,708],[471,185,828,374]],
- coop:[[492,207,810,410],[240,468,592,684]],
- 'home-veranda':[[318,420,795,170],[600,710,1155,480]],
- 'home-gable':[[465,180,906,423],[165,473,640,720]],
- 'home-courtyard':[[318,420,795,170],[600,710,1155,480]],
- 'adobe-gable':[[432,143,920,420],[135,460,639,702]],
- 'adobe-veranda':[[432,143,920,420],[135,460,639,702]],
-};
-for(const [key,spans]of Object.entries(roofSpans))buildingProjection[key].spans=[spans];
-
-// Circular tank lids use the same ground-plane camera, rather than a guessed
-// flattened ellipse. Eight rim points also constrain the intervening paint.
-buildingProjection.well.circles=[
- {center:[628,268],radius:332,ry:147,hidden:[6]},
- {center:[628,151],radius:84,ry:42},
-];
-buildingProjection.biodigester.circles=[{center:[429,504],radius:98,ry:40}];
 
 function slope(edges) {
   const sums=edges.reduce((s,[x1,y1,x2,y2])=>{

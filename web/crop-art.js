@@ -1,4 +1,3 @@
-import {meshPoint,meshPolygons} from './building-mesh.js';
 import { greenhouseBeds, greenhousePlants, greenhouseGlass, greenhouseDoor } from './greenhouse-layout.js';
 import { preparedFrames, drawPreparedFrame } from './sprite-frames.js';
 import { buildingArt, cameraCalibration } from './building-art.js?v=night-1';
@@ -22,18 +21,15 @@ export function loadCropArt(source) {
   if(!ready){cropArt=new Image();cropArt.src=source || new URL('./art/crops.png',import.meta.url).href;fieldArt=new Image();fieldArt.src=new URL('./art/field-crops.png',import.meta.url).href;ready=Promise.all([cropArt,fieldArt].map(image=>image.decode().then(()=>preparedFrames(image,cropFrameOptions))));}
   return ready;
 }
-const meshPaths=new WeakMap();
 export function drawCrops(ctx,b,x,y,scale=1,night=0,health=1) {
   if(!cropArt?.naturalWidth||!fieldArt?.naturalWidth)return;
   const greenhouse=b.kind==='greenhouse',art=buildingArt[b.kind],w=art.width;
   const {vertical,shear}=cameraCalibration(art),c=b.crop;
-  const point=(u,v)=>{const [x,y]=meshPoint(art.mesh,[u*(art.mesh?.size||1),v*(art.mesh?.size||1)]),U=x/(art.mesh?.size||1),V=y/(art.mesh?.size||1);return[(U-.5)*w,((V-art.anchor)*vertical+(U-.5)*shear)*w];};
+  const point=(u,v)=>[(u-.5)*w,((v-art.anchor)*vertical+(u-.5)*shear)*w];
   ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
   const path=polygons=>{
-    let pieces=meshPaths.get(polygons);
-    if(!pieces){const size=art.mesh?.size||1;pieces=polygons.flatMap(polygon=>meshPolygons(art.mesh,polygon.map(([u,v])=>[u*size,v*size]))).map(polygon=>polygon.map(([x,y])=>{const u=x/size,v=y/size;return[(u-.5)*w,((v-art.anchor)*vertical+(u-.5)*shear)*w];}));meshPaths.set(polygons,pieces);}
     ctx.beginPath();
-    for(const polygon of pieces){polygon.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();}
+    for(const polygon of polygons){polygon.forEach(([u,v],i)=>{const p=point(u,v);if(i)ctx.lineTo(...p);else ctx.moveTo(...p);});ctx.closePath();}
   };
   const positions=greenhouse ? greenhousePlants :
     Array.from({length:9},(_,i)=>{const u=i%3-1,v=Math.floor(i/3)-1;return [.495+(u-v)*.105,.52+(u+v)*.0525];});

@@ -16,7 +16,7 @@ header,main{max-width:1280px;margin:auto}header{padding:24px 24px 12px}header h1
 <label>Camera <select id="camera"><option value="corrected">Game projection</option><option value="source">Uncorrected source</option></select></label>
 <label><input type="checkbox" id="guides" checked> Show measured edges</label>
 <button id="export">Export traced geometry</button></div>
-<p class="legend"><b>Teal: exact 2:1 directions</b> · <em>Orange dashes: traced painted edges</em> · Pale grid: map ground plane. Blue: vertical posts and centered gables. Roof pitches and organic shapes are excluded from horizontal-axis tests. Brown: actual occupied plot boundary.</p>
+<p class="legend"><b>Teal: exact 2:1 directions</b> · <em>Orange dashes: traced painted edges</em> · Pale grid: map ground plane. Blue: traced vertical posts. Roof pitches and organic shapes are excluded from horizontal-axis tests. Brown: actual occupied plot boundary.</p>
 <p id="status" role="status">Loading day and night sources…</p>
 <div id="buildings"></div>
 <dialog id="focus"><button id="focus-close" aria-label="Close enlarged sprite">×</button><canvas id="focus-canvas"></canvas><figcaption id="focus-caption"></figcaption></dialog></main><script type="module" src="projection.js"></script>

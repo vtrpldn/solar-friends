@@ -1,4 +1,3 @@
-import {meshPoint} from '../web/building-mesh.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
@@ -17,8 +16,7 @@ for(const [kind,art]of Object.entries(allBuildingArt))for(const file of [art.fil
     drawBuildingArt(ctx,{complete:true,naturalWidth:image.width,naturalHeight:image.height},art,registration.x*zoom,registration.y*zoom,registration.scale*zoom);
     const[dx,dy,dw]=rectangle,[a,b,c,d]=matrix;
     for(const[u,v]of points){
-      const size=art.mesh?.size||1,[U,V]=meshPoint(art.mesh,[u*size,v*size]);
-      const X=dx+U/size*dw,Y=dy+V/size*dw,x=tx+a*X+c*Y,y=ty+b*X+d*Y;
+      const X=dx+u*dw,Y=dy+v*dw,x=tx+a*X+c*Y,y=ty+b*X+d*Y;
       assert(Math.abs(x)<=n*34*zoom+1e-5,`${kind} ${file}: painted pixel outside grid column`);
       assert(y+Math.abs(x)/2<=((center*2+n)*17)*zoom+1e-5,`${kind} ${file}: painted pixel crosses front grid edge`);
       pixels++;

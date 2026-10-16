@@ -1,4 +1,3 @@
-import {meshPoint,meshOutline} from './building-mesh.js';
 import { TILE_HALF_WIDTH as W, TILE_HALF_HEIGHT as H } from './projection.js';
 import { cameraCalibration } from './building-art.js';
 import { buildingSilhouettes } from './building-silhouettes.js';
@@ -53,15 +52,14 @@ export const paintedGrounds={
 };
 const placements=new WeakMap();
 export function placementArt(kind,art) {
-  const key=[kind,art.width,art.anchor,art.aspect,art.axes?.join(','),!!art.mesh].join('|'),cached=placements.get(art);
+  const key=[kind,art.width,art.anchor,art.aspect,art.axes?.join(',')].join('|'),cached=placements.get(art);
   if(cached?.key===key)return cached.value;
-  const [size,rawLandmarks]=paintedGrounds[kind],{vertical,shear}=cameraCalibration(art);
-  const landmarks=rawLandmarks.map(p=>meshPoint(art.mesh,p));
+  const [size,landmarks]=paintedGrounds[kind],{vertical,shear}=cameraCalibration(art);
   const groundX=(landmarks[0][0]/size+landmarks[2][0]/size-1)*art.width/2;
-  const outline=meshOutline(art.mesh,buildingSilhouettes[kind].hull.map(([u,v])=>[u*size,v*size])).map(([U,V])=>{const u=U/size,v=V/size;return [
+  const outline=buildingSilhouettes[kind].hull.map(([u,v])=>[
     (u-.5)*art.width-groundX,
     ((v-art.anchor*(art.aspect||1))*vertical+(u-.5)*shear)*art.width,
-  ];});
+  ]);
   const n=footprintSize(kind),halfWidth=Math.max(...outline.map(([x])=>Math.abs(x)));
   const front=Math.max(...outline.map(([x,y])=>y+Math.abs(x)*H/W));
   // Use the full painted volume, preserving its proportions. Walls and roofs

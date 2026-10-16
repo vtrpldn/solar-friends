@@ -1,4 +1,3 @@
-import {meshPoint} from './building-mesh.js';
 import { cameraCalibration, drawBuildingArt } from './building-art.js';
 import { placementArt } from './building-footprints.js';
 
@@ -11,9 +10,8 @@ export function lampLightOffset(art) {
   const placement = placementArt('streetlight', art);
   const { vertical, shear } = cameraCalibration(art);
   const width = art.width * placement.scale;
-  const size=art.mesh?.size||1,[u,v]=meshPoint(art.mesh,lampBulb.map(n=>n*size));
-  const x = (u/size - .5) * width;
-  const y = (v/size - art.anchor) * width;
+  const x = (lampBulb[0] - .5) * width;
+  const y = (lampBulb[1] - art.anchor) * width;
   return { x: placement.x + x, y: placement.y + shear * x + vertical * y };
 }
 

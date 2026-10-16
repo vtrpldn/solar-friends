@@ -1,12 +1,11 @@
 import {allBuildingArt,drawBuildingArt,cameraCalibration} from '../building-art.js';
 import {buildingProjection} from '../building-projection.js';
 import {placementArt,footprintSize} from '../building-footprints.js';
-import {meshPoint} from '../building-mesh.js';
 const $=id=>document.getElementById(id),images=new Map(),cards=[];
 let focus;
 function draw({key,art,canvas,caption},large=false){
  const night=$('light').value==='night',corrected=$('camera').value==='corrected',guides=$('guides').checked;
- const config=corrected?art:{...art,axes:undefined,mesh:undefined},m=buildingProjection[key],ctx=canvas.getContext('2d');
+ const config=corrected?art:{...art,axes:undefined},m=buildingProjection[key],ctx=canvas.getContext('2d');
  const scale=large?3.9:1.65,width=large?1000:400,height=large?920:430,cx=width/2,cy=height*.76;
  canvas.width=width*2;canvas.height=height*2;ctx.scale(2,2);
  ctx.fillStyle=night?'#233947':'#e3e8d3';ctx.fillRect(0,0,width,height);
@@ -20,11 +19,11 @@ function draw({key,art,canvas,caption},large=false){
  let error=0;
  if(m){
   const {vertical,shear}=cameraCalibration(config),w=art.width*scale*registration.scale;
-  const point=p=>{const [u,v]=meshPoint(config.mesh,p);return[origin[0]+(u/m.size-.5)*w,origin[1]+((v/m.size-art.anchor*(art.aspect||1))*vertical+(u/m.size-.5)*shear)*w];};
+  const point=p=>{const [u,v]=p;return[origin[0]+(u/m.size-.5)*w,origin[1]+((v/m.size-art.anchor*(art.aspect||1))*vertical+(u/m.size-.5)*shear)*w];};
   for(const [direction,target]of [['right',.5],['left',-.5]])for(const [index,e]of m[direction].entries()){
    const p=point(e.slice(0,2)),q=point(e.slice(2)),ideal=[q[0],p[1]+target*(q[0]-p[0])];
    error=Math.max(error,Math.abs(q[1]-ideal[1])/scale);
-   if(guides){ctx.lineWidth=1.6;ctx.strokeStyle='#50e1ce';ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...ideal);ctx.stroke();ctx.lineWidth=1.1;ctx.strokeStyle='#f4a44c';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();ctx.setLineDash([]);if(large){ctx.font='11px sans-serif';ctx.fillStyle=night?'#fff6dc':'#263b31';ctx.fillText(m[direction+'Labels'][index],p[0]+4,p[1]-5);}}
+   if(guides){ctx.lineWidth=1.6;ctx.strokeStyle='#50e1ce';ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...ideal);ctx.stroke();ctx.lineWidth=1.1;ctx.strokeStyle='#f4a44c';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(...p);ctx.lineTo(...q);ctx.stroke();ctx.setLineDash([]);if(large){ctx.font='11px sans-serif';ctx.fillStyle=night?'#fff6dc':'#263b31';ctx.fillText((m[direction+'Labels']?.[index]||direction+' edge '+(index+1)),p[0]+4,p[1]-5);}}
   }
   if(guides){
    ctx.strokeStyle='#93b5ff';ctx.lineWidth=1.2;
@@ -37,14 +36,14 @@ function draw({key,art,canvas,caption},large=false){
   }
  }
  caption.replaceChildren(document.createTextNode(art.name));const detail=document.createElement('span');
- detail.textContent=m?`${m.structure} · ${m.right.length+m.left.length} traced axes · ${error.toFixed(3)} px drift at game scale`:'Organic planting · no rectangular structure';caption.append(detail);
+ detail.textContent=m?`${m.right.length+m.left.length} traced axes · ${error.toFixed(3)} px drift at game scale`:'Organic planting · no rectangular structure';caption.append(detail);
  return error;
 }
 function render(){
  let maximum=0;
  for(const card of cards)maximum=Math.max(maximum,draw(card));
  if(focus)draw({...focus,canvas:$('focus-canvas'),caption:$('focus-caption')},true);
- $('status').textContent=`${cards.length} variants · 25 architectural structures + 2 organic plantings. ${$('camera').value==='corrected'?'Registered game projection':'Uncorrected source'}. Maximum traced-axis drift: ${maximum.toFixed(3)} px. Open a sprite to inspect roofs, gable centers, frames and ground contact. Numeric alignment alone does not certify painting quality.`;
+ $('status').textContent=`${cards.length} variants · 25 architectural structures + 2 organic plantings. ${$('camera').value==='corrected'?'Registered game projection':'Uncorrected source'}. Maximum traced-axis drift: ${maximum.toFixed(3)} px. Local texture warps removed; previous proportions restored. Visual review remains required: trace alignment does not certify artwork quality.`;
  $('status').dataset.drift=String(maximum);
 }
 for(const [key,art]of Object.entries(allBuildingArt)){
