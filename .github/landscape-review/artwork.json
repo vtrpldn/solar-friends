@@ -1,0 +1,26 @@
+{
+  "generator": "image_gen",
+  "transparentBackground": true,
+  "references": [
+    "web/art/workshop-isometric.png",
+    "web/art/warehouse.png",
+    "web/art/mata-atlantica-atlas.png"
+  ],
+  "intent": "Warm painted 2:1 orthographic Brazilian countryside. Open timber and terracotta community shed without a raised platform; four botanical details and four geological details as a transparent 4 by 2 atlas.",
+  "assets": [
+    {
+      "file": "web/art/starter-shed.png",
+      "width": 1254,
+      "height": 1254,
+      "opaque": 419596,
+      "transparent": 1116734
+    },
+    {
+      "file": "web/art/landscape-details.png",
+      "width": 1254,
+      "height": 1254,
+      "opaque": 378827,
+      "transparent": 1101203
+    }
+  ]
+}
