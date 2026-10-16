@@ -3,8 +3,8 @@
   "frame": {
     "samples": 90,
     "simulation": {
-      "median": 1,
-      "p95": 1.3000000715255737
+      "median": 0.8999999761581421,
+      "p95": 1.2999999523162842
     },
     "sample": {
       "median": 1.5,
@@ -12,14 +12,15 @@
     },
     "paint": {
       "median": 7.900000095367432,
-      "p95": 8.899999976158142
+      "p95": 9.399999976158142
     },
     "total": {
-      "median": 10.5,
-      "p95": 16.399999976158142
+      "median": 10.700000047683716,
+      "p95": 15.200000047683716
     }
   },
-  "editToReadyMs": 5089,
+  "editToReadyMs": 5019,
   "checkpoint": true,
-  "browserErrors": []
+  "browserErrors": [],
+  "failedBuildPreserved": true
 }

@@ -19,9 +19,11 @@ assert(bulb.y < -70 && bulb.y > -85);
 const traces = [], source = { complete: true, naturalWidth: 3, naturalHeight: 1 };
 const pixels = new Uint8ClampedArray([245,185,65,255, 70,95,150,255, 245,185,65,0]);
 globalThis.document = { createElement: () => ({ width:0, height:0, getContext: () => ({
+  save(){},restore(){},scale(){},beginPath(){},lineTo(){},moveTo(){},closePath(){},clip(){},transform(){},
   drawImage(){}, getImageData: () => ({data:pixels}), putImageData(){}
 }) }) };
 const ctx = {
+  getTransform(){return {a:1,b:0,c:0,d:1};},
   save(){}, restore(){}, translate(x,y){traces.push(['translate',x,y]);}, transform(){},
   drawImage(){traces.push(['paint']);}, fillRect(){traces.push(['halo']);},
   createRadialGradient(){return {addColorStop(){}};}, globalAlpha:1

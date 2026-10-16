@@ -15,7 +15,19 @@ try{
  const result={profile:'iteration',frame:perf,editToReadyMs:Date.now()-started,checkpoint:JSON.stringify(before)===JSON.stringify(after),browserErrors:errors};
  await writeFile(new URL('../artifacts/isometric/browser-performance.json',import.meta.url),JSON.stringify(result,null,2));
  if(!result.checkpoint){await writeFile('/private/tmp/solar-reload-before.json',JSON.stringify(before));await writeFile('/private/tmp/solar-reload-after.json',JSON.stringify(after));}
+ // A compiler error must not reload or replace the last working WASM.
+ await page.evaluate(()=>{window.iterationEvents=[];const events=new EventSource('/__dev/events');events.onmessage=e=>window.iterationEvents.push(JSON.parse(e.data));});
+ let loads=0;page.on('load',()=>loads++);
+ await writeFile(file,source+'\nthis is deliberately invalid Rust for the rebuild check\n');
+ await page.waitForFunction(()=>window.iterationEvents.some(e=>e.status==='error'),null,{timeout:60000});
+ assert.equal(loads,0,'A failed build must leave the current page running');
+ assert.deepEqual(await page.evaluate(()=>window.solarDev.snapshot()),after);
+ result.failedBuildPreserved=true;
+ const ready=page.waitForEvent('load',{timeout:60000});await writeFile(file,source);await ready;await page.waitForFunction(()=>window.solarDevReloadReady);
+ assert.deepEqual(await page.evaluate(()=>window.solarDev.snapshot()),after,'Recovery rebuild preserves the checkpoint');
+ await writeFile(new URL('../artifacts/isometric/browser-performance.json',import.meta.url),JSON.stringify(result,null,2));
  console.log(JSON.stringify(result,null,2));
  assert(result.checkpoint,'Exact paused checkpoint');assert.deepEqual(errors,[]);
+ await page.locator('#dev-close').click();
  await page.screenshot({path:new URL('../artifacts/isometric/performance-game.png',import.meta.url).pathname});
 }finally{await writeFile(file,source);await browser.close();}

@@ -21,14 +21,14 @@ import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt } from './building-footprints.js';
 import { installBuildMenu, paintIcon } from './build-menu.js';
 import { unlitFilter, buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
-import { drawNightEmission } from './night-lighting.js';
+import { drawNightEmission, paintDepthLight } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { weatherSummary, updateClimateForecast } from './climate-ui.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
-import { RESIDENT_WIDTH, preparedFrames } from './sprite-frames.js';
+import { RESIDENT_WIDTH, FRAME_ANCHOR, preparedFrames } from './sprite-frames.js';
 import {farmNames,farmNotes,updateAgricultureUI} from './agriculture-ui.js';
 import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
 import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
@@ -72,8 +72,9 @@ const artworkPreview = nightPreview || residentPreview || previewParams.has("art
 const directScenario = previewParams.get('dev-scenario');
 let sandboxRulesUI;
 let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
-const canvas = $("#world"),
-  ctx = canvas.getContext("2d");
+const canvas = $("#world");
+let ctx = canvas.getContext("2d");
+const lightLayer=document.createElement('canvas'),lightContext=lightLayer.getContext('2d');
 const kinds = {
   ...Object.fromEntries(Object.entries(farmNames).map(([k,n])=>[k,[n,farmNotes[k]]])),
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
@@ -741,6 +742,11 @@ function render() {
   drawGroundWeather(ctx,weatherView);
   drawWaterConnections(ctx,iso,scale,state);
   drawElectricalConnections(ctx,iso,scale,state);
+  const darkness = nightAmount(state.village.minutes);
+  if(darkness>0){
+    if(lightLayer.width!==canvas.width||lightLayer.height!==canvas.height){lightLayer.width=canvas.width;lightLayer.height=canvas.height;}
+    lightContext.resetTransform();lightContext.clearRect(0,0,lightLayer.width,lightLayer.height);lightContext.setTransform(ctx.getTransform());
+  }
   const objects = [
     ...(state.village.power.network?.nodes||[]).filter(n=>n.owner.kind==='ground').map(n=>({depth:n.x+n.y+.4,draw:()=>drawBattery(ctx,iso(n.x,n.y),scale,nightAmount(state.village.minutes))})),
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
@@ -753,6 +759,13 @@ function render() {
     ...state.village.buildings.map((b) => ({
       depth: b.x + b.y,
       draw: () => building(b),
+      light: () => {
+        if(b.progress<100)return;
+        const c=state.environment.power.connections.find(c=>c.id===b.id);
+        if(!['grid','roof'].includes(c?.source)||c.light_level<=0)return;
+        const p=iso(b.x,b.y),key=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
+        drawNightEmission(ctx,nightBuildingImages[key],allBuildingArt[key],key,p.x,p.y,scale,darkness*c.light_level);
+      },
     })),
     ...flock(state.village).map((hen) => ({
       depth: hen.x + hen.y + 0.1,
@@ -761,9 +774,18 @@ function render() {
     ...state.residents.map((r) => ({
       depth: r.x + r.y + 0.6,
       draw: () => resident(r),
+      occlude: () => {
+        if(!residentVisible(r,state.village))return;
+        const surface=residentSurfaces.get(r.id),animation=residentAnimations.get(r.id),p=iso(r.x,r.y);
+        if(!surface||!animation)return;
+        const w=RESIDENT_WIDTH*scale;ctx.save();ctx.translate(p.x,p.y);ctx.scale(animation.facing,animation.breath);ctx.drawImage(surface,-w/2,-w*FRAME_ANCHOR,w,w);ctx.restore();
+      },
     })),
   ];
-  objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
+  objects.sort((a, b) => a.depth - b.depth).forEach(o=>{
+    o.draw();
+    if(darkness>0){const world=ctx;try{ctx=lightContext;paintDepthLight(ctx,o.occlude||o.draw,o.light);}finally{ctx=world;}}
+  });
   landMap?.drawFocus(tile);
   for(const job of state.village.building_jobs||[]){if(job.stage!=='pack'||!job.destination)continue;const b=state.village.buildings.find(b=>b.id===job.building);polygon(footprintCorners(b.kind,...job.destination).map(([x,y])=>{const p=iso(x,y);return[p.x,p.y];}),'#a5b77422','#b9cf8b');}
 
@@ -807,21 +829,12 @@ function render() {
   const hour = (state.village.minutes % 1440) / 60;
   // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
-  const darkness = nightAmount(state.village.minutes);
   const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
   ctx.fillStyle = `rgba(237,150,84,${twilight})`;
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
   ctx.fillRect(0, 0, width, height);
-  if(darkness>0){
-    for(const b of state.village.buildings){
-      if(b.progress<100)continue;
-      const c=state.environment.power.connections.find(c=>c.id===b.id);
-      if(!['grid','roof'].includes(c?.source) || c.light_level<=0)continue;
-      const p=iso(b.x,b.y),kind=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
-      drawNightEmission(ctx,nightBuildingImages[kind],allBuildingArt[kind],kind,p.x,p.y,scale,darkness*c.light_level);
-    }
-  }
+  if(darkness>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(lightLayer,0,0,lightLayer.width,lightLayer.height,0,0,width,height);ctx.restore();}
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),

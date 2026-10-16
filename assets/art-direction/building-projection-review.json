@@ -1,7 +1,7 @@
 {
   "reviewed": "2026-10-16",
-  "scope": "All 27 building variants, day and night. Measured architectural ground directions use shared orthographic calibration; organic groves and orchards have no structural edge measurements.",
-  "method": "Hand-traced structural landmarks, shared game renderer, day/night visual review. Per-edge tolerance 2 pixels at zoom 1. These are raster illustration tolerances, not a claim that every painted detail has exact geometry. PNG hashes require renewed review after any source replacement.",
+  "scope": "All 27 building variants, day and night, through source and actual game rendering on terrain. Organic groves and orchards have no rectangular architectural axes.",
+  "method": "Hand-traced roofs, frames, ground contacts and gables drive 25 complete, non-folded texture meshes. Traced structural axes use exact 2:1 directions, roof ridges and eaves have equal spans, shed posts close a parallelogram, and circular tank rims use 2:1 ellipses. Visual review checks painting quality, proportions and ground contact separately from these numeric constraints. Source brush strokes retain their painted texture.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
     "cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
@@ -58,5 +58,14 @@
   "farming_review": {
     "date": "2026-10-15",
     "notes": "New pasture and hive roof, fence and box edges traced in building-projection.js. New orchard trees arranged along a diamond, with disconnected mulch rings and no platform. These three unlit outdoor plots share their daytime alpha geometry and use a runtime night tint; no duplicated night PNGs."
+  },
+  "style": "Warm painted timber, terracotta, cream/adobe walls, blue/turquoise fixtures and leafy greens; shared upper-left daylight and matching night silhouettes. Reviewed at game scale and enlarged, with planted greenhouse overlays and depth-occluded night emissions.",
+  "geometry_files": {
+    "web/building-projection.js": "15c404752258bd7f7ae0aab4fae8740511d1955326fafb31eb679504c475aa73",
+    "web/building-mesh-data.js": "07d1801a3cbbc93beabfb94c658f015ea46083efdf1288b987401848a9ac2d72",
+    "web/building-mesh.js": "1fbb3c70740bd90a713ba1e87908db9c567690abf3856d09d9726916712d0379",
+    "web/building-art.js": "5ce708aaaa200981af42c8e99cdb8e247f93ea48548465038c7534464d022c9a",
+    "web/crop-art.js": "ff07892192ed8e55e21edb4230c8adb852f69e9a516612def1f5f44c904af9a9",
+    "web/night-lighting.js": "49cefacb62a3156c0e28b7495fd0d4a8a0538974fd52ed5c2a66b580ca119117"
   }
 }

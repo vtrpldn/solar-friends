@@ -1,3 +1,4 @@
+import {meshPoint} from './building-mesh.js';
 import { cameraCalibration, drawBuildingArt } from './building-art.js';
 import { placementArt } from './building-footprints.js';
 
@@ -10,8 +11,9 @@ export function lampLightOffset(art) {
   const placement = placementArt('streetlight', art);
   const { vertical, shear } = cameraCalibration(art);
   const width = art.width * placement.scale;
-  const x = (lampBulb[0] - .5) * width;
-  const y = (lampBulb[1] - art.anchor) * width;
+  const size=art.mesh?.size||1,[u,v]=meshPoint(art.mesh,lampBulb.map(n=>n*size));
+  const x = (u/size - .5) * width;
+  const y = (v/size - art.anchor) * width;
   return { x: placement.x + x, y: placement.y + shear * x + vertical * y };
 }
 
@@ -56,4 +58,11 @@ export function drawNightEmission(ctx, image, art, kind, x, y, scale, amount) {
     ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
   }
   ctx.restore();
+}
+
+// Walk this layer in the same back-to-front order as the visible scene. Every
+// foreground silhouette blocks earlier light, including non-emitting objects.
+export function paintDepthLight(ctx,occlude,emit) {
+  ctx.save();ctx.globalCompositeOperation='destination-out';occlude();ctx.restore();
+  emit?.();
 }

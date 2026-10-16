@@ -7,7 +7,11 @@
     "benchmark": "node scripts/benchmark-engine.mjs",
     "dev:check": "node scripts/dev-check.mjs",
     "dev:browser": "node scripts/dev-check.mjs --browser-only",
-    "dev:serve": "node scripts/serve.mjs"
+    "dev:serve": "node scripts/serve.mjs",
+    "dev:check-iteration": "node scripts/check-iteration.mjs",
+    "art:project": "node scripts/rectify-buildings.mjs"
   },
-  "devDependencies": { "playwright": "1.62.1" }
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
 }

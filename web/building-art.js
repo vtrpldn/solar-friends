@@ -1,3 +1,4 @@
+import {buildingMeshes} from './building-mesh-data.js';
 import {paintImage} from './paint-cache.js';
 // Canonical runtime sizes and measured ground-axis slopes for the painted assets.
 // Width is the full source-cell width at zoom 1, including transparent padding.
@@ -45,6 +46,7 @@ export const allBuildingArt = {...buildingArt,...homeVariants,...adobeVariants};
 for (const [key, art] of Object.entries(allBuildingArt)) {
   const axes=measuredAxes(key);
   if(axes)art.axes=axes;
+  if(buildingMeshes[key])art.mesh=buildingMeshes[key];
 }
 export const homeArtKeys = ['home', ...Object.keys(homeVariants)];
 export function buildingArtKey(building, buildings, projects = []) {
@@ -80,7 +82,11 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   const sourceWidth = image?.naturalWidth ?? image?.width;
   const sourceHeight = image?.naturalHeight ?? image?.height;
   if (!sourceWidth || !sourceHeight || image.complete === false) return;
-  const [cx, cy, cw, ch] = art.cell || [0, 0, 1, 1];
+  const matrix=ctx.getTransform?.(),pixels=art.width*scale*(matrix?Math.max(Math.hypot(matrix.a,matrix.b),Math.hypot(matrix.c,matrix.d)):1);
+  const resolution=Math.min(1024,Math.max(128,Math.ceil(pixels/128)*128));
+  const texture=buildingTexture(image,art.mesh,art.cell,resolution);
+  const [cx, cy, cw, ch] = texture===image ? art.cell || [0, 0, 1, 1] : [0,0,1,1];
+  const textureWidth=texture.width??texture.naturalWidth,textureHeight=texture.height??texture.naturalHeight;
   const w = art.width * scale;
   const { vertical, shear } = cameraCalibration(art);
   ctx.save();
@@ -88,8 +94,8 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   if(art.renderFilter)ctx.filter=(ctx.filter==='none'?'':ctx.filter+' ')+art.renderFilter;
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
-  paintImage(ctx,buildingTexture(image, art.mesh), cx * sourceWidth, cy * sourceHeight,
-    cw * sourceWidth, ch * sourceHeight,
+  paintImage(ctx,texture, cx * textureWidth, cy * textureHeight,
+    cw * textureWidth, ch * textureHeight,
     -w / 2, -w * (art.aspect||1) * art.anchor, w, w * (art.aspect||1));
   ctx.restore();
 }
