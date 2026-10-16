@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "days": 84,
+  "from_day": 92,
+  "to_day": 176,
+  "seasons": [
+    "wet",
+    "dry"
+  ],
+  "rainSamples": 350,
+  "foodMeasure": "Ready ingredients, meals, milk and honey; eggs require cooking",
+  "minFood": 8,
+  "maxFood": 61,
+  "minBasicFood": 0,
+  "maxBasicFood": 50,
+  "maxHunger": 44.46470642089844,
+  "minEnergy": 92.24978637695312,
+  "exact_checkpoints": 85,
+  "serviceOrders": 7,
+  "serviceSpending": 80520,
+  "completedServices": 7,
+  "pendingServices": 0,
+  "residents": [
+    {
+      "work": 0.16681131747960423,
+      "leisure": 0.6851241103975004
+    },
+    {
+      "work": 0.15972342264477096,
+      "leisure": 0.6871218668971478
+    },
+    {
+      "work": 0.14891789762968052,
+      "leisure": 0.6873926485743731
+    },
+    {
+      "work": 0.16092943201376936,
+      "leisure": 0.6960413080895008
+    },
+    {
+      "work": 0.1613788372491854,
+      "leisure": 0.700051449151089
+    }
+  ]
+}

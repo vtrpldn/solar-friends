@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "source": "Identical copies of the earned one-home Story comparison; only player commands",
+  "simulatedSeconds": 512,
+  "smallNativeSteps": 5120,
+  "fastBrowserFrames": 320,
+  "checkpoints": 12,
+  "comparison": "Exact complete snapshots; no numeric tolerance for speed equivalence",
+  "moneyPaid": 22000,
+  "gardenProgress": 100
+}

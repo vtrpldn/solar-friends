@@ -1,0 +1,140 @@
+{
+  "first": [
+    {
+      "name": "Iara",
+      "task": "rest",
+      "reason": "Taking a proper rest until I feel ready to help again."
+    },
+    {
+      "name": "Bento",
+      "task": "eat",
+      "reason": "Sitting down for a cooked meal."
+    },
+    {
+      "name": "Luz",
+      "task": "socialize",
+      "reason": "I need some company. Taking time to catch up before more chores."
+    },
+    {
+      "name": "Cauã",
+      "task": "garden",
+      "reason": "Watering our dry fruit trees before taking on another project."
+    },
+    {
+      "name": "Nina",
+      "task": "outside",
+      "reason": "Walking out for my rainwater systems technician shift at a regional water cooperative. Back at 17:00."
+    }
+  ],
+  "rested": true,
+  "ate": true,
+  "connected": true,
+  "worked": true,
+  "completedAt": 3532.050048828125,
+  "request": {
+    "building": null,
+    "created": 2010,
+    "destination": null,
+    "finished": 3517.800048828125,
+    "id": 58,
+    "material": null,
+    "phase": "complete",
+    "reason": "Finished the batch you asked me to help with.",
+    "remaining": 7.25,
+    "task": "gather"
+  },
+  "days": [
+    {
+      "minutes": 2011.050048828125,
+      "food": 18,
+      "meals": 8,
+      "project": 0
+    },
+    {
+      "minutes": 3454.050048828125,
+      "food": 16,
+      "meals": 0,
+      "project": 0
+    },
+    {
+      "minutes": 4897.0498046875,
+      "food": 22,
+      "meals": 0,
+      "project": 100
+    },
+    {
+      "minutes": 6340.0498046875,
+      "food": 19,
+      "meals": 1,
+      "project": 100
+    }
+  ],
+  "leisure": [
+    0.6308693351558062,
+    0.6457367666079558,
+    0.6565725827499933,
+    0.6316885972849587,
+    0.6610430272942014
+  ],
+  "activities": [
+    [
+      "rest",
+      "eat",
+      "nature_walk",
+      "garden",
+      "birdwatch",
+      "stargaze",
+      "sleep",
+      "haul",
+      "build",
+      "water"
+    ],
+    [
+      "eat",
+      "garden",
+      "stretch",
+      "daydream",
+      "stargaze",
+      "sleep",
+      "haul",
+      "cook",
+      "build",
+      "water",
+      "compost"
+    ],
+    [
+      "socialize",
+      "daydream",
+      "eat",
+      "gather",
+      "stretch",
+      "stargaze",
+      "sleep",
+      "haul",
+      "water",
+      "garden"
+    ],
+    [
+      "garden",
+      "haul",
+      "birdwatch",
+      "eat",
+      "nature_walk",
+      "stargaze",
+      "sleep",
+      "cook",
+      "idle",
+      "water"
+    ],
+    [
+      "outside",
+      "return",
+      "stretch",
+      "eat",
+      "stargaze",
+      "sleep",
+      "daydream",
+      "socialize"
+    ]
+  ]
+}
