@@ -9,7 +9,7 @@ export function gatheringInfo(v){
   const count=`${v.progress.gatherings} ${v.progress.gatherings===1?'gathering':'gatherings'} shared`;
   const deadline=p?`Day ${1+Math.floor(p.deadline/1440)} · 18:00`:'';
   let summary=`${count}. Plan five prepared meals for a shared table; delivery has until the following evening.`;
-  if(p?.phase==='preparing')summary=`${name}: ${arrived}/5 meals delivered${incoming?` · ${incoming} on the way`:''}. ${stored?.blocker||`Neighbours bring portions during community hours. Delivery deadline: ${deadline}.`}`;
+  if(p?.phase==='preparing')summary=`${name}: ${arrived}/5 meals delivered${incoming?` · ${incoming} on the way`:''}. ${stored?.blocker||`Neighbours bring portions when they have the energy. Delivery deadline: ${deadline}.`}`;
   if(p?.phase==='ready')summary=`Five meals are at ${name}. Waiting for three fed, rested neighbours to be in the village, between 08:00 and 18:00.`;
   if(p?.phase==='serving')summary=`${name}: ${v.progress.attended.toString(2).replaceAll('0','').length} neighbours arrived · ${Math.max(0,Math.ceil(v.progress.gathering_until-v.minutes))} minutes left. ${p.spent_after==null?'Meals wait for three arrivals.':'Five delivered meals shared.'}`;
   if(p?.phase==='cancelled'&&p.spent_after==null&&p.finished>=p.deadline)summary='The delivery deadline passed. Unserved meals remain available. Add a road from the pantry or move the table closer, then try again.';

@@ -486,7 +486,7 @@ mod tests {
     use super::*;
     fn scene() -> Game {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert!(g.configure_sandbox_rules(false, true, true));
         for (kind, x, y) in [
             ("solar_farm", 5, 5),
@@ -523,7 +523,7 @@ mod tests {
     #[test]
     fn simultaneous_source_recovery_reserves_distinct_clear_ground_for_each_bank() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("solar_farm", 5, 5), "ok");
         assert_eq!(g.place("solar_farm", 10, 5), "ok");
@@ -561,9 +561,9 @@ mod tests {
     #[test]
     fn rainy_river_generation_is_a_valid_electrical_frame() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert!(g.configure_sandbox_rules(false, true, true));
-        let (x, y) = (26, 5);
+        let (x, y) = ((river_center(5.) - 1.35).ceil() as i32, 5);
         assert_eq!(g.place("hydro", x, y), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.minutes = 900.;
@@ -710,9 +710,12 @@ mod tests {
     #[test]
     fn river_generator_removal_keeps_its_charge_on_the_accessible_bank() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert!(g.configure_sandbox_rules(false, true, true));
-        assert_eq!(g.place("hydro", 26, 5), "ok");
+        assert_eq!(
+            g.place("hydro", (river_center(5.) - 1.35).ceil() as i32, 5),
+            "ok"
+        );
         let id;
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -757,7 +760,7 @@ mod tests {
             .iter_mut()
             .find(|n| n["id"].as_u64() == Some(u64::from(id.0)))
             .unwrap();
-        row["x"] = 26.into();
+        row["x"] = 62.into();
         row["y"] = 5.into();
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), raw);

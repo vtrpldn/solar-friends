@@ -259,12 +259,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
     else {
         return false;
     };
-    if !ready(v, &j, r.id)
-        || r.task != "utility"
-        || !work_time(v.minutes)
-        || !minutes.is_finite()
-        || minutes <= 0.
-    {
+    if !ready(v, &j, r.id) || r.task != "utility" || !minutes.is_finite() || minutes <= 0. {
         return false;
     }
     let Some(p) = approach(v, j.id, r.id) else {

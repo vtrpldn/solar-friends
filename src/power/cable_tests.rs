@@ -5,7 +5,7 @@ fn scene() -> Game {
 }
 fn scene_with(extra: &[(&str, i32, i32)]) -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (kind, x, y) in [
         ("solar_farm", 5, 5),
         ("streetlight", 12, 5),

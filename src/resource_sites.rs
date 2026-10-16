@@ -279,7 +279,7 @@ pub fn valid(v: &Village) -> bool {
         .iter()
         .enumerate()
         .any(|(i, n)| !n.is_finite() || *n < 0. || *n > LAND[i] || n.fract() != 0.)
-        || v.economy.sources.len() > 676
+        || v.economy.sources.len() > ((crate::MAP_SIZE - 2) * (crate::MAP_SIZE - 2)) as usize
     {
         return false;
     }
@@ -352,7 +352,7 @@ impl Game {
         if let Err(message) = location(&v, material, x, y) {
             return message.into();
         }
-        if v.economy.sources.len() >= 676 {
+        if v.economy.sources.len() >= ((crate::MAP_SIZE - 2) * (crate::MAP_SIZE - 2)) as usize {
             return "This village has reached its plot limit.".into();
         }
         if v.logistics.is_some() && v.simulation.next_id.checked_add(1).is_none() {
@@ -490,8 +490,8 @@ pub fn view(v: &Village) -> serde_json::Value {
         let soil=crate::land::condition(v,size(s.material),s.x,s.y);
         let rate=crate::land::growth(&soil);
         let status=if s.material>=2&&!crate::sandbox::land(v){"Sandbox extraction does not deplete this patch; its saved reserve is preserved."}else if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
-        else if !s.planted{if s.auto_replant||s.plant_requested{if !crate::planting::ready(v,index){"Planting waits for delivered stock. Order timber seedlings or bamboo starts in Trade, then let neighbours haul them to this plot."}else if !water_available(v,index){"Replanting waits for two irrigation water."}else{"Planting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
-        else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot during normal work hours."};
+        else if !s.planted{if s.auto_replant||s.plant_requested{if !crate::planting::ready(v,index){"Planting waits for delivered stock. Order timber seedlings or bamboo starts in Trade, then let neighbours haul them to this plot."}else if !water_available(v,index){"Replanting waits for two irrigation water."}else{"Planting queued for a neighbour with enough energy."}}else{"Cut plot · choose whether to plant again."}}
+        else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot when they have the energy."};
         serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":available(v,index)>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"unlimited":s.material>=2&&!crate::sandbox::land(v),"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":if s.material==0{4000}else{0},"planting_stock":crate::planting::required(v,index).map(|(material,amount)|serde_json::json!({"material":material,"amount":amount,"here":crate::organics::available(v,crate::logistics::Owner::Source(index),material)})),"batch":if s.material==0{8}else{4}})
     }).collect();
     serde_json::json!(rows)
@@ -661,7 +661,7 @@ mod tests {
     fn quarries_only_share_their_own_patch_and_relocation_cannot_duplicate_stone() {
         let mut g = Game::new();
         assert_eq!(g.place_source(3, 18, 18), "ok");
-        assert_eq!(g.place_source(3, 23, 23), "ok");
+        assert_eq!(g.place_source(3, 40, 23), "ok");
         let first = g.app.world().resource::<Village>().economy.sources[0].remaining;
         let second = g.app.world().resource::<Village>().economy.sources[1].remaining;
         {

@@ -7,6 +7,7 @@ import { measuredAxes } from './building-projection.js';
 import { buildingTexture } from './building-mesh.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
+  shed:{name:'Community shed',file:'starter-shed.png',nightFile:'starter-shed.png',nightTint:'brightness(.6) saturate(.72)',width:185,anchor:.8},
   orchard: {name:'Fruit orchard',file:'orchard.png',nightFile:'orchard.png',nightTint:'brightness(.6) saturate(.72)',width:210,anchor:.83},
   goat_pasture: {name:'Goat pasture',file:'goat-pasture.png',nightFile:'goat-pasture.png',nightTint:'brightness(.6) saturate(.72)',width:218,anchor:.83},
   apiary: {name:'Stingless bee apiary',file:'apiary.png',nightFile:'apiary.png',nightTint:'brightness(.6) saturate(.72)',width:84,anchor:.84},

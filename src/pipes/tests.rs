@@ -1,7 +1,7 @@
 use super::*;
 fn scene() -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (kind, x, y) in [("well", 5, 5), ("kitchen", 12, 5), ("solar_farm", 5, 18)] {
         assert_eq!(g.place(kind, x, y), "ok");
     }

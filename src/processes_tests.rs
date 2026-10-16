@@ -1,7 +1,7 @@
 use super::*;
 fn scene(kinds: &[&str]) -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (i, kind) in kinds.iter().enumerate() {
         assert_eq!(g.place(kind, 5 + i as i32 * 5, 5), "ok");
     }

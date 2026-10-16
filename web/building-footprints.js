@@ -3,7 +3,7 @@ import { cameraCalibration } from './building-art.js';
 import { buildingSilhouettes } from './building-silhouettes.js';
 
 export function footprintSize(kind) {
-  if (['square','solar_farm','source_timber','orchard','goat_pasture'].includes(kind)) return 3;
+  if (['shed','square','solar_farm','source_timber','orchard','goat_pasture'].includes(kind)) return 3;
   if (['well','compost','coop','streetlight','road','hydro','eco_toilet','battery','apiary'].includes(kind)) return 1;
   return 2;
 }
@@ -22,6 +22,7 @@ export function footprintCorners(kind,x,y) {
 // Painted ground-contact landmarks, left/front/right, in source-cell units.
 // These register the building to its plot independently of transparent padding.
 export const paintedGrounds={
+  shed:[1254,[[230,905],[550,1055],[1050,955]]],
   orchard:[1280,[[200,1000],[640,1110],[1080,1000]]],
   goat_pasture:[1280,[[134,704],[646,1043],[1132,745]]],
   apiary:[1280,[[277,958],[703,1093],[975,989]]],

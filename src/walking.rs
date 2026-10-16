@@ -390,7 +390,7 @@ mod tests {
     use super::*;
     fn scene() -> (Game, Village, Resident) {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("home", 10, 9), "ok");
         let mut v = g.app.world().resource::<Village>().clone();
         v.minutes = 570.;
@@ -467,12 +467,12 @@ mod tests {
         v.buildings.push(Building {
             id: 2,
             kind: "hydro".into(),
-            x: 25,
+            x: (river_center(10.) - 1.35).ceil() as i32,
             y: 10,
             ..v.buildings[0].clone()
         });
         navigation::refresh(&mut v);
-        (r.x, r.y) = (25., 10.);
+        (r.x, r.y) = ((river_center(10.) - 1.35).ceil(), 10.);
         clear(&mut r);
         assert!(!spacing::land(r.x, r.y));
         assert!(quote(&v, &r).unwrap().1);
@@ -516,7 +516,7 @@ mod tests {
         let (_, mut v, mut r) = scene();
         // A full column of occupied plots divides the western village from this site.
         let template = v.buildings[0].clone();
-        for y in (1..28).step_by(2) {
+        for y in (1..MAP_SIZE).step_by(2) {
             v.buildings.push(Building {
                 id: v.buildings.len(),
                 x: 6,
@@ -603,7 +603,7 @@ mod tests {
     fn the_resident_loop_finishes_the_same_requested_batch_sooner_with_roads() {
         fn finish(paved: bool) -> usize {
             let mut g = Game::new();
-            g.start_mode("sandbox");
+            g.start_fixture_mode("sandbox");
             assert_eq!(g.place("home", 7, 12), "ok");
             {
                 let mut v = g.app.world_mut().resource_mut::<Village>();

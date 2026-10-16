@@ -197,6 +197,8 @@ pub fn moisture_valid(v: &Village) -> bool {
 pub fn condition(v: &Village, n: i32, x: i32, y: i32) -> Ground {
     if !crate::sandbox::land(v) {
         return Ground {
+            biome: habitat(v.land.seed, x as f32, y as f32).0,
+            geology: habitat(v.land.seed, x as f32, y as f32).1,
             fertility: 0.72,
             retention: 1.,
             cover: 0.35,
@@ -207,6 +209,8 @@ pub fn condition(v: &Village, n: i32, x: i32, y: i32) -> Ground {
         };
     }
     let mut out = Ground {
+        biome: habitat(v.land.seed, x as f32, y as f32).0,
+        geology: habitat(v.land.seed, x as f32, y as f32).1,
         fertility: 0.,
         retention: 0.,
         cover: 0.,

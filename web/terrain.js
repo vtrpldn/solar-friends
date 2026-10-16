@@ -1,13 +1,15 @@
+import {habitatAt,habitatColors} from "./habitats.js";
 // Paint terrain once per village layout. Frames reuse this texture while panning
 // and zooming; the simulation's isometric coordinates stay unchanged.
 export const GROUND_START = -2.5;
-export const GROUND_SIZE = 32;
-const RESOLUTION = 2560;
+export const GROUND_SIZE = 69;
+const RESOLUTION = 4096;
 
-export const MAP_SIZE = 28;
+export const MAP_SIZE = 64;
 export function riverCenter(y) {
-  return 25.8 + Math.sin(y * 0.32) * 0.65;
+  return 57.8 + Math.sin(y * 0.11) * 1.5 + Math.sin(y * 0.32) * 0.65;
 }
+export function hydroCell(y){return Math.ceil(riverCenter(y)-1.35);}
 export function riverBank(x, y) {
   return x >= riverCenter(y) - 2.3;
 }
@@ -44,7 +46,7 @@ function paintRiver(g) {
     g.strokeStyle = color;
     g.stroke();
   }
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < Math.ceil(GROUND_SIZE / .33); i++) {
     const y = GROUND_START + i * 0.33;
     const side = i % 2 ? 1 : -1;
     const [x, py] = groundPoint(
@@ -93,22 +95,28 @@ function paintSoil(g,soil){
     }
   }
 }
-export function paintTerrain(texture, roads = [], resourceSites = [],soil=[]) {
+function paintedTexture(g,texture,side){
+  const tile=32*RESOLUTION/GROUND_SIZE,half=texture.width/2;
+  for(let y=0;y<RESOLUTION;y+=tile)for(let x=0;x<RESOLUTION;x+=tile){
+    const flipX=Math.round(x/tile)%2,flipY=Math.round(y/tile)%2;
+    g.save();g.translate(x+(flipX?tile:0),y+(flipY?tile:0));g.scale(flipX?-1:1,flipY?-1:1);
+    g.drawImage(texture,side*half,0,half,texture.height,0,0,tile,tile);g.restore();
+  }
+}
+function paintHabitats(g,seed){
+  const unit=RESOLUTION/GROUND_SIZE;
+  for(let y=0;y<MAP_SIZE;y+=2)for(let x=0;x<MAP_SIZE;x+=2){
+    const name=habitatAt(seed,x,y);if(name==='Flower meadow')continue;
+    const [px,py]=groundPoint(x,y),radius=unit*2.4,patch=g.createRadialGradient(px,py,0,px,py,radius);
+    patch.addColorStop(0,habitatColors[name]+'38');patch.addColorStop(1,habitatColors[name]+'00');
+    g.fillStyle=patch;g.fillRect(px-radius,py-radius,radius*2,radius*2);
+  }
+}
+export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0) {
   const ground = surface();
   const g = ground.getContext("2d");
-  const half = texture.width / 2;
-  g.drawImage(
-    texture,
-    0,
-    0,
-    half,
-    texture.height,
-    0,
-    0,
-    RESOLUTION,
-    RESOLUTION,
-  );
-
+  paintedTexture(g,texture,0);
+  paintHabitats(g,seed);
   paintSoil(g,soil);
   const paths = surface();
   const p = paths.getContext("2d");
@@ -124,17 +132,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[]) {
   }
   p.shadowBlur = 0;
   p.globalCompositeOperation = "source-in";
-  p.drawImage(
-    texture,
-    half,
-    0,
-    half,
-    texture.height,
-    0,
-    0,
-    RESOLUTION,
-    RESOLUTION,
-  );
+  paintedTexture(p,texture,1);
   g.drawImage(paths, 0, 0);
   paintRiver(g);
 
@@ -145,14 +143,9 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[]) {
   e.scale(RESOLUTION, RESOLUTION);
   e.fillStyle = "white";
   e.beginPath();
-  e.moveTo(0.08, 0.15);
-  e.bezierCurveTo(0.03, 0.04, 0.28, 0.075, 0.4, 0.055);
-  e.bezierCurveTo(0.6, 0.02, 0.8, 0.065, 0.9, 0.08);
-  e.bezierCurveTo(0.99, 0.23, 0.92, 0.4, 0.955, 0.6);
-  e.bezierCurveTo(0.975, 0.75, 0.94, 0.88, 0.88, 0.925);
-  e.bezierCurveTo(0.69, 0.965, 0.51, 0.925, 0.34, 0.95);
-  e.bezierCurveTo(0.13, 0.94, 0.035, 0.86, 0.065, 0.71);
-  e.bezierCurveTo(0.045, 0.51, 0.025, 0.34, 0.08, 0.15);
+  // Dissolve only the margin outside the complete 64-cell property.
+  const inset=.018;
+  e.roundRect(inset,inset,1-2*inset,1-2*inset,.025);
   e.fill();
   // Resource clearings sit at the property edge. Keep the same meadow texture
   // under their complete ground contact instead of dissolving it into blank space.

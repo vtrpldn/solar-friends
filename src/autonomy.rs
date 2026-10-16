@@ -19,8 +19,7 @@ pub fn food_interrupt(v: &Village, r: &Resident) -> bool {
         return false;
     }
     r.hunger > 75.
-        || work_time(v.minutes)
-            && !matches!(r.task.as_str(), "cook" | "haul" | "water" | "garden")
+        || !matches!(r.task.as_str(), "cook" | "haul" | "water" | "garden")
             && workforce::urgent_food(v, r.id)
             && !occupations::available(v, r.id)
 }
@@ -44,13 +43,10 @@ pub fn preparation(v: &Village, r: &Resident, travel: f32, work: f32) -> Option<
     }
 }
 
-/// A break is a deadline for starting chores, with a bounded allowance to put
-/// down a carried load or finish an attended piece of work. Serious needs and
-/// commitments are handled separately and always interrupt this allowance.
+/// Finish a short attended task or put down a nearby carried load before a
+/// routine meal. Serious needs and personal commitments still interrupt.
 pub fn finishing(v: &Village, r: &Resident) -> bool {
-    let m = v.minutes.rem_euclid(1440.);
-    if !((720.0..735.).contains(&m) || (960.0..975.).contains(&m))
-        || r.energy < 28.
+    if r.energy < 28.
         || r.hunger > 60.
         || r.social < 35.
         || occupations::available(v, r.id)
@@ -86,18 +82,6 @@ pub fn finishing(v: &Village, r: &Resident) -> bool {
         && r.remaining > 0.
         && r.remaining <= 5.
         && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
-}
-
-pub fn fits_before_break(v: &Village, travel: f32, work: f32) -> bool {
-    let m = v.minutes.rem_euclid(1440.);
-    let end = if (540.0..720.).contains(&m) {
-        720.
-    } else if (900.0..960.).contains(&m) {
-        960.
-    } else {
-        return true; // Reports may inspect offers outside community hours.
-    };
-    travel + work <= end - m
 }
 
 #[cfg(test)]
@@ -144,7 +128,7 @@ mod tests {
         choose(&mut r, &v);
         assert_eq!(
             r.task, "socialize",
-            "Loneliness must matter even during community hours"
+            "Loneliness must matter even when they have the energy"
         );
         r.social = 60.;
         choose(&mut r, &v);
@@ -280,7 +264,10 @@ mod tests {
                         .iter()
                         .any(|p| p.id == load.to && p.items[load.material] >= load.amount)
                 );
-                assert_ne!(s.residents[0].task, "haul");
+                assert!(
+                    s.residents[0].energy >= 28.,
+                    "A delivered load may be followed by more useful hauling"
+                );
             }
             let checkpoint = g.snapshot();
             assert!(g.restore(&checkpoint));
@@ -290,7 +277,7 @@ mod tests {
     #[test]
     fn a_carried_water_container_reaches_its_tank_before_lunch() {
         let (mut g, _, mut r) = scene();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("home", 7, 10), "ok");
         let mut v = g.app.world().resource::<Village>().clone();
         v.arrived = true;
@@ -358,7 +345,7 @@ mod tests {
     #[test]
     fn an_idle_resident_notices_new_animal_care_without_waiting_for_a_hobby_timer() {
         let (mut g, _, mut r) = scene();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("apiary", 13, 15), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -392,6 +379,7 @@ mod tests {
         let mut far = near.clone();
         far.id = 1;
         far.x += 2.5;
+        far.energy = 28.1;
         v.workforce.preferences[0][2] = 0;
         v.workforce.preferences[1][2] = 2;
         workforce::refresh(&mut v, [&near, &far]);
@@ -400,8 +388,8 @@ mod tests {
             .find(|o| o.task == "gather")
             .unwrap();
         assert!(
-            remote.blocker.is_some(),
-            "The favourite worker cannot fit the journey plus batch"
+            preparation(&v, &far, remote.travel_minutes.unwrap(), 30.).is_some(),
+            "The tired favourite needs to recover before the journey and batch"
         );
         choose(&mut near, &v);
         assert_eq!(
@@ -462,16 +450,16 @@ mod tests {
         );
     }
     #[test]
-    fn late_offers_explain_why_a_long_errand_should_wait() {
+    fn late_offers_remain_open_while_the_resident_has_energy() {
         let (_, mut v, r) = scene();
         v.minutes = 719.;
         logistics::fixture_stock(&mut v, economy::FOOD, 12);
         let offers = workforce::offers(&v, &r);
         assert!(!offers.is_empty());
-        assert!(offers.iter().all(|o| o.blocker.is_some()));
+        assert!(offers.iter().any(|o| o.blocker.is_none()));
         let mut person = r;
         choose(&mut person, &v);
-        assert!(leisure::hobby(&person.task));
+        assert!(requests::work(&person.task) || person.task == "haul");
     }
     fn install(g: &mut Game, v: Village, r: Resident) {
         *g.app.world_mut().resource_mut::<Village>() = v;
@@ -668,7 +656,7 @@ mod tests {
     #[test]
     fn overdue_goats_get_one_caregiver_before_new_construction() {
         let (mut g, _, mut r) = scene();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("goat_pasture", 13, 15), "ok");
         assert_eq!(g.place("garden", 13, 20), "ok");
         let mut v = g.app.world().resource::<Village>().clone();

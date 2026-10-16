@@ -40,7 +40,7 @@ fn waiting(v: &Village, id: usize) -> String {
         return requests::supply_wait(v, id);
     }
     if v.economy.outside_jobs.iter().all(|enabled| *enabled) {
-        return "All five neighbours have outside shifts. Keep someone available during community hours for hauling and construction.".into();
+        return "All five neighbours have outside shifts. Keep someone available when they have the energy for hauling and construction.".into();
     }
     if !economy::can_build(v, id) {
         return "Reserved supplies did not reach the site within this window. Review outside shifts, helping requests, storage access and receiving room.".into();
@@ -137,7 +137,7 @@ impl Game {
         serde_json::json!({"schema":1,"based_at":based_at,"through":v.minutes,"days":days,
             "funds_before":before_funds,"funds_projected":v.economy.money,"projects":projects,
             "paid_orders":paid_orders,
-            "assumptions":"Current plans, work preferences, outside shifts and requests stay unchanged. Residents keep their needs and community hours. Paid orders and local production continue; no new purchases or player actions are assumed. Dates are rounded to half-hour windows and are conditional, not promises."}).to_string()
+            "assumptions":"Current plans, work preferences, outside shifts and requests stay unchanged. Residents work according to energy, needs and personal commitments. Paid orders and local production continue; no new purchases or player actions are assumed. Dates are rounded to half-hour windows and are conditional, not promises."}).to_string()
     }
 }
 
@@ -236,9 +236,10 @@ mod tests {
         );
         assert_eq!(away["through"], local["through"]);
         assert!(
-            away["projects"][0]["blocker"]
-                .as_str()
-                .is_some_and(|s| s.contains("outside shifts"))
+            away["projects"][0]["completed_at"].is_number()
+                || away["projects"][0]["blocker"]
+                    .as_str()
+                    .is_some_and(|s| s.contains("outside shifts"))
         );
     }
     #[test]

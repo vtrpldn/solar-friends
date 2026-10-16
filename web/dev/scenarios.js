@@ -4,7 +4,7 @@ import {withAutonomyScene} from './autonomy-fixture.js';
 import {withMaintenanceScene} from './maintenance-fixture.js';
 import {resetMaterialLocations} from './material-fixture.js';
 import { footprint, occupies } from '../building-footprints.js';
-import { MAP_SIZE, riverBank } from '../terrain.js';
+import { MAP_SIZE, riverBank, hydroCell } from '../terrain.js';
 import {makeArtPreview} from './art-preview.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 import {withSeasonalWeather} from './climate-fixture.js';
@@ -113,7 +113,7 @@ export function makeScenario(id, fresh, established) {
     ].map(site=>({...site,restored:false,player_placed:true,active:true,moisture:site.material<2?1440:0,planted:site.material<2,auto_replant:true,auto_harvest:true,harvest_requested:false,plant_requested:false,harvests:0}));
   }
   if(id.startsWith('circular')||id==='banana') {
-    v.buildings=[['home',6,8],['home',10,8],['eco_toilet',14,8],['kitchen',18,8],['biodigester',6,13],['wetland',14,13],['warehouse',18,13],['garden',14,17],['well',18,17],['streetlight',21,13],['hydro',24,13]].map(([kind,x,y],id)=>({id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop:structuredClone(established.village.buildings[0].crop),poultry:{remaining:0}}));
+    v.buildings=[['home',6,8],['home',10,8],['eco_toilet',14,8],['kitchen',18,8],['biodigester',6,13],['wetland',14,13],['warehouse',18,13],['garden',14,17],['well',18,17],['streetlight',21,13],['hydro',hydroCell(13),13]].map(([kind,x,y],id)=>({id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop:structuredClone(established.village.buildings[0].crop),poultry:{remaining:0}}));
     if(id==='banana')v.buildings.push({...structuredClone(v.buildings[0]),id:v.buildings.length,kind:'banana_treatment',x:9,y:17});
     v.economy.projects=v.buildings.map(b=>({building:b.id,recipe:b.kind==='home'?'adobe':'standard',appearance:b.kind==='home'?4+b.id:0,priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===b.kind)[b.kind==='home'?'adobe':'standard'].length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)}));
     v.economy.next_building=v.buildings.length;v.economy.orders=[];
@@ -158,7 +158,7 @@ export function makeScenario(id, fresh, established) {
   }
   if(id.startsWith('climate-')&&!v.buildings.some(b=>b.kind==='hydro')){
     const id=v.economy.next_building++,kind='hydro';
-    v.buildings.push({...structuredClone(v.buildings[0]),id,kind,x:26,y:5,progress:100,contributors:0,next_visit:0,visits:0});
+    v.buildings.push({...structuredClone(v.buildings[0]),id,kind,x:hydroCell(5),y:5,progress:100,contributors:0,next_visit:0,visits:0});
     v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)});
   }
   if(id.startsWith('maintenance')){for(const i of [4,8,9,10,15])v.economy.stock[i]=0;v.progress.tool_uses=0;}

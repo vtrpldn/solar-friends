@@ -2,7 +2,7 @@ use super::*;
 use crate::{Resident, ecology, logistics, power};
 fn garden() -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 5, 5), "ok");
     g
@@ -10,7 +10,7 @@ fn garden() -> Game {
 #[test]
 fn wetness_lives_in_the_ground_and_rain_does_not_enter_a_greenhouse() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 13, 13), "ok");
     assert_eq!(g.place("greenhouse", 17, 13), "ok");
@@ -132,7 +132,7 @@ fn tree_shade_saves_water_but_heavy_shade_reduces_crop_growth() {
 #[test]
 fn visible_tree_canopies_reduce_solar_output_and_cutting_reduces_shade() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("solar_farm", 18, 18), "ok");
     g.app.world_mut().resource_mut::<Village>().minutes = 720.;
@@ -170,7 +170,7 @@ fn moisture_edits_and_forged_crop_summaries_fail_without_changing_the_world() {
         let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
         match change {
             0 => bad["village"]["land"]["water"] = serde_json::json!([]),
-            1 => bad["village"]["land"]["water"][27] = 1.into(),
+            1 => bad["village"]["land"]["water"][MAP_SIZE as usize - 1] = 1.into(),
             2 => bad["village"]["land"]["water"][145] = 2.into(),
             _ => bad["village"]["buildings"][0]["crop"]["moisture"] = 119.into(),
         }
@@ -232,7 +232,7 @@ fn crop_outlook_matches_actual_harvest_and_next_planting_without_mutation() {
 #[test]
 fn legal_border_gardens_have_four_ground_cells_and_save_all_their_water() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 1, 1), "ok");
     let preview: serde_json::Value = serde_json::from_str(&g.land_preview("garden", 1, 1)).unwrap();
@@ -242,12 +242,12 @@ fn legal_border_gardens_have_four_ground_cells_and_save_all_their_water() {
         assert_eq!(v.land.soil.len(), 4);
         v.buildings[0].crop.planted = true;
         water_plot(&mut v, 2, 1, 1, 1.);
-        for i in [0, 1, 28, 29] {
+        for i in [0, 1, MAP_SIZE as usize, MAP_SIZE as usize + 1] {
             assert_eq!(v.land.water[i], 1.);
         }
         assert!(valid(&v));
         ecology::advance(&mut v, 60.);
-        for i in [0, 1, 28, 29] {
+        for i in [0, 1, MAP_SIZE as usize, MAP_SIZE as usize + 1] {
             assert!(v.land.water[i] > 0.5);
             assert!(v.land.water[i] < 1.);
         }
@@ -259,7 +259,7 @@ fn legal_border_gardens_have_four_ground_cells_and_save_all_their_water() {
 #[test]
 fn grove_canopy_stays_during_packing_and_returns_only_after_rebuilding() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("grove", 15, 15), "ok");
     let before = ground(g.app.world().resource::<Village>(), 16, 16).shade;

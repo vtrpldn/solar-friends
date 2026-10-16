@@ -62,6 +62,15 @@ impl Game {
 
     /// Starts a fresh mode; invalid input leaves the running village untouched.
     pub fn start_mode(&mut self, mode: &str) -> bool {
+        self.initialise_mode(mode, true)
+    }
+}
+impl Game {
+    #[cfg(test)]
+    pub(crate) fn start_fixture_mode(&mut self, mode: &str) -> bool {
+        self.initialise_mode(mode, false)
+    }
+    fn initialise_mode(&mut self, mode: &str, founding: bool) -> bool {
         let mode = match mode {
             "story" => Mode::Story,
             "sandbox" => Mode::Sandbox,
@@ -92,6 +101,9 @@ impl Game {
             replenish(&mut v);
             v.simulation.materials = None;
             simulation::start_materials(&mut v);
+        }
+        if founding {
+            founding::start(&mut v);
         }
         true
     }
@@ -137,7 +149,7 @@ mod tests {
     #[test]
     fn sandbox_builds_freely_and_round_trips_without_story_progress() {
         let mut g = Game::new();
-        assert!(g.start_mode("sandbox"));
+        assert!(g.start_fixture_mode("sandbox"));
         let before = g.app.world().resource::<Village>().economy.money;
         assert_eq!(g.place("solar_farm", 5, 5), "ok");
         assert_eq!(g.place("greenhouse", 10, 5), "ok");
@@ -172,14 +184,14 @@ mod tests {
                 .completed,
             [false; 4]
         );
-        assert!(!g.start_mode("invalid"));
+        assert!(!g.start_fixture_mode("invalid"));
         assert_eq!(g.snapshot(), saved);
     }
 
     #[test]
     fn sandbox_removal_cleans_visits_and_keeps_recovered_battery_plots_occupied() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("solar_farm", 5, 5), "ok");
         assert_eq!(g.place("home", 12, 5), "ok");
         {

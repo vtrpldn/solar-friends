@@ -177,7 +177,7 @@ mod tests {
     use super::*;
     fn setup() -> Game {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert!(g.configure_sandbox_rules(false, true, true));
         for (kind, x, y) in [
             ("eco_toilet", 5, 5),

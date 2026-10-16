@@ -10,6 +10,9 @@ pub fn land(x: f32, y: f32) -> bool {
 }
 
 pub(crate) fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
+    if b.kind == "shed" && b.progress >= 100. {
+        return true;
+    }
     let size = interactions::footprint_size(&b.kind);
     let left = (b.x - size / 2) as f32 - 0.5;
     let back = (b.y - size / 2) as f32 - 0.5;
@@ -26,7 +29,7 @@ pub fn free_spot(v: &Village, p: (f32, f32), id: usize) -> bool {
             && (requests::work(&r.task)
                 || matches!(
                     r.task.as_str(),
-                    "visit" | "eat" | "rest" | "socialize" | "sanitation"
+                    "visit" | "eat" | "rest" | "socialize" | "sanitation" | "daydream"
                 ))
             && (r.target_x - p.0).hypot(r.target_y - p.1) < PERSONAL_SPACE
     })
@@ -45,7 +48,7 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
             let p = (x + radius * angle.cos(), y + radius * angle.sin());
             if navigation::clear(v, p.0, p.1)
                 && navigation::exit_segment(v, [x, y], [p.0, p.1])
-                && p.0 < 25.8 + (p.1 * 0.32).sin() * 0.65 - 2.3
+                && !river_bank(p.0.floor() as i32, p.1.floor() as i32)
                 && v.buildings.iter().all(|b| clear_plot(b, p.0, p.1))
                 && spots
                     .iter()

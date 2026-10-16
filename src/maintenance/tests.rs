@@ -1,7 +1,7 @@
 use super::*;
 fn scene() -> Game {
     let mut g = Game::new();
-    assert!(g.start_mode("sandbox"));
+    assert!(g.start_fixture_mode("sandbox"));
     assert_eq!(g.place("workshop", 6, 6), "ok");
     assert_eq!(g.place("solar_farm", 12, 6), "ok");
     g.tick(0.25);

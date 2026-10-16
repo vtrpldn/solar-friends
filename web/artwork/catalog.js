@@ -1,3 +1,4 @@
+import {natureArt} from '../nature-art.js';
 import {economyArt,economyAtlasFile} from '../economy-art.js';
 import {batteryArt} from '../battery-art.js';
 import { RESIDENT_WIDTH, FRAME_ANCHOR } from '../sprite-frames.js';
@@ -31,3 +32,5 @@ add('recovered-battery','Recovered battery','recovered-battery.png','Land & supp
 add('economy-original','Original economy prop study','economy-atlas.png','References',{usage:'Reference',width:250,anchor:.95});
 
 ['Maize','Cassava','Fodder grass'].forEach((name,column)=>['Seedling','Growing','Harvestable'].forEach((stage,row)=>add(`field-crop-${column}-${row}`,`${name} · ${stage}`,'field-crops.png','Crops',{crop:true,frame:row*3+column,cell:[column/3,row/3,1/3,1/3],width:column===2?26:30,anchor:FRAME_ANCHOR})));
+
+natureArt.forEach((art,i)=>add(`landscape-${i}`,art.name,art.file,i<4?'Vegetation':'Terrain',{...art,file:'../art/'+art.file}));

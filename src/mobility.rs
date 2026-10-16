@@ -31,7 +31,7 @@ pub fn gate(v: &Village, id: usize) -> (f32, f32) {
     let preferred = 13. + (id as f32 - 2.) * 1.25;
     let clear =
         |x, y| spacing::land(x, y) && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y));
-    for offset in 0..28 {
+    for offset in 0..MAP_SIZE {
         for sign in [1., -1.] {
             let y = preferred + offset as f32 * sign;
             if clear(0.4, y) {
@@ -40,12 +40,12 @@ pub fn gate(v: &Village, id: usize) -> (f32, f32) {
         }
     }
     // The southern edge stays beyond buildable foundations, even in a dense village.
-    for x in 1..=22 {
-        if clear(x as f32, 27.6) {
-            return (x as f32, 27.6);
+    for x in 1..MAP_SIZE - 2 {
+        if clear(x as f32, MAP_SIZE as f32 - 0.4) {
+            return (x as f32, MAP_SIZE as f32 - 0.4);
         }
     }
-    (10., 27.6)
+    (10., MAP_SIZE as f32 - 0.4)
 }
 pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
     walking::clear(r);

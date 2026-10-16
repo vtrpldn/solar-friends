@@ -792,7 +792,7 @@ pub fn valid(v: &Village) -> bool {
             || p.kit != kit(&p.plan)
             || p.priority > 3
             || p.plan.cells.is_empty()
-            || p.plan.cells.len() > 676
+            || p.plan.cells.len() > ((crate::MAP_SIZE - 2) * (crate::MAP_SIZE - 2)) as usize
             || !p.work.is_finite()
             || !(0.0..=p.labour()).contains(&p.work)
             || !p.removal_work.is_finite()

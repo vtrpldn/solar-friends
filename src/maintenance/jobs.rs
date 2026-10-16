@@ -223,7 +223,6 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         || r.id >= 5
         || !minutes.is_finite()
         || minutes <= 0.
-        || !work_time(v.minutes)
         || (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08
         || (r.x - j.anchor[0]).hypot(r.y - j.anchor[1]) > 4.
         || approach(v, id, r.id).is_none_or(|p| (r.x - p[0]).hypot(r.y - p[1]) > 0.08)

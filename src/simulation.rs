@@ -322,7 +322,7 @@ mod tests {
     #[test]
     fn stable_ids_never_reuse_cancelled_work_and_reject_corrupt_references() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("garden", 5, 5), "ok");
         assert_eq!(g.queue_building_work(0, "demolish", 0, 0), "ok");
         let first = g.app.world().resource::<Village>().building_jobs[0]

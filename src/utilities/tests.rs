@@ -1,7 +1,7 @@
 use super::*;
 fn scene() -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (kind, x, y) in [
         ("well", 5, 5),
         ("garden", 12, 5),
@@ -100,7 +100,7 @@ fn footprint_ports_use_real_one_two_and_three_cell_boundaries() {
 #[test]
 fn shortest_routes_share_clear_road_corridors_without_entering_buildings() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert_eq!(g.place("well", 5, 5), "ok");
     assert_eq!(g.place("garden", 12, 5), "ok");
     let v = g.app.world().resource::<Village>();
@@ -177,7 +177,10 @@ fn inaccessible_and_separated_ports_produce_actionable_failures() {
 #[test]
 fn hydro_ports_only_reach_the_safe_bank_and_routes_never_cross_water() {
     let mut g = scene();
-    assert_eq!(g.place("hydro", 26, 5), "ok");
+    assert_eq!(
+        g.place("hydro", (river_center(5.) - 1.35).ceil() as i32, 5),
+        "ok"
+    );
     let v = g.app.world().resource::<Village>();
     let endpoint = endpoints(v, Kind::Electricity)
         .into_iter()
@@ -201,7 +204,7 @@ fn hydro_ports_only_reach_the_safe_bank_and_routes_never_cross_water() {
     }
     let mut blocked = v.clone();
     let mut obstacle = blocked.buildings[8].clone();
-    obstacle.x = 25;
+    obstacle.x = endpoint.ports[0].cell[0];
     obstacle.y = 5;
     obstacle.id = 100;
     blocked.buildings.push(obstacle);

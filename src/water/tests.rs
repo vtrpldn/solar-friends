@@ -1,7 +1,7 @@
 use super::*;
 fn scene() -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (kind, x, y) in [
         ("well", 5, 5),
         ("kitchen", 12, 5),
@@ -366,7 +366,7 @@ fn healthy_local_reserves_wait_for_a_useful_refill_batch() {
 #[test]
 fn household_buffers_replace_the_camp_reserve_after_everyone_is_housed() {
     let mut g = scene();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert_eq!(g.place("home", 5, 10), "ok");
     assert_eq!(g.place("home", 18, 10), "ok");
     let mut v = g.app.world().resource::<Village>().clone();

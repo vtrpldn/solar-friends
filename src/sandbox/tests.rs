@@ -1,7 +1,7 @@
 use super::*;
 fn game() -> Game {
     let mut g = Game::new();
-    assert!(g.start_mode("sandbox"));
+    assert!(g.start_fixture_mode("sandbox"));
     g
 }
 fn state(g: &mut Game) -> Save {

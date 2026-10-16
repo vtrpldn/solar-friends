@@ -383,7 +383,7 @@ mod tests {
     #[test]
     fn a_fractional_route_cannot_clip_a_cistern_corner_between_samples() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("well", 6, 10), "ok");
         let v = g.app.world().resource::<Village>();
         for x in [-1., 1.] {
@@ -413,7 +413,7 @@ mod tests {
     #[test]
     fn standing_neighbours_do_not_trap_a_route_at_an_occupied_grid_corner() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("square", 6, 6), "ok");
         let raw = g.snapshot();
         let v = g.app.world().resource::<Village>();
@@ -445,7 +445,7 @@ mod tests {
     #[test]
     fn derived_graph_reuse_and_invalidation_preserve_queries_and_exact_routes() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         let before = g.snapshot();
         refresh(&mut g.app.world_mut().resource_mut::<Village>());
         assert_eq!(g.snapshot(), before);
@@ -497,7 +497,7 @@ mod tests {
     #[test]
     fn an_occupied_origin_can_exit_but_cannot_cross_another_building() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         g.place("home", 8, 8);
         g.place("home", 12, 8);
         let v = g.app.world().resource::<Village>();
@@ -512,7 +512,7 @@ mod tests {
     #[test]
     fn roads_improve_the_same_route_without_spending_goods_or_time() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         let open = route(g.app.world().resource::<Village>(), [3., 3.], [13., 3.]).unwrap();
         for x in 3..=13 {
             assert_eq!(g.toggle_road(x, 3), "ok");
@@ -527,7 +527,7 @@ mod tests {
     #[test]
     fn routes_detour_around_foundations_and_never_cut_a_corner() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("home", 8, 8), "ok");
         let v = g.app.world().resource::<Village>();
         let path = route(v, [4., 8.], [12., 8.]).unwrap();
@@ -539,8 +539,8 @@ mod tests {
     #[test]
     fn river_and_enclosed_clearings_have_honest_blockers() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
-        assert!(route(g.app.world().resource::<Village>(), [2., 3.], [27., 3.]).is_err());
+        g.start_fixture_mode("sandbox");
+        assert!(route(g.app.world().resource::<Village>(), [2., 3.], [62., 3.]).is_err());
         for (x, y) in [
             (8, 4),
             (10, 4),
@@ -575,7 +575,7 @@ mod tests {
     #[test]
     fn a_source_plot_changes_access_and_road_edits_change_cost_immediately() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         let open = route(g.app.world().resource::<Village>(), [4., 5.], [12., 5.]).unwrap();
         assert_eq!(g.place_source(0, 8, 5), "ok");
         let v = g.app.world().resource::<Village>();

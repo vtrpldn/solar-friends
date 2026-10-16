@@ -31,7 +31,7 @@ fn seeded_ground_is_repeatable_and_arrival_land_is_viable() {
 #[test]
 fn sites_on_one_patch_share_depletion_but_other_patches_survive() {
     let mut g = Game::new();
-    for (x, y) in [(18, 18), (18, 21), (23, 23)] {
+    for (x, y) in [(18, 18), (18, 21), (40, 23)] {
         assert_eq!(g.place_source(3, x, y), "ok");
     }
     let v = g.app.world().resource::<Village>();
@@ -122,7 +122,7 @@ fn construction_changes_soil_when_work_starts_and_removal_keeps_it() {
 #[test]
 fn moving_only_disturbs_destination_when_rebuilding_is_attended() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("home", 5, 5), "ok");
     assert_eq!(g.queue_building_work(0, "move", 18, 18), "ok");

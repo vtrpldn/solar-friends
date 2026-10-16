@@ -1,3 +1,4 @@
+import {habitatAt,habitatColors} from './habitats.js';
 import {usesLogistics} from './sandbox-rules.js';
 import {paintIcon} from './build-menu.js';
 import {allBuildingArt,buildingArtKey} from './building-art.js';
@@ -88,7 +89,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     }
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
     ctx.fillStyle='#87965b';ctx.fillRect(0,0,MAP_SIZE,MAP_SIZE);
-    for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ctx.fillStyle=riverBank(x,y)?'#74a7a0':(x+y)%7===0?'#a9aa6c':'#87965b';ctx.fillRect(x,y,1,1);}
+    for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ctx.fillStyle=riverBank(x,y)?'#74a7a0':habitatColors[habitatAt(state.village.land.seed,x,y)];ctx.fillRect(x,y,1,1);}
     ctx.fillStyle='#d3b181';for(const [x,y] of state.village.roads)ctx.fillRect(x-.45,y-.45,.9,.9);
     for(const b of state.village.buildings){ctx.fillStyle=b.progress>=100?'#ece0a8':'#ac7851';ctx.fillRect(b.x-.7,b.y-.7,1.4,1.4);}
     for(const r of state.residents){if(r.trip?.phase==='away')continue;ctx.fillStyle=r.id===selected?'#ffe296':'#435d36';ctx.beginPath();ctx.arc(r.x,r.y,.45,0,Math.PI*2);ctx.fill();}

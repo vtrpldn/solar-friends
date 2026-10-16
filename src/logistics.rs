@@ -258,6 +258,7 @@ pub(crate) fn layout(v: &Village) -> u32 {
     let mut mix = |n: u32| h = (h ^ n).wrapping_mul(16777619);
     for b in &v.buildings {
         mix(b.id as u32);
+        mix(u32::from(b.kind == "shed" && b.progress >= 100.));
         mix(b.x as u32);
         mix(b.y as u32);
         mix(interactions::footprint_size(&b.kind) as u32);
@@ -1660,8 +1661,8 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     for p in &s.stores {
         if !p.x.is_finite()
             || !p.y.is_finite()
-            || !(0.3..=27.7).contains(&p.x)
-            || !(0.3..=27.7).contains(&p.y)
+            || !(0.3..=crate::MAP_SIZE as f32 - 0.3).contains(&p.x)
+            || !(0.3..=crate::MAP_SIZE as f32 - 0.3).contains(&p.y)
             || p.capacity > 600
             || p.blocker.as_ref().is_some_and(|s| s.len() > 200)
             || p.items.iter().chain(&p.target).any(|n| *n > 600)
@@ -1804,7 +1805,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || h.next > h.route.len()
             || h.route.iter().chain([&h.pickup, &h.dropoff]).any(|p| {
                 p.iter()
-                    .any(|n| !n.is_finite() || !(0.3..=27.7).contains(n))
+                    .any(|n| !n.is_finite() || !(0.3..=crate::MAP_SIZE as f32 - 0.3).contains(n))
             })
             || !s.stores.iter().any(|p| p.id == h.from)
             || !s.stores.iter().any(|p| p.id == h.to)
@@ -1982,7 +1983,7 @@ mod tests {
     #[test]
     fn bounded_compost_inputs_arrive_before_optional_pantry_topups() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         assert_eq!(g.place("compost", 17, 9), "ok");
         let mut v = g.app.world().resource::<Village>().clone();
@@ -2163,7 +2164,7 @@ mod tests {
     #[test]
     fn moving_storage_evacuates_before_packing_and_checkpoints_every_stage() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 8, 8), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -2225,7 +2226,7 @@ mod tests {
     #[test]
     fn a_dropped_load_in_a_narrow_corridor_can_be_recovered() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("kitchen", 10, 10), "ok");
         assert_eq!(g.place("garden", 13, 10), "ok");
         {
@@ -2275,7 +2276,7 @@ mod tests {
     #[test]
     fn incoming_orders_keep_their_unloading_space_and_storage_targets_are_atomic() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -2313,7 +2314,7 @@ mod tests {
     #[test]
     fn unreachable_storage_reports_a_blocker_and_does_not_trap_workers() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 15, 18), "ok");
         for x in [12, 14, 16, 18] {
             for y in [15, 21] {
@@ -2403,7 +2404,7 @@ mod tests {
     #[test]
     fn a_put_down_load_inside_a_new_plot_can_leave_only_its_covering_foundation() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("kitchen", 10, 10), "ok");
         assert_eq!(g.place("home", 13, 10), "ok");
         let v = g.app.world().resource::<Village>();
@@ -2424,7 +2425,7 @@ mod tests {
     #[test]
     fn an_incoming_pot_kit_leaves_other_haulers_available_for_construction() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("kitchen", 8, 8), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -2471,7 +2472,7 @@ mod tests {
     #[test]
     fn reserved_forestry_starts_are_delivered_before_optional_pantry_topups() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("kitchen", 8, 8), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -2503,7 +2504,7 @@ mod tests {
     #[test]
     fn lowering_a_storage_target_queues_a_return_instead_of_teleporting_goods() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -2560,7 +2561,7 @@ mod tests {
     #[test]
     fn routine_pantry_topups_do_not_starve_bounded_preparation() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("workshop", 5, 5), "ok");
         assert_eq!(g.place("garden", 13, 5), "ok");
         {
@@ -2635,7 +2636,10 @@ mod tests {
             economy::add(&mut v, 13, 1);
             economy::add(&mut v, 14, 1);
         }
-        assert_eq!(g.place("hydro", 26, 5), "ok");
+        assert_eq!(
+            g.place("hydro", (river_center(5.) - 1.35).ceil() as i32, 5),
+            "ok"
+        );
         complete(&mut g);
         let v = g.app.world().resource::<Village>();
         assert_eq!(v.buildings[0].kind, "hydro");
@@ -2674,7 +2678,7 @@ mod tests {
     #[test]
     fn hauling_at_a_crowded_corner_keeps_the_next_waypoint_reachable() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("garden", 13, 10), "ok");
         let v = g.app.world().resource::<Village>().clone();
         let mut r = g

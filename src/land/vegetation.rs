@@ -10,42 +10,93 @@ pub struct Tree {
     pub cleared: bool,
 }
 pub fn generate(seed: u32) -> Vec<Tree> {
-    (0..170)
+    (0..1800)
         .filter_map(|index| {
             let sample = |domain| simulation::sample(seed, domain, index) as f64 / u32::MAX as f64;
-            let x = (sample(71) * 32. - 2.) as f32;
-            let y = (sample(72) * 32. - 2.) as f32;
-            if x > 1. && x < 27. && y > 1. && y < 27.
-                || (x - (25.8 + (y * 0.32).sin() * 0.65)).abs() < 1.8
+            let x = (sample(71) * (MAP_SIZE + 4) as f64 - 2.) as f32;
+            let y = (sample(72) * (MAP_SIZE + 4) as f64 - 2.) as f32;
+            // The founding meadow remains open; the rest of the property is alive.
+            if (2.5..23.).contains(&x) && (2.5..25.).contains(&y)
+                || x > crate::river_center(y) - 2.5
             {
                 return None;
             }
+            let biome = habitat(seed, x, y).0;
+            let detail = index % 3 != 0;
+            let species = if detail {
+                match biome {
+                    "Atlantic forest" => 4 + index as usize % 2,
+                    "River meadow" => {
+                        if index % 2 == 0 {
+                            4
+                        } else {
+                            11
+                        }
+                    }
+                    "Rocky woodland" => 8 + index as usize % 2,
+                    "Clay terraces" => {
+                        if index % 2 == 0 {
+                            7
+                        } else {
+                            10
+                        }
+                    }
+                    "Dry woodland" => 7,
+                    _ => 6,
+                }
+            } else {
+                index as usize / 3 % 4
+            };
             Some(Tree {
                 index,
                 x,
                 y,
-                species: index as usize % 4,
-                size: (0.65 + sample(73) * 0.55) as f32,
+                species,
+                size: (if detail { 0.7 } else { 0.65 } + sample(73) * 0.45) as f32,
                 cleared: false,
             })
         })
         .collect()
 }
+fn crown(t: &Tree) -> Option<(f32, f32)> {
+    (t.species < 4).then_some((
+        if t.species == 1 { 1.8 } else { 2.8 } * t.size,
+        if t.species == 1 { 0.45 } else { 0.65 },
+    ))
+}
+
 fn exposure(trees: &[Tree], x: i32, y: i32) -> f32 {
     let mut light = 1.;
     for t in trees.iter().filter(|t| !t.cleared) {
-        let radius = if t.species == 1 { 1.8 } else { 2.8 } * t.size;
+        let Some((radius, strength)) = crown(t) else {
+            continue;
+        };
         let distance = (x as f32 - t.x - 0.8).hypot(y as f32 - t.y - 0.8);
-        let strength = if t.species == 1 { 0.45 } else { 0.65 };
         light *= 1. - strength * (1. - distance / radius).max(0.);
     }
     light
 }
 pub fn rebuild(v: &mut Village) {
-    v.land.natural_light = (0..MAP_SIZE)
-        .flat_map(|y| (0..MAP_SIZE).map(move |x| (x, y)))
-        .map(|(x, y)| exposure(&v.land.vegetation, x, y))
-        .collect();
+    // Splat each crown only into nearby cells, rather than comparing every
+    // property cell to every plant whenever a foundation clears vegetation.
+    let mut light = vec![1.; (MAP_SIZE * MAP_SIZE) as usize];
+    for t in v.land.vegetation.iter().filter(|t| !t.cleared) {
+        let Some((radius, strength)) = crown(t) else {
+            continue;
+        };
+        for y in ((t.y + 0.8 - radius).floor() as i32).max(0)
+            ..=((t.y + 0.8 + radius).ceil() as i32).min(MAP_SIZE - 1)
+        {
+            for x in ((t.x + 0.8 - radius).floor() as i32).max(0)
+                ..=((t.x + 0.8 + radius).ceil() as i32).min(MAP_SIZE - 1)
+            {
+                let distance = (x as f32 - t.x - 0.8).hypot(y as f32 - t.y - 0.8);
+                light[(y * MAP_SIZE + x) as usize] *=
+                    1. - strength * (1. - distance / radius).max(0.);
+            }
+        }
+    }
+    v.land.natural_light = light;
 }
 pub fn light(v: &Village, x: i32, y: i32) -> f32 {
     if (0..MAP_SIZE).contains(&x)

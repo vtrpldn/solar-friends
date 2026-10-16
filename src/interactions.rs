@@ -1,7 +1,10 @@
 //! Building visits finish only after residents reach the selected building.
 use super::*;
 pub fn radius(kind: &str) -> i32 {
-    if matches!(kind, "square" | "solar_farm" | "orchard" | "goat_pasture") {
+    if matches!(
+        kind,
+        "shed" | "square" | "solar_farm" | "orchard" | "goat_pasture"
+    ) {
         2
     } else {
         1
@@ -10,7 +13,7 @@ pub fn radius(kind: &str) -> i32 {
 /// Occupied tile centers. Even plots keep the saved anchor at their front tile.
 pub fn footprint_size(kind: &str) -> i32 {
     match kind {
-        "square" | "solar_farm" | "orchard" | "goat_pasture" => 3,
+        "shed" | "square" | "solar_farm" | "orchard" | "goat_pasture" => 3,
         "well" | "compost" | "coop" | "streetlight" | "hydro" | "eco_toilet" | "apiary" => 1,
         _ => 2,
     }
