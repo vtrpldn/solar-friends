@@ -2,7 +2,7 @@
 import {spawn} from 'node:child_process';
 import {watch} from 'node:fs';
 import {mkdir,readFile,readdir,rm} from 'node:fs/promises';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {homedir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -23,14 +23,14 @@ async function build(){
  if(building){pending=true;return;}
  building=true;const identity=await fingerprint();
  if(identity===lastFingerprint){building=false;return;}
- const started=performance.now(),id=String(++revision),out=path.join(buildRoot,id);
+ const started=performance.now(),id=randomUUID(),out=path.join(buildRoot,id);
  send({status:'building'});
  try{
   await run('cargo',['build','--locked','--profile','iteration','--target','wasm32-unknown-unknown']);
   await mkdir(out,{recursive:true});
   await run('wasm-bindgen',['--target','web','--out-dir',out,'target/wasm32-unknown-unknown/iteration/solar_friends.wasm']);
-  current=id;lastFingerprint=identity;
-  console.log(`Ready ${id}: ${((performance.now()-started)/1000).toFixed(2)}s`);
+  current=id;revision++;lastFingerprint=identity;
+  console.log(`Ready ${revision}: ${((performance.now()-started)/1000).toFixed(2)}s`);
   send({status:'ready',revision:id});
  }catch(error){console.error(error.message);send({status:'error',message:error.message});await rm(out,{recursive:true,force:true});}
  finally{building=false;if(pending){pending=false;await build();}}
@@ -51,7 +51,7 @@ const server=await serve(Number(process.env.PORT||4173),{handle:async(req,res,pa
  }
  if(pathname==='/__dev/client.js'){res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'}).end(client);return true;}
  if(pathname.startsWith('/pkg/')){res.writeHead(307,{Location:`/__dev/build/${current}/${path.basename(pathname)}`,'Cache-Control':'no-store'}).end();return true;}
- const match=pathname.match(/^\/__dev\/build\/(\d+)\/(solar_friends(?:_bg\.wasm|\.js))$/);
+ const match=pathname.match(/^\/__dev\/build\/([0-9a-f-]{36})\/(solar_friends(?:_bg\.wasm|\.js))$/);
  if(match){const bytes=await readFile(path.join(buildRoot,match[1],match[2]));res.writeHead(200,{'Content-Type':match[2].endsWith('.wasm')?'application/wasm':'text/javascript','Cache-Control':'no-store'}).end(bytes);return true;}
  return false;
 },html:body=>body.replace('</body>','<script type="module" src="/__dev/client.js"></script></body>')});

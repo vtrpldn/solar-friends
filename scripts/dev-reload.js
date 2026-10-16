@@ -6,12 +6,10 @@ events.onmessage=event=>{
  if(update.status==='error')console.error('Rebuild failed. Game kept running:',update.message);
  if(update.status==='ready')reload();
 };
-let pending=false;
-window.addEventListener('solar:dev-ready',()=>{if(pending)reload();});
 function reload(){
- if(!window.solarDevReloadReady&&document.querySelector('#world')){pending=true;return;}
- pending=false;
+ // During boot, keep the checkpoint from the last working page untouched.
+ // This also lets a fixed JS syntax error recover without a working Game API.
+ if(!window.solarDevReloadReady){location.reload();return;}
  const event=new Event('solar:dev-reload',{cancelable:true});
- // The game cancels reload if it cannot preserve the current checkpoint.
  if(window.dispatchEvent(event))location.reload();
 }

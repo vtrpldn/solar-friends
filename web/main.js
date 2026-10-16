@@ -1915,6 +1915,7 @@ function setup() {
     try {
       sessionStorage.setItem('solar-dev-reload', JSON.stringify({
         url:location.href, raw:game.snapshot(), active:gameActive, paused, speed, zoom, pan,
+        dialogs:[...document.querySelectorAll('dialog[open]')].map(dialog=>dialog.id),
         scene:sandboxName, parent:sandbox ? {...sandbox, game:undefined, raw:sandbox.game.snapshot()} : null,
       }));
     } catch { event.preventDefault(); toast('Reload paused: export your checkpoint before refreshing.'); }
@@ -2095,10 +2096,13 @@ try {
         sandbox?.game.free();sandbox={...resume.parent,game:parent};sandboxName=resume.scene;
       }
       ({zoom,pan,speed}=resume);gameActive=resume.active;
-      storage=modeStores[JSON.parse(resume.raw).village.mode||'story'];
+      storage=modeStores[JSON.parse(resume.parent?.raw||resume.raw).village.mode||'story'];
       if(gameActive)$('#main-menu').close();
       if(paused!==resume.paused)togglePause();
-      refreshDevScene();devTools.refresh();
+      refreshDevScene();devTools.refresh();last=0;reportElapsed=Infinity;
+      const dialogs=resume.dialogs||[];
+      for(const dialog of document.querySelectorAll('dialog[open]'))if(!dialogs.includes(dialog.id))dialog.close();
+      for(const id of dialogs){const dialog=document.getElementById(id);if(dialog&&!dialog.open)dialog.showModal();}
     }
     sessionStorage.removeItem('solar-dev-reload');
   }

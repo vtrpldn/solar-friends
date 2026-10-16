@@ -1,26 +1,29 @@
 {
+  "runningRecovery": true,
   "profile": "iteration",
   "frame": {
     "samples": 90,
     "simulation": {
       "median": 0.8999999761581421,
-      "p95": 1.2999999523162842
+      "p95": 1.1999999284744263
     },
     "sample": {
       "median": 1.5,
-      "p95": 1.899999976158142
+      "p95": 1.8000000715255737
     },
     "paint": {
-      "median": 7.900000095367432,
-      "p95": 9.399999976158142
+      "median": 7.600000023841858,
+      "p95": 8.800000071525574
     },
     "total": {
-      "median": 10.700000047683716,
-      "p95": 15.200000047683716
+      "median": 10.300000071525574,
+      "p95": 14.600000023841858
     }
   },
-  "editToReadyMs": 5019,
+  "editToReadyMs": 5391,
   "checkpoint": true,
   "browserErrors": [],
-  "failedBuildPreserved": true
+  "failedBuildPreserved": true,
+  "javascriptRecovery": true,
+  "modeIsolation": true
 }
