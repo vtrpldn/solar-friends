@@ -36,3 +36,5 @@ add('economy-original','Original economy prop study','economy-atlas.png','Refere
 natureArt.forEach((art,i)=>add(`landscape-${i}`,art.name,art.file,i<4?'Vegetation':'Terrain',{...art,file:'../art/'+art.file}));
 
 add('shed-proposal','Shed proposal · geometry correction needed','starter-shed-isometric.png','References',{usage:'Unapproved candidate',width:185,anchor:.8});
+
+add('shed-original','Original shed · archived perspective','starter-shed.png','References',{usage:'Reference',width:185,anchor:.8});

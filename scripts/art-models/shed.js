@@ -12,7 +12,7 @@ export const shedCamera={width:1280,height:1280,origin:[640,700],halfWidth:160,h
 export function projectPoint(p,camera=shedCamera){return[camera.origin[0]+(p[0]-p[1])*camera.halfWidth,camera.origin[1]+(p[0]+p[1])*camera.halfHeight-p[2]*camera.halfWidth];}
 
 export function buildShedModel(){
- const faces=[],{x:sx,y:sy,postHeight:height,roofRise:rise,overhang:over}=shedDimensions;
+ const faces=[],rafters=[],{x:sx,y:sy,postHeight:height,roofRise:rise,overhang:over}=shedDimensions;
  function face(points,material,axis=null,shade=1,center=null,uv=null,normals=null){
   let normal=unit(cross(sub(points[1],points[0]),sub(points[2],points[0])));
   if(center&&dot(normal,sub(mean(points),center))<0){points=[...points].reverse();uv=uv&&[...uv].reverse();normals=normals&&[...normals].reverse();normal=mul(normal,-1);}
@@ -31,8 +31,7 @@ export function buildShedModel(){
  for(const y of [0,sy])beam([-.05,y,height],[sx+.05,y,height],.15);
  for(const x of [0,sx]){
   beam([x,-.04,height],[x,sy+.04,height],.15);
-  beam([x,0,height+.05],[x,sy/2,height+rise+.10],.12);
-  beam([x,sy/2,height+rise+.10],[x,sy,height+.05],.12);
+  for(const points of [[[x,0,height+.10],[x,sy/2,height+rise+.10]],[[x,sy/2,height+rise+.10],[x,sy,height+.10]]]){rafters.push(points);beam(...points,.12);}
   beam([x,sy/2,height],[x,sy/2,height+rise+.10],.11);
  }
  // Short knee braces share the same rigid coordinate system as the posts.
@@ -77,7 +76,7 @@ export function buildShedModel(){
   const x=-over+col*column;
   barrel([x,sy/2,roofSeat+rise+.025],[Math.min(sx+over,x+column+.045),sy/2,roofSeat+rise+.025],.115,[0,0,1],1.04);
  }
- return{faces:faces.sort((a,b)=>a.depth-b.depth),feet,features:{ridge:[[-over,sy/2,roofSeat+rise],[sx+over,sy/2,roofSeat+rise]],nearEave:[[-over,sy+over,roofHeight(sy+over)],[sx+over,sy+over,roofHeight(sy+over)]],farEave:[[-over,-over,roofHeight(-over)],[sx+over,-over,roofHeight(-over)]],frontBeam:[[sx,0,height],[sx,sy,height]],frontPeak:[sx,sy/2,height+rise+.10]}};
+ return{faces:faces.sort((a,b)=>a.depth-b.depth),feet,features:{rafters,ridge:[[-over,sy/2,roofSeat+rise],[sx+over,sy/2,roofSeat+rise]],nearEave:[[-over,sy+over,roofHeight(sy+over)],[sx+over,sy+over,roofHeight(sy+over)]],farEave:[[-over,-over,roofHeight(-over)],[sx+over,-over,roofHeight(-over)]],frontBeam:[[sx,0,height],[sx,sy,height]],frontPeak:[sx,sy/2,height+rise+.10]}};
 }
 
 // Depth-buffered orthographic rendering prevents large roof faces from painting

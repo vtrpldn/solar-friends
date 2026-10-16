@@ -24,11 +24,12 @@ try{
  await page.locator('#light').selectOption('day');await page.locator('#guides').check();
  await page.getByRole('button',{name:'Inspect Community shed',exact:true}).click();
  await page.locator('#focus').screenshot({path:`${output}/shed-structure.png`});screenshots.push(`${output}/shed-structure.png`);await page.locator('#focus-close').click();
+ const runtimeShed=await page.evaluate(async()=>(await import('/building-art.js')).allBuildingArt.shed.file);
  await page.locator('#proposal').check();
  await page.getByRole('button',{name:'Inspect Community shed',exact:true}).click();
  assert.match(await page.locator('#focus-caption').innerText(),/UNAPPROVED CANDIDATE/);
  assert.match(await page.locator('#status').innerText(),/Candidate comparison only/);
- assert.equal(await page.evaluate(async()=>(await import('/building-art.js')).allBuildingArt.shed.file),'starter-shed.png','Candidate comparison must not alter runtime artwork');
+ assert.equal(await page.evaluate(async()=>(await import('/building-art.js')).allBuildingArt.shed.file),runtimeShed,'Candidate comparison must not alter runtime artwork');
  await page.locator('#focus').screenshot({path:`${output}/shed-candidate.png`});
  await page.locator('#focus-close').click();await page.locator('#proposal').uncheck();
  await page.getByRole('button',{name:'Inspect Greenhouse',exact:true}).click();await page.locator('#focus').screenshot({path:`${output}/greenhouse-structure.png`});await page.locator('#focus-close').click();

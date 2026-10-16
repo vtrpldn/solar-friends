@@ -1,6 +1,6 @@
 {
-  "scope": "27 building variants available for day and night inspection; this record fingerprints source files, not visual approval.",
-  "method": "Broad local texture warps rejected after visible distortion. Runtime camera calibration and placement restored to commit 866285c. Selected edge measurements are diagnostic only and cannot certify proportions or internal geometry.",
+  "scope": "27 building variants manually inspected in day and night through the actual renderer, plus enlarged structural guides and planted village scenes. Fingerprints bind this review to the installed sources.",
+  "method": "Broad local texture warps removed. The shed is baked from rigid 3D geometry using the map camera and painted material textures. Other buildings retain their earlier calibration and placement. Selected traces are diagnostic and do not certify every sprite's internal geometry.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
     "cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
@@ -47,7 +47,8 @@
     "apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
     "goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
     "orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
-    "starter-shed.png": "edca1e619b1738a9defc86b2873e3773eddff10a2135a9dcd9aa7ea090fa3e7b"
+    "starter-shed-model.png": "0c8dbb9862a9e62e044f985ec0f108538ee694d2ed99ae29923c42360f52e67e",
+    "starter-shed-model-night.png": "31c9f26e4821752f8efcc408974dda500db327e9cc6e376832430cdb6336a752"
   },
   "banana_treatment_review": {
     "date": "2026-10-14",
@@ -59,5 +60,54 @@
     "notes": "New pasture and hive roof, fence and box edges traced in building-projection.js. New orchard trees arranged along a diamond, with disconnected mulch rings and no platform. These three unlit outdoor plots share their daytime alpha geometry and use a runtime night tint; no duplicated night PNGs."
   },
   "style": "Target: warm painted timber, terracotta, cream/adobe walls, blue/turquoise fixtures and leafy greens. Proportions and ground contact require visual inspection.",
-  "status": "needs-visual-review"
+  "status": "visually-reviewed-at-game-scale",
+  "shed_review": {
+    "date": "2026-10-16",
+    "source": "scripts/art-models/shed.js",
+    "notes": "Parallel ridge/eaves, equal upright posts and centered gable come from one orthographic construction model. Compared with the houses and residents on real day/night terrain; matching night silhouette, small native fern tufts and translucent contact shade, no base platform."
+  },
+  "visual_review": {
+    "date": "2026-10-16",
+    "variants": [
+      "shed",
+      "orchard",
+      "goat_pasture",
+      "apiary",
+      "hydro",
+      "eco_toilet",
+      "banana_treatment",
+      "wetland",
+      "biodigester",
+      "warehouse",
+      "solar_farm",
+      "streetlight",
+      "home",
+      "kitchen",
+      "grove",
+      "garden",
+      "greenhouse",
+      "well",
+      "compost",
+      "square",
+      "workshop",
+      "coop",
+      "home-veranda",
+      "home-gable",
+      "home-courtyard",
+      "adobe-gable",
+      "adobe-veranda"
+    ],
+    "captures": [
+      "artifacts/isometric/day-0.png",
+      "artifacts/isometric/day-1.png",
+      "artifacts/isometric/day-2.png",
+      "artifacts/isometric/night-0.png",
+      "artifacts/isometric/night-1.png",
+      "artifacts/isometric/night-2.png",
+      "artifacts/isometric/artwork-preview-game.png",
+      "artifacts/isometric/night-preview-game.png"
+    ],
+    "findings": "Broad warps removed; the original painted proportions are restored. The replacement shed has coherent rigid geometry and matches neighboring timber/terracotta buildings at gameplay scale. No remaining obvious warped roofs or stretched facades were observed in these views.",
+    "limits": "Hand-painted sources retain small drawing deviations. Traced architectural edges differ from the shared grid by at most 1.17 pixels at zoom 1. This is a visual review, not a mathematical proof of every painted line."
+  }
 }

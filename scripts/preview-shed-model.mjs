@@ -14,7 +14,7 @@ projection=projection.replace(/  shed:\{[^\n]+\},/,`  shed:${JSON.stringify(meas
 footprints=footprints.replace(/  shed:\[[^\n]+/,`  shed:[${shedCamera.width},${JSON.stringify([feet[3],feet[2],feet[1]])}],`);
 art=art.replace("nightFile:'starter-shed.png',nightTint:'brightness(.6) saturate(.72)'","nightFile:'starter-shed-model-night.png'");
 const silhouettes={...buildingSilhouettes,shed:{day:createHash('sha256').update(day).digest('hex'),night:createHash('sha256').update(night).digest('hex'),hull:convexHull([...alphaOutline(A),...alphaOutline(B)])}};
-const replacements=new Map([['/art/starter-shed.png',day],['/art/starter-shed-model-night.png',night],['/building-art.js',art],['/building-projection.js',projection],['/building-footprints.js',footprints],['/building-silhouettes.js','export const buildingSilhouettes='+JSON.stringify(silhouettes)+';']]);
+const replacements=new Map([['/art/starter-shed.png',day],['/art/starter-shed-model.png',day],['/art/starter-shed-model-night.png',night],['/building-art.js',art],['/building-projection.js',projection],['/building-footprints.js',footprints],['/building-silhouettes.js','export const buildingSilhouettes='+JSON.stringify(silhouettes)+';']]);
 const server=await serve(0,{handle(req,res,url){if(!replacements.has(url))return false;res.writeHead(200,{'Content-Type':url.endsWith('.png')?'image/png':'text/javascript','Cache-Control':'no-store'}).end(replacements.get(url));return true;}}),browser=await chromium.launch({headless:true});
 try{
  const page=await browser.newPage({viewport:{width:1500,height:1050}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await mkdir('artifacts/isometric/shed-model-review',{recursive:true});

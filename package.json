@@ -10,7 +10,8 @@
     "dev:serve": "node scripts/serve.mjs",
     "dev:check-iteration": "node scripts/check-iteration.mjs",
     "art:shed": "node scripts/render-shed-model.mjs",
-    "art:shed:preview": "node scripts/preview-shed-model.mjs"
+    "art:shed:preview": "node scripts/preview-shed-model.mjs",
+    "art:shed:check": "node scripts/verify-shed-model.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"
