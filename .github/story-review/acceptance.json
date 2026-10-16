@@ -1,12 +1,11 @@
 {
   "objective": "Implement simulator-plan.md in full, including Stage 7",
-  "status": "awaiting_corrected_release",
+  "status": "PASS_LOCAL_RELEASE",
   "plan": "simulator-plan.md",
   "correctedEngineCommit": "2f62e43",
-  "releaseHarnessCommit": "3ca164e",
+  "releaseHarnessCommit": "ec282d4",
   "requiredFinalRun": "node scripts/dev-check.mjs",
-  "pipelineSession": 4378,
-  "pipelineLog": "/private/tmp/solar-story-final-check.txt",
+  "pipelineLog": "/private/tmp/solar-story-desktop-final.txt",
   "groups": [
     {
       "system": "foundations",
@@ -22,7 +21,7 @@
         "scripts/verify-storage.mjs",
         "scripts/verify-time-balance.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/simulation.rs",
         "src/lib.rs"
@@ -32,7 +31,15 @@
         "The simulation time report accounts for every resident minute. The clock comparison replays 5,120 identical native steps through normal and selected 16x browser batches with exact complete snapshots.",
         "Inspection, forecasts and native reports preserve the current snapshot. Invalid schema, accounts and references fail atomically; the same seed and checkpoints reproduce the same state.",
         "verify-simulation writes and advances all five protected baselines; compact and dispersed baselines have identical property and seed."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "physical_resources",
@@ -51,7 +58,7 @@
         "scripts/verify-production.mjs",
         "scripts/verify-requests.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/logistics.rs",
         "src/navigation.rs",
@@ -62,7 +69,15 @@
         "The logistics replay observes actual pickup and delivery before construction; navigation and work-route replays cover occupied foundations, the river, roads and receiving-room reservations.",
         "The logistics comparison completes nearby and paved projects sooner than the same distant unpaved project. Workforce cases change real site selection through priority, preference and recent chore history.",
         "Building-work, logistics, request and native lifecycle cases interrupt actual cargo and cover cancel, salvage, warehouse evacuation and relocation. The pickup correction additionally makes immediate saves valid before another tick."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "resident_time",
@@ -85,7 +100,7 @@
         "scripts/verify-farming.mjs",
         "scripts/verify-time-balance.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/workforce.rs",
         "src/requests.rs",
@@ -99,7 +114,16 @@
         "The request replay and manual review observe acceptance, a named target, travel, pause reasons, completed work and return to independent activity; completed and cancelled batches preserve exact ownership.",
         "The forecast replays the real simulation without changing it. A matched-horizon outside-shift comparison changes both completion and income; plan changes invalidate stale workers.",
         "The mixed-needs scene chooses rest, a meal, company, dry-crop care and an outside shift for five different residents. Its four-day project and request finish. The seasonal run retains healthy needs and majority individual waking village leisure."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "production",
@@ -121,7 +145,7 @@
         "scripts/verify-organics.mjs",
         "scripts/verify-passive-processes.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/production.rs",
         "src/food.rs",
@@ -134,7 +158,16 @@
         "Kitchen, tools and gathering replays collect actual ingredients and tools, use located pots and tables, and require attendance before useful outputs.",
         "Freshness and food cases carry dated lots, put interrupted food down, return only unexpired inputs and expire lots once. The fresh Story and seasonal runs exercise ongoing pantry recovery.",
         "Passive-process and organics cases retain owned inputs and output room through pause, movement and cancellation; detached digestate continues curing and plant growth follows its actual conditions."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "living_land",
@@ -154,7 +187,7 @@
         "scripts/verify-restoration.mjs",
         "scripts/verify-housing-balance.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/land.rs",
         "src/resource_sites.rs",
@@ -167,7 +200,16 @@
         "Matched gardening cases show slower maturity and smaller yields on depleted ground. Roads and extraction leave persistent disturbance; real standing canopy changes solar exposure and preview values.",
         "Restoration requires reserved compost, physical delivery and attended gradual soil work. The land replay recovers extraction from another patch, and the housing comparison actually moves a poor layout and restores services. restore_source only queues renewable-plot soil work and cannot refill finite deposits.",
         "The same native footprint inspection supplies land overlays and placement information; report and preview calls leave exact snapshots unchanged."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "utilities",
@@ -190,7 +232,7 @@
         "scripts/verify-utility-balance.mjs",
         "scripts/verify-housing-balance.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/water.rs",
         "src/pipes.rs",
@@ -205,7 +247,17 @@
         "Electrical cases compare isolated and connected circuits, local capacity, unequal charge, cable limits and private roofs. Generated, consumed, stored, curtailed and deliberately discharged energy balance separately.",
         "The paid utility comparison installs five liquid lines and pump cables plus workshop power, then operates manual and connected copies for 24 days each. Power-loss cases preserve batches and retain manual starter work.",
         "Battery replay observes a named resident carrying recovered equipment to reserved ground, exact continuation and once-only material salvage with recorded discharge. Native cases cover need interruption and safe pickup refusal during battery transport."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "long_term",
@@ -224,7 +276,7 @@
         "scripts/verify-suppliers.mjs",
         "scripts/verify-seasonal-balance.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/climate.rs",
         "src/maintenance.rs",
@@ -237,7 +289,16 @@
         "Six domains gain bounded daily practice from completed useful work and an actual paid outside shift; pausing learning preserves experience and ordinary jobs remain available to novices.",
         "Supplier replay reserves finite offers, rejects stale quotes, refunds once, restocks on schedule and preserves confirmed price and arrival terms across subsequent option and calendar changes.",
         "The earned optional campaign operates for another 84 days with 85 exact checkpoints, seven completed service jobs with paid parts, 8–61 directly edible portions, healthy needs and at least 68% waking village leisure per resident."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     },
     {
       "system": "story_and_release",
@@ -265,7 +326,7 @@
         "scripts/verify-sprite-grid-fit.mjs",
         "scripts/verify-time-balance.mjs"
       ],
-      "status": "pending_matching_release",
+      "status": "PASS",
       "implementationSources": [
         "src/progression.rs",
         "src/outcomes.rs",
@@ -283,16 +344,31 @@
         "All eight combinations of independently saved Sandbox rules are replayed. Comfortable defaults and free placement remain; switching constraints preserves confirmed orders, property and paused projects.",
         "The desktop suite exercises controls, overlays, blocked work, protected saves and artwork tools. Manual review separately checks resident decisions, request follow-through, the journal, day/night proportions and the real full-canvas PNG export.",
         "The final release report must contain passing formatting, all 507 native tests, strict all-target lint, the matching WebAssembly build, every script syntax check, all public verifiers and the complete desktop suite. Hosted CI status is recorded separately."
-      ]
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
     }
   ],
   "limits": [
     "A completed local release does not authorize merging any pull request.",
     "Hosted checks previously could not start because of account billing; recheck and record their actual final state.",
     "The pre-pickup-fix pipeline and its artifacts are baseline evidence, not the final corrected release.",
-    "Scripted pacing and housing results describe the declared choices, not minimum possible player completion times."
+    "Scripted pacing and housing results describe the declared choices, not minimum possible player completion times.",
+    "The final release uses an explicit verifier-only continuation after reproducing a stale food-measurement assertion. The original failed report is preserved; native and game sources remain unchanged."
   ],
-  "reviewNoteOrder": "Each note corresponds to the requirement at the same index. Group statuses remain pending until the corrected full release finishes.",
+  "reviewNoteOrder": "Requirements, reviewNotes and verdicts correspond by index. Each verdict uses the reviewed implementation and listed observed checks on the matching native engine, with a separate final presentation replay.",
   "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
   "focusedEvidence": [
     ".github/story-review/autonomy.json",
@@ -301,5 +377,36 @@
     ".github/story-review/housing-balance.json",
     ".github/story-review/seasonal-balance.json",
     ".github/story-review/clock-balance.json"
-  ]
+  ],
+  "releaseExecution": {
+    "initialCommand": "node scripts/dev-check.mjs",
+    "initialResult": "Stopped at utility reserve measurement, which omitted directly edible milk and honey",
+    "initialReport": "artifacts/story-food-measurement-baseline/report.json",
+    "continuationCommand": "node .github/story-review/continue-release.mjs",
+    "continuationSource": "e7f3bee",
+    "status": "PASS: all required local phases verified",
+    "unchangedNativeSource": "2f62e43",
+    "carriedPublicChecks": 61,
+    "repeated": "All 175 script syntax checks; both 24-day manual/connected cases from exact earned paid installation checkpoints; six remaining public verifiers; complete desktop suite",
+    "guard": "The continuation reconstructs and verifies the original source/build fingerprint, rejects every game-source change, and checks the identical engine hash before reusing evidence",
+    "publicReport": "artifacts/story-public-release/report.json",
+    "presentationCorrection": {
+      "commit": "ec282d4",
+      "files": [
+        "web/hud.css",
+        "scripts/browser-checks.mjs",
+        "scripts/story-browser-checks.mjs"
+      ],
+      "proof": ".github/story-review/journal-header.json",
+      "reason": "Expanding optional paths scrolled the journal title outside the book. Keep header and close control visible, scroll only its inner pages, and explicitly open retained optional sections in browser checks.",
+      "nativeEngineChanged": false
+    },
+    "finalDesktopCommand": "node scripts/dev-check.mjs --browser-only",
+    "desktopRetry": "The first attempt to open a local server was denied by the sandbox. Browser permission was then granted. The subsequent review reproduced journal clipping and a stale collapsed/open test assumption; the full suite is replaying after those corrections.",
+    "finalReport": ".github/story-review/release-report.json",
+    "finalDesktopSource": "ec282d4cd18fc94f9946f2fe621e7d417871434a"
+  },
+  "provenRequirements": 44,
+  "currentSyntaxEvidence": ".github/story-review/syntax.json",
+  "hostedEvidence": ".github/story-review/hosted-check.json"
 }

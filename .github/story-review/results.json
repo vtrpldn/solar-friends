@@ -1,0 +1,516 @@
+{
+  "completedLocally": true,
+  "objective": "Implement simulator-plan.md in full, all six systems and Stages 0–7",
+  "sourceCommit": "ec282d4cd18fc94f9946f2fe621e7d417871434a",
+  "nativeSourceCommit": "2f62e437e872d8143679a5e127cb7fe1b4d6685b",
+  "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+  "presentationCssSha256": "64c42bec72da2ccd894318378010d682f33ba5da5439648b8e4c349b836ec836",
+  "sourceAndBuildHash": "95030cefb06e6a40a6d9344d7f4893e4d07c79547fd085c7216738fe709d3a14",
+  "acceptance": {
+    "requirements": 44,
+    "passed": 44,
+    "groups": 8,
+    "file": ".github/story-review/acceptance.json"
+  },
+  "checks": {
+    "nativeTests": 507,
+    "strictAllTargetLint": "PASS",
+    "formatting": "PASS",
+    "wasmBuild": "PASS",
+    "currentScriptSyntax": 175,
+    "publicVerifiers": 67,
+    "desktopCaptures": 200,
+    "browserErrors": [],
+    "fullReport": ".github/story-review/release-report.json"
+  },
+  "campaigns": {
+    "minimal": {
+      "finishedDay": 38,
+      "elapsedDays": 37.635416666666664,
+      "chapters": 13,
+      "buildingTypes": 12,
+      "optionalTypesNotBuilt": [
+        "warehouse",
+        "compost",
+        "workshop",
+        "greenhouse",
+        "banana_treatment",
+        "hydro",
+        "orchard",
+        "goat_pasture",
+        "apiary"
+      ],
+      "pacing": [
+        {
+          "label": "first-fifteen-minutes-at-1x",
+          "minutes": 3180,
+          "chapters": 0,
+          "buildings": [
+            {
+              "kind": "well",
+              "progress": 100
+            },
+            {
+              "kind": "home",
+              "progress": 50
+            }
+          ],
+          "money": 238400,
+          "needs": [
+            {
+              "name": "Iara",
+              "hunger": 16.603559494018555,
+              "energy": 100,
+              "social": 69.72267150878906
+            },
+            {
+              "name": "Bento",
+              "hunger": 18.694826126098633,
+              "energy": 100,
+              "social": 69.72267150878906
+            },
+            {
+              "name": "Luz",
+              "hunger": 14.976020812988281,
+              "energy": 99.69371795654297,
+              "social": 68.09768676757812
+            },
+            {
+              "name": "Cauã",
+              "hunger": 19.616140365600586,
+              "energy": 100,
+              "social": 69.75769805908203
+            },
+            {
+              "name": "Nina",
+              "hunger": 12.8960599899292,
+              "energy": 99.86873626708984,
+              "social": 69.75769805908203
+            }
+          ],
+          "observations": {
+            "best": [
+              360,
+              1440,
+              0,
+              0,
+              0
+            ],
+            "best_housing_spend": null,
+            "current": [
+              360,
+              1440,
+              0,
+              0,
+              0
+            ],
+            "food_access": true,
+            "food_at_stores": 19,
+            "housing": [],
+            "last_sample": 3165.75,
+            "leisure_day": true,
+            "net_spending": 105600,
+            "order_received": true,
+            "qualifies": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "resources_sold": false,
+            "schema": 1,
+            "services_ready": false,
+            "shortest_delivery": 10.5,
+            "soil_improved": false
+          }
+        },
+        {
+          "label": "first-week",
+          "minutes": 10560,
+          "chapters": 1,
+          "buildings": [
+            {
+              "kind": "well",
+              "progress": 100
+            },
+            {
+              "kind": "home",
+              "progress": 100
+            },
+            {
+              "kind": "garden",
+              "progress": 100
+            },
+            {
+              "kind": "kitchen",
+              "progress": 100
+            },
+            {
+              "kind": "grove",
+              "progress": 100
+            },
+            {
+              "kind": "home",
+              "progress": 0
+            }
+          ],
+          "money": 250200,
+          "needs": [
+            {
+              "name": "Iara",
+              "hunger": 1.0400004386901855,
+              "energy": 99.70861053466797,
+              "social": 76.07186889648438
+            },
+            {
+              "name": "Bento",
+              "hunger": 1.7225010395050049,
+              "energy": 99.53620147705078,
+              "social": 74.44688415527344
+            },
+            {
+              "name": "Luz",
+              "hunger": 19.923574447631836,
+              "energy": 100,
+              "social": 65.79690551757812
+            },
+            {
+              "name": "Cauã",
+              "hunger": 23.06852912902832,
+              "energy": 99.45744323730469,
+              "social": 70.1969223022461
+            },
+            {
+              "name": "Nina",
+              "hunger": 19.688554763793945,
+              "energy": 99.75497436523438,
+              "social": 85.83190155029297
+            }
+          ],
+          "observations": {
+            "best": [
+              360,
+              1440,
+              720,
+              0,
+              0
+            ],
+            "best_housing_spend": null,
+            "current": [
+              360,
+              1440,
+              0,
+              0,
+              0
+            ],
+            "food_access": true,
+            "food_at_stores": 38,
+            "housing": [
+              {
+                "building": 5,
+                "spending": 122600,
+                "started": 9375
+              }
+            ],
+            "last_sample": 10545.75,
+            "leisure_day": true,
+            "net_spending": 203800,
+            "order_received": true,
+            "qualifies": [
+              true,
+              true,
+              false,
+              false,
+              false
+            ],
+            "resources_sold": false,
+            "schema": 1,
+            "services_ready": false,
+            "shortest_delivery": 6,
+            "soil_improved": false
+          }
+        }
+      ],
+      "file": ".github/story-review/story-minimal.json"
+    },
+    "optional": {
+      "finishedDay": 92,
+      "chapters": 13,
+      "buildingTypes": 21,
+      "measurableLessons": 47,
+      "referenceGuides": 7,
+      "file": ".github/story-review/story-optional.json"
+    }
+  },
+  "housing": {
+    "source": "Story commands, then exact independent copies of one earned one-home village; no authored inventory, money, clock, buildings or progress",
+    "checkpoints": 249,
+    "file": ".github/story-review/housing-balance.json",
+    "paths": [
+      {
+        "name": "near-bought",
+        "constructionDays": 4.0625,
+        "installationDays": 9.208333333333334,
+        "operatingDays": 19.322916666666668,
+        "dryDays": 7,
+        "housingSpendCentavos": 98984,
+        "tilesProduced": 0,
+        "incomeCentavos": 682000,
+        "minimumLeisureShare": 0.6488502175264139
+      },
+      {
+        "name": "far-bought",
+        "constructionDays": 4.09375,
+        "installationDays": 15,
+        "operatingDays": 14,
+        "dryDays": 7.5,
+        "housingSpendCentavos": 98984,
+        "tilesProduced": 0,
+        "incomeCentavos": 726000,
+        "minimumLeisureShare": 0.6292407108239095,
+        "recovery": {
+          "to": [
+            16,
+            14
+          ],
+          "days": 9.1875,
+          "netExternalSpending": 79080,
+          "fresh": 2.999999999999999,
+          "greywater": 4.599874835007567
+        }
+      },
+      {
+        "name": "near-local-adobe",
+        "constructionDays": 7.041666666666667,
+        "installationDays": 10.020833333333334,
+        "operatingDays": 15.53125,
+        "dryDays": 7,
+        "housingSpendCentavos": 91286,
+        "tilesProduced": 6,
+        "incomeCentavos": 704000,
+        "minimumLeisureShare": 0.648005148005148
+      },
+      {
+        "name": "near-village-time",
+        "constructionDays": 4.25,
+        "installationDays": 10.770833333333334,
+        "operatingDays": 17.572916666666668,
+        "dryDays": 7,
+        "housingSpendCentavos": 98984,
+        "tilesProduced": 0,
+        "incomeCentavos": 0,
+        "minimumLeisureShare": 0.6591661151555261
+      },
+      {
+        "name": "near-building-preference",
+        "constructionDays": 4.020833333333333,
+        "installationDays": 9,
+        "operatingDays": 19.572916666666668,
+        "dryDays": 7,
+        "housingSpendCentavos": 98984,
+        "tilesProduced": 0,
+        "incomeCentavos": 682000,
+        "minimumLeisureShare": 0.6396562308164518
+      }
+    ]
+  },
+  "seasonal": {
+    "passed": true,
+    "days": 84,
+    "from_day": 92,
+    "to_day": 176,
+    "seasons": [
+      "wet",
+      "dry"
+    ],
+    "rainSamples": 350,
+    "foodMeasure": "Ready ingredients, meals, milk and honey; eggs require cooking",
+    "minFood": 8,
+    "maxFood": 61,
+    "minBasicFood": 0,
+    "maxBasicFood": 50,
+    "maxHunger": 44.46470642089844,
+    "minEnergy": 92.24978637695312,
+    "exact_checkpoints": 85,
+    "serviceOrders": 7,
+    "serviceSpending": 80520,
+    "completedServices": 7,
+    "pendingServices": 0,
+    "residents": [
+      {
+        "work": 0.16681131747960423,
+        "leisure": 0.6851241103975004
+      },
+      {
+        "work": 0.15972342264477096,
+        "leisure": 0.6871218668971478
+      },
+      {
+        "work": 0.14891789762968052,
+        "leisure": 0.6873926485743731
+      },
+      {
+        "work": 0.16092943201376936,
+        "leisure": 0.6960413080895008
+      },
+      {
+        "work": 0.1613788372491854,
+        "leisure": 0.700051449151089
+      }
+    ]
+  },
+  "utility": {
+    "file": ".github/story-review/utility-balance.json",
+    "installationDays": 27.929166666666667,
+    "netFundChangeDuringInstallationCentavos": 358246,
+    "results": [
+      {
+        "name": "manual",
+        "from_day": 120,
+        "days": 24,
+        "fund": 1101267,
+        "lowestFood": 11,
+        "highestFood": 49,
+        "lowestBasicFood": 2,
+        "highestBasicFood": 37,
+        "peakHunger": 43.74627685546875,
+        "workshop_energy": 0,
+        "residents": [
+          {
+            "work": 0.16362530413625304,
+            "leisure": 0.690389294403893
+          },
+          {
+            "work": 0.15719467956469166,
+            "leisure": 0.6958887545344619
+          },
+          {
+            "work": 0.13609112709832133,
+            "leisure": 0.6756594724220624
+          },
+          {
+            "work": 0.15458358298382266,
+            "leisure": 0.701018573996405
+          },
+          {
+            "work": 0.14625445897740785,
+            "leisure": 0.7015457788347206
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "greywater",
+            "water": 0
+          },
+          {
+            "kind": "sewage",
+            "water": 0
+          },
+          {
+            "kind": "irrigation",
+            "water": 0
+          }
+        ]
+      },
+      {
+        "name": "connected",
+        "from_day": 120,
+        "days": 24,
+        "fund": 763253,
+        "lowestFood": 13,
+        "highestFood": 51,
+        "lowestBasicFood": 0,
+        "highestBasicFood": 38,
+        "peakHunger": 32.369720458984375,
+        "workshop_energy": 0.5742810912430288,
+        "residents": [
+          {
+            "work": 0.16514875531268974,
+            "leisure": 0.6988463873709775
+          },
+          {
+            "work": 0.1509090909090909,
+            "leisure": 0.6975757575757576
+          },
+          {
+            "work": 0.13592814371257486,
+            "leisure": 0.6892215568862275
+          },
+          {
+            "work": 0.14577084583083383,
+            "leisure": 0.7126574685062987
+          },
+          {
+            "work": 0.1509546539379475,
+            "leisure": 0.7064439140811456
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 52.999999999999545
+          },
+          {
+            "kind": "fresh",
+            "water": 200.67953762581678
+          },
+          {
+            "kind": "greywater",
+            "water": 57.19557340272041
+          },
+          {
+            "kind": "sewage",
+            "water": 29.99999999999985
+          },
+          {
+            "kind": "irrigation",
+            "water": 14.000000000000028
+          }
+        ]
+      }
+    ]
+  },
+  "clock": {
+    "passed": true,
+    "source": "Identical copies of the earned one-home Story comparison; only player commands",
+    "simulatedSeconds": 512,
+    "smallNativeSteps": 5120,
+    "fastBrowserFrames": 320,
+    "checkpoints": 12,
+    "comparison": "Exact complete snapshots; no numeric tolerance for speed equivalence",
+    "moneyPaid": 22000,
+    "gardenProgress": 100
+  },
+  "manualReview": ".github/story-review/manual-review.json",
+  "hostedCheck": {
+    "checkedAt": "2026-10-16T13:48:32.135Z",
+    "status": "BLOCKED",
+    "githubConclusion": "FAILURE",
+    "sourceCommit": "ec282d4cd18fc94f9946f2fe621e7d417871434a",
+    "jobStarted": false,
+    "url": "https://github.com/vtrpldn/solar-friends/actions/runs/38909762502/job/117002332014",
+    "reason": "The job was not started because recent account payments have failed or your spending limit needs to be increased.",
+    "pullRequest": "https://github.com/vtrpldn/solar-friends/pull/63",
+    "draft": true,
+    "merged": false
+  },
+  "pullRequest": "https://github.com/vtrpldn/solar-friends/pull/63",
+  "merged": false,
+  "limits": [
+    "Local verification does not authorize a pull-request merge. Hosted CI could not start because of account billing/spending limits.",
+    "The final release combines source- and engine-matched native/public phases, repeated current syntax and a complete final desktop replay; the initial failed measurement report is preserved.",
+    "Scripted pacing excludes reading and automatic acceleration; the chosen serial route is not a minimum possible completion time.",
+    "Manual development scenes are explicitly authored and protected; the two campaigns and housing baselines use earned progress.",
+    "The utility report field installation_spending is opening fund minus closing fund during installation, including wages. Housing budgets separately measure actual net external purchases.",
+    "The full capture index is retained locally under artifacts/dev-check; selected reviewed images are committed beside this manifest."
+  ]
+}

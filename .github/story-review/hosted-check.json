@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-16T13:48:32.135Z",
+  "status": "BLOCKED",
+  "githubConclusion": "FAILURE",
+  "sourceCommit": "ec282d4cd18fc94f9946f2fe621e7d417871434a",
+  "jobStarted": false,
+  "url": "https://github.com/vtrpldn/solar-friends/actions/runs/38909762502/job/117002332014",
+  "reason": "The job was not started because recent account payments have failed or your spending limit needs to be increased.",
+  "pullRequest": "https://github.com/vtrpldn/solar-friends/pull/63",
+  "draft": true,
+  "merged": false
+}
