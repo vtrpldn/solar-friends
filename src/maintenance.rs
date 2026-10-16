@@ -2,6 +2,8 @@
 use crate::*;
 use simulation::Id;
 
+pub mod jobs;
+
 pub const SERVICE_AT: f64 = 70.;
 pub const FAILURE_AT: f64 = 10.;
 
@@ -54,6 +56,7 @@ pub struct State {
     pub schema: u32,
     pub enabled: bool,
     pub records: Vec<Record>,
+    pub jobs: Vec<jobs::Job>,
 }
 impl Default for State {
     fn default() -> Self {
@@ -61,6 +64,7 @@ impl Default for State {
             schema: 1,
             enabled: false,
             records: vec![],
+            jobs: vec![],
         }
     }
 }
@@ -89,6 +93,10 @@ fn assets(v: &Village) -> Vec<Asset> {
         let equipment = if n.capacity > 0. {
             Equipment::Battery(n.id)
         } else if n.kind == electricity::Kind::Pump {
+            // Planned ports do not own a pump yet. A commissioned pump keeps
+            // its record when relocation gives its node a replacement line.
+            let owned=matches!(n.owner,electricity::Owner::Pump(id) if pipes::line(v,id).is_some_and(|p|p.spent.is_some()));
+            if !owned && !v.maintenance.records.iter().any(|r|r.equipment==Equipment::Pump(n.id)) {return None;}
             Equipment::Pump(n.id)
         } else {
             return None;
@@ -103,8 +111,12 @@ fn assets(v: &Village) -> Vec<Asset> {
     result
 }
 pub fn sync(v: &mut Village) {
+    if !v.maintenance.enabled && v.maintenance.records.is_empty() && v.maintenance.jobs.is_empty() {
+        return;
+    }
     // The condition model is staged behind an explicit switch until attended
     // repairs and player controls are delivered. Existing play keeps its rules.
+    jobs::reconcile(v);
     let wanted = assets(v);
     v.maintenance
         .records
@@ -195,7 +207,8 @@ pub fn factor(condition: f64) -> f64 {
 pub fn valid(v: &Village) -> bool {
     let wanted = assets(v);
     let records = &v.maintenance.records;
-    v.maintenance.schema == 1
+    jobs::valid(v)
+        && v.maintenance.schema == 1
         && (!v.maintenance.enabled || records.len() == wanted.len())
         && records.len() <= 1701
         && records.iter().enumerate().all(|(i, r)| {
@@ -217,22 +230,88 @@ pub fn report(v: &Village) -> serde_json::Value {
         serde_json::json!({"equipment":a.equipment,"name":a.equipment.label(),"location":a.location,
             "condition":condition,"service_due":condition<=SERVICE_AT,"failed":condition<=FAILURE_AT,
             "condition_factor":factor(condition),"use_units":r.map_or(0.,|r|r.use_units),"unit":a.equipment.units(),
-            "exposure_minutes":r.map_or(0.,|r|r.exposure_minutes)})
+            "service_kit":jobs::kit(a.equipment),"exposure_minutes":r.map_or(0.,|r|r.exposure_minutes)})
     }).collect();
     serde_json::json!({"schema":v.maintenance.schema,"enabled":v.maintenance.enabled,"service_at":SERVICE_AT,"failure_at":FAILURE_AT,
-        "operating_penalties_active":false,"equipment":rows})
+        "operating_penalties_active":false,"equipment":rows,"jobs":jobs::view(v)})
 }
 #[wasm_bindgen]
 impl Game {
+    pub fn queue_equipment_service(&mut self, data: &str) -> String {
+        let Ok(key) = serde_json::from_str::<Equipment>(data) else {
+            return "Choose existing equipment.".into();
+        };
+        match jobs::queue(&mut self.app.world_mut().resource_mut::<Village>(), key) {
+            Ok(_) => "ok".into(),
+            Err(e) => e.into(),
+        }
+    }
+    pub fn configure_equipment_service(&mut self, id: u32, paused: bool) -> bool {
+        {
+            let mut v = self.app.world_mut().resource_mut::<Village>();
+            let Some(j) = v
+                .maintenance
+                .jobs
+                .iter_mut()
+                .find(|j| j.id == Id(id) && j.active())
+            else {
+                return false;
+            };
+            j.paused = paused;
+        }
+        self.sync_maintenance_activities();
+        true
+    }
+    pub fn cancel_equipment_service(&mut self, id: u32) -> bool {
+        let result = jobs::cancel(&mut self.app.world_mut().resource_mut::<Village>(), Id(id));
+        if result {
+            self.sync_maintenance_activities();
+        }
+        result
+    }
     pub fn maintenance_report(&self) -> String {
         report(self.app.world().resource::<Village>()).to_string()
     }
     pub fn set_equipment_condition(&mut self, enabled: bool) {
-        let mut v = self.app.world_mut().resource_mut::<Village>();
-        v.maintenance.enabled = enabled;
-        sync(&mut v);
+        {
+            let mut v = self.app.world_mut().resource_mut::<Village>();
+            v.maintenance.enabled = enabled;
+            sync(&mut v);
+            logistics::sync(&mut v);
+        }
+        self.sync_maintenance_activities();
     }
 }
 
 #[cfg(test)]
 mod tests;
+
+impl Game {
+    pub(crate) fn sync_maintenance_activities(&mut self) {
+        let v = self.app.world().resource::<Village>().clone();
+        for mut r in self
+            .app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(self.app.world_mut())
+        {
+            if r.task == "utility"
+                && r.activity_material
+                    .and_then(|n| u32::try_from(n).ok())
+                    .and_then(|id| jobs::job(&v, Id(id)))
+                    .is_some_and(|j| !j.active() || j.paused)
+            {
+                assign(
+                    &mut r,
+                    &v,
+                    "rest",
+                    "The service work is paused or finished. Taking a break.",
+                    false,
+                );
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod repair_tests;

@@ -780,3 +780,117 @@ fn pump_condition_counts_only_water_that_reaches_the_receiving_tank() {
     }
     checkpoint(&mut g);
 }
+
+#[test]
+fn a_pump_service_job_consumes_local_parts_and_preserves_its_liquid_and_energy() {
+    let mut g = scene();
+    g.set_equipment_condition(true);
+    let line = queued(&mut g);
+    install_direct(&mut g, line);
+    let key = {
+        let v = g.app.world().resource::<Village>();
+        maintenance::Equipment::Pump(
+            v.power
+                .network
+                .nodes
+                .iter()
+                .find(|n| n.owner == electricity::Owner::Pump(line))
+                .unwrap()
+                .id,
+        )
+    };
+    g.app
+        .world_mut()
+        .resource_mut::<Village>()
+        .maintenance
+        .records
+        .iter_mut()
+        .find(|r| r.equipment == key)
+        .unwrap()
+        .condition = 40.;
+    assert_eq!(
+        g.queue_equipment_service(&serde_json::to_string(&key).unwrap()),
+        "ok"
+    );
+    let id = g
+        .app
+        .world()
+        .resource::<Village>()
+        .maintenance
+        .jobs
+        .last()
+        .unwrap()
+        .id;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let kit = maintenance::jobs::job(&v, id).unwrap().kit();
+        for (i, n) in kit.into_iter().enumerate() {
+            if n > 0 {
+                assert!(logistics::receive(&mut v, Owner::Camp, i, n));
+                organics::fixture_transfer(&mut v, Owner::Maintenance(id), i, n);
+            }
+        }
+    }
+    {
+        let world = g.app.world_mut();
+        let mut r = world
+            .query::<&Resident>()
+            .iter(world)
+            .next()
+            .unwrap()
+            .clone();
+        let mut v = world.resource_mut::<Village>();
+        assert!(maintenance::jobs::assign_target(&mut r, &v, id));
+        [r.x, r.y] = [r.target_x, r.target_y];
+        let water = serde_json::to_string(&v.water_supply).unwrap();
+        let energy = serde_json::to_string(&v.power.network).unwrap();
+        assert!(maintenance::jobs::work(&mut v, &r, 40.));
+        assert_eq!(serde_json::to_string(&v.water_supply).unwrap(), water);
+        assert_eq!(serde_json::to_string(&v.power.network).unwrap(), energy);
+    }
+    checkpoint(&mut g);
+}
+
+#[test]
+fn a_planned_pump_port_does_not_age_equipment_before_parts_are_committed() {
+    let mut g = scene();
+    g.set_equipment_condition(true);
+    let id = queued(&mut g);
+    let key = {
+        let v = g.app.world().resource::<Village>();
+        maintenance::Equipment::Pump(
+            v.power
+                .network
+                .nodes
+                .iter()
+                .find(|n| n.owner == electricity::Owner::Pump(id))
+                .unwrap()
+                .id,
+        )
+    };
+    g.tick(30.);
+    assert!(
+        !g.app
+            .world()
+            .resource::<Village>()
+            .maintenance
+            .records
+            .iter()
+            .any(|r| r.equipment == key)
+    );
+    checkpoint(&mut g);
+    install_direct(&mut g, id);
+    assert_eq!(
+        g.app
+            .world()
+            .resource::<Village>()
+            .maintenance
+            .records
+            .iter()
+            .find(|r| r.equipment == key)
+            .unwrap()
+            .condition,
+        100.
+    );
+    checkpoint(&mut g);
+}

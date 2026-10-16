@@ -506,6 +506,7 @@ impl Game {
         }
         self.sync_production_activities();
         self.sync_restoration_activities();
+        self.sync_maintenance_activities();
         self.sync_help();
         "ok".into()
     }

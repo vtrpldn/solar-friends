@@ -9,6 +9,8 @@ pub fn blocker(v: &Village, r: &Resident) -> Option<String> {
         "Wait until everyone has reached the village."
     } else if !(480.0..960.).contains(&v.minutes.rem_euclid(1440.)) {
         "Town pickups leave between 08:00 and 16:00."
+    } else if maintenance::jobs::in_service(v, maintenance::Equipment::Truck) {
+        "The pickup is booked for service. Finish or cancel its maintenance first."
     } else if r.trip.is_some() {
         "Already away or commuting."
     } else if r.task == "sleep" || sleep::due(r, v.minutes) {

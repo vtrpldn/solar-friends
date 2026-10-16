@@ -1688,6 +1688,7 @@ impl Game {
             .chain(v.processes.batches.iter().map(|p| p.id))
             .chain(v.land.deposits.iter().map(|d| d.id))
             .chain(v.restoration.iter().map(|j| j.id))
+            .chain(v.maintenance.jobs.iter().map(|j| j.id))
             .chain(v.water_supply.tanks.iter().map(|p| p.id))
             .chain(v.water_supply.trips.iter().map(|p| p.id))
             .chain(v.pipes.lines.iter().map(|p| p.id))

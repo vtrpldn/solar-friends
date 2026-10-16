@@ -1,5 +1,7 @@
 // Explicit fixture authoring only. Playable saves retain their located ownership.
 export function resetMaterialLocations(state) {
+  if(state.village.maintenance?.jobs?.some(j=>j.finished==null))throw new Error('Finish or cancel equipment service before restaging a material fixture.');
+  state.village.maintenance={schema:1,enabled:false,records:[],jobs:[]};
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
   if(state.village.power?.battery_jobs?.some(j=>!['complete','cancelled'].includes(j.phase)))throw new Error('Finish battery work before restaging a material fixture.');

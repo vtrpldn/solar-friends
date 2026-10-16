@@ -617,6 +617,10 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
             job.material
                 .and_then(|id| restoration::approach(v, simulation::Id(id as u32), peer.id))
                 .map(|p| (p[0], p[1]))
+        } else if job.task == "utility" {
+            job.material
+                .and_then(|id| utilities::crew_approach(v, simulation::Id(id as u32), peer.id))
+                .map(|p| (p[0], p[1]))
         } else if matches!(job.task.as_str(), "source" | "prepare") {
             let mut worker = peer.clone();
             assign(&mut worker, v, &job.task, job.reason, false);

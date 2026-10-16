@@ -523,6 +523,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
             let row = v.pipes.lines.iter_mut().find(|p| p.id == id).unwrap();
             row.spent = Some(paid);
             row.phase = Phase::Installing;
+            maintenance::sync(v);
         }
         let boundary = if p.work < p.plan.cells.len() as f32 * 4. {
             ((p.work / 4.).floor() + 1.) * 4.

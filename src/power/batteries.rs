@@ -531,59 +531,63 @@ impl Game {
         serde_json::json!({"allowed":result.is_ok(),"reason":result.err().unwrap_or("Residents will pack, carry and install the battery. Existing cables must be dismantled and reinstalled."),"packing_minutes":12,"installation_minutes":18}).to_string()
     }
     pub fn queue_battery_work(&mut self, bank: u32, action: &str, x: i32, y: i32) -> String {
-        let mut v = self.app.world_mut().resource_mut::<Village>();
-        let id = Id(bank);
-        let Some(n) = self::bank(&v, id)
-            .filter(|n| n.owner == Owner::Ground && n.kind == NodeKind::Battery)
-            .cloned()
-        else {
-            return "Choose a recovered battery on the ground.".into();
-        };
-        if busy(&v, id) {
-            return "This battery already has resident work queued.".into();
-        }
-        let (action, phase, dest) = match action {
-            "move" => (Action::Move, Phase::Packing, Some([x, y])),
-            "salvage" => (Action::Salvage, Phase::Salvaging, None),
-            _ => return "Choose move or careful battery salvage.".into(),
-        };
-        if let Some(d) = dest
-            && let Err(reason) = move_reason(&v, id, d[0], d[1])
         {
-            return reason.into();
+            let mut v = self.app.world_mut().resource_mut::<Village>();
+            let id = Id(bank);
+            let Some(n) = self::bank(&v, id)
+                .filter(|n| n.owner == Owner::Ground && n.kind == NodeKind::Battery)
+                .cloned()
+            else {
+                return "Choose a recovered battery on the ground.".into();
+            };
+            if busy(&v, id) {
+                return "This battery already has resident work queued.".into();
+            }
+            let (action, phase, dest) = match action {
+                "move" => (Action::Move, Phase::Packing, Some([x, y])),
+                "salvage" => (Action::Salvage, Phase::Salvaging, None),
+                _ => return "Choose move or careful battery salvage.".into(),
+            };
+            if let Some(d) = dest
+                && let Err(reason) = move_reason(&v, id, d[0], d[1])
+            {
+                return reason.into();
+            }
+            let reserve = if action == Action::Salvage {
+                u32::from(n.equipment)
+            } else {
+                0
+            };
+            if economy::storage(&v) + reserve > economy::capacity(&v) {
+                return "Make receiving room for the recovered battery equipment first.".into();
+            }
+            if v.power.battery_jobs.len() >= 256
+                || v.simulation
+                    .next_id
+                    .checked_add(1 + u32::from(reserve > 0))
+                    .is_none()
+            {
+                return "Finish existing equipment work before queuing more.".into();
+            }
+            let job = v.simulation.allocate().unwrap();
+            let created = v.minutes;
+            v.power.battery_jobs.push(Job {
+                id: job,
+                bank: id,
+                action,
+                phase,
+                origin: [n.x, n.y],
+                destination: dest,
+                carrier: None,
+                work: 0.,
+                created,
+                finished: None,
+                recovered: 0,
+            });
+            economy::rebalance(&mut v);
+            maintenance::sync(&mut v);
         }
-        let reserve = if action == Action::Salvage {
-            u32::from(n.equipment)
-        } else {
-            0
-        };
-        if economy::storage(&v) + reserve > economy::capacity(&v) {
-            return "Make receiving room for the recovered battery equipment first.".into();
-        }
-        if v.power.battery_jobs.len() >= 256
-            || v.simulation
-                .next_id
-                .checked_add(1 + u32::from(reserve > 0))
-                .is_none()
-        {
-            return "Finish existing equipment work before queuing more.".into();
-        }
-        let job = v.simulation.allocate().unwrap();
-        let created = v.minutes;
-        v.power.battery_jobs.push(Job {
-            id: job,
-            bank: id,
-            action,
-            phase,
-            origin: [n.x, n.y],
-            destination: dest,
-            carrier: None,
-            work: 0.,
-            created,
-            finished: None,
-            recovered: 0,
-        });
-        economy::rebalance(&mut v);
+        self.sync_maintenance_activities();
         "ok".into()
     }
     pub fn cancel_battery_work(&mut self, id: u32) -> String {

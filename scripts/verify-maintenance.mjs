@@ -49,4 +49,48 @@ if(process.env.SOLAR_CONDITION_BASELINE){
 }
 await writeFile(output+'/before.json',JSON.stringify(initial));await writeFile(output+'/after.json',g.snapshot());
 await writeFile(output+'/report.json',JSON.stringify({days:4,exactCheckpoints:5,baselineMinutes,equipment:JSON.parse(g.maintenance_report())},null,2));g.free();
-console.log(`PASS: four days of owned equipment condition, read-only diagnostics, real battery use, exact checkpoints, frozen wear and invalid-save rejection${baselineMinutes?'; released-build parity over one day':''}. Repair jobs and operating penalties remain in progress.`);
+console.log(`PASS: four days of owned equipment condition, read-only diagnostics, real battery use, exact checkpoints, frozen wear and invalid-save rejection${baselineMinutes?'; released-build parity over one day':''}. Operating penalties and player controls remain in progress.`);
+
+// Authored worn equipment establishes service demand; purchases, carriage and
+// attended repair below use the real public game commands and resident queue.
+const {resetMaterialLocations}=await import('../web/dev/material-fixture.js');
+const repair=new Game();repair.start_mode('sandbox');
+for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',8,16]])assert.equal(repair.place(kind,x,y),'ok');
+repair.tick(.25);
+const fixture=JSON.parse(repair.snapshot()),v=fixture.village;
+v.mode='story';v.arrived=true;v.minutes=540;v.food=40;v.meals=12;v.economy.stock.fill(0);v.progress.tool_uses=0;v.progress.completed.fill(true);v.progress.later_completed.fill(true);
+for(const r of fixture.residents){Object.assign(r,{task:'idle',remaining:0,requested:false,trip:null,help:null,activity_material:null,activity_store:null,activity_batch:null,activity_building:null,visit_building:null,energy:90,hunger:10,social:90,x:10+r.id*.8,y:13});r.target_x=r.x;r.target_y=r.y;r.walking={};}
+assert(repair.restore(JSON.stringify(resetMaterialLocations(fixture))));repair.set_outside_work(false);repair.set_equipment_condition(true);
+const wornScene=JSON.parse(repair.snapshot());wornScene.village.maintenance.records.find(r=>r.equipment.kind==='workshop').condition=40;
+assert(repair.restore(JSON.stringify(wornScene)));await writeFile(output+'/repair-before.json',repair.snapshot());
+assert.equal(repair.queue_equipment_service(JSON.stringify({kind:'workshop',id:0})),'ok');
+const service=JSON.parse(repair.maintenance_report()).jobs.at(-1),serviceId=service.job.id;
+assert.deepEqual(service.missing,service.kit);
+assert.equal(repair.order_supplies_pickup(JSON.stringify(service.kit),3),'ok','A real resident buys the service kit in town');
+let carried=false,attended=false,interrupted=false,finished=false;
+function repairCheckpoint(){const raw=repair.snapshot(),copy=new Game();assert(copy.restore(raw));assert.equal(copy.snapshot(),raw);copy.free();assert(JSON.parse(repair.simulation_report()).materials.every(m=>m.difference===0));}
+for(let tick=0;tick<5*1920;tick++){
+  repair.tick(.25);
+  if(tick%4)continue;
+  const s=JSON.parse(repair.snapshot()),j=s.village.maintenance.jobs.find(j=>j.id===serviceId),store=s.village.logistics.stores.find(p=>p.owner.kind==='maintenance'&&p.owner.id===serviceId);
+  carried ||= !!store&&s.village.logistics.shipments.some(h=>h.carrying&&h.to===store.id);
+  attended ||= j.work>0;
+  if(j.work>0&&j.finished==null&&!interrupted){
+    assert(s.residents.some(r=>r.task==='utility'&&r.activity_material===serviceId),'A named resident is physically servicing the equipment');
+    assert(repair.configure_equipment_service(serviceId,true));repairCheckpoint();
+    const work=j.work;for(let t=0;t<40;t++)repair.tick(.25);
+    assert.equal(JSON.parse(repair.snapshot()).village.maintenance.jobs.find(j=>j.id===serviceId).work,work);
+    assert(repair.configure_equipment_service(serviceId,false));interrupted=true;
+  }
+  if(j.finished!=null){assert.equal(j.cancelled,false);finished=true;break;}
+  if(tick%500===0)repairCheckpoint();
+}
+assert(finished&&carried&&attended&&interrupted,'Pickup, local delivery, attendance and interruption lead to actual completed service');
+repairCheckpoint();const repaired=JSON.parse(repair.snapshot()),done=repaired.village.maintenance.jobs.find(j=>j.id===serviceId);
+assert(repaired.village.maintenance.records.find(r=>r.equipment.kind==='workshop').condition>99.9);
+for(let i=0;i<service.kit.length;i++)assert.equal(done.spent[i][1]-done.spent[i][0],service.kit[i]);
+const beforeQuery=repair.snapshot(),serviceReport=JSON.parse(repair.maintenance_report());assert.equal(repair.snapshot(),beforeQuery);
+assert.equal(serviceReport.jobs.find(r=>r.job.id===serviceId).phase,'complete');
+assert.equal(repair.cancel_equipment_service(serviceId),false);
+await writeFile(output+'/repair-after.json',repair.snapshot());await writeFile(output+'/repair-report.json',JSON.stringify({carried,attended,interrupted,finished,service:serviceReport.jobs.find(r=>r.job.id===serviceId)},null,2));repair.free();
+console.log('PASS: a town pickup supplies an authored worn workshop; residents deliver its kit, perform real service, pause/save/resume it and finish with exactly one recorded kit and valid material accounts.');
