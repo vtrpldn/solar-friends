@@ -1,0 +1,637 @@
+{
+  "why": "Resident needs, useful village work and bounded leisure should make understandable progress together.",
+  "engineSourceCommit": "1612d06d12416face977b27215a68f77134a80e0",
+  "wasmSha256": "0e6ab477e1af99375325bef1a291d06db02a13e19991f1b1ad83a9c7d5f4432e",
+  "completedAt": "2026-10-16T03:55:50.148739+00:00",
+  "nativeTests": 444,
+  "focusedBehaviorRegressions": 12,
+  "javascriptSyntaxChecks": 156,
+  "gameplay": [
+    {
+      "name": "verify-art-preview.mjs",
+      "exit": 0,
+      "seconds": 0.26
+    },
+    {
+      "name": "verify-artwork.mjs",
+      "exit": 0,
+      "seconds": 0.12
+    },
+    {
+      "name": "verify-autonomy.mjs",
+      "exit": 0,
+      "seconds": 11.31
+    },
+    {
+      "name": "verify-away-routines.mjs",
+      "exit": 0,
+      "seconds": 0.98
+    },
+    {
+      "name": "verify-banana-treatment.mjs",
+      "exit": 0,
+      "seconds": 0.6
+    },
+    {
+      "name": "verify-batteries.mjs",
+      "exit": 0,
+      "seconds": 6.3
+    },
+    {
+      "name": "verify-building-projection.mjs",
+      "exit": 0,
+      "seconds": 0.18
+    },
+    {
+      "name": "verify-building-work.mjs",
+      "exit": 0,
+      "seconds": 14.18
+    },
+    {
+      "name": "verify-chickens.mjs",
+      "exit": 0,
+      "seconds": 0.43
+    },
+    {
+      "name": "verify-circular.mjs",
+      "exit": 0,
+      "seconds": 1.49
+    },
+    {
+      "name": "verify-climate.mjs",
+      "exit": 0,
+      "seconds": 0.27
+    },
+    {
+      "name": "verify-cultivation.mjs",
+      "exit": 0,
+      "seconds": 3.14
+    },
+    {
+      "name": "verify-dev-tools.mjs",
+      "exit": 0,
+      "seconds": 1.16
+    },
+    {
+      "name": "verify-economy.mjs",
+      "exit": 0,
+      "seconds": 222.91
+    },
+    {
+      "name": "verify-electrical-fixtures.mjs",
+      "exit": 0,
+      "seconds": 0.36
+    },
+    {
+      "name": "verify-electricity.mjs",
+      "exit": 0,
+      "seconds": 15.27
+    },
+    {
+      "name": "verify-farming.mjs",
+      "exit": 0,
+      "seconds": 53.25
+    },
+    {
+      "name": "verify-food.mjs",
+      "exit": 0,
+      "seconds": 3.01
+    },
+    {
+      "name": "verify-forecast.mjs",
+      "exit": 0,
+      "seconds": 4.68
+    },
+    {
+      "name": "verify-freshness.mjs",
+      "exit": 0,
+      "seconds": 0.5
+    },
+    {
+      "name": "verify-gatherings.mjs",
+      "exit": 0,
+      "seconds": 2.85
+    },
+    {
+      "name": "verify-grid-foundations.mjs",
+      "exit": 0,
+      "seconds": 0.23
+    },
+    {
+      "name": "verify-kitchen-batches.mjs",
+      "exit": 0,
+      "seconds": 8.08
+    },
+    {
+      "name": "verify-land.mjs",
+      "exit": 0,
+      "seconds": 1.44
+    },
+    {
+      "name": "verify-leisure.mjs",
+      "exit": 0,
+      "seconds": 124.37
+    },
+    {
+      "name": "verify-living-land.mjs",
+      "exit": 0,
+      "seconds": 0.53
+    },
+    {
+      "name": "verify-logistics.mjs",
+      "exit": 0,
+      "seconds": 1.03
+    },
+    {
+      "name": "verify-maintenance.mjs",
+      "exit": 0,
+      "seconds": 3.09
+    },
+    {
+      "name": "verify-modes.mjs",
+      "exit": 0,
+      "seconds": 5.49
+    },
+    {
+      "name": "verify-navigation.mjs",
+      "exit": 0,
+      "seconds": 0.11
+    },
+    {
+      "name": "verify-night-lighting.mjs",
+      "exit": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "verify-occupations.mjs",
+      "exit": 0,
+      "seconds": 0.19
+    },
+    {
+      "name": "verify-organics.mjs",
+      "exit": 0,
+      "seconds": 11.57
+    },
+    {
+      "name": "verify-passive-processes.mjs",
+      "exit": 0,
+      "seconds": 6.09
+    },
+    {
+      "name": "verify-pipes.mjs",
+      "exit": 0,
+      "seconds": 23.71
+    },
+    {
+      "name": "verify-planting.mjs",
+      "exit": 0,
+      "seconds": 8.33
+    },
+    {
+      "name": "verify-playtest.mjs",
+      "exit": 0,
+      "seconds": 0.62
+    },
+    {
+      "name": "verify-polish.mjs",
+      "exit": 0,
+      "seconds": 4.53
+    },
+    {
+      "name": "verify-power.mjs",
+      "exit": 0,
+      "seconds": 4.16
+    },
+    {
+      "name": "verify-production.mjs",
+      "exit": 0,
+      "seconds": 8.54
+    },
+    {
+      "name": "verify-quests.mjs",
+      "exit": 0,
+      "seconds": 735.55
+    },
+    {
+      "name": "verify-requests.mjs",
+      "exit": 0,
+      "seconds": 3.09
+    },
+    {
+      "name": "verify-resident-animation.mjs",
+      "exit": 0,
+      "seconds": 0.08
+    },
+    {
+      "name": "verify-resource-sites.mjs",
+      "exit": 0,
+      "seconds": 12.13
+    },
+    {
+      "name": "verify-restoration.mjs",
+      "exit": 0,
+      "seconds": 0.7
+    },
+    {
+      "name": "verify-sanitation.mjs",
+      "exit": 0,
+      "seconds": 19.16
+    },
+    {
+      "name": "verify-seasonal-balance.mjs",
+      "exit": 0,
+      "seconds": 707.97
+    },
+    {
+      "name": "verify-simulation.mjs",
+      "exit": 0,
+      "seconds": 0.6
+    },
+    {
+      "name": "verify-situations.mjs",
+      "exit": 0,
+      "seconds": 70.27
+    },
+    {
+      "name": "verify-sleep-speed.mjs",
+      "exit": 0,
+      "seconds": 7.8
+    },
+    {
+      "name": "verify-sprite-frames.mjs",
+      "exit": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "verify-sprite-grid-fit.mjs",
+      "exit": 0,
+      "seconds": 7.19
+    },
+    {
+      "name": "verify-storage.mjs",
+      "exit": 0,
+      "seconds": 0.05
+    },
+    {
+      "name": "verify-tools.mjs",
+      "exit": 0,
+      "seconds": 15.03
+    },
+    {
+      "name": "verify-utility-balance.mjs",
+      "exit": 0,
+      "initialAttempt": {
+        "exit": 124,
+        "seconds": 900.0,
+        "reason": "Runner time limit after earned installation and completed manual comparison"
+      },
+      "continuedFromEarnedInstallation": true,
+      "continuationCommand": "SOLAR_UTILITY_CONTINUE=1 node scripts/verify-utility-balance.mjs"
+    },
+    {
+      "name": "verify-utility-routes.mjs",
+      "exit": 0,
+      "seconds": 0.12
+    },
+    {
+      "name": "verify-water.mjs",
+      "exit": 0,
+      "seconds": 3.77
+    },
+    {
+      "name": "verify-weather.mjs",
+      "exit": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "verify-work-routes.mjs",
+      "exit": 0,
+      "seconds": 1.31
+    },
+    {
+      "name": "verify-workforce.mjs",
+      "exit": 0,
+      "seconds": 0.18
+    }
+  ],
+  "desktop": {
+    "captures": 179,
+    "errors": [],
+    "sourceAndBuildHash": "a59185b8d010847bd81398925cf3968e83496fdb001514c219a8bcfcf70b24e8"
+  },
+  "autonomy": {
+    "first": [
+      {
+        "name": "Iara",
+        "task": "rest",
+        "reason": "Taking a proper rest until I feel ready to help again."
+      },
+      {
+        "name": "Bento",
+        "task": "eat",
+        "reason": "Sitting down for a cooked meal."
+      },
+      {
+        "name": "Luz",
+        "task": "socialize",
+        "reason": "I need some company. Taking time to catch up before more chores."
+      },
+      {
+        "name": "Cau\u00e3",
+        "task": "haul",
+        "reason": "Collecting 4 timber for a local delivery."
+      },
+      {
+        "name": "Nina",
+        "task": "outside",
+        "reason": "Walking out for my rainwater systems technician shift at a regional water cooperative. Back at 17:00."
+      }
+    ],
+    "rested": true,
+    "ate": true,
+    "connected": true,
+    "worked": true,
+    "completedAt": 2164.050048828125,
+    "request": {
+      "building": null,
+      "created": 2010,
+      "destination": null,
+      "finished": 3517.800048828125,
+      "id": 58,
+      "material": null,
+      "phase": "complete",
+      "reason": "Finished the batch you asked me to help with.",
+      "remaining": 7.25,
+      "task": "gather"
+    },
+    "days": [
+      {
+        "minutes": 2011.050048828125,
+        "food": 18,
+        "meals": 8,
+        "project": 0
+      },
+      {
+        "minutes": 3454.050048828125,
+        "food": 11,
+        "meals": 0,
+        "project": 100
+      },
+      {
+        "minutes": 4897.0498046875,
+        "food": 13,
+        "meals": 0,
+        "project": 100
+      },
+      {
+        "minutes": 6340.0498046875,
+        "food": 11,
+        "meals": 0,
+        "project": 100
+      }
+    ],
+    "leisure": [
+      0.5895226697045581,
+      0.5872537347954789,
+      0.6320645629133449,
+      0.5492239227424524,
+      0.6123215153277899
+    ],
+    "activities": [
+      [
+        "rest",
+        "eat",
+        "nature_walk",
+        "birdwatch",
+        "stargaze",
+        "sleep",
+        "haul",
+        "cook",
+        "idle",
+        "water",
+        "garden"
+      ],
+      [
+        "eat",
+        "haul",
+        "build",
+        "stretch",
+        "garden",
+        "daydream",
+        "stargaze",
+        "sleep",
+        "water",
+        "compost",
+        "cook"
+      ],
+      [
+        "socialize",
+        "eat",
+        "daydream",
+        "gather",
+        "stretch",
+        "sleep",
+        "garden",
+        "haul",
+        "stargaze",
+        "water"
+      ],
+      [
+        "haul",
+        "birdwatch",
+        "eat",
+        "nature_walk",
+        "stargaze",
+        "sleep",
+        "garden",
+        "cook",
+        "idle",
+        "water",
+        "compost"
+      ],
+      [
+        "outside",
+        "return",
+        "stretch",
+        "eat",
+        "daydream",
+        "stargaze",
+        "sleep",
+        "socialize"
+      ]
+    ]
+  },
+  "story": {
+    "fresh": true,
+    "chapters": 13,
+    "completedDay": 132,
+    "buildingKindsTaught": 21
+  },
+  "unchangedStoryRecovery": {
+    "compostHours": 12.3,
+    "authoredResources": false
+  },
+  "seasonal": {
+    "passed": true,
+    "days": 84,
+    "from_day": 132,
+    "to_day": 216,
+    "seasons": [
+      "wet",
+      "dry"
+    ],
+    "rainSamples": 316,
+    "minFood": 4,
+    "maxFood": 49,
+    "maxHunger": 61.44295120239258,
+    "minEnergy": 87.71662902832031,
+    "exact_checkpoints": 85,
+    "serviceOrders": 4,
+    "serviceSpending": 48500,
+    "completedServices": 6,
+    "pendingServices": 0,
+    "residents": [
+      {
+        "work": 0.17483971582048172,
+        "leisure": 0.6406168774909028
+      },
+      {
+        "work": 0.1684556786703601,
+        "leisure": 0.6622229916897507
+      },
+      {
+        "work": 0.1584344556486071,
+        "leisure": 0.6286104939326611
+      },
+      {
+        "work": 0.16666666666666666,
+        "leisure": 0.6262002743484225
+      },
+      {
+        "work": 0.1600547195622435,
+        "leisure": 0.643467852257182
+      }
+    ]
+  },
+  "utilities": {
+    "wasm_sha256": "0e6ab477e1af99375325bef1a291d06db02a13e19991f1b1ad83a9c7d5f4432e",
+    "continuedFromEarnedInstallation": true,
+    "installation_days": 28.020833333333332,
+    "installation_spending": 360800,
+    "results": [
+      {
+        "name": "manual",
+        "from_day": 160,
+        "days": 24,
+        "fund": 1767600,
+        "lowestFood": 4,
+        "highestFood": 42,
+        "peakHunger": 65.52656555175781,
+        "workshop_energy": 0,
+        "residents": [
+          {
+            "work": 0.16717325227963525,
+            "leisure": 0.6054711246200608
+          },
+          {
+            "work": 0.1792395896197948,
+            "leisure": 0.643934821967411
+          },
+          {
+            "work": 0.1788715486194478,
+            "leisure": 0.531812725090036
+          },
+          {
+            "work": 0.1894167167769092,
+            "leisure": 0.5959110042092604
+          },
+          {
+            "work": 0.1744047619047619,
+            "leisure": 0.6160714285714286
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "greywater",
+            "water": 0
+          },
+          {
+            "kind": "sewage",
+            "water": 0
+          },
+          {
+            "kind": "irrigation",
+            "water": 0
+          }
+        ]
+      },
+      {
+        "name": "connected",
+        "from_day": 160,
+        "days": 24,
+        "fund": 1427200,
+        "lowestFood": 2,
+        "highestFood": 44,
+        "peakHunger": 50.56495666503906,
+        "workshop_energy": 0.6000000000000002,
+        "residents": [
+          {
+            "work": 0.17102860620815583,
+            "leisure": 0.6445526475958613
+          },
+          {
+            "work": 0.16424242424242425,
+            "leisure": 0.6478787878787878
+          },
+          {
+            "work": 0.1307738452309538,
+            "leisure": 0.617876424715057
+          },
+          {
+            "work": 0.1582430806257521,
+            "leisure": 0.6161251504211793
+          },
+          {
+            "work": 0.15535714285714286,
+            "leisure": 0.6672619047619047
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 60.999999999999446
+          },
+          {
+            "kind": "fresh",
+            "water": 174.14889130522366
+          },
+          {
+            "kind": "greywater",
+            "water": 59.01487530068648
+          },
+          {
+            "kind": "sewage",
+            "water": 29.999999999999844
+          },
+          {
+            "kind": "irrigation",
+            "water": 19.050000000000008
+          }
+        ]
+      }
+    ]
+  },
+  "hostedCI": {
+    "status": "not_started",
+    "reason": "Account billing limit; zero job steps ran.",
+    "url": "https://github.com/vtrpldn/solar-friends/actions/runs/38846543675/job/116798263909"
+  }
+}
