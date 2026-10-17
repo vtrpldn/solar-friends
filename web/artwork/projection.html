@@ -5,7 +5,7 @@
 <link rel="icon" type="image/svg+xml" href="../favicon.svg"><title>Building projection review · Solar Friends</title>
 
 <style>
-header,main{max-width:1280px;margin:auto}header{padding:24px 24px 12px}header h1{font-size:30px;margin:6px 0}main{display:block;padding:0 24px 24px}.controls{display:flex;align-items:center;gap:24px;margin:16px 0}.controls label{display:flex;gap:8px;align-items:center}.controls input{width:auto}#buildings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}figure{margin:0;background:#eef0df;border:1px solid #ccd2bf;border-radius:10px;overflow:hidden}canvas{display:block;width:100%}figcaption{padding:8px 12px;font-size:13px}figcaption span{display:block;font-size:11px;line-height:1.5;color:#52624d}#status{font-size:13px;line-height:1.5}.legend{font-size:12px;color:#52624d;margin:8px 0}.legend b{color:#167b74}.legend em{color:#99531b;font-style:normal}nav{font-size:14px}
+header,main{max-width:1280px;margin:auto}header{padding:24px 24px 12px}header h1{font-size:30px;margin:6px 0}main{display:block;padding:0 24px 24px}.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:16px 0}.controls label{display:flex;gap:8px;align-items:center}.controls input{width:auto}#buildings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}figure{margin:0;background:#eef0df;border:1px solid #ccd2bf;border-radius:10px;overflow:hidden}canvas{display:block;width:100%}figcaption{padding:8px 12px;font-size:13px}figcaption span{display:block;font-size:11px;line-height:1.5;color:#52624d}#status{font-size:13px;line-height:1.5}.legend{font-size:12px;color:#52624d;margin:8px 0}.legend b{color:#167b74}.legend em{color:#99531b;font-style:normal}nav{font-size:14px}
 .projection-focus{display:block;width:100%;padding:0;border:0;border-radius:0;background:transparent;cursor:zoom-in}#focus{max-width:1050px;width:1050px;padding:16px}#focus canvas{width:100%;max-height:78vh;object-fit:contain}#focus-close{float:right}.controls button{margin-left:auto}</style>
 <link rel="stylesheet" href="studio.css?v=game-workbench-2"></head>
 <body class="artwork-shell">
@@ -13,6 +13,7 @@ header,main{max-width:1280px;margin:auto}header{padding:24px 24px 12px}header h1
 <main>
 <div class="controls">
 <label>Lighting <select id="light"><option value="day">Day</option><option value="night">Night</option></select></label>
+<label>Work state <select id="stage"><option value="built">Completed</option><option value="blueprint">Blueprint</option><option value="construction">Construction</option><option value="pack">Packing</option><option value="rebuild">Rebuilding</option><option value="salvage">Salvaging</option><option value="demolish">Demolishing</option></select></label>
 <label>Camera <select id="camera"><option value="corrected">Game projection</option><option value="source">Uncorrected source</option></select></label>
 <label><input type="checkbox" id="guides" checked> Show measured edges</label>
 <label><input type="checkbox" id="context"> Compare home, resident & road</label>

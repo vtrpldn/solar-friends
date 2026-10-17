@@ -1,6 +1,7 @@
+import {constructionOpacity,drawBuildingState} from '../building-state-art.js';
 import {allBuildingArt,drawBuildingArt,cameraCalibration} from '../building-art.js';
 import {buildingProjection} from '../building-projection.js';
-import {placementArt,footprintSize,footprint} from '../building-footprints.js';
+import {placementArt,footprintSize,footprint,footprintCorners} from '../building-footprints.js';
 import {paintTerrain,GROUND_START,GROUND_SIZE} from '../terrain.js';
 import {drawPreparedFrame,RESIDENT_WIDTH} from '../sprite-frames.js';
 const $=id=>document.getElementById(id),images=new Map(),cards=[];
@@ -40,7 +41,11 @@ function draw({key,art:originalArt,canvas,caption},large=false){
  ctx.beginPath();[[0,-n*17],[n*34,0],[0,n*17],[-n*34,0]].forEach(([x,y],i)=>i?ctx.lineTo(cx+x*scale,cy+center+y*scale):ctx.moveTo(cx+x*scale,cy+center+y*scale));ctx.closePath();ctx.stroke();
  const source=night?art.nightFile:art.file;
  canvas.dataset.source=source;
- drawBuildingArt(ctx,images.get(source),{...config,renderFilter:night?art.nightTint:undefined},...origin,scale*registration.scale);
+ const mode=$('stage').value,complete=!['blueprint','construction'].includes(mode),stage=mode==='construction'?1:0;
+ const work=['pack','rebuild','salvage','demolish'].includes(mode)?{stage:mode==='pack'?'pack':mode==='rebuild'?'rebuild':'dismantle',action:mode,work:mode==='pack'?12:mode==='rebuild'?18:mode==='salvage'?27:9}:null;
+ canvas.dataset.workState=mode;
+ drawBuildingArt(ctx,images.get(source),{...config,renderFilter:night?art.nightTint:undefined},...origin,scale*registration.scale,constructionOpacity(complete,work,stage,3));
+ drawBuildingState(ctx,{work,complete,progress:stage?40:0,point:{x:cx,y:cy},corners:footprintCorners(key,0,0).map(([x,y])=>({x:cx+(x-y)*34*scale,y:cy+(x+y)*17*scale})),scale,kind:key,stage,label:stage?'Structure':'Blueprint'});
  let error=0;
  if(m){
   const {vertical,shear}=cameraCalibration(config),w=art.width*scale*registration.scale;
@@ -61,7 +66,7 @@ function draw({key,art:originalArt,canvas,caption},large=false){
   }
  }
  caption.replaceChildren(document.createTextNode(art.name+(proposed?' · UNAPPROVED CANDIDATE':'')));const detail=document.createElement('span');
- detail.textContent=proposed?proposal.issue:m?`${m.right.length+m.left.length} traced axes · ${error.toFixed(3)} px drift at game scale`:'Organic planting · no rectangular structure';caption.append(detail);
+ detail.textContent=proposed?proposal.issue:m?`${m.right.length+m.left.length+(m.heldOut?.right?.length||0)+(m.heldOut?.left?.length||0)} traced edges · ${error.toFixed(3)} px drift at game scale`:'Organic planting · no rectangular structure';caption.append(detail);
  return error;
 }
 function render(){
@@ -90,5 +95,5 @@ try{
  $('candidate').replaceChildren(...proposals.map(p=>{const option=document.createElement('option');option.value=p.id;option.textContent=p.label;return option;}));
  for(const file of new Set(proposals.flatMap(p=>[p.art.file,p.art.nightFile]))){const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}
  await Promise.all([...new Set([...Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]),'terrain-atlas.png','animations/iara.png'])].map(async file=>{const image=new Image();image.src='../art/'+file;await image.decode();images.set(file,image);}));
- for(const id of ['light','camera','guides','proposal','context','candidate'])$(id).addEventListener('change',render);render();
+ for(const id of ['light','camera','guides','proposal','context','candidate','stage'])$(id).addEventListener('change',render);render();
 }catch(error){$('status').textContent='Projection review failed: '+error.message;console.error(error);}

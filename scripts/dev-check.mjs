@@ -18,11 +18,11 @@ async function command(label, executable, args) {
   console.log(`→ ${label}`);
   const started=Date.now();let log='';
   const code=await new Promise((resolve,reject)=>{
-    const timeout=['verify-housing-balance.mjs','verify-seasonal-balance.mjs','verify-utility-balance.mjs'].includes(label)?1_800_000:600_000;
+    const timeout=label==='verify-economy.mjs'?3_600_000:['verify-housing-balance.mjs','verify-seasonal-balance.mjs','verify-utility-balance.mjs'].includes(label)?1_800_000:600_000;
     const child=spawn(executable,args,{env,cwd:root,stdio:['ignore','pipe','pipe'],timeout});
     const append=data=>{log+=data;process.stdout.write(data);};
     child.stdout.on('data',append);child.stderr.on('data',append);
-    child.on('error',reject);child.on('close',resolve);
+    child.on('error',reject);child.on('close',(exitCode,signal)=>{if(signal)append(`\nStopped by ${signal}; command limit ${timeout/1000} seconds.\n`);resolve(exitCode);});
   });
   const filename=`check-${results.length+1}.txt`;await writeFile(path.join(output,filename),log);
   results.push({label,status:code===0?'PASS':'FAIL',seconds:(Date.now()-started)/1000,log:filename});

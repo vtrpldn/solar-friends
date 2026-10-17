@@ -1,0 +1,268 @@
+{
+  "dependencyOrder": [
+    {
+      "number": 33,
+      "headRefName": "codex/simulation-plan",
+      "baseRefName": "main",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/33",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 34,
+      "headRefName": "codex/simulation-foundations",
+      "baseRefName": "codex/simulation-plan",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/34",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 35,
+      "headRefName": "codex/physical-resources",
+      "baseRefName": "codex/simulation-foundations",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/35",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 36,
+      "headRefName": "codex/resident-work-planning",
+      "baseRefName": "codex/physical-resources",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/36",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 37,
+      "headRefName": "codex/production-batches",
+      "baseRefName": "codex/resident-work-planning",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/37",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 38,
+      "headRefName": "codex/located-tools",
+      "baseRefName": "codex/production-batches",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/38",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 39,
+      "headRefName": "codex/located-food",
+      "baseRefName": "codex/located-tools",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/39",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 40,
+      "headRefName": "codex/kitchen-batches",
+      "baseRefName": "codex/located-food",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/40",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 41,
+      "headRefName": "codex/gathering-deliveries",
+      "baseRefName": "codex/kitchen-batches",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/41",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 42,
+      "headRefName": "codex/perishable-food",
+      "baseRefName": "codex/gathering-deliveries",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/42",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 43,
+      "headRefName": "codex/passive-processes",
+      "baseRefName": "codex/perishable-food",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/43",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 44,
+      "headRefName": "codex/living-land",
+      "baseRefName": "codex/passive-processes",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/44",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 45,
+      "headRefName": "codex/soil-and-shade",
+      "baseRefName": "codex/living-land",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/45",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 46,
+      "headRefName": "codex/land-restoration",
+      "baseRefName": "codex/soil-and-shade",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/46",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 47,
+      "headRefName": "codex/resident-restoration",
+      "baseRefName": "codex/land-restoration",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/47",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 48,
+      "headRefName": "codex/planting-supplies",
+      "baseRefName": "codex/resident-restoration",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/48",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 49,
+      "headRefName": "codex/canopy-and-ground",
+      "baseRefName": "codex/planting-supplies",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/49",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 50,
+      "headRefName": "codex/utility-routes",
+      "baseRefName": "codex/canopy-and-ground",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/50",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 51,
+      "headRefName": "codex/located-water",
+      "baseRefName": "codex/utility-routes",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/51",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 52,
+      "headRefName": "codex/installed-water",
+      "baseRefName": "codex/located-water",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/52",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 53,
+      "headRefName": "codex/located-sanitation",
+      "baseRefName": "codex/installed-water",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/53",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 54,
+      "headRefName": "codex/connected-electricity",
+      "baseRefName": "codex/located-sanitation",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/54",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 55,
+      "headRefName": "codex/seasonal-weather",
+      "baseRefName": "codex/connected-electricity",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/55",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 56,
+      "headRefName": "codex/game-interface-polish",
+      "baseRefName": "codex/seasonal-weather",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/56",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 57,
+      "headRefName": "codex/farming-and-husbandry",
+      "baseRefName": "codex/game-interface-polish",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/57",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 58,
+      "headRefName": "codex/equipment-maintenance",
+      "baseRefName": "codex/farming-and-husbandry",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/58",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 59,
+      "headRefName": "codex/resident-autonomy",
+      "baseRefName": "codex/equipment-maintenance",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/59",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 60,
+      "headRefName": "codex/resident-skills",
+      "baseRefName": "codex/resident-autonomy",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/60",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 61,
+      "headRefName": "codex/seasonal-suppliers",
+      "baseRefName": "codex/resident-skills",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/61",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 62,
+      "headRefName": "codex/sandbox-simulation",
+      "baseRefName": "codex/seasonal-suppliers",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/62",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 63,
+      "headRefName": "codex/story-planning",
+      "baseRefName": "codex/sandbox-simulation",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/63",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 65,
+      "headRefName": "codex/living-landscape",
+      "baseRefName": "codex/story-planning",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/65",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 66,
+      "headRefName": "codex/isometric-performance",
+      "baseRefName": "codex/living-landscape",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/66",
+      "mergeable": "MERGEABLE"
+    },
+    {
+      "number": 67,
+      "headRefName": "codex/finishing-pass",
+      "baseRefName": "codex/isometric-performance",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/67",
+      "mergeable": "MERGEABLE"
+    }
+  ],
+  "otherOpenPRs": [
+    64
+  ],
+  "mainProtected": false,
+  "requiredChecks": [],
+  "hostedLimitation": "Actions billing/spending prevents jobs starting; rulesets API unavailable for current private-repo plan (403). Branch endpoint reports protection disabled and no required status checks.",
+  "mergeApproval": "Not authorized for any current PR.",
+  "parallelPR64": {
+    "isAncestor": false,
+    "note": "Parallel resident-decisions branch is not in the dependency chain. Its autonomous-care and edible-reserve changes were folded into later landscape work; do not merge it blindly over newer work.",
+    "currentSourceChecks": {
+      "install": true,
+      "a_clock_mealtime_does_not_force_a_second_breakfast": true,
+      "urgent_personal_hunger_interrupts_construction_without_reachable_food": true,
+      "urgent_food_never_restarts_the_foraging_timer": true,
+      "outside_commitments_interrupt_a_long_lonely_leisure_activity": true,
+      "a_community_pantry_shortage_does_not_cancel_a_paid_shift": true,
+      "a_full_pantry_still_allows_care_for_an_existing_drying_crop": true,
+      "dry_crop_care_and_a_ready_harvest_precede_optional_expansion": true,
+      "dairy_and_honey_prevent_false_food_emergencies_and_accept_real_meal_requests": true,
+      "eggs_do_not_masquerade_as_edible_portions": true,
+      "overdue_goats_get_one_caregiver_before_new_construction": true,
+      "a_full_harvest_store_is_reported_instead_of_repeatedly_worked": true
+    },
+    "laterIntegrationCommit": "d5fb09c"
+  }
+}
