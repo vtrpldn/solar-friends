@@ -34,7 +34,7 @@ Review the active art against the existing illustrated houses and residents. An 
 
 - [x] Inventory all active building variants and their associated props, crops and resident interactions from the runtime registries. Keep rejected candidates clearly separated in the art tools.
 - [x] Compare each building at normal and close gameplay zoom beside a resident, an established home and an adjacent road. Check doors, headroom, seats, worktops, tools, roof tiles and vegetation as well as overall size.
-- [ ] Inspect actual roof, wall, frame and furniture geometry. Include structural edges that were not used to calibrate the sprite. Check upright posts, centered gables, consistent overhangs and supported furniture.
+- [x] Inspect actual roof, wall, frame and furniture geometry. Include structural edges that were not used to calibrate the sprite. Check upright posts, centered gables, consistent overhangs and supported furniture.
 - [ ] Inspect ground contact, road joins, placement ghosts, selection, construction, working and removal states where applicable. Include crop growth and resident carrying/working poses around the changed assets.
 - [ ] Check day/night continuity and powered/unpowered lighting. Repair source artwork only where a visible defect is identified, then recheck the installed result in the village.
 
@@ -73,16 +73,16 @@ Acceptance: no crash, growing backlog, recurring input stall or unbounded resour
 
 ## 4. Reconcile documentation
 
-- [ ] Update the [README](README.md) to the 32×32 map, starter shed/storage, current save behavior, energy-driven work and current development commands.
-- [ ] Remove obsolete claims that production, utilities or the six simulation stages are still unfinished. Preserve older reports as clearly dated history and link to current results.
-- [ ] Reconcile [construction](plan.md), [resident autonomy](resident-autonomy-plan.md), [farming](farming-plan.md) and [playtest](playtest.md) descriptions that still mention removed work windows or missing features already delivered.
-- [ ] Reconcile [future ideas](IDEAS.md) with shipped behavior. Keep genuinely new features outside this finishing checklist.
+- [x] Update the [README](README.md) to the 32×32 map, starter shed/storage, current save behavior, energy-driven work and current development commands.
+- [x] Remove obsolete claims that production, utilities or the six simulation stages are still unfinished. Preserve older reports as clearly dated history and link to current results.
+- [x] Reconcile [construction](plan.md), [resident autonomy](resident-autonomy-plan.md), [farming](farming-plan.md) and [playtest](playtest.md) descriptions that still mention removed work windows or missing features already delivered.
+- [x] Reconcile [future ideas](IDEAS.md) with shipped behavior. Keep genuinely new features outside this finishing checklist.
 
 Acceptance: current-facing documentation matches source and observed behavior, local links resolve, and readers can distinguish delivered mechanics, remaining finishing work and optional future ideas. Documentation-only changes need content and link checks; they do not justify repeating long simulation campaigns.
 
 ## 5. Integrate and check the final build
 
-- [ ] Inspect the complete parent-branch chain before integration. At planning time, [PR #66](https://github.com/vtrpldn/solar-friends/pull/66) depends on [PR #65](https://github.com/vtrpldn/solar-friends/pull/65), which itself targets the Story planning branch. Resolve the full dependency order and any conflicts without dropping earlier work.
+- [x] Inspect the complete parent-branch chain before integration. At planning time, [PR #66](https://github.com/vtrpldn/solar-friends/pull/66) depends on [PR #65](https://github.com/vtrpldn/solar-friends/pull/65), which itself targets the Story planning branch. Resolve the full dependency order and any conflicts without dropping earlier work.
 - [ ] Run the relevant checks after each fix. Once the final candidate is stable, run `npm run dev:check` for formatting, native tests, lint, build, script checks, gameplay/art verifiers and desktop regressions. Tie results to the exact candidate commit.
 - [ ] Check which hosted checks the target branch requires. Have the account owner resolve the GitHub Actions billing/spending blocker, then rerun those checks. Record jobs prevented from starting as blocked. Required blocked checks prevent integration; optional blocked checks remain a disclosed validation limitation in the individual merge decision. Do not bypass branch protection or change account billing settings.
 - [ ] Refresh PR descriptions and include the visual and performance evidence needed for review. Keep each PR unmerged until it receives individual, explicit user approval.
@@ -95,7 +95,7 @@ Acceptance: approved changes reach the intended branch in dependency order, requ
 - [ ] Artwork review complete; source identities and visual findings recorded.
 - [ ] Manual first-hour Story playtest complete; blocking and material pacing/clarity defects fixed and rechecked.
 - [ ] Sustained desktop performance measured; remaining limitations documented.
-- [ ] Current documentation reconciled with the game.
+- [x] Current documentation reconciled with the game.
 - [ ] Final checks complete and individually approved PRs integrated.
 - [ ] Integrated build launched and checked, with a concise completion report linking the evidence.
 

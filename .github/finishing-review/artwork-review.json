@@ -463,5 +463,27 @@
     "Animals",
     "Crops",
     "Land & supplies"
-  ]
+  ],
+  "additionalReview": {
+    "statesCaptured": 378,
+    "states": [
+      "built",
+      "blueprint",
+      "construction",
+      "pack",
+      "rebuild",
+      "salvage",
+      "demolish"
+    ],
+    "sharedRenderer": "web/building-state-art.js",
+    "reviewed": "All three day blueprint/construction groups; all work modes in first group; installed powered-night village. Remaining night work matrices and final state captures still need visual completion.",
+    "residentWorkSheets": [
+      "iara",
+      "bento",
+      "luz",
+      "caua",
+      "nina"
+    ],
+    "crops": "All six crop families now exposed in 120 day/night growth views; representative garden and greenhouse states reviewed."
+  }
 }
