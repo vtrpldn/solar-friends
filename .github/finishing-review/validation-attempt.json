@@ -1,0 +1,171 @@
+{
+  "candidateStart": "7634a97",
+  "startedAt": "2026-10-18T08:10:18.823Z",
+  "finishedAt": "2026-10-18T16:18:40.091Z",
+  "sourceAndBuildHash": "2dce828d709256158ecad52f730f1d7b238b62e3ff0b7d0190274b31e8a33c0a",
+  "status": "incomplete; full command exited unsuccessfully",
+  "passedChecks": 248,
+  "unsuccessful": [
+    {
+      "label": "Rust behavior",
+      "status": "FAIL",
+      "seconds": 3092.577,
+      "log": "check-2.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": 510
+    },
+    {
+      "label": "verify-away-routines.mjs",
+      "status": "FAIL",
+      "seconds": 950.617,
+      "log": "check-199.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-building-work.mjs",
+      "status": "FAIL",
+      "seconds": 963.423,
+      "log": "check-203.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-economy.mjs",
+      "status": "FAIL",
+      "seconds": 3866.221,
+      "log": "check-209.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-farming.mjs",
+      "status": "FAIL",
+      "seconds": 1169.842,
+      "log": "check-212.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-gatherings.mjs",
+      "status": "FAIL",
+      "seconds": 913.98,
+      "log": "check-217.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-housing-balance.mjs",
+      "status": "FAIL",
+      "seconds": 2152.545,
+      "log": "check-219.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-landscape.mjs",
+      "status": "FAIL",
+      "seconds": 776.546,
+      "log": "check-223.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-leisure.mjs",
+      "status": "FAIL",
+      "seconds": 1260.517,
+      "log": "check-224.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-modes.mjs",
+      "status": "FAIL",
+      "seconds": 927.875,
+      "log": "check-228.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-planning-paths.mjs",
+      "status": "FAIL",
+      "seconds": 1086.91,
+      "log": "check-236.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-quests.mjs",
+      "status": "FAIL",
+      "seconds": 1128.568,
+      "log": "check-242.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-resource-sites.mjs",
+      "status": "FAIL",
+      "seconds": 1034.06,
+      "log": "check-245.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-sandbox-rules.mjs",
+      "status": "FAIL",
+      "seconds": 943.302,
+      "log": "check-247.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-sanitation.mjs",
+      "status": "FAIL",
+      "seconds": 1077.791,
+      "log": "check-248.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-seasonal-balance.mjs",
+      "status": "FAIL",
+      "seconds": 1864.039,
+      "log": "check-249.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-situations.mjs",
+      "status": "FAIL",
+      "seconds": 1169.506,
+      "log": "check-252.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-sleep-speed.mjs",
+      "status": "FAIL",
+      "seconds": 961.134,
+      "log": "check-254.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "verify-utility-balance.mjs",
+      "status": "FAIL",
+      "seconds": 1800.079,
+      "log": "check-262.txt",
+      "reason": "process deadline",
+      "nativeCasesReportedPassing": null
+    },
+    {
+      "label": "page.waitForFunction: Timeout 30000ms exceeded.",
+      "status": "FAIL",
+      "reason": "browser observation timeout",
+      "nativeCasesReportedPassing": null
+    }
+  ],
+  "environmentEvidence": "pmset power log confirms repeated maintenance sleep and brief DarkWake cycles on 2026-10-18, including an observed 1036-second sleep. Temporary idle-sleep prevention did not provide a continuous awake session.",
+  "nextAction": "Rerun timed-out checks and browser validation while the Mac stays fully awake; do not treat these timeouts as green checks or as reproduced game assertion failures.",
+  "additionalCheck": "Updated five-minute phase-cost and event-timing diagnostics pass their standalone deterministic verifier."
+}

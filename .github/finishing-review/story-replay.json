@@ -2,7 +2,7 @@
   "startedAt": "2026-10-16T21:57:30Z",
   "origin": "http://127.0.0.1:4194/?performance",
   "candidateCommit": "dfb8b69",
-  "scope": "Fresh uninterrupted Story replay using ordinary controls; full validation suite runs concurrently, so timings here are not clean performance acceptance.",
+  "scope": "Fresh Story through ordinary controls; interrupted exploratory run, retained as functional-flow evidence rather than first-hour pacing acceptance.",
   "checkpoints": [
     {
       "targetMinutes": 5,

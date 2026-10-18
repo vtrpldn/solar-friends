@@ -35,7 +35,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review."
+      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "orchard",
@@ -51,7 +53,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Grouped foliage and mulch contacts fit plot; fruit scale is stylized consistently."
+      "notes": "Grouped foliage and mulch contacts fit plot; fruit scale is stylized consistently.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "goat_pasture",
@@ -67,7 +71,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Coherent fence, goat and shelter scale; no floating fence feet."
+      "notes": "Coherent fence, goat and shelter scale; no floating fence feet.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "apiary",
@@ -83,7 +89,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Hives accessible at working height; compact overhead weather roof."
+      "notes": "Hives accessible at working height; compact overhead weather roof.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "hydro",
@@ -99,7 +107,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Small machine shelter and wheel, not a walk-in human doorway."
+      "notes": "Small machine shelter and wheel, not a walk-in human doorway.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "eco_toilet",
@@ -115,7 +125,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review."
+      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "banana_treatment",
@@ -131,7 +143,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "wetland",
@@ -147,7 +161,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Rectangular planted bed occupies rear of its square plot; clear ground contact."
+      "notes": "Rectangular planted bed occupies rear of its square plot; clear ground contact.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "biodigester",
@@ -163,7 +179,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Service cabinet is equipment-scale; tank contacts and pipe curves coherent."
+      "notes": "Service cabinet is equipment-scale; tank contacts and pipe curves coherent.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "warehouse",
@@ -179,7 +197,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "solar_farm",
@@ -195,7 +215,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "streetlight",
@@ -211,7 +233,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "home",
@@ -227,7 +251,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "kitchen",
@@ -243,7 +269,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "grove",
@@ -259,7 +287,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "garden",
@@ -275,7 +305,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "greenhouse",
@@ -291,7 +323,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "well",
@@ -307,7 +341,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "compost",
@@ -323,7 +359,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "square",
@@ -339,7 +377,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Seat and table heights coherent with resident; no pergola."
+      "notes": "Seat and table heights coherent with resident; no pergola.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "workshop",
@@ -355,7 +395,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Coherent steep gable, open front and usable workbench; roof pitch differs intentionally from homes."
+      "notes": "Coherent steep gable, open front and usable workbench; roof pitch differs intentionally from homes.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "coop",
@@ -371,7 +413,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Bird-scale entrance and ramp; appropriate beside a human."
+      "notes": "Bird-scale entrance and ramp; appropriate beside a human.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "home-veranda",
@@ -387,7 +431,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "home-gable",
@@ -403,7 +449,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "home-courtyard",
@@ -419,7 +467,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "adobe-gable",
@@ -435,7 +485,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     },
     {
       "kind": "adobe-veranda",
@@ -451,7 +503,9 @@
       "style": "reviewed",
       "geometry": "visually reviewed roof/frame/ground where architectural",
       "proportions": "reviewed",
-      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views."
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Day blueprint/construction and night construction/rebuild matrices inspected. Packing/removal retain this source and use the same reviewed work-label overlay."
     }
   ],
   "families": [
@@ -476,7 +530,7 @@
       "demolish"
     ],
     "sharedRenderer": "web/building-state-art.js",
-    "reviewed": "All three day blueprint/construction groups; all work modes in first group; installed powered-night village. Remaining night work matrices and final state captures still need visual completion.",
+    "reviewed": "All 27 day blueprint/construction views and night construction/rebuild views reviewed; all common work labels and full-opacity removal modes reviewed in the first group. Geometry is shared by every work overlay. Powered and empty-battery village scenes compared live; roof-powered homes remain lit while shared lamps switch off.",
     "residentWorkSheets": [
       "iara",
       "bento",
@@ -484,6 +538,11 @@
       "caua",
       "nina"
     ],
-    "crops": "All six crop families now exposed in 120 day/night growth views; representative garden and greenhouse states reviewed."
+    "crops": "All six crop families now exposed in 120 day/night growth views; representative garden and greenhouse states reviewed.",
+    "powerEvidence": [
+      "unpowered-night-village.png",
+      "powered-night-village.png"
+    ],
+    "lightingScope": "Inspector work matrices show the chosen source lighting. Actual powered/unpowered behavior was checked in the village scenes, not inferred from the source inspector."
   }
 }

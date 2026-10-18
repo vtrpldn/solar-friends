@@ -36,7 +36,7 @@ Review the active art against the existing illustrated houses and residents. An 
 - [x] Compare each building at normal and close gameplay zoom beside a resident, an established home and an adjacent road. Check doors, headroom, seats, worktops, tools, roof tiles and vegetation as well as overall size.
 - [x] Inspect actual roof, wall, frame and furniture geometry. Include structural edges that were not used to calibrate the sprite. Check upright posts, centered gables, consistent overhangs and supported furniture.
 - [ ] Inspect ground contact, road joins, placement ghosts, selection, construction, working and removal states where applicable. Include crop growth and resident carrying/working poses around the changed assets.
-- [ ] Check day/night continuity and powered/unpowered lighting. Repair source artwork only where a visible defect is identified, then recheck the installed result in the village.
+- [x] Check day/night continuity and powered/unpowered lighting. Repair source artwork only where a visible defect is identified, then recheck the installed result in the village.
 
 Acceptance: every active building has recorded style, geometry, proportions, ground-contact and applicable state findings; no unresolved visible distortion, floating contact, clipped silhouette or material-style mismatch remains. Preserve the painted treatment and requested subject. No local sprite warps or added platforms to conceal errors. Mechanical grid checks support the visual review but cannot replace it, and passing them does not justify calling painted geometry mathematically perfect.
 
