@@ -22,6 +22,7 @@ export function withAuthoredElectricalCircuits(state){
       const authored=JSON.parse(game.snapshot()),v=authored.village,line=v.pipes.lines.at(-1),account=v.simulation.materials;
       line.phase='active';line.work=quote.labour_minutes;
       line.spent=line.kit.map((n,i)=>{
+        if(!n)return [0,0];
         const before=account.spent[i];account.opening[i]+=n;account.spent[i]+=n;
         return [before,account.spent[i]];
       });

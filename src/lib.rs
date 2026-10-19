@@ -18,6 +18,7 @@ mod interactions;
 mod land;
 mod leisure;
 mod logistics;
+mod maintenance;
 mod mobility;
 mod modes;
 mod navigation;
@@ -46,7 +47,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 22;
+pub const SAVE_VERSION: u32 = 23;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -152,6 +153,8 @@ pub struct Village {
     pub simulation: simulation::State,
     #[serde(default)]
     pub climate: climate::State,
+    #[serde(default)]
+    pub maintenance: maintenance::State,
     #[serde(default)]
     pub logistics: Option<logistics::State>,
     #[serde(skip)]
@@ -685,6 +688,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     modes::replenish(&mut v);
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    maintenance::advance(&mut v, dt * MINUTES_PER_SECOND);
     freshness::advance(&mut v);
     let activities: Vec<_> = people
         .iter()
@@ -1196,6 +1200,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     let residents: Vec<_> = people.iter().cloned().collect();
     pipes::prune(&mut v, &residents);
     power::batteries::prune(&mut v, &residents);
+    maintenance::sync(&mut v);
     progression::update(&mut v);
 }
 #[wasm_bindgen]
@@ -1208,6 +1213,11 @@ impl Game {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
                 climate: climate::State { enabled: true },
+                maintenance: maintenance::State {
+                    enabled: true,
+                    automatic: true,
+                    ..Default::default()
+                },
                 logistics: None,
                 navigation: None,
                 workforce: workforce::State::default(),
@@ -1295,6 +1305,7 @@ impl Game {
         assert!(water::initialise(
             &mut app.world_mut().resource_mut::<Village>()
         ));
+        maintenance::sync(&mut app.world_mut().resource_mut::<Village>());
         Self { app }
     }
     pub fn tick(&mut self, seconds: f32) {
@@ -1339,6 +1350,7 @@ impl Game {
         let mut economy = economy::view(&village);
         economy["pickup_drivers"] = serde_json::json!(residents.iter().map(|r| serde_json::json!({"id":r.id,"name":r.name,"blocker":town_pickup::blocker(&village,r)})).collect::<Vec<_>>());
         economy["pickup_capacity"] = town_pickup::CAPACITY.into();
+        economy["pickup_minutes"] = town_pickup::drive_minutes(&village).into();
         economy["pickup_fee"] = 2000.into();
         serde_json::json!({
             "environment": {
@@ -1539,6 +1551,7 @@ impl Game {
             project.reserved = [0; economy::COUNT];
             economy::rebalance(&mut v);
         }
+        maintenance::sync(&mut v);
         event(
             &mut v,
             format!("A new {kind} is planned. Residents can help build it."),
@@ -1653,6 +1666,7 @@ impl Game {
             || !power::valid(v)
             || !economy::valid(v)
             || !sanitation::valid(v)
+            || !maintenance::valid(v)
         {
             return false;
         }
@@ -1680,6 +1694,7 @@ impl Game {
             .chain(v.processes.batches.iter().map(|p| p.id))
             .chain(v.land.deposits.iter().map(|d| d.id))
             .chain(v.restoration.iter().map(|j| j.id))
+            .chain(v.maintenance.jobs.iter().map(|j| j.id))
             .chain(v.water_supply.tanks.iter().map(|p| p.id))
             .chain(v.water_supply.trips.iter().map(|p| p.id))
             .chain(v.pipes.lines.iter().map(|p| p.id))

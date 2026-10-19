@@ -15,6 +15,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Village simulation plan](simulator-plan.md)
 - [Completed gameplay and artwork playtest](playtest.md)
 - [Farming and animal care](#farming-and-animal-care)
+- [Equipment upkeep](#equipment-upkeep)
 - [Village quests](#village-quests)
 - [Village situations](#village-situations)
 - [Development tools](#development-tools)
@@ -49,7 +50,7 @@ Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls f
 
 A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and residents have individual preferred bedtimes, adjusted earlier when tired and later when rested (20:00–23:30). Each locks a 6–9 hour sleep target based on energy when settling down; travel and interruptions do not count as sleep. When everyone is actually asleep or working off-site, time automatically advances at 16× and restores the player’s selected speed when someone wakes or begins returning. Pauses and open dialogs still stop time. Autonomous chores run from 09:00 to noon and 15:00 to 16:00; urgent foraging can interrupt free time while residents are awake. Requested household tasks can continue outside those windows, subject to their needs. Material collection and preparation respect community work hours even when requested. Optional outside jobs depart from 09:00 (until 10:00 if morning needs delay departure), run until 17:00 and then return to the village. Residents spend free time on nature walks, birdwatching, gentle stretches, daydreaming, and stargazing after 20:00. Hobbies restore energy, use individual quiet spots, and survive reloading. The lighting changes continuously at dawn and dusk. Existing walking, looking, stretching, and sitting animations accompany these activities.
 
-New villages restart after confirmation and retain a backup for their mode. The current game writes version 22 saves; older playable saves do not import. Development fixtures use a separate authored format. Old browser keys remain untouched.
+New villages restart after confirmation and retain a backup for their mode. The current game writes version 23 saves; older playable saves do not import. Development fixtures use a separate authored format. Old browser keys remain untouched.
 
 ## Game modes
 
@@ -318,3 +319,13 @@ Open **Supplies → Stores → Stored supplies** to inspect locations and delive
 Interrupted loads remain recoverable where they are put down. Cancelled staging and salvage stay at their plot until collected. Storage houses must empty before a resident crew can pack or dismantle them. Blocked access appears in construction and storage details. Save version 4 validates location ownership and cargo; older aggregate fixtures establish located storage once when imported. Protected dev scenes remain separate from saved villages.
 
 The simulator work is ongoing. Production inputs, connected utilities, land properties, maintenance and the shared work forecasts follow in their respective plan stages. The logistics verifier exports real pickup, cargo and night artwork checkpoints under the generated artifacts directory for replay through Dev Tools.
+
+## Equipment upkeep
+
+Story equipment ages from actual use and weather. Pumps, workshop tools, batteries and the shared pickup have saved condition. Open Supplies → Ecology to see condition, service kits and work; a HUD notice appears when service is due. Automatic scheduling books service at 70% but does not purchase parts. Use the normal Trade basket to buy missing spares. Residents carry them to the unit and perform service during community hours. Pausing preserves work; cancellation preserves unused parts and any improvement already made, and defers automatic rebooking until manually scheduled again.
+
+Worn pumps move less water; battery charging and transmission slow without deleting stored charge. Failed powered tools can use slower hand work. Pickup travel takes 120–240 game minutes depending on condition, fixed when the order is confirmed. A failed or booked pickup cannot start another trip, while town delivery remains available. Equipment stops once servicing starts. Sandbox starts with wear off and can enable it independently of seasons.
+
+Protected `maintenance` and `maintenance-outage` scenes provide worn and failed equipment without changing saved villages.
+
+Project priority also applies to the local batches still needed by that project and to hauling their inputs. Prioritising a home moves its missing frames, fittings and roofing forward alongside direct site deliveries. Paused or fully supplied projects stop boosting preparation; normal stock targets keep ordinary priority. Essential needs and community work hours still take precedence.

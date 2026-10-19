@@ -406,7 +406,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                     450.
                 }
             } else {
-                610.
+                520. + production::project_priority(v, batch.material).unwrap_or(1) as f32 * 90.
             },
             if batch.material == economy::MEALS {
                 "Preparing a saved pot at the kitchen."
@@ -616,6 +616,10 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
         } else if job.task == "restore" {
             job.material
                 .and_then(|id| restoration::approach(v, simulation::Id(id as u32), peer.id))
+                .map(|p| (p[0], p[1]))
+        } else if job.task == "utility" {
+            job.material
+                .and_then(|id| utilities::crew_approach(v, simulation::Id(id as u32), peer.id))
                 .map(|p| (p[0], p[1]))
         } else if matches!(job.task.as_str(), "source" | "prepare") {
             let mut worker = peer.clone();

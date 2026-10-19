@@ -55,7 +55,7 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
     let day = (v.minutes / 1440.).floor() * 1440.;
     let return_at = match purpose {
         Purpose::Work => day + 1020.,
-        Purpose::Pickup => v.minutes + town_pickup::DRIVE_MINUTES,
+        Purpose::Pickup => v.minutes + town_pickup::drive_minutes(v),
         Purpose::Overnight => {
             v.minutes
                 + if r.sleep.started_at.is_some() {
@@ -111,7 +111,10 @@ pub fn advance(
     if trip.purpose == Purpose::Pickup && trip.phase == Phase::Leaving {
         // Driving starts at the village gate, rather than consuming the trip
         // while the resident is still walking to the vehicle.
-        trip.return_at = v.minutes + town_pickup::DRIVE_MINUTES;
+        trip.return_at = v.minutes
+            + trip.order.map_or(town_pickup::DRIVE_MINUTES, |id| {
+                town_pickup::ordered_minutes(v, id)
+            });
         if let Some(o) = v
             .economy
             .orders

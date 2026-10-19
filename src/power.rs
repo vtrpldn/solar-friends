@@ -259,6 +259,7 @@ mod tests {
             b.progress = 100.;
         }
         crate::logistics::sync(&mut v);
+        v.maintenance = maintenance::State::default();
         v.minutes = 360.;
         fixtures::connect(&mut v, Owner::Building(0), Owner::Building(1));
         freshness::fixture_reseed(&mut v);
@@ -359,6 +360,61 @@ mod tests {
             old["village"]["power"] = bad;
             assert!(!restored.restore(&old.to_string()));
         }
+    }
+    #[test]
+    fn failed_storage_stays_charged_and_worn_systems_reduce_charging_and_cable_rate() {
+        let mut v = village();
+        v.minutes = 720.;
+        v.maintenance.enabled = true;
+        maintenance::sync(&mut v);
+        fixtures::charge(&mut v, 12.);
+        let id = v
+            .power
+            .network
+            .nodes
+            .iter()
+            .find(|n| n.kind == electricity::Kind::Solar)
+            .unwrap()
+            .id;
+        let key = maintenance::Equipment::Battery(id);
+        let node = v
+            .power
+            .network
+            .nodes
+            .iter()
+            .find(|n| n.id == id)
+            .unwrap()
+            .clone();
+        let healthy = network::generation(&v, &node, 720.);
+        v.maintenance
+            .records
+            .iter_mut()
+            .find(|r| r.equipment == key)
+            .unwrap()
+            .condition = 40.;
+        assert!((network::generation(&v, &node, 720.) - healthy * 0.75).abs() < 1e-6);
+        assert_eq!(network::wires(&v)[0].capacity_per_hour, 9.);
+        v.maintenance
+            .records
+            .iter_mut()
+            .find(|r| r.equipment == key)
+            .unwrap()
+            .condition = 10.;
+        v.minutes = 1260.;
+        advance(&mut v, 60.);
+        finish_frame(&mut v, 60.);
+        assert_eq!(
+            v.power
+                .network
+                .nodes
+                .iter()
+                .find(|n| n.id == id)
+                .unwrap()
+                .charge,
+            12.
+        );
+        assert_eq!(v.power.network.account.consumed, 0.);
+        assert!(valid(&v));
     }
 }
 

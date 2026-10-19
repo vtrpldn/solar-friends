@@ -66,7 +66,10 @@ impl Game {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.mode = mode;
         v.climate.enabled = mode == Mode::Story;
+        v.maintenance.enabled = mode == Mode::Story;
+        v.maintenance.automatic = mode == Mode::Story;
         if mode == Mode::Sandbox {
+            v.maintenance = maintenance::State::default();
             v.events = vec!["An open clearing. Every possibility is yours to explore.".into()];
             v.wood = 100.;
             v.economy.stock[1..].fill(24);

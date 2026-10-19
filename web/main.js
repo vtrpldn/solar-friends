@@ -6,6 +6,7 @@ import {gatheringInfo} from './gathering-ui.js';
 import {drawCarriedMaterials,drawSupplyPile,drawCarriedWater,drawWaterPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {makeArtPreview} from './dev/art-preview.js';
+import {installMaintenanceUI} from './maintenance-ui.js';
 import {installGameUI,itemIcon} from './game-ui.js';
 import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
@@ -161,7 +162,7 @@ let game,
   state,
   selected = null,
   tool = null,
-  buildMenu, economyUI, gameUI,
+  buildMenu, economyUI, gameUI, maintenanceUI,
   speed = 1,
   paused = false,
   zoom = 1.3,
@@ -1162,6 +1163,7 @@ function updateCircularUI(v) {
   $('#auto-digest').disabled=!ready('biodigester');$('#filter-greywater').disabled=!ready('wetland');
 }
 function updateSupplies(v) {
+  maintenanceUI?.update();
   updateCircularUI(v);
   $('#hen-controls').hidden=!buildingUnlocked(v,'coop');
   $('#egg-control').hidden=!buildingUnlocked(v,'coop');
@@ -1460,6 +1462,7 @@ function setup() {
     $('#person').hidden=true;$('#placement').hidden=false;$('#placement').textContent='Choose a battery plot · resident packing, transport and installation · Esc to cancel';
     $('#relocation-guidance').textContent=$('#placement').textContent;$('#relocation-guidance').hidden=false;canvas.style.cursor='crosshair';
   },snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  maintenanceUI=installMaintenanceUI({game:()=>game,snapshot:()=>state,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,developer:()=>!!sandbox||artworkPreview||!!directScenario,openTown:()=>showPanel('town-panel'),openUpkeep:()=>showPanel('supplies-panel','ecology'),focusAt:(x,y)=>{const p=iso(x,y);cameraTarget={x:pan.x+width*.29-p.x,y:pan.y+height*.45-p.y,dt:1/60};}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {

@@ -345,33 +345,53 @@ pub fn crew_jobs(v: &Village, resident: usize) -> Vec<(crate::simulation::Id, u8
                 .filter(|j| crate::power::batteries::ready(v, j, resident))
                 .map(|j| (j.id, 3)),
         )
+        .chain(
+            v.maintenance
+                .jobs
+                .iter()
+                .filter(|j| crate::maintenance::jobs::ready(v, j))
+                .map(|j| (j.id, 2)),
+        )
         .collect()
 }
 pub fn crew_exists(v: &Village, id: crate::simulation::Id) -> bool {
-    crate::pipes::line(v, id).is_some() || crate::power::batteries::job(v, id).is_some()
+    crate::pipes::line(v, id).is_some()
+        || crate::power::batteries::job(v, id).is_some()
+        || crate::maintenance::jobs::job(v, id).is_some()
 }
 pub fn crew_ready(v: &Village, id: crate::simulation::Id, resident: usize) -> bool {
-    crate::pipes::line(v, id).is_some_and(|p| crate::pipes::ready(v, p))
+    crate::maintenance::jobs::job(v, id).is_some_and(|j| crate::maintenance::jobs::ready(v, j))
+        || crate::pipes::line(v, id).is_some_and(|p| crate::pipes::ready(v, p))
         || crate::power::batteries::job(v, id)
             .is_some_and(|j| crate::power::batteries::ready(v, j, resident))
 }
 pub fn crew_approach(v: &Village, id: crate::simulation::Id, resident: usize) -> Option<[f32; 2]> {
-    crate::pipes::approach(v, id, resident)
+    crate::maintenance::jobs::approach(v, id, resident)
+        .or_else(|| crate::pipes::approach(v, id, resident))
         .or_else(|| crate::power::batteries::approach(v, id, resident))
 }
 pub fn assign_crew(r: &mut crate::Resident, v: &Village, id: crate::simulation::Id) -> bool {
-    if crate::power::batteries::job(v, id).is_some() {
+    if crate::maintenance::jobs::job(v, id).is_some() {
+        crate::maintenance::jobs::assign_target(r, v, id)
+    } else if crate::power::batteries::job(v, id).is_some() {
         crate::power::batteries::assign_target(r, v, id)
     } else {
         crate::pipes::assign_target(r, v, id)
     }
 }
 pub fn crew_reason(v: &Village, id: crate::simulation::Id) -> Option<&'static str> {
-    crate::pipes::line(v, id)
-        .map(crate::pipes::work_reason)
+    crate::maintenance::jobs::job(v, id)
+        .map(|_| "Servicing village equipment with delivered spare parts.")
+        .or_else(|| crate::pipes::line(v, id).map(crate::pipes::work_reason))
         .or_else(|| crate::power::batteries::job(v, id).map(crate::power::batteries::reason))
 }
 pub fn crew_work(v: &mut Village, r: &crate::Resident, minutes: f32) -> bool {
+    if r.activity_material
+        .and_then(|n| u32::try_from(n).ok())
+        .is_some_and(|id| crate::maintenance::jobs::job(v, crate::simulation::Id(id)).is_some())
+    {
+        return crate::maintenance::jobs::work(v, r, minutes);
+    }
     if r.activity_material
         .and_then(|id| u32::try_from(id).ok())
         .is_some_and(|id| crate::power::batteries::job(v, crate::simulation::Id(id)).is_some())

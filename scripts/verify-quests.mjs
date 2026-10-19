@@ -1,3 +1,4 @@
+import {buyServiceParts} from './upkeep-playtest.mjs';
 import {writeFileSync} from 'node:fs';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
@@ -10,13 +11,17 @@ const g=new Game(),snap=()=>JSON.parse(g.snapshot()),output=process.argv[2]||'ar
 if(output)await fs.mkdir(output,{recursive:true});
 await fs.mkdir('artifacts/logistics',{recursive:true});
 g.set_outside_work(true);
-let savedCareCheckIn=false;
+let savedCareCheckIn=false,upkeepChecked=-Infinity,serviceOrders=0,serviceSpending=0;
 function until(test,label,limit=24000){
  for(let i=0;i<limit;i++){
   // Keep every quarter-second simulation step. Poll the full UI snapshot every
   // three game minutes; chapter waits do not need a render snapshot each tick.
   if(i%4===0||i===limit-1){
    const current=snap(),care=current.village.situations.active;
+   if(current.village.minutes-upkeepChecked>=1440){
+    upkeepChecked=current.village.minutes;const order=buyServiceParts(g,current);
+    if(order){serviceOrders++;serviceSpending+=order.paid;}
+   }
    if(output&&!savedCareCheckIn&&care&&care.response==null&&care.resolved==null){writeFileSync(`${output}/care-check-in.json`,g.snapshot());savedCareCheckIn=true;}
    if(test(current))return;
   }
@@ -32,10 +37,29 @@ function location(kind){
  if(kind==='hydro')for(let y=5;y<=25;y++)for(let x=23;x<=26;x++)if(!placementReason(v,kind,x,y)&&(kind!=='apiary'||v.buildings.some(b=>['orchard','grove'].includes(b.kind)&&Math.max(Math.abs(b.x-x),Math.abs(b.y-y))<=6)))return [x,y];
  throw Error(`No accessible planned plot for ${kind}`);
 }
+function localHousingPlot(){
+ const v=snap().village,w=v.buildings.find(b=>b.kind==='workshop'),origins=[[10,13],[w.x+2,w.y]],plans=[];
+ // Compare the real routed haul cost instead of adding housing to the far
+ // end of the first-fit rows. This is a player layout choice, not free stock.
+ for(let y=2;y<26;y++)for(let x=2;x<25;x++)if(!placementReason(v,'home',x,y))for(const point of [[x+2,y],[x-2,y],[x,y+2],[x,y-2]]){
+  const routes=origins.map(from=>JSON.parse(g.route_quote(...from,...point)).route);
+  if(routes.every(Boolean))plans.push({site:[x,y],point,origins,cost:routes[0].minutes*2+routes[1].minutes});
+ }
+ plans.sort((a,b)=>a.cost-b.cost);assert(plans.length,'Local housing needs reachable stores and a workshop');return plans[0];
+}
 function purchase(items){if(!items.some(Boolean))return;until(s=>s.environment.economy.money>=items.reduce((n,q,i)=>n+q*s.environment.economy.materials[i].price,6000),'purchase funds');assert.equal(g.order_supplies(JSON.stringify(items)),'ok');}
 function build(kind,recipe='standard',local=false,site=null){
- const [x,y]=site||location(kind);assert.equal(g.place_with_recipe(kind,x,y,recipe),'ok',`${kind} placement`);
+ const localPlan=local&&!site?localHousingPlot():null;
+ const [x,y]=site||localPlan?.site||location(kind);assert.equal(g.place_with_recipe(kind,x,y,recipe),'ok',`${kind} placement`);
  const id=snap().village.buildings.at(-1).id;
+ if(local){
+  assert.equal(g.configure_project(id,3,false,recipe),'ok','Prioritise this locally supplied housing project');
+  for(const origin of localPlan?.origins||[]){
+   const route=JSON.parse(g.route_quote(...origin,...localPlan.point)).route;assert(route,'The placed home must retain its service approach');
+   for(const [rx,ry] of route.points){const px=Math.round(rx),py=Math.round(ry),v=snap().village;if(!v.roads.some(p=>p[0]===px&&p[1]===py)&&!placementReason(v,'road',px,py))assert.equal(g.toggle_road(px,py),'ok');}
+  }
+  console.log(`Local housing plan: (${x}, ${y}) with native-routed supply roads and high project priority`);
+ }
  const missing=snap().environment.economy.shortage;
  if(local){for(const i of [5,6,7,8])missing[i]=0;missing[0]+=12;missing[2]+=20;missing[4]+=6;}
  purchase(missing);
@@ -72,11 +96,18 @@ async function complete(chapter){
   assert(g.track_quest(chapter+1));
  }
 }
+let timber,solar;
+if(process.env.SOLAR_STORY_FROM){
+ const raw=await fs.readFile(process.env.SOLAR_STORY_FROM,'utf8');assert(g.restore(raw));assert.equal(g.snapshot(),raw);
+ const v=snap().village;assert(quests.slice(0,9).every((_,i)=>questCompleted(v,i)),'Resume only an earned first nine chapters');
+ assert.equal(v.progress.tracked,9);timber=v.economy.sources.findIndex(s=>s.material===0);solar=v.buildings.find(b=>b.kind==='solar_farm').id;
+ console.log('Resuming the earned chapter-nine checkpoint with an exact restore');
+}else{
 until(s=>s.village.arrived,'arrival');
 // Keep daily food and shelter near the arrival store, then expand along corridors.
 for(const [kind,x,y] of [['well',6,10],['home',8,8],['garden',13,10],['kitchen',10,10],['home',12,7]])build(kind,'standard',false,[x,y]);
 await complete(0);
-build('grove');const timber=source(0),bamboo=source(1);await complete(1);
+build('grove');timber=source(0);const bamboo=source(1);await complete(1);
 build('square','standard',false,[8,16]);
 // A shared table beside homes and the kitchen keeps actual guest and food trips short.
 for(const [x,y] of [[10,7],[10,8],[11,8],[11,9],[11,10],[11,11],...[11,12,13,14,15,16,17,18].map(y=>[10,y])])assert.equal(g.toggle_road(x,y),'ok');
@@ -124,7 +155,7 @@ build('apiary');
 until(s=>s.village.buildings.find(b=>b.id===rotationGarden).agriculture.previous_crop==='beans','harvest a bean crop');
 assert(g.configure_crop(rotationGarden,'maize',true));
 await complete(5);
-const solar=build('solar_farm'),lamp=build('streetlight');
+solar=build('solar_farm');const lamp=build('streetlight');
 const b=snap().village.buildings.find(b=>b.id===lamp);
 // Actual adjacent free path, without occupying the lamp's cell.
 for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
@@ -146,6 +177,7 @@ build('biodigester');g.configure_banana_treatment(false);
 // for a hen batch; use the normal preference control rather than idle for them.
 g.set_food_preferences(snap().village.supplies.feed_hens,false);
 await complete(8);
+}
 for(const material of [2,3,4])source(material);
 for(let i=0;i<5;i++){
  until(s=>s.village.economy.sources[i].remaining>0,`source ${i} maturity`);
@@ -189,4 +221,5 @@ gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);
 const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
 for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
 assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
+console.log(`Upkeep: ${serviceOrders} paid spare-part deliveries, R$ ${(serviceSpending/100).toFixed(2)}`);
 g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 21 building kinds taught.');

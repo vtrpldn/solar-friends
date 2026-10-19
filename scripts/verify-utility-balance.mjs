@@ -1,3 +1,4 @@
+import {buyServiceParts} from './upkeep-playtest.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {writeFileSync} from 'node:fs';
@@ -10,7 +11,7 @@ const output='artifacts/utility-balance';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),line=(s,id)=>s.village.pipes.lines.find(p=>p.id===id);
 const raw=await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story/solar-complete.json','utf8');
 const connected=new Game(),manual=new Game();assert(connected.restore(raw));assert(manual.restore(raw));
-assert.equal(snap(connected).village.version,22);assert(snap(connected).village.progress.later_completed.every(Boolean),'Use the earned completed Story village');
+assert.equal(snap(connected).village.version,23);assert(snap(connected).village.progress.later_completed.every(Boolean),'Use the earned completed Story village');
 function checkpoint(g){
   const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();
   assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));
@@ -18,7 +19,8 @@ function checkpoint(g){
   const n=snap(g).village.power.network,a=n.account;assert(Math.abs(a.opening+a.generated-a.consumed-a.curtailed-a.discharged-n.nodes.reduce((sum,n)=>sum+n.charge,0))<.001);
 }
 function until(g,test,label,days=16){
-  for(let tick=0;tick<days*1920;tick++){if(tick%8===0&&test(snap(g)))return;g.tick(.25);}
+  let checked=-Infinity;
+  for(let tick=0;tick<days*1920;tick++){if(tick%8===0){const s=snap(g);if(test(s))return;if(s.village.minutes-checked>=1440){checked=s.village.minutes;buyServiceParts(g,s);}}g.tick(.25);}
   writeFileSync(output+'/stalled.json',g.snapshot());throw new Error(label+'; see '+output+'/stalled.json');
 }
 function purchase(g,kit){
@@ -65,7 +67,7 @@ for(const [name,g]of [['manual',manual],['connected',connected]]){
     lowestFood=Math.min(lowestFood,food);highestFood=Math.max(highestFood,food);
     for(const r of s.residents){const c=counts[r.id];if(r.task!=='sleep'&&!r.trip)c.awake++;if(!r.trip&&work.has(r.task))c.work++;if(!r.trip&&leisure.has(r.task))c.leisure++;
       peakHunger=Math.max(peakHunger,r.hunger);assert(r.hunger<95&&r.energy>20,'The established village must retain food and rest');}
-    if(tick%1920===0)checkpoint(g);
+    if(tick%1920===0){buyServiceParts(g,s);checkpoint(g);}
   }
   checkpoint(g);const after=snap(g),used=after.village.production.sites.find(p=>p.building===building('workshop')).energy_used-energyBefore;
   await writeFile(output+'/'+name+'-after.json',g.snapshot());

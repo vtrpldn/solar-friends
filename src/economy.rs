@@ -110,6 +110,8 @@ pub struct Order {
     pub status: String,
     #[serde(default)]
     pub pickup_by: Option<usize>,
+    #[serde(default)]
+    pub pickup_minutes: Option<f32>,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -584,7 +586,7 @@ pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
 pub fn shortage(v: &Village) -> Bundle {
     let mut needs = gross_needs(v);
     for (i, n) in needs.iter_mut().enumerate() {
-        *n += crate::pipes::demand(v, i);
+        *n += crate::pipes::demand(v, i) + crate::maintenance::jobs::demand(v, i);
     }
     for index in 0..v.economy.sources.len() {
         if let Some((material, amount)) = crate::planting::required(v, index) {
@@ -790,7 +792,7 @@ fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     Ok(total)
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":(reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i)+crate::restoration::reserved_amount(v,i)+crate::planting::reserved(v,i)+crate::pipes::demand(v,i)).min(quantity(v,i)),"processing":crate::restoration::processing(v,i)+crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
+    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":(reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i)+crate::restoration::reserved_amount(v,i)+crate::planting::reserved(v,i)+crate::pipes::demand(v,i)+crate::maintenance::jobs::demand(v,i)).min(quantity(v,i)),"processing":crate::restoration::processing(v,i)+crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
     let projects:Vec<_>=v.economy.projects.iter().filter_map(|p|{
         let b=v.buildings.iter().find(|b|b.id==p.building)?;if b.progress>=100.{return None;}
         let stages=recipe(&b.kind,&p.recipe)?;let s=stages.get(p.stage)?;
@@ -928,6 +930,9 @@ pub fn valid(v: &Village) -> bool {
                     .map(|(&n, p)| n as i64 * p)
                     .sum::<i64>()
                     + if o.pickup_by.is_some() { 2000 } else { 6000 }
+            || o.pickup_minutes
+                .is_some_and(|n| !n.is_finite() || !(120.0..=240.).contains(&n))
+            || o.pickup_minutes.is_some() != o.pickup_by.is_some()
             || o.pickup_by.is_some_and(|id| id >= 5)
             || (o.pickup_by.is_some()
                 && (!matches!(o.status.as_str(), "collecting" | "delivered")
@@ -994,7 +999,7 @@ pub(crate) fn place_order(
     v.economy.next_order = next_order;
     let dispatch = v.minutes + if pickup_by.is_some() { 0. } else { 120. };
     let arrival = if pickup_by.is_some() {
-        v.minutes + 120.
+        v.minutes + crate::town_pickup::drive_minutes(v)
     } else {
         (dispatch / 1440.).floor() * 1440. + if dispatch % 1440. < 600. { 600. } else { 2040. }
     };
@@ -1011,6 +1016,7 @@ pub(crate) fn place_order(
         }
         .into(),
         pickup_by,
+        pickup_minutes: pickup_by.map(|_| crate::town_pickup::drive_minutes(v)),
     });
     ledger(
         v,

@@ -523,6 +523,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
             let row = v.pipes.lines.iter_mut().find(|p| p.id == id).unwrap();
             row.spent = Some(paid);
             row.phase = Phase::Installing;
+            maintenance::sync(v);
         }
         let boundary = if p.work < p.plan.cells.len() as f32 * 4. {
             ((p.work / 4.).floor() + 1.) * 4.
@@ -676,10 +677,11 @@ pub fn advance(v: &mut Village, minutes: f32) {
         let i = c.index();
         let source = water::tank(v, p.anchors[0].endpoint).unwrap();
         let target = water::tank(v, p.anchors[1].endpoint).unwrap();
-        let amount = (f64::from(minutes) * FLOW_PER_MINUTE)
-            .min(water::free(v, source, c, None))
-            .min(water::room(v, target, c))
-            .min(power::pump_available(v, p.id) / ENERGY_PER_WATER);
+        let amount =
+            (f64::from(minutes) * FLOW_PER_MINUTE * maintenance::pump_performance(v, p.id))
+                .min(water::free(v, source, c, None))
+                .min(water::room(v, target, c))
+                .min(power::pump_available(v, p.id) / ENERGY_PER_WATER);
         if amount <= 0. {
             continue;
         }
@@ -688,6 +690,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if amount <= 0. {
             continue;
         }
+        maintenance::pump_used(v, p.id, amount);
         v.water_supply
             .tanks
             .iter_mut()
