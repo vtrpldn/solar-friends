@@ -1,3 +1,4 @@
+import {resetMaterialLocations} from './material-fixture.js';
 import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 import {makeArtPreview} from './art-preview.js';
@@ -50,10 +51,10 @@ export function makeScenario(id, fresh, established) {
     r.target_x = r.x; r.target_y = r.y;
   }
   if(id.startsWith('sim-')) {
-    const compact=[['home',9,9],['home',12,9],['warehouse',9,13],['garden',12,13],['kitchen',15,13],['well',15,9]];
+    const compact=[['home',9,9],['home',12,9],['warehouse',6,13],['garden',12,13],['kitchen',15,13],['well',15,9]];
     const dispersed=[['home',4,5],['home',12,5],['warehouse',5,19],['garden',19,19],['kitchen',19,6],['well',5,10]];
-    const balanced=[['home',6,8],['home',10,8],['warehouse',18,13],['garden',14,17],['greenhouse',10,13],['kitchen',18,8],['well',18,17],['coop',6,13],['compost',6,17],['grove',10,17],['solar_farm',18,22],['streetlight',14,21]];
-    const enclosed=[['warehouse',12,12],...[[10,10],[12,10],[14,10],[10,12],[14,12],[10,14],[12,14],[14,14]].map(([x,y])=>['home',x,y])];
+    const balanced=[['home',6,8],['home',10,8],['warehouse',18,13],['garden',14,17],['greenhouse',12,12],['kitchen',18,8],['well',18,17],['coop',6,13],['compost',6,17],['grove',10,17],['solar_farm',18,22],['streetlight',14,21]];
+    const enclosed=[['warehouse',15,18],...[...[12,14,16,18].flatMap(x=>[[x,15],[x,21]]),...[12,18].flatMap(x=>[[x,17],[x,19]])].map(([x,y])=>['home',x,y])];
     const layout=id==='sim-spread'?dispersed:id==='sim-balanced'?balanced:id==='sim-blocked'?enclosed:compact;
     v.economy=structuredClone(fresh.village.economy);v.economy.next_building=layout.length;
     v.building_jobs=[];v.roads=[];v.circular=structuredClone(fresh.village.circular);
@@ -126,7 +127,7 @@ export function makeScenario(id, fresh, established) {
     v.food = 18; v.meals = 8;
     for (const r of state.residents) r.last_meal_slot = 4;
   }
-  return state;
+  return resetMaterialLocations(state);
 }
 export function advanceGame(game, minutes) {
   if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) throw new Error('Advance between 0 and 1440 game minutes.');

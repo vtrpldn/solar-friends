@@ -43,6 +43,8 @@ impl Game {
             v.events = vec!["An open clearing. Every possibility is yours to explore.".into()];
             v.wood = 100.;
             v.economy.stock[1..].fill(24);
+            v.logistics = None;
+            logistics::initialise(&mut v);
             replenish(&mut v);
             v.simulation.materials = None;
             simulation::start_materials(&mut v);

@@ -254,7 +254,9 @@ Rust owns simulation and validated saves. Bevy App and ECS schedule systems and 
 
 - `src/lib.rs`: simulation, requests, construction, saves, and tests.
 - `src/modes.rs`: Story/Sandbox initialization, replenishment and Sandbox removal.
-- `src/economy.rs`: materials, stage reservations, orders, finite sites, preparation, income and sales.
+- `src/economy.rs`: stage reservations, orders, preparation, income and sales.
+- `src/logistics.rs` and `src/navigation.rs`: located ownership, cargo, supply routes, storage targets and recovery.
+- `src/workforce.rs`: food-work reservations derived from current resident activities.
 - `web/economy-ui.js` and `web/economy-art.js`: project/Town controls and shared resource sprites.
 - `src/resource_sites.rs` and `web/resource-sites.js`: player plot placement, cultivation, finite property reserves and preview rules.
 - `src/progression.rs`: persistent quest milestones and building unlocks.
@@ -268,7 +270,7 @@ Run `cargo test --locked` for resource accounting, refusal, construction/harvest
 
 ## Prototype scope
 
-This is a small playable slice. Resident movement follows direct paths; collision-aware navigation, deeper relationship stories, skill progression, seasonal ecology, vehicle deliveries, contracts, specialist crews and the full first-year scenario are future work. Each home provides three beds. Residents without a bed walk out to stay with neighbours overnight, leave the map while sleeping, and begin their return when their individual 6–9 hour sleep target is complete. Those with beds sleep inside village homes and recover faster. New beds do not interrupt an overnight stay already underway. Departures, absence and return walks persist in saves; the People panel shows the reason and return time, and local requests wait until residents return. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
+This is a small playable slice. Material hauling follows routes around occupied plots and the river. Other resident activities retain direct steering. Deeper relationship stories, skill progression, seasonal ecology, connected utilities, contracts, specialist crews and the full first-year scenario remain future work. Each home provides three beds. Residents without a bed walk out to stay with neighbours overnight, leave the map while sleeping, and begin their return when their individual 6–9 hour sleep target is complete. Those with beds sleep inside village homes and recover faster. New beds do not interrupt an overnight stay already underway. Departures, absence and return walks persist in saves; the People panel shows the reason and return time, and local requests wait until residents return. Socializing currently restores the acting resident's social need. No multiplayer or cloud saves.
 
 Artwork was generated with OpenAI's built-in image generation tool using the user-approved Brazilian ecovila concept. The browser game uses separate sprites rather than displaying the concept as a background.
 
@@ -290,6 +292,16 @@ The simplified game cycle is inspired by the [Emater-DF banana evapotranspiratio
 
 ### Simulation foundations
 
-Dev Tools records observed time for each neighbour: travel, village work, outside work, meals, rest, social time, leisure and sleep. Leisure walks count as leisure. Eight days of observations survive saves. Material accounting compares receipts and spending with current stock, keeping reservations, incoming orders and expected salvage separate. Edited test scenes establish their own baseline. Physical inventories and hauling remain the next implementation stage in [the simulator plan](simulator-plan.md).
+Dev Tools records observed time for each neighbour: travel, village work, outside work, meals, rest, social time, leisure and sleep. Leisure walks count as leisure. Eight days of observations survive saves. Material accounting compares receipts and spending with current stock, keeping reservations, incoming orders and expected salvage separate. Edited test scenes establish their own baseline. The continuing stages are tracked in [the simulator plan](simulator-plan.md).
 
 Use the compact, dispersed, empty-fund, enclosed-storage and established simulation baselines to compare layouts. Each is a protected scene with its own observations; loading one never replaces a playable village save.
+
+### Physical construction supplies
+
+Construction materials live in camp storage, individual storage houses, material-plot output piles and project staging. The materials total includes carried loads. Residents collect up to 12 units per trip; a construction stage starts after its inputs reach the site. Roads speed up hauling, while occupied plots and the river block routes. Residents retain meals, sleep, outside jobs and community work hours. Existing cooking and foraging work covers the expected food deficit before more neighbours join it, leaving other people free to help with projects.
+
+Open **Supplies → Construction materials → Where supplies are** to inspect locations and deliveries. A storage house reserve queues local hauling. Lowering a reserve queues returns; changing a target never transfers goods immediately. Town deliveries and resident pickups unload at camp. Keep room there for incoming orders.
+
+Interrupted loads remain recoverable where they are put down. Cancelled staging and salvage stay at their plot until collected. Storage houses must empty before a resident crew can pack or dismantle them. Blocked access appears in construction and storage details. Save version 4 validates location ownership and cargo; older aggregate fixtures establish located storage once when imported. Protected dev scenes remain separate from saved villages.
+
+The simulator work is ongoing. Production inputs, connected utilities, land properties, maintenance and the shared work forecasts follow in their respective plan stages. The logistics verifier exports real pickup, cargo and night artwork checkpoints under the generated artifacts directory for replay through Dev Tools.

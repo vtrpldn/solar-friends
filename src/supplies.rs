@@ -146,7 +146,7 @@ mod tests {
             .later_completed = [true; crate::progression::LATER_CHAPTERS];
         assert_eq!(game.place("coop", 5, 5), "ok");
         let mut v = game.app.world().resource::<Village>().clone();
-        v.buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut v, 0);
         v.minutes = 360.;
         v.economy.ledger.clear();
         v
@@ -259,7 +259,7 @@ mod tests {
         {
             let mut v = game.app.world_mut().resource_mut::<Village>();
             v.food = 0.;
-            v.wood = 100.;
+            crate::logistics::fixture_stock(&mut v, 0, 100);
             v.water = 100.;
             v.minutes = 540.;
         }

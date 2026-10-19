@@ -1,3 +1,4 @@
+import {drawCarriedMaterials,drawSupplyPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {makeArtPreview} from './dev/art-preview.js';
 import {installGameUI} from './game-ui.js';
@@ -78,6 +79,7 @@ const kinds = {
   streetlight: ["Street light", "Light village paths · needs shared power"],
 };
 const tasks = {
+  haul: "Hauling building supplies",
   visit: "Visiting a village building",
   arrive: "Arriving at our new home",
   sanitation: "Using the ecological toilet",
@@ -488,6 +490,7 @@ function placementValid(kind, x, y) {
   return !(movingBuilding===null?placementReason(state.village,kind,x,y):movePlacementReason(state.village,movingBuilding,x,y));
 }
 function activityLabel(r) {
+  if(r.task==='haul')return r.reason;
   if(r.trip)return tripLabel(r,state.environment.economy.jobs.find(j=>j.id===r.id));
   if(r.task === "sleep")return sleepLabel(r);
   if (r.task === "idle") return idleLabels[residentActivity(r, state.village.minutes)];
@@ -508,7 +511,7 @@ function announceMilestones() {
   previousVillage = state.village;
   for (const event of found) {
     const text = event.kind === "building" ? `${kinds[event.building][0]} ready · A new place for village life.`
-      : event.kind === "building_work" ? event.action==='move'?"Building moved · ready in its new place.":event.action==='salvage'?"Salvage finished · materials returned to storage.":"Demolition finished · the plot is clear."
+      : event.kind === "building_work" ? event.action==='move'?"Building moved · ready in its new place.":event.action==='salvage'?"Salvage finished · recovered materials await collection.":"Demolition finished · the plot is clear."
       : event.kind === "harvest" ? "Harvest gathered · Fresh food for everyone."
       : event.kind === "quest" ? `${quests[event.quest].title} complete · Unlocked ${quests[event.quest].reward}`
       : "A new friendship · Shared time is bringing neighbours closer.";
@@ -599,6 +602,7 @@ function resident(r) {
   }
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
     { base: animations[r.id], idle: idleAnimations[r.id], activities: activityAnimations[r.id] }, animation, p.x, py, RESIDENT_WIDTH * s);
+  if(state.village.logistics?.shipments.some(h=>h.resident===r.id&&h.carrying))drawCarriedMaterials(ctx,p,s,animation.facing,nightAmount(state.village.minutes));
   if (isSelected) {
     ctx.font = `600 ${Math.max(11, 11 * s)}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -685,6 +689,7 @@ function render() {
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
   const objects = [
+    ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
     ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
     ...flora.filter(f=>!state.village.economy.sources.some(site=>site.active&&Math.hypot(f.x-site.x,f.y-site.y)<2.5)).map((f) => ({
       depth: f.x + f.y,

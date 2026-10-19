@@ -96,7 +96,7 @@ pub struct Entry {
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Economy {
-    // Timber remains in Village.wood; stock[0] must stay zero.
+    // Validated summary of located ownership. Timber is mirrored in Village.wood; stock[0] stays zero.
     pub stock: Bundle,
     pub money: i64,
     pub ledger: Vec<Entry>,
@@ -291,6 +291,9 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
     })
 }
 pub fn quantity(v: &Village, i: usize) -> u32 {
+    if v.logistics.is_some() {
+        return crate::logistics::total(v, i);
+    }
     if i == 0 {
         v.wood.floor() as u32
     } else {
@@ -298,6 +301,13 @@ pub fn quantity(v: &Village, i: usize) -> u32 {
     }
 }
 pub(crate) fn add(v: &mut Village, i: usize, n: u32) {
+    if v.logistics.is_some() {
+        assert!(
+            crate::logistics::receive(v, crate::logistics::Owner::Camp, i, n),
+            "receiving area full"
+        );
+        return;
+    }
     crate::simulation::material_change(v, i, n, true);
     if i == 0 {
         v.wood += n as f32
@@ -306,6 +316,10 @@ pub(crate) fn add(v: &mut Village, i: usize, n: u32) {
     }
 }
 pub(crate) fn remove(v: &mut Village, i: usize, n: u32) {
+    if v.logistics.is_some() {
+        crate::logistics::spend(v, None, i, n);
+        return;
+    }
     crate::simulation::material_change(v, i, n, false);
     if i == 0 {
         v.wood -= n as f32
@@ -317,6 +331,9 @@ pub fn reserved(v: &Village, i: usize) -> u32 {
     v.economy.projects.iter().map(|p| p.reserved[i]).sum()
 }
 pub fn free(v: &Village, i: usize) -> u32 {
+    if v.logistics.is_some() {
+        return crate::logistics::free(v, i);
+    }
     quantity(v, i).saturating_sub(reserved(v, i))
 }
 pub fn incoming(v: &Village, i: usize) -> u32 {
@@ -391,6 +408,10 @@ pub fn plan(v: &mut Village, id: usize) {
     rebalance(v);
 }
 pub fn rebalance(v: &mut Village) {
+    if v.logistics.is_some() {
+        crate::logistics::rebalance(v);
+        return;
+    }
     let mut available = std::array::from_fn::<_, COUNT, _>(|i| quantity(v, i));
     for p in &mut v.economy.projects {
         p.reserved = [0; COUNT];
@@ -434,7 +455,14 @@ pub fn can_build(v: &Village, id: usize) -> bool {
         return false;
     };
     let stages = recipe(&b.kind, &p.recipe).unwrap();
-    !p.paused && p.stage < stages.len() && (p.committed || p.reserved == stages[p.stage].items)
+    !p.paused
+        && p.stage < stages.len()
+        && (p.committed
+            || if v.logistics.is_some() {
+                crate::logistics::project_ready(v, id, stages[p.stage].items)
+            } else {
+                p.reserved == stages[p.stage].items
+            })
 }
 pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
     if !can_build(v, id) {
@@ -452,7 +480,11 @@ pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
     let current = p.stage;
     if !p.committed {
         for (i, &n) in stages[current].items.iter().enumerate() {
-            remove(v, i, n);
+            if v.logistics.is_some() {
+                crate::logistics::spend(v, Some(crate::logistics::Owner::Site(id)), i, n);
+            } else {
+                remove(v, i, n);
+            }
             v.economy.projects[index].consumed[i] += n;
         }
         v.economy.projects[index].reserved = [0; COUNT];
@@ -509,6 +541,31 @@ fn preparation(v: &Village, i: usize) -> Option<(Bundle, u32)> {
         _ => None,
     }
 }
+fn preparation_space(v: &Village, inputs: Bundle, output: u32) -> bool {
+    if v.logistics.is_none() {
+        return true;
+    }
+    let s = v.logistics.as_ref().unwrap();
+    let camp = s
+        .stores
+        .iter()
+        .find(|p| p.owner == crate::logistics::Owner::Camp)
+        .unwrap();
+    let freed: u32 = (0..COUNT)
+        .map(|i| {
+            inputs[i].min(
+                camp.items[i].saturating_sub(
+                    s.shipments
+                        .iter()
+                        .filter(|h| !h.carrying && h.from == camp.id && h.material == i)
+                        .map(|h| h.amount)
+                        .sum(),
+                ),
+            )
+        })
+        .sum();
+    crate::logistics::room(v, crate::logistics::Owner::Camp) + freed >= output
+}
 pub fn local_job(v: &Village) -> Option<(String, usize)> {
     let needs = shortage(v);
     for (index, _) in v.economy.sources.iter().enumerate() {
@@ -518,8 +575,9 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
     }
     for i in [5, 6, 7, 8] {
         if needs[i] > 0
-            && let Some((inputs, _)) = preparation(v, i)
+            && let Some((inputs, output)) = preparation(v, i)
             && (0..COUNT).all(|j| free(v, j) >= inputs[j])
+            && preparation_space(v, inputs, output)
         {
             return Some(("prepare".into(), i));
         }
@@ -539,6 +597,16 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
     }
     for (index, _) in v.economy.sources.iter().enumerate() {
         if crate::resource_sites::wanted(v, index, &raw) {
+            if v.logistics.is_some()
+                && crate::logistics::source_space(v, index)
+                    < if v.economy.sources[index].material == 0 {
+                        8
+                    } else {
+                        1
+                    }
+            {
+                continue;
+            }
             return Some(("source".into(), index));
         }
     }
@@ -556,16 +624,36 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
             return;
         }
         let i = v.economy.sources[index].material;
-        let n = (if i == 0 { 8 } else { 4 })
+        let mut n = (if i == 0 { 8 } else { 4 })
             .min(v.economy.sources[index].remaining.floor() as u32)
             .min(capacity(v) - storage(v));
+        if v.logistics.is_some() {
+            n = n.min(crate::logistics::source_space(v, index));
+        }
+        if n == 0 {
+            return;
+        }
+        if i == 0 && n < 8 {
+            return;
+        }
         crate::resource_sites::harvested(v, index, n);
-        add(v, i, n);
+        if v.logistics.is_some() {
+            assert!(crate::logistics::receive(
+                v,
+                crate::logistics::Owner::Source(index),
+                i,
+                n
+            ));
+        } else {
+            add(v, i, n);
+        }
         if i == 0 {
             v.progress.timber += n;
         }
     } else if let Some((inputs, yield_)) = preparation(v, index) {
-        if storage(v) - inputs.iter().sum::<u32>() + yield_ > capacity(v) {
+        if storage(v) - inputs.iter().sum::<u32>() + yield_ > capacity(v)
+            || !preparation_space(v, inputs, yield_)
+        {
             return;
         }
         for (i, &n) in inputs.iter().enumerate() {
@@ -596,7 +684,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         event(
             v,
             format!(
-                "Town delivery {} is here. Supplies are ready for our projects.",
+                "Town delivery {} is at camp. Residents will bring supplies to our projects.",
                 id + 1
             ),
         );
@@ -616,6 +704,11 @@ pub fn quote(v: &Village, items: Bundle) -> Result<i64, String> {
     quote_with_fee(v, items, 6000)
 }
 fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
+    if v.logistics.is_some()
+        && items.iter().sum::<u32>() > crate::logistics::room(v, crate::logistics::Owner::Camp)
+    {
+        return Err("Make room at the arrival store. Haul supplies to a storage house or use existing materials before ordering more.".into());
+    }
     if storage(v) + items.iter().sum::<u32>() > capacity(v) {
         return Err(
             "There is not enough receiving space. Finish a project or use stored materials.".into(),
@@ -635,12 +728,12 @@ fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     Ok(total)
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"stored":quantity(v,i),"reserved":reserved(v,i),"available":free(v,i),"incoming":incoming(v,i)})).collect();
+    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i),"available":free(v,i),"incoming":incoming(v,i)})).collect();
     let projects:Vec<_>=v.economy.projects.iter().filter_map(|p|{
         let b=v.buildings.iter().find(|b|b.id==p.building)?;if b.progress>=100.{return None;}
         let stages=recipe(&b.kind,&p.recipe)?;let s=stages.get(p.stage)?;
         let missing:Bundle=std::array::from_fn(|i|if p.committed{0}else{s.items[i].saturating_sub(p.reserved[i])});
-        Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
+        Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"on_site":if v.logistics.is_some(){crate::logistics::project_items(v,b.id)}else{[0;COUNT]},"hauling_blocker":v.logistics.as_ref().and_then(|s|s.stores.iter().find(|p|p.owner==crate::logistics::Owner::Site(b.id))).and_then(|p|p.blocker.as_deref()),"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
     }).collect();
     let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","banana_treatment","biodigester","warehouse"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
     let preparation: Vec<_> = [5, 6, 7, 8]
@@ -812,6 +905,9 @@ pub(crate) fn place_order(
     } else {
         quote(v, items)
     }?;
+    let Some(next_order) = v.economy.next_order.checked_add(1) else {
+        return Err("Order identity limit reached.".into());
+    };
     if v.economy.orders.len() >= 100 {
         let keep = v
             .economy
@@ -833,7 +929,7 @@ pub(crate) fn place_order(
         });
     }
     let id = v.economy.next_order;
-    v.economy.next_order += 1;
+    v.economy.next_order = next_order;
     let dispatch = v.minutes + if pickup_by.is_some() { 0. } else { 120. };
     let arrival = if pickup_by.is_some() {
         v.minutes + 120.
@@ -947,7 +1043,10 @@ impl Game {
         if v.economy.exchange_day == day {
             return "Our neighbour's spare fittings are already exchanged today.".into();
         }
-        if v.food < 40. || storage(&v) + 2 > capacity(&v) {
+        if v.food < 40.
+            || storage(&v) + 2 > capacity(&v)
+            || crate::logistics::room(&v, crate::logistics::Owner::Camp) < 2
+        {
             return "The neighbour asks for four surplus ingredients; keep 36 for the household and room for two fittings.".into();
         }
         v.food -= 4.;
@@ -1104,16 +1203,23 @@ mod tests {
         assert_eq!(g.place("home", 12, 8), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.economy.stock[2] = 6;
+            crate::logistics::fixture_stock(&mut v, 2, 6);
             rebalance(&mut v);
             assert_eq!(reserved(&v, 2), 6);
-            assert!(can_build(&v, 0));
+            assert_eq!(v.economy.projects[0].reserved[2], 6);
+            assert!(!can_build(&v, 0));
             assert!(!can_build(&v, 1));
         }
         assert_eq!(g.configure_project(1, 3, false, "standard"), "ok");
-        assert!(can_build(g.app.world().resource::<Village>(), 1));
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.projects[1].reserved[2],
+            6
+        );
         assert_eq!(g.configure_project(1, 3, true, "standard"), "ok");
-        assert!(can_build(g.app.world().resource::<Village>(), 0));
+        assert_eq!(
+            g.app.world().resource::<Village>().economy.projects[0].reserved[2],
+            6
+        );
         let before = g.app.world().resource::<Village>().wood;
         assert_eq!(g.cancel_project(0), "ok");
         assert_eq!(g.app.world().resource::<Village>().wood, before);
@@ -1139,6 +1245,7 @@ mod tests {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let earth = quantity(&v, 2);
         let wood = v.wood;
+        crate::logistics::fixture_stage(&mut v, 0);
         assert!(!build(&mut v, 0, 1.));
         assert_eq!(quantity(&v, 2), earth - 4);
         assert_eq!(v.wood, wood - 4.);
@@ -1208,7 +1315,7 @@ mod tests {
         assert_eq!(g.place_source(2, 5, 5), "ok");
         assert_eq!(g.place("garden", 8, 8), "ok");
         v = g.app.world_mut().resource_mut::<Village>();
-        v.economy.stock[2] = 0;
+        crate::logistics::fixture_stock(&mut v, 2, 0);
         rebalance(&mut v);
         assert_eq!(local_job(&v), Some(("source".into(), 0)));
         let deposit = v.economy.sources[0].remaining;
@@ -1228,12 +1335,12 @@ mod tests {
         assert_eq!(g.place("workshop", 8, 8), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         assert!(preparation(&v, 7).is_none());
-        v.buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut v, 0);
         assert_eq!(preparation(&v, 7), Some((bundle(&[(2, 2), (0, 1)]), 2)));
         assert_eq!(preparation(&v, 8), Some((bundle(&[(4, 1), (3, 1)]), 2)));
         assert_eq!(g.place("home", 12, 8), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.economy.stock[7] = 0;
+        crate::logistics::fixture_stock(&mut v, 7, 0);
         rebalance(&mut v);
         assert_eq!(local_job(&v), Some(("prepare".into(), 7)));
         let earth = quantity(&v, 2);
@@ -1282,9 +1389,11 @@ mod tests {
         assert_eq!(g.snapshot(), before);
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.economy.stock = [0; COUNT];
-            v.wood = 0.;
-            v.economy.stock[12] = 600;
+            for i in 0..COUNT {
+                crate::logistics::fixture_stock(&mut v, i, 0);
+            }
+            crate::logistics::fixture_stock(&mut v, 0, 0);
+            crate::logistics::fixture_stock(&mut v, 12, 600);
             v.economy.money = 0;
             rebalance(&mut v);
         }
@@ -1341,7 +1450,7 @@ mod tests {
             query
                 .iter(g.app.world())
                 .filter(|r| r.id < 2)
-                .all(|r| r.task == "build")
+                .all(|r| r.task == "haul")
         );
         g.app.world_mut().resource_mut::<Village>().minutes = 780.;
         g.tick(0.25);
@@ -1358,10 +1467,10 @@ mod tests {
             .completed = [true; 4];
         assert_eq!(g.place("workshop", 8, 8), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut v, 0);
         v.economy.sources[0].growth = 1.;
         v.economy.sources[0].remaining = 32.;
-        v.wood = 0.;
+        crate::logistics::fixture_stock(&mut v, 0, 0);
         assert_eq!(shortage(&v)[0], 8);
         assert_eq!(local_job(&v), Some(("source".into(), 0)));
         finish_job(&mut v, "source", 0);
@@ -1371,7 +1480,7 @@ mod tests {
         v.progress.tool_uses = 12;
         assert_eq!(shortage(&v)[0], 0);
         v.progress.tool_uses = 0;
-        v.wood = 0.;
+        crate::logistics::fixture_stock(&mut v, 0, 0);
         v.progress.use_tools = false;
         assert_eq!(shortage(&v)[0], 0);
         assert!(local_job(&v).is_none());
@@ -1421,13 +1530,15 @@ mod infrastructure_tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             assert_eq!(capacity(&v), 900);
-            v.wood = 700.;
-            v.economy.stock = [0; COUNT];
+            for i in 0..COUNT {
+                crate::logistics::fixture_stock(&mut v, i, 0);
+            }
+            crate::logistics::fixture_stock(&mut v, 0, 700);
         }
         let mut restored = Game::new();
         assert!(restored.restore(&g.snapshot()));
         assert!(!g.remove_sandbox_building(0));
-        g.app.world_mut().resource_mut::<Village>().wood = 500.;
+        crate::logistics::fixture_stock(&mut g.app.world_mut().resource_mut::<Village>(), 0, 500);
         assert!(g.remove_sandbox_building(0));
         assert_eq!(capacity(g.app.world().resource::<Village>()), 600);
     }

@@ -1,3 +1,4 @@
+import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -25,7 +26,7 @@ for(const [kind,art]of Object.entries(allBuildingArt)){
     assert.deepEqual(road,foundation,'Road and occupied plot must share pixels at every camera zoom');
   }
   if(kind.startsWith('home-')||kind.startsWith('adobe-')||kind==='hydro')continue;
-  assert(game.restore(JSON.stringify(base)));assert.equal(game.place(kind,8,8),'ok');
+  assert(game.restore(JSON.stringify(resetMaterialLocations(base))));assert.equal(game.place(kind,8,8),'ok');
   const saved=game.snapshot(),v=JSON.parse(saved).village;
   for(let x=Math.ceil(f.minX);x<f.maxX;x++)for(let y=Math.ceil(f.minY);y<f.maxY;y++){
     assert(occupies(v.buildings[0],x,y));
@@ -34,16 +35,16 @@ for(const [kind,art]of Object.entries(allBuildingArt)){
   }
   assert.equal(game.toggle_road(rx,ry),'ok',`${kind}: adjacent road must meet the foundation`);
   assert(game.restore(game.snapshot()));
-  assert(game.restore(JSON.stringify(base)));
+  assert(game.restore(JSON.stringify(resetMaterialLocations(base))));
   assert.equal(game.toggle_road(8,8),'ok');
   assert.notEqual(game.place(kind,8,8),'ok','Buildings must not cover existing roads');
   assert.equal(JSON.parse(game.snapshot()).village.wood,100);
-  assert(game.restore(JSON.stringify(base)));
+  assert(game.restore(JSON.stringify(resetMaterialLocations(base))));
   assert.equal(game.toggle_road(rx,ry),'ok');
   assert.equal(game.place(kind,8,8),'ok','A new foundation must fit directly beside an existing road');
 }
 // A legacy road below a building can still be loaded and removed safely.
-assert(game.restore(JSON.stringify(base)));assert.equal(game.place('home',8,8),'ok');
+assert(game.restore(JSON.stringify(resetMaterialLocations(base))));assert.equal(game.place('home',8,8),'ok');
 const legacy=JSON.parse(game.snapshot());legacy.village.roads=[[7,8]];
 assert(game.restore(JSON.stringify(legacy)));assert.equal(game.toggle_road(7,8),'ok');
 game.free();

@@ -215,7 +215,11 @@ mod tests {
     #[test]
     fn tightly_packed_buildings_do_not_fall_back_to_a_shared_point() {
         let mut game = Game::new();
-        game.app.world_mut().resource_mut::<Village>().wood = 1000.;
+        crate::logistics::fixture_stock(
+            &mut game.app.world_mut().resource_mut::<Village>(),
+            0,
+            1000,
+        );
         for x in (2..=10).step_by(2) {
             for y in (2..=10).step_by(2) {
                 assert_eq!(game.place("garden", x, y), "ok");
@@ -245,6 +249,10 @@ mod tests {
         assert_eq!(game.place("garden", 10, 6), "ok");
         let mut v = game.app.world().resource::<Village>().clone();
         for task in ["build", "garden"] {
+            if task == "build" {
+                crate::logistics::fixture_stage(&mut v, 0);
+                crate::logistics::fixture_stage(&mut v, 1);
+            }
             if task == "garden" {
                 for b in &mut v.buildings {
                     b.progress = 100.;
@@ -292,7 +300,7 @@ mod tests {
     fn separate_work_spots_preserve_targets_and_older_saves() {
         let mut game = Game::new();
         assert_eq!(game.place("garden", 6, 6), "ok");
-        game.app.world_mut().resource_mut::<Village>().buildings[0].progress = 100.;
+        crate::logistics::fixture_finish(&mut game.app.world_mut().resource_mut::<Village>(), 0);
         let v = game.app.world().resource::<Village>().clone();
         let mut q = game.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(game.app.world_mut()) {

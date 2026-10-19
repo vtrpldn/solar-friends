@@ -1,3 +1,4 @@
+import {writeFileSync} from 'node:fs';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -7,16 +8,23 @@ import {sourceKinds} from '../web/resource-sites.js';
 await init({module_or_path:await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot()),output=process.argv[2]||'artifacts/story';
 if(output)await fs.mkdir(output,{recursive:true});
+await fs.mkdir('artifacts/logistics',{recursive:true});
 g.set_outside_work(true);
 function until(test,label,limit=24000){
  for(let i=0;i<limit;i++){if(test(snap()))return;g.tick(.25);}
- const s=snap(),chapter=s.village.progress.tracked;
+ const s=snap(),chapter=s.village.progress.tracked;writeFileSync('artifacts/logistics/stalled-story.json',g.snapshot());
  throw new Error(`Timed out: ${label} on day ${1+Math.floor(s.village.minutes/1440)}. ${JSON.stringify({chapter,goals:quests[chapter].objectives(s.village).filter(o=>!o.done),stock:s.environment.economy.shortage,residents:s.residents.map(r=>[r.name,r.task,r.reason]),progress:s.village.progress})}`);
 }
-function location(kind){const v=snap().village;for(let y=5;y<=25;y++)for(let x=5;x<=26;x++)if(!placementReason(v,kind,x,y))return [x,y];throw Error(`No space for ${kind}`);}
+function location(kind){
+ const v=snap().village;
+ // Leave access corridors between plots; continuous first-fit rows create walls.
+ if(kind!=='hydro')for(const y of [5,9,13,17,21,25])for(const x of [5,9,13,17,21])if(!placementReason(v,kind,x,y))return [x,y];
+ if(kind==='hydro')for(let y=5;y<=25;y++)for(let x=23;x<=26;x++)if(!placementReason(v,kind,x,y))return [x,y];
+ throw Error(`No accessible planned plot for ${kind}`);
+}
 function purchase(items){if(!items.some(Boolean))return;until(s=>s.environment.economy.money>=items.reduce((n,q,i)=>n+q*s.environment.economy.materials[i].price,6000),'purchase funds');assert.equal(g.order_supplies(JSON.stringify(items)),'ok');}
-function build(kind,recipe='standard',local=false){
- const [x,y]=location(kind);assert.equal(g.place_with_recipe(kind,x,y,recipe),'ok',`${kind} placement`);
+function build(kind,recipe='standard',local=false,site=null){
+ const [x,y]=site||location(kind);assert.equal(g.place_with_recipe(kind,x,y,recipe),'ok',`${kind} placement`);
  const id=snap().village.buildings.at(-1).id;
  const missing=snap().environment.economy.shortage;
  if(local){for(const i of [5,6,7,8])missing[i]=0;missing[0]+=12;missing[2]+=20;missing[4]+=6;}
@@ -35,7 +43,8 @@ async function complete(chapter){
  if(chapter<quests.length-2)assert(!g.track_quest(chapter+2),'cannot skip a chapter');
 }
 until(s=>s.village.arrived,'arrival');
-for(const k of ['well','home','garden','kitchen','home'])build(k);
+// Keep daily food and shelter near the arrival store, then expand along corridors.
+for(const [kind,x,y] of [['well',6,10],['home',8,8],['garden',13,10],['kitchen',10,10],['home',12,7]])build(kind,'standard',false,[x,y]);
 await complete(0);
 build('grove');const timber=source(0),bamboo=source(1);await complete(1);
 build('square');

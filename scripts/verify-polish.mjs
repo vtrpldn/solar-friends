@@ -1,3 +1,4 @@
+import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import init, { Game } from '../web/pkg/solar_friends.js';
@@ -8,7 +9,7 @@ const fixture = JSON.parse(game.snapshot());
 fixture.village.progress.completed = [true, true, true, true];
 fixture.village.progress.later_completed.fill(true);
 fixture.village.wood = 100;
-assert.equal(game.restore(JSON.stringify(fixture)), true);
+assert.equal(game.restore(JSON.stringify(resetMaterialLocations(fixture))), true);
 assert.equal(game.place('home', 8, 8), 'ok');
 assert.equal(game.place('square', 16, 16), 'ok');
 const base = game.snapshot(), village = JSON.parse(base).village;
