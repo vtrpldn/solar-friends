@@ -2,6 +2,11 @@ import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 import {makeArtPreview} from './art-preview.js';
 export const scenarios = [
+  {id:'sim-compact',name:'Simulation baseline · compact',detail:'Homes, food and storage grouped together. Compare observed travel with the dispersed layout using the same starting supplies and seed.'},
+  {id:'sim-spread',name:'Simulation baseline · dispersed',detail:'The same homes and services spread across the property. A paired baseline for transport, travel budgets and later completion forecasts.'},
+  {id:'sim-poor',name:'Simulation baseline · empty funds',detail:'Compact services, no construction materials or money, and Bento’s outside job enabled at 09:00. Test a recovery route without selling household food.'},
+  {id:'sim-blocked',name:'Simulation baseline · enclosed storage',detail:'A warehouse enclosed by occupied plots. This fixture establishes the blocked-access case for the routing and hauling stage.'},
+  {id:'sim-balanced',name:'Simulation baseline · established',detail:'Two homes, varied food, storage, rainwater and solar power. Observe multiple days of time use and material accounts before adding logistics.'},
   {id:'banana',name:'Banana sewage treatment',detail:'A sealed banana bed beside our sanitation buildings, eight accumulated toilet waste and digestion paused. Compare automatic treatment with biogas in Water & waste; saved villages stay protected.'},
   {id:'art',name:'All building artwork',detail:'Every building and house variation, including adobe homes, river power, sanitation and storage. Separate completed plots, normal game scale and renderer; saved villages stay protected.'},
   {id:'art-night',name:'All building artwork at night',detail:'The complete building gallery at 21:00, with rooftop and shared power, matching night sprites and interior lighting.'},
@@ -34,6 +39,7 @@ export function makeScenario(id, fresh, established) {
   if(id==='art'||id==='art-night')return makeArtPreview(fresh,established,{night:id==='art-night'});
   const state = id==='grid'?makeArtPreview(fresh,established):structuredClone(established), v = state.village;
   v.minutes = 1440 + 600;
+  v.simulation=structuredClone(fresh.village.simulation);v.simulation.materials=null;
   v.wood = 110; v.food = 100; v.water = 100; v.meals = 10;
   v.supplies.eggs = 0;
   v.situations = { day: 1, cooking: [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], active: null, resolved_count: 0 };
@@ -42,6 +48,22 @@ export function makeScenario(id, fresh, established) {
     r.reason = 'Ready for a development scenario.'; r.remaining = 0;
     r.requested = false; r.visit_building = null; r.last_meal_slot = 3;
     r.target_x = r.x; r.target_y = r.y;
+  }
+  if(id.startsWith('sim-')) {
+    const compact=[['home',9,9],['home',12,9],['warehouse',9,13],['garden',12,13],['kitchen',15,13],['well',15,9]];
+    const dispersed=[['home',4,5],['home',12,5],['warehouse',5,19],['garden',19,19],['kitchen',19,6],['well',5,10]];
+    const balanced=[['home',6,8],['home',10,8],['warehouse',18,13],['garden',14,17],['greenhouse',10,13],['kitchen',18,8],['well',18,17],['coop',6,13],['compost',6,17],['grove',10,17],['solar_farm',18,22],['streetlight',14,21]];
+    const enclosed=[['warehouse',12,12],...[[10,10],[12,10],[14,10],[10,12],[14,12],[10,14],[12,14],[14,14]].map(([x,y])=>['home',x,y])];
+    const layout=id==='sim-spread'?dispersed:id==='sim-balanced'?balanced:id==='sim-blocked'?enclosed:compact;
+    v.economy=structuredClone(fresh.village.economy);v.economy.next_building=layout.length;
+    v.building_jobs=[];v.roads=[];v.circular=structuredClone(fresh.village.circular);
+    v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress.gathering_until=0;v.progress.invited=0;v.progress.attended=0;
+    v.buildings=layout.map(([kind,x,y],id)=>({...structuredClone(established.village.buildings[0]),id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,poultry:{remaining:0}}));
+    v.economy.projects=v.buildings.map(b=>({building:b.id,recipe:'standard',appearance:b.kind==='home'?b.id%4:0,priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===b.kind).standard.length,labour:0,committed:false,reserved:Array(15).fill(0),consumed:Array(15).fill(0)}));
+    v.power={stored:id==='sim-balanced'?30:0,disabled:[]};v.food=36;v.meals=10;v.water=80;v.minutes=1440+540;
+    for(const b of v.buildings)if(['garden','greenhouse'].includes(b.kind))Object.assign(b.crop,{planted:true,kind:'lettuce',next_kind:'lettuce',growth:90,moisture:180,nursery:0,harvests:0});
+    if(id==='sim-poor'){v.economy.money=0;v.economy.ledger=[];v.economy.stock.fill(0);v.wood=0;v.economy.outside_jobs[1]=true;}
+    for(const r of state.residents)Object.assign(r,{x:8+r.id*1.2,y:17,target_x:8+r.id*1.2,target_y:17,activity_building:null,activity_material:null,trip:null,last_sanitation_day:-1});
   }
   if (id.startsWith('economy')) {
     v.power={stored:0,disabled:[]};

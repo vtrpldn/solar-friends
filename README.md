@@ -287,3 +287,9 @@ Build a **Banana treatment bed** under **Build → Water & waste**. Story unlock
 A completed 2×2 bed treats up to six sealed toilet waste per game day without power. Water & waste shows lifetime treatment and lets you pause it to reserve waste for the biodigester. It produces no drinking water, irrigation water or food. Moving, demolishing or salvaging closes the bed while residents work.
 
 The simplified game cycle is inspired by the [Emater-DF banana evapotranspiration basin](https://biblioteca.emater.df.gov.br/jspui/handle/123456789/128). Day/night sprites and their prompts are recorded in `assets/art-direction/banana-sanitation-prompts.json`; the artwork preview includes both. The protected `banana` development scenario starts with accumulated waste and digestion paused.
+
+### Simulation foundations
+
+Dev Tools records observed time for each neighbour: travel, village work, outside work, meals, rest, social time, leisure and sleep. Leisure walks count as leisure. Eight days of observations survive saves. Material accounting compares receipts and spending with current stock, keeping reservations, incoming orders and expected salvage separate. Edited test scenes establish their own baseline. Physical inventories and hauling remain the next implementation stage in [the simulator plan](simulator-plan.md).
+
+Use the compact, dispersed, empty-fund, enclosed-storage and established simulation baselines to compare layouts. Each is a protected scene with its own observations; loading one never replaces a playable village save.

@@ -99,7 +99,7 @@ impl Game {
                 "destination": [next.target_x, next.target_y]}, "alternatives": alternatives})
             })
             .collect();
-        serde_json::json!({"minute": v.minutes, "residents": residents,
+        serde_json::json!({"minute": v.minutes, "simulation": simulation::view(&v), "residents": residents,
             "history": self.app.world().resource::<Diagnostics>().history})
         .to_string()
     }

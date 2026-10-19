@@ -16,6 +16,7 @@ mod power;
 mod progression;
 mod resource_sites;
 mod sanitation;
+mod simulation;
 mod situations;
 mod sleep;
 mod spacing;
@@ -110,6 +111,8 @@ pub struct Building {
 pub struct Village {
     #[serde(default)]
     pub mode: modes::Mode,
+    #[serde(default)]
+    pub simulation: simulation::State,
     pub version: u32,
     pub map_size: i32,
     pub minutes: f32,
@@ -629,6 +632,17 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     modes::replenish(&mut v);
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    let activities: Vec<_> = people
+        .iter()
+        .map(|r| (r.id, simulation::activity(r)))
+        .collect();
+    let until = v.minutes;
+    simulation::record_time(
+        &mut v.simulation,
+        f64::from(before),
+        f64::from(until),
+        &activities,
+    );
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     economy::advance(&mut v, dt * MINUTES_PER_SECOND);
     power::advance(&mut v, dt * MINUTES_PER_SECOND);
@@ -936,7 +950,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     v.progress.compost += 1;
                 }
                 "craft" if economy::free(&v, 0) >= 8 && v.progress.tool_uses <= 24 => {
-                    v.wood -= 8.;
+                    economy::remove(&mut v, 0, 8);
                     v.progress.tool_uses += 12;
                     v.progress.tools_crafted += 1;
                 }
@@ -1009,6 +1023,7 @@ impl Game {
         app.insert_resource(Step::default())
             .insert_resource(Village {
                 mode: modes::Mode::Story,
+                simulation: simulation::State::default(),
                 version: 3,
                 map_size: MAP_SIZE,
                 minutes: 480.,
@@ -1070,6 +1085,7 @@ impl Game {
                 sleep: sleep::Routine::default(),
             });
         }
+        simulation::start_materials(&mut app.world_mut().resource_mut::<Village>());
         Self { app }
     }
     pub fn tick(&mut self, seconds: f32) {
@@ -1445,7 +1461,8 @@ impl Game {
         {
             return false;
         }
-        if !building_work::valid(v)
+        if !simulation::valid(v)
+            || !building_work::valid(v)
             || !supplies::valid(v)
             || !power::valid(v)
             || !economy::valid(v)
@@ -1550,6 +1567,7 @@ impl Game {
             self.app.world_mut().spawn(r);
         }
         save.village.map_size = MAP_SIZE;
+        simulation::start_materials(&mut save.village);
         progression::update(&mut save.village);
         self.app.insert_resource(save.village);
         self.app
