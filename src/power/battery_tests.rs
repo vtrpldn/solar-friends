@@ -307,6 +307,16 @@ fn an_actual_carrier_moves_the_owned_bank_and_a_needs_break_puts_it_down_without
         .unwrap()
         .carrier
         .unwrap();
+    {
+        let mut v = g.app.world().resource::<Village>().clone();
+        v.minutes = (v.minutes / 1440.).floor() * 1440. + 600.;
+        let mut query = g.app.world_mut().query::<&Resident>();
+        let r = query.iter(g.app.world()).find(|r| r.id == carrier).unwrap();
+        assert_eq!(
+            town_pickup::blocker(&v, r).as_deref(),
+            Some("Finish carrying the battery before driving.")
+        );
+    }
     assert_eq!(
         batteries::bank(g.app.world().resource::<Village>(), bank)
             .unwrap()

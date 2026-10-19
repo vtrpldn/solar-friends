@@ -11,9 +11,9 @@ const wasm=await readFile(new URL('solar_friends_bg.wasm',pkg)),wasm_sha256=crea
 await init({module_or_path:wasm});
 const output='artifacts/utility-balance';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),line=(s,id)=>s.village.pipes.lines.find(p=>p.id===id);
-const raw=await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story/solar-complete.json','utf8');
+const raw=await readFile(process.env.SOLAR_STORY_CHECKPOINT||'artifacts/story-optional/solar-complete.json','utf8');
 const connected=new Game(),manual=new Game();assert(connected.restore(raw));assert(manual.restore(raw));
-assert.equal(snap(connected).village.version,26);assert(snap(connected).village.progress.later_completed.every(Boolean),'Use the earned completed Story village');
+assert.equal(snap(connected).village.version,27);assert(snap(connected).village.progress.later_completed.every(Boolean),'Use the earned completed Story village');
 function checkpoint(g){
   const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();
   assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));
@@ -41,16 +41,21 @@ function cable(g,to){
 const start=snap(connected),building=kind=>start.village.buildings.find(b=>b.kind===kind).id;
 const routes=[['fresh',building('well'),building('kitchen')],['fresh',building('well'),building('home')],['greywater',building('kitchen'),building('wetland')],['sewage',building('eco_toilet'),building('biodigester')],['irrigation',building('wetland'),building('garden')]];
 const installed=[];
-const continuing=process.env.SOLAR_UTILITY_CONTINUE==='1',results=[];
+const continuing=process.env.SOLAR_UTILITY_CONTINUE==='1',replaying=process.env.SOLAR_UTILITY_REPLAY==='1',results=[];
+assert(!(continuing&&replaying),'Choose continuation or replay, not both');
 let ready;
-if(continuing){
+if(continuing||replaying){
   const prior=JSON.parse(await readFile(output+'/report.json','utf8'));
-  assert.equal(prior.results.length,1,'Continue only after the completed manual comparison');
-  if(prior.wasm_sha256)assert.equal(prior.wasm_sha256,wasm_sha256,'Continue the same game build');
+  assert.equal(prior.results.length,replaying?2:1,'Reuse only the declared earned comparison checkpoints');
+  assert.equal(prior.wasm_sha256,wasm_sha256,'Continue the same game build');
   assert(connected.restore(await readFile(output+'/connected-before.json','utf8')));
   assert(manual.restore(await readFile(output+'/manual-before.json','utf8')));
   ready=snap(connected);assert.equal(snap(manual).village.minutes,ready.village.minutes);
   assert.equal(ready.village.simulation.seed,start.village.simulation.seed);
+  assert.equal(snap(manual).village.simulation.seed,start.village.simulation.seed);
+  assert(Math.abs(ready.village.minutes-start.village.minutes-prior.installation_days*1440)<.001,'Reuse the original earned installation calendar');
+  checkpoint(connected);checkpoint(manual);
+  if(continuing){
   const finished=new Game();assert(finished.restore(await readFile(output+'/manual-after.json','utf8')));checkpoint(finished);
   const before=snap(manual),after=snap(finished),site=s=>s.village.production.sites.find(p=>p.building===building('workshop'));
   assert.equal(after.village.minutes-before.village.minutes,24*1440);
@@ -59,11 +64,12 @@ if(continuing){
   const result=prior.results[0];assert.equal(result.name,'manual');assert.equal(result.days,24);
   assert(result.lowestFood>0&&result.highestFood<=100&&result.residents.every(r=>r.leisure>.5));
   results.push(result);finished.free();
+  }
   for(const [kind,from,to]of routes){
     const p=ready.village.pipes.lines.find(p=>p.plan.kind===kind&&p.plan.from===from&&p.plan.to===to&&p.phase==='active');
     assert(p,'Continue only with all five actually installed liquid routes');installed.push({kind,id:p.id});
   }
-  console.log('Continuing connected comparison from the earned paid installation; manual results and native accounts rechecked.');
+  console.log(replaying?'Replaying both comparisons from the same-build earned paid installation; exact saves and native accounts rechecked.':'Continuing connected comparison from the earned paid installation; manual results and native accounts rechecked.');
 }else{
   for(const [kind,from,to]of routes){
     const quote=JSON.parse(connected.water_connection_quote(kind,from,to));assert(quote.allowed,quote.reason);
@@ -87,18 +93,23 @@ for(const [name,g]of (continuing?[['connected',connected]]:[['manual',manual],['
   const before=snap(g),counts=before.residents.map(()=>({awake:0,work:0,leisure:0}));
   assert.equal(g.set_production_target(7,before.village.economy.stock[7]+2),'ok');
   const outputBefore=before.village.production.accounting.outputs[7],energyBefore=before.village.production.sites.find(p=>p.building===building('workshop')).energy_used;
-  let lowestFood=Infinity,highestFood=0,peakHunger=0;
+  let lowestFood=Infinity,highestFood=0,lowestBasicFood=Infinity,highestBasicFood=0,peakHunger=0,recordedLowBasic=false;
   for(let tick=0;tick<24*1920;tick++){
-    g.tick(.25);if(tick%20)continue;const s=snap(g),v=s.village;const food=v.food+v.meals;
+    g.tick(.25);if(tick%20)continue;const s=snap(g),v=s.village,basic=v.food+v.meals;
+    // The native eater also uses milk and honey. Eggs need cooking, and
+    // committed pot ingredients are not ready food. Match the seasonal check.
+    const food=basic+s.environment.economy.materials[25].stored+s.environment.economy.materials[26].stored;
     lowestFood=Math.min(lowestFood,food);highestFood=Math.max(highestFood,food);
+    lowestBasicFood=Math.min(lowestBasicFood,basic);highestBasicFood=Math.max(highestBasicFood,basic);
+    if(basic===0&&!recordedLowBasic){recordedLowBasic=true;writeFileSync(output+'/'+name+'-low-basic.json',g.snapshot());}
     for(const r of s.residents){const c=counts[r.id];if(r.task!=='sleep'&&!r.trip)c.awake++;if(!r.trip&&work.has(r.task))c.work++;if(!r.trip&&leisure.has(r.task))c.leisure++;
       peakHunger=Math.max(peakHunger,r.hunger);assert(r.hunger<95&&r.energy>20,'The established village must retain food and rest');}
     if(tick%1920===0){buyServiceParts(g,s);checkpoint(g);}
   }
   checkpoint(g);const after=snap(g),used=after.village.production.sites.find(p=>p.building===building('workshop')).energy_used-energyBefore;
   await writeFile(output+'/'+name+'-after.json',g.snapshot());
-  results.push({name,from_day:1+Math.floor(before.village.minutes/1440),days:24,fund:after.village.economy.money,lowestFood,highestFood,peakHunger,workshop_energy:used,residents:counts.map(c=>({work:c.work/c.awake,leisure:c.leisure/c.awake})),flow:installed.map(p=>({kind:p.kind,water:line(after,p.id)?.transferred||0}))});
-  await writeFile(output+'/report.json',JSON.stringify({wasm_sha256,continuedFromEarnedInstallation:continuing,installation_days:(ready.village.minutes-start.village.minutes)/1440,installation_spending:start.village.economy.money-ready.village.economy.money,results},null,2));
+  results.push({name,from_day:1+Math.floor(before.village.minutes/1440),days:24,fund:after.village.economy.money,lowestFood,highestFood,lowestBasicFood,highestBasicFood,peakHunger,workshop_energy:used,residents:counts.map(c=>({work:c.work/c.awake,leisure:c.leisure/c.awake})),flow:installed.map(p=>({kind:p.kind,water:line(after,p.id)?.transferred||0}))});
+  await writeFile(output+'/report.json',JSON.stringify({wasm_sha256,foodMeasure:'Ready ingredients, meals, milk and honey; eggs require cooking',continuedFromEarnedInstallation:continuing,replayedFromEarnedInstallation:replaying,installation_days:(ready.village.minutes-start.village.minutes)/1440,installation_spending:start.village.economy.money-ready.village.economy.money,results},null,2));
   console.log(name+': '+JSON.stringify(results.at(-1)));
   assert(after.village.production.accounting.outputs[7]>=outputBefore+2,'Both hand and powered tools finish the requested useful output');
   assert(name==='connected'?used>0:used===0,'Only the attended powered workshop spends operating energy');
@@ -106,5 +117,5 @@ for(const [name,g]of (continuing?[['connected',connected]]:[['manual',manual],['
   for(const c of counts)assert(c.leisure/c.awake>.5,'The successful village must leave each resident most waking time for themselves');
   if(name==='connected')for(const p of installed)assert(line(after,p.id).transferred>0,p.kind+' must actually operate through its local powered route');
 }
-await writeFile(output+'/report.json',JSON.stringify({wasm_sha256,continuedFromEarnedInstallation:continuing,installation_days:(ready.village.minutes-start.village.minutes)/1440,installation_spending:start.village.economy.money-ready.village.economy.money,results},null,2));
+await writeFile(output+'/report.json',JSON.stringify({wasm_sha256,foodMeasure:'Ready ingredients, meals, milk and honey; eggs require cooking',continuedFromEarnedInstallation:continuing,replayedFromEarnedInstallation:replaying,installation_days:(ready.village.minutes-start.village.minutes)/1440,installation_spending:start.village.economy.money-ready.village.economy.money,results},null,2));
 connected.free();manual.free();console.log('PASS: earned paid utility installation and a 24-day manual/connected comparison preserve all material, energy and liquid accounts, exact saves, useful production, healthy reserves and resident leisure.');

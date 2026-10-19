@@ -1,0 +1,51 @@
+{
+  "minutes": 184917.75,
+  "ingredients": 0,
+  "meals": 0,
+  "milk": 4,
+  "honey": 9,
+  "residents": [
+    {
+      "name": "Iara",
+      "hunger": 6.174989223480225,
+      "task": "haul",
+      "reason": "Collecting 2 fodder for a local delivery."
+    },
+    {
+      "name": "Bento",
+      "hunger": 2.9575021266937256,
+      "task": "socialize",
+      "reason": "There is time to catch up with my neighbours."
+    },
+    {
+      "name": "Luz",
+      "hunger": 3.445002555847168,
+      "task": "sanitation",
+      "reason": "Taking a private moment at the ecological toilet."
+    },
+    {
+      "name": "Cauã",
+      "hunger": 3.9325029850006104,
+      "task": "sanitation",
+      "reason": "Taking a private moment at the ecological toilet."
+    },
+    {
+      "name": "Nina",
+      "hunger": 3.4775025844573975,
+      "task": "socialize",
+      "reason": "There is time to catch up with my neighbours."
+    }
+  ],
+  "mealRequest": {
+    "resident": "Iara",
+    "answer": "Iara: Happy to help with your request. Continuing the work you asked me to help with.",
+    "material": 25,
+    "store": 652
+  },
+  "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+  "source": "Earned paid-installation connected village replay, with unchanged native engine; no authored inventory or clock",
+  "checkpoint": {
+    "file": "artifacts/utility-balance/first-low-basic.json",
+    "sha256": "2637e215e3babf6d72afffec21ea2b8e43c29995cfb4e6336f643773ee03a04b"
+  }
+}

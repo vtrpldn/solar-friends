@@ -8,7 +8,7 @@ description: Implementation stages for physical resources, production, resident 
 
 Make village planning depend on where resources are, how people spend their time, and how the land and infrastructure change. The player identifies a bottleneck, compares solutions, commits space and resources, observes the result, and adjusts. Residents retain meals, sleep, friendships, optional outside jobs, and hobbies.
 
-Implementation is active. The stages below remain the complete scope; the progress section records delivered parts and outstanding work. The existing [construction economy plan](plan.md) remains the record of delivered economy work.
+All six systems and Stages 0–7 are implemented and locally verified. The current results and requirement-by-requirement evidence are recorded below; earlier progress entries are preserved as history. The existing [construction economy plan](plan.md) remains the record of delivered economy work.
 
 ## Why
 
@@ -54,7 +54,7 @@ One integrated playtest should follow a housing expansion: compare buying tiles 
 
 ## Delivery checklist for all six systems
 
-This checklist defines the intended deliveries, rather than claiming that each system is finished. Use the implementation progress below to distinguish delivered work from unfinished work.
+This checklist defines the acceptance criteria for the six systems. The final local release meets these criteria; the implementation progress and linked audit identify the matching source and observations.
 
 ### 1. Physical resources and hauling
 
@@ -275,6 +275,20 @@ The dev report should expose material conservation, travelling cargo, route fail
 Completion requires all six systems, the redesigned Story introductions, configurable Sandbox constraints, and repeated seasonal operation to meet their acceptance checks. Record unresolved performance or balance limits alongside the corresponding result. Update this plan as stages are delivered, and preserve incremental review and commits.
 
 ## Implementation progress
+
+- All six systems and Stages 0–7 pass the final local acceptance audit: 44 requirements across foundations, physical resources, resident time, production, living land, utilities, long-term change and Story/release integration. Save version 27 uses native source `2f62e43`, WebAssembly hash `de542a74…`, and final presentation `ec282d4`. Formatting, all 507 native tests, strict all-target lint, the release build, 175 current script syntax checks, all 67 public verifiers and the complete 200-capture desktop suite pass without browser errors. See [the final evidence](.github/story-review/results.json), [the requirement audit](.github/story-review/acceptance.json) and [Story outcomes](story-plan.md).
+
+- The integrated Story keeps thirteen linear chapters, with 47 separate measurable optional lessons and seven reference guides introducing all twenty-one building types. A fresh minimal campaign finishes on day 38 without nine optional types; the complete optional route finishes on day 92 with every measurable lesson earned. The first fifteen minutes at the 1× clock rate completes the well and half of the first home; the first week completes the introductory chapter and core shelter/food buildings. These are recorded serial player choices, excluding reading and automatic acceleration.
+
+- The five-way housing comparison begins with exact copies of one village after nine earned chapters. Purchased parts, local adobe production, distant placement, outside-work choices and construction preferences all support occupied housing and real paid service installation, followed by at least fourteen operating days including seven dry days. The runs preserve healthy needs, majority individual waking village leisure, 249 exact checkpoints and material/liquid/energy accounts. The poorly placed home recovers through resident relocation and replacement services. Locally made roofing reduces external housing spending from R$989.84 to R$912.86 while increasing construction from 4.06 to 7.04 days. Forecast checks separately demonstrate the same-horizon income/completion effect of outside shifts.
+
+- An earned completed village operates for another 84 days across repeated wet/dry periods, with 85 exact checkpoints, seven completed paid-part service jobs, 8–61 directly edible portions and at least 68% waking village leisure for each resident. The paid manual and connected utility comparison operates for 24 days per case; every installed liquid route transfers actual contents, only attended powered workshop work consumes operating energy, needs remain healthy and each resident retains majority leisure. Neither comparison authors replacement food, funds or utility kits.
+
+- The completion audit fixed immediate-save pickup handoffs while preserving carried materials and liquids, and verified exact normal-step/selected-16× continuation. It also corrected a utility measurement that omitted directly edible milk and honey, and fixed journal-header clipping during long optional pages. Source/build guards preserve valid native/public evidence; the corrected utility cases, all current script syntax and the entire final desktop suite were replayed. The original failed measurement report and before/after journal evidence remain available. GitHub's hosted check could not start because of account billing/spending limits; the PRs remain unmerged and require individual approval.
+
+### Earlier increments (historical)
+
+The entries below describe earlier source versions and the work still open at those points. The final acceptance record above supersedes their remaining-work notes.
 
 - Optional Sandbox constraints verified in save version 26. Settings independently selects construction and supplies, living land, and local utilities. New Sandbox villages keep free instant construction and comfortable defaults; every building remains unlocked. Switching rules preserves property, paid orders and ongoing work. Neutral land stops ordinary depletion without resetting saved soil and deposits, and avoids pointless irrigation chores. Comfortable utilities supply fresh water and overflow handling; free operating power has its own meter and does not create battery charge. Construction remains accessible for existing projects and land controls, and inventory shows actual stock in every mode. All 478 native tests, strict lint, 166 JavaScript syntax checks and 60 public verifiers pass. A full fresh Story day matches the supplier release apart from additive metadata. The full desktop walkthrough passes 196 captures without browser errors, including five focused settings/save/placement/power captures. A seven-day constrained Sandbox finishes its workshop, receives a paid R$67 order without fund replenishment, preserves eight exact checkpoints and all resource accounts, and retains healthy needs and at least 53% waking village leisure per resident. The older full Story, seasonal and utility runs were not repeated for this Sandbox-only increment. See [sandbox-plan.md](sandbox-plan.md) and [.github/sandbox-review/results.json](.github/sandbox-review/results.json). PR #62 is draft and unmerged; hosted CI is blocked by account billing limits. Outcome-based Story teaching and the integrated paired housing comparison across layouts, work preferences and material methods remain required.
 

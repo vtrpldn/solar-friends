@@ -1,0 +1,88 @@
+{
+  "reviewedAt": "2026-10-16T12:35:09.824Z",
+  "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+  "frontendCommit": "ec282d4cd18fc94f9946f2fe621e7d417871434a",
+  "scope": "Manual in-app-browser review at 1600 by 900, using explicitly authored protected development scenes; these observations are not earned campaign progress.",
+  "checks": [
+    {
+      "name": "Distinct decisions after competing needs",
+      "scene": "autonomy",
+      "status": "PASS",
+      "observed": [
+        "Iara rests at low energy",
+        "Bento sits down to eat",
+        "Luz seeks company",
+        "Cauã waters dry fruit trees",
+        "Nina leaves for her rainwater technician shift"
+      ]
+    },
+    {
+      "name": "Rest remains protected after a helping request",
+      "status": "PASS",
+      "observed": "Iara: I need to rest first. Ask me when I have more energy."
+    },
+    {
+      "name": "Accepted work names a target and acknowledges pause",
+      "status": "PASS",
+      "observed": [
+        "Accepted day 2 at 09:30",
+        "Stingless bee apiary at 10, 23",
+        "On the way",
+        "The village is paused. Resume time to let Cauã continue."
+      ]
+    },
+    {
+      "name": "Accepted work finishes and the resident resumes independent activity",
+      "status": "PASS",
+      "observed": [
+        "Finished",
+        "Finished the batch you asked me to help with.",
+        "Cauã resumed foraging after the request; later went for a meal."
+      ]
+    },
+    {
+      "name": "General request label matches plant and animal care",
+      "status": "PASS",
+      "observed": "Tend the farm appears on both the action and the accepted apiary request."
+    },
+    {
+      "name": "Journal primary and optional paths",
+      "scene": "story-planning",
+      "status": "PASS",
+      "observed": "Four primary rows retain aligned right-hand progress; optional paths are separate and expandable, with their own actions and explanation. All thirteen chapter entries fit the desktop journal navigation."
+    },
+    {
+      "name": "Day and night building lineup",
+      "scenes": [
+        "art",
+        "art-night"
+      ],
+      "status": "PASS",
+      "observed": "Reviewed at normal game scale and two zoom-out steps for the complete lineup. Painted proportions, grounded bases, open square, greenhouse planting, private roof lighting and the streetlight lamp emission remain coherent."
+    },
+    {
+      "name": "Native PNG export",
+      "status": "PASS",
+      "observed": "The browser downloads a real PNG with the full canvas dimensions, and the complete village snapshot remains unchanged."
+    },
+    {
+      "name": "Journal header and close control remain inside the book",
+      "status": "PASS",
+      "evidence": ".github/story-review/journal-header.json"
+    }
+  ],
+  "fullReleaseEvidence": ".github/story-review/release-report.json",
+  "capture": {
+    "file": ".github/story-review/native-scene.png",
+    "method": "Game Dev Tools → Download scene PNG, exercised by an isolated browser check",
+    "width": 1600,
+    "height": 900,
+    "sha256": "fee82a058cddf90441d1b933334421f65c45dcf586f95f44abd9a34ebfcc31fa"
+  },
+  "originalFrontendCommit": "9bf2d48",
+  "presentationFollowup": {
+    "sourceCommit": "ec282d4cd18fc94f9946f2fe621e7d417871434a",
+    "evidence": ".github/story-review/journal-header.json",
+    "observed": "At 1600 and 1280 desktop widths, reading first/last optional paths preserves the title and close control, scrolls only the inner page, and retains real guide actions and protected-save isolation."
+  }
+}

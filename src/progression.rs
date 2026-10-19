@@ -45,6 +45,7 @@ fn later_chapters<'de, D: serde::Deserializer<'de>>(
 #[serde(default)]
 pub struct Progress {
     pub completed: [bool; 4],
+    pub outcomes: crate::outcomes::State,
     #[serde(deserialize_with = "later_chapters")]
     pub later_completed: [bool; LATER_CHAPTERS],
     pub seedlings_raised: u32,
@@ -91,6 +92,7 @@ impl Default for Progress {
     fn default() -> Self {
         Self {
             completed: [false; 4],
+            outcomes: crate::outcomes::State::default(),
             later_completed: [false; LATER_CHAPTERS],
             seedlings_raised: 0,
             seedlings_used: 0,
@@ -174,88 +176,62 @@ pub fn update(v: &mut Village) {
         .count();
     let introduction = v.arrived
         && ready(v, "well")
-        && homes >= 2
+        && homes >= 1
         && v.harvests > 0
         && ready(v, "kitchen")
-        && v.meals_served > 0
-        && v.mornings > 0;
+        && v.meals_served > 0;
+    let grown_food = ready(v, "grove") || ready(v, "orchard");
+    let planted_material = v
+        .economy
+        .sources
+        .iter()
+        .any(|s| s.material < 2 && (s.planted || s.harvests > 0));
+    let tools = v.progress.tools_crafted > 0
+        || v.simulation
+            .materials
+            .as_ref()
+            .is_some_and(|a| a.spent[crate::economy::TOOLS] > 0);
+    let varied = v.progress.eggs_collected >= 3
+        || v.progress.milk_collected > 0
+        || v.progress.honey_collected > 0
+        || v.progress.orchard_fruit > 0
+        || v.progress.crop_rotations > 0;
     let goals = [
         introduction,
-        ready(v, "grove")
-            && v.progress.fruit >= 6
-            && (0..2).all(|m| {
-                v.economy
-                    .sources
-                    .iter()
-                    .any(|s| s.material == m && (s.planted || s.harvests > 0))
-            }),
-        v.meals_served >= 5
-            && v.progress.social_mask == 31
-            && v.progress.welcome_supper
-            && ready(v, "square"),
-        v.economy.orders.iter().any(|o| o.status == "delivered")
-            && v.progress.shared_builds > 0
-            && v.progress.tool_library
-            && ready(v, "warehouse")
-            && v.economy
-                .orders
-                .iter()
-                .any(|o| o.status == "delivered" && o.pickup_by.is_some())
-            && v.economy.work_day.iter().any(|day| *day >= 0),
-        ready(v, "workshop")
-            && ready(v, "compost")
-            && ready(v, "greenhouse")
-            && v.progress.tools_crafted > 0
-            && v.progress.enriched_harvests > 0
-            && v.progress.seedlings_raised > 0
-            && v.progress.seedlings_used > 0,
-        ready(v, "coop")
-            && v.progress.eggs_collected >= 3
-            && v.progress.egg_meal
-            && ready(v, "orchard")
-            && v.progress.orchard_fruit > 0
-            && ready(v, "goat_pasture")
-            && v.progress.milk_collected > 0
-            && ready(v, "apiary")
-            && v.progress.honey_collected > 0
-            && v.progress.crop_rotations > 0,
-        ready(v, "solar_farm")
-            && ready(v, "streetlight")
-            && v.power.stored >= 12.
-            && v.progress.night_lights,
+        grown_food
+            && (v.progress.fruit >= 6 || v.progress.orchard_fruit > 0)
+            && planted_material
+            && crate::outcomes::earned(v, crate::outcomes::PANTRY),
+        ready(v, "square") && v.progress.welcome_supper,
+        v.progress.outcomes.order_received
+            && v.progress
+                .outcomes
+                .shortest_delivery
+                .is_some_and(|n| n <= 30.)
+            && (v.economy.work_day.iter().any(|day| *day >= 0)
+                || v.progress.surplus_sold
+                || v.progress.parts_exchanged
+                || v.progress.outcomes.resources_sold),
+        tools && (v.progress.enriched_harvests > 0 || v.progress.outcomes.soil_improved),
+        varied && crate::outcomes::earned(v, crate::outcomes::DIET),
+        ready(v, "solar_farm") && ready(v, "streetlight") && v.progress.night_lights,
         ready(v, "eco_toilet")
             && ready(v, "wetland")
-            && ready(v, "banana_treatment")
-            && v.circular.waste_treated >= 5.
             && v.circular.toilet_visits >= 5
             && v.circular.water_reused >= 8.
-            && v.progress.rain_caught
-            && v.progress.reclaimed_irrigation,
-        ready(v, "biodigester")
-            && v.circular.batches > 0
-            && v.progress.biogas_meal
-            && v.progress.digestate_cured,
-        (0..5).all(|m| {
-            v.economy
-                .sources
-                .iter()
-                .any(|s| s.material == m && s.harvests > 0)
-        }) && v.progress.timber_replanted
-            && v.progress.prepared_batches > 0
-            && v.economy.projects.iter().any(|p| {
-                p.recipe == "adobe"
-                    && v.buildings
-                        .iter()
-                        .any(|b| b.id == p.building && b.kind == "home" && b.progress >= 100.)
-            })
-            && v.progress.surplus_sold
-            && v.progress.parts_exchanged,
-        ready(v, "hydro") && v.progress.river_night,
-        v.situations.resolved_count > 0 && v.progress.hobby_mask == 31,
-        BUILDINGS.iter().all(|kind| ready(v, kind))
-            && homes >= 2
-            && v.food >= 18.
-            && v.water >= 20.
+            && v.progress.reclaimed_irrigation
+            && crate::outcomes::earned(v, crate::outcomes::SERVICES),
+        ready(v, "biodigester") && v.circular.batches > 0 && v.progress.biogas_meal,
+        homes >= 2 && v.economy.money >= 10_000,
+        crate::outcomes::earned(v, crate::outcomes::NIGHT)
+            && crate::outcomes::earned(v, crate::outcomes::SERVICES),
+        v.situations.resolved_count > 0
+            && v.progress.hobby_mask == 31
+            && v.progress.outcomes.leisure_day,
+        homes >= 2
+            && crate::outcomes::earned(v, crate::outcomes::DRY)
+            && crate::outcomes::earned(v, crate::outcomes::SERVICES)
+            && v.progress.outcomes.leisure_day
             && v.progress.gatherings >= 2,
     ];
     let celebrations = [
@@ -269,7 +245,7 @@ pub fn update(v: &mut Village) {
         "Water Comes Around complete! The next chapter is ready in the village journal.",
         "Scraps into Energy complete! The next chapter is ready in the village journal.",
         "Homes of Earth complete! The next chapter is ready in the village journal.",
-        "The River Keeps Giving complete! The next chapter is ready in the village journal.",
+        "Power Through the Evening complete! The next chapter is ready in the village journal.",
         "Room to Breathe complete! The next chapter is ready in the village journal.",
         "A Village in Balance complete! Vila Aurora's story continues in your hands.",
     ];
@@ -447,5 +423,30 @@ mod tests {
         assert_eq!(s.resident, 0);
         assert!(!s.story_check_in);
         assert_eq!(s.worry, 4.);
+    }
+    #[test]
+    fn final_chapter_rewards_sustained_outcomes_without_every_building() {
+        let mut g = Game::new();
+        assert!(g.start_mode("sandbox"));
+        for (x, y) in [(6, 6), (10, 6)] {
+            assert_eq!(g.place("home", x, y), "ok");
+        }
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.mode = Mode::Story;
+        v.progress.completed.fill(true);
+        v.progress.later_completed[..8].fill(true);
+        v.progress.outcomes.best[crate::outcomes::DRY] =
+            crate::outcomes::TARGETS[crate::outcomes::DRY];
+        v.progress.outcomes.best[crate::outcomes::SERVICES] =
+            crate::outcomes::TARGETS[crate::outcomes::SERVICES];
+        v.progress.outcomes.leisure_day = true;
+        v.progress.gatherings = 2;
+        v.progress.outcomes.best_housing_spend = Some(crate::outcomes::HOUSING_BUDGET + 1);
+        update(&mut v);
+        assert!(
+            completed(&v, 12),
+            "Optional building paths and an over-budget challenge cannot block the finale"
+        );
+        assert_eq!(v.buildings.len(), 2);
     }
 }

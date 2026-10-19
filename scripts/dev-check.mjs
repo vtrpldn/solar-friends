@@ -18,7 +18,7 @@ async function command(label, executable, args) {
   console.log(`→ ${label}`);
   const started=Date.now();let log='';
   const code=await new Promise((resolve,reject)=>{
-    const timeout=['verify-seasonal-balance.mjs','verify-utility-balance.mjs'].includes(label)?1_800_000:600_000;
+    const timeout=['verify-housing-balance.mjs','verify-seasonal-balance.mjs','verify-utility-balance.mjs'].includes(label)?1_800_000:600_000;
     const child=spawn(executable,args,{env,cwd:root,stdio:['ignore','pipe','pipe'],timeout});
     const append=data=>{log+=data;process.stdout.write(data);};
     child.stdout.on('data',append);child.stderr.on('data',append);
@@ -41,7 +41,7 @@ try {
   if(!process.argv.includes('--browser-only')) {
     await command('Rust formatting','cargo',['fmt','--check']);
     await command('Rust behavior','cargo',['test','--locked']);
-    await command('Rust lint','cargo',['clippy','--locked','--','-D','warnings']);
+    await command('Rust lint','cargo',['clippy','--locked','--all-targets','--','-D','warnings']);
     await command('Build WebAssembly','bash',['scripts/build.sh']);
     for(const file of [...await jsFiles('web'), ...await jsFiles('scripts')]) await command(`Syntax: ${file}`,process.execPath,['--check',file]);
     for(const file of (await readdir('scripts')).filter(s=>/^verify-.*\.mjs$/.test(s)).sort()) await command(file,process.execPath,[`scripts/${file}`]);

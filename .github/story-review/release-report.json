@@ -1,0 +1,2322 @@
+{
+  "startedAt": "2026-10-16T12:08:59.479Z",
+  "finishedAt": "2026-10-16T13:49:08.630Z",
+  "scope": "Full local release: matched native/public phases and final desktop replay",
+  "sourceAndBuildHash": "95030cefb06e6a40a6d9344d7f4893e4d07c79547fd085c7216738fe709d3a14",
+  "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+  "sourceCommit": "ec282d4cd18fc94f9946f2fe621e7d417871434a",
+  "execution": {
+    "originalFullRun": "artifacts/story-food-measurement-baseline/report.json",
+    "originalFailure": "The utility measurement omitted directly edible milk and honey. Reproduced available food and a real milk meal claim; corrected the verifier without changing the native engine.",
+    "publicRun": "artifacts/story-public-release/report.json",
+    "publicSourceAndBuildHash": "796d6dc26ef51c5af8e44a8af49bd34544b08a2c849b69705f3b64900a2ba2ca",
+    "continuation": {
+      "resumedAt": "2026-10-16T13:22:43.756Z",
+      "baselineCommit": "ccb0486",
+      "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+      "priorSourceAndBuildHash": "abdb6e9a971dff0453a99f5f819cf88a72f307dd2a993860fd7f232dce973513",
+      "priorFailure": "Utility reserve measurement excluded directly edible milk and honey. The reproduced moment held four milk and nine honey, and a real meal request claimed milk.",
+      "priorReport": "artifacts/story-food-measurement-baseline/report.json",
+      "changedSources": [
+        "scripts/verify-utility-balance.mjs"
+      ],
+      "carriedNativeChecks": 4,
+      "carriedPublicChecks": 61,
+      "repeated": "Every script syntax check, both 24-day utility cases from exact earned installation checkpoints, remaining public verifiers and the complete desktop suite"
+    },
+    "presentationChangesSincePublic": [
+      "scripts/browser-checks.mjs",
+      "scripts/story-browser-checks.mjs",
+      "web/hud.css"
+    ],
+    "presentationProof": ".github/story-review/journal-header.json",
+    "syntax": "All 175 current scripts were parsed again after the final presentation change.",
+    "desktop": "The complete desktop suite was rerun after the journal correction, with local-server/browser permission granted.",
+    "nativeAndGameJs": "The native source, compiled engine and gameplay JavaScript remained unchanged through the presentation follow-up."
+  },
+  "results": [
+    {
+      "label": "Rust formatting",
+      "status": "PASS",
+      "seconds": 0.677,
+      "log": "check-1.txt"
+    },
+    {
+      "label": "Rust behavior",
+      "status": "PASS",
+      "seconds": 74.215,
+      "log": "check-2.txt"
+    },
+    {
+      "label": "Rust lint",
+      "status": "PASS",
+      "seconds": 0.125,
+      "log": "check-3.txt"
+    },
+    {
+      "label": "Build WebAssembly",
+      "status": "PASS",
+      "seconds": 0.207,
+      "log": "check-4.txt"
+    },
+    {
+      "label": "Syntax: web/agriculture-ui.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/catalog.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/checks.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/grid-fit.js",
+      "status": "PASS",
+      "seconds": 0.037,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/pixel-checks.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/projection.js",
+      "status": "PASS",
+      "seconds": 0.036,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/recipes.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/studio.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/artwork/workbench.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/battery-art.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/battery-plots.js",
+      "status": "PASS",
+      "seconds": 0.041,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/build-menu.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/building-art.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/building-footprints.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/building-mesh.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/building-projection.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/building-silhouettes.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/chickens.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/climate-ui.js",
+      "status": "PASS",
+      "seconds": 0.034,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/crop-art.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/art-draft.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/art-preview.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/autonomy-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/climate-fixture.js",
+      "status": "PASS",
+      "seconds": 0.034,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/electrical-fixture.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/maintenance-fixture.js",
+      "status": "PASS",
+      "seconds": 0.037,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/material-fixture.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/sandbox-fixture.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/scenarios.js",
+      "status": "PASS",
+      "seconds": 0.036,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/story-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/tools.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/dev/utility-planner.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/economy-art.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/economy-ui.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/electricity-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/forecast-worker.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/forecasts.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/freshness-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/game-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/gathering-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/greenhouse-layout.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/land-map.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/logistics-art.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/main.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/maintenance-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/night-lighting.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/planting-ui.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/polish.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/power.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/process-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/production-ui.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/projection.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/quests.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/resident-animation.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/resident-presence.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/resident-skills.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/resource-sites.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/restoration-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/sandbox-rules.js",
+      "status": "PASS",
+      "seconds": 0.081,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/settings.js",
+      "status": "PASS",
+      "seconds": 0.079,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/simulation-speed.js",
+      "status": "PASS",
+      "seconds": 0.074,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/situations.js",
+      "status": "PASS",
+      "seconds": 0.076,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/sprite-frames.js",
+      "status": "PASS",
+      "seconds": 0.101,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/supplier-ui.js",
+      "status": "PASS",
+      "seconds": 0.057,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/terrain.js",
+      "status": "PASS",
+      "seconds": 0.045,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/utility-lines-art.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/village-audio.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/village-storage.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/water-connections.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/water-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: web/weather.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/battery-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/climate-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/cultivation-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/dev-check.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/electricity-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/farming-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/food-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/freshness-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/gathering-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/housing-planning-run.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/interface-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/kitchen-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/land-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/lib/png-alpha.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/living-land-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/maintenance-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/organics-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/pipes-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/planting-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/process-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/restoration-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/sandbox-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/sanitation-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/serve.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/skills-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/story-all-paths.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/story-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/story-fixture.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/story-planning-run.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/supplier-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/sync-art-prompts.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/sync-building-silhouettes.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/tool-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/upkeep-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/utility-routes-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-art-preview.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-artwork.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-autonomy.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-away-routines.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-banana-treatment.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-batteries.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-building-projection.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-building-work.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-chickens.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-circular.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-climate.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-cultivation.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-dev-tools.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-economy.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-electrical-fixtures.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-electricity.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-farming.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-food.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-forecast.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-freshness.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-gatherings.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-grid-foundations.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-housing-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-kitchen-batches.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-land.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-leisure.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-living-land.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-logistics.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-maintenance.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-modes.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-navigation.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-night-lighting.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-occupations.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-organics.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-passive-processes.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-pipes.mjs",
+      "status": "PASS",
+      "seconds": 0.026,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-planning-paths.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-planting.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-polish.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-power.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-production.mjs",
+      "status": "PASS",
+      "seconds": 0.036,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-quests.mjs",
+      "status": "PASS",
+      "seconds": 0.034,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-requests.mjs",
+      "status": "PASS",
+      "seconds": 0.034,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-resident-animation.mjs",
+      "status": "PASS",
+      "seconds": 0.034,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-resource-sites.mjs",
+      "status": "PASS",
+      "seconds": 0.036,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-restoration.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-sandbox-rules.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-sanitation.mjs",
+      "status": "PASS",
+      "seconds": 0.037,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-seasonal-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-simulation.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-situations.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-skills.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-sleep-speed.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-sprite-frames.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-sprite-grid-fit.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-storage.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-story-objectives.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-suppliers.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-time-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-tools.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-utility-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-utility-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-water.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-weather.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-work-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/verify-workforce.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "Syntax: scripts/water-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "syntax-current.json"
+    },
+    {
+      "label": "verify-art-preview.mjs",
+      "status": "PASS",
+      "seconds": 0.219,
+      "log": "check-180.txt"
+    },
+    {
+      "label": "verify-artwork.mjs",
+      "status": "PASS",
+      "seconds": 0.121,
+      "log": "check-181.txt"
+    },
+    {
+      "label": "verify-autonomy.mjs",
+      "status": "PASS",
+      "seconds": 9.693,
+      "log": "check-182.txt"
+    },
+    {
+      "label": "verify-away-routines.mjs",
+      "status": "PASS",
+      "seconds": 0.913,
+      "log": "check-183.txt"
+    },
+    {
+      "label": "verify-banana-treatment.mjs",
+      "status": "PASS",
+      "seconds": 0.555,
+      "log": "check-184.txt"
+    },
+    {
+      "label": "verify-batteries.mjs",
+      "status": "PASS",
+      "seconds": 8.373,
+      "log": "check-185.txt"
+    },
+    {
+      "label": "verify-building-projection.mjs",
+      "status": "PASS",
+      "seconds": 0.159,
+      "log": "check-186.txt"
+    },
+    {
+      "label": "verify-building-work.mjs",
+      "status": "PASS",
+      "seconds": 14.471,
+      "log": "check-187.txt"
+    },
+    {
+      "label": "verify-chickens.mjs",
+      "status": "PASS",
+      "seconds": 0.393,
+      "log": "check-188.txt"
+    },
+    {
+      "label": "verify-circular.mjs",
+      "status": "PASS",
+      "seconds": 1.431,
+      "log": "check-189.txt"
+    },
+    {
+      "label": "verify-climate.mjs",
+      "status": "PASS",
+      "seconds": 0.251,
+      "log": "check-190.txt"
+    },
+    {
+      "label": "verify-cultivation.mjs",
+      "status": "PASS",
+      "seconds": 3.264,
+      "log": "check-191.txt"
+    },
+    {
+      "label": "verify-dev-tools.mjs",
+      "status": "PASS",
+      "seconds": 1.315,
+      "log": "check-192.txt"
+    },
+    {
+      "label": "verify-economy.mjs",
+      "status": "PASS",
+      "seconds": 234.481,
+      "log": "check-193.txt"
+    },
+    {
+      "label": "verify-electrical-fixtures.mjs",
+      "status": "PASS",
+      "seconds": 0.351,
+      "log": "check-194.txt"
+    },
+    {
+      "label": "verify-electricity.mjs",
+      "status": "PASS",
+      "seconds": 14.304,
+      "log": "check-195.txt"
+    },
+    {
+      "label": "verify-farming.mjs",
+      "status": "PASS",
+      "seconds": 56.306,
+      "log": "check-196.txt"
+    },
+    {
+      "label": "verify-food.mjs",
+      "status": "PASS",
+      "seconds": 3.129,
+      "log": "check-197.txt"
+    },
+    {
+      "label": "verify-forecast.mjs",
+      "status": "PASS",
+      "seconds": 5.078,
+      "log": "check-198.txt"
+    },
+    {
+      "label": "verify-freshness.mjs",
+      "status": "PASS",
+      "seconds": 0.514,
+      "log": "check-199.txt"
+    },
+    {
+      "label": "verify-gatherings.mjs",
+      "status": "PASS",
+      "seconds": 3.022,
+      "log": "check-200.txt"
+    },
+    {
+      "label": "verify-grid-foundations.mjs",
+      "status": "PASS",
+      "seconds": 0.228,
+      "log": "check-201.txt"
+    },
+    {
+      "label": "verify-housing-balance.mjs",
+      "status": "PASS",
+      "seconds": 735.4,
+      "log": "check-202.txt"
+    },
+    {
+      "label": "verify-kitchen-batches.mjs",
+      "status": "PASS",
+      "seconds": 7.816,
+      "log": "check-203.txt"
+    },
+    {
+      "label": "verify-land.mjs",
+      "status": "PASS",
+      "seconds": 1.486,
+      "log": "check-204.txt"
+    },
+    {
+      "label": "verify-leisure.mjs",
+      "status": "PASS",
+      "seconds": 138.346,
+      "log": "check-205.txt"
+    },
+    {
+      "label": "verify-living-land.mjs",
+      "status": "PASS",
+      "seconds": 0.722,
+      "log": "check-206.txt"
+    },
+    {
+      "label": "verify-logistics.mjs",
+      "status": "PASS",
+      "seconds": 1.317,
+      "log": "check-207.txt"
+    },
+    {
+      "label": "verify-maintenance.mjs",
+      "status": "PASS",
+      "seconds": 3.294,
+      "log": "check-208.txt"
+    },
+    {
+      "label": "verify-modes.mjs",
+      "status": "PASS",
+      "seconds": 5.961,
+      "log": "check-209.txt"
+    },
+    {
+      "label": "verify-navigation.mjs",
+      "status": "PASS",
+      "seconds": 0.11,
+      "log": "check-210.txt"
+    },
+    {
+      "label": "verify-night-lighting.mjs",
+      "status": "PASS",
+      "seconds": 0.035,
+      "log": "check-211.txt"
+    },
+    {
+      "label": "verify-occupations.mjs",
+      "status": "PASS",
+      "seconds": 0.222,
+      "log": "check-212.txt"
+    },
+    {
+      "label": "verify-organics.mjs",
+      "status": "PASS",
+      "seconds": 13.663,
+      "log": "check-213.txt"
+    },
+    {
+      "label": "verify-passive-processes.mjs",
+      "status": "PASS",
+      "seconds": 6.488,
+      "log": "check-214.txt"
+    },
+    {
+      "label": "verify-pipes.mjs",
+      "status": "PASS",
+      "seconds": 16.203,
+      "log": "check-215.txt"
+    },
+    {
+      "label": "verify-planning-paths.mjs",
+      "status": "PASS",
+      "seconds": 526.762,
+      "log": "check-216.txt"
+    },
+    {
+      "label": "verify-planting.mjs",
+      "status": "PASS",
+      "seconds": 13.633,
+      "log": "check-217.txt"
+    },
+    {
+      "label": "verify-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.738,
+      "log": "check-218.txt"
+    },
+    {
+      "label": "verify-polish.mjs",
+      "status": "PASS",
+      "seconds": 5.673,
+      "log": "check-219.txt"
+    },
+    {
+      "label": "verify-power.mjs",
+      "status": "PASS",
+      "seconds": 4.841,
+      "log": "check-220.txt"
+    },
+    {
+      "label": "verify-production.mjs",
+      "status": "PASS",
+      "seconds": 10.709,
+      "log": "check-221.txt"
+    },
+    {
+      "label": "verify-quests.mjs",
+      "status": "PASS",
+      "seconds": 85.055,
+      "log": "check-222.txt"
+    },
+    {
+      "label": "verify-requests.mjs",
+      "status": "PASS",
+      "seconds": 3.513,
+      "log": "check-223.txt"
+    },
+    {
+      "label": "verify-resident-animation.mjs",
+      "status": "PASS",
+      "seconds": 0.091,
+      "log": "check-224.txt"
+    },
+    {
+      "label": "verify-resource-sites.mjs",
+      "status": "PASS",
+      "seconds": 14.089,
+      "log": "check-225.txt"
+    },
+    {
+      "label": "verify-restoration.mjs",
+      "status": "PASS",
+      "seconds": 0.906,
+      "log": "check-226.txt"
+    },
+    {
+      "label": "verify-sandbox-rules.mjs",
+      "status": "PASS",
+      "seconds": 1.267,
+      "log": "check-227.txt"
+    },
+    {
+      "label": "verify-sanitation.mjs",
+      "status": "PASS",
+      "seconds": 22.602,
+      "log": "check-228.txt"
+    },
+    {
+      "label": "verify-seasonal-balance.mjs",
+      "status": "PASS",
+      "seconds": 730.805,
+      "log": "check-229.txt"
+    },
+    {
+      "label": "verify-simulation.mjs",
+      "status": "PASS",
+      "seconds": 0.706,
+      "log": "check-230.txt"
+    },
+    {
+      "label": "verify-situations.mjs",
+      "status": "PASS",
+      "seconds": 75.327,
+      "log": "check-231.txt"
+    },
+    {
+      "label": "verify-skills.mjs",
+      "status": "PASS",
+      "seconds": 48.967,
+      "log": "check-232.txt"
+    },
+    {
+      "label": "verify-sleep-speed.mjs",
+      "status": "PASS",
+      "seconds": 9.44,
+      "log": "check-233.txt"
+    },
+    {
+      "label": "verify-sprite-frames.mjs",
+      "status": "PASS",
+      "seconds": 0.048,
+      "log": "check-234.txt"
+    },
+    {
+      "label": "verify-sprite-grid-fit.mjs",
+      "status": "PASS",
+      "seconds": 4.699,
+      "log": "check-235.txt"
+    },
+    {
+      "label": "verify-storage.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "check-236.txt"
+    },
+    {
+      "label": "verify-story-objectives.mjs",
+      "status": "PASS",
+      "seconds": 0.071,
+      "log": "check-237.txt"
+    },
+    {
+      "label": "verify-suppliers.mjs",
+      "status": "PASS",
+      "seconds": 3.775,
+      "log": "check-238.txt"
+    },
+    {
+      "label": "verify-time-balance.mjs",
+      "status": "PASS",
+      "seconds": 10.066,
+      "log": "check-239.txt"
+    },
+    {
+      "label": "verify-tools.mjs",
+      "status": "PASS",
+      "seconds": 11.252,
+      "log": "check-240.txt"
+    },
+    {
+      "label": "verify-utility-balance.mjs",
+      "status": "PASS",
+      "seconds": 463.32,
+      "log": "continuation-241.txt"
+    },
+    {
+      "label": "verify-utility-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.127,
+      "log": "continuation-242.txt"
+    },
+    {
+      "label": "verify-water.mjs",
+      "status": "PASS",
+      "seconds": 4.355,
+      "log": "continuation-243.txt"
+    },
+    {
+      "label": "verify-weather.mjs",
+      "status": "PASS",
+      "seconds": 0.049,
+      "log": "continuation-244.txt"
+    },
+    {
+      "label": "verify-work-routes.mjs",
+      "status": "PASS",
+      "seconds": 1.471,
+      "log": "continuation-245.txt"
+    },
+    {
+      "label": "verify-workforce.mjs",
+      "status": "PASS",
+      "seconds": 0.184,
+      "log": "continuation-246.txt"
+    },
+    {
+      "label": "Desktop interactions, save isolation, artwork tools and captures",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "label": "Main menu: Story and Sandbox",
+      "file": "main-menu.png"
+    },
+    {
+      "label": "Pantry field-book page at 1600 desktop width",
+      "file": "interface-1600-pantry.png"
+    },
+    {
+      "label": "Stores field-book page at 1600 desktop width",
+      "file": "interface-1600-stores.png"
+    },
+    {
+      "label": "Water field-book page at 1600 desktop width",
+      "file": "interface-1600-water.png"
+    },
+    {
+      "label": "Ecology field-book page at 1600 desktop width",
+      "file": "interface-1600-ecology.png"
+    },
+    {
+      "label": "Trade shares the village control spacing at 1600",
+      "file": "interface-1600-town-panel.png"
+    },
+    {
+      "label": "Construction shares the village control spacing at 1600",
+      "file": "interface-1600-projects-panel.png"
+    },
+    {
+      "label": "Power shares the village control spacing at 1600",
+      "file": "interface-1600-power-panel.png"
+    },
+    {
+      "label": "Resident roster and gathering action at 1600",
+      "file": "interface-1600-residents.png"
+    },
+    {
+      "label": "Iara’s needs and illustrated actions precede work settings at 1600",
+      "file": "interface-1600-character.png"
+    },
+    {
+      "label": "Game settings retain keyboard-operable toggles at 1600",
+      "file": "interface-1600-settings.png"
+    },
+    {
+      "label": "Field guide and key bindings at 1600",
+      "file": "interface-1600-help.png"
+    },
+    {
+      "label": "Parchment development workbench at 1600",
+      "file": "interface-1600-workbench.png"
+    },
+    {
+      "label": "Pantry field-book page at 1280 desktop width",
+      "file": "interface-1280-pantry.png"
+    },
+    {
+      "label": "Stores field-book page at 1280 desktop width",
+      "file": "interface-1280-stores.png"
+    },
+    {
+      "label": "Water field-book page at 1280 desktop width",
+      "file": "interface-1280-water.png"
+    },
+    {
+      "label": "Ecology field-book page at 1280 desktop width",
+      "file": "interface-1280-ecology.png"
+    },
+    {
+      "label": "Trade shares the village control spacing at 1280",
+      "file": "interface-1280-town-panel.png"
+    },
+    {
+      "label": "Construction shares the village control spacing at 1280",
+      "file": "interface-1280-projects-panel.png"
+    },
+    {
+      "label": "Power shares the village control spacing at 1280",
+      "file": "interface-1280-power-panel.png"
+    },
+    {
+      "label": "Resident roster and gathering action at 1280",
+      "file": "interface-1280-residents.png"
+    },
+    {
+      "label": "Iara’s needs and illustrated actions precede work settings at 1280",
+      "file": "interface-1280-character.png"
+    },
+    {
+      "label": "Game settings retain keyboard-operable toggles at 1280",
+      "file": "interface-1280-settings.png"
+    },
+    {
+      "label": "Field guide and key bindings at 1280",
+      "file": "interface-1280-help.png"
+    },
+    {
+      "label": "Parchment development workbench at 1280",
+      "file": "interface-1280-workbench.png"
+    },
+    {
+      "label": "Primary village outcomes and separate optional paths at 1600",
+      "file": "story-paths-1600.png"
+    },
+    {
+      "label": "Primary village outcomes and separate optional paths at 1280",
+      "file": "story-paths-1280.png"
+    },
+    {
+      "label": "Actual observed food and services stay distinct from authored preview resources",
+      "file": "story-observations.png"
+    },
+    {
+      "label": "Saved local stone patches remain visible after resident extraction exhausts one",
+      "file": "land-stone.png"
+    },
+    {
+      "label": "Foundation disturbance survives real resident demolition",
+      "file": "land-disturbed.png"
+    },
+    {
+      "label": "Delivered compost and saved resident labour restore the ground gradually",
+      "file": "soil-restoration.png"
+    },
+    {
+      "label": "A marked grid plot reserves compost and waits for actual resident delivery",
+      "file": "soil-restoration-queued.png"
+    },
+    {
+      "label": "Resident work finishes and its soil improvements remain on the land",
+      "file": "soil-restoration-complete.png"
+    },
+    {
+      "label": "Plantation controls reserve an attended job for the whole timber plot",
+      "file": "soil-restoration-plantation.png"
+    },
+    {
+      "label": "Actual resident-tended crops show persistent soil conditions and adjusted growing time",
+      "file": "cultivation-soil.png"
+    },
+    {
+      "label": "Saved root-zone water and crop potential are inspectable on the actual plot",
+      "file": "cultivation-moisture.png"
+    },
+    {
+      "label": "Visible tree canopy reduces solar exposure beside the generator",
+      "file": "cultivation-shade.png"
+    },
+    {
+      "label": "Residents carry separate timber seedlings and bamboo starts to marked plots",
+      "file": "planting-forestry-cargo.png"
+    },
+    {
+      "label": "Marked forestry plots expose delivered stock and attended planting requirements",
+      "file": "planting-queued.png"
+    },
+    {
+      "label": "A greenhouse seedling travels to an outdoor garden before its planting bonus",
+      "file": "planting-vegetable-cargo.png"
+    },
+    {
+      "label": "Removed roads leave soft soil marks beneath the original meadow texture",
+      "file": "living-ground.png"
+    },
+    {
+      "label": "The same normal-view soil marks expose actual disturbance and a recovery action",
+      "file": "living-ground-inspection.png"
+    },
+    {
+      "label": "Resident restoration retains its soil improvement in the normal game view",
+      "file": "living-ground-restored.png"
+    },
+    {
+      "label": "Standing banana vegetation contributes to the same shade and solar model",
+      "file": "living-banana-shade.png"
+    },
+    {
+      "label": "A seven-day paper forecast opens directly from the village clock",
+      "file": "climate-forecast-wet.png"
+    },
+    {
+      "label": "Seeded wet-season rain shares the existing ground and building palette",
+      "file": "climate-wet.png"
+    },
+    {
+      "label": "Seasonal rain retains cloud and wet-soil cues with reduced motion",
+      "file": "climate-wet-reduced.png"
+    },
+    {
+      "label": "The dry-period forecast explains lower river flow and the next weather window",
+      "file": "climate-forecast-dry.png"
+    },
+    {
+      "label": "Sandbox can opt into the same saved seasonal calendar",
+      "file": "climate-sandbox-option.png"
+    },
+    {
+      "label": "Orchard, dairy pasture and apiary share the village terrain and building scale",
+      "file": "farming-village.png"
+    },
+    {
+      "label": "Readable goat care and local supplies at 1600px",
+      "file": "farming-goats-1600.png"
+    },
+    {
+      "label": "Hive forage and inspection controls at 1600px",
+      "file": "farming-bees-1600.png"
+    },
+    {
+      "label": "Milk, honey and farm records inside the pantry book at 1600px",
+      "file": "farming-pantry-1600.png"
+    },
+    {
+      "label": "Readable goat care and local supplies at 1280px",
+      "file": "farming-goats-1280.png"
+    },
+    {
+      "label": "Hive forage and inspection controls at 1280px",
+      "file": "farming-bees-1280.png"
+    },
+    {
+      "label": "Milk, honey and farm records inside the pantry book at 1280px",
+      "file": "farming-pantry-1280.png"
+    },
+    {
+      "label": "New farm buildings appear with the same illustrated build controls",
+      "file": "farming-build-menu.png"
+    },
+    {
+      "label": "A named resident accepts a saved, targeted animal-care request",
+      "file": "farming-request.png"
+    },
+    {
+      "label": "Resident care and collection advance real farm production",
+      "file": "farming-after-care.png"
+    },
+    {
+      "label": "Equipment condition shares the field book at 1600",
+      "file": "upkeep-1600.png"
+    },
+    {
+      "label": "Equipment condition shares the field book at 1280",
+      "file": "upkeep-1280.png"
+    },
+    {
+      "label": "The service kit enters the normal town basket",
+      "file": "upkeep-spares.png"
+    },
+    {
+      "label": "Paused service retains its consumed kit and partial work",
+      "file": "upkeep-paused.png"
+    },
+    {
+      "label": "Resident work restores workshop condition through the real controls",
+      "file": "upkeep-finished.png"
+    },
+    {
+      "label": "A failed pickup can receive spare parts by town delivery",
+      "file": "upkeep-truck-recovery.png"
+    },
+    {
+      "label": "Night equipment failure preserves charge and exposes recovery",
+      "file": "upkeep-night.png"
+    },
+    {
+      "label": "Resident field notes show earned experience at 1600px",
+      "file": "learning-1600.png"
+    },
+    {
+      "label": "Resident field notes show earned experience at 1280px",
+      "file": "learning-1280.png"
+    },
+    {
+      "label": "Field notes replay experience earned through fourteen days of useful work",
+      "file": "learning-earned.png"
+    },
+    {
+      "label": "Town offer uses the existing trade book at 1600px",
+      "file": "suppliers-board-1600.png"
+    },
+    {
+      "label": "Town offer uses the existing trade book at 1280px",
+      "file": "suppliers-board-1280.png"
+    },
+    {
+      "label": "Seeded restock prices and the freight calendar are visible before buying",
+      "file": "suppliers-forecast.png"
+    },
+    {
+      "label": "Confirmed receipts preserve the partial offer price and arrival date",
+      "file": "suppliers-receipt.png"
+    },
+    {
+      "label": "A resident returns the purchased offer through a real town pickup",
+      "file": "suppliers-pickup.png"
+    },
+    {
+      "label": "A delayed freight date is quoted and retained in the confirmed order",
+      "file": "suppliers-freight.png"
+    },
+    {
+      "label": "A real midnight restock updates prices without replacing the focused basket",
+      "file": "suppliers-midnight.png"
+    },
+    {
+      "label": "Read-only water corridor follows exact ports and existing road cells",
+      "file": "utility-fresh-route.png"
+    },
+    {
+      "label": "River generator uses its integral bank lead before joining safe land corridors",
+      "file": "utility-hydro-route.png"
+    },
+    {
+      "label": "A moving cistern cannot promise an active utility route",
+      "file": "utility-move-blocker.png"
+    },
+    {
+      "label": "Located water shows the actual destination and carried load",
+      "file": "water-in-transit.png"
+    },
+    {
+      "label": "Resident carries a water pail at gameplay scale",
+      "file": "water-carry-art.png"
+    },
+    {
+      "label": "Interrupted water remains in a recoverable container",
+      "file": "water-recovery.png"
+    },
+    {
+      "label": "Recovered water pails follow the village night palette",
+      "file": "water-recovery-night.png"
+    },
+    {
+      "label": "Reclaimed irrigation remains separate from fresh-water loads",
+      "file": "water-irrigation.png"
+    },
+    {
+      "label": "Exact corridor preview and actual installation kit",
+      "file": "pipes-planner.png"
+    },
+    {
+      "label": "Named resident bringing parts to the route",
+      "file": "pipes-kit-delivery.png"
+    },
+    {
+      "label": "An existing installer reports the switch to resident dismantling",
+      "file": "pipes-resident-work.png"
+    },
+    {
+      "label": "Paused corridor work retains progress and priority",
+      "file": "pipes-installation-paused.png"
+    },
+    {
+      "label": "Installed line reports delivered water and battery use",
+      "file": "pipes-running.png"
+    },
+    {
+      "label": "Moving a source queues a newly routed installation",
+      "file": "pipes-replacement.png"
+    },
+    {
+      "label": "Installed water corridors at night",
+      "file": "pipes-night.png"
+    },
+    {
+      "label": "Installed water corridors at outage",
+      "file": "pipes-outage.png"
+    },
+    {
+      "label": "Greywater route has its own compatible receiving port and paid kit",
+      "file": "sanitation-planner.png"
+    },
+    {
+      "label": "Local sanitation buffers, reserved delivery and named closed-container carrier",
+      "file": "sanitation-stores.png"
+    },
+    {
+      "label": "An actual greywater load uses a closed fitted-lid container",
+      "file": "sanitation-carrying.png"
+    },
+    {
+      "label": "Resident describes the actual closed-container sanitation job",
+      "file": "sanitation-resident.png"
+    },
+    {
+      "label": "Filtration retains sealed ownership and protects return space",
+      "file": "sanitation-filtering.png"
+    },
+    {
+      "label": "Resident-installed greywater line reports metered local flow and energy use",
+      "file": "sanitation-pumping.png"
+    },
+    {
+      "label": "Separate fitted-lid service containers at recovered",
+      "file": "sanitation-recovered.png"
+    },
+    {
+      "label": "Separate fitted-lid service containers at recovered-night",
+      "file": "sanitation-recovered-night.png"
+    },
+    {
+      "label": "Separate fitted-lid service containers at sewage-carrying",
+      "file": "sanitation-sewage-carrying.png"
+    },
+    {
+      "label": "Outcome chapters retain optional material paths and a sustained dry-period finale",
+      "file": "story-journal.png"
+    },
+    {
+      "label": "Story care agreement requires actual follow-through",
+      "file": "story-care.png"
+    },
+    {
+      "label": "Resident salvage underway; recovered materials remain pending",
+      "file": "building-salvage.png"
+    },
+    {
+      "label": "Packing complete; crew walks to the new site to rebuild",
+      "file": "building-move.png"
+    },
+    {
+      "label": "Player plants timber trees and chooses harvest settings",
+      "file": "player-planted-timber.png"
+    },
+    {
+      "label": "Resident harvests deliver whole-tree timber and cultivated bamboo",
+      "file": "material-harvest-controls.png"
+    },
+    {
+      "label": "Choose a driver for same-day town pickup",
+      "file": "town-pickup.png"
+    },
+    {
+      "label": "Accepted helping request with paused-time guidance",
+      "file": "helping-request.png"
+    },
+    {
+      "label": "Helping request finishes through real resident work",
+      "file": "helping-request-complete.png"
+    },
+    {
+      "label": "Conditional workweek forecast with unchanged live project",
+      "file": "workweek-forecast.png"
+    },
+    {
+      "label": "Located production identity and committed input diagnostics",
+      "file": "production-diagnostics.png"
+    },
+    {
+      "label": "Paused preparation keeps committed inputs and partial labour",
+      "file": "production-paused.png"
+    },
+    {
+      "label": "Finished workshop preparation and bounded village reserve",
+      "file": "production-finished.png"
+    },
+    {
+      "label": "Tool batch retains committed timber and partial work while paused",
+      "file": "tools-batch.png"
+    },
+    {
+      "label": "Buy tool supplies as an alternative to local crafting",
+      "file": "tools-town.png"
+    },
+    {
+      "label": "Purchased tool supplies belong to the arrival store",
+      "file": "tools-arrival.png"
+    },
+    {
+      "label": "Cooked portions and delivered ingredients remain in the kitchen pantry",
+      "file": "food-pantry.png"
+    },
+    {
+      "label": "Town food purchases use the real trade controls",
+      "file": "food-trade.png"
+    },
+    {
+      "label": "Kitchen pot keeps its labour while the station is paused",
+      "file": "kitchen-paused.png"
+    },
+    {
+      "label": "A cancelled pot returns its ingredients and meal reserves stay bounded",
+      "file": "kitchen-recovery.png"
+    },
+    {
+      "label": "Resumed kitchen work finishes the same pot at its selected pantry",
+      "file": "kitchen-finished.png"
+    },
+    {
+      "label": "Interrupted powered tools keep their committed batch",
+      "file": "workshop-power-outage.png"
+    },
+    {
+      "label": "Hand tools finish the same batch without more electrical consumption",
+      "file": "workshop-power-fallback.png"
+    },
+    {
+      "label": "The Power panel previews a grid-aligned resident-installed cable",
+      "file": "electrical-planner.png"
+    },
+    {
+      "label": "Commissioned cable, local charge, pause and resident dismantling controls",
+      "file": "electrical-installed.png"
+    },
+    {
+      "label": "Battery destination preview with visible resident-work guidance",
+      "file": "battery-move-preview.png"
+    },
+    {
+      "label": "Residents install the same charged bank at its reserved plot",
+      "file": "battery-installed.png"
+    },
+    {
+      "label": "Careful salvage returns one paid unit after attended work",
+      "file": "battery-salvaged.png"
+    },
+    {
+      "label": "A recovered bank is shown with its actual carrier",
+      "file": "battery-carried.png"
+    },
+    {
+      "label": "Recovered equipment uses the shared night shading without a floor platform",
+      "file": "battery-night.png"
+    },
+    {
+      "label": "Planning reserves five meals while neighbours prepare delivery",
+      "file": "gathering-planned.png"
+    },
+    {
+      "label": "Cancelling carried gathering food leaves its portions recoverable",
+      "file": "gathering-recovery.png"
+    },
+    {
+      "label": "Delivered portions are shared once and friendships grow through attendance",
+      "file": "gathering-complete.png"
+    },
+    {
+      "label": "Freshness dates and portions to use soon are visible in Supplies",
+      "file": "freshness-use-soon.png"
+    },
+    {
+      "label": "Spoilage removes real portions and reports the loss",
+      "file": "freshness-spoiled.png"
+    },
+    {
+      "label": "Interrupted pots recover only fresh inputs and allow replacement",
+      "file": "freshness-pot.png"
+    },
+    {
+      "label": "Two digesters retain independent batches while one is paused",
+      "file": "processes-paused.png"
+    },
+    {
+      "label": "Recovering a sealed batch returns its inputs once and pauses that site",
+      "file": "processes-recovered.png"
+    },
+    {
+      "label": "Independent sealed digestate stores keep their full curing period",
+      "file": "processes-curing.png"
+    },
+    {
+      "label": "Scraps and compost use local stores and resident cargo",
+      "file": "organic-supplies.png"
+    },
+    {
+      "label": "Town sells mature compost while kitchen scraps stay in the local loop",
+      "file": "organic-trade.png"
+    },
+    {
+      "label": "Fixed scenario: autonomy",
+      "file": "scenario-autonomy.png"
+    },
+    {
+      "label": "Residents follow their own needs and village commitments",
+      "file": "autonomy-residents.png"
+    },
+    {
+      "label": "Fixed scenario: hungry",
+      "file": "scenario-hungry.png"
+    },
+    {
+      "label": "Fixed scenario: harvest",
+      "file": "scenario-harvest.png"
+    },
+    {
+      "label": "Fixed scenario: cook",
+      "file": "scenario-cook.png"
+    },
+    {
+      "label": "Fixed scenario: coop",
+      "file": "scenario-coop.png"
+    },
+    {
+      "label": "Fixed scenario: night",
+      "file": "scenario-night.png"
+    },
+    {
+      "label": "Fixed scenario: power-outage",
+      "file": "scenario-power-outage.png"
+    },
+    {
+      "label": "Fixed scenario: rain",
+      "file": "scenario-rain.png"
+    },
+    {
+      "label": "Rain with reduced motion: cloud cover and wet ground",
+      "file": "weather-reduced-motion.png"
+    },
+    {
+      "label": "Fixed scenario: after-rain",
+      "file": "scenario-after-rain.png"
+    },
+    {
+      "label": "Fixed scenario: dry-afternoon",
+      "file": "scenario-dry-afternoon.png"
+    },
+    {
+      "label": "Fixed scenario: arrival",
+      "file": "scenario-arrival.png"
+    },
+    {
+      "label": "Fixed scenario: village",
+      "file": "scenario-village.png"
+    },
+    {
+      "label": "Fixed scenario: circular",
+      "file": "scenario-circular.png"
+    },
+    {
+      "label": "Fixed scenario: circular-night",
+      "file": "scenario-circular-night.png"
+    },
+    {
+      "label": "Fixed scenario: art",
+      "file": "scenario-art.png"
+    },
+    {
+      "label": "Fixed scenario: art-night",
+      "file": "scenario-art-night.png"
+    },
+    {
+      "label": "Observed resident time and reconciled material accounts",
+      "file": "simulation-accounting.png"
+    },
+    {
+      "label": "Located storage after two resident deliveries",
+      "file": "physical-storage.png"
+    },
+    {
+      "label": "Resident work preferences in the village",
+      "file": "resident-work.png"
+    },
+    {
+      "label": "Resident routines and locally supplied water and waste processing",
+      "file": "circular-controls.png"
+    },
+    {
+      "label": "Banana bed treatment and player pause control",
+      "file": "banana-treatment.png"
+    },
+    {
+      "label": "Iara at her individual outside occupation",
+      "file": "resident-occupation.png"
+    },
+    {
+      "label": "Simulation workbench and resident diagnostics",
+      "file": "simulation.png"
+    },
+    {
+      "label": "Game canvas exported through its own capture control",
+      "file": "native-scene.png"
+    },
+    {
+      "label": "Fixed desktop village",
+      "file": "village.png"
+    },
+    {
+      "label": "Game HUD at 1280 × 800",
+      "file": "game-hud-1280.png"
+    },
+    {
+      "label": "Dev Tools at 1280 × 800",
+      "file": "dev-tools-1280.png"
+    },
+    {
+      "label": "Artwork calibration with shared game scale",
+      "file": "calibration.png"
+    },
+    {
+      "label": "Replacement review with identical source control",
+      "file": "replacement.png"
+    },
+    {
+      "label": "Replacement silhouette overlay at dusk",
+      "file": "replacement-dusk.png"
+    },
+    {
+      "label": "Recipe cards with saved revision history",
+      "file": "recipes.png"
+    },
+    {
+      "label": "All painted building sprites on their actual grid cells",
+      "file": "sprite-grid-day.png"
+    },
+    {
+      "label": "Shared full-sprite grid fit at night",
+      "file": "sprite-grid-night.png"
+    },
+    {
+      "label": "Real Sandbox seasons survive saving, reloading and Continue sandbox",
+      "file": "climate-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox wear and automatic service survive Continue sandbox",
+      "file": "upkeep-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox learning survives Continue sandbox",
+      "file": "learning-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox supplier variation survives Continue sandbox",
+      "file": "suppliers-sandbox-reload.png"
+    },
+    {
+      "label": "Independent Sandbox simulation rules use the game settings at 1600px",
+      "file": "sandbox-rules-1600.png"
+    },
+    {
+      "label": "Independent Sandbox simulation rules use the game settings at 1280px",
+      "file": "sandbox-rules-1280.png"
+    },
+    {
+      "label": "All Sandbox rules and mixed construction states survive Continue sandbox",
+      "file": "sandbox-rules-reload.png"
+    },
+    {
+      "label": "Sandbox Construction uses delivered materials and real resident work",
+      "file": "sandbox-construction.png"
+    },
+    {
+      "label": "Comfortable night power is separate from owned battery charge",
+      "file": "sandbox-comfortable-power.png"
+    },
+    {
+      "label": "Framed sprite inventory with its own scroll area at 1600",
+      "file": "interface-1600-sprite-library.png"
+    },
+    {
+      "label": "Artwork calibration uses the game workbench at 1600",
+      "file": "interface-1600-art-calibration.png"
+    },
+    {
+      "label": "Artwork replacement uses the game workbench at 1600",
+      "file": "interface-1600-art-replacement.png"
+    },
+    {
+      "label": "Artwork recipe uses the game workbench at 1600",
+      "file": "interface-1600-art-recipe.png"
+    },
+    {
+      "label": "Live sprite checks shares the artwork tool frame at 1600",
+      "file": "interface-1600-checks.png"
+    },
+    {
+      "label": "Building projection shares the artwork tool frame at 1600",
+      "file": "interface-1600-projection.png"
+    },
+    {
+      "label": "Sprite grid fit shares the artwork tool frame at 1600",
+      "file": "interface-1600-grid-fit.png"
+    },
+    {
+      "label": "Framed sprite inventory with its own scroll area at 1280",
+      "file": "interface-1280-sprite-library.png"
+    },
+    {
+      "label": "Artwork calibration uses the game workbench at 1280",
+      "file": "interface-1280-art-calibration.png"
+    },
+    {
+      "label": "Artwork replacement uses the game workbench at 1280",
+      "file": "interface-1280-art-replacement.png"
+    },
+    {
+      "label": "Artwork recipe uses the game workbench at 1280",
+      "file": "interface-1280-art-recipe.png"
+    },
+    {
+      "label": "Live sprite checks shares the artwork tool frame at 1280",
+      "file": "interface-1280-checks.png"
+    },
+    {
+      "label": "Building projection shares the artwork tool frame at 1280",
+      "file": "interface-1280-projection.png"
+    },
+    {
+      "label": "Sprite grid fit shares the artwork tool frame at 1280",
+      "file": "interface-1280-grid-fit.png"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,580 @@
+{
+  "passed": true,
+  "route": "fresh-all-paths",
+  "source": "Real placement, purchases, resident work and player commands; no authored progress or inventory",
+  "chapterResults": [
+    {
+      "chapter": 1,
+      "minutes": 12462,
+      "day": 9,
+      "money": 282000
+    },
+    {
+      "chapter": 2,
+      "minutes": 15090,
+      "day": 11,
+      "money": 321000
+    },
+    {
+      "chapter": 3,
+      "minutes": 17985,
+      "day": 13,
+      "money": 347700
+    },
+    {
+      "chapter": 4,
+      "minutes": 23706,
+      "day": 17,
+      "money": 388765
+    },
+    {
+      "chapter": 5,
+      "minutes": 38025,
+      "day": 27,
+      "money": 538415
+    },
+    {
+      "chapter": 6,
+      "minutes": 49635,
+      "day": 35,
+      "money": 429642
+    },
+    {
+      "chapter": 7,
+      "minutes": 61596,
+      "day": 43,
+      "money": 471729
+    },
+    {
+      "chapter": 8,
+      "minutes": 75831,
+      "day": 53,
+      "money": 598828
+    },
+    {
+      "chapter": 9,
+      "minutes": 89976,
+      "day": 63,
+      "money": 783260
+    },
+    {
+      "chapter": 10,
+      "minutes": 112968,
+      "day": 79,
+      "money": 1023450
+    },
+    {
+      "chapter": 11,
+      "minutes": 127383,
+      "day": 89,
+      "money": 1133459
+    },
+    {
+      "chapter": 12,
+      "minutes": 128823,
+      "day": 90,
+      "money": 1155459
+    },
+    {
+      "chapter": 13,
+      "minutes": 131754,
+      "day": 92,
+      "money": 1155459
+    }
+  ],
+  "optionalLessons": [
+    {
+      "chapter": 1,
+      "label": "Give everyone a bed",
+      "value": 2,
+      "target": 2,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 1,
+      "label": "Welcome the next morning",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 2,
+      "label": "Plant timber trees",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 2,
+      "label": "Cultivate bamboo",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 2,
+      "label": "Establish a fruit orchard",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 2,
+      "label": "Harvest orchard fruit",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 3,
+      "label": "Serve five cooked meals",
+      "value": 5,
+      "target": 5,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 3,
+      "label": "Make time for every neighbour",
+      "value": 5,
+      "target": 5,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Build a storage house",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Bring home an outside-job contribution",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Collect an order by truck",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Support a shared tool library",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Finish a shared construction",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Set a broad work preference",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 4,
+      "label": "Compare the next working week",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 5,
+      "label": "Build a workshop",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Craft a set of tools",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Build a compost station",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Bring in an enriched harvest",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Build a greenhouse",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Raise a greenhouse seedling",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Plant a seedling outdoors",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 5,
+      "label": "Manage saved production batches",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 5,
+      "label": "Choose hand tools or powered workshop tools",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 6,
+      "label": "Establish a fruit orchard",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Harvest orchard fruit",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Rotate after beans",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Care for dairy goats",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Collect stingless bee honey",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Build a chicken coop",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Cook with our eggs",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 6,
+      "label": "Collect our first three eggs",
+      "value": 3,
+      "target": 3,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 7,
+      "label": "Store twelve energy",
+      "value": 12,
+      "target": 12,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 8,
+      "label": "Build a banana treatment bed",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 8,
+      "label": "Treat five toilet waste",
+      "value": 5,
+      "target": 5,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 8,
+      "label": "Catch rain in our cistern",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 8,
+      "label": "Compare carrying with fresh-water pipes",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 8,
+      "label": "Keep water and waste routes separate",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 9,
+      "label": "Finish curing digestate",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Harvest the five local materials",
+      "value": 5,
+      "target": 5,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Replant a harvested timber plot",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Prepare building materials locally",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Complete an adobe home",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Sell genuine surplus",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Exchange with our neighbour",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 10,
+      "label": "Read the land before expanding",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 10,
+      "label": "Complete an expansion within R$ 1.200 of external spending",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 11,
+      "label": "Place a river generator",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 11,
+      "label": "Generate river power after dusk",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 11,
+      "label": "Prepare for wet and dry periods",
+      "value": 0,
+      "target": 1,
+      "done": false,
+      "guide": true
+    },
+    {
+      "chapter": 11,
+      "label": "Complete real equipment service",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 11,
+      "label": "Use a firm seasonal purchase",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 12,
+      "label": "Learn through useful work",
+      "value": 1,
+      "target": 1,
+      "done": true,
+      "guide": false
+    },
+    {
+      "chapter": 13,
+      "label": "Explore every building at your own pace",
+      "value": 21,
+      "target": 21,
+      "done": true,
+      "guide": false
+    }
+  ],
+  "buildingKinds": [
+    "home",
+    "garden",
+    "well",
+    "kitchen",
+    "grove",
+    "warehouse",
+    "compost",
+    "square",
+    "workshop",
+    "greenhouse",
+    "coop",
+    "solar_farm",
+    "streetlight",
+    "eco_toilet",
+    "wetland",
+    "banana_treatment",
+    "biodigester",
+    "hydro",
+    "orchard",
+    "goat_pasture",
+    "apiary"
+  ],
+  "observations": {
+    "best": [
+      360,
+      1440,
+      720,
+      240,
+      720
+    ],
+    "best_housing_spend": 87600,
+    "current": [
+      75,
+      210,
+      0,
+      0,
+      0
+    ],
+    "food_access": true,
+    "food_at_stores": 38,
+    "housing": [],
+    "last_sample": 131745.75,
+    "leisure_day": true,
+    "net_spending": 1102841,
+    "order_received": true,
+    "qualifies": [
+      true,
+      true,
+      false,
+      false,
+      false
+    ],
+    "resources_sold": false,
+    "schema": 1,
+    "services_ready": false,
+    "shortest_delivery": 3.75,
+    "soil_improved": true
+  },
+  "serviceOrders": 1,
+  "serviceSpending": 8158
+}

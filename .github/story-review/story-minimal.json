@@ -1,0 +1,914 @@
+{
+  "passed": true,
+  "route": "fresh-minimal",
+  "checkpointSource": null,
+  "source": "Only real public game commands; no authored inventories, progress or completed buildings",
+  "checkpoints": [
+    {
+      "chapter": 1,
+      "name": "A Shared Beginning",
+      "day": 6,
+      "minutes": 8310,
+      "money": 310400,
+      "buildings": 4
+    },
+    {
+      "chapter": 2,
+      "name": "Roots for Tomorrow",
+      "day": 10,
+      "minutes": 13905,
+      "money": 282600,
+      "buildings": 6
+    },
+    {
+      "chapter": 3,
+      "name": "A Place to Gather",
+      "day": 12,
+      "minutes": 16680,
+      "money": 297700,
+      "buildings": 7
+    },
+    {
+      "chapter": 4,
+      "name": "Made by Our Hands",
+      "day": 12,
+      "minutes": 16680,
+      "money": 297700,
+      "buildings": 7
+    },
+    {
+      "chapter": 5,
+      "name": "Growing Resilience",
+      "day": 13,
+      "minutes": 18255,
+      "money": 312500,
+      "buildings": 7
+    },
+    {
+      "chapter": 6,
+      "name": "A Fuller Table",
+      "day": 16,
+      "minutes": 22200,
+      "money": 332992,
+      "buildings": 8
+    },
+    {
+      "chapter": 7,
+      "name": "Sunshine to Share",
+      "day": 20,
+      "minutes": 28485,
+      "money": 276952,
+      "buildings": 10
+    },
+    {
+      "chapter": 8,
+      "name": "Water Comes Around",
+      "day": 28,
+      "minutes": 39480,
+      "money": 347611,
+      "buildings": 12
+    },
+    {
+      "chapter": 9,
+      "name": "Scraps into Energy",
+      "day": 32,
+      "minutes": 45270,
+      "money": 384249,
+      "buildings": 13
+    },
+    {
+      "chapter": 10,
+      "name": "Homes of Earth",
+      "day": 32,
+      "minutes": 45270,
+      "money": 384249,
+      "buildings": 13
+    },
+    {
+      "chapter": 11,
+      "name": "Power Through the Evening",
+      "day": 32,
+      "minutes": 45270,
+      "money": 384249,
+      "buildings": 13
+    },
+    {
+      "chapter": 12,
+      "name": "Room to Breathe",
+      "day": 33,
+      "minutes": 46710,
+      "money": 406249,
+      "buildings": 13
+    },
+    {
+      "chapter": 13,
+      "name": "A Village in Balance",
+      "day": 38,
+      "minutes": 54675,
+      "money": 378377,
+      "buildings": 13
+    }
+  ],
+  "pacing": [
+    {
+      "label": "first-fifteen-minutes-at-1x",
+      "minutes": 3180,
+      "chapters": 0,
+      "buildings": [
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        }
+      ],
+      "money": 238400,
+      "needs": [
+        {
+          "name": "Iara",
+          "hunger": 16.603559494018555,
+          "energy": 100,
+          "social": 69.72267150878906
+        },
+        {
+          "name": "Bento",
+          "hunger": 18.694826126098633,
+          "energy": 100,
+          "social": 69.72267150878906
+        },
+        {
+          "name": "Luz",
+          "hunger": 14.976020812988281,
+          "energy": 99.69371795654297,
+          "social": 68.09768676757812
+        },
+        {
+          "name": "Cauã",
+          "hunger": 19.616140365600586,
+          "energy": 100,
+          "social": 69.75769805908203
+        },
+        {
+          "name": "Nina",
+          "hunger": 12.8960599899292,
+          "energy": 99.86873626708984,
+          "social": 69.75769805908203
+        }
+      ],
+      "observations": {
+        "best": [
+          360,
+          1440,
+          0,
+          0,
+          0
+        ],
+        "best_housing_spend": null,
+        "current": [
+          360,
+          1440,
+          0,
+          0,
+          0
+        ],
+        "food_access": true,
+        "food_at_stores": 19,
+        "housing": [],
+        "last_sample": 3165.75,
+        "leisure_day": true,
+        "net_spending": 105600,
+        "order_received": true,
+        "qualifies": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "resources_sold": false,
+        "schema": 1,
+        "services_ready": false,
+        "shortest_delivery": 10.5,
+        "soil_improved": false
+      }
+    },
+    {
+      "label": "first-week",
+      "minutes": 10560,
+      "chapters": 1,
+      "buildings": [
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "grove",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 0
+        }
+      ],
+      "money": 250200,
+      "needs": [
+        {
+          "name": "Iara",
+          "hunger": 1.0400004386901855,
+          "energy": 99.70861053466797,
+          "social": 76.07186889648438
+        },
+        {
+          "name": "Bento",
+          "hunger": 1.7225010395050049,
+          "energy": 99.53620147705078,
+          "social": 74.44688415527344
+        },
+        {
+          "name": "Luz",
+          "hunger": 19.923574447631836,
+          "energy": 100,
+          "social": 65.79690551757812
+        },
+        {
+          "name": "Cauã",
+          "hunger": 23.06852912902832,
+          "energy": 99.45744323730469,
+          "social": 70.1969223022461
+        },
+        {
+          "name": "Nina",
+          "hunger": 19.688554763793945,
+          "energy": 99.75497436523438,
+          "social": 85.83190155029297
+        }
+      ],
+      "observations": {
+        "best": [
+          360,
+          1440,
+          720,
+          0,
+          0
+        ],
+        "best_housing_spend": null,
+        "current": [
+          360,
+          1440,
+          0,
+          0,
+          0
+        ],
+        "food_access": true,
+        "food_at_stores": 38,
+        "housing": [
+          {
+            "building": 5,
+            "spending": 122600,
+            "started": 9375
+          }
+        ],
+        "last_sample": 10545.75,
+        "leisure_day": true,
+        "net_spending": 203800,
+        "order_received": true,
+        "qualifies": [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "resources_sold": false,
+        "schema": 1,
+        "services_ready": false,
+        "shortest_delivery": 6,
+        "soil_improved": false
+      }
+    }
+  ],
+  "orders": [
+    {
+      "minutes": 525,
+      "reason": "well materials",
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 2055,
+      "reason": "home materials",
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 2535,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": false,
+      "cost": 15600
+    },
+    {
+      "minutes": 4950,
+      "reason": "kitchen materials",
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 6270,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11600
+    },
+    {
+      "minutes": 9375,
+      "reason": "home materials",
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        4,
+        2,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 12210,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11600
+    },
+    {
+      "minutes": 13905,
+      "reason": "square materials",
+      "items": [
+        0,
+        0,
+        0,
+        10,
+        0,
+        3,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": false
+    },
+    {
+      "minutes": 14895,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11600
+    },
+    {
+      "minutes": 16680,
+      "reason": "Bought tools and mature compost",
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 18255,
+      "reason": "coop materials",
+      "items": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        2,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": false
+    },
+    {
+      "minutes": 20835,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11408
+    },
+    {
+      "minutes": 22200,
+      "reason": "solar_farm materials",
+      "items": [
+        0,
+        0,
+        0,
+        6,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        2,
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 23505,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": false,
+      "cost": 15408
+    },
+    {
+      "minutes": 25155,
+      "reason": "streetlight materials",
+      "items": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 26595,
+      "reason": "Electrical connection kit",
+      "items": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": true
+    },
+    {
+      "minutes": 27060,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": false,
+      "cost": 15408
+    },
+    {
+      "minutes": 28485,
+      "reason": "eco_toilet materials",
+      "items": [
+        0,
+        0,
+        2,
+        4,
+        0,
+        0,
+        0,
+        3,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": false
+    },
+    {
+      "minutes": 29985,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": false,
+      "cost": 15408
+    },
+    {
+      "minutes": 30855,
+      "reason": "wetland materials",
+      "items": [
+        0,
+        0,
+        4,
+        8,
+        0,
+        0,
+        0,
+        0,
+        2,
+        3,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": false
+    },
+    {
+      "minutes": 33780,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": false,
+      "cost": 12272
+    },
+    {
+      "minutes": 39480,
+      "reason": "biodigester materials",
+      "items": [
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        6,
+        2,
+        3,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pickup": false
+    },
+    {
+      "minutes": 40920,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11888
+    },
+    {
+      "minutes": 43755,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11888
+    },
+    {
+      "minutes": 49470,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": true,
+      "cost": 11888
+    },
+    {
+      "minutes": 51555,
+      "reason": "Bridge the observed pantry reserve",
+      "pickup": false,
+      "cost": 15984
+    }
+  ],
+  "days": 37.635416666666664,
+  "buildingKinds": [
+    "well",
+    "home",
+    "garden",
+    "kitchen",
+    "grove",
+    "square",
+    "coop",
+    "solar_farm",
+    "streetlight",
+    "eco_toilet",
+    "wetland",
+    "biodigester"
+  ],
+  "optionalNotBuilt": [
+    "warehouse",
+    "compost",
+    "workshop",
+    "greenhouse",
+    "banana_treatment",
+    "hydro",
+    "orchard",
+    "goat_pasture",
+    "apiary"
+  ],
+  "outcomes": {
+    "best": [
+      360,
+      1440,
+      720,
+      240,
+      720
+    ],
+    "best_housing_spend": 92800,
+    "current": [
+      360,
+      1440,
+      720,
+      240,
+      720
+    ],
+    "food_access": true,
+    "food_at_stores": 32,
+    "housing": [],
+    "last_sample": 54660.75,
+    "leisure_day": true,
+    "net_spending": 603623,
+    "order_received": true,
+    "qualifies": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "resources_sold": false,
+    "schema": 1,
+    "services_ready": true,
+    "shortest_delivery": 6,
+    "soil_improved": true
+  }
+}

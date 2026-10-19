@@ -1,4 +1,5 @@
 import {checkSandboxRules} from './sandbox-browser-checks.mjs';
+import {checkStoryControls} from './story-browser-checks.mjs';
 import {checkSupplierControls,checkSupplierSandboxSave} from './supplier-browser-checks.mjs';
 import {checkMaintenanceControls,checkMaintenanceSandboxSave} from './maintenance-browser-checks.mjs';
 import {checkSkillControls,checkSkillSandboxSave} from './skills-browser-checks.mjs';
@@ -78,6 +79,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const original=await page.evaluate(()=>window.solarDev.snapshot());
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   await checkInterfaceControls({page,saved,capture});
+  await checkStoryControls({page,saved,capture});
   assert.equal(original.village.economy.sources.length,0,'New villages start without fixed resource sites');
   await checkLandControls({page,saved,capture});
   await checkRestorationControls({page,saved,capture});
@@ -100,20 +102,23 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     await page.locator('#dev-close').click();
   }
   await storyCheckpoint(9);
-  assert.equal(await page.locator('#goal-action').textContent(),'Open Land & materials');
-  await page.locator('#goal-action').click();
+  await page.keyboard.press('j');
+  assert.equal(await page.locator('[data-chapter]').count(),13);
+  assert.equal(await page.locator('.quest-card:not([hidden]) [data-quest-art]').getAttribute('data-quest-art'),'adobe-gable');
+  const materialChoices=page.locator('.quest-card:not([hidden]) .journal-options');
+  if(!await materialChoices.evaluate(el=>el.open))await materialChoices.locator('summary').click();
+  const materialPath=page.locator('.quest-card:not([hidden]) .journal-option').filter({hasText:'Harvest the five local materials'});
+  assert(await materialPath.isVisible());
+  await materialPath.getByRole('button').click();
   assert(await page.locator('#projects-panel').isVisible());
   assert(await page.locator('#land-sources').evaluate(el=>el.closest('details').open));
   await page.getByRole('button',{name:'Close projects',exact:true}).click();
   await page.keyboard.press('j');
-  assert.equal(await page.locator('[data-chapter]').count(),13);
-  assert((await page.locator('#quest-total').textContent()).includes('9 of 13'));
-  assert((await page.locator('.quest-card:not([hidden]) .quest-guidance').textContent()).includes('request a mature harvest'));
-  assert.equal(await page.locator('.quest-card:not([hidden]) [data-quest-art]').getAttribute('data-quest-art'),'adobe-gable');
   await page.locator('[data-chapter="12"]').click();
   assert((await page.locator('.quest-card:not([hidden]) h3').textContent()).includes('A Village in Balance'));
-  assert(!await page.locator('[data-track="12"]').isEnabled());
-  await capture('Thirteen Story chapters and the locked finale','story-journal.png');
+  assert((await page.locator('.quest-card:not([hidden])').textContent()).includes('Keep the village comfortable for twelve dry hours'));
+  assert(!(await page.locator('.quest-card:not([hidden]) .objective').allTextContents()).some(text=>/every building/.test(text)));
+  await capture('Outcome chapters retain optional material paths and a sustained dry-period finale','story-journal.png');
   await page.locator('#close-journal').click();
   await page.locator('#dev-button').click();
   // Replay the concern when it actually emerged; a changed work layout can
@@ -416,7 +421,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     const state=await page.evaluate(()=>window.solarDev.snapshot());
     if(expected)assert(state.residents.some(r=>r.task===expected),`${id}: expected ${expected}`);
     if(id==='autonomy'){
-      assert.deepEqual(state.residents.map(r=>r.task),['rest','eat','socialize','haul','outside']);
+      assert.deepEqual(state.residents.map(r=>r.task),['rest','eat','socialize','garden','outside']);
+      assert.match(state.residents[3].reason,/dry fruit trees/,'Existing dry fruit trees receive care before expansion');
     }
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
@@ -613,6 +619,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-dev-tab="checks"]').click();
   const download=page.waitForEvent('download');await page.locator('#dev-bundle').click();
   const diagnostic=await download;await diagnostic.saveAs(path.join(output,'diagnostic.json'));
+  await checkSceneExport({page,output});
+  screenshots.push({label:'Game canvas exported through its own capture control',file:'native-scene.png'});
   assert(JSON.parse(await readFile(path.join(output,'diagnostic.json'),'utf8')).diagnostics.residents.length===5);
   await page.locator('#dev-close').click();
   await page.evaluate(()=>window.solarDev.loadScenario('village'));
@@ -695,4 +703,17 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkSandboxRules({browser,base,output,screenshots,errors});
   await checkArtworkInterface({browser,base,output,screenshots,errors});
   assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
+}
+
+export async function checkSceneExport({page,output}) {
+  const before=await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
+  const pending=page.waitForEvent('download');
+  await page.locator('#dev-capture').click();
+  const download=await pending;assert.equal(download.suggestedFilename(),'solar-friends-scene.png');
+  const file=path.join(output,'native-scene.png');await download.saveAs(file);
+  const bytes=await readFile(file),size=await page.locator('#world').evaluate(el=>[el.width,el.height]);
+  assert.deepEqual(bytes.subarray(0,8),Buffer.from([137,80,78,71,13,10,26,10]),'The capture is a real PNG');
+  assert.deepEqual([bytes.readUInt32BE(16),bytes.readUInt32BE(20)],size,'Export the full game canvas at its real resolution');
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),before,'Capturing never advances or changes the village');
+  console.log('PASS: native scene PNG download, full canvas dimensions and unchanged village state.');
 }

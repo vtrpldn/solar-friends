@@ -1,0 +1,1057 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-16T13:44:51.187Z",
+  "count": 175,
+  "results": [
+    {
+      "file": "web/agriculture-ui.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "sha256": "3c52f5e865532f32bd60b56bed24e6b53acb65b318b4c6c8aae2ff0855646d6e"
+    },
+    {
+      "file": "web/artwork/catalog.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "sha256": "2bbd0845854a7a964b5489b9aac876fbb42a44a443b661d1aefc57fae7897dfa"
+    },
+    {
+      "file": "web/artwork/checks.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "sha256": "55355fb4763577689971def2293b3640c219172c47a6a0d4abfa11bd68222fbf"
+    },
+    {
+      "file": "web/artwork/grid-fit.js",
+      "status": "PASS",
+      "seconds": 0.037,
+      "sha256": "5bf05c3f764597759be9d18545ad5605d8c898025dd146b134906d0c5bccd905"
+    },
+    {
+      "file": "web/artwork/pixel-checks.js",
+      "status": "PASS",
+      "seconds": 0.035,
+      "sha256": "ce9d86667e89468e9a3bb6cc8907df1d0fc17ce33e5aa6986358dc7fbf139c75"
+    },
+    {
+      "file": "web/artwork/projection.js",
+      "status": "PASS",
+      "seconds": 0.036,
+      "sha256": "b6e5d52fb27be114eaf18ab0bb34c41fd910c6a1b86807363c3f1aac73a714b2"
+    },
+    {
+      "file": "web/artwork/recipes.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "dc76fea43b8300437a288051fdf898d660bc5a7f9a28703e9713bd6993d2c97b"
+    },
+    {
+      "file": "web/artwork/studio.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "2e27f0d7f11a779e5293383c4a8809aa34856925979667456e2fdf78bb7bd684"
+    },
+    {
+      "file": "web/artwork/workbench.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "3d657afa59fbccc3d16c4b1153fb9f40f82923df6823934b3e29fde045ffa4f4"
+    },
+    {
+      "file": "web/battery-art.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "3b1e35e481dd9c0deeb3eab7e74e18cc9c626d566e68a7eee33be48f2861ec61"
+    },
+    {
+      "file": "web/battery-plots.js",
+      "status": "PASS",
+      "seconds": 0.041,
+      "sha256": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84"
+    },
+    {
+      "file": "web/build-menu.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "sha256": "dd4e020af275a2a30d63d346e232cd47a7f900855dccfd7b62683c3716299d92"
+    },
+    {
+      "file": "web/building-art.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "sha256": "6c6a6043bd7fbd8332a9bd84c9a24764ce37f6ffba8b705ae0f97db3c03afe8a"
+    },
+    {
+      "file": "web/building-footprints.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "69c306cbe88e5c2239f579cd89f9534cadb899dcb26c93369eff202a333b7561"
+    },
+    {
+      "file": "web/building-mesh.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "0aec4f4db53e33163e79b87d5e282a503f352e7e28e47f6be8643dafe8d33959"
+    },
+    {
+      "file": "web/building-projection.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "16f1305f8e63e16a0db2c584e4834b0c32502e5f9ff5e3974fe5f721d387d263"
+    },
+    {
+      "file": "web/building-silhouettes.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "sha256": "da5cb26bb56d7aa8b3b154b28f4c0d03919303b8b76a5ffc6745b2c407db9e43"
+    },
+    {
+      "file": "web/chickens.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "f6f5bae76ae524bb4369c860ff8b4f779440e6e23c6c9ff8940cbbb6abbf7218"
+    },
+    {
+      "file": "web/climate-ui.js",
+      "status": "PASS",
+      "seconds": 0.034,
+      "sha256": "d41227d9a4616cdae4d5ea34e251fef28288b089ba1e640ccd36c837e29afcd5"
+    },
+    {
+      "file": "web/crop-art.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "d1fb863e3ce5761e06bf5dc6ed9ae411216ac7452bb9a2a1f61000423321f9ca"
+    },
+    {
+      "file": "web/dev/art-draft.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "90061bafd03a04fc778d8f0fb186ddb1bdbae5022a1c3f47dd5029fb84ecc6d2"
+    },
+    {
+      "file": "web/dev/art-preview.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "26019292ae58bb1d0338c4f9b9a706550e920fb0d94c0ce7fc936eaaa4a21a19"
+    },
+    {
+      "file": "web/dev/autonomy-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "bad6ae0bd80b875d4f86473c4f58fb0228d0baef9b9ae3df8ea2a87755fa1455"
+    },
+    {
+      "file": "web/dev/climate-fixture.js",
+      "status": "PASS",
+      "seconds": 0.034,
+      "sha256": "76f1986a9af883764d5252dfe41088a537e031da03aefffffbf09c6aeefc44f5"
+    },
+    {
+      "file": "web/dev/electrical-fixture.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "sha256": "c6db06b3a7269b1de79ea041e3f7248f8c69b2a7c842fcc7f68ee08fe57a2251"
+    },
+    {
+      "file": "web/dev/maintenance-fixture.js",
+      "status": "PASS",
+      "seconds": 0.037,
+      "sha256": "969ee72eb0319da98a1b8b2c378f6cb0a92e99a4268d5a3aceade84f4a919634"
+    },
+    {
+      "file": "web/dev/material-fixture.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "sha256": "74347480656b9aa92f0960b1c04672638b8bee184121cfbcff6ea12816b37050"
+    },
+    {
+      "file": "web/dev/sandbox-fixture.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "sha256": "b394d6ce23b6d6e70c22f1eb479e99d9e54dffc056c47a62637b12b7c172b5a4"
+    },
+    {
+      "file": "web/dev/scenarios.js",
+      "status": "PASS",
+      "seconds": 0.036,
+      "sha256": "44b67ba0374076124809794d9cd1c333608ddd3ef08a41aa25042b13498e57bb"
+    },
+    {
+      "file": "web/dev/story-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "6cf4414e43ff8e48a73cba960080fc1723e89e537291acac0ff00b27e9256f2e"
+    },
+    {
+      "file": "web/dev/tools.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "f9670c0e6100c190990d1b8e5c1f9684e6172477a843463d17a356e290023ab3"
+    },
+    {
+      "file": "web/dev/utility-planner.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "4568d42503a6c96a3ce683ad06ff8c51f3849c2bbebdb50c2c376c303824926f"
+    },
+    {
+      "file": "web/economy-art.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "5613d9f4c0920a246aef5a31ff9a6bff74289bc0422578e49011e0ef02b7d063"
+    },
+    {
+      "file": "web/economy-ui.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "e25979f6467987b86ca2227ab298b34a0cc81a43a3a93e67aa478580af268345"
+    },
+    {
+      "file": "web/electricity-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "1a3b514d3d1afe2752a418acee3558a001d631bbabe96573043cc21d33ab1432"
+    },
+    {
+      "file": "web/forecast-worker.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "5cf47c113d8b06491c572ae1934957e50054d25f4bba68891d3d96f86296dcb7"
+    },
+    {
+      "file": "web/forecasts.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "sha256": "7f9eba4dba450a4b70c65e0d7cad6d008cece7ce10eeb7c9fe7bc8e5ee74fe31"
+    },
+    {
+      "file": "web/freshness-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "655b3ccb8e50d2d79a5a95c73cd4053e2dd1ff4d4607c63bbb26a8f8f8fefebd"
+    },
+    {
+      "file": "web/game-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "32157c6162c71b55978e190931149fa4b904b127579d588058aebed8da63df8a"
+    },
+    {
+      "file": "web/gathering-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "3a15f4975e04af9783ff7eaec330fc88c514fdb42fb3171122be4d7e3d109102"
+    },
+    {
+      "file": "web/greenhouse-layout.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8"
+    },
+    {
+      "file": "web/land-map.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "7d7efd4874c87c6f41bc129307e6332cfdad3b4e3b1e7a2c4511103703fe050f"
+    },
+    {
+      "file": "web/logistics-art.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "aa547595125fc0e50c07baf3129bbf4904ff85f75497dc768794dfb3c02099a3"
+    },
+    {
+      "file": "web/main.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "sha256": "1b4a5539c8ff3e4af3a9ce8c98761e61e9c01335c14c36d1021ed1b35bd239b1"
+    },
+    {
+      "file": "web/maintenance-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "fa29b229300834129fa17bd8a09059f48e629b275952a4d3ee8094f0f3689bdd"
+    },
+    {
+      "file": "web/night-lighting.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "e87f0c97c5176229c7a3eb1b00e5e22b0aada11a6f37c5b881dcbe6eddae5e9b"
+    },
+    {
+      "file": "web/planting-ui.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "72b950ed72a46eed24f03df7632bd557a0316247c6a91ed90a633cb913e97fa2"
+    },
+    {
+      "file": "web/polish.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "0bf85f701a4a398fdc10eba7df4251cee895d0ba499fe0c79d87dc9986da8995"
+    },
+    {
+      "file": "web/power.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "4b94dd05027feac390df6565740839ed8ed3971342bce92db7e9deb1ff60a65a"
+    },
+    {
+      "file": "web/process-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "02e0c9d823e0f27713a6412b190dc7e976227bea05e0a3119ee9ce5bb680de9f"
+    },
+    {
+      "file": "web/production-ui.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "75287f938abc17489e171f3bf2dfb323c66741902f03fdb3dcc297796572aee8"
+    },
+    {
+      "file": "web/projection.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "0e6c4a4372a9cfc7db8802cf9f387a4f9e97f1f08758e6c69e58f3949bf62506"
+    },
+    {
+      "file": "web/quests.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "9ffe7a0135810afa0f6b422d28aa5a28292f1b5685054a282a581a1143d63049"
+    },
+    {
+      "file": "web/resident-animation.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "c65be284075afc5298f918920268c50efc3da74923443b4dda94e18437d3264c"
+    },
+    {
+      "file": "web/resident-presence.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "3adfa8d439a1ca51473708d8df994aebd1182004666319f082a6f7d971fe9810"
+    },
+    {
+      "file": "web/resident-skills.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "ce6b2f1215e761c9d7ad6751836916a3123b0d240436f36f21c7df25ebb2770d"
+    },
+    {
+      "file": "web/resource-sites.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "b91fc2d22f5ebb7a5b4d5595240f9498071a0df3e8f4eee0e705cd7bf043c6b4"
+    },
+    {
+      "file": "web/restoration-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "a927206c30bdc1cfde666a220b44681b5c86e5b3d562ae94c1c2deb575410927"
+    },
+    {
+      "file": "web/sandbox-rules.js",
+      "status": "PASS",
+      "seconds": 0.081,
+      "sha256": "31fc6ab85c89bafdbbbdb214c523ff95b2248611106f282d128478d944a2f34b"
+    },
+    {
+      "file": "web/settings.js",
+      "status": "PASS",
+      "seconds": 0.079,
+      "sha256": "30103668bb7270e27ae46a68ddb5bd96121c59bc9bc79d20cd5860ea8b0de22d"
+    },
+    {
+      "file": "web/simulation-speed.js",
+      "status": "PASS",
+      "seconds": 0.074,
+      "sha256": "b836e6a84fbe2c34780c3c5c76d5be0e48d4452865e0627c5eb4a1b077bf035d"
+    },
+    {
+      "file": "web/situations.js",
+      "status": "PASS",
+      "seconds": 0.076,
+      "sha256": "508eb0b265be748841be42e0de357a18ec4f2e8d70ceb64afb2ecf8300472816"
+    },
+    {
+      "file": "web/sprite-frames.js",
+      "status": "PASS",
+      "seconds": 0.101,
+      "sha256": "b7b59266c090add9d6e4ed9a05a719dd25bd40ff529113534840190a09fcc983"
+    },
+    {
+      "file": "web/supplier-ui.js",
+      "status": "PASS",
+      "seconds": 0.057,
+      "sha256": "2f7f8d2e13bf93e66741d8588faf9f836e4c0551dfa88d3ccec1ca13bdfb27df"
+    },
+    {
+      "file": "web/terrain.js",
+      "status": "PASS",
+      "seconds": 0.045,
+      "sha256": "93859ccee3357496ec299c9f4138bb5befaf62ab810395fc545602709ce8ab9d"
+    },
+    {
+      "file": "web/utility-lines-art.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e"
+    },
+    {
+      "file": "web/village-audio.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "49b5a3e74bbad13c28d3b1944027661938bee13847ea3fcc4d960edbf823b321"
+    },
+    {
+      "file": "web/village-storage.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "7aa967c90cbea802ed7b7ef314d875587b1df9e45bebfbb865404e7363cc1eb2"
+    },
+    {
+      "file": "web/water-connections.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "0f6ed61583acf4f237e2983c12e195d9fec32e344b3b3ebdaeeaa9e72ea95a5d"
+    },
+    {
+      "file": "web/water-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "0ecefc68f91bd981b2ce6f13868e78b4f5a5f04c85d427e581e99dd0ad258d39"
+    },
+    {
+      "file": "web/weather.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "5acdaf1ad8eeb5aacf4ca8bdced03faa3caf26db6bd769108b847d33d552d67b"
+    },
+    {
+      "file": "scripts/battery-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "bbd7b9af2cbe61e974a374a8b9e8ea8c3667ba8968653d438ed0b1f9337b302c"
+    },
+    {
+      "file": "scripts/browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "16f599998accb57f572c298d9fe1514798a986058baa8d89f0290be263ce35f0"
+    },
+    {
+      "file": "scripts/climate-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "f517ee9ab187524e5e120b75e0f64f4de835ff1acdd2c6745c0b635add1f108e"
+    },
+    {
+      "file": "scripts/cultivation-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "417ea6f5483b6426ad5e043e43cbdaed01c257c213eb584ecdfdd66673d2e261"
+    },
+    {
+      "file": "scripts/dev-check.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "fd52c7a8594585390e303641a13172147f87ec76c63a045afea0c7234e943a82"
+    },
+    {
+      "file": "scripts/electricity-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "6e6ecce0c355ee8a52213b8780b9ab8f18fd601538a7b4c344056cd062ab8559"
+    },
+    {
+      "file": "scripts/farming-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "d2f273cc9dadfb04305d7d0f22207d83dcd720deb1b093fcd8657191b8be6b29"
+    },
+    {
+      "file": "scripts/food-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "c445e3ce55cdf7129a79de6307cb231df29a3718b0029b87f322dd9fbf9dd102"
+    },
+    {
+      "file": "scripts/freshness-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "716c550a652e7f2d55bdcd12b8da8713b78d5dfd61fb1719cd91f857b01bbee4"
+    },
+    {
+      "file": "scripts/gathering-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "797570f9a3f2cd34d5579ffe6e61fdaac8a1dc6e11b2cd064b0046d2214fd713"
+    },
+    {
+      "file": "scripts/housing-planning-run.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "0826e51389e2f8be33f313fe14e66069a61b832ed95a4aee03cbd55ad4ca52d5"
+    },
+    {
+      "file": "scripts/interface-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "157d269bb280e302f49720b6e2c507b339af82254543e7dc758ef272efcd24bf"
+    },
+    {
+      "file": "scripts/kitchen-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "91a313c2a3d67f74100e934528003d824d7f04ad611f82c2d8dbfad536b1cd07"
+    },
+    {
+      "file": "scripts/land-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "116808dc825128d51067c0465031b4225d11dcbbaf8d8731e5c3e35c978e7f64"
+    },
+    {
+      "file": "scripts/lib/png-alpha.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "66aa03e1e6046b65fb6e5e7449d73cb44cdd64ded0f75fd2af800eb84882e03c"
+    },
+    {
+      "file": "scripts/living-land-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "a2edce2786121b1175ed44e989bbd1b824cc8423ff025e2d5a4c7b3aaa48a773"
+    },
+    {
+      "file": "scripts/maintenance-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "2317c2950446892bb5252c50f006c51ae31c5b10dc0708202b366d9739e8bfbc"
+    },
+    {
+      "file": "scripts/organics-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "bc15009b4266824e728bbd47123c88551c5cded0934691d147fc731b69ad3ff7"
+    },
+    {
+      "file": "scripts/pipes-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "cdf43d93df4386d019ca9ca40193a6ab587ddba6832e09a1fbedd6bfa9c7ff67"
+    },
+    {
+      "file": "scripts/planting-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "e90a82d6dd0aa29d630e1db099f398ab8ef6f372a7ddcd28cddab42bd67003a1"
+    },
+    {
+      "file": "scripts/process-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "ea355ceaa975d2ea8957e2a675a62998892a2f7d7c68629bcc0c0e7b83b7253f"
+    },
+    {
+      "file": "scripts/restoration-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "7efff99e6afd8dd34af55b3c2ddee911d30d8441406a267d703397215972b1dc"
+    },
+    {
+      "file": "scripts/sandbox-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "9042ac57ac8e1b11320b7fd393f6c544133ae23f4ad17d0a8c64bfe60ae8a94e"
+    },
+    {
+      "file": "scripts/sanitation-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "4a6036dce85f8c54a0cc700e2db499fd8407b2941efdf587aa7e44482fe11535"
+    },
+    {
+      "file": "scripts/serve.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "b4b4663190d629f9b90aa3342d77d167b065a1eabd15cd99cdccf5e0dd75b825"
+    },
+    {
+      "file": "scripts/skills-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "7d8057f0b62a9ccf0df1f71522c9fc27134778c54603ed378543cb3cce4dde1e"
+    },
+    {
+      "file": "scripts/story-all-paths.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "296b796b493299ca2f811916ebaa988819966aa3186d89a73354764eeb4d2b7a"
+    },
+    {
+      "file": "scripts/story-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "aecfda9f14094146500bd8d052331edc3d0355e29586fd3b05df701ef78dcddd"
+    },
+    {
+      "file": "scripts/story-fixture.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "ca0ec90d52e0de3dead7cc2141f6741509cf0ffde3e67c6f0f31233e5fd1b26c"
+    },
+    {
+      "file": "scripts/story-planning-run.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "a47ef19a953af8f251b47c7f2563d12c8abc357b9d9283cfe5db45a4c56ebe57"
+    },
+    {
+      "file": "scripts/supplier-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "4f5ca9113147bca1d87c1f60e6e99e641a1da610cb795330595b1bef9d4dda1a"
+    },
+    {
+      "file": "scripts/sync-art-prompts.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "9c08511c27bb0d4f8ad42be5e9b8ff8e5b9c75ab35289a6be9508e09e062a9d0"
+    },
+    {
+      "file": "scripts/sync-building-silhouettes.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "ca546d514882dc48bdf53a2ac9bce7190b067177478b5f9760476d7ff57bdd93"
+    },
+    {
+      "file": "scripts/tool-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "dde1212ecfe36b6eef9545cfa46987602be968dbdfb3815b186df14d5301234e"
+    },
+    {
+      "file": "scripts/upkeep-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "6c564a59b2adc93b5a98767fb3d2eacf4a20af52a039b95ddee01dbcf6007ee4"
+    },
+    {
+      "file": "scripts/utility-routes-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "2b7b1f2cb997b02997d0f5d15bbd92a77929efde0445c4620c1021d2ef8bf1f5"
+    },
+    {
+      "file": "scripts/verify-art-preview.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "3be0428bdc805d3b298a817dd52c472b6c26e293b38aa1655e0c19b271fc58cd"
+    },
+    {
+      "file": "scripts/verify-artwork.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "418050dd4017c5260fdee446413a3d50d5cf69d3b4afe01944ffa03af8f6ef0c"
+    },
+    {
+      "file": "scripts/verify-autonomy.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "c1014487cf84a133c61d842eeacc3025ccf4ac8f560c37dffad4ef10c9be65f0"
+    },
+    {
+      "file": "scripts/verify-away-routines.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "12708d4b8df6b070cc949efeabd2b1211150d7bde607ef13d44d27a5199901db"
+    },
+    {
+      "file": "scripts/verify-banana-treatment.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "0041a45c2faf875116f073fabf09e6d72cee6ed02a23738eaf205ac4eaf2fd76"
+    },
+    {
+      "file": "scripts/verify-batteries.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "acea20e8e3d73b7a6cbccf890d9145db2d1c18c48ca00729e1f3290c35a35b36"
+    },
+    {
+      "file": "scripts/verify-building-projection.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "32d32c51613b56289aaf06690d608f439f879fdb4c199eec70e2cb72bd2bc04a"
+    },
+    {
+      "file": "scripts/verify-building-work.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "a477f82f4f85decffe1d0447ac17546c14299b02cac18a204e2967d702c51590"
+    },
+    {
+      "file": "scripts/verify-chickens.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "6f72328b94b0166fd6b234c6bd3509ddc6657fd60b95dff461fc71b29b3a884b"
+    },
+    {
+      "file": "scripts/verify-circular.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "965d1f2e1894a705d63ff9f11402a1606e8630745ef074a0674015425511f681"
+    },
+    {
+      "file": "scripts/verify-climate.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "cdf16791700f70b2cd2f3386bc2dfe07379e00a6db08a29ae75c0f4cef09f1c0"
+    },
+    {
+      "file": "scripts/verify-cultivation.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "10a16b87f1fcf75ca1f573bc0f237c2a0fdf7a23a602057ffda339292b555a0a"
+    },
+    {
+      "file": "scripts/verify-dev-tools.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "cc9dbf678dfba01c04184d022978ecc6135829f35c47695dd87e5b73cb3d172f"
+    },
+    {
+      "file": "scripts/verify-economy.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "3c24b5c73e5732af17b2390dd8f6f2c59c11559ca957e0cfa332836f44100f17"
+    },
+    {
+      "file": "scripts/verify-electrical-fixtures.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "0905e35729d787147c6f7ab4931c2422e00a18d69cdc6e484b0a970c8aa9a91c"
+    },
+    {
+      "file": "scripts/verify-electricity.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "0bfbd26034d188404c2f2760c76e6ed980b429729f9c6ffdd489ce68d85a90d8"
+    },
+    {
+      "file": "scripts/verify-farming.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "5cefe09c92bb3aa61b308bfc34072d6f1c3b6b943fbedb855b6f789bea28296f"
+    },
+    {
+      "file": "scripts/verify-food.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "c0170e14af81679d451a6a6fb59b99bc60c73552d05f7f64f6f82e27bbd33b7a"
+    },
+    {
+      "file": "scripts/verify-forecast.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "287086e6151fd93aaae0b74e21729acf738936eb1df2a3421c34f479cfdbfcdc"
+    },
+    {
+      "file": "scripts/verify-freshness.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "4e90a6cd957ed296d3e89f8fb98a7ad962a5a3700249146bff5e95f15e5330ab"
+    },
+    {
+      "file": "scripts/verify-gatherings.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "b792f33b9ff376aec343d939f6edd0d6db459c196866362cb0e7d8ca54a3eba5"
+    },
+    {
+      "file": "scripts/verify-grid-foundations.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "c8a3372aab2be5625aa0d5dfd93cb8c2d850c1e90c562e9e66d08d00b0bbd98d"
+    },
+    {
+      "file": "scripts/verify-housing-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "a8f27805ffea88606e80fcfc467f35fc20a98a703c2bc186c0f410fc668cafbe"
+    },
+    {
+      "file": "scripts/verify-kitchen-batches.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "c95b1040bbf5b1e7336d50e1b05de63d06ad4116f46fefc239cc3579c87f22ee"
+    },
+    {
+      "file": "scripts/verify-land.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "ac0caa3983c4bc213da1a9f746488cd03cd7c4f6c2181c5b464d64ca434baaea"
+    },
+    {
+      "file": "scripts/verify-leisure.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "28cb59979dd882ca4b839cfb2f15a00d9ec8fedac0c8f149df1908202be0d0a9"
+    },
+    {
+      "file": "scripts/verify-living-land.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "81fa44ee26971d8eca99df65b75decb54cbe012fa367703ae95658ce279c350a"
+    },
+    {
+      "file": "scripts/verify-logistics.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "6eba3e7ccf7a46098127e3efcae92f6681c59b24e8ef1da8f9265c0d0353d3d1"
+    },
+    {
+      "file": "scripts/verify-maintenance.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "77682ef5aa8611824deb81b43704db66b5619d5cee9bf6bb2c827635dda8d53d"
+    },
+    {
+      "file": "scripts/verify-modes.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "de57ffb99ebdaef46fe70c83a99786338487fe39778fdf54743f88a139d50d9b"
+    },
+    {
+      "file": "scripts/verify-navigation.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "sha256": "1c5db4a7b9ad15b6f7109292e1eb70111d09901bf3d7df1f7dea0707580bf5b3"
+    },
+    {
+      "file": "scripts/verify-night-lighting.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "85a058e662836546c74b520a5fa7ab57f62b22a223789ac753117cf506cfc32a"
+    },
+    {
+      "file": "scripts/verify-occupations.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "32cc43857fea4f2bfa0484c2b3a2f15f4bcf7a4cdad95aeeddfe46a995870273"
+    },
+    {
+      "file": "scripts/verify-organics.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "bcc14b981e873f4ad467ef4fd3ce164211926fc0988809acc1c815762625fb79"
+    },
+    {
+      "file": "scripts/verify-passive-processes.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "6fa57989508a5a207c6aee8804d06dc724424c72673fd85d2c3aba0c75404961"
+    },
+    {
+      "file": "scripts/verify-pipes.mjs",
+      "status": "PASS",
+      "seconds": 0.026,
+      "sha256": "fbe5a5ad1c4df2ddd7aa6d5d5c62f134dfadcc7197a2c8fb1fd5e29a8679e299"
+    },
+    {
+      "file": "scripts/verify-planning-paths.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "3c0b440e0fb113f2d56c88af0e6e19255a733c3c3cde207aa98de7fc902ebb3f"
+    },
+    {
+      "file": "scripts/verify-planting.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "5e3f9743d2ebd3389a0538dc5bbe3cc73d9f7b2828bc2fba239ccb57f024bacf"
+    },
+    {
+      "file": "scripts/verify-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "603edffea5cd8a0eab9c8dd884db850ba32b0da00d01707ea416fe4d3aa7db53"
+    },
+    {
+      "file": "scripts/verify-polish.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "de7f3dd02ef8f96778892a9ceac424299f67fe37d26a0ca8c0460ffceb42cbe2"
+    },
+    {
+      "file": "scripts/verify-power.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "67eeb64e04ca650eb83ba485d312db7ff77c6f4f44eee0bc3e8a7130474b70f7"
+    },
+    {
+      "file": "scripts/verify-production.mjs",
+      "status": "PASS",
+      "seconds": 0.036,
+      "sha256": "33bc07a1bfc5b23e2baa0e399b842a9ba990b102f3889c06846b77d1c534e79c"
+    },
+    {
+      "file": "scripts/verify-quests.mjs",
+      "status": "PASS",
+      "seconds": 0.034,
+      "sha256": "d1ef6e69ee0e0a659e24a9be897754bf8592180fd1aadf26e1a7d8581a04fbf1"
+    },
+    {
+      "file": "scripts/verify-requests.mjs",
+      "status": "PASS",
+      "seconds": 0.034,
+      "sha256": "227234c5b908a715c91938575f9e2a2166d9cc2d596288ac253f05c76b53c4f4"
+    },
+    {
+      "file": "scripts/verify-resident-animation.mjs",
+      "status": "PASS",
+      "seconds": 0.034,
+      "sha256": "bc0f10e07ffa70f54a974fce2faf68aec5d9acad168d8cfd754d001440b8c495"
+    },
+    {
+      "file": "scripts/verify-resource-sites.mjs",
+      "status": "PASS",
+      "seconds": 0.036,
+      "sha256": "b850a3ce839afd5575e4a1cc9b4ee0e9814c48cf0c15c2e3de62474243af5b3e"
+    },
+    {
+      "file": "scripts/verify-restoration.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "sha256": "a9a07dbd7d638bdff5878e269cb8fed11519381efd4ad988d4f705b3024e10ed"
+    },
+    {
+      "file": "scripts/verify-sandbox-rules.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "sha256": "b91723bd9b2fcd80c8bc5489b93a90c7f9e057e75f52893f9c7cfdf8d48130a2"
+    },
+    {
+      "file": "scripts/verify-sanitation.mjs",
+      "status": "PASS",
+      "seconds": 0.037,
+      "sha256": "d220e91bd7bb81f0be91aaeae301753eaca47aa68d51a784b17f05b8806003e4"
+    },
+    {
+      "file": "scripts/verify-seasonal-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "sha256": "d7cd3987958b35c9aa0fbcdd8ff79ea32a1e6a695a3f4bb501e49564142cdfc7"
+    },
+    {
+      "file": "scripts/verify-simulation.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "c876294df6e6ed056dec8010f9a653097b5543535579303a2051ba65358a9bb5"
+    },
+    {
+      "file": "scripts/verify-situations.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "d72c6125d742a5172e374bcce74dffde4495c6534e0742e6dbdbf602c4755d75"
+    },
+    {
+      "file": "scripts/verify-skills.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "315e926bc1d297a15a0c2b0705b82f37be49b1a1a739a2a7940abecef58c8ca6"
+    },
+    {
+      "file": "scripts/verify-sleep-speed.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "e39e8b52977d039a1c8eeceb18721bcc9c3165bf1b5d70a305d23ea6840b2493"
+    },
+    {
+      "file": "scripts/verify-sprite-frames.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "18308813dfa60a837014d4556105919bf8bd3cc81158bd55c56df7bf9edb5e09"
+    },
+    {
+      "file": "scripts/verify-sprite-grid-fit.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "sha256": "4fc6511537b84dc9ca105e3f40157db502267cf039beb21307edf2d9a6751ce8"
+    },
+    {
+      "file": "scripts/verify-storage.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "2c8e30d0bc17e62fe0c0c17a4bf901b56ee8737b39a7a5317f1a433ef9225dd8"
+    },
+    {
+      "file": "scripts/verify-story-objectives.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "c6907a4c7f192a6ae1e195ca0f7e945090305865a914cc0b798c631a6da33c8d"
+    },
+    {
+      "file": "scripts/verify-suppliers.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "8d845375e46ecaed419e0728b647013888882ec3533b2578118349e836bfa129"
+    },
+    {
+      "file": "scripts/verify-time-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "sha256": "7e700a89ec761954c4a40a76f7fd83f5174598f7677bc00de179f267854e2304"
+    },
+    {
+      "file": "scripts/verify-tools.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "99d5bb8fbad190d35b4e00dd225f9100442b9208edfb7fee177d48a62ac81603"
+    },
+    {
+      "file": "scripts/verify-utility-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "a31dc3fb02e1703d0156bbaabe3dd7d04cc351585cb7d7371cbcef14cfd636d2"
+    },
+    {
+      "file": "scripts/verify-utility-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "e6b2ca0915a0ef9c33ddbf9690dd51330477b43f9f0253403fbc8425df18c528"
+    },
+    {
+      "file": "scripts/verify-water.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "sha256": "22f53e81736a11a575f3f0252b3392ff9cabaa2fc1aa69c6ff4a700b465b2615"
+    },
+    {
+      "file": "scripts/verify-weather.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "161d7f30852b8b9ebe597c2954e8c78838d69caa91c31103ba9e30adeaeb736a"
+    },
+    {
+      "file": "scripts/verify-work-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "95e0ddab731b29b5ec8ab6bc37f8ba14361020ca69d45a287f5a08c3d2b24a75"
+    },
+    {
+      "file": "scripts/verify-workforce.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "sha256": "90783854c98501069a0237acb53879df41deba6ea9ad1bcc20ac8067b521f38a"
+    },
+    {
+      "file": "scripts/water-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "sha256": "1bbf254eb153d5cfd03cdf1aeb5d80ef19f7ac975d3c481b2ee1e10f292ade0b"
+    }
+  ]
+}

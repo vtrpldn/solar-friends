@@ -70,7 +70,13 @@ pub fn wanted(v: &Village, id: usize) -> bool {
         return economy::quantity(v, FODDER) < 24;
     }
     if !kind(b) {
-        return supplies::needs_ingredients(v);
+        // Keeping an existing crop alive is care, even when the pantry is full.
+        // Do not plant or harvest extra food beyond the ordinary reserve.
+        return supplies::needs_ingredients(v)
+            || ecology::farm(b)
+                && b.crop.planted
+                && b.crop.growth < ecology::duration(&b.crop)
+                && b.crop.moisture <= 45.;
     }
     if !open(v, b) {
         return false;

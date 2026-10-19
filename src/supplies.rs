@@ -3,10 +3,10 @@ use super::*;
 
 pub fn urgent(v: &Village) -> bool {
     // Leave a full round of portions while foragers walk to separate patches.
-    v.food < 6. && v.meals < 3
+    v.food < 6. && v.meals + food::other_portions(v) < 3
 }
 pub fn needs_ingredients(v: &Village) -> bool {
-    v.food < 18. && v.food + (v.meals as f32) < 30.
+    v.food < 18. && v.food + ((v.meals + food::other_portions(v)) as f32) < 30.
 }
 
 #[derive(Clone, Default, Serialize, Deserialize)]

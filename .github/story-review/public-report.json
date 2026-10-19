@@ -1,0 +1,1504 @@
+{
+  "startedAt": "2026-10-16T12:08:59.479Z",
+  "finishedAt": "2026-10-16T13:30:38.583Z",
+  "sourceAndBuildHash": "796d6dc26ef51c5af8e44a8af49bd34544b08a2c849b69705f3b64900a2ba2ca",
+  "scope": "Full development check with corrected-verifier continuation",
+  "continuation": {
+    "resumedAt": "2026-10-16T13:22:43.756Z",
+    "baselineCommit": "ccb0486",
+    "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+    "priorSourceAndBuildHash": "abdb6e9a971dff0453a99f5f819cf88a72f307dd2a993860fd7f232dce973513",
+    "priorFailure": "Utility reserve measurement excluded directly edible milk and honey. The reproduced moment held four milk and nine honey, and a real meal request claimed milk.",
+    "priorReport": "artifacts/story-food-measurement-baseline/report.json",
+    "changedSources": [
+      "scripts/verify-utility-balance.mjs"
+    ],
+    "carriedNativeChecks": 4,
+    "carriedPublicChecks": 61,
+    "repeated": "Every script syntax check, both 24-day utility cases from exact earned installation checkpoints, remaining public verifiers and the complete desktop suite"
+  },
+  "results": [
+    {
+      "label": "Rust formatting",
+      "status": "PASS",
+      "seconds": 0.677,
+      "log": "check-1.txt"
+    },
+    {
+      "label": "Rust behavior",
+      "status": "PASS",
+      "seconds": 74.215,
+      "log": "check-2.txt"
+    },
+    {
+      "label": "Rust lint",
+      "status": "PASS",
+      "seconds": 0.125,
+      "log": "check-3.txt"
+    },
+    {
+      "label": "Build WebAssembly",
+      "status": "PASS",
+      "seconds": 0.207,
+      "log": "check-4.txt"
+    },
+    {
+      "label": "Syntax: web/agriculture-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-5.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/catalog.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-6.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/checks.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-7.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/grid-fit.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-8.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/pixel-checks.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-9.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/projection.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-10.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/recipes.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-11.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/studio.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-12.txt"
+    },
+    {
+      "label": "Syntax: web/artwork/workbench.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-13.txt"
+    },
+    {
+      "label": "Syntax: web/battery-art.js",
+      "status": "PASS",
+      "seconds": 0.026,
+      "log": "continuation-14.txt"
+    },
+    {
+      "label": "Syntax: web/battery-plots.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-15.txt"
+    },
+    {
+      "label": "Syntax: web/build-menu.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-16.txt"
+    },
+    {
+      "label": "Syntax: web/building-art.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-17.txt"
+    },
+    {
+      "label": "Syntax: web/building-footprints.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-18.txt"
+    },
+    {
+      "label": "Syntax: web/building-mesh.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-19.txt"
+    },
+    {
+      "label": "Syntax: web/building-projection.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-20.txt"
+    },
+    {
+      "label": "Syntax: web/building-silhouettes.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-21.txt"
+    },
+    {
+      "label": "Syntax: web/chickens.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-22.txt"
+    },
+    {
+      "label": "Syntax: web/climate-ui.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-23.txt"
+    },
+    {
+      "label": "Syntax: web/crop-art.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-24.txt"
+    },
+    {
+      "label": "Syntax: web/dev/art-draft.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-25.txt"
+    },
+    {
+      "label": "Syntax: web/dev/art-preview.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-26.txt"
+    },
+    {
+      "label": "Syntax: web/dev/autonomy-fixture.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-27.txt"
+    },
+    {
+      "label": "Syntax: web/dev/climate-fixture.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-28.txt"
+    },
+    {
+      "label": "Syntax: web/dev/electrical-fixture.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-29.txt"
+    },
+    {
+      "label": "Syntax: web/dev/maintenance-fixture.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-30.txt"
+    },
+    {
+      "label": "Syntax: web/dev/material-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-31.txt"
+    },
+    {
+      "label": "Syntax: web/dev/sandbox-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-32.txt"
+    },
+    {
+      "label": "Syntax: web/dev/scenarios.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-33.txt"
+    },
+    {
+      "label": "Syntax: web/dev/story-fixture.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-34.txt"
+    },
+    {
+      "label": "Syntax: web/dev/tools.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-35.txt"
+    },
+    {
+      "label": "Syntax: web/dev/utility-planner.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-36.txt"
+    },
+    {
+      "label": "Syntax: web/economy-art.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "continuation-37.txt"
+    },
+    {
+      "label": "Syntax: web/economy-ui.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-38.txt"
+    },
+    {
+      "label": "Syntax: web/electricity-ui.js",
+      "status": "PASS",
+      "seconds": 0.034,
+      "log": "continuation-39.txt"
+    },
+    {
+      "label": "Syntax: web/forecast-worker.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-40.txt"
+    },
+    {
+      "label": "Syntax: web/forecasts.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "continuation-41.txt"
+    },
+    {
+      "label": "Syntax: web/freshness-ui.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-42.txt"
+    },
+    {
+      "label": "Syntax: web/game-ui.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-43.txt"
+    },
+    {
+      "label": "Syntax: web/gathering-ui.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-44.txt"
+    },
+    {
+      "label": "Syntax: web/greenhouse-layout.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-45.txt"
+    },
+    {
+      "label": "Syntax: web/land-map.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-46.txt"
+    },
+    {
+      "label": "Syntax: web/logistics-art.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-47.txt"
+    },
+    {
+      "label": "Syntax: web/main.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "continuation-48.txt"
+    },
+    {
+      "label": "Syntax: web/maintenance-ui.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-49.txt"
+    },
+    {
+      "label": "Syntax: web/night-lighting.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-50.txt"
+    },
+    {
+      "label": "Syntax: web/planting-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-51.txt"
+    },
+    {
+      "label": "Syntax: web/polish.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-52.txt"
+    },
+    {
+      "label": "Syntax: web/power.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-53.txt"
+    },
+    {
+      "label": "Syntax: web/process-ui.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-54.txt"
+    },
+    {
+      "label": "Syntax: web/production-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-55.txt"
+    },
+    {
+      "label": "Syntax: web/projection.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-56.txt"
+    },
+    {
+      "label": "Syntax: web/quests.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-57.txt"
+    },
+    {
+      "label": "Syntax: web/resident-animation.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-58.txt"
+    },
+    {
+      "label": "Syntax: web/resident-presence.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-59.txt"
+    },
+    {
+      "label": "Syntax: web/resident-skills.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-60.txt"
+    },
+    {
+      "label": "Syntax: web/resource-sites.js",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-61.txt"
+    },
+    {
+      "label": "Syntax: web/restoration-ui.js",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "continuation-62.txt"
+    },
+    {
+      "label": "Syntax: web/sandbox-rules.js",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "continuation-63.txt"
+    },
+    {
+      "label": "Syntax: web/settings.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-64.txt"
+    },
+    {
+      "label": "Syntax: web/simulation-speed.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-65.txt"
+    },
+    {
+      "label": "Syntax: web/situations.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-66.txt"
+    },
+    {
+      "label": "Syntax: web/sprite-frames.js",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-67.txt"
+    },
+    {
+      "label": "Syntax: web/supplier-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-68.txt"
+    },
+    {
+      "label": "Syntax: web/terrain.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-69.txt"
+    },
+    {
+      "label": "Syntax: web/utility-lines-art.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-70.txt"
+    },
+    {
+      "label": "Syntax: web/village-audio.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-71.txt"
+    },
+    {
+      "label": "Syntax: web/village-storage.js",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-72.txt"
+    },
+    {
+      "label": "Syntax: web/water-connections.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-73.txt"
+    },
+    {
+      "label": "Syntax: web/water-ui.js",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-74.txt"
+    },
+    {
+      "label": "Syntax: web/weather.js",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-75.txt"
+    },
+    {
+      "label": "Syntax: scripts/battery-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "continuation-76.txt"
+    },
+    {
+      "label": "Syntax: scripts/browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-77.txt"
+    },
+    {
+      "label": "Syntax: scripts/climate-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-78.txt"
+    },
+    {
+      "label": "Syntax: scripts/cultivation-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-79.txt"
+    },
+    {
+      "label": "Syntax: scripts/dev-check.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-80.txt"
+    },
+    {
+      "label": "Syntax: scripts/electricity-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-81.txt"
+    },
+    {
+      "label": "Syntax: scripts/farming-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-82.txt"
+    },
+    {
+      "label": "Syntax: scripts/food-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-83.txt"
+    },
+    {
+      "label": "Syntax: scripts/freshness-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-84.txt"
+    },
+    {
+      "label": "Syntax: scripts/gathering-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-85.txt"
+    },
+    {
+      "label": "Syntax: scripts/housing-planning-run.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-86.txt"
+    },
+    {
+      "label": "Syntax: scripts/interface-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-87.txt"
+    },
+    {
+      "label": "Syntax: scripts/kitchen-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-88.txt"
+    },
+    {
+      "label": "Syntax: scripts/land-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-89.txt"
+    },
+    {
+      "label": "Syntax: scripts/lib/png-alpha.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-90.txt"
+    },
+    {
+      "label": "Syntax: scripts/living-land-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-91.txt"
+    },
+    {
+      "label": "Syntax: scripts/maintenance-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-92.txt"
+    },
+    {
+      "label": "Syntax: scripts/organics-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-93.txt"
+    },
+    {
+      "label": "Syntax: scripts/pipes-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-94.txt"
+    },
+    {
+      "label": "Syntax: scripts/planting-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-95.txt"
+    },
+    {
+      "label": "Syntax: scripts/process-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-96.txt"
+    },
+    {
+      "label": "Syntax: scripts/restoration-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-97.txt"
+    },
+    {
+      "label": "Syntax: scripts/sandbox-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-98.txt"
+    },
+    {
+      "label": "Syntax: scripts/sanitation-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-99.txt"
+    },
+    {
+      "label": "Syntax: scripts/serve.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-100.txt"
+    },
+    {
+      "label": "Syntax: scripts/skills-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-101.txt"
+    },
+    {
+      "label": "Syntax: scripts/story-all-paths.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-102.txt"
+    },
+    {
+      "label": "Syntax: scripts/story-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-103.txt"
+    },
+    {
+      "label": "Syntax: scripts/story-fixture.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-104.txt"
+    },
+    {
+      "label": "Syntax: scripts/story-planning-run.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-105.txt"
+    },
+    {
+      "label": "Syntax: scripts/supplier-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-106.txt"
+    },
+    {
+      "label": "Syntax: scripts/sync-art-prompts.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-107.txt"
+    },
+    {
+      "label": "Syntax: scripts/sync-building-silhouettes.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-108.txt"
+    },
+    {
+      "label": "Syntax: scripts/tool-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-109.txt"
+    },
+    {
+      "label": "Syntax: scripts/upkeep-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-110.txt"
+    },
+    {
+      "label": "Syntax: scripts/utility-routes-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-111.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-art-preview.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-112.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-artwork.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-113.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-autonomy.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-114.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-away-routines.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-115.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-banana-treatment.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-116.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-batteries.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-117.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-building-projection.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-118.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-building-work.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-119.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-chickens.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-120.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-circular.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "continuation-121.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-climate.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-122.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-cultivation.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-123.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-dev-tools.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-124.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-economy.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-125.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-electrical-fixtures.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-126.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-electricity.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-127.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-farming.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-128.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-food.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-129.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-forecast.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-130.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-freshness.mjs",
+      "status": "PASS",
+      "seconds": 0.027,
+      "log": "continuation-131.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-gatherings.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-132.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-grid-foundations.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-133.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-housing-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-134.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-kitchen-batches.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-135.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-land.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-136.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-leisure.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "continuation-137.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-living-land.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "continuation-138.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-logistics.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "continuation-139.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-maintenance.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-140.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-modes.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-141.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-navigation.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-142.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-night-lighting.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-143.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-occupations.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-144.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-organics.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-145.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-passive-processes.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-146.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-pipes.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-147.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-planning-paths.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-148.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-planting.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-149.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-150.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-polish.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-151.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-power.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-152.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-production.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-153.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-quests.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-154.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-requests.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-155.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-resident-animation.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-156.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-resource-sites.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-157.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-restoration.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-158.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-sandbox-rules.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-159.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-sanitation.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-160.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-seasonal-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-161.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-simulation.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-162.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-situations.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-163.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-skills.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-164.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-sleep-speed.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-165.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-sprite-frames.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-166.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-sprite-grid-fit.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-167.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-storage.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-168.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-story-objectives.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-169.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-suppliers.mjs",
+      "status": "PASS",
+      "seconds": 0.031,
+      "log": "continuation-170.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-time-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-171.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-tools.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-172.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-utility-balance.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "continuation-173.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-utility-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.029,
+      "log": "continuation-174.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-water.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-175.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-weather.mjs",
+      "status": "PASS",
+      "seconds": 0.028,
+      "log": "continuation-176.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-work-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-177.txt"
+    },
+    {
+      "label": "Syntax: scripts/verify-workforce.mjs",
+      "status": "PASS",
+      "seconds": 0.032,
+      "log": "continuation-178.txt"
+    },
+    {
+      "label": "Syntax: scripts/water-browser-checks.mjs",
+      "status": "PASS",
+      "seconds": 0.03,
+      "log": "continuation-179.txt"
+    },
+    {
+      "label": "verify-art-preview.mjs",
+      "status": "PASS",
+      "seconds": 0.219,
+      "log": "check-180.txt"
+    },
+    {
+      "label": "verify-artwork.mjs",
+      "status": "PASS",
+      "seconds": 0.121,
+      "log": "check-181.txt"
+    },
+    {
+      "label": "verify-autonomy.mjs",
+      "status": "PASS",
+      "seconds": 9.693,
+      "log": "check-182.txt"
+    },
+    {
+      "label": "verify-away-routines.mjs",
+      "status": "PASS",
+      "seconds": 0.913,
+      "log": "check-183.txt"
+    },
+    {
+      "label": "verify-banana-treatment.mjs",
+      "status": "PASS",
+      "seconds": 0.555,
+      "log": "check-184.txt"
+    },
+    {
+      "label": "verify-batteries.mjs",
+      "status": "PASS",
+      "seconds": 8.373,
+      "log": "check-185.txt"
+    },
+    {
+      "label": "verify-building-projection.mjs",
+      "status": "PASS",
+      "seconds": 0.159,
+      "log": "check-186.txt"
+    },
+    {
+      "label": "verify-building-work.mjs",
+      "status": "PASS",
+      "seconds": 14.471,
+      "log": "check-187.txt"
+    },
+    {
+      "label": "verify-chickens.mjs",
+      "status": "PASS",
+      "seconds": 0.393,
+      "log": "check-188.txt"
+    },
+    {
+      "label": "verify-circular.mjs",
+      "status": "PASS",
+      "seconds": 1.431,
+      "log": "check-189.txt"
+    },
+    {
+      "label": "verify-climate.mjs",
+      "status": "PASS",
+      "seconds": 0.251,
+      "log": "check-190.txt"
+    },
+    {
+      "label": "verify-cultivation.mjs",
+      "status": "PASS",
+      "seconds": 3.264,
+      "log": "check-191.txt"
+    },
+    {
+      "label": "verify-dev-tools.mjs",
+      "status": "PASS",
+      "seconds": 1.315,
+      "log": "check-192.txt"
+    },
+    {
+      "label": "verify-economy.mjs",
+      "status": "PASS",
+      "seconds": 234.481,
+      "log": "check-193.txt"
+    },
+    {
+      "label": "verify-electrical-fixtures.mjs",
+      "status": "PASS",
+      "seconds": 0.351,
+      "log": "check-194.txt"
+    },
+    {
+      "label": "verify-electricity.mjs",
+      "status": "PASS",
+      "seconds": 14.304,
+      "log": "check-195.txt"
+    },
+    {
+      "label": "verify-farming.mjs",
+      "status": "PASS",
+      "seconds": 56.306,
+      "log": "check-196.txt"
+    },
+    {
+      "label": "verify-food.mjs",
+      "status": "PASS",
+      "seconds": 3.129,
+      "log": "check-197.txt"
+    },
+    {
+      "label": "verify-forecast.mjs",
+      "status": "PASS",
+      "seconds": 5.078,
+      "log": "check-198.txt"
+    },
+    {
+      "label": "verify-freshness.mjs",
+      "status": "PASS",
+      "seconds": 0.514,
+      "log": "check-199.txt"
+    },
+    {
+      "label": "verify-gatherings.mjs",
+      "status": "PASS",
+      "seconds": 3.022,
+      "log": "check-200.txt"
+    },
+    {
+      "label": "verify-grid-foundations.mjs",
+      "status": "PASS",
+      "seconds": 0.228,
+      "log": "check-201.txt"
+    },
+    {
+      "label": "verify-housing-balance.mjs",
+      "status": "PASS",
+      "seconds": 735.4,
+      "log": "check-202.txt"
+    },
+    {
+      "label": "verify-kitchen-batches.mjs",
+      "status": "PASS",
+      "seconds": 7.816,
+      "log": "check-203.txt"
+    },
+    {
+      "label": "verify-land.mjs",
+      "status": "PASS",
+      "seconds": 1.486,
+      "log": "check-204.txt"
+    },
+    {
+      "label": "verify-leisure.mjs",
+      "status": "PASS",
+      "seconds": 138.346,
+      "log": "check-205.txt"
+    },
+    {
+      "label": "verify-living-land.mjs",
+      "status": "PASS",
+      "seconds": 0.722,
+      "log": "check-206.txt"
+    },
+    {
+      "label": "verify-logistics.mjs",
+      "status": "PASS",
+      "seconds": 1.317,
+      "log": "check-207.txt"
+    },
+    {
+      "label": "verify-maintenance.mjs",
+      "status": "PASS",
+      "seconds": 3.294,
+      "log": "check-208.txt"
+    },
+    {
+      "label": "verify-modes.mjs",
+      "status": "PASS",
+      "seconds": 5.961,
+      "log": "check-209.txt"
+    },
+    {
+      "label": "verify-navigation.mjs",
+      "status": "PASS",
+      "seconds": 0.11,
+      "log": "check-210.txt"
+    },
+    {
+      "label": "verify-night-lighting.mjs",
+      "status": "PASS",
+      "seconds": 0.035,
+      "log": "check-211.txt"
+    },
+    {
+      "label": "verify-occupations.mjs",
+      "status": "PASS",
+      "seconds": 0.222,
+      "log": "check-212.txt"
+    },
+    {
+      "label": "verify-organics.mjs",
+      "status": "PASS",
+      "seconds": 13.663,
+      "log": "check-213.txt"
+    },
+    {
+      "label": "verify-passive-processes.mjs",
+      "status": "PASS",
+      "seconds": 6.488,
+      "log": "check-214.txt"
+    },
+    {
+      "label": "verify-pipes.mjs",
+      "status": "PASS",
+      "seconds": 16.203,
+      "log": "check-215.txt"
+    },
+    {
+      "label": "verify-planning-paths.mjs",
+      "status": "PASS",
+      "seconds": 526.762,
+      "log": "check-216.txt"
+    },
+    {
+      "label": "verify-planting.mjs",
+      "status": "PASS",
+      "seconds": 13.633,
+      "log": "check-217.txt"
+    },
+    {
+      "label": "verify-playtest.mjs",
+      "status": "PASS",
+      "seconds": 0.738,
+      "log": "check-218.txt"
+    },
+    {
+      "label": "verify-polish.mjs",
+      "status": "PASS",
+      "seconds": 5.673,
+      "log": "check-219.txt"
+    },
+    {
+      "label": "verify-power.mjs",
+      "status": "PASS",
+      "seconds": 4.841,
+      "log": "check-220.txt"
+    },
+    {
+      "label": "verify-production.mjs",
+      "status": "PASS",
+      "seconds": 10.709,
+      "log": "check-221.txt"
+    },
+    {
+      "label": "verify-quests.mjs",
+      "status": "PASS",
+      "seconds": 85.055,
+      "log": "check-222.txt"
+    },
+    {
+      "label": "verify-requests.mjs",
+      "status": "PASS",
+      "seconds": 3.513,
+      "log": "check-223.txt"
+    },
+    {
+      "label": "verify-resident-animation.mjs",
+      "status": "PASS",
+      "seconds": 0.091,
+      "log": "check-224.txt"
+    },
+    {
+      "label": "verify-resource-sites.mjs",
+      "status": "PASS",
+      "seconds": 14.089,
+      "log": "check-225.txt"
+    },
+    {
+      "label": "verify-restoration.mjs",
+      "status": "PASS",
+      "seconds": 0.906,
+      "log": "check-226.txt"
+    },
+    {
+      "label": "verify-sandbox-rules.mjs",
+      "status": "PASS",
+      "seconds": 1.267,
+      "log": "check-227.txt"
+    },
+    {
+      "label": "verify-sanitation.mjs",
+      "status": "PASS",
+      "seconds": 22.602,
+      "log": "check-228.txt"
+    },
+    {
+      "label": "verify-seasonal-balance.mjs",
+      "status": "PASS",
+      "seconds": 730.805,
+      "log": "check-229.txt"
+    },
+    {
+      "label": "verify-simulation.mjs",
+      "status": "PASS",
+      "seconds": 0.706,
+      "log": "check-230.txt"
+    },
+    {
+      "label": "verify-situations.mjs",
+      "status": "PASS",
+      "seconds": 75.327,
+      "log": "check-231.txt"
+    },
+    {
+      "label": "verify-skills.mjs",
+      "status": "PASS",
+      "seconds": 48.967,
+      "log": "check-232.txt"
+    },
+    {
+      "label": "verify-sleep-speed.mjs",
+      "status": "PASS",
+      "seconds": 9.44,
+      "log": "check-233.txt"
+    },
+    {
+      "label": "verify-sprite-frames.mjs",
+      "status": "PASS",
+      "seconds": 0.048,
+      "log": "check-234.txt"
+    },
+    {
+      "label": "verify-sprite-grid-fit.mjs",
+      "status": "PASS",
+      "seconds": 4.699,
+      "log": "check-235.txt"
+    },
+    {
+      "label": "verify-storage.mjs",
+      "status": "PASS",
+      "seconds": 0.033,
+      "log": "check-236.txt"
+    },
+    {
+      "label": "verify-story-objectives.mjs",
+      "status": "PASS",
+      "seconds": 0.071,
+      "log": "check-237.txt"
+    },
+    {
+      "label": "verify-suppliers.mjs",
+      "status": "PASS",
+      "seconds": 3.775,
+      "log": "check-238.txt"
+    },
+    {
+      "label": "verify-time-balance.mjs",
+      "status": "PASS",
+      "seconds": 10.066,
+      "log": "check-239.txt"
+    },
+    {
+      "label": "verify-tools.mjs",
+      "status": "PASS",
+      "seconds": 11.252,
+      "log": "check-240.txt"
+    },
+    {
+      "label": "verify-utility-balance.mjs",
+      "status": "PASS",
+      "seconds": 463.32,
+      "log": "continuation-241.txt"
+    },
+    {
+      "label": "verify-utility-routes.mjs",
+      "status": "PASS",
+      "seconds": 0.127,
+      "log": "continuation-242.txt"
+    },
+    {
+      "label": "verify-water.mjs",
+      "status": "PASS",
+      "seconds": 4.355,
+      "log": "continuation-243.txt"
+    },
+    {
+      "label": "verify-weather.mjs",
+      "status": "PASS",
+      "seconds": 0.049,
+      "log": "continuation-244.txt"
+    },
+    {
+      "label": "verify-work-routes.mjs",
+      "status": "PASS",
+      "seconds": 1.471,
+      "log": "continuation-245.txt"
+    },
+    {
+      "label": "verify-workforce.mjs",
+      "status": "PASS",
+      "seconds": 0.184,
+      "log": "continuation-246.txt"
+    },
+    {
+      "label": "listen EPERM: operation not permitted 127.0.0.1",
+      "status": "FAIL"
+    }
+  ],
+  "screenshots": [],
+  "errors": []
+}

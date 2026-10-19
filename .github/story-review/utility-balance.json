@@ -1,0 +1,122 @@
+{
+  "wasm_sha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+  "foodMeasure": "Ready ingredients, meals, milk and honey; eggs require cooking",
+  "continuedFromEarnedInstallation": false,
+  "replayedFromEarnedInstallation": true,
+  "installation_days": 27.929166666666667,
+  "installation_spending": 358246,
+  "results": [
+    {
+      "name": "manual",
+      "from_day": 120,
+      "days": 24,
+      "fund": 1101267,
+      "lowestFood": 11,
+      "highestFood": 49,
+      "lowestBasicFood": 2,
+      "highestBasicFood": 37,
+      "peakHunger": 43.74627685546875,
+      "workshop_energy": 0,
+      "residents": [
+        {
+          "work": 0.16362530413625304,
+          "leisure": 0.690389294403893
+        },
+        {
+          "work": 0.15719467956469166,
+          "leisure": 0.6958887545344619
+        },
+        {
+          "work": 0.13609112709832133,
+          "leisure": 0.6756594724220624
+        },
+        {
+          "work": 0.15458358298382266,
+          "leisure": 0.701018573996405
+        },
+        {
+          "work": 0.14625445897740785,
+          "leisure": 0.7015457788347206
+        }
+      ],
+      "flow": [
+        {
+          "kind": "fresh",
+          "water": 0
+        },
+        {
+          "kind": "fresh",
+          "water": 0
+        },
+        {
+          "kind": "greywater",
+          "water": 0
+        },
+        {
+          "kind": "sewage",
+          "water": 0
+        },
+        {
+          "kind": "irrigation",
+          "water": 0
+        }
+      ]
+    },
+    {
+      "name": "connected",
+      "from_day": 120,
+      "days": 24,
+      "fund": 763253,
+      "lowestFood": 13,
+      "highestFood": 51,
+      "lowestBasicFood": 0,
+      "highestBasicFood": 38,
+      "peakHunger": 32.369720458984375,
+      "workshop_energy": 0.5742810912430288,
+      "residents": [
+        {
+          "work": 0.16514875531268974,
+          "leisure": 0.6988463873709775
+        },
+        {
+          "work": 0.1509090909090909,
+          "leisure": 0.6975757575757576
+        },
+        {
+          "work": 0.13592814371257486,
+          "leisure": 0.6892215568862275
+        },
+        {
+          "work": 0.14577084583083383,
+          "leisure": 0.7126574685062987
+        },
+        {
+          "work": 0.1509546539379475,
+          "leisure": 0.7064439140811456
+        }
+      ],
+      "flow": [
+        {
+          "kind": "fresh",
+          "water": 52.999999999999545
+        },
+        {
+          "kind": "fresh",
+          "water": 200.67953762581678
+        },
+        {
+          "kind": "greywater",
+          "water": 57.19557340272041
+        },
+        {
+          "kind": "sewage",
+          "water": 29.99999999999985
+        },
+        {
+          "kind": "irrigation",
+          "water": 14.000000000000028
+        }
+      ]
+    }
+  ]
+}

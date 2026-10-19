@@ -174,6 +174,15 @@ fn harvest_base(v: &Village, b: &Building) -> u32 {
 fn harvest_yield(v: &Village, r: &Resident, index: usize) -> u32 {
     harvest_base(v, &v.buildings[index]) + if r.favorite == "garden" { 3 } else { 0 }
 }
+pub fn harvest_blocker(v: &Village, b: &Building, r: &Resident) -> Option<&'static str> {
+    if !farm(b) || !b.crop.planted || b.crop.growth < duration(&b.crop) {
+        return None;
+    }
+    let output = harvest_base(v, b) + if r.favorite == "garden" { 3 } else { 0 };
+    (economy::capacity(v).saturating_sub(economy::storage(v)) < output
+        || logistics::room(v, logistics::Owner::Site(b.id)) < output)
+        .then_some("The harvest needs room at this plot and in village storage before it can be collected.")
+}
 #[wasm_bindgen]
 impl Game {
     pub fn crop_outlook(&self, id: usize) -> String {

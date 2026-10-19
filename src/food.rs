@@ -25,6 +25,121 @@ pub fn available(v: &Village, p: &Store, material: usize, resident: Option<usize
             + gatherings::held(v, p.id, material),
     )
 }
+pub const EDIBLE: [usize; 4] = [MEALS, FOOD, MILK, HONEY];
+
+/// The same dated portions used by the meal chooser, after existing claims.
+fn portions_at(
+    v: &Village,
+    p: &Store,
+    material: usize,
+    resident: Option<usize>,
+    ready_at: f32,
+) -> u32 {
+    if p.items[material] == 0 {
+        return 0;
+    }
+    let free = available(v, p, material, resident);
+    let dated = p
+        .food_lots
+        .iter()
+        .filter(|l| l.material == material && (!sandbox::logistics(v) || l.expires > ready_at))
+        .map(|l| l.amount)
+        .sum::<u32>();
+    dated.saturating_sub(p.items[material] - free)
+}
+pub fn owned_portions(v: &Village) -> u32 {
+    EDIBLE.into_iter().map(|m| economy::quantity(v, m)).sum()
+}
+pub fn other_portions(v: &Village) -> u32 {
+    v.logistics.as_ref().map_or(0, |s| {
+        s.stores
+            .iter()
+            .map(|p| {
+                [MILK, HONEY]
+                    .into_iter()
+                    .map(|m| portions_at(v, p, m, None, v.minutes))
+                    .sum::<u32>()
+            })
+            .sum()
+    })
+}
+pub fn summary(v: &Village) -> serde_json::Value {
+    let owned = owned_portions(v);
+    let unclaimed = v.logistics.as_ref().map_or(owned, |s| {
+        s.stores
+            .iter()
+            .map(|p| {
+                EDIBLE
+                    .into_iter()
+                    .map(|m| portions_at(v, p, m, None, v.minutes))
+                    .sum::<u32>()
+            })
+            .sum()
+    });
+    let carried = v.logistics.as_ref().map_or(0, |s| {
+        s.shipments
+            .iter()
+            .filter(|h| h.carrying && EDIBLE.contains(&h.material))
+            .map(|h| h.amount)
+            .sum()
+    });
+    let cooking = v
+        .production
+        .batches
+        .iter()
+        .filter(|b| b.active() && b.committed)
+        .map(|b| EDIBLE.into_iter().map(|m| b.inputs[m]).sum::<u32>())
+        .sum::<u32>();
+    serde_json::json!({"owned":owned,"unclaimed_at_stores":unclaimed,"carried":carried,"committed_to_cooking":cooking,"note":"Ingredients, prepared meals, milk and honey can be eaten directly. Eggs need cooking. Store totals do not guarantee a clear path; carried supplies and committed cooking inputs are separate."})
+}
+/// Observe actual reachable stores; cargo and cooking inputs cannot feed a
+/// pantry achievement. A resident's own claimed meal still establishes access.
+pub fn observed_access(v: &Village, people: &[Resident]) -> (u32, bool) {
+    let mut participants: Vec<_> = people
+        .iter()
+        .filter(|r| r.trip.is_none())
+        .cloned()
+        .collect();
+    if participants.is_empty() {
+        let Some(mut visitor) = people.first().cloned() else {
+            return (0, false);
+        };
+        visitor.x = CAMP.0;
+        visitor.y = CAMP.1;
+        visitor.trip = None;
+        participants.push(visitor);
+    }
+    let mut fed = vec![false; participants.len()];
+    let mut total = 0;
+    if let Some(s) = &v.logistics {
+        for p in &s.stores {
+            if EDIBLE.into_iter().all(|m| p.items[m] == 0) {
+                continue;
+            }
+            let mut reachable = 0;
+            for (index, r) in participants.iter().enumerate() {
+                let Some(point) = logistics::approaches(v, p, r.id) else {
+                    continue;
+                };
+                let Ok((route, _)) = navigation::work_route(v, [r.x, r.y], point) else {
+                    continue;
+                };
+                let at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
+                fed[index] |= EDIBLE
+                    .into_iter()
+                    .any(|m| portions_at(v, p, m, Some(r.id), at) > 0);
+                reachable = reachable.max(
+                    EDIBLE
+                        .into_iter()
+                        .map(|m| portions_at(v, p, m, None, at))
+                        .sum::<u32>(),
+                );
+            }
+            total += reachable;
+        }
+    }
+    (total, fed.into_iter().all(|b| b))
+}
 pub fn needs(v: &Village, building: usize) -> Bundle {
     let mut n = [0; COUNT];
     let Some(b) = v
@@ -162,7 +277,7 @@ pub fn reserved_space(v: &Village, owner: Option<Owner>) -> u32 {
 pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
     let mut choices = vec![];
     for p in &v.logistics.as_ref()?.stores {
-        if [MEALS, FOOD, MILK, HONEY]
+        if EDIBLE
             .into_iter()
             .all(|i| available(v, p, i, Some(r.id)) == 0)
         {
@@ -174,9 +289,10 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
         let Ok((route, _)) = navigation::work_route(v, [r.x, r.y], point) else {
             continue;
         };
-        for material in [MEALS, FOOD, MILK, HONEY] {
+        for material in EDIBLE {
             let available_now = available(v, p, material, Some(r.id));
             let ready_at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
+            let future = portions_at(v, p, material, Some(r.id), ready_at);
             let edible: Vec<_> = p
                 .food_lots
                 .iter()
@@ -184,11 +300,6 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
                     l.material == material && (!sandbox::logistics(v) || l.expires > ready_at)
                 })
                 .collect();
-            let future = edible
-                .iter()
-                .map(|l| l.amount)
-                .sum::<u32>()
-                .saturating_sub(p.items[material] - available_now);
             if available_now > 0 && future > 0 {
                 let expires = edible.first().map_or(f32::INFINITY, |l| l.expires);
                 choices.push((

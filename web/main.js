@@ -853,7 +853,7 @@ function selectPerson(id) {
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
     `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
-      ["garden", "Tend garden"],
+      ["garden", "Tend the farm"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
       ["gather", "Forage food"],
@@ -916,12 +916,55 @@ function replaceMarkup(element, html) {
     element._markup = html;
   }
 }
+function questAction(route) {
+  const v=state.village;
+  let label='',onClick=()=>{},disabled=false,explanation=null;
+  if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>{if(route.recipe){$('#home-material-method').value=route.recipe;$('#home-material-method').dispatchEvent(new Event('change'));}setTool(route.kind);};}
+  if(route?.type==='visit'){label=(v.building_jobs||[]).some(j=>j.building===route.id)?'Review crew work':`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
+  if(route?.type==='project'){
+    label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
+    onClick=()=>showPanel('projects-panel');
+    const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
+    explanation=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
+  }
+  if(route?.type==='supper'||route?.type==='tool_library'){
+    const supper=route.type==='supper', gathering=gatheringInfo(v), underway=supper&&gathering.active;
+    label=underway?(gathering.preparing?'Preparing welcome supper':'Welcome supper underway'):supper?'Host welcome supper · 5 meals':'Support tool library · R$ 120';
+    disabled=underway;
+    if(underway)explanation=gathering.summary;
+    onClick=()=>{
+      const result=supper?game.host_gathering():game.contribute_tool_library();
+      toast(result==='ok'?(supper?'Welcome supper is planned. Neighbours will bring five meals to the shared table.':'The shared tool library is funded.'):result);
+      state=JSON.parse(game.snapshot());updateUI();save();
+    };
+  }
+  const chapterPanels={build:['build-panel','Review village buildings'],town:['town-panel','Open Town'],land:['projects-panel','Open Land & materials'],preparation:['projects-panel','Review material preparation'],supplies:['supplies-panel','Open Supplies'],power:['power-panel','Open Power'],people:['community-panel','Meet our neighbours']};
+  if(chapterPanels[route?.type]){
+    const [panel,text]=chapterPanels[route.type];label=text;
+    onClick=()=>{showPanel(panel,route.page);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
+  }
+  if(route?.type==='land_map'){label='Read the land';onClick=()=>{if(!landMap.isOpen())$('#land-map-toggle').click();};}
+  if(route?.type==='weather'){label='Read the weather forecast';onClick=()=>$('#weather-open').click();}
+  if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
+  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
+  return {label,disabled,explanation,run(){
+    if($('#quest-dialog').open)$('#quest-dialog').close();
+    $('[data-panel="goals-panel"]').setAttribute('aria-expanded','false');
+    onClick();
+  }};
+}
+function goalValue(value){return Number.isInteger(value)?value:Number(value).toFixed(1);}
+function optionalMarkup(v,q,chapter,locked){
+  const options=q.options?.(v)||[];
+  if(!options.length)return '';
+  return `<details class="journal-options" data-choices="${chapter}"><summary>Other paths · optional</summary><p>Choose what helps our village. These paths do not block the next chapter. Markers reflect the current village; completed chapters and measured outcomes stay credited.</p>${options.map((o,index)=>`<section class="journal-option ${o.done?'done':''}"><span aria-hidden="true">${o.guide?'·':o.done?'✓':'◇'}</span><div><b>${o.label}</b><small>${o.guide?'Guide':`${goalValue(o.value)}/${o.target}${o.unit?' '+o.unit:''}`}</small><p>${o.hint}</p><button data-quest-option="${chapter}:${index}" ${locked?'disabled':''}>${o.guide?'Explore this guide':o.done?'Review':'Explore this path'}</button></div></section>`).join('')}</details>`;
+}
 function objectiveMarkup(objectives, completed = false) {
   const current = completed ? -1 : objectives.findIndex((o) => !o.done);
   return objectives
     .map(
       (o, i) =>
-        `<div class="objective ${completed || o.done ? "done" : ""} ${i === current ? "current" : ""}"><span>${completed || o.done ? "✓" : i + 1}</span><b>${o.label}</b><small>${completed ? o.target : o.value}/${o.target}</small></div>`,
+        `<div class="objective ${completed || o.done ? "done" : ""} ${i === current ? "current" : ""}"><span>${completed || o.done ? "✓" : i + 1}</span><b>${o.label}</b><small>${goalValue(completed ? o.target : o.value)}/${o.target}${o.unit?' '+o.unit:''}</small></div>`,
     )
     .join("");
 }
@@ -971,37 +1014,11 @@ function updateQuests() {
   );
   replaceMarkup($("#objectives"), objectiveMarkup(objectives, done));
   const route=goalRoute(state,done?{build:quest.building,target:1}:next);
-  const action=$("#tutorial-action"), shortcut=$("#goal-action");
-  action.disabled=false;shortcut.disabled=false;
-  let label='',onClick=()=>{};
-  if(route?.type==='plan'){label=`Plan ${kinds[route.kind][0].toLowerCase()} · free blueprint`;onClick=()=>{if(route.recipe){$('#home-material-method').value=route.recipe;$('#home-material-method').dispatchEvent(new Event('change'));}setTool(route.kind);};}
-  if(route?.type==='visit'){label=(v.building_jobs||[]).some(j=>j.building===route.id)?'Review crew work':`Visit ${kinds[v.buildings.find(b=>b.id===route.id).kind][0].toLowerCase()}`;onClick=()=>inspectBuilding(route.id);}
-  if(route?.type==='project'){
-    label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
-    onClick=()=>showPanel('projects-panel');
-    const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
-    $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
-  }
-  if(route?.type==='supper'||route?.type==='tool_library'){
-    const supper=route.type==='supper', gathering=gatheringInfo(v), underway=supper&&gathering.active;
-    label=underway?(gathering.preparing?'Preparing welcome supper':'Welcome supper underway'):supper?'Host welcome supper · 5 meals':'Support tool library · R$ 120';
-    action.disabled=underway;shortcut.disabled=underway;
-    if(underway)$('#tutorial-copy').textContent=gathering.summary;
-    onClick=()=>{
-      const result=supper?game.host_gathering():game.contribute_tool_library();
-      toast(result==='ok'?(supper?'Welcome supper is planned. Neighbours will bring five meals to the shared table.':'The shared tool library is funded.'):result);
-      state=JSON.parse(game.snapshot());updateUI();save();
-    };
-  }
-  const chapterPanels={build:['build-panel','Review village buildings'],town:['town-panel','Open Town'],land:['projects-panel','Open Land & materials'],preparation:['projects-panel','Review material preparation'],supplies:['supplies-panel','Open Supplies'],power:['power-panel','Open Power'],people:['community-panel','Meet our neighbours']};
-  if(chapterPanels[route?.type]){
-    const [panel,text]=chapterPanels[route.type];label=text;
-    onClick=()=>{showPanel(panel,route.page);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
-  }
-  if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
-  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
-  action.hidden=!route;action.textContent=label;action.onclick=onClick;
-  shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
+  const action=$("#tutorial-action"),shortcut=$("#goal-action"),choice=questAction(route);
+  action.disabled=choice.disabled;shortcut.disabled=choice.disabled;
+  if(choice.explanation)$('#tutorial-copy').textContent=choice.explanation;
+  action.hidden=!route;action.textContent=choice.label;action.onclick=choice.run;
+  shortcut.hidden=done||!route;shortcut.textContent=choice.label.replace(' · free blueprint','');shortcut.onclick=choice.run;
   $("#open-journal").textContent =
     done && id === 0
       ? "Choose our next quest →"
@@ -1011,6 +1028,8 @@ function updateQuests() {
   $("#quest-total").textContent =
     `${completions.filter(Boolean).length} of ${quests.length} chapters complete`;
   replaceMarkup($('#journal-chapters'),quests.map((q,i)=>`<button data-chapter="${i}" aria-pressed="${i===journalPage}"><span class="chapter-number">${completions[i]?'✓':i+1}</span><span><b>${q.title}</b><small>${questStatus(v,i)}</small></span></button>`).join(''));
+  const openChoices=[...$('#quest-list').querySelectorAll('.journal-options[open]')].map(el=>el.dataset.choices);
+  const focusedOption=document.activeElement?.dataset?.questOption;
   replaceMarkup(
     $("#quest-list"),
     quests
@@ -1022,12 +1041,21 @@ function updateQuests() {
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
       ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."}</p>` : ""}
       ${objectiveMarkup(q.objectives(v), completions[i])}
+      ${optionalMarkup(v,q,i,locked)}
       <p class="journal-reward"><b>${completions[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
       ${completions[i] ? `<p class="quest-after">${q.after}</p>` : ""}
       <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? `Complete ${quests[i-1]?.title} first` : i === id ? "Following this quest" : completions[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
       })
       .join(""),
   );
+  for(const chapter of openChoices){const el=$(`#quest-list [data-choices="${chapter}"]`);if(el)el.open=true;}
+  if(focusedOption)$(`[data-quest-option="${focusedOption}"]`)?.focus({preventScroll:true});
+  for(const button of $('#quest-list').querySelectorAll('[data-quest-option]'))button.onclick=()=>{
+    const [chapter,index]=button.dataset.questOption.split(':').map(Number),objective=quests[chapter].options(v)[index];
+    let route=goalRoute(state,objective);
+    if(objective.done&&route?.type==='tool_library')route={type:'town'};
+    const selected=questAction(route);if(!selected.disabled)selected.run();
+  };
   for(const canvas of $('#quest-list').querySelectorAll('[data-quest-art]')){
     if(!canvas._painted){const key=canvas.dataset.questArt;paintIcon(canvas,key,buildingImages[key],allBuildingArt[key]);canvas._painted=true;}
   }
@@ -1176,9 +1204,9 @@ function updateSupplies(v) {
   const fed = coops.filter(b => b.poultry.remaining > 0);
   const shared=v.progress.gathering_delivery;
   const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
-  const days = (v.food + v.meals-sharedReserve) / 15;
   replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"],["milk",state.environment.economy.materials[25].stored,"Fresh milk"],["honey",state.environment.economy.materials[26].stored,"Honey"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
-  $("#pantry-outlook").textContent = !usesLogistics(v) ? "Sandbox replenishes ingredients and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food. Cooking, hen feed and spoilage can change this estimate.`;
+  const foodReserve=state.environment.economy.food_reserve;
+  $("#pantry-outlook").textContent = !usesLogistics(v) ? "Sandbox replenishes ingredients and meals. Neighbours keep their daily routines and have time for hobbies." : `${foodReserve.unclaimed_at_stores} unclaimed edible portions at stores · ${foodReserve.carried} carried · ${foodReserve.committed_to_cooking} ingredients held in cooking. Ingredients, prepared meals, milk and honey can be eaten directly; eggs need cooking. Clear paths still matter.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
@@ -1229,8 +1257,11 @@ function updateUI() {
   updateSupplies(v);
   updatePowerUI(state,kinds);
   updateBuildingPanel();
-  for (const k of ["wood", "food", "water"])
+  for (const k of ["wood", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
+  const foodReserve=state.environment.economy.food_reserve;
+  $('#food').textContent=foodReserve?.unclaimed_at_stores??Math.floor(v.food+v.meals);
+  $('#food').closest('button').title='Unclaimed ingredients, meals, milk and honey at stores · open pantry for claims, cargo and cooking inputs';
   $("#happiness").textContent =
     Math.round(state.residents.reduce((s, r) => s + r.happiness, 0) / 5) + "%";
   const mins = Math.floor(v.minutes) % 1440;
@@ -1338,7 +1369,7 @@ function updateUI() {
     $('#person .help-order').hidden=!help;
     if(help){
       const titles={accepted:'Accepted',travelling:'On the way',working:'Working',paused:'Paused',blocked:'Waiting',complete:'Finished',cancelled:'Cancelled'};
-      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend garden',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Water & sanitation',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
+      const names={build:'Help build',building_work:'Help the building crew',garden:'Tend the farm',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Water & sanitation',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
       const target=help.building==null?null:v.buildings.find(b=>b.id===help.building);
       const text={'.help-phase':titles[help.phase],'.help-task':(names[help.task]||help.task)+(target?` · ${kinds[target.kind][0]} at ${target.x}, ${target.y}`:''),'.help-reason':help.reason,'.help-time':`Accepted day ${1+Math.floor(help.created/1440)} · ${String(Math.floor(help.created%1440/60)).padStart(2,'0')}:${String(Math.floor(help.created%60)).padStart(2,'0')}`};
       for(const [selector,value] of Object.entries(text)){const el=$('#person '+selector);if(el.textContent!==value)el.textContent=value;}

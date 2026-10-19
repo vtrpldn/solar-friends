@@ -26,6 +26,13 @@ pub fn blocker(v: &Village, r: &Resident) -> Option<String> {
         "The pickup is booked for service. Finish or cancel its maintenance first."
     } else if r.trip.is_some() {
         "Already away or commuting."
+    } else if v
+        .power
+        .battery_jobs
+        .iter()
+        .any(|j| j.phase == power::batteries::Phase::Carrying && j.carrier == Some(r.id))
+    {
+        "Finish carrying the battery before driving."
     } else if r.task == "sleep" || sleep::due(r, v.minutes) {
         "Needs to finish sleeping."
     } else if r.energy < 40. {
@@ -43,18 +50,25 @@ pub fn blocker(v: &Village, r: &Resident) -> Option<String> {
 }
 
 fn send_driver(g: &mut Game, id: usize) {
-    let v = g.app.world().resource::<Village>().clone();
-    let mut query = g.app.world_mut().query::<&mut Resident>();
-    let mut r = query
-        .iter_mut(g.app.world_mut())
-        .find(|r| r.id == id)
-        .unwrap();
-    requests::pause(&mut r);
-    sleep::pause(&mut r);
-    r.task = "pickup".into();
-    r.requested = true;
-    r.remaining = 0.;
-    mobility::begin(&mut r, &v, mobility::Purpose::Pickup);
+    let mut v = g.app.world().resource::<Village>().clone();
+    {
+        let mut query = g.app.world_mut().query::<&mut Resident>();
+        let mut r = query
+            .iter_mut(g.app.world_mut())
+            .find(|r| r.id == id)
+            .unwrap();
+        // Finish the physical handoff in the command itself: a save or another
+        // order can follow before the next tick has a chance to clean up work.
+        logistics::interrupt(&mut v, &r);
+        water::interrupt(&mut v, &r);
+        requests::pause(&mut r);
+        sleep::pause(&mut r);
+        r.task = "pickup".into();
+        r.requested = true;
+        r.remaining = 0.;
+        mobility::begin(&mut r, &v, mobility::Purpose::Pickup);
+    }
+    *g.app.world_mut().resource_mut::<Village>() = v;
 }
 
 pub fn finish(v: &mut Village, order: u32, driver: usize) {
@@ -337,6 +351,115 @@ mod tests {
                 g.restore(&saved),
                 "pickup saves must reload during {phase:?}"
             );
+        }
+    }
+    #[test]
+    fn pickup_releases_pending_and_carried_water_before_an_immediate_save() {
+        for carrying in [false, true] {
+            for convert in [false, true] {
+                let mut g = healthy();
+                {
+                    let mut v = g.app.world_mut().resource_mut::<Village>();
+                    water::draw(&mut v, water::Owner::Camp, water::Class::Fresh, 100.);
+                }
+                let v = g.app.world().resource::<Village>().clone();
+                {
+                    let mut q = g.app.world_mut().query::<&mut Resident>();
+                    let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
+                    assign(&mut r, &v, "water", "Bringing fresh water home.", false);
+                }
+                until(&mut g, |s| {
+                    s.village
+                        .water_supply
+                        .trips
+                        .iter()
+                        .any(|h| h.resident == 0 && h.carrying == carrying)
+                });
+                let before = state(&mut g);
+                let raw = g.snapshot();
+                assert!(g.restore(&raw));
+                if convert {
+                    assert_eq!(g.order_supplies(&bundle()), "ok");
+                    let id = state(&mut g).village.economy.orders.last().unwrap().id;
+                    assert_eq!(g.collect_order(id, 0), "ok");
+                } else {
+                    assert_eq!(g.order_supplies_pickup(&bundle(), 0), "ok");
+                }
+                let after = state(&mut g);
+                assert!(
+                    after
+                        .village
+                        .water_supply
+                        .trips
+                        .iter()
+                        .all(|h| h.resident != 0)
+                );
+                assert_eq!(
+                    water::total(&after.village, water::Class::Fresh),
+                    water::total(&before.village, water::Class::Fresh)
+                );
+                let saved = g.snapshot();
+                let mut copy = Game::new();
+                assert!(
+                    copy.restore(&saved),
+                    "pickup interruption must save without an intervening tick"
+                );
+                assert_eq!(copy.snapshot(), saved);
+            }
+        }
+    }
+    #[test]
+    fn pickup_preserves_reserved_and_carried_materials_before_an_immediate_save() {
+        for carrying in [false, true] {
+            for convert in [false, true] {
+                let mut g = healthy();
+                assert_eq!(g.place("garden", 6, 6), "ok");
+                {
+                    let mut q = g.app.world_mut().query::<&mut Resident>();
+                    q.iter_mut(g.app.world_mut())
+                        .find(|r| r.id == 0)
+                        .unwrap()
+                        .remaining = 0.;
+                }
+                until(&mut g, |s| {
+                    s.village
+                        .logistics
+                        .as_ref()
+                        .unwrap()
+                        .shipments
+                        .iter()
+                        .any(|h| h.resident == 0 && h.carrying == carrying)
+                });
+                let before = state(&mut g);
+                if convert {
+                    assert_eq!(g.order_supplies(&bundle()), "ok");
+                    let id = state(&mut g).village.economy.orders.last().unwrap().id;
+                    assert_eq!(g.collect_order(id, 0), "ok");
+                } else {
+                    assert_eq!(g.order_supplies_pickup(&bundle(), 0), "ok");
+                }
+                let after = state(&mut g);
+                assert!(
+                    after
+                        .village
+                        .logistics
+                        .as_ref()
+                        .unwrap()
+                        .shipments
+                        .iter()
+                        .all(|h| h.resident != 0)
+                );
+                for i in 0..economy::COUNT {
+                    assert_eq!(
+                        economy::quantity(&after.village, i),
+                        economy::quantity(&before.village, i)
+                    );
+                }
+                let raw = g.snapshot();
+                let mut copy = Game::new();
+                assert!(copy.restore(&raw));
+                assert_eq!(copy.snapshot(), raw);
+            }
         }
     }
     #[test]

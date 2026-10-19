@@ -1,0 +1,412 @@
+{
+  "objective": "Implement simulator-plan.md in full, including Stage 7",
+  "status": "PASS_LOCAL_RELEASE",
+  "plan": "simulator-plan.md",
+  "correctedEngineCommit": "2f62e43",
+  "releaseHarnessCommit": "ec282d4",
+  "requiredFinalRun": "node scripts/dev-check.mjs",
+  "pipelineLog": "/private/tmp/solar-story-desktop-final.txt",
+  "groups": [
+    {
+      "system": "foundations",
+      "requirements": [
+        "Stable saved identities for inventory, shipments, work, batches and connections; cancelled identities are not reused.",
+        "One game clock and complete resident time accounts.",
+        "Read-only diagnostics, exact continuation, seeded repeatability and atomic malformed-save rejection.",
+        "Compact, dispersed, empty-fund, blocked-access and established protected baselines."
+      ],
+      "publicEvidence": [
+        "scripts/verify-simulation.mjs",
+        "scripts/verify-dev-tools.mjs",
+        "scripts/verify-storage.mjs",
+        "scripts/verify-time-balance.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/simulation.rs",
+        "src/lib.rs"
+      ],
+      "reviewNotes": [
+        "simulation::allocate monotonically allocates saved identities; public cancellation and exact-checkpoint cases verify they are not reused.",
+        "The simulation time report accounts for every resident minute. The clock comparison replays 5,120 identical native steps through normal and selected 16x browser batches with exact complete snapshots.",
+        "Inspection, forecasts and native reports preserve the current snapshot. Invalid schema, accounts and references fail atomically; the same seed and checkpoints reproduce the same state.",
+        "verify-simulation writes and advances all five protected baselines; compact and dispersed baselines have identical property and seed."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "physical_resources",
+      "requirements": [
+        "Arrival, extraction, warehouse, worksite and project stores own their actual goods; summaries distinguish available, reserved, committed and travelling supplies.",
+        "Residents collect and deliver along clear paths, with bounded cargo, reserved receiving room and attendance before construction.",
+        "Near storage and useful roads reduce actual completion time; priorities and recent workload govern competing jobs.",
+        "Interruptions, blocked paths, full stores, cancellation, salvage, warehouse closure and relocation preserve ownership and capacity."
+      ],
+      "publicEvidence": [
+        "scripts/verify-logistics.mjs",
+        "scripts/verify-navigation.mjs",
+        "scripts/verify-work-routes.mjs",
+        "scripts/verify-building-work.mjs",
+        "scripts/verify-economy.mjs",
+        "scripts/verify-production.mjs",
+        "scripts/verify-requests.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/logistics.rs",
+        "src/navigation.rs",
+        "src/building_work.rs"
+      ],
+      "reviewNotes": [
+        "Located stores own stock; incoming orders, reservations, committed process inputs and cargo are reported separately. Material accounts are checked during real construction and production.",
+        "The logistics replay observes actual pickup and delivery before construction; navigation and work-route replays cover occupied foundations, the river, roads and receiving-room reservations.",
+        "The logistics comparison completes nearby and paved projects sooner than the same distant unpaved project. Workforce cases change real site selection through priority, preference and recent chore history.",
+        "Building-work, logistics, request and native lifecycle cases interrupt actual cargo and cover cancel, salvage, warehouse evacuation and relocation. The pickup correction additionally makes immediate saves valid before another tick."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "resident_time",
+      "requirements": [
+        "Travel, outside shifts, village work, meals, sleep and leisure use the same clock.",
+        "Shared reachable jobs respect needs, preferences, workload, agreements, useful working time and limited work positions.",
+        "Helping requests visibly accept, travel, wait, work, pause, finish or cancel without duplicate inputs or labour.",
+        "Conditional project and fund forecasts use the real simulation and invalidate when player plans change.",
+        "Hunger interrupts work, existing crops and overdue animals receive care, and balanced villages preserve individual sleep and substantial leisure."
+      ],
+      "publicEvidence": [
+        "scripts/verify-workforce.mjs",
+        "scripts/verify-forecast.mjs",
+        "scripts/verify-requests.mjs",
+        "scripts/verify-autonomy.mjs",
+        "scripts/verify-leisure.mjs",
+        "scripts/verify-away-routines.mjs",
+        "scripts/verify-occupations.mjs",
+        "scripts/verify-sleep-speed.mjs",
+        "scripts/verify-farming.mjs",
+        "scripts/verify-time-balance.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/workforce.rs",
+        "src/requests.rs",
+        "src/autonomy.rs",
+        "src/forecast.rs",
+        "src/sleep.rs"
+      ],
+      "reviewNotes": [
+        "Time categories follow actual activity and distinguish sleep from commuting. Outside-job and sleep-speed replays verify travel, attendance, once-only pay, individual sleep and acceleration boundaries.",
+        "The shared offer list uses reachable routes, available work positions, preparation, break budgets, personal preferences and recent chores. Agreement and claim cases exercise the competing choices.",
+        "The request replay and manual review observe acceptance, a named target, travel, pause reasons, completed work and return to independent activity; completed and cancelled batches preserve exact ownership.",
+        "The forecast replays the real simulation without changing it. A matched-horizon outside-shift comparison changes both completion and income; plan changes invalidate stale workers.",
+        "The mixed-needs scene chooses rest, a meal, company, dry-crop care and an outside shift for five different residents. Its four-day project and request finish. The seasonal run retains healthy needs and majority individual waking village leisure."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "production",
+      "requirements": [
+        "Located saved batches use delivered inputs, labour, passive duration, targets and bounded output space.",
+        "Local camp/workshop manufacture and purchasing both support an actual housing expansion.",
+        "Kitchen pots, tools and shared meals use the same located ownership and real attendance.",
+        "Food dates survive carriage, refunds and cancellations; expiry is once-only and recovery remains possible.",
+        "Growth, digestion, filtration, banana treatment and curing progress independently when their conditions permit; interruptions preserve ownership."
+      ],
+      "publicEvidence": [
+        "scripts/verify-production.mjs",
+        "scripts/verify-housing-balance.mjs",
+        "scripts/verify-tools.mjs",
+        "scripts/verify-food.mjs",
+        "scripts/verify-kitchen-batches.mjs",
+        "scripts/verify-gatherings.mjs",
+        "scripts/verify-freshness.mjs",
+        "scripts/verify-organics.mjs",
+        "scripts/verify-passive-processes.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/production.rs",
+        "src/food.rs",
+        "src/freshness.rs",
+        "src/processes.rs"
+      ],
+      "reviewNotes": [
+        "Production replay observes located input cargo, a single claimed work position, partial attended labour and local output; batch identities and needs interruptions continue exactly.",
+        "Five copies of one earned village include purchased roofing and six locally produced roof tiles for an actual adobe home, with housing spending recorded separately from wages.",
+        "Kitchen, tools and gathering replays collect actual ingredients and tools, use located pots and tables, and require attendance before useful outputs.",
+        "Freshness and food cases carry dated lots, put interrupted food down, return only unexpired inputs and expire lots once. The fresh Story and seasonal runs exercise ongoing pantry recovery.",
+        "Passive-process and organics cases retain owned inputs and output room through pause, movement and cancellation; detached digestate continues curing and plant growth follows its actual conditions."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "living_land",
+      "requirements": [
+        "Seeded fertility, retention, moisture, nutrients, shade, vegetation and finite local deposits persist.",
+        "Player-placed extraction depletes its own deposit; planted timber and bamboo grow and can be harvested and replanted.",
+        "Suitability changes real growth and yield; construction, roads, extraction and canopy have lasting local effects.",
+        "Delivered compost and attended restoration recover soil; depleted deposits and poor layouts retain practical recovery routes.",
+        "Grid overlays and placement previews explain the land before commitment without changing the world."
+      ],
+      "publicEvidence": [
+        "scripts/verify-land.mjs",
+        "scripts/verify-cultivation.mjs",
+        "scripts/verify-resource-sites.mjs",
+        "scripts/verify-planting.mjs",
+        "scripts/verify-living-land.mjs",
+        "scripts/verify-restoration.mjs",
+        "scripts/verify-housing-balance.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/land.rs",
+        "src/resource_sites.rs",
+        "src/planting.rs",
+        "src/restoration.rs"
+      ],
+      "reviewNotes": [
+        "Land inspection returns seeded soil and nine finite local deposits. Malformed coverage and deposit references are rejected; observed soil and vegetation survive exact checkpoints.",
+        "Actual resident extraction exhausts one stone patch without changing a different patch; clearing and replacing its site cannot refill it. Planted timber and bamboo use renewable growth and harvest lifecycles.",
+        "Matched gardening cases show slower maturity and smaller yields on depleted ground. Roads and extraction leave persistent disturbance; real standing canopy changes solar exposure and preview values.",
+        "Restoration requires reserved compost, physical delivery and attended gradual soil work. The land replay recovers extraction from another patch, and the housing comparison actually moves a poor layout and restores services. restore_source only queues renewable-plot soil work and cannot refill finite deposits.",
+        "The same native footprint inspection supplies land overlays and placement information; report and preview calls leave exact snapshots unchanged."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "utilities",
+      "requirements": [
+        "Fresh water, greywater, sealed sewage and reclaimed irrigation have separate located contents, compatible ports and owned process inputs.",
+        "Residents carry bounded, class-appropriate loads along actual routes; manual treated-water and sealed-service alternatives prevent dead ends.",
+        "Paid kits, local delivery and resident corridor work precede commissioned flow; priorities, capacity, pausing, dismantling and replacement preserve equipment and contents.",
+        "Connected circuits own generation, stored charge, consumption, curtailment and discharge; unconnected consumers cannot use distant supply and rooftop storage stays private.",
+        "Pumps need their actual cable connection; optional powered workshop work pauses safely on outage while manual starter work remains available.",
+        "Recovered batteries have visible locations, occupied plots, resident transport, safe interruption, charged ownership and once-only material salvage."
+      ],
+      "publicEvidence": [
+        "scripts/verify-water.mjs",
+        "scripts/verify-sanitation.mjs",
+        "scripts/verify-pipes.mjs",
+        "scripts/verify-utility-routes.mjs",
+        "scripts/verify-electricity.mjs",
+        "scripts/verify-batteries.mjs",
+        "scripts/verify-electrical-fixtures.mjs",
+        "scripts/verify-utility-balance.mjs",
+        "scripts/verify-housing-balance.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/water.rs",
+        "src/pipes.rs",
+        "src/power.rs",
+        "src/electricity.rs",
+        "src/power/batteries.rs"
+      ],
+      "reviewNotes": [
+        "Water and sanitation replays check all four independent liquid accounts, local inputs, sealed committed contents, compatible destinations and returned batch space.",
+        "Actual closed-container and fresh-water trips reserve room and walk clear routes. Neighbouring treated-water collection and sealed off-site handoff remain available without granting local treatment outputs.",
+        "Pipe and route replays purchase kits, haul them and perform resident installation before flow. Pause, priority, removal, replacement and endpoint movement preserve property and liquids.",
+        "Electrical cases compare isolated and connected circuits, local capacity, unequal charge, cable limits and private roofs. Generated, consumed, stored, curtailed and deliberately discharged energy balance separately.",
+        "The paid utility comparison installs five liquid lines and pump cables plus workshop power, then operates manual and connected copies for 24 days each. Power-loss cases preserve batches and retain manual starter work.",
+        "Battery replay observes a named resident carrying recovered equipment to reserved ground, exact continuation and once-only material salvage with recorded discharge. Native cases cover need interruption and safe pickup refusal during battery transport."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "long_term",
+      "requirements": [
+        "Saved seeded wet/dry conditions and forecasts consistently affect roots, rain capture, solar output and river generation.",
+        "Use and exposure wear owned equipment; warnings, spare parts, delivered kits and attended service allow recovery from failure.",
+        "Bounded useful practice grants gradual skills, including paid occupations, while novices retain ordinary work.",
+        "Supplier prices, finite offers and freight changes are predictable; confirmed receipts remain firm and essential goods remain available.",
+        "The completed village operates across repeated seasons with paid maintenance, healthy reserves, exact saves, valid accounts and majority waking village leisure."
+      ],
+      "publicEvidence": [
+        "scripts/verify-climate.mjs",
+        "scripts/verify-weather.mjs",
+        "scripts/verify-maintenance.mjs",
+        "scripts/verify-skills.mjs",
+        "scripts/verify-suppliers.mjs",
+        "scripts/verify-seasonal-balance.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/climate.rs",
+        "src/maintenance.rs",
+        "src/skills.rs",
+        "src/market.rs"
+      ],
+      "reviewNotes": [
+        "Climate and weather cases preserve the seeded future and compare actual crop water, collection, solar and river effects; the extended village observes both seasons and real rain.",
+        "Maintenance replay purchases parts through a real resident pickup, observes kit cargo and attended repair, pauses and resumes a service, and restores the same owned equipment without changing charge ownership.",
+        "Six domains gain bounded daily practice from completed useful work and an actual paid outside shift; pausing learning preserves experience and ordinary jobs remain available to novices.",
+        "Supplier replay reserves finite offers, rejects stale quotes, refunds once, restocks on schedule and preserves confirmed price and arrival terms across subsequent option and calendar changes.",
+        "The earned optional campaign operates for another 84 days with 85 exact checkpoints, seven completed service jobs with paid parts, 8–61 directly edible portions, healthy needs and at least 68% waking village leisure per resident."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    },
+    {
+      "system": "story_and_release",
+      "requirements": [
+        "Thirteen linear chapters teach all six systems through meaningful outcomes; earlier valid work counts and all twenty-one buildings have actionable introductions.",
+        "Primary goals are separate from 47 optional measurable lessons and seven reference guides; every building is not required for campaign completion.",
+        "Saved observation windows use reachable, unclaimed edible food, actual needs, household services, powered nights, leisure and dry-period comfort; spending and delivery challenges use actual transactions.",
+        "Both fresh minimal and complete optional campaigns finish through player commands, paid supplies, resident work, care and gatherings, with exact chapter checkpoints.",
+        "Five independent copies of one earned one-home village compare layout, method, outside work and preferences; each supports occupied housing, paid services, dry-weather operation and leisure.",
+        "A poorly placed home recovers through actual resident relocation and restored metered services.",
+        "First-fifteen-minute and first-week pacing are recorded; these are 1x clock equivalents, excluding reading time and automatic acceleration.",
+        "Sandbox retains free placement and comfortable defaults, with independently saved construction/supply, living-land and utility constraints; rules preserve existing property and orders.",
+        "Desktop controls, day/night artwork, cargo, overlays, blocked-work feedback, read-only panels and protected-save isolation pass rendered review.",
+        "Formatting, all native tests, strict all-target lint, WebAssembly, script syntax and every public verifier pass on the final engine."
+      ],
+      "publicEvidence": [
+        "scripts/verify-story-objectives.mjs",
+        "scripts/verify-quests.mjs",
+        "scripts/verify-planning-paths.mjs",
+        "scripts/verify-housing-balance.mjs",
+        "scripts/verify-sandbox-rules.mjs",
+        "scripts/verify-modes.mjs",
+        "scripts/verify-art-preview.mjs",
+        "scripts/verify-artwork.mjs",
+        "scripts/verify-sprite-grid-fit.mjs",
+        "scripts/verify-time-balance.mjs"
+      ],
+      "status": "PASS",
+      "implementationSources": [
+        "src/progression.rs",
+        "src/outcomes.rs",
+        "web/quests.js",
+        "web/main.js"
+      ],
+      "reviewNotes": [
+        "The objective catalog covers thirteen chapters and all twenty-one building types; fresh minimal and full optional play use the real linear unlocks, construction, purchases, resident work and gatherings.",
+        "The minimal route completes without nine optional building types. The complete route earns all 47 measurable lessons; seven guide entries do not add campaign gates. Desktop checks keep optional paths separate from primary progress.",
+        "Native outcome tests distinguish claimed, expiring, committed and inaccessible food; require actual needs and local services; retain consecutive observation windows; and count only completed short deliveries and net paid housing purchases.",
+        "Fresh campaigns complete on day 38 and day 92, respectively, with exact chapter saves. The optional run builds all twenty-one types without authored inventory, money, clock or progress.",
+        "Five independent earned one-home copies support real occupied housing, paid installation, at least fourteen operating days including seven dry days, healthy needs, majority leisure and 249 exact checkpoints.",
+        "The distant-home case performs resident relocation and replacement installation; metered fresh and greywater flow resumes through new active lines.",
+        "The pacing report records fifteen minutes at the 1x game-clock rate and the first week: well complete and home half built at the first sample; the introductory chapter and core food buildings complete by the week sample. Scripted choices are serial and exclude reading and automatic acceleration.",
+        "All eight combinations of independently saved Sandbox rules are replayed. Comfortable defaults and free placement remain; switching constraints preserves confirmed orders, property and paused projects.",
+        "The desktop suite exercises controls, overlays, blocked work, protected saves and artwork tools. Manual review separately checks resident decisions, request follow-through, the journal, day/night proportions and the real full-canvas PNG export.",
+        "The final release report must contain passing formatting, all 507 native tests, strict all-target lint, the matching WebAssembly build, every script syntax check, all public verifiers and the complete desktop suite. Hosted CI status is recorded separately."
+      ],
+      "verdicts": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ],
+      "publicExecutionReport": ".github/story-review/public-report.json",
+      "releaseReport": ".github/story-review/release-report.json"
+    }
+  ],
+  "limits": [
+    "A completed local release does not authorize merging any pull request.",
+    "Hosted checks previously could not start because of account billing; recheck and record their actual final state.",
+    "The pre-pickup-fix pipeline and its artifacts are baseline evidence, not the final corrected release.",
+    "Scripted pacing and housing results describe the declared choices, not minimum possible player completion times.",
+    "The final release uses an explicit verifier-only continuation after reproducing a stale food-measurement assertion. The original failed report is preserved; native and game sources remain unchanged."
+  ],
+  "reviewNoteOrder": "Requirements, reviewNotes and verdicts correspond by index. Each verdict uses the reviewed implementation and listed observed checks on the matching native engine, with a separate final presentation replay.",
+  "engineWasmSha256": "de542a74d0189688063e6c8cb6b4a71430755bc75dbe307fa9f7f17a9586df52",
+  "focusedEvidence": [
+    ".github/story-review/autonomy.json",
+    ".github/story-review/story-minimal.json",
+    ".github/story-review/story-optional.json",
+    ".github/story-review/housing-balance.json",
+    ".github/story-review/seasonal-balance.json",
+    ".github/story-review/clock-balance.json"
+  ],
+  "releaseExecution": {
+    "initialCommand": "node scripts/dev-check.mjs",
+    "initialResult": "Stopped at utility reserve measurement, which omitted directly edible milk and honey",
+    "initialReport": "artifacts/story-food-measurement-baseline/report.json",
+    "continuationCommand": "node .github/story-review/continue-release.mjs",
+    "continuationSource": "e7f3bee",
+    "status": "PASS: all required local phases verified",
+    "unchangedNativeSource": "2f62e43",
+    "carriedPublicChecks": 61,
+    "repeated": "All 175 script syntax checks; both 24-day manual/connected cases from exact earned paid installation checkpoints; six remaining public verifiers; complete desktop suite",
+    "guard": "The continuation reconstructs and verifies the original source/build fingerprint, rejects every game-source change, and checks the identical engine hash before reusing evidence",
+    "publicReport": "artifacts/story-public-release/report.json",
+    "presentationCorrection": {
+      "commit": "ec282d4",
+      "files": [
+        "web/hud.css",
+        "scripts/browser-checks.mjs",
+        "scripts/story-browser-checks.mjs"
+      ],
+      "proof": ".github/story-review/journal-header.json",
+      "reason": "Expanding optional paths scrolled the journal title outside the book. Keep header and close control visible, scroll only its inner pages, and explicitly open retained optional sections in browser checks.",
+      "nativeEngineChanged": false
+    },
+    "finalDesktopCommand": "node scripts/dev-check.mjs --browser-only",
+    "desktopRetry": "The first attempt to open a local server was denied by the sandbox. Browser permission was then granted. The subsequent review reproduced journal clipping and a stale collapsed/open test assumption; the full suite is replaying after those corrections.",
+    "finalReport": ".github/story-review/release-report.json",
+    "finalDesktopSource": "ec282d4cd18fc94f9946f2fe621e7d417871434a"
+  },
+  "provenRequirements": 44,
+  "currentSyntaxEvidence": ".github/story-review/syntax.json",
+  "hostedEvidence": ".github/story-review/hosted-check.json"
+}
