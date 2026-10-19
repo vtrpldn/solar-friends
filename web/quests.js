@@ -83,7 +83,7 @@ export const quests = [
     reward: "Compost + community square · soil & friendship",
     building: "compost",
     after:
-      "Build a compost station. Two kitchen scraps become one compost; gardens use it automatically for three extra food per harvest.",
+      "Build a compost station near the kitchen and gardens. Neighbours carry two scraps there, turn them into one compost, then deliver it to a growing plot for an enriched harvest.",
     objectives: (v) => [
       goal(
         "Plant a food forest",
@@ -149,7 +149,7 @@ export const quests = [
     after:
       "Build a workshop and a greenhouse. Delivering eight timber to its workbench lets a neighbour craft twelve tool uses. Tools must reach a project to give 25% faster construction; moist greenhouse beds raise seedlings.",
     objectives: (v) => [
-      goal("Build a storage house",count(v,"warehouse"),1,"Incoming orders and queued salvage also reserve space. A storage house adds 300 receiving spaces. Buildings offers resident demolition, salvage and moving; clear stock before dismantling a store.","warehouse"),
+      goal("Build a storage house",count(v,"warehouse"),1,"Short roads between the arrival store, storage houses and worksites reduce hauling time. Incoming orders and queued salvage also reserve space. A storage house adds 300 receiving spaces. Buildings offers resident demolition, salvage and moving; clear stock before dismantling a store.","warehouse"),
       actionGoal("town", "Bring home an outside-job contribution", +v.economy.work_day.some(day=>day>=0),1,"Enable one personal occupation in Town. Residents leave for their 09:00–17:00 shift and contribute its income after returning. Jobs are optional; you may disable them after this lesson."),
       actionGoal("town", "Collect an order by truck", +v.economy.orders.some(o=>o.status==="delivered"&&o.pickup_by!=null),1,"Buy a small basket, choose resident pickup and an available driver. The truck holds 40 units; it must return before supplies count. Larger orders use next-day delivery."),
       goal(
@@ -183,8 +183,8 @@ export const quests = [
     objectives: v => [
       goal("Build a workshop", count(v,"workshop"),1,"Finish a workshop in Projects, then let Bento make tools.","workshop"),
       goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight timber available and ask Bento to craft during community hours. He brings inputs to an open workshop and resumes the saved batch after breaks. Finished tools travel onward to projects and harvests.","workshop"),
-      goal("Build a compost station",count(v,"compost"),1,"Kitchen scraps become compost for our gardens.","compost"),
-      goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Make compost from kitchen scraps. The next garden harvest uses it automatically, feeds the soil and gradually repairs disturbance.","garden"),
+      goal("Build a compost station",count(v,"compost"),1,"Neighbours deliver kitchen scraps here and turn them into compost.","compost"),
+      goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Keep the kitchen, compost station and gardens connected by short paths. Neighbours carry scraps for composting and deliver mature compost to the plot before its harvest.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),
       actionGoal("supplies", "Raise a greenhouse seedling",v.progress.seedlings_raised||0,1,"Plant and keep the greenhouse moist. Eight base hours of moist growth raises a seedling. Soil and light affect the time; check Growing plots in Supplies. Rain does not water covered beds."),
       actionGoal("supplies", "Plant a seedling outdoors",v.progress.seedlings_used||0,1,"Keep garden replanting enabled and harvest a mature bed. Its next planting uses an available seedling for a growth head start. Supplies also lets you choose beans, lettuce or tomatoes."),
@@ -235,9 +235,9 @@ export const quests = [
     after:"Gas stretches our cooking, and cured digestate returns to the soil. Let's build our next home from local earth.",
     objectives:v=>[
       goal("Build a biodigester",count(v,"biodigester"),1,"Order its equipment and complete the sealed installation.","biodigester"),
-      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Two sealed waste and two kitchen scraps take eight hours to make four gas and two digestate."),
+      actionGoal("supplies","Complete a digestion batch",v.circular.batches,1,"Enable automatic feeding in Supplies. Two sealed waste and two scraps delivered to this digester take eight hours to make four gas and two digestate."),
       actionGoal("supplies","Cook a meal with biogas",+v.progress.biogas_meal,1,"Enable biogas cooking. The next pot uses one gas and yields one extra meal; fresh water is still required."),
-      actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Digestate becomes usable compost only after curing; its later use will not erase this milestone."),
+      actionGoal("supplies","Finish curing digestate",+v.progress.digestate_cured,1,"Wait a full day after digestion. Cured compost remains in a pile at that plot until neighbours collect it; its later use will not erase this milestone."),
     ],
   },
   {
@@ -248,7 +248,7 @@ export const quests = [
       actionGoal("land","Harvest the five local materials",[0,1,2,3,4].filter(m=>v.economy.sources.some(s=>s.material===m&&s.harvests>0)).length,5,"Open Land and request a mature harvest batch for timber and bamboo. Place earth, stone and salvage extraction sites and request their batches too; stone belongs on southeast ground. Residents work 09:00–12:00 and 15:00–16:00. Extraction reserves are finite; clearing a site does not refill them. Missing: "+["timber","bamboo","earth","stone","salvage"].filter((_,m)=>!v.economy.sources.some(s=>s.material===m&&s.harvests>0)).join(", ")+"."),
       actionGoal("land","Replant a harvested timber plot",+v.progress.timber_replanted,1,"Harvest all four whole trees, then enable replanting or request it. A resident plants the next crop using R$ 40 and two irrigation water."),
       actionGoal("preparation","Prepare building materials locally",v.progress.prepared_batches||0,1,"Choose Local or Adobe for an unfinished project before materials are committed. Supply raw earth, timber and salvage. Neighbours bring inputs to camp or a workshop, then prepare materials there during community hours. Follow each saved batch in Preparing materials; zero reserve makes only what projects need."),
-      {...goal("Complete an adobe home",+v.economy.projects.some(p=>p.recipe==="adobe"&&v.buildings.some(b=>b.id===p.building&&b.kind==="home"&&b.progress>=100)),1,"Plan a home, choose Adobe before building starts, then follow its stages in Projects. Imported fittings and roofing still matter.","home"),recipe:"adobe"},
+      {...goal("Complete an adobe home",+v.economy.projects.some(p=>p.recipe==="adobe"&&v.buildings.some(b=>b.id===p.building&&b.kind==="home"&&b.progress>=100)),1,"Plan a home, choose Adobe before building starts, then connect it to stores and workshops with roads. Follow its stages in Projects; imported fittings and roofing still matter.","home"),recipe:"adobe"},
       actionGoal("town","Sell genuine surplus",+v.progress.surplus_sold,1,"Ask for extra garden harvests or gathering in People until you have at least 37 ingredients, then sell one in Town. Normal chores keep a smaller healthy pantry; this one-off sale must leave the protected 36-ingredient reserve."),
       actionGoal("town","Exchange with our neighbour",+v.progress.parts_exchanged,1,"Set aside four ingredients above the 36 reserve and exchange them for two fittings in Town. The neighbour trades once per day."),
     ],

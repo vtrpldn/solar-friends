@@ -113,9 +113,8 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
                 p.remaining -= 30.;
             }
         }
-        "compost" if v.progress.scraps >= 2 => {
-            v.progress.scraps -= 2;
-            v.progress.compost += 1;
+        "compost" => {
+            organics::turn(v, id);
         }
         "workshop" => {
             let _ = production::order_tools(v, Some(id));
@@ -147,7 +146,7 @@ mod tests {
                 v.progress.completed = [true; 4];
                 v.progress.later_completed = [true; crate::progression::LATER_CHAPTERS];
                 crate::logistics::fixture_stock(&mut v, 0, 200);
-                v.progress.scraps = 4;
+                crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
             }
             assert_eq!(g.place(kind, 5, 5), "ok", "{kind}");
             crate::logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
@@ -223,7 +222,7 @@ mod tests {
             crate::logistics::fixture_finish(&mut v, 0);
             food::fixture_stage(&mut v, 0);
             v.buildings[0].poultry.remaining = 100.;
-            v.progress.scraps = 2;
+            crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
             let mut q = g.app.world_mut().query::<&Resident>();
             let mut r = q.iter(g.app.world()).next().unwrap().clone();
             r.energy = 40.;

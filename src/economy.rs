@@ -3,10 +3,12 @@ use crate::{Game, Village, event, ready};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub const COUNT: usize = 19;
+pub const COUNT: usize = 21;
 pub const FOOD: usize = 16;
 pub const MEALS: usize = 17;
 pub const EGGS: usize = 18;
+pub const COMPOST: usize = 19;
+pub const SCRAPS: usize = 20;
 pub const TOOLS: usize = 15;
 pub const CAPACITY: u32 = 600;
 pub const NAMES: [&str; COUNT] = [
@@ -29,6 +31,8 @@ pub const NAMES: [&str; COUNT] = [
     "food",
     "meals",
     "eggs",
+    "compost",
+    "scraps",
 ];
 const LABELS: [&str; COUNT] = [
     "Timber",
@@ -50,10 +54,12 @@ const LABELS: [&str; COUNT] = [
     "Ingredients",
     "Prepared meals",
     "Eggs",
+    "Mature compost",
+    "Kitchen scraps",
 ];
 const PRICES: [i64; COUNT] = [
     700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900, 400,
-    800, 300,
+    800, 300, 800, 0,
 ];
 pub type Bundle = [u32; COUNT];
 #[derive(Clone, Serialize, Deserialize)]
@@ -144,7 +150,7 @@ impl Default for Economy {
     fn default() -> Self {
         Self {
             stock: [
-                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0,
+                0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0,
             ],
             money: 300000,
             ledger: vec![Entry {
@@ -315,6 +321,8 @@ pub fn quantity(v: &Village, i: usize) -> u32 {
         FOOD => v.food as u32,
         MEALS => v.meals,
         EGGS => v.supplies.eggs,
+        COMPOST => v.progress.compost,
+        SCRAPS => v.progress.scraps,
         _ => v.economy.stock[i],
     }
 }
@@ -369,6 +377,8 @@ pub fn storage(v: &Village) -> u32 {
         + v.building_jobs.iter().flat_map(|j| j.returns).sum::<u32>()
         + crate::production::reserved_space(v)
         + crate::food::reserved_space(v, None)
+        + crate::organics::processing(v, SCRAPS)
+        + crate::processes::held(v, crate::processes::Kind::Curing) * 2
 }
 pub fn capacity(v: &Village) -> u32 {
     CAPACITY
@@ -592,31 +602,31 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
             return Some(("source".into(), index));
         }
     }
+    if storage(v) < capacity(v) {
+        let raw = crate::production::demand(v);
+        for (index, _) in v.economy.sources.iter().enumerate() {
+            if crate::resource_sites::wanted(v, index, &raw) {
+                if v.logistics.is_some()
+                    && crate::logistics::source_space(v, index)
+                        < if v.economy.sources[index].material == 0 {
+                            8
+                        } else {
+                            1
+                        }
+                {
+                    continue;
+                }
+                return Some(("source".into(), index));
+            }
+        }
+    }
     if let Some(batch) = crate::production::jobs(v).next() {
         return Some((
             crate::production::task(batch.material).into(),
             batch.material,
         ));
     }
-    if storage(v) >= capacity(v) {
-        return None;
-    }
-    let raw = crate::production::demand(v);
-    for (index, _) in v.economy.sources.iter().enumerate() {
-        if crate::resource_sites::wanted(v, index, &raw) {
-            if v.logistics.is_some()
-                && crate::logistics::source_space(v, index)
-                    < if v.economy.sources[index].material == 0 {
-                        8
-                    } else {
-                        1
-                    }
-            {
-                continue;
-            }
-            return Some(("source".into(), index));
-        }
-    }
+
     None
 }
 pub fn finish_job(v: &mut Village, task: &str, target: usize) -> bool {
@@ -704,6 +714,9 @@ pub fn quote(v: &Village, items: Bundle) -> Result<i64, String> {
     quote_with_fee(v, items, 6000)
 }
 fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
+    if items[SCRAPS] > 0 {
+        return Err("Kitchen scraps come from cooking, not the town shop.".into());
+    }
     if v.logistics.is_some()
         && items.iter().sum::<u32>() > crate::logistics::room(v, crate::logistics::Owner::Camp)
     {
@@ -728,7 +741,7 @@ fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     Ok(total)
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i),"processing":v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
+    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i),"processing":crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
     let projects:Vec<_>=v.economy.projects.iter().filter_map(|p|{
         let b=v.buildings.iter().find(|b|b.id==p.building)?;if b.progress>=100.{return None;}
         let stages=recipe(&b.kind,&p.recipe)?;let s=stages.get(p.stage)?;
@@ -1009,6 +1022,9 @@ impl Game {
     }
 
     pub fn sell_material(&mut self, material: usize, n: u32) -> String {
+        if material == SCRAPS {
+            return "Kitchen scraps are used locally, not sold.".into();
+        }
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if material >= COUNT
             || n == 0
@@ -1074,10 +1090,15 @@ impl Game {
         if !s.active || s.material > 1 || s.restored {
             return "This source cannot be restored again.".into();
         }
-        if v.progress.compost < 2 {
-            return "Set aside two compost to enrich this cultivated plot.".into();
+        if crate::organics::available(&v, crate::logistics::Owner::Source(index), COMPOST) < 2 {
+            return "Deliver two compost to this cultivated plot before enriching it.".into();
         }
-        v.progress.compost -= 2;
+        crate::logistics::spend(
+            &mut v,
+            Some(crate::logistics::Owner::Source(index)),
+            COMPOST,
+            2,
+        );
         v.economy.sources[index].restored = true;
         "ok".into()
     }

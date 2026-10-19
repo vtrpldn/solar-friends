@@ -7,7 +7,7 @@ export async function checkFoodControls({page,saved,capture}){
   await page.locator('#dev-close').click();
   await page.locator('[data-hud-resource="food"]').click();
   if(!await page.locator('#material-inventory').isVisible())await page.getByText('Stored supplies',{exact:true}).click();
-  assert.equal(await page.locator('.material-slot').count(),19);
+  assert.equal(await page.locator('.material-slot').count(),21);
   assert((await page.locator('.material-slot[data-item="17"]').textContent()).includes('5 free'));
   const location=page.locator('.storage-location').filter({hasText:'Kitchen pantry 1'});
   assert((await location.textContent()).includes('3 ingredients · 5 prepared meals'));
@@ -19,7 +19,7 @@ export async function checkFoodControls({page,saved,capture}){
   const before=await page.evaluate(()=>window.solarDev.snapshot());
   await page.getByRole('button',{name:'Buy supplies',exact:true}).click();
   const ordered=await page.evaluate(()=>window.solarDev.snapshot());
-  assert.deepEqual(ordered.village.economy.orders.at(-1).items.slice(16),[1,1,1]);
+  assert.deepEqual(ordered.village.economy.orders.at(-1).items.slice(16,19),[1,1,1]);
   assert.equal(ordered.village.economy.money,before.village.economy.money-7500);
   await capture('Town food purchases use the real trade controls','food-trade.png');
   await page.locator('#dev-button').click();await page.locator('#dev-import-file').setInputFiles('artifacts/food/eating-route.json');

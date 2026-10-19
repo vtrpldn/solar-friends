@@ -194,7 +194,7 @@ pub fn cancel(v: &mut Village, id: Id) -> bool {
     match b.kind {
         Kind::Digestion => {
             v.circular.waste += 2.;
-            v.progress.scraps = v.progress.scraps.saturating_add(2);
+            assert!(organics::recover(v, &b));
         }
         Kind::Filtration => v.circular.greywater += 12.,
         _ => {}
@@ -285,6 +285,15 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 .phase = Phase::AwaitingOutput;
             continue;
         }
+        if before.kind == Kind::Curing && !organics::cured(v, before.x, before.y) {
+            v.processes
+                .batches
+                .iter_mut()
+                .find(|b| b.id == id)
+                .unwrap()
+                .phase = Phase::AwaitingOutput;
+            continue;
+        }
         // Allocate the detached sealed curing store before crediting gas.
         if before.kind == Kind::Digestion
             && !spawn(v, Kind::Curing, None, before.x, before.y, 1440.)
@@ -314,7 +323,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 v.circular.water_reused += 8.;
             }
             Kind::Curing => {
-                v.progress.compost = v.progress.compost.saturating_add(2);
+                // The cured pile was received at the batch location before completion.
                 v.progress.digestate_cured = true;
                 event(
                     v,
@@ -358,7 +367,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
             Kind::Digestion => {
                 v.circular.auto_feed
                     && v.circular.waste >= 2.
-                    && v.progress.scraps >= 2
+                    && organics::available(v, logistics::Owner::Pantry(building), economy::SCRAPS)
+                        >= 2
                     && v.circular.biogas + production::held_biogas(v) as f32 + held_gas(v) + 4.
                         <= 12.
             }
@@ -374,7 +384,12 @@ pub fn advance(v: &mut Village, minutes: f32) {
             match kind {
                 Kind::Digestion => {
                     v.circular.waste -= 2.;
-                    v.progress.scraps -= 2;
+                    logistics::spend(
+                        v,
+                        Some(logistics::Owner::Pantry(building)),
+                        economy::SCRAPS,
+                        2,
+                    );
                 }
                 Kind::Filtration => v.circular.greywater -= 12.,
                 _ => {}
@@ -449,6 +464,15 @@ pub fn valid(v: &Village) -> bool {
             && (b.phase != Phase::Complete || b.remaining == 0.)
             && (b.kind != Kind::Curing || b.phase != Phase::Cancelled)
             && (b.kind != Kind::Banana || b.phase != Phase::Complete)
+            && (!b.active()
+                || b.kind != Kind::Digestion
+                || b.building.is_some_and(|id| {
+                    v.logistics.as_ref().is_some_and(|s| {
+                        s.stores
+                            .iter()
+                            .any(|p| p.owner == logistics::Owner::Pantry(id))
+                    })
+                }))
             && b.treated.is_finite()
             && b.treated >= 0.
             && b.treated <= 1e9
@@ -533,8 +557,11 @@ fn station_reason(v: &Village, kind: Kind, id: usize) -> &'static str {
         {
             "Make room for four cooking gas. Kitchens use stored gas before another batch can start."
         }
-        Kind::Digestion if v.circular.waste < 2. || v.progress.scraps < 2 => {
-            "Waiting for two sealed waste and two kitchen scraps."
+        Kind::Digestion
+            if v.circular.waste < 2.
+                || organics::available(v, logistics::Owner::Pantry(id), economy::SCRAPS) < 2 =>
+        {
+            "Waiting for two sealed waste and two scraps delivered to this digester."
         }
         Kind::Digestion => "Ready to digest when time resumes.",
         Kind::Filtration if !v.circular.filter_water => "Automatic filtration is paused.",

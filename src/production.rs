@@ -286,9 +286,12 @@ pub fn site_space(v: &Village, owner: Owner) -> u32 {
         Owner::Pantry(b) => pantry_site(v, b),
         _ => None,
     } {
-        pending(v, id)
-            .filter(|b| b.committed)
-            .map_or(0, |b| b.inputs.iter().sum::<u32>().max(b.output))
+        pending(v, id).filter(|b| b.committed).map_or(0, |b| {
+            b.inputs
+                .iter()
+                .sum::<u32>()
+                .max(b.output + u32::from(b.material == economy::MEALS))
+        })
     } else {
         0
     }
@@ -527,6 +530,7 @@ fn can_spawn(v: &Village, id: Id, material: usize) -> bool {
     };
     let existing: u32 = (0..COUNT).map(|i| inputs[i].min(present(v, id, i))).sum();
     let inputs_total = inputs.iter().sum::<u32>();
+    let output = output + u32::from(material == economy::MEALS);
     economy::capacity(v).saturating_sub(economy::storage(v)) >= output.saturating_sub(inputs_total)
         && logistics::room(v, p.owner) + existing >= inputs_total.max(output)
 }
@@ -758,7 +762,9 @@ fn finish(v: &mut Village, id: Id) -> bool {
     else {
         return false;
     };
-    if logistics::room(v, owner(v, b.site)) + site_space(v, owner(v, b.site)) < b.output {
+    if logistics::room(v, owner(v, b.site)) + site_space(v, owner(v, b.site))
+        < b.output + u32::from(b.material == economy::MEALS)
+    {
         v.production
             .batches
             .iter_mut()
@@ -787,7 +793,7 @@ fn finish(v: &mut Village, id: Id) -> bool {
         sanitation::household_water(v, 1.);
         v.supplies.used += b.inputs[economy::FOOD] as f32;
         v.supplies.meals_cooked += b.output;
-        v.progress.scraps = v.progress.scraps.saturating_add(1);
+        assert!(logistics::receive(v, owner(v, b.site), economy::SCRAPS, 1));
         v.progress.egg_meal |= b.inputs[economy::EGGS] > 0;
         v.progress.biogas_meal |= b.biogas;
         situations::cooked(v, b.last_worker.unwrap());

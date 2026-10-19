@@ -74,14 +74,18 @@ for(const [x,y] of [[10,7],[10,8],[11,8],[11,9],[11,10],[11,11],...[11,12,13,14,
 until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
 await complete(2);
 build('warehouse');
-const basket=Array(19).fill(0);basket[0]=1;
+// Expand a real street network as the village grows. Keep blueprints, stores,
+// kitchens and later utility plots connected rather than relying on distant dirt walks.
+const streets=[...Array.from({length:15},(_,i)=>i+11).flatMap(y=>[11,15,19].map(x=>[x,y])),...[11,15,19,23].flatMap(y=>Array.from({length:19},(_,i)=>[i+4,y]))];
+for(const [x,y] of streets)if(!snap().village.roads.some(([a,b])=>a===x&&b===y)&&!placementReason(snap().village,'road',x,y))assert.equal(g.toggle_road(x,y),'ok');
+const basket=Array(21).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
 // Buying tools can satisfy routine demand; the Story introduction still asks
 // the player to learn local crafting through one explicit workshop request.
 if(!snap().village.progress.tools_crafted){
- const timber=Array(19).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
+ const timber=Array(21).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
  until(s=>s.village.progress.tools_crafted>0||/Happy|already accepted/.test(g.request(1,'craft',false)),'request a saved tool batch');
 }
 await complete(4);

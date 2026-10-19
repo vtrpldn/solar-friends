@@ -40,7 +40,7 @@ fn independent_digesters_keep_their_own_progress_and_pause_without_a_worker() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 4.;
-        v.progress.scraps = 4;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
         step(&mut v, 1.);
         assert_eq!(held_gas(&v), 8.);
         assert_ne!(owned(&v, 0).id, owned(&v, 1).id);
@@ -88,7 +88,7 @@ fn cancelling_returns_sealed_inputs_once_and_protects_room_for_their_return() {
     let (gas, water) = {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         v.circular.greywater = 12.;
         step(&mut v, 1.);
         let ids = (owned(&v, 0).id, owned(&v, 1).id);
@@ -118,7 +118,7 @@ fn moving_keeps_the_same_sealed_batch_and_demolition_returns_unprocessed_inputs(
     let id = {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
         owned(&v, 0).id
     };
@@ -142,6 +142,11 @@ fn moving_keeps_the_same_sealed_batch_and_demolition_returns_unprocessed_inputs(
         let mut v = g.app.world_mut().resource_mut::<Village>();
         assert_eq!(v.circular.waste, 2.);
         assert_eq!(v.progress.scraps, 2);
+        assert!(
+            !building_work::work(&mut v, 0, 1000.),
+            "Recovered feed must leave the closing pantry first"
+        );
+        organics::fixture_transfer(&mut v, logistics::Owner::Camp, economy::SCRAPS, 2);
         assert!(building_work::work(&mut v, 0, 1000.));
         assert_eq!(held(&v, Kind::Digestion), 0);
         assert_eq!(v.circular.biogas, 0.);
@@ -154,7 +159,7 @@ fn detached_curing_survives_the_original_building_and_credits_compost_once() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
         step(&mut v, 480.);
         assert_eq!(v.circular.biogas, 4.);
@@ -187,7 +192,7 @@ fn passive_processes_finish_during_normal_sleep_without_creating_a_resident_job(
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.minutes = 1320.;
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         v.circular.greywater = 12.;
         freshness::fixture_reseed(&mut v);
     }
@@ -209,7 +214,7 @@ fn malformed_owners_summaries_and_shared_id_collisions_fail_atomically() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
     }
     let before = g.snapshot();
@@ -237,7 +242,7 @@ fn adding_another_digester_never_accelerates_a_committed_batch() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 6.;
-        v.progress.scraps = 6;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 6);
         step(&mut v, 1.);
         step(&mut v, 120.);
         assert_eq!(owned(&v, 0).remaining, 360.);
@@ -246,6 +251,7 @@ fn adding_another_digester_never_accelerates_a_committed_batch() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         logistics::fixture_finish(&mut v, 1);
+        organics::fixture_transfer(&mut v, logistics::Owner::Pantry(1), economy::SCRAPS, 2);
         step(&mut v, 1.);
         assert_eq!(owned(&v, 0).remaining, 359.);
         assert_eq!(owned(&v, 1).remaining, 480.);
@@ -268,7 +274,7 @@ fn daily_toilet_visits_leave_enough_sealed_space_for_process_input_recovery() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         step(&mut v, 1.);
         v.circular.waste = 77.5;
         assert!(!sanitation::due(&v, &r));
@@ -291,7 +297,7 @@ fn ready_process_feedback_distinguishes_staged_inputs_from_missing_inputs() {
                 .starts_with("Waiting")
         );
         v.circular.waste = 2.;
-        v.progress.scraps = 2;
+        crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         v.circular.greywater = 12.;
         let ready = view(&v);
         assert!(

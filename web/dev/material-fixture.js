@@ -4,15 +4,17 @@ export function resetMaterialLocations(state) {
   state.village.version=3;
   delete state.village.land;
   state.village.processes={schema:1,batches:[],paused:[]};
-  state.village.freshness={schema:1,expired:Array(19).fill(0)};
+  state.village.freshness={schema:1,expired:Array(21).fill(0)};
   Object.assign(state.village.progress,{gathering_delivery:null,gathering_until:0,invited:0,attended:0});
-  for(const b of [state.village.economy.stock,...state.village.economy.projects.flatMap(p=>[p.reserved,p.consumed]),...state.village.economy.orders.map(o=>o.items),...(state.village.building_jobs||[]).map(j=>j.returns)])while(b.length<19)b.push(0);
+  for(const b of [state.village.economy.stock,...state.village.economy.projects.flatMap(p=>[p.reserved,p.consumed]),...state.village.economy.orders.map(o=>o.items),...(state.village.building_jobs||[]).map(j=>j.returns)])while(b.length<21)b.push(0);
   state.village.economy.stock[16]=state.village.food;
   state.village.economy.stock[17]=state.village.meals;
   state.village.economy.stock[18]=state.village.supplies.eggs;
+  state.village.economy.stock[19]=state.village.progress.compost||0;
+  state.village.economy.stock[20]=state.village.progress.scraps||0;
   state.village.economy.stock[15]=state.village.progress.tool_uses||0;
   state.village.logistics=null;
-  state.village.production={schema:1,sites:[],batches:[],targets:Array.from({length:19},(_,i)=>i===17?8:0)};
+  state.village.production={schema:1,sites:[],batches:[],targets:Array.from({length:21},(_,i)=>i===17?8:0)};
   for(const r of state.residents||[]){
     r.activity_batch=null;r.activity_store=null;
     if(r.task==='prepare'){r.task='idle';r.remaining=0;r.activity_material=null;r.activity_building=null;r.target_x=r.x;r.target_y=r.y;r.requested=false;}
@@ -38,8 +40,14 @@ function alignFoodLots(state,material){
 // Deliberate test-scene stock changes. Never call while importing a playable save.
 // Preserve existing locations and cargo; change only the requested food delta.
 export function restockFixtureFood(state) {
+  const v=state.village;return restockFixtureMaterials(state,[[16,v.food],[17,v.meals],[18,v.supplies.eggs]]);
+}
+export function restockFixtureOrganics(state) {
+  const v=state.village;return restockFixtureMaterials(state,[[19,v.progress.compost||0],[20,v.progress.scraps||0]]);
+}
+function restockFixtureMaterials(state,targets) {
   const v=state.village,s=v.logistics;if(!s)return state;
-  for(const [i,target] of [[16,v.food],[17,v.meals],[18,v.supplies.eggs]]){
+  for(const [i,target] of targets){
     if(!Number.isInteger(target)||target<0)throw new Error('Fixture food uses whole portions.');
     const carried=s.shipments.filter(h=>h.carrying&&h.material===i).reduce((n,h)=>n+h.amount,0);
     const current=s.stores.reduce((n,p)=>n+p.items[i],carried);
@@ -58,10 +66,21 @@ export function restockFixtureFood(state) {
       }
       if(remove)throw new Error('Finish food cargo before reducing this fixture reserve.');
     }
-    alignFoodLots(state,i);
-    v.freshness??={schema:1,expired:Array(19).fill(0)};v.freshness.expired[i]=0;
+    if(i<19)alignFoodLots(state,i);
+    v.freshness??={schema:1,expired:Array(21).fill(0)};v.freshness.expired[i]=0;
     v.economy.stock[i]=target;
     if(v.simulation.materials){v.simulation.materials.opening[i]=target;v.simulation.materials.received[i]=0;v.simulation.materials.spent[i]=0;}
   }
+  return state;
+}
+
+// Explicit test setup only. This is not a live-game transfer or save migration.
+export function stageFixtureMaterial(state,owner,material,n) {
+  const s=state.village.logistics,p=s.stores.find(p=>p.owner.kind===owner.kind&&p.owner.id===owner.id);
+  if(!p||s.shipments.length)throw Error('Stage a material fixture before any cargo starts.');
+  let left=Math.max(0,n-p.items[material]);
+  for(const from of s.stores){if(from===p)continue;const amount=Math.min(left,from.items[material]);from.items[material]-=amount;p.items[material]+=amount;left-=amount;}
+  if(left)throw Error('Fixture input is absent.');
+  if(p.items.reduce((a,b)=>a+b,0)>p.capacity)throw Error('Fixture staging is full.');
   return state;
 }

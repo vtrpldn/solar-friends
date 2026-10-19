@@ -19,6 +19,7 @@ mod mobility;
 mod modes;
 mod navigation;
 mod occupations;
+mod organics;
 mod power;
 mod processes;
 mod production;
@@ -261,7 +262,7 @@ fn available(v: &Village, task: &str) -> bool {
         "sanitation" => ready(v, "eco_toilet"),
         "cook" => production::can_order_meals(v),
         "water" => v.water < ecology::capacity(v),
-        "compost" => ready(v, "compost") && v.progress.scraps >= 2,
+        "compost" => v.buildings.iter().any(|b| organics::can_turn(v, b.id)),
         "craft" => production::can_order_tools(v),
         "eat" => v.food >= 1. || v.meals > 0,
         "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
@@ -300,6 +301,8 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
         .filter(|b| {
             if task == "garden" {
                 ecology::needs_tending(b, sanitation::irrigation_water(v))
+            } else if task == "compost" {
+                organics::can_turn(v, b.id)
             } else if task == "build" {
                 economy::can_build(v, b.id)
             } else {
@@ -392,6 +395,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "sleep" => 60.,
         "eat" => 5.,
         "sanitation" => 4.,
+        "compost" => 3.,
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
@@ -598,7 +602,7 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
                     "Gardens need planting, two water when dry, or time to grow before harvest."
                 }
                 "cook" => "We need a kitchen, three food and one water first.",
-                "compost" => "We need a compost station and two kitchen scraps first.",
+                "compost" => "Two scraps need to reach a compost station before a neighbour can turn them.",
                 "craft" => {
                     "We need an open workshop with room for a batch, eight available timber, and fewer than 25 tool uses already stored or ordered. Inputs must be delivered before crafting."
                 }
@@ -1056,10 +1060,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                         r.remaining = 1.;
                     }
                 }
-                "compost" if v.progress.scraps >= 2 => {
-                    completed_batch = true;
-                    v.progress.scraps -= 2;
-                    v.progress.compost += 1;
+                "compost" => {
+                    completed_batch = r
+                        .activity_building
+                        .is_some_and(|id| organics::turn(&mut v, id));
                 }
                 "rest" => {
                     completed_batch = true;
@@ -1135,7 +1139,7 @@ impl Game {
                 land: land::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 12,
+                version: 13,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1500,7 +1504,13 @@ impl Game {
         "ok".into()
     }
     pub fn restore(&mut self, data: &str) -> bool {
-        let Ok(mut save) = serde_json::from_str::<Save>(data) else {
+        let Ok(mut raw) = serde_json::from_str::<serde_json::Value>(data) else {
+            return false;
+        };
+        if raw["village"]["version"] == 3 {
+            organics::author_fixture(&mut raw);
+        }
+        let Ok(mut save) = serde_json::from_value::<Save>(raw) else {
             return false;
         };
         if save.village.economy.outside_committed_day < -1
@@ -1594,7 +1604,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 12)
+            || !matches!(v.version, 3 | 13)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1681,7 +1691,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 12;
+            save.village.version = 13;
             if !processes::initialise(&mut save.village) {
                 return false;
             }
@@ -2128,7 +2138,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":12", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":13", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

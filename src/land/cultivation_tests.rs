@@ -84,7 +84,7 @@ fn depleted_soil_grows_and_yields_less_and_attended_compost_improves_it() {
     {
         let mut v = tired.app.world_mut().resource_mut::<Village>();
         let before = condition(&v, 2, 5, 5);
-        v.progress.compost = 1;
+        crate::organics::fixture(&mut v, crate::economy::COMPOST, 1);
         v.buildings[0].crop.planted = true;
         v.buildings[0].crop.growth = 180.;
         sync_moisture(&mut v);
@@ -171,7 +171,7 @@ fn moisture_edits_and_forged_crop_summaries_fail_without_changing_the_world() {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), saved);
     }
-    assert!(!g.restore(&saved.replace("\"version\":12", "\"version\":11")));
+    assert!(!g.restore(&saved.replace("\"version\":13", "\"version\":11")));
 }
 
 #[test]
