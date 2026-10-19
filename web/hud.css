@@ -233,7 +233,7 @@ footer .resources b[hidden]{display:none!important}
 .community .panel-heading .panel-close{top:10px;right:10px}.community .panel-heading{position:static;gap:12px;padding-right:32px}.community .panel-heading .count{flex:none}.community .panel-heading h2{flex:1}
 .panel .resident{gap:12px;padding:12px 0;min-height:76px}.resident b{font-size:15px}.resident small{font-size:12px}.community-footer{font-size:11px}
 #host-gathering{min-height:36px;font:700 12px "Trebuchet MS",Verdana,sans-serif}
-dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -14px 0 12px}.dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.dialog-actions button{min-height:40px}
+dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -14px 0 12px}.dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}dialog .dialog-actions button:not(.dialog-close):not(.mode-choice){min-height:40px}
 #settings-dialog .save-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}#settings-dialog .save-actions:first-of-type button:last-child{grid-column:1/-1}#settings-dialog .save-actions button{min-height:36px;white-space:normal}#settings-dialog #save{background:linear-gradient(#b6c68a,#97ac64);border-color:#718448;font-weight:700}
 #settings-dialog .setting-row{display:flex;align-items:center;gap:16px}#settings-dialog .setting-row>span{flex:1;min-width:0}#settings-dialog .setting-row input{order:-1}.settings-section small,.setting-row small{color:var(--muted)}
 #help-dialog ol{list-style:none;counter-reset:help-step;padding:0;display:grid;gap:12px;margin:20px 0}#help-dialog li{counter-increment:help-step;position:relative;padding:12px 12px 12px 46px;margin:0;background:#d5bf8520;border:1px solid #bfa670;border-radius:5px;font-size:13px}#help-dialog li::before{content:counter(help-step);position:absolute;left:12px;top:12px;width:23px;height:23px;display:grid;place-items:center;border:1px solid #a68b52;border-bottom:3px solid #8e713e;border-radius:4px;background:#dbc58d;color:#62502d;font-weight:700}#help-dialog li b{display:block;margin-bottom:5px;color:var(--ink)}
@@ -290,4 +290,4 @@ dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -1
 .power-build,.town-list-heading>div{display:flex;flex-wrap:wrap;gap:8px}
 .town-list-heading{align-items:flex-start;flex-wrap:wrap}
 .dialog-actions button{align-self:stretch}
-dialog button.danger{background:linear-gradient(#e5bd96,#ce986f);border-color:#93603d;color:#552d1c}
+dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f);border-color:#93603d;color:#552d1c}
