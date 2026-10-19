@@ -46,16 +46,19 @@ Use the existing [artwork inspector](web/artwork/projection.html), [catalog](web
 
 Start a fresh Story village through the normal menu and play for one real hour, including reading and decision time. Use ordinary player controls and the available speed controls. Keep debugging tools for observation and reproduction; progression must use earned resources and resident work.
 
-- [ ] Check the arrival with shed and storage, the first quest explanation, the first purchase or local collection decision, construction and early food/water management.
-- [ ] Record the next goal and its explanation at 5, 15, 30 and 60 minutes. Note confusing terminology, repeated menu searching, unexplained waiting, overwhelming choices and periods without a useful decision.
-- [ ] Observe energy-driven work, meals, rest, shelter use and outside jobs. Confirm that the interface explains interruptions without implying the removed community work schedule still exists.
-- [ ] Exercise an accepted request for help and observe acceptance, movement, useful progress and completion. Check a declined or unavailable request for a clear explanation.
-- [ ] Save, return to the menu and continue once. Confirm the village, current work and chosen mode survive correctly.
+- [x] Check the arrival with shed and storage, the first quest explanation, the first purchase or local collection decision, construction and early food/water management.
+- [x] Record the next goal and its explanation at 5, 15, 30 and 60 minutes. Note confusing terminology, repeated menu searching, unexplained waiting, overwhelming choices and periods without a useful decision.
+- [x] Observe energy-driven work, meals, rest, shelter use and outside jobs. Confirm that the interface explains interruptions without implying the removed community work schedule still exists.
+- [x] Exercise an accepted request for help and observe acceptance, movement, useful progress and completion. Check a declined or unavailable request for a clear explanation.
+- [x] Save, return to the menu and continue once. Confirm the village, current work and chosen mode survive correctly.
 - [ ] Fix reproduced pacing or feedback problems in small increments, then replay the affected section from its checkpoint.
 
 If a relevant action is unavailable during the first hour, test it afterward from an earned checkpoint and label that evidence separately. Include one local-production versus purchase choice, one recoverable shortage and one layout improvement; compare the expected cost/time benefit with what residents actually do.
 
 Acceptance: the first hour has no reproducible progression blocker; each observed wait or refusal has an understandable cause and a usable next action. At least one resource or layout choice produces a visible consequence. The playtest report includes the tester's pacing judgment and unresolved minor issues separately from automated campaign results. Exact quest timings are observations, not a reason to force every player through the same schedule.
+
+
+The awake [first-hour record](.github/finishing-review/story-awake-session.json) reached chapter eight with seven chapters earned. Six reproduced clarity findings remain to fix and recheck; the timed session is complete, but this stage is not accepted yet.
 
 ## 3. Validate sustained performance
 

@@ -1,0 +1,17 @@
+{
+  "candidate": "b0658d7",
+  "startedAt": "2026-10-18T23:40:08.016Z",
+  "finishedAt": "2026-10-19T00:32:07.960Z",
+  "sourceAndBuildHash": "2dce828d709256158ecad52f730f1d7b238b62e3ff0b7d0190274b31e8a33c0a",
+  "status": "not-green",
+  "passed": 267,
+  "failed": [
+    {
+      "label": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-chapter=\"10\"]')\u001b[22m\n\u001b[2m    - locator resolved to <button data-chapter=\"10\" aria-pressed=\"false\">\u2026</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "status": "FAIL"
+    }
+  ],
+  "nativeCases": 510,
+  "note": "All command checks and long simulation campaigns passed while awake. Final browser sequence failed clicking hidden journal chapter10; investigate visibility/state rather than increasing the timeout.",
+  "report": "artifacts/finishing/awake-baseline-report.json"
+}

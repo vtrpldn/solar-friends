@@ -1,0 +1,132 @@
+{
+  "candidate": "b0658d7",
+  "origin": "http://127.0.0.1:4194/",
+  "startUtc": "2026-10-18T23:40:35Z",
+  "status": "Timed first-hour play complete; reproduced clarity fixes and targeted rechecks pending.",
+  "scope": "Fresh Story through ordinary New story confirmation; previous test checkpoint retained by game backup. No edited resources or debug progression. Full validation runs separately; this is not clean performance evidence.",
+  "checkpoints": [
+    {
+      "targetMinutes": 5,
+      "observedAt": "2026-10-18T23:45:46Z",
+      "elapsedMinutes": 5.18,
+      "goal": "Serve a cooked meal",
+      "explanation": "Kitchen water & fittings stage needs one plumbing supplies; quest routes Construction and Trade and explains delivery versus pickup.",
+      "state": "Day 5 20:40; cistern, home and garden finished; kitchen placed, first harvest earned; R$2080, food13, water94/127.",
+      "judgment": "The early loop provides concrete decisions, with clear construction causes. 8x passes days quickly while reading; slowed to 1x for the collection window. One stale acceptance message remains beneath a correctly finished request."
+    },
+    {
+      "targetMinutes": 15,
+      "observedAt": "2026-10-18T23:55:29Z",
+      "elapsedMinutes": 14.9,
+      "goal": "Growing Resilience: make tools or put bought tools to use",
+      "explanation": "Craft at workshop with delivered timber, or buy tools and use them in construction/harvest. Next objective improves a growing plot with compost or restoration.",
+      "state": "Day11 02:38; four chapters earned, eight buildings, bamboo and quarry; R$3201, food31, water100/137, three beds.",
+      "judgment": "Earlier delivered order, pickup, income and shared construction satisfy logistics chapter on arrival, so that chapter advances quickly; this rewards choices already made. Quarry setup required finding a true deposit using Land views; a little navigation friction, no blocker. No resource grant or debug progression used."
+    },
+    {
+      "targetMinutes": 30,
+      "observedAt": "2026-10-19T00:11:23Z",
+      "elapsedMinutes": 30.8,
+      "goal": "Growing Resilience: make tools or put bought tools to use",
+      "explanation": "Workshop crafting needs deliveredtimber; boughttools can instead be used in construction or harvest. Soil improvement already satisfied through actual compost delivery and residentrestoration.",
+      "state": "Day16 16:37; eleven buildings, twohomes/5beds, fourresourceplots; R$3399.36, food32, water106/149.",
+      "judgment": "Normal1x construction remained readable with short useful waits. Localtimber growth is longer but has progress/time estimates and a purchasealternative. Chose adobe housing and landrestoration while it grew. Concrete friction: extractionoverlay closes betweenmenus; an unusedvaliddeposit cell reports no matchingdeposit aftersoilpin. Readonlydiagnostics confirmed patchbounds; allprogression stillusesnormalUI and earnedresources."
+    },
+    {
+      "targetMinutes": 60,
+      "observedAt": "2026-10-19T00:41:18Z",
+      "elapsedMinutes": 60.72,
+      "goal": "Water Comes Around: build an ecological toilet",
+      "explanation": "Daily private routines need fresh handwashing water and free greywater/sewage buffers; manual closed-container carrying and compatible installed lines are alternatives. Next steps are reed-bed filtration and reused irrigation.",
+      "state": "Day29 02:23, fifteen buildings including two homes and two cisterns; seven chapters completed; 5/5beds, R$4677.78, food29, water65/230, wellbeing87%. Paused and saved.",
+      "judgment": "The hour sustained useful resource and layout decisions. Chose local stone/earth/timber and frame preparation, imported manufactured equipment, scheduled one outside job, restored garden soil, and built extra rain storage before sanitation. Longest optional route was growing timber rather than buying tools; other meaningful work remained available. Repeated menu searching around extraction and idle production inputs deserves the recorded fixes. No crash, irreversible shortage or stuck resident observed. Not a full thirteen-chapter completion or a clean dense-performance measurement."
+    }
+  ],
+  "observations": [
+    {
+      "elapsedMinutes": 2,
+      "observation": "Arrival shed and storage visible, five residents shelter from rain. Arrival objective advances to cistern. Cistern and home planned; Construction explains resident hauling and Foundation labour. 4x selected."
+    },
+    {
+      "elapsedMinutes": 4,
+      "observation": "Iara accepted Help build with a precise supplies-travelling explanation, later request Finished and cistern completed. Garden visit accepted, first harvest automatic. A late pickup is disabled with explicit08:00\u201316:00 restriction."
+    },
+    {
+      "elapsedMinutes": 8,
+      "observation": "Luz returns from paid pickup, kitchen finishes and cooks. Bento returns and contributes240. Chapter2 starts."
+    },
+    {
+      "elapsedMinutes": 10,
+      "observation": "Food forest built and requested gathering finishes. Bamboo planted/watered by residents, growth visible. Chapter3 starts."
+    },
+    {
+      "elapsedMinutes": 13,
+      "observation": "Square missing6stone. Quarry25 selected instead of imported stone+transport; geology refusals explain southeast restriction. Land overlay identifiesdeposit; quarry established and square completed by residents."
+    },
+    {
+      "elapsedMinutes": 14,
+      "observation": "Welcome supper transports5meals and runs; chapters3and4 complete through earned earlier logistics outcomes. Save/menu/page reload/Continue preserved six buildings, R$2080, chapter1unfinished kitchen and occupation schedule earlier at minute6."
+    }
+  ],
+  "viewport": {
+    "width": 1818,
+    "height": 1023,
+    "dpr": 0.8800000548362732,
+    "note": "Temporary desktop CDP metrics override; browser page zoom affected CSS dimensions. Record actual dimensions; reset override when finished."
+  },
+  "findings": [
+    {
+      "id": "PLAY-01",
+      "status": "reproduced",
+      "issue": "Accepted request response remains after its live help order changes or finishes.",
+      "evidence": "stale-request-feedback.png; reproducedagain after page reload and gatheringcompletion."
+    },
+    {
+      "id": "PLAY-02",
+      "status": "reproduced",
+      "issue": "Crafting refusal lists multiple possible blockers instead of the actual unavailable input/condition.",
+      "evidence": "Nina craftrequest at finishedemptyworkshop with noavailabletimber."
+    },
+    {
+      "id": "PLAY-03",
+      "status": "reproduced",
+      "issue": "Extraction placement hides the depositlayer when leavingLandviews; playermustrememberpatches or repeat invalidplacement."
+    },
+    {
+      "id": "PLAY-04",
+      "status": "reproduced",
+      "issue": "Pinning an unuseddeposit cell for soil inspection changes previewkind to garden and incorrectly reports no matchingdeposit.",
+      "evidence": "Earthpatch x12..20,y14..25 confirmed via readonlysnapshot. Plot15,21 saysno matchingdeposit; establishedsourceat13,21 shows24/52. deposit-inspection-before.png."
+    },
+    {
+      "id": "PLAY-05",
+      "status": "reproduced",
+      "issue": "An idle production reserve does not explain missing recipe inputs beside the station. Opening recipes revealed fittings needed for local frames. Supplying those fittings produced frames at both workbenches and completed the coop."
+    },
+    {
+      "id": "PLAY-06",
+      "status": "reproduced",
+      "issue": "The primary different-food-cycle action opens Ecology, while Farm & animals and hen feeding controls are in Pantry."
+    }
+  ],
+  "endedAt": "2026-10-19T00:41:18Z",
+  "elapsedMinutes": 60.72,
+  "startTimePrecision": "Start timestamp approximate within ten seconds; end clock read directly. Session includes ordinary reading, decisions, deliberate pauses and read-only diagnostic reproduction.",
+  "moduleNote": "The test tab retained earlier UI modules for the initial six minutes. Save/menu/reload/Continue loaded the current delivered modules; native simulation identity stayed unchanged. Earlier obsolete grammar was already fixed and was not logged as a new defect.",
+  "minorObservations": [
+    {
+      "issue": "Temporary no-clear-hauling-route warning during initial coop supply reservation.",
+      "outcome": "Resolved without any layout change. Kept the project at the cancellation confirmation, and it reached the next stage normally. Trace before altering route logic."
+    },
+    {
+      "issue": "Fast-forward can pass the pickup window during reading.",
+      "outcome": "Current disabled action explains08:00\u201316:00; ordinary pause and delivery provide alternatives."
+    },
+    {
+      "issue": "Started workshop work locks its construction method.",
+      "outcome": "Expected reservation behavior; pausing before choosing avoids the short decision window."
+    }
+  ],
+  "finalEvidence": "artifacts/finishing/story-awake-end.json",
+  "scopedPerformance": "Recorder history retained with the end snapshot, but intensive campaigns competed for CPU; this does not satisfy dense sustained acceptance."
+}
