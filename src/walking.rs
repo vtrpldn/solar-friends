@@ -91,7 +91,7 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
             v.buildings
                 .iter()
                 .find(|b| b.kind == "workshop" && b.progress >= 100.)
-                .map_or(CAMP, |b| (b.x as f32, b.y as f32))
+                .map_or(crate::camp(v), |b| (b.x as f32, b.y as f32))
         };
         return spacing::material_spot(v, base.0, base.1, r.id)
             .map(|p| [p.0, p.1])

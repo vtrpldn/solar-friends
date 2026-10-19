@@ -240,9 +240,10 @@ pub fn initialise(v: &mut Village) -> bool {
         if kind != Kind::Curing && building.is_none() {
             return false;
         }
-        let (id, x, y) = building.map_or((None, CAMP.0 as i32, CAMP.1 as i32), |(id, x, y)| {
-            (Some(id), x, y)
-        });
+        let (id, x, y) = building.map_or(
+            (None, crate::camp(&v).0 as i32, crate::camp(&v).1 as i32),
+            |(id, x, y)| (Some(id), x, y),
+        );
         if !spawn(v, kind, id, x, y, remaining) {
             return false;
         }

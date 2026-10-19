@@ -991,7 +991,7 @@ fn anchor_identity(v: &Village, kind: Kind, id: i64, a: &Anchor) -> bool {
         return i64::from(a.endpoint.0) == id && power::shared_kind(&a.kind);
     }
     match owner(id) {
-        Some(water::Owner::Camp) => a.kind == "camp" && (a.x as f32, a.y as f32) == CAMP,
+        Some(water::Owner::Camp) => a.kind == "camp" && (a.x as f32, a.y as f32) == crate::camp(v),
         Some(water::Owner::Source(index)) => v.economy.sources.get(index).is_some_and(|s| {
             a.kind
                 == if s.material == 0 {

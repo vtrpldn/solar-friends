@@ -92,8 +92,8 @@ pub fn placement(
             "Keep the river and its banks clear. Choose a clearing farther inland."
         });
     }
-    if (x as f32 - CAMP.0).abs() < radius as f32 + 0.5
-        && (y as f32 - CAMP.1).abs() < radius as f32 + 0.5
+    if (x as f32 - crate::camp(v).0).abs() < radius as f32 + 0.5
+        && (y as f32 - crate::camp(v).1).abs() < radius as f32 + 0.5
     {
         return Err("Keep the arrival clearing free for gathering and supplies.");
     }

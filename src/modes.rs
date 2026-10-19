@@ -103,7 +103,28 @@ impl Game {
             simulation::start_materials(&mut v);
         }
         if founding {
+            v.camp = (MAP_SIZE as f32 / 2., MAP_SIZE as f32 / 2.);
+            v.logistics = None;
+            logistics::initialise(&mut v);
+            v.production = production::State::default();
+            production::sync(&mut v);
+            v.water_supply = water::State::default();
+            assert!(water::initialise(&mut v));
+            v.maintenance.records.clear();
+            maintenance::sync(&mut v);
             founding::start(&mut v);
+        }
+        drop(v);
+        if founding {
+            let dx = MAP_SIZE as f32 / 2. - CAMP.0;
+            let dy = MAP_SIZE as f32 / 2. - CAMP.1;
+            let mut query = self.app.world_mut().query::<&mut Resident>();
+            for mut r in query.iter_mut(self.app.world_mut()) {
+                r.x += dx;
+                r.y += dy;
+                r.target_x += dx;
+                r.target_y += dy;
+            }
         }
         true
     }

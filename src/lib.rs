@@ -56,6 +56,12 @@ pub const MAP_SIZE: i32 = 64;
 pub const SAVE_VERSION: u32 = 29;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
+fn legacy_camp() -> (f32, f32) {
+    CAMP
+}
+pub(crate) fn camp(v: &Village) -> (f32, f32) {
+    v.camp
+}
 const TASKS: &[&str] = &[
     "visit",
     "arrive",
@@ -193,6 +199,8 @@ pub struct Village {
     pub workforce_peers: [Option<Resident>; 5],
     pub version: u32,
     pub map_size: i32,
+    #[serde(default = "legacy_camp")]
+    pub camp: (f32, f32),
     pub minutes: f32,
     pub wood: f32,
     pub economy: economy::Economy,
@@ -312,7 +320,7 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
         return p;
     }
     if task == "water" {
-        return (1., 13. + (id as f32 - 2.) * 0.65);
+        return (1., crate::camp(v).1 + (id as f32 - 2.) * 0.65);
     }
     if task == "sleep" || task == "rest" {
         return shelter(v, id)
@@ -323,14 +331,23 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
                     spacing::approach(v, b, id)
                 }
             })
-            .unwrap_or((CAMP.0 + (id as f32 - 2.) * 1.25, CAMP.1));
+            .unwrap_or((
+                crate::camp(&v).0 + (id as f32 - 2.) * 1.25,
+                crate::camp(&v).1,
+            ));
     }
     if task == "gather" && !ready(v, "grove") {
-        return (3., 11. + id as f32 * 1.25);
+        return (
+            crate::camp(v).0 - 7.,
+            crate::camp(v).1 - 2. + id as f32 * 1.25,
+        );
     }
     destination_building(v, task, id)
         .and_then(|b| spacing::approach(v, b, id))
-        .unwrap_or((CAMP.0 + (id as f32 - 2.) * 1.25, CAMP.1 + 0.5))
+        .unwrap_or((
+            crate::camp(&v).0 + (id as f32 - 2.) * 1.25,
+            crate::camp(&v).1 + 0.5,
+        ))
 }
 fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a Building> {
     if task == "gathering" {
@@ -483,8 +500,10 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         r.activity_building = None;
         r.task = "rest".into();
         r.reason = "Taking a break where there is room. That building is too crowded.".into();
-        (r.target_x, r.target_y) =
-            idle_destination(v, r.id).unwrap_or((CAMP.0 + (r.id as f32 - 2.) * 1.25, CAMP.1));
+        (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((
+            crate::camp(&v).0 + (r.id as f32 - 2.) * 1.25,
+            crate::camp(&v).1,
+        ));
         return;
     }
     if task == "eat" {
@@ -517,7 +536,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
             {
                 (b.x as f32, b.y as f32)
             } else {
-                CAMP
+                crate::camp(&v)
             };
             if let Some(point) = spacing::material_spot(v, base.0, base.1, r.id) {
                 (r.target_x, r.target_y) = point;
@@ -1286,6 +1305,7 @@ impl Game {
                 workforce_peers: std::array::from_fn(|_| None),
                 version: SAVE_VERSION,
                 map_size: MAP_SIZE,
+                camp: CAMP,
                 minutes: 480.,
                 wood: 32.,
                 economy: economy::Economy::default(),
@@ -1840,6 +1860,10 @@ impl Game {
             || !sandbox::valid(v)
             || !matches!(v.version, 3 | SAVE_VERSION)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
+            || [v.camp.0, v.camp.1]
+                .iter()
+                .any(|n| !n.is_finite() || !(1.0..=(MAP_SIZE - 2) as f32).contains(n))
+            || river_bank(v.camp.0 as i32, v.camp.1 as i32)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
             || !v.minutes.is_finite()

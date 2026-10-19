@@ -28,7 +28,7 @@ pub fn departure_time(minutes: f32) -> bool {
     (540.0..600.).contains(&minutes.rem_euclid(1440.))
 }
 pub fn gate(v: &Village, id: usize) -> (f32, f32) {
-    let preferred = 13. + (id as f32 - 2.) * 1.25;
+    let preferred = crate::camp(v).1 + (id as f32 - 2.) * 1.25;
     let clear =
         |x, y| spacing::land(x, y) && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y));
     for offset in 0..MAP_SIZE {
@@ -156,7 +156,9 @@ pub fn advance(
         }
         trip.phase = Phase::Returning;
         r.task = "return".into();
-        (r.target_x, r.target_y) = spacing::material_spot(v, CAMP.0, CAMP.1, r.id).unwrap_or(CAMP);
+        (r.target_x, r.target_y) =
+            spacing::material_spot(v, crate::camp(&v).0, crate::camp(&v).1, r.id)
+                .unwrap_or(crate::camp(&v));
         r.reason = match trip.purpose {
             Purpose::Work => "Back from work. Walking into the village for the evening.",
             Purpose::Pickup => "Back with the town supplies. Walking into the village.",

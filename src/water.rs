@@ -90,8 +90,13 @@ pub(crate) fn owner_tank(v: &Village, owner: Owner) -> Option<&Tank> {
 }
 fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; LIQUIDS])> {
     let mut out = vec![
-        (Owner::Camp, CAMP.0, CAMP.1, [40., 60., 120., 80.]),
-        (Owner::Service, 1., 13., [0., 0., LOAD, LOAD]),
+        (
+            Owner::Camp,
+            crate::camp(&v).0,
+            crate::camp(&v).1,
+            [40., 60., 120., 80.],
+        ),
+        (Owner::Service, 1., crate::camp(v).1, [0., 0., LOAD, LOAD]),
     ];
     out.extend(v.buildings.iter().filter_map(|b| {
         if b.progress < 100. && building_work::original_progress(v, b.id) != Some(100.) {
@@ -344,8 +349,8 @@ fn stage(v: &mut Village, class: Class, amount: f64, future_return: Option<(Owne
         v.water_supply.tanks.push(Tank {
             id,
             owner: Owner::Ground,
-            x: CAMP.0 + 0.7,
-            y: CAMP.1,
+            x: crate::camp(&v).0 + 0.7,
+            y: crate::camp(&v).1,
             capacity: contents,
             water: contents,
         });

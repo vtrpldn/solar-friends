@@ -226,7 +226,15 @@ pub fn initialise(v: &mut Village) -> bool {
     }
     let items: Bundle = std::array::from_fn(|i| economy::quantity(v, i));
     v.logistics = Some(State::default());
-    if create(v, Owner::Camp, CAMP.0, CAMP.1, economy::CAPACITY).is_none() {
+    if create(
+        v,
+        Owner::Camp,
+        crate::camp(&v).0,
+        crate::camp(&v).1,
+        economy::CAPACITY,
+    )
+    .is_none()
+    {
         v.logistics = None;
         return false;
     }
@@ -1684,7 +1692,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         }
         owners.push(p.owner);
         let anchored = match p.owner {
-            Owner::Camp => p.capacity == economy::CAPACITY && (p.x, p.y) == CAMP,
+            Owner::Camp => p.capacity == economy::CAPACITY && (p.x, p.y) == crate::camp(&v),
             Owner::Warehouse(id) => {
                 p.capacity == 300
                     && v.buildings.iter().any(|b| {

@@ -2,7 +2,10 @@
 use crate::*;
 
 pub fn start(v: &mut Village) {
-    for (kind, x, y) in [("shed", 8, 10), ("warehouse", 14, 10)] {
+    let (cx, cy) = crate::camp(v);
+    land::disturb_plot(v, 10, cx as i32, cy as i32, 0.05);
+    for (kind, dx, dy) in [("shed", -2, -3), ("warehouse", 4, -3)] {
+        let (x, y) = (cx as i32 + dx, cy as i32 + dy);
         let id = v.economy.next_building;
         v.economy.next_building += 1;
         v.buildings.push(Building {
@@ -104,6 +107,12 @@ mod tests {
             assert!(g.start_mode(mode));
             let v = g.app.world().resource::<Village>();
             assert_eq!(v.map_size, MAP_SIZE);
+            assert_eq!(v.camp, (MAP_SIZE as f32 / 2., MAP_SIZE as f32 / 2.));
+            assert!(
+                v.buildings
+                    .iter()
+                    .all(|b| (b.x - MAP_SIZE / 2).abs() <= 4 && (b.y - MAP_SIZE / 2).abs() <= 4)
+            );
             assert_eq!(v.land.water.len(), (MAP_SIZE * MAP_SIZE) as usize);
             assert_eq!(v.buildings.len(), 2);
             assert!(ready(v, "shed") && ready(v, "warehouse"));
