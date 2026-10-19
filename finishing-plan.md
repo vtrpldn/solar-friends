@@ -74,6 +74,8 @@ Proposed desktop targets: normal 1× play should approach the display's refresh 
 
 Acceptance: no crash, growing backlog, recurring input stall or unbounded resource growth during the session; report all scenarios and their measured limits. The [sprite cache](web/paint-cache.js) stays within its defined budget. Preserve exact simulation progress at higher speed. Recheck [live-edit recovery](scripts/check-iteration.mjs) only if the development loop changes.
 
+The [thirty-minute baseline](.github/finishing-review/dense-performance-baseline.json) meets the frame targets in all six windows, but records recurring fast-forward simulation stalls. The cable-anchor geometry bottleneck has a focused fix and exact [simulation parity evidence](.github/finishing-review/cable-anchor-parity.json); browser rechecking remains open.
+
 ## 4. Reconcile documentation
 
 - [x] Update the [README](README.md) to the 32×32 map, starter shed/storage, current save behavior, energy-driven work and current development commands.
