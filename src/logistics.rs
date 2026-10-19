@@ -1315,7 +1315,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 11
+    if v.version != 12
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5

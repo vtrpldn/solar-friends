@@ -15,7 +15,7 @@ Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_comp
 Object.assign(fixture.village.circular,{waste:8,greywater:24,biogas:0,banana_treatment:false});fixture.village.economy.outside_jobs=Array(5).fill(false);
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});
 assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));
-g.tick(.25);let s=snap(g);assert.equal(s.village.version,11);assert(owned(s,0)&&owned(s,1)&&owned(s,2));
+g.tick(.25);let s=snap(g);assert.equal(s.village.version,12);assert(owned(s,0)&&owned(s,1)&&owned(s,2));
 assert.notEqual(owned(s,0).id,owned(s,1).id);assert.equal(owned(s,0).remaining,480);assert.equal(owned(s,1).remaining,480);assert.equal(s.environment.economy.processes.reserved_gas,8);assert.equal(s.village.circular.waste,4);assert.equal(s.village.progress.scraps,0);
 advanceGame(g,120);s=snap(g);assert.equal(owned(s,0).remaining,360);assert.equal(owned(s,1).remaining,360);checkpoint(g);
 await writeFile('artifacts/processes/working.json',g.snapshot());

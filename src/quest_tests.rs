@@ -533,7 +533,7 @@ fn rain_needs_completed_storage_and_dry_days_pause_crops() {
     assert_eq!(v.water, 115.);
     v.minutes = 2. * 1440. + 900.;
     v.buildings[0].crop.growth = 0.;
-    v.buildings[0].crop.moisture = 10.;
+    land::water_plot(&mut v, 2, 14, 10, 10. / 240.);
     ecology::advance(&mut v, 60.);
     assert_eq!(v.buildings[0].crop.growth, 10.);
     assert_eq!(v.water, 115.);
@@ -593,6 +593,13 @@ fn crop_saves_round_trip_migrate_and_reject_invalid_state() {
         moisture: 100.,
         ..ecology::Crop::default()
     };
+    land::water_plot(
+        &mut g.app.world_mut().resource_mut::<Village>(),
+        2,
+        14,
+        10,
+        100. / 240.,
+    );
     let saved = g.snapshot();
     let mut restored = Game::new();
     assert!(restored.restore(&saved));

@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import init,{Game} from '../web/pkg/solar_friends.js';
+await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
+const snap=g=>JSON.parse(g.snapshot());
+function until(g,predicate,label,limit=3*1920){for(let tick=0;tick<limit;tick++){g.tick(.25);if(tick%4===3&&predicate(snap(g)))return;}throw new Error(label+' did not finish within three days');}
+await mkdir('artifacts/cultivation',{recursive:true});
+async function harvest(name,nutrients,compost){
+ const g=new Game();g.start_mode('sandbox');assert.equal(g.place('garden',5,5),'ok');
+ let fixture=snap(g);for(const soil of fixture.village.land.soil)soil.nutrients=nutrients;fixture.village.progress.compost=compost;
+ assert(g.restore(JSON.stringify(fixture)),'Explicit soil fixture must meet current save validation');
+ until(g,s=>s.village.arrived,'arrival');
+ const before=snap(g),start=before.village.minutes,accepted=g.request(1,'garden',true);let matureAt=null,growingSave=null;
+ assert.equal(snap(g).residents.find(r=>r.id===1).help?.task,'garden',accepted);
+ until(g,s=>{if(growingSave==null&&s.village.buildings[0].crop.growth>=60)growingSave=g.snapshot();if(matureAt==null&&s.village.buildings[0].crop.growth>=180)matureAt=s.village.minutes;if(s.village.harvests>before.village.harvests)return true;const crop=s.village.buildings[0].crop,r=s.residents.find(r=>r.id===1);if(r.help?.finished!=null&&(!crop.planted||crop.moisture<=90||crop.growth>=180))g.request(1,'garden',true);return false;},'resident harvest');
+ const after=snap(g),preview=JSON.parse(g.land_preview('garden',5,5)),checkpoint=g.snapshot();
+ assert(g.restore(checkpoint));assert.equal(g.snapshot(),checkpoint);
+ assert(after.residents.some(r=>r.help?.task==='garden'),'A resident accepted an identifiable gardening request');
+ assert(preview.ground.nutrients<nutrients||compost>0,'Harvest affects actual ground');
+ await writeFile(`artifacts/cultivation/${name}.json`,checkpoint);assert(growingSave);await writeFile(`artifacts/cultivation/${name}-growing.json`,growingSave);
+ assert(matureAt!=null,'Observed actual maturity before resident harvesting');
+ const result={name,matureMinutes:matureAt-start,minutes:after.village.minutes-start,food:after.village.supplies.gathered-before.village.supplies.gathered,nutrients:preview.ground.nutrients,compost:after.village.progress.compost};
+ g.free();return result;
+}
+const healthy=await harvest('healthy',1,0),tired=await harvest('depleted',.4,0),amended=await harvest('composted',.4,1);
+assert(tired.food<healthy.food,'Depleted ground produces less with the same worker and crop');
+assert(tired.matureMinutes>healthy.matureMinutes,'Depleted ground matures later even when the same work window can contain both harvests');
+assert(amended.nutrients>tired.nutrients,'Resident-applied compost improves saved soil');assert.equal(amended.compost,0);
+const g=new Game();g.start_mode('sandbox');assert.equal(g.place('solar_farm',18,18),'ok');
+let fixture=snap(g);fixture.village.minutes=720;assert(g.restore(JSON.stringify(fixture)));
+const before=snap(g).environment.power.solar_generation;
+assert.equal(g.place('grove',15,15),'ok');const shade=JSON.parse(g.land_preview('solar_farm',18,18)),after=snap(g).environment.power.solar_generation;
+assert(shade.ground.shade>0);assert(after<before);assert(Math.abs(after/before-shade.solar_exposure)<.0001);
+const snapshot=g.snapshot();assert(g.restore(snapshot));assert.equal(g.snapshot(),snapshot);await writeFile('artifacts/cultivation/shade.json',snapshot);
+assert.equal(g.land_report(),g.land_report());assert.equal(g.snapshot(),snapshot);
+assert.equal(g.queue_building_work(1,'demolish',0,0),'ok');
+assert.equal(JSON.parse(g.land_preview('solar_farm',18,18)).solar_exposure,shade.solar_exposure,'A standing grove keeps shading while removal is queued');
+until(g,s=>!s.village.buildings.some(b=>b.id===1),'resident grove removal');
+assert.equal(JSON.parse(g.land_preview('solar_farm',18,18)).solar_exposure,1);
+const cleared=g.snapshot();assert(g.restore(cleared));assert.equal(g.snapshot(),cleared);await writeFile('artifacts/cultivation/cleared-shade.json',cleared);
+const edge=new Game();edge.start_mode('sandbox');assert.equal(edge.place('garden',1,1),'ok');assert.equal(JSON.parse(edge.land_preview('garden',1,1)).cells,4);assert(edge.restore(edge.snapshot()));edge.free();
+g.free();console.log('PASS: real resident gardening, soil-dependent yield and maturity, actual compost use, persistent nutrients, exact saves and matching solar/shade preview. '+JSON.stringify({healthy,tired,amended,solar:{before,after,exposure:shade.solar_exposure}}));

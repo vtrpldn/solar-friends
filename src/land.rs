@@ -2,6 +2,11 @@
 use crate::{Game, MAP_SIZE, Village, interactions, resource_sites, river_bank, simulation};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+mod water;
+pub use water::{
+    RootZone, advance_fallow, condition, growth, harvest_soil, plot_water, solar_exposure,
+    sync_moisture, water_plot, yield_factor,
+};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Deposit {
@@ -34,6 +39,7 @@ pub struct State {
     pub revision: u32,
     pub deposits: Vec<Deposit>,
     pub soil: Vec<Soil>,
+    pub water: Vec<f32>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub struct Ground {
@@ -42,6 +48,8 @@ pub struct Ground {
     pub cover: f32,
     pub nutrients: f32,
     pub disturbance: f32,
+    pub moisture: f32,
+    pub shade: f32,
 }
 // Broad geological regions are legible across seeds; the amount at each patch varies.
 const REGIONS: [(i32, i32, i32, i32); 9] = [
@@ -67,16 +75,20 @@ pub fn initialise(v: &mut Village) -> bool {
     let Some(end) = v.simulation.next_id.checked_add(9) else {
         return false;
     };
-    if v.economy
-        .land
-        .iter()
-        .enumerate()
-        .any(|(i, n)| !n.is_finite() || *n < 0. || *n > resource_sites::LAND[i] || n.fract() != 0.)
+    if v.buildings.iter().any(|b| !crate::ecology::valid(b))
+        || v.economy
+            .sources
+            .iter()
+            .any(|s| !s.moisture.is_finite() || !(0.0..=1440.).contains(&s.moisture))
+        || v.economy.land.iter().enumerate().any(|(i, n)| {
+            !n.is_finite() || *n < 0. || *n > resource_sites::LAND[i] || n.fract() != 0.
+        })
     {
         return false;
     }
     let mut state = State {
-        schema: 1,
+        schema: 2,
+        water: vec![0.; (MAP_SIZE * MAP_SIZE) as usize],
         seed: v.simulation.seed,
         ..State::default()
     };
@@ -102,7 +114,7 @@ pub fn initialise(v: &mut Village) -> bool {
     v.simulation.next_id = end;
     v.land = state;
     // This path authors a new village or an explicit version-3 development fixture.
-    // Playable version-11 saves are validated, never repaired or replenished here.
+    // Playable version-12 saves are validated, never repaired or replenished here.
     for index in 0..v.economy.sources.len() {
         let s = &v.economy.sources[index];
         if s.material < 2 {
@@ -117,6 +129,36 @@ pub fn initialise(v: &mut Village) -> bool {
         if s.active {
             s.remaining = d.remaining as f32;
         }
+    }
+    let mut watered: Vec<_> = v
+        .buildings
+        .iter()
+        .filter(|b| crate::ecology::farm(b) && b.progress >= 100. && b.crop.planted)
+        .map(|b| {
+            (
+                interactions::footprint_size(&b.kind),
+                b.x,
+                b.y,
+                b.crop.moisture / crate::ecology::moisture_capacity(b),
+            )
+        })
+        .collect();
+    watered.extend(
+        v.economy
+            .sources
+            .iter()
+            .filter(|s| s.active && s.material < 2 && s.planted)
+            .map(|s| {
+                (
+                    resource_sites::size(s.material),
+                    s.x,
+                    s.y,
+                    s.moisture / 1440.,
+                )
+            }),
+    );
+    for (n, x, y, water) in watered {
+        water_plot(v, n, x, y, water);
     }
     true
 }
@@ -206,6 +248,13 @@ pub fn ground(v: &Village, x: i32, y: i32) -> Ground {
         cover: edit.map_or(base_cover, |s| s.cover),
         nutrients,
         disturbance,
+        moisture: v
+            .land
+            .water
+            .get((y * MAP_SIZE + x) as usize)
+            .copied()
+            .unwrap_or(0.),
+        shade: water::shade(v, x, y),
     }
 }
 pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
@@ -217,10 +266,7 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     };
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
-            if !(1..MAP_SIZE - 1).contains(&a)
-                || !(1..MAP_SIZE - 1).contains(&b)
-                || river_bank(a, b)
-            {
+            if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
                 continue;
             }
             if let Some(s) = v.land.soil.iter_mut().find(|s| s.x == a && s.y == b) {
@@ -242,10 +288,11 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     v.land.revision = v.land.revision.saturating_add(1);
 }
 pub fn valid(v: &Village) -> bool {
-    if v.land.schema != 1
+    if v.land.schema != 2
         || v.land.seed != v.simulation.seed
         || v.land.deposits.len() != 9
-        || v.land.soil.len() > 676
+        || v.land.soil.len() > (MAP_SIZE * MAP_SIZE) as usize
+        || !water::moisture_valid(v)
     {
         return false;
     }
@@ -266,11 +313,13 @@ pub fn valid(v: &Village) -> bool {
     }
     let mut last = None;
     for s in &v.land.soil {
-        if !(1..MAP_SIZE - 1).contains(&s.x)
-            || !(1..MAP_SIZE - 1).contains(&s.y)
+        if !(0..MAP_SIZE).contains(&s.x)
+            || !(0..MAP_SIZE).contains(&s.y)
             || river_bank(s.x, s.y)
             || last.is_some_and(|key| key >= (s.y, s.x))
-            || [s.nutrients, s.disturbance, s.cover]
+            || !s.nutrients.is_finite()
+            || !(0.0..=1.25).contains(&s.nutrients)
+            || [s.disturbance, s.cover]
                 .iter()
                 .any(|n| !n.is_finite() || !(0.0..=1.).contains(n))
         {
@@ -289,8 +338,8 @@ pub fn valid(v: &Village) -> bool {
     })
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let cells: Vec<_> = (1..MAP_SIZE - 1)
-        .flat_map(|y| (1..MAP_SIZE - 1).map(move |x| (x, y)))
+    let cells: Vec<_> = (0..MAP_SIZE)
+        .flat_map(|y| (0..MAP_SIZE).map(move |x| (x, y)))
         .filter(|&(x, y)| !river_bank(x, y))
         .map(|(x, y)| serde_json::json!({"x":x,"y":y,"ground":ground(v,x,y)}))
         .collect();
@@ -326,10 +375,7 @@ impl Game {
         let mut rows = vec![];
         for a in x - n / 2..x - n / 2 + n {
             for b in y - n / 2..y - n / 2 + n {
-                if !(1..MAP_SIZE - 1).contains(&a)
-                    || !(1..MAP_SIZE - 1).contains(&b)
-                    || river_bank(a, b)
-                {
+                if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
                     return "{}".into();
                 }
                 rows.push(ground(v, a, b));
@@ -342,13 +388,17 @@ impl Game {
             nutrients: rows.iter().map(|r| r.nutrients).sum::<f32>() / count,
             cover: rows.iter().map(|r| r.cover).sum::<f32>() / count,
             disturbance: rows.iter().map(|r| r.disturbance).sum::<f32>() / count,
+            moisture: rows.iter().map(|r| r.moisture).sum::<f32>() / count,
+            shade: rows.iter().map(|r| r.shade).sum::<f32>() / count,
         };
         let patch = material
             .filter(|m| *m >= 2)
             .and_then(|m| deposit(v, m, x, y));
-        serde_json::json!({"x":x,"y":y,"cells":rows.len(),"ground":soil,"deposit":patch})
+        serde_json::json!({"x":x,"y":y,"cells":rows.len(),"ground":soil,"deposit":patch,"growth_multiplier":growth(&soil),"yield_multiplier":yield_factor(&soil),"solar_exposure":1.-soil.shade*0.8})
             .to_string()
     }
 }
+#[cfg(test)]
+mod cultivation_tests;
 #[cfg(test)]
 mod tests;

@@ -68,7 +68,9 @@ until(s=>s.village.arrived,'arrival');
 for(const [kind,x,y] of [['well',6,10],['home',8,8],['garden',13,10],['kitchen',10,10],['home',12,7]])build(kind,'standard',false,[x,y]);
 await complete(0);
 build('grove');const timber=source(0),bamboo=source(1);await complete(1);
-build('square');
+build('square','standard',false,[8,16]);
+// A shared table beside homes and the kitchen keeps actual guest and food trips short.
+for(const [x,y] of [[10,7],[10,8],[11,8],[11,9],[11,10],[11,11],...[11,12,13,14,15,16,17,18].map(y=>[10,y])])assert.equal(g.toggle_road(x,y),'ok');
 until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
 await complete(2);
 build('warehouse');

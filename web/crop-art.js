@@ -18,7 +18,7 @@ export function loadCropArt(source) {
   if(!ready){cropArt=new Image();cropArt.src=source || new URL('./art/crops.png',import.meta.url).href;ready=cropArt.decode().then(()=>preparedFrames(cropArt,cropFrameOptions));}
   return ready;
 }
-export function drawCrops(ctx,b,x,y,scale=1,night=0) {
+export function drawCrops(ctx,b,x,y,scale=1,night=0,health=1) {
   if(!cropArt?.naturalWidth)return;
   const greenhouse=b.kind==='greenhouse',art=buildingArt[b.kind],w=art.width;
   const {vertical,shear}=cameraCalibration(art),c=b.crop;
@@ -34,7 +34,7 @@ export function drawCrops(ctx,b,x,y,scale=1,night=0) {
   const paint=()=>{
     path(soil);ctx.fillStyle=c.moisture>0?'rgba(55,32,20,.17)':'rgba(204,163,102,.28)';ctx.fill();
     if(!c.planted)return;
-    ctx.filter=`brightness(${1-night*.45}) saturate(${c.moisture>0 ? 1 : .55})${c.moisture>0 ? '' : ' sepia(.3)'}`;
+    ctx.filter=`brightness(${1-night*.45}) saturate(${c.moisture>0 ? Math.max(.45,Math.min(1,health)) : .55})${c.moisture>0 ? '' : ' sepia(.3)'}`;
     const width=(c.kind==='lettuce'?22:26)*(greenhouse?.85:1);
     const ordered=positions.map(([u,v])=>point(u,v)).sort((a,b)=>a[1]-b[1]);
     for(const p of ordered)drawPreparedFrame(ctx,cropArt,cropFrame(c),p[0],p[1],width,cropFrameOptions);

@@ -562,11 +562,15 @@ pub fn view(v: &Village) -> serde_json::Value {
     }).collect();
     let mut growing:Vec<_>=v.buildings.iter().filter(|b|ecology::farm(b)&&b.crop.planted).map(|b|{
         let duration=ecology::duration(&b.crop);
-        serde_json::json!({"name":format!("{} {}",if b.kind=="greenhouse"{"Greenhouse"}else{"Garden"},b.id+1),"x":b.x,"y":b.y,"progress":b.crop.growth/duration*100.,"duration":duration,"remaining":duration-b.crop.growth,"reason":if b.progress<100.{"Paused while residents change this building."}else if b.crop.growth>=duration{"Ready for a resident to harvest."}else if b.crop.moisture<=0.{"Dry. Growth waits for irrigation or suitable rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
+        let soil=crate::land::condition(v,crate::interactions::footprint_size(&b.kind),b.x,b.y);
+        let growth=crate::land::growth(&soil);
+        serde_json::json!({"building":b.id,"soil":soil,"growth_multiplier":growth,"yield_multiplier":crate::land::yield_factor(&soil),"health":(soil.fertility/0.6).min(1.)*(1.-(soil.shade-0.4).max(0.)*0.5),"name":format!("{} {}",if b.kind=="greenhouse"{"Greenhouse"}else{"Garden"},b.id+1),"x":b.x,"y":b.y,"progress":b.crop.growth/duration*100.,"duration":duration,"remaining":(duration-b.crop.growth)/growth,"reason":if b.progress<100.{"Paused while residents change this building."}else if b.crop.growth>=duration{"Ready for a resident to harvest."}else if b.crop.moisture<=0.{"Dry. Growth waits for irrigation or suitable rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
     }).collect();
     growing.extend(v.economy.sources.iter().filter(|s|s.active&&s.material<2&&s.planted).map(|s|{
-        let duration=if s.material==0{5760.}else{2880.}/if s.restored{1.25}else{1.};
-        serde_json::json!({"name":if s.material==0{"Timber trees"}else{"Bamboo"},"x":s.x,"y":s.y,"progress":s.growth*100.,"duration":duration,"remaining":(1.-s.growth)*duration,"reason":if s.growth>=1.{"Mature. A resident can harvest a batch."}else if s.moisture<=0.{"Dry. Growth waits for irrigation or rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
+        let soil=crate::land::condition(v,crate::resource_sites::size(s.material),s.x,s.y);
+        let growth=crate::land::growth(&soil);
+        let duration=if s.material==0{5760.}else{2880.}/if s.restored{1.25}else{1.}/growth;
+        serde_json::json!({"soil":soil,"growth_multiplier":growth,"name":if s.material==0{"Timber trees"}else{"Bamboo"},"x":s.x,"y":s.y,"progress":s.growth*100.,"duration":duration,"remaining":(1.-s.growth)*duration,"reason":if s.growth>=1.{"Mature. A resident can harvest a batch."}else if s.moisture<=0.{"Dry. Growth waits for irrigation or rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
     }));
     serde_json::json!({"batches":rows,"stations":stations,"definitions":definitions,"growing":growing,"paused":v.processes.paused,"held_waste":held_waste(v),"held_greywater":held_greywater(v),"reserved_gas":held_gas(v),"reserved_irrigation":held_irrigation(v),"note":"Each building owns its passive process. Detached sealed digestate stores keep curing after a building moves or closes."})
 }
