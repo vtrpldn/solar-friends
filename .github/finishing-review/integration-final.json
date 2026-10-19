@@ -1,0 +1,424 @@
+{
+  "status": "complete-with-explicitly-accepted-hosted-limitation",
+  "integratedMain": "f822004ed3b866b32b044f9a1c2d4709aadc33d0",
+  "integratedTree": "ec1dfbfe56feb6b036e6d99e5a4b7a3807777179",
+  "matchesValidatedCandidateTree": "9d48200e1e73ca73a760b7cca85d34fc394b95ba",
+  "validatedSourceCandidate": "81fdb3f5d40a173db756a1f5bf989a5fed3dce7c",
+  "servedWasmSha256": "b1dd302daaf2b6bd90301833e2df8d47b585e188911ef21f3badebdf144cd9fe",
+  "servedAt": "http://127.0.0.1:4196/",
+  "recordedAt": "2026-10-19T02:59:23.032699+00:00",
+  "approval": {
+    "answerVerbatim": "Approve every listed PR",
+    "individualPRs": [
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      65,
+      66,
+      67
+    ],
+    "acceptedLimitation": "Hosted Actions account billing/spending block; no required hosted checks on main."
+  },
+  "mergedPRs": [
+    {
+      "headRefOid": "5e3fe189403094af097001a713a4c33518151652",
+      "mergeCommit": {
+        "oid": "3c2f84c36073086cb69dd9ed2bb22c4a3dee34ac"
+      },
+      "mergedAt": "2026-10-19T02:46:52Z",
+      "number": 33,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/33"
+    },
+    {
+      "headRefOid": "a015320ae6edde5202f1227fa7600c4b33c27d49",
+      "mergeCommit": {
+        "oid": "646ff545c3ea16a08387ffb06a9a1c43c911dbf1"
+      },
+      "mergedAt": "2026-10-19T02:47:01Z",
+      "number": 34,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/34"
+    },
+    {
+      "headRefOid": "e83de7bfa3c224b0decea5e2b331adf306d6e006",
+      "mergeCommit": {
+        "oid": "df810d1d64da7d495615921bf1c672f4b5cee510"
+      },
+      "mergedAt": "2026-10-19T02:47:08Z",
+      "number": 35,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/35"
+    },
+    {
+      "headRefOid": "53135c47075d2531ae820122cd2be27dfed72ee9",
+      "mergeCommit": {
+        "oid": "37276849e21798c3932b205ea227b24aa3c2b8f2"
+      },
+      "mergedAt": "2026-10-19T02:47:16Z",
+      "number": 36,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/36"
+    },
+    {
+      "headRefOid": "e8b836b9a27a8809d40aa4871522ac79a909bebd",
+      "mergeCommit": {
+        "oid": "98e75c01244a875f9fa5ca67b824e3259211f1b9"
+      },
+      "mergedAt": "2026-10-19T02:47:24Z",
+      "number": 37,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/37"
+    },
+    {
+      "headRefOid": "974bff42288cba46a227acc4be82b8241ace20c8",
+      "mergeCommit": {
+        "oid": "a8c8944f927512b62d5f5c2f38cf46ed3f98720b"
+      },
+      "mergedAt": "2026-10-19T02:47:31Z",
+      "number": 38,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/38"
+    },
+    {
+      "headRefOid": "4f5b533c6bb5bfd4043e54e3a96d82fbcda9defc",
+      "mergeCommit": {
+        "oid": "79b56793cda5115924da15cb3c8d94f7a0212f8a"
+      },
+      "mergedAt": "2026-10-19T02:47:39Z",
+      "number": 39,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/39"
+    },
+    {
+      "headRefOid": "52cbd08a7f1c91799a61a8d50151ae42b7198453",
+      "mergeCommit": {
+        "oid": "c0f818bb3fe02c68fd1f0027421edaad0e6b1c54"
+      },
+      "mergedAt": "2026-10-19T02:47:46Z",
+      "number": 40,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/40"
+    },
+    {
+      "headRefOid": "d833684da7c3e216549c820c22978c48747dc11a",
+      "mergeCommit": {
+        "oid": "822603f5980ffaf5f857d65e748fd818745903ce"
+      },
+      "mergedAt": "2026-10-19T02:47:54Z",
+      "number": 41,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/41"
+    },
+    {
+      "headRefOid": "7caa0c9e7c2f2761285354c574f13b04b5203d34",
+      "mergeCommit": {
+        "oid": "2ff6ac4ccda81a997e528dc7dd7a54fa8e3774ad"
+      },
+      "mergedAt": "2026-10-19T02:48:02Z",
+      "number": 42,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/42"
+    },
+    {
+      "headRefOid": "d244207e1af4ad9cc73a504f8bb4765e16a8e841",
+      "mergeCommit": {
+        "oid": "2765219d20327e538dba1cfaf3c509b9ec05ab40"
+      },
+      "mergedAt": "2026-10-19T02:48:10Z",
+      "number": 43,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/43"
+    },
+    {
+      "headRefOid": "f0a6a03394cb157b905f6bc46b79abb466ba7d45",
+      "mergeCommit": {
+        "oid": "94cc85b08fc0c3d57338f76de0d29d7a03c47123"
+      },
+      "mergedAt": "2026-10-19T02:48:19Z",
+      "number": 44,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/44"
+    },
+    {
+      "headRefOid": "67029bf9c1c3d41267aef24405b40c948241feb5",
+      "mergeCommit": {
+        "oid": "567fcd8df619c515959abe70e385764d2d9433e3"
+      },
+      "mergedAt": "2026-10-19T02:48:26Z",
+      "number": 45,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/45"
+    },
+    {
+      "headRefOid": "dca0d743bda9de2961080f2cf4ef2878ad9424b1",
+      "mergeCommit": {
+        "oid": "13062b460b89bf8b4fa86f7a997039a7708b9787"
+      },
+      "mergedAt": "2026-10-19T02:48:35Z",
+      "number": 46,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/46"
+    },
+    {
+      "headRefOid": "61133d450a567504bad038d6cd528be4ff0983ac",
+      "mergeCommit": {
+        "oid": "9c031c2af17b0f08b1f1b3d2e2b4140d776b3792"
+      },
+      "mergedAt": "2026-10-19T02:48:43Z",
+      "number": 47,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/47"
+    },
+    {
+      "headRefOid": "dad22676007a3e20a964eb98110d4ac4a767bb58",
+      "mergeCommit": {
+        "oid": "e4ac4ef576e5af50b87dfd7beaee5f8e6cffb59e"
+      },
+      "mergedAt": "2026-10-19T02:48:51Z",
+      "number": 48,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/48"
+    },
+    {
+      "headRefOid": "bb39c4184aae0f056fd4a351cc8add260f339000",
+      "mergeCommit": {
+        "oid": "56661b017bc0d12d3234fc53984bd1225793570f"
+      },
+      "mergedAt": "2026-10-19T02:48:58Z",
+      "number": 49,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/49"
+    },
+    {
+      "headRefOid": "22b54a5b6d4ee89c2367f8f061b17c80da906045",
+      "mergeCommit": {
+        "oid": "d5dcc09e7ac10177355cbd8b37ba94e4fe535a8e"
+      },
+      "mergedAt": "2026-10-19T02:49:06Z",
+      "number": 50,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/50"
+    },
+    {
+      "headRefOid": "cee3c1f424a50a88454705f5d0227899c44ae72e",
+      "mergeCommit": {
+        "oid": "4dc4f506b0751934679b05384ae101c3a69f820f"
+      },
+      "mergedAt": "2026-10-19T02:49:13Z",
+      "number": 51,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/51"
+    },
+    {
+      "headRefOid": "7829817d6b4d2fa142f51db82e95990ca8e181dc",
+      "mergeCommit": {
+        "oid": "bf1f6ebb86e1fe60d72a171e623a58039fde2897"
+      },
+      "mergedAt": "2026-10-19T02:49:22Z",
+      "number": 52,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/52"
+    },
+    {
+      "headRefOid": "cdfe02338675c353171a941eea47f45cead2695b",
+      "mergeCommit": {
+        "oid": "73bf1b522807ec6f443b0dd8db707f077a21347d"
+      },
+      "mergedAt": "2026-10-19T02:49:29Z",
+      "number": 53,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/53"
+    },
+    {
+      "headRefOid": "5710837fc6ac0629ad1be5550f35b95898d4f853",
+      "mergeCommit": {
+        "oid": "700d74b32c466f28575b77c73aed1563d6beb4d4"
+      },
+      "mergedAt": "2026-10-19T02:49:36Z",
+      "number": 54,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/54"
+    },
+    {
+      "headRefOid": "99d1eaeb13c540e95fe0769d5683b3e41c380e01",
+      "mergeCommit": {
+        "oid": "c6221ac3e1145ee0740d010a7b611e9826cde4a0"
+      },
+      "mergedAt": "2026-10-19T02:49:43Z",
+      "number": 55,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/55"
+    },
+    {
+      "headRefOid": "6d1230071683bfa4c5597977ede7afa4a03d8f81",
+      "mergeCommit": {
+        "oid": "03fec1f1357298aeb3142515ef32ffef494a93da"
+      },
+      "mergedAt": "2026-10-19T02:49:51Z",
+      "number": 56,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/56"
+    },
+    {
+      "headRefOid": "612080db735755088e996298a586f38cd8d8c5b2",
+      "mergeCommit": {
+        "oid": "71dd535bf28dd9a23f68ca0e86b29f64f02c8a3e"
+      },
+      "mergedAt": "2026-10-19T02:49:58Z",
+      "number": 57,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/57"
+    },
+    {
+      "headRefOid": "932921cf69e27ed5067d4c36bd7d9ae0c7ab3f57",
+      "mergeCommit": {
+        "oid": "f0cd2d593d73ba765b520d26ab11cec689908c2b"
+      },
+      "mergedAt": "2026-10-19T02:50:07Z",
+      "number": 58,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/58"
+    },
+    {
+      "headRefOid": "9534454f8a18a504f3e8bc3e18226500c99291d6",
+      "mergeCommit": {
+        "oid": "7a012bdf72eabf2c328816b3f96bb629a87629a2"
+      },
+      "mergedAt": "2026-10-19T02:50:14Z",
+      "number": 59,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/59"
+    },
+    {
+      "headRefOid": "7c59f7830a0b0305d109747633a5ddf7bd466f73",
+      "mergeCommit": {
+        "oid": "8225e844c14c871d3dc2a4eb3160eb78bcab9514"
+      },
+      "mergedAt": "2026-10-19T02:50:21Z",
+      "number": 60,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/60"
+    },
+    {
+      "headRefOid": "4a2be6b8eb66ad89880613ecd3e82107d5e706d3",
+      "mergeCommit": {
+        "oid": "a3d2f1f71b635a2c72c92ec232d9602292d20fad"
+      },
+      "mergedAt": "2026-10-19T02:50:29Z",
+      "number": 61,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/61"
+    },
+    {
+      "headRefOid": "ae2629ea8ca1009bc2b99daf1eea1538420fb83e",
+      "mergeCommit": {
+        "oid": "95dd4310218422313c0214f29eacca0e459e1bd4"
+      },
+      "mergedAt": "2026-10-19T02:50:37Z",
+      "number": 62,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/62"
+    },
+    {
+      "headRefOid": "5732f438d06f681fcf837dd15ead70dd44c2ce22",
+      "mergeCommit": {
+        "oid": "d2ad388fc164bb6ff851d1705158ba8375787a61"
+      },
+      "mergedAt": "2026-10-19T02:50:44Z",
+      "number": 63,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/63"
+    },
+    {
+      "headRefOid": "b2ca2305bd30bc49dfdfe1ee3550530ad3d2d85d",
+      "mergeCommit": {
+        "oid": "650e7d074773da11e5919af8a95db8ca3f513db7"
+      },
+      "mergedAt": "2026-10-19T02:50:52Z",
+      "number": 65,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/65"
+    },
+    {
+      "headRefOid": "ccca832b6b63a919e195dabfd0b3dc989fa2fe87",
+      "mergeCommit": {
+        "oid": "097a3da1b6dacaa51433fc04e31cb4af98772316"
+      },
+      "mergedAt": "2026-10-19T02:50:59Z",
+      "number": 66,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/66"
+    },
+    {
+      "headRefOid": "9d48200e1e73ca73a760b7cca85d34fc394b95ba",
+      "mergeCommit": {
+        "oid": "f822004ed3b866b32b044f9a1c2d4709aadc33d0"
+      },
+      "mergedAt": "2026-10-19T02:51:08Z",
+      "number": 67,
+      "state": "MERGED",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/67"
+    }
+  ],
+  "excludedPR": {
+    "number": 64,
+    "reason": "Excluded from approval; behavior already folded into later landscape work. Remains open and untouched."
+  },
+  "hosted": {
+    "status": "did-not-start-account-blocked",
+    "url": "https://github.com/vtrpldn/solar-friends/actions/runs/39191892582/job/117866314830",
+    "annotation": "The job was not started because recent account payments have failed or your spending limit needs to be increased.",
+    "requiredChecks": [],
+    "bypassUsed": false
+  },
+  "launchChecks": {
+    "normalControlsOnly": true,
+    "isolatedOriginPreservedPlayerSaves": true,
+    "newStory": "Fresh arrival with shed/storage and normal first chapter.",
+    "constructionAndRequest": "Placed Cistern 3 at 8,14; Iara accepted Help build with an explicit pump shortage. Bought one pump for R$220 including delivery. Residents completed the cistern; next goal became first home, capacity115; Iara request became Finished with no stale refusal/acceptance response.",
+    "storyReload": "Saved, Main menu, full reload, Continue Story retained 3 buildings, R$2780, 50% cistern project and incoming supply. Construction subsequently completed.",
+    "sandbox": "Started separate free-build mode, placed Home 3 instantly, saved, reloaded and Continued Sandbox with shed/storage/home preserved. Story save remained separately available.",
+    "artworkPreview": "Active protected artwork preview loaded 27 variants, rendered at normal and wider zoom; protected scene did not replace normal saves.",
+    "consoleWarningsAndErrors": []
+  },
+  "evidence": [
+    "integrated-main-menu.png",
+    "integrated-story-complete.png",
+    "integrated-art-preview.png"
+  ],
+  "localFullValidation": "validation-final.json",
+  "performance": [
+    "dense-performance-baseline.json",
+    "dense-performance-recheck.json"
+  ],
+  "completionNote": "Subsequent main commit records this evidence and checklist only; tested game source and art remain unchanged."
+}

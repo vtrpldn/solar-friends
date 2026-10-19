@@ -11,5 +11,5 @@
   "nativeCases": 513,
   "desktopCaptures": 200,
   "report": "artifacts/finishing/final-report.json",
-  "note": "Complete full suite, including desktop browser flow. Later evidence-only documentation commits do not change the tested game, scripts or artwork. Integration remains unapproved; hosted Actions did not start because of the account billing/spending block."
+  "note": "Complete full suite, including desktop browser flow. Later evidence-only documentation commits do not change the tested game, scripts or artwork. Approved integration and launch checks are recorded in integration-final.json; hosted account limitation was explicitly accepted."
 }

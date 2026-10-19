@@ -245,7 +245,7 @@
   "mainProtected": false,
   "requiredChecks": [],
   "hostedLimitation": "Actions billing/spending prevents jobs starting; rulesets API unavailable for current private-repo plan (403). Branch endpoint reports protection disabled and no required status checks.",
-  "mergeApproval": "Not authorized for any current PR.",
+  "mergeApproval": "User explicitly approved each PR33\u201363 and65\u201367 and accepted the hosted account limitation. See integration-final.json.",
   "parallelPR64": {
     "isAncestor": false,
     "note": "Parallel resident-decisions branch is not in the dependency chain. Its autonomous-care and edible-reserve changes were folded into later landscape work; do not merge it blindly over newer work.",
@@ -625,5 +625,6 @@
     "stablePatchId": "9029666055bb76ae5f4a971de0e20ce4b8b5473c",
     "sequentialMergeTree": "9e8690da3a0320c2d3ce8c5fe99ce2464529f474",
     "note": "All PR37 parent work is included. Its final journal assertion has a patch-identical commit in PR38 and now lives in story-all-paths.mjs. A read-only merge-tree simulation of PR37 then PR38 is clean and exactly matches PR38 tree. Merging PR37 directly over the final candidate instead conflicts with the newer wrapper; use the recorded dependency order."
-  }
+  },
+  "integrationFinal": "integration-final.json"
 }

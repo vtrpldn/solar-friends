@@ -91,7 +91,7 @@ Acceptance: current-facing documentation matches source and observed behavior, l
 - [x] Run the relevant checks after each fix. Once the final candidate is stable, run `npm run dev:check` for formatting, native tests, lint, build, script checks, gameplay/art verifiers and desktop regressions. Tie results to the exact candidate commit.
 - [x] Inspect hosted requirements and record blocked jobs accurately. The current branch endpoint reports no protection and no required checks. Actions jobs cannot start because of account billing/spending; account-owner resolution and a hosted rerun remain pending. Required blocked checks would prevent integration; the current optional block must be disclosed and explicitly accepted in the individual merge decision. No protection or billing settings were changed.
 - [x] Refresh PR descriptions and include the visual and performance evidence needed for review. Keep each PR unmerged until it receives individual, explicit user approval.
-- [ ] After approved integration, launch the final branch and check New Game, Continue, Sandbox, save/reload, one construction/request interaction and the active artwork preview. Confirm that the served build is the integrated one.
+- [x] After approved integration, launch the final branch and check New Game, Continue, Sandbox, save/reload, one construction/request interaction and the active artwork preview. Confirm that the served build is the integrated one.
 
 Acceptance: approved changes reach the intended branch in dependency order, required checks pass on the final candidate, and the integrated game passes the launch checks. Record local readiness and any external check limitation separately. A required hosted check that cannot run keeps integration incomplete.
 
@@ -101,9 +101,9 @@ Acceptance: approved changes reach the intended branch in dependency order, requ
 - [x] Manual first-hour Story playtest complete; blocking and material pacing/clarity defects fixed and rechecked.
 - [x] Sustained desktop performance measured; remaining limitations documented.
 - [x] Current documentation reconciled with the game.
-- [ ] Final checks complete and individually approved PRs integrated.
-- [ ] Integrated build launched and checked, with a concise completion report linking the evidence.
+- [x] Final checks complete and individually approved PRs integrated.
+- [x] Integrated build launched and checked, with a concise completion report linking the evidence.
 
 This plan adds no new simulation systems. Housing assignment, additional upgrades, new buildings and other expansion ideas remain separate future work. Finishing the current pass does not authorize merging any PR.
 
-The final [local validation](.github/finishing-review/validation-final.json) passed all 268 checks, including 513 native tests and the complete desktop browser flow, on candidate `81fdb3f`. Integration and the integrated launch check remain pending individual PR approval.
+The final [local validation](.github/finishing-review/validation-final.json) passed all 268 checks, including 513 native tests and the complete desktop browser flow, on candidate `81fdb3f`. The user subsequently approved each of PRs #33–#63 and #65–#67 with the hosted-check limitation explicitly accepted. All 34 are merged; the integrated file tree exactly matches the validated candidate. The [integrated launch record](.github/finishing-review/integration-final.json) covers New Story, Continue, separate Sandbox saves, construction/request completion and the 27-variant artwork preview. PR #64 remains untouched as agreed.

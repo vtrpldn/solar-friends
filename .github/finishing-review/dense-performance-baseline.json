@@ -1,5 +1,5 @@
 {
-  "status": "baseline-complete-stalls-under-investigation",
+  "status": "baseline-complete-finding-fixed-and-rechecked",
   "commit": "27ee38304f731feaf306d10209914b1b3508f5ab",
   "wasm_sha256": "50d76d4d240454ced9d8cd1411caced24d13bcf7c90e336253354361e12047a3",
   "hardware": {
@@ -757,7 +757,7 @@
   "findings": [
     {
       "id": "PERF01",
-      "status": "fix-implemented-browser-recheck-pending",
+      "status": "fixed-and-browser-rechecked",
       "severity": "material polish",
       "observed": "All six window frame p95 values 17-19ms meet targets, but recurring >100ms simulation spikes at 8x remain. Window stall counts 5,1,29,41,1,2. Initial Continue includes 533ms loading gap; largest paint cost 276.6ms during early camera/lighting cache warming.",
       "next": "Profile expensive simulation functions and recheck exact behavior after any optimization.",
@@ -767,7 +767,8 @@
         "native": "19 pipe tests, 24 power tests, 10 electricity tests passed; strict clippy passed",
         "parity": "cable-anchor-parity.json: 3840 old/new ticks and 32 exact full-state checkpoints match; materials/water/energy balance",
         "timing_limit": "The Node timing comparison overlapped native checks, so its timing is diagnostic only; live browser acceptance remains pending."
-      }
+      },
+      "resolutionEvidence": "dense-performance-recheck.json and cable-anchor-parity.json"
     }
   ],
   "limits": [
