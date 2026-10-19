@@ -1,4 +1,5 @@
 import { scenarios } from './scenarios.js';
+import {installUtilityPlanner} from './utility-planner.js';
 export function download(data, name, type = 'application/json') {
   const url = URL.createObjectURL(new Blob([typeof data === 'string' ? data : JSON.stringify(data, null, 2)], { type }));
   const a = document.createElement('a'); a.href = url; a.download = name; a.click();
@@ -11,7 +12,8 @@ export function installDevTools(api) {
   dialog.innerHTML = `<button class="dialog-close" id="dev-close" aria-label="Close Dev Tools">×</button>
     <span class="eyebrow">SOLAR FRIENDS / WORKBENCH</span><h2 id="dev-title">A little room to experiment.</h2>
     <p id="dev-mode" role="status"></p>
-    <nav class="dev-tabs" aria-label="Developer workspaces"><button data-dev-tab="simulation" aria-pressed="true">Simulation</button><button data-dev-tab="art" aria-pressed="false">Artwork</button><button data-dev-tab="checks" aria-pressed="false">Checks & captures</button></nav>
+    <nav class="dev-tabs" aria-label="Developer workspaces"><button data-dev-tab="simulation" aria-pressed="true">Simulation</button><button data-dev-tab="utilities" aria-pressed="false">Utility routes</button><button data-dev-tab="art" aria-pressed="false">Artwork</button><button data-dev-tab="checks" aria-pressed="false">Checks & captures</button></nav>
+    <section data-dev-page="utilities" hidden></section>
     <section data-dev-page="simulation"><div class="dev-grid"><section class="dev-card"><h3>Scenario launcher</h3>
       <label for="dev-scenario">Start from</label><select id="dev-scenario">${scenarios.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}<option value="copy">Copy of my current village</option><option value="imported" disabled>Imported checkpoint</option></select>
       <p id="dev-scenario-detail"></p><div class="dev-actions"><button id="dev-load">Load test scene</button><button id="dev-return">Return to village</button></div>
@@ -31,6 +33,7 @@ export function installDevTools(api) {
     <section data-dev-page="checks" hidden><div class="dev-grid"><section class="dev-card"><h3>Repeatable development check</h3><p>From the project folder, run:</p><pre>npm ci\nnpx playwright install chromium\nnpm run dev:check</pre><p>Builds the game, runs Rust and JavaScript checks, opens fixed desktop scenarios, and records screenshots and browser errors. The report is written to <code>artifacts/dev-check/index.html</code>.</p><button id="dev-report">Open latest local report</button><p id="dev-report-status" role="status"></p><p>A browser cannot run your terminal commands. Run the command locally, then open its report here.</p></section>
     <section class="dev-card"><h3>Capture this state</h3><p>Fix the camera and freeze the scene before taking comparable screenshots. Captures contain the game canvas; the development check also captures the complete interface.</p><div class="dev-actions"><button id="dev-fixed">Fix camera & pause</button><button id="dev-capture">Download scene PNG</button><button id="dev-bundle">Export diagnostic report</button></div><p>Reports include the current village state, resident decisions, and errors observed in this tab.</p><h4>Browser errors</h4><pre id="dev-errors"></pre></section></div></section>`;
   document.body.append(dialog);
+  const utilityPlanner=installUtilityPlanner(api,dialog.querySelector('[data-dev-page="utilities"]'));
   const $ = id => document.getElementById(id);
   const banner = document.createElement('div'); banner.id = 'dev-banner'; banner.hidden = true;
   banner.innerHTML = 'Development test scene · autosave off <button>Dev Tools</button>'; document.body.append(banner);
@@ -40,6 +43,7 @@ export function installDevTools(api) {
   window.addEventListener('error', e => recordError(e.message));
   window.addEventListener('unhandledrejection', e => recordError(e.reason));
   function refresh() {
+    if(!dialog.querySelector('[data-dev-page="utilities"]').hidden)utilityPlanner.refresh();
     const snapshot = api.snapshot();
     if (observedScenario !== api.scenario()) {
       observedScenario = api.scenario();
@@ -90,6 +94,7 @@ export function installDevTools(api) {
   for (const button of dialog.querySelectorAll('[data-dev-tab]')) button.onclick = () => {
     for (const item of dialog.querySelectorAll('[data-dev-tab]')) item.setAttribute('aria-pressed', String(item === button));
     for (const section of dialog.querySelectorAll('[data-dev-page]')) section.hidden = section.dataset.devPage !== button.dataset.devTab;
+    if(button.dataset.devTab==='utilities')utilityPlanner.refresh();
   };
   $('dev-scenario').onchange = () => { $('dev-load').disabled=$('dev-scenario').value==='imported'; $('dev-scenario-detail').textContent = scenarios.find(s => s.id === $('dev-scenario').value)?.detail || ($('dev-scenario').value==='imported'?'An exported checkpoint, restored in the protected test scene. Select a standard scene to start something else.':'A temporary copy of the village currently on screen.'); };
   $('dev-scenario').onchange();
