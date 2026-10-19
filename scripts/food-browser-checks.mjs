@@ -7,7 +7,7 @@ export async function checkFoodControls({page,saved,capture}){
   await page.locator('#dev-close').click();
   await page.locator('[data-hud-resource="food"]').click();
   if(!await page.locator('#material-inventory').isVisible())await page.getByText('Stored supplies',{exact:true}).click();
-  assert.equal(await page.locator('.material-slot').count(),21);
+  assert.equal(await page.locator('.material-slot').count(),24);
   assert((await page.locator('.material-slot[data-item="17"]').textContent()).includes('5 free'));
   const location=page.locator('.storage-location').filter({hasText:'Kitchen pantry 1'});
   assert((await location.textContent()).includes('3 ingredients · 5 prepared meals'));

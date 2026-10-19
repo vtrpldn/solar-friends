@@ -140,6 +140,7 @@ fn visible_tree_canopies_reduce_solar_output_and_cutting_reduces_shade() {
     assert_eq!(h.place_source(0, 5, 5), "ok");
     {
         let mut v = h.app.world_mut().resource_mut::<Village>();
+        v.economy.sources[0].planted = true;
         v.economy.sources[0].growth = 1.;
         v.economy.sources[0].remaining = 32.;
         let before = ground(&v, 6, 6).shade;
@@ -171,7 +172,7 @@ fn moisture_edits_and_forged_crop_summaries_fail_without_changing_the_world() {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), saved);
     }
-    assert!(!g.restore(&saved.replace("\"version\":14", "\"version\":11")));
+    assert!(!g.restore(&saved.replace("\"version\":15", "\"version\":11")));
 }
 
 #[test]

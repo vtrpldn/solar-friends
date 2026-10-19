@@ -2,6 +2,7 @@ import {checkOrganicControls} from './organics-browser-checks.mjs';
 import {checkCultivationControls} from './cultivation-browser-checks.mjs';
 import {checkLandControls} from './land-browser-checks.mjs';
 import {checkRestorationControls} from './restoration-browser-checks.mjs';
+import {checkPlantingControls} from './planting-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
 import assert from 'node:assert/strict';
@@ -37,7 +38,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-hud-resource="materials"]').click();
   assert(await page.locator('#supplies-panel').isVisible());
   assert(await page.locator('#materials-stores').evaluate(el=>el.open));
-  assert.equal(await page.locator('.material-slot').count(),21);
+  assert.equal(await page.locator('.material-slot').count(),24);
   const idleRefreshes=await page.evaluate(()=>new Promise(resolve=>{
     let count=0;const observer=new MutationObserver(records=>{count+=records.length;});
     observer.observe(document.querySelector('#supplies-panel'),{subtree:true,childList:true,characterData:true});
@@ -66,6 +67,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkLandControls({page,saved,capture});
   await checkRestorationControls({page,saved,capture});
   await checkCultivationControls({page,saved,capture});
+  await checkPlantingControls({page,saved,capture});
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){
     await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);
@@ -155,11 +157,11 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.mouse.click(treePlot.x,treePlot.y);
   let land=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(land.village.economy.sources.length,1);assert.equal(land.village.economy.sources[0].growth,0);
-  assert.equal(land.village.economy.money,planting.village.economy.money-8000);assert.equal(land.village.water,planting.village.water-2);
+  assert.equal(land.village.economy.money,planting.village.economy.money-4000);assert.equal(land.village.water,planting.village.water);
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Construction',exact:true}).click();
   if(!await page.locator('#land-sources').evaluate(el=>el.closest('details').open))await page.getByText('Our land resources',{exact:true}).click();
   assert(!await page.getByRole('button',{name:'Cut one tree · 8 timber',exact:true}).isEnabled());
-  assert((await page.locator('#land-sources').textContent()).includes('0% grown'));
+  assert((await page.locator('#land-sources').textContent()).includes('Awaiting resident planting'));
   await page.locator('[data-site="0"][data-source-setting="harvest"]').uncheck();
   assert(!(await page.evaluate(()=>window.solarDev.snapshot())).village.economy.sources[0].auto_harvest);
   await capture('Player plants timber trees and chooses harvest settings','player-planted-timber.png');
@@ -416,7 +418,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
   await page.locator('#dev-inspection details summary').filter({hasText:'Material accounting · seed'}).click();
   const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
-  assert.equal(balances.length,21);assert(balances.every(text=>text==='0'));
+  assert.equal(balances.length,24);assert(balances.every(text=>text==='0'));
   await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
   // A storage target queues resident trips instead of moving material instantly.
   await page.locator('#dev-close').click();await page.locator('[data-hud-resource="materials"]').click();

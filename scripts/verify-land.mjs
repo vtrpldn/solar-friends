@@ -18,7 +18,11 @@ const home=JSON.parse(g.land_preview('home',6,6));assert.equal(home.cells,4);ass
 assert.equal(g.land_preview('home',2147483647,5),'{}');assert.equal(g.place_source(3,2147483647,5),'Choose an inland clearing inside the village.');
 assert.equal(g.snapshot(),first);
 // Public commands and actual resident work exhaust one local reserve.
-g.start_mode('sandbox');assert.equal(g.place_source(3,18,18),'ok');assert.equal(g.place_source(3,18,21),'ok');assert.equal(g.place_source(3,23,23),'ok');
+g.start_mode('sandbox');
+// Isolate deposit exhaustion from full arrival storage. Planting stock also
+// occupies real shelves; a storage house provides receiving room for the stone.
+assert.equal(g.place('warehouse',6,13),'ok');
+assert.equal(g.place_source(3,18,18),'ok');assert.equal(g.place_source(3,18,21),'ok');assert.equal(g.place_source(3,23,23),'ok');
 for(let i=0;i<3;i++)assert.equal(g.configure_source(i,false,false),'ok');
 const before=snap(),patch=before.village.economy.sources[0].deposit,other=before.village.economy.sources[2].remaining;
 assert.equal(before.village.economy.sources[1].deposit,patch);assert.notEqual(before.village.economy.sources[2].deposit,patch);

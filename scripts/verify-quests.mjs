@@ -78,7 +78,7 @@ build('warehouse');
 // kitchens and later utility plots connected rather than relying on distant dirt walks.
 const streets=[...Array.from({length:15},(_,i)=>i+11).flatMap(y=>[11,15,19].map(x=>[x,y])),...[11,15,19,23].flatMap(y=>Array.from({length:19},(_,i)=>[i+4,y]))];
 for(const [x,y] of streets)if(!snap().village.roads.some(([a,b])=>a===x&&b===y)&&!placementReason(snap().village,'road',x,y))assert.equal(g.toggle_road(x,y),'ok');
-const basket=Array(21).fill(0);basket[0]=1;
+const basket=Array(24).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
@@ -93,7 +93,7 @@ const restoredGarden=g.snapshot();assert(g.restore(restoredGarden));assert.equal
 // Buying tools can satisfy routine demand; the Story introduction still asks
 // the player to learn local crafting through one explicit workshop request.
 if(!snap().village.progress.tools_crafted){
- const timber=Array(21).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
+ const timber=Array(24).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
  until(s=>s.village.progress.tools_crafted>0||/Happy|already accepted/.test(g.request(1,'craft',false)),'request a saved tool batch');
 }
 await complete(4);
@@ -116,7 +116,8 @@ for(let tree=0;tree<4&&!snap().village.progress.timber_replanted;tree++){
  until(s=>s.village.economy.sources[timber].harvests>harvests,'whole timber tree harvest');
  if(!snap().village.economy.sources[timber].planted)break;
 }
-until(s=>s.village.progress.timber_replanted,'resident replanting');
+purchase(snap().environment.economy.shortage.map((n,i)=>i===22?n:0));
+until(s=>s.village.progress.timber_replanted,'resident replanting from delivered timber seedlings');
 build('home','adobe',true);
 // Share deliberate surplus work within normal hours; no after-hours foraging shift.
 function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(!r.requested&&r.task!=='gather'&&r.task!=='garden'){if(id!==0||!g.request(id,'garden',false).includes('Happy'))g.request(id,'gather',false);}}return false;},label);}

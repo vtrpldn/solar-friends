@@ -462,7 +462,9 @@ function tree(x, y, s = 1, species = 0) {
 function materialSite(site,alpha=1){
   if(!site.active)return;
   ctx.save();ctx.globalAlpha*=alpha;ctx.filter=unlitFilter(nightAmount(state.village.minutes));
-  if(site.material===0){
+  if(site.material<2&&!site.planted&&site.harvests===0){
+    const n=site.material===0?3:2;for(const [dx,dy]of [[-.5,-.5],[.5,-.5],[-.5,.5],[.5,.5]]){const p=iso(site.x+dx*(n-1),site.y+dy*(n-1));ctx.strokeStyle='#765438';ctx.lineWidth=2*scale;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y-8*scale);ctx.stroke();ctx.fillStyle='#dbc28a';ctx.fillRect(p.x-3*scale,p.y-9*scale,6*scale,3*scale);}
+  }else if(site.material===0){
     const mature=site.growth>=1,trees=mature?Math.ceil(site.remaining/8):site.planted?4:0;
     for(let i=0;i<4;i++){const x=site.x+(i%2?.7:-.7),y=site.y+(i<2?-.7:.7);
       if(i<trees)tree(x,y,.18+.42*(mature?1:site.growth),0);
@@ -1080,7 +1082,7 @@ function updateBuildingPanel() {
     $("#replant-crop").checked = c.replant;
     $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. At current soil and supplies: ${outlook.harvest_min}–${outlook.harvest_max} food.`;
     $("#crop-details").textContent = `Root-zone wetness ${Math.round(outlook.soil.moisture*100)}% · retention ×${outlook.soil.retention.toFixed(2)} · tree shade ${Math.round(outlook.soil.shade*100)}%. Growth ×${outlook.growth_multiplier.toFixed(2)}. Harvest size depends on the gardener. ${spec.note}.`;
-    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per ${(outlook.nursery_minutes/60).toFixed(1)} moist growing hours at current soil and light · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water. Covered soil dries more slowly; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
+    $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per ${(outlook.nursery_minutes/60).toFixed(1)} moist growing hours at current soil and light · ${outlook.seedlings_here} vegetable seedlings at this greenhouse · ${state.village.seedlings} across the village. Seedlings stay at this greenhouse until neighbours carry them to outdoor beds for a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water. Covered soil dries more slowly; rain cannot water this bed.` : `${outlook.seedlings_here} vegetable seedlings at this garden · ${state.village.seedlings} across the village. Only a delivered seedling gives this bed a 25% head start.`;
   }
   const visitors = b ? state.residents.filter(r => r.task === "visit" && r.visit_building === b.id) : [];
   $("#building-activity").textContent = !b ? "" : b.progress < 100 ? "Open Village → Construction for stage materials, purchases and priorities." : visitors.length

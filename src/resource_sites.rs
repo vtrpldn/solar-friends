@@ -90,9 +90,6 @@ fn water(v: &mut Village) {
         v.water -= 2.;
     }
 }
-fn replant_cost(material: usize) -> i64 {
-    if material == 0 { 4000 } else { 0 }
-}
 pub fn care(v: &Village, index: usize) -> bool {
     let Some(s) = v.economy.sources.get(index) else {
         return false;
@@ -103,7 +100,7 @@ pub fn care(v: &Village, index: usize) -> bool {
         && if s.planted {
             s.growth < 1. && s.moisture < 120.
         } else {
-            (s.auto_replant || s.plant_requested) && v.economy.money >= replant_cost(s.material)
+            (s.auto_replant || s.plant_requested) && crate::planting::ready(v, index)
         }
 }
 pub fn reason(v: &Village, index: usize) -> &'static str {
@@ -136,10 +133,10 @@ pub fn finish(v: &mut Village, index: usize) -> bool {
     }
     let material = v.economy.sources[index].material;
     if !v.economy.sources[index].planted {
-        if material == 0 {
-            economy::contribute(v, replant_cost(material), "Timber seedlings for replanting");
+        if material == 0 && v.economy.sources[index].harvests > 0 {
             v.progress.timber_replanted = true;
         }
+        crate::planting::consume(v, index);
         v.economy.sources[index].plant_requested = false;
         v.economy.sources[index].planted = true;
         v.economy.sources[index].growth = 0.;
@@ -353,18 +350,12 @@ impl Game {
         let cost = if v.mode == crate::modes::Mode::Sandbox {
             0
         } else {
-            [8000, 3000, 1500, 2500, 1500][material]
+            [4000, 1000, 1500, 2500, 1500][material]
         };
         if v.economy.money < cost {
             return "The shared fund cannot cover establishing this plot.".into();
         }
-        if material < 2 && !water_available(&v) {
-            return "Set aside two irrigation water for planting.".into();
-        }
         economy::contribute(&mut v, cost, "Establishing a material plot");
-        if material < 2 {
-            water(&mut v);
-        }
         let deposit =
             (material >= 2).then(|| crate::land::deposit(&v, material, x, y).unwrap().clone());
         let remaining = deposit.as_ref().map_or(0., |d| d.remaining as f32);
@@ -382,17 +373,14 @@ impl Game {
             player_placed: true,
             active: true,
             growth: if material < 2 { 0. } else { 1. },
-            moisture: if material < 2 { 1440. } else { 0. },
-            planted: material < 2,
+            moisture: 0.,
+            planted: false,
             auto_replant: true,
             auto_harvest: true,
             harvest_requested: false,
-            plant_requested: false,
+            plant_requested: material < 2,
             harvests: 0,
         });
-        if material < 2 {
-            crate::land::water_plot(&mut v, size(material), x, y, 1.);
-        }
         crate::logistics::sync(&mut v);
         event(&mut v, "A player-managed material plot is established.");
         "ok".into()
@@ -425,9 +413,6 @@ impl Game {
         if s.material >= 2 || s.planted {
             return "That plot does not need replanting.".into();
         }
-        if v.economy.money < replant_cost(s.material) || !water_available(&v) {
-            return "Set aside irrigation water and seedling funds before replanting.".into();
-        }
         v.economy.sources[index].plant_requested = true;
         "ok".into()
     }
@@ -440,6 +425,10 @@ impl Game {
             s.active = false;
             s.remaining = 0.;
             s.planted = false;
+            s.moisture = 0.;
+            if s.material < 2 {
+                s.growth = 0.;
+            }
             s.harvest_requested = false;
             s.plant_requested = false;
             crate::restoration::reconcile(&mut v);
@@ -465,8 +454,8 @@ impl Game {
 }
 pub fn options() -> serde_json::Value {
     serde_json::json!([
-        {"material":0,"key":"source_timber","name":"Timber trees","cost":8000,"size":3,"days":4,"description":"Plant four timber trees · harvest whole trees · replant renewably"},
-        {"material":1,"key":"source_bamboo","name":"Bamboo plot","cost":3000,"size":2,"days":2,"description":"Cultivate bamboo · shoots regrow after cutting"},
+        {"material":0,"key":"source_timber","name":"Timber trees","cost":4000,"planting_material":economy::TREE_STARTS,"planting_amount":4,"size":3,"days":4,"description":"Mark a timber plot · deliver four timber seedlings · resident planting"},
+        {"material":1,"key":"source_bamboo","name":"Bamboo plot","cost":1000,"planting_material":economy::BAMBOO_STARTS,"planting_amount":1,"size":2,"days":2,"description":"Mark a bamboo plot · deliver one bamboo start · shoots regrow after cutting"},
         {"material":2,"key":"source_earth","name":"Earth digging","cost":1500,"size":2,"days":0,"description":"Choose an earth extraction area · finite local deposit"},
         {"material":3,"key":"source_stone","name":"Stone quarry","cost":2500,"size":2,"days":0,"description":"Place on stony southeast ground · finite local stone deposit"},
         {"material":4,"key":"source_salvage","name":"Salvage recovery","cost":1500,"size":2,"days":0,"description":"Sort reclaimed material from the property · finite local deposit"}
@@ -484,9 +473,9 @@ pub fn view(v: &Village) -> serde_json::Value {
         let soil=crate::land::condition(v,size(s.material),s.x,s.y);
         let rate=crate::land::growth(&soil);
         let status=if s.material>=2{if s.remaining>0.{"Finite local deposit · shared only by sites on this patch."}else{"Local deposit exhausted · choose another patch or purchase in town."}}
-        else if !s.planted{if s.auto_replant||s.plant_requested{if v.economy.money<replant_cost(s.material){"Replanting waits for seedling funds."}else if !water_available(v){"Replanting waits for two irrigation water."}else{"Replanting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
+        else if !s.planted{if s.auto_replant||s.plant_requested{if !crate::planting::ready(v,index){"Planting waits for delivered stock. Order timber seedlings or bamboo starts in Trade, then let neighbours haul them to this plot."}else if !water_available(v){"Replanting waits for two irrigation water."}else{"Planting queued for normal community work hours."}}else{"Cut plot · choose whether to plant again."}}
         else if s.growth>=1.{"Mature · ready for a harvest batch."}else if s.moisture<=0.{"Growth paused · needs irrigation or rain."}else{"Growing · neighbours water the plot during normal work hours."};
-        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":replant_cost(s.material),"batch":if s.material==0{8}else{4}})
+        serde_json::json!({"index":index,"name":names[s.material],"status":status,"ready":s.remaining>=if s.material==0{8.}else{1.},"care":care(v,index),"deposit":s.deposit,"remaining":s.remaining,"maximum":s.maximum,"growth_percent":(s.growth*100.).floor(),"soil":soil,"growth_multiplier":rate,"hours_left":((1.-s.growth)*if s.material==0{96.}else{48.}/rate).ceil(),"replant_cost":if s.material==0{4000}else{0},"planting_stock":crate::planting::required(v,index).map(|(material,amount)|serde_json::json!({"material":material,"amount":amount,"here":crate::organics::available(v,crate::logistics::Owner::Source(index),material)})),"batch":if s.material==0{8}else{4}})
     }).collect();
     serde_json::json!(rows)
 }
@@ -510,8 +499,9 @@ mod tests {
         assert_eq!(g.snapshot(), original);
         assert_eq!(g.place_source(0, 5, 5), "ok");
         let v = g.app.world().resource::<Village>();
-        assert_eq!(v.economy.money, 292000);
-        assert_eq!(v.water, water_before - 2.);
+        assert_eq!(v.economy.money, 296000);
+        assert_eq!(v.water, water_before);
+        assert!(!v.economy.sources[0].planted);
         assert_eq!(v.economy.sources[0].remaining, 0.);
         let saved = g.snapshot();
         assert_ne!(g.place_source(1, 5, 5), "ok");
@@ -527,6 +517,13 @@ mod tests {
         assert_ne!(g.harvest_source(0), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
+            crate::organics::fixture_transfer(
+                &mut v,
+                crate::logistics::Owner::Source(0),
+                economy::TREE_STARTS,
+                4,
+            );
+            assert!(finish(&mut v, 0));
             advance(&mut v, 1440.);
             assert_eq!(v.economy.sources[0].growth, 0.25);
             let growth = v.economy.sources[0].growth;
@@ -553,8 +550,16 @@ mod tests {
             }
             assert!(!v.economy.sources[0].planted);
             let funds = v.economy.money;
+            assert!(!finish(&mut v, 0));
+            crate::logistics::fixture_stock(&mut v, economy::TREE_STARTS, 4);
+            crate::organics::fixture_transfer(
+                &mut v,
+                crate::logistics::Owner::Source(0),
+                economy::TREE_STARTS,
+                4,
+            );
             assert!(finish(&mut v, 0));
-            assert_eq!(v.economy.money, funds - 4000);
+            assert_eq!(v.economy.money, funds);
             assert!(!finish(&mut v, 0));
             assert_eq!(v.economy.sources[0].remaining, 0.);
             assert!(valid(&v));
@@ -568,6 +573,13 @@ mod tests {
         assert_eq!(g.place_source(1, 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
+            crate::organics::fixture_transfer(
+                &mut v,
+                crate::logistics::Owner::Source(0),
+                economy::BAMBOO_STARTS,
+                1,
+            );
+            assert!(finish(&mut v, 0));
             advance(&mut v, 1440.);
             assert!(finish(&mut v, 0));
             advance(&mut v, 1440.);
@@ -631,6 +643,13 @@ mod tests {
         assert_eq!(g.configure_source(0, true, false), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
+            crate::organics::fixture_transfer(
+                &mut v,
+                crate::logistics::Owner::Source(0),
+                economy::TREE_STARTS,
+                4,
+            );
+            assert!(finish(&mut v, 0));
             v.economy.sources[0].growth = 1.;
             v.economy.sources[0].remaining = 32.;
             let mut needs = [0; economy::COUNT];
@@ -652,9 +671,9 @@ mod tests {
             assert!(!finish(&mut v, 0));
             assert!(!v.economy.sources[0].planted);
             assert_eq!(v.economy.money, 3999);
-            assert!(view(&v).to_string().contains("seedling funds"));
+            assert!(view(&v).to_string().contains("delivered stock"));
         }
-        assert_ne!(g.replant_source(0), "ok");
+        assert_eq!(g.replant_source(0), "ok");
         let checkpoint = g.snapshot();
         assert!(g.restore(&checkpoint));
     }
@@ -670,6 +689,13 @@ mod tests {
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (17.) as u32);
             crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 12);
             crate::logistics::fixture_finish(&mut v, 0);
+            crate::organics::fixture_transfer(
+                &mut v,
+                crate::logistics::Owner::Source(0),
+                economy::TREE_STARTS,
+                4,
+            );
+            assert!(finish(&mut v, 0));
             v.economy.sources[0].growth = 1.;
             v.economy.sources[0].remaining = 32.;
         }

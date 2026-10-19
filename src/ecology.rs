@@ -54,7 +54,7 @@ pub fn valid(b: &Building) -> bool {
         && c.moisture.is_finite()
         && (0.0..=moisture_capacity(b)).contains(&c.moisture)
         && c.nursery.is_finite()
-        && (0.0..480.).contains(&c.nursery)
+        && (0.0..=480.).contains(&c.nursery)
         && (c.planted || (c.growth == 0. && c.moisture == 0. && c.harvests == 0))
 }
 
@@ -129,12 +129,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
         let b = &mut v.buildings[i];
         b.crop.growth =
             (b.crop.growth + wet_minutes * land::growth(&condition)).min(duration(&b.crop));
-        if covered && v.seedlings < 12 {
-            let progress = b.crop.nursery + wet_minutes * land::growth(&condition);
-            let raised = ((progress / 480.).floor() as u32).min(12 - v.seedlings);
-            v.seedlings += raised;
-            v.progress.seedlings_raised = v.progress.seedlings_raised.saturating_add(raised);
-            b.crop.nursery = progress % 480.;
+        if covered {
+            planting::raise(v, i, wet_minutes * land::growth(&condition));
         }
     }
     land::sync_moisture(v);
@@ -183,7 +179,7 @@ impl Game {
         }
         let soil = land::condition(v, interactions::footprint_size(&b.kind), b.x, b.y);
         let minimum = harvest_base(v, &next);
-        serde_json::json!({"crop":next.crop.kind,"harvest_min":minimum,"harvest_max":minimum+3,"soil":soil,"growth_multiplier":land::growth(&soil),"nursery_minutes":480./land::growth(&soil)}).to_string()
+        serde_json::json!({"crop":next.crop.kind,"harvest_min":minimum,"harvest_max":minimum+3,"soil":soil,"growth_multiplier":land::growth(&soil),"nursery_minutes":480./land::growth(&soil),"seedlings_here":organics::available(v,logistics::Owner::Site(b.id),economy::SEEDLINGS)}).to_string()
     }
 }
 pub fn tend(v: &mut Village, r: &Resident) {
@@ -212,18 +208,24 @@ pub fn tend(v: &mut Village, r: &Resident) {
     if harvesting && economy::capacity(v).saturating_sub(economy::storage(v)) < output {
         return;
     }
+    let seedling = outdoor
+        && !v.buildings[index].crop.planted
+        && organics::available(v, logistics::Owner::Site(site_id), economy::SEEDLINGS) > 0;
+    if seedling {
+        logistics::spend(
+            v,
+            Some(logistics::Owner::Site(site_id)),
+            economy::SEEDLINGS,
+            1,
+        );
+        v.progress.seedlings_used = v.progress.seedlings_used.saturating_add(1);
+    }
     let crop = &mut v.buildings[index].crop;
     if !crop.planted {
         crop.planted = true;
         crop.kind = crop.next_kind.clone();
         crop.harvests = 0;
-        crop.growth = if outdoor && v.seedlings > 0 {
-            v.seedlings -= 1;
-            v.progress.seedlings_used = v.progress.seedlings_used.saturating_add(1);
-            duration(crop) * 0.25
-        } else {
-            0.
-        };
+        crop.growth = if seedling { duration(crop) * 0.25 } else { 0. };
     } else if harvesting {
         if crop.kind == "tomatoes" && crop.harvests < 2 {
             crop.harvests += 1;
@@ -331,6 +333,7 @@ mod farming_tests {
         assert_eq!(g.place("garden", 8, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         crate::logistics::fixture_finish(&mut v, 1);
+        crate::organics::fixture_transfer(&mut v, logistics::Owner::Site(1), economy::SEEDLINGS, 1);
         let mut outdoor = r.clone();
         outdoor.target_x = 8.75;
         tend(&mut v, &outdoor);
