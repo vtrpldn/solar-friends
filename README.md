@@ -13,6 +13,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Game modes](#game-modes)
 - [Construction economy](#construction-economy)
 - [Village simulation plan](simulator-plan.md)
+- [Remaining finishing steps](finishing-plan.md)
 - [Completed gameplay and artwork playtest](playtest.md)
 - [Farming and animal care](#farming-and-animal-care)
 - [Equipment upkeep](#equipment-upkeep)

@@ -62,14 +62,14 @@ pub struct Ground {
 // Broad geological regions are legible across seeds; the amount at each patch varies.
 const REGIONS: [(i32, i32, i32, i32); 9] = [
     (1, 1, 16, 11),
-    (12, 14, 25, 18),
-    (1, 33, 24, 27),
-    (17, 17, 6, 10),
-    (35, 17, 15, 16),
-    (24, 43, 25, 17),
+    (12, 14, 9, 12),
+    (1, 24, 11, 7),
+    (17, 17, 4, 7),
+    (22, 20, 5, 7),
+    (17, 25, 7, 6),
     (1, 8, 9, 16),
-    (30, 1, 18, 9),
-    (10, 38, 13, 8),
+    (17, 1, 10, 6),
+    (10, 26, 8, 5),
 ];
 fn quantities(seed: u32, material: usize) -> [u32; 3] {
     let total = resource_sites::LAND[material - 2] as u32;

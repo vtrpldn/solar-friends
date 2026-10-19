@@ -1,3 +1,6 @@
+import {paintImage} from './paint-cache.js';
+import { performanceMeter } from './dev/performance.js';
+import { sampleFrame } from './frame-state.js';
 import {natureArt as natureDetails} from './nature-art.js';
 import {usesLogistics,usesUtilities,installSandboxRulesUI} from './sandbox-rules.js';
 import {renderResidentSkills} from './resident-skills.js';
@@ -18,14 +21,14 @@ import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt } from './building-footprints.js';
 import { installBuildMenu, paintIcon } from './build-menu.js';
 import { unlitFilter, buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
-import { drawNightEmission } from './night-lighting.js';
+import { drawNightEmission, paintDepthLight } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { weatherSummary, updateClimateForecast } from './climate-ui.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
 import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idleLabels } from './resident-animation.js?v=2';
-import { RESIDENT_WIDTH, preparedFrames } from './sprite-frames.js';
+import { RESIDENT_WIDTH, FRAME_ANCHOR, preparedFrames } from './sprite-frames.js';
 import {farmNames,farmNotes,updateAgricultureUI} from './agriculture-ui.js';
 import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
 import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
@@ -62,14 +65,16 @@ const milestoneQueue = [];
 let showingMilestone = false;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const previewParams = new URLSearchParams(location.search);
+const meter=performanceMeter(previewParams.has('performance'));
 const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
 const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
 const directScenario = previewParams.get('dev-scenario');
 let sandboxRulesUI;
 let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
-const canvas = $("#world"),
-  ctx = canvas.getContext("2d");
+const canvas = $("#world");
+let ctx = canvas.getContext("2d");
+const lightLayer=document.createElement('canvas'),lightContext=lightLayer.getContext('2d');
 const kinds = {
   ...Object.fromEntries(Object.entries(farmNames).map(([k,n])=>[k,[n,farmNotes[k]]])),
   hydro:['River generator','Small riverbank wheel · generates all day and night'],
@@ -469,7 +474,7 @@ function tree(x, y, s = 1, species = 0) {
     if(!natureArt.complete||!natureArt.naturalWidth)return;
     const art=natureDetails[species-4];if(!art)return;
     const [cx,cy,cw,ch]=art.cell,w=art.width*s*scale,h=w*art.aspect;
-    ctx.save();ctx.filter=unlitFilter(nightAmount(state.village.minutes));ctx.drawImage(natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h);ctx.restore();return;
+    ctx.save();paintImage(ctx,natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h,unlitFilter(nightAmount(state.village.minutes)));ctx.restore();return;
   }
   const w = forestSpecies[species].width * s * scale;
   const cell = forestArt.width / 2;
@@ -488,7 +493,7 @@ function tree(x, y, s = 1, species = 0) {
 }
 function materialSite(site,alpha=1){
   if(!site.active)return;
-  ctx.save();ctx.globalAlpha*=alpha;ctx.filter=unlitFilter(nightAmount(state.village.minutes));
+  ctx.save();ctx.globalAlpha*=alpha;
   if(site.material<2&&!site.planted&&site.harvests===0){
     const n=site.material===0?3:2;for(const [dx,dy]of [[-.5,-.5],[.5,-.5],[-.5,.5],[.5,.5]]){const p=iso(site.x+dx*(n-1),site.y+dy*(n-1));ctx.strokeStyle='#765438';ctx.lineWidth=2*scale;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y-8*scale);ctx.stroke();ctx.fillStyle='#dbc28a';ctx.fillRect(p.x-3*scale,p.y-9*scale,6*scale,3*scale);}
   }else if(site.material===0){
@@ -509,8 +514,8 @@ function sprite(kind, x, y, alpha = 1, id) {
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
   const level=buildingLighting(state.environment.power,id,kind,complete);
   for(const layer of lightingLayers(night,level,alpha)){
-    ctx.save();ctx.filter=layer.source==='night'&&art.nightTint?art.nightTint:layer.filter;
-    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],art,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
+    ctx.save();const filteredArt={...art,renderFilter:layer.source==='night'&&art.nightTint?art.nightTint:layer.filter};
+    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],filteredArt,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
     ctx.restore();
   }
 }
@@ -674,6 +679,7 @@ function resident(r) {
     ctx.fillText("z", p.x + 8 * s, py - 30 * s);
   }
 }
+let terrainSample;
 function render() {
   $('#relocation-guidance').hidden=!tool||(movingBattery===null&&movingBuilding===null);
   if(!$('#relocation-guidance').hidden)$('#relocation-guidance').textContent=$('#placement').textContent;
@@ -694,8 +700,11 @@ function render() {
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
   const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
-  const soil=soilAppearance(state.village.land.soil);
-  const standingTrees=state.village.land.vegetation.filter(t=>!t.cleared);
+  if(terrainSample?.land!==state.village.land)terrainSample={land:state.village.land,soil:soilAppearance(state.village.land.soil),trees:state.village.land.vegetation.filter(t=>!t.cleared)};
+  const soil=terrainSample.soil;
+  // Conservative screen bounds include tall crowns and their shadows.
+  const standingTrees=terrainSample.trees;
+  const onScreenTree=f=>{const p=iso(f.x,f.y),margin=220*scale;return p.x>=-margin&&p.x<=width+margin&&p.y>=-margin&&p.y<=height+margin;};
   for(const [key,value] of Object.entries({forestSeed:state.village.land.seed,forestCount:standingTrees.length,soilCells:soil.length}))if(canvas.dataset[key]!==String(value))canvas.dataset[key]=String(value);
   const key = JSON.stringify([state.village.land.seed,visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
   if (groundKey !== key) {
@@ -733,18 +742,30 @@ function render() {
   drawGroundWeather(ctx,weatherView);
   drawWaterConnections(ctx,iso,scale,state);
   drawElectricalConnections(ctx,iso,scale,state);
+  const darkness = nightAmount(state.village.minutes);
+  if(darkness>0){
+    if(lightLayer.width!==canvas.width||lightLayer.height!==canvas.height){lightLayer.width=canvas.width;lightLayer.height=canvas.height;}
+    lightContext.resetTransform();lightContext.clearRect(0,0,lightLayer.width,lightLayer.height);lightContext.setTransform(ctx.getTransform());
+  }
   const objects = [
     ...(state.village.power.network?.nodes||[]).filter(n=>n.owner.kind==='ground').map(n=>({depth:n.x+n.y+.4,draw:()=>drawBattery(ctx,iso(n.x,n.y),scale,nightAmount(state.village.minutes))})),
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
     ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
-    ...standingTrees.map((f) => ({
+    ...standingTrees.filter(onScreenTree).map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),
     ...state.village.buildings.map((b) => ({
       depth: b.x + b.y,
       draw: () => building(b),
+      light: () => {
+        if(b.progress<100)return;
+        const c=state.environment.power.connections.find(c=>c.id===b.id);
+        if(!['grid','roof'].includes(c?.source)||c.light_level<=0)return;
+        const p=iso(b.x,b.y),key=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
+        drawNightEmission(ctx,nightBuildingImages[key],allBuildingArt[key],key,p.x,p.y,scale,darkness*c.light_level);
+      },
     })),
     ...flock(state.village).map((hen) => ({
       depth: hen.x + hen.y + 0.1,
@@ -753,9 +774,18 @@ function render() {
     ...state.residents.map((r) => ({
       depth: r.x + r.y + 0.6,
       draw: () => resident(r),
+      occlude: () => {
+        if(!residentVisible(r,state.village))return;
+        const surface=residentSurfaces.get(r.id),animation=residentAnimations.get(r.id),p=iso(r.x,r.y);
+        if(!surface||!animation)return;
+        const w=RESIDENT_WIDTH*scale;ctx.save();ctx.translate(p.x,p.y);ctx.scale(animation.facing,animation.breath);ctx.drawImage(surface,-w/2,-w*FRAME_ANCHOR,w,w);ctx.restore();
+      },
     })),
   ];
-  objects.sort((a, b) => a.depth - b.depth).forEach((o) => o.draw());
+  objects.sort((a, b) => a.depth - b.depth).forEach(o=>{
+    o.draw();
+    if(darkness>0){const world=ctx;try{ctx=lightContext;paintDepthLight(ctx,o.occlude||o.draw,o.light);}finally{ctx=world;}}
+  });
   landMap?.drawFocus(tile);
   for(const job of state.village.building_jobs||[]){if(job.stage!=='pack'||!job.destination)continue;const b=state.village.buildings.find(b=>b.id===job.building);polygon(footprintCorners(b.kind,...job.destination).map(([x,y])=>{const p=iso(x,y);return[p.x,p.y];}),'#a5b77422','#b9cf8b');}
 
@@ -799,21 +829,12 @@ function render() {
   const hour = (state.village.minutes % 1440) / 60;
   // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
-  const darkness = nightAmount(state.village.minutes);
   const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
   ctx.fillStyle = `rgba(237,150,84,${twilight})`;
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
   ctx.fillRect(0, 0, width, height);
-  if(darkness>0){
-    for(const b of state.village.buildings){
-      if(b.progress<100)continue;
-      const c=state.environment.power.connections.find(c=>c.id===b.id);
-      if(!['grid','roof'].includes(c?.source) || c.light_level<=0)continue;
-      const p=iso(b.x,b.y),kind=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
-      drawNightEmission(ctx,nightBuildingImages[kind],allBuildingArt[kind],kind,p.x,p.y,scale,darkness*c.light_level);
-    }
-  }
+  if(darkness>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(lightLayer,0,0,lightLayer.width,lightLayer.height,0,0,width,height);ctx.restore();}
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
@@ -1464,8 +1485,9 @@ function togglePause() {
   );
   $("#pause").classList.toggle("active", paused);
 }
-let paintedState = null, paintedView = "";
+let paintedState = null, paintedView = "", reportElapsed = Infinity;
 function frame(stamp) {
+  meter.start(stamp);
   if (!last) last = stamp;
   const elapsed = Math.max(0, (stamp - last) / 1000);
   const dt = Math.min(elapsed, 0.1);
@@ -1478,13 +1500,18 @@ function frame(stamp) {
   if (running) {
     if(!reducedMotion.matches)weatherTime += dt;
     time += advanceSimulation(game, Math.min(elapsed, 1), speed);
-    state = JSON.parse(game.snapshot());
+    meter.mark('simulation');
+    reportElapsed += elapsed;
+    state = sampleFrame(game, state, reportElapsed >= .25);
+    if (reportElapsed >= .25) reportElapsed = 0;
   }
+  meter.mark('sample');
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
     render(); gameUI?.drawMap(state,selected); paintedState = state; paintedView = viewKey;
   }
+  meter.mark('paint');
   uiElapsed += dt;
   saveElapsed += elapsed;
   if (uiElapsed > 0.3) {
@@ -1495,6 +1522,7 @@ function frame(stamp) {
     save();
     saveElapsed = 0;
   }
+  meter.finish(running);
   requestAnimationFrame(frame);
 }
 function setup() {
@@ -1883,6 +1911,15 @@ function setup() {
     }
   });
   window.addEventListener("resize", resize);
+  window.addEventListener('solar:dev-reload', event => {
+    try {
+      sessionStorage.setItem('solar-dev-reload', JSON.stringify({
+        url:location.href, raw:game.snapshot(), active:gameActive, paused, speed, zoom, pan,
+        dialogs:[...document.querySelectorAll('dialog[open]')].map(dialog=>dialog.id),
+        scene:sandboxName, parent:sandbox ? {...sandbox, game:undefined, raw:sandbox.game.snapshot()} : null,
+      }));
+    } catch { event.preventDefault(); toast('Reload paused: export your checkpoint before refreshing.'); }
+  });
   window.addEventListener("pagehide", () => save());
   document.addEventListener("visibilitychange", () => {
     last = 0;
@@ -2048,6 +2085,29 @@ try {
     togglePause();
     save();
   }
+  // Dev-server reloads preserve the test scene separately from playable saves.
+  const resumeRaw=sessionStorage.getItem('solar-dev-reload');
+  if(resumeRaw){
+    const resume=JSON.parse(resumeRaw);
+    if(resume.url===location.href && game.restore(resume.raw)){
+      if(resume.parent){
+        const parent=new Game();
+        if(!parent.restore(resume.parent.raw)){parent.free();throw new Error('Dev reload parent checkpoint needs recovery');}
+        sandbox?.game.free();sandbox={...resume.parent,game:parent};sandboxName=resume.scene;
+      }
+      ({zoom,pan,speed}=resume);gameActive=resume.active;
+      storage=modeStores[JSON.parse(resume.parent?.raw||resume.raw).village.mode||'story'];
+      if(gameActive)$('#main-menu').close();
+      if(paused!==resume.paused)togglePause();
+      refreshDevScene();devTools.refresh();last=0;reportElapsed=Infinity;
+      const dialogs=resume.dialogs||[];
+      for(const dialog of document.querySelectorAll('dialog[open]'))if(!dialogs.includes(dialog.id))dialog.close();
+      for(const id of dialogs){const dialog=document.getElementById(id);if(dialog&&!dialog.open)dialog.showModal();}
+    }
+    sessionStorage.removeItem('solar-dev-reload');
+  }
+
+  window.solarDevReloadReady=true;window.dispatchEvent(new Event('solar:dev-ready'));
 } catch (error) {
   console.error(error);
   $("#load-status").textContent =

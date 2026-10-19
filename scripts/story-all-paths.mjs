@@ -1,3 +1,4 @@
+import {MAP_SIZE,hydroCell} from '../web/terrain.js';
 import {buyServiceParts} from './upkeep-playtest.mjs';
 import {writeFileSync} from 'node:fs';
 import fs from 'node:fs/promises';
@@ -36,7 +37,8 @@ function location(kind){
  const v=snap().village;
  // Leave access corridors between plots; continuous first-fit rows create walls.
  if(kind!=='hydro')for(const y of [5,9,13,17,21,25])for(const x of [5,9,13,17,21])if(!placementReason(v,kind,x,y)&&(kind!=='apiary'||v.buildings.some(b=>['orchard','grove'].includes(b.kind)&&Math.max(Math.abs(b.x-x),Math.abs(b.y-y))<=6)))return [x,y];
- if(kind==='hydro')for(let y=5;y<=25;y++)for(let x=23;x<=26;x++)if(!placementReason(v,kind,x,y)&&(kind!=='apiary'||v.buildings.some(b=>['orchard','grove'].includes(b.kind)&&Math.max(Math.abs(b.x-x),Math.abs(b.y-y))<=6)))return [x,y];
+ if(kind==='hydro')for(let y=5;y<=25;y++)for(const x of [hydroCell(y)])if(!placementReason(v,kind,x,y)&&(kind!=='apiary'||v.buildings.some(b=>['orchard','grove'].includes(b.kind)&&Math.max(Math.abs(b.x-x),Math.abs(b.y-y))<=6)))return [x,y];
+ if(kind.startsWith('source_'))for(let y=2;y<MAP_SIZE-2;y++)for(let x=2;x<MAP_SIZE-2;x++)if(!placementReason(v,kind,x,y))return [x,y];
  throw Error(`No accessible planned plot for ${kind}`);
 }
 function localHousingPlot(){
@@ -66,8 +68,8 @@ function build(kind,recipe='standard',local=false,site=null){
  if(local){for(const i of [5,6,7,8])missing[i]=0;missing[0]+=12;missing[2]+=20;missing[4]+=6;}
  purchase(missing);
  const started=snap().village.minutes;
- // Local construction includes extraction, processing and several community
- // work windows. Keep a finite twenty-four-day bound for a complete building.
+ // Local construction includes extraction, processing and resident work and recovery
+ // cycles. Keep a finite twenty-four-day bound for a complete building.
  until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`,24*1920);
  if(kind==='home'&&recipe==='adobe')console.log(`Local adobe home: ${((snap().village.minutes-started)/1440).toFixed(1)} game days from blueprint to completion`);
  return id;
@@ -129,7 +131,7 @@ until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pic
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
 // Restore the actual garden through delivered compost and attended work,
-// while food, outside shifts and the existing community hours remain active.
+// while food needs, outside shifts and resident energy remain active.
 until(s=>{
  if(s.environment.economy.materials[19].available>=2)return true;
  // Routine care also supplies growing beds. Ask for deliberate extra turning
@@ -203,7 +205,7 @@ for(let tree=0;tree<4&&!snap().village.progress.timber_replanted;tree++){
 purchase(snap().environment.economy.shortage.map((n,i)=>i===22?n:0));
 until(s=>s.village.progress.timber_replanted,'resident replanting from delivered timber seedlings');
 build('home','adobe',true);
-// Share deliberate surplus work within normal hours; no after-hours foraging shift.
+// Share deliberate surplus work while respecting each resident’s needs.
 function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(!r.requested&&r.task!=='gather'&&r.task!=='garden'){if(id!==0||!g.request(id,'garden',false).includes('Happy'))g.request(id,'gather',false);}}return false;},label);}
 gatherExtra(()=>g.sell_surplus(1)==='ok','sell surplus');
 gatherExtra(()=>g.exchange_parts()==='ok','neighbour exchange');await complete(9);
@@ -228,13 +230,20 @@ until(s=>{
 },'follow through with a neighbour helping at the kitchen');
 await complete(11);
 until(()=>g.host_gathering()==='ok','second gathering');
-gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);
+gatherExtra(s=>s.village.food>=38,'healthy pantry');
+// This low-level empty-property replay also exercises the shed's paid recipe;
+// new game modes receive their founding shelter through start_mode instead.
+if(!snap().village.buildings.some(b=>b.kind==='shed'))build('shed');
+// A faster campaign can finish before anything needs service. The optional
+// upkeep replay waits for real wear and paid, delivered resident service.
+until(s=>s.village.maintenance.jobs.some(j=>j.finished!=null&&!j.cancelled),'complete an optional equipment service after natural wear',70*1920);
+await complete(12);
 const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
 for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
 assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
 const optionalLessons=quests.flatMap((q,chapter)=>q.options(s.village).map(o=>({chapter:chapter+1,label:o.label,value:o.value,target:o.target,done:o.done,guide:!!o.guide})));
 assert(optionalLessons.every(o=>o.guide||o.done),'The all-path replay completes every optional lesson: '+JSON.stringify(optionalLessons.filter(o=>!o.guide&&!o.done)));
 for(const q of quests)for(const objective of q.options(s.village))assert(goalRoute(s,objective),'Optional routes remain actionable');
-await fs.writeFile(`${output}/report.json`,JSON.stringify({passed:true,route:'fresh-all-paths',source:'Real placement, purchases, resident work and player commands; no authored progress or inventory',chapterResults,optionalLessons,buildingKinds:storyBuildingKinds,observations:s.village.progress.outcomes,serviceOrders,serviceSpending},null,2));
+await fs.writeFile(`${output}/report.json`,JSON.stringify({passed:true,route:process.env.SOLAR_STORY_FROM?'earned-checkpoint-continuation':'fresh-all-paths',checkpointSource:process.env.SOLAR_STORY_FROM||null,source:'Real placement, purchases, resident work and player commands; no authored progress or inventory',chapterResults,optionalLessons,buildingKinds:storyBuildingKinds,observations:s.village.progress.outcomes,serviceOrders,serviceSpending},null,2));
 console.log(`Upkeep: ${serviceOrders} paid spare-part deliveries, R$ ${(serviceSpending/100).toFixed(2)}`);
-g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 21 building kinds taught.');
+g.free();console.log((process.env.SOLAR_STORY_FROM?'PASS: earned-checkpoint continuation; ':'PASS: ')+ 'all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 22 building kinds taught.');

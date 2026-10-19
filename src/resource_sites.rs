@@ -547,13 +547,15 @@ mod tests {
                 2.,
             );
             assert!(finish(&mut v, 0));
+            // This test isolates irrigation, independent of the seeded forest.
+            v.land.natural_light.fill(1.);
             advance(&mut v, 1440.);
             assert_eq!(v.economy.sources[0].growth, 0.25);
             let growth = v.economy.sources[0].growth;
             advance(&mut v, 600.);
-            assert!(
-                v.economy.sources[0].growth > growth,
-                "Visible perimeter shade keeps a little water after the unshaded day"
+            assert_eq!(
+                v.economy.sources[0].growth, growth,
+                "Dry trees stop growing"
             );
             let dry_growth = v.economy.sources[0].growth;
             advance(&mut v, 600.);
@@ -661,7 +663,7 @@ mod tests {
     fn quarries_only_share_their_own_patch_and_relocation_cannot_duplicate_stone() {
         let mut g = Game::new();
         assert_eq!(g.place_source(3, 18, 18), "ok");
-        assert_eq!(g.place_source(3, 40, 23), "ok");
+        assert_eq!(g.place_source(3, 24, 23), "ok");
         let first = g.app.world().resource::<Village>().economy.sources[0].remaining;
         let second = g.app.world().resource::<Village>().economy.sources[1].remaining;
         {

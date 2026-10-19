@@ -1,0 +1,66 @@
+{
+  "art": {
+    "name": "Community shed",
+    "file": "starter-shed-isometric.png",
+    "nightFile": "starter-shed-isometric.png",
+    "nightTint": "brightness(.6) saturate(.72)",
+    "width": 185,
+    "anchor": 0.8,
+    "axes": [
+      0.502774639105809,
+      -0.42609856811225016
+    ]
+  },
+  "placement": {
+    "scale": 1.3786532212535094,
+    "x": 1.9322033782719623,
+    "y": 32.40428942186718
+  },
+  "measurement": {
+    "size": 1254,
+    "right": [
+      [
+        207,
+        824,
+        664,
+        1036
+      ],
+      [
+        426,
+        162,
+        884,
+        410
+      ]
+    ],
+    "left": [
+      [
+        664,
+        1036,
+        1028,
+        881
+      ],
+      [
+        695,
+        625,
+        1028,
+        483
+      ]
+    ],
+    "upright": [
+      664,
+      720,
+      664,
+      1010
+    ],
+    "rightLabels": [
+      "Left/front feet",
+      "Roof ridge"
+    ],
+    "leftLabels": [
+      "Front/right feet",
+      "Front crossbeam"
+    ]
+  },
+  "status": "needs-correction",
+  "issue": "Roof ridge and ground axes still disagree; diagnostic drift 3.89 px at game scale. Candidate is for comparison only and is not used by the game."
+}

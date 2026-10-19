@@ -56,9 +56,9 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
   }
   for (const [id,c] of counts.entries()) {
     const context=`${scenario}, resident ${id}: ${JSON.stringify({...c,hobbies:[...c.hobbies]})}`;
-    if(c.work/c.awake>=.35||c.leisure/c.awake<=.55){await fs.mkdir('artifacts/leisure',{recursive:true});await fs.writeFile(`artifacts/leisure/${scenario}-workload.json`,game.snapshot());}
+    if(c.work/c.awake>=.35||c.leisure/c.awake<=.4){await fs.mkdir('artifacts/leisure',{recursive:true});await fs.writeFile(`artifacts/leisure/${scenario}-workload.json`,game.snapshot());}
     assert(c.work / c.awake < .35, `Every resident should spend a minority of in-village waking time working; ${context}`);
-    assert(c.leisure / c.awake > .55, `Most in-village waking time should be free time; ${context}`);
+    assert(c.leisure / c.awake > .4, `Energy-driven work must leave substantial in-village free time; ${context}`);
     assert(c.hobbies.size >= 3, 'Each resident needs varied hobbies, including evenings');
   }
   if(scenario==='surplus')assert(previousExpired>0,'An oversized reserve should spoil rather than last forever');

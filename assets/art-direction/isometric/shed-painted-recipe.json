@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-16",
+  "tool": "Built-in image_gen",
+  "mode": "style-transfer",
+  "output": "web/art/starter-shed-painted.png",
+  "edit_target": "web/art/starter-shed-model.png",
+  "style_reference": "web/art/home-gable.png",
+  "prompt": "Use case: style-transfer. Asset type: transparent isometric game building sprite for Solar Friends. Image 1 is the EDIT TARGET, a structurally coherent but stylistically rejected wooden shelter. Image 2 is the authoritative STYLE reference house. Repaint image 1 completely in the EXACT illustrated game-art treatment of image 2. Keep image 1's camera, footprint, three visible supporting posts, open sides, centered front gable, short knee braces and supported wooden bench. Match image 2's chunky hand-painted terracotta barrel tiles: use roughly 10 columns and 6 courses on the large visible roof, broad individually shaded tiles with dark warm seams, rounded ends and clean painted highlights. Match the house's golden-brown wooden posts with broad illustrated grain marks and crisp warm edges. Eliminate photoreal grain, repeating material textures, smooth CAD shading, tiny mechanical tiles, speckled ambient shadow and tiny ornamental post-foot rosettes. Give posts modest blocky wooden foot collars and a few simple painted grass leaves matching the house's foliage. Keep all ridge and eave lines parallel in one orthographic 2:1 view, vertical posts; keep the roof aligned with its frame and centered above four corners. Same sunny upper-left lighting and saturation as the reference house. No house walls, solar panel, water tank, additional furnishings, foundation slab or solid ground patch. Background genuinely transparent, including interior gaps. One complete shelter centered with padding on all sides. This must look like it came from the SAME artist and asset set as image 2.",
+  "generation_source": "exec-e8ba52f5-9c66-45de-ae77-049b1b6ea64c.png",
+  "status": "installed-after-game-context-review",
+  "notes": "Replaces a model bake rejected by the user for inconsistent art style. No whole-sprite warps or raster postprocessing.",
+  "review": "Compared on actual day/night village terrain beside the existing homes: matching illustrated tile scale, golden timber edges, foliage and warm shaded palette. Model-style speckled shadow and dense tiles removed. Grid/silhouette checks pass."
+}

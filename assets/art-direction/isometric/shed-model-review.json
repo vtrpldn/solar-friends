@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-16",
+  "method": "Rigid authored 3D geometry with painted material textures; depth-buffered orthographic bake, not a warp of an existing building sprite.",
+  "geometry": "Shared 2:1 camera, equal upright posts, parallel roof ridge/eaves and centered front gable.",
+  "style_review": "Rejected by user on 2026-10-16: mechanically rendered tiles, materials and edges inconsistent with the illustrated game assets. Earlier acceptance was incorrect.",
+  "source": "scripts/art-models/shed.js",
+  "materials": "assets/art-direction/isometric/materials/building-materials.png",
+  "material_recipe": "assets/art-direction/isometric/materials/recipe.json",
+  "foliage": "web/art/landscape-details.png",
+  "outputs": [
+    "web/art/starter-shed-model.png",
+    "web/art/starter-shed-model-night.png"
+  ],
+  "scope": "Archived rejected prototype, never use as runtime art. Source model tools removed; available in Git history.",
+  "status": "rejected-by-user"
+}

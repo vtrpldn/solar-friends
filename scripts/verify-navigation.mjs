@@ -1,3 +1,4 @@
+import {MAP_SIZE} from '../web/terrain.js';
 import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -26,7 +27,7 @@ const detour=quote(4,8,12,8);
 assert(detour.route.distance>8);
 for(const p of detour.route.points)assert(p[0]<=6.3||p[0]>=8.7||p[1]<=6.3||p[1]>=8.7);
 assert.equal(quote(4,8,8,8).route,null,'Foundation destinations are blocked');
-assert.equal(quote(3,3,27,3).route,null,'No route crosses the river');
+assert.equal(quote(3,3,MAP_SIZE-1,3).route,null,'No route crosses the river');
 assert.equal(quote(NaN,3,4,4).route,null);
 assert.equal(quote(3,3,Infinity,4).route,null);
 assert.equal(quote(4,4,4,4).route.minutes,0);

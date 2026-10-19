@@ -10,7 +10,7 @@ const snap=g=>JSON.parse(g.snapshot());
 function checkpoint(g){const s=g.snapshot(),h=new Game();assert(h.restore(s));assert.equal(h.snapshot(),s);assert(!s.includes('natural_light'));h.free();}
 function until(g,test,label,limit=4*1920){for(let n=0;n<limit;n++){if(test(snap(g)))return;g.tick(.25);}throw Error(label);}
 const edge=new Game();let tree=null;
-for(let seed=0;seed<64&&!tree;seed++){assert(edge.set_simulation_seed(seed));tree=snap(edge).village.land.vegetation.find(t=>{const x=Math.floor(t.x+.5),y=Math.floor(t.y+.5);return x>=1&&x<=22&&y>=1&&y<=26;});}
+for(let seed=0;seed<64&&!tree;seed++){assert(edge.set_simulation_seed(seed));tree=snap(edge).village.land.vegetation.find(t=>{const x=Math.floor(t.x+.5),y=Math.floor(t.y+.5);return t.species<4&&x>=1&&x<=22&&y>=1&&y<=26;});}
 assert(tree);const point=[Math.floor(tree.x+.5),Math.floor(tree.y+.5)],standing=edge.snapshot(),before=JSON.parse(edge.land_report());
 await writeFile('artifacts/living-land/standing-trees.json',standing);
 assert.equal(edge.toggle_road(...point),'ok');assert.equal(edge.toggle_road(...point),'ok');const after=JSON.parse(edge.land_report());

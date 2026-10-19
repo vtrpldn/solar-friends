@@ -25,7 +25,8 @@ const buildings=[{kind:'home',x:10,y:13},{kind:'solar_farm',x:18,y:19},{kind:'ga
 const points=weatherSites(buildings);
 const density=(MAP_SIZE/28)**2;
 assert(points.length>400*density&&points.length<480*density);
-assert(points.some(p=>p.x>50)&&points.some(p=>p.y>50),'Weather covers the expanded property');
+assert(points.some(p=>p.x>MAP_SIZE-4)&&points.some(p=>p.y>MAP_SIZE-4),'Weather reaches both far property edges');
+assert(points.every(p=>p.x>=1&&p.x<MAP_SIZE-1&&p.y>=1&&p.y<MAP_SIZE-1),'Rain sites stay on the current property');
 assert(points.every(p=>!buildings.some(b=>occupies(b,p.x,p.y))),'Pools and impacts must avoid foundations');
 assert.deepEqual(weatherSites(buildings),points,'World sites must be deterministic');
 

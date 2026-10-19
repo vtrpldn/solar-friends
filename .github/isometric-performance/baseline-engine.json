@@ -1,0 +1,53 @@
+{
+  "engine": "wasm",
+  "results": [
+    {
+      "scene": "arrival",
+      "map": 64,
+      "snapshotBytes": 213308,
+      "tick": {
+        "median": 1.0550000000000637,
+        "p95": 1.2987919999999349,
+        "total": 289.7300470000008
+      },
+      "snapshot": {
+        "median": 2.5295000000000982,
+        "p95": 2.8100000000000023,
+        "total": 768.6931310000009
+      }
+    },
+    {
+      "scene": "village",
+      "map": 64,
+      "snapshotBytes": 227301,
+      "tick": {
+        "median": 1.2402910000000702,
+        "p95": 8.662958000000117,
+        "total": 650.9950770000019
+      },
+      "snapshot": {
+        "median": 2.9439159999999447,
+        "p95": 3.974499999999807,
+        "total": 931.208876999998
+      }
+    },
+    {
+      "scene": "autonomy",
+      "map": 64,
+      "snapshotBytes": 230465,
+      "tick": {
+        "median": 1.04300000000012,
+        "p95": 2.4376250000000255,
+        "total": 382.3472910000014
+      },
+      "snapshot": {
+        "median": 3.022292000000107,
+        "p95": 3.330500000000029,
+        "total": 923.9163760000006
+      }
+    }
+  ],
+  "sourceCommit": "b2ca230",
+  "engineSha256": "2e9f134729d957cff45403a9d34f21c33041cacec7f9a709902fe8b522f55558",
+  "note": "Same-machine isolated WASM measurements before the 32-cell change; timings in milliseconds."
+}

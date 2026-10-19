@@ -57,3 +57,10 @@ export function drawNightEmission(ctx, image, art, kind, x, y, scale, amount) {
   }
   ctx.restore();
 }
+
+// Walk this layer in the same back-to-front order as the visible scene. Every
+// foreground silhouette blocks earlier light, including non-emitting objects.
+export function paintDepthLight(ctx,occlude,emit) {
+  ctx.save();ctx.globalCompositeOperation='destination-out';occlude();ctx.restore();
+  emit?.();
+}

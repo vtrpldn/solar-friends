@@ -34,3 +34,10 @@ add('economy-original','Original economy prop study','economy-atlas.png','Refere
 ['Maize','Cassava','Fodder grass'].forEach((name,column)=>['Seedling','Growing','Harvestable'].forEach((stage,row)=>add(`field-crop-${column}-${row}`,`${name} · ${stage}`,'field-crops.png','Crops',{crop:true,frame:row*3+column,cell:[column/3,row/3,1/3,1/3],width:column===2?26:30,anchor:FRAME_ANCHOR})));
 
 natureArt.forEach((art,i)=>add(`landscape-${i}`,art.name,art.file,i<4?'Vegetation':'Terrain',{...art,file:'../art/'+art.file}));
+
+add('shed-proposal','Shed proposal · geometry correction needed','starter-shed-isometric.png','References',{usage:'Unapproved candidate',width:185,anchor:.8});
+
+add('shed-original','Original shed · archived perspective','starter-shed.png','References',{usage:'Reference',width:185,anchor:.8});
+
+add('shed-rejected-model','Shed model · rejected art style','starter-shed-model.png','References',{usage:'Rejected prototype',width:185,anchor:.8});
+add('shed-rejected-model-night','Shed model · rejected night style','starter-shed-model-night.png','References',{usage:'Rejected prototype',width:185,anchor:.8});

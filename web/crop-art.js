@@ -37,10 +37,10 @@ export function drawCrops(ctx,b,x,y,scale=1,night=0,health=1) {
   const paint=()=>{
     path(soil);ctx.fillStyle=c.moisture>0?'rgba(55,32,20,.17)':'rgba(204,163,102,.28)';ctx.fill();
     if(!c.planted)return;
-    ctx.filter=`brightness(${1-night*.45}) saturate(${c.moisture>0 ? Math.max(.45,Math.min(1,health)) : .55})${c.moisture>0 ? '' : ' sepia(.3)'}`;
+    const filter=`brightness(${1-night*.45}) saturate(${c.moisture>0 ? Math.max(.45,Math.min(1,health)) : .55})${c.moisture>0 ? '' : ' sepia(.3)'}`;
     const width=(c.kind==='lettuce'?22:['maize','cassava'].includes(c.kind)?30:26)*(greenhouse?.85:1);
     const ordered=positions.map(([u,v])=>point(u,v)).sort((a,b)=>a[1]-b[1]);
-    for(const p of ordered)drawPreparedFrame(ctx,['maize','cassava','fodder'].includes(c.kind)?fieldArt:cropArt,cropFrame(c),p[0],p[1],width,cropFrameOptions);
+    for(const p of ordered)drawPreparedFrame(ctx,['maize','cassava','fodder'].includes(c.kind)?fieldArt:cropArt,cropFrame(c),p[0],p[1],width,cropFrameOptions,filter);
   };
   if(greenhouse){
     // Glass mutes the leaves. Through the open door they keep their color.

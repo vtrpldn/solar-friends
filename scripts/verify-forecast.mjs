@@ -28,7 +28,8 @@ await writeFile('artifacts/forecasts/outside-shifts.json',away.snapshot());
 const shifted=JSON.parse(away.project_forecast(1));
 assert(shifted.funds_projected>report.funds_projected,'Outside shifts contribute income over the same horizon');
 assert(!shifted.projects[0].completed_at||shifted.projects[0].completed_at>actual,'Outside work takes people away from village projects');
-assert.match(shifted.projects[0].blocker,/outside shifts/,'A staffing shortage must not be reported as a broken route');
+if(shifted.projects[0].completed_at)assert.equal(shifted.projects[0].blocker,null,'Working after their shift can finish the project without a blocker');
+else assert.match(shifted.projects[0].blocker,/outside shifts/,'A staffing shortage must not be reported as a broken route');
 assert.equal(g.project_forecast(0),JSON.stringify({error:'Choose a forecast window of 1–14 days.'}));
 
 const changedFood=JSON.parse(before);changedFood.village.supplies.feed_hens=!changedFood.village.supplies.feed_hens;

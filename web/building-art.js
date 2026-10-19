@@ -1,13 +1,13 @@
+import {paintImage} from './paint-cache.js';
 // Canonical runtime sizes and measured ground-axis slopes for the painted assets.
 // Width is the full source-cell width at zoom 1, including transparent padding.
 // Axis calibration keeps verticals vertical and maps the two measured ground
 // directions to the same +/- 1/2 slopes used by projection.js.
 import { TILE_HALF_HEIGHT, TILE_HALF_WIDTH } from './projection.js';
 import { measuredAxes } from './building-projection.js';
-import { buildingTexture } from './building-mesh.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
-  shed:{name:'Community shed',file:'starter-shed.png',nightFile:'starter-shed.png',nightTint:'brightness(.6) saturate(.72)',width:185,anchor:.8},
+  shed:{name:'Community shed',file:'starter-shed-painted.png',nightFile:'starter-shed-painted.png',nightTint:'brightness(.6) saturate(.72)',width:185,anchor:.8},
   orchard: {name:'Fruit orchard',file:'orchard.png',nightFile:'orchard.png',nightTint:'brightness(.6) saturate(.72)',width:210,anchor:.83},
   goat_pasture: {name:'Goat pasture',file:'goat-pasture.png',nightFile:'goat-pasture.png',nightTint:'brightness(.6) saturate(.72)',width:218,anchor:.83},
   apiary: {name:'Stingless bee apiary',file:'apiary.png',nightFile:'apiary.png',nightTint:'brightness(.6) saturate(.72)',width:84,anchor:.84},
@@ -84,11 +84,11 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   const { vertical, shear } = cameraCalibration(art);
   ctx.save();
   ctx.globalAlpha *= alpha;
-  if(art.renderFilter)ctx.filter=(ctx.filter==='none'?'':ctx.filter+' ')+art.renderFilter;
+  const filter=[ctx.filter==='none'?'':ctx.filter,art.renderFilter].filter(Boolean).join(' ')||'none';
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
-  ctx.drawImage(buildingTexture(image, art.mesh), cx * sourceWidth, cy * sourceHeight,
+  paintImage(ctx,image, cx * sourceWidth, cy * sourceHeight,
     cw * sourceWidth, ch * sourceHeight,
-    -w / 2, -w * (art.aspect||1) * art.anchor, w, w * (art.aspect||1));
+    -w / 2, -w * (art.aspect||1) * art.anchor, w, w * (art.aspect||1), filter);
   ctx.restore();
 }

@@ -52,8 +52,8 @@ mod water;
 mod workforce;
 use progression::Progress;
 
-pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 28;
+pub const MAP_SIZE: i32 = 32;
+pub const SAVE_VERSION: u32 = 29;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -241,7 +241,7 @@ fn event(v: &mut Village, text: impl Into<String>) {
     }
 }
 fn river_center(y: f32) -> f32 {
-    57.8 + (y * 0.11).sin() * 1.5 + (y * 0.32).sin() * 0.65
+    29.8 + (y * 0.22).sin() * 0.65
 }
 fn river_bank(x: i32, y: i32) -> bool {
     x as f32 >= river_center(y as f32) - 2.3
@@ -1390,6 +1390,33 @@ impl Game {
                     && r.sleep.started_at.is_some()
                     && r.sleep.slept_minutes < r.sleep.duration_minutes
             })
+    }
+    /// A read-only animation render sample. Full reports and static land stay in snapshot().
+    /// Never use this partial view as a save file.
+    pub fn frame_state(&mut self) -> String {
+        let mut query = self.app.world_mut().query::<&Resident>();
+        let world = self.app.world();
+        let v = world.resource::<Village>();
+        let residents: Vec<_> = query.iter(world).collect();
+        serde_json::json!({
+            "village": {
+                "minutes": v.minutes,
+                "buildings": v.buildings,
+                "building_jobs": v.building_jobs,
+                "power": v.power,
+                "water_supply": v.water_supply,
+                "logistics": v.logistics,
+                "roads": v.roads,
+                "economy": { "sources": v.economy.sources },
+            },
+            "residents": residents,
+            "environment": {
+                "raining": climate::at(v, v.minutes).raining,
+                "weather": { "current": climate::at(v, v.minutes) },
+                "power": power::supply(v),
+            },
+        })
+        .to_string()
     }
     pub fn snapshot(&mut self) -> String {
         let mut village = self.app.world().resource::<Village>().clone();

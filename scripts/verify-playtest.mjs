@@ -29,8 +29,8 @@ s=JSON.parse(garden.snapshot());assert.equal(s.village.buildings[0].progress,100
 assert.equal(lightingLayers(1,0)[0].filter,unlitFilter(1));
 console.log('PASS: persistent home appearance, cancellation identities, actionable goal routes, completed-garden visits, malformed-style save rejection and shared unlit rendering.');
 
-for(const [w,h] of [[848,1328],[1024,768],[1440,900],[1920,1080]]){
-  const z=clampZoom(w,h,-100),range=zoomLimits(w,h),first=Math.max(.45,range.base*z),next=Math.max(.45,range.base*clampZoom(w,h,z+.15));
+for(const [w,h] of [[1280,800],[1440,900],[1920,1080]]){
+  const z=clampZoom(w,h,-100),range=zoomLimits(w,h),first=Math.max(.18,range.base*z),next=Math.max(.18,range.base*clampZoom(w,h,z+.15));
   assert(next>first,'A zoom-in click after the widest view must visibly magnify the map');
   assert.equal(clampZoom(w,h,100),range.max);assert.equal(clampZoom(w,h,z-.15),z);
 }

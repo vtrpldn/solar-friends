@@ -1,0 +1,33 @@
+{
+  "runningRecovery": true,
+  "profile": "iteration",
+  "frame": {
+    "samples": 90,
+    "simulation": {
+      "median": 0.5,
+      "p95": 0.6999999284744263
+    },
+    "sample": {
+      "median": 0.30000007152557373,
+      "p95": 1.600000023841858
+    },
+    "paint": {
+      "median": 7.300000071525574,
+      "p95": 7.800000071525574
+    },
+    "total": {
+      "median": 8.200000047683716,
+      "p95": 11.5
+    },
+    "frameInterval": {
+      "median": 16.40000000000009,
+      "p95": 18.40000000000009
+    }
+  },
+  "editToReadyMs": 4984,
+  "checkpoint": true,
+  "browserErrors": [],
+  "failedBuildPreserved": true,
+  "javascriptRecovery": true,
+  "modeIsolation": true
+}
