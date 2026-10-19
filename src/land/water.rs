@@ -61,25 +61,30 @@ pub fn sync_moisture(v: &mut Village) {
         v.economy.sources[i].moisture = water;
     }
 }
-fn step_cell(v: &mut Village, x: i32, y: i32, minutes: f32, profile: RootZone) -> f32 {
+fn step_cell(
+    v: &mut Village,
+    x: i32,
+    y: i32,
+    minutes: f32,
+    profile: RootZone,
+    weather: crate::climate::Weather,
+) -> f32 {
     let RootZone {
         capacity,
         drying,
         covered,
     } = profile;
     let index = (y * MAP_SIZE + x) as usize;
-    let rain = if !covered && ecology::raining(v.minutes) {
-        3.
-    } else {
-        0.
-    };
+    let rain = if !covered { 3. * weather.rain } else { 0. };
     let start = v.land.water[index];
     if start == 0. && rain == 0. {
         return 0.;
     }
     let g = ground(v, x, y);
-    let drying =
-        drying / g.retention * (1. - g.shade * 0.35) * (1. - (g.cover - 0.35).max(0.) * 0.2);
+    let drying = drying / g.retention
+        * (1. - g.shade * 0.35)
+        * (1. - (g.cover - 0.35).max(0.) * 0.2)
+        * (1. + (weather.evaporation - 1.) * if covered { 0.4 } else { 1. });
     let wet = if rain > 0. {
         minutes
     } else {
@@ -91,13 +96,15 @@ fn step_cell(v: &mut Village, x: i32, y: i32, minutes: f32, profile: RootZone) -
 pub fn plot_water(v: &mut Village, n: i32, x: i32, y: i32, minutes: f32, profile: RootZone) -> f32 {
     let mut wet = 0.;
     let mut count = 0;
+    let weather = crate::climate::at(v, v.minutes);
     for (a, b) in cells(n, x, y) {
-        wet += step_cell(v, a, b, minutes, profile);
+        wet += step_cell(v, a, b, minutes, profile, weather);
         count += 1;
     }
     if count == 0 { 0. } else { wet / count as f32 }
 }
 pub fn advance_fallow(v: &mut Village, minutes: f32) {
+    let weather = crate::climate::at(v, v.minutes);
     let mut tended = [false; (MAP_SIZE * MAP_SIZE) as usize];
     let mut covered = [false; (MAP_SIZE * MAP_SIZE) as usize];
     for b in &v.buildings {
@@ -134,6 +141,7 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
                         drying: 1.,
                         covered: covered[i],
                     },
+                    weather,
                 );
             }
         }

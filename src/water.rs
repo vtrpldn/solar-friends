@@ -521,7 +521,8 @@ pub fn sandbox_excess(v: &mut Village, class: Class, amount: f64) {
 }
 pub fn rain(v: &mut Village, minutes: f32) {
     sync(v);
-    if !ecology::raining(v.minutes) {
+    let rain = climate::at(v, v.minutes).rain;
+    if rain <= 0. {
         return;
     }
     let ids: Vec<_> = v
@@ -535,7 +536,7 @@ pub fn rain(v: &mut Village, minutes: f32) {
             v,
             Owner::Building(id),
             Class::Fresh,
-            f64::from(minutes) * 0.3,
+            f64::from(minutes) * 0.3 * f64::from(rain),
         ) > 0.
         {
             v.progress.rain_caught = true;

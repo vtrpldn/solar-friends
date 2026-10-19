@@ -29,6 +29,8 @@ footer{position:fixed;inset:0;z-index:28;display:block;padding:0;background:none
 .resources .item-icon{width:30px;height:30px}.sandbox-mode [data-hud-resource="fund"]{display:none}
 footer .season.panel{position:fixed;left:18px;bottom:53px;display:flex;align-items:center;gap:9px;width:213px;padding:10px 12px 5px;background:linear-gradient(#786244,#5b452f);border:3px solid #5b3e25;border-bottom:0;border-radius:9px 9px 0 0;box-shadow:inset 0 0 0 1px #b5945c;color:#f5e6b9;pointer-events:auto}
 .season .eyebrow{display:none}.season-icon{color:#edcb71;font-size:26px}.season b{display:block;font-size:13px;font-variant-numeric:tabular-nums}.season small{display:block;color:#d8c6a0;font-size:9px;margin-top:2px}
+.season #weather-open{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;border:0;border-radius:inherit;background:transparent;box-shadow:none;cursor:pointer}
+.season #weather-open:hover{background:#edcb7114}
 .time-controls{position:fixed;left:18px;bottom:18px;display:flex;gap:3px;width:213px;min-height:38px;align-items:center;justify-content:center;padding:4px 6px 6px;border:3px solid #5b3e25;border-top:0;border-radius:0 0 9px 9px;background:#5b452f;box-shadow:inset 0 -1px 0 #b5945c,0 4px 0 #3e2d2060;pointer-events:auto}
 .time-controls button{min-height:25px;min-width:27px;padding:4px 6px;color:#e7d7ad;background:#493b2b;border:1px solid #8b744a;border-radius:4px;font-size:11px}
 .time-controls button.active{color:#403923;background:#d7c48a;border-color:#f0dca2;box-shadow:inset 0 1px 0 #fff2c3}

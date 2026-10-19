@@ -242,18 +242,11 @@ pub fn generation(v: &Village, n: &Node, minutes: f32) -> f64 {
         .sin()
         .max(0.);
     let sun = || f64::from(land::solar_exposure(v, n.size, n.x, n.y));
+    let weather = climate::at(v, minutes);
     match n.kind {
-        NodeKind::Solar => 6. * altitude * sun(),
-        NodeKind::Roof => 0.6 * altitude * sun(),
-        NodeKind::Hydro => {
-            1.8 * if ecology::raining(minutes) {
-                1.3
-            } else if (minutes / 1440.) as u32 % 3 == 2 {
-                0.65
-            } else {
-                1.
-            }
-        }
+        NodeKind::Solar => 6. * altitude * sun() * f64::from(weather.solar_factor),
+        NodeKind::Roof => 0.6 * altitude * sun() * f64::from(weather.solar_factor),
+        NodeKind::Hydro => 1.8 * f64::from(weather.river_factor),
         _ => 0.,
     }
 }

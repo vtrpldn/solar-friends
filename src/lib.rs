@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 mod building_work;
+mod climate;
 mod devtools;
 mod ecology;
 mod economy;
@@ -146,6 +147,8 @@ pub struct Village {
     pub mode: modes::Mode,
     #[serde(default)]
     pub simulation: simulation::State,
+    #[serde(default)]
+    pub climate: climate::State,
     #[serde(default)]
     pub logistics: Option<logistics::State>,
     #[serde(skip)]
@@ -1197,6 +1200,7 @@ impl Game {
             .insert_resource(Village {
                 mode: modes::Mode::Story,
                 simulation: simulation::State::default(),
+                climate: climate::State { enabled: true },
                 logistics: None,
                 navigation: None,
                 workforce: workforce::State::default(),
@@ -1331,11 +1335,12 @@ impl Game {
         economy["pickup_fee"] = 2000.into();
         serde_json::json!({
             "environment": {
-                "raining": ecology::raining(village.minutes),
+                "raining": climate::at(&village,village.minutes).raining,
+                "weather": climate::view(&village),
                 "water_capacity": ecology::capacity(&village),
                 "power": power::supply(&village),
                 "economy": economy,
-                "dry_day": (village.minutes / 1440.) as u32 % 3 == 2,
+                "dry_day": !climate::day(&village,(village.minutes/1440.) as u32).rain_expected,
             },
             "village": village,
             "residents": residents,
