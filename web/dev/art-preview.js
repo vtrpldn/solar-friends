@@ -2,6 +2,7 @@ import {resetMaterialLocations} from './material-fixture.js';
 import {allBuildingArt,homeArtKeys,adobeVariants} from '../building-art.js';
 import {placementReason} from '../polish.js';
 import {MAP_SIZE} from '../terrain.js';
+import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 
 // Build the gallery from the live registry, not an older village's inventory.
 // It is a separate, paused fixture; production saves are never overwritten.
@@ -37,5 +38,6 @@ export function makeArtPreview(fresh,established,{night=false}={}) {
   }
   v.economy.next_building=v.buildings.length;
   for(const r of state.residents)Object.assign(r,{task:'idle',reason:'Enjoying our artwork showcase.',remaining:0,requested:false,trip:null,visit_building:null,activity_building:null,activity_material:null,x:8+r.id*.7,y:15.5,target_x:8+r.id*.7,target_y:15.5,energy:90,hunger:20,social:80,last_meal_slot:3,last_sanitation_day:-1});
-  return resetMaterialLocations(state);
+  const prepared=resetMaterialLocations(state);
+  return night?withAuthoredElectricalCircuits(prepared):prepared;
 }

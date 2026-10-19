@@ -1,3 +1,4 @@
+import {checkWorkshopPowerControls,checkElectricalControls} from './electricity-browser-checks.mjs';
 import {checkOrganicControls} from './organics-browser-checks.mjs';
 import {checkCultivationControls} from './cultivation-browser-checks.mjs';
 import {checkLandControls} from './land-browser-checks.mjs';
@@ -16,6 +17,7 @@ import path from 'node:path';
 import {checkToolControls} from './tool-browser-checks.mjs';
 import {checkFoodControls} from './food-browser-checks.mjs';
 import {checkKitchenControls} from './kitchen-browser-checks.mjs';
+import {checkBatteryControls} from './battery-browser-checks.mjs';
 import {checkGatheringControls} from './gathering-browser-checks.mjs';
 export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
@@ -386,12 +388,15 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkToolControls({page,saved,capture});
   await checkFoodControls({page,saved,capture});
   await checkKitchenControls({page,saved,capture});
+  await checkWorkshopPowerControls({page,saved,capture});
+  await checkElectricalControls({page,saved,capture});
+  await checkBatteryControls({page,saved,capture});
   await checkGatheringControls({page,saved,capture});
   await checkFreshnessControls({page,saved,capture});
   await checkProcessControls({page,saved,capture});
   await checkOrganicControls({page,saved,capture});
   await page.locator('#dev-button').click();
-  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
+  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['power-outage',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
     await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
@@ -400,6 +405,12 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
     if(id==='coop')assert.equal(state.village.supplies.eggs,3);
+    if(['night','circular-night','art-night','power-outage'].includes(id)){
+      assert(state.village.pipes.lines.some(p=>p.plan.kind==='electricity'&&p.phase==='active'),'Night scenes contain real installed cables');
+      const lights=state.environment.power.connections.filter(c=>c.source==='grid'&&c.enabled);
+      assert(lights.length>0&&lights.every(c=>c.connected),'Preview lights belong to connected circuits');
+      assert(lights.every(c=>id==='power-outage'?c.light_level===0:c.light_level>.99),'Empty circuits leave shared lamps off; charged previews illuminate them');
+    }
     if(id==='art'||id==='art-night'){
       const rendered=await page.evaluate(async()=>{const {allBuildingArt,buildingArtKey}=await import('./building-art.js?v=night-1');const s=window.solarDev.snapshot();return {expected:Object.keys(allBuildingArt).sort(),actual:s.village.buildings.map(b=>buildingArtKey(b,s.village.buildings,s.village.economy.projects)).sort()};});
       assert.deepEqual(rendered.actual,rendered.expected,'All building artwork must be present through the actual Dev Tools launcher');

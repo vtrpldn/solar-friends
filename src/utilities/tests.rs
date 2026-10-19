@@ -53,7 +53,7 @@ fn utility_classes_only_expose_compatible_directions_and_distinct_water() {
         (Kind::Greywater, 2, 3),
         (Kind::Sewage, 4, 5),
         (Kind::Sewage, 4, 6),
-        (Kind::Electricity, 7, 8),
+        (Kind::Electricity, electrical(v, 7), electrical(v, 8)),
     ] {
         assert_path(v, &plan(v, kind, from, to).unwrap());
     }
@@ -62,7 +62,7 @@ fn utility_classes_only_expose_compatible_directions_and_distinct_water() {
         (Kind::Irrigation, 3, 2),
         (Kind::Greywater, 2, 1),
         (Kind::Sewage, 4, 1),
-        (Kind::Electricity, 7, 2_000),
+        (Kind::Electricity, electrical(v, 7), 2_000),
         (Kind::Fresh, 0, 0),
         (Kind::Fresh, 2, 0),
     ] {
@@ -181,11 +181,14 @@ fn hydro_ports_only_reach_the_safe_bank_and_routes_never_cross_water() {
     let v = g.app.world().resource::<Village>();
     let endpoint = endpoints(v, Kind::Electricity)
         .into_iter()
-        .find(|e| e.id == 9)
+        .find(|e| e.kind == "hydro")
         .unwrap();
     assert_eq!(endpoint.ports.len(), 1);
     assert!(endpoint.ports[0].bank_lead);
-    assert_path(v, &plan(v, Kind::Electricity, 9, 8).unwrap());
+    assert_path(
+        v,
+        &plan(v, Kind::Electricity, electrical(v, 9), electrical(v, 8)).unwrap(),
+    );
     for x in -1..=MAP_SIZE {
         for y in -1..=MAP_SIZE {
             if river_bank(x, y)
@@ -203,9 +206,14 @@ fn hydro_ports_only_reach_the_safe_bank_and_routes_never_cross_water() {
     obstacle.id = 100;
     blocked.buildings.push(obstacle);
     assert!(
-        plan(&blocked, Kind::Electricity, 9, 8)
-            .unwrap_err()
-            .contains("footprint edge")
+        plan(
+            &blocked,
+            Kind::Electricity,
+            electrical(&blocked, 9),
+            electrical(&blocked, 8)
+        )
+        .unwrap_err()
+        .contains("footprint edge")
     );
 }
 #[test]
@@ -253,4 +261,17 @@ fn renewable_plots_have_separate_compatible_ports_and_keep_their_identities() {
     let v = g.app.world().resource::<Village>();
     assert!(plan(v, Kind::Fresh, 0, -2).is_err());
     assert_path(v, &plan(v, Kind::Fresh, 0, -3).unwrap());
+}
+
+fn electrical(v: &Village, building: usize) -> i64 {
+    i64::from(
+        v.power
+            .network
+            .nodes
+            .iter()
+            .find(|n| n.owner == crate::electricity::Owner::Building(building))
+            .unwrap()
+            .id
+            .0,
+    )
 }

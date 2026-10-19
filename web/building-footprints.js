@@ -4,7 +4,7 @@ import { buildingSilhouettes } from './building-silhouettes.js';
 
 export function footprintSize(kind) {
   if (['square','solar_farm','source_timber'].includes(kind)) return 3;
-  if (['well','compost','coop','streetlight','road','hydro','eco_toilet'].includes(kind)) return 1;
+  if (['well','compost','coop','streetlight','road','hydro','eco_toilet','battery'].includes(kind)) return 1;
   return 2;
 }
 export function footprint(kind,x,y) {

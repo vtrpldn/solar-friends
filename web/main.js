@@ -1,3 +1,5 @@
+import {drawElectricalConnections,electricalOverlayRevision} from './electricity-ui.js';
+import {drawBattery} from './battery-art.js';
 import {drawWaterConnections,waterOverlayRevision} from './water-connections.js';
 import {installLandMap} from './land-map.js';
 import {gatheringInfo} from './gathering-ui.js';
@@ -36,7 +38,7 @@ import {
   zoomLimits,
   clampZoom,
 } from "./projection.js";
-import init, { Game } from "./pkg/solar_friends.js?v=devtools-1";
+import init, { Game } from "./pkg/solar_friends.js";
 import {
   paintTerrain,
   soilAppearance,
@@ -102,7 +104,7 @@ const tasks = {
   return: "Returning to the village",
   cook: "Making a shared meal",
   water: "Moving water or closed service containers",
-  utility: "Working on water lines",
+  utility: "Working on village services",
   socialize: "Finding some company",
   compost: "Turning kitchen scraps",
   restore: "Restoring the soil",
@@ -183,7 +185,7 @@ let lastVillagePanel = "building-panel";
 let journalPage = 0;
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
-let pendingRemoval = null, movingBuilding = null;
+let pendingRemoval = null, movingBuilding = null, movingBattery = null;
 const escapeHtml = (s) =>
   String(s).replace(
     /[&<>"']/g,
@@ -491,7 +493,15 @@ function buildingSprite(kind, x, y, alpha = 1, id) {
   sprite(buildingArtKey({kind,id},state.village.buildings,state.village.economy.projects),x,y,alpha,id);
 }
 function placementValid(kind, x, y) {
+  if(movingBattery!==null)return game.battery_plot_available(movingBattery,x,y);
   return !(movingBuilding===null?placementReason(state.village,kind,x,y):movePlacementReason(state.village,movingBuilding,x,y));
+}
+let batteryPreviewKey='',batteryPreviewReason='';
+function placementMessage(kind,x,y){
+  if(movingBattery===null)return movingBuilding===null?placementReason(state.village,kind,x,y):movePlacementReason(state.village,movingBuilding,x,y);
+  const key=JSON.stringify([movingBattery,x,y,state.village.minutes,state.village.power.battery_jobs]);
+  if(key!==batteryPreviewKey){batteryPreviewKey=key;const quote=JSON.parse(game.battery_move_quote(movingBattery,x,y));batteryPreviewReason=quote.allowed?'':quote.reason;}
+  return batteryPreviewReason;
 }
 function activityLabel(r) {
   if(r.task==='haul')return r.reason;
@@ -532,7 +542,7 @@ function resetPolish() {
   economyUI?.resetForecast();
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
-  movingBuilding = null; pendingRemoval = null;
+  movingBuilding = null; movingBattery = null; pendingRemoval = null;
   cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; setZoom(1.3);
 }
 
@@ -609,6 +619,7 @@ function resident(r) {
     { base: animations[r.id], idle: idleAnimations[r.id], activities: activityAnimations[r.id] }, animation, p.x, py, RESIDENT_WIDTH * s);
   if(state.village.logistics?.shipments.some(h=>h.resident===r.id&&h.carrying))drawCarriedMaterials(ctx,p,s,animation.facing,nightAmount(state.village.minutes));
   const waterLoad=state.village.water_supply.trips.find(h=>h.resident===r.id&&h.carrying);if(waterLoad)drawCarriedWater(ctx,p,s,animation.facing,waterLoad.class,nightAmount(state.village.minutes));
+  if(state.village.power.network?.nodes.some(n=>n.owner.kind==='carrier'&&n.owner.id===r.id))drawBattery(ctx,{x:p.x+animation.facing*8*s,y:p.y-12*s},s*.65,nightAmount(state.village.minutes),1,true);
   if (isSelected) {
     ctx.font = `600 ${Math.max(11, 11 * s)}px 'DM Sans',sans-serif`;
     ctx.textAlign = "center";
@@ -632,6 +643,8 @@ function resident(r) {
   }
 }
 function render() {
+  $('#relocation-guidance').hidden=!tool||(movingBattery===null&&movingBuilding===null);
+  if(!$('#relocation-guidance').hidden)$('#relocation-guidance').textContent=$('#placement').textContent;
   const weather = weatherConditions(state.environment,state.village.minutes);
   canvas.dataset.weather = weather.label;
   if (cameraTarget) {
@@ -640,6 +653,7 @@ function render() {
     pan.y += (cameraTarget.y - pan.y) * blend;
     if (Math.hypot(cameraTarget.x - pan.x, cameraTarget.y - pan.y) < 0.5) cameraTarget = null;
   }
+  if(ctx.canvas.dataset.cameraMoving!==String(!!cameraTarget))ctx.canvas.dataset.cameraMoving=String(!!cameraTarget);
   scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.45, scale);
   origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
@@ -686,7 +700,9 @@ function render() {
   // Foundations and road tiles share the same half-tile boundary lattice.
   drawGroundWeather(ctx,weatherView);
   drawWaterConnections(ctx,iso,scale,state);
+  drawElectricalConnections(ctx,iso,scale,state);
   const objects = [
+    ...(state.village.power.network?.nodes||[]).filter(n=>n.owner.kind==='ground').map(n=>({depth:n.x+n.y+.4,draw:()=>drawBattery(ctx,iso(n.x,n.y),scale,nightAmount(state.village.minutes))})),
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
     ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
@@ -713,14 +729,16 @@ function render() {
 
   if (tool && pointer) {
     const t = uniso(pointer.x, pointer.y);
-    const reason = movingBuilding===null?placementReason(state.village, tool, t.x, t.y):movePlacementReason(state.village,movingBuilding,t.x,t.y);
+    const reason = placementMessage(tool,t.x,t.y);
     polygon(footprintCorners(tool,t.x,t.y).map(([x,y]) => {
       const p = iso(x,y); return [p.x,p.y];
     }), reason ? "#cd745a66" : "#f5f1b277", reason ? "#a74431" : "#fff8cf");
-    if(tool.startsWith('source_'))materialSite({material:sourceMaterial(tool),x:t.x,y:t.y,active:true,planted:true,growth:0.4,remaining:16,maximum:32},.55);
+    if(movingBattery!==null)drawBattery(ctx,iso(t.x,t.y),scale,nightAmount(state.village.minutes),.55);
+    else if(tool.startsWith('source_'))materialSite({material:sourceMaterial(tool),x:t.x,y:t.y,active:true,planted:true,growth:0.4,remaining:16,maximum:32},.55);
     else if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55,movingBuilding??undefined);
-    $("#placement").textContent = reason || (movingBuilding!==null ? "Choose the new plot · residents will pack and rebuild · Esc to cancel" : `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`);
+    $("#placement").textContent = reason || (movingBattery!==null?'Choose a battery plot · resident packing, transport and installation · Esc to cancel':movingBuilding!==null ? "Choose the new plot · residents will pack and rebuild · Esc to cancel" : `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`);
     $("#placement").classList.toggle("invalid", Boolean(reason));
+    if(!$('#relocation-guidance').hidden){$('#relocation-guidance').textContent=$('#placement').textContent;$('#relocation-guidance').classList.toggle('invalid',Boolean(reason));}
   }
   const hovered = pointer && !tool && !drag ? residentAt(pointer.x, pointer.y) : null;
   const hint = $("#resident-hint");
@@ -1330,6 +1348,8 @@ function updateUI() {
 }
 function setTool(kind) {
   movingBuilding = null;
+  movingBattery = null;
+  $('#relocation-guidance').hidden=true;
   if (kind && !buildingUnlocked(state.village, kind)) {
     openJournal();
     return;
@@ -1379,7 +1399,7 @@ function frame(stamp) {
     state = JSON.parse(game.snapshot());
   }
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
-  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision()].join("|");
+  const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
     render(); paintedState = state; paintedView = viewKey;
   }
@@ -1406,7 +1426,19 @@ function setup() {
     showPanel($(`[data-panel="${lastVillagePanel}"]`).hidden?'building-panel':lastVillagePanel);
   };
   landMap=installLandMap({game:()=>game,snapshot:()=>state,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,render:()=>{paintedState=null;render();}});
-  economyUI=installEconomyUI({avatar,paintPortraits,snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
+  const focusUtility=plan=>{
+    const points=[plan.start.edge,...plan.cells,plan.end.edge].map(([x,y])=>iso(x,y));
+    const middleX=(Math.min(...points.map(p=>p.x))+Math.max(...points.map(p=>p.x)))/2;
+    const middleY=(Math.min(...points.map(p=>p.y))+Math.max(...points.map(p=>p.y)))/2;
+    const freeWidth=Math.max(180,$('#village-book').getBoundingClientRect().left-20);
+    cameraTarget={x:pan.x+freeWidth/2-middleX,y:pan.y+height*.46-middleY,dt:1/60};
+    ctx.canvas.dataset.cameraMoving='true';
+  };
+  economyUI=installEconomyUI({avatar,paintPortraits,focusUtility,moveBattery:id=>{
+    setTool(null);closePanels();selected=null;movingBattery=id;tool='battery';cameraTarget=null;
+    $('#person').hidden=true;$('#placement').hidden=false;$('#placement').textContent='Choose a battery plot · resident packing, transport and installation · Esc to cancel';
+    $('#relocation-guidance').textContent=$('#placement').textContent;$('#relocation-guidance').hidden=false;canvas.style.cursor='crosshair';
+  },snapshot:()=>state,game:()=>game,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast,openTown:()=>showPanel('town-panel'),planSource:material=>setTool(sourceKinds[material]),locate:id=>{const b=state.village.buildings.find(b=>b.id===id);if(b){closePanels();const p=iso(b.x,b.y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.42-p.y,dt:1/60};}}});
   previousVillage = state.village;
   for (const event of ["pointerdown", "keydown"]) document.addEventListener(event, () => { void sound.start(); });
   for (const [id, key] of [["ambience-volume", "ambienceVolume"], ["effects-volume", "effectsVolume"]]) {
@@ -1428,13 +1460,13 @@ function setup() {
   $('#building-work-actions').onclick=event=>{
     const button=event.target.closest('[data-building-work]'),b=state.village.buildings.find(b=>b.id===Number($('#building-choice').value));if(!button||!b)return;
     if(button.dataset.buildingWork==='move'){
-      closePanels();selected=null;movingBuilding=b.id;tool=b.kind;cameraTarget=null;$('#placement').hidden=false;$('#placement').textContent='Choose a new plot · residents will pack and rebuild · Esc to cancel';toast('Choose a new plot for this building.');return;
+      closePanels();selected=null;movingBuilding=b.id;tool=b.kind;cameraTarget=null;$('#placement').hidden=false;$('#placement').textContent='Choose a new plot · residents will pack and rebuild · Esc to cancel';$('#relocation-guidance').textContent=$('#placement').textContent;$('#relocation-guidance').hidden=false;toast('Choose a new plot for this building.');return;
     }
     const quote=JSON.parse(game.building_work_quote(b.id)),salvage=button.dataset.buildingWork==='salvage';
     const returns=quote.salvage.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
     pendingRemoval={id:b.id,action:button.dataset.buildingWork};
     $('#building-work-title').textContent=salvage?'Salvage this building?':'Demolish this building?';
-    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; owned supplies remain recoverable. Cistern contents stay in containers at the original plot. Removing a generator reduces battery capacity when work finishes.`;
+    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; owned supplies remain recoverable. Cistern contents stay in containers at the original plot. Charged batteries remain as separate equipment; manage their relocation or salvage in Power.`;
     $('#building-work-dialog').showModal();
   };
   $('#building-work-close').onclick=()=>{pendingRemoval=null;$('#building-work-dialog').close();};
@@ -1691,10 +1723,10 @@ function setup() {
     if(landMap.pin(uniso(x,y),tool)){render();return;}
     if (tool) {
       const p = uniso(x, y),
-        result = movingBuilding!==null?game.queue_building_work(movingBuilding,"move",p.x,p.y):tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
+        result = movingBattery!==null?game.queue_battery_work(movingBattery,'move',p.x,p.y):movingBuilding!==null?game.queue_building_work(movingBuilding,"move",p.x,p.y):tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
       if (result === "ok") {
         if (tool !== "road") {
-          toast(movingBuilding!==null?'Move queued. Residents will pack here and rebuild at the new plot.':tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
+          toast(movingBattery!==null?'Battery move queued. A neighbour will pack, carry and install it.':movingBuilding!==null?'Move queued. Residents will pack here and rebuild at the new plot.':tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
           setTool(null);
         }
         state = JSON.parse(game.snapshot());
@@ -1709,6 +1741,10 @@ function setup() {
           return occupies(b,cell.x,cell.y);
         });
         if (b) inspectBuilding(b.id);
+        else{
+          const bank=state.village.power.network?.nodes.find(n=>n.owner.kind==='ground'&&n.x===cell.x&&n.y===cell.y);
+          if(bank){showPanel('power-panel');$(`[data-battery="${bank.id}"]`)?.scrollIntoView({block:'nearest'});}
+        }
       }
     }
   });
@@ -1770,7 +1806,7 @@ function refreshDevScene() {
   economyUI?.resetForecast();
   setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
-  state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; pendingRemoval = null;
+  state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; movingBattery = null; pendingRemoval = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   clearTimeout(toastTimer); $("#toast").hidden = true;

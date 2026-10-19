@@ -44,7 +44,16 @@ for(const kind of buildings) {
   assert(restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,1);
   for(let tick=0;tick<4000&&snap(restore).village.building_jobs.length;tick++)restore.tick(.25);
   assert.equal(snap(restore).village.buildings.length,0,'Sandbox removal also needs resident work');
-  assert(restore.restore(restore.snapshot()));assert.equal(restore.place(kind,kind==='hydro'?26:5,5),'ok');
+  assert(restore.restore(restore.snapshot()));
+  const cleared=restore.place(kind,kind==='hydro'?26:5,5);
+  if(cleared!=='ok'){
+    assert.match(cleared,/recovered battery/,'Only retained owned equipment can block rebuilding on the cleared plot');
+    const banks=snap(restore).village.power.network.nodes.filter(n=>n.owner.kind==='ground');assert(banks.length>0);
+    for(const bank of banks)assert.equal(restore.queue_battery_work(bank.id,'salvage',0,0),'ok');
+    for(let tick=0;tick<6000&&snap(restore).village.power.network.nodes.some(n=>n.owner.kind==='ground');tick++)restore.tick(.25);
+    assert.equal(restore.place(kind,kind==='hydro'?26:5,5),'ok','Resident equipment salvage frees the original plot');
+    assert.equal(snap(restore).village.power.salvaged_equipment,0,'Free Sandbox buildings cannot yield purchased batteries');
+  }
   assert(restore.start_mode('story'));assert(!restore.remove_sandbox_building(0));assert.equal(snap(restore).village.buildings.length,0);assert.equal(snap(restore).village.mode,'story');
   g.free();restore.free();
 }

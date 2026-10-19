@@ -37,5 +37,18 @@ assert(short.route.distance<.15,'Nearby fractional approaches do not detour to a
 const stable=g.snapshot();
 for(let n=0;n<10;n++)assert.deepEqual(quote(4,8,12,8),detour);
 assert.equal(g.snapshot(),stable,'Repeated and rejected quotes remain read-only');
+const corner=new Game();corner.start_mode('sandbox');
+assert.equal(corner.place('well',6,10),'ok');
+const cornerBefore=corner.snapshot();
+for(const x of [-1,1])for(const y of [-1,1]){
+  const route=JSON.parse(corner.route_quote(6+x*.9463263,10+y*.592515,6,10+y)).route;
+  assert(route&&route.points.length>2,'Short fractional routes must detour around every cistern corner');
+  for(let leg=1;leg<route.points.length;leg++)for(let sample=0;sample<=1000;sample++){
+    const a=route.points[leg-1],b=route.points[leg],t=sample/1000;
+    const px=a[0]+(b[0]-a[0])*t,py=a[1]+(b[1]-a[1])*t;
+    assert(px<=5.3||px>=6.7||py<=9.3||py>=10.7,'No approved leg clips the cistern clearance');
+  }
+}
+assert.equal(corner.snapshot(),cornerBefore,'Corner route inspection is read-only');corner.free();
 g.free();restored.free();
 console.log('PASS: deterministic planned transport routes, road costs, foundation and source detours, inaccessible endpoints, reloads and read-only public queries.');

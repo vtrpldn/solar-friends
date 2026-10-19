@@ -1,4 +1,4 @@
-//! Installed water lines: owned kits, attended corridor work and metered pumping.
+//! Installed pipes and cables: owned kits, attended corridor work and local flow.
 use crate::*;
 use economy::{Bundle, COUNT};
 use logistics::Owner;
@@ -23,7 +23,7 @@ pub struct Anchor {
     pub x: i32,
     pub y: i32,
     pub size: i32,
-    pub tank: Id,
+    pub endpoint: Id,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Line {
@@ -84,15 +84,16 @@ impl Line {
 pub fn line(v: &Village, id: Id) -> Option<&Line> {
     v.pipes.lines.iter().find(|p| p.id == id)
 }
-fn owner(id: i32) -> Option<water::Owner> {
+fn owner(id: i64) -> Option<water::Owner> {
     if id == -1 {
         Some(water::Owner::Camp)
     } else if id >= 0 {
-        Some(water::Owner::Building(id as usize))
+        usize::try_from(id).ok().map(water::Owner::Building)
     } else {
         id.checked_neg()?
             .checked_sub(2)
-            .map(|i| water::Owner::Source(i as usize))
+            .and_then(|i| usize::try_from(i).ok())
+            .map(water::Owner::Source)
     }
 }
 fn class(kind: Kind) -> Option<water::Class> {
@@ -104,9 +105,23 @@ fn class(kind: Kind) -> Option<water::Class> {
         _ => None,
     }
 }
+fn pair(kind: Kind, from: i64, to: i64) -> (u8, i64, i64) {
+    if kind == Kind::Electricity && from > to {
+        (kind as u8, to, from)
+    } else {
+        (kind as u8, from, to)
+    }
+}
+fn same_pair(p: &Line, kind: Kind, from: i64, to: i64) -> bool {
+    pair(p.plan.kind, p.plan.from, p.plan.to) == pair(kind, from, to)
+}
 pub fn kit(plan: &Plan) -> Bundle {
     let mut k = [0; COUNT];
     k[8] = 2;
+    if plan.kind == Kind::Electricity {
+        k[10] = (plan.cells.len() as u32).div_ceil(3) + 1;
+        return k;
+    }
     k[9] = (plan.cells.len() as u32).div_ceil(3) + 1;
     k[10] = 1;
     k[14] = 1;
@@ -167,16 +182,29 @@ pub fn reserved(v: &Village, x: i32, y: i32) -> bool {
         .iter()
         .any(|p| p.live() && p.plan.cells.contains(&[x, y]))
 }
-fn anchored(v: &Village, id: i32, a: &Anchor) -> bool {
+fn anchored(v: &Village, kind: Kind, id: i64, a: &Anchor) -> bool {
+    if kind == Kind::Electricity {
+        return power::endpoints(v).iter().any(|e| {
+            e.id == id
+                && a.endpoint.0 as i64 == id
+                && (e.x, e.y, e.size, e.kind.as_str()) == (a.x, a.y, a.size, a.kind.as_str())
+        });
+    }
     owner(id)
         .and_then(|o| water::owner_tank(v, o))
-        .is_some_and(|p| p.id == a.tank && (p.x, p.y) == (a.x as f32, a.y as f32))
+        .is_some_and(|p| p.id == a.endpoint && (p.x, p.y) == (a.x as f32, a.y as f32))
 }
-fn present_owner(v: &Village, id: i32) -> bool {
+fn present_owner(v: &Village, kind: Kind, id: i64) -> bool {
+    if kind == Kind::Electricity {
+        return power::electrical_node(v, id).is_some();
+    }
     owner(id).and_then(|o| water::owner_tank(v, o)).is_some()
 }
-fn endpoint_open(v: &Village, id: i32, a: &Anchor) -> bool {
-    anchored(v, id, a) && water::tank(v, a.tank).is_some_and(|t| water::open(v, t))
+fn endpoint_open(v: &Village, kind: Kind, id: i64, a: &Anchor) -> bool {
+    if kind == Kind::Electricity {
+        return anchored(v, kind, id, a) && power::electrical_open(v, id);
+    }
+    anchored(v, kind, id, a) && water::tank(v, a.endpoint).is_some_and(|t| water::open(v, t))
 }
 pub fn ready(v: &Village, p: &Line) -> bool {
     if p.paused || !p.live() {
@@ -186,8 +214,8 @@ pub fn ready(v: &Village, p: &Line) -> bool {
         return p.removal_work < p.removal_labour();
     }
     if !matches!(p.phase, Phase::AwaitingInputs | Phase::Installing)
-        || !endpoint_open(v, p.plan.from, &p.anchors[0])
-        || !endpoint_open(v, p.plan.to, &p.anchors[1])
+        || !endpoint_open(v, p.plan.kind, p.plan.from, &p.anchors[0])
+        || !endpoint_open(v, p.plan.kind, p.plan.to, &p.anchors[1])
     {
         return false;
     }
@@ -227,6 +255,13 @@ pub fn assign_target(r: &mut Resident, v: &Village, id: Id) -> bool {
     true
 }
 pub fn work_reason(p: &Line) -> &'static str {
+    if p.plan.kind == Kind::Electricity {
+        return if p.phase == Phase::Removing {
+            "Dismantling our electrical cable along its marked corridor."
+        } else {
+            "Installing our electrical cable along its marked corridor."
+        };
+    }
     if p.phase == Phase::Removing {
         "Dismantling our water connection along its marked corridor."
     } else {
@@ -259,14 +294,15 @@ pub fn reconcile(v: &mut Village) {
         .filter(|p| {
             p.live()
                 && p.phase != Phase::Removing
-                && (!anchored(v, p.plan.from, &p.anchors[0])
-                    || !anchored(v, p.plan.to, &p.anchors[1]))
+                && (!anchored(v, p.plan.kind, p.plan.from, &p.anchors[0])
+                    || !anchored(v, p.plan.kind, p.plan.to, &p.anchors[1]))
         })
         .map(|p| {
             (
                 p.id,
                 p.spent.is_some(),
-                present_owner(v, p.plan.from) && present_owner(v, p.plan.to),
+                present_owner(v, p.plan.kind, p.plan.from)
+                    && present_owner(v, p.plan.kind, p.plan.to),
             )
         })
         .collect();
@@ -285,10 +321,10 @@ pub fn reconcile(v: &mut Village) {
 fn propose(
     v: &Village,
     kind: Kind,
-    from: i32,
-    to: i32,
+    from: i64,
+    to: i64,
 ) -> Result<(Plan, [Anchor; 2]), &'static str> {
-    let water_class = class(kind).ok_or("Choose a supported liquid class for this line.")?;
+    let water_class = class(kind);
     let plan = utilities::plan(v, kind, from, to)?;
     let endpoints = utilities::endpoints(v, kind);
     let anchor = |id| -> Result<Anchor, &'static str> {
@@ -296,37 +332,62 @@ fn propose(
             .iter()
             .find(|p| p.id == id)
             .ok_or("That endpoint is missing.")?;
-        let tank = owner(id)
-            .and_then(|o| water::owner_tank(v, o))
-            .ok_or("This building has no water buffer yet.")?;
-        if tank.capacity[water_class.index()] <= 0. {
-            return Err("This container cannot hold that water class.");
-        }
+        let endpoint = if kind == Kind::Electricity {
+            power::electrical_node(v, id)
+                .ok_or("This electrical port is missing.")?
+                .id
+        } else {
+            let class = water_class.ok_or("Choose a supported liquid class.")?;
+            let tank = owner(id)
+                .and_then(|o| water::owner_tank(v, o))
+                .ok_or("This building has no water buffer yet.")?;
+            if tank.capacity[class.index()] <= 0. {
+                return Err("This container cannot hold that water class.");
+            }
+            tank.id
+        };
         Ok(Anchor {
             kind: e.kind.clone(),
             x: e.x,
             y: e.y,
             size: e.size,
-            tank: tank.id,
+            endpoint,
         })
     };
     Ok((plan, [anchor(from)?, anchor(to)?]))
 }
-pub fn queue(v: &mut Village, kind: Kind, from: i32, to: i32) -> Result<Id, &'static str> {
+pub fn queue(
+    v: &mut Village,
+    kind: Kind,
+    from: impl Into<i64>,
+    to: impl Into<i64>,
+) -> Result<Id, &'static str> {
+    queue_replacement(v, kind, from.into(), to.into(), None)
+}
+fn queue_replacement(
+    v: &mut Village,
+    kind: Kind,
+    from: i64,
+    to: i64,
+    previous: Option<Id>,
+) -> Result<Id, &'static str> {
     if v.pipes.lines.iter().filter(|p| p.live()).count() >= 64 || v.pipes.lines.len() >= 256 {
-        return Err("Finish or remove an existing water line first.");
+        return Err("Finish or remove an existing utility connection first.");
     }
-    if v.pipes.lines.iter().any(|p| {
-        p.live()
-            && p.phase != Phase::Removing
-            && p.plan.kind == kind
-            && p.plan.from == from
-            && p.plan.to == to
-    }) {
+    if v.pipes
+        .lines
+        .iter()
+        .any(|p| p.live() && p.phase != Phase::Removing && same_pair(p, kind, from, to))
+    {
         return Err("This connection is already planned or installed.");
     }
     let (plan, anchors) = propose(v, kind, from, to)?;
-    if v.simulation.next_id.checked_add(2).is_none() {
+    let identities = if previous.is_some() || kind == Kind::Electricity {
+        2
+    } else {
+        3
+    };
+    if v.simulation.next_id.checked_add(identities).is_none() {
         return Err("No connection identities remain.");
     }
     let id = v.simulation.allocate().unwrap();
@@ -357,6 +418,17 @@ pub fn queue(v: &mut Village, kind: Kind, from: i32, to: i32) -> Result<Id, &'st
         BUFFER,
     )
     .unwrap();
+    if let Some(previous) = previous {
+        v.pipes
+            .lines
+            .iter_mut()
+            .find(|p| p.id == previous)
+            .unwrap()
+            .replacement = false;
+        if kind != Kind::Electricity {
+            power::replace_pump(v, previous, id);
+        }
+    }
     economy::rebalance(v);
     Ok(id)
 }
@@ -400,6 +472,7 @@ fn finish_removal(v: &mut Village, id: Id) -> bool {
     row.phase = Phase::Retired;
     row.finished = Some(v.minutes);
     release_store(v, id);
+    economy::rebalance(v);
     true
 }
 pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
@@ -463,7 +536,11 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
             row.phase = Phase::Active;
             event(
                 v,
-                "A neighbour finished installing and commissioning a water line.",
+                if p.plan.kind == Kind::Electricity {
+                    "A neighbour finished installing and commissioning an electrical cable."
+                } else {
+                    "A neighbour finished installing and commissioning a water line."
+                },
             );
             return true;
         }
@@ -479,16 +556,17 @@ fn reason(v: &Village, p: &Line) -> &'static str {
         };
     }
     if p.paused {
-        return "Paused; water and delivered parts remain owned.";
+        return "Paused; delivered parts and connected stores remain owned.";
     }
     if p.phase == Phase::Removing {
         return if p.removal_work >= p.removal_labour() {
             "Dismantled kit is held here. Make room in village storage to recover it."
         } else {
-            "Resident dismantling is queued; the pump is off."
+            "Resident dismantling is queued; this connection is off."
         };
     }
-    if !endpoint_open(v, p.plan.from, &p.anchors[0]) || !endpoint_open(v, p.plan.to, &p.anchors[1])
+    if !endpoint_open(v, p.plan.kind, p.plan.from, &p.anchors[0])
+        || !endpoint_open(v, p.plan.kind, p.plan.to, &p.anchors[1])
     {
         return "Disconnected while endpoint building work finishes.";
     }
@@ -500,17 +578,26 @@ fn reason(v: &Village, p: &Line) -> &'static str {
         };
     }
     if p.phase == Phase::Installing {
-        return "Residents are laying the corridor and commissioning the pump.";
+        return if p.plan.kind == Kind::Electricity {
+            "Residents are laying the cable and checking its electrical ports."
+        } else {
+            "Residents are laying the corridor and commissioning the pump."
+        };
+    }
+    if p.plan.kind == Kind::Electricity {
+        return "Installed cable joins compatible local electrical ports.";
     }
     let c = class(p.plan.kind).unwrap();
-    let from = water::tank(v, p.anchors[0].tank).unwrap();
-    let to = water::tank(v, p.anchors[1].tank).unwrap();
+    let from = water::tank(v, p.anchors[0].endpoint).unwrap();
+    let to = water::tank(v, p.anchors[1].endpoint).unwrap();
     if water::free(v, from, c, None) <= 0. {
         "Source is empty or reserved for carrying."
     } else if water::room(v, to, c) <= 0. {
         "Receiving buffer is full or promised to a carrier."
-    } else if v.power.stored <= 0. {
-        "Pump needs energy in the shared battery; manual delivery remains available."
+    } else if !power::pump_connected(v, p.id) {
+        "Connect this pump to a local electrical circuit; manual delivery remains available."
+    } else if power::pump_available(v, p.id) <= 0. {
+        "This circuit has no available energy or cable capacity; manual delivery remains available."
     } else {
         "Pumping within the line's flow and power limits."
     }
@@ -535,15 +622,12 @@ pub fn advance(v: &mut Village, minutes: f32) {
         .map(|p| (p.id, p.plan.kind, p.plan.from, p.plan.to, p.priority))
         .collect();
     for (id, kind, from, to, priority) in replacements {
-        if !present_owner(v, from)
-            || !present_owner(v, to)
-            || v.pipes.lines.iter().any(|p| {
-                p.live()
-                    && p.phase != Phase::Removing
-                    && p.plan.kind == kind
-                    && p.plan.from == from
-                    && p.plan.to == to
-            })
+        if !present_owner(v, kind, from)
+            || !present_owner(v, kind, to)
+            || v.pipes
+                .lines
+                .iter()
+                .any(|p| p.live() && p.phase != Phase::Removing && same_pair(p, kind, from, to))
         {
             v.pipes
                 .lines
@@ -553,7 +637,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 .replacement = false;
             continue;
         }
-        if let Ok(next) = queue(v, kind, from, to) {
+        if let Ok(next) = queue_replacement(v, kind, from, to, Some(id)) {
             v.pipes
                 .lines
                 .iter_mut()
@@ -581,68 +665,82 @@ pub fn advance(v: &mut Village, minutes: f32) {
     ids.sort_unstable();
     for (_, id) in ids {
         let p = line(v, Id(id)).unwrap().clone();
-        if !endpoint_open(v, p.plan.from, &p.anchors[0])
-            || !endpoint_open(v, p.plan.to, &p.anchors[1])
+        if !endpoint_open(v, p.plan.kind, p.plan.from, &p.anchors[0])
+            || !endpoint_open(v, p.plan.kind, p.plan.to, &p.anchors[1])
         {
             continue;
         }
-        let c = class(p.plan.kind).unwrap();
+        let Some(c) = class(p.plan.kind) else {
+            continue;
+        };
         let i = c.index();
-        let source = water::tank(v, p.anchors[0].tank).unwrap();
-        let target = water::tank(v, p.anchors[1].tank).unwrap();
+        let source = water::tank(v, p.anchors[0].endpoint).unwrap();
+        let target = water::tank(v, p.anchors[1].endpoint).unwrap();
         let amount = (f64::from(minutes) * FLOW_PER_MINUTE)
             .min(water::free(v, source, c, None))
             .min(water::room(v, target, c))
-            .min(f64::from(v.power.stored) / ENERGY_PER_WATER);
+            .min(power::pump_available(v, p.id) / ENERGY_PER_WATER);
+        if amount <= 0. {
+            continue;
+        }
+        let energy = power::spend_pump(v, p.id, amount * ENERGY_PER_WATER);
+        let amount = (energy / ENERGY_PER_WATER).min(amount);
         if amount <= 0. {
             continue;
         }
         v.water_supply
             .tanks
             .iter_mut()
-            .find(|t| t.id == p.anchors[0].tank)
+            .find(|t| t.id == p.anchors[0].endpoint)
             .unwrap()
             .water[i] -= amount;
         v.water_supply
             .tanks
             .iter_mut()
-            .find(|t| t.id == p.anchors[1].tank)
+            .find(|t| t.id == p.anchors[1].endpoint)
             .unwrap()
             .water[i] += amount;
-        let energy = amount * ENERGY_PER_WATER;
-        v.power.stored = (v.power.stored - energy as f32).max(0.);
         let row = v.pipes.lines.iter_mut().find(|p| p.id == Id(id)).unwrap();
         row.transferred += amount;
         row.energy_used += energy;
     }
     water::summaries(v);
 }
+#[cfg(test)]
 pub fn view(v: &Village) -> serde_json::Value {
-    let rows:Vec<_>=v.pipes.lines.iter().map(|p|{
+    view_filtered(v, None)
+}
+pub fn view_filtered(v: &Village, electrical: Option<bool>) -> serde_json::Value {
+    let rows:Vec<_>=v.pipes.lines.iter().filter(|p|electrical.is_none_or(|is_electric|is_electric==(p.plan.kind==Kind::Electricity))).map(|p|{
         let items=v.logistics.as_ref().and_then(|s|s.stores.iter().find(|s|s.owner==Owner::Utility(p.id))).map_or([0;COUNT],|s|s.items);
         serde_json::json!({"line":p,"reason":reason(v,p),"parts_here":items,"labour_minutes":p.labour(),"removal_minutes":p.removal_labour(),"ready":ready(v,p)})
     }).collect();
-    serde_json::json!({"lines":rows,"flow_per_hour":FLOW_PER_MINUTE*60.,"energy_per_water":ENERGY_PER_WATER,"power_source":"shared_battery"})
+    serde_json::json!({"lines":rows,"flow_per_hour":FLOW_PER_MINUTE*60.,"energy_per_water":ENERGY_PER_WATER,"power_source":"local_circuits"})
 }
-pub fn pump_demand(v: &Village) -> f32 {
+pub fn pump_loads(v: &Village, minutes: f64) -> Vec<(Id, f64)> {
     v.pipes
         .lines
         .iter()
-        .filter(|p| {
-            p.phase == Phase::Active
-                && !p.paused
-                && endpoint_open(v, p.plan.from, &p.anchors[0])
-                && endpoint_open(v, p.plan.to, &p.anchors[1])
+        .filter_map(|p| {
+            if p.phase != Phase::Active
+                || p.paused
+                || !endpoint_open(v, p.plan.kind, p.plan.from, &p.anchors[0])
+                || !endpoint_open(v, p.plan.kind, p.plan.to, &p.anchors[1])
+            {
+                return None;
+            }
+            let c = class(p.plan.kind)?;
+            let source = water::tank(v, p.anchors[0].endpoint)?;
+            let target = water::tank(v, p.anchors[1].endpoint)?;
+            let amount = (minutes * FLOW_PER_MINUTE)
+                .min(water::free(v, source, c, None))
+                .min(water::room(v, target, c));
+            (amount > 0.).then_some((p.id, amount * ENERGY_PER_WATER))
         })
-        .filter(|p| {
-            let Some(c) = class(p.plan.kind) else {
-                return false;
-            };
-            water::tank(v, p.anchors[0].tank).is_some_and(|t| water::free(v, t, c, None) > 0.)
-                && water::tank(v, p.anchors[1].tank).is_some_and(|t| water::room(v, t, c) > 0.)
-        })
-        .count() as f32
-        * (FLOW_PER_MINUTE * 60. * ENERGY_PER_WATER) as f32
+        .collect()
+}
+pub fn pump_demand(v: &Village) -> f32 {
+    pump_loads(v, 1.).iter().map(|(_, n)| n * 60.).sum::<f64>() as f32
 }
 pub fn uses_camp(v: &Village) -> bool {
     v.pipes.lines.iter().any(|p| {
@@ -650,7 +748,7 @@ pub fn uses_camp(v: &Village) -> bool {
             && !p.paused
             && p.plan.kind == Kind::Fresh
             && p.plan.from == -1
-            && endpoint_open(v, p.plan.to, &p.anchors[1])
+            && endpoint_open(v, p.plan.kind, p.plan.to, &p.anchors[1])
     })
 }
 pub fn prune(v: &mut Village, people: &[Resident]) {
@@ -683,7 +781,7 @@ pub fn valid(v: &Village) -> bool {
     for p in &v.pipes.lines {
         if p.id.0 == 0
             || p.id.0 >= v.simulation.next_id
-            || class(p.plan.kind).is_none()
+            || (class(p.plan.kind).is_none() && p.plan.kind != Kind::Electricity)
             || p.plan.from == p.plan.to
             || p.kit != kit(&p.plan)
             || p.priority > 3
@@ -701,7 +799,13 @@ pub fn valid(v: &Village) -> bool {
             || [p.transferred, p.energy_used]
                 .iter()
                 .any(|n| !n.is_finite() || *n < 0.)
-            || (p.energy_used - p.transferred * ENERGY_PER_WATER).abs() > 0.001
+            || (if p.plan.kind == Kind::Electricity {
+                p.energy_used
+            } else {
+                p.energy_used - p.transferred * ENERGY_PER_WATER
+            })
+            .abs()
+                > 0.001
             || p.phase == Phase::AwaitingInputs && (p.spent.is_some() || p.work != 0.)
             || matches!(p.phase, Phase::Installing | Phase::Active | Phase::Removing)
                 && p.spent.is_none()
@@ -716,9 +820,9 @@ pub fn valid(v: &Village) -> bool {
         }
         if p.live()
             && p.phase != Phase::Removing
-            && (!pairs.insert((p.plan.kind as u8, p.plan.from, p.plan.to))
-                || !anchored(v, p.plan.from, &p.anchors[0])
-                || !anchored(v, p.plan.to, &p.anchors[1]))
+            && (!pairs.insert(pair(p.plan.kind, p.plan.from, p.plan.to))
+                || !anchored(v, p.plan.kind, p.plan.from, &p.anchors[0])
+                || !anchored(v, p.plan.kind, p.plan.to, &p.anchors[1]))
         {
             return false;
         }
@@ -730,7 +834,7 @@ pub fn valid(v: &Village) -> bool {
                 "camp" | "home" | "kitchen" | "eco_toilet"
             ),
             Kind::Sewage => p.anchors[0].kind == "eco_toilet",
-            _ => false,
+            Kind::Electricity => power::shared_kind(&p.anchors[0].kind),
         };
         let receiver_ok = match p.plan.kind {
             Kind::Fresh => matches!(
@@ -752,7 +856,7 @@ pub fn valid(v: &Village) -> bool {
                 p.anchors[1].kind.as_str(),
                 "biodigester" | "banana_treatment"
             ),
-            _ => false,
+            Kind::Electricity => power::shared_kind(&p.anchors[1].kind),
         };
         if !source_ok || !receiver_ok {
             return false;
@@ -783,13 +887,14 @@ pub fn valid(v: &Village) -> bool {
                 "camp" => 1,
                 "source_timber" => 3,
                 "source_bamboo" => 2,
+                "battery" | "pump" => 1,
                 k => interactions::footprint_size(k),
             };
             if size != a.size
-                || a.tank.0 == 0
-                || a.tank.0 >= v.simulation.next_id
+                || a.endpoint.0 == 0
+                || a.endpoint.0 >= v.simulation.next_id
                 || !port_geometry(a, port)
-                || !anchor_identity(v, endpoint, a)
+                || !anchor_identity(v, p.plan.kind, endpoint, a)
             {
                 return false;
             }
@@ -831,6 +936,19 @@ pub fn valid(v: &Village) -> bool {
     true
 }
 fn port_geometry(a: &Anchor, p: &utilities::Port) -> bool {
+    if a.kind == "pump" {
+        return a.size == 1
+            && !p.bank_lead
+            && p.edge == [a.x as f32, a.y as f32]
+            && p.cell == [a.x, a.y];
+    }
+    if a.kind == "hydro" {
+        return a.size == 1
+            && p.bank_lead
+            && p.edge == [a.x as f32 - 0.5, a.y as f32]
+            && p.cell[1] == a.y
+            && (a.x - 4..a.x).contains(&p.cell[0]);
+    }
     if !(1..MAP_SIZE - 1).contains(&a.x)
         || !(1..MAP_SIZE - 1).contains(&a.y)
         || !(1..=3).contains(&a.size)
@@ -857,7 +975,10 @@ fn port_geometry(a: &Anchor, p: &utilities::Port) -> bool {
         .any(|(cell, edge)| p.cell == *cell && p.edge == *edge)
     })
 }
-fn anchor_identity(v: &Village, id: i32, a: &Anchor) -> bool {
+fn anchor_identity(v: &Village, kind: Kind, id: i64, a: &Anchor) -> bool {
+    if kind == Kind::Electricity {
+        return i64::from(a.endpoint.0) == id && power::shared_kind(&a.kind);
+    }
     match owner(id) {
         Some(water::Owner::Camp) => a.kind == "camp" && (a.x as f32, a.y as f32) == CAMP,
         Some(water::Owner::Source(index)) => v.economy.sources.get(index).is_some_and(|s| {
@@ -882,20 +1003,20 @@ fn anchor_identity(v: &Village, id: i32, a: &Anchor) -> bool {
 #[wasm_bindgen]
 impl Game {
     pub fn water_connections(&self) -> String {
-        view(self.app.world().resource::<Village>()).to_string()
+        view_filtered(self.app.world().resource::<Village>(), Some(false)).to_string()
     }
     pub fn water_connection_quote(&self, kind: &str, from: i32, to: i32) -> String {
+        let from = i64::from(from);
+        let to = i64::from(to);
         let v = self.app.world().resource::<Village>();
         match Kind::parse(kind)
             .ok_or("Choose fresh water, irrigation, greywater or sealed sewage.")
             .and_then(|k| {
-                if v.pipes.lines.iter().any(|p| {
-                    p.live()
-                        && p.phase != Phase::Removing
-                        && p.plan.kind == k
-                        && p.plan.from == from
-                        && p.plan.to == to
-                }) {
+                if v.pipes
+                    .lines
+                    .iter()
+                    .any(|p| p.live() && p.phase != Phase::Removing && same_pair(p, k, from, to))
+                {
                     Err("This connection is already planned or installed.")
                 } else {
                     propose(v, k, from, to)
@@ -921,6 +1042,63 @@ impl Game {
             Ok(_) => "ok".into(),
             Err(e) => e.into(),
         }
+    }
+    pub fn electrical_connection_quote(&self, from: u32, to: u32) -> String {
+        let v = self.app.world().resource::<Village>();
+        let quote = if v.pipes.lines.iter().any(|p| {
+            p.live()
+                && p.phase != Phase::Removing
+                && same_pair(p, Kind::Electricity, i64::from(from), i64::from(to))
+        }) {
+            Err("This cable is already planned or installed.")
+        } else {
+            propose(v, Kind::Electricity, i64::from(from), i64::from(to))
+        };
+        match quote {Ok((plan,_))=>serde_json::json!({"allowed":true,"labour_minutes":plan.cells.len() as f32*4.+12.,"parts":kit(&plan),"plan":plan,"energy_per_hour":12.}).to_string(),Err(reason)=>serde_json::json!({"allowed":false,"reason":reason}).to_string()}
+    }
+    pub fn queue_electrical_connection(&mut self, from: u32, to: u32) -> String {
+        match queue(
+            &mut self.app.world_mut().resource_mut::<Village>(),
+            Kind::Electricity,
+            from,
+            to,
+        ) {
+            Ok(_) => "ok".into(),
+            Err(reason) => reason.into(),
+        }
+    }
+    pub fn configure_electrical_connection(
+        &mut self,
+        id: u32,
+        priority: u8,
+        paused: bool,
+    ) -> String {
+        if !self
+            .app
+            .world()
+            .resource::<Village>()
+            .pipes
+            .lines
+            .iter()
+            .any(|p| p.id == Id(id) && p.plan.kind == Kind::Electricity)
+        {
+            return "Choose an electrical cable.".into();
+        }
+        self.configure_water_connection(id, priority, paused)
+    }
+    pub fn remove_electrical_connection(&mut self, id: u32) -> String {
+        if !self
+            .app
+            .world()
+            .resource::<Village>()
+            .pipes
+            .lines
+            .iter()
+            .any(|p| p.id == Id(id) && p.plan.kind == Kind::Electricity)
+        {
+            return "Choose an electrical cable.".into();
+        }
+        self.remove_water_connection(id)
     }
     pub fn configure_water_connection(&mut self, id: u32, priority: u8, paused: bool) -> String {
         if priority > 3 {

@@ -1,0 +1,6 @@
+{
+  "tool": "Built-in image_gen",
+  "asset": "web/art/recovered-battery.png",
+  "reference": "web/art/solar-farm.png",
+  "prompt": "Use case: stylized-concept. Asset type: one small transparent game sprite for Solar Friends. Reference image role: STYLE AND CAMERA REFERENCE ONLY, do not reproduce the solar panels or plot. Create a single portable recovered battery unit, a squat compact cream metal case with a teal lid, one sturdy folding carry handle, two tiny capped terminals and a modest amber charge indicator. Match the warm hand-painted textures, soft edge shading and charming proportions of the electrical cabinet in the reference. Orthographic isometric view, parallel edges with screen ground axes at plus and minus 26.565 degrees, verticals vertical, no perspective convergence. The full unit including handle should be about knee height beside a resident and narrower than half one ground tile. One centered isolated object only. No plants, soil, earth mound, floor tile, pedestal, platform, border, cables trailing away, lettering, numerals or labels. Genuine transparent background, no baked shadow or glow, entire silhouette fits comfortably with transparent margins. We will render it at 26-32 screen pixels wide; use clear simple readable shapes."
+}

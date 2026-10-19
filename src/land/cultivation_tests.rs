@@ -174,7 +174,10 @@ fn moisture_edits_and_forged_crop_summaries_fail_without_changing_the_world() {
         assert!(!g.restore(&bad.to_string()));
         assert_eq!(g.snapshot(), saved);
     }
-    assert!(!g.restore(&saved.replace("\"version\":19", "\"version\":11")));
+    assert!(!g.restore(&saved.replace(
+        &format!("\"version\":{}", crate::SAVE_VERSION),
+        "\"version\":11"
+    )));
 }
 
 #[test]

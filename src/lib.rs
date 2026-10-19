@@ -7,6 +7,7 @@ mod building_work;
 mod devtools;
 mod ecology;
 mod economy;
+pub mod electricity;
 mod food;
 mod forecast;
 mod freshness;
@@ -43,7 +44,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 28;
-pub const SAVE_VERSION: u32 = 19;
+pub const SAVE_VERSION: u32 = 21;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 const TASKS: &[&str] = &[
@@ -278,7 +279,7 @@ fn available(v: &Village, task: &str) -> bool {
         "water" => water::has_work(v),
         "compost" => v.buildings.iter().any(|b| organics::can_turn(v, b.id)),
         "restore" => v.restoration.iter().any(|j| restoration::ready(v, j)),
-        "utility" => v.pipes.lines.iter().any(|p| pipes::ready(v, p)),
+        "utility" => (0..5).any(|id| !utilities::crew_jobs(v, id).is_empty()),
         "craft" => production::can_order_tools(v),
         "eat" => v.food >= 1. || v.meals > 0,
         "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
@@ -836,6 +837,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task != "water" {
             water::interrupt(&mut v, &r);
         }
+        power::batteries::interrupt(&mut v, &r);
         if mobility::advance(&mut r, &mut v, &neighbours, dt) {
             requests::observe(&mut r, &v);
             continue;
@@ -925,6 +927,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task != "water" {
             water::interrupt(&mut v, &r);
         }
+        power::batteries::interrupt(&mut v, &r);
         if mobility::advance(&mut r, &mut v, &neighbours, 0.) {
             requests::observe(&mut r, &v);
             continue;
@@ -1003,7 +1006,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task == "restore" && restoration::work(&mut v, &r, dt * MINUTES_PER_SECOND) {
             r.remaining = 0.;
         }
-        if r.task == "utility" && pipes::work(&mut v, &r, dt * MINUTES_PER_SECOND) {
+        if r.task == "utility" && utilities::crew_work(&mut v, &r, dt * MINUTES_PER_SECOND) {
             r.remaining = 0.;
         }
         if r.task == "building_work" {
@@ -1156,9 +1159,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     restoration::job(&v, simulation::Id(id as u32)).is_none_or(|j| !j.active())
                 }))
             || (r.task == "utility"
-                && r.activity_material.is_none_or(|id| {
-                    pipes::line(&v, simulation::Id(id as u32)).is_none_or(|p| !pipes::ready(&v, p))
-                }))
+                && r.activity_material
+                    .is_none_or(|id| !utilities::crew_ready(&v, simulation::Id(id as u32), r.id)))
             || (r.task == "building_work"
                 && r.activity_building
                     .is_none_or(|id| building_work::job(&v, id).is_none()))
@@ -1180,8 +1182,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         );
     }
     production::finish_frame(&mut v, people.iter());
+    power::finish_frame(&mut v, dt * MINUTES_PER_SECOND);
     let residents: Vec<_> = people.iter().cloned().collect();
     pipes::prune(&mut v, &residents);
+    power::batteries::prune(&mut v, &residents);
     progression::update(&mut v);
 }
 #[wasm_bindgen]
@@ -1447,6 +1451,9 @@ impl Game {
         {
             return "Choose a tile beside the building.".into();
         }
+        if power::batteries::reserved(&v, x, y, None) {
+            return "Move the recovered battery or its reserved destination before placing a road here.".into();
+        }
         if restoration::reserved(&v, x, y) {
             return "That ground is reserved for soil restoration.".into();
         }
@@ -1660,6 +1667,8 @@ impl Game {
             .chain(v.water_supply.tanks.iter().map(|p| p.id))
             .chain(v.water_supply.trips.iter().map(|p| p.id))
             .chain(v.pipes.lines.iter().map(|p| p.id))
+            .chain(v.power.network.nodes.iter().map(|n| n.id))
+            .chain(v.power.battery_jobs.iter().map(|j| j.id))
             .chain(
                 save.residents
                     .iter()
@@ -1729,7 +1738,7 @@ impl Game {
                     } else if r.task == "utility" {
                         u32::try_from(i)
                             .ok()
-                            .is_none_or(|id| pipes::line(v, simulation::Id(id)).is_none())
+                            .is_none_or(|id| !utilities::crew_exists(v, simulation::Id(id)))
                     } else {
                         i >= economy::COUNT
                     }
@@ -1787,13 +1796,19 @@ impl Game {
                 return false;
             }
             save.village.version = SAVE_VERSION;
+            if !power::initialise(&mut save.village) {
+                return false;
+            }
             if !water::initialise(&mut save.village) {
                 return false;
             }
             if !processes::initialise(&mut save.village) {
                 return false;
             }
-            if !water::valid(&save.village, &save.residents) || !processes::valid(&save.village) {
+            if !water::valid(&save.village, &save.residents)
+                || !processes::valid(&save.village)
+                || !power::valid(&save.village)
+            {
                 return false;
             }
             economy::rebalance(&mut save.village);
@@ -2253,7 +2268,9 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":19", "\"version\":2")));
+        assert!(
+            !h.restore(&saved.replace(&format!("\"version\":{SAVE_VERSION}"), "\"version\":2"))
+        );
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

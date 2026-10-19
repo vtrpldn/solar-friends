@@ -59,7 +59,7 @@ pub struct Port {
 pub struct Endpoint {
     /// -1 is camp; -2-index identifies a persistent material plot; non-negative
     /// identities are saved building IDs. Preview identities allocate no state.
-    pub id: i32,
+    pub id: i64,
     pub kind: String,
     pub x: i32,
     pub y: i32,
@@ -73,6 +73,9 @@ fn inside(n: i32, x: i32, y: i32, a: i32, b: i32) -> bool {
     (x - n / 2..x - n / 2 + n).contains(&a) && (y - n / 2..y - n / 2 + n).contains(&b)
 }
 pub(crate) fn clear(v: &Village, x: i32, y: i32) -> bool {
+    base_clear(v, x, y) && !crate::power::batteries::reserved(v, x, y, None)
+}
+pub(crate) fn base_clear(v: &Village, x: i32, y: i32) -> bool {
     !river_bank(x, y) && unoccupied(v, x, y)
 }
 fn unoccupied(v: &Village, x: i32, y: i32) -> bool {
@@ -122,7 +125,7 @@ pub(crate) fn ports(v: &Village, n: i32, x: i32, y: i32) -> Vec<Port> {
     }
     result
 }
-fn hydro_ports(v: &Village, b: &Building) -> Vec<Port> {
+pub(crate) fn hydro_ports(v: &Village, b: &Building) -> Vec<Port> {
     for offset in 1..=4 {
         let x = b.x - offset;
         if !unoccupied(v, x, b.y) {
@@ -139,6 +142,9 @@ fn hydro_ports(v: &Village, b: &Building) -> Vec<Port> {
     vec![]
 }
 pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
+    if kind == Kind::Electricity {
+        return power::endpoints(v);
+    }
     let mut result = vec![];
     if matches!(kind, Kind::Fresh | Kind::Greywater) {
         result.push(Endpoint {
@@ -160,7 +166,7 @@ pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
             return None;
         }
         Some(Endpoint {
-            id: i32::try_from(b.id).ok()?,
+            id: i64::try_from(b.id).ok()?,
             kind: b.kind.clone(),
             x: b.x,
             y: b.y,
@@ -181,7 +187,7 @@ pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
                 return None;
             }
             Some(Endpoint {
-                id: i32::try_from(i).ok()?.checked_add(2)?.checked_neg()?,
+                id: i64::try_from(i).ok()?.checked_add(2)?.checked_neg()?,
                 kind: if s.material == 0 {
                     "source_timber"
                 } else {
@@ -204,8 +210,8 @@ pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Plan {
     pub kind: Kind,
-    pub from: i32,
-    pub to: i32,
+    pub from: i64,
+    pub to: i64,
     pub start: Port,
     pub end: Port,
     pub cells: Vec<[i32; 2]>,
@@ -213,7 +219,14 @@ pub struct Plan {
 }
 /// Breadth-first search over all compatible ports finds the fewest corridor
 /// cells. Fixed iteration order keeps ties deterministic, without consuming RNG.
-pub fn plan(v: &Village, kind: Kind, from: i32, to: i32) -> Result<Plan, &'static str> {
+pub fn plan(
+    v: &Village,
+    kind: Kind,
+    from: impl Into<i64>,
+    to: impl Into<i64>,
+) -> Result<Plan, &'static str> {
+    let from = from.into();
+    let to = to.into();
     if from == to {
         return Err("Choose two different buildings.");
     }
@@ -318,3 +331,53 @@ impl Game {
 
 #[cfg(test)]
 mod tests;
+
+pub fn crew_jobs(v: &Village, resident: usize) -> Vec<(crate::simulation::Id, u8)> {
+    v.pipes
+        .lines
+        .iter()
+        .filter(|p| crate::pipes::ready(v, p))
+        .map(|p| (p.id, p.priority))
+        .chain(
+            v.power
+                .battery_jobs
+                .iter()
+                .filter(|j| crate::power::batteries::ready(v, j, resident))
+                .map(|j| (j.id, 3)),
+        )
+        .collect()
+}
+pub fn crew_exists(v: &Village, id: crate::simulation::Id) -> bool {
+    crate::pipes::line(v, id).is_some() || crate::power::batteries::job(v, id).is_some()
+}
+pub fn crew_ready(v: &Village, id: crate::simulation::Id, resident: usize) -> bool {
+    crate::pipes::line(v, id).is_some_and(|p| crate::pipes::ready(v, p))
+        || crate::power::batteries::job(v, id)
+            .is_some_and(|j| crate::power::batteries::ready(v, j, resident))
+}
+pub fn crew_approach(v: &Village, id: crate::simulation::Id, resident: usize) -> Option<[f32; 2]> {
+    crate::pipes::approach(v, id, resident)
+        .or_else(|| crate::power::batteries::approach(v, id, resident))
+}
+pub fn assign_crew(r: &mut crate::Resident, v: &Village, id: crate::simulation::Id) -> bool {
+    if crate::power::batteries::job(v, id).is_some() {
+        crate::power::batteries::assign_target(r, v, id)
+    } else {
+        crate::pipes::assign_target(r, v, id)
+    }
+}
+pub fn crew_reason(v: &Village, id: crate::simulation::Id) -> Option<&'static str> {
+    crate::pipes::line(v, id)
+        .map(crate::pipes::work_reason)
+        .or_else(|| crate::power::batteries::job(v, id).map(crate::power::batteries::reason))
+}
+pub fn crew_work(v: &mut Village, r: &crate::Resident, minutes: f32) -> bool {
+    if r.activity_material
+        .and_then(|id| u32::try_from(id).ok())
+        .is_some_and(|id| crate::power::batteries::job(v, crate::simulation::Id(id)).is_some())
+    {
+        crate::power::batteries::work(v, r, minutes)
+    } else {
+        crate::pipes::work(v, r, minutes)
+    }
+}

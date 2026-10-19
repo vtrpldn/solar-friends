@@ -4,12 +4,14 @@ import { readFile } from 'node:fs/promises';
 import init, { Game } from '../web/pkg/solar_friends.js';
 import { advanceGame } from '../web/dev/scenarios.js';
 import { buildingLighting, lightingLayers, powerConnections } from '../web/power.js';
+import {withAuthoredElectricalCircuits} from '../web/dev/electrical-fixture.js';
 
 await init({module_or_path: await readFile(new URL('../web/pkg/solar_friends_bg.wasm', import.meta.url))});
-const g=new Game(), fixture=JSON.parse(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8'));
+const g=new Game(), legacy=JSON.parse(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8'));
 const snapshot=()=>JSON.parse(g.snapshot());
 const restore=state=>assert(g.restore(JSON.stringify(state)));
-fixture.village.minutes=1260;
+legacy.village.minutes=1260;
+const fixture=withAuthoredElectricalCircuits(legacy);
 restore(fixture);
 const initial=snapshot().environment.power;
 assert.equal(initial.generation,0);
@@ -29,7 +31,11 @@ assert.equal(g.set_power_enabled(fixture.village.buildings.find(b=>b.kind==='hom
 const switched=g.snapshot(); assert(g.restore(switched)); assert.equal(g.snapshot(),switched);
 assert(g.set_power_enabled(lamp,true));
 
-fixture.village.power.stored=.01;restore(fixture);advanceGame(g,1);
+const empty=structuredClone(fixture),power=empty.village.power;
+let remaining=.01;
+for(const n of power.network.nodes)if(n.kind!=='roof'&&n.capacity>0){n.charge=Math.min(remaining,n.capacity);remaining-=n.charge;}
+power.stored=.01;power.network.account={opening:power.network.nodes.reduce((sum,n)=>sum+n.charge,0),generated:0,consumed:0,curtailed:0,discharged:0};
+restore(empty);advanceGame(g,1);
 let p=snapshot().environment.power;
 assert.equal(p.stored,0);assert.equal(p.grid_level,0);
 for(const c of p.connections) {
@@ -43,11 +49,12 @@ advanceGame(g,660);assert(snapshot().environment.power.stored>30);
 advanceGame(g,720);assert(snapshot().environment.power.stored>0);
 assert(g.restore(g.snapshot()));
 
-delete fixture.village.power;restore(fixture);
-assert.deepEqual(snapshot().village.power,{stored:0,disabled:[]});
-const farm=fixture.village.buildings.find(b=>b.kind==='solar_farm');
-farm.progress=0;fixture.village.minutes=720;fixture.village.economy.projects=[{building:farm.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(24).fill(0),consumed:Array(24).fill(0)}];restore(fixture);
-p=snapshot().environment.power;assert.equal(p.capacity,0);assert.equal(p.generation,0);assert.equal(p.grid_level,0);
+delete legacy.village.power;restore(legacy);
+assert.equal(snapshot().village.power.stored,0);assert.deepEqual(snapshot().village.power.disabled,[]);
+assert.equal(snapshot().village.pipes.lines.length,0,'Legacy authoring does not invent installed cables');
+const farm=legacy.village.buildings.find(b=>b.kind==='solar_farm');
+farm.progress=0;legacy.village.minutes=720;legacy.village.economy.projects=[{building:farm.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(24).fill(0),consumed:Array(24).fill(0)}];restore(legacy);
+p=snapshot().environment.power;assert(p.capacity===0);assert(p.generation===0);assert.equal(p.grid_level,0);
 
 // Construction uses the public placement API and reserves mixed materials without charging for the blueprint.
 const fresh=new Game(), start=JSON.parse(fresh.snapshot()).village.wood;
@@ -55,7 +62,7 @@ unlockStory(fresh);
 assert.equal(fresh.place('solar_farm',5,5),'ok');
 assert.equal(fresh.place('streetlight',10,5),'ok');
 assert.equal(JSON.parse(fresh.snapshot()).village.wood,start);
-assert.equal(JSON.parse(fresh.snapshot()).environment.power.capacity,0);
+assert(JSON.parse(fresh.snapshot()).environment.power.capacity===0);
 fresh.free();g.free();
 
 // Cancelling an early project must keep every later lighting control attached

@@ -154,21 +154,31 @@ mod tests {
     }
 
     #[test]
-    fn sandbox_removal_cleans_visits_power_and_frees_the_plot() {
+    fn sandbox_removal_cleans_visits_and_keeps_recovered_battery_plots_occupied() {
         let mut g = Game::new();
         g.start_mode("sandbox");
         assert_eq!(g.place("solar_farm", 5, 5), "ok");
         assert_eq!(g.place("home", 12, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.power.stored = 20.;
+            crate::power::fixtures::charge(&mut v, 20.);
         }
         assert!(g.remove_sandbox_building(0));
         assert_eq!(g.app.world().resource::<Village>().power.stored, 20.);
         let queued = g.snapshot();
         assert!(g.restore(&queued));
         crate::building_work::work(&mut g.app.world_mut().resource_mut::<Village>(), 0, 18.);
-        assert_eq!(g.app.world().resource::<Village>().power.stored, 0.);
+        assert_eq!(g.app.world().resource::<Village>().power.stored, 20.);
+        assert!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .power
+                .network
+                .nodes
+                .iter()
+                .any(|n| n.owner == crate::electricity::Owner::Ground && n.charge == 20.)
+        );
         let mut q = g.app.world_mut().query::<&mut Resident>();
         let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
         r.visit_building = Some(1);
@@ -180,7 +190,7 @@ mod tests {
         assert!(g.restore(&saved));
         assert_ne!(g.place("garden", 12, 5), "ok");
         crate::building_work::work(&mut g.app.world_mut().resource_mut::<Village>(), 1, 18.);
-        assert_eq!(g.place("garden", 12, 5), "ok");
+        assert!(g.place("garden", 12, 5).contains("recovered battery"));
         let before = g.snapshot();
         assert!(!g.remove_sandbox_building(99));
         assert_eq!(g.snapshot(), before);

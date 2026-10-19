@@ -40,7 +40,12 @@ const offsite=scene(0,12);until(offsite,s=>s.village.water_supply.trips.some(h=>
 until(offsite,s=>s.village.water_supply.external[3]>=12,'Actual neighbouring service handoff');assert(report(offsite).external[3]>=12);assert.equal(report(offsite).tanks.find(p=>p.owner.kind==='service').water[3],0);assert.equal(snap(offsite).village.circular.biogas,0);assert.equal(snap(offsite).village.circular.waste_treated,0);await save(offsite,'handed-over');
 // Installation is earned with a purchased kit and actual corridor attendance.
 const pipes=scene(0,0),quote=JSON.parse(pipes.water_connection_quote('greywater',1,2));assert(quote.allowed);assert.equal(pipes.queue_water_connection('greywater',1,2),'ok');assert.equal(pipes.order_supplies_pickup(JSON.stringify(quote.parts),4),'ok');
-until(pipes,s=>s.village.pipes.lines[0].phase==='active','Residents install the greywater connection');await save(pipes,'connected');
+until(pipes,s=>s.village.pipes.lines[0].phase==='active','Residents install the greywater connection');
+const ports=snap(pipes).village.power.network.nodes,pump=ports.find(n=>n.owner.kind==='pump').id,solar=ports.find(n=>n.kind==='solar').id;
+const powerQuote=JSON.parse(pipes.electrical_connection_quote(solar,pump));assert(powerQuote.allowed);assert.equal(pipes.queue_electrical_connection(solar,pump),'ok');
+const cable=snap(pipes).village.pipes.lines.at(-1).id;
+let ordered=false;until(pipes,()=>{if(!ordered)ordered=pipes.order_supplies_pickup(JSON.stringify(powerQuote.parts),4)==='ok';return ordered;},'A resident buys the greywater pump cable kit');
+until(pipes,s=>s.village.pipes.lines.find(p=>p.id===cable).phase==='active','Residents deliver and install local pump power');await save(pipes,'connected');
 // Controlled local inflow fixture: retain the earned installed line and seed
 // owned greywater at the source, with an explicit matching opening account.
 const inflow=snap(pipes),source=tank(inflow,1);source.water[2]+=12;inflow.village.circular.greywater=Math.fround(inflow.village.circular.greywater+12);inflow.village.water_supply.opening[2]+=12;assert(pipes.restore(JSON.stringify(inflow)));

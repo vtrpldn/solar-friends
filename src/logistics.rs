@@ -257,6 +257,17 @@ pub(crate) fn layout(v: &Village) -> u32 {
         mix(s.x as u32);
         mix(s.y as u32);
     }
+    for n in v
+        .power
+        .network
+        .nodes
+        .iter()
+        .filter(|n| n.owner == crate::electricity::Owner::Ground)
+    {
+        mix(n.id.0);
+        mix(n.x as u32);
+        mix(n.y as u32);
+    }
     for &(x, y) in &v.roads {
         mix(x as u32);
         mix(y as u32);
@@ -368,6 +379,7 @@ pub fn sync(v: &mut Village) {
                 .any(|h| [h.from, h.to, h.recovery].contains(&p.id))
     });
     water::sync(v);
+    power::sync(v);
     pipes::reconcile(v);
 }
 pub fn receive(v: &mut Village, owner: Owner, i: usize, n: u32) -> bool {
@@ -1373,7 +1385,7 @@ pub fn advance(
     if h.layout != v.logistics.as_ref().unwrap().layout
         || h.route
             .get(h.next)
-            .is_some_and(|p| !navigation::clear(v, p[0], p[1]))
+            .is_some_and(|p| !navigation::segment(v, [r.x, r.y], *p))
     {
         let Ok(path) = navigation::route(v, [r.x, r.y], target) else {
             interrupt(v, r);

@@ -421,7 +421,9 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             return wait(
                 r,
                 Phase::Blocked,
-                if batch.material == economy::MEALS {
+                if let Some(reason) = production::power_blocker(v, batch.site) {
+                    reason
+                } else if batch.material == economy::MEALS {
                     production::building(v, batch.site)
                         .and_then(|id| {
                             sanitation::washing_blocker(v, water::Owner::Building(id), 1.)

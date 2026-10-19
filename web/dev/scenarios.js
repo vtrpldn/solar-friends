@@ -2,6 +2,7 @@ import {resetMaterialLocations} from './material-fixture.js';
 import { footprint, occupies } from '../building-footprints.js';
 import { MAP_SIZE, riverBank } from '../terrain.js';
 import {makeArtPreview} from './art-preview.js';
+import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 export const scenarios = [
   {id:'sim-compact',name:'Simulation baseline · compact',detail:'Homes, food and storage grouped together. Compare observed travel with the dispersed layout using the same starting supplies and seed.'},
   {id:'sim-spread',name:'Simulation baseline · dispersed',detail:'The same homes and services spread across the property. A paired baseline for transport, travel budgets and later completion forecasts.'},
@@ -127,7 +128,8 @@ export function makeScenario(id, fresh, established) {
     v.food = 18; v.meals = 8;
     for (const r of state.residents) r.last_meal_slot = 4;
   }
-  return resetMaterialLocations(state);
+  const prepared=resetMaterialLocations(state);
+  return ['night','power','power-outage','circular-night'].includes(id)?withAuthoredElectricalCircuits(prepared):prepared;
 }
 export function advanceGame(game, minutes) {
   if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440) throw new Error('Advance between 0 and 1440 game minutes.');

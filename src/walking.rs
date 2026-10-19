@@ -45,8 +45,8 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
             .and_then(|n| u32::try_from(n).ok())
             .map(simulation::Id)
             .ok_or("This utility work has ended.")?;
-        return pipes::approach(v, id, r.id)
-            .ok_or("This water line needs delivered parts and a clear work corridor.");
+        return utilities::crew_approach(v, id, r.id)
+            .ok_or("This service job needs an available crew position and a clear route.");
     }
     if r.task == "restore" {
         let id = r
@@ -241,15 +241,13 @@ pub fn advance(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], 
                 return true;
             }
         };
-        if let Some(p) = r
+        if let Some(reason) = r
             .activity_material
             .and_then(|n| u32::try_from(n).ok())
-            .and_then(|n| pipes::line(v, simulation::Id(n)))
+            .and_then(|id| utilities::crew_reason(v, simulation::Id(id)))
+            && r.reason != reason
         {
-            let reason = pipes::work_reason(p);
-            if r.reason != reason {
-                r.reason = reason.into();
-            }
+            r.reason = reason.into();
         }
         if goal != [r.target_x, r.target_y] {
             (r.target_x, r.target_y) = (goal[0], goal[1]);

@@ -1,11 +1,13 @@
 import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import fs from 'node:fs/promises';
+import {writeFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import init, { Game } from '../web/pkg/solar_friends.js';
 import { situationView } from '../web/situations.js';
 await init({ module_or_path: await fs.readFile(new URL('../web/pkg/solar_friends_bg.wasm', import.meta.url)) });
 const output = process.argv[2];
-if (output) await fs.mkdir(output, { recursive: true });
+const failureOutput=output||'artifacts/situations';
+await fs.mkdir(failureOutput, { recursive: true });
 const snapshot = g => JSON.parse(g.snapshot());
 function until(g, predicate, label, limit = 25000, beforeTick = () => {}) {
   for (let i = 0; i < limit; i++) {
@@ -13,7 +15,9 @@ function until(g, predicate, label, limit = 25000, beforeTick = () => {}) {
     beforeTick(g);
     g.tick(0.25);
   }
-  throw new Error(`${label}: ${g.snapshot()}`);
+  const checkpoint=`${failureOutput}/stalled.json`;
+  writeFileSync(checkpoint,g.snapshot());
+  throw new Error(`${label}: see ${checkpoint}`);
 }
 const game = new Game();
 assert.match(situationView(snapshot(game).village, snapshot(game).residents).markup, /no one has raised a concern/);
@@ -29,6 +33,10 @@ for (const [kind, x, y, cost] of [
 }
 // Building visits now share cooking naturally. Deliberately assign repeated
 // kitchen work to one resident to exercise the unequal-work concern.
+// Use actual work preferences and clear service roads to sustain that workload;
+// a village sharing a few slow pots does not meet the concern's threshold.
+for(let id=0;id<5;id++)assert.equal(game.set_work_preference(id,'food',id===2?2:0),'ok');
+for(const [x,y]of [[6,11],[7,11],[8,11],[9,11],[10,11],[11,11],[12,11],[13,11],[14,11],[10,12],[10,13],[9,12],[8,12],[7,12],[6,12],[5,12],[4,12],[3,12],[2,12],[1,12],[1,13]])assert.equal(game.toggle_road(x,y),'ok');
 // Stock the scenario; all cooking records still come from completed tasks.
 const stocked = JSON.parse(game.snapshot());
 stocked.village.food = 300;
