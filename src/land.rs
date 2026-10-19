@@ -114,7 +114,7 @@ pub fn initialise(v: &mut Village) -> bool {
     v.simulation.next_id = end;
     v.land = state;
     // This path authors a new village or an explicit version-3 development fixture.
-    // Playable version-13 saves are validated, never repaired or replenished here.
+    // Playable version-14 saves are validated, never repaired or replenished here.
     for index in 0..v.economy.sources.len() {
         let s = &v.economy.sources[index];
         if s.material < 2 {
@@ -282,6 +282,36 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
                     cover: base.cover * (1. - impact),
                 });
             }
+        }
+    }
+    v.land.soil.sort_by_key(|s| (s.y, s.x));
+    v.land.revision = v.land.revision.saturating_add(1);
+}
+pub fn restore_soil(v: &mut Village, n: i32, x: i32, y: i32, fraction: f32) {
+    for a in x - n / 2..x - n / 2 + n {
+        for b in y - n / 2..y - n / 2 + n {
+            if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
+                continue;
+            }
+            if !v.land.soil.iter().any(|s| s.x == a && s.y == b) {
+                let g = ground(v, a, b);
+                v.land.soil.push(Soil {
+                    x: a,
+                    y: b,
+                    nutrients: g.nutrients,
+                    cover: g.cover,
+                    disturbance: g.disturbance,
+                });
+            }
+            let s = v
+                .land
+                .soil
+                .iter_mut()
+                .find(|s| s.x == a && s.y == b)
+                .unwrap();
+            s.nutrients = (s.nutrients + fraction * 0.25).min(1.25);
+            s.cover = (s.cover + fraction * 0.25).min(1.);
+            s.disturbance = (s.disturbance - fraction * 0.35).max(0.);
         }
     }
     v.land.soil.sort_by_key(|s| (s.y, s.x));

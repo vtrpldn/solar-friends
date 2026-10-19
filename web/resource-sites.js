@@ -22,6 +22,7 @@ export function sourcePlacementReason(v,material,x,y){
   }
   for(let X=a;X<a+n;X++)for(let Y=b;Y<b+n;Y++){
     if(X<1||Y<1||X>=MAP_SIZE-1||Y>=MAP_SIZE-1||riverBank(X,Y))return 'Choose an inland clearing inside the village.';
+    if((v.restoration||[]).some(j=>j.finished==null&&X>=j.x-Math.floor(j.size/2)&&X<j.x-Math.floor(j.size/2)+j.size&&Y>=j.y-Math.floor(j.size/2)&&Y<j.y-Math.floor(j.size/2)+j.size))return 'That ground is reserved for soil restoration.';
     if(Math.abs(X-10)<1.5&&Math.abs(Y-13)<1.5||(v.building_jobs||[]).some(j=>j.destination&&occupies({...v.buildings.find(b=>b.id===j.building),x:j.destination[0],y:j.destination[1]},X,Y))||v.roads.some(([rx,ry])=>rx===X&&ry===Y)||v.buildings.some(s=>occupies(s,X,Y))||v.economy.sources.some(s=>sourceOccupies(s,X,Y)))return 'Keep buildings, paths, other plots and the arrival clearing free.';
   }
   if(v.economy.sources.length>=676)return 'This village has reached its plot limit.';

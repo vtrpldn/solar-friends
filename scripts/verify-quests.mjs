@@ -82,6 +82,14 @@ const basket=Array(21).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
+// Restore the actual garden through delivered compost and attended work,
+// while food, outside shifts and the existing community hours remain active.
+until(s=>s.environment.economy.materials[19].available>=2,'compost for soil work');
+assert.equal(g.restore_plot(13,10),'ok');
+const soilJob=snap().village.restoration.at(-1).id;
+until(s=>s.village.restoration.find(j=>j.id===soilJob).finished!=null,'resident garden restoration');
+assert.equal(snap().village.restoration.find(j=>j.id===soilJob).cancelled,false);
+const restoredGarden=g.snapshot();assert(g.restore(restoredGarden));assert.equal(g.snapshot(),restoredGarden);
 // Buying tools can satisfy routine demand; the Story introduction still asks
 // the player to learn local crafting through one explicit workshop request.
 if(!snap().village.progress.tools_crafted){

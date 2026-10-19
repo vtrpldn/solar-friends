@@ -35,21 +35,13 @@ pub fn needs(v: &Village, owner: Owner, items: &mut Bundle) {
                 }
             }
         }
-        Owner::Site(id) if building_work::job(v, id).is_none() => {
-            if v.buildings
-                .iter()
-                .any(|b| b.id == id && b.progress >= 100. && ecology::farm(b) && b.crop.planted)
-            {
-                items[COMPOST] = 1;
-            }
-        }
-        Owner::Source(index)
-            if v.economy
-                .sources
-                .get(index)
-                .is_some_and(|s| s.active && s.material < 2 && !s.restored) =>
+        Owner::Site(id)
+            if building_work::job(v, id).is_none()
+                && v.buildings.iter().any(|b| {
+                    b.id == id && b.progress >= 100. && ecology::farm(b) && b.crop.planted
+                }) =>
         {
-            items[COMPOST] = 2;
+            items[COMPOST] = 1;
         }
         _ => {}
     }
@@ -58,7 +50,12 @@ pub fn wants_compost(v: &Village) -> bool {
     let staged: u32 = v.logistics.as_ref().map_or(0, |s| {
         s.stores
             .iter()
-            .filter(|p| matches!(p.owner, Owner::Site(_) | Owner::Source(_)))
+            .filter(|p| {
+                matches!(
+                    p.owner,
+                    Owner::Site(_) | Owner::Source(_) | Owner::Restoration(_)
+                )
+            })
             .map(|p| p.items[COMPOST])
             .sum()
     });

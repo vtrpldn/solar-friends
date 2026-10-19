@@ -596,7 +596,7 @@ pub fn view(v: &Village) -> serde_json::Value {
     growing.extend(v.economy.sources.iter().filter(|s|s.active&&s.material<2&&s.planted).map(|s|{
         let soil=crate::land::condition(v,crate::resource_sites::size(s.material),s.x,s.y);
         let growth=crate::land::growth(&soil);
-        let duration=if s.material==0{5760.}else{2880.}/if s.restored{1.25}else{1.}/growth;
+        let duration=if s.material==0{5760.}else{2880.}/growth;
         serde_json::json!({"soil":soil,"growth_multiplier":growth,"name":if s.material==0{"Timber trees"}else{"Bamboo"},"x":s.x,"y":s.y,"progress":s.growth*100.,"duration":duration,"remaining":(1.-s.growth)*duration,"reason":if s.growth>=1.{"Mature. A resident can harvest a batch."}else if s.moisture<=0.{"Dry. Growth waits for irrigation or rain."}else{"Growing while the soil is moist; no worker attendance needed."}})
     }));
     serde_json::json!({"batches":rows,"stations":stations,"definitions":definitions,"growing":growing,"paused":v.processes.paused,"held_waste":held_waste(v),"held_greywater":held_greywater(v),"reserved_gas":held_gas(v),"reserved_irrigation":held_irrigation(v),"note":"Each building owns its passive process. Detached sealed digestate stores keep curing after a building moves or closes."})

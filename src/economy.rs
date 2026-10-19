@@ -1,5 +1,5 @@
 //! Project-led sourcing and a local town economy. All transactions live here.
-use crate::{Game, Village, event, ready};
+use crate::{Game, Village, event, ready, restoration};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -741,7 +741,7 @@ fn quote_with_fee(v: &Village, items: Bundle, fee: i64) -> Result<i64, String> {
     Ok(total)
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i),"processing":crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
+    let materials:Vec<_>=(0..COUNT).map(|i|serde_json::json!({"id":i,"key":NAMES[i],"name":LABELS[i],"price":PRICES[i],"buyable":i!=SCRAPS,"stored":quantity(v,i),"in_transit":v.logistics.as_ref().map_or(0,|s|s.shipments.iter().filter(|h|h.carrying&&h.material==i).map(|h|h.amount).sum::<u32>()),"reserved":reserved(v,i)+crate::production::input_demand(v,i)+crate::gatherings::reserved(v,i)+crate::restoration::reserved_amount(v,i),"processing":crate::restoration::processing(v,i)+crate::organics::processing(v,i)+v.production.batches.iter().filter(|b|b.active()&&b.committed).map(|b|b.inputs[i]).sum::<u32>(),"available":free(v,i),"incoming":incoming(v,i)})).collect();
     let projects:Vec<_>=v.economy.projects.iter().filter_map(|p|{
         let b=v.buildings.iter().find(|b|b.id==p.building)?;if b.progress>=100.{return None;}
         let stages=recipe(&b.kind,&p.recipe)?;let s=stages.get(p.stage)?;
@@ -1084,23 +1084,19 @@ impl Game {
     }
     pub fn restore_source(&mut self, index: usize) -> String {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        let Some(s) = v.economy.sources.get(index) else {
-            return "Source not found.".into();
+        let Some(s) = v
+            .economy
+            .sources
+            .get(index)
+            .filter(|s| s.active && s.material < 2)
+        else {
+            return "Choose a cultivated material plot.".into();
         };
-        if !s.active || s.material > 1 || s.restored {
-            return "This source cannot be restored again.".into();
+        let (x, y) = (s.x, s.y);
+        match restoration::queue(&mut v, x, y) {
+            Ok(_) => "ok".into(),
+            Err(e) => e,
         }
-        if crate::organics::available(&v, crate::logistics::Owner::Source(index), COMPOST) < 2 {
-            return "Deliver two compost to this cultivated plot before enriching it.".into();
-        }
-        crate::logistics::spend(
-            &mut v,
-            Some(crate::logistics::Owner::Source(index)),
-            COMPOST,
-            2,
-        );
-        v.economy.sources[index].restored = true;
-        "ok".into()
     }
     pub fn configure_project(
         &mut self,

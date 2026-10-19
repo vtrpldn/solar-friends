@@ -134,6 +134,9 @@ pub fn placement(
             if v.roads.contains(&(px, py)) {
                 return Err("Keep roads clear. Choose a plot beside the road.");
             }
+            if restoration::reserved(v, px, py) {
+                return Err("That ground is reserved for soil restoration.");
+            }
             if reserved(v, px, py, ignore) {
                 return Err("That plot is reserved for a building move.");
             }
@@ -465,6 +468,7 @@ impl Game {
             let mut j = j;
             j.id = Some(work_id);
             v.building_jobs.push(j);
+            restoration::reconcile(&mut v);
             if action != Action::Move {
                 processes::close(&mut v, id);
             }
@@ -492,6 +496,7 @@ impl Game {
             }
         }
         self.sync_production_activities();
+        self.sync_restoration_activities();
         self.sync_help();
         "ok".into()
     }

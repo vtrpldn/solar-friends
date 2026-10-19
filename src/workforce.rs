@@ -43,7 +43,7 @@ fn category(task: &str) -> Option<usize> {
         "haul" => Some(1),
         "cook" | "garden" | "gather" => Some(2),
         "source" | "prepare" | "craft" => Some(3),
-        "water" | "compost" => Some(4),
+        "water" | "compost" | "restore" => Some(4),
         _ => None,
     }
 }
@@ -459,6 +459,41 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             reason: "Bringing supplies along a clear route to where they are needed.",
         });
     }
+    for j in v.restoration.iter().filter(|j| restoration::ready(v, j)) {
+        let mut worker = r.clone();
+        assign(
+            &mut worker,
+            v,
+            "restore",
+            "Restoring the soil with delivered compost.",
+            false,
+        );
+        if !restoration::assign_target(&mut worker, v, j.id)
+            || occupied(v, r, "restore", None, worker.activity_material, None) > 0
+        {
+            continue;
+        }
+        let (travel, blocker) = match walking::quote(v, &worker) {
+            Ok((route, _)) => {
+                let p = route.points.last().unwrap();
+                (worker.target_x, worker.target_y) = (p[0], p[1]);
+                (Some(route.minutes), None)
+            }
+            Err(reason) => (None, Some(reason.to_string())),
+        };
+        out.push(Offer {
+            task: "restore".into(),
+            building: None,
+            material: worker.activity_material,
+            batch: None,
+            destination: [worker.target_x, worker.target_y],
+            travel_minutes: travel,
+            blocker,
+            score: travel.map_or(-1000., |t| score(v, r, "restore", 620., t)),
+            urgency: 620.,
+            reason: "Restoring the soil with delivered compost.",
+        });
+    }
     out.sort_by(|a, b| {
         b.score
             .total_cmp(&a.score)
@@ -484,6 +519,12 @@ pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
     r.activity_building = job.building;
     r.activity_material = job.material;
     r.activity_batch = job.batch;
+    if r.task == "restore" {
+        r.remaining = r
+            .activity_material
+            .and_then(|id| restoration::job(v, simulation::Id(id as u32)))
+            .map_or(0., |j| (restoration::LABOUR - j.work) / MINUTES_PER_SECOND);
+    }
     if r.task == "compost" {
         r.remaining = 3.;
     }
@@ -534,6 +575,10 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
                 .iter()
                 .find(|b| b.id == id)
                 .and_then(|b| spacing::approach(v, b, peer.id))
+        } else if job.task == "restore" {
+            job.material
+                .and_then(|id| restoration::approach(v, simulation::Id(id as u32), peer.id))
+                .map(|p| (p[0], p[1]))
         } else if matches!(job.task.as_str(), "source" | "prepare") {
             let mut worker = peer.clone();
             assign(&mut worker, v, &job.task, job.reason, false);

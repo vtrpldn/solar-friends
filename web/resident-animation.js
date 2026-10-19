@@ -34,7 +34,7 @@ export function residentActivity(r, minutes) {
   if (['build','building_work','craft','prepare'].includes(r.task)) return 'work';
   if (r.task === 'cook') return 'cook';
   if (r.task === 'water') return 'water';
-  if (['garden', 'compost', 'gather'].includes(r.task)) return 'tend';
+  if (['garden', 'compost', 'restore', 'gather'].includes(r.task)) return 'tend';
   if (r.task === 'visit') {
     if (r.visitingKind === 'workshop') return 'work';
     if (r.visitingKind === 'kitchen') return 'cook';

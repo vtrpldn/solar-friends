@@ -52,6 +52,15 @@ fn bank(v: &Village, id: usize) -> Option<[f32; 2]> {
     None
 }
 pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
+    if r.task == "restore" {
+        let id = r
+            .activity_material
+            .and_then(|n| u32::try_from(n).ok())
+            .map(simulation::Id)
+            .ok_or("This soil work has ended.")?;
+        return restoration::approach(v, id, r.id)
+            .ok_or("Soil work needs delivered compost and a clear approach.");
+    }
     if r.task == "eat" {
         return food::target(v, r);
     }
