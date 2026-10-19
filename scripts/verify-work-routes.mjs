@@ -9,7 +9,9 @@ await mkdir('artifacts/work-routes',{recursive:true});
 function scene(paved){
  const g=new Game();g.start_mode('sandbox');assert.equal(g.place('home',7,12),'ok');
  const s=snap(g);Object.assign(s.village,{arrived:true,minutes:540,food:80,meals:10,water:40});
- for(const r of s.residents)Object.assign(r,{task:'idle',remaining:90,energy:90,hunger:10,social:10,last_meal_slot:0,x:10+r.id,y:13,target_x:10+r.id,target_y:13});
+ // Keep the requested worker ready; other neighbours take social breaks so
+ // this comparison measures road travel rather than recovery from loneliness.
+ for(const r of s.residents)Object.assign(r,{task:'idle',remaining:90,energy:90,hunger:10,social:r.id===0?90:10,last_meal_slot:0,x:10+r.id,y:13,target_x:10+r.id,target_y:13});
  assert(g.restore(JSON.stringify(restockFixtureFood(s))));
  if(paved)for(let x=2;x<=12;x++)for(let y=8;y<=16;y++)g.toggle_road(x,y);
  return g;

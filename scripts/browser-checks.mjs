@@ -404,12 +404,15 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkProcessControls({page,saved,capture});
   await checkOrganicControls({page,saved,capture});
   await page.locator('#dev-button').click();
-  for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['power-outage',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
+  for(const [id,expected] of [['autonomy',null],['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['power-outage',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
     await page.waitForFunction(id=>window.solarDev.scenario()===id,id);
     await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
     const state=await page.evaluate(()=>window.solarDev.snapshot());
     if(expected)assert(state.residents.some(r=>r.task===expected),`${id}: expected ${expected}`);
+    if(id==='autonomy'){
+      assert.deepEqual(state.residents.map(r=>r.task),['rest','eat','socialize','haul','outside']);
+    }
     if(id==='cook')assert.equal(state.village.situations.active.resident,2);
     if(id==='night')assert.equal(state.village.minutes % 1440,1260.75);
     if(id==='coop')assert.equal(state.village.supplies.eggs,3);
@@ -432,6 +435,13 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
       if(id==='after-rain')assert((await page.locator('.season small').textContent()).includes('After the rain'));
     }
     await capture(`Fixed scenario: ${id}`,`scenario-${id}.png`);
+    if(id==='autonomy'){
+      await page.getByRole('button',{name:'People',exact:true}).click();
+      assert(await page.locator('#community-panel').isVisible());
+      await capture('Residents follow their own needs and village commitments','autonomy-residents.png');
+      await page.getByRole('button',{name:'Close community',exact:true}).click();
+    }
+
     if(id==='rain') {
       const before=await page.locator('#world').evaluate(el=>el.toDataURL());
       await page.waitForTimeout(120);

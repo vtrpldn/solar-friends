@@ -628,7 +628,9 @@ mod tests {
                 r.remaining = 90.;
                 r.energy = 90.;
                 r.hunger = 10.;
-                r.social = 10.;
+                // Keep the requested worker ready; the other neighbours take
+                // social breaks so this comparison isolates road travel.
+                r.social = if r.id == 0 { 90. } else { 10. };
                 r.last_meal_slot = 0;
                 (r.x, r.y) = (10. + r.id as f32, 13.);
                 (r.target_x, r.target_y) = (r.x, r.y);

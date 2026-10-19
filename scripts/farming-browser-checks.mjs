@@ -53,7 +53,11 @@ export async function checkFarmingControls({page,saved,capture}){
   assert.match(await page.locator('#building-response').textContent(),/accepted|help|supplies|ready|saved/i);
   await capture('A named resident accepts a saved, targeted animal-care request','farming-request.png');
   await page.locator('#dev-button').click();
-  for(let day=0;day<3;day++){
+  // Follow real deliveries and shared work windows, allowing the farm's first
+  // harvests a week while residents also meet their needs and other chores.
+  for(let day=0;day<7;day++){
+    const progress=await page.evaluate(()=>window.solarDev.snapshot().village.progress);
+    if(progress.milk_collected>0&&progress.honey_collected>0&&progress.orchard_fruit>0)break;
     const minute=await page.evaluate(()=>window.solarDev.snapshot().village.minutes);await page.locator('#dev-minutes').fill('1440');await page.locator('#dev-advance').click();
     await page.waitForFunction(minute=>window.solarDev.snapshot().village.minutes>=minute+1440,minute);
   }

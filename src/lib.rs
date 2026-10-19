@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 mod agriculture;
+mod autonomy;
 mod building_work;
 mod climate;
 mod devtools;
@@ -525,7 +526,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
 fn choose(r: &mut Resident, v: &Village) {
     requests::pause(r);
     r.work_check_at = v.minutes;
-    let meal_due = meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot);
+    let meal_due = autonomy::meal_due(r, v.minutes);
     let (task, reason) = if sleeping_time(v.minutes, r) {
         (
             "sleep",
@@ -549,11 +550,14 @@ fn choose(r: &mut Resident, v: &Village) {
                 "Eating available ingredients while we wait for a cooked meal."
             },
         )
-    } else if r.energy < 28. {
+    } else if autonomy::recovering(r) {
         if requests::pending(r, "rest") && requests::resume(r, v) {
             return;
         }
-        ("rest", "I need a break before I can help again.")
+        (
+            "rest",
+            "Taking a proper rest until I feel ready to help again.",
+        )
     } else if v.progress.gathering_until > v.minutes && v.progress.invited & (1 << r.id) != 0 {
         (
             "gathering",
@@ -561,7 +565,7 @@ fn choose(r: &mut Resident, v: &Village) {
         )
     } else if situations::apply_agreement(r, v) {
         return;
-    } else if workforce::urgent_food(v, r.id) || (r.hunger > 60. && !workforce::eating(v, r.id)) {
+    } else if autonomy::foraging(v, r) {
         if requests::pending(r, "gather") && requests::resume(r, v) {
             return;
         }
@@ -575,6 +579,11 @@ fn choose(r: &mut Resident, v: &Village) {
         (
             "outside",
             "Leaving for my job at a neighbouring farm until 17:00.",
+        )
+    } else if autonomy::company(r) {
+        (
+            "socialize",
+            "I need some company. Taking time to catch up before more chores.",
         )
     } else if requests::resume(r, v) {
         return;
@@ -867,6 +876,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 "source" | "prepare" | "outside" | "building_work"
             ))
             && !work_time(v.minutes)
+            && !autonomy::finishing(&v, &r)
             && matches!(
                 r.task.as_str(),
                 "build"
@@ -887,27 +897,29 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             )
             && !(r.task == "gather"
                 && (supplies::urgent(&v) || r.hunger > 60. && !workforce::eating(&v, r.id)));
-        let ready_work = available(&v, "restore")
-            || available(&v, "utility")
-            || available(&v, "build")
-            || available(&v, "building_work")
-            || logistics::pending(&v, r.id)
-            || economy::local_job(&v).is_some()
-            || occupations::available(&v, r.id)
-            || (v.progress.use_tools && v.progress.tool_uses == 0 && available(&v, "craft"))
-            || (workforce::cooking(&v, r.id) && available(&v, "cook"))
-            || workforce::ingredients(&v, r.id)
-            || r.help.as_ref().is_some_and(|q| q.active())
-            || water::has_work(&v);
+        // Only interrupt free time for a real, reachable offer. This shares
+        // the queue with new farming/production jobs and ignores blocked sites.
         let chores_start = !r.requested
             && work_time(v.minutes)
+            && !autonomy::recovering(&r)
+            && !autonomy::company(&r)
+            && r.social >= 65.
+            && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"))
             && (!work_time(before)
-                || (occupations::available(&v, r.id))
-                || (ready_work
-                    && v.minutes - r.work_check_at >= 5.
-                    && r.social >= 65.
-                    && !situations::protected(&v, r.id, "cook")))
-            && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"));
+                || occupations::available(&v, r.id)
+                || (v.minutes - r.work_check_at >= 5.
+                    && !situations::protected(&v, r.id, "cook")
+                    && (r.help.as_ref().is_some_and(|q| q.active())
+                        || workforce::offers(&v, &r)
+                            .iter()
+                            .any(|o| o.blocker.is_none()))));
+        if !r.requested
+            && work_time(v.minutes)
+            && autonomy::free_time(&r)
+            && v.minutes - r.work_check_at >= 5.
+        {
+            r.work_check_at = v.minutes;
+        }
         if r.task != "arrive"
             && (sleeping_time(v.minutes, &r) != (r.task == "sleep")
                 || (sleeping_time(v.minutes, &r) && shelter(&v, r.id).is_none())
@@ -921,9 +933,16 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 || chores_start)
             || (requests::work(&r.task) || r.task == "haul")
                 && (r.energy < 28.
+                    || (r.social < 35. && !(r.task == "gather" && autonomy::foraging(&v, &r)))
                     || (workforce::eating(&v, r.id)
-                        && (r.hunger > 60.
-                            || meal_slot(v.minutes).is_some_and(|s| s != r.last_meal_slot))))
+                        && autonomy::meal_due(&r, v.minutes)
+                        && !autonomy::finishing(&v, &r)))
+            || (r.task != "arrive"
+                && r.trip.is_none()
+                && autonomy::free_time(&r)
+                && ((r.task != "rest" && r.energy < 28.)
+                    || (r.task != "socialize" && r.social < 35.)
+                    || (workforce::eating(&v, r.id) && autonomy::meal_due(&r, v.minutes))))
         {
             v.workforce_peers[r.id] = Some(r.clone());
             choose(&mut r, &v);
@@ -1978,7 +1997,8 @@ mod tests {
         let initial: Save = serde_json::from_str(&g.snapshot()).unwrap();
         let mut restored = Game::new();
         assert!(restored.restore(&g.snapshot()));
-        for _ in 0..240 {
+        // Stop before dinner; residents now notice meal time during hobbies.
+        for _ in 0..238 {
             g.tick(0.25);
             restored.tick(0.25);
         }

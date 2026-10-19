@@ -54,9 +54,15 @@ for(let frame=0;frame<80;frame++)g.tick(.25);assert.equal(line(snap(g),id).trans
 assert.equal(g.configure_water_connection(id,3,false),'ok');const active=g.snapshot();
 const night=new Game();assert(night.restore(active));until(night,s=>s.village.minutes%1440>=1260,'Actual evening for line-art review',2*1920);checkpoint(night);await writeFile('artifacts/pipes/night.json',night.snapshot());
 // Controlled outage fixture: keep the real installation and water accounts,
-// empty the night battery, and move owned buffer water back to its cistern.
+// empty the night battery, and move owned kitchen water into another buffer.
 const outage=new Game(),dark=snap(night),source=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===0),target=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===1);
-assert.equal(dark.village.water_supply.trips.length,0);const back=Math.min(2,target.water[0],source.capacity[0]-source.water[0]);target.water[0]-=back;source.water[0]+=back;assert(source.water[0]>0&&target.water[0]<target.capacity[0],'Outage has real source water and room for a transfer');
+assert.equal(dark.village.water_supply.trips.length,0);
+// Resident schedules can leave both cistern and kitchen full. Redistribute the
+// same owned water to create headroom rather than assuming the cistern is low.
+const buffer=[source,...dark.village.water_supply.tanks.filter(t=>t!==source&&t!==target)].find(t=>t.capacity[0]-t.water[0]>=2);
+assert(buffer,'An existing fresh-water buffer has room for this controlled outage');
+const back=Math.min(2,target.water[0]);target.water[0]-=back;buffer.water[0]+=back;
+assert(source.water[0]>0&&target.water[0]<target.capacity[0],'Outage has real source water and room for a transfer');
 for(const n of dark.village.power.network.nodes)if(n.kind!=='roof'){dark.village.power.network.account.discharged+=n.charge;n.charge=0;}
 dark.village.power.stored=0;assert(outage.restore(JSON.stringify(dark)));
 const flow=line(snap(outage),id).transferred;for(let n=0;n<20;n++)outage.tick(.25);assert.equal(line(snap(outage),id).transferred,flow);assert.equal(snap(outage).environment.power.generation,0);checkpoint(outage);await writeFile('artifacts/pipes/outage.json',outage.snapshot());night.free();outage.free();

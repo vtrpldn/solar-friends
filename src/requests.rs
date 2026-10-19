@@ -219,6 +219,7 @@ pub fn observe(r: &mut Resident, v: &Village) {
         q.reason = match r.task.as_str() {
             "eat" => "Paused for a meal. The request will continue afterwards.",
             "rest" => "Paused for rest. The request is saved.",
+            "socialize" => "Paused to catch up with neighbours. The request is saved.",
             "sleep" => "Paused for sleep. The request will continue during community hours.",
             "sanitation" => "Paused for a private moment. The request is saved.",
             "outside" => {
