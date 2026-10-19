@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -7,7 +8,7 @@ await mkdir('artifacts/tools',{recursive:true});
 const TOOLS=15,snap=g=>JSON.parse(g.snapshot()),person=(s,id=0)=>s.residents.find(r=>r.id===id);
 function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();}
 function scene(){
- const g=new Game();g.start_mode('sandbox');assert.equal(g.place('workshop',6,6),'ok');assert.equal(g.place('garden',14,10),'ok');
+ const g=new Game();startEmptySandbox(g);assert.equal(g.place('workshop',6,6),'ok');assert.equal(g.place('garden',14,10),'ok');
  const s=snap(g);Object.assign(s.village,{mode:'story',arrived:true,minutes:540,food:80,meals:10,water:40});
  Object.assign(s.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),use_tools:false,tool_uses:0});
  s.village.economy.outside_jobs=Array(5).fill(false);

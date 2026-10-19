@@ -214,8 +214,8 @@ pub fn gather(v: &mut Village, building: Option<usize>, x: f32, y: f32, amount: 
     let id = logistics::create(
         v,
         Owner::Ground,
-        x.clamp(0.3, 27.7),
-        y.clamp(0.3, 27.7),
+        x.clamp(0.3, crate::MAP_SIZE as f32 - 0.3),
+        y.clamp(0.3, crate::MAP_SIZE as f32 - 0.3),
         amount.max(12),
     )
     .expect("food pile identity exhausted");
@@ -552,7 +552,7 @@ mod tests {
     #[test]
     fn sales_and_gatherings_cannot_spend_reserved_food_even_immediately_after_reload() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -566,7 +566,7 @@ mod tests {
         assert_ne!(g.exchange_parts(), "ok");
         assert_eq!(g.snapshot(), before);
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("square", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -700,7 +700,7 @@ mod tests {
     #[test]
     fn unreachable_food_keeps_hungry_neighbours_foraging_until_they_can_eat() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 15, 18), "ok");
         for x in [12, 14, 16, 18] {
             for y in [15, 21] {

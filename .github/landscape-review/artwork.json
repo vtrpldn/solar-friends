@@ -1,0 +1,36 @@
+{
+  "generator": "image_gen",
+  "transparentBackground": true,
+  "references": [
+    "web/art/workshop-isometric.png",
+    "web/art/warehouse.png",
+    "web/art/mata-atlantica-atlas.png"
+  ],
+  "intent": "Warm painted 2:1 orthographic Brazilian countryside. Open timber and terracotta community shed without a raised platform; four botanical details and four geological details as a transparent 4 by 2 atlas.",
+  "assets": [
+    {
+      "file": "web/art/starter-shed.png",
+      "width": 1254,
+      "height": 1254,
+      "opaque": 419596,
+      "transparent": 1116734
+    },
+    {
+      "file": "web/art/landscape-details.png",
+      "width": 1254,
+      "height": 1254,
+      "opaque": 378827,
+      "transparent": 1101203
+    }
+  ],
+  "prompts": [
+    {
+      "asset": "web/art/starter-shed.png",
+      "prompt": "Single transparent-background isometric basic open community shed for a Brazilian countryside village. Same warm hand-painted miniature art as workshop-isometric.png and warehouse.png. Orthographic 2:1 ground axes, vertical timber posts, modest terracotta pitched roof, open front and sides, simple rear bench, clear central shade for five villagers. Roof framing aligned with footprint; no convergence or twisted roof. No tools, people, clutter, windows, doors, walls, solar panels, platform, slab, large dirt island, halo or background. Full sprite, generous transparent margin, upper-left daylight."
+    },
+    {
+      "asset": "web/art/landscape-details.png",
+      "prompt": "Transparent square atlas with four columns and two rows of small isolated Brazilian countryside nature details, matching mata-atlantica-atlas.png warm painted art and 2:1 orthographic camera. Top row: fern cluster, red bromeliad, purple/yellow wildflowers, golden dry grasses and shrub. Bottom row: weathered granite, pale quartz stones, orange-red clay/ironstone, mossy river boulders with reeds. Small understory scale, upper-left daylight, no people, animals, soil mounds, platforms, dividers, labels, shadows, checkerboard or background."
+    }
+  ]
+}

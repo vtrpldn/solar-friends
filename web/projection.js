@@ -19,7 +19,7 @@ export function unproject(x, y, origin, scale) {
 // Keep logical zoom limits aligned with the minimum visible world scale.
 export function zoomLimits(width, height) {
   const base=Math.max(.001,Math.min(width/1900,height/1050));
-  return {base,min:Math.min(1.8,Math.max(.6,.45/base)),max:1.8};
+  return {base,min:Math.min(1.8,Math.max(.18,.18/base)),max:1.8};
 }
 export function clampZoom(width,height,value) {
   const {min,max}=zoomLimits(width,height);

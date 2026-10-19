@@ -380,7 +380,7 @@ fn introductory_and_steady_sandbox_orders_keep_the_existing_prices_and_calendar(
         terms(view(&g), [1; economy::COUNT], false).prices,
         economy::PRICES
     );
-    assert!(g.start_mode("sandbox"));
+    assert!(g.start_fixture_mode("sandbox"));
     assert!(!view(&g).market.enabled);
     g.set_supplier_variation(true);
     let early = terms(view(&g), [1; economy::COUNT], false);

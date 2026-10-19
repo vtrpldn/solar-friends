@@ -21,7 +21,7 @@ Object.assign(v,{arrived:true,minutes:540,food:60,meals:12});
 v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress.use_tools=false;
 v.economy.money=2000000;v.economy.outside_jobs.fill(false);
 for(const r of authored.residents)Object.assign(r,{task:'idle',trip:null,help:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_building:null,activity_material:null,activity_batch:null,activity_store:null});
-assert(g.restore(JSON.stringify(resetMaterialLocations(authored))));assert.equal(snap(g).village.version,27);
+assert(g.restore(JSON.stringify(resetMaterialLocations(authored))));assert.equal(snap(g).village.version,28);
 assert.equal(g.set_production_target(17,0),'ok');assert.equal(g.place('solar_farm',5,5),'ok');
 const kit=Array(v.economy.stock.length).fill(0);
 for(const stage of snap(g).environment.economy.recipes.find(r=>r.kind==='solar_farm').standard)for(let i=0;i<kit.length;i++)kit[i]+=stage.items[i];
@@ -34,7 +34,7 @@ await writeFile(output+'/recovered.json',g.snapshot());
 let s=snap(g),b=bank(s);const charge=b.charge,id=b.id,received=s.village.simulation.materials.received[13];
 assert.match(placementReason(s.village,'garden',b.x,b.y),/recovered battery/);
 const raw=g.snapshot();assert.equal(JSON.parse(g.battery_move_quote(id,14,20)).allowed,true);assert.equal(g.snapshot(),raw);
-for(const [x,y]of [[0,0],[26,5],[10,13]]){assert.equal(JSON.parse(g.battery_move_quote(id,x,y)).allowed,false);assert.notEqual(g.queue_battery_work(id,'move',x,y),'ok');assert.equal(g.snapshot(),raw);}
+for(const [x,y]of [[0,0],[62,5],[10,13]]){assert.equal(JSON.parse(g.battery_move_quote(id,x,y)).allowed,false);assert.notEqual(g.queue_battery_work(id,'move',x,y),'ok');assert.equal(g.snapshot(),raw);}
 assert.equal(g.queue_battery_work(id,'move',14,20),'ok');
 assert.match(placementReason(snap(g).village,'garden',14,20),/recovered battery/);
 assert.notEqual(g.place('garden',14,20),'ok');assert.notEqual(g.toggle_road(14,20),'ok');checkpoint(g);

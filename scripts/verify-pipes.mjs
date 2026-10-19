@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {writeFileSync} from 'node:fs';
@@ -12,7 +13,7 @@ function account(g){
 }
 function checkpoint(g){const raw=g.snapshot(),h=new Game();if(!h.restore(raw)){writeFileSync('artifacts/pipes/invalid-checkpoint.json',raw);assert.fail('Pipe checkpoint rejected; see artifacts/pipes/invalid-checkpoint.json');}assert.equal(h.snapshot(),raw);h.free();account(g);}
 function until(g,test,label,limit=5*1920){for(let frame=0;frame<limit;frame++){if(test(snap(g)))return;g.tick(.25);}throw Error(label+' · '+g.water_connections());}
-const g=new Game();g.start_mode('sandbox');
+const g=new Game();startEmptySandbox(g);
 for(const [kind,x,y]of [['well',5,5],['kitchen',12,5],['solar_farm',5,18]])assert.equal(g.place(kind,x,y),'ok');
 const f=snap(g),v=f.village;Object.assign(v,{mode:'story',arrived:true,minutes:540,food:60,meals:12,water:80,seedlings:0});
 v.economy.stock.fill(0);v.economy.money=20000000;v.economy.outside_jobs.fill(false);v.supplies.eggs=0;Object.assign(v.progress,{compost:0,scraps:0,tool_uses:0});v.power.stored=10;v.progress.completed.fill(true);v.progress.later_completed.fill(true);

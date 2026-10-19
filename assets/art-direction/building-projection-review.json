@@ -1,6 +1,6 @@
 {
-  "reviewed": "2026-10-09",
-  "scope": "All 26 building variants, day and night. Measured architectural ground directions use shared orthographic calibration; organic groves and orchards have no structural edge measurements.",
+  "reviewed": "2026-10-16",
+  "scope": "All 27 building variants, day and night. Measured architectural ground directions use shared orthographic calibration; organic groves and orchards have no structural edge measurements.",
   "method": "Hand-traced structural landmarks, shared game renderer, day/night visual review. Per-edge tolerance 2 pixels at zoom 1. These are raster illustration tolerances, not a claim that every painted detail has exact geometry. PNG hashes require renewed review after any source replacement.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
@@ -47,7 +47,8 @@
     "banana-treatment-night.png": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4",
     "apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
     "goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
-    "orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4"
+    "orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "starter-shed.png": "edca1e619b1738a9defc86b2873e3773eddff10a2135a9dcd9aa7ea090fa3e7b"
   },
   "banana_treatment_review": {
     "date": "2026-10-14",

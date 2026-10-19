@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -17,7 +18,7 @@ function checkpoint(g){
 }
 function until(g,test,label,limit=5*1920){for(let frame=0;frame<limit;frame++){if(test(snap(g)))return;g.tick(.25);}throw Error(label+' · '+g.water_report());}
 function scene(grey=12,sewage=0){
-  const g=new Game();g.start_mode('sandbox');
+  const g=new Game();startEmptySandbox(g);
   for(const [kind,x,y]of [['home',5,5],['kitchen',12,5],['wetland',18,5],['eco_toilet',5,11],['biodigester',12,11],['banana_treatment',18,11],['solar_farm',5,18]])assert.equal(g.place(kind,x,y),'ok');
   const f=snap(g),v=f.village;Object.assign(v,{mode:'story',arrived:true,minutes:540,water:0,food:60,meals:12,seedlings:0});
   Object.assign(v.circular,{greywater:grey,waste:sewage,auto_feed:false,filter_water:false,banana_treatment:false});v.production.targets[17]=0;v.economy.outside_jobs.fill(false);v.economy.money=20000000;v.power.stored=10;v.progress.completed.fill(true);v.progress.later_completed.fill(true);

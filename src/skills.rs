@@ -139,7 +139,7 @@ mod tests {
     }
     fn kitchen() -> (Game, Resident) {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -335,7 +335,7 @@ mod tests {
     #[test]
     fn service_learning_requires_the_completed_supplied_job() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("workshop", 6, 6), "ok");
         g.set_equipment_condition(true);
         {

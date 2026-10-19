@@ -152,9 +152,6 @@ pub fn cook_at(v: &mut Village, id: usize) -> bool {
     let Some(batch) = production::order_meals(v, Some(id)) else {
         return false;
     };
-    while !work_time(v.minutes) {
-        v.minutes += 1.;
-    }
     let mut g = Game::new();
     let mut r = g
         .app

@@ -220,13 +220,10 @@ pub fn observe(r: &mut Resident, v: &Village) {
             "eat" => "Paused for a meal. The request will continue afterwards.",
             "rest" => "Paused for rest. The request is saved.",
             "socialize" => "Paused to catch up with neighbours. The request is saved.",
-            "sleep" => "Paused for sleep. The request will continue during community hours.",
+            "sleep" => "Paused for sleep. The request will continue after waking.",
             "sanitation" => "Paused for a private moment. The request is saved.",
             "outside" => {
                 "An outside shift comes first. Disable future shifts to make room for village work."
-            }
-            _ if work(&q.task) && !work_time(v.minutes) => {
-                "Waiting for community hours: 09:00–12:00 and 15:00–16:00."
             }
             _ => "Waiting for a safe moment to continue.",
         }
@@ -315,13 +312,6 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             r,
             Phase::Paused,
             "An outside shift comes first. Disable future shifts to make room for village work.",
-        );
-    }
-    if work(&q.task) && !work_time(v.minutes) && !(q.task == "gather" && supplies::urgent(v)) {
-        return wait(
-            r,
-            Phase::Paused,
-            "Waiting for community hours: 09:00–12:00 and 15:00–16:00.",
         );
     }
     if situations::protected(v, r.id, &q.task) {
@@ -986,24 +976,23 @@ mod tests {
         );
     }
     #[test]
-    fn queued_work_waits_through_the_evening_and_sleep_without_extending_shifts() {
+    fn an_evening_help_request_can_finish_without_waiting_for_morning() {
         let mut g = scene();
         g.app.world_mut().resource_mut::<Village>().minutes = 1000.;
         assert!(g.request(0, "gather", false).contains("Happy"));
-        assert_eq!(person(&mut g, 0).help.unwrap().phase, Phase::Paused);
+        assert_ne!(person(&mut g, 0).help.unwrap().phase, Phase::Paused);
         let id = person(&mut g, 0).help.unwrap().id;
         let mut slept = false;
         until(&mut g, |g| {
             let r = person(g, 0);
-            let v = g.app.world().resource::<Village>();
             slept |= r.task == "sleep";
             if r.requested && work(&r.task) {
-                assert!(work_time(v.minutes));
+                assert!(r.energy >= 28.);
             }
             assert_eq!(r.help.as_ref().unwrap().id, id);
             r.help.unwrap().phase == Phase::Complete
         });
-        assert!(slept);
+        assert!(!slept);
         checkpoint(&mut g);
     }
     #[test]
@@ -1117,8 +1106,16 @@ mod tests {
     #[test]
     fn cancelling_a_building_request_puts_carried_supplies_down_without_losing_them() {
         let mut g = scene();
+        {
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            for mut r in q.iter_mut(g.app.world_mut()).filter(|r| r.id != 0) {
+                r.task = "rest".into();
+                r.energy = 5.;
+                r.remaining = 90.;
+            }
+        }
         assert_eq!(g.place("garden", 18, 18), "ok");
-        g.request(0, "build", false);
+        assert!(g.request(0, "build", false).contains("Happy"));
         until(&mut g, |g| {
             g.app
                 .world()
@@ -1129,6 +1126,7 @@ mod tests {
                 .shipments
                 .iter()
                 .any(|h| h.resident == 0 && h.carrying)
+                && person(g, 0).help.as_ref().is_some_and(|q| q.active())
         });
         let before: [u32; economy::COUNT] =
             std::array::from_fn(|i| economy::quantity(g.app.world().resource::<Village>(), i));
@@ -1303,7 +1301,7 @@ mod tests {
             person(g, 0).help.unwrap().phase == Phase::Complete
         });
         assert_eq!(g.app.world().resource::<Village>().economy.work_day[0], 0);
-        assert!(g.app.world().resource::<Village>().minutes >= 1440. + 540.);
+        assert!(g.app.world().resource::<Village>().minutes >= 1020.);
     }
     #[test]
     fn cancelling_an_outside_work_request_preserves_the_shift_and_once_only_pay() {

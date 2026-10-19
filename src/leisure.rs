@@ -9,6 +9,16 @@ pub fn hobby(task: &str) -> bool {
 }
 
 pub fn choose(r: &Resident, v: &Village) -> (&'static str, &'static str) {
+    if founding::weather_shelter(v) && founding::quiet_spot(v, r.id).is_some() {
+        return (
+            "daydream",
+            if climate::at(v, v.minutes).raining {
+                "Listening to the rain from the shared shed."
+            } else {
+                "Taking a quiet moment in the shade of the shared shed."
+            },
+        );
+    }
     if r.social < 65. {
         return ("socialize", "There is time to catch up with my neighbours.");
     }

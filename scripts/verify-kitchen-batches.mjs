@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -13,7 +14,7 @@ function until(g,test,label,limit=14000){
   throw Error(label+': '+JSON.stringify(snap(g).residents.map(r=>[r.name,r.task,r.reason,r.help?.reason])));
 }
 function scene(eggs=false,gas=0){
-  const g=new Game();g.start_mode('sandbox');
+  const g=new Game();startEmptySandbox(g);
   assert.equal(g.place('kitchen',6,6),'ok');assert.equal(g.place('kitchen',16,10),'ok');
   const s=snap(g);Object.assign(s.village,{mode:'story',arrived:true,minutes:540,food:36,meals:0,water:40});
   Object.assign(s.village.supplies,{eggs:eggs?4:0,use_eggs:eggs,feed_hens:false});

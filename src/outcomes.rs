@@ -234,7 +234,7 @@ pub fn valid(v: &Village) -> bool {
     let s = &v.progress.outcomes;
     s.schema == 1
         && s.net_spending.unsigned_abs() <= MONEY_LIMIT as u64
-        && s.housing.len() <= 676
+        && s.housing.len() <= ((crate::MAP_SIZE - 2) * (crate::MAP_SIZE - 2)) as usize
         && s.last_sample
             .is_none_or(|n| n.is_finite() && n >= 0. && n <= v.minutes)
         && s.best_housing_spend
@@ -276,7 +276,7 @@ mod tests {
     use super::*;
     fn scene() -> (Game, Village, Vec<Resident>) {
         let mut g = Game::new();
-        assert!(g.start_mode("sandbox"));
+        assert!(g.start_fixture_mode("sandbox"));
         for (kind, x, y) in [("home", 6, 8), ("home", 10, 8), ("kitchen", 13, 10)] {
             assert_eq!(g.place(kind, x, y), "ok");
         }

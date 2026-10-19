@@ -1,3 +1,17 @@
+fn stop_transport(g: &mut Game) {
+    let people: Vec<_> = g
+        .app
+        .world_mut()
+        .query::<&Resident>()
+        .iter(g.app.world())
+        .cloned()
+        .collect();
+    let mut v = g.app.world_mut().resource_mut::<Village>();
+    for r in &people {
+        logistics::interrupt(&mut v, r);
+        water::interrupt(&mut v, r);
+    }
+}
 use super::*;
 
 fn advance(g: &mut Game, seconds: f32) {
@@ -8,8 +22,10 @@ fn advance(g: &mut Game, seconds: f32) {
 fn setup() -> Game {
     let mut g = Game::new();
     advance(&mut g, 15.);
+    stop_transport(&mut g);
     let mut q = g.app.world_mut().query::<&mut Resident>();
     for mut r in q.iter_mut(g.app.world_mut()) {
+        walking::clear(&mut r);
         r.task = "idle".into();
         r.activity_store = None;
         r.remaining = 90.;
@@ -21,6 +37,7 @@ fn setup() -> Game {
     g
 }
 fn ready_building(g: &mut Game, kind: &str, x: i32, y: i32) {
+    stop_transport(g);
     logistics::fixture_stock(&mut g.app.world_mut().resource_mut::<Village>(), 0, 100);
     assert_eq!(g.place(kind, x, y), "ok");
     let mut v = g.app.world_mut().resource_mut::<Village>();

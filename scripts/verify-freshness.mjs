@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -12,7 +13,7 @@ function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.rest
 function conserved(g){assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));}
 function until(g,test,label,limit=12000){for(let frame=0;frame<limit;frame++){const s=snap(g);if(test(s))return s;g.tick(.25);}throw Error(label+': '+JSON.stringify(snap(g).residents.map(r=>[r.name,r.task,r.reason,r.help?.reason])));}
 function scene(kitchen=true,eggs=0){
-  const g=new Game();g.start_mode('sandbox');if(kitchen)assert.equal(g.place('kitchen',6,6),'ok');
+  const g=new Game();startEmptySandbox(g);if(kitchen)assert.equal(g.place('kitchen',6,6),'ok');
   const s=snap(g);Object.assign(s.village,{mode:'story',arrived:true,minutes:540,food:36,meals:0,water:40});
   Object.assign(s.village.supplies,{eggs,use_eggs:eggs>0,feed_hens:false});
   Object.assign(s.village.circular,{biogas:eggs?3:0,use_biogas:true});
@@ -79,6 +80,6 @@ assert(allLots(s).filter(l=>l.material===EGGS).every(l=>l.produced===6300));chec
 assert.notEqual(kitchen.cancel_production_batch(id),'ok');await writeFile('artifacts/freshness/pot-spoiled.json',kitchen.snapshot());
 // Forged dates, amounts and expired saves are rejected atomically.
 const before=fifo.snapshot();for(const [field,value] of [['amount',600],['produced',99999],['expires',99999]]){const bad=snap(fifo);bad.village.logistics.stores.find(p=>p.food_lots.length).food_lots[0][field]=value;assert(!fifo.restore(JSON.stringify(bad)));assert.equal(fifo.snapshot(),before);}
-const sandbox=new Game();sandbox.start_mode('sandbox');const free=epoch(snap(sandbox),20000);for(const l of allLots(free)){l.produced=0;l.expires=life[l.material];}assert(sandbox.restore(JSON.stringify(free)));sandbox.tick(.25);assert.equal(snap(sandbox).village.freshness.expired.reduce((a,b)=>a+b,0),0);assert.match(freshnessMarkup(snap(sandbox)),/does not spoil in Sandbox/);checkpoint(sandbox);
+const sandbox=new Game();startEmptySandbox(sandbox);const free=epoch(snap(sandbox),20000);for(const l of allLots(free)){l.produced=0;l.expires=life[l.material];}assert(sandbox.restore(JSON.stringify(free)));sandbox.tick(.25);assert.equal(snap(sandbox).village.freshness.expired.reduce((a,b)=>a+b,0),0);assert.match(freshnessMarkup(snap(sandbox)),/does not spoil in Sandbox/);checkpoint(sandbox);
 for(const game of [g,copy,interrupted,fifo,cooked,waste,kitchen,sandbox])game.free();
 console.log('PASS: food age survives real hauling and recovery; FIFO eating, partial cargo expiry, once-only losses, fresh-only pot refunds, exact replay, invalid-date rejection, recovery and forgiving Sandbox are verified.');

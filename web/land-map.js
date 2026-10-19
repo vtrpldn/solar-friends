@@ -1,7 +1,9 @@
+import {habitatColors} from './habitats.js';
 import {installRestorationUI} from './restoration-ui.js';
 const layers={
+  habitat:{legend:'Living habitats · inspect a cell for its plants, underlying geology and growing conditions.',color:g=>habitatColors[g.biome]+'88'},
   moisture:{legend:'Pale → deep blue · actual saved root-zone wetness. Rain and watering remain in the ground after harvest or demolition.',color:g=>`rgba(30,104,170,${.08+g.moisture*.55})`},
-  shade:{legend:'Purple · shade from visible perimeter trees, food forests, timber, bamboo and banana beds. Shade slows drying; heavy shade reduces crop growth and solar output.',color:g=>`rgba(72,51,108,${g.shade*.65})`},
+  shade:{legend:'Purple · shade from visible woodland trees, food forests, timber, bamboo and banana beds. Shade slows drying; heavy shade reduces crop growth and solar output.',color:g=>`rgba(72,51,108,${g.shade*.65})`},
   fertility:{legend:'Brown → green · lower to higher fertility. Building work, roads and extraction leave lasting disturbance.',color:g=>`hsla(${30+g.fertility*80},45%,42%,.42)`},
   retention:{legend:'Pale → deep blue · how slowly this ground dries. This view shows retention, not stored water.',color:g=>`rgba(45,108,156,${.12+(g.retention-.65)/.7*.45})`},
   disturbance:{legend:'Orange · disturbed ground. Darker plots record foundation work, road building or extraction.',color:g=>`rgba(173,88,40,${g.disturbance*.6})`},
@@ -42,7 +44,7 @@ export function installLandMap(api){
       if(!ground)message='Choose an inland clearing to inspect its ground.';
       else{
         focus={x:pointer.x,y:pointer.y,size:Math.sqrt(preview.cells)};
-        message=`Plot ${pointer.x}, ${pointer.y} · ${preview.cells} ${preview.cells===1?'cell':'cells'}\nFertility ${Math.round(ground.fertility*100)}% · water retention ×${ground.retention.toFixed(2)}\nMoisture ${Math.round(ground.moisture*100)}% · tree shade ${Math.round(ground.shade*100)}%\nCrop growth ×${preview.growth_multiplier.toFixed(2)} · harvest ×${preview.yield_multiplier.toFixed(2)}\nSolar exposure ${Math.round(preview.solar_exposure*100)}% · disturbance ${Math.round(ground.disturbance*100)}%`;
+        message=`${ground.biome} · ${ground.geology}\nPlot ${pointer.x}, ${pointer.y} · ${preview.cells} ${preview.cells===1?'cell':'cells'}\nFertility ${Math.round(ground.fertility*100)}% · water retention ×${ground.retention.toFixed(2)}\nMoisture ${Math.round(ground.moisture*100)}% · tree shade ${Math.round(ground.shade*100)}%\nCrop growth ×${preview.growth_multiplier.toFixed(2)} · harvest ×${preview.yield_multiplier.toFixed(2)}\nSolar exposure ${Math.round(preview.solar_exposure*100)}% · disturbance ${Math.round(ground.disturbance*100)}%`;
         if(preview.deposit)message+=`\nLocal ${['','','earth','stone','reclaimed material'][preview.deposit.material]} patch · ${preview.deposit.remaining} / ${preview.deposit.maximum} remaining`;
         else if(rule.material!=null&&!tool)message+='\nNo matching local deposit at this plot.';
       }

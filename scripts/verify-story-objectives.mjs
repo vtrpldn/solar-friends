@@ -23,4 +23,4 @@ assert.equal(goalRoute(orchard,quests[1].objectives(orchard.village)[0]).type,'p
 const homes={village:{buildings:[{kind:'home',id:0,progress:100},{kind:'home',id:1,progress:0}],economy:{projects:[{building:0,recipe:'adobe'},{building:1,recipe:'standard'}]},building_jobs:[]},environment:{economy:{projects:[{kind:'home',building:1,recipe:'standard'}]}}};
 assert.deepEqual(goalRoute(homes,{build:'home',recipe:'adobe',target:1}),{type:'visit',id:0},'Review the completed material method even while a different home is under construction');
 const before=g.snapshot();g.story_outcomes_report();assert.equal(g.snapshot(),before);g.free();
-console.log(`PASS: thirteen outcome chapters, ${optional} separate optional lessons, all twenty-one building types taught, native observation targets, meaningful orchard and recipe routes, finite progress and read-only reports.`);
+console.log(`PASS: thirteen outcome chapters, ${optional} separate optional lessons, all ${storyBuildingKinds.length} building types taught, native observation targets, meaningful orchard and recipe routes, finite progress and read-only reports.`);

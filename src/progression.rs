@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 
 pub const CHAPTER_COUNT: usize = 13;
 pub const LATER_CHAPTERS: usize = CHAPTER_COUNT - 4;
-pub const BUILDINGS: [&str; 21] = [
+pub const BUILDINGS: [&str; 22] = [
+    "shed",
     "home",
     "garden",
     "well",
@@ -338,7 +339,7 @@ mod tests {
     #[test]
     fn rain_and_lighting_credit_require_actual_collection_and_energy() {
         let mut g = Game::new();
-        assert!(g.start_mode("sandbox"));
+        assert!(g.start_fixture_mode("sandbox"));
         assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("well", 5, 5), "ok");
         assert_eq!(g.place("streetlight", 9, 5), "ok");
@@ -383,7 +384,7 @@ mod tests {
     #[test]
     fn late_story_offers_personal_time_without_inventing_overwork() {
         let mut g = Game::new();
-        assert!(g.start_mode("sandbox"));
+        assert!(g.start_fixture_mode("sandbox"));
         assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -409,7 +410,7 @@ mod tests {
     #[test]
     fn a_real_cooking_concern_takes_precedence_over_the_story_check_in() {
         let mut g = Game::new();
-        assert!(g.start_mode("sandbox"));
+        assert!(g.start_fixture_mode("sandbox"));
         assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -427,7 +428,7 @@ mod tests {
     #[test]
     fn final_chapter_rewards_sustained_outcomes_without_every_building() {
         let mut g = Game::new();
-        assert!(g.start_mode("sandbox"));
+        assert!(g.start_fixture_mode("sandbox"));
         for (x, y) in [(6, 6), (10, 6)] {
             assert_eq!(g.place("home", x, y), "ok");
         }

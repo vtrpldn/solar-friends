@@ -43,8 +43,8 @@ fn perimeter_trees_and_cached_shade_are_seeded_and_queries_leave_them_unchanged(
     );
     let mut uncached = v.clone();
     uncached.land.natural_light.clear();
-    for y in 0..28 {
-        for x in 0..28 {
+    for y in 0..MAP_SIZE {
+        for x in 0..MAP_SIZE {
             assert_eq!(ground(v, x, y), ground(&uncached, x, y));
         }
     }
@@ -117,7 +117,7 @@ fn a_blueprint_keeps_natural_trees_until_foundation_work_actually_starts() {
 #[test]
 fn banana_canopies_shade_solar_even_while_treatment_is_paused_and_move_with_the_bed() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("solar_farm", 18, 18), "ok");
     g.app.world_mut().resource_mut::<Village>().minutes = 720.;

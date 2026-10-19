@@ -2,7 +2,7 @@ use super::*;
 
 fn scene() -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (kind, x, y) in [
         ("home", 5, 5),
         ("kitchen", 12, 5),

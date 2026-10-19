@@ -20,7 +20,7 @@
       "target_x": 10.75,
       "target_y": 16.75,
       "task": "build",
-      "trait_name": "Patient \u00b7 gardener",
+      "trait_name": "Patient · gardener",
       "x": 10.824997901916504,
       "y": 16.75
     },
@@ -39,7 +39,7 @@
       "target_x": 10.899999618530273,
       "target_y": 16.75,
       "task": "build",
-      "trait_name": "Practical \u00b7 builder",
+      "trait_name": "Practical · builder",
       "x": 10.974997520446777,
       "y": 16.75
     },
@@ -58,7 +58,7 @@
       "target_x": 10.75,
       "target_y": 16.75,
       "task": "build",
-      "trait_name": "Sociable \u00b7 cook",
+      "trait_name": "Sociable · cook",
       "x": 10.75,
       "y": 16.75
     },
@@ -69,7 +69,7 @@
       "hunger": 10.887500762939453,
       "id": 3,
       "last_meal_slot": 15,
-      "name": "Cau\u00e3",
+      "name": "Cauã",
       "reason": "Turning kitchen scraps into nourishment for our soil.",
       "remaining": 10,
       "requested": false,
@@ -77,7 +77,7 @@
       "target_x": 6.900000095367432,
       "target_y": 16.75,
       "task": "compost",
-      "trait_name": "Curious \u00b7 forager",
+      "trait_name": "Curious · forager",
       "x": 7.1335673332214355,
       "y": 16.750234603881836
     },
@@ -96,7 +96,7 @@
       "target_x": 10.75,
       "target_y": 16.75,
       "task": "build",
-      "trait_name": "Thoughtful \u00b7 caretaker",
+      "trait_name": "Thoughtful · caretaker",
       "x": 10.824997901916504,
       "y": 16.75
     }
@@ -350,7 +350,7 @@
     ],
     "food": 132,
     "harvests": 10,
-    "map_size": 28,
+    "map_size": 64,
     "meals": 5,
     "meals_served": 45,
     "minutes": 7800,

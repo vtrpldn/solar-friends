@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -7,7 +8,7 @@ import {sourceKinds} from '../web/resource-sites.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 await mkdir('artifacts/restoration',{recursive:true});
 const snap=g=>JSON.parse(g.snapshot());
-function scene(){const g=new Game();g.start_mode('sandbox');const f=snap(g),v=f.village;Object.assign(v,{mode:'story',minutes:540,arrived:true,food:60,meals:16});Object.assign(v.progress,{compost:4,completed:Array(4).fill(true),later_completed:Array(9).fill(true)});v.economy.outside_jobs.fill(false);
+function scene(){const g=new Game();startEmptySandbox(g);const f=snap(g),v=f.village;Object.assign(v,{mode:'story',minutes:540,arrived:true,food:60,meals:16});Object.assign(v.progress,{compost:4,completed:Array(4).fill(true),later_completed:Array(9).fill(true)});v.economy.outside_jobs.fill(false);
  for(const r of f.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{},last_meal_slot:0});
  assert(g.restore(JSON.stringify(resetMaterialLocations(f))));const poor=snap(g);poor.village.land.soil=[];for(const y of [17,18])for(const x of [17,18])poor.village.land.soil.push({x,y,nutrients:.4,disturbance:.6,cover:.1});assert(g.restore(JSON.stringify(poor)));return g;}
 function until(g,test,label){for(let n=0;n<12000;n++){const s=snap(g);assert(s.residents.filter(r=>r.task==='restore').length<=1,'One resident claims one restoration job');if(test(s))return s;g.tick(.25);}throw Error(label+': '+JSON.stringify(snap(g).residents.map(r=>[r.name,r.task,r.reason])));}

@@ -5,6 +5,8 @@ export function storyPlanningScene(){
  const game=new Game();
  try{
   if(!game.start_mode('sandbox'))throw Error('Could not prepare Story teaching scene.');
+  const initial=JSON.parse(game.snapshot());initial.village.buildings=[];initial.village.economy.next_building=0;
+  if(!game.restore(JSON.stringify(resetMaterialLocations(initial))))throw Error('Could not author the teaching layout.');
   for(const [kind,x,y] of [['well',7,12],['home',8,8],['home',12,7],['garden',13,10],['kitchen',10,10],['grove',6,14]]){
    if(game.place(kind,x,y)!=='ok')throw Error('Story scene needs a clear '+kind+' plot.');
   }

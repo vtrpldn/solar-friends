@@ -2,7 +2,9 @@
 use crate::{Game, MAP_SIZE, Village, interactions, resource_sites, river_bank, simulation};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+mod habitat;
 pub mod vegetation;
+pub use habitat::habitat;
 mod water;
 pub use water::{
     RootZone, advance_fallow, condition, growth, harvest_soil, plot_water, solar_exposure,
@@ -47,6 +49,8 @@ pub struct State {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub struct Ground {
+    pub biome: &'static str,
+    pub geology: &'static str,
     pub fertility: f32,
     pub retention: f32,
     pub cover: f32,
@@ -58,14 +62,14 @@ pub struct Ground {
 // Broad geological regions are legible across seeds; the amount at each patch varies.
 const REGIONS: [(i32, i32, i32, i32); 9] = [
     (1, 1, 16, 11),
-    (12, 14, 9, 12),
-    (1, 18, 9, 9),
-    (17, 17, 4, 7),
-    (21, 21, 6, 6),
-    (17, 24, 4, 3),
+    (12, 14, 25, 18),
+    (1, 33, 24, 27),
+    (17, 17, 6, 10),
+    (35, 17, 15, 16),
+    (24, 43, 25, 17),
     (1, 8, 9, 16),
-    (13, 1, 9, 6),
-    (10, 24, 10, 3),
+    (30, 1, 18, 9),
+    (10, 38, 13, 8),
 ];
 fn quantities(seed: u32, material: usize) -> [u32; 3] {
     let total = resource_sites::LAND[material - 2] as u32;
@@ -236,25 +240,24 @@ pub fn ground(v: &Village, x: i32, y: i32) -> Ground {
     let index = (y * MAP_SIZE + x) as u32;
     let starter = (4..=16).contains(&x) && (4..=16).contains(&y);
     let sample = |domain| simulation::sample(v.land.seed, domain, index) as f64 / u32::MAX as f64;
+    let profile = habitat(v.land.seed, x as f32, y as f32);
     let base_fertility = if starter {
         0.72
     } else {
-        0.35 + sample(51) as f32 * 0.6
+        profile.2 + (sample(51) as f32 - 0.5) * 0.08
     };
-    let base_cover = if starter {
-        0.35
-    } else {
-        0.2 + sample(53) as f32 * 0.7
-    };
+    let base_cover = if starter { 0.35 } else { profile.4 };
     let edit = v.land.soil.iter().find(|s| s.x == x && s.y == y);
     let nutrients = edit.map_or(1., |s| s.nutrients);
     let disturbance = edit.map_or(0., |s| s.disturbance);
     Ground {
+        biome: profile.0,
+        geology: profile.1,
         fertility: (base_fertility * nutrients * (1. - disturbance * 0.3)).clamp(0., 1.),
         retention: if starter {
             1.
         } else {
-            0.65 + sample(52) as f32 * 0.7
+            (profile.3 + (sample(52) as f32 - 0.5) * 0.08).clamp(0.65, 1.35)
         },
         cover: edit.map_or(base_cover, |s| s.cover),
         nutrients,
@@ -278,10 +281,7 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     disturb_plot(v, n, x, y, impact);
 }
 pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
-    if !crate::sandbox::land(v) {
-        vegetation::clear(v, n, x, y);
-        return;
-    }
+    let impact = if crate::sandbox::land(v) { impact } else { 0. };
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
             if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
@@ -433,6 +433,8 @@ impl Game {
         }
         let count = rows.len() as f32;
         let soil = Ground {
+            biome: ground(v, x, y).biome,
+            geology: ground(v, x, y).geology,
             fertility: rows.iter().map(|r| r.fertility).sum::<f32>() / count,
             retention: rows.iter().map(|r| r.retention).sum::<f32>() / count,
             nutrients: rows.iter().map(|r| r.nutrients).sum::<f32>() / count,

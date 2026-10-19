@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -25,7 +26,7 @@ for(const [x,y]of [[15,16],[17,16],[19,16]])assert.equal(g.restore_plot(x,y),'ok
 assert.equal(snap(g).village.progress.compost,0);assert(snap(g).village.land.soil.some(s=>s.nutrients>1&&s.disturbance<.4));checkpoint(g);await writeFile('artifacts/living-land/restored-clearing.json',g.snapshot());
 const quarry=new Game();assert.equal(quarry.place_source(3,18,18),'ok');assert.equal(snap(quarry).village.land.soil.length,0);assert.equal(quarry.harvest_source(0),'ok');
 until(quarry,s=>s.village.economy.sources[0].harvests>0,'Actual resident extraction');const worked=snap(quarry).village.land.soil;assert(worked.length===4&&worked.every(s=>s.disturbance>0));assert.equal(quarry.clear_source(0),'ok');assert.deepEqual(snap(quarry).village.land.soil,worked);checkpoint(quarry);await writeFile('artifacts/living-land/extracted-ground.json',quarry.snapshot());
-const banana=new Game();banana.start_mode('sandbox');assert(banana.configure_sandbox_rules(false,true,true));assert.equal(banana.place('solar_farm',18,18),'ok');let noon=snap(banana);noon.village.minutes=720;assert(banana.restore(JSON.stringify(noon)));
+const banana=new Game();startEmptySandbox(banana);assert(banana.configure_sandbox_rules(false,true,true));assert.equal(banana.place('solar_farm',18,18),'ok');let noon=snap(banana);noon.village.minutes=720;assert(banana.restore(JSON.stringify(noon)));
 const sun=snap(banana).environment.power.solar_generation;assert.equal(banana.place('banana_treatment',15,16),'ok');const shaded=snap(banana).environment.power.solar_generation;
 assert(shaded<sun);banana.configure_banana_treatment(false);assert.equal(snap(banana).environment.power.solar_generation,shaded);checkpoint(banana);await writeFile('artifacts/living-land/banana-shade.json',banana.snapshot());
 for(const game of [edge,g,quarry,banana])game.free();console.log(`PASS: seeded visible forest and real clearing shade, saved road/extraction disturbance, ${appearance.length} restrained soil patches, resident restoration, exact checkpoints, read-only appearance, and banana canopy solar exposure (${sun.toFixed(2)} → ${shaded.toFixed(2)}).`);

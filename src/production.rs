@@ -522,7 +522,7 @@ pub fn sync(v: &mut Village) {
         .iter()
         .filter(|b| b.active())
         .map(|b| {
-            let phase = if !operational(v, b.site) || !work_time(v.minutes) {
+            let phase = if !operational(v, b.site) {
                 Phase::Paused
             } else if site(v, b.site).is_some_and(|s| {
                 s.kind == Kind::Workshop
@@ -804,8 +804,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
     let Some(b) = batch(v, id).filter(|b| ready(v, b)).cloned() else {
         return false;
     };
-    if !work_time(v.minutes)
-        || !matches_task(b.material, &r.task)
+    if !matches_task(b.material, &r.task)
         || (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08
         || seconds <= 0.
         || !seconds.is_finite()
@@ -1015,7 +1014,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker,"work_speed":work_speed(v,s),"energy_per_hour":if s.powered{WORKSHOP_ENERGY_PER_HOUR}else{0.}})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
-        "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
+        "recipes":recipes,"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
         "note":"Preparation inputs and outputs belong to the worksite buffer; kitchen pots use their existing pantry. Hauling changes their location; work consumes staged inputs once and credits outputs once."})
 }
 pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a Resident>) {
@@ -1039,7 +1038,7 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         .production
         .sites
         .iter()
-        .filter(|s| operational(v, s.id) && work_time(v.minutes))
+        .filter(|s| operational(v, s.id))
         .map(|s| s.id)
         .collect();
     let water_ready: Vec<_> = v

@@ -4,7 +4,7 @@ import { occupies } from './building-footprints.js';
 const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = x => { const n = clamp(x); return n * n * (3 - 2 * n); };
 const seed = n => { const v = Math.sin(n * 127.1 + 43.7) * 43758.5453; return v - Math.floor(v); };
-const sites = Array.from({length:480},(_,i)=>({id:i,x:1+seed(i*3)*26,y:1+seed(i*3+1)*26,phase:seed(i*3+2)}));
+const sites = Array.from({length:Math.round(480*(MAP_SIZE/28)**2)},(_,i)=>({id:i,x:1+seed(i*3)*(MAP_SIZE-2),y:1+seed(i*3+1)*(MAP_SIZE-2),phase:seed(i*3+2)}));
 
 // Only the simulation's raining flag can produce rainfall. The afternoon
 // schedule supplies visual buildup, cloud cover, and two hours of drying.
@@ -35,7 +35,7 @@ export function drawGroundWeather(ctx, {conditions, buildings, project, scale, t
   ctx.save();
   // Small shallow pools sit on the ground plane, underneath buildings and
   // residents. The same seeded positions survive panning, zooming and pause.
-  for(const site of clear.filter(p=>p.id<34)) {
+  for(const site of clear.filter(p=>p.id<Math.round(34*(MAP_SIZE/28)**2))) {
     if(riverBank(site.x,site.y)||conditions.wet<=.01)continue;
     const p=project(site.x,site.y),radius=(10+site.phase*17)*scale;
     ctx.save();ctx.translate(p.x,p.y);ctx.scale(1,.5);
@@ -49,7 +49,7 @@ export function drawGroundWeather(ctx, {conditions, buildings, project, scale, t
     ctx.restore();counts.puddles++;
   }
   if(conditions.rain&&!reducedMotion) {
-    for(const site of clear.filter(p=>p.id<160)) {
+    for(const site of clear.filter(p=>p.id<Math.round(160*(MAP_SIZE/28)**2))) {
       const phase=(time*1.6+site.phase)%1;if(phase>.45)continue;
       const p=project(site.x,site.y),water=riverBank(site.x,site.y),r=(1.5+phase*(water?16:8))*scale;
       ctx.strokeStyle=`rgba(213,231,226,${conditions.rain*(1-phase/.45)*(water?.36:.32)})`;

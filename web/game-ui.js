@@ -1,3 +1,4 @@
+import {habitatAt,habitatColors} from './habitats.js';
 import {usesLogistics} from './sandbox-rules.js';
 import {paintIcon} from './build-menu.js';
 import {allBuildingArt,buildingArtKey} from './building-art.js';
@@ -6,7 +7,7 @@ import {riverBank,MAP_SIZE} from './terrain.js';
 const sheet=new URL('./ui/items.svg',import.meta.url).href;
 export const materialIcons=['timber','bamboo','earth','stone','salvage','frames','walls','tiles','fittings','plumbing','electrical','covering','panels','batteries','pumps','tools','food','meals','eggs','compost','scraps','seedlings','tree_starts','bamboo_starts','fodder','milk','honey','goats','bees'];
 export const itemIcon=key=>`<svg class="item-icon" aria-hidden="true" viewBox="0 0 48 48"><use href="${sheet}#${key}"/></svg>`;
-const buildingNames={orchard:'Fruit orchard',goat_pasture:'Goat pasture',apiary:'Stingless bee apiary',hydro:'River generator',eco_toilet:'Ecological toilet',banana_treatment:'Banana treatment bed',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost station',square:'Village square',coop:'Chicken coop',workshop:'Workshop',solar_farm:'Solar farm',streetlight:'Street light'};
+const buildingNames={shed:'Community shed',orchard:'Fruit orchard',goat_pasture:'Goat pasture',apiary:'Stingless bee apiary',hydro:'River generator',eco_toilet:'Ecological toilet',banana_treatment:'Banana treatment bed',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost station',square:'Village square',coop:'Chicken coop',workshop:'Workshop',solar_farm:'Solar farm',streetlight:'Street light'};
 
 export function installGameUI({images,avatar,paintPortraits,selectPerson,showPanel,openDev,focusAt,worldView}) {
   const $=s=>document.querySelector(s);
@@ -56,7 +57,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     else{showPanel('supplies-panel',resource==='materials'?'stores':resource==='water'?'water':'pantry');if(resource==='materials'){$('#materials-stores').open=true;$('#materials-stores').scrollIntoView({block:'nearest'});}}
   };
   const map=$('#village-map'),ctx=map.getContext('2d');
-  let mapCentre={x:14,y:14},buildingKey='';
+  let mapCentre={x:10,y:13},buildingKey='',mapTerrain=null,mapSeed=null;
   map.onclick=event=>{const rect=map.getBoundingClientRect();mapCentre={x:(event.clientX-rect.left)/rect.width*MAP_SIZE,y:(event.clientY-rect.top)/rect.height*MAP_SIZE};focusAt(mapCentre.x,mapCentre.y);};
   map.onkeydown=event=>{const delta={ArrowLeft:[-2,0],ArrowRight:[2,0],ArrowUp:[0,-2],ArrowDown:[0,2]}[event.key];if(!delta)return;event.preventDefault();event.stopPropagation();mapCentre={x:Math.max(0,Math.min(MAP_SIZE,mapCentre.x+delta[0])),y:Math.max(0,Math.min(MAP_SIZE,mapCentre.y+delta[1]))};focusAt(mapCentre.x,mapCentre.y);};
   const portraits=new Map();
@@ -86,14 +87,21 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
       button.dataset.condition=condition;
       button.querySelector('.citizen-status').textContent=away&&r.trip.purpose==='pickup'?'⇄':away&&r.trip.purpose==='work'?'↗':asleep?'z':r.trip?'↔':r.hunger>75||r.energy<25?'!':'';
     }
+    drawMap(state,selected);
+  }
+  function drawMap(state,selected){
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
-    ctx.fillStyle='#87965b';ctx.fillRect(0,0,MAP_SIZE,MAP_SIZE);
-    for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ctx.fillStyle=riverBank(x,y)?'#74a7a0':(x+y)%7===0?'#a9aa6c':'#87965b';ctx.fillRect(x,y,1,1);}
+    if(!mapTerrain||mapSeed!==state.village.land.seed){
+      mapTerrain=document.createElement('canvas');mapTerrain.width=map.width;mapTerrain.height=map.height;mapSeed=state.village.land.seed;
+      const ground=mapTerrain.getContext('2d');ground.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
+      for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ground.fillStyle=riverBank(x,y)?'#74a7a0':habitatColors[habitatAt(mapSeed,x,y)];ground.fillRect(x,y,1,1);}
+    }
+    ctx.drawImage(mapTerrain,0,0,MAP_SIZE,MAP_SIZE);
     ctx.fillStyle='#d3b181';for(const [x,y] of state.village.roads)ctx.fillRect(x-.45,y-.45,.9,.9);
     for(const b of state.village.buildings){ctx.fillStyle=b.progress>=100?'#ece0a8':'#ac7851';ctx.fillRect(b.x-.7,b.y-.7,1.4,1.4);}
     for(const r of state.residents){if(r.trip?.phase==='away')continue;ctx.fillStyle=r.id===selected?'#ffe296':'#435d36';ctx.beginPath();ctx.arc(r.x,r.y,.45,0,Math.PI*2);ctx.fill();}
     ctx.strokeStyle='#fff5cd';ctx.lineWidth=.3;ctx.beginPath();worldView().forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();ctx.restore();
   }
   paintPortraits();
-  return {update,updateBuilding,selectSupplyPage};
+  return {update,updateBuilding,selectSupplyPage,drawMap};
 }

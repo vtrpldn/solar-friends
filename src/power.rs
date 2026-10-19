@@ -434,10 +434,13 @@ mod hydro_tests {
     #[test]
     fn river_generator_requires_bank_access_and_powers_the_night_in_dry_weather() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_ne!(g.place("hydro", 5, 5), "ok");
         assert_ne!(g.place("hydro", 25, 5), "ok");
-        assert_eq!(g.place("hydro", 26, 5), "ok");
+        assert_eq!(
+            g.place("hydro", (river_center(5.) - 1.35).ceil() as i32, 5),
+            "ok"
+        );
         assert_eq!(g.place("streetlight", 20, 5), "ok");
         let mut v = g.app.world().resource::<Village>().clone();
         fixtures::connect(&mut v, Owner::Building(0), Owner::Building(1));

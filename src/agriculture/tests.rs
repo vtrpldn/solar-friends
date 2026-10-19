@@ -1,7 +1,7 @@
 use super::*;
 fn scene(kind: &str) -> Game {
     let mut g = Game::new();
-    assert!(g.start_mode("sandbox"));
+    assert!(g.start_fixture_mode("sandbox"));
     assert_eq!(g.place(kind, 6, 6), "ok");
     let mut v = g.app.world_mut().resource_mut::<Village>();
     v.mode = modes::Mode::Story;

@@ -460,7 +460,7 @@ fn battery_commands_reject_bad_plots_duplicate_claims_and_forged_hardware_withou
     let mut g = recovered();
     let bank = bank(&g);
     let raw = g.snapshot();
-    for (x, y) in [(26, 5), (0, 0), (10, 13)] {
+    for (x, y) in [(62, 5), (0, 0), (10, 13)] {
         assert_ne!(g.queue_battery_work(bank.0, "move", x, y), "ok");
         assert_eq!(g.snapshot(), raw);
     }
@@ -476,7 +476,7 @@ fn battery_commands_reject_bad_plots_duplicate_claims_and_forged_hardware_withou
             "work" => bad["village"]["power"]["battery_jobs"][0]["work"] = 12.into(),
             "destination" => {
                 bad["village"]["power"]["battery_jobs"][0]["destination"] =
-                    serde_json::json!([26, 5])
+                    serde_json::json!([62, 5])
             }
             _ => bad["village"]["power"]["network"]["nodes"][0]["equipment"] = 2.into(),
         }
@@ -490,7 +490,7 @@ fn battery_commands_reject_bad_plots_duplicate_claims_and_forged_hardware_withou
 #[test]
 fn free_preview_equipment_cannot_be_salvaged_into_purchased_hardware() {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     assert_eq!(g.place("solar_farm", 5, 5), "ok");
     g.app
         .world_mut()

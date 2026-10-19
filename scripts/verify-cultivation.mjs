@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {restockFixtureOrganics} from '../web/dev/material-fixture.js';
@@ -7,7 +8,7 @@ const snap=g=>JSON.parse(g.snapshot());
 function until(g,predicate,label,limit=3*1920){for(let tick=0;tick<limit;tick++){g.tick(.25);if(tick%4===3&&predicate(snap(g)))return;}throw new Error(label+' did not finish within three days');}
 await mkdir('artifacts/cultivation',{recursive:true});
 async function harvest(name,nutrients,compost){
- const g=new Game();g.start_mode('sandbox');assert(g.configure_sandbox_rules(false,true,true));assert.equal(g.place('garden',5,5),'ok');
+ const g=new Game();startEmptySandbox(g);assert(g.configure_sandbox_rules(false,true,true));assert.equal(g.place('garden',5,5),'ok');
  let fixture=snap(g);for(const soil of fixture.village.land.soil)soil.nutrients=nutrients;fixture.village.progress.compost=compost;
  assert(g.restore(JSON.stringify(restockFixtureOrganics(fixture))),'Explicit soil fixture must meet current save validation');
  until(g,s=>s.village.arrived,'arrival');
@@ -27,7 +28,7 @@ const healthy=await harvest('healthy',1,0),tired=await harvest('depleted',.4,0),
 assert(tired.food<healthy.food,'Depleted ground produces less with the same worker and crop');
 assert(tired.matureMinutes>healthy.matureMinutes,'Depleted ground matures later even when the same work window can contain both harvests');
 assert(amended.nutrients>tired.nutrients,'Resident-applied compost improves saved soil');assert.equal(amended.compost,0);
-const g=new Game();g.start_mode('sandbox');assert(g.configure_sandbox_rules(false,true,true));assert.equal(g.place('solar_farm',18,18),'ok');
+const g=new Game();startEmptySandbox(g);assert(g.configure_sandbox_rules(false,true,true));assert.equal(g.place('solar_farm',18,18),'ok');
 let fixture=snap(g);fixture.village.minutes=720;assert(g.restore(JSON.stringify(restockFixtureOrganics(fixture))));
 const before=snap(g).environment.power.solar_generation;
 assert.equal(g.place('grove',15,15),'ok');const shade=JSON.parse(g.land_preview('solar_farm',18,18)),after=snap(g).environment.power.solar_generation;
@@ -39,5 +40,5 @@ assert.equal(JSON.parse(g.land_preview('solar_farm',18,18)).solar_exposure,shade
 until(g,s=>!s.village.buildings.some(b=>b.id===1),'resident grove removal');
 assert.equal(JSON.parse(g.land_preview('solar_farm',18,18)).solar_exposure,1);
 const cleared=g.snapshot();assert(g.restore(cleared));assert.equal(g.snapshot(),cleared);await writeFile('artifacts/cultivation/cleared-shade.json',cleared);
-const edge=new Game();edge.start_mode('sandbox');assert(edge.configure_sandbox_rules(false,true,true));assert.equal(edge.place('garden',1,1),'ok');assert.equal(JSON.parse(edge.land_preview('garden',1,1)).cells,4);assert(edge.restore(edge.snapshot()));edge.free();
+const edge=new Game();startEmptySandbox(edge);assert(edge.configure_sandbox_rules(false,true,true));assert.equal(edge.place('garden',1,1),'ok');assert.equal(JSON.parse(edge.land_preview('garden',1,1)).cells,4);assert(edge.restore(edge.snapshot()));edge.free();
 g.free();console.log('PASS: real resident gardening, soil-dependent yield and maturity, actual compost use, persistent nutrients, exact saves and matching solar/shade preview. '+JSON.stringify({healthy,tired,amended,solar:{before,after,exposure:shade.solar_exposure}}));

@@ -111,7 +111,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     const button=event.target.closest('[data-store-target]');if(!button)return;
     const row=button.closest('.storage-location'),building=Number(button.dataset.storeTarget),store=snapshot().village.logistics.stores.find(p=>p.owner.kind==='warehouse'&&p.owner.id===building),target=[...store.target];
     target[Number(row.querySelector('select').value)]=Number(row.querySelector('input').value);
-    const result=game().set_storage_target(building,JSON.stringify(target));transact(result);if(result==='ok')notify('Reserve set. Residents will move available supplies during community hours.');
+    const result=game().set_storage_target(building,JSON.stringify(target));transact(result);if(result==='ok')notify('Reserve set. Residents will move available supplies when they have the energy.');
   };
   $('#storage-locations').onchange=event=>{if(event.target.matches('select')){const row=event.target.closest('.storage-location'),building=Number(row.querySelector('button').dataset.storeTarget),store=snapshot().village.logistics.stores.find(p=>p.owner.kind==='warehouse'&&p.owner.id===building);row.querySelector('input').value=store.target[Number(event.target.value)];}};
   $('#storage-locations').addEventListener('focusout',()=>queueMicrotask(update));
@@ -131,7 +131,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.materials[16].available<4||e.used+2>e.capacity;
     $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}${e.production?.reserved_space?` · ${e.production.reserved_space} spaces reserved for processing`:''}`;
-    $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
+    $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows each neighbour’s energy and needs`:'Plan a building to start a shared project. Blueprints are free.';
     const outlook=forecasts.summary();
     $('#project-forecast').hidden=!e.projects.length;
     $('#project-forecast-run').disabled=outlook.pending;

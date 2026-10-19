@@ -493,7 +493,7 @@ impl Game {
             economy::rebalance(&mut v);
             event(
                 &mut v,
-                "Building work is queued. Residents will make time during community work hours.",
+                "Building work is queued. Residents will make time when they have the energy.",
             );
             v.clone()
         };
@@ -557,7 +557,7 @@ mod tests {
     use super::*;
     fn sandbox(kind: &str) -> Game {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place(kind, 5, 5), "ok");
         g
@@ -669,7 +669,7 @@ mod tests {
             ("unknown", 16, 18),
             ("move", 5, 5),
             ("move", 10, 13),
-            ("move", 26, 5),
+            ("move", 62, 5),
         ] {
             assert_ne!(g.queue_building_work(0, action, x, y), "ok");
             assert_eq!(g.snapshot(), before);

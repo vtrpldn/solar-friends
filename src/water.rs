@@ -970,8 +970,8 @@ pub fn interrupt(v: &mut Village, r: &Resident) {
             .iter_mut()
             .find(|p| p.id == h.recovery)
             .unwrap();
-        p.x = r.x.clamp(0.3, 27.7);
-        p.y = r.y.clamp(0.3, 27.7);
+        p.x = r.x.clamp(0.3, crate::MAP_SIZE as f32 - 0.3);
+        p.y = r.y.clamp(0.3, crate::MAP_SIZE as f32 - 0.3);
         p.capacity = water;
         p.water = water;
     }
@@ -1012,8 +1012,8 @@ pub fn advance(
         v.water_supply.tanks.push(Tank {
             id: recovery,
             owner: Owner::Ground,
-            x: r.x.clamp(0.3, 27.7),
-            y: r.y.clamp(0.3, 27.7),
+            x: r.x.clamp(0.3, crate::MAP_SIZE as f32 - 0.3),
+            y: r.y.clamp(0.3, crate::MAP_SIZE as f32 - 0.3),
             capacity: [0.; LIQUIDS],
             water: [0.; LIQUIDS],
         });
@@ -1176,7 +1176,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || p.id.0 >= v.simulation.next_id
             || ![p.x, p.y]
                 .iter()
-                .all(|x| x.is_finite() && (0.3..=27.7).contains(x))
+                .all(|x| x.is_finite() && (0.3..=crate::MAP_SIZE as f32 - 0.3).contains(x))
             || p.capacity
                 .iter()
                 .chain(&p.water)
@@ -1235,7 +1235,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || h.pickup
                 .iter()
                 .chain(&h.dropoff)
-                .any(|x| !x.is_finite() || !(0.3..=27.7).contains(x))
+                .any(|x| !x.is_finite() || !(0.3..=crate::MAP_SIZE as f32 - 0.3).contains(x))
             || tank(v, h.to).is_none()
             || tank(v, h.to).is_some_and(|p| !near(p, h.dropoff))
             || h.from == Some(h.to)

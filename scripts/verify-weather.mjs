@@ -1,3 +1,4 @@
+import {MAP_SIZE} from '../web/terrain.js';
 import assert from 'node:assert/strict';
 import { weatherConditions, weatherSites, drawGroundWeather, drawWeatherAir } from '../web/weather.js';
 import { occupies } from '../web/building-footprints.js';
@@ -22,7 +23,9 @@ assert.equal(weatherConditions(seasonal,750).clouds,.9);
 assert.equal(weatherConditions(seasonal,750).wet,.7);
 const buildings=[{kind:'home',x:10,y:13},{kind:'solar_farm',x:18,y:19},{kind:'garden',x:6,y:5}];
 const points=weatherSites(buildings);
-assert(points.length>400&&points.length<480);
+const density=(MAP_SIZE/28)**2;
+assert(points.length>400*density&&points.length<480*density);
+assert(points.some(p=>p.x>50)&&points.some(p=>p.y>50),'Weather covers the expanded property');
 assert(points.every(p=>!buildings.some(b=>occupies(b,p.x,p.y))),'Pools and impacts must avoid foundations');
 assert.deepEqual(weatherSites(buildings),points,'World sites must be deterministic');
 
@@ -31,7 +34,7 @@ const ctx=new Proxy({}, {get:(_,key)=>{
   if(key==='createRadialGradient'||key==='createLinearGradient')return()=>({addColorStop(){}});
   return (...args)=>{trace.push([key,...args]);};
 },set:()=>true});
-for(const scale of [.45,1,1.8]) {
+for(const scale of [.18,.45,1,1.8]) {
   const view={conditions:weatherConditions(rain,900),buildings,project:(x,y)=>project(x,y,{x:800,y:20},scale),scale,width:1600,height:1000,time:2,reducedMotion:false};
   trace=[];const ground=drawGroundWeather(ctx,view),air=drawWeatherAir(ctx,view);
   assert(ground.puddles>0&&ground.splashes>0&&ground.ripples>0&&air.streaks>0);
@@ -46,4 +49,4 @@ for(const scale of [.45,1,1.8]) {
   const dryGround=drawGroundWeather(ctx,{...view,conditions:weatherConditions(dry,900)});
   assert.equal(dryGround.puddles+dryGround.splashes+dryGround.ripples,0);
 }
-console.log('PASS: authoritative rain, storm buildup, two-hour drying, stable world positions, foundation exclusion, pause, animation and reduced motion at three zooms.');
+console.log('PASS: authoritative rain, storm buildup, two-hour drying, stable world positions, foundation exclusion, pause, animation and reduced motion at four zooms, including the property overview.');

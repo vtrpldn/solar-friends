@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
@@ -11,7 +12,7 @@ const snap=g=>JSON.parse(g.snapshot());
 const line=(s,id)=>s.village.pipes.lines.find(p=>p.id===id);
 function checkpoint(g){const raw=g.snapshot(),h=new Game();assert(h.restore(raw));assert.equal(h.snapshot(),raw);h.free();assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));}
 function until(g,goal,label,observe=()=>{}){for(let i=0;i<8*1920;i++){const s=snap(g);observe(s);if(goal(s))return s;g.tick(.25);}throw new Error(label+': '+g.electricity_report());}
-const g=new Game();g.start_mode('sandbox');
+const g=new Game();startEmptySandbox(g);
 for(const [kind,x,y] of [['solar_farm',5,5],['workshop',12,5],['streetlight',18,5],['home',18,12]])assert.equal(g.place(kind,x,y),'ok');
 const authored=snap(g),v=authored.village;
 Object.assign(v,{mode:'story',arrived:true,minutes:540,food:60,meals:12,wood:8});
@@ -19,7 +20,7 @@ v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress
 v.economy.stock.fill(0);v.economy.stock[2]=8;v.economy.money=2000000;v.economy.outside_jobs.fill(false);v.power.stored=10;
 for(const r of authored.residents)Object.assign(r,{task:'idle',trip:null,help:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_building:null,activity_material:null,activity_batch:null,activity_store:null});
 assert(g.restore(JSON.stringify(resetMaterialLocations(authored))));
-assert.equal(snap(g).village.version,27);
+assert.equal(snap(g).village.version,28);
 assert.equal(g.set_production_target(17,0),'ok');
 await writeFile(`${output}/before.json`,g.snapshot());
 const port=building=>snap(g).village.power.network.nodes.find(n=>n.owner.kind==='building'&&n.owner.id===building).id;

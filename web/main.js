@@ -1,3 +1,4 @@
+import {natureArt as natureDetails} from './nature-art.js';
 import {usesLogistics,usesUtilities,installSandboxRulesUI} from './sandbox-rules.js';
 import {renderResidentSkills} from './resident-skills.js';
 import {drawElectricalConnections,electricalOverlayRevision} from './electricity-ui.js';
@@ -76,6 +77,7 @@ const kinds = {
   banana_treatment:['Banana treatment bed','Treat sewage in a sealed banana basin'],
   wetland:['Reed bed','Filter greywater into irrigation water'],
   biodigester:['Biodigester','Sealed waste + scraps → cooking gas and cured compost'],
+  shed:['Community shed','Open shelter for shade, rain cover and quiet breaks'],
   warehouse:['Storage house','Store 300 extra construction materials'],
   road: ["Road", "Click to add or remove a road tile"],
   home: ["Home", "Three beds and a good night’s rest"],
@@ -155,6 +157,7 @@ let groundLayer,
   groundKey = null;
 const forestArt = new Image();
 forestArt.src = "art/mata-atlantica-atlas.png";
+const natureArt=new Image();natureArt.src="art/landscape-details.png";
 const forestSpecies = [
   { name: "Jequitibá-rosa", width: 145 },
   { name: "Juçara", width: 112 },
@@ -364,7 +367,16 @@ function installMenu() {
   $('#menu-help').onclick=openHelp;
 }
 function setZoom(value) {
+  const limitsBefore=zoomLimits(width,height),previousScale=Math.max(.18,limitsBefore.base*zoom);
   zoom=clampZoom(width,height,value);
+  const ratio=Math.max(.18,limitsBefore.base*zoom)/previousScale;
+  // Preserve the same world point at the viewing centre, including a minimap
+  // flight that has not finished yet. Larger zoom ranges must not lose the map.
+  const anchor={x:width*.01,y:-height*.05};
+  for(const point of [pan,cameraTarget].filter(Boolean)){
+    point.x=anchor.x+(point.x-anchor.x)*ratio;
+    point.y=anchor.y+(point.y-anchor.y)*ratio;
+  }
   const limits=zoomLimits(width,height);
   $('#zoom-out').disabled=zoom<=limits.min+1e-6;$('#zoom-in').disabled=zoom>=limits.max-1e-6;
 }
@@ -452,6 +464,13 @@ function drawPlacementGrid() {
 }
 function tree(x, y, s = 1, species = 0) {
   const p = iso(x, y);
+  if(p.x < -180*scale || p.x>width+180*scale || p.y< -30*scale || p.y>height+220*scale)return;
+  if(species>=4){
+    if(!natureArt.complete||!natureArt.naturalWidth)return;
+    const art=natureDetails[species-4];if(!art)return;
+    const [cx,cy,cw,ch]=art.cell,w=art.width*s*scale,h=w*art.aspect;
+    ctx.save();ctx.filter=unlitFilter(nightAmount(state.village.minutes));ctx.drawImage(natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h);ctx.restore();return;
+  }
   const w = forestSpecies[species].width * s * scale;
   const cell = forestArt.width / 2;
   contactShadow(p.x, p.y + 2 * scale, 23 * s * scale, 11.5 * s * scale, 0.16);
@@ -556,7 +575,7 @@ function resetPolish() {
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   movingBuilding = null; movingBattery = null; pendingRemoval = null;
-  cameraTarget = null; pointer = null; pan = { x: 0, y: 0 }; setZoom(1.3);
+  cameraTarget = null; pointer = null; setZoom(1.3); pan = { x: 0, y: 0 };
 }
 
 function building(b) {
@@ -668,7 +687,7 @@ function render() {
   }
   if(ctx.canvas.dataset.cameraMoving!==String(!!cameraTarget))ctx.canvas.dataset.cameraMoving=String(!!cameraTarget);
   scale = Math.min(width / 1900, height / 1050) * zoom;
-  scale = Math.max(0.45, scale);
+  scale = Math.max(0.18, scale);
   origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
   const weatherView = {conditions:weather,buildings:state.village.buildings,project:iso,scale,time:weatherTime,width,height,reducedMotion:reducedMotion.matches};
   ctx.clearRect(0, 0, width, height);
@@ -678,9 +697,9 @@ function render() {
   const soil=soilAppearance(state.village.land.soil);
   const standingTrees=state.village.land.vegetation.filter(t=>!t.cleared);
   for(const [key,value] of Object.entries({forestSeed:state.village.land.seed,forestCount:standingTrees.length,soilCells:soil.length}))if(canvas.dataset[key]!==String(value))canvas.dataset[key]=String(value);
-  const key = JSON.stringify([visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
+  const key = JSON.stringify([state.village.land.seed,visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil);
+    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil,state.village.land.seed);
     groundKey = key;
   }
   ctx.save();
@@ -701,8 +720,8 @@ function render() {
   );
   ctx.restore();
   // Sparse currents move along the channel in world coordinates.
-  for (let i = 0; i < 32; i++) {
-    const y = ((i * 0.93 + time * 0.12) % 29) - 0.5;
+  for (let i = 0; i < Math.ceil(MAP_SIZE*1.1); i++) {
+    const y = ((i * 0.93 + time * 0.12) % MAP_SIZE) - 0.5;
     const offset = Math.sin(i * 2.3) * 0.7;
     const a = iso(riverCenter(y) + offset, y);
     const b = iso(riverCenter(y + 0.35) + offset, y + 0.35);
@@ -925,7 +944,7 @@ function questAction(route) {
     label=route.project.paused?'Review paused project':route.project.ready?'View construction project':'Review project supplies';
     onClick=()=>showPanel('projects-panel');
     const missing=route.project.missing.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
-    explanation=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
+    explanation=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work when they have energy, after meals and rest. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
   }
   if(route?.type==='supper'||route?.type==='tool_library'){
     const supper=route.type==='supper', gathering=gatheringInfo(v), underway=supper&&gathering.active;
@@ -1091,6 +1110,7 @@ const buildingPurposes = {
   banana_treatment:'A sealed banana evapotranspiration bed treats one toilet waste every four game hours (six per day). It produces no water or food. Open Water & waste to pause it and reserve waste for biogas.',
   wetland:'A lined reed bed filters 12 greywater into 8 irrigation water over six hours. Reclaimed water is never used for drinking or cooking.',
   biodigester:'Two sealed waste + two organic residues take eight hours to produce four cooking gas and two digestate. Digestate cures for a full day before becoming compost.',
+  shed:'An open shared roof provides daytime shade and rain shelter. Residents rest and spend quiet time here, with separate places for everyone. It has no overnight beds.',
   warehouse:'A communal store adds 300 spaces for construction materials, including incoming supplies. Manage its contents in Supplies.',
   solar_farm: "Collects sunshine and charges the shared battery. Generation peaks at 6 energy per hour; each farm stores 36 energy.",
   streetlight: "Lights the path after sunset, using 0.1 energy per hour from the shared battery.",
@@ -1120,8 +1140,7 @@ function updateBuildingPanel() {
   $('#building-work-actions').hidden=!!crew;
   $('#cancel-building-work').hidden=!crew||crew.stage==='rebuild';
   const crewMembers=crew?state.residents.filter(r=>r.task==='building_work'&&r.activity_building===b.id):[];
-  const clockMinute=state.village.minutes%1440,crewHours=clockMinute>=540&&clockMinute<720||clockMinute>=900&&clockMinute<960;
-  const crewNote=paused?'Paused · resume time for resident work.':crewMembers.length?crewMembers.map(r=>`${r.name} ${Math.hypot(r.x-r.target_x,r.y-r.target_y)<=.08?'working':'on the way'}`).join(' · '):crewHours?'Queued · neighbours will finish their meals or rest first.':'Queued · next community work window: 09:00–12:00 or 15:00–16:00.';
+  const crewNote=paused?'Paused · resume time for resident work.':crewMembers.length?crewMembers.map(r=>`${r.name} ${Math.hypot(r.x-r.target_x,r.y-r.target_y)<=.08?'working':'on the way'}`).join(' · '):'Queued · neighbours will finish meals, rest or outside commitments first.';
   $('#building-work-status').textContent=crew?`${crew.stage==='pack'?'Packing':crew.stage==='rebuild'?'Rebuilding':crew.action==='salvage'?'Careful salvage':'Demolition'} · ${Math.floor(crew.work/(crew.stage==='pack'?24:crew.stage==='rebuild'?36:crew.action==='demolish'?18:54)*100)}%. ${crewNote}`:'Demolition clears quickly with no material return. Salvage takes three times the work and recovers half of recorded materials. Moving packs and rebuilds the same building.';
   $('#building-work-actions [data-building-work="move"]').disabled=!b||b.progress<100;
 
@@ -1154,12 +1173,12 @@ function updateBuildingPanel() {
   if(b?.kind==='workshop'&&b.progress>=100){
     const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
     const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
-    $('#building-activity').textContent=site?.paused?'Worksite paused. Resume it in Construction → Preparing materials.':batch?`Saved batch #${batch.id}: ${batch.output} ${state.environment.economy.materials[batch.material].name.toLowerCase()} · ${Math.floor(batch.work/10*100)}% prepared. ${worker?worker.name+(worker.task==='haul'?' is bringing the inputs.':worker.task==='craft'?' is helping with this batch.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Construction → Preparing materials.`:'No batch queued. Ask a neighbour to craft, or set a village reserve in Construction → Preparing materials.';
+    $('#building-activity').textContent=site?.paused?'Worksite paused. Resume it in Construction → Preparing materials.':batch?`Saved batch #${batch.id}: ${batch.output} ${state.environment.economy.materials[batch.material].name.toLowerCase()} · ${Math.floor(batch.work/10*100)}% prepared. ${worker?worker.name+(worker.task==='haul'?' is bringing the inputs.':worker.task==='craft'?' is helping with this batch.':"’s request is saved through their break."):'Neighbours will continue when they have the energy.'} Track it in Construction → Preparing materials.`:'No batch queued. Ask a neighbour to craft, or set a village reserve in Construction → Preparing materials.';
   }
   if(b?.kind==='kitchen'&&b.progress>=100){
     const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
     const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
-    $('#building-activity').textContent=site?.paused?'Kitchen paused. Resume it in Supplies → Kitchen.':batch?`Saved pot #${batch.id}: ${batch.output} meals · ${Math.floor(batch.work/10*100)}% cooked. ${batch.phase==='awaiting_water'?(state.environment.economy.production.recipes.find(d=>d.site===site.id)?.service_blocker||'Waiting for fresh water and greywater space.'):worker?worker.name+(worker.task==='haul'?' is bringing ingredients.':worker.task==='cook'?' is helping with this pot.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Supplies → Kitchen.`:'No pot queued. Ask a neighbour to cook, or set a meal reserve in Supplies → Kitchen.';
+    $('#building-activity').textContent=site?.paused?'Kitchen paused. Resume it in Supplies → Kitchen.':batch?`Saved pot #${batch.id}: ${batch.output} meals · ${Math.floor(batch.work/10*100)}% cooked. ${batch.phase==='awaiting_water'?(state.environment.economy.production.recipes.find(d=>d.site===site.id)?.service_blocker||'Waiting for fresh water and greywater space.'):worker?worker.name+(worker.task==='haul'?' is bringing ingredients.':worker.task==='cook'?' is helping with this pot.':"’s request is saved through their break."):'Neighbours will continue when they have the energy.'} Track it in Supplies → Kitchen.`:'No pot queued. Ask a neighbour to cook, or set a meal reserve in Supplies → Kitchen.';
   }
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
   if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
@@ -1218,7 +1237,7 @@ function updateSupplies(v) {
     : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
     : "Neighbours queue a pot when the reserve needs topping up and there is room for its meals.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
-    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop during community hours."}`;
+    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop when they have the energy."}`;
   const weatherLine=state.environment.weather ? weatherSummary(state.environment.weather,v.minutes) : state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon" : "Rain today from 14:00 to 17:00";
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${Math.round(state.environment.water_capacity)} water. ${weatherLine}. Gardens pause safely when dry.`;
   updateClimateForecast(state);
@@ -1250,7 +1269,7 @@ function updateUI() {
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
   $('#help-intro').textContent=free?(instant?'Sandbox unlocks every building. New buildings are instant and free; pantry, tools and funds replenish. Settings lets you add construction, living-land and utility constraints.':'Sandbox unlocks every building. Supplies and resident labour are needed for new construction; plan projects in Construction and purchases in Trade. Living-land and utility rules are separate choices in Settings.'):'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
-  replaceMarkup($('#help-start'),instant?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':free?'<b>Plan your own village.</b> Every building is unlocked. Choose a blueprint in Build, manage its supplies and priority in Construction, and let residents carry and build during community hours. Adjust the other simulation rules in Settings.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
+  replaceMarkup($('#help-start'),instant?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':free?'<b>Plan your own village.</b> Every building is unlocked. Choose a blueprint in Build, manage its supplies and priority in Construction, and let residents carry and build when they have the energy. Adjust the other simulation rules in Settings.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build when they have the energy.');
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1324,7 +1343,7 @@ function updateUI() {
     $('#person .occupation-description').textContent=job.description;
     $('#person .occupation-toggle').checked=job.enabled;
     const workToday=v.workforce.days.find(day=>day.day===Math.floor(v.minutes/1440))?.residents[r.id]?.reduce((sum,n)=>sum+n,0)||0;
-    $('#person .work-today').textContent=`${Math.round(workToday)} min of village chores today, including travel. Community hours: 09:00–12:00 and 15:00–16:00.`;
+    $('#person .work-today').textContent=`${Math.round(workToday)} min of village chores today, including travel. Work follows energy, meals, rest and personal commitments.`;
     for(const [i,key] of ['construction','hauling','food','materials','care'].entries()){
       const input=$(`#person [data-work-preference="${key}"]`);
       if(input!==document.activeElement)input.value=String(v.workforce.preferences[r.id][i]);
@@ -1464,7 +1483,7 @@ function frame(stamp) {
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
   if (running || cameraTarget || state !== paintedState || viewKey !== paintedView) {
-    render(); paintedState = state; paintedView = viewKey;
+    render(); gameUI?.drawMap(state,selected); paintedState = state; paintedView = viewKey;
   }
   uiElapsed += dt;
   saveElapsed += elapsed;
@@ -1537,7 +1556,7 @@ function setup() {
   };
   $('#building-work-close').onclick=()=>{pendingRemoval=null;$('#building-work-dialog').close();};
   $('#building-work-confirm').onclick=()=>{
-    if(pendingRemoval){const result=game.queue_building_work(pendingRemoval.id,pendingRemoval.action,0,0);toast(result==='ok'?`Crew job queued. ${paused?'Resume time to let residents work.':'Neighbours will work during community hours.'}`:result);state=JSON.parse(game.snapshot());updateUI();save();}
+    if(pendingRemoval){const result=game.queue_building_work(pendingRemoval.id,pendingRemoval.action,0,0);toast(result==='ok'?`Crew job queued. ${paused?'Resume time to let residents work.':'Neighbours will work when they have the energy.'}`:result);state=JSON.parse(game.snapshot());updateUI();save();}
     pendingRemoval=null;$('#building-work-dialog').close();
   };
   $('#cancel-building-work').onclick=()=>{const result=game.cancel_building_work(Number($('#building-choice').value));toast(result==='ok'?'Crew job cancelled.':result);state=JSON.parse(game.snapshot());updateUI();save();};
@@ -1644,7 +1663,7 @@ function setup() {
     const result = game.host_gathering();
     toast(
       result === "ok"
-        ? "The gathering is planned. Neighbours will deliver five meals during community hours, then the invitation starts."
+        ? "The gathering is planned. Neighbours will deliver five meals when they have the energy, then the invitation starts."
         : result,
     );
     state = JSON.parse(game.snapshot());
@@ -1904,6 +1923,7 @@ const devAPI = {
       let raw;
       if (id === 'copy') raw = game.snapshot();
       else {
+        candidate.start_mode('story');
         const fresh = JSON.parse(candidate.snapshot());
         const response = await fetch('./artwork/village-preview.json');
         if (!response.ok || !candidate.restore(await response.text())) throw new Error('Could not load the village fixture.');

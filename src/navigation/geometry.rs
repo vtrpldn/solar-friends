@@ -45,6 +45,7 @@ fn plot(size: i32, x: i32, y: i32) -> Bounds {
 pub(super) fn obstacles(v: &Village) -> impl Iterator<Item = Bounds> + '_ {
     v.buildings
         .iter()
+        .filter(|b| b.kind != "shed" || b.progress < 100.)
         .map(|b| plot(interactions::footprint_size(&b.kind), b.x, b.y))
         .chain(
             v.economy

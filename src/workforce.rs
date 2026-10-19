@@ -126,7 +126,7 @@ fn projected(v: &Village, id: usize) -> (f32, f32) {
         .iter()
         // An unfinished pot cannot feed breakfast or a meal break while cooks
         // are off duty. Keep a small edible reserve until work can resume.
-        .filter(|b| work_time(v.minutes) && production::ready(v, b))
+        .filter(|b| production::ready(v, b))
         .map(|b| b.output)
         .sum::<u32>() as f32;
     let gathered = v
@@ -347,7 +347,7 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                 Some(b.id),
                 None,
                 620. + priority as f32 * 60.,
-                "Working on a supplied project during our community hours.",
+                "Working on a supplied project while we have the energy.",
             );
         }
         if building_work::job(v, b.id).is_some() && !logistics::occupied_building(v, b.id) {
@@ -542,19 +542,6 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
         {
             offer.score += 45.;
         }
-        // Haul and water quotes already include both legs. Continuous crew
-        // work needs a useful six minutes; indivisible batches need their rest.
-        let work = minimum_work_minutes(v, offer);
-        if offer.blocker.is_none()
-            && offer
-                .travel_minutes
-                .is_some_and(|travel| !autonomy::fits_before_break(v, travel, work))
-        {
-            offer.blocker = Some(
-                "There is not enough time for this journey and useful work before our next break."
-                    .into(),
-            );
-        }
     }
     out.sort_by(|a, b| {
         b.score
@@ -602,7 +589,7 @@ fn garden_priority(v: &Village, b: &Building, resident: usize) -> (f32, &'static
     } else {
         (
             390.,
-            "Tending our crops, fruit trees and animals during community hours.",
+            "Tending our crops, fruit trees and animals when they have the energy.",
         )
     }
 }
@@ -616,16 +603,6 @@ fn work_minutes(v: &Village, job: &Offer) -> f32 {
         3. * MINUTES_PER_SECOND
     } else {
         10. * MINUTES_PER_SECOND
-    }
-}
-fn minimum_work_minutes(v: &Village, job: &Offer) -> f32 {
-    if matches!(
-        job.task.as_str(),
-        "build" | "building_work" | "utility" | "restore"
-    ) {
-        6.
-    } else {
-        work_minutes(v, job)
     }
 }
 pub fn choose_work(r: &mut Resident, v: &Village) -> bool {
@@ -776,9 +753,7 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
             continue;
         };
         let travel = route.minutes;
-        if !autonomy::fits_before_break(v, travel, minimum_work_minutes(v, job))
-            || autonomy::preparation(v, peer, travel, work_minutes(v, job)).is_some()
-        {
+        if autonomy::preparation(v, peer, travel, work_minutes(v, job)).is_some() {
             continue;
         }
         let continuity = if (job.building.is_some() || job.batch.is_some() || job.task == "source")
@@ -881,10 +856,7 @@ mod tests {
         r.energy = 90.;
         v.minutes = 850.;
         choose(&mut r, &v);
-        assert!(
-            leisure::hobby(&r.task),
-            "Work preferences cannot extend community hours"
-        );
+        assert_eq!(r.task, "water", "Useful chores remain available at midday");
     }
     #[test]
     fn shared_queue_honours_work_positions_travel_and_recent_chores() {
@@ -1039,7 +1011,7 @@ mod tests {
         assert!(!valid(&v));
     }
     #[test]
-    fn a_pot_waiting_for_community_hours_cannot_replace_an_edible_reserve() {
+    fn a_ready_pot_is_counted_at_breakfast_lunch_and_evening() {
         let mut g = Game::new();
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
@@ -1048,21 +1020,10 @@ mod tests {
         food::fixture_stage(&mut v, 0);
         economy::rebalance(&mut v);
         assert!(production::jobs(&v).any(|b| b.material == economy::MEALS));
-        v.minutes = 480.;
-        assert!(
-            urgent_food(&v, 4),
-            "Breakfast needs edible portions before cooking resumes"
-        );
-        v.minutes = 540.;
-        assert!(
-            !urgent_food(&v, 4),
-            "The available pot can be cooked during community hours"
-        );
-        v.minutes = 780.;
-        assert!(
-            urgent_food(&v, 4),
-            "The lunch break must retain actual food as well"
-        );
+        for minute in [480., 780., 1080.] {
+            v.minutes = minute;
+            assert!(!urgent_food(&v, 4), "A staged pot is available at any hour");
+        }
     }
     #[test]
     fn cooking_projection_counts_a_saved_pot_once_even_when_workers_share_it() {

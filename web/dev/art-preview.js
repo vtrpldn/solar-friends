@@ -1,7 +1,7 @@
 import {resetMaterialLocations} from './material-fixture.js';
 import {allBuildingArt,homeArtKeys,adobeVariants} from '../building-art.js';
 import {placementReason} from '../polish.js';
-import {MAP_SIZE} from '../terrain.js';
+import {MAP_SIZE,hydroCell} from '../terrain.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 
 // Build the gallery from the live registry, not an older village's inventory.
@@ -25,7 +25,7 @@ export function makeArtPreview(fresh,established,{night=false}={}) {
     const isHome=homeArtKeys.includes(key)||adobeKeys.includes(key),kind=isHome?'home':key;
     const recipe=adobeKeys.includes(key)?'adobe':'standard';
     const appearance=isHome?adobeKeys.includes(key)?4+adobeKeys.indexOf(key):homeArtKeys.indexOf(key):undefined;
-    const sites=kind==='hydro'?[[24,13],...candidates]:candidates;
+    const sites=kind==='hydro'?[[hydroCell(13),13],...candidates]:candidates;
     const position=sites.find(([x,y])=>!placementReason(v,kind,x,y));
     if(!position)throw new Error(`No clear preview plot for ${key}`);
     const id=v.buildings.length,[x,y]=position;

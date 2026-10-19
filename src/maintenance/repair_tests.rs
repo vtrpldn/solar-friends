@@ -3,7 +3,7 @@ use jobs::{assign_target, job, ready, work};
 use logistics::Owner;
 fn scene() -> Game {
     let mut g = Game::new();
-    g.start_mode("sandbox");
+    g.start_fixture_mode("sandbox");
     for (kind, x, y) in [("workshop", 6, 6), ("solar_farm", 12, 6), ("home", 8, 16)] {
         assert_eq!(g.place(kind, x, y), "ok");
     }
@@ -106,7 +106,7 @@ fn checkpoint(g: &mut Game) {
     );
 }
 #[test]
-fn service_requires_local_parts_attendance_and_community_hours() {
+fn service_requires_local_parts_and_attendance_at_any_hour() {
     let mut g = scene();
     let id = queued(&mut g, Equipment::Workshop(0));
     stock(&mut g, id, false);
@@ -131,11 +131,13 @@ fn service_requires_local_parts_attendance_and_community_hours() {
     assert!(!work(&mut v, &r, 5.));
     r.x = r.target_x;
     v.minutes = 800.;
-    assert!(!work(&mut v, &r, 5.));
+    assert!(!work(&mut v, &r, 0.));
     v.minutes = 900.;
     assert!(!work(&mut v, &r, f32::NAN));
     assert_eq!(v.simulation.materials.as_ref().unwrap().spent, before);
     assert_eq!(job(&v, id).unwrap().work, 0.);
+    assert!(!work(&mut v, &r, 5.));
+    assert_eq!(job(&v, id).unwrap().work, 5.);
 }
 #[test]
 fn partial_service_uses_one_kit_and_survives_pause_save_and_resume() {
@@ -461,7 +463,10 @@ fn spare_claims_and_healthy_or_duplicate_service_requests_are_atomic() {
 fn a_river_generator_battery_receives_service_parts_from_its_safe_bank() {
     let mut g = scene();
     g.app.world_mut().resource_mut::<Village>().mode = modes::Mode::Sandbox;
-    assert_eq!(g.place("hydro", 26, 5), "ok");
+    assert_eq!(
+        g.place("hydro", (river_center(5.) - 1.35).ceil() as i32, 5),
+        "ok"
+    );
     g.app.world_mut().resource_mut::<Village>().mode = modes::Mode::Story;
     g.tick(0.25);
     let key = {

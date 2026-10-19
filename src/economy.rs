@@ -243,6 +243,10 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
     let local = variant == "local";
     let frame = if local { (1, 8) } else { (5, 4) };
     Some(match kind {
+        "shed" => vec![
+            stage("Timber posts & bench", &[(0, 8), (8, 1)], 14.),
+            stage("Terracotta shelter roof", &[(7, 6)], 12.),
+        ],
         "home" => vec![
             stage("Foundation", &[(2, 6), (3, 4)], 12.),
             stage("Structure", &[frame, (6, 6)], 22.),
@@ -805,7 +809,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let missing:Bundle=std::array::from_fn(|i|if p.committed{0}else{s.items[i].saturating_sub(p.reserved[i])});
         Some(serde_json::json!({"building":b.id,"kind":b.kind,"stage":s.name,"stage_index":p.stage,"stages":stages,"recipe":p.recipe,"priority":p.priority,"paused":p.paused,"committed":p.committed,"missing":missing,"on_site":if v.logistics.is_some(){crate::logistics::project_items(v,b.id)}else{[0;COUNT]},"hauling_blocker":v.logistics.as_ref().and_then(|s|s.stores.iter().find(|p|p.owner==crate::logistics::Owner::Site(b.id))).and_then(|p|p.blocker.as_deref()),"reserved":p.reserved,"consumed":p.consumed,"labour":p.labour,"work":s.work,"ready":can_build(v,b.id),"progress":b.progress}))
     }).collect();
-    let recipes:Vec<_>=["home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","banana_treatment","biodigester","warehouse","orchard","goat_pasture","apiary"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
+    let recipes:Vec<_>=["shed","home","garden","greenhouse","kitchen","well","grove","compost","square","workshop","coop","solar_farm","streetlight","hydro","eco_toilet","wetland","banana_treatment","biodigester","warehouse","orchard","goat_pasture","apiary"].into_iter().map(|kind|serde_json::json!({"kind":kind,"standard":recipe(kind,"standard"),"local":recipe(kind,"local"),"adobe":recipe(kind,"adobe")})).collect();
     let preparation: Vec<_> = [5, 6, 7, 8]
         .into_iter()
         .filter_map(|i| {
@@ -838,7 +842,7 @@ pub fn valid(v: &Village) -> bool {
         || e.stock[0] != 0
         || storage(v) > capacity(v)
         || e.orders.len() > 100
-        || e.projects.len() > 676
+        || e.projects.len() > ((crate::MAP_SIZE - 2) * (crate::MAP_SIZE - 2)) as usize
         || !crate::resource_sites::valid(v)
         || e.ledger.len() > 80
         || !e.last_delivery.is_finite()
@@ -1664,7 +1668,7 @@ mod infrastructure_tests {
     #[test]
     fn completed_storage_adds_capacity_incoming_reserves_it_and_removal_cannot_overfill() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();

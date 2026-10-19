@@ -115,7 +115,7 @@ mod tests {
     use super::*;
     fn greenhouse() -> Game {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("greenhouse", 5, 5), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();

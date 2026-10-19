@@ -731,7 +731,7 @@ mod tests {
         checkpoint(&mut g);
     }
     #[test]
-    fn late_preparation_rests_overnight_then_delivers_within_the_next_working_day() {
+    fn afternoon_preparation_can_finish_before_night_when_neighbours_are_ready() {
         let mut g = scene();
         g.app.world_mut().resource_mut::<Village>().minutes = 945.;
         assert_eq!(g.host_gathering(), "ok");
@@ -756,10 +756,10 @@ mod tests {
         }
         let v = g.app.world().resource::<Village>();
         let p = v.progress.gathering_delivery.as_ref().unwrap();
-        assert!(crossed_night);
+        assert!(!crossed_night);
         assert_eq!(p.phase, Phase::Complete);
-        assert_eq!((p.started.unwrap() / 1440.).floor(), 1.);
-        assert_eq!(v.progress.gathering_day, 1);
+        assert_eq!((p.started.unwrap() / 1440.).floor(), 0.);
+        assert_eq!(v.progress.gathering_day, 0);
         assert_ne!(
             g.host_gathering(),
             "ok",
@@ -770,7 +770,7 @@ mod tests {
     #[test]
     fn a_carrier_can_use_reachable_portions_when_the_preferred_store_is_enclosed() {
         let mut g = Game::new();
-        g.start_mode("sandbox");
+        g.start_fixture_mode("sandbox");
         assert_eq!(g.place("warehouse", 15, 18), "ok");
         for x in [12, 14, 16, 18] {
             for y in [15, 21] {

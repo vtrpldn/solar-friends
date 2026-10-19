@@ -1,3 +1,4 @@
+import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
@@ -7,7 +8,7 @@ const snap=g=>JSON.parse(g.snapshot());
 const person=g=>snap(g).residents.find(r=>r.id===0);
 await mkdir('artifacts/work-routes',{recursive:true});
 function scene(paved){
- const g=new Game();g.start_mode('sandbox');assert.equal(g.place('home',7,12),'ok');
+ const g=new Game();startEmptySandbox(g);assert.equal(g.place('home',7,12),'ok');
  const s=snap(g);Object.assign(s.village,{arrived:true,minutes:540,food:80,meals:10,water:40});
  // Keep the requested worker ready; other neighbours take social breaks so
  // this comparison measures road travel rather than recovery from loneliness.
