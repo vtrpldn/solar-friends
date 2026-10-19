@@ -32,7 +32,7 @@ pub struct Blocker {
     pub reason: String,
 }
 pub fn supports(task: &str) -> bool {
-    requests::work(task) || task == "visit"
+    requests::work(task) || matches!(task, "visit" | "eat")
 }
 pub fn clear(r: &mut Resident) {
     r.walking.route = None;
@@ -52,6 +52,9 @@ fn bank(v: &Village, id: usize) -> Option<[f32; 2]> {
     None
 }
 pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
+    if r.task == "eat" {
+        return food::target(v, r);
+    }
     if r.task == "water" {
         return bank(v, r.id).ok_or("Leave a clear place to collect water along the village bank.");
     }
@@ -136,6 +139,7 @@ fn cooling_down(v: &Village, r: &Resident) -> bool {
         b.task == r.task
             && b.building == r.activity_building.or(r.visit_building)
             && b.material == r.activity_material
+            && b.goal == [r.target_x, r.target_y]
             && b.layout == logistics::layout(v)
             && b.retry_at > v.minutes
     })
@@ -164,6 +168,8 @@ pub fn block(v: &Village, r: &mut Resident, reason: &str) {
     r.remaining = 12.;
     r.activity_building = None;
     r.activity_material = None;
+    r.activity_store = None;
+    r.activity_batch = None;
     r.visit_building = None;
     r.requested = false;
     r.target_x = r.x;
@@ -456,8 +462,8 @@ mod tests {
         assert!(quote(&v, &r).is_err());
         let mut work = v.clone();
         work.buildings[0].kind = "garden".into();
-        work.food = 0.;
-        work.meals = 0;
+        crate::logistics::fixture_stock(&mut work, crate::economy::FOOD, (0.) as u32);
+        crate::logistics::fixture_stock(&mut work, crate::economy::MEALS, 0);
         let offers = workforce::offers(&work, &r);
         let garden = offers.iter().find(|o| o.task == "garden").unwrap();
         assert!(garden.blocker.is_some());
@@ -537,8 +543,8 @@ mod tests {
                 let mut v = g.app.world_mut().resource_mut::<Village>();
                 v.arrived = true;
                 v.minutes = 540.;
-                v.food = 80.;
-                v.meals = 10;
+                crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
+                crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
                 v.water = 40.;
                 if paved {
                     for x in 2..=12 {
@@ -557,6 +563,7 @@ mod tests {
                 .iter_mut(g.app.world_mut())
             {
                 r.task = "idle".into();
+                r.activity_store = None;
                 r.remaining = 90.;
                 r.energy = 90.;
                 r.hunger = 10.;

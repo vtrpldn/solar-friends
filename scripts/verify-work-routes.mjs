@@ -1,3 +1,4 @@
+import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -9,7 +10,7 @@ function scene(paved){
  const g=new Game();g.start_mode('sandbox');assert.equal(g.place('home',7,12),'ok');
  const s=snap(g);Object.assign(s.village,{arrived:true,minutes:540,food:80,meals:10,water:40});
  for(const r of s.residents)Object.assign(r,{task:'idle',remaining:90,energy:90,hunger:10,social:10,last_meal_slot:0,x:10+r.id,y:13,target_x:10+r.id,target_y:13});
- assert(g.restore(JSON.stringify(s)));
+ assert(g.restore(JSON.stringify(restockFixtureFood(s))));
  if(paved)for(let x=2;x<=12;x++)for(let y=8;y<=16;y++)g.toggle_road(x,y);
  return g;
 }

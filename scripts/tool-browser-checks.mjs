@@ -57,7 +57,7 @@ export async function checkToolControls({page,saved,capture}){
   assert(!await useTools.isChecked());await useTools.check();
   assert(await page.evaluate(()=>window.solarDev.snapshot().village.progress.use_tools));
   await useTools.uncheck();assert(!await page.evaluate(()=>window.solarDev.snapshot().village.progress.use_tools));
-  if(!await page.locator('#material-inventory').isVisible())await page.getByText('Construction materials',{exact:true}).click();
+  if(!await page.locator('#material-inventory').isVisible())await page.getByText('Stored supplies',{exact:true}).click();
   assert((await page.locator('.material-slot[data-item="15"]').textContent()).includes('1 free'));
   assert((await page.locator('#storage-locations').textContent()).includes('1 tool supplies'));
   await page.locator('.material-slot[data-item="15"]').scrollIntoViewIfNeeded();

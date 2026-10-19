@@ -308,12 +308,14 @@ mod tests {
     #[test]
     fn cooking_credit_requires_consumed_eggs_and_gas_and_survives_use() {
         let mut g = Game::new();
+        assert_eq!(g.place("kitchen", 5, 5), "ok");
+        crate::logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.food = 2.;
-            v.supplies.eggs = 2;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (2.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
             v.circular.biogas = 1.;
-            crate::supplies::cook(&mut v);
+            crate::supplies::fixture_cook(&mut v);
             assert!(v.progress.egg_meal && v.progress.biogas_meal);
             assert_eq!(v.supplies.eggs, 0);
             assert_eq!(v.circular.biogas, 0.);
@@ -324,9 +326,9 @@ mod tests {
         let mut empty = Game::new();
         let mut v = empty.app.world_mut().resource_mut::<Village>();
         v.water = 0.;
-        v.supplies.eggs = 2;
+        crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
         v.circular.biogas = 1.;
-        crate::supplies::cook(&mut v);
+        crate::supplies::fixture_cook(&mut v);
         assert!(!v.progress.egg_meal && !v.progress.biogas_meal);
     }
 

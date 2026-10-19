@@ -69,58 +69,123 @@ pub fn advance(v: &mut Village, minutes: f32) {
             .iter()
             .filter(|b| b.kind == "coop" && b.poultry.remaining > 0.)
             .count() as u32;
-    for b in &mut v.buildings {
-        if b.kind != "coop" || b.progress < 100. {
-            continue;
-        }
-        if b.poultry.remaining <= 0. {
-            // Keep six ingredients for residents, and avoid wasting feed at capacity.
-            if !v.supplies.feed_hens || v.food < 9. || reserved_eggs + 3 > 12 {
+    let coops: Vec<_> = v
+        .buildings
+        .iter()
+        .filter(|b| b.kind == "coop" && b.progress >= 100. && building_work::job(v, b.id).is_none())
+        .map(|b| b.id)
+        .collect();
+    for id in coops {
+        let index = v.buildings.iter().position(|b| b.id == id).unwrap();
+        if v.buildings[index].poultry.remaining <= 0. {
+            let local =
+                food::pantry(v, id).map_or(0, |p| food::available(v, p, economy::FOOD, None));
+            if !v.supplies.feed_hens || v.food < 9. || local < 3 || reserved_eggs + 3 > 12 {
                 continue;
             }
-            v.food -= 3.;
+            logistics::spend(v, Some(logistics::Owner::Pantry(id)), economy::FOOD, 3);
             v.supplies.used += 3.;
-            b.poultry.remaining = 720.;
+            v.buildings[index].poultry.remaining = 720.;
             reserved_eggs += 3;
         }
-        b.poultry.remaining = (b.poultry.remaining - elapsed).max(0.);
-        if b.poultry.remaining == 0. {
+        let remaining = &mut v.buildings[index].poultry.remaining;
+        *remaining = (*remaining - elapsed).max(0.);
+        if *remaining == 0. {
             let laid = 3.min(12u32.saturating_sub(v.supplies.eggs));
-            v.supplies.eggs += laid;
-            v.supplies.eggs_laid += laid;
-            v.progress.eggs_collected += laid;
+            if logistics::receive(v, logistics::Owner::Pantry(id), economy::EGGS, laid) {
+                v.supplies.eggs_laid += laid;
+                v.progress.eggs_collected += laid;
+            } else {
+                v.buildings[index].poultry.remaining = 0.001;
+            }
         }
     }
 }
-pub fn can_cook(v: &Village) -> bool {
-    v.water >= 1. && (v.food >= 3. || (v.supplies.use_eggs && v.supplies.eggs >= 2 && v.food >= 2.))
-}
-pub fn cook(v: &mut Village) {
-    if !can_cook(v) {
-        return;
+pub fn can_cook_at(v: &Village, id: usize) -> bool {
+    let Some(b) = v
+        .buildings
+        .iter()
+        .find(|b| b.id == id && b.kind == "kitchen" && b.progress >= 100.)
+    else {
+        return false;
+    };
+    if building_work::job(v, b.id).is_some() || v.water < 1. {
+        return false;
     }
-    let eggs = v.supplies.use_eggs && v.supplies.eggs >= 2 && v.food >= 2.;
-    let ingredients = if eggs { 2. } else { 3. };
+    let Some(p) = food::pantry(v, id) else {
+        return false;
+    };
+    let ingredients = food::available(v, p, economy::FOOD, None);
+    let eggs = v.supplies.use_eggs && food::available(v, p, economy::EGGS, None) >= 2;
+    let extra =
+        if eggs { 3 } else { 2 } + u32::from(v.circular.use_biogas && v.circular.biogas >= 1.);
+    economy::capacity(v).saturating_sub(economy::storage(v)) >= extra
+        && ingredients >= if eggs { 2 } else { 3 }
+        && logistics::room(v, p.owner)
+            >= if eggs { 7 - 4 } else { 5 - 3 }
+                + u32::from(v.circular.use_biogas && v.circular.biogas >= 1.)
+}
+pub fn can_cook(v: &Village) -> bool {
+    v.buildings.iter().any(|b| can_cook_at(v, b.id))
+}
+pub fn cook_at(v: &mut Village, id: usize) -> bool {
+    if !can_cook_at(v, id) {
+        return false;
+    }
+    let eggs = v.supplies.use_eggs
+        && food::pantry(v, id).is_some_and(|p| food::available(v, p, economy::EGGS, None) >= 2);
+    let ingredients = if eggs { 2 } else { 3 };
     let fuel = v.circular.use_biogas && v.circular.biogas >= 1.;
-    let meals = (if eggs { 7 } else { 5 }) + u32::from(fuel);
+    let meals = if eggs { 7 } else { 5 } + u32::from(fuel);
     if fuel {
         v.circular.biogas -= 1.;
         v.progress.biogas_meal = true;
     }
-    v.food -= ingredients;
-    sanitation::household_water(v, 1.);
+    logistics::spend(
+        v,
+        Some(logistics::Owner::Pantry(id)),
+        economy::FOOD,
+        ingredients,
+    );
     if eggs {
-        v.supplies.eggs -= 2;
+        logistics::spend(v, Some(logistics::Owner::Pantry(id)), economy::EGGS, 2);
         v.progress.egg_meal = true;
     }
-    v.meals += meals;
-    v.supplies.used += ingredients;
+    sanitation::household_water(v, 1.);
+    assert!(logistics::receive(
+        v,
+        logistics::Owner::Pantry(id),
+        economy::MEALS,
+        meals
+    ));
+    v.supplies.used += ingredients as f32;
     v.supplies.meals_cooked += meals;
     v.progress.scraps = v.progress.scraps.saturating_add(1);
+    true
 }
+#[cfg(test)]
+pub fn fixture_cook(v: &mut Village) {
+    if let Some(id) = v
+        .buildings
+        .iter()
+        .find(|b| b.kind == "kitchen" && b.progress >= 100.)
+        .map(|b| b.id)
+    {
+        food::fixture_stage(v, id);
+    }
+    if let Some(id) = v
+        .buildings
+        .iter()
+        .find(|b| can_cook_at(v, b.id))
+        .map(|b| b.id)
+    {
+        cook_at(v, id);
+    }
+}
+
 pub fn valid(v: &Village) -> bool {
     let s = &v.supplies;
-    s.eggs <= 60
+    s.eggs <= economy::capacity(v)
         && [s.gathered, s.used]
             .iter()
             .all(|n| n.is_finite() && *n >= 0.)
@@ -152,6 +217,16 @@ mod tests {
         v
     }
     fn run(v: &mut Village, minutes: u32) {
+        logistics::sync(v);
+        let ids: Vec<_> = v
+            .buildings
+            .iter()
+            .filter(|b| b.kind == "coop")
+            .map(|b| b.id)
+            .collect();
+        for id in ids {
+            food::fixture_stage(v, id);
+        }
         for _ in 0..minutes {
             v.minutes += 1.;
             advance(v, 1.);
@@ -160,7 +235,7 @@ mod tests {
     #[test]
     fn feed_is_paid_once_and_eggs_need_daylight() {
         let mut v = coop();
-        v.food = 9.;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (9.) as u32);
         run(&mut v, 719);
         assert_eq!(v.food, 6.);
         assert_eq!(v.supplies.eggs, 0);
@@ -180,10 +255,10 @@ mod tests {
         run(&mut v, 10);
         assert_eq!(v.food, food);
         v.supplies.feed_hens = true;
-        v.supplies.eggs = 60;
+        crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 60);
         run(&mut v, 10);
         assert_eq!(v.food, food);
-        v.supplies.eggs = 0;
+        crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 0);
         v.buildings[0].progress = 99.;
         run(&mut v, 10);
         assert_eq!(v.food, food);
@@ -191,7 +266,7 @@ mod tests {
     #[test]
     fn several_coops_reserve_only_a_dozen_eggs_and_keep_legacy_surplus() {
         let mut v = coop();
-        v.food = 100.;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (100.) as u32);
         let building = v.buildings[0].clone();
         for id in 1..6 {
             let mut b = building.clone();
@@ -204,26 +279,29 @@ mod tests {
         run(&mut v, 2880);
         assert_eq!(v.supplies.eggs, 12);
         assert_eq!(v.food, 88.);
-        v.supplies.eggs = 60;
+        crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 60);
         run(&mut v, 1440);
         assert_eq!(v.supplies.eggs, 60);
         assert_eq!(v.food, 88.);
     }
     #[test]
     fn recipes_account_for_inputs_and_fallback() {
-        let mut v = coop();
-        v.food = 2.;
+        let mut g = Game::new();
+        assert_eq!(g.place("kitchen", 5, 5), "ok");
+        let mut v = g.app.world().resource::<Village>().clone();
+        logistics::fixture_finish(&mut v, 0);
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (2.) as u32);
         v.water = 1.;
-        v.supplies.eggs = 2;
-        cook(&mut v);
+        crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
+        fixture_cook(&mut v);
         assert_eq!((v.food, v.water, v.supplies.eggs, v.meals), (0., 0., 0, 7));
-        cook(&mut v);
+        fixture_cook(&mut v);
         assert_eq!(v.meals, 7);
-        v.food = 3.;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (3.) as u32);
         v.water = 1.;
-        v.supplies.eggs = 2;
+        crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
         v.supplies.use_eggs = false;
-        cook(&mut v);
+        fixture_cook(&mut v);
         assert_eq!((v.food, v.water, v.supplies.eggs, v.meals), (0., 0., 2, 12));
         assert_eq!(v.supplies.meals_cooked, 12);
         assert_eq!(v.supplies.used, 5.);
@@ -258,7 +336,7 @@ mod tests {
         let mut game = Game::new();
         {
             let mut v = game.app.world_mut().resource_mut::<Village>();
-            v.food = 0.;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (0.) as u32);
             crate::logistics::fixture_stock(&mut v, 0, 100);
             v.water = 100.;
             v.minutes = 540.;

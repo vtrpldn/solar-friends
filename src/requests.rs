@@ -475,7 +475,9 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             "There is no clear work position at the requested site.",
         );
     }
-    r.activity_material = q.material;
+    if task != "eat" {
+        r.activity_material = q.material;
+    }
     if !continuous(&q.task) && !matches!(q.task.as_str(), "prepare" | "craft") {
         r.remaining = q.remaining;
     }
@@ -585,7 +587,10 @@ pub fn enqueue_at(
         task,
         "source" | "prepare" | "outside" | "water" | "gather" | "rest" | "socialize" | "eat"
     ) {
-        if matches!(task, "source" | "prepare" | "outside" | "water" | "gather") {
+        if matches!(
+            task,
+            "source" | "prepare" | "outside" | "water" | "gather" | "eat"
+        ) {
             None
         } else {
             destination_building(v, task, r.id).map(|b| b.id)
@@ -803,13 +808,14 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.arrived = true;
             v.minutes = 540.;
-            v.food = 80.;
-            v.meals = 10;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
             v.water = 40.;
         }
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
+            r.activity_store = None;
             r.remaining = 90.;
             r.energy = 90.;
             r.hunger = 10.;
@@ -870,12 +876,22 @@ mod tests {
         until(&mut g, |g| {
             person(g, 0).help.as_ref().unwrap().phase == Phase::Complete
         });
-        assert_eq!(g.app.world().resource::<Village>().supplies.gathered, 2.);
+        assert_eq!(
+            g.app.world().resource::<Village>().supplies.gathered,
+            2.,
+            "{}",
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+        );
         assert_eq!(person(&mut g, 0).help.unwrap().id, id);
         for _ in 0..80 {
             g.tick(0.25);
         }
-        assert_eq!(g.app.world().resource::<Village>().supplies.gathered, 2.);
+        assert_eq!(
+            g.app.world().resource::<Village>().supplies.gathered,
+            2.,
+            "{}",
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+        );
         checkpoint(&mut g);
     }
     #[test]
@@ -906,7 +922,12 @@ mod tests {
         until(&mut g, |g| {
             person(g, 0).help.as_ref().unwrap().phase == Phase::Complete
         });
-        assert_eq!(g.app.world().resource::<Village>().supplies.gathered, 2.);
+        assert_eq!(
+            g.app.world().resource::<Village>().supplies.gathered,
+            2.,
+            "{}",
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+        );
     }
     #[test]
     fn queued_work_waits_through_the_evening_and_sleep_without_extending_shifts() {
@@ -996,6 +1017,7 @@ mod tests {
         let mut g = scene();
         assert_eq!(g.place("kitchen", 8, 8), "ok");
         logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
+        food::fixture_stage(&mut g.app.world_mut().resource_mut::<Village>(), 0);
         assert!(g.request(0, "cook", false).contains("Happy"));
         assert!(g.request(1, "cook", false).contains("Happy"));
         assert_eq!(person(&mut g, 1).help.unwrap().phase, Phase::Blocked);
@@ -1017,8 +1039,13 @@ mod tests {
         let mut g = scene();
         assert_eq!(g.place("kitchen", 8, 8), "ok");
         logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 0);
+        food::fixture_stage(&mut g.app.world_mut().resource_mut::<Village>(), 0);
         assert!(g.request(0, "cook", false).contains("Happy"));
-        g.app.world_mut().resource_mut::<Village>().food = 2.;
+        crate::logistics::fixture_stock(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            crate::economy::FOOD,
+            (2.) as u32,
+        );
         {
             let mut query = g.app.world_mut().query::<&mut Resident>();
             for mut r in query.iter_mut(g.app.world_mut()).filter(|r| r.id != 0) {
@@ -1082,27 +1109,32 @@ mod tests {
         let mut g = scene();
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.food = 2.;
-            v.meals = 0;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (2.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
         }
         {
+            let v = g.app.world().resource::<Village>().clone();
             let mut query = g.app.world_mut().query::<&mut Resident>();
             for mut r in query.iter_mut(g.app.world_mut()) {
                 match r.id {
                     0 => {
                         r.task = "gather".into();
+                        r.activity_store = None;
                         r.remaining = 5.;
                         r.x = 3.;
                         r.y = 11.;
                         r.hunger = 90.;
                     }
                     1 | 2 => {
-                        r.task = "eat".into();
+                        assign(&mut r, &v, "eat", "test", false);
+                        r.x = r.target_x;
+                        r.y = r.target_y;
                         r.remaining = 4.;
                         r.hunger = 80.;
                     }
                     _ => {
                         r.task = "rest".into();
+                        r.activity_store = None;
                         r.remaining = 90.;
                     }
                 }
@@ -1119,7 +1151,12 @@ mod tests {
         for _ in 0..19 {
             g.tick(0.25);
         }
-        assert_eq!(g.app.world().resource::<Village>().supplies.gathered, 2.);
+        assert_eq!(
+            g.app.world().resource::<Village>().supplies.gathered,
+            2.,
+            "{}",
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+        );
     }
     #[test]
     fn cancelling_a_waiting_help_request_does_not_cancel_a_committed_town_trip() {
@@ -1252,9 +1289,12 @@ mod tests {
             .economy
             .outside_jobs[0] = true;
         {
+            let v = g.app.world().resource::<Village>().clone();
             let mut q = g.app.world_mut().query::<&mut Resident>();
             let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
-            r.task = "eat".into();
+            assign(&mut r, &v, "eat", "test", false);
+            r.x = r.target_x;
+            r.y = r.target_y;
             r.remaining = 2.;
             r.hunger = 80.;
         }
@@ -1275,8 +1315,8 @@ mod tests {
         {
             let mut v = hungry.app.world_mut().resource_mut::<Village>();
             v.economy.outside_jobs[0] = true;
-            v.food = 0.;
-            v.meals = 0;
+            crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (0.) as u32);
+            crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
         }
         {
             let mut q = hungry.app.world_mut().query::<&mut Resident>();
@@ -1285,6 +1325,7 @@ mod tests {
                 .find(|r| r.id == 0)
                 .unwrap();
             r.task = "gather".into();
+            r.activity_store = None;
             r.remaining = 1.;
             r.hunger = 50.;
             r.x = 3.;

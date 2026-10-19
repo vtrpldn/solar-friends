@@ -13,9 +13,19 @@ pub fn replenish(v: &mut Village) {
     if v.mode != Mode::Sandbox {
         return;
     }
-    v.food = v.food.max(80.);
+    let _ = logistics::receive(
+        v,
+        logistics::Owner::Camp,
+        economy::FOOD,
+        80u32.saturating_sub(economy::quantity(v, economy::FOOD)),
+    );
     v.water = ecology::capacity(v);
-    v.meals = v.meals.max(20);
+    let _ = logistics::receive(
+        v,
+        logistics::Owner::Camp,
+        economy::MEALS,
+        20u32.saturating_sub(economy::quantity(v, economy::MEALS)),
+    );
     v.economy.money = v.economy.money.max(10_000_000);
     let missing = 36u32.saturating_sub(economy::quantity(v, economy::TOOLS));
     if missing > 0 {
@@ -111,7 +121,11 @@ mod tests {
         );
         assert_eq!(g.app.world().resource::<Village>().economy.money, before);
         assert!(!g.track_quest(0));
-        g.app.world_mut().resource_mut::<Village>().food = 0.;
+        crate::logistics::fixture_stock(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            crate::economy::FOOD,
+            (0.) as u32,
+        );
         g.tick(0.25);
         assert!(g.app.world().resource::<Village>().food > 79.);
         let saved = g.snapshot();
@@ -152,6 +166,7 @@ mod tests {
         r.visit_building = Some(1);
         r.activity_building = Some(1);
         r.task = "visit".into();
+        r.activity_store = None;
         assert!(g.remove_sandbox_building(1));
         let saved = g.snapshot();
         assert!(g.restore(&saved));

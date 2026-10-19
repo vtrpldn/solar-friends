@@ -97,7 +97,7 @@
         <h2>Supplies</h2>
         <p id="pantry-stock"></p>
         <p id="pantry-outlook" role="status"></p>
-        <details class="economy-section" id="materials-stores"><summary>Construction materials</summary><p id="storage-summary"></p><div id="material-inventory"></div><div id="storage-locations"></div></details>
+        <details class="economy-section" id="materials-stores"><summary>Stored supplies</summary><p id="storage-summary"></p><div id="material-inventory"></div><div id="storage-locations"></div></details>
         <section id="tools-control" hidden><h3>Tools</h3><label><input id="use-tools" type="checkbox" /> Use delivered tools</label><p id="tools-stock"></p><p>One use per completed build or harvest. Residents bring tools to the worksite first. Work continues at its usual rate without tools.</p></section><h3>Today so far</h3>
         <p id="pantry-flow"></p>
         <h3>Kitchen</h3>
@@ -110,7 +110,7 @@
         <p id="coop-status"></p></section>
         <section id="circular-controls"><h3>Water &amp; waste</h3><p id="circular-stock"></p><p id="circular-output"></p><p id="toilet-status"></p><label><input id="filter-greywater" type="checkbox"> Filter greywater automatically</label><p id="wetland-status"></p><label><input id="banana-treatment" type="checkbox"> Treat sewage with banana trees automatically</label><p id="banana-status"></p><label><input id="auto-digest" type="checkbox"> Feed the biodigester automatically</label><p id="digester-status"></p><label><input id="use-biogas" type="checkbox"> Cook with biogas when available</label><details><summary>Closing the loop</summary><p>Daily toilet waste stays sealed. Two waste + two kitchen scraps take 8 hours to make 4 cooking gas and 2 digestate. Digestate cures for a full day before becoming compost. One cooking gas stretches a pot by one meal.</p><p>A lined reed bed filters 12 greywater into 8 irrigation water over 6 hours. Gardens use reclaimed water first. Drinking, cooking, and handwashing always need fresh water. Processing pauses at full output stores.</p><p>A banana treatment bed is a sealed evapotranspiration basin for toilet sewage. Each finished bed treats up to six waste per day through its planted soil and roots, without producing drinking water, irrigation water or food. Pause banana treatment to keep more waste for the biodigester.</p></details></section><h3>Water &amp; weather</h3>
         <p id="pantry-weather"></p>
-        <details><summary>How the pantry works</summary><p>Ingredients include garden vegetables and gathered fruit. Residents forage wild food when the pantry runs low. Hungry hens wait safely; crops wait for water.</p></details>
+        <details><summary>How the pantry works</summary><p>Harvests stay at their garden or forest plot. Residents carry ingredients and eggs to kitchen pantries and hen feed to coops. Meals stay at the kitchen; neighbours walk to an available stored portion before eating. Town food purchases unload at the arrival store. A food forest yields six ingredients per gathering batch; wild foraging yields two. Residents stop routine gathering when reserves are healthy. Hungry hens wait safely; crops wait for water.</p></details>
       </aside>
       <aside id="projects-panel" class="panel economy-panel" hidden aria-label="Construction projects">
         <button class="panel-close" data-close-panel aria-label="Close projects">×</button>
@@ -129,7 +129,7 @@
         <span class="eyebrow">FROM OUR LAND, FROM OUR NEIGHBOURS</span><h2>Town trader</h2>
         <div class="town-account"><span>Shared fund<b id="town-fund"></b></span><small id="jobs-outlook"></small></div>
         <details class="economy-section outside-jobs"><summary>Outside occupations</summary><p>Choose who works a 09:00–17:00 shift. Each contribution reaches the shared fund on return; lunch is provided off-site. Keep some neighbours home for building, meals and town pickups.</p><div id="outside-jobs"></div><small>Turning a schedule off stops future shifts. A shift already started finishes normally; rest, meals and agreed days off still come first.</small></details>
-        <div class="town-list-heading"><h3>Building supplies</h3><div><button id="town-shortages">Add village needs</button><button id="town-clear">Clear</button></div></div>
+        <div class="town-list-heading"><h3>Town supplies</h3><div><button id="town-shortages">Add village needs</button><button id="town-clear">Clear</button></div></div>
         <fieldset class="transport-choice"><legend>Bring supplies home</legend><label><input type="radio" name="town-transport" value="delivery" checked> Town delivery <small>R$ 60 · next scheduled delivery</small></label><label><input type="radio" name="town-transport" value="pickup"> Drive to collect <small>R$ 20 fuel · up to 40 units · about 2 hours away</small></label><div id="pickup-controls" hidden><label for="pickup-driver">Driver</label><select id="pickup-driver"></select><small id="pickup-driver-note"></small></div></fieldset>
         <div id="town-catalog"></div><div class="town-checkout"><div><b id="town-total"></b><p id="town-delivery"></p><small id="town-basket-status" role="status"></small><small id="town-pickup-status" role="status"></small></div><button id="town-order" class="primary">Buy supplies</button></div>
         <details class="economy-section"><summary>Orders & deliveries</summary><div id="town-orders"></div></details>
@@ -218,7 +218,7 @@
       </section>
       <div class="resources" aria-label="Village resources">
         <button data-hud-resource="fund" title="Village fund · town trader"><span data-item-icon="coins" aria-hidden="true"></span><span><b id="fund"></b><small>Fund</small></span></button>
-        <button data-hud-resource="materials" title="Stored building materials"><span data-item-icon="materials" aria-hidden="true"></span><span><b id="material-total">0</b><small>Materials</small><b id="wood" hidden>0</b></span></button>
+        <button data-hud-resource="materials" title="All stored supplies"><span data-item-icon="materials" aria-hidden="true"></span><span><b id="material-total">0</b><small>Stores</small><b id="wood" hidden>0</b></span></button>
         <button data-hud-resource="food" title="Ingredients · open supplies"><span data-item-icon="food" aria-hidden="true"></span><span><b id="food">42</b><small>Food</small></span></button>
         <button data-hud-resource="water" title="Water stores · open supplies"><span data-item-icon="water" aria-hidden="true"></span><span><b id="water">65</b><small id="water-capacity">Water / 40</small></span></button>
         <button data-hud-resource="happiness" title="Resident wellbeing"><span data-item-icon="heart" aria-hidden="true"></span><span><b id="happiness">75%</b><small>Wellbeing</small></span></button>

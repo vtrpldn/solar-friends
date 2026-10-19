@@ -1,3 +1,4 @@
+import {restockFixtureFood} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -8,7 +9,7 @@ const snap=g=>JSON.parse(g.snapshot());
 const g=new Game(),fixture=snap(g);
 Object.assign(fixture.village,{arrived:true,minutes:540,food:80,meals:10,water:40});
 for(const r of fixture.residents)Object.assign(r,{task:'idle',remaining:0,energy:90,hunger:10,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});
-assert(g.restore(JSON.stringify(fixture)));assert.equal(g.place('garden',13,15),'ok');
+assert(g.restore(JSON.stringify(restockFixtureFood(fixture))));assert.equal(g.place('garden',13,15),'ok');
 const before=g.snapshot(),report=JSON.parse(g.project_forecast(1));
 assert.equal(g.snapshot(),before,'Forecasting cannot advance the clock or spend, reserve or pay anything in the live village');
 await writeFile('artifacts/forecasts/project.json',before);
@@ -29,6 +30,9 @@ assert(shifted.funds_projected>report.funds_projected,'Outside shifts contribute
 assert(!shifted.projects[0].completed_at||shifted.projects[0].completed_at>actual,'Outside work takes people away from village projects');
 assert.match(shifted.projects[0].blocker,/outside shifts/,'A staffing shortage must not be reported as a broken route');
 assert.equal(g.project_forecast(0),JSON.stringify({error:'Choose a forecast window of 1–14 days.'}));
+
+const changedFood=JSON.parse(before);changedFood.village.supplies.feed_hens=!changedFood.village.supplies.feed_hens;
+assert.notEqual(forecastPlan(changedFood),forecastPlan(JSON.parse(before)),'Food preferences change the real work queue and must invalidate its forecast');
 
 // A cancelled or superseded background replay cannot overwrite a newer result.
 const previousWorker=globalThis.Worker,workers=[];

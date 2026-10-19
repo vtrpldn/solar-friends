@@ -67,14 +67,14 @@ build('square');
 until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
 await complete(2);
 build('warehouse');
-const basket=Array(16).fill(0);basket[0]=1;
+const basket=Array(19).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
 // Buying tools can satisfy routine demand; the Story introduction still asks
 // the player to learn local crafting through one explicit workshop request.
 if(!snap().village.progress.tools_crafted){
- const timber=Array(16).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
+ const timber=Array(19).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
  until(s=>s.village.progress.tools_crafted>0||/Happy|already accepted/.test(g.request(1,'craft',false)),'request a saved tool batch');
 }
 await complete(4);
@@ -100,7 +100,7 @@ for(let tree=0;tree<4&&!snap().village.progress.timber_replanted;tree++){
 until(s=>s.village.progress.timber_replanted,'resident replanting');
 build('home','adobe',true);
 // Share deliberate surplus work within normal hours; no after-hours foraging shift.
-function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(r.task!=='gather'&&!r.requested)g.request(id,'gather',false);}return false;},label);}
+function gatherExtra(test,label){until(s=>{if(test(s))return true;for(const id of [0,3]){const r=s.residents.find(r=>r.id===id);if(!r.requested&&r.task!=='gather'&&r.task!=='garden'){if(id!==0||!g.request(id,'garden',false).includes('Happy'))g.request(id,'gather',false);}}return false;},label);}
 gatherExtra(()=>g.sell_surplus(1)==='ok','sell surplus');
 gatherExtra(()=>g.exchange_parts()==='ok','neighbour exchange');await complete(9);
 build('hydro');await complete(10);

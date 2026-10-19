@@ -93,7 +93,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
         }
         "garden" | "greenhouse" => ecology::tend(v, r),
         "kitchen" if supplies::can_cook(v) && !situations::protected(v, r.id, "cook") => {
-            supplies::cook(v);
+            supplies::cook_at(v, id);
             situations::cooked(v, r.id);
         }
         "well" if v.water >= 1. => {
@@ -102,9 +102,9 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
             r.hunger = (r.hunger - 5.).max(0.);
         }
         "grove" => {
-            v.food += 2.;
-            v.supplies.gathered += 2.;
-            v.progress.fruit = v.progress.fruit.saturating_add(2);
+            let gathered = food::gather(v, Some(id), r.x, r.y, food::forage_yield(v, Some(id)));
+            v.supplies.gathered += gathered as f32;
+            v.progress.fruit = v.progress.fruit.saturating_add(gathered);
         }
         "coop" => {
             r.social = (r.social + 10.).min(100.);
@@ -156,6 +156,7 @@ mod tests {
                 let mut q = g.app.world_mut().query::<&mut Resident>();
                 let mut r = q.iter_mut(g.app.world_mut()).find(|r| r.id == 0).unwrap();
                 r.task = "idle".into();
+                r.activity_store = None;
                 r.energy = 60.;
             }
             assert!(g.visit_building(0, 0).contains("Iara:"));
@@ -213,6 +214,7 @@ mod tests {
             assert_eq!(g.place(kind, 5, 5), "ok");
             let mut v = g.app.world().resource::<Village>().clone();
             crate::logistics::fixture_finish(&mut v, 0);
+            food::fixture_stage(&mut v, 0);
             v.buildings[0].poultry.remaining = 100.;
             v.progress.scraps = 2;
             let mut q = g.app.world_mut().query::<&Resident>();
@@ -238,7 +240,7 @@ mod tests {
                     assert_eq!(v.water, water - 1.);
                     assert_eq!(r.energy, 50.);
                 }
-                "grove" => assert_eq!(v.food, food + 2.),
+                "grove" => assert_eq!(v.food, food + 6.),
                 "coop" => {
                     assert_eq!(v.buildings[0].poultry.remaining, 70.);
                     assert_eq!(r.social, 50.);

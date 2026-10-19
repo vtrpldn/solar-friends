@@ -285,7 +285,7 @@ mod tests {
         assert_eq!(v.circular.reclaimed, 6.);
         assert_eq!(v.water, fresh);
         v.water = 0.;
-        v.food = 10.;
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (10.) as u32);
         assert!(!supplies::can_cook(&v));
         advance(&mut v, 1.);
         v.circular.filter_water = false;
@@ -302,13 +302,13 @@ mod tests {
         advance(&mut v, 1.);
         assert_eq!(v.circular.digestion, 0.);
         assert_eq!(v.circular.waste, 4.);
-        v.food = 20.;
-        v.meals = 0;
-        supplies::cook(&mut v);
+        crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (20.) as u32);
+        crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
+        supplies::fixture_cook(&mut v);
         assert_eq!(v.meals, 6);
         assert_eq!(v.circular.biogas, 11.);
         v.circular.use_biogas = false;
-        supplies::cook(&mut v);
+        supplies::fixture_cook(&mut v);
         assert_eq!(v.meals, 11);
         assert_eq!(v.circular.biogas, 11.);
     }

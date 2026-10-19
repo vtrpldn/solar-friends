@@ -1,7 +1,7 @@
 import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 import {unlockStory} from './story-fixture.mjs';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
 import {makeScenario} from '../web/dev/scenarios.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
@@ -17,7 +17,7 @@ for(const scenario of ['economy','economy-poor','economy-depleted']){
     if(i%100===0){
       const missing=e.shortage,total=missing.reduce((sum,n,j)=>sum+n*e.materials[j].price,6000);
       if(missing.some(n=>n)&&e.money>=total){assert.equal(g.order_supplies(JSON.stringify(missing)),'ok');orders++;}
-      const saved=g.snapshot();assert(g.restore(saved),'Every intermediate state must survive save/reload');
+      const saved=g.snapshot();if(!g.restore(saved)){await writeFile('artifacts/logistics/invalid-economy-checkpoint.json',saved);assert.fail('Every intermediate state must survive save/reload; see artifacts/logistics/invalid-economy-checkpoint.json');}
       assert.equal(g.snapshot(),saved,'Reload must not repeat grants, delivery or work');
     }
     assert(e.money>=0&&e.used<=e.capacity);assert(e.materials.every(m=>m.available>=0&&m.reserved<=m.stored));

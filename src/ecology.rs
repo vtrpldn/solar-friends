@@ -129,6 +129,26 @@ pub fn tend(v: &mut Village, r: &Resident) {
     let site_id = v.buildings[index].id;
     let capacity = moisture_capacity(&v.buildings[index]);
     let outdoor = v.buildings[index].kind == "garden";
+    let pending = &v.buildings[index].crop;
+    if pending.planted && pending.growth >= duration(pending) {
+        let base = match pending.kind.as_str() {
+            "beans" => 10,
+            "tomatoes" if pending.harvests > 0 && v.progress.compost == 0 => 4,
+            "tomatoes" => 6,
+            _ => 5,
+        };
+        let output = base
+            + if r.favorite == "garden" { 3 } else { 0 }
+            + if v.progress.compost > 0 { 3 } else { 0 }
+            + if v.progress.use_tools && logistics::site_tools(v, site_id) > 0 {
+                2
+            } else {
+                0
+            };
+        if economy::capacity(v).saturating_sub(economy::storage(v)) < output {
+            return;
+        }
+    }
     let crop = &mut v.buildings[index].crop;
     if !crop.planted {
         crop.planted = true;
@@ -159,17 +179,17 @@ pub fn tend(v: &mut Village, r: &Resident) {
             crop.moisture = 0.;
             crop.harvests = 0;
         }
-        let before = v.food;
-        v.food += yield_food + if r.favorite == "garden" { 3. } else { 0. };
+        yield_food += if r.favorite == "garden" { 3. } else { 0. };
         if v.progress.compost > 0 {
             v.progress.compost -= 1;
-            v.food += 3.;
+            yield_food += 3.;
             v.progress.enriched_harvests += 1;
         }
         if progression::use_tool(v, site_id) {
-            v.food += 2.;
+            yield_food += 2.;
         }
-        v.supplies.gathered += v.food - before;
+        food::gather(v, Some(site_id), r.x, r.y, yield_food as u32);
+        v.supplies.gathered += yield_food;
         v.harvests += 1;
     } else if v.circular.reclaimed >= 2. || v.water >= 2. {
         if v.circular.reclaimed >= 2. {
