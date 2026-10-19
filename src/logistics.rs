@@ -1296,7 +1296,8 @@ fn plan(v: &Village, r: &Resident) -> Option<Plan> {
         let Ok(second) = navigation::route(v, a, b) else {
             continue;
         };
-        let effort = first.minutes + second.minutes;
+        let effort =
+            (first.minutes + second.minutes) / skills::factor(v, r.id, skills::Skill::Logistics);
         if best.as_ref().is_none_or(|(_, _, _, _, n)| effort < *n) {
             best = Some((c, a, b, first, effort));
         }
@@ -1430,6 +1431,7 @@ fn walk(
     target: [f32; 2],
     dt: f32,
 ) {
+    let dt = dt * skills::factor(v, r.id, skills::Skill::Logistics);
     let final_target = (r.target_x, r.target_y);
     (r.target_x, r.target_y) = (target[0], target[1]);
     let old = (r.x, r.y);
@@ -1574,7 +1576,14 @@ pub fn advance(
         let target = s.stores.iter_mut().find(|p| p.id == h.to).unwrap();
         target.items[h.material] += h.amount;
         freshness::merge(&mut target.food_lots, h.food_lots);
+        let useful = !matches!(
+            target.owner,
+            Owner::Camp | Owner::Warehouse(_) | Owner::Ground
+        );
         s.shipments.remove(index);
+        if useful {
+            skills::award(v, r.id, skills::Skill::Logistics, h.amount.min(3) as u8);
+        }
         r.remaining = 0.;
         sync(v);
         rebalance(v);

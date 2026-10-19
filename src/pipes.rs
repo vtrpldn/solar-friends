@@ -495,6 +495,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
     if r.task != "utility" || minutes <= 0. || (r.x - target[0]).hypot(r.y - target[1]) > 0.08 {
         return false;
     }
+    let minutes = minutes * skills::factor(v, r.id, skills::Skill::Care);
     if p.phase == Phase::Removing {
         let boundary = if p.removal_work < 4. {
             4.
@@ -508,6 +509,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         row.removal_work += amount;
         if row.removal_work >= p.removal_labour() {
             finish_removal(v, id);
+            skills::award(v, r.id, skills::Skill::Care, 2);
             return true;
         }
     } else {
@@ -535,6 +537,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         row.work += amount;
         if row.work >= p.labour() {
             row.phase = Phase::Active;
+            skills::award(v, r.id, skills::Skill::Care, 4);
             event(
                 v,
                 if p.plan.kind == Kind::Electricity {

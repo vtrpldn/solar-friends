@@ -923,6 +923,10 @@ pub fn quote(v: &Village, r: &Resident) -> Option<Quote> {
         }
     }
     service_quotes(v, r, &mut options);
+    for q in &mut options {
+        q.minutes =
+            (q.minutes - 6.).max(0.) / skills::factor(v, r.id, skills::Skill::Logistics) + 6.;
+    }
     options.sort_by(|a, b| {
         (b.urgency - b.minutes * 1.5)
             .total_cmp(&(a.urgency - a.minutes * 1.5))
@@ -1143,6 +1147,12 @@ pub fn advance(
         } else {
             p.water[h.class.index()] += h.amount;
         }
+        skills::award(
+            v,
+            r.id,
+            skills::Skill::Logistics,
+            h.amount.floor().min(3.) as u8,
+        );
         v.water_supply.trips.retain(|p| p.resident != r.id);
         r.remaining = 0.;
         walking::clear(r);

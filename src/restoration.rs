@@ -271,13 +271,14 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         let after = v.simulation.materials.as_ref().unwrap().spent[COMPOST];
         v.restoration.iter_mut().find(|j| j.id == id).unwrap().spent = Some([before, after]);
     }
-    let amount = minutes.min(LABOUR - j.work);
+    let amount = (minutes * skills::factor(v, r.id, skills::Skill::Farming)).min(LABOUR - j.work);
     land::restore_soil(v, j.size, j.x, j.y, amount / LABOUR);
     let row = v.restoration.iter_mut().find(|j| j.id == id).unwrap();
     row.work = (row.work + amount).min(LABOUR);
     let complete = row.work >= LABOUR;
     if complete {
         row.finished = Some(v.minutes);
+        skills::award(v, r.id, skills::Skill::Farming, 3);
         if let Some(i) = j.source {
             v.economy.sources[i].restored = true;
         }

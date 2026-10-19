@@ -1,4 +1,5 @@
 //! Project-led sourcing and a local town economy. All transactions live here.
+use crate::skills;
 use crate::{Game, Village, event, ready, restoration};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -1240,6 +1241,18 @@ pub fn finish_outside(v: &mut Village, id: usize) {
     let day = (v.minutes / 1440.) as i32;
     if id < 5 && v.economy.outside_committed_days[id] == day && v.economy.work_day[id] != day {
         v.economy.work_day[id] = day;
+        skills::award(
+            v,
+            id,
+            [
+                skills::Skill::Farming,
+                skills::Skill::Building,
+                skills::Skill::Cooking,
+                skills::Skill::Farming,
+                skills::Skill::Care,
+            ][id],
+            2,
+        );
         let job = crate::occupations::JOBS[id];
         ledger(
             v,

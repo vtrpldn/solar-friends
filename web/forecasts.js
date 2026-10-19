@@ -11,7 +11,7 @@ export function forecastPlan(s){
     projects:v.economy.projects.map(p=>[p.building,p.recipe,p.priority,p.paused]),
     sources:v.economy.sources.map(p=>[p.material,p.x,p.y,p.active,p.auto_replant]),
     pipes:v.pipes?.lines.map(p=>[p.id,p.plan.kind,p.plan.from,p.plan.to,p.priority,p.paused,['removing','retired'].includes(p.phase)]),
-    jobs:v.economy.outside_jobs,preferences:v.workforce.preferences,
+    jobs:v.economy.outside_jobs,preferences:v.workforce.preferences,learning:v.skills?.enabled,
     production:[v.production?.targets,v.production?.sites.filter(s=>s.paused).map(s=>s.id)],
     restoration:v.restoration?.map(j=>[j.id,j.x,j.y,j.size,j.cancelled]),
     requests:s.residents.map(r=>[r.help?.id,r.help?.phase==='cancelled']),
