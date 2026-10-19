@@ -37,6 +37,7 @@ mod supplies;
 mod town_pickup;
 mod utilities;
 mod walking;
+mod water;
 mod workforce;
 use progression::Progress;
 
@@ -157,6 +158,8 @@ pub struct Village {
     pub land: land::State,
     #[serde(default)]
     pub restoration: Vec<restoration::Job>,
+    #[serde(default)]
+    pub water_supply: water::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
     #[serde(skip)]
@@ -264,10 +267,10 @@ fn available(v: &Village, task: &str) -> bool {
         "garden" => v
             .buildings
             .iter()
-            .any(|b| ecology::needs_tending(b, sanitation::irrigation_water(v))),
+            .any(|b| ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))),
         "sanitation" => ready(v, "eco_toilet"),
         "cook" => production::can_order_meals(v),
-        "water" => v.water < ecology::capacity(v),
+        "water" => water::has_work(v),
         "compost" => v.buildings.iter().any(|b| organics::can_turn(v, b.id)),
         "restore" => v.restoration.iter().any(|j| restoration::ready(v, j)),
         "craft" => production::can_order_tools(v),
@@ -278,7 +281,7 @@ fn available(v: &Village, task: &str) -> bool {
 }
 fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
     if task == "water" {
-        return (22.5, 11. + id as f32 * 1.25);
+        return (1., 13. + (id as f32 - 2.) * 0.65);
     }
     if task == "sleep" || task == "rest" {
         return shelter(v, id)
@@ -307,7 +310,7 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
         .iter()
         .filter(|b| {
             if task == "garden" {
-                ecology::needs_tending(b, sanitation::irrigation_water(v))
+                ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
             } else if task == "compost" {
                 organics::can_turn(v, b.id)
             } else if task == "build" {
@@ -319,7 +322,13 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
                             q.material == economy::MEALS
                                 && production::building(v, q.site) == Some(b.id)
                         }))
-                    && (task != "sanitation" || b.next_visit <= v.minutes)
+                    && (task != "sanitation"
+                        || b.next_visit <= v.minutes
+                            && water::available(
+                                v,
+                                water::Owner::Building(b.id),
+                                water::Class::Fresh,
+                            ) >= 1.)
                     && b.kind
                         == match task {
                             "garden" => "garden",
@@ -406,6 +415,10 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         "rest" | "socialize" | "idle" => 12.,
         _ => 10.,
     };
+    if task == "water" {
+        water::assign_target(v, r);
+        return;
+    }
     if task == "restore" {
         if let Some(id) = v
             .restoration
@@ -661,6 +674,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     if dt <= 0. {
         return;
     }
+    water::sync(&mut v);
     modes::replenish(&mut v);
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
@@ -696,6 +710,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         for mut r in &mut people {
             if v.progress.invited & (1 << r.id) != 0 {
                 logistics::interrupt(&mut v, &r);
+                water::interrupt(&mut v, &r);
                 assign(
                     &mut r,
                     &v,
@@ -816,6 +831,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task != "haul" {
             logistics::interrupt(&mut v, &r);
         }
+        if r.task != "water" {
+            water::interrupt(&mut v, &r);
+        }
         if mobility::advance(&mut r, &mut v, &neighbours, dt) {
             requests::observe(&mut r, &v);
             continue;
@@ -823,7 +841,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         let sleeping = r.task == "sleep";
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
-        sanitation::household_water(&mut v, dt * if sleeping { 0.002 } else { 0.009 });
+        let household =
+            shelter(&v, r.id).map_or(water::Owner::Camp, |b| water::Owner::Building(b.id));
+        sanitation::household_at(&mut v, household, dt * if sleeping { 0.002 } else { 0.009 });
         let chores_finished = (r
             .help
             .as_ref()
@@ -863,7 +883,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             || (workforce::cooking(&v, r.id) && available(&v, "cook"))
             || workforce::ingredients(&v, r.id)
             || r.help.as_ref().is_some_and(|q| q.active())
-            || v.water < 24.;
+            || water::has_work(&v);
         let chores_start = !r.requested
             && work_time(v.minutes)
             && (!work_time(before)
@@ -898,11 +918,18 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         if r.task != "haul" {
             logistics::interrupt(&mut v, &r);
         }
+        if r.task != "water" {
+            water::interrupt(&mut v, &r);
+        }
         if mobility::advance(&mut r, &mut v, &neighbours, 0.) {
             requests::observe(&mut r, &v);
             continue;
         }
         if logistics::advance(&mut v, &mut r, &neighbours, dt) {
+            requests::observe(&mut r, &v);
+            continue;
+        }
+        if water::advance(&mut v, &mut r, &neighbours, dt) {
             requests::observe(&mut r, &v);
             continue;
         }
@@ -1065,13 +1092,12 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 "garden" if r.requested || supplies::needs_ingredients(&v) => {
                     completed_batch = v.buildings.iter().any(|b| {
                         Some(b.id) == r.activity_building
-                            && ecology::needs_tending(b, sanitation::irrigation_water(&v))
+                            && ecology::needs_tending(
+                                b,
+                                water::irrigation(&v, water::Owner::Building(b.id)),
+                            )
                     });
                     ecology::tend(&mut v, &r)
-                }
-                "water" if v.water < ecology::capacity(&v) => {
-                    completed_batch = true;
-                    v.water = (v.water + 18.).min(ecology::capacity(&v));
                 }
                 "sanitation" => {
                     sanitation::use_toilet(&mut v, &mut r);
@@ -1166,9 +1192,10 @@ impl Game {
                 processes: processes::State::default(),
                 land: land::State::default(),
                 restoration: vec![],
+                water_supply: water::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 16,
+                version: 17,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1240,6 +1267,9 @@ impl Game {
         ));
         logistics::initialise(&mut app.world_mut().resource_mut::<Village>());
         production::sync(&mut app.world_mut().resource_mut::<Village>());
+        assert!(water::initialise(
+            &mut app.world_mut().resource_mut::<Village>()
+        ));
         Self { app }
     }
     pub fn tick(&mut self, seconds: f32) {
@@ -1375,7 +1405,13 @@ impl Game {
             return "We agreed to cover this work. Let our neighbour have their time back.".into();
         }
         interactions::start(&mut r, &v, building, true);
-        format!("{}: {}", r.name, r.reason)
+        let message = format!("{}: {}", r.name, r.reason);
+        let interrupted = r.clone();
+        water::interrupt(
+            &mut self.app.world_mut().resource_mut::<Village>(),
+            &interrupted,
+        );
+        message
     }
     pub fn set_food_preferences(&mut self, feed_hens: bool, use_eggs: bool) {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -1575,6 +1611,7 @@ impl Game {
             || !processes::valid(v)
             || !land::valid(v)
             || !restoration::valid(v)
+            || !water::valid(v, &save.residents)
             || !gatherings::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
@@ -1609,6 +1646,8 @@ impl Game {
             .chain(v.processes.batches.iter().map(|p| p.id))
             .chain(v.land.deposits.iter().map(|d| d.id))
             .chain(v.restoration.iter().map(|j| j.id))
+            .chain(v.water_supply.tanks.iter().map(|p| p.id))
+            .chain(v.water_supply.trips.iter().map(|p| p.id))
             .chain(
                 save.residents
                     .iter()
@@ -1638,7 +1677,7 @@ impl Game {
         {
             return false;
         }
-        if !matches!(v.version, 3 | 16)
+        if !matches!(v.version, 3 | 17)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1730,8 +1769,11 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 16;
+            save.village.version = 17;
             if !processes::initialise(&mut save.village) {
+                return false;
+            }
+            if !water::initialise(&mut save.village) {
                 return false;
             }
             economy::rebalance(&mut save.village);
@@ -1849,7 +1891,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.minutes = 900.;
-            v.water = 100.;
+            crate::water::fixture_fresh(&mut v, 100.);
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (100.) as u32);
         }
         let mut q = g.app.world_mut().query::<&mut Resident>();
@@ -2178,7 +2220,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":16", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":17", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

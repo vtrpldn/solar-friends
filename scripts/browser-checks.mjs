@@ -5,6 +5,7 @@ import {checkRestorationControls} from './restoration-browser-checks.mjs';
 import {checkPlantingControls} from './planting-browser-checks.mjs';
 import {checkLivingLandControls} from './living-land-browser-checks.mjs';
 import {checkUtilityRoutes} from './utility-routes-browser-checks.mjs';
+import {checkWaterControls} from './water-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
 import assert from 'node:assert/strict';
@@ -72,6 +73,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkPlantingControls({page,saved,capture});
   await checkLivingLandControls({page,saved,capture});
   await checkUtilityRoutes({page,saved,capture});
+  await checkWaterControls({page,saved,capture});
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){
     await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);
@@ -245,12 +247,17 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   pickup=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(pickup.village.economy.money,deliveryFunds+4000);
   assert.equal(pickup.residents[1].trip.purpose,'pickup');
-  await page.locator('#dev-button').click();await page.locator('#dev-load').click();await page.locator('#dev-close').click();
+  // Helping with water needs a real empty receiver and a reachable supply.
+  // The replenished village used for the trade checks already has full buffers.
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/water/before.json');
+  await page.waitForFunction(()=>{const v=window.solarDev.snapshot().village;return v.buildings.length===5&&v.water===24&&v.water_supply.trips.length===0;});
+  await page.locator('#dev-close').click();
   await page.getByRole('button',{name:'People',exact:true}).click();
   await page.getByRole('button',{name:'Meet Iara',exact:true}).click();
   await page.getByRole('button',{name:'Help build',exact:true}).click();
   assert((await page.locator('#person .response').textContent()).includes('No stage is ready'),'Refusals must be visible in the resident panel');
-  await page.getByRole('button',{name:'Collect river water',exact:true}).click();
+  await page.getByRole('button',{name:'Fetch & deliver water',exact:true}).click();
   assert((await page.locator('#person .response').textContent()).includes('Happy'));
   assert(await page.locator('#person .response').isVisible());
   assert(await page.getByRole('button',{name:'Resume time',exact:true}).isVisible());
@@ -272,6 +279,9 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).help.phase),'cancelled');
 
   await page.getByRole('button',{name:'Close resident details',exact:true}).click();
+  // Building interactions need the established village's solar farm and lamp.
+  await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('village');await page.locator('#dev-load').click();
+  await page.waitForFunction(()=>window.solarDev.scenario()==='village');await page.locator('#dev-close').click();
   await page.getByRole('button',{name:'Village',exact:true}).click();
   await page.getByRole('button',{name:'Buildings',exact:true}).click();
   await page.locator('#building-choice').selectOption('0');

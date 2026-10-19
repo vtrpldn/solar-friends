@@ -7,7 +7,7 @@ fn empty() -> Game {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.arrived = true;
         v.minutes = 540.;
-        v.water = 40.;
+        crate::water::fixture_fresh(&mut v, 40.);
         v.progress.completed = [true; 4];
         v.production.targets = [0; COUNT];
         for i in [FOOD, MEALS, EGGS] {

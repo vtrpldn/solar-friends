@@ -350,6 +350,7 @@ pub fn sync(v: &mut Village) {
                 .iter()
                 .any(|h| [h.from, h.to, h.recovery].contains(&p.id))
     });
+    water::sync(v);
 }
 pub fn receive(v: &mut Village, owner: Owner, i: usize, n: u32) -> bool {
     let mut lots = vec![];
@@ -676,6 +677,12 @@ pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> 
     (navigation::clear(v, x, y) && doorway(v, p, [x, y])).then_some([x, y])
 }
 fn doorway(v: &Village, p: &Store, to: [f32; 2]) -> bool {
+    // A blueprint can enclose a walker carrying goods. Its interrupted load
+    // remains inside that plot, reachable through the same bounded departure
+    // geometry as an occupied worksite. It cannot cross another foundation.
+    if p.owner == Owner::Ground {
+        return navigation::exit_segment(v, [p.x, p.y], to);
+    }
     // River generators are supplied from a land approach. Their connection to
     // that approach crosses water; the resident's walking route never does.
     let river_structure = v
@@ -720,6 +727,14 @@ struct Candidate {
 }
 fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if matches!(to, Owner::Restoration(_)) {
+        return 1;
+    }
+    // Forestry starts are a bounded claim for a player-established plot.
+    // Repeated optional pantry top-ups must not postpone its first planting
+    // or renewable replanting indefinitely.
+    if matches!(to, Owner::Source(_))
+        && matches!(material, economy::TREE_STARTS | economy::BAMBOO_STARTS)
+    {
         return 1;
     }
     let kind = match to {
@@ -1392,7 +1407,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 16
+    if v.version != 17
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -2045,6 +2060,7 @@ mod tests {
             v.simulation.materials = None;
             simulation::start_materials(&mut v);
         }
+        crate::water::replenish(&mut g.app.world_mut().resource_mut::<Village>());
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
             r.task = "idle".into();
@@ -2096,6 +2112,59 @@ mod tests {
         let saved = g.snapshot();
         assert!(g.restore(&saved));
         assert_eq!(g.snapshot(), saved);
+    }
+    #[test]
+    fn a_put_down_load_inside_a_new_plot_can_leave_only_its_covering_foundation() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("kitchen", 10, 10), "ok");
+        assert_eq!(g.place("home", 13, 10), "ok");
+        let v = g.app.world().resource::<Village>();
+        let mut p = v.logistics.as_ref().unwrap().stores[0].clone();
+        p.owner = Owner::Ground;
+        p.x = 10.;
+        p.y = 10.;
+        for id in 0..5 {
+            let point = approaches(v, &p, id).expect("The enclosed load has a reachable doorway");
+            assert!(navigation::clear(v, point[0], point[1]));
+            assert!(navigation::exit_segment(v, [p.x, p.y], point));
+        }
+        assert!(
+            !doorway(v, &p, [14.4, 10.]),
+            "Recovery cannot cross an unrelated home"
+        );
+    }
+    #[test]
+    fn reserved_forestry_starts_are_delivered_before_optional_pantry_topups() {
+        let mut g = Game::new();
+        g.start_mode("sandbox");
+        assert_eq!(g.place("kitchen", 8, 8), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.mode = modes::Mode::Story;
+            v.arrived = true;
+            v.minutes = 540.;
+            v.progress.completed = [true; 4];
+            v.progress.later_completed = [true; 9];
+            fixture_stock(&mut v, economy::FOOD, 60);
+            fixture_stock(&mut v, economy::MEALS, 12);
+            fixture_stock(&mut v, economy::TREE_STARTS, 4);
+        }
+        assert_eq!(g.place_source(0, 16, 13), "ok");
+        let world = g.app.world_mut();
+        let mut r = world
+            .query::<&Resident>()
+            .iter(world)
+            .next()
+            .unwrap()
+            .clone();
+        r.x = CAMP.0;
+        r.y = CAMP.1;
+        let v = world.resource::<Village>();
+        assert!(!supplies::urgent(v));
+        let (candidate, ..) = plan(v, &r).expect("Delivered starts have a reachable planting site");
+        assert_eq!(candidate.material, economy::TREE_STARTS);
+        assert_eq!(candidate.amount, 4);
     }
     #[test]
     fn lowering_a_storage_target_queues_a_return_instead_of_teleporting_goods() {

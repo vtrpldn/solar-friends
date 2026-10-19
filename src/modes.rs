@@ -19,7 +19,7 @@ pub fn replenish(v: &mut Village) {
         economy::FOOD,
         80u32.saturating_sub(economy::quantity(v, economy::FOOD)),
     );
-    v.water = ecology::capacity(v);
+    water::replenish(v);
     let _ = logistics::receive(
         v,
         logistics::Owner::Camp,

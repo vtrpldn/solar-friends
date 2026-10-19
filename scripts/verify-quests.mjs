@@ -84,7 +84,14 @@ until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
 // Restore the actual garden through delivered compost and attended work,
 // while food, outside shifts and the existing community hours remain active.
-until(s=>s.environment.economy.materials[19].available>=2,'compost for soil work');
+until(s=>{
+ if(s.environment.economy.materials[19].available>=2)return true;
+ // Routine care also supplies growing beds. Ask for deliberate extra turning
+ // through the resident control instead of waiting for an unrequested surplus.
+ const neighbour=s.residents.find(r=>r.id===0);
+ if(!neighbour.help||['complete','cancelled'].includes(neighbour.help.phase))g.request(0,'compost',false);
+ return false;
+},'requested compost for soil work');
 assert.equal(g.restore_plot(13,10),'ok');
 const soilJob=snap().village.restoration.at(-1).id;
 until(s=>s.village.restoration.find(j=>j.id===soilJob).finished!=null,'resident garden restoration');
@@ -104,7 +111,7 @@ const b=snap().village.buildings.find(b=>b.id===lamp);
 for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
 await complete(6);
 for(const k of ['eco_toilet','wetland','banana_treatment'])build(k);await complete(7);
-build('biodigester');await complete(8);
+build('biodigester');g.configure_banana_treatment(false);await complete(8);
 for(const material of [2,3,4])source(material);
 for(let i=0;i<5;i++){
  until(s=>s.village.economy.sources[i].remaining>0,`source ${i} maturity`);

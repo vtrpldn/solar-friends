@@ -332,7 +332,7 @@ mod tests {
         assert_eq!(g.snapshot(), save);
         let mut empty = Game::new();
         let mut v = empty.app.world_mut().resource_mut::<Village>();
-        v.water = 0.;
+        crate::water::fixture_fresh(&mut v, 0.);
         crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
         v.circular.biogas = 1.;
         crate::supplies::fixture_cook(&mut v);
@@ -348,10 +348,16 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.minutes = 900.;
-            v.water = crate::ecology::capacity(&v);
+            let full = crate::ecology::capacity(&v);
+            crate::water::fixture_fresh(&mut v, full);
             crate::ecology::advance(&mut v, 1.);
             assert!(!v.progress.rain_caught);
-            v.water -= 1.;
+            crate::water::draw(
+                &mut v,
+                crate::water::Owner::Building(0),
+                crate::water::Class::Fresh,
+                1.,
+            );
             crate::ecology::advance(&mut v, 1.);
             assert!(v.progress.rain_caught);
             v.minutes = 1320.;

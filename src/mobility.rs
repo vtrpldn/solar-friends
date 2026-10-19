@@ -190,7 +190,9 @@ pub fn advance(
         r.energy = (r.energy - dt * 0.035).max(0.);
         r.hunger = (r.hunger + dt * 0.13).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
-        v.water = (v.water - dt * 0.009).max(0.);
+        let household =
+            shelter(v, r.id).map_or(water::Owner::Camp, |b| water::Owner::Building(b.id));
+        sanitation::household_at(v, household, dt * 0.009);
     } else if trip.phase == Phase::Leaving {
         trip.phase = Phase::Away;
         if trip.purpose == Purpose::Overnight {
@@ -308,7 +310,7 @@ mod tests {
             v.minutes = 540.;
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
             crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
-            v.water = 40.;
+            crate::water::fixture_fresh(&mut v, 40.);
         }
         let mut q = g.app.world_mut().query::<&mut Resident>();
         for mut r in q.iter_mut(g.app.world_mut()) {
@@ -503,13 +505,13 @@ mod tests {
     #[test]
     fn a_small_water_store_does_not_keep_the_caretaker_working_forever() {
         let mut g = healthy();
-        g.app.world_mut().resource_mut::<Village>().water = 39.;
+        crate::water::fixture_fresh(&mut g.app.world_mut().resource_mut::<Village>(), 39.);
         let v = g.app.world().resource::<Village>().clone();
         let mut nina = residents(&mut g)[4].clone();
         choose(&mut nina, &v);
         assert!(leisure::hobby(&nina.task));
         let mut low = v.clone();
-        low.water = 20.;
+        crate::water::fixture_fresh(&mut low, 20.);
         choose(&mut nina, &low);
         assert_eq!(nina.task, "water");
     }

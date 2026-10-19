@@ -7,7 +7,7 @@ fn scene(eggs: bool, gas: f32) -> (Game, Id, Resident) {
         v.progress.completed = [true; 4];
         v.arrived = true;
         v.minutes = 540.;
-        v.water = 40.;
+        crate::water::fixture_fresh(&mut v, 40.);
         v.supplies.use_eggs = eggs;
         v.circular.use_biogas = true;
         v.circular.biogas = gas;
@@ -85,8 +85,8 @@ fn reclaimed_water_cannot_resume_a_saved_pot_but_fresh_water_can() {
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
         assert!(!work(&mut v, &r, 3.));
-        v.water = 0.;
-        v.circular.reclaimed = 20.;
+        crate::water::fixture_fresh(&mut v, 0.);
+        crate::water::fixture_irrigation(&mut v, 20.);
         sync(&mut v);
         assert_eq!(batch(&v, id).unwrap().phase, Phase::AwaitingWater);
         assert!(!work(&mut v, &r, 7.));
@@ -96,7 +96,7 @@ fn reclaimed_water_cannot_resume_a_saved_pot_but_fresh_water_can() {
     checkpoint(&mut g);
     {
         let mut v = g.app.world_mut().resource_mut::<Village>();
-        v.water = 1.;
+        crate::water::fixture_fresh(&mut v, 1.);
         assert!(work(&mut v, &r, 7.));
         assert_eq!(v.water, 0.);
         assert_eq!(v.circular.reclaimed, 20.);

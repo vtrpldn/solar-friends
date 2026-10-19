@@ -327,15 +327,6 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             reason,
         });
     };
-    if v.water < 24. && available(v, "water") {
-        add(
-            "water",
-            None,
-            None,
-            1100.,
-            "Carrying water for our essential daily needs.",
-        );
-    }
     for b in &v.buildings {
         if economy::can_build(v, b.id) {
             let priority = v
@@ -361,7 +352,9 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
                 "Making time for our queued building crew work.",
             );
         }
-        if ingredients(v, r.id) && ecology::needs_tending(b, sanitation::irrigation_water(v)) {
+        if ingredients(v, r.id)
+            && ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+        {
             add(
                 "garden",
                 Some(b.id),
@@ -434,14 +427,22 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             "Gathering a little food for our next meals.",
         );
     }
-    if v.water < 70_f32.min(ecology::capacity(v) * 0.8) && available(v, "water") && v.water >= 24. {
-        add(
-            "water",
-            None,
-            None,
-            180.,
-            "Keeping a useful water reserve for tomorrow.",
-        );
+    if water::has_work(v)
+        && occupied(v, r, "water", None, None, None) < 2
+        && let Some(q) = water::quote(v, r)
+    {
+        out.push(Offer {
+            task: "water".into(),
+            building: None,
+            material: None,
+            batch: None,
+            destination: q.pickup,
+            travel_minutes: Some(q.minutes),
+            blocker: None,
+            score: score(v, r, "water", q.urgency, q.minutes),
+            urgency: q.urgency,
+            reason: "Taking a water load to its local container.",
+        });
     }
     if logistics::pending(v, r.id) {
         let quote = logistics::quote(v, r);
@@ -552,7 +553,7 @@ fn willing(v: &Village, r: &Resident, task: &str) -> bool {
 /// giving it to the first entity in the simulation loop. Existing work keeps
 /// its claim until completion or a needs interruption.
 fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
-    if job.task == "haul" {
+    if matches!(job.task.as_str(), "haul" | "water") {
         return true;
     } // Shipment reservations own these slots.
     let capacity = if matches!(job.task.as_str(), "build" | "building_work" | "water") {
@@ -649,7 +650,7 @@ mod tests {
         v.minutes = 570.;
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (12.) as u32);
         crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 8);
-        v.water = 30.;
+        crate::water::fixture_fresh(&mut v, 30.);
         let mut r = saved.residents[0].clone();
         r.x = 12.;
         r.y = 11.;
@@ -674,7 +675,7 @@ mod tests {
         v.workforce.preferences[0][4] = 2;
         choose(&mut r, &v);
         assert_eq!(r.task, "water");
-        v.water = 5.;
+        crate::water::fixture_fresh(&mut v, 5.);
         v.workforce.preferences[0][4] = 0;
         choose(&mut r, &v);
         assert_eq!(r.task, "water");
@@ -734,7 +735,7 @@ mod tests {
         v.minutes = 570.;
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
         crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 8);
-        v.water = 40.;
+        crate::water::fixture_fresh(&mut v, 40.);
         logistics::fixture_stage(&mut v, 0);
         logistics::fixture_stage(&mut v, 1);
         v.economy.projects[0].priority = 0;
@@ -772,7 +773,7 @@ mod tests {
     #[test]
     fn limited_job_goes_to_the_best_available_neighbour_and_rotates() {
         let (_, mut v, mut first) = scene();
-        v.water = 40.;
+        crate::water::fixture_fresh(&mut v, 40.);
         let mut near = first.clone();
         near.id = 1;
         near.x = 3.;

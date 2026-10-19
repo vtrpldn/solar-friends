@@ -1,4 +1,4 @@
-import {restockFixtureFood} from '../web/dev/material-fixture.js';
+import {restockFixtureFood,restockFixtureWater} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -8,7 +8,7 @@ function scene(){
   const g=new Game(),s=snap(g);
   Object.assign(s.village,{arrived:true,minutes:570,food:12,meals:8,water:30});
   for(const r of s.residents)Object.assign(r,{task:'idle',trip:null,remaining:r.id===0?0:100,x:12,y:11,target_x:12,target_y:11,energy:90,hunger:10,social:90,last_meal_slot:0});
-  assert(g.restore(JSON.stringify(restockFixtureFood(s))));return g;
+  assert(g.restore(JSON.stringify(restockFixtureWater(restockFixtureFood(s)))));return g;
 }
 const food=scene(),care=scene();
 for(const [g,foodLevel,careLevel] of [[food,2,0],[care,0,2]]){

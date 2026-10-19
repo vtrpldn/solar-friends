@@ -319,7 +319,13 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 );
             }
             Kind::Filtration => {
-                v.circular.reclaimed += 8.;
+                let amount = water::add(
+                    v,
+                    water::Owner::Building(before.building.unwrap()),
+                    water::Class::Irrigation,
+                    8.,
+                );
+                assert!((amount - 8.).abs() < 0.000001);
                 v.circular.water_reused += 8.;
             }
             Kind::Curing => {

@@ -46,18 +46,14 @@ impl Default for Circular {
         }
     }
 }
-pub fn household_water(v: &mut Village, amount: f32) {
-    let used = amount.min(v.water);
-    v.water -= used;
+pub fn household_at(v: &mut Village, owner: water::Owner, amount: f32) {
+    let used = water::draw(v, owner, water::Class::Fresh, f64::from(amount)) as f32;
     v.circular.greywater =
         (v.circular.greywater + used * 0.7).min(120. - processes::held_greywater(v));
 }
-pub fn irrigation_water(v: &Village) -> f32 {
-    if v.circular.reclaimed >= 2. {
-        v.circular.reclaimed
-    } else {
-        v.water
-    }
+#[cfg(test)]
+pub fn household_water(v: &mut Village, amount: f32) {
+    household_at(v, water::Owner::Camp, amount);
 }
 pub fn due(v: &Village, r: &Resident) -> bool {
     v.buildings
@@ -66,7 +62,10 @@ pub fn due(v: &Village, r: &Resident) -> bool {
         && v.minutes.rem_euclid(1440.) >= 450. + r.id as f32 * 45.
         && r.last_sanitation_day < (v.minutes / 1440.) as i32
         && v.circular.waste + processes::held_waste(v) + 1. <= 80.
-        && v.water >= 1.
+        && v.buildings.iter().any(|b| {
+            b.kind == "eco_toilet"
+                && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 1.
+        })
 }
 pub fn use_toilet(v: &mut Village, r: &mut Resident) {
     let id = spacing::building(r, v);
@@ -78,6 +77,7 @@ pub fn use_toilet(v: &mut Village, r: &mut Resident) {
             && b.kind == "eco_toilet"
             && b.progress >= 100.
             && b.next_visit <= v.minutes
+            && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 1.
     }) else {
         return;
     };
@@ -86,7 +86,7 @@ pub fn use_toilet(v: &mut Village, r: &mut Resident) {
     v.circular.waste += 1.;
     v.circular.toilet_visits = v.circular.toilet_visits.saturating_add(1);
     v.buildings[index].visits = v.buildings[index].visits.saturating_add(1);
-    household_water(v, 1.);
+    household_at(v, water::Owner::Building(v.buildings[index].id), 1.);
 }
 pub fn advance(v: &mut Village, minutes: f32) {
     processes::advance(v, minutes);
@@ -146,6 +146,7 @@ mod tests {
         ] {
             assert_eq!(g.place(kind, x, y), "ok");
         }
+        water::replenish(&mut g.app.world_mut().resource_mut::<Village>());
         g
     }
     #[test]
@@ -217,12 +218,18 @@ mod tests {
         advance(&mut v, 360.);
         assert_eq!(v.circular.reclaimed, 8.);
         assert_eq!(v.water, fresh);
+        water::fixture_at(
+            &mut v,
+            water::Owner::Building(4),
+            water::Class::Irrigation,
+            4.,
+        );
         interactions::start(&mut r, &v, 4, true);
         ecology::tend(&mut v, &r);
         ecology::tend(&mut v, &r);
         assert_eq!(v.circular.reclaimed, 6.);
         assert_eq!(v.water, fresh);
-        v.water = 0.;
+        crate::water::fixture_fresh(&mut v, 0.);
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (10.) as u32);
         assert!(!supplies::can_cook(&v));
         advance(&mut v, 1.);

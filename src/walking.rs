@@ -38,19 +38,6 @@ pub fn clear(r: &mut Resident) {
     r.walking.route = None;
 }
 
-fn bank(v: &Village, id: usize) -> Option<[f32; 2]> {
-    for offset in 0..=24 {
-        for sign in [1., -1.] {
-            let y = 11. + id as f32 * 1.25 + offset as f32 * sign * 1.25;
-            for x in [22.5, 23., 22.] {
-                if navigation::clear(v, x, y) && spacing::free_spot(v, (x, y), id) {
-                    return Some([x, y]);
-                }
-            }
-        }
-    }
-    None
-}
 pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
     if r.task == "restore" {
         let id = r
@@ -65,7 +52,7 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
         return food::target(v, r);
     }
     if r.task == "water" {
-        return bank(v, r.id).ok_or("Leave a clear place to collect water along the village bank.");
+        return water::target(v, r);
     }
     if matches!(r.task.as_str(), "prepare" | "craft" | "cook") {
         let id = r
@@ -118,7 +105,9 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
         } else if b.progress < 100. || building_work::job(v, id).is_some() {
             return Err("The requested worksite is closed for construction or crew work.");
         }
-        if r.task == "garden" && !ecology::needs_tending(b, sanitation::irrigation_water(v)) {
+        if r.task == "garden"
+            && !ecology::needs_tending(b, water::irrigation(v, water::Owner::Building(b.id)))
+        {
             return Err("This plot is growing or needs water before tending can continue.");
         }
         return spacing::approach(v, b, r.id)
@@ -554,7 +543,7 @@ mod tests {
                 v.minutes = 540.;
                 crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (80.) as u32);
                 crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 10);
-                v.water = 40.;
+                crate::water::fixture_fresh(&mut v, 40.);
                 if paved {
                     for x in 2..=12 {
                         for y in 8..=16 {

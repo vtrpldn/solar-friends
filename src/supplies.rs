@@ -107,7 +107,9 @@ pub fn can_cook_at(v: &Village, id: usize) -> bool {
     else {
         return false;
     };
-    if building_work::job(v, b.id).is_some() || v.water < 1. {
+    if building_work::job(v, b.id).is_some()
+        || water::available(v, water::Owner::Building(b.id), water::Class::Fresh) < 1.
+    {
         return false;
     }
     let Some(p) = food::pantry(v, id) else {
@@ -284,14 +286,14 @@ mod tests {
         let mut v = g.app.world().resource::<Village>().clone();
         logistics::fixture_finish(&mut v, 0);
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (2.) as u32);
-        v.water = 1.;
+        crate::water::fixture_fresh(&mut v, 1.);
         crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
         fixture_cook(&mut v);
         assert_eq!((v.food, v.water, v.supplies.eggs, v.meals), (0., 0., 0, 7));
         fixture_cook(&mut v);
         assert_eq!(v.meals, 7);
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (3.) as u32);
-        v.water = 1.;
+        crate::water::fixture_fresh(&mut v, 1.);
         crate::logistics::fixture_stock(&mut v, crate::economy::EGGS, 2);
         v.supplies.use_eggs = false;
         fixture_cook(&mut v);
@@ -331,7 +333,7 @@ mod tests {
             let mut v = game.app.world_mut().resource_mut::<Village>();
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (0.) as u32);
             crate::logistics::fixture_stock(&mut v, 0, 100);
-            v.water = 100.;
+            crate::water::fixture_fresh(&mut v, 100.);
             v.minutes = 540.;
         }
         for _ in 0..800 {

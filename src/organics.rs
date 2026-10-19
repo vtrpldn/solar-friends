@@ -183,6 +183,9 @@ pub fn author_fixture(raw: &mut serde_json::Value) {
         }
     }
     bundles(raw);
+    if let Some(v) = raw["village"].as_object_mut() {
+        v.remove("water_supply");
+    }
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-import {restockFixtureFood} from '../web/dev/material-fixture.js';
+import {restockFixtureFood,restockFixtureWater} from '../web/dev/material-fixture.js';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -9,7 +9,7 @@ const snap=g=>JSON.parse(g.snapshot());
 const g=new Game(),fixture=snap(g);
 Object.assign(fixture.village,{arrived:true,minutes:540,food:80,meals:10,water:40});
 for(const r of fixture.residents)Object.assign(r,{task:'idle',remaining:0,energy:90,hunger:10,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});
-assert(g.restore(JSON.stringify(restockFixtureFood(fixture))));assert.equal(g.place('garden',13,15),'ok');
+assert(g.restore(JSON.stringify(restockFixtureWater(restockFixtureFood(fixture)))));assert.equal(g.place('garden',13,15),'ok');
 const before=g.snapshot(),report=JSON.parse(g.project_forecast(1));
 assert.equal(g.snapshot(),before,'Forecasting cannot advance the clock or spend, reserve or pay anything in the live village');
 await writeFile('artifacts/forecasts/project.json',before);

@@ -16,7 +16,7 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
   if (scenario === 'surplus') Object.assign(state.village, {food:150, meals:100});
   if (scenario === 'surplus') state.village.supplies.eggs = 60; // An intentionally overstocked fixture; expiry must lead to recovery.
   assert(game.restore(JSON.stringify(state)));
-  const counts = Array.from({length:5}, () => ({awake:0,work:0,leisure:0,hobbies:new Set()}));
+  const counts = Array.from({length:5}, () => ({awake:0,work:0,leisure:0,hobbies:new Set(),tasks:{}}));
   let minStock = Infinity, maxStock = 0, maxHunger = 0, previousStock=state.village.food+state.village.meals, previousHarvests=state.village.harvests, previousExpired=0;
   // Two weeks include several dry days, all kitchen rotations, and food recovery.
   for (let tick = 0; tick < 14 * 1920; tick++) {
@@ -34,6 +34,7 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
     previousStock=stock;previousHarvests=v.harvests;previousExpired=expired;
     for (const r of residents) {
       const c = counts[r.id];
+      c.tasks[r.task]=(c.tasks[r.task]||0)+1;
       maxHunger = Math.max(maxHunger, r.hunger);
       if (r.task !== 'sleep' && !r.trip) c.awake++;
       if (!r.trip && work.has(r.task)) c.work++;
@@ -53,9 +54,11 @@ for (const scenario of ['arrival','leisure','hungry','surplus']) {
       restored.free();
     }
   }
-  for (const c of counts) {
-    assert(c.work / c.awake < .35, 'Every resident should spend a minority of in-village waking time working');
-    assert(c.leisure / c.awake > .55, 'Most in-village waking time should be free time');
+  for (const [id,c] of counts.entries()) {
+    const context=`${scenario}, resident ${id}: ${JSON.stringify({...c,hobbies:[...c.hobbies]})}`;
+    if(c.work/c.awake>=.35||c.leisure/c.awake<=.55){await fs.mkdir('artifacts/leisure',{recursive:true});await fs.writeFile(`artifacts/leisure/${scenario}-workload.json`,game.snapshot());}
+    assert(c.work / c.awake < .35, `Every resident should spend a minority of in-village waking time working; ${context}`);
+    assert(c.leisure / c.awake > .55, `Most in-village waking time should be free time; ${context}`);
     assert(c.hobbies.size >= 3, 'Each resident needs varied hobbies, including evenings');
   }
   if(scenario==='surplus')assert(previousExpired>0,'An oversized reserve should spoil rather than last forever');
