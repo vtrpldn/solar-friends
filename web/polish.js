@@ -17,7 +17,7 @@ export function placementReason(village, kind, x, y) {
   }
   const radius = ['shed','square','solar_farm','orchard','goat_pasture'].includes(kind) ? 2 : 1;
   if (x - radius < 0 || y - radius < 0 || x + radius >= MAP_SIZE || y + radius >= MAP_SIZE || (kind==='hydro' ? x<riverCenter(y)-1.35||x>=riverCenter(y)-.35 : riverBank(x + radius - 1, y))) return kind==='hydro'?'Place in the shallow village side of the river.':'Keep the riverbank clear. Move farther inland.';
-  if (Math.abs(x - 10) < radius + 0.5 && Math.abs(y - 13) < radius + 0.5) return 'Leave the arrival clearing open for everyone.';
+  if (Math.abs(x - (village.camp?.[0]??10)) < radius + 0.5 && Math.abs(y - (village.camp?.[1]??13)) < radius + 0.5) return 'Leave the arrival clearing open for everyone.';
   if (village.buildings.some(b => Math.abs(b.x - x) < radius + (['shed','square','solar_farm','orchard','goat_pasture'].includes(b.kind) ? 2 : 1) && Math.abs(b.y - y) < radius + (['shed','square','solar_farm','orchard','goat_pasture'].includes(b.kind) ? 2 : 1))) return 'Leave a little room between buildings.';
   if(village.logistics?.stores.some(p=>p.owner.kind==='ground'&&p.items.some(n=>n)&&occupies({kind,x,y},Math.round(p.x),Math.round(p.y))))return 'Let residents collect the materials lying on this plot before building here.';
   if((village.restoration||[]).some(j=>j.finished==null&&Array.from({length:j.size},(_,i)=>j.x-Math.floor(j.size/2)+i).some(a=>Array.from({length:j.size},(_,i)=>j.y-Math.floor(j.size/2)+i).some(b=>occupies({kind,x,y},a,b)))))return 'That ground is reserved for soil restoration.';

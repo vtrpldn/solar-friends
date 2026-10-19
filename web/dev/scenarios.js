@@ -1,3 +1,4 @@
+import {centerLayout} from './center-layout.js';
 import {storyPlanningScene} from './story-fixture.js';
 import {sandboxPlanningScene} from './sandbox-fixture.js';
 import {withAutonomyScene} from './autonomy-fixture.js';
@@ -164,7 +165,7 @@ export function makeScenario(id, fresh, established) {
   if(id.startsWith('maintenance')){for(const i of [4,8,9,10,15])v.economy.stock[i]=0;v.progress.tool_uses=0;}
   if(id==='learning')v.minutes=40*1440+540;
   if(id==='suppliers')v.minutes=14*1440+540;
-  const prepared=resetMaterialLocations(state);
+  const prepared=resetMaterialLocations(id==='grid'?state:centerLayout(state));
   if(id==='suppliers'){prepared.village.market.enabled=true;return prepared;}
   if(id==='learning'){prepared.village.skills.enabled=true;prepared.village.skills.people[0].experience[2]=100;prepared.village.skills.people[2].experience[3]=60;return prepared;}
   if(id==='autonomy')return withAutonomyScene(prepared);

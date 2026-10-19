@@ -1,3 +1,4 @@
+import {centerLayout} from './center-layout.js';
 import {Game} from '../pkg/solar_friends.js';
 import {resetMaterialLocations} from './material-fixture.js';
 // An explicitly authored teaching scene; only subsequent ticks earn observed time.
@@ -16,7 +17,7 @@ export function storyPlanningScene(){
   v.food=32;v.meals=12;v.progress.completed[0]=true;v.progress.tracked=1;
   v.progress.outcomes={schema:1};v.economy.outside_jobs[4]=true;
   for(const r of state.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,help:null,energy:90,hunger:20,social:85,x:10+(r.id-2)*.8,y:13,target_x:10+(r.id-2)*.8,target_y:13,last_meal_slot:0,walking:{},activity_batch:null,activity_store:null,activity_material:null,activity_building:null});
-  if(!game.restore(JSON.stringify(resetMaterialLocations(state))))throw Error('Invalid Story teaching fixture.');
+  if(!game.restore(JSON.stringify(resetMaterialLocations(centerLayout(state)))))throw Error('Invalid Story teaching fixture.');
   return JSON.parse(game.snapshot());
  }finally{game.free();}
 }

@@ -14,7 +14,7 @@ export function withAutonomyScene(state){
   const game=new Game();
   try{
     if(!game.restore(JSON.stringify(staged)))throw Error('Resident autonomy needs a valid staged village.');
-    if(game.place('garden',20,15)!=='ok')throw Error('The autonomy project needs a clear plot.');
+    if(game.place('garden',42,34)!=='ok')throw Error('The autonomy project needs a clear plot.');
     const project=JSON.parse(game.snapshot()).village.buildings.at(-1).id;
     if(game.configure_project(project,3,false,'standard')!=='ok')throw Error('Could not prioritize the autonomy project.');
     return JSON.parse(game.snapshot());

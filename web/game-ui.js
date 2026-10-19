@@ -57,7 +57,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     else{showPanel('supplies-panel',resource==='materials'?'stores':resource==='water'?'water':'pantry');if(resource==='materials'){$('#materials-stores').open=true;$('#materials-stores').scrollIntoView({block:'nearest'});}}
   };
   const map=$('#village-map'),ctx=map.getContext('2d');
-  let mapCentre={x:10,y:13},buildingKey='',mapTerrain=null,mapSeed=null;
+  let mapCentre={x:MAP_SIZE/2,y:MAP_SIZE/2},buildingKey='',mapTerrain=null,mapSeed=null;
   map.onclick=event=>{const rect=map.getBoundingClientRect();mapCentre={x:(event.clientX-rect.left)/rect.width*MAP_SIZE,y:(event.clientY-rect.top)/rect.height*MAP_SIZE};focusAt(mapCentre.x,mapCentre.y);};
   map.onkeydown=event=>{const delta={ArrowLeft:[-2,0],ArrowRight:[2,0],ArrowUp:[0,-2],ArrowDown:[0,2]}[event.key];if(!delta)return;event.preventDefault();event.stopPropagation();mapCentre={x:Math.max(0,Math.min(MAP_SIZE,mapCentre.x+delta[0])),y:Math.max(0,Math.min(MAP_SIZE,mapCentre.y+delta[1]))};focusAt(mapCentre.x,mapCentre.y);};
   const portraits=new Map();

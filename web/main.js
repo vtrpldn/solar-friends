@@ -380,7 +380,7 @@ function setZoom(value) {
   const ratio=Math.max(.18,limitsBefore.base*zoom)/previousScale;
   // Preserve the same world point at the viewing centre, including a minimap
   // flight that has not finished yet. Larger zoom ranges must not lose the map.
-  const anchor={x:width*.01,y:-height*.05};
+  const anchor={x:0,y:0};
   for(const point of [pan,cameraTarget].filter(Boolean)){
     point.x=anchor.x+(point.x-anchor.x)*ratio;
     point.y=anchor.y+(point.y-anchor.y)*ratio;
@@ -667,7 +667,8 @@ function render() {
   if(ctx.canvas.dataset.cameraMoving!==String(!!cameraTarget))ctx.canvas.dataset.cameraMoving=String(!!cameraTarget);
   scale = Math.min(width / 1900, height / 1050) * zoom;
   scale = Math.max(0.18, scale);
-  origin = { x: width * 0.49 + pan.x, y: height * 0.5 - 459 * scale + pan.y };
+  origin = { x: width * 0.5 + pan.x, y: height * 0.5 - (MAP_SIZE - 1) * 17 * scale + pan.y };
+  canvas.dataset.cameraCenter=JSON.stringify(unproject(width/2,height/2,origin,scale));
   const weatherView = {conditions:weather,buildings:state.village.buildings,project:iso,scale,time:weatherTime,width,height,reducedMotion:reducedMotion.matches};
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
@@ -1961,7 +1962,7 @@ const devAPI = {
     else game.free();
     game = candidate; sandboxName = id; game.dev_observe(true);
     if (!paused) togglePause();
-    refreshDevScene(); devTools?.refresh();
+    zoom=1.3;pan={x:0,y:0};refreshDevScene(); devTools?.refresh();
   },
   importSandbox(raw) {
     if(loadingScenario)throw new Error('Wait for the scenario to finish loading.');
