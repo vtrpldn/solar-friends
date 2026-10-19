@@ -43,13 +43,15 @@ pub fn work(task: &str) -> bool {
             | "cook"
             | "compost"
             | "restore"
+            | "utility"
             | "craft"
             | "source"
             | "prepare"
     )
 }
 pub fn allowed(task: &str) -> bool {
-    work(task) && task != "restore" || matches!(task, "eat" | "rest" | "socialize" | "outside")
+    work(task) && !matches!(task, "restore" | "utility")
+        || matches!(task, "eat" | "rest" | "socialize" | "outside")
 }
 pub fn pending(r: &Resident, task: &str) -> bool {
     r.help

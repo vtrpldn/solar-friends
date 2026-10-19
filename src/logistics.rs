@@ -14,6 +14,7 @@ pub enum Owner {
     Production(Id),
     Pantry(usize),
     Restoration(Id),
+    Utility(Id),
     Ground,
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -76,11 +77,15 @@ pub(crate) fn closing(v: &Village, owner: Owner) -> bool {
     match owner {
         Owner::Warehouse(id) | Owner::Pantry(id) => building_work::job(v, id).is_some(),
         Owner::Production(id) => production::closing(v, id),
+        Owner::Utility(id) => pipes::closing(v, id),
         _ => false,
     }
 }
 fn general(owner: Owner) -> bool {
-    !matches!(owner, Owner::Site(_) | Owner::Restoration(_))
+    !matches!(
+        owner,
+        Owner::Site(_) | Owner::Restoration(_) | Owner::Utility(_)
+    )
 }
 pub fn total(v: &Village, i: usize) -> u32 {
     let s = v.logistics.as_ref().unwrap();
@@ -125,6 +130,7 @@ fn usable(v: &Village, p: &Store, i: usize) -> u32 {
             + crate::food::held(v, p.id, i, None)
             + gatherings::held(v, p.id, i)
             + restoration::held(v, p.owner, i)
+            + pipes::held(v, p.owner, i)
             + crate::planting::held(v, p.owner, i),
     )
 }
@@ -157,8 +163,10 @@ pub fn free(v: &Village, i: usize) -> u32 {
         .map(|p| usable(v, p, i))
         .sum::<u32>();
     total(v, i)
-        .saturating_sub(economy::reserved(v, i) + production::input_demand(v, i))
-        .min(accessible.saturating_sub(production::unclaimed(v, i)))
+        .saturating_sub(
+            economy::reserved(v, i) + production::input_demand(v, i) + pipes::demand(v, i),
+        )
+        .min(accessible.saturating_sub(production::unclaimed(v, i) + pipes::unclaimed(v, i)))
 }
 pub fn project_ready(v: &Village, id: usize, needs: Bundle) -> bool {
     let s = v.logistics.as_ref().unwrap();
@@ -312,6 +320,15 @@ pub fn sync(v: &mut Village) {
             .filter(|j| j.active())
             .map(|j| (Owner::Restoration(j.id), j.x as f32, j.y as f32, 12)),
     );
+    wanted.extend(v.pipes.lines.iter().filter(|p| p.live()).map(|p| {
+        let cell = p.plan.cells[0];
+        (
+            Owner::Utility(p.id),
+            cell[0] as f32,
+            cell[1] as f32,
+            pipes::BUFFER,
+        )
+    }));
     for &(owner, x, y, capacity) in &wanted {
         if !v
             .logistics
@@ -351,6 +368,7 @@ pub fn sync(v: &mut Village) {
                 .any(|h| [h.from, h.to, h.recovery].contains(&p.id))
     });
     water::sync(v);
+    pipes::reconcile(v);
 }
 pub fn receive(v: &mut Village, owner: Owner, i: usize, n: u32) -> bool {
     let mut lots = vec![];
@@ -529,6 +547,7 @@ pub fn rebalance(v: &mut Village) {
             .map(|p| usable(v, p, i))
             .sum::<u32>()
             .saturating_sub(production::unclaimed(v, i))
+            .saturating_sub(pipes::unclaimed(v, i))
     });
     let mut order: Vec<_> = (0..v.economy.projects.len()).collect();
     order.sort_by_key(|&i| {
@@ -586,6 +605,7 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
             })
             .unwrap_or([0; COUNT]),
         Owner::Production(id) => production::needs(v, id),
+        Owner::Utility(id) => pipes::needs(v, id),
         Owner::Pantry(id) => crate::food::needs(v, id),
         Owner::Restoration(id) => {
             let mut n = [0; COUNT];
@@ -627,7 +647,7 @@ pub fn site_tools(v: &Village, id: usize) -> u32 {
 pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> {
     // A put-down load can lie in a narrow walkable corridor. Pick it up where
     // it actually rests rather than requiring a ring of space around it.
-    if p.owner == Owner::Ground && navigation::clear(v, p.x, p.y) {
+    if matches!(p.owner, Owner::Ground | Owner::Utility(_)) && navigation::clear(v, p.x, p.y) {
         return Some([p.x, p.y]);
     }
     let (x, y) = match p.owner {
@@ -1007,6 +1027,47 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         material: i,
                         amount,
                         rank: (1, 4, b.id.0),
+                    });
+                }
+            }
+        }
+    }
+    for line in v
+        .pipes
+        .lines
+        .iter()
+        .filter(|p| p.live() && !p.paused && p.spent.is_none())
+    {
+        let Some(to) = s.stores.iter().find(|p| p.owner == Owner::Utility(line.id)) else {
+            continue;
+        };
+        for i in 0..COUNT {
+            let incoming: u32 = s
+                .shipments
+                .iter()
+                .filter(|h| h.to == to.id && h.material == i)
+                .map(|h| h.amount)
+                .sum();
+            let missing = line.kit[i].saturating_sub(to.items[i] + incoming);
+            if missing == 0 {
+                continue;
+            }
+            for from in s
+                .stores
+                .iter()
+                .filter(|p| p.id != to.id && general(p.owner) && !closing(v, p.owner))
+            {
+                let amount = missing
+                    .min(usable(v, from, i))
+                    .min(LOAD)
+                    .min(room(v, to.owner));
+                if amount > 0 {
+                    out.push(Candidate {
+                        from: from.id,
+                        to: to.id,
+                        material: i,
+                        amount,
+                        rank: (1, 3 - u32::from(line.priority), line.id.0),
                     });
                 }
             }
@@ -1407,7 +1468,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 17
+    if v.version != 18
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1500,6 +1561,14 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                 p.capacity == 12
                     && restoration::job(v, id)
                         .is_some_and(|j| j.active() && (p.x, p.y) == (j.x as f32, j.y as f32))
+            }
+            Owner::Utility(id) => {
+                p.capacity == pipes::BUFFER
+                    && pipes::line(v, id).is_some_and(|line| {
+                        line.live()
+                            && (p.x, p.y)
+                                == (line.plan.cells[0][0] as f32, line.plan.cells[0][1] as f32)
+                    })
             }
             Owner::Ground => p.capacity <= 300,
             Owner::Production(id) => {

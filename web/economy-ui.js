@@ -1,5 +1,6 @@
 import {installProcessUI} from './process-ui.js';
 import {installWaterUI} from './water-ui.js';
+import {installWaterConnections} from './water-connections.js';
 import {freshnessMarkup,freshnessWarning,expiryNote} from './freshness-ui.js';
 import {itemIcon,materialIcons} from './game-ui.js';
 import {createProjectForecasts} from './forecasts.js';
@@ -23,6 +24,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   const productionUI=installProductionUI({snapshot,game,transact,notify});
   const processUI=installProcessUI({snapshot,game,transact});
   const waterUI=installWaterUI({game});
+  const waterConnections=installWaterConnections({game,snapshot,transact,openTown});
   const materials=snapshot().environment.economy.materials;
   $('#town-catalog').innerHTML=materials.filter(m=>m.buyable!==false).map(m=>`<article class="town-item"><div class="trade-item-art">${itemIcon(materialIcons[m.id])}</div><label for="buy-${m.id}">${m.name}</label><small class="trade-price">${money(m.price)}</small><div class="trade-quantity"><button type="button" data-adjust="-1" aria-label="Remove one ${m.name.toLowerCase()}">−</button><input id="buy-${m.id}" type="number" min="0" max="100" step="1" value="0" aria-label="Order ${m.name}" data-material="${m.id}"><button type="button" data-adjust="1" aria-label="Add one ${m.name.toLowerCase()}">+</button></div></article>`).join('');
   $('#spare-material').innerHTML=materials.filter(m=>m.price>0).map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
@@ -95,7 +97,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     transact(result);if(result==='ok'&&['harvest','plant','enrich'].includes(action))notify('Queued for community work. Resume time if the village is paused.');
   };
   $('#land-sources').onchange=event=>{const input=event.target.closest('[data-source-setting]');if(!input)return;const index=Number(input.dataset.site),site=snapshot().village.economy.sources[index];transact(game().configure_source(index,input.dataset.sourceSetting==='replant'?input.checked:site.auto_replant,input.dataset.sourceSetting==='harvest'?input.checked:site.auto_harvest));};
-  const locationName=p=>p.owner.kind==='production'?productionSiteName(snapshot().village.production.sites.find(s=>s.id===p.owner.id)||{},snapshot().village)+' pile':({camp:'Arrival store',warehouse:`Storage house ${(p.owner.id??0)+1}`,source:`Material plot ${(p.owner.id??0)+1}`,site:`${snapshot().village.buildings.find(b=>b.id===p.owner.id)?.progress>=100?'Garden supplies':'Construction site'} ${(p.owner.id??0)+1}`,ground:'Recoverable pile',restoration:`Soil work ${(p.owner.id??0)}`,pantry:snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind==='square'?`Shared table ${(p.owner.id??0)+1}`:`${names[snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind]||'Food'} ${['compost','biodigester'].includes(snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind)?'store':'pantry'} ${(p.owner.id??0)+1}`}[p.owner.kind]);
+  const locationName=p=>p.owner.kind==='production'?productionSiteName(snapshot().village.production.sites.find(s=>s.id===p.owner.id)||{},snapshot().village)+' pile':({camp:'Arrival store',warehouse:`Storage house ${(p.owner.id??0)+1}`,source:`Material plot ${(p.owner.id??0)+1}`,site:`${snapshot().village.buildings.find(b=>b.id===p.owner.id)?.progress>=100?'Garden supplies':'Construction site'} ${(p.owner.id??0)+1}`,ground:'Recoverable pile',utility:'Water line kit',restoration:`Soil work ${(p.owner.id??0)}`,pantry:snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind==='square'?`Shared table ${(p.owner.id??0)+1}`:`${names[snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind]||'Food'} ${['compost','biodigester'].includes(snapshot().village.buildings.find(b=>b.id===p.owner.id)?.kind)?'store':'pantry'} ${(p.owner.id??0)+1}`}[p.owner.kind]);
   $('#storage-locations').onclick=event=>{
     const button=event.target.closest('[data-store-target]');if(!button)return;
     const row=button.closest('.storage-location'),building=Number(button.dataset.storeTarget),store=snapshot().village.logistics.stores.find(p=>p.owner.kind==='warehouse'&&p.owner.id===building),target=[...store.target];
@@ -131,6 +133,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     productionUI.update(s);
     processUI.update(s);
     waterUI.update(s);
+    waterConnections.update(s);
     const freshnessKey=JSON.stringify(e.freshness);if(freshnessKey!==lastFreshness){lastFreshness=freshnessKey;$('#food-freshness').innerHTML=freshnessMarkup(s);const warning=freshnessWarning(s);$('#food-freshness-warning').textContent=warning;$('#food-freshness-warning').hidden=!warning;}
     const locations=v.logistics?.stores||[],shipments=v.logistics?.shipments||[],locationKey=JSON.stringify({locations,shipments:shipments.map(h=>[h.resident,h.material,h.amount,h.carrying])});
     if(locationKey!==lastLocations&&!$('#storage-locations').contains(document.activeElement)){

@@ -43,7 +43,7 @@ fn category(task: &str) -> Option<usize> {
         "haul" => Some(1),
         "cook" | "garden" | "gather" => Some(2),
         "source" | "prepare" | "craft" => Some(3),
-        "water" | "compost" | "restore" => Some(4),
+        "water" | "compost" | "restore" | "utility" => Some(4),
         _ => None,
     }
 }
@@ -493,6 +493,31 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
             score: travel.map_or(-1000., |t| score(v, r, "restore", 620., t)),
             urgency: 620.,
             reason: "Restoring the soil with delivered compost.",
+        });
+    }
+    for p in v.pipes.lines.iter().filter(|p| pipes::ready(v, p)) {
+        let mut worker = r.clone();
+        if !pipes::assign_target(&mut worker, v, p.id)
+            || occupied(v, r, "utility", None, worker.activity_material, None) > 0
+        {
+            continue;
+        }
+        let (travel, blocker) = match walking::quote(v, &worker) {
+            Ok((route, _)) => (Some(route.minutes), None),
+            Err(e) => (None, Some(e.into())),
+        };
+        let urgency = 540. + f32::from(p.priority) * 60.;
+        out.push(Offer {
+            task: "utility".into(),
+            building: None,
+            material: worker.activity_material,
+            batch: None,
+            destination: [worker.target_x, worker.target_y],
+            travel_minutes: travel,
+            blocker,
+            score: travel.map_or(-1000., |t| score(v, r, "utility", urgency, t)),
+            urgency,
+            reason: pipes::work_reason(p),
         });
     }
     out.sort_by(|a, b| {

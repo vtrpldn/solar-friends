@@ -20,6 +20,7 @@ mod modes;
 mod navigation;
 mod occupations;
 mod organics;
+mod pipes;
 mod planting;
 mod power;
 mod processes;
@@ -60,6 +61,7 @@ const TASKS: &[&str] = &[
     "socialize",
     "compost",
     "restore",
+    "utility",
     "craft",
     "gathering",
     "nature_walk",
@@ -160,6 +162,8 @@ pub struct Village {
     pub restoration: Vec<restoration::Job>,
     #[serde(default)]
     pub water_supply: water::State,
+    #[serde(default)]
+    pub pipes: pipes::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
     #[serde(skip)]
@@ -273,6 +277,7 @@ fn available(v: &Village, task: &str) -> bool {
         "water" => water::has_work(v),
         "compost" => v.buildings.iter().any(|b| organics::can_turn(v, b.id)),
         "restore" => v.restoration.iter().any(|j| restoration::ready(v, j)),
+        "utility" => v.pipes.lines.iter().any(|p| pipes::ready(v, p)),
         "craft" => production::can_order_tools(v),
         "eat" => v.food >= 1. || v.meals > 0,
         "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
@@ -694,6 +699,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     supplies::advance(&mut v, dt * MINUTES_PER_SECOND);
     economy::advance(&mut v, dt * MINUTES_PER_SECOND);
     power::advance(&mut v, dt * MINUTES_PER_SECOND);
+    pipes::advance(&mut v, dt * MINUTES_PER_SECOND);
     sanitation::advance(&mut v, dt * MINUTES_PER_SECOND);
     ecology::advance(&mut v, dt * MINUTES_PER_SECOND);
     land::advance_fallow(&mut v, dt * MINUTES_PER_SECOND);
@@ -863,6 +869,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     | "cook"
                     | "compost"
                     | "restore"
+                    | "utility"
                     | "craft"
                     | "gather"
                     | "visit"
@@ -874,6 +881,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             && !(r.task == "gather"
                 && (supplies::urgent(&v) || r.hunger > 60. && !workforce::eating(&v, r.id)));
         let ready_work = available(&v, "restore")
+            || available(&v, "utility")
             || available(&v, "build")
             || available(&v, "building_work")
             || logistics::pending(&v, r.id)
@@ -997,6 +1005,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             v.progress.attended |= 1 << r.id;
         }
         if r.task == "restore" && restoration::work(&mut v, &r, dt * MINUTES_PER_SECOND) {
+            r.remaining = 0.;
+        }
+        if r.task == "utility" && pipes::work(&mut v, &r, dt * MINUTES_PER_SECOND) {
             r.remaining = 0.;
         }
         if r.task == "building_work" {
@@ -1152,6 +1163,10 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 && r.activity_material.is_none_or(|id| {
                     restoration::job(&v, simulation::Id(id as u32)).is_none_or(|j| !j.active())
                 }))
+            || (r.task == "utility"
+                && r.activity_material.is_none_or(|id| {
+                    pipes::line(&v, simulation::Id(id as u32)).is_none_or(|p| !pipes::ready(&v, p))
+                }))
             || (r.task == "building_work"
                 && r.activity_building
                     .is_none_or(|id| building_work::job(&v, id).is_none()))
@@ -1173,6 +1188,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         );
     }
     production::finish_frame(&mut v, people.iter());
+    let residents: Vec<_> = people.iter().cloned().collect();
+    pipes::prune(&mut v, &residents);
     progression::update(&mut v);
 }
 #[wasm_bindgen]
@@ -1193,9 +1210,10 @@ impl Game {
                 land: land::State::default(),
                 restoration: vec![],
                 water_supply: water::State::default(),
+                pipes: pipes::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 17,
+                version: 18,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1612,6 +1630,7 @@ impl Game {
             || !land::valid(v)
             || !restoration::valid(v)
             || !water::valid(v, &save.residents)
+            || !pipes::valid(v)
             || !gatherings::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
@@ -1648,6 +1667,7 @@ impl Game {
             .chain(v.restoration.iter().map(|j| j.id))
             .chain(v.water_supply.tanks.iter().map(|p| p.id))
             .chain(v.water_supply.trips.iter().map(|p| p.id))
+            .chain(v.pipes.lines.iter().map(|p| p.id))
             .chain(
                 save.residents
                     .iter()
@@ -1677,7 +1697,7 @@ impl Game {
         {
             return false;
         }
-        if !matches!(v.version, 3 | 17)
+        if !matches!(v.version, 3 | 18)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1714,6 +1734,10 @@ impl Game {
                         u32::try_from(i).ok().is_none_or(|id| {
                             restoration::job(v, simulation::Id(id)).is_none_or(|j| !j.active())
                         })
+                    } else if r.task == "utility" {
+                        u32::try_from(i)
+                            .ok()
+                            .is_none_or(|id| pipes::line(v, simulation::Id(id)).is_none())
                     } else {
                         i >= economy::COUNT
                     }
@@ -1737,6 +1761,7 @@ impl Game {
                     && r.activity_building
                         .is_none_or(|id| building_work::job(v, id).is_none()))
                 || (r.task == "restore" && r.activity_material.is_none())
+                || (r.task == "utility" && r.activity_material.is_none())
                 || !TASKS.contains(&r.task.as_str())
                 || !mobility::valid(v, r)
                 || !sleep::valid(r, v.minutes)
@@ -1769,7 +1794,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 17;
+            save.village.version = 18;
             if !processes::initialise(&mut save.village) {
                 return false;
             }
@@ -2220,7 +2245,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":17", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":18", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

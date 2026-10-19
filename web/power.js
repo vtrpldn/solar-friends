@@ -39,8 +39,10 @@ export function updatePowerUI(state,kinds) {
   $('power-battery').max=p.capacity||1;$('power-battery').value=p.stored;
   $('power-generation').textContent=`${p.generation.toFixed(1)} / hour · solar ${p.solar_generation.toFixed(1)} + river ${p.hydro_generation.toFixed(1)}`;
   $('power-demand').textContent=`${p.demand.toFixed(1)} / hour`;
+  $('power-pumps').textContent=p.pump_demand?`Active water pumps can draw up to ${p.pump_demand.toFixed(1)} energy/hour. They stop when a source is empty or its receiving buffer is full. Pause individual lines in Supplies → Water & weather.`:'';
   const loads=powerConnections(state),nightLoad=loads.filter(c=>c.enabled).reduce((sum,c)=>sum+c.load,0);
   $('power-outlook').textContent=!(p.farms+p.hydros)?'Solar farms charge in daylight; river generators produce through the night.':!nightLoad?'No shared lights are drawing power.':`${(p.stored/nightLoad).toFixed(1)} hours of full-night lighting stored for ${loads.filter(c=>c.enabled).length} connected ${loads.filter(c=>c.enabled).length===1?'building or light':'buildings and lights'}.`;
+  if(p.pump_demand)$('power-outlook').textContent=`${(p.stored/(nightLoad+p.pump_demand)).toFixed(1)} hours stored at full night lighting and current pump demand. Pumps stop when buffers fill; generation can extend this.`;
   $('power-roofs').textContent=`${p.connections.filter(c=>c.source==='roof' && c.enabled).length} ${p.connections.filter(c=>c.source==='roof' && c.enabled).length===1?'home uses its':'homes use their'} own rooftop panels and batteries.`;
   const list=$('power-loads'),key=loads.map(c=>`${c.id}:${c.building.kind}`).join(',');
   if(list.dataset.key!==key){

@@ -71,7 +71,7 @@ fn caps(kind: &str) -> Option<[f64; 2]> {
 pub fn tank(v: &Village, id: Id) -> Option<&Tank> {
     v.water_supply.tanks.iter().find(|p| p.id == id)
 }
-fn owner_tank(v: &Village, owner: Owner) -> Option<&Tank> {
+pub(crate) fn owner_tank(v: &Village, owner: Owner) -> Option<&Tank> {
     v.water_supply.tanks.iter().find(|p| p.owner == owner)
 }
 fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; 2])> {
@@ -115,13 +115,13 @@ fn claimed(v: &Village, id: Id, class: Class, except: Option<usize>) -> f64 {
         .map(|h| h.amount)
         .sum()
 }
-fn free(v: &Village, p: &Tank, class: Class, except: Option<usize>) -> f64 {
+pub(crate) fn free(v: &Village, p: &Tank, class: Class, except: Option<usize>) -> f64 {
     (p.water[class.index()] - claimed(v, p.id, class, except)).max(0.)
 }
-fn room(v: &Village, p: &Tank, class: Class) -> f64 {
+pub(crate) fn room(v: &Village, p: &Tank, class: Class) -> f64 {
     (p.capacity[class.index()] - p.water[class.index()] - incoming(v, p.id, class)).max(0.)
 }
-fn open(v: &Village, p: &Tank) -> bool {
+pub(crate) fn open(v: &Village, p: &Tank) -> bool {
     match p.owner {
         Owner::Building(id) => {
             v.buildings.iter().any(|b| b.id == id && b.progress >= 100.)
@@ -383,7 +383,11 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
             // Arrival barrels serve neighbours without a home. Once everyone
             // is housed, refill their actual household buffers instead of
             // shuttling a reserve into an unused camp and back out again.
-            let people = (0..5).filter(|&r| shelter(v, r).is_none()).count();
+            let people = if pipes::uses_camp(v) {
+                5
+            } else {
+                (0..5).filter(|&r| shelter(v, r).is_none()).count()
+            };
             let essential = people as f64 * 2.4;
             (
                 people as f64 * 8.,

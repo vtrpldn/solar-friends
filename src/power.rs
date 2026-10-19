@@ -28,6 +28,7 @@ pub struct Supply {
     pub stored: f32,
     pub generation: f32,
     pub demand: f32,
+    pub pump_demand: f32,
     pub grid_level: f32,
     pub darkness: f32,
     pub connections: Vec<Connection>,
@@ -94,6 +95,7 @@ pub fn supply(v: &Village) -> Supply {
     let hydros = hydros(v);
     let capacity = capacity(v);
     let (generation, demand, darkness) = rates(v, v.minutes);
+    let pump_demand = pipes::pump_demand(v);
     let stored = v.power.stored.min(capacity);
     // Fade during the final minute of charge; sunlight can directly supply a
     // partially lit grid at dawn. No on/off oscillation around an empty battery.
@@ -112,7 +114,8 @@ pub fn supply(v: &Village) -> Supply {
         capacity,
         stored,
         generation,
-        demand,
+        demand: demand + pump_demand,
+        pump_demand,
         grid_level,
         darkness,
         connections: v

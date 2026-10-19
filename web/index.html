@@ -114,7 +114,16 @@
         <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
         <p id="coop-status"></p></section>
         <section id="circular-controls"><h3>Water &amp; waste</h3><p id="circular-stock"></p><p id="circular-output"></p><p id="toilet-status"></p><label><input id="filter-greywater" type="checkbox"> Filter greywater automatically</label><p id="wetland-status"></p><label><input id="banana-treatment" type="checkbox"> Treat sewage with banana trees automatically</label><p id="banana-status"></p><label><input id="auto-digest" type="checkbox"> Feed the biodigester automatically</label><p id="digester-status"></p><label><input id="use-biogas" type="checkbox"> Cook with biogas when available</label><details><summary>Closing the loop</summary><p>Daily toilet waste stays sealed. Two waste + two kitchen scraps take 8 hours to make 4 cooking gas and 2 digestate. Digestate cures for a full day before becoming compost. One cooking gas stretches a pot by one meal.</p><p>A lined reed bed filters 12 greywater into 8 irrigation water over 6 hours. Gardens use reclaimed water first. Drinking, cooking, and handwashing always need fresh water. Processing pauses at full output stores.</p><p>A banana treatment bed is a sealed evapotranspiration basin for toilet sewage. Each finished bed treats up to six waste per day through its planted soil and roots, without producing drinking water, irrigation water or food. Pause banana treatment to keep more waste for the biodigester.</p></details></section><section id="passive-controls" hidden><h3>Working with nature</h3><div id="passive-processes"></div></section><h3>Water &amp; weather</h3>
-        <p id="pantry-weather"></p><details id="local-water"><summary>Where water is</summary><p id="local-water-summary"></p><p>Fresh water and reclaimed irrigation stay separate. Neighbours carry up to twelve water per trip during community hours. Rain fills each cistern locally. The manual fallback is treated water from the neighbouring farm; river water is not a fresh-water supply.</p><div id="local-water-stores"></div></details>
+        <p id="pantry-weather"></p><details id="local-water"><summary>Where water is</summary><p id="local-water-summary"></p><p>Fresh water and reclaimed irrigation stay separate. Neighbours carry up to twelve water per trip during community hours. Rain fills each cistern locally. The manual fallback is treated water from the neighbouring farm; river water is not a fresh-water supply.</p><details id="water-networks"><summary>Pipes &amp; pumps</summary>
+          <p id="water-line-summary"></p><p>Pumps use the shared battery; household rooftop batteries stay private. Manual carrying remains available.</p>
+          <label><input id="pipe-overlay" type="checkbox"> Show water lines on the village</label><p class="pipe-legend">Blue: fresh water · green: irrigation · gold dashes: planned work · grey: paused · rust: dismantling</p>
+          <div id="water-lines"></div>
+          <details id="water-line-planner"><summary>Plan a new water line</summary><p>Choose a supply and destination. Neighbours deliver its kit, lay the corridor and commission the pump.</p>
+            <div class="pipe-planner"><label for="pipe-kind">Water class<select id="pipe-kind"><option value="fresh">Fresh water</option><option value="irrigation">Reclaimed irrigation</option></select></label><label>Supply<select id="pipe-from" aria-label="Water line supply"></select></label><label>Destination<select id="pipe-to" aria-label="Water line destination"></select></label></div>
+            <p id="pipe-quote" role="status"></p><button id="pipe-queue">Queue resident installation</button>
+          </details>
+          <button id="water-buy-parts">Find missing parts in Trade</button>
+        </details><div id="local-water-stores"></div></details>
         <details><summary>How the pantry works</summary><p>Harvests stay at their garden or forest plot. Residents carry ingredients and eggs to kitchen pantries and hen feed to coops. Meals stay at the kitchen; neighbours walk to an available stored portion before eating. Town food purchases unload at the arrival store. A food forest yields six ingredients per gathering batch; wild foraging yields two. Residents stop routine gathering when reserves are healthy. Hungry hens wait safely; crops wait for water.</p></details>
       </aside>
       <aside id="projects-panel" class="panel economy-panel" hidden aria-label="Construction projects">
@@ -150,8 +159,8 @@
         <p id="power-summary"></p>
         <div class="power-battery-label"><b>Battery</b><span id="power-charge"></span></div>
         <progress id="power-battery" aria-label="Stored shared energy" value="0" max="36"></progress>
-        <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting demand<b id="power-demand"></b></span></div>
-        <p id="power-outlook"></p>
+        <div class="power-rates"><span>Generating<b id="power-generation"></b></span><span>Lighting &amp; pumps<b id="power-demand"></b></span></div>
+        <p id="power-outlook"></p><p id="power-pumps"></p>
         <div class="power-build"><button id="build-solar" class="primary">Plan solar farm</button><button id="build-hydro">Plan river generator</button><button id="build-streetlight">Plan street light</button></div>
         <h3>Shared lighting</h3><div id="power-loads"></div>
         <p id="power-roofs"></p>
