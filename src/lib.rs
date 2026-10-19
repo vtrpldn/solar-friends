@@ -9,6 +9,7 @@ mod ecology;
 mod economy;
 mod food;
 mod forecast;
+mod gatherings;
 mod interactions;
 mod leisure;
 mod logistics;
@@ -281,6 +282,9 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
         .unwrap_or((CAMP.0 + (id as f32 - 2.) * 1.25, CAMP.1 + 0.5))
 }
 fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a Building> {
+    if task == "gathering" {
+        return gatherings::destination(v).and_then(|id| v.buildings.iter().find(|b| b.id == id));
+    }
     let eligible: Vec<_> = v
         .buildings
         .iter()
@@ -651,9 +655,28 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         v.mornings += 1;
         event(&mut v, "A new morning. The community is waking up.");
     }
+    let available_neighbours = people
+        .iter()
+        .filter(|r| gatherings::eligible(r))
+        .fold(0u8, |m, r| m | (1 << r.id));
+    if gatherings::advance(&mut v, available_neighbours) {
+        for mut r in &mut people {
+            if v.progress.invited & (1 << r.id) != 0 {
+                logistics::interrupt(&mut v, &r);
+                assign(
+                    &mut r,
+                    &v,
+                    "gathering",
+                    "Meals have reached our shared table. Coming to share food and stories.",
+                    true,
+                );
+            }
+        }
+    }
     if v.progress.gathering_until > 0. && v.minutes >= v.progress.gathering_until {
         let attended = v.progress.attended;
-        if attended.count_ones() >= 3 {
+        let success = attended.count_ones() >= 3 && gatherings::served(&v);
+        if success {
             v.progress.gatherings += 1;
             v.progress.welcome_supper = true;
             v.meals_served += attended.count_ones();
@@ -679,9 +702,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 "Too few neighbours made it to the square. Try gathering closer to home tomorrow.",
             );
         }
-        v.progress.gathering_until = 0.;
-        v.progress.invited = 0;
-        v.progress.attended = 0;
+        gatherings::finish(&mut v, success);
         for mut r in &mut people {
             if r.task == "gathering" {
                 r.remaining = 0.;
@@ -1096,7 +1117,7 @@ impl Game {
                 production: production::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 7,
+                version: 8,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1456,61 +1477,6 @@ impl Game {
         progression::update(&mut v);
         "ok".into()
     }
-    pub fn host_gathering(&mut self) -> String {
-        let v = self.app.world().resource::<Village>();
-        if v.mode == modes::Mode::Story && !progression::available(v, 2) {
-            return "Finish Roots for Tomorrow before hosting our welcome supper.".into();
-        }
-        if !ready(v, "square")
-            && !(v.progress.completed[0] && ready(v, "kitchen") && !v.progress.welcome_supper)
-        {
-            return "Build a community square first, or finish the introduction to host a welcome supper at the kitchen.".into();
-        }
-        let day = (v.minutes / 1440.).floor() as i32;
-        if v.progress.gathering_until > 0. || v.progress.gathering_day == day {
-            return "We can host one gathering each day. Come back tomorrow.".into();
-        }
-        if !(480.0..1080.).contains(&(v.minutes % 1440.)) {
-            return "Start a gathering between 08:00 and 18:00, with time before bed.".into();
-        }
-        if v.meals < 5 || economy::free(v, economy::MEALS) < 5 {
-            return "Set aside five unreserved prepared meals for the gathering.".into();
-        }
-        let mut invited: u8 = 0;
-        let mut q = self.app.world_mut().query::<&Resident>();
-        for r in q.iter(self.app.world()) {
-            if r.trip.is_none() && r.energy >= 25. && r.hunger <= 75. && r.task != "arrive" {
-                invited |= 1 << r.id;
-            }
-        }
-        if invited.count_ones() < 3 {
-            return "At least three neighbours need to be rested and fed.".into();
-        }
-        let mut v = self.app.world_mut().resource_mut::<Village>();
-        economy::remove(&mut v, economy::MEALS, 5);
-        v.progress.gathering_day = day;
-        v.progress.gathering_until = v.minutes + 120.;
-        v.progress.invited = invited;
-        v.progress.attended = 0;
-        event(
-            &mut v,
-            "A gathering is starting! Neighbours are heading to our shared table.",
-        );
-        let v = v.clone();
-        let mut q = self.app.world_mut().query::<&mut Resident>();
-        for mut r in q.iter_mut(self.app.world_mut()) {
-            if invited & (1 << r.id) != 0 {
-                assign(
-                    &mut r,
-                    &v,
-                    "gathering",
-                    "Sharing food and stories at our shared table.",
-                    true,
-                );
-            }
-        }
-        "ok".into()
-    }
     pub fn restore(&mut self, data: &str) -> bool {
         let Ok(mut save) = serde_json::from_str::<Save>(data) else {
             return false;
@@ -1537,6 +1503,7 @@ impl Game {
         if !logistics::valid(v, &save.residents)
             || !workforce::valid(v)
             || !production::valid(v)
+            || !gatherings::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
             || !supplies::valid(v)
@@ -1566,6 +1533,7 @@ impl Game {
                     .iter()
                     .flat_map(|s| s.shipments.iter().map(|h| h.id)),
             )
+            .chain(v.progress.gathering_delivery.iter().map(|p| p.id))
             .chain(
                 save.residents
                     .iter()
@@ -1596,7 +1564,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 7)
+            || !matches!(v.version, 3 | 8)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1682,7 +1650,7 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 7;
+            save.village.version = 8;
             economy::rebalance(&mut save.village);
         }
         let entities: Vec<Entity> = self
@@ -2126,7 +2094,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":7", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":8", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

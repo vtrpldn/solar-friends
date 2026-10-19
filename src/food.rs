@@ -20,7 +20,9 @@ pub fn held(v: &Village, store: Id, material: usize, except: Option<usize>) -> u
 }
 pub fn available(v: &Village, p: &Store, material: usize, resident: Option<usize>) -> u32 {
     p.items[material].saturating_sub(
-        logistics::pickup_reserved(v, p.id, material) + held(v, p.id, material, resident),
+        logistics::pickup_reserved(v, p.id, material)
+            + held(v, p.id, material, resident)
+            + gatherings::held(v, p.id, material),
     )
 }
 pub fn needs(v: &Village, building: usize) -> Bundle {
@@ -55,6 +57,7 @@ pub fn needs(v: &Village, building: usize) -> Bundle {
         }
         _ => {}
     }
+    n[MEALS] = n[MEALS].max(gatherings::needs(v, building));
     if let Some(site) = production::pantry_site(v, building) {
         let inputs = production::needs(v, site);
         for i in 0..COUNT {

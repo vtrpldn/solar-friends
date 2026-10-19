@@ -67,7 +67,7 @@ impl Default for State {
 fn sum(items: &Bundle) -> u32 {
     items.iter().sum()
 }
-fn closing(v: &Village, owner: Owner) -> bool {
+pub(crate) fn closing(v: &Village, owner: Owner) -> bool {
     match owner {
         Owner::Warehouse(id) | Owner::Pantry(id) => building_work::job(v, id).is_some(),
         Owner::Production(id) => production::closing(v, id),
@@ -117,7 +117,8 @@ fn usable(v: &Village, p: &Store, i: usize) -> u32 {
     p.items[i].saturating_sub(
         pickup_reserved(v, p.id, i)
             + production::held(v, p.owner, i)
-            + crate::food::held(v, p.id, i, None),
+            + crate::food::held(v, p.id, i, None)
+            + gatherings::held(v, p.id, i),
     )
 }
 fn arriving(s: &State, id: Id) -> u32 {
@@ -253,7 +254,7 @@ pub fn sync(v: &mut Village) {
     }
     let mut wanted = vec![];
     for b in &v.buildings {
-        if matches!(b.kind.as_str(), "kitchen" | "coop" | "grove")
+        if matches!(b.kind.as_str(), "kitchen" | "coop" | "grove" | "square")
             && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Pantry(b.id), b.x as f32, b.y as f32, 60));
@@ -728,6 +729,37 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         rank: (1, 3 - p.priority, p.building as u32),
                     });
                 }
+            }
+        }
+    }
+    // A planned shared meal can use kitchen portions without waiting for a surplus pantry.
+    if let Some(party) = gatherings::active(v)
+        .filter(|p| p.spent_after.is_none() && !closing(v, Owner::Pantry(p.building)))
+        && let Some(to) = s.stores.iter().find(|p| p.id == party.store)
+    {
+        let incoming: u32 = s
+            .shipments
+            .iter()
+            .filter(|h| h.to == to.id && h.material == economy::MEALS)
+            .map(|h| h.amount)
+            .sum();
+        let missing = gatherings::PORTIONS.saturating_sub(to.items[economy::MEALS] + incoming);
+        for from in s
+            .stores
+            .iter()
+            .filter(|p| p.id != to.id && !closing(v, p.owner))
+        {
+            let amount = missing
+                .min(gatherings::held(v, from.id, economy::MEALS) + usable(v, from, economy::MEALS))
+                .min(room(v, to.owner));
+            if amount > 0 {
+                out.push(Candidate {
+                    from: from.id,
+                    to: to.id,
+                    material: economy::MEALS,
+                    amount,
+                    rank: (1, 0, to.id.0),
+                });
             }
         }
     }
@@ -1207,7 +1239,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 7
+    if v.version != 8
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1271,7 +1303,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                 p.capacity == 60
                     && v.buildings.iter().any(|b| {
                         b.id == id
-                            && matches!(b.kind.as_str(), "kitchen" | "coop" | "grove")
+                            && matches!(b.kind.as_str(), "kitchen" | "coop" | "grove" | "square")
                             && (b.progress >= 100.
                                 || building_work::original_progress(v, id) == Some(100.))
                             && (p.x, p.y) == (b.x as f32, b.y as f32)

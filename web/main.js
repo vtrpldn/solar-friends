@@ -1,3 +1,4 @@
+import {gatheringInfo} from './gathering-ui.js';
 import {drawCarriedMaterials,drawSupplyPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {makeArtPreview} from './dev/art-preview.js';
@@ -950,13 +951,13 @@ function updateQuests() {
     $('#tutorial-copy').textContent=route.project.paused?'This project is paused. Resume it in Village → Construction when you are ready.':route.project.ready?`${route.project.stage}: materials are ready. Neighbours work 09:00–12:00 and 15:00–16:00. Review the project or plan other essentials while it is underway.`:`The ${route.project.stage.toLowerCase()} stage is waiting for ${missing}. Open Village → Construction for the recipe and Trade for missing equipment. Choose delivery or a resident pickup; small orders can come back the same day.`;
   }
   if(route?.type==='supper'||route?.type==='tool_library'){
-    const supper=route.type==='supper', underway=supper&&p.gathering_until>v.minutes;
-    label=underway?'Welcome supper underway':supper?'Host welcome supper · 5 meals':'Support tool library · R$ 120';
+    const supper=route.type==='supper', gathering=gatheringInfo(v), underway=supper&&gathering.active;
+    label=underway?(gathering.preparing?'Preparing welcome supper':'Welcome supper underway'):supper?'Host welcome supper · 5 meals':'Support tool library · R$ 120';
     action.disabled=underway;shortcut.disabled=underway;
-    if(underway)$('#tutorial-copy').textContent=`The neighbours are making their way to the kitchen. ${p.attended.toString(2).replaceAll('0','').length} have arrived; three need to attend before the supper ends. ${Math.ceil(p.gathering_until-v.minutes)} game minutes remain.`;
+    if(underway)$('#tutorial-copy').textContent=gathering.summary;
     onClick=()=>{
       const result=supper?game.host_gathering():game.contribute_tool_library();
-      toast(result==='ok'?(supper?'Welcome supper is starting at the kitchen.':'The shared tool library is funded.'):result);
+      toast(result==='ok'?(supper?'Welcome supper is planned. Neighbours will bring five meals to the shared table.':'The shared tool library is funded.'):result);
       state=JSON.parse(game.snapshot());updateUI();save();
     };
   }
@@ -966,7 +967,7 @@ function updateQuests() {
     onClick=()=>{showPanel(panel);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
   }
   if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
-  if(route?.type==='gathering'){label='Host a gathering · 5 meals';onClick=()=>{const result=game.host_gathering();toast(result==='ok'?'Our gathering is starting.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
+  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
   action.hidden=!route;action.textContent=label;action.onclick=onClick;
   shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
   $("#open-journal").textContent =
@@ -1002,7 +1003,7 @@ function updateQuests() {
   const has = (kind) =>
     v.buildings.some((b) => b.kind === kind && b.progress >= 100);
   $("#village-craft").hidden =
-    !has("compost") && !has("square") && !p.gathering_until;
+    !has("compost") && !has("square") && !gatheringInfo(v).active;
   $("#compost-stock").hidden = !has("compost");
   $("#compost-stock").textContent =
     `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched ${p.enriched_harvests === 1 ? "harvest" : "harvests"}`;
@@ -1010,20 +1011,16 @@ function updateQuests() {
   $("#tools-stock").textContent =
     `${p.tool_uses} tool ${p.tool_uses===1?'use':'uses'} owned across the village · ${p.tools_crafted} ${p.tools_crafted===1?'batch':'batches'} crafted`;
   $("#use-tools").checked = p.use_tools;
-  $("#gathering-control").hidden = !has("square") && !p.gathering_until;
-  $("#gathering-status").textContent =
-    p.gathering_until > v.minutes
-      ? `Gathering in progress · ${Math.ceil(p.gathering_until - v.minutes)} minutes left`
-      : `${p.gatherings} ${p.gatherings === 1 ? "gathering" : "gatherings"} shared · costs 5 prepared meals`;
-  $("#host-gathering").disabled =
-    p.gathering_until > v.minutes ||
-    p.gathering_day === Math.floor(v.minutes / 1440);
-  $("#host-gathering").textContent =
-    p.gathering_until > v.minutes
-      ? "Neighbours are gathering…"
-      : p.gathering_day === Math.floor(v.minutes / 1440)
-        ? "Next gathering tomorrow"
-        : "Host a gathering";
+  const gathering=gatheringInfo(v);
+  $("#gathering-control").hidden = !has("square") && !gathering.active;
+  $("#gathering-status").textContent = gathering.summary;
+  $("#shared-table").hidden = !has("square") && !p.gathering_delivery;
+  $("#shared-table-status").textContent = gathering.summary;
+  for(const button of document.querySelectorAll('[data-cancel-gathering]'))button.hidden=!gathering.active;
+  $("#host-gathering").disabled = gathering.active || p.gathering_day === Math.floor(v.minutes / 1440);
+  $("#host-gathering").textContent = gathering.active
+    ? gathering.preparing ? "Preparing our gathering…" : "Neighbours are gathering…"
+    : p.gathering_day === Math.floor(v.minutes / 1440) ? "Next gathering tomorrow" : "Host a gathering";
 }
 const buildingPurposes = {
   hydro:'Produces 1.8 energy/hour day and night (less on dry days, more during rain). Adds 18 battery capacity. Workers approach from land.',
@@ -1133,9 +1130,11 @@ function updateSupplies(v) {
   const s = v.supplies;
   const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
   const fed = coops.filter(b => b.poultry.remaining > 0);
-  const days = (v.food + v.meals) / 15;
+  const shared=v.progress.gathering_delivery;
+  const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
+  const days = (v.food + v.meals-sharedReserve) / 15;
   $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
-  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of food before cooking gains or hen feed. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
+  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food before cooking gains or hen feed. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
@@ -1544,12 +1543,17 @@ function setup() {
     const result = game.host_gathering();
     toast(
       result === "ok"
-        ? "The gathering has begun. Give neighbours time to reach the square."
+        ? "The gathering is planned. Neighbours will deliver five meals during community hours, then the invitation starts."
         : result,
     );
     state = JSON.parse(game.snapshot());
     updateUI();
     save();
+  };
+  for(const button of document.querySelectorAll('[data-cancel-gathering]'))button.onclick=()=>{
+    const result=game.cancel_gathering();
+    toast(result==='ok'?'Gathering cancelled. Unserved meals remain recoverable.':result);
+    state=JSON.parse(game.snapshot());updateUI();save();
   };
   $("#use-tools").onchange = (e) => {
     game.set_tools_enabled(e.target.checked);

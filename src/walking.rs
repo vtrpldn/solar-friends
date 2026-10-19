@@ -32,7 +32,7 @@ pub struct Blocker {
     pub reason: String,
 }
 pub fn supports(task: &str) -> bool {
-    requests::work(task) || matches!(task, "visit" | "eat")
+    requests::work(task) || matches!(task, "visit" | "eat" | "gathering")
 }
 pub fn clear(r: &mut Resident) {
     r.walking.route = None;
