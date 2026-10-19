@@ -131,7 +131,7 @@ fn valid_lots(v: &Village, lots: &[Lot], items: &economy::Bundle) -> bool {
             || l.produced > v.minutes
             || l.expires != l.produced + life
             || l.expires <= l.produced
-            || (v.mode == modes::Mode::Story && l.expires <= v.minutes)
+            || (sandbox::logistics(v) && l.expires <= v.minutes)
     }) {
         return false;
     }
@@ -178,7 +178,7 @@ pub fn valid(v: &Village) -> bool {
         })
 }
 pub fn advance(v: &mut Village) {
-    if v.mode == modes::Mode::Sandbox || v.logistics.is_none() {
+    if !sandbox::logistics(v) || v.logistics.is_none() {
         return;
     }
     let mut spent = [0u32; COUNT];
@@ -265,7 +265,7 @@ pub fn view(v: &Village) -> serde_json::Value {
             inspect(&b.food_lots);
         }
     }
-    serde_json::json!({"enabled":v.mode==modes::Mode::Story,"expired":v.freshness.expired,"due_within_day":due,"next_expiry":next,"lifetimes":[{"material":FOOD,"minutes":lifetime(FOOD)},{"material":MEALS,"minutes":lifetime(MEALS)},{"material":EGGS,"minutes":lifetime(EGGS)},{"material":MILK,"minutes":lifetime(MILK)},{"material":HONEY,"minutes":lifetime(HONEY)}],"note":"Game balance days. Moving food or refunding inputs preserves its age. Prepared meals first; use the oldest reachable portions of each kind."})
+    serde_json::json!({"enabled":sandbox::logistics(v),"expired":v.freshness.expired,"due_within_day":due,"next_expiry":next,"lifetimes":[{"material":FOOD,"minutes":lifetime(FOOD)},{"material":MEALS,"minutes":lifetime(MEALS)},{"material":EGGS,"minutes":lifetime(EGGS)},{"material":MILK,"minutes":lifetime(MILK)},{"material":HONEY,"minutes":lifetime(HONEY)}],"note":"Game balance days. Moving food or refunding inputs preserves its age. Prepared meals first; use the oldest reachable portions of each kind."})
 }
 #[cfg(test)]
 pub(crate) fn fixture_reseed(v: &mut Village) {

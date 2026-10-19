@@ -1,3 +1,4 @@
+import {usesLogistics,usesUtilities,installSandboxRulesUI} from './sandbox-rules.js';
 import {renderResidentSkills} from './resident-skills.js';
 import {drawElectricalConnections,electricalOverlayRevision} from './electricity-ui.js';
 import {drawBattery} from './battery-art.js';
@@ -64,6 +65,7 @@ const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
 const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
 const directScenario = previewParams.get('dev-scenario');
+let sandboxRulesUI;
 let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world"),
   ctx = canvas.getContext("2d");
@@ -747,7 +749,7 @@ function render() {
     if(movingBattery!==null)drawBattery(ctx,iso(t.x,t.y),scale,nightAmount(state.village.minutes),.55);
     else if(tool.startsWith('source_'))materialSite({material:sourceMaterial(tool),x:t.x,y:t.y,active:true,planted:true,growth:0.4,remaining:16,maximum:32},.55);
     else if (tool !== "road") buildingSprite(tool, t.x, t.y, 0.55,movingBuilding??undefined);
-    $("#placement").textContent = reason || (movingBattery!==null?'Choose a battery plot · resident packing, transport and installation · Esc to cancel':movingBuilding!==null ? "Choose the new plot · residents will pack and rebuild · Esc to cancel" : `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`);
+    $("#placement").textContent = reason || (movingBattery!==null?'Choose a battery plot · resident packing, transport and installation · Esc to cancel':movingBuilding!==null ? "Choose the new plot · residents will pack and rebuild · Esc to cancel" : `${tool === "road" ? "Road · Click to add or remove" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):!usesLogistics(state.village)?'Free · instant':'Blueprint · materials in Construction'}`} · Drag to pan · Esc to cancel`);
     $("#placement").classList.toggle("invalid", Boolean(reason));
     if(!$('#relocation-guidance').hidden){$('#relocation-guidance').textContent=$('#placement').textContent;$('#relocation-guidance').classList.toggle('invalid',Boolean(reason));}
   }
@@ -1149,7 +1151,7 @@ function updateCircularUI(v) {
   $('#circular-stock').textContent=`${liquids.present[3].toFixed(1)} sealed sewage (${liquids.sealed[3].toFixed(1)} in digesters) · ${liquids.present[2].toFixed(1)} greywater (${liquids.sealed[2].toFixed(1)} filtering). Storage and receiving space belong to each site.`;
   $('#circular-output').textContent=`${c.reclaimed.toFixed(1)} / ${liquids.capacities[1].toFixed(0)} irrigation storage · ${c.biogas.toFixed(0)} / 12 cooking gas`;
   const toilets=v.buildings.filter(b=>b.kind==='eco_toilet'&&b.progress>=100).map(b=>liquids.tanks.find(p=>p.owner.kind==='building'&&p.owner.id===b.id)).filter(p=>p?.open);
-  const wetToilets=toilets.filter(p=>p.water[0]-p.reserved_pickup[0]>=1),usable=wetToilets.some(p=>v.mode==='sandbox'||p.room[2]>=.7&&p.room[3]>=1);
+  const wetToilets=toilets.filter(p=>p.water[0]-p.reserved_pickup[0]>=1),usable=wetToilets.some(p=>!usesUtilities(v)||p.room[2]>=.7&&p.room[3]>=1);
   $('#toilet-status').textContent=!ready('eco_toilet')?'Build an ecological toilet for private daily routines.':!toilets.length?'The toilets are closed for building work.':!wetToilets.length?'Handwashing needs one fresh water delivered to an open toilet.':!usable?'A toilet’s local greywater or sewage buffer is full. Neighbours can carry a closed container to treatment or the service point; installed lines save trips.':`${c.toilet_visits} daily visits completed. Residents make their own way there while awake.`;
   const filters=passive?.stations.filter(s=>s.kind==='filtration')||[];
   $('#wetland-status').textContent=!ready('wetland')?'Build a reed bed to reuse household greywater.':filters.length===1?filters[0].reason:`${filters.length} reed beds. Each keeps its own saved batch; review its inputs and status below.`;
@@ -1176,7 +1178,7 @@ function updateSupplies(v) {
   const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
   const days = (v.food + v.meals-sharedReserve) / 15;
   replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"],["milk",state.environment.economy.materials[25].stored,"Fresh milk"],["honey",state.environment.economy.materials[26].stored,"Honey"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
-  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food. Cooking, hen feed and spoilage can change this estimate.`;
+  $("#pantry-outlook").textContent = !usesLogistics(v) ? "Sandbox replenishes ingredients and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food. Cooking, hen feed and spoilage can change this estimate.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
@@ -1208,18 +1210,19 @@ function openSituations() {
   $("#situation-dialog").showModal();
 }
 function updateUI() {
-  const free = state.village.mode==='sandbox';
+  const free = state.village.mode==='sandbox', instant = !usesLogistics(state.village);
+  sandboxRulesUI?.update();
   $('#mode-badge').textContent=free?'Sandbox':'Story';
   $('#mode-label').textContent=`${free?'SANDBOX':'STORY'}`;
   $('.goal-tracker').hidden=free;
   $('[data-panel="goals-panel"]').hidden=free;
-  $('[data-panel="projects-panel"]').hidden=free;
+  $('[data-panel="projects-panel"]').hidden=false;
   // Trade also holds optional supplier settings in free Sandbox.
   $('[data-panel="town-panel"]').hidden=false;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
-  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
-  replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
+  $('#help-intro').textContent=free?(instant?'Sandbox unlocks every building. New buildings are instant and free; pantry, tools and funds replenish. Settings lets you add construction, living-land and utility constraints.':'Sandbox unlocks every building. Supplies and resident labour are needed for new construction; plan projects in Construction and purchases in Trade. Living-land and utility rules are separate choices in Settings.'):'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
+  replaceMarkup($('#help-start'),instant?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':free?'<b>Plan your own village.</b> Every building is unlocked. Choose a blueprint in Build, manage its supplies and priority in Construction, and let residents carry and build during community hours. Adjust the other simulation rules in Settings.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
   const v = state.village;
@@ -1357,17 +1360,17 @@ function updateUI() {
     button.classList.toggle("locked", !unlocked);
     button.classList.remove("unaffordable");
     const quest = unlockQuest[button.dataset.kind];
-    if(button.dataset.kind.startsWith('source_')){const option=state.environment.economy.source_options.find(s=>s.key===button.dataset.kind);button.querySelector('small').textContent=free?'Free planting':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(option.cost/100);button.title=option.description+' · '+recipeSummary(state,option.key);button.setAttribute('aria-label','Place '+option.name);button.setAttribute('aria-pressed',String(button.dataset.kind===tool));continue;}
+    if(button.dataset.kind.startsWith('source_')){const option=state.environment.economy.source_options.find(s=>s.key===button.dataset.kind);button.querySelector('small').textContent=instant?'Free plot':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(option.cost/100);button.title=option.description+' · '+recipeSummary(state,option.key);button.setAttribute('aria-label','Place '+option.name);button.setAttribute('aria-pressed',String(button.dataset.kind===tool));continue;}
     button.querySelector("small").textContent = unlocked
-      ? button.dataset.kind === "road" ? "Free" : v.mode==='sandbox' ? "Free · instant" : "Free blueprint"
+      ? button.dataset.kind === "road" ? "Free" : !usesLogistics(v) ? "Free · instant" : "Free blueprint"
       : "Quest reward";
     button.title = unlocked
-      ? `${kinds[button.dataset.kind][1]} · ${free?'Free · instant construction':recipeSummary(state,button.dataset.kind,button.dataset.kind==='home'?$('#home-material-method').value:'standard')}`
+      ? `${kinds[button.dataset.kind][1]} · ${instant?'Free · instant construction':recipeSummary(state,button.dataset.kind,button.dataset.kind==='home'?$('#home-material-method').value:'standard')}`
       : `Complete ${quests[quest].title} to unlock`;
     button.setAttribute(
       "aria-label",
       unlocked
-        ? v.mode==='sandbox' ? `Build ${kinds[button.dataset.kind][0]}, free and instant` : `Plan ${kinds[button.dataset.kind][0]}, free blueprint`
+        ? !usesLogistics(v) ? `Build ${kinds[button.dataset.kind][0]}, free and instant` : `Plan ${kinds[button.dataset.kind][0]}, free blueprint`
         : `View quest to unlock ${kinds[button.dataset.kind][0]}`,
     );
     button.classList.toggle("active", button.dataset.kind === tool);
@@ -1397,7 +1400,7 @@ function setTool(kind) {
   $("#placement").classList.remove("invalid");
   $("#placement").hidden = !tool;
   $("#placement").textContent = tool
-    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):state.village.mode==='sandbox'?'Free · instant':'Blueprint · materials in Construction'} · Esc to cancel`
+    ? tool === "road" ? "Road · Click to add or remove · Free · Esc to finish" : `Place ${kinds[tool][0].toLowerCase()} · ${tool?.startsWith('source_')?recipeSummary(state,tool):!usesLogistics(state.village)?'Free · instant':'Blueprint · materials in Construction'} · Esc to cancel`
     : "";
   canvas.style.cursor = tool ? "crosshair" : "grab";
   updateUI();
@@ -1463,6 +1466,7 @@ function setup() {
     cameraTarget={x:pan.x+freeWidth/2-middleX,y:pan.y+height*.46-middleY,dt:1/60};
     ctx.canvas.dataset.cameraMoving='true';
   };
+  sandboxRulesUI=installSandboxRulesUI({game:()=>game,snapshot:()=>state,changed:()=>{state=JSON.parse(game.snapshot());updateUI();save();},notify:toast});
   economyUI=installEconomyUI({avatar,paintPortraits,focusUtility,moveBattery:id=>{
     setTool(null);closePanels();selected=null;movingBattery=id;tool='battery';cameraTarget=null;
     $('#person').hidden=true;$('#placement').hidden=false;$('#placement').textContent='Choose a battery plot · resident packing, transport and installation · Esc to cancel';
@@ -1765,7 +1769,7 @@ function setup() {
         result = movingBattery!==null?game.queue_battery_work(movingBattery,'move',p.x,p.y):movingBuilding!==null?game.queue_building_work(movingBuilding,"move",p.x,p.y):tool === "road" ? game.toggle_road(p.x, p.y) : tool.startsWith('source_')?game.place_source(sourceMaterial(tool),p.x,p.y):game.place_with_recipe(tool, p.x, p.y, tool==='home'?$('#home-material-method').value:'standard');
       if (result === "ok") {
         if (tool !== "road") {
-          toast(movingBattery!==null?'Battery move queued. A neighbour will pack, carry and install it.':movingBuilding!==null?'Move queued. Residents will pack here and rebuild at the new plot.':tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:state.village.mode==='sandbox'?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
+          toast(movingBattery!==null?'Battery move queued. A neighbour will pack, carry and install it.':movingBuilding!==null?'Move queued. Residents will pack here and rebuild at the new plot.':tool.startsWith('source_')?`${kinds[tool][0]} established. Check Construction → Our land resources for growth and harvests.`:!usesLogistics(state.village)?`${kinds[tool][0]} is ready.`:`${kinds[tool][0]} planned. Let's build it together.`);
           setTool(null);
         }
         state = JSON.parse(game.snapshot());

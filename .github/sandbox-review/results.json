@@ -1,0 +1,332 @@
+{
+  "why": "Let players explore the actual physical simulation without repeating Story unlocks, while keeping free and comfortable Sandbox defaults.",
+  "completedAt": "2026-10-16T08:58:26.712Z",
+  "engineSourceCommit": "0f0e4d9a5e46510df6db9880e96cb04096c7b5ec",
+  "frontendSourceCommit": "dcdf1a3e4bb67bee9fc8ab7e1f80ca5248a31608",
+  "saveVersion": 26,
+  "wasmSha256": "1cba2885dd275fca83fc0010466cb2eaac44ee7d0b04b8905f1f3916bd88c6cd",
+  "nativeTests": 478,
+  "focusedNativeRegressions": 11,
+  "strictAllTargetLint": "PASS",
+  "javascriptSyntaxChecks": 166,
+  "publicVerifiers": [
+    {
+      "name": "verify-art-preview.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-artwork.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-autonomy.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-away-routines.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-banana-treatment.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-batteries.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-building-projection.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-building-work.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-chickens.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-circular.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-climate.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-cultivation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-dev-tools.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-economy.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-electrical-fixtures.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-electricity.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-farming.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-food.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-forecast.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-freshness.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-gatherings.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-grid-foundations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-kitchen-batches.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-land.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-leisure.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-living-land.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-logistics.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-maintenance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-modes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-navigation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-night-lighting.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-occupations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-organics.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-passive-processes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-pipes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-planting.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-playtest.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-polish.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-power.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-production.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-requests.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-resident-animation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-resource-sites.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-restoration.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sandbox-rules.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sanitation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-simulation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-situations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-skills.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sleep-speed.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sprite-frames.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sprite-grid-fit.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-storage.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-suppliers.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-tools.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-utility-routes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-water.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-weather.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-work-routes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-workforce.mjs",
+      "status": "PASS"
+    }
+  ],
+  "sandbox": {
+    "passed": true,
+    "checks": [
+      "New projects require actual resident material trips and work, with conserved supplies",
+      "Switching rules preserves confirmed receipts and paused construction",
+      "All eight independent saved rule combinations continue exactly",
+      "Actual extraction yields materials without depleting preserved reserves until living land is enabled",
+      "Free operating power lights a disconnected path, and local utilities restores the real outage without invented charge",
+      "Protected Sandbox planning scene uses the actual free-build and constrained-project commands",
+      "One full Story day matches the supplier release apart from additive schema metadata"
+    ],
+    "baselineMinutes": 1440
+  },
+  "constrainedWeek": {
+    "passed": true,
+    "days": 7,
+    "fromMinutes": 540,
+    "toMinutes": 10620,
+    "exactDailyCheckpoints": 8,
+    "workshopCompleted": true,
+    "minReadyFood": 2,
+    "maxReadyFood": 100,
+    "maxHunger": 33.63254165649414,
+    "minEnergy": 73.63491821289062,
+    "leisure": [
+      0.5829787234042553,
+      0.6125,
+      0.6367432150313153,
+      0.532293986636971,
+      0.6035242290748899
+    ],
+    "openingFunds": 10000000,
+    "paidOrder": 6700,
+    "orderStatus": "delivered",
+    "startingFunds": 9993300,
+    "endingFunds": 9993300,
+    "seasonalOption": false,
+    "maintenanceOption": false,
+    "energyAccountDifference": -4.298783551348606e-13,
+    "activeRules": {
+      "land": true,
+      "logistics": true,
+      "supplied_energy": 0,
+      "utilities": true
+    },
+    "sampleMinutes": 15,
+    "readyFoodDefinition": "Owned ingredients, prepared meals, milk and honey, including supply trips. Committed cooking inputs and uncooked eggs are excluded. Actual hunger is measured separately."
+  },
+  "desktop": {
+    "status": "PASS",
+    "captures": 196,
+    "errors": [],
+    "sourceAndBuildHash": "7801fb0158ff6aaa7c9ca1f78c3013a45ab55b1e38113e6653fb79a509b4703b",
+    "focusedCaptures": 5,
+    "scope": "Keyboard switches, actual constrained and free map placement, retained projects, real stock, Continue sandbox, protected rule changes, real construction and night power, plus the full existing desktop and artwork walkthrough"
+  },
+  "storyComparison": {
+    "minutes": 1440,
+    "baselineWasmSha256": "d36c1c37e3739e1bcde9362838393d02478f24810fdfbe020f5e9ab6d8411072",
+    "scope": "Exact village and resident state for a full fresh Story day, excluding the new saved rule fields and save version. Derived environment reports gain rule metadata."
+  },
+  "notRepeated": [
+    "Fresh thirteen-chapter Story replay",
+    "84-day seasonal replay",
+    "24-day manual/connected utility comparison"
+  ],
+  "priorLongRunEvidence": "../suppliers-review/results.json",
+  "hostedCI": {
+    "status": "BLOCKED",
+    "reason": "The hosted job cannot start because of the GitHub account billing/spending limit.",
+    "check": "https://github.com/vtrpldn/solar-friends/actions/runs/38875469296/job/116889355737",
+    "draft": true,
+    "merged": false
+  },
+  "remainingRoadmap": [
+    "Outcome-based linear Story teaching with optional alternative objectives",
+    "Integrated paired housing expansion and balance across layouts, work preferences and construction methods"
+  ]
+}

@@ -1,3 +1,4 @@
+import {usesUtilities} from './sandbox-rules.js';
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const names={well:'Cistern',home:'Home',kitchen:'Kitchen',garden:'Garden',greenhouse:'Greenhouse',eco_toilet:'Ecological toilet',wetland:'Reed bed',biodigester:'Biodigester',banana_treatment:'Banana treatment bed'};
 export const liquidNames=['fresh water','irrigation','greywater','sealed sewage'];
@@ -25,7 +26,7 @@ export function installWaterUI({game}){
       }).join('')+trips.map(h=>{
         const resident=state.residents.find(r=>r.id===h.resident),from=h.from==null?'the neighbouring farm’s treated-water tap':waterContainerName(report.tanks.find(p=>p.id===h.from),v),to=waterContainerName(report.tanks.find(p=>p.id===h.to),v);
         return `<p data-${section?'waste':'water'}-carrier="${h.resident}"><b>${escape(resident?.name||'Neighbour')}</b> · ${h.carrying?'carrying':'collecting'} ${n(h.amount)} ${liquidNames[report.classes.indexOf(h.class)]}${section?' in a closed service container':''}<br><small>${escape(from)} → ${escape(to)}</small></p>`;
-      }).join('')+(section?`<p>Neighbouring service point: ${n(report.external[2])} greywater · ${n(report.external[3])} sewage handed over. Off-site treatment returns no village irrigation, gas or compost.</p>${v.mode==='sandbox'?`<p>Sandbox excess disposal: ${n(report.sandbox_disposed[2])} greywater · ${n(report.sandbox_disposed[3])} sewage. Local buffers stay comfortable.</p>`:''}`:'');
+      }).join('')+(section?`<p>Neighbouring service point: ${n(report.external[2])} greywater · ${n(report.external[3])} sewage handed over. Off-site treatment returns no village irrigation, gas or compost.</p>${!usesUtilities(v)?`<p>Sandbox excess disposal: ${n(report.sandbox_disposed[2])} greywater · ${n(report.sandbox_disposed[3])} sewage. Local buffers stay comfortable.</p>`:''}`:'');
       if(markup!==keys[section]){keys[section]=markup;list.innerHTML=markup;}
     }
   }};

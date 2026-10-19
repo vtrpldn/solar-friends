@@ -181,8 +181,7 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
                 .food_lots
                 .iter()
                 .filter(|l| {
-                    l.material == material
-                        && (v.mode == modes::Mode::Sandbox || l.expires > ready_at)
+                    l.material == material && (!sandbox::logistics(v) || l.expires > ready_at)
                 })
                 .collect();
             let future = edible

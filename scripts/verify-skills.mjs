@@ -7,7 +7,7 @@ import {makeScenario} from '../web/dev/scenarios.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const output='artifacts/skills';await mkdir(output,{recursive:true});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot()),fresh=snap();
-assert.equal(fresh.village.version,25);assert(fresh.village.skills.enabled);
+assert.equal(fresh.village.version,26);assert(fresh.village.skills.enabled);
 assert(g.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));
 assert(g.restore(JSON.stringify(makeScenario('farming',fresh,snap()))));g.set_resident_learning(true);
 assert.equal(g.place('garden',20,15),'ok');assert.equal(g.set_production_target(6,snap().environment.economy.materials[6].stored+2),'ok');assert(g.set_resident_job(4,true));

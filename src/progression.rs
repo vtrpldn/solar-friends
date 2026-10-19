@@ -363,6 +363,7 @@ mod tests {
     fn rain_and_lighting_credit_require_actual_collection_and_energy() {
         let mut g = Game::new();
         assert!(g.start_mode("sandbox"));
+        assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("well", 5, 5), "ok");
         assert_eq!(g.place("streetlight", 9, 5), "ok");
         {
@@ -407,6 +408,7 @@ mod tests {
     fn late_story_offers_personal_time_without_inventing_overwork() {
         let mut g = Game::new();
         assert!(g.start_mode("sandbox"));
+        assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.arrived = true;
@@ -432,6 +434,7 @@ mod tests {
     fn a_real_cooking_concern_takes_precedence_over_the_story_check_in() {
         let mut g = Game::new();
         assert!(g.start_mode("sandbox"));
+        assert!(g.configure_sandbox_rules(false, true, true));
         assert_eq!(g.place("kitchen", 5, 5), "ok");
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.arrived = true;

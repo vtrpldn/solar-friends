@@ -13,13 +13,18 @@ pub fn replenish(v: &mut Village) {
     if v.mode != Mode::Sandbox {
         return;
     }
+    if !sandbox::utilities(v) {
+        water::replenish(v);
+    }
+    if sandbox::logistics(v) {
+        return;
+    }
     let _ = logistics::receive(
         v,
         logistics::Owner::Camp,
         economy::FOOD,
         80u32.saturating_sub(economy::quantity(v, economy::FOOD)),
     );
-    water::replenish(v);
     let _ = logistics::receive(
         v,
         logistics::Owner::Camp,
@@ -65,6 +70,7 @@ impl Game {
         *self = Self::new();
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.mode = mode;
+        v.sandbox_rules = sandbox::Rules::default();
         v.skills.enabled = mode == Mode::Story;
         v.market.enabled = mode == Mode::Story;
         v.climate.enabled = mode == Mode::Story;

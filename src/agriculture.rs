@@ -280,7 +280,7 @@ pub fn rotation(v: &mut Village, id: usize, crop: &str) {
     }
     let (n, x, y) = (interactions::footprint_size(&b.kind), b.x, b.y);
     // Legume residues replenish nutrients; changing to a food crop improves cover too.
-    if crop == "beans" || rotated {
+    if crate::sandbox::land(v) && (crop == "beans" || rotated) {
         land::restore_soil(v, n, x, y, if rotated { 0.24 } else { 0.12 });
     }
 }

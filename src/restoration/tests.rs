@@ -2,6 +2,7 @@ use super::*;
 fn scene() -> Game {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 5, 5), "ok");
     logistics::fixture_stock(&mut g.app.world_mut().resource_mut::<Village>(), COMPOST, 4);
     g

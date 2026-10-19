@@ -83,7 +83,8 @@ pub fn needs_tending(v: &Village, b: &Building, water: f32) -> bool {
         && b.progress >= 100.
         && ((!b.crop.planted && b.crop.replant)
             || (b.crop.planted
-                && (b.crop.growth >= duration(&b.crop) || (b.crop.moisture <= 90. && water >= 2.))))
+                && (b.crop.growth >= duration(&b.crop)
+                    || (sandbox::land(v) && b.crop.moisture <= 90. && water >= 2.))))
 }
 
 pub fn advance(v: &mut Village, minutes: f32) {

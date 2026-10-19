@@ -3,6 +3,7 @@ use crate::{Resident, ecology, logistics, power};
 fn garden() -> Game {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 5, 5), "ok");
     g
 }
@@ -10,6 +11,7 @@ fn garden() -> Game {
 fn wetness_lives_in_the_ground_and_rain_does_not_enter_a_greenhouse() {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 13, 13), "ok");
     assert_eq!(g.place("greenhouse", 17, 13), "ok");
     {
@@ -131,6 +133,7 @@ fn tree_shade_saves_water_but_heavy_shade_reduces_crop_growth() {
 fn visible_tree_canopies_reduce_solar_output_and_cutting_reduces_shade() {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("solar_farm", 18, 18), "ok");
     g.app.world_mut().resource_mut::<Village>().minutes = 720.;
     let before = power::supply(g.app.world().resource::<Village>()).solar_generation;
@@ -230,6 +233,7 @@ fn crop_outlook_matches_actual_harvest_and_next_planting_without_mutation() {
 fn legal_border_gardens_have_four_ground_cells_and_save_all_their_water() {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("garden", 1, 1), "ok");
     let preview: serde_json::Value = serde_json::from_str(&g.land_preview("garden", 1, 1)).unwrap();
     assert_eq!(preview["cells"], 4);
@@ -256,6 +260,7 @@ fn legal_border_gardens_have_four_ground_cells_and_save_all_their_water() {
 fn grove_canopy_stays_during_packing_and_returns_only_after_rebuilding() {
     let mut g = Game::new();
     g.start_mode("sandbox");
+    assert!(g.configure_sandbox_rules(false, true, true));
     assert_eq!(g.place("grove", 15, 15), "ok");
     let before = ground(g.app.world().resource::<Village>(), 16, 16).shade;
     assert_eq!(g.queue_building_work(0, "move", 5, 5), "ok");

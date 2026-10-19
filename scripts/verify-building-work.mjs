@@ -30,7 +30,7 @@ for(const action of ['demolish','salvage']){
 }
 assert(timings[0]<timings[1],'Demolition must finish sooner than salvage from the same earned village');
 // The player may cancel before packing ends, without a refund or teleport.
-const g=new Game();g.start_mode('sandbox');assert.equal(g.place_with_recipe('home',5,5,'adobe'),'ok');
+const g=new Game();g.start_mode('sandbox');assert(g.configure_sandbox_rules(false,true,true));assert.equal(g.place_with_recipe('home',5,5,'adobe'),'ok');
 assert.equal(g.queue_building_work(0,'move',18,18),'ok');assert.equal(g.cancel_building_work(0),'ok');assert.equal(snap(g).village.buildings[0].x,5);checkpoint(g);
 const before=snap(g);assert.equal(g.queue_building_work(0,'move',18,18),'ok');checkpoint(g);
 assert.deepEqual(goalRoute(snap(g),{build:'home',recipe:'adobe',target:1}),{type:'visit',id:0},'A moved prerequisite should route to crew review instead of an unnecessary replacement');
@@ -42,7 +42,7 @@ until(g,s=>s.village.building_jobs.length===0,'resident rebuilding');
 let moved=snap(g);assert.equal(moved.village.buildings[0].id,0);assert.equal(moved.village.buildings[0].progress,100);assert.equal(moved.village.economy.projects[0].recipe,'adobe');assert.equal(moved.village.economy.projects[0].appearance,4);assert.equal(moved.village.economy.next_building,1);assert.equal(moved.village.wood,before.village.wood);checkpoint(g);
 assert.equal(g.place('garden',5,5),'ok','Old plot becomes reusable after packing');
 // Native placement and every preview must respect both the old site and the reserved site.
-const h=new Game();h.start_mode('sandbox');h.place('home',5,5);h.queue_building_work(0,'move',16,18);const reserved=h.snapshot(),v=JSON.parse(reserved).village;
+const h=new Game();h.start_mode('sandbox');assert(h.configure_sandbox_rules(false,true,true));h.place('home',5,5);h.queue_building_work(0,'move',16,18);const reserved=h.snapshot(),v=JSON.parse(reserved).village;
 let comparisons=0;
 for(const kind of [...snap(h).environment.economy.recipes.map(r=>r.kind),'road',...sourceKinds])for(let x=1;x<=26;x++)for(let y=1;y<=26;y++){
  assert(h.restore(reserved));const allowed=!placementReason(v,kind,x,y);

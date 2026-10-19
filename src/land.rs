@@ -202,6 +202,9 @@ pub fn deposit(v: &Village, material: usize, x: i32, y: i32) -> Option<&Deposit>
         .map(|(d, _)| d)
 }
 pub fn extract(v: &mut Village, id: simulation::Id, amount: u32) {
+    if !crate::sandbox::land(v) {
+        return;
+    }
     let Some(d) = v.land.deposits.iter_mut().find(|d| d.id == id) else {
         return;
     };
@@ -275,6 +278,10 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     disturb_plot(v, n, x, y, impact);
 }
 pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
+    if !crate::sandbox::land(v) {
+        vegetation::clear(v, n, x, y);
+        return;
+    }
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
             if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {

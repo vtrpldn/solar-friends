@@ -1,3 +1,4 @@
+import {usesUtilities} from './sandbox-rules.js';
 // The simulation owns supply and load. The renderer only consumes its snapshot.
 export function buildingLighting(power, id, kind, complete = true) {
   if (!complete) return 0;
@@ -17,6 +18,7 @@ export function lightingLayers(night, level, alpha=1) {
 }
 export function connectionLabel(connection, power) {
   if(!connection)return '';
+  if(power.comfortable&&['roof','grid'].includes(connection.source))return connection.enabled?'Sandbox operating power · owned battery charge is preserved':'Lights switched off or construction unfinished';
   if(connection.source==='roof')return !connection.enabled?'Rooftop panels available after construction':power.darkness>.1&&connection.light_level<.01?'Private rooftop battery empty · lights off':'Own rooftop panels · private battery';
   if(connection.source==='solar')return connection.enabled?'Adds 6 energy/hour at midday and 36 battery capacity':'Connects after construction';
   if(connection.source==='hydro')return connection.enabled?'River flow · up to 2.3 energy/hour · 18 battery capacity':'Connects after construction';
@@ -33,7 +35,7 @@ export function powerConnections(state) {
   return state.environment.power.connections.filter(c=>c.source==='grid').map(c=>({...c,building:buildings.get(c.id)})).filter(c=>c.building);
 }
 export function updatePowerUI(state,kinds) {
-  const p=state.environment.power,$=id=>document.getElementById(id);
+  const p={...state.environment.power,comfortable:!usesUtilities(state.village)},$=id=>document.getElementById(id);
   $('power-title').textContent=!(p.farms+p.hydros)?'Shared village power':p.darkness>.1?'Light after sunset':'Charging our battery';
   $('power-summary').textContent=!(p.farms+p.hydros)?'Build a solar farm or river generator to light shared buildings and streets. Homes with rooftop panels provide their own lighting.':p.generation>p.demand?(p.stored>=p.capacity-.01?'The battery is full. Extra generation is left unused.':'Our generators are powering the village and charging its battery.'):p.stored>.01?'Stored energy is supplying the village.':'The shared battery is empty. Connected lights wait for generation.';
   $('power-charge').textContent=`${p.stored.toFixed(1)} / ${p.capacity.toFixed(0)} energy`;
@@ -52,7 +54,14 @@ export function updatePowerUI(state,kinds) {
     $('power-outlook').textContent=`${loads.filter(c=>c.enabled).length} shared lights enabled · ${loads.filter(c=>c.enabled&&!c.connected).length} without a connected battery. Compare local charge and cable routes below; combined storage cannot predict every building’s running time.`;
     $('power-pumps').textContent='Pumps draw first, then attended powered tools, then lighting. Tools draw only while a resident works; the circuit cards show their possible operating demand.';
   }
+  if(p.comfortable){
+    $('power-title').textContent='Comfortable Sandbox power';
+    $('power-summary').textContent='Operating power is free. Owned generators, charge and installed cables remain available for a later utility challenge.';
+    $('power-outlook').textContent=`${(state.village.sandbox_rules?.supplied_energy||0).toFixed(1)} energy supplied freely; this is separate from physical generation and battery use.`;
+    $('power-explanation').textContent='Enable Local utilities in Settings to require connected circuits and available charge. Existing lines and charge are preserved when changing this rule.';
+  }
   $('power-roofs').textContent=`${p.connections.filter(c=>c.source==='roof' && c.enabled).length} ${p.connections.filter(c=>c.source==='roof' && c.enabled).length===1?'home uses its':'homes use their'} own rooftop panels and batteries.`;
+  if(p.comfortable)$('power-roofs').textContent='All enabled lights have free operating power. Rooftop battery charge remains with each home.';
   const list=$('power-loads'),key=loads.map(c=>`${c.id}:${c.building.kind}`).join(',');
   if(list.dataset.key!==key){
     list.dataset.key=key;list.replaceChildren();

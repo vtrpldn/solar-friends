@@ -18,7 +18,7 @@ const home=JSON.parse(g.land_preview('home',6,6));assert.equal(home.cells,4);ass
 assert.equal(g.land_preview('home',2147483647,5),'{}');assert.equal(g.place_source(3,2147483647,5),'Choose an inland clearing inside the village.');
 assert.equal(g.snapshot(),first);
 // Public commands and actual resident work exhaust one local reserve.
-g.start_mode('sandbox');
+g.start_mode('sandbox');assert(g.configure_sandbox_rules(false,true,true));
 // Isolate deposit exhaustion from full arrival storage. Planting stock also
 // occupies real shelves; a storage house provides receiving room for the stone.
 assert.equal(g.place('warehouse',6,13),'ok');
@@ -56,7 +56,7 @@ for(const corrupt of [state=>state.village.land.deposits[0].remaining++,state=>s
 await mkdir('artifacts/land',{recursive:true});await writeFile('artifacts/land/exhausted.json',checkpoint);
 // Instant Sandbox building is still real construction for its land; planning a Story blueprint is not.
 const h=new Game();assert.equal(h.place('home',5,5),'ok');assert.equal(JSON.parse(h.snapshot()).village.land.soil.length,0);
-h.start_mode('sandbox');assert.equal(h.place('home',5,5),'ok');
+h.start_mode('sandbox');assert(h.configure_sandbox_rules(false,true,true));assert.equal(h.place('home',5,5),'ok');
 assert(JSON.parse(h.land_preview('road',5,5)).ground.disturbance>0);
 const changed=h.snapshot();assert(h.restore(changed));assert.equal(h.snapshot(),changed);
 const soil=JSON.parse(changed).village.land.soil;
