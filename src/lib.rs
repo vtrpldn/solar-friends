@@ -9,6 +9,7 @@ mod ecology;
 mod economy;
 mod food;
 mod forecast;
+mod freshness;
 mod gatherings;
 mod interactions;
 mod leisure;
@@ -141,6 +142,8 @@ pub struct Village {
     pub workforce: workforce::State,
     #[serde(default)]
     pub production: production::State,
+    #[serde(default)]
+    pub freshness: freshness::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
     #[serde(skip)]
@@ -633,6 +636,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     modes::replenish(&mut v);
     let before = v.minutes;
     v.minutes += dt * MINUTES_PER_SECOND;
+    freshness::advance(&mut v);
     let activities: Vec<_> = people
         .iter()
         .map(|r| (r.id, simulation::activity(r)))
@@ -699,7 +703,11 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         } else {
             event(
                 &mut v,
-                "Too few neighbours made it to the square. Try gathering closer to home tomorrow.",
+                if attended.count_ones() >= 3 {
+                    "Neighbours reached the shared table, but five fresh meals were no longer available. Prepare fresh portions for another day."
+                } else {
+                    "Too few neighbours made it to the square. Try gathering closer to home tomorrow."
+                },
             );
         }
         gatherings::finish(&mut v, success);
@@ -1115,9 +1123,10 @@ impl Game {
                 navigation: None,
                 workforce: workforce::State::default(),
                 production: production::State::default(),
+                freshness: freshness::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 8,
+                version: 9,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1503,6 +1512,7 @@ impl Game {
         if !logistics::valid(v, &save.residents)
             || !workforce::valid(v)
             || !production::valid(v)
+            || !freshness::valid(v)
             || !gatherings::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
@@ -1564,7 +1574,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 8)
+            || !matches!(v.version, 3 | 9)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1647,10 +1657,11 @@ impl Game {
             return false;
         }
         if save.village.version == 3 {
+            save.village.freshness = freshness::State::default();
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 8;
+            save.village.version = 9;
             economy::rebalance(&mut save.village);
         }
         let entities: Vec<Entity> = self
@@ -2094,7 +2105,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":8", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":9", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {

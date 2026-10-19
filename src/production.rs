@@ -54,6 +54,10 @@ pub struct Batch {
     pub site: Id,
     pub material: usize,
     pub inputs: Bundle,
+    #[serde(default)]
+    pub food_lots: Vec<freshness::Lot>,
+    #[serde(default)]
+    pub spoiled: bool,
     pub output: u32,
     pub work: f32,
     pub last_worker: Option<usize>,
@@ -542,6 +546,8 @@ fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
         site: id,
         material,
         inputs,
+        food_lots: vec![],
+        spoiled: false,
         output,
         work: 0.,
         last_worker: None,
@@ -713,10 +719,20 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
             v.circular.biogas -= 1.;
             v.production.accounting.biogas_used += 1;
         }
+        let mut food_lots = vec![];
         for (i, &n) in b.inputs.iter().enumerate() {
-            logistics::spend(v, Some(owner(v, b.site)), i, n);
+            freshness::merge(
+                &mut food_lots,
+                logistics::take(v, Some(owner(v, b.site)), i, n),
+            );
             v.production.accounting.inputs[i] += u64::from(n);
         }
+        v.production
+            .batches
+            .iter_mut()
+            .find(|b| b.id == id)
+            .unwrap()
+            .food_lots = food_lots;
         v.production
             .batches
             .iter_mut()
@@ -758,6 +774,7 @@ fn finish(v: &mut Village, id: Id) -> bool {
         .find(|b| b.id == id)
         .unwrap();
     current.phase = Phase::Complete;
+    current.food_lots.clear();
     current.finished = Some(v.minutes);
     assert!(logistics::receive(
         v,
@@ -792,6 +809,7 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
         .find(|b| b.id == id)
         .unwrap();
     current.phase = Phase::Cancelled;
+    current.food_lots.clear();
     current.committed = false;
     current.finished = Some(v.minutes);
     if b.committed {
@@ -800,7 +818,17 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
             v.production.accounting.biogas_used -= 1;
         }
         for (i, &n) in b.inputs.iter().enumerate() {
-            assert!(logistics::receive(v, owner(v, b.site), i, n));
+            if freshness::lifetime(i).is_some() {
+                let lots = b
+                    .food_lots
+                    .iter()
+                    .filter(|l| l.material == i)
+                    .cloned()
+                    .collect();
+                assert!(logistics::receive_preserved(v, owner(v, b.site), i, lots));
+            } else {
+                assert!(logistics::receive(v, owner(v, b.site), i, n));
+            }
             v.production.accounting.inputs[i] -= u64::from(n);
         }
     }
@@ -957,6 +985,7 @@ pub fn valid(v: &Village) -> bool {
             && b.id.0 < v.simulation.next_id
             && (!b.active() || active.insert(b.site))
             && (!b.manual || matches!(b.material, economy::TOOLS | economy::MEALS))
+            && (!b.spoiled || (b.material == economy::MEALS && b.phase == Phase::Cancelled))
             && b.inputs == inputs
             && b.output == output
             && b.work.is_finite()
@@ -1092,6 +1121,8 @@ pub(crate) fn fixture_inputs(v: &mut Village, id: Id) {
     let to = s.stores.iter().position(|p| p.owner == owner).unwrap();
     for (i, &n) in b.inputs.iter().enumerate() {
         assert!(s.stores[from].items[i] >= n);
+        let lots = freshness::take(&mut s.stores[from].food_lots, i, n);
+        freshness::merge(&mut s.stores[to].food_lots, lots);
         s.stores[from].items[i] -= n;
         s.stores[to].items[i] += n;
     }

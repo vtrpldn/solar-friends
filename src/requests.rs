@@ -106,7 +106,14 @@ pub fn observe(r: &mut Resident, v: &Village) {
                     r,
                     v,
                     Phase::Cancelled,
-                    "The requested production batch was cancelled.",
+                    if q.batch
+                        .and_then(|id| production::batch(v, id))
+                        .is_some_and(|b| b.spoiled)
+                    {
+                        "The pot's ingredients spoiled during the interruption. Fresh inputs were recovered; ask for a new batch."
+                    } else {
+                        "The requested production batch was cancelled."
+                    },
                 );
                 return;
             }

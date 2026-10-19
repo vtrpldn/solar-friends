@@ -197,6 +197,7 @@ mod tests {
         }
         crate::logistics::sync(&mut v);
         v.minutes = 360.;
+        freshness::fixture_reseed(&mut v);
         v.economy.ledger.clear();
         v
     }

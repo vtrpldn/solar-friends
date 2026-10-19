@@ -165,7 +165,11 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
         cancel(v);
         event(
             v,
-            "The gathering was cancelled. Unserved meals stay stored or recoverable; try an earlier time or a clearer supply route.",
+            if p.phase != Phase::Serving && v.minutes >= p.deadline {
+                "The gathering missed its delivery deadline. Unserved meals stay recoverable. Roads shorten the haul; a table closer to the pantry can help."
+            } else {
+                "The gathering was cancelled. Unserved meals stay stored or recoverable; try an earlier time or a clearer supply route."
+            },
         );
         return false;
     }
@@ -237,6 +241,7 @@ pub(crate) fn fixture_table(v: &mut Village) {
     s.stores[from].items[MEALS] -= PORTIONS;
     s.stores[to].items[MEALS] += PORTIONS;
     logistics::sync_totals(v);
+    freshness::fixture_reseed(v);
 }
 pub fn valid(v: &Village) -> bool {
     let Some(p) = &v.progress.gathering_delivery else {
@@ -467,6 +472,7 @@ mod tests {
         s.stores[from].items[MEALS] -= PORTIONS;
         s.stores[to].items[MEALS] += PORTIONS;
         logistics::sync_totals(v);
+        freshness::fixture_reseed(v);
     }
     #[test]
     fn residents_really_deliver_the_meals_before_the_invitation_and_serve_once() {
@@ -592,6 +598,7 @@ mod tests {
                 .unwrap()
                 .items[MEALS] += 5;
             logistics::sync_totals(&mut v);
+            freshness::fixture_reseed(&mut v);
         }
         for mut r in g
             .app
@@ -796,6 +803,7 @@ mod tests {
                 .unwrap()
                 .items[MEALS] += 5;
             logistics::sync_totals(&mut v);
+            freshness::fixture_reseed(&mut v);
         }
         for mut r in g
             .app

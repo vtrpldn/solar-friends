@@ -205,6 +205,7 @@ mod tests {
         let mut v = game.app.world().resource::<Village>().clone();
         crate::logistics::fixture_finish(&mut v, 0);
         v.minutes = 360.;
+        freshness::fixture_reseed(&mut v);
         v.economy.ledger.clear();
         v
     }

@@ -109,6 +109,7 @@ pub fn gather(v: &mut Village, building: Option<usize>, x: f32, y: f32, amount: 
         .find(|p| p.id == id)
         .unwrap();
     owner_items.items[FOOD] = amount;
+    freshness::add(&mut owner_items.food_lots, FOOD, amount, v.minutes);
     simulation::material_change(v, FOOD, amount, true);
     logistics::sync_totals(v);
     amount
@@ -170,9 +171,26 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
             continue;
         };
         for material in [MEALS, FOOD] {
-            if available(v, p, material, Some(r.id)) > 0 {
+            let available_now = available(v, p, material, Some(r.id));
+            let ready_at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
+            let edible: Vec<_> = p
+                .food_lots
+                .iter()
+                .filter(|l| {
+                    l.material == material
+                        && (v.mode == modes::Mode::Sandbox || l.expires > ready_at)
+                })
+                .collect();
+            let future = edible
+                .iter()
+                .map(|l| l.amount)
+                .sum::<u32>()
+                .saturating_sub(p.items[material] - available_now);
+            if available_now > 0 && future > 0 {
+                let expires = edible.first().map_or(f32::INFINITY, |l| l.expires);
                 choices.push((
                     material != MEALS,
+                    expires,
                     route.minutes,
                     p.id.0,
                     p.id,
@@ -182,8 +200,13 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
             }
         }
     }
-    choices.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.total_cmp(&b.1)).then(a.2.cmp(&b.2)));
-    choices.first().map(|p| (p.3, p.4, p.5))
+    choices.sort_by(|a, b| {
+        a.0.cmp(&b.0)
+            .then(a.1.total_cmp(&b.1))
+            .then(a.2.total_cmp(&b.2))
+            .then(a.3.cmp(&b.3))
+    });
+    choices.first().map(|p| (p.4, p.5, p.6))
 }
 pub fn assign(r: &mut Resident, v: &Village) -> bool {
     let Some((store, material, point)) = meal(v, r) else {
@@ -282,6 +305,8 @@ pub fn fixture_stage(v: &mut Village, id: usize) {
             }
             let n = missing.min(v.logistics.as_ref().unwrap().stores[from].items[i]);
             let s = v.logistics.as_mut().unwrap();
+            let lots = freshness::take(&mut s.stores[from].food_lots, i, n);
+            freshness::merge(&mut s.stores[to].food_lots, lots);
             s.stores[from].items[i] -= n;
             s.stores[to].items[i] += n;
             missing -= n;
