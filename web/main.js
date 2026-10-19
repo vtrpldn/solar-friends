@@ -866,7 +866,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">Ask for a hand</p><p class="request-guide">Choose one chore. They’ll help once, then return to their own routine. Meals, rest and outside commitments still come first.</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel this request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend the farm"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -907,11 +907,12 @@ function selectPerson(id) {
     if (b) request(b.dataset.task, false);
   };
   $("#person .persuade").onclick = () => request(lastTask, true);
-  $("#person .resume-request").onclick = () => { if(paused)togglePause(); updateUI(); };
+  $("#person .resume-request").onclick = () => { if(paused)togglePause(); updateUI(); const status=$("#person .help-order");status.setAttribute("tabindex","-1");status.focus({preventScroll:true}); };
   $('#person .cancel-help').onclick=()=>{
     const result=game.cancel_help(id);
     response=result==='ok'?'Request cancelled.':result;
     encouragable=false;state=JSON.parse(game.snapshot());responseContext=requestContext(state.residents.find(r=>r.id===id));updateUI();save();
+    $('#person .requests button:not([hidden])')?.focus();
   };
   updateUI();
 }
@@ -923,7 +924,12 @@ function request(task, encourage) {
   responseContext = requestContext(state.residents.find(r=>r.id===selected));
   updateUI();
   save();
-  $(encouragable ? "#person .persuade" : "#person .response").scrollIntoView({ block: "nearest" });
+  const help=state.residents.find(r=>r.id===selected)?.help;
+  const accepted=help&&!['complete','cancelled'].includes(help.phase)&&help.task===task;
+  if(accepted)toast(`${state.residents.find(r=>r.id===selected).name} accepted your request.${paused?' Resume time to let them begin.':''}`);
+  const feedback=$(accepted?'#person .help-order':encouragable?'#person .persuade':'#person .response');
+  feedback.scrollIntoView({block:'nearest'});
+  feedback.setAttribute('tabindex','-1');feedback.focus({preventScroll:true});
 }
 function replaceMarkup(element, html) {
   if (element._markup !== html) {
@@ -1382,8 +1388,14 @@ function updateUI() {
     }
     const help=r.help,activeHelp=help&&!['complete','cancelled'].includes(help.phase);
     $('#person .help-order').hidden=!help;
+    $('#person .requests').hidden=!!activeHelp;
+    $('#person .request-guide').textContent=activeHelp
+      ? 'One request at a time. Follow their progress below, or cancel this request before choosing another chore.'
+      : 'Choose one chore. They’ll help once, then return to their own routine. Meals, rest and outside commitments still come first.';
+    $('#person .resume-request').textContent=`Resume time · let ${r.name} continue`;
+
     if(help){
-      const titles={accepted:'Accepted',travelling:'On the way',working:'Working',paused:'Paused',blocked:'Waiting',complete:'Finished',cancelled:'Cancelled'};
+      const titles={accepted:`${r.name} accepted`,travelling:`${r.name} is on the way`,working:`${r.name} is helping`,paused:'Taking care of their needs first',blocked:'Waiting to continue',complete:'Request completed',cancelled:'Request cancelled'};
       const names={build:'Help build',building_work:'Help the building crew',garden:'Tend the farm',gather:'Forage food',source:'Source materials',prepare:'Prepare materials',water:'Water & sanitation',cook:'Make a meal',rest:'Take a rest',socialize:'Spend time together',compost:'Turn scraps',craft:'Craft tools',eat:'Have a meal',outside:'Outside shift'};
       const target=help.building==null?null:v.buildings.find(b=>b.id===help.building);
       const text={'.help-phase':titles[help.phase],'.help-task':(names[help.task]||help.task)+(target?` · ${kinds[target.kind][0]} at ${target.x}, ${target.y}`:''),'.help-reason':help.reason,'.help-time':`Accepted day ${1+Math.floor(help.created/1440)} · ${String(Math.floor(help.created%1440/60)).padStart(2,'0')}:${String(Math.floor(help.created%60)).padStart(2,'0')}`};
