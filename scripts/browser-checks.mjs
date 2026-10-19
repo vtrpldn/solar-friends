@@ -301,6 +301,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
   }
   assert.equal(await page.locator('#person .help-phase').textContent(),'Finished');
+  assert.equal(await page.locator('#person .response').isVisible(),false,'Old acceptance and waiting feedback must disappear when the live request changes');
   assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).help.id),requested.help.id);
   await capture('Helping request finishes through real resident work','helping-request-complete.png');
   await page.getByRole('button',{name:'Forage food',exact:true}).click();

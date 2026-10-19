@@ -316,7 +316,7 @@ const primary=[
   actionGoal('supplies','Improve a growing plot',+(v.progress.enriched_harvests>0||v.progress.outcomes?.soil_improved),1,'Use delivered compost before a harvest, or restore a plot through Land views. Compost can be turned from scraps or bought. Compare soil and walking distances before adding more beds.','ecology'),
  ],
  v=>[
-  actionGoal('supplies','Add a different local food cycle',+(v.progress.eggs_collected>=3||v.progress.milk_collected>0||v.progress.honey_collected>0||v.progress.orchard_fruit>0||v.progress.crop_rotations>0),1,'Choose hens, goats, bees, orchard fruit, or a bean rotation followed by another crop. Each needs different land, supplies and resident time. Bought produce helps the pantry but does not establish a local cycle.','ecology'),
+  actionGoal('supplies','Add a different local food cycle',+(v.progress.eggs_collected>=3||v.progress.milk_collected>0||v.progress.honey_collected>0||v.progress.orchard_fruit>0||v.progress.crop_rotations>0),1,'Choose hens, goats, bees, orchard fruit, or a bean rotation followed by another crop. Check Farm & animals and Chicken coops in Supplies → Pantry. Each needs different land, supplies and resident time. Bought produce helps the pantry but does not establish a local cycle.','pantry'),
   observed(v,1,'Keep eight edible portions for a day',24,'Let the food plan support daily life: eight reachable, unclaimed portions, hunger no higher than 65 and energy at least 25. Buy a reserve or improve local growing and delivery.'),
  ],
  v=>['Build a solar farm','Light a village path','Light a path after dusk'].map(label=>lesson(v,6,label)),

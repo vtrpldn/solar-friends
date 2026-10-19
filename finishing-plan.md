@@ -35,7 +35,7 @@ Review the active art against the existing illustrated houses and residents. An 
 - [x] Inventory all active building variants and their associated props, crops and resident interactions from the runtime registries. Keep rejected candidates clearly separated in the art tools.
 - [x] Compare each building at normal and close gameplay zoom beside a resident, an established home and an adjacent road. Check doors, headroom, seats, worktops, tools, roof tiles and vegetation as well as overall size.
 - [x] Inspect actual roof, wall, frame and furniture geometry. Include structural edges that were not used to calibrate the sprite. Check upright posts, centered gables, consistent overhangs and supported furniture.
-- [ ] Inspect ground contact, road joins, placement ghosts, selection, construction, working and removal states where applicable. Include crop growth and resident carrying/working poses around the changed assets.
+- [x] Inspect ground contact, road joins, placement ghosts, selection, construction, working and removal states where applicable. Include crop growth and resident carrying/working poses around the changed assets.
 - [x] Check day/night continuity and powered/unpowered lighting. Repair source artwork only where a visible defect is identified, then recheck the installed result in the village.
 
 Acceptance: every active building has recorded style, geometry, proportions, ground-contact and applicable state findings; no unresolved visible distortion, floating contact, clipped silhouette or material-style mismatch remains. Preserve the painted treatment and requested subject. No local sprite warps or added platforms to conceal errors. Mechanical grid checks support the visual review but cannot replace it, and passing them does not justify calling painted geometry mathematically perfect.
@@ -51,14 +51,14 @@ Start a fresh Story village through the normal menu and play for one real hour, 
 - [x] Observe energy-driven work, meals, rest, shelter use and outside jobs. Confirm that the interface explains interruptions without implying the removed community work schedule still exists.
 - [x] Exercise an accepted request for help and observe acceptance, movement, useful progress and completion. Check a declined or unavailable request for a clear explanation.
 - [x] Save, return to the menu and continue once. Confirm the village, current work and chosen mode survive correctly.
-- [ ] Fix reproduced pacing or feedback problems in small increments, then replay the affected section from its checkpoint.
+- [x] Fix reproduced pacing or feedback problems in small increments, then replay the affected section from its checkpoint.
 
 If a relevant action is unavailable during the first hour, test it afterward from an earned checkpoint and label that evidence separately. Include one local-production versus purchase choice, one recoverable shortage and one layout improvement; compare the expected cost/time benefit with what residents actually do.
 
 Acceptance: the first hour has no reproducible progression blocker; each observed wait or refusal has an understandable cause and a usable next action. At least one resource or layout choice produces a visible consequence. The playtest report includes the tester's pacing judgment and unresolved minor issues separately from automated campaign results. Exact quest timings are observations, not a reason to force every player through the same schedule.
 
 
-The awake [first-hour record](.github/finishing-review/story-awake-session.json) reached chapter eight with seven chapters earned. Six reproduced clarity findings remain to fix and recheck; the timed session is complete, but this stage is not accepted yet.
+The awake [first-hour record](.github/finishing-review/story-awake-session.json) reached chapter eight with seven chapters earned. The six reproduced clarity findings are fixed and covered by live rechecks, native tests and the complete desktop browser flow; see the [recheck record](.github/finishing-review/polish-rechecks.json).
 
 ## 3. Validate sustained performance
 
@@ -95,8 +95,8 @@ Acceptance: approved changes reach the intended branch in dependency order, requ
 
 ## Completion checklist
 
-- [ ] Artwork review complete; source identities and visual findings recorded.
-- [ ] Manual first-hour Story playtest complete; blocking and material pacing/clarity defects fixed and rechecked.
+- [x] Artwork review complete; source identities and visual findings recorded.
+- [x] Manual first-hour Story playtest complete; blocking and material pacing/clarity defects fixed and rechecked.
 - [ ] Sustained desktop performance measured; remaining limitations documented.
 - [x] Current documentation reconciled with the game.
 - [ ] Final checks complete and individually approved PRs integrated.

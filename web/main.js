@@ -192,7 +192,9 @@ let width = 0,
   lastTask = null,
   toastTimer;
 let response = "",
+  responseContext = null,
   encouragable = false;
+const requestContext = r => JSON.stringify([r.help?.id,r.help?.phase,r.help?.reason,r.task,r.trip?.phase]);
 const modeStores = Object.fromEntries(['story','sandbox'].map(mode => [mode,new VillageStorage(undefined,`${SAVE_KEY}-${mode}`)]));
 let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
@@ -857,6 +859,7 @@ function selectPerson(id) {
   if (tool) setTool(null);
   selected = id;
   response = "";
+  responseContext = null;
   encouragable = false;
   $("#person").hidden = false;
   const r = state.residents.find((p) => p.id === id);
@@ -908,7 +911,7 @@ function selectPerson(id) {
   $('#person .cancel-help').onclick=()=>{
     const result=game.cancel_help(id);
     response=result==='ok'?'Request cancelled.':result;
-    encouragable=false;state=JSON.parse(game.snapshot());updateUI();save();
+    encouragable=false;state=JSON.parse(game.snapshot());responseContext=requestContext(state.residents.find(r=>r.id===id));updateUI();save();
   };
   updateUI();
 }
@@ -917,6 +920,7 @@ function request(task, encourage) {
   response = game.request(selected, task, encourage);
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
+  responseContext = requestContext(state.residents.find(r=>r.id===selected));
   updateUI();
   save();
   $(encouragable ? "#person .persuade" : "#person .response").scrollIntoView({ block: "nearest" });
@@ -1389,6 +1393,7 @@ function updateUI() {
     const activity=(r.requested ? 'Your request · ' : '') + (!r.trip && r.task!=='sleep' && Math.hypot(r.x-r.target_x,r.y-r.target_y)>.08 ? 'On the way · ' : '') + activityLabel(r);
     const activityEl=$("#person .person-activity");
     if(activityEl.textContent!==activity)activityEl.textContent=activity;
+    if(response&&responseContext!==null&&responseContext!==requestContext(r)){response="";encouragable=false;responseContext=null;}
     $("#person .response").hidden = !response;
     const reply=$("#person .response");
     if(reply.textContent!==response)reply.textContent=response;

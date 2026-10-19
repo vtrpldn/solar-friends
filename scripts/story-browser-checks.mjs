@@ -51,7 +51,8 @@ export async function checkStoryControls({page,saved,capture}){
  await openOptions();
  await card.locator('.journal-option').filter({hasText:'Read the land before expanding'}).getByRole('button').click();
  assert.equal(await page.locator('#land-map-toggle').getAttribute('aria-expanded'),'true');
- await page.keyboard.press('j');await page.locator('[data-chapter="10"]').click();await openOptions();
+ // Land views focuses its selector, where game shortcuts are intentionally suppressed.
+ await page.locator('[data-panel="goals-panel"]').click();await page.locator('[data-chapter="10"]').click();await openOptions();
  await card.locator('.journal-option').filter({hasText:'Prepare for wet and dry periods'}).getByRole('button').click();
  assert(await page.locator('#supplies-panel').isVisible());assert(await page.locator('#weather-forecast').evaluate(el=>el.open));
  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved,'Story teaching scenes and imported achievements protect the playable save');

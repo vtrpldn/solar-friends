@@ -2,7 +2,7 @@
   "candidate": "b0658d7",
   "origin": "http://127.0.0.1:4194/",
   "startUtc": "2026-10-18T23:40:35Z",
-  "status": "Timed first-hour play complete; reproduced clarity fixes and targeted rechecks pending.",
+  "status": "First-hour play and reproduced material clarity fixes complete; final full validation pending.",
   "scope": "Fresh Story through ordinary New story confirmation; previous test checkpoint retained by game backup. No edited resources or debug progression. Full validation runs separately; this is not clean performance evidence.",
   "checkpoints": [
     {
@@ -77,36 +77,42 @@
   "findings": [
     {
       "id": "PLAY-01",
-      "status": "reproduced",
+      "status": "fixed-and-rechecked",
       "issue": "Accepted request response remains after its live help order changes or finishes.",
-      "evidence": "stale-request-feedback.png; reproducedagain after page reload and gatheringcompletion."
+      "evidence": "stale-request-feedback.png; reproducedagain after page reload and gatheringcompletion.",
+      "recheck": "See polish-rechecks.json for live, native and browser coverage."
     },
     {
       "id": "PLAY-02",
-      "status": "reproduced",
+      "status": "fixed-and-rechecked",
       "issue": "Crafting refusal lists multiple possible blockers instead of the actual unavailable input/condition.",
-      "evidence": "Nina craftrequest at finishedemptyworkshop with noavailabletimber."
+      "evidence": "Nina craftrequest at finishedemptyworkshop with noavailabletimber.",
+      "recheck": "See polish-rechecks.json for live, native and browser coverage."
     },
     {
       "id": "PLAY-03",
-      "status": "reproduced",
-      "issue": "Extraction placement hides the depositlayer when leavingLandviews; playermustrememberpatches or repeat invalidplacement."
+      "status": "fixed-and-rechecked",
+      "issue": "Extraction placement hides the depositlayer when leavingLandviews; playermustrememberpatches or repeat invalidplacement.",
+      "recheck": "See polish-rechecks.json for live, native and browser coverage."
     },
     {
       "id": "PLAY-04",
-      "status": "reproduced",
+      "status": "fixed-and-rechecked",
       "issue": "Pinning an unuseddeposit cell for soil inspection changes previewkind to garden and incorrectly reports no matchingdeposit.",
-      "evidence": "Earthpatch x12..20,y14..25 confirmed via readonlysnapshot. Plot15,21 saysno matchingdeposit; establishedsourceat13,21 shows24/52. deposit-inspection-before.png."
+      "evidence": "Earthpatch x12..20,y14..25 confirmed via readonlysnapshot. Plot15,21 saysno matchingdeposit; establishedsourceat13,21 shows24/52. deposit-inspection-before.png.",
+      "recheck": "See polish-rechecks.json for live, native and browser coverage."
     },
     {
       "id": "PLAY-05",
-      "status": "reproduced",
-      "issue": "An idle production reserve does not explain missing recipe inputs beside the station. Opening recipes revealed fittings needed for local frames. Supplying those fittings produced frames at both workbenches and completed the coop."
+      "status": "fixed-and-rechecked",
+      "issue": "An idle production reserve does not explain missing recipe inputs beside the station. Opening recipes revealed fittings needed for local frames. Supplying those fittings produced frames at both workbenches and completed the coop.",
+      "recheck": "See polish-rechecks.json for live, native and browser coverage."
     },
     {
       "id": "PLAY-06",
-      "status": "reproduced",
-      "issue": "The primary different-food-cycle action opens Ecology, while Farm & animals and hen feeding controls are in Pantry."
+      "status": "fixed-and-rechecked",
+      "issue": "The primary different-food-cycle action opens Ecology, while Farm & animals and hen feeding controls are in Pantry.",
+      "recheck": "See polish-rechecks.json for live, native and browser coverage."
     }
   ],
   "endedAt": "2026-10-19T00:41:18Z",
@@ -116,7 +122,7 @@
   "minorObservations": [
     {
       "issue": "Temporary no-clear-hauling-route warning during initial coop supply reservation.",
-      "outcome": "Resolved without any layout change. Kept the project at the cancellation confirmation, and it reached the next stage normally. Trace before altering route logic."
+      "outcome": "Resolved without any layout change. Kept the project at the cancellation confirmation, and it reached the next stage normally. Trace before altering route logic. Diagnostic wording now scopes the wait to a carrier who can reach both ends; routing behavior is unchanged."
     },
     {
       "issue": "Fast-forward can pass the pickup window during reading.",

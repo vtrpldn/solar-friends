@@ -666,6 +666,72 @@ pub fn can_order_tools(v: &Village) -> bool {
                 .iter()
                 .any(|s| can_spawn(v, s.id, economy::TOOLS)))
 }
+// Read-only explanations share the queue's eligibility checks; dispatch keeps its allocation-free predicate.
+fn spawn_blocker(v: &Village, id: Id, material: usize) -> Option<String> {
+    if can_spawn(v, id, material) {
+        return None;
+    }
+    if !operational(v, id) {
+        return Some("Finish or resume this worksite first.".into());
+    }
+    if pending(v, id).is_some() {
+        return Some("This worksite is finishing another saved batch.".into());
+    }
+    let (inputs, _, _) = choice(v, id, material)?;
+    let missing: Vec<_> = (0..COUNT)
+        .filter_map(|i| {
+            let n = inputs[i].saturating_sub(economy::free(v, i));
+            (n > 0).then(|| format!("{n} {}", economy::NAMES[i].replace('_', " ")))
+        })
+        .collect();
+    if !missing.is_empty() {
+        return Some(format!(
+            "Still needed for one batch: {}. Supply these inputs locally or through Trade; neighbours then carry them here.",
+            missing.join(" · ")
+        ));
+    }
+    Some("Make room in this worksite and the village stores before starting another batch.".into())
+}
+pub fn tool_request_blocker(v: &Village) -> Option<String> {
+    if can_order_tools(v) {
+        return None;
+    }
+    let tools = economy::quantity(v, economy::TOOLS)
+        + future(v, economy::TOOLS)
+        + economy::incoming(v, economy::TOOLS);
+    if tools > 24 {
+        return Some(format!(
+            "We already have {tools} tool uses stored, being made or ordered. Use some before requesting another batch."
+        ));
+    }
+    let workshops: Vec<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| s.kind == Kind::Workshop)
+        .collect();
+    if workshops.is_empty() {
+        return Some("Build and finish a workshop before crafting tools.".into());
+    }
+    let open: Vec<_> = workshops.iter().filter(|s| operational(v, s.id)).collect();
+    if open.is_empty() {
+        if workshops.iter().any(|s| {
+            s.paused
+                && !closing(v, s.id)
+                && s.building
+                    .is_some_and(|id| v.buildings.iter().any(|b| b.id == id && b.progress >= 100.))
+        }) {
+            return Some("Resume the workshop in Construction → Preparing materials before requesting tools.".into());
+        }
+        return Some(
+            "Finish construction or crew work on a workshop before requesting tools.".into(),
+        );
+    }
+    let Some(site) = open.iter().find(|s| pending(v, s.id).is_none()) else {
+        return Some("Our open workshops are finishing other saved batches. Let one finish before requesting tools.".into());
+    };
+    spawn_blocker(v, site.id, economy::TOOLS)
+}
 pub fn order_tools(v: &mut Village, at: Option<usize>) -> Option<Id> {
     if let Some(b) = v.production.batches.iter().find(|b| {
         b.active()
@@ -994,6 +1060,7 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
     true
 }
 pub fn view(v: &Village) -> serde_json::Value {
+    let wanted = demand(v);
     let recipes: Vec<_> = v.production.sites.iter().map(|s| {
         let variants: &[(bool, bool)] = if s.kind == Kind::Kitchen {
             &[(false, false), (true, false), (false, true), (true, true)]
@@ -1011,7 +1078,15 @@ pub fn view(v: &Village) -> serde_json::Value {
         let service_blocker = power_blocker(v, s.id).or_else(|| (s.kind == Kind::Kitchen).then(|| {
             s.building.and_then(|id| sanitation::washing_blocker(v,water::Owner::Building(id),1.))
         }).flatten());
-        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker,"work_speed":work_speed(v,s),"energy_per_hour":if s.powered{WORKSHOP_ENERGY_PER_HOUR}else{0.}})
+        let idle_reason = (operational(v,s.id) && pending(v,s.id).is_none()).then(|| {
+            if PRODUCTS.into_iter().any(|i|wanted[i]>0 && can_spawn(v,s.id,i)) { return None; }
+            PRODUCTS.into_iter().find_map(|i| {
+                (wanted[i]>0 && choice(v,s.id,i).is_some()).then(|| {
+                    spawn_blocker(v,s.id,i).map(|reason|format!("To prepare {}: {reason}",economy::NAMES[i].replace('_'," ")))
+                }).flatten()
+            })
+        }).flatten();
+        serde_json::json!({"site":s.id,"recipes":recipes,"idle_reason":idle_reason,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker,"work_speed":work_speed(v,s),"energy_per_hour":if s.powered{WORKSHOP_ENERGY_PER_HOUR}else{0.}})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
         "recipes":recipes,"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
@@ -1428,6 +1503,97 @@ mod tests {
         let s = g.snapshot();
         assert!(g.restore(&s));
         assert_eq!(g.snapshot(), s);
+    }
+    #[test]
+    fn idle_reserve_explains_missing_inputs_without_reserving_or_spending_them() {
+        let mut g = scene();
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.production.targets = [0; COUNT];
+        v.production.targets[5] = 2;
+        logistics::fixture_stock(&mut v, 5, 0);
+        logistics::fixture_stock(&mut v, 0, 4);
+        logistics::fixture_stock(&mut v, 8, 0);
+        logistics::fixture_stock(&mut v, 4, 0);
+        let before = serde_json::to_string(&*v).unwrap();
+        let report = view(&v);
+        let camp = report["recipes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| {
+                r["site"]
+                    == v.production
+                        .sites
+                        .iter()
+                        .find(|s| s.kind == Kind::Camp)
+                        .unwrap()
+                        .id
+                        .0
+            })
+            .unwrap();
+        assert!(camp["idle_reason"].as_str().unwrap().contains("1 fittings"));
+        assert_eq!(serde_json::to_string(&*v).unwrap(), before);
+        logistics::fixture_stock(&mut v, 8, 1);
+        let camp_id = v
+            .production
+            .sites
+            .iter()
+            .find(|s| s.kind == Kind::Camp)
+            .unwrap()
+            .id;
+        assert!(can_spawn(&v, camp_id, 5));
+        let report = view(&v);
+        assert!(
+            report["recipes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|r| r["site"] == camp_id.0)
+                .unwrap()["idle_reason"]
+                .is_null()
+        );
+    }
+    #[test]
+    fn tool_refusal_identifies_the_actual_shortage_or_stock_limit() {
+        let mut g = scene();
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.production.targets = [0; COUNT];
+        logistics::fixture_stock(&mut v, economy::TOOLS, 0);
+        logistics::fixture_stock(&mut v, 0, 7);
+        assert!(
+            tool_request_blocker(&v)
+                .unwrap()
+                .contains("other saved batches")
+        );
+        let active: Vec<_> = v
+            .production
+            .batches
+            .iter()
+            .filter(|b| b.active())
+            .map(|b| b.id)
+            .collect();
+        for id in active {
+            assert!(cancel_batch(&mut v, id));
+        }
+        assert!(tool_request_blocker(&v).unwrap().contains("1 timber"));
+        logistics::fixture_stock(&mut v, 0, 8);
+        assert!(can_order_tools(&v));
+        assert!(tool_request_blocker(&v).is_none());
+        logistics::fixture_stock(&mut v, economy::TOOLS, 25);
+        let before = serde_json::to_string(&*v).unwrap();
+        assert!(tool_request_blocker(&v).unwrap().contains("25 tool uses"));
+        assert_eq!(serde_json::to_string(&*v).unwrap(), before);
+        logistics::fixture_stock(&mut v, economy::TOOLS, 0);
+        for site in &mut v.production.sites {
+            if site.kind == Kind::Workshop {
+                site.paused = true;
+            }
+        }
+        assert!(
+            tool_request_blocker(&v)
+                .unwrap()
+                .starts_with("Resume the workshop")
+        );
     }
     #[test]
     fn project_priority_reaches_preparation_offers_and_releases_them_when_paused() {

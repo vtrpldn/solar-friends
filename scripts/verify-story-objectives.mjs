@@ -17,6 +17,7 @@ for(const [chapter,index,window]of [[1,3,0],[5,1,1],[7,5,2],[10,0,3],[12,1,4]]){
  assert.equal(quests[chapter].objectives(v)[index].target*60,report.target_minutes[window]);
 }
 assert.equal(quests[0].objectives(v).find(o=>o.build==='home').target,1,'Arrival needs one home; later housing can be planned early');
+assert.equal(goalRoute(s,quests[5].objectives(v)[0]).page,'pantry','The food-cycle lesson opens the page with Farm & animals and hen controls');
 assert.equal(quests[12].objectives(v).some(o=>/every.*building/i.test(o.label)),false);
 const orchard=structuredClone(s);orchard.village.buildings=[{kind:'orchard',id:0,progress:0}];orchard.environment.economy.projects=[{kind:'orchard',building:0,recipe:'standard'}];
 assert.equal(goalRoute(orchard,quests[1].objectives(orchard.village)[0]).type,'project','Choosing the orchard path must not prompt a food forest instead');
