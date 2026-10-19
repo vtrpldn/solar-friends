@@ -88,9 +88,9 @@ Acceptance: current-facing documentation matches source and observed behavior, l
 ## 5. Integrate and check the final build
 
 - [x] Inspect the complete parent-branch chain before integration. At planning time, [PR #66](https://github.com/vtrpldn/solar-friends/pull/66) depends on [PR #65](https://github.com/vtrpldn/solar-friends/pull/65), which itself targets the Story planning branch. Resolve the full dependency order and any conflicts without dropping earlier work.
-- [ ] Run the relevant checks after each fix. Once the final candidate is stable, run `npm run dev:check` for formatting, native tests, lint, build, script checks, gameplay/art verifiers and desktop regressions. Tie results to the exact candidate commit.
-- [ ] Check which hosted checks the target branch requires. Have the account owner resolve the GitHub Actions billing/spending blocker, then rerun those checks. Record jobs prevented from starting as blocked. Required blocked checks prevent integration; optional blocked checks remain a disclosed validation limitation in the individual merge decision. Do not bypass branch protection or change account billing settings.
-- [ ] Refresh PR descriptions and include the visual and performance evidence needed for review. Keep each PR unmerged until it receives individual, explicit user approval.
+- [x] Run the relevant checks after each fix. Once the final candidate is stable, run `npm run dev:check` for formatting, native tests, lint, build, script checks, gameplay/art verifiers and desktop regressions. Tie results to the exact candidate commit.
+- [x] Inspect hosted requirements and record blocked jobs accurately. The current branch endpoint reports no protection and no required checks. Actions jobs cannot start because of account billing/spending; account-owner resolution and a hosted rerun remain pending. Required blocked checks would prevent integration; the current optional block must be disclosed and explicitly accepted in the individual merge decision. No protection or billing settings were changed.
+- [x] Refresh PR descriptions and include the visual and performance evidence needed for review. Keep each PR unmerged until it receives individual, explicit user approval.
 - [ ] After approved integration, launch the final branch and check New Game, Continue, Sandbox, save/reload, one construction/request interaction and the active artwork preview. Confirm that the served build is the integrated one.
 
 Acceptance: approved changes reach the intended branch in dependency order, required checks pass on the final candidate, and the integrated game passes the launch checks. Record local readiness and any external check limitation separately. A required hosted check that cannot run keeps integration incomplete.
@@ -105,3 +105,5 @@ Acceptance: approved changes reach the intended branch in dependency order, requ
 - [ ] Integrated build launched and checked, with a concise completion report linking the evidence.
 
 This plan adds no new simulation systems. Housing assignment, additional upgrades, new buildings and other expansion ideas remain separate future work. Finishing the current pass does not authorize merging any PR.
+
+The final [local validation](.github/finishing-review/validation-final.json) passed all 268 checks, including 513 native tests and the complete desktop browser flow, on candidate `81fdb3f`. Integration and the integrated launch check remain pending individual PR approval.

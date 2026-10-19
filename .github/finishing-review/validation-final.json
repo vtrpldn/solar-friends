@@ -1,0 +1,15 @@
+{
+  "candidate": "81fdb3f5d40a173db756a1f5bf989a5fed3dce7c",
+  "startedAt": "2026-10-19T01:57:03.390Z",
+  "finishedAt": "2026-10-19T02:42:00.159Z",
+  "sourceAndBuildHash": "ad0da3b587c79130f509006c9a4494a698728201aed1e788af8641b457ba9717",
+  "wasmSha256": "b1dd302daaf2b6bd90301833e2df8d47b585e188911ef21f3badebdf144cd9fe",
+  "status": "pass",
+  "passed": 268,
+  "failed": [],
+  "browserErrors": [],
+  "nativeCases": 513,
+  "desktopCaptures": 200,
+  "report": "artifacts/finishing/final-report.json",
+  "note": "Complete full suite, including desktop browser flow. Later evidence-only documentation commits do not change the tested game, scripts or artwork. Integration remains unapproved; hosted Actions did not start because of the account billing/spending block."
+}

@@ -264,5 +264,366 @@
       "a_full_harvest_store_is_reported_instead_of_repeatedly_worked": true
     },
     "laterIntegrationCommit": "d5fb09c"
+  },
+  "reviewedCandidate": "81fdb3f5d40a173db756a1f5bf989a5fed3dce7c",
+  "localValidation": "validation-final.json",
+  "currentHeadsAtValidation": [
+    {
+      "baseRefName": "main",
+      "headRefName": "codex/simulation-plan",
+      "headRefOid": "5e3fe189403094af097001a713a4c33518151652",
+      "isDraft": true,
+      "number": 33,
+      "title": "Plan connected village simulation and resource tradeoffs",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/33",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/simulation-plan",
+      "headRefName": "codex/simulation-foundations",
+      "headRefOid": "a015320ae6edde5202f1227fa7600c4b33c27d49",
+      "isDraft": true,
+      "number": 34,
+      "title": "Add simulator accounting and persistent work identities",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/34",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/simulation-foundations",
+      "headRefName": "codex/physical-resources",
+      "headRefOid": "e83de7bfa3c224b0decea5e2b331adf306d6e006",
+      "isDraft": true,
+      "number": 35,
+      "title": "Deliver construction supplies through resident hauling",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/35",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/physical-resources",
+      "headRefName": "codex/resident-work-planning",
+      "headRefOid": "53135c47075d2531ae820122cd2be27dfed72ee9",
+      "isDraft": true,
+      "number": 36,
+      "title": "Share resident work and forecast construction around real schedules",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/36",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/resident-work-planning",
+      "headRefName": "codex/production-batches",
+      "headRefOid": "e8b836b9a27a8809d40aa4871522ac79a909bebd",
+      "isDraft": true,
+      "number": 37,
+      "title": "Stage preparation inputs and preserve worksite production batches",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/37",
+      "ancestor_of_candidate": false
+    },
+    {
+      "baseRefName": "codex/production-batches",
+      "headRefName": "codex/located-tools",
+      "headRefOid": "974bff42288cba46a227acc4be82b8241ace20c8",
+      "isDraft": true,
+      "number": 38,
+      "title": "Deliver workshop tools to projects and harvests",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/38",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/located-tools",
+      "headRefName": "codex/located-food",
+      "headRefOid": "4f5b533c6bb5bfd4043e54e3a96d82fbcda9defc",
+      "isDraft": true,
+      "number": 39,
+      "title": "Locate food supplies and resident meals",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/39",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/located-food",
+      "headRefName": "codex/kitchen-batches",
+      "headRefOid": "52cbd08a7f1c91799a61a8d50151ae42b7198453",
+      "isDraft": true,
+      "number": 40,
+      "title": "Save attended kitchen batches and pantry recipes",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/40",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/kitchen-batches",
+      "headRefName": "codex/gathering-deliveries",
+      "headRefOid": "d833684da7c3e216549c820c22978c48747dc11a",
+      "isDraft": true,
+      "number": 41,
+      "title": "Deliver food to shared tables before gatherings",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/41",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/gathering-deliveries",
+      "headRefName": "codex/perishable-food",
+      "headRefOid": "7caa0c9e7c2f2761285354c574f13b04b5203d34",
+      "isDraft": true,
+      "number": 42,
+      "title": "Preserve food freshness through storage and work",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/42",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/perishable-food",
+      "headRefName": "codex/passive-processes",
+      "headRefOid": "d244207e1af4ad9cc73a504f8bb4765e16a8e841",
+      "isDraft": true,
+      "number": 43,
+      "title": "Give each passive process its own saved batch",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/43",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/passive-processes",
+      "headRefName": "codex/living-land",
+      "headRefOid": "f0a6a03394cb157b905f6bc46b79abb466ba7d45",
+      "isDraft": true,
+      "number": 44,
+      "title": "Make extraction local and add persistent land inspection",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/44",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/living-land",
+      "headRefName": "codex/soil-and-shade",
+      "headRefOid": "67029bf9c1c3d41267aef24405b40c948241feb5",
+      "isDraft": true,
+      "number": 45,
+      "title": "Make cultivation respond to persistent soil moisture and shade",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/45",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/soil-and-shade",
+      "headRefName": "codex/land-restoration",
+      "headRefOid": "dca0d743bda9de2961080f2cf4ef2878ad9424b1",
+      "isDraft": true,
+      "number": 46,
+      "title": "Locate compost and kitchen scraps in the village supply chain",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/46",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/land-restoration",
+      "headRefName": "codex/resident-restoration",
+      "headRefOid": "61133d450a567504bad038d6cd528be4ff0983ac",
+      "isDraft": true,
+      "number": 47,
+      "title": "Restore soil with delivered compost and resident work",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/47",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/resident-restoration",
+      "headRefName": "codex/planting-supplies",
+      "headRefOid": "dad22676007a3e20a964eb98110d4ac4a767bb58",
+      "isDraft": true,
+      "number": 48,
+      "title": "Supply resident planting with local seedlings and town stock",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/48",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/planting-supplies",
+      "headRefName": "codex/canopy-and-ground",
+      "headRefOid": "bb39c4184aae0f056fd4a351cc8add260f339000",
+      "isDraft": true,
+      "number": 49,
+      "title": "Make visible canopies and ground changes part of the land simulation",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/49",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/canopy-and-ground",
+      "headRefName": "codex/utility-routes",
+      "headRefOid": "22b54a5b6d4ee89c2367f8f061b17c80da906045",
+      "isDraft": true,
+      "number": 50,
+      "title": "Plan compatible utility routes around actual village plots",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/50",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/utility-routes",
+      "headRefName": "codex/located-water",
+      "headRefOid": "cee3c1f424a50a88454705f5d0227899c44ae72e",
+      "isDraft": true,
+      "number": 51,
+      "title": "Deliver water to local stores before residents use it",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/51",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/located-water",
+      "headRefName": "codex/installed-water",
+      "headRefOid": "7829817d6b4d2fa142f51db82e95990ca8e181dc",
+      "isDraft": true,
+      "number": 52,
+      "title": "Install water connections through resident work",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/52",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/installed-water",
+      "headRefName": "codex/located-sanitation",
+      "headRefOid": "cdfe02338675c353171a941eea47f45cead2695b",
+      "isDraft": true,
+      "number": 53,
+      "title": "Connect local greywater and sealed sewage treatment",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/53",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/located-sanitation",
+      "headRefName": "codex/connected-electricity",
+      "headRefOid": "5710837fc6ac0629ad1be5550f35b95898d4f853",
+      "isDraft": true,
+      "number": 54,
+      "title": "Connect local batteries and village power users",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/54",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/connected-electricity",
+      "headRefName": "codex/seasonal-weather",
+      "headRefOid": "99d1eaeb13c540e95fe0769d5683b3e41c380e01",
+      "isDraft": true,
+      "number": 55,
+      "title": "Introduce seeded wet and dry seasons",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/55",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/seasonal-weather",
+      "headRefName": "codex/game-interface-polish",
+      "headRefOid": "6d1230071683bfa4c5597977ede7afa4a03d8f81",
+      "isDraft": true,
+      "number": 56,
+      "title": "Make village management read like a game field book",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/56",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/game-interface-polish",
+      "headRefName": "codex/farming-and-husbandry",
+      "headRefOid": "612080db735755088e996298a586f38cd8d8c5b2",
+      "isDraft": true,
+      "number": 57,
+      "title": "Expand farming and animal husbandry",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/57",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/farming-and-husbandry",
+      "headRefName": "codex/equipment-maintenance",
+      "headRefOid": "932921cf69e27ed5067d4c36bd7d9ae0c7ab3f57",
+      "isDraft": true,
+      "number": 58,
+      "title": "Add equipment condition and resident maintenance",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/58",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/equipment-maintenance",
+      "headRefName": "codex/resident-autonomy",
+      "headRefOid": "9534454f8a18a504f3e8bc3e18226500c99291d6",
+      "isDraft": true,
+      "number": 59,
+      "title": "Give residents needs-aware routines and purposeful work",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/59",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/resident-autonomy",
+      "headRefName": "codex/resident-skills",
+      "headRefOid": "7c59f7830a0b0305d109747633a5ddf7bd466f73",
+      "isDraft": true,
+      "number": 60,
+      "title": "Let residents learn gradually from useful work",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/60",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/resident-skills",
+      "headRefName": "codex/seasonal-suppliers",
+      "headRefOid": "4a2be6b8eb66ad89880613ecd3e82107d5e706d3",
+      "isDraft": true,
+      "number": 61,
+      "title": "Add predictable town suppliers and seasonal offers",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/61",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/seasonal-suppliers",
+      "headRefName": "codex/sandbox-simulation",
+      "headRefOid": "ae2629ea8ca1009bc2b99daf1eea1538420fb83e",
+      "isDraft": true,
+      "number": 62,
+      "title": "Add optional Sandbox simulation constraints",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/62",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/sandbox-simulation",
+      "headRefName": "codex/story-planning",
+      "headRefOid": "5732f438d06f681fcf837dd15ead70dd44c2ce22",
+      "isDraft": true,
+      "number": 63,
+      "title": "Teach village planning through Story outcomes and optional paths",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/63",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/sandbox-simulation",
+      "headRefName": "codex/resident-decisions",
+      "headRefOid": "ebbbddf39b6e6bcc733455ed4463275b356fb07e",
+      "isDraft": true,
+      "number": 64,
+      "title": "Make resident decisions respond to needs and existing farm care",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/64",
+      "ancestor_of_candidate": false
+    },
+    {
+      "baseRefName": "codex/story-planning",
+      "headRefName": "codex/living-landscape",
+      "headRefOid": "b2ca2305bd30bc49dfdfe1ee3550530ad3d2d85d",
+      "isDraft": true,
+      "number": 65,
+      "title": "Expand the landscape and founding village",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/65",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/living-landscape",
+      "headRefName": "codex/isometric-performance",
+      "headRefOid": "ccca832b6b63a919e195dabfd0b3dc989fa2fe87",
+      "isDraft": true,
+      "number": 66,
+      "title": "Resize the village to 32 cells, improve performance and preserve building proportions",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/66",
+      "ancestor_of_candidate": true
+    },
+    {
+      "baseRefName": "codex/isometric-performance",
+      "headRefName": "codex/finishing-pass",
+      "headRefOid": "81fdb3f5d40a173db756a1f5bf989a5fed3dce7c",
+      "isDraft": true,
+      "number": 67,
+      "title": "Finish artwork consistency and desktop playtesting",
+      "url": "https://github.com/vtrpldn/solar-friends/pull/67",
+      "ancestor_of_candidate": true
+    }
+  ],
+  "pr37History": {
+    "head": "e8b836b9a27a8809d40aa4871522ac79a909bebd",
+    "equivalentCandidateCommit": "974bff42288cba46a227acc4be82b8241ace20c8",
+    "stablePatchId": "9029666055bb76ae5f4a971de0e20ce4b8b5473c",
+    "sequentialMergeTree": "9e8690da3a0320c2d3ce8c5fe99ce2464529f474",
+    "note": "All PR37 parent work is included. Its final journal assertion has a patch-identical commit in PR38 and now lives in story-all-paths.mjs. A read-only merge-tree simulation of PR37 then PR38 is clean and exactly matches PR38 tree. Merging PR37 directly over the final candidate instead conflicts with the newer wrapper; use the recorded dependency order."
   }
 }
