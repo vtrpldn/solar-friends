@@ -53,7 +53,7 @@ footer .season.panel{position:fixed;left:18px;bottom:53px;display:flex;align-ite
 .panel h2,dialog h2{font:600 24px/1.2 "Fraunces",Georgia,serif;color:#4a3a25;margin:6px 0 14px;letter-spacing:0}
 .panel>.eyebrow,.panel-heading>.eyebrow,dialog>.eyebrow{display:none}
 .panel p,dialog p{font-size:13px;line-height:1.6;color:var(--muted)}.panel h3,dialog h3{font:700 14px/1.3 "Trebuchet MS",Verdana,sans-serif;color:#665231;margin:16px 0 8px}
-.panel-close,.dialog-close,.close-person{float:none;position:absolute;right:10px;top:10px;width:26px;height:26px;padding:0;display:grid;place-items:center;border:1px solid #b28e59;border-bottom:2px solid #785632;border-radius:5px;background:#dcc695;color:#755333;font-size:18px;line-height:1}
+.panel-close,.dialog-close,.close-person{float:none;position:absolute;right:10px;top:10px;width:32px;height:32px;min-width:32px;min-height:32px;padding:0;display:grid;place-items:center;border:1px solid #b28e59;border-bottom:2px solid #785632;border-radius:5px;background:#dcc695;color:#755333;font-size:18px;line-height:1}
 .panel button:not(.panel-close):not(.resident),dialog button:not(.dialog-close):not(.mode-choice){border:1px solid #a88b55;border-bottom:3px solid #8c6a3c;border-radius:5px;background:linear-gradient(#e6d8af,#cebb85);box-shadow:inset 0 1px 0 #fff0c5;padding:7px 11px;min-height:32px;color:#504327;font:700 12px/1.35 "Trebuchet MS",Verdana,sans-serif}
 .panel button.primary,dialog button.primary,.panel .resume-request{background:linear-gradient(#a5b774,#7f9755)!important;border-color:#6b803d!important;color:#26331a!important}
 .panel button:active,.hud-dock button:active,dialog button:active{box-shadow:inset 0 2px 3px #40311f30;transform:translateY(1px)}
@@ -132,8 +132,8 @@ footer .season.panel{top:auto;right:auto;height:auto;max-height:none;margin:0}
 #town-catalog .town-item{display:flex;flex-direction:column;align-items:center;min-width:0;padding:8px 5px 7px;margin:0;border:2px solid #b59759;border-bottom:3px solid #8f6d3b;border-radius:5px;background:linear-gradient(#e6d7ad,#d6c18d);box-shadow:inset 0 0 0 1px #f9e9ba;text-align:center;gap:0}
 .trade-item-art{height:48px;display:grid;place-items:center}.trade-item-art .item-icon{width:47px;height:47px}.town-item>label{display:grid;place-items:center;min-height:25px;font-size:10px;line-height:1.25;color:#71512b;font-weight:bold;margin:4px 0 1px}.trade-price{font-size:10px!important;color:#94723a!important;margin:0 0 6px!important;display:block;font-weight:700}
 .trade-quantity{display:flex;align-items:stretch;justify-content:center;width:100%;gap:3px;margin-top:auto}
-#town-catalog .trade-quantity button{width:22px;min-width:22px;height:24px;padding:0;font-size:15px;line-height:20px;border-width:1px;border-bottom-width:2px;color:#785a2e}
-#town-catalog .trade-quantity input{width:35px;height:24px;min-width:0;padding:2px;text-align:center;border:1px solid #b2935c;border-radius:3px;font-size:11px;font-weight:bold;background:#f5e6bf;appearance:textfield;-moz-appearance:textfield}
+#town-catalog .trade-quantity button{width:32px;min-width:32px;height:32px;min-height:32px;padding:0;font-size:15px;line-height:20px;border-width:1px;border-bottom-width:2px;color:#785a2e}
+#town-catalog .trade-quantity input{width:35px;height:32px;min-height:32px;min-width:0;padding:2px;text-align:center;border:1px solid #b2935c;border-radius:3px;font-size:11px;font-weight:bold;background:#f5e6bf;appearance:textfield;-moz-appearance:textfield}
 .trade-quantity input::-webkit-inner-spin-button,.trade-quantity input::-webkit-outer-spin-button{appearance:none;margin:0}
 .town-checkout{position:sticky;bottom:-24px;background:#eddfba;margin:12px -23px -24px;padding:12px 23px 16px;border-top:3px solid #bc9e63;box-shadow:0 -4px 9px #82683820;z-index:2}
 .town-checkout b{font-size:19px}.town-checkout p{max-width:310px}.town-checkout>button.primary{padding:10px 14px;min-height:42px}
@@ -230,7 +230,7 @@ footer .resources b[hidden]{display:none!important}
 /* Character actions and pause dialogs use game controls, with clear hit areas. */
 .person .person-heading .traits{margin:6px 0 0}.person .person-activity{margin-top:0}.person .requests button{display:flex;align-items:center;gap:7px;text-align:left;padding:8px;min-height:44px}.person .requests .item-icon{width:23px;height:23px}.person .requests span{min-width:0;font-size:12px;line-height:1.35}
 .person .resident-book-tools{position:sticky;top:-22px;z-index:4;display:flex;align-items:center;justify-content:space-between;min-height:44px;margin:-22px -20px 14px;padding:8px 12px;background:var(--paper);border-bottom:1px solid #b7a16d}.person .resident-book-tools>b{font-size:13px}.person .close-person{position:static;float:none;margin:0}
-.community .panel-heading .panel-close{top:-8px;right:-8px}.community .panel-heading{gap:12px;padding-right:32px}.community .panel-heading .count{flex:none}.community .panel-heading h2{flex:1}
+.community .panel-heading .panel-close{top:10px;right:10px}.community .panel-heading{position:static;gap:12px;padding-right:32px}.community .panel-heading .count{flex:none}.community .panel-heading h2{flex:1}
 .panel .resident{gap:12px;padding:12px 0;min-height:76px}.resident b{font-size:15px}.resident small{font-size:12px}.community-footer{font-size:11px}
 #host-gathering{min-height:36px;font:700 12px "Trebuchet MS",Verdana,sans-serif}
 dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -14px 0 12px}.dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.dialog-actions button{min-height:40px}
@@ -282,3 +282,12 @@ dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -1
 
 .journal-options{margin:18px 0 8px;border-top:1px solid #ccb782;padding-top:12px}.journal-options>summary{font-weight:700;color:#5d653d;cursor:pointer}.journal-options>p{font-size:12px}.journal-option{display:flex;gap:10px;padding:13px 0;border-bottom:1px solid #d8c797}.journal-option>span{color:#788848;flex:0 0 18px}.journal-option>div{flex:1;min-width:0}.journal-option b{font-size:13px}.journal-option small{float:right;font-size:11px;color:var(--muted)}.journal-option p{font-size:12px;line-height:1.5;margin:7px 0 10px}.journal-option button{font-size:12px;padding:7px 12px}.journal-option.done>span{color:#637941}
 .journal-option>div{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px}.journal-option b{grid-column:1;grid-row:1}.journal-option small{grid-column:2;grid-row:1;float:none;align-self:center;white-space:nowrap;margin:0}.journal-option p,.journal-option button{grid-column:1/-1}
+
+/* Keep action rows on the field baseline and reserve the right edge for confirmation. */
+.panel .project-actions{align-items:flex-end}
+.panel .project-actions label{margin:0}
+.panel .project-actions :is(select,button){min-height:34px}
+.power-build,.town-list-heading>div{display:flex;flex-wrap:wrap;gap:8px}
+.town-list-heading{align-items:flex-start;flex-wrap:wrap}
+.dialog-actions button{align-self:stretch}
+dialog button.danger{background:linear-gradient(#e5bd96,#ce986f);border-color:#93603d;color:#552d1c}
