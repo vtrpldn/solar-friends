@@ -13,14 +13,21 @@ const $ = id => document.getElementById(id);
 const storageKey = 'solar-friends-art-recipes-v1';
 export function installWorkbench({ getSelected, images, onSelect }) {
   let selected, draft, candidate = null, candidateData = null, report = null, recipes = {}, loadToken = 0;
-  const section = document.createElement('section'); section.id = 'art-workbench';
+  const section = document.createElement('section'); section.id = 'art-workbench'; section.hidden=true;
   section.innerHTML = `<div class="workbench-heading"><div><span class="eyebrow">ART DIRECTION / PRACTICAL TOOLS</span><h2 id="workbench-name"></h2></div><label>Working sprite<select id="workbench-sprite"></select></label></div>
     <nav class="workbench-tabs" aria-label="Artwork tools"><button data-art-tab="calibration" aria-pressed="true">Calibrate</button><button data-art-tab="replacement" aria-pressed="false">Review replacement</button><button data-art-tab="recipe" aria-pressed="false">Recipe card</button></nav>
     <section data-art-page="calibration"><div class="workbench-layout"><div><canvas id="calibration-scene" aria-label="Game scale comparison with home and resident"></canvas><p class="hint">At game scale beside a home and Iara. The diamond shows the map’s 2:1 ground axes.</p><div class="controls"><label>Scene zoom<select id="calibration-zoom"><option value="1">Game scale × 1</option><option value="2">Game scale × 2</option></select></label><label>Lighting<input id="calibration-light" type="range" min="0" max="1" step="0.05" value="0"></label></div><canvas id="anchor-canvas" class="checker" aria-label="Drag the red ground marker vertically to calibrate the anchor" tabindex="0"></canvas><p class="hint">Drag the red ground marker up or down. Use the numeric field or arrow keys for precise changes. Characters and crops use the same isolated, aligned poses as the game.</p></div>
     <div><div class="workbench-form"><label>Cell width in game pixels<input id="cal-width" type="number" min="8" max="400" step="0.1"></label><label>Ground anchor (0–1)<input id="cal-anchor" type="number" min="0" max="1" step="0.005"></label><label>Right ground slope<input id="cal-right" type="number" min="0.1" max="2" step="0.01"></label><label>Left ground slope<input id="cal-left" type="number" min="-2" max="-0.1" step="0.01"></label></div><p class="hint">Camera calibration applies to building sprites. Non-building widths and anchors export as a proposal for their renderer.</p><div class="workbench-actions"><button id="cal-reset">Reset calibration</button><button id="cal-export">Export configuration</button><button id="cal-preview">Preview draft in game ↗</button></div><pre id="cal-config"></pre><p>Draft settings never change production artwork. Export them for a reviewed code change.</p></div></div></section>
     <section data-art-page="replacement" hidden><div class="workbench-layout"><div><canvas id="replacement-scene" aria-label="Original and replacement at game scale"></canvas><div class="controls"><label>Scale<select id="replacement-zoom"><option value="1">Game scale × 1</option><option value="2">Game scale × 2</option></select></label><label>Night blend<input id="replacement-light" type="range" min="0" max="1" step="0.05" value="0"></label><label>Comparison<select id="replacement-mode"><option value="side">Side by side</option><option value="overlay">Silhouette overlay</option><option value="difference">Pixel difference</option></select></label><label>Activity<select id="replacement-row"><option value="0">Row 1</option><option value="1">Row 2</option><option value="2">Row 3</option><option value="3">Row 4</option></select></label><label>Frame<input id="replacement-frame" type="range" min="0" max="3" value="0"></label></div><p class="hint">Original on the left; candidate on the right. Overlays share the exact crop and anchor. Use the full source sheet for atlas replacements.</p></div><div><label>Candidate PNG<input id="replacement-file" type="file" accept="image/png"></label><div class="workbench-actions"><button id="replacement-preview">Preview candidate in game ↗</button><button id="replacement-export">Export pixel report</button><button id="replacement-clear">Discard candidate</button></div><pre id="replacement-report">Choose a PNG to check dimensions, silhouette changes, atlas edges, padding and animation baselines.</pre><p>Automated flags locate changes. Check palette, painted style, identity, camera and lighting visually before approving.</p></div></div></section>
     <section data-art-page="recipe" hidden><div class="workbench-layout"><div><p id="recipe-rules"></p><div id="recipe-references"></div><label>Working generation brief<textarea id="recipe-prompt"></textarea></label><p class="hint">Use these reference images with the brief. This tool prepares a recipe; it does not call an image generator.</p><div class="workbench-actions"><button id="recipe-export">Export recipe & brief</button><button id="recipe-reset">Restore suggested brief</button></div></div><div><h3>Revision history</h3><label>What changed?<input id="recipe-note" placeholder="Describe the revision and review outcome"></label><div class="workbench-actions"><button id="recipe-save">Save recipe revision</button></div><ol id="recipe-history"></ol><p class="hint">Recipe revisions stay in this browser. Export to keep them with the source artwork. Image bytes are identified by SHA-256; source versions live in Git.</p><details><summary>Original prompt records</summary><pre id="recipe-original"></pre></details></div></div></section><p id="workbench-status" role="status"></p>`;
-  document.querySelector('main').prepend(section);
+  document.querySelector('main').insertBefore(section,$('art-library'));
+  function showWorkspace(name){
+    const editing=name==='workbench';section.hidden=!editing;$('art-library').hidden=editing;
+    for(const button of document.querySelectorAll('[data-studio-page]'))button.setAttribute('aria-pressed',String(button.dataset.studioPage===name));
+    const url=new URL(location.href);if(editing)url.searchParams.set('tool',section.querySelector('[data-art-tab][aria-pressed="true"]').dataset.artTab);else url.searchParams.delete('tool');history.replaceState(null,'',url);
+    redraw();
+  }
+  for(const button of document.querySelectorAll('[data-studio-page]'))button.onclick=()=>showWorkspace(button.dataset.studioPage);
   try { const stored = JSON.parse(localStorage.getItem(storageKey) || '{}'); if (stored && typeof stored === 'object' && !Array.isArray(stored)) recipes = stored; } catch { $('workbench-status').textContent = 'Saved recipes could not be read.'; }
   for (const s of catalog) $('workbench-sprite').add(new Option(s.name, s.id));
   let originalRecords = {};
@@ -29,6 +36,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   function showTab(name) {
     for (const b of section.querySelectorAll('[data-art-tab]')) b.setAttribute('aria-pressed', String(b.dataset.artTab === name));
     for (const page of section.querySelectorAll('[data-art-page]')) page.hidden = page.dataset.artPage !== name;
+    if(!section.hidden){const url=new URL(location.href);url.searchParams.set('tool',name);history.replaceState(null,'',url);}
     redraw();
   }
   for (const b of section.querySelectorAll('[data-art-tab]')) b.onclick = () => showTab(b.dataset.artTab);
@@ -186,6 +194,7 @@ export function installWorkbench({ getSelected, images, onSelect }) {
   $('recipe-reset').onclick=()=>{$('recipe-prompt').value=defaultRecipe(selected).prompt;};
   select(getSelected());
   showTab(['replacement','recipe'].includes(new URLSearchParams(location.search).get('tool'))?new URLSearchParams(location.search).get('tool'):'calibration');
+  showWorkspace(new URLSearchParams(location.search).has('tool')?'workbench':'library');
   new ResizeObserver(redraw).observe(section);
   for(const image of images.values())image.addEventListener('load',redraw);
   return { select, redraw };

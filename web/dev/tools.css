@@ -1,32 +1,35 @@
-#dev-dialog{width:min(1100px,94vw);max-width:1100px;padding:30px;max-height:88vh;color:#283f34;background:#f6f1e5}
-#dev-dialog h2{font:normal 34px Georgia,serif;margin:8px 0 12px}
-.dev-tabs{display:flex;gap:8px;border-bottom:1px solid #c6cabb;padding:14px 0;margin-bottom:20px}
-.dev-tabs button[aria-pressed=true]{background:#345b48;color:#fff9ec}
-#dev-utility-map{display:block;width:100%;max-height:390px;border:1px solid #b7bfac;background:#ece2c4;border-radius:4px}
-#dev-utility-status{min-height:64px;padding:10px;background:#ece5cf;border-left:3px solid #8b9a6f}
-.dev-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-.dev-card{padding:20px;border:1px solid #c8cbb9;border-radius:8px;background:#fffcf4}
-.dev-card h3{margin-top:0;font:normal 23px Georgia,serif}
-.dev-card label{display:block;margin:12px 0 6px}
-.dev-card select,.dev-card input{max-width:100%;padding:8px;background:#fffdf5;color:inherit;border:1px solid #b7bfac;border-radius:4px}
-.dev-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.dev-card p,.dev-card li{font-size:13px;line-height:1.6}
-.dev-card a{color:#386b51}.dev-card pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#e9ecdf;padding:12px;font-size:12px}
-#dev-mode{padding:10px 14px;background:#e5ead9;border-left:3px solid #9c593c;font-size:13px}
-#dev-inspection{max-height:46vh;overflow:auto}
-#dev-inspection table{width:100%;border-collapse:collapse;font-size:12px}
-#dev-inspection th,#dev-inspection td{text-align:left;border-bottom:1px solid #d9dece;padding:7px}
-#dev-history{padding-left:18px;max-height:250px;overflow:auto}
-#dev-button{font-size:12px;padding:9px 14px;white-space:nowrap}
-#dev-banner{position:fixed;top:224px;left:20px;transform:none;z-index:15;background:#2f5343;color:#fff9ec;border:1px solid #b4c2a2;border-radius:6px;padding:10px 18px;font:11px 'DM Sans',sans-serif}
-#dev-banner button{margin-left:12px;padding:5px 10px}
-.dev-link{display:block;padding:10px 0;border-bottom:1px solid #dddcca;text-decoration:none}.dev-link b{display:block}.dev-link span{font-size:12px}
+/* A village workbench, using the same wood, paper and controls as the game. */
+#dev-dialog{width:min(1100px,calc(100vw - 64px));max-width:1100px;max-height:calc(100dvh - 64px);padding:24px;color:var(--ink);background:linear-gradient(110deg,#f1e6c4,#e6d6ac)}
+#dev-dialog h2{font:600 28px/1.2 "Fraunces",Georgia,serif;margin:4px 36px 16px 0}
+#dev-dialog h3{font:600 21px/1.3 "Fraunces",Georgia,serif;margin:0 0 14px}
+#dev-dialog h4{font-size:13px;margin:20px 0 8px}
+#dev-mode{padding:10px 12px;margin:0 0 12px;background:#d3dbac;border:1px solid #9ba66c;border-radius:4px;color:#44522d;font-size:12px}
+#dev-dialog .dev-tabs{position:sticky;top:-24px;z-index:2;display:flex;gap:6px;flex-wrap:wrap;margin:0 -24px 20px;padding:12px 24px;background:#7a5a35;border-block:1px solid #533b26;box-shadow:0 3px 0 #533b2630}
+#dev-dialog .dev-tabs button{flex:1;min-width:130px}
+#dev-dialog button:not(.dialog-close),#dev-button,#dev-banner button{min-height:32px;padding:7px 12px;border:1px solid #a58a55;border-bottom:3px solid #826039;border-radius:5px;background:linear-gradient(#e6d5a7,#cdb57e);box-shadow:inset 0 1px 0 #fae9bb;color:#4b3b24;font:700 12px/1.4 "Trebuchet MS",Verdana,sans-serif;cursor:pointer}
+#dev-dialog .dev-tabs button[aria-pressed=true],#dev-dialog #dev-load{background:linear-gradient(#b9c88c,#97ab63);border-color:#687d40;color:#344321}
+#dev-dialog button:hover,#dev-button:hover{filter:brightness(1.06)}
+#dev-dialog button:disabled{opacity:.5;cursor:default;filter:saturate(.3)}
+#dev-dialog :is(button,select,input,textarea,a):focus-visible,#dev-button:focus-visible{outline:3px solid #b87931;outline-offset:3px}
+.dev-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.dev-card{min-width:0;padding:18px;border:1px solid #bca16b;border-radius:5px;background:#e0cea025;box-shadow:inset 0 0 0 1px #fff0c750}
+.dev-card label{display:block;font-size:12px;font-weight:700;margin:14px 0 6px}
+.dev-card :is(select,input,textarea){max-width:100%;padding:8px;min-height:34px;background:#f7edcf;color:var(--ink);border:1px solid #aa8d55;border-radius:4px;font:13px "Trebuchet MS",Verdana,sans-serif;box-shadow:inset 0 1px 3px #8c63301c}
+.dev-card select{width:100%}.dev-card input[type=number]{width:110px;margin-right:8px}
+.dev-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.dev-card p,.dev-card li{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.dev-card :is(a,small){color:var(--muted)}
+.dev-card pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#d5c08e70;border:1px solid #bca16b;border-radius:4px;padding:12px;font-size:12px;line-height:1.6}
+#dev-inspection{max-height:48vh;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+#dev-inspection table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+#dev-inspection :is(th,td){text-align:left;vertical-align:top;border-bottom:1px solid #c1a871;padding:8px 6px;overflow-wrap:anywhere}
+#dev-history{padding-left:20px;max-height:250px;overflow:auto}
+#dev-banner{position:fixed;top:224px;left:20px;z-index:15;border:2px solid #82693d;border-radius:5px;background:#516643;color:#eadcb9;font:11px/1.5 "Trebuchet MS",Verdana,sans-serif;padding:9px 11px;box-shadow:0 3px 0 #293a2470}
+#dev-banner button{margin-left:12px;min-height:28px;padding:4px 8px;font-size:11px}
+#dev-button{white-space:nowrap;min-height:32px;padding:6px 10px;font-size:11px}
+.dev-link{display:block;padding:12px 0;border-bottom:1px solid #bca16b;text-decoration:none;color:#66512e!important}
+.dev-link:hover{color:#40552e!important}.dev-link b{display:block;font-size:13px}.dev-link span{display:block;font-size:12px;line-height:1.5;margin-top:4px}
 #dev-errors{max-height:180px;overflow:auto}
-#dev-dialog button:not(.dialog-close),#dev-button,#dev-banner button{border:1px solid #b7c1ae;border-radius:5px;background:#fffcf3;padding:9px 12px;font:600 12px 'Trebuchet MS',sans-serif;color:#2c4939;cursor:pointer;line-height:1.3}
-#dev-dialog button:not(.dialog-close):hover,#dev-button:hover{background:#e1e8d5;border-color:#6b8267}
-#dev-dialog button:disabled{opacity:.45;cursor:not-allowed}
-#dev-dialog .dev-tabs button[aria-pressed=true]{background:#345b48;color:#fff9ec;border-color:#345b48}
-#dev-dialog #dev-load{background:#345b48;color:#fff9ec;border-color:#345b48}
-#dev-dialog button:focus-visible,#dev-dialog select:focus-visible,#dev-dialog input:focus-visible,#dev-button:focus-visible{outline:3px solid #b66b45;outline-offset:3px}
-#dev-dialog input[type=number]{margin-right:8px}
-#dev-dialog .dev-tabs{position:sticky;top:-30px;background:#f6f1e5;z-index:1}
+#dev-utility-map{display:block;width:100%;max-height:390px;border:2px solid #967544;background:#ece2c4;border-radius:4px}
+#dev-utility-status{min-height:64px;padding:12px;background:#d9d4a5;border-left:3px solid #8b9a6f}
+#dev-close{position:sticky;top:0;float:right;z-index:4;margin:-10px -10px 0 10px}

@@ -6,7 +6,7 @@ import {gatheringInfo} from './gathering-ui.js';
 import {drawCarriedMaterials,drawSupplyPile,drawCarriedWater,drawWaterPile} from './logistics-art.js';
 import {sourceKinds,sourceMaterial,sourceCare} from './resource-sites.js';
 import {makeArtPreview} from './dev/art-preview.js';
-import {installGameUI} from './game-ui.js';
+import {installGameUI,itemIcon} from './game-ui.js';
 import {economyImage,drawEconomyArt} from './economy-art.js';
 import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
 import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
@@ -355,7 +355,7 @@ function installMenu() {
   $('#open-main-menu').onclick=openMainMenu;
   $('.brand').onclick=event=>{if(!artworkPreview&&!directScenario){event.preventDefault();openMainMenu();}};
   $('#menu-settings').onclick=()=>$('#settings').click();
-  $('#menu-help').onclick=()=>$('#help-dialog').showModal();
+  $('#menu-help').onclick=openHelp;
 }
 function setZoom(value) {
   zoom=clampZoom(width,height,value);
@@ -812,7 +812,8 @@ function closePanels() {
     button.setAttribute("aria-expanded", "false");
   }
 }
-function showPanel(id) {
+function openHelp(){const dialog=$("#help-dialog");dialog.showModal();dialog.scrollTop=0;}
+function showPanel(id,supplyPage) {
   closePanels();
   selected = null;
   $("#person").hidden = true;
@@ -824,6 +825,7 @@ function showPanel(id) {
     lastVillagePanel = id;
   }
   $(`[data-panel="${id}"]`).setAttribute("aria-expanded", "true");
+  if(id==='supplies-panel'&&supplyPage)gameUI.selectSupplyPage(supplyPage);
   $("#" + id).querySelector("button").focus();
   updateUI();
 }
@@ -838,7 +840,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-portrait">${avatar(r.id)}</div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<button class="close-person" aria-label="Close resident details">×</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">ASK FOR A HAND</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend garden"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -852,10 +854,10 @@ function selectPerson(id) {
       ["compost", "Turn scraps"],
       ["craft", "Craft tools · 8 timber"],
     ]
-      .map(([t, n]) => `<button data-task="${t}">${n}</button>`)
+      .map(([t, n]) => `<button data-task="${t}">${itemIcon(({garden:"food",build:"frames",building_work:"frames",gather:"food",source:"timber",prepare:"walls",water:"water",cook:"meals",rest:"journal",socialize:"heart",compost:"compost",craft:"tools"})[t])}<span>${n}</span></button>`)
       .join(
         "",
-      )}</div><p class="friendship-note"></p>`;
+      )}</div><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="friendship-note"></p>`;
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
@@ -981,10 +983,10 @@ function updateQuests() {
   const chapterPanels={build:['build-panel','Review village buildings'],town:['town-panel','Open Town'],land:['projects-panel','Open Land & materials'],preparation:['projects-panel','Review material preparation'],supplies:['supplies-panel','Open Supplies'],power:['power-panel','Open Power'],people:['community-panel','Meet our neighbours']};
   if(chapterPanels[route?.type]){
     const [panel,text]=chapterPanels[route.type];label=text;
-    onClick=()=>{showPanel(panel);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
+    onClick=()=>{showPanel(panel,route.page);if(route.type==='land'||route.type==='preparation'){const el=$(route.type==='land'?'#land-sources':'#preparation-recipes');el.closest('details').open=true;el.scrollIntoView({block:'nearest'});}};
   }
   if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
-  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
+  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
   action.hidden=!route;action.textContent=label;action.onclick=onClick;
   shortcut.hidden=done||!route;shortcut.textContent=label.replace(' · free blueprint','');shortcut.onclick=onClick;
   $("#open-journal").textContent =
@@ -1154,8 +1156,8 @@ function updateSupplies(v) {
   const shared=v.progress.gathering_delivery;
   const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
   const days = (v.food + v.meals-sharedReserve) / 15;
-  $("#pantry-stock").textContent = `${Math.floor(v.food)} ingredients · ${s.eggs} eggs · ${v.meals} ready meals`;
-  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food before cooking gains, hen feed or spoilage. Neighbours aim for a modest reserve, then take time for hobbies. Chores: 9–12 and 15–16; urgent foraging can happen anytime while awake.`;
+  replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
+  $("#pantry-outlook").textContent = v.mode==='sandbox' ? "Sandbox replenishes ingredients, water and meals. Neighbours keep their daily routines and have time for hobbies." : `${days < 1 ? "Time to top up the pantry. " : ""}About ${days.toFixed(1)} days of unreserved food. Cooking, hen feed and spoilage can change this estimate.`;
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
@@ -1196,7 +1198,7 @@ function updateUI() {
   $('[data-panel="town-panel"]').hidden=free;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
-  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Story follows thirteen chapters. Blueprints are free; Village → Construction tracks materials and Trade offers delivery or resident pickup. Each chapter opens the next part of village life.';
+  $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
   replaceMarkup($('#help-start'),free?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build during normal work hours.');
   economyUI?.update();
   updateSituations();
@@ -1276,7 +1278,7 @@ function updateUI() {
     $('#person .occupation-toggle').setAttribute('aria-label',`Schedule ${r.name}'s outside job`);
     $('#person .occupation-schedule-note').textContent=r.trip?.purpose==='work'?'This shift is committed. Turning this off stops future shifts.':job.enabled?(v.minutes%1440>=600?'Next outside shift tomorrow at 09:00. Lunch is provided off-site.':'Leaves 09:00–10:00 when rested. Lunch is provided off-site.'):'Optional · staying available for village life.';
     for(const button of $('#person').querySelectorAll('[data-task]'))button.disabled=!!r.trip;
-    $("#person .quote").hidden = !!response && r.requested && response.endsWith(r.reason);
+    $("#person .quote").hidden = r.task === "idle" || (!!response && r.requested && response.endsWith(r.reason));
     $("#person .quote").textContent = "“" + (r.task === "idle" ? idleLabels[residentActivity(r, v.minutes)] + "." : r.reason) + "”";
     const stats = {
       Energy: r.energy,
@@ -1605,8 +1607,8 @@ function setup() {
     state=JSON.parse(game.snapshot());updateUI();render();save();
   };
   $('#weather-open').onclick=()=>{
-    showPanel('supplies-panel');
-    const forecast=$('#weather-forecast');forecast.open=true;forecast.scrollIntoView({block:'start'});forecast.querySelector('summary').focus({preventScroll:true});
+    showPanel('supplies-panel','water');
+    const forecast=$('#weather-forecast');forecast.open=true;forecast.querySelector('summary').focus({preventScroll:true});
   };
   $("#pause").onclick = togglePause;
   for (const b of document.querySelectorAll("[data-speed]"))
@@ -1698,7 +1700,7 @@ function setup() {
       ? "Saved on this device."
       : "Applied for this session. Device storage is unavailable.";
   };
-  $("#help").onclick = () => $("#help-dialog").showModal();
+  $("#help").onclick = openHelp;
   $("#close-help").onclick = $("#start-playing").onclick = () =>
     $("#help-dialog").close();
   $("#zoom-in").onclick = () => {setZoom(zoom + 0.15);render();};

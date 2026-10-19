@@ -52,7 +52,7 @@ export async function checkToolControls({page,saved,capture}){
   assert.equal(state.village.economy.orders.at(-1).status,'delivered');
   assert.equal(state.village.logistics.stores.find(p=>p.owner.kind==='camp').items[15],1);
   assert.equal(state.village.progress.tool_uses,1);
-  await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  await page.getByRole('button',{name:'Supplies',exact:true}).click();await page.getByRole('tab',{name:'Stores',exact:true}).click();
   const useTools=page.getByRole('checkbox',{name:'Use delivered tools',exact:true});
   assert(!await useTools.isChecked());await useTools.check();
   assert(await page.evaluate(()=>window.solarDev.snapshot().village.progress.use_tools));

@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 export async function checkSanitationControls({page,saved,capture}){
   const snapshot=()=>page.evaluate(()=>window.solarDev.snapshot());
   async function show(){
-    await page.locator('[data-hud-resource="water"]').click();
+    await page.locator('[data-hud-resource="water"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();
     if(!await page.locator('#local-waste').evaluate(el=>el.open))await page.getByText('Where waste is',{exact:true}).click();
   }
   async function load(name){
@@ -18,6 +18,7 @@ export async function checkSanitationControls({page,saved,capture}){
   await load('before');
   assert.match(await page.locator('#local-waste-summary').textContent(),/12 greywater/);
   assert.doesNotMatch(await page.locator('#local-water-stores').textContent(),/greywater|sewage|NaN/);
+  await page.getByRole('tab',{name:'Water',exact:true}).click();
   if(!await page.locator('#local-water').evaluate(el=>el.open))await page.getByText('Where water is',{exact:true}).click();
   if(!await page.locator('#water-networks').evaluate(el=>el.open))await page.getByText('Pipes & pumps',{exact:true}).click();
   if(!await page.locator('#water-line-planner').evaluate(el=>el.open))await page.getByText('Plan a new water line',{exact:true}).click();
@@ -56,7 +57,7 @@ export async function checkSanitationControls({page,saved,capture}){
   await cancel.click();assert.equal((await snapshot()).village.processes.batches.find(b=>b.id===batch.id).phase,'cancelled');
   assert.match(await page.locator('#local-waste-stores').textContent(),/Recoverable liquid containers/);
 
-  await load('pumping');assert.match(await page.locator('#water-lines').textContent(),/Greywater · Installed/);
+  await load('pumping');await page.getByRole('tab',{name:'Water',exact:true}).click();assert.match(await page.locator('#water-lines').textContent(),/Greywater · Installed/);
   assert.match(await page.locator('#water-lines').textContent(),/[1-9][\d.,]* units transferred/);
   await page.locator('#water-lines').scrollIntoViewIfNeeded();await capture('Resident-installed greywater line reports metered local flow and energy use','sanitation-pumping.png');
   await page.getByRole('button',{name:'Pause water line',exact:true}).click();

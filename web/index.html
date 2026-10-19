@@ -7,7 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <title>Solar Friends · Vila Aurora</title>
     <link rel="stylesheet" href="style.css?v=combined-hud-2" />
-    <link rel="stylesheet" href="hud.css?v=game-interface-1" />
+    <link rel="stylesheet" href="hud.css?v=game-interface-2" />
     <link rel="stylesheet" href="dev/tools.css">
     <link rel="stylesheet" href="land-map.css">
     <link rel="stylesheet" href="main-menu.css?v=title-screen-1">
@@ -87,7 +87,7 @@
           <p id="compost-stock" hidden></p>
           <div id="gathering-control" hidden>
             <small id="gathering-status"></small
-            ><button id="host-gathering">Host a gathering</button><button data-cancel-gathering hidden>Cancel gathering</button>
+            ><button id="host-gathering" class="primary">Host a gathering</button><button data-cancel-gathering hidden>Cancel gathering</button>
           </div>
         </section>
       </aside>
@@ -96,16 +96,22 @@
         <button class="panel-close" data-close-panel aria-label="Close supplies">×</button>
         <span class="eyebrow">ENOUGH FOR EVERYONE</span>
         <h2>Supplies</h2>
-        <p id="pantry-stock"></p>
+        <nav class="supplies-tabs" role="tablist" aria-label="Supply pages">
+          <button id="supply-tab-pantry" role="tab" data-supply-tab="pantry" aria-controls="supply-pantry" aria-selected="true" tabindex="0">Pantry</button>
+          <button id="supply-tab-stores" role="tab" data-supply-tab="stores" aria-controls="supply-stores" aria-selected="false" tabindex="-1">Stores</button>
+          <button id="supply-tab-water" role="tab" data-supply-tab="water" aria-controls="supply-water" aria-selected="false" tabindex="-1">Water</button>
+          <button id="supply-tab-ecology" role="tab" data-supply-tab="ecology" aria-controls="supply-ecology" aria-selected="false" tabindex="-1">Ecology</button>
+        </nav>
+        <section id="supply-pantry" class="supply-page" role="tabpanel" aria-labelledby="supply-tab-pantry">
+        <div id="pantry-stock" class="pantry-stacks" role="group" aria-label="Pantry stores"></div>
         <p id="pantry-outlook" role="status"></p>
         <p id="food-freshness-warning" role="status" hidden></p>
         <details class="economy-section"><summary>Keeping food fresh</summary><div id="food-freshness"></div></details>
-        <details class="economy-section" id="materials-stores"><summary>Stored supplies</summary><p id="storage-summary"></p><div id="material-inventory"></div><div id="storage-locations"></div></details>
-        <section id="tools-control" hidden><h3>Tools</h3><label><input id="use-tools" type="checkbox" /> Use delivered tools</label><p id="tools-stock"></p><p>One use per completed build or harvest. Residents bring tools to the worksite first. Work continues at its usual rate without tools.</p></section><h3>Today so far</h3>
+<h3>Today so far</h3>
         <p id="pantry-flow"></p>
         <h3>Kitchen</h3>
         <label id="egg-control"><input id="use-eggs" type="checkbox" /> Cook with eggs when available</label>
-        <details><summary>Recipes &amp; cooking</summary><p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p></details>
+        <details><summary>Recipes &amp; cooking</summary><p>Simple pot: 3 ingredients + 1 water → 5 meals.<br />Egg pot: 2 ingredients + 2 eggs + 1 water → 7 meals.</p><p>Neighbours bring ingredients here and share a saved pot. Work continues through breaks. A pot needs one delivered fresh water and room for its greywater to finish; cancellation returns its fresh ingredients and held gas. Interrupted pots keep their ingredient dates; spoiled inputs cannot become meals.</p></details>
         <p id="kitchen-status"></p>
         <div id="kitchen-batches"></div>
         <section id="shared-table" hidden><h3>Our shared table</h3><p id="shared-table-status" role="status"></p><button data-cancel-gathering aria-label="Cancel gathering from Supplies" hidden>Cancel gathering</button></section>
@@ -113,7 +119,13 @@
         <label><input id="feed-hens" type="checkbox" /> Feed hens automatically</label>
         <details><summary>Feeding &amp; egg production</summary><p>Each coop uses 3 ingredients for 3 eggs over 12 daylight hours. Six ingredients stay reserved for people. Feeding pauses when a dozen eggs are laid or on the way. Larger stocks from older saves stay available to use.</p></details>
         <p id="coop-status"></p></section>
-        <section id="circular-controls"><h3>Water &amp; waste</h3><p id="circular-stock"></p><p id="circular-output"></p><details id="local-waste"><summary>Where waste is</summary><p id="local-waste-summary"></p><p>Washing leaves greywater at each home, kitchen or toilet. Toilet sewage stays in a separate sealed buffer. Neighbours carry closed service containers during community hours to an available treatment site, or to the neighbouring service point. A full local buffer pauses further use. Local treatment saves travel and keeps useful products in the village.</p><div id="local-waste-stores"></div></details><p id="toilet-status"></p><label><input id="filter-greywater" type="checkbox"> Filter greywater automatically</label><p id="wetland-status"></p><label><input id="banana-treatment" type="checkbox"> Treat sewage with banana trees automatically</label><p id="banana-status"></p><label><input id="auto-digest" type="checkbox"> Feed the biodigester automatically</label><p id="digester-status"></p><label><input id="use-biogas" type="checkbox"> Cook with biogas when available</label><details><summary>Closing the loop</summary><p>Daily toilet waste stays sealed. Deliver two sewage and two kitchen scraps to the same biodigester. They take 8 hours to make 4 cooking gas and 2 digestate. Digestate cures for a full day before becoming compost. One cooking gas stretches a pot by one meal.</p><p>Deliver 12 greywater to a lined reed bed. It filters them into 8 irrigation water over 6 hours. Gardens use reclaimed water first. Drinking, cooking, and handwashing always need fresh water. Processing pauses at full output stores.</p><p>A banana treatment bed is a sealed evapotranspiration basin for toilet sewage. Each finished bed treats up to six waste per day through its planted soil and roots, without producing drinking water, irrigation water or food. Pause banana treatment to keep more waste for the biodigester.</p></details></section><section id="passive-controls" hidden><h3>Working with nature</h3><div id="passive-processes"></div></section><h3>Water &amp; weather</h3>
+        <details><summary>How the pantry works</summary><p>Harvests stay at their garden or forest plot. Residents carry ingredients and eggs to kitchen pantries and hen feed to coops. Meals stay at the kitchen; neighbours walk to an available stored portion before eating. Town food purchases unload at the arrival store. A food forest yields six ingredients per gathering batch; wild foraging yields two. Residents stop routine gathering when reserves are healthy. Hungry hens wait safely; crops wait for water.</p></details>
+        </section>
+        <section id="supply-stores" class="supply-page" role="tabpanel" aria-labelledby="supply-tab-stores" hidden>
+        <details class="economy-section" id="materials-stores"><summary>Stored supplies</summary><p id="storage-summary"></p><div id="material-inventory"></div><div id="storage-locations"></div></details>
+        <section id="tools-control" hidden><h3>Tools</h3><label><input id="use-tools" type="checkbox" /> Use delivered tools</label><p id="tools-stock"></p><p>One use per completed build or harvest. Residents bring tools to the worksite first. Work continues at its usual rate without tools.</p></section>        </section>
+        <section id="supply-water" class="supply-page" role="tabpanel" aria-labelledby="supply-tab-water" hidden>
+<h3>Water &amp; weather</h3>
         <p id="pantry-weather"></p>
         <details id="weather-forecast" hidden><summary>Weather ahead</summary><p id="climate-summary"></p><ol id="weather-days"></ol><label id="season-weather-control" hidden><input type="checkbox" id="season-weather"> Seasonal weather in this Sandbox</label><p>Dry weather dries soil faster and lowers river output. Irrigation keeps plants growing; stored energy covers cloudy afternoons. Seasons last 21 game days. New Story villages begin with two weeks of familiar afternoon weather.</p></details>
         <details id="local-water"><summary>Where water is</summary><p id="local-water-summary"></p><p>Fresh water and reclaimed irrigation stay separate. Neighbours carry up to twelve water per trip during community hours. Rain fills each cistern locally. The manual fallback is treated water from the neighbouring farm; river water is not a fresh-water supply.</p><details id="water-networks"><summary>Pipes &amp; pumps</summary>
@@ -126,7 +138,9 @@
           </details>
           <button id="water-buy-parts">Find missing parts in Trade</button>
         </details><div id="local-water-stores"></div></details>
-        <details><summary>How the pantry works</summary><p>Harvests stay at their garden or forest plot. Residents carry ingredients and eggs to kitchen pantries and hen feed to coops. Meals stay at the kitchen; neighbours walk to an available stored portion before eating. Town food purchases unload at the arrival store. A food forest yields six ingredients per gathering batch; wild foraging yields two. Residents stop routine gathering when reserves are healthy. Hungry hens wait safely; crops wait for water.</p></details>
+        </section>
+        <section id="supply-ecology" class="supply-page" role="tabpanel" aria-labelledby="supply-tab-ecology" hidden>
+        <section id="circular-controls"><h3>Water &amp; waste</h3><p id="circular-stock"></p><p id="circular-output"></p><details id="local-waste"><summary>Where waste is</summary><p id="local-waste-summary"></p><p>Washing leaves greywater at each home, kitchen or toilet. Toilet sewage stays in a separate sealed buffer. Neighbours carry closed service containers during community hours to an available treatment site, or to the neighbouring service point. A full local buffer pauses further use. Local treatment saves travel and keeps useful products in the village.</p><div id="local-waste-stores"></div></details><p id="toilet-status"></p><label><input id="filter-greywater" type="checkbox"> Filter greywater automatically</label><p id="wetland-status"></p><label><input id="banana-treatment" type="checkbox"> Treat sewage with banana trees automatically</label><p id="banana-status"></p><label><input id="auto-digest" type="checkbox"> Feed the biodigester automatically</label><p id="digester-status"></p><label><input id="use-biogas" type="checkbox"> Cook with biogas when available</label><details><summary>Closing the loop</summary><p>Daily toilet waste stays sealed. Deliver two sewage and two kitchen scraps to the same biodigester. They take 8 hours to make 4 cooking gas and 2 digestate. Digestate cures for a full day before becoming compost. One cooking gas stretches a pot by one meal.</p><p>Deliver 12 greywater to a lined reed bed. It filters them into 8 irrigation water over 6 hours. Gardens use reclaimed water first. Drinking, cooking, and handwashing always need fresh water. Processing pauses at full output stores.</p><p>A banana treatment bed is a sealed evapotranspiration basin for toilet sewage. Each finished bed treats up to six waste per day through its planted soil and roots, without producing drinking water, irrigation water or food. Pause banana treatment to keep more waste for the biodigester.</p></details></section><section id="passive-controls" hidden><h3>Working with nature</h3><div id="passive-processes"></div></section>        </section>
       </aside>
       <aside id="projects-panel" class="panel economy-panel" hidden aria-label="Construction projects">
         <button class="panel-close" data-close-panel aria-label="Close projects">×</button>
@@ -145,9 +159,11 @@
         <span class="eyebrow">FROM OUR LAND, FROM OUR NEIGHBOURS</span><h2>Town trader</h2>
         <div class="town-account"><span>Shared fund<b id="town-fund"></b></span><small id="jobs-outlook"></small></div>
         <details class="economy-section outside-jobs"><summary>Outside occupations</summary><p>Choose who works a 09:00–17:00 shift. Each contribution reaches the shared fund on return; lunch is provided off-site. Keep some neighbours home for building, meals and town pickups.</p><div id="outside-jobs"></div><small>Turning a schedule off stops future shifts. A shift already started finishes normally; rest, meals and agreed days off still come first.</small></details>
+        <section class="town-shopping" aria-label="Town supplies and order">
         <div class="town-list-heading"><h3>Town supplies</h3><div><button id="town-shortages">Add village needs</button><button id="town-clear">Clear</button></div></div>
         <fieldset class="transport-choice"><legend>Bring supplies home</legend><label><input type="radio" name="town-transport" value="delivery" checked> Town delivery <small>R$ 60 · next scheduled delivery</small></label><label><input type="radio" name="town-transport" value="pickup"> Drive to collect <small>R$ 20 fuel · up to 40 units · about 2 hours away</small></label><div id="pickup-controls" hidden><label for="pickup-driver">Driver</label><select id="pickup-driver"></select><small id="pickup-driver-note"></small></div></fieldset>
         <div id="town-catalog"></div><div class="town-checkout"><div><b id="town-total"></b><p id="town-delivery"></p><small id="town-basket-status" role="status"></small><small id="town-pickup-status" role="status"></small></div><button id="town-order" class="primary">Buy supplies</button></div>
+        </section>
         <details class="economy-section"><summary>Orders & deliveries</summary><div id="town-orders"></div></details>
         <details class="economy-section"><summary>Surplus & neighbour exchange</summary><p>Keep 36 ingredients for household meals. Our neighbour can exchange two spare fittings for four surplus ingredients once each day.</p><button id="sell-surplus"></button><button id="exchange-parts">Exchange 4 surplus food → 2 fittings</button></details>
         <details class="economy-section"><summary>Spare materials & receiving space</summary><p>Sell stored, unreserved materials at half their town price to free space. Future stages may need them again; incoming supplies and current reservations stay protected.</p><div class="spare-sale"><label>Material<select id="spare-material"></select></label><label>Units<input id="spare-quantity" type="number" min="1" max="20" step="1" value="5"></label><button id="sell-material">Sell spare materials</button></div><p id="spare-quote" role="status"></p></details>
@@ -314,7 +330,6 @@
         ×</button
       ><span class="eyebrow">WELCOME TO VILA AURORA</span>
       <h2 id="help-title">How to play</h2><p id="help-intro">Choose Story to follow thirteen chapters and manage resources, or Sandbox to build freely with everything unlocked.</p>
-      <p>Five residents. A patch of Brazilian earth. A shared beginning.</p>
       <ol>
         <li id="help-start">
           <b>Start with the essentials.</b> Open Journal and follow A Shared Beginning in the
@@ -323,24 +338,23 @@
           during working hours.
         </li>
         <li>
-          <b>Get to know your neighbours.</b> Open People or select a resident to see their
+          <details class="guide-tip"><summary>Get to know your neighbours</summary><p>Open People or select a resident to see their
           needs and request help. Explain why it matters if they hesitate;
-          exhausted people still need rest.
+          exhausted people still need rest.</p></details>
         </li>
         <li>
-          <b>Find your balance.</b> Plant gardens, water their soil, and let
+          <details class="guide-tip"><summary>Find your balance</summary><p>Plant gardens, water their soil, and let
           crops grow before harvesting. Cisterns catch afternoon rain;
           neighbours fetch treated water during dry spells. Plan construction in Village → Construction,
           source local materials, and combine purchases in Trade. Residents choose work, meals, rest and company for
           themselves. Each home has three beds. Breakfast is at 06:30, lunch at
-          noon, and dinner at 18:00. Neighbours choose their own bedtime and sleep for 6–9 hours, depending on their energy.
+          noon, and dinner at 18:00. Neighbours choose their own bedtime and sleep for 6–9 hours, depending on their energy.</p></details>
         </li>
       </ol>
       <p class="hint">
-        A full day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site, then returns to your chosen speed. Pause and change speed at the
-        bottom left. B opens Build, V the village window, J the journal, P residents, I supplies, and M the map. Space pauses time; Escape closes a window or opens the menu. Your village autosaves locally; open
-        Settings to save immediately or start a new village.
+        A day takes eight minutes at 1×. Time moves at 16× while everyone is asleep or working off-site. The village pauses while you read and autosaves on this device.
       </p>
+      <div class="control-guide" aria-label="Game controls"><span><kbd>B</kbd>Build</span><span><kbd>V</kbd>Village</span><span><kbd>J</kbd>Journal</span><span><kbd>P</kbd>People</span><span><kbd>I</kbd>Supplies</span><span><kbd>M</kbd>Map</span><span><kbd>Space</kbd>Pause time</span><span><kbd>Esc</kbd>Close / menu</span></div>
       <details class="dev-tools">
         <summary>Debug &amp; development tools</summary>
         <p>Previews use a separate village and never overwrite your progress.</p><button id="help-open-dev">Dev Tools</button>
@@ -369,7 +383,7 @@
         <h3 id="building-settings">Building &amp; placement</h3>
         <label class="setting-row" for="placement-grid">
           <span
-            ><b>Placement grid</b
+            ><b id="placement-grid-label">Placement grid</b
             ><small id="grid-description"
               >Show tile guides while placing a building. The arrival clearing
               stays reserved.</small
@@ -379,6 +393,7 @@
             type="checkbox"
             role="switch"
             id="placement-grid"
+            aria-labelledby="placement-grid-label"
             aria-describedby="grid-description"
           />
         </label>
@@ -404,8 +419,8 @@
     <dialog id="import-dialog" aria-labelledby="import-title">
       <h2 id="import-title">Welcome back to your village</h2>
       <p id="import-summary"></p>
-      <button id="cancel-import">Keep this village</button>
-      <button id="confirm-import" class="primary">Load village</button>
+      <div class="dialog-actions"><button id="cancel-import">Keep this village</button>
+      <button id="confirm-import" class="primary">Load village</button></div>
     </dialog>
     <dialog id="restart-dialog" aria-labelledby="restart-title">
       <span class="eyebrow">A FRESH BEGINNING</span>
@@ -414,11 +429,11 @@
         Your current village will be replaced by an empty lot and five arriving
         neighbours. A backup stays on this device.
       </p>
-      <button id="cancel-restart">Keep this village</button>
-      <button id="confirm-restart" class="primary">Start new village</button>
+      <div class="dialog-actions"><button id="cancel-restart">Keep this village</button>
+      <button id="confirm-restart" class="primary">Start new village</button></div>
     </dialog>
-    <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Confirm cancellation</button></dialog>
-    <dialog id="building-work-dialog" aria-labelledby="building-work-title"><h2 id="building-work-title">Queue building work?</h2><p id="building-work-note"></p><button id="building-work-close">Keep building</button><button id="building-work-confirm" class="primary">Queue resident work</button></dialog>
+    <dialog id="project-cancel-dialog" aria-labelledby="project-cancel-title"><h2 id="project-cancel-title">Cancel this project?</h2><p id="project-cancel-note"></p><div class="dialog-actions"><button id="project-cancel-close">Keep project</button><button id="project-cancel-confirm">Confirm cancellation</button></div></dialog>
+    <dialog id="building-work-dialog" aria-labelledby="building-work-title"><h2 id="building-work-title">Queue building work?</h2><p id="building-work-note"></p><div class="dialog-actions"><button id="building-work-close">Keep building</button><button id="building-work-confirm" class="primary">Queue resident work</button></div></dialog>
     <script type="module" src="main.js?v=modes-1"></script>
   </body>
 </html>

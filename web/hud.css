@@ -1,10 +1,10 @@
 /* The game overlays the world: wood edges, paper windows, item slots and portraits. */
-:root{--ink:#443a29;--muted:#786849;--paper:#efe4c5;--line:#d5c398;--green:#617849;--gold:#dfb969;--wood:#72502f;--rim:#40321f;--shadow:0 5px 0 #352a2060,0 12px 24px #17271740}
+:root{--ink:#443a29;--muted:#6e5c3e;--paper:#efe4c5;--line:#d5c398;--green:#617849;--gold:#dfb969;--wood:#72502f;--rim:#40321f;--shadow:0 5px 0 #352a2060,0 12px 24px #17271740}
 body,button,input,select,textarea{font-family:"Trebuchet MS",Verdana,sans-serif}
 main{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
 #world{width:100%;height:100%;display:block}
 button{transition:background .12s,box-shadow .12s}
-button:focus-visible,a:focus-visible,canvas:focus-visible{outline:3px solid #efc968;outline-offset:3px}
+button:focus-visible,a:focus-visible,canvas:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #efc968;outline-offset:3px}
 button:hover{filter:brightness(1.05)}
 button:disabled{filter:saturate(.35);opacity:.5;cursor:default}
 [hidden]{display:none!important}
@@ -52,18 +52,20 @@ footer .season.panel{position:fixed;left:18px;bottom:53px;display:flex;align-ite
 .panel,dialog{border:5px solid #765333;border-radius:10px;background:linear-gradient(120deg,#f4eacd,#e9dbb4);box-shadow:inset 0 0 0 2px #c5a36b,inset 0 0 0 3px #f8ebc8,var(--shadow)}
 .panel h2,dialog h2{font:600 24px/1.2 "Fraunces",Georgia,serif;color:#4a3a25;margin:6px 0 14px;letter-spacing:0}
 .panel>.eyebrow,.panel-heading>.eyebrow,dialog>.eyebrow{display:none}
-.panel p,dialog p{font-size:12px;line-height:1.55;color:#756747}.panel h3,dialog h3{font:700 14px/1.3 "Trebuchet MS",Verdana,sans-serif;color:#665231;margin:16px 0 8px}
+.panel p,dialog p{font-size:13px;line-height:1.6;color:var(--muted)}.panel h3,dialog h3{font:700 14px/1.3 "Trebuchet MS",Verdana,sans-serif;color:#665231;margin:16px 0 8px}
 .panel-close,.dialog-close,.close-person{float:none;position:absolute;right:10px;top:10px;width:26px;height:26px;padding:0;display:grid;place-items:center;border:1px solid #b28e59;border-bottom:2px solid #785632;border-radius:5px;background:#dcc695;color:#755333;font-size:18px;line-height:1}
-.panel button:not(.panel-close):not(.resident),dialog button:not(.dialog-close):not(.mode-choice){border:1px solid #a88b55;border-bottom:3px solid #8c6a3c;border-radius:5px;background:linear-gradient(#e6d8af,#cebb85);box-shadow:inset 0 1px 0 #fff0c5;padding:7px 11px;color:#504327;font-size:12px}
+.panel button:not(.panel-close):not(.resident),dialog button:not(.dialog-close):not(.mode-choice){border:1px solid #a88b55;border-bottom:3px solid #8c6a3c;border-radius:5px;background:linear-gradient(#e6d8af,#cebb85);box-shadow:inset 0 1px 0 #fff0c5;padding:7px 11px;min-height:32px;color:#504327;font:700 12px/1.35 "Trebuchet MS",Verdana,sans-serif}
 .panel button.primary,dialog button.primary,.panel .resume-request{background:linear-gradient(#a5b774,#7f9755)!important;border-color:#6b803d!important;color:#26331a!important}
 .panel button:active,.hud-dock button:active,dialog button:active{box-shadow:inset 0 2px 3px #40311f30;transform:translateY(1px)}
 .panel input[type=number],.panel select,dialog input[type=number],dialog select{border:1px solid #b29763;border-radius:4px;background:#faf0d3;color:#4e4028;padding:6px;font:12px "Trebuchet MS",Verdana,sans-serif}
-.panel input[type=checkbox],dialog input[type=checkbox]{accent-color:#758a48;width:17px;height:17px;appearance:auto!important;vertical-align:middle;border-radius:3px}.setting-row input::after{content:none!important}
+.panel input[type=checkbox],dialog input[type=checkbox]{appearance:none!important;position:relative;flex:none;width:18px;height:18px;margin:0;vertical-align:middle;border:1px solid #8b6f3e;border-radius:3px;background:linear-gradient(#e1d0a0,#f9edc9);box-shadow:inset 0 1px 3px #79542d30;cursor:pointer}
+.panel input[type=checkbox]:checked,dialog input[type=checkbox]:checked{background:linear-gradient(#9eaf68,#748b4b)}
+.panel input[type=checkbox]:checked::before,dialog input[type=checkbox]:checked::before{content:"";position:absolute;left:5px;top:2px;width:5px;height:9px;border:solid #fff3c9;border-width:0 2px 2px 0;transform:rotate(45deg)}.setting-row input::after{content:none!important}
 .panel details,dialog details{border-top:1px solid #c7b483;padding:12px 0;font-size:12px}.panel summary,dialog summary{font-weight:700;color:#715634;cursor:pointer}
 .panel progress,dialog progress{height:11px;border:1px solid #b29863;border-radius:4px;background:#d8c89e;accent-color:#7f9853;overflow:hidden}.panel progress::-webkit-progress-bar,dialog progress::-webkit-progress-bar{background:#d8c89e}.panel progress::-webkit-progress-value,dialog progress::-webkit-progress-value{background:linear-gradient(#b3c77c,#819b50)}
 #village-book{position:fixed;right:18px;top:86px;bottom:126px;width:min(630px,calc(100vw - 340px));z-index:40;border:5px solid #765333;border-radius:11px;background:#d5bd83;box-shadow:inset 0 0 0 2px #c5a36b,var(--shadow);overflow:hidden}
 .book-tabs{height:58px;padding:8px 40px 0 10px;display:flex;gap:4px;align-items:stretch;background:linear-gradient(#87623d,#6d4f2f);border-bottom:2px solid #79532d}
-.book-tabs button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;border:1px solid #5f4126;border-bottom:0;border-radius:5px 5px 0 0;background:#b39863;color:#473a26;box-shadow:inset 0 1px 0 #d7bd84;font-size:10px;font-weight:bold}
+.book-tabs button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:3px;padding:5px 4px;border:1px solid #5f4126;border-bottom:0;border-radius:5px 5px 0 0;background:#b39863;color:#473a26;box-shadow:inset 0 1px 0 #d7bd84;font-size:12px;font-weight:bold}
 .book-tabs button[aria-expanded=true]{background:#efe1b9;box-shadow:inset 0 3px 0 #e7c779;color:#4b3b24}.book-tabs .item-icon{width:24px;height:24px}.book-house{font-size:28px;line-height:24px;color:#735432}
 #village-book>.panel{position:absolute!important;inset:58px 0 0!important;width:100%!important;max-width:none!important;max-height:none!important;height:auto!important;overflow-y:auto;padding:20px 23px 24px;border:0;border-radius:0;box-shadow:none;background:linear-gradient(100deg,#f1e6c4,#e8dab2)}
 #village-book .panel-close{position:fixed;right:31px;top:98px;z-index:44}
@@ -73,7 +75,7 @@ footer .season.panel{position:fixed;left:18px;bottom:53px;display:flex;align-ite
 .supplies h3{border-bottom:1px solid #cbb887;padding-bottom:5px}.supplies label{display:flex;gap:8px;align-items:center;margin:9px 0;font-size:12px}
 .power-rates{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #ceb982;border-bottom:1px solid #ceb982;padding:12px 0}.power-rates span{font-size:12px}.power-rates b{display:block;font-size:20px;color:#546b36}
 #power-battery{width:100%;height:18px}.power-battery-label{display:flex;justify-content:space-between;margin-bottom:6px}.power-loads,#power-loads{margin-top:8px}.power-load{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #d6c49b}.power-load span{display:block}.power-load small{display:block;margin-top:3px;font-size:11px;color:#766847}
-.community,.person,.chapter{position:fixed;right:18px;left:auto;top:88px;width:335px;max-height:calc(100dvh - 216px);padding:22px 20px 18px;z-index:40;overflow-y:auto}
+.community,.person,.chapter{position:fixed;right:18px;left:auto;top:88px;width:360px;max-height:calc(100dvh - 216px);padding:22px 20px 18px;z-index:40;overflow-y:auto}
 .chapter{width:370px}.chapter #tutorial-count{display:block;font-size:10px;letter-spacing:.5px;color:#8a6c35;font-weight:bold}.chapter h2{font-size:24px}.chapter #tutorial-copy{display:block;font-size:13px}.chapter #quest-speaker{display:block;font-size:11px}.chapter .resource-cycle{background:none;border-radius:0;border-top:1px solid #cbb589;padding:10px 0;margin:12px 0}.chapter .resource-cycle small{font-size:10px}.objective{border-bottom:1px solid #d4c094;font-size:12px}.chapter #village-needs{display:block}
 .community .panel-heading{position:relative;display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;padding-right:24px}.community .panel-heading h2{margin:0;font-size:25px}.community .panel-heading .panel-close{top:-15px;right:-10px}.community .count{border:1px solid #bea171;background:#d6c38b;color:#796132;border-radius:4px;width:26px;height:25px;display:grid;place-items:center;font-size:12px}
 #residents{display:flex;flex-direction:column;gap:2px;margin:0}
@@ -81,8 +83,8 @@ footer .season.panel{position:fixed;left:18px;bottom:53px;display:flex;align-ite
 .resident .avatar{width:44px;height:50px;flex:none;border:2px solid #b3965b;border-radius:5px;background:#dfd4a4!important;overflow:hidden;margin:0}.avatar canvas{display:block;width:100%;height:100%}.resident .info{flex:1;min-width:0}.resident b{font-size:14px;color:#51412a}.resident small{display:block;font-size:11px;line-height:1.4;color:#7a6a47;margin-top:3px}.resident .arrow{color:#9a7a42;font-size:17px}.energy-tiny{display:block;max-width:110px;height:3px;background:#c8bc94;margin-top:5px}.energy-tiny i{display:block;height:100%;background:#8b9f57}
 .community-footer{border:0;background:none;margin:12px 0 0;padding:0;font-size:10px;color:#8c7954}.live-dot{width:5px;height:5px;background:#92a255;border-radius:50%}
 #village-craft.panel{position:static;border:0;background:none;box-shadow:none;border-radius:0;padding:14px 0 0;margin-top:14px;border-top:1px solid #ccb787}#village-craft>.eyebrow{display:none}
-.person h2{font-size:27px;margin:4px 0 3px}.person .traits{font-size:11px;margin:3px 0 16px;color:#8d764e}.person-portrait{float:left;margin-right:14px}.person-portrait .avatar{display:block;width:54px;height:62px;border:2px solid #b19056;border-radius:7px;overflow:hidden;background:#d6c99a!important}
-.person .person-activity{clear:both;padding:9px 10px;margin:15px 0 12px;font-size:11px;line-height:1.5;border:1px solid #c0ae76;border-radius:4px;background:#e4dbb1;color:#69733e}
+.person h2{font-size:27px;margin:4px 0 3px}.person .traits{font-size:11px;margin:3px 0 16px;color:#8d764e}.person-heading{display:flex;align-items:center;gap:14px;padding-right:30px;margin-bottom:16px}.person-heading>div{min-width:0}.person-portrait{flex:none;margin:0}.person-portrait .avatar{display:block;width:54px;height:62px;border:2px solid #b19056;border-radius:7px;overflow:hidden;background:#d6c99a!important}
+.person .person-activity{padding:9px 10px;margin:15px 0 12px;font-size:11px;line-height:1.5;border:1px solid #c0ae76;border-radius:4px;background:#e4dbb1;color:#69733e}
 .person .quote{font:italic 14px/1.5 "Fraunces",Georgia,serif;margin:12px 0;color:#80643d}.person .stat{font-size:11px;grid-template-columns:68px 1fr 26px;gap:8px;margin-top:10px}.meter{height:6px;background:#d4c59b;border:1px solid #bba371;border-radius:2px}.meter i{background:#8b9f56}
 .request-title{font-size:11px;font-weight:bold;letter-spacing:0;margin:20px 0 10px;color:#795d32}.requests{display:grid;grid-template-columns:1fr 1fr;gap:6px}.person .requests button{min-height:31px;font-size:11px;padding:6px}.response{background:#e9d6a3;color:#79592d;border:1px solid #c4a568;border-radius:4px;font-size:12px;line-height:1.5;margin:0 0 10px;padding:9px}.person .request-pause{font-size:11px;margin:8px 0;color:#7b6844}.person .resume-request{margin-bottom:11px}.person .friendship-note{font-size:10px;margin:15px 0 0;color:#98815a}.person .persuade{margin:0 0 10px}
 .goal-tracker{position:fixed;top:85px;left:18px;width:240px;z-index:25;padding:0;border:3px solid #80613b;border-radius:6px;background:linear-gradient(100deg,#efe3ba,#ddcea0);box-shadow:inset 0 0 0 1px #f8edc7,0 3px 0 #4d382555}
@@ -152,7 +154,7 @@ footer .resources b[hidden]{display:none!important}
 .community .panel-heading{padding:0 24px 0 0}
 #build-panel .tool-art{background:none!important;margin:0}
 #build-panel .build-tool{max-width:none}
-.panel .panel-close,.panel .close-person,dialog .dialog-close{width:26px;height:26px;min-width:26px;min-height:26px;padding:0!important;border:1px solid #ad8f56;border-bottom:2px solid #86623a;border-radius:4px;background:linear-gradient(#e0c997,#c7ad74);color:#735332}
+.panel .panel-close,.panel .close-person,dialog .dialog-close{width:32px;height:32px;min-width:32px;min-height:32px;padding:0!important;border:1px solid #ad8f56;border-bottom:2px solid #86623a;border-radius:4px;background:linear-gradient(#e0c997,#c7ad74);color:#735332}
 /* The journal is a chapter index and a single quest page, rather than a card grid. */
 #quest-dialog{width:min(860px,calc(100vw - 64px));padding:26px 28px;background:linear-gradient(95deg,#e8d5a5,#f3e6c6 38%,#eddeb7)}
 #quest-dialog h2{font:600 27px "Fraunces",Georgia,serif;margin:0 0 10px}.journal-intro{max-width:none;color:#8b7650!important;font-size:12px!important;margin:0 0 10px!important}
@@ -168,7 +170,7 @@ footer .resources b[hidden]{display:none!important}
 #power-loads label{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #c8b48155}#power-loads label>span{flex:1;min-width:0}#power-loads b{display:block;font-size:12px}#power-loads small{display:block;margin-top:3px;font-size:10px;line-height:1.4;color:#897443}
 .volume-control{display:grid;grid-template-columns:1fr auto;gap:8px;margin:14px 0}.volume-control output{font-variant-numeric:tabular-nums;color:#897443}.volume-control input{grid-column:1/-1;width:100%;margin:0;cursor:pointer}.settings-section>small{display:block;line-height:1.5}
 .transport-choice{border:1px solid #bda16b;border-radius:5px;padding:10px 12px;margin:14px 0;display:grid;grid-template-columns:1fr 1fr;gap:9px;background:#e2d1a433}.transport-choice legend{font-size:11px;font-weight:bold;color:#775e34;padding:0 5px}.transport-choice>label{font-size:12px;cursor:pointer}.transport-choice input{accent-color:#7a8c50}.transport-choice small{display:block;font-size:10px;color:#8f7648;line-height:1.45;margin:5px 0 0 23px}.transport-choice #pickup-controls{grid-column:1/-1;border-top:1px solid #c8b07b;padding-top:9px}.transport-choice #pickup-controls label{font-size:11px;margin-right:8px}.transport-choice select{max-width:100%;font-size:11px}#pickup-driver-note{margin-left:0}.town-checkout #town-pickup-status{display:block;color:#60703d;margin-top:6px;max-width:350px}.order-actions{display:flex;flex-direction:column;gap:5px;flex:none}.order-actions button{font-size:10px!important}.order-row>div:first-child{min-width:0;flex:1}.order-row span{font-size:11px;line-height:1.5;display:block;margin-top:4px}#pickup-dialog label{font-size:12px;display:block;margin:16px 0 7px}#pickup-order-driver{width:100%;padding:8px;background:#f4e6c0;border:1px solid #b3975e;border-radius:4px;font-size:12px}#pickup-confirm{width:100%}
-#town-panel .town-checkout{position:static;margin-bottom:0}
+#town-panel{scroll-padding-bottom:120px}#town-panel .town-checkout{position:sticky;bottom:-24px;z-index:3;margin:16px -23px 0;padding:12px 23px;background:#e6d6ab;border-top:2px solid #a98b52;box-shadow:0 -4px 8px #70522d18}
 .town-account #jobs-outlook{max-width:260px;font-size:11px;line-height:1.5}.outside-jobs>p,.outside-jobs>small{font-size:11px;line-height:1.5;color:#88734d}.occupation-card{padding:13px 0;border-bottom:1px solid #c9b27d}.occupation-heading{display:flex;align-items:center;gap:9px}.occupation-heading>div{flex:1;min-width:0}.occupation-heading strong{display:block;font:600 16px "Fraunces",Georgia,serif;color:#66512c}.occupation-heading b{display:block;font-size:11px;color:#877045;margin-top:3px}.occupation-heading label{font-size:10px;white-space:nowrap;cursor:pointer}.occupation-heading input,.resident-occupation input{accent-color:#829752}.occupation-heading .avatar{width:36px;height:42px;overflow:hidden;border:1px solid #ab8e56;border-radius:4px;background:#d4c594!important;flex:none}.occupation-heading canvas{width:100%;height:100%}.occupation-card p{font-size:11px;margin:7px 0;line-height:1.5}.occupation-card>small{font-size:10px;color:#8a7043}.occupation-card>span{display:block;font-size:10px;color:#617141;margin-top:6px}.resident-occupation{border-top:1px solid #c3aa71;border-bottom:1px solid #c3aa71;padding:11px 0;margin:12px 0}.resident-occupation>b{display:block;font-size:12px;color:#6b542e}.resident-occupation>small{display:block;font-size:10px;color:#90764b;margin-top:4px;line-height:1.45}.resident-occupation p{font-size:11px;margin:7px 0}.resident-occupation label{font-size:11px;cursor:pointer;display:block;margin-top:7px}
 .home-method {display:flex;align-items:center;gap:10px;margin:6px 0 12px;color:#5c4c30;font-size:13px;font-weight:700;}
 .home-method select {width:auto;min-width:220px;padding:6px 12px;background:#fff5d7;border:1px solid #9b865d;border-radius:3px;color:#4c412c;font:inherit;}
@@ -194,3 +196,53 @@ footer .resources b[hidden]{display:none!important}
 
 .cable-endpoints{display:grid;grid-template-columns:1fr;gap:6px;margin:12px 0}.cable-endpoints select{width:100%;min-width:0}.electrical-circuit{border-left:3px solid #b49a56;padding:4px 12px;margin:14px 0}.electrical-circuit h4{font:600 16px "Fraunces",Georgia,serif;margin:4px 0 8px}.electrical-circuit progress{width:100%}.electrical-circuit p{font-size:12px;line-height:1.6}.electrical-circuit small{font-size:11px;line-height:1.5}.cable-overlay{display:block;margin:14px 0}#cable-planner{border-top:1px solid #cab17b;padding-top:14px;margin-top:16px}
 .relocation-guidance{position:absolute;bottom:120px;left:50%;transform:translateX(-50%);max-width:min(720px,80vw);padding:10px 16px;margin:0;background:#f3e4bc;color:#59482f;border:2px solid #a28754;border-radius:6px;box-shadow:0 3px 12px #273a2533;font-size:12px;text-align:center;pointer-events:none;z-index:20}.relocation-guidance.invalid{color:#984e30;border-color:#b8784c}
+
+/* Indexed supply pages keep village management close to the world. */
+.supplies-tabs{position:sticky;top:-20px;z-index:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 -23px 18px;padding:10px 20px;background:#e8dab2;border-block:1px solid #b99b62;box-shadow:0 3px 0 #a3824730}
+#supplies-panel .supplies-tabs button{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 5px;min-height:42px;font-size:12px}
+.supplies-tabs .item-icon{width:26px;height:26px}
+#supplies-panel .supplies-tabs [aria-selected=true]{background:linear-gradient(#b6c68a,#97ac64);border-color:#6e8142;box-shadow:inset 0 0 0 1px #d4d9a0;color:#344321}
+.supply-page{min-width:0}.supply-page>h3:first-child{margin-top:0}.supply-page>p:first-child{margin-top:0}
+.person .requests{gap:8px}.person .requests button{min-height:36px}.person .requests [data-task=craft]{grid-column:1/-1}
+.person .stat{margin:10px 0}.person .resident-occupation{margin-top:20px;padding-block:14px}.person .work-preferences{margin-bottom:0}
+.panel .count{font-variant-numeric:tabular-nums}
+.panel :is(.production-targets,.storage-reserve,.spare-sale) :is(input,select){min-height:32px}
+.panel :is(.production-title,.project-title,.occupation-heading)>:first-child{min-width:0;overflow-wrap:anywhere}
+.panel :is(.production-title,.project-title) h3,.panel .production-title h4{line-height:1.35}
+.panel .production-targets>div{grid-template-columns:minmax(0,1fr) 50px auto;gap:8px;align-items:end}.panel .production-targets button{min-height:32px}
+#village-book .book-tabs{gap:5px}#village-book .book-tabs button{font-size:12px}.book-tabs .item-icon{width:26px;height:26px}
+.panel :is(.cable-endpoints,.pipe-planner){padding:12px;border:1px solid #b89b65;border-radius:5px;background:#d8c28b30}
+.panel :is(.cable-endpoints,.pipe-planner) select{min-width:0;min-height:34px;width:100%}
+.panel .cable-endpoints{display:grid;grid-template-columns:1fr;gap:6px}.panel .cable-endpoints label:not(:first-child){margin-top:8px}
+.panel .spare-sale{display:grid;grid-template-columns:minmax(0,1fr) 70px;gap:10px}.panel .spare-sale button{grid-column:1/-1}.panel .spare-sale :is(select,input){width:100%;min-width:0}
+.panel summary,dialog summary{line-height:1.5}.panel details[open]>summary,dialog details[open]>summary{margin-bottom:12px}
+.panel :is(.storage-location,.production-worksite){padding:14px 0}.panel .storage-reserve button{margin:0}.panel .storage-reserve label{margin:0}
+#build-panel .build-tool{min-height:116px}#build-panel .build-tool b{white-space:normal;text-align:center;line-height:1.3;min-height:28px;display:grid;place-items:center}
+#village-book :is(.economy-section,.supply-page) small{line-height:1.5;color:var(--muted)}
+
+/* Character actions and pause dialogs use game controls, with clear hit areas. */
+.person .person-heading .traits{margin:6px 0 0}.person .person-activity{margin-top:0}.person .requests button{display:flex;align-items:center;gap:7px;text-align:left;padding:8px;min-height:44px}.person .requests .item-icon{width:23px;height:23px}.person .requests span{min-width:0;font-size:12px;line-height:1.35}
+.person .close-person{position:sticky;top:0;float:right;z-index:4;margin:-10px -8px 0 0}
+.community .panel-heading .panel-close{top:-8px;right:-8px}.community .panel-heading{gap:12px;padding-right:32px}.community .panel-heading .count{flex:none}.community .panel-heading h2{flex:1}
+.panel .resident{gap:12px;padding:12px 0;min-height:76px}.resident b{font-size:15px}.resident small{font-size:12px}.community-footer{font-size:11px}
+#host-gathering{min-height:36px;font:700 12px "Trebuchet MS",Verdana,sans-serif}
+dialog .dialog-close{position:sticky;top:0;float:right;z-index:5;margin:-12px -14px 0 12px}.dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.dialog-actions button{min-height:40px}
+#settings-dialog .save-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}#settings-dialog .save-actions:first-of-type button:last-child{grid-column:1/-1}#settings-dialog .save-actions button{min-height:36px;white-space:normal}#settings-dialog #save{background:linear-gradient(#b6c68a,#97ac64);border-color:#718448;font-weight:700}
+#settings-dialog .setting-row{display:flex;align-items:center;gap:16px}#settings-dialog .setting-row>span{flex:1;min-width:0}#settings-dialog .setting-row input{order:-1}.settings-section small,.setting-row small{color:var(--muted)}
+#help-dialog ol{list-style:none;counter-reset:help-step;padding:0;display:grid;gap:12px;margin:20px 0}#help-dialog li{counter-increment:help-step;position:relative;padding:12px 12px 12px 46px;margin:0;background:#d5bf8520;border:1px solid #bfa670;border-radius:5px;font-size:13px}#help-dialog li::before{content:counter(help-step);position:absolute;left:12px;top:12px;width:23px;height:23px;display:grid;place-items:center;border:1px solid #a68b52;border-bottom:3px solid #8e713e;border-radius:4px;background:#dbc58d;color:#62502d;font-weight:700}#help-dialog li b{display:block;margin-bottom:5px;color:var(--ink)}
+.control-guide{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0}.control-guide>span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}.control-guide kbd{min-width:25px;padding:4px;border:1px solid #b49a63;border-bottom:3px solid #8e713e;border-radius:4px;background:#e8d9ae;color:#5d492a;text-align:center;font:700 11px "Trebuchet MS",sans-serif}
+#help-dialog .dev-tools nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}#help-dialog .dev-tools a{margin:0;padding:10px;border:1px solid #b8a16a;border-radius:4px;background:#d4c18d30;color:#67512d}#help-dialog .dev-tools a span{color:var(--muted)}#start-playing{width:100%;min-height:40px}
+#pickup-dialog #pickup-confirm{margin-top:12px;min-height:40px}.volume-control input{height:18px}
+
+#supplies-panel{scroll-padding-top:80px}#supplies-panel>h2{position:absolute;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}#supplies-panel .supplies-tabs{margin-top:-20px}.supply-page [id]{scroll-margin-top:12px}
+
+.panel input[type=radio],dialog input[type=radio]{appearance:none;flex:none;width:18px;height:18px;min-height:18px;margin:0;vertical-align:middle;border:1px solid #8b6f3e;border-radius:50%;background:#f4e6be;box-shadow:inset 0 1px 3px #79542d30;cursor:pointer}.panel input[type=radio]:checked,dialog input[type=radio]:checked{background:radial-gradient(circle,#657c3d 0 4px,#f4e6be 5px)}
+.town-list-heading>div{display:flex;gap:8px;flex-wrap:wrap}.town-item{scroll-margin-block:16px 120px}
+
+.pantry-stacks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px}.pantry-stacks>span{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #b79b62;border-radius:5px;background:linear-gradient(#e5d5a7,#d6c18b);box-shadow:inset 0 0 0 1px #f3e3b6}.pantry-stacks b{display:block;font-size:20px;color:#5c4828;font-variant-numeric:tabular-nums}.pantry-stacks small{display:block;font-size:11px}.pantry-stacks .item-icon{width:34px;height:34px}
+
+.panel input:disabled,dialog input:disabled{opacity:.45;filter:saturate(.3);cursor:default}
+
+#help-dialog li .guide-tip{border:0;padding:0;margin:0}#help-dialog .guide-tip summary{color:var(--ink);font-size:13px}#help-dialog .guide-tip p{margin:10px 0 0}#help-dialog .dev-tools a{display:block;text-decoration:none}#help-dialog .dev-tools a span{display:block;margin-top:5px;font-size:11px;line-height:1.5}
+
+.town-shopping{margin-bottom:16px}
