@@ -6,6 +6,8 @@
 // Keep these landmarks visible in the projection review; do not infer a pass
 // merely from the requested camera in an image-generation prompt.
 export const buildingProjection = {
+  goat_pasture:{size:1280,right:[[156,704,505,899],[518,372,854,555]],left:[[749,918,1107,743],[906,548,1075,461]],upright:[855,580,855,730]},
+  apiary:{size:1280,right:[[273,312,692,538],[461,176,889,404]],left:[[697,834,850,754],[414,591,535,529]],upright:[704,854,704,1036]},
   hydro:{size:1280,right:[[304,744,566,873],[359,685,629,819]],left:[[563,872,740,792],[650,787,826,707]],upright:[620,584,620,818]},
   eco_toilet:{size:1280,right:[[237,975,609,1168],[345,879,614,1014]],left:[[609,1168,1087,974],[664,975,938,864]],upright:[626,725,626,1028]},
   banana_treatment:{size:1280,right:[[92,743,630,1137],[92,667,630,1063]],left:[[630,1137,1173,754],[630,1063,1173,677]],upright:[632,1062,632,1128]},

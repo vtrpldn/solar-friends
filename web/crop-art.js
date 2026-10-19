@@ -2,6 +2,9 @@ import { greenhouseBeds, greenhousePlants, greenhouseGlass, greenhouseDoor } fro
 import { preparedFrames, drawPreparedFrame } from './sprite-frames.js';
 import { buildingArt, cameraCalibration } from './building-art.js?v=night-1';
 export const cropTypes = {
+  maize:{name:'Maize',minutes:720,yield:14,note:'Large harvest · thirsty crop · rotate after beans to rebuild the soil'},
+  cassava:{name:'Cassava',minutes:1440,yield:20,note:'Slow staple crop · soil dries half as fast'},
+  fodder:{name:'Fodder grass',minutes:480,yield:10,note:'Animal feed, not household food · soil dries half as fast · routine tending pauses around 24 stored fodder'},
   lettuce: { name:'Lettuce', minutes:180, yield:5, note:'Quick crop · one harvest' },
   beans: { name:'Beans', minutes:360, yield:10, note:'Larger harvest · soil dries half as fast' },
   tomatoes: { name:'Tomatoes', minutes:300, yield:6, note:'Three harvests · later harvests take 3 hours; compost maintains yield' },
@@ -9,17 +12,17 @@ export const cropTypes = {
 export const cropFrameOptions = {columns:3,rows:3,referenceRow:2};
 export function cropDuration(c) { return c.kind === 'tomatoes' && c.harvests > 0 ? 180 : cropTypes[c.kind || 'lettuce'].minutes; }
 export function cropFrame(c) {
-  const column=['lettuce','beans','tomatoes'].indexOf(c.kind || 'lettuce');
+  const column=(['maize','cassava','fodder'].includes(c.kind)?['maize','cassava','fodder']:['lettuce','beans','tomatoes']).indexOf(c.kind || 'lettuce');
   const fraction=c.growth/cropDuration(c);
   return (fraction >= 1 ? 2 : fraction >= .33 ? 1 : 0)*3 + Math.max(0,column);
 }
-let cropArt,ready;
+let cropArt,fieldArt,ready;
 export function loadCropArt(source) {
-  if(!ready){cropArt=new Image();cropArt.src=source || new URL('./art/crops.png',import.meta.url).href;ready=cropArt.decode().then(()=>preparedFrames(cropArt,cropFrameOptions));}
+  if(!ready){cropArt=new Image();cropArt.src=source || new URL('./art/crops.png',import.meta.url).href;fieldArt=new Image();fieldArt.src=new URL('./art/field-crops.png',import.meta.url).href;ready=Promise.all([cropArt,fieldArt].map(image=>image.decode().then(()=>preparedFrames(image,cropFrameOptions))));}
   return ready;
 }
 export function drawCrops(ctx,b,x,y,scale=1,night=0,health=1) {
-  if(!cropArt?.naturalWidth)return;
+  if(!cropArt?.naturalWidth||!fieldArt?.naturalWidth)return;
   const greenhouse=b.kind==='greenhouse',art=buildingArt[b.kind],w=art.width;
   const {vertical,shear}=cameraCalibration(art),c=b.crop;
   const point=(u,v)=>[(u-.5)*w,((v-art.anchor)*vertical+(u-.5)*shear)*w];
@@ -35,9 +38,9 @@ export function drawCrops(ctx,b,x,y,scale=1,night=0,health=1) {
     path(soil);ctx.fillStyle=c.moisture>0?'rgba(55,32,20,.17)':'rgba(204,163,102,.28)';ctx.fill();
     if(!c.planted)return;
     ctx.filter=`brightness(${1-night*.45}) saturate(${c.moisture>0 ? Math.max(.45,Math.min(1,health)) : .55})${c.moisture>0 ? '' : ' sepia(.3)'}`;
-    const width=(c.kind==='lettuce'?22:26)*(greenhouse?.85:1);
+    const width=(c.kind==='lettuce'?22:['maize','cassava'].includes(c.kind)?30:26)*(greenhouse?.85:1);
     const ordered=positions.map(([u,v])=>point(u,v)).sort((a,b)=>a[1]-b[1]);
-    for(const p of ordered)drawPreparedFrame(ctx,cropArt,cropFrame(c),p[0],p[1],width,cropFrameOptions);
+    for(const p of ordered)drawPreparedFrame(ctx,['maize','cassava','fodder'].includes(c.kind)?fieldArt:cropArt,cropFrame(c),p[0],p[1],width,cropFrameOptions);
   };
   if(greenhouse){
     // Glass mutes the leaves. Through the open door they keep their color.

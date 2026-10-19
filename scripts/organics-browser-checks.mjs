@@ -10,7 +10,7 @@ export async function checkOrganicControls({page,saved,capture}){
   await page.locator('[data-organic-supplies]').scrollIntoViewIfNeeded();
   await capture('Scraps and compost use local stores and resident cargo','organic-supplies.png');
   assert.equal(await page.locator('.material-slot[data-item="19"] strong').textContent(),'Mature compost');
-  assert.equal(await page.locator('.material-slot[data-item="20"] strong').textContent(),'Kitchen scraps');
+  assert.equal(await page.locator('.material-slot[data-item="20"] strong').textContent(),'Organic residues');
   await page.getByRole('button',{name:'Trade',exact:true}).click();
   assert.equal(await page.locator('#buy-20').count(),0,'Scraps are a local cooking byproduct');
   const input=page.getByRole('spinbutton',{name:'Order Mature compost',exact:true});await input.fill('1');

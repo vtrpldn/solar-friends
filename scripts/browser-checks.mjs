@@ -1,3 +1,4 @@
+import {checkFarmingControls} from './farming-browser-checks.mjs';
 import {checkInterfaceControls,checkArtworkInterface} from './interface-browser-checks.mjs';
 import {checkWorkshopPowerControls,checkElectricalControls} from './electricity-browser-checks.mjs';
 import {checkOrganicControls} from './organics-browser-checks.mjs';
@@ -47,7 +48,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-hud-resource="materials"]').click();
   assert(await page.locator('#supplies-panel').isVisible());
   assert(await page.locator('#materials-stores').evaluate(el=>el.open));
-  assert.equal(await page.locator('.material-slot').count(),24);
+  assert.equal(await page.locator('.material-slot').count(),29);
   const idleRefreshes=await page.evaluate(()=>new Promise(resolve=>{
     let count=0;const observer=new MutationObserver(records=>{count+=records.length;});
     observer.observe(document.querySelector('#supplies-panel'),{subtree:true,childList:true,characterData:true});
@@ -80,6 +81,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkPlantingControls({page,saved,capture});
   await checkLivingLandControls({page,saved,capture});
   await checkClimateControls({page,saved,capture});
+  await checkFarmingControls({page,saved,capture});
   await checkUtilityRoutes({page,saved,capture});
   await checkWaterControls({page,saved,capture});
   await checkPipeControls({page,saved,capture});
@@ -451,7 +453,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
   await page.locator('#dev-inspection details summary').filter({hasText:'Material accounting · seed'}).click();
   const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
-  assert.equal(balances.length,24);assert(balances.every(text=>text==='0'));
+  assert.equal(balances.length,29);assert(balances.every(text=>text==='0'));
   await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
   // A storage target queues resident trips instead of moving material instantly.
   await page.locator('#dev-close').click();await page.locator('[data-hud-resource="materials"]').click();
@@ -662,8 +664,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert((await page.locator('#recipe-history').textContent()).includes('Browser check:'));
   await capture('Recipe cards with saved revision history','recipes.png');
   await page.goto(new URL('/artwork/grid-fit.html',base).href);
-  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('23 variants'));
-  assert.equal(await page.locator('#cards figure').count(),23);
+  await page.waitForFunction(count=>document.querySelector('#status').textContent.startsWith(`${count} variants`),expectedVariants);
+  assert.equal(await page.locator('#cards figure').count(),expectedVariants);
   await capture('All painted building sprites on their actual grid cells','sprite-grid-day.png');
   await page.locator('#lighting').selectOption('night');
   await capture('Shared full-sprite grid fit at night','sprite-grid-night.png');

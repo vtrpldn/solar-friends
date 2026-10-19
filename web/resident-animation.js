@@ -34,13 +34,14 @@ export function residentActivity(r, minutes) {
   if (['build','building_work','craft','prepare','utility'].includes(r.task)) return 'work';
   if (r.task === 'cook') return 'cook';
   if (r.task === 'water') return 'water';
+  if(r.task==='garden'&&r.worksiteKind==='goat_pasture')return 'feed';
   if (['garden', 'compost', 'restore', 'gather'].includes(r.task)) return 'tend';
   if (r.task === 'visit') {
     if (r.visitingKind === 'workshop') return 'work';
     if (r.visitingKind === 'kitchen') return 'cook';
-    if (r.visitingKind === 'coop') return 'feed';
+    if (['coop','goat_pasture'].includes(r.visitingKind)) return 'feed';
     if (r.visitingKind === 'well') return 'water';
-    if (['compost', 'garden', 'greenhouse', 'grove'].includes(r.visitingKind)) return 'tend';
+    if (['compost', 'garden', 'greenhouse', 'grove', 'orchard', 'goat_pasture', 'apiary'].includes(r.visitingKind)) return 'tend';
     if (['home', 'square'].includes(r.visitingKind)) return 'sit';
   }
   const slot = Math.floor((minutes + r.id * 29) / 24);

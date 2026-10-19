@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 pub const CHAPTER_COUNT: usize = 13;
 pub const LATER_CHAPTERS: usize = CHAPTER_COUNT - 4;
-pub const BUILDINGS: [&str; 18] = [
+pub const BUILDINGS: [&str; 21] = [
     "home",
     "garden",
     "well",
@@ -22,6 +22,9 @@ pub const BUILDINGS: [&str; 18] = [
     "banana_treatment",
     "biodigester",
     "hydro",
+    "orchard",
+    "goat_pasture",
+    "apiary",
 ];
 
 // Existing seven-chapter saves retain their achievements and open chapter eight.
@@ -59,6 +62,10 @@ pub struct Progress {
     pub river_night: bool,
     pub hobby_mask: u8,
     pub eggs_collected: u32,
+    pub milk_collected: u32,
+    pub honey_collected: u32,
+    pub orchard_fruit: u32,
+    pub crop_rotations: u32,
     pub tracked: usize,
     pub fruit: u32,
     pub timber: u32,
@@ -100,6 +107,10 @@ impl Default for Progress {
             river_night: false,
             hobby_mask: 0,
             eggs_collected: 0,
+            milk_collected: 0,
+            honey_collected: 0,
+            orchard_fruit: 0,
+            crop_rotations: 0,
             tracked: 0,
             fruit: 0,
             timber: 0,
@@ -128,10 +139,10 @@ pub fn unlocked(v: &Village, kind: &str) -> bool {
         return true;
     }
     let chapter = match kind {
-        "grove" | "warehouse" => Some(0),
+        "grove" | "warehouse" | "orchard" => Some(0),
         "compost" | "square" => Some(1),
         "workshop" | "greenhouse" => Some(3),
-        "coop" => Some(4),
+        "coop" | "goat_pasture" | "apiary" => Some(4),
         "solar_farm" | "streetlight" => Some(5),
         "eco_toilet" | "wetland" | "banana_treatment" => Some(6),
         "biodigester" => Some(7),
@@ -198,7 +209,16 @@ pub fn update(v: &mut Village) {
             && v.progress.enriched_harvests > 0
             && v.progress.seedlings_raised > 0
             && v.progress.seedlings_used > 0,
-        ready(v, "coop") && v.progress.eggs_collected >= 3 && v.progress.egg_meal,
+        ready(v, "coop")
+            && v.progress.eggs_collected >= 3
+            && v.progress.egg_meal
+            && ready(v, "orchard")
+            && v.progress.orchard_fruit > 0
+            && ready(v, "goat_pasture")
+            && v.progress.milk_collected > 0
+            && ready(v, "apiary")
+            && v.progress.honey_collected > 0
+            && v.progress.crop_rotations > 0,
         ready(v, "solar_farm")
             && ready(v, "streetlight")
             && v.power.stored >= 12.

@@ -53,7 +53,7 @@ delete legacy.village.power;restore(legacy);
 assert.equal(snapshot().village.power.stored,0);assert.deepEqual(snapshot().village.power.disabled,[]);
 assert.equal(snapshot().village.pipes.lines.length,0,'Legacy authoring does not invent installed cables');
 const farm=legacy.village.buildings.find(b=>b.kind==='solar_farm');
-farm.progress=0;legacy.village.minutes=720;legacy.village.economy.projects=[{building:farm.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(24).fill(0),consumed:Array(24).fill(0)}];restore(legacy);
+farm.progress=0;legacy.village.minutes=720;legacy.village.economy.projects=[{building:farm.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(29).fill(0),consumed:Array(29).fill(0)}];restore(legacy);
 p=snapshot().environment.power;assert(p.capacity===0);assert(p.generation===0);assert.equal(p.grid_level,0);
 
 // Construction uses the public placement API and reserves mixed materials without charging for the blueprint.

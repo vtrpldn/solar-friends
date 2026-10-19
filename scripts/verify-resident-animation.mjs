@@ -78,3 +78,6 @@ for (const name of ['iara','bento','luz','caua','nina']) {
   assert.equal(png[25],6,'Idle atlas must have an alpha channel');
 }
 console.log(`PASS: standing idles, task boundaries, ${transitions} clip transitions, mirrored facing, pause, and resident preview`);
+
+assert.equal(residentActivity({id:0,task:'garden',worksiteKind:'goat_pasture',x:1,y:1,target_x:1,target_y:1},600),'feed');
+assert.equal(residentActivity({id:0,task:'garden',worksiteKind:'apiary',x:1,y:1,target_x:1,target_y:1},600),'tend');

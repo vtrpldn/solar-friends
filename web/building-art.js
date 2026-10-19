@@ -7,6 +7,9 @@ import { measuredAxes } from './building-projection.js';
 import { buildingTexture } from './building-mesh.js';
 const atlas = 'village-atlas-isometric.png';
 export const buildingArt = {
+  orchard: {name:'Fruit orchard',file:'orchard.png',nightFile:'orchard.png',nightTint:'brightness(.6) saturate(.72)',width:210,anchor:.83},
+  goat_pasture: {name:'Goat pasture',file:'goat-pasture.png',nightFile:'goat-pasture.png',nightTint:'brightness(.6) saturate(.72)',width:218,anchor:.83},
+  apiary: {name:'Stingless bee apiary',file:'apiary.png',nightFile:'apiary.png',nightTint:'brightness(.6) saturate(.72)',width:84,anchor:.84},
   hydro: { name:'River generator', file:'hydro.png', width:96, anchor:.75 },
   eco_toilet: { name:'Ecological toilet', file:'eco-toilet.png', width:100, anchor:.88 },
   banana_treatment: { name:'Banana treatment bed', file:'banana-treatment.png', width:162, anchor:.85 },
@@ -58,7 +61,7 @@ export function buildingArtKey(building, buildings, projects = []) {
   return homeArtKeys[ordinal%homeArtKeys.length];
 }
 // Night variants share the original crop, camera, scale and ground anchor.
-for (const art of Object.values(allBuildingArt)) art.nightFile = art.file.replace('.png', '-night.png');
+for (const art of Object.values(allBuildingArt)) art.nightFile ??= art.file.replace('.png', '-night.png');
 export function nightAmount(minutes) {
   const hour = (((minutes % 1440) + 1440) % 1440) / 60;
   const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
@@ -80,6 +83,7 @@ export function drawBuildingArt(ctx, image, art, x, y, scale = 1, alpha = 1) {
   const { vertical, shear } = cameraCalibration(art);
   ctx.save();
   ctx.globalAlpha *= alpha;
+  if(art.renderFilter)ctx.filter=(ctx.filter==='none'?'':ctx.filter+' ')+art.renderFilter;
   ctx.translate(x, y);
   ctx.transform(1, shear, 0, vertical, 0, 0);
   ctx.drawImage(buildingTexture(image, art.mesh), cx * sourceWidth, cy * sourceHeight,

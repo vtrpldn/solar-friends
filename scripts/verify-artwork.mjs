@@ -13,7 +13,7 @@ for (const file of files) {
   assert(!fingerprints.has(hash), `Duplicate artwork file: ${file}`);
   fingerprints.add(hash);
 }
-const crops = catalog.filter(sprite => sprite.file).map(sprite => `${sprite.file}:${sprite.cell.join(',')}`);
+const crops = catalog.filter(sprite => sprite.file).map(sprite => `${sprite.file}:${sprite.cell.join(',')}:${sprite.renderFilter||''}`);
 assert.equal(new Set(crops).size, crops.length, 'Source crops must not be listed twice');
 for (const file of files) assert(catalog.some(sprite => sprite.file === `../art/${file}`), `Uncatalogued artwork: ${file}`);
 for (const sprite of catalog) {

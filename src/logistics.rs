@@ -291,7 +291,15 @@ pub fn sync(v: &mut Village) {
     for b in &v.buildings {
         if matches!(
             b.kind.as_str(),
-            "kitchen" | "coop" | "grove" | "square" | "compost" | "biodigester"
+            "kitchen"
+                | "coop"
+                | "grove"
+                | "square"
+                | "compost"
+                | "biodigester"
+                | "goat_pasture"
+                | "apiary"
+                | "orchard"
         ) && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Pantry(b.id), b.x as f32, b.y as f32, 60));
@@ -633,6 +641,7 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
     }
     crate::organics::needs(v, owner, &mut items);
     crate::planting::needs(v, owner, &mut items);
+    crate::agriculture::needs(v, owner, &mut items);
     items
 }
 fn tool_target(v: &Village, id: usize) -> bool {
@@ -781,6 +790,21 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if kind == Some("biodigester") && material == economy::SCRAPS && v.circular.waste >= 4. {
         return 1;
     }
+    if kind == Some("kitchen")
+        && v.meals < 3
+        && let Owner::Pantry(id) = to
+        && let Some(p) = food::pantry(v, id)
+        && match material {
+            economy::FOOD => p.items[economy::FOOD] < 3,
+            economy::EGGS => p.items[economy::EGGS] < 2,
+            _ => false,
+        }
+    {
+        return 1;
+    }
+    if kind == Some("goat_pasture") && material == economy::FODDER {
+        return 1;
+    }
     if kind == Some("coop") {
         return if v.food >= 18. { 1 } else { 3 };
     }
@@ -853,7 +877,15 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                             material: i,
                             amount: n,
                             rank: (
-                                if closing(v, from.owner) { 0 } else { 2 },
+                                if closing(v, from.owner)
+                                    || i == economy::SCRAPS
+                                        && sum(&from.items) + arriving(s, from.id)
+                                            >= from.capacity.saturating_sub(12)
+                                {
+                                    0
+                                } else {
+                                    2
+                                },
                                 u32::from(i >= economy::FOOD),
                                 from.id.0,
                             ),
@@ -1547,7 +1579,15 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                         b.id == id
                             && matches!(
                                 b.kind.as_str(),
-                                "kitchen" | "coop" | "grove" | "square" | "compost" | "biodigester"
+                                "kitchen"
+                                    | "coop"
+                                    | "grove"
+                                    | "square"
+                                    | "compost"
+                                    | "biodigester"
+                                    | "goat_pasture"
+                                    | "apiary"
+                                    | "orchard"
                             )
                             && (b.progress >= 100.
                                 || building_work::original_progress(v, id) == Some(100.))

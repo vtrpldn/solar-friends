@@ -33,6 +33,13 @@ pub fn replenish(v: &mut Village) {
             let _ = logistics::receive(v, logistics::Owner::Camp, material, missing);
         }
     }
+    if v.buildings
+        .iter()
+        .any(|b| matches!(b.kind.as_str(), "goat_pasture" | "coop") && b.progress >= 100.)
+    {
+        let missing = 12u32.saturating_sub(economy::quantity(v, economy::FODDER));
+        let _ = logistics::receive(v, logistics::Owner::Camp, economy::FODDER, missing);
+    }
     let missing = 36u32.saturating_sub(economy::quantity(v, economy::TOOLS));
     if missing > 0 {
         let _ = logistics::receive(v, logistics::Owner::Camp, economy::TOOLS, missing);
@@ -64,6 +71,10 @@ impl Game {
             v.wood = 100.;
             v.economy.stock[1..].fill(24);
             v.economy.stock[economy::TREE_STARTS] = 8;
+            v.economy.stock[economy::FODDER] = 0;
+            for i in [economy::MILK, economy::HONEY, economy::GOATS, economy::BEES] {
+                v.economy.stock[i] = 0;
+            }
             v.economy.stock[economy::BAMBOO_STARTS] = 2;
             v.logistics = None;
             logistics::initialise(&mut v);

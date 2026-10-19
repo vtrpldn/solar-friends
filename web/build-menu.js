@@ -5,7 +5,7 @@ import { buildingArt, drawBuildingArt } from './building-art.js';
 const groups = [
   {id:'land',name:'Land & materials',kinds:sourceKinds},
   { id: 'village', name: 'Village', kinds: ['home', 'road', 'well', 'warehouse', 'square'] },
-  { id: 'food', name: 'Food & growing', kinds: ['garden', 'greenhouse', 'kitchen', 'grove', 'coop'] },
+  { id: 'food', name: 'Food & growing', kinds: ['garden', 'greenhouse', 'kitchen', 'grove', 'orchard', 'coop', 'goat_pasture', 'apiary'] },
   { id: 'craft', name: 'Craft & reuse', kinds: ['workshop', 'compost'] },
   { id:'circular', name:'Water & waste', kinds:['eco_toilet','wetland','banana_treatment','biodigester'] },
   { id: 'power', name: 'Power', kinds: ['solar_farm', 'hydro', 'streetlight'] },

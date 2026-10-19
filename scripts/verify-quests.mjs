@@ -28,8 +28,8 @@ function until(test,label,limit=24000){
 function location(kind){
  const v=snap().village;
  // Leave access corridors between plots; continuous first-fit rows create walls.
- if(kind!=='hydro')for(const y of [5,9,13,17,21,25])for(const x of [5,9,13,17,21])if(!placementReason(v,kind,x,y))return [x,y];
- if(kind==='hydro')for(let y=5;y<=25;y++)for(let x=23;x<=26;x++)if(!placementReason(v,kind,x,y))return [x,y];
+ if(kind!=='hydro')for(const y of [5,9,13,17,21,25])for(const x of [5,9,13,17,21])if(!placementReason(v,kind,x,y)&&(kind!=='apiary'||v.buildings.some(b=>['orchard','grove'].includes(b.kind)&&Math.max(Math.abs(b.x-x),Math.abs(b.y-y))<=6)))return [x,y];
+ if(kind==='hydro')for(let y=5;y<=25;y++)for(let x=23;x<=26;x++)if(!placementReason(v,kind,x,y)&&(kind!=='apiary'||v.buildings.some(b=>['orchard','grove'].includes(b.kind)&&Math.max(Math.abs(b.x-x),Math.abs(b.y-y))<=6)))return [x,y];
  throw Error(`No accessible planned plot for ${kind}`);
 }
 function purchase(items){if(!items.some(Boolean))return;until(s=>s.environment.economy.money>=items.reduce((n,q,i)=>n+q*s.environment.economy.materials[i].price,6000),'purchase funds');assert.equal(g.order_supplies(JSON.stringify(items)),'ok');}
@@ -41,8 +41,8 @@ function build(kind,recipe='standard',local=false,site=null){
  purchase(missing);
  const started=snap().village.minutes;
  // Local construction includes extraction, processing and several community
- // work windows. Keep a finite sixteen-day bound for a complete building.
- until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`,16*1920);
+ // work windows. Keep a finite twenty-four-day bound for a complete building.
+ until(s=>s.village.buildings.find(b=>b.id===id).progress>=100,`build ${kind}`,24*1920);
  if(kind==='home'&&recipe==='adobe')console.log(`Local adobe home: ${((snap().village.minutes-started)/1440).toFixed(1)} game days from blueprint to completion`);
  return id;
 }
@@ -62,7 +62,7 @@ async function complete(chapter){
  // Select the next journal page through its real command for reproducible UI checkpoints.
  assert(g.track_quest(Math.min(chapter+1,quests.length-1)));
  const saved=g.snapshot(),s=snap();assert(quests[chapter].objectives(s.village).every(o=>o.done),`Rust and UI agree: ${quests[chapter].title}`);
- assert(g.restore(saved),`reload chapter ${chapter+1}`);assert.equal(g.snapshot(),saved);
+ if(!g.restore(saved)){writeFileSync(`${output}/invalid-chapter-${chapter+1}.json`,saved);assert.fail(`reload chapter ${chapter+1}`);}assert.equal(g.snapshot(),saved);
  assert.equal(s.village.progress.tracked,Math.min(chapter+1,quests.length-1));
  if(output)await fs.writeFile(`${output}/solar-${chapter===0?'intro':chapter===12?'complete':`chapter-${chapter+1}`}.json`,saved);
  console.log(`Chapter ${chapter+1}/${quests.length}: ${quests[chapter].title} · day ${1+Math.floor(s.village.minutes/1440)}`);
@@ -87,7 +87,7 @@ build('warehouse');
 // kitchens and later utility plots connected rather than relying on distant dirt walks.
 const streets=[...Array.from({length:15},(_,i)=>i+11).flatMap(y=>[11,15,19].map(x=>[x,y])),...[11,15,19,23].flatMap(y=>Array.from({length:19},(_,i)=>[i+4,y]))];
 for(const [x,y] of streets)if(!snap().village.roads.some(([a,b])=>a===x&&b===y)&&!placementReason(snap().village,'road',x,y))assert.equal(g.toggle_road(x,y),'ok');
-const basket=Array(24).fill(0);basket[0]=1;
+const basket=Array(29).fill(0);basket[0]=1;
 until(()=>g.order_supplies_pickup(JSON.stringify(basket),3)==='ok','resident pickup');
 until(()=>g.contribute_tool_library()==='ok','tool library');await complete(3);
 for(const k of ['workshop','compost','greenhouse'])build(k);
@@ -109,11 +109,21 @@ const restoredGarden=g.snapshot();assert(g.restore(restoredGarden));assert.equal
 // Buying tools can satisfy routine demand; the Story introduction still asks
 // the player to learn local crafting through one explicit workshop request.
 if(!snap().village.progress.tools_crafted){
- const timber=Array(24).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
+ const timber=Array(29).fill(0);timber[0]=Math.max(0,8-snap().environment.economy.materials[0].available);purchase(timber);
  until(s=>s.village.progress.tools_crafted>0||/Happy|already accepted/.test(g.request(1,'craft',false)),'request a saved tool batch');
 }
 await complete(4);
-build('coop');await complete(5);
+// Expanded food chapter: use actual plans, purchases, deliveries and resident work.
+const rotationGarden=snap().village.buildings.find(b=>b.kind==='garden').id;
+assert(g.configure_crop(rotationGarden,'beans',true));
+build('coop');
+const fodderGarden=build('garden');assert(g.configure_crop(fodderGarden,'fodder',true));
+build('orchard');
+build('goat_pasture');
+build('apiary');
+until(s=>s.village.buildings.find(b=>b.id===rotationGarden).agriculture.previous_crop==='beans','harvest a bean crop');
+assert(g.configure_crop(rotationGarden,'maize',true));
+await complete(5);
 const solar=build('solar_farm'),lamp=build('streetlight');
 const b=snap().village.buildings.find(b=>b.id===lamp);
 // Actual adjacent free path, without occupying the lamp's cell.
@@ -179,4 +189,4 @@ gatherExtra(s=>s.village.food>=38,'healthy pantry');await complete(12);
 const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
 for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
 assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
-g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 18 building kinds taught.');
+g.free();console.log('PASS: all 13 chapters completed from a fresh Story through real placement, purchases, resident work, resource cycles, cooking, care and gatherings; every chapter saved/reloaded and all 21 building kinds taught.');

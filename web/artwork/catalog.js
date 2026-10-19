@@ -11,7 +11,7 @@ function add(id, name, file, group, options = {}) {
 for (const [kind, art] of Object.entries(allBuildingArt)) {
   const id = { home: 'village-atlas-isometric.png-0', kitchen: 'village-atlas-isometric.png-1', grove: 'village-atlas-isometric.png-3', garden: 'garden-simple', well: 'cistern' }[kind] || kind;
   add(id, art.name, art.file, 'Buildings', { ...art, file: `../art/${art.file}`, building: true });
-  add(`${id}-night`, `${art.name} · night`, art.nightFile, 'Buildings', { ...art, name: `${art.name} · night`, file: `../art/${art.nightFile}`, building: true });
+  add(`${id}-night`, `${art.name} · night`, art.nightFile, 'Buildings', { ...art, name: `${art.name} · night`, file: `../art/${art.nightFile}`, renderFilter:art.nightTint, building: true });
 }
 ['Jequitibá-rosa','Juçara','Embaúba','Pau-brasil'].forEach((name,i) => add(`forest-${i}`,name,'mata-atlantica-atlas.png','Vegetation',{cell:[i%2/2,Math.floor(i/2)/2,.5,.5],width:[145,112,113,125][i],anchor:.85}));
 ['Meadow','Red earth'].forEach((name,i) => add(`terrain-${i}`,name,'terrain-atlas.png','Terrain',{cell:[i/2,0,.5,1],anchor:.5}));
@@ -29,3 +29,5 @@ economyArt.forEach((art,i)=>add(`economy-${i}`,art.name,economyAtlasFile,'Land &
 add('recovered-battery','Recovered battery','recovered-battery.png','Land & supplies',{cell:batteryArt.crop.map(n=>n/1254),width:batteryArt.width,anchor:batteryArt.anchor,aspect:batteryArt.crop[3]/batteryArt.crop[2]});
 
 add('economy-original','Original economy prop study','economy-atlas.png','References',{usage:'Reference',width:250,anchor:.95});
+
+['Maize','Cassava','Fodder grass'].forEach((name,column)=>['Seedling','Growing','Harvestable'].forEach((stage,row)=>add(`field-crop-${column}-${row}`,`${name} · ${stage}`,'field-crops.png','Crops',{crop:true,frame:row*3+column,cell:[column/3,row/3,1/3,1/3],width:column===2?26:30,anchor:FRAME_ANCHOR})));

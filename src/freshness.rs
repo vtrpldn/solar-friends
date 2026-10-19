@@ -1,6 +1,6 @@
 //! Age follows owned food through storage, cargo and committed cooking inputs.
 use crate::*;
-use economy::{COUNT, EGGS, FOOD, MEALS};
+use economy::{COUNT, EGGS, FOOD, HONEY, MEALS, MILK};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Lot {
@@ -29,6 +29,8 @@ pub fn lifetime(material: usize) -> Option<f32> {
         FOOD => Some(4. * 1440.),
         MEALS => Some(3. * 1440.),
         EGGS => Some(8. * 1440.),
+        MILK => Some(2. * 1440.),
+        HONEY => Some(28. * 1440.),
         _ => None,
     }
 }
@@ -136,7 +138,7 @@ fn valid_lots(v: &Village, lots: &[Lot], items: &economy::Bundle) -> bool {
     if lots.windows(2).any(|w| w[0].expires > w[1].expires) {
         return false;
     }
-    [FOOD, MEALS, EGGS]
+    [FOOD, MEALS, EGGS, MILK, HONEY]
         .into_iter()
         .all(|i| amount(lots, i) == items[i])
 }
@@ -184,7 +186,7 @@ pub fn advance(v: &mut Village) {
     let s = v.logistics.as_mut().unwrap();
     for p in &mut s.stores {
         let expired = discard(&mut p.food_lots, v.minutes);
-        for i in [FOOD, MEALS, EGGS] {
+        for i in [FOOD, MEALS, EGGS, MILK, HONEY] {
             if expired[i] > 0 {
                 p.items[i] -= expired[i];
                 spent[i] += expired[i];
@@ -202,7 +204,7 @@ pub fn advance(v: &mut Village) {
         spent[h.material] += n;
         h.amount > 0
     });
-    for i in [FOOD, MEALS, EGGS] {
+    for i in [FOOD, MEALS, EGGS, MILK, HONEY] {
         if spent[i] > 0 {
             simulation::material_change(v, i, spent[i], false);
             v.freshness.expired[i] += u64::from(spent[i]);
@@ -218,7 +220,7 @@ pub fn advance(v: &mut Village) {
     {
         let expired = discard(&mut b.food_lots, v.minutes);
         if expired.iter().any(|n| *n > 0) {
-            for i in [FOOD, MEALS, EGGS] {
+            for i in [FOOD, MEALS, EGGS, MILK, HONEY] {
                 v.freshness.expired[i] += u64::from(expired[i]);
             }
             b.spoiled = true;
@@ -263,14 +265,14 @@ pub fn view(v: &Village) -> serde_json::Value {
             inspect(&b.food_lots);
         }
     }
-    serde_json::json!({"enabled":v.mode==modes::Mode::Story,"expired":v.freshness.expired,"due_within_day":due,"next_expiry":next,"lifetimes":[{"material":FOOD,"minutes":lifetime(FOOD)},{"material":MEALS,"minutes":lifetime(MEALS)},{"material":EGGS,"minutes":lifetime(EGGS)}],"note":"Game balance days. Moving food or refunding inputs preserves its age. Prepared meals first; use the oldest reachable portions of each kind."})
+    serde_json::json!({"enabled":v.mode==modes::Mode::Story,"expired":v.freshness.expired,"due_within_day":due,"next_expiry":next,"lifetimes":[{"material":FOOD,"minutes":lifetime(FOOD)},{"material":MEALS,"minutes":lifetime(MEALS)},{"material":EGGS,"minutes":lifetime(EGGS)},{"material":MILK,"minutes":lifetime(MILK)},{"material":HONEY,"minutes":lifetime(HONEY)}],"note":"Game balance days. Moving food or refunding inputs preserves its age. Prepared meals first; use the oldest reachable portions of each kind."})
 }
 #[cfg(test)]
 pub(crate) fn fixture_reseed(v: &mut Village) {
     if let Some(s) = &mut v.logistics {
         for p in &mut s.stores {
             p.food_lots.clear();
-            for i in [FOOD, MEALS, EGGS] {
+            for i in [FOOD, MEALS, EGGS, MILK, HONEY] {
                 add(&mut p.food_lots, i, p.items[i], v.minutes);
             }
         }
@@ -284,7 +286,7 @@ pub(crate) fn fixture_reseed(v: &mut Village) {
     for b in &mut v.production.batches {
         b.food_lots.clear();
         if b.active() && b.committed {
-            for i in [FOOD, MEALS, EGGS] {
+            for i in [FOOD, MEALS, EGGS, MILK, HONEY] {
                 add(&mut b.food_lots, i, b.inputs[i], v.minutes);
             }
         }

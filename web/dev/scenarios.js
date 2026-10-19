@@ -5,6 +5,7 @@ import {makeArtPreview} from './art-preview.js';
 import {withAuthoredElectricalCircuits} from './electrical-fixture.js';
 import {withSeasonalWeather} from './climate-fixture.js';
 export const scenarios = [
+  {id:'farming',name:'Farming & animal care',detail:'Fodder, beans, a young orchard, dairy goats and stingless bees. Actual resident care, hauling, fresh drinking water, crop rotation and local produce stores.'},
   {id:'sim-compact',name:'Simulation baseline · compact',detail:'Homes, food and storage grouped together. Compare observed travel with the dispersed layout using the same starting supplies and seed.'},
   {id:'sim-spread',name:'Simulation baseline · dispersed',detail:'The same homes and services spread across the property. A paired baseline for transport, travel budgets and later completion forecasts.'},
   {id:'sim-poor',name:'Simulation baseline · empty funds',detail:'Compact services, no construction materials or money, and Bento’s outside job enabled at 09:00. Test a recovery route without selling household food.'},
@@ -70,6 +71,17 @@ export function makeScenario(id, fresh, established) {
     if(id==='sim-poor'){v.economy.money=0;v.economy.ledger=[];v.economy.stock.fill(0);v.wood=0;v.economy.outside_jobs[1]=true;}
     for(const r of state.residents)Object.assign(r,{x:8+r.id*1.2,y:17,target_x:8+r.id*1.2,target_y:17,activity_building:null,activity_material:null,trip:null,last_sanitation_day:-1});
   }
+  if(id==='farming'){
+    const layout=[['home',6,6],['home',10,6],['warehouse',6,11],['kitchen',10,11],['well',15,7],['garden',14,12],['garden',18,12],['greenhouse',20,7],['orchard',8,18],['goat_pasture',14,19],['apiary',10,23],['grove',4,23],['coop',18,19],['compost',20,23]];
+    v.economy=structuredClone(fresh.village.economy);v.economy.next_building=layout.length;
+    v.building_jobs=[];v.roads=[];v.power={stored:0,disabled:[]};v.circular=structuredClone(fresh.village.circular);
+    v.progress=structuredClone(fresh.village.progress);v.progress.completed.fill(true);v.progress.later_completed.fill(true);
+    v.buildings=layout.map(([kind,x,y],id)=>({...structuredClone(established.village.buildings[0]),id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop:structuredClone(fresh.village.buildings[0]?.crop||established.village.buildings[0].crop),poultry:{remaining:0},agriculture:{enabled:true,growth:kind==='orchard'?7920:0,cared_until:0,welfare:70,pending:0,harvested:0,rotations:0,previous_crop:'',fruiting:false}}));
+    v.economy.projects=v.buildings.map(b=>({building:b.id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===b.kind).standard.length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)}));
+    for(const b of v.buildings)if(['garden','greenhouse'].includes(b.kind))Object.assign(b.crop,{planted:true,kind:b.id===5?'fodder':b.id===6?'beans':'tomatoes',next_kind:b.id===5?'fodder':b.id===6?'maize':'tomatoes',growth:120,moisture:180,nursery:0,harvests:0,replant:true});
+    v.economy.stock[24]=12;v.food=18;v.meals=8;v.water=90;v.minutes=1440+540;
+    for(const r of state.residents)Object.assign(r,{x:8+r.id*1.2,y:14.5,target_x:8+r.id*1.2,target_y:14.5,activity_building:null,activity_material:null,trip:null,last_sanitation_day:-1});
+  }
   if (id.startsWith('economy')) {
     v.power={stored:0,disabled:[]};
     v.buildings=[['home',8,8],['greenhouse',13,8],['solar_farm',17,13]].map(([kind,x,y],id)=>({id,kind,x,y,progress:0,contributors:0,next_visit:0,visits:0,crop:structuredClone(fresh.village.buildings[0]?.crop||established.village.buildings[0].crop),poultry:{remaining:0}}));
@@ -134,7 +146,7 @@ export function makeScenario(id, fresh, established) {
   if(id.startsWith('climate-')&&!v.buildings.some(b=>b.kind==='hydro')){
     const id=v.economy.next_building++,kind='hydro';
     v.buildings.push({...structuredClone(v.buildings[0]),id,kind,x:26,y:5,progress:100,contributors:0,next_visit:0,visits:0});
-    v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(24).fill(0),consumed:Array(24).fill(0)});
+    v.economy.projects.push({building:id,recipe:'standard',priority:1,paused:false,stage:fresh.environment.economy.recipes.find(r=>r.kind===kind).standard.length,labour:0,committed:false,reserved:Array(fresh.environment.economy.materials.length).fill(0),consumed:Array(fresh.environment.economy.materials.length).fill(0)});
   }
   const prepared=resetMaterialLocations(state);
   if(id.startsWith('climate-'))return withAuthoredElectricalCircuits(withSeasonalWeather(prepared,{dry:id==='climate-dry'}));

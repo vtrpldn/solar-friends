@@ -1,6 +1,6 @@
 //! Food shares material ownership, cargo and conservation accounting.
 use crate::*;
-use economy::{Bundle, COUNT, EGGS, FOOD, MEALS};
+use economy::{Bundle, COUNT, EGGS, FOOD, HONEY, MEALS, MILK};
 use logistics::{Owner, Store};
 use simulation::Id;
 
@@ -49,11 +49,15 @@ pub fn needs(v: &Village, building: usize) -> Bundle {
         }
         "coop"
             if v.supplies.feed_hens
-                && v.food >= 9.
+                && (v.food >= 9. || economy::quantity(v, economy::FODDER) >= 2)
                 && v.supplies.eggs < 12
                 && b.poultry.remaining <= 0. =>
         {
-            n[FOOD] = 3;
+            if economy::quantity(v, economy::FODDER) >= 2 {
+                n[economy::FODDER] = 2;
+            } else {
+                n[FOOD] = 3;
+            }
         }
         _ => {}
     }
@@ -158,7 +162,7 @@ pub fn reserved_space(v: &Village, owner: Option<Owner>) -> u32 {
 pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
     let mut choices = vec![];
     for p in &v.logistics.as_ref()?.stores {
-        if [MEALS, FOOD]
+        if [MEALS, FOOD, MILK, HONEY]
             .into_iter()
             .all(|i| available(v, p, i, Some(r.id)) == 0)
         {
@@ -170,7 +174,7 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
         let Ok((route, _)) = navigation::work_route(v, [r.x, r.y], point) else {
             continue;
         };
-        for material in [MEALS, FOOD] {
+        for material in [MEALS, FOOD, MILK, HONEY] {
             let available_now = available(v, p, material, Some(r.id));
             let ready_at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
             let edible: Vec<_> = p
@@ -226,7 +230,7 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
         .ok_or("This food store is no longer available.")?;
     let i = r
         .activity_material
-        .filter(|i| matches!(*i, FOOD | MEALS))
+        .filter(|i| matches!(*i, FOOD | MEALS | MILK | HONEY))
         .ok_or("Choose a stored portion first.")?;
     if available(v, p, i, Some(r.id)) == 0 {
         return Err("This store has no unclaimed portions. Gather food or bring a meal here.");
@@ -269,7 +273,9 @@ pub fn eat(v: &mut Village, r: &mut Resident) -> bool {
         r.hunger = (r.hunger - 65.).max(0.);
         r.social = (r.social + 8.).min(100.);
     } else {
-        v.supplies.used += 1.;
+        if i == FOOD {
+            v.supplies.used += 1.;
+        }
         r.hunger = (r.hunger - 45.).max(0.);
     }
     true

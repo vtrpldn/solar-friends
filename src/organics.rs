@@ -1,4 +1,4 @@
-//! Cooking scraps and mature compost have the same physical owners as other goods.
+//! Kitchen scraps, animal residues and mature compost have the same physical owners as other goods.
 use crate::*;
 use economy::{Bundle, COMPOST, COUNT, SCRAPS};
 use logistics::Owner;

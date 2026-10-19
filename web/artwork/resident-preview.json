@@ -20,7 +20,7 @@
       "target_x": 8.0,
       "target_y": 12.5,
       "task": "idle",
-      "trait_name": "Patient · gardener",
+      "trait_name": "Patient \u00b7 gardener",
       "x": 8.0,
       "y": 12.5
     },
@@ -39,7 +39,7 @@
       "target_x": 9.4,
       "target_y": 12.5,
       "task": "idle",
-      "trait_name": "Practical · builder",
+      "trait_name": "Practical \u00b7 builder",
       "x": 9.4,
       "y": 12.5
     },
@@ -58,7 +58,7 @@
       "target_x": 10.8,
       "target_y": 12.5,
       "task": "idle",
-      "trait_name": "Sociable · cook",
+      "trait_name": "Sociable \u00b7 cook",
       "x": 10.8,
       "y": 12.5
     },
@@ -69,7 +69,7 @@
       "hunger": 10,
       "id": 3,
       "last_meal_slot": 15,
-      "name": "Cauã",
+      "name": "Cau\u00e3",
       "reason": "Taking a quiet break in the animation preview.",
       "remaining": 90,
       "requested": false,
@@ -77,7 +77,7 @@
       "target_x": 12.2,
       "target_y": 12.5,
       "task": "idle",
-      "trait_name": "Curious · forager",
+      "trait_name": "Curious \u00b7 forager",
       "x": 12.2,
       "y": 12.5
     },
@@ -96,7 +96,7 @@
       "target_x": 13.6,
       "target_y": 12.5,
       "task": "idle",
-      "trait_name": "Thoughtful · caretaker",
+      "trait_name": "Thoughtful \u00b7 caretaker",
       "x": 13.6,
       "y": 12.5
     }

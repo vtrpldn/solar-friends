@@ -17,7 +17,7 @@ function render(){
         const[a,b]=line.map(([x,y])=>project(x,y,origin,1));ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
       }
     }
-    drawBuildingArt(ctx,images.get(night?art.nightFile:art.file),art,origin.x+p.x,origin.y+p.y,p.scale);
+    drawBuildingArt(ctx,images.get(night?art.nightFile:art.file),{...art,renderFilter:night?art.nightTint:undefined},origin.x+p.x,origin.y+p.y,p.scale);
     ctx.save();ctx.filter=night?'brightness(.6)':'none';drawPreparedFrame(ctx,images.get('iara'),8,origin.x-n*34-22,origin.y+16,RESIDENT_WIDTH,{referenceRow:2});ctx.restore();
     if(guides){
       const corners=[[f.minX,f.minY],[f.maxX,f.minY],[f.maxX,f.maxY],[f.minX,f.maxY]].map(([x,y])=>project(x,y,origin,1));

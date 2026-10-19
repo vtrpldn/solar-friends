@@ -56,7 +56,7 @@ const night=new Game();assert(night.restore(active));until(night,s=>s.village.mi
 // Controlled outage fixture: keep the real installation and water accounts,
 // empty the night battery, and move owned buffer water back to its cistern.
 const outage=new Game(),dark=snap(night),source=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===0),target=dark.village.water_supply.tanks.find(t=>t.owner.kind==='building'&&t.owner.id===1);
-assert.equal(dark.village.water_supply.trips.length,0);const back=Math.min(2,target.water[0],source.capacity[0]-source.water[0]);assert(back>0);target.water[0]-=back;source.water[0]+=back;
+assert.equal(dark.village.water_supply.trips.length,0);const back=Math.min(2,target.water[0],source.capacity[0]-source.water[0]);target.water[0]-=back;source.water[0]+=back;assert(source.water[0]>0&&target.water[0]<target.capacity[0],'Outage has real source water and room for a transfer');
 for(const n of dark.village.power.network.nodes)if(n.kind!=='roof'){dark.village.power.network.account.discharged+=n.charge;n.charge=0;}
 dark.village.power.stored=0;assert(outage.restore(JSON.stringify(dark)));
 const flow=line(snap(outage),id).transferred;for(let n=0;n<20;n++)outage.tick(.25);assert.equal(line(snap(outage),id).transferred,flow);assert.equal(snap(outage).environment.power.generation,0);checkpoint(outage);await writeFile('artifacts/pipes/outage.json',outage.snapshot());night.free();outage.free();

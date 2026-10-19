@@ -841,6 +841,8 @@ pub fn valid(v: &Village) -> bool {
                 p.anchors[1].kind.as_str(),
                 "home"
                     | "kitchen"
+                    | "orchard"
+                    | "goat_pasture"
                     | "garden"
                     | "greenhouse"
                     | "eco_toilet"
@@ -849,7 +851,7 @@ pub fn valid(v: &Village) -> bool {
             ),
             Kind::Irrigation => matches!(
                 p.anchors[1].kind.as_str(),
-                "garden" | "greenhouse" | "source_timber" | "source_bamboo"
+                "garden" | "greenhouse" | "orchard" | "source_timber" | "source_bamboo"
             ),
             Kind::Greywater => p.anchors[1].kind == "wetland",
             Kind::Sewage => matches!(

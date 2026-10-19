@@ -1,6 +1,6 @@
 {
   "reviewed": "2026-10-09",
-  "scope": "All 23 building variants, day and night. Measured ground-plane structural directions calibrated to game orthographic axes; the organic grove is excluded.",
+  "scope": "All 26 building variants, day and night. Measured architectural ground directions use shared orthographic calibration; organic groves and orchards have no structural edge measurements.",
   "method": "Hand-traced structural landmarks, shared game renderer, day/night visual review. Per-edge tolerance 2 pixels at zoom 1. These are raster illustration tolerances, not a claim that every painted detail has exact geometry. PNG hashes require renewed review after any source replacement.",
   "files": {
     "cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
@@ -44,11 +44,18 @@
     "adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
     "adobe-veranda-night.png": "0ab2a6b62393681e7bc44ff2ea319a6ed60bf84bfcb665db7b8e5be18024e655",
     "banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
-    "banana-treatment-night.png": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4"
+    "banana-treatment-night.png": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4",
+    "apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4"
   },
   "banana_treatment_review": {
     "date": "2026-10-14",
     "landmarks": "Masonry ground corners and upper rim edges, upright front corner. Night geometry visually matches daytime.",
     "notes": "Shared affine camera calibration, full-silhouette grid fit; no auxiliary platform."
+  },
+  "farming_review": {
+    "date": "2026-10-15",
+    "notes": "New pasture and hive roof, fence and box edges traced in building-projection.js. New orchard trees arranged along a diamond, with disconnected mulch rings and no platform. These three unlit outdoor plots share their daytime alpha geometry and use a runtime night tint; no duplicated night PNGs."
   }
 }

@@ -269,6 +269,42 @@ mod tests {
         );
     }
     #[test]
+    fn pickup_interrupting_a_meal_clears_its_store_reservation_before_saving() {
+        let mut g = healthy();
+        let store = state(&mut g).village.logistics.unwrap().stores[0].id;
+        {
+            let mut query = g.app.world_mut().query::<&mut Resident>();
+            let mut r = query
+                .iter_mut(g.app.world_mut())
+                .find(|r| r.id == 0)
+                .unwrap();
+            r.task = "eat".into();
+            r.activity_store = Some(store);
+            r.activity_material = Some(economy::FOOD);
+        }
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.order_supplies_pickup(&bundle(), 0), "ok");
+        assert!(state(&mut g).residents[0].activity_store.is_none());
+        for phase in [
+            mobility::Phase::Leaving,
+            mobility::Phase::Away,
+            mobility::Phase::Returning,
+        ] {
+            until(&mut g, |s| {
+                s.residents[0]
+                    .trip
+                    .as_ref()
+                    .is_some_and(|t| t.phase == phase)
+            });
+            let saved = g.snapshot();
+            assert!(
+                g.restore(&saved),
+                "pickup saves must reload during {phase:?}"
+            );
+        }
+    }
+    #[test]
     fn delivery_conversion_refunds_fee_and_cannot_repeat_or_cancel() {
         let mut g = healthy();
         let funds = state(&mut g).village.economy.money;

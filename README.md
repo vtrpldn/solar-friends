@@ -14,6 +14,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Construction economy](#construction-economy)
 - [Village simulation plan](simulator-plan.md)
 - [Completed gameplay and artwork playtest](playtest.md)
+- [Farming and animal care](#farming-and-animal-care)
 - [Village quests](#village-quests)
 - [Village situations](#village-situations)
 - [Development tools](#development-tools)
@@ -36,7 +37,7 @@ Open [the village](http://127.0.0.1:4173). The pinned Rust toolchain includes th
 
 Choose a free blueprint in Build and click a clearing. Open Projects to inspect staged materials, priorities and progress; source local materials or buy missing supplies in Town. Residents construct ready stages during community work hours, or you can select a resident and ask for help. People can refuse based on their energy or hunger. Explaining the community need can overcome reluctance, but never exhaustion.
 
-Chicken coops need stone footings, prepared frames, roof tiles and fittings, and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes three ingredients, while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Feeding reserves room for at most twelve eggs across all coops, including batches underway.
+Chicken coops need stone footings, prepared frames, roof tiles and fittings, and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes two delivered fodder, or three ingredients while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Feeding reserves room for at most twelve eggs across all coops, including batches underway.
 
 Gardens need planting, watering, moist growth, and harvesting. Lettuce takes three game hours; beans take six; tomatoes take five before the first of three harvests. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents forage food, collect needed building materials from player-established plots, carry river water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. The arrival tutorial starts on an empty 28×28 lot (784 tiles, roughly twice the previous 400). Build a cistern, two homes, a garden, and a kitchen, bring in a harvest, serve a prepared meal, and reach the next morning.
 
@@ -48,7 +49,7 @@ Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls f
 
 A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and residents have individual preferred bedtimes, adjusted earlier when tired and later when rested (20:00–23:30). Each locks a 6–9 hour sleep target based on energy when settling down; travel and interruptions do not count as sleep. When everyone is actually asleep or working off-site, time automatically advances at 16× and restores the player’s selected speed when someone wakes or begins returning. Pauses and open dialogs still stop time. Autonomous chores run from 09:00 to noon and 15:00 to 16:00; urgent foraging can interrupt free time while residents are awake. Requested household tasks can continue outside those windows, subject to their needs. Material collection and preparation respect community work hours even when requested. Optional outside jobs depart from 09:00 (until 10:00 if morning needs delay departure), run until 17:00 and then return to the village. Residents spend free time on nature walks, birdwatching, gentle stretches, daydreaming, and stargazing after 20:00. Hobbies restore energy, use individual quiet spots, and survive reloading. The lighting changes continuously at dawn and dusk. Existing walking, looking, stretching, and sitting animations accompany these activities.
 
-New villages restart after confirmation and retain a backup for their mode. This economy uses version 3 saves; earlier formats do not import. Old browser keys remain untouched.
+New villages restart after confirmation and retain a backup for their mode. The current game writes version 22 saves; older playable saves do not import. Development fixtures use a separate authored format. Old browser keys remain untouched.
 
 ## Game modes
 
@@ -159,6 +160,18 @@ When ingredients and meals run low, residents prioritize gathering wild food eve
 Autonomous food work tops up ingredients only below eighteen ingredients and thirty ingredients plus meals. Cooking resumes below eight prepared meals, with kitchen duty rotating across residents. Completed harvests and pots can exceed those thresholds by one batch; workers recheck the pantry before adding more. Timber trips stop adding unwanted fruit. Explicitly requested production still works when the pantry is full. Old surpluses are consumed normally rather than discarded.
 
 The **A relaxed afternoon** developer scenario demonstrates hobbies with a modest pantry. Run `node scripts/verify-leisure.mjs` after rebuilding to check two weeks each of arrival, established, hungry, and surplus villages, including food bounds, individual free time, and save compatibility.
+
+## Farming and animal care
+
+Gardens and greenhouses offer lettuce (180 moist growing minutes), beans (360), tomatoes (300, then two 180-minute regrowths), maize (720), cassava (1440) and fodder grass (480). Soil and light modify growth and yields. Beans, cassava and fodder dry half as quickly as lettuce. Harvest beans, then harvest a different food crop in the same bed to improve nutrients and soil cover. Buildings → Growing details shows the previous crop, rotation count and pollination. Fodder becomes feed in the garden's actual store; it does not add household ingredients. Routine feed growing pauses around 24 stored units.
+
+- Fruit orchards occupy 3×3 tiles. Construction uses four delivered tree seedlings and two compost. Establishment takes six moist growing days; subsequent fruit takes two. Trees remain planted after harvest. Dry roots pause growth. A tended nearby apiary adds two fruit.
+- Goat pastures occupy 3×3 tiles and include a purchased dairy goat pair in their final construction stage. Residents carry feed to a six-fodder buffer and fresh water to the trough. Daily attended care consumes two fodder and two fresh water. Fed goats grow 2–4 milk over a day, according to wellbeing; collection also provides an organic residue for composting or digestion. Milk collection pauses around eight stored milk. Daily care continues when reserves are full or milk production is paused. Reclaimed water cannot fill the drinking trough.
+- Stingless bee apiaries occupy one tile and require a purchased colony. Residents inspect hives every two days. A flowering bean/tomato garden, orchard or food forest within six tiles supports honey growth. Twelve daylight hours yield three honey, collected by a resident. Inspected hives improve nearby bean and tomato yields by 15% and add two orchard fruit. Honey collection pauses around eight stored.
+
+Milk and honey are separate, located food portions. Residents walk to them before eating; they can also be sold through Trade. Milk keeps for two game days and honey for 28 in Story. Hens prefer two delivered fodder per batch, with three ingredients as the fallback. These rates, lifetimes and yields are game balance values.
+
+Build → Food & growing contains the new plans. Buildings shows supplies, wellbeing, progress, assigned workers and production controls; Supplies → Pantry links to each farm. Story introduces orchards, rotations, dairy and bees in A Fuller Table, after unlocking their plans through the earlier chapters. Sandbox unlocks them immediately and replenishes modest feed when livestock is present. The protected `farming` development scene exercises real resident work without changing a saved village.
 
 ## Village quests
 
