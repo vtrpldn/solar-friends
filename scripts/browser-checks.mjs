@@ -1,3 +1,4 @@
+import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -356,6 +357,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkKitchenControls({page,saved,capture});
   await checkGatheringControls({page,saved,capture});
   await checkFreshnessControls({page,saved,capture});
+  await checkProcessControls({page,saved,capture});
   await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();

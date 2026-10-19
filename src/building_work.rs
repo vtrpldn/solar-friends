@@ -304,6 +304,7 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
         }
         event(v, "Our building is ready in its new place.");
     } else {
+        processes::close(v, id);
         v.buildings.retain(|b| b.id != id);
         v.economy.projects.retain(|p| p.building != id);
         v.power.disabled.retain(|&b| b != id);
@@ -455,6 +456,9 @@ impl Game {
             let mut j = j;
             j.id = Some(work_id);
             v.building_jobs.push(j);
+            if action != Action::Move {
+                processes::close(&mut v, id);
+            }
             v.buildings
                 .iter_mut()
                 .find(|b| b.id == id)

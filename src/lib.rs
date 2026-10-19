@@ -19,6 +19,7 @@ mod modes;
 mod navigation;
 mod occupations;
 mod power;
+mod processes;
 mod production;
 mod progression;
 mod requests;
@@ -144,6 +145,8 @@ pub struct Village {
     pub production: production::State,
     #[serde(default)]
     pub freshness: freshness::State,
+    #[serde(default)]
+    pub processes: processes::State,
     #[serde(skip)]
     pub activity_claims: [Option<workforce::Claim>; 5],
     #[serde(skip)]
@@ -1124,9 +1127,10 @@ impl Game {
                 workforce: workforce::State::default(),
                 production: production::State::default(),
                 freshness: freshness::State::default(),
+                processes: processes::State::default(),
                 activity_claims: std::array::from_fn(|_| None),
                 workforce_peers: std::array::from_fn(|_| None),
-                version: 9,
+                version: 10,
                 map_size: MAP_SIZE,
                 minutes: 480.,
                 wood: 32.,
@@ -1513,6 +1517,7 @@ impl Game {
             || !workforce::valid(v)
             || !production::valid(v)
             || !freshness::valid(v)
+            || !processes::valid(v)
             || !gatherings::valid(v)
             || !simulation::valid(v)
             || !building_work::valid(v)
@@ -1544,6 +1549,7 @@ impl Game {
                     .flat_map(|s| s.shipments.iter().map(|h| h.id)),
             )
             .chain(v.progress.gathering_delivery.iter().map(|p| p.id))
+            .chain(v.processes.batches.iter().map(|p| p.id))
             .chain(
                 save.residents
                     .iter()
@@ -1574,7 +1580,7 @@ impl Game {
             return false;
         }
         if v.seedlings > 12
-            || !matches!(v.version, 3 | 9)
+            || !matches!(v.version, 3 | 10)
             || (v.map_size != MAP_SIZE && v.map_size != 20)
             || save.residents.len() != 5
             || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
@@ -1661,7 +1667,10 @@ impl Game {
             if !logistics::initialise(&mut save.village) {
                 return false;
             }
-            save.village.version = 9;
+            save.village.version = 10;
+            if !processes::initialise(&mut save.village) {
+                return false;
+            }
             economy::rebalance(&mut save.village);
         }
         let entities: Vec<Entity> = self
@@ -2105,7 +2114,7 @@ mod tests {
         }
         assert!(!h.restore("{}"));
         let saved = g.snapshot();
-        assert!(!h.restore(&saved.replace("\"version\":9", "\"version\":2")));
+        assert!(!h.restore(&saved.replace("\"version\":10", "\"version\":2")));
     }
     #[test]
     fn invalid_time_and_insufficient_resources_leave_state_unchanged() {
