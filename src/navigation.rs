@@ -28,7 +28,16 @@ pub fn clear(v: &Village, x: f32, y: f32) -> bool {
 /// Leave an occupied origin without entering any other plot or re-entering a
 /// boundary already crossed. This is also the line of access to a worksite.
 pub fn departure_step(v: &Village, from: [f32; 2], to: [f32; 2]) -> bool {
-    if from.iter().chain(&to).any(|n| !n.is_finite()) {
+    departure_path(v, &[from, to])
+}
+/// Keep the occupied-origin permission across a steering turn, including the
+/// water beside a river generator. Each plot boundary may be crossed once.
+pub(crate) fn departure_turn(v: &Village, origin: [f32; 2], turn: [f32; 2], to: [f32; 2]) -> bool {
+    clear(v, to[0], to[1]) && departure_path(v, &[origin, turn, to])
+}
+fn departure_path(v: &Village, path: &[[f32; 2]]) -> bool {
+    let from = path[0];
+    if path.iter().flatten().any(|n| !n.is_finite()) {
         return false;
     }
     let mut land = spacing::land(from[0], from[1]);
@@ -50,30 +59,34 @@ pub fn departure_step(v: &Village, from: [f32; 2], to: [f32; 2]) -> bool {
         .iter()
         .map(|s| source_clear(s, from[0], from[1]))
         .collect();
-    let steps = ((from[0] - to[0]).hypot(from[1] - to[1]) / 0.1)
-        .ceil()
-        .max(1.) as u32;
-    for i in 0..=steps {
-        let t = i as f32 / steps as f32;
-        let x = from[0] + (to[0] - from[0]) * t;
-        let y = from[1] + (to[1] - from[1]) * t;
-        if spacing::land(x, y) {
-            land = true;
-        } else if land {
-            return false;
-        }
-        for (j, b) in v.buildings.iter().enumerate() {
-            if spacing::clear_plot(b, x, y) {
-                buildings_out[j] = true;
-            } else if buildings_out[j] {
+    for leg in path.windows(2) {
+        let from = leg[0];
+        let to = leg[1];
+        let steps = ((from[0] - to[0]).hypot(from[1] - to[1]) / 0.1)
+            .ceil()
+            .max(1.) as u32;
+        for i in 0..=steps {
+            let t = i as f32 / steps as f32;
+            let x = from[0] + (to[0] - from[0]) * t;
+            let y = from[1] + (to[1] - from[1]) * t;
+            if spacing::land(x, y) {
+                land = true;
+            } else if land {
                 return false;
             }
-        }
-        for (j, s) in sources.iter().enumerate() {
-            if source_clear(s, x, y) {
-                sources_out[j] = true;
-            } else if sources_out[j] {
-                return false;
+            for (j, b) in v.buildings.iter().enumerate() {
+                if spacing::clear_plot(b, x, y) {
+                    buildings_out[j] = true;
+                } else if buildings_out[j] {
+                    return false;
+                }
+            }
+            for (j, s) in sources.iter().enumerate() {
+                if source_clear(s, x, y) {
+                    sources_out[j] = true;
+                } else if sources_out[j] {
+                    return false;
+                }
             }
         }
     }

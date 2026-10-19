@@ -18,6 +18,8 @@ pub struct Request {
     pub task: String,
     pub building: Option<usize>,
     pub material: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub batch: Option<simulation::Id>,
     pub destination: Option<(i32, i32)>,
     pub created: f32,
     pub finished: Option<f32>,
@@ -56,11 +58,15 @@ pub fn pending(r: &Resident, task: &str) -> bool {
 fn continuous(task: &str) -> bool {
     matches!(task, "build" | "building_work" | "outside")
 }
+pub(crate) fn related(task: &str, requested: &str) -> bool {
+    task == requested
+        || (task == "haul" && matches!(requested, "build" | "building_work" | "prepare"))
+}
 fn owns_activity(r: &Resident) -> bool {
     r.requested
-        && r.help.as_ref().is_some_and(|q| {
-            q.active() && (r.task == q.task || (r.task == "haul" && continuous(&q.task)))
-        })
+        && r.help
+            .as_ref()
+            .is_some_and(|q| q.active() && related(&r.task, &q.task))
 }
 fn finish(r: &mut Resident, v: &Village, phase: Phase, reason: &str) {
     let owned = owns_activity(r);
@@ -78,6 +84,31 @@ pub fn observe(r: &mut Resident, v: &Village) {
     let Some(q) = r.help.as_ref().filter(|q| q.active()).cloned() else {
         return;
     };
+    if q.task == "prepare"
+        && let Some(id) = q.batch
+    {
+        match production::batch(v, id).map(|b| b.phase) {
+            Some(production::Phase::Complete) => {
+                finish(
+                    r,
+                    v,
+                    Phase::Complete,
+                    "The requested production batch is ready.",
+                );
+                return;
+            }
+            Some(production::Phase::Cancelled) | None => {
+                finish(
+                    r,
+                    v,
+                    Phase::Cancelled,
+                    "The requested production batch was cancelled.",
+                );
+                return;
+            }
+            _ => {}
+        }
+    }
     if q.task == "build" {
         match v.buildings.iter().find(|b| Some(b.id) == q.building) {
             None => {
@@ -146,7 +177,7 @@ pub fn observe(r: &mut Resident, v: &Village) {
         );
         return;
     }
-    let matching = r.requested && (r.task == q.task || (r.task == "haul" && continuous(&q.task)));
+    let matching = r.requested && related(&r.task, &q.task);
     if matching {
         let away = r
             .trip
@@ -333,9 +364,15 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         } else {
             "haul"
         }
-    } else if q.task == "building_work"
-        && q.building
-            .is_some_and(|id| logistics::occupied_building(v, id))
+    } else if (q.task == "prepare"
+        && q.batch
+            .and_then(|id| production::batch(v, id))
+            .is_some_and(|b| {
+                !b.committed && !production::ready(v, b) && production::operational(v, b.site)
+            }))
+        || (q.task == "building_work"
+            && q.building
+                .is_some_and(|id| logistics::occupied_building(v, id)))
     {
         "haul"
     } else {
@@ -346,14 +383,31 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         worker.task = "haul".into();
         worker.requested = true;
         if logistics::quote(v, &worker).is_none() {
-            let reason = if q.task == "build" {
+            let reason = if q.task == "prepare" {
+                "The batch inputs need a clear route to the production worksite. Check access and reserved supplies.".into()
+            } else if q.task == "build" {
                 supply_wait(v, q.building.unwrap())
             } else {
                 "The storage contents need an accessible receiving store and a clear route before packing can start.".into()
             };
             return wait(r, Phase::Blocked, &reason);
         }
-    } else if matches!(task, "source" | "prepare") {
+    } else if task == "prepare" {
+        let Some(batch) = q.batch.and_then(|id| production::batch(v, id)) else {
+            return wait(
+                r,
+                Phase::Blocked,
+                "This request no longer has a production batch.",
+            );
+        };
+        if !production::ready(v, batch) {
+            return wait(
+                r,
+                Phase::Blocked,
+                "The batch is waiting for staged inputs or an open worksite. Check production and hauling.",
+            );
+        }
+    } else if task == "source" {
         if !economy::local_job(v).is_some_and(|(t, i)| t == task && Some(i) == q.material) {
             return wait(
                 r,
@@ -389,6 +443,13 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         "Continuing the work you asked me to help with.",
         true,
     );
+    if task == "prepare" && !q.batch.is_some_and(|id| production::assign_batch(r, v, id)) {
+        return wait(
+            r,
+            Phase::Blocked,
+            "There is no clear work position at this production site.",
+        );
+    }
     if let Some(id) = q.building.filter(|_| task != "haul") {
         let Some(b) = v.buildings.iter().find(|b| b.id == id) else {
             return false;
@@ -413,7 +474,7 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         );
     }
     r.activity_material = q.material;
-    if !continuous(&q.task) {
+    if !continuous(&q.task) && q.task != "prepare" {
         r.remaining = q.remaining;
     }
     if walking::supports(task) {
@@ -459,7 +520,12 @@ pub fn completed_batch(r: &mut Resident, v: &Village, completed: bool) {
         );
     }
 }
-pub fn matches_haul(r: &Resident, from: logistics::Owner, to: logistics::Owner) -> bool {
+pub fn matches_haul(
+    v: &Village,
+    r: &Resident,
+    from: logistics::Owner,
+    to: logistics::Owner,
+) -> bool {
     let Some(q) = r
         .help
         .as_ref()
@@ -471,7 +537,12 @@ pub fn matches_haul(r: &Resident, from: logistics::Owner, to: logistics::Owner) 
         ("build", Some(id)) => to == logistics::Owner::Site(id),
         ("building_work", Some(id)) => {
             matches!(from,logistics::Owner::Warehouse(b)|logistics::Owner::Site(b) if b==id)
+                || matches!(from,logistics::Owner::Production(site) if production::building(v,site)==Some(id))
         }
+        ("prepare", _) => q
+            .batch
+            .and_then(|id| production::batch(v, id))
+            .is_some_and(|b| to == logistics::Owner::Production(b.site)),
         _ => true,
     }
 }
@@ -504,7 +575,19 @@ pub fn enqueue(v: &mut Village, r: &mut Resident, task: &str, encourage: bool) -
     } else {
         destination_building(v, task, r.id).map(|b| b.id)
     };
-    let material = if matches!(task, "source" | "prepare") {
+    let batch = if task == "prepare" {
+        production::jobs(v)
+            .next()
+            .or_else(|| v.production.batches.iter().find(|b| b.active()))
+            .map(|b| b.id)
+    } else {
+        None
+    };
+    let material = if task == "prepare" {
+        batch
+            .and_then(|id| production::batch(v, id))
+            .map(|b| b.material)
+    } else if task == "source" {
         economy::local_job(v).map(|(_, i)| i)
     } else {
         None
@@ -521,6 +604,7 @@ pub fn enqueue(v: &mut Village, r: &mut Resident, task: &str, encourage: bool) -
         task: task.into(),
         building,
         material,
+        batch,
         destination,
         created: v.minutes,
         finished: None,
@@ -599,6 +683,12 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
                 })
         })
         && (q.task != "prepare" || q.material.is_some_and(|i| (5..=8).contains(&i)))
+        && q.batch.is_none_or(|id| {
+            q.task == "prepare"
+                && id.0 < v.simulation.next_id
+                && production::batch(v, id).map_or(!q.active(), |b| Some(b.material) == q.material)
+        })
+        && (q.task != "prepare" || !q.active() || q.batch.is_some())
         && (q.task != "building_work"
             || !q.active()
             || q.building.is_some_and(|id| {

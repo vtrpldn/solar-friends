@@ -273,6 +273,7 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
         (b.x, b.y) = destination;
         v.building_jobs[index].stage = Stage::Rebuild;
         v.building_jobs[index].work = 0.;
+        crate::production::sync(v);
         logistics::sync(v);
         event(
             v,
@@ -477,6 +478,8 @@ impl Game {
                 choose(&mut r, &village);
             }
         }
+        self.sync_production_activities();
+        self.sync_help();
         "ok".into()
     }
     pub fn cancel_building_work(&mut self, id: usize) -> String {

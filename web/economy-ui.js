@@ -1,5 +1,6 @@
 import {itemIcon,materialIcons} from './game-ui.js';
 import {createProjectForecasts} from './forecasts.js';
+import {installProductionUI,productionSiteName} from './production-ui.js';
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:n%100?2:0,maximumFractionDigits:2}).format(n/100);
 const time=t=>`Day ${Math.floor(t/1440)+1} · ${String(Math.floor(t%1440/60)).padStart(2,'0')}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16,6 +17,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   $('#project-forecast-run').onclick=forecasts.start;
   $('#project-forecast-cancel').onclick=forecasts.cancel;
   const transact=result=>{if(result!=='ok')notify(result);else{forecasts.invalidate();lastProjects='';changed();update();}};
+  const productionUI=installProductionUI({snapshot,game,transact,notify});
   const materials=snapshot().environment.economy.materials;
   $('#town-catalog').innerHTML=materials.map(m=>`<article class="town-item"><div class="trade-item-art">${itemIcon(materialIcons[m.id])}</div><label for="buy-${m.id}">${m.name}</label><small class="trade-price">${money(m.price)}</small><div class="trade-quantity"><button type="button" data-adjust="-1" aria-label="Remove one ${m.name.toLowerCase()}">−</button><input id="buy-${m.id}" type="number" min="0" max="100" step="1" value="0" aria-label="Order ${m.name}" data-material="${m.id}"><button type="button" data-adjust="1" aria-label="Add one ${m.name.toLowerCase()}">+</button></div></article>`).join('');
   $('#spare-material').innerHTML=materials.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
@@ -88,7 +90,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     transact(result);if(result==='ok'&&['harvest','plant'].includes(action))notify('Queued for community work. Resume time if the village is paused.');
   };
   $('#land-sources').onchange=event=>{const input=event.target.closest('[data-source-setting]');if(!input)return;const index=Number(input.dataset.site),site=snapshot().village.economy.sources[index];transact(game().configure_source(index,input.dataset.sourceSetting==='replant'?input.checked:site.auto_replant,input.dataset.sourceSetting==='harvest'?input.checked:site.auto_harvest));};
-  const locationName=p=>({camp:'Arrival store',warehouse:`Storage house ${(p.owner.id??0)+1}`,source:`Material plot ${(p.owner.id??0)+1}`,site:`Construction site ${(p.owner.id??0)+1}`,ground:'Recoverable pile'}[p.owner.kind]);
+  const locationName=p=>p.owner.kind==='production'?productionSiteName(snapshot().village.production.sites.find(s=>s.id===p.owner.id)||{},snapshot().village)+' pile':({camp:'Arrival store',warehouse:`Storage house ${(p.owner.id??0)+1}`,source:`Material plot ${(p.owner.id??0)+1}`,site:`Construction site ${(p.owner.id??0)+1}`,ground:'Recoverable pile'}[p.owner.kind]);
   $('#storage-locations').onclick=event=>{
     const button=event.target.closest('[data-store-target]');if(!button)return;
     const row=button.closest('.storage-location'),building=Number(button.dataset.storeTarget),store=snapshot().village.logistics.stores.find(p=>p.owner.kind==='warehouse'&&p.owner.id===building),target=[...store.target];
@@ -110,7 +112,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     }
     $('#sell-surplus').disabled=e.saleable_food===0;$('#sell-surplus').textContent=e.saleable_food?`Sell ${Math.min(20,e.saleable_food)} surplus ingredients`:'36 ingredients stay for the household';
     $('#exchange-parts').disabled=!e.exchange_available||v.food<40||e.used+2>e.capacity;
-    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}`;
+    $('#storage-summary').textContent=`${e.used} / ${e.capacity} spaces · including incoming orders${e.salvage_reserved?` and ${e.salvage_reserved} reserved for salvage`:""}${e.production?.reserved_space?` · ${e.production.reserved_space} spaces reserved for processing`:''}`;
     $('#project-summary').textContent=e.projects.length?`${e.projects.length} active ${e.projects.length===1?'project':'projects'} · work follows normal community hours`:'Plan a building to start a shared project. Blueprints are free.';
     const outlook=forecasts.summary();
     $('#project-forecast').hidden=!e.projects.length;
@@ -121,7 +123,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#project-forecast-assumptions').hidden=!outlook.assumptions;
     $('#project-forecast-assumptions').textContent=outlook.assumptions;
     $('#property-description').textContent=e.property;
-    $('#preparation-recipes').innerHTML=`<p>${e.workshop?'Workshop preparation includes roof tiles and efficient salvage recovery.':'Residents prepare frames, wall material and fittings at the camp. A workshop adds roof tiles and more efficient salvage recovery.'}</p>`+e.preparation.map(r=>`<p class="recipe-stage"><b>${r.yield} ${e.materials[r.material].name.toLowerCase()}</b>${r.inputs.map((n,i)=>n?`${n} ${e.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')}</p>`).join('');
+    productionUI.update(s);
     const locations=v.logistics?.stores||[],shipments=v.logistics?.shipments||[],locationKey=JSON.stringify({locations,shipments:shipments.map(h=>[h.resident,h.material,h.amount,h.carrying])});
     if(locationKey!==lastLocations&&!$('#storage-locations').contains(document.activeElement)){
       lastLocations=locationKey;

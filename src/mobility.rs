@@ -81,6 +81,7 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
     });
     r.activity_building = None;
     r.activity_material = None;
+    r.activity_batch = None;
     r.visit_building = None;
     (r.target_x, r.target_y) = gate(v, r.id);
     r.reason=match purpose {
