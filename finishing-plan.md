@@ -64,17 +64,17 @@ The awake [first-hour record](.github/finishing-review/story-awake-session.json)
 
 Measure the actual desktop browser used to play the game. The existing [performance report](.github/isometric-performance/scene-performance.json) covers 120 frames per scene in software-rendered Chromium, so it does not establish sustained smoothness in that browser.
 
-- [ ] Record hardware, browser, viewport, render backend, build, selected speed and whether automatic acceleration is active.
-- [ ] Run a continuous 30–60 minute session with normal play, a dense supported village, rain, night lighting, and 1×, 8× and 16× operation. Density means buildings, crops, resource piles and concurrent jobs with the supported resident population.
-- [ ] Pan and zoom, open ordinary game panels, queue construction and hauling, change a utility and save/reload. Distinguish initial loading and deliberate pauses from stalls during active play.
-- [ ] Record real frame intervals, simulation work, rendering work and input response in five-minute windows. Track resource/cache use across repeated scene and zoom changes to detect growth rather than treating a single high sample as a leak.
-- [ ] Reproduce the largest stalls, identify their cause and fix the measured bottleneck. Recheck material, liquid and energy accounting if an optimization changes simulation behavior.
+- [x] Record hardware, browser, viewport, render backend, build, selected speed and whether automatic acceleration is active.
+- [x] Run a continuous 30–60 minute session with normal play, a dense supported village, rain, night lighting, and 1×, 8× and 16× operation. Density means buildings, crops, resource piles and concurrent jobs with the supported resident population.
+- [x] Pan and zoom, open ordinary game panels, queue construction and hauling, change a utility and save/reload. Distinguish initial loading and deliberate pauses from stalls during active play.
+- [x] Record real frame intervals, simulation work, rendering work and input response in five-minute windows. Track resource/cache use across repeated scene and zoom changes to detect growth rather than treating a single high sample as a leak.
+- [x] Reproduce the largest stalls, identify their cause and fix the measured bottleneck. Recheck material, liquid and energy accounting if an optimization changes simulation behavior.
 
 Proposed desktop targets: normal 1× play should approach the display's refresh rate, with a 95th-percentile frame interval at or below 33 ms; dense rain/night or fast-forward should remain at or below 50 ms. Investigate unexplained pauses above 100 ms and visible input lag. Record target misses honestly rather than lowering targets to match a run.
 
 Acceptance: no crash, growing backlog, recurring input stall or unbounded resource growth during the session; report all scenarios and their measured limits. The [sprite cache](web/paint-cache.js) stays within its defined budget. Preserve exact simulation progress at higher speed. Recheck [live-edit recovery](scripts/check-iteration.mjs) only if the development loop changes.
 
-The [thirty-minute baseline](.github/finishing-review/dense-performance-baseline.json) meets the frame targets in all six windows, but records recurring fast-forward simulation stalls. The cable-anchor geometry bottleneck has a focused fix and exact [simulation parity evidence](.github/finishing-review/cable-anchor-parity.json); browser rechecking remains open.
+The [thirty-minute baseline](.github/finishing-review/dense-performance-baseline.json) meets the frame targets in all six windows, but records recurring fast-forward simulation stalls. The cable-anchor geometry bottleneck has a focused fix and exact [simulation parity evidence](.github/finishing-review/cable-anchor-parity.json); the [focused browser recheck](.github/finishing-review/dense-performance-recheck.json) meets the target and does not repeat those simulation stalls. Initial loading and isolated long frames remain explicitly recorded.
 
 ## 4. Reconcile documentation
 
@@ -99,7 +99,7 @@ Acceptance: approved changes reach the intended branch in dependency order, requ
 
 - [x] Artwork review complete; source identities and visual findings recorded.
 - [x] Manual first-hour Story playtest complete; blocking and material pacing/clarity defects fixed and rechecked.
-- [ ] Sustained desktop performance measured; remaining limitations documented.
+- [x] Sustained desktop performance measured; remaining limitations documented.
 - [x] Current documentation reconciled with the game.
 - [ ] Final checks complete and individually approved PRs integrated.
 - [ ] Integrated build launched and checked, with a concise completion report linking the evidence.
