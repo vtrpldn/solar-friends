@@ -1,3 +1,4 @@
+import {checkSupplierControls,checkSupplierSandboxSave} from './supplier-browser-checks.mjs';
 import {checkMaintenanceControls,checkMaintenanceSandboxSave} from './maintenance-browser-checks.mjs';
 import {checkSkillControls,checkSkillSandboxSave} from './skills-browser-checks.mjs';
 import {checkFarmingControls} from './farming-browser-checks.mjs';
@@ -86,6 +87,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkFarmingControls({page,saved,capture});
   await checkMaintenanceControls({page,saved,capture});
   await checkSkillControls({page,saved,capture});
+  await checkSupplierControls({page,saved,capture});
   await checkUtilityRoutes({page,saved,capture});
   await checkWaterControls({page,saved,capture});
   await checkPipeControls({page,saved,capture});
@@ -255,7 +257,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Trade',exact:true}).click();
   await page.locator('[name="town-transport"][value="delivery"]').check();await page.locator('#buy-10').fill('1');await page.locator('#town-order').click();
   const deliveryFunds=await page.evaluate(()=>window.solarDev.snapshot().village.economy.money);
-  await page.getByText('Orders & deliveries',{exact:true}).click();await page.locator('[data-collect-order="0"]').click();
+  const deliveries=page.locator('details').filter({has:page.locator('#town-orders')});if(!await deliveries.evaluate(el=>el.open))await deliveries.locator('summary').click();await page.locator('[data-collect-order="0"]').click();
   await page.locator('#pickup-order-driver').selectOption('1');
   assert((await page.locator('#pickup-order-summary').textContent()).includes('R$ 40'));
   await capture('Choose a driver for same-day town pickup','town-pickup.png');
@@ -688,6 +690,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkClimateSandboxSave({browser,base,output,screenshots,errors});
   await checkMaintenanceSandboxSave({browser,base,output,screenshots,errors});
   await checkSkillSandboxSave({browser,base,output,screenshots,errors});
+  await checkSupplierSandboxSave({browser,base,output,screenshots,errors});
   await checkArtworkInterface({browser,base,output,screenshots,errors});
   assert.deepEqual(errors,[],'The Sandbox seasonal setting must have no browser errors');
 }

@@ -184,7 +184,12 @@ for(let i=0;i<5;i++){
  assert.equal(g.harvest_source(i),'ok');until(s=>s.village.economy.sources[i].harvests>0,`source ${i} resident harvest`);
 }
 for(let tree=0;tree<4&&!snap().village.progress.timber_replanted;tree++){
- until(s=>s.village.economy.sources[timber].remaining>=8,'timber maturity');assert.equal(g.harvest_source(timber),'ok');
+ // Autonomous harvesting may finish the whole plot during earlier chapters.
+ // Buy its actual replacement seedlings instead of waiting for cleared trees.
+ const empty=s=>!s.village.economy.sources[timber].planted&&s.village.economy.sources[timber].harvests>0;
+ until(s=>empty(s)||s.village.economy.sources[timber].remaining>=8,'timber maturity');
+ if(empty(snap()))break;
+ assert.equal(g.harvest_source(timber),'ok');
  const harvests=snap().village.economy.sources[timber].harvests;
  until(s=>s.village.economy.sources[timber].harvests>harvests,'whole timber tree harvest');
  if(!snap().village.economy.sources[timber].planted)break;

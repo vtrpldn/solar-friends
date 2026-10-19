@@ -1,0 +1,489 @@
+{
+  "why": "Town purchases, local preparation and resident pickups need predictable tradeoffs while daily needs and leisure remain protected.",
+  "engineSourceCommit": "7f3787e2bb9cf4305f93bd33acc0bbb6488e9e1a",
+  "frontendSourceCommit": "fc6d24f1cd6d723544e44fa54cab9a1d7642307c",
+  "wasmSha256": "d36c1c37e3739e1bcde9362838393d02478f24810fdfbe020f5e9ab6d8411072",
+  "completedAt": "2026-10-16T08:07:09.301Z",
+  "nativeTests": 467,
+  "strictAllTargetLint": "PASS",
+  "javascriptSyntaxChecks": 162,
+  "publicVerifiers": [
+    {
+      "name": "verify-art-preview.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-artwork.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-autonomy.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-away-routines.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-banana-treatment.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-batteries.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-building-projection.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-building-work.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-chickens.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-circular.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-climate.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-cultivation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-dev-tools.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-economy.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-electrical-fixtures.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-electricity.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-farming.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-food.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-forecast.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-freshness.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-gatherings.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-grid-foundations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-kitchen-batches.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-land.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-leisure.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-living-land.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-logistics.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-maintenance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-modes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-navigation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-night-lighting.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-occupations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-organics.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-passive-processes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-pipes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-planting.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-playtest.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-polish.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-power.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-production.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-quests.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-requests.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-resident-animation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-resource-sites.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-restoration.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sanitation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-seasonal-balance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-simulation.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-situations.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-skills.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sleep-speed.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sprite-frames.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-sprite-grid-fit.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-storage.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-suppliers.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-tools.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-utility-balance.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-utility-routes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-water.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-weather.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-work-routes.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "verify-workforce.mjs",
+      "status": "PASS"
+    }
+  ],
+  "suppliers": {
+    "paidDelivery": 43800,
+    "paidPickup": 39800,
+    "offerMaterial": 13,
+    "pickupPhases": [
+      "leaving",
+      "away",
+      "returning"
+    ],
+    "exactPickupCheckpoints": 11,
+    "freightDue": 40920,
+    "freightPaid": 7176,
+    "delayedCalendarDay": 26,
+    "baselineMinutes": 1440
+  },
+  "desktop": {
+    "status": "PASS",
+    "captures": 191,
+    "errors": [],
+    "sourceAndBuildHash": "467a83238b697d46633e2d0f276ff66169506a5c4ba2e86ee0385c7424219fdf",
+    "focusedCaptures": 8,
+    "focusScope": "Offers, partial discounts, exact receipts, real pickup, announced freight, actual midnight restock with focused basket, Sandbox save isolation, village-specific draft reset"
+  },
+  "story": {
+    "status": "PASS",
+    "fresh": true,
+    "chapters": 13,
+    "buildingKinds": 21,
+    "completedDay": 106,
+    "localAdobeDays": 9,
+    "paidPartsDeliveries": 1,
+    "paidPartsCostCentavos": 8158,
+    "exactChapterCheckpoints": 13
+  },
+  "longRunSource": {
+    "path": "artifacts/suppliers/earned-campaign-before-long.json",
+    "sha256": "878bfb13a2cd1acb965dcd19b819390a35be99fad834b8e24bc433b5a6fe8821",
+    "day": 106,
+    "provenance": "Earned exact chapter-nine continuation completed before the later fresh Story replay. No authored progress or resources. Both continuations use the matching release."
+  },
+  "seasonal": {
+    "passed": true,
+    "days": 84,
+    "from_day": 106,
+    "to_day": 190,
+    "seasons": [
+      "dry",
+      "wet"
+    ],
+    "rainSamples": 304,
+    "foodMeasure": "Ready ingredients, meals, milk and honey; eggs require cooking",
+    "minFood": 7,
+    "maxFood": 62,
+    "minBasicFood": 0,
+    "maxBasicFood": 53,
+    "maxHunger": 44.741310119628906,
+    "minEnergy": 87.92489624023438,
+    "exact_checkpoints": 85,
+    "serviceOrders": 7,
+    "serviceSpending": 80784,
+    "completedServices": 7,
+    "pendingServices": 0,
+    "residents": [
+      {
+        "work": 0.18951612903225806,
+        "leisure": 0.5960729312762973
+      },
+      {
+        "work": 0.18724960808221564,
+        "leisure": 0.611914300644487
+      },
+      {
+        "work": 0.16666666666666666,
+        "leisure": 0.5865284974093264
+      },
+      {
+        "work": 0.17588898525585428,
+        "leisure": 0.608326105810928
+      },
+      {
+        "work": 0.17928286852589642,
+        "leisure": 0.5967434609388533
+      }
+    ]
+  },
+  "utility": {
+    "wasm_sha256": "d36c1c37e3739e1bcde9362838393d02478f24810fdfbe020f5e9ab6d8411072",
+    "continuedFromEarnedInstallation": false,
+    "installation_days": 29,
+    "installation_spending": 404040,
+    "results": [
+      {
+        "name": "manual",
+        "from_day": 135,
+        "days": 24,
+        "fund": 1202671,
+        "lowestFood": 5,
+        "highestFood": 42,
+        "peakHunger": 49.58114242553711,
+        "workshop_energy": 0,
+        "residents": [
+          {
+            "work": 0.18287461773700306,
+            "leisure": 0.5902140672782875
+          },
+          {
+            "work": 0.17073170731707318,
+            "leisure": 0.6030487804878049
+          },
+          {
+            "work": 0.15538089480048367,
+            "leisure": 0.5441354292623942
+          },
+          {
+            "work": 0.16091954022988506,
+            "leisure": 0.5819721718088324
+          },
+          {
+            "work": 0.18115501519756838,
+            "leisure": 0.5623100303951368
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "fresh",
+            "water": 0
+          },
+          {
+            "kind": "greywater",
+            "water": 0
+          },
+          {
+            "kind": "sewage",
+            "water": 0
+          },
+          {
+            "kind": "irrigation",
+            "water": 0
+          }
+        ]
+      },
+      {
+        "name": "connected",
+        "from_day": 135,
+        "days": 24,
+        "fund": 852871,
+        "lowestFood": 4,
+        "highestFood": 43,
+        "peakHunger": 25.362064361572266,
+        "workshop_energy": 0.8912621404230598,
+        "residents": [
+          {
+            "work": 0.20319214241866176,
+            "leisure": 0.5807243707796194
+          },
+          {
+            "work": 0.16056166056166057,
+            "leisure": 0.6068376068376068
+          },
+          {
+            "work": 0.14457831325301204,
+            "leisure": 0.5644578313253013
+          },
+          {
+            "work": 0.1756511205330103,
+            "leisure": 0.6075105996365839
+          },
+          {
+            "work": 0.19114077669902912,
+            "leisure": 0.5995145631067961
+          }
+        ],
+        "flow": [
+          {
+            "kind": "fresh",
+            "water": 52.99999999999953
+          },
+          {
+            "kind": "fresh",
+            "water": 211.2936108596681
+          },
+          {
+            "kind": "greywater",
+            "water": 48.69999999999976
+          },
+          {
+            "kind": "sewage",
+            "water": 35.99999999999979
+          },
+          {
+            "kind": "irrigation",
+            "water": 12.000000000000023
+          }
+        ]
+      }
+    ]
+  },
+  "foodMeasurement": {
+    "seasonal": "Counts only ingredients, prepared meals, stored milk and honey, the four foods consumed directly by native food::meal/eat. Eggs and committed cooking inputs are excluded.",
+    "basicReserveCanBeZero": true,
+    "firstLowBasic": {
+      "minutes": 218238.75,
+      "ingredients": 0,
+      "meals": 0,
+      "milk": 3,
+      "honey": 9,
+      "hunger": [
+        15.34003734588623,
+        1.8200011253356934,
+        1.072500467300415,
+        0.5850000381469727,
+        2.5675017833709717
+      ]
+    },
+    "utility": "Retains its existing ingredients-plus-meals metric; both paired villages maintain a positive basic reserve."
+  },
+  "hostedCI": {
+    "status": "BLOCKED",
+    "reason": "GitHub account billing/spending limit prevents the hosted job from starting; no merge performed."
+  },
+  "remainingRoadmap": [
+    "Outcome-based linear Story introductions with optional alternatives",
+    "Optional Sandbox logistics, land and utility constraints",
+    "Integrated paired housing expansion and planning balance"
+  ]
+}

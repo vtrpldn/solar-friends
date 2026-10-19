@@ -66,6 +66,7 @@ impl Game {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         v.mode = mode;
         v.skills.enabled = mode == Mode::Story;
+        v.market.enabled = mode == Mode::Story;
         v.climate.enabled = mode == Mode::Story;
         v.maintenance.enabled = mode == Mode::Story;
         v.maintenance.automatic = mode == Mode::Story;

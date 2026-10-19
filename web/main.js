@@ -550,7 +550,7 @@ function announceMilestones() {
   }
 }
 function resetPolish() {
-  economyUI?.resetForecast();
+  economyUI?.resetForVillage();
   previousVillage = state.village; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   movingBuilding = null; movingBattery = null; pendingRemoval = null;
@@ -1214,7 +1214,8 @@ function updateUI() {
   $('.goal-tracker').hidden=free;
   $('[data-panel="goals-panel"]').hidden=free;
   $('[data-panel="projects-panel"]').hidden=free;
-  $('[data-panel="town-panel"]').hidden=free;
+  // Trade also holds optional supplier settings in free Sandbox.
+  $('[data-panel="town-panel"]').hidden=false;
   $('[data-panel="power-panel"]').hidden=!buildingUnlocked(state.village,'solar_farm');
   $('#new-scenario').textContent=free?'New sandbox':'New story';
   $('#help-intro').textContent=free?'Sandbox unlocks every building. Construction is instant and free; ingredients, meals, water, tools and funds replenish while village life unfolds.':'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
@@ -1841,7 +1842,7 @@ function setup() {
 // Both the workbench and automated checks use this interface. Mutations require
 // a sandbox; the original Game object stays untouched until it is restored.
 function refreshDevScene() {
-  economyUI?.resetForecast();
+  economyUI?.resetForVillage();
   setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; movingBattery = null; pendingRemoval = null;

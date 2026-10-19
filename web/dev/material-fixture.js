@@ -2,6 +2,8 @@
 export function resetMaterialLocations(state) {
   if(state.village.maintenance?.jobs?.some(j=>j.finished==null))throw new Error('Finish or cancel equipment service before restaging a material fixture.');
   state.village.maintenance={schema:1,enabled:false,records:[],jobs:[]};
+  state.village.market={schema:1,enabled:false,last_period:0,used:0};
+  for(const o of state.village.economy.orders)if(o.terms?.discount)throw Error("Do not restage a fixture with claimed supplier offers.");
   state.village.skills={schema:1,enabled:false,people:Array.from({length:5},()=>({experience:Array(6).fill(0),today:Array(6).fill(0),day:0}))};
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
