@@ -2,12 +2,12 @@ import {habitatAt,habitatColors} from "./habitats.js";
 // Paint terrain once per village layout. Frames reuse this texture while panning
 // and zooming; the simulation's isometric coordinates stay unchanged.
 export const GROUND_START = -2.5;
-export const GROUND_SIZE = 37;
-const RESOLUTION = 2560;
+export const GROUND_SIZE = 69;
+const RESOLUTION = 4096;
 
-export const MAP_SIZE = 32;
+export const MAP_SIZE = 64;
 export function riverCenter(y) {
-  return 29.8 + Math.sin(y * 0.22) * 0.65;
+  return (MAP_SIZE - 2.2) + Math.sin(y * 0.22) * 0.65;
 }
 export function hydroCell(y){return Math.ceil(riverCenter(y)-1.35);}
 export function riverBank(x, y) {
@@ -108,7 +108,7 @@ function paintHabitats(g,seed){
   for(let y=0;y<MAP_SIZE;y+=2)for(let x=0;x<MAP_SIZE;x+=2){
     const name=habitatAt(seed,x,y);if(name==='Flower meadow')continue;
     const [px,py]=groundPoint(x,y),radius=unit*2.4,patch=g.createRadialGradient(px,py,0,px,py,radius);
-    patch.addColorStop(0,habitatColors[name]+'38');patch.addColorStop(1,habitatColors[name]+'00');
+    patch.addColorStop(0,habitatColors[name]+'20');patch.addColorStop(1,habitatColors[name]+'00');
     g.fillStyle=patch;g.fillRect(px-radius,py-radius,radius*2,radius*2);
   }
 }
@@ -116,6 +116,8 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   const ground = surface();
   const g = ground.getContext("2d");
   paintedTexture(g,texture,0);
+  // Quiet the repeated leaf texture so buildings and planted plots stay legible.
+  g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
   paintHabitats(g,seed);
   paintSoil(g,soil);
   const paths = surface();

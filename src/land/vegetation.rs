@@ -10,7 +10,7 @@ pub struct Tree {
     pub cleared: bool,
 }
 pub fn generate(seed: u32) -> Vec<Tree> {
-    (0..(1800 * MAP_SIZE * MAP_SIZE / 4096) as u32)
+    (0..(1000 * MAP_SIZE * MAP_SIZE / 4096) as u32)
         .filter_map(|index| {
             let sample = |domain| simulation::sample(seed, domain, index) as f64 / u32::MAX as f64;
             let x = (sample(71) * (MAP_SIZE + 4) as f64 - 2.) as f32;
@@ -21,8 +21,15 @@ pub fn generate(seed: u32) -> Vec<Tree> {
             {
                 return None;
             }
+            // Broad seeded groves alternate with open ground instead of an even scatter.
+            let phase = (seed % 997) as f32 / 997. * std::f32::consts::TAU;
+            let grove = (x * 0.22 + phase).sin() + (y * 0.19 - phase).cos();
+            if grove < 0.3 {
+                return None;
+            }
             let biome = habitat(seed, x, y).0;
-            let detail = index % 3 != 0;
+            // Keep understory accents sparse enough that individual trees read clearly.
+            let detail = index % 5 < 2;
             let species = if detail {
                 match biome {
                     "Atlantic forest" => 4 + index as usize % 2,

@@ -103,8 +103,8 @@ mod tests {
             let mut g = Game::new();
             assert!(g.start_mode(mode));
             let v = g.app.world().resource::<Village>();
-            assert_eq!(v.map_size, 32);
-            assert_eq!(v.land.water.len(), 1024);
+            assert_eq!(v.map_size, MAP_SIZE);
+            assert_eq!(v.land.water.len(), (MAP_SIZE * MAP_SIZE) as usize);
             assert_eq!(v.buildings.len(), 2);
             assert!(ready(v, "shed") && ready(v, "warehouse"));
             assert!(

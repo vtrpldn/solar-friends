@@ -52,7 +52,7 @@ mod water;
 mod workforce;
 use progression::Progress;
 
-pub const MAP_SIZE: i32 = 32;
+pub const MAP_SIZE: i32 = 64;
 pub const SAVE_VERSION: u32 = 29;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
@@ -241,7 +241,7 @@ fn event(v: &mut Village, text: impl Into<String>) {
     }
 }
 fn river_center(y: f32) -> f32 {
-    29.8 + (y * 0.22).sin() * 0.65
+    (MAP_SIZE as f32 - 2.2) + (y * 0.22).sin() * 0.65
 }
 fn river_bank(x: i32, y: i32) -> bool {
     x as f32 >= river_center(y as f32) - 2.3
