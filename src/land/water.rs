@@ -230,15 +230,20 @@ pub fn solar_exposure(v: &Village, n: i32, x: i32, y: i32) -> f32 {
     1. - condition(v, n, x, y).shade * 0.8
 }
 pub fn shade(v: &Village, x: i32, y: i32) -> f32 {
-    let mut exposure = 1.;
+    let mut exposure = vegetation::light(v, x, y);
     for b in &v.buildings {
         let standing = b.progress >= 100.
             || crate::building_work::job(v, b.id).is_some_and(|j| {
                 j.original_progress >= 100. && j.stage != crate::building_work::Stage::Rebuild
             });
-        if b.kind == "grove" && standing {
+        if standing && matches!(b.kind.as_str(), "grove" | "banana_treatment") {
+            let (radius, strength) = if b.kind == "grove" {
+                (3.5, 0.75)
+            } else {
+                (2.5, 0.5)
+            };
             let distance = (x as f32 - b.x as f32 - 1.).hypot(y as f32 - b.y as f32 - 1.);
-            exposure *= 1. - 0.75 * (1. - distance / 3.5).max(0.);
+            exposure *= 1. - strength * (1. - distance / radius).max(0.);
         }
     }
     for s in &v.economy.sources {

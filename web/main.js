@@ -38,6 +38,7 @@ import {
 import init, { Game } from "./pkg/solar_friends.js?v=devtools-1";
 import {
   paintTerrain,
+  soilAppearance,
   GROUND_START,
   GROUND_SIZE,
   MAP_SIZE,
@@ -189,10 +190,6 @@ const escapeHtml = (s) =>
         c
       ],
   );
-const hash = (x, y = 0) => {
-  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-  return n - Math.floor(n);
-};
 function avatar(id) {
   return `<span class="avatar" style="background:${colors[id]}20"><canvas data-portrait="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
 }
@@ -631,19 +628,6 @@ function resident(r) {
     ctx.fillText("z", p.x + 8 * s, py - 30 * s);
   }
 }
-const flora = [];
-for (let i = 0; i < 170; i++) {
-  let x = hash(i, 1) * 32 - 2,
-    y = hash(i, 2) * 32 - 2;
-  if (x > 1 && x < 27 && y > 1 && y < 27) continue;
-  if (Math.abs(x - riverCenter(y)) < 1.8) continue;
-  flora.push({
-    x,
-    y,
-    species: i % forestSpecies.length,
-    size: 0.65 + hash(i, 3) * 0.55,
-  });
-}
 function render() {
   const weather = weatherConditions(state.environment,state.village.minutes);
   canvas.dataset.weather = weather.label;
@@ -661,9 +645,12 @@ function render() {
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
   const visibleRoads=state.village.roads.filter(([x,y])=>!state.village.buildings.some(b=>occupies(b,x,y)));
-  const key = JSON.stringify([visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y])]);
+  const soil=soilAppearance(state.village.land.soil);
+  const standingTrees=state.village.land.vegetation.filter(t=>!t.cleared);
+  for(const [key,value] of Object.entries({forestSeed:state.village.land.seed,forestCount:standingTrees.length,soilCells:soil.length}))if(canvas.dataset[key]!==String(value))canvas.dataset[key]=String(value);
+  const key = JSON.stringify([visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active));
+    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil);
     groundKey = key;
   }
   ctx.save();
@@ -698,7 +685,7 @@ function render() {
   const objects = [
     ...(state.village.logistics?.stores||[]).filter(p=>p.owner.kind!=='warehouse'&&p.items.some(n=>n)).map(p=>({depth:p.x+p.y+1.3,draw:()=>drawSupplyPile(ctx,iso(p.x+.4,p.y+1),scale,p.items.reduce((a,b)=>a+b,0),nightAmount(state.village.minutes))})),
     ...state.village.economy.sources.filter(s=>s.active).map(site=>({depth:site.x+site.y,draw:()=>materialSite(site)})),
-    ...flora.filter(f=>!state.village.economy.sources.some(site=>site.active&&Math.hypot(f.x-site.x,f.y-site.y)<2.5)).map((f) => ({
+    ...standingTrees.map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),

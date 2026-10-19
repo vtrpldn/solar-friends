@@ -187,7 +187,9 @@ fn footprint_previews_use_every_cell_and_remain_read_only() {
     let home: serde_json::Value = serde_json::from_str(&g.land_preview("home", 5, 5)).unwrap();
     assert_eq!(single["cells"], 1);
     assert_eq!(home["cells"], 4);
-    assert_eq!(single["ground"], home["ground"]);
+    assert_eq!(single["ground"]["fertility"], home["ground"]["fertility"]);
+    let mean_shade=(4..=5).flat_map(|y|(4..=5).map(move |x|(x,y))).map(|(x,y)|serde_json::from_str::<serde_json::Value>(&g.land_preview("road",x,y)).unwrap()["ground"]["shade"].as_f64().unwrap()).sum::<f64>()/4.;
+    assert!((home["ground"]["shade"].as_f64().unwrap() - mean_shade).abs() < 0.000001);
     let quarry: serde_json::Value =
         serde_json::from_str(&g.land_preview("source_stone", 18, 18)).unwrap();
     assert_eq!(quarry["deposit"]["material"], 3);
