@@ -69,7 +69,7 @@ export async function checkPipeControls({page,saved,capture}){
     setTimeout(()=>{observer.disconnect();resolve(changes);},700);
   }));
   assert.equal(churn,0,'Paused pipe reports remain stable');assert.equal(JSON.stringify(await snapshot()),raw,'Pipe inspection changes no simulation state');
-  await load('pumping');assert.match(await page.locator('#water-lines').textContent(),/[1-9][\d.,]* water transferred/);
+  await load('pumping');assert.match(await page.locator('#water-lines').textContent(),/[1-9][\d.,]* units transferred/);
   await page.getByRole('button',{name:'Power',exact:true}).click();assert.match(await page.locator('#power-pumps').textContent(),/pump/i);
   await show();await page.locator('#water-lines').scrollIntoViewIfNeeded();await capture('Installed line reports delivered water and battery use','pipes-running.png');
   const beforeRemoval=(await snapshot()).village.simulation.materials.received;

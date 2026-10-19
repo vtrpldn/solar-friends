@@ -191,9 +191,9 @@ fn choice(v: &Village, id: Id, material: usize) -> Option<(Bundle, u32, bool)> {
 }
 fn service_ready(v: &Village, b: &Batch) -> bool {
     b.material != economy::MEALS
-        || (building(v, b.site).is_some_and(|id| {
-            water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1.
-        }) && (b.committed || !b.biogas || v.circular.biogas >= 1.))
+        || (building(v, b.site)
+            .is_some_and(|id| sanitation::washing_ready(v, water::Owner::Building(id), 1.))
+            && (b.committed || !b.biogas || v.circular.biogas >= 1.))
 }
 fn store(v: &Village, id: Id) -> Option<&logistics::Store> {
     v.logistics
@@ -857,7 +857,10 @@ pub fn view(v: &Village) -> serde_json::Value {
                 }))
             })
         }).collect();
-        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id))})
+        let service_blocker = (s.kind == Kind::Kitchen).then(|| {
+            s.building.and_then(|id| sanitation::washing_blocker(v,water::Owner::Building(id),1.))
+        }).flatten();
+        serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,owner(v,s.id)),"service_blocker":service_blocker})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
         "recipes":recipes,"work_open":work_time(v.minutes),"buffer_capacity":BUFFER,"labour_minutes":LABOUR*MINUTES_PER_SECOND,"labour_seconds":LABOUR,"reserved_space":reserved_space(v),
@@ -892,9 +895,8 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
         .sites
         .iter()
         .filter(|s| {
-            building(v, s.id).is_some_and(|id| {
-                water::available(v, water::Owner::Building(id), water::Class::Fresh) >= 1.
-            })
+            building(v, s.id)
+                .is_some_and(|id| sanitation::washing_ready(v, water::Owner::Building(id), 1.))
         })
         .map(|s| s.id)
         .collect();

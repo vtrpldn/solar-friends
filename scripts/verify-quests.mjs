@@ -110,7 +110,17 @@ const b=snap().village.buildings.find(b=>b.id===lamp);
 // Actual adjacent free path, without occupying the lamp's cell.
 for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){if(!placementReason(snap().village,'road',b.x+dx,b.y+dy)){assert.equal(g.toggle_road(b.x+dx,b.y+dy),'ok');break;}}
 await complete(6);
-for(const k of ['eco_toilet','wetland','banana_treatment'])build(k);await complete(7);
+for(const k of ['eco_toilet','wetland','banana_treatment'])build(k);
+// A healthy pantry can leave mature crops waiting and new beds unplanted.
+// Deliberately request tending to demonstrate reclaimed irrigation rather than
+// expecting autonomous food work to manufacture demand for the chapter.
+until(s=>{
+ if(s.village.progress.reclaimed_irrigation)return true;
+ const r=s.residents.find(r=>r.id===3);
+ if(!r.help||r.help.finished!=null)g.request(3,'garden',false);
+ return false;
+},'resident tending with reclaimed irrigation');
+await complete(7);
 build('biodigester');g.configure_banana_treatment(false);await complete(8);
 for(const material of [2,3,4])source(material);
 for(let i=0;i<5;i++){

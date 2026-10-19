@@ -25,7 +25,8 @@ export async function checkGatheringControls({page,saved,capture}){
   s=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(s.village.meals,10);assert.equal(s.village.progress.gathering_delivery.phase,'cancelled');
   assert.equal(s.environment.economy.materials[17].reserved,0);
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();
+  // Inspect the actual recovery handoff before another neighbour can reclaim it.
+  await page.locator('#dev-button').click();await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
   s=await page.evaluate(()=>window.solarDev.snapshot());
   assert(s.village.logistics.stores.some(p=>p.owner.kind==='ground'&&p.items[17]>0));
   await page.locator('#dev-close').click();await page.locator('[data-hud-resource="food"]').click();

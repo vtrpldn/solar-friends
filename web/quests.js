@@ -55,7 +55,7 @@ export const quests = [
         "Serve a cooked meal",
         count(v, "kitchen") ? v.meals_served : 0,
         1,
-        "Build a kitchen. Three food and one water make five meals; neighbours eat at mealtimes.",
+        "Build a kitchen. Three food and one fresh water make five meals. Washing leaves greywater in this kitchen’s buffer; neighbours carry closed containers to the neighbouring service point until local treatment is available. Check Supplies → Where waste is if the buffer is full.",
         "kitchen",
       ),
       goal(
@@ -219,14 +219,14 @@ export const quests = [
     story:"“Fresh water for our bodies, reclaimed water for our roots. Each has its own place.”",
     after:"Our water has a second life. Now give sealed toilet waste and kitchen scraps a safe, useful destination.",
     objectives:v=>[
-      goal("Build an ecological toilet",count(v,"eco_toilet"),1,"Residents use it daily. Keep fresh water for handwashing; waste stays sealed.","eco_toilet"),
+      goal("Build an ecological toilet",count(v,"eco_toilet"),1,"Residents use it daily. Deliver fresh water for handwashing and leave space in its local greywater and sewage buffers. Neighbours carry closed service containers, or you can install separate compatible lines through Pipes & pumps.","eco_toilet"),
       goal("Build a lined reed bed",count(v,"wetland"),1,"A reed bed filters household greywater. Its output is irrigation water, never drinking water.","wetland"),
       goal("Build a banana treatment bed",count(v,"banana_treatment"),1,"A sealed basin planted with banana trees treats toilet sewage through its soil and roots. Its water stays separate from our drinking and irrigation stores.","banana_treatment"),
-      actionGoal("supplies","Treat five toilet waste",Math.floor(v.circular.waste_treated ?? 0),5,"Enable banana treatment in Water & waste. Each finished bed treats one waste every four game hours. It needs no power and produces no water or food."),
-      actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water available per visit."),
+      actionGoal("supplies","Treat five toilet waste",Math.floor(v.circular.waste_treated ?? 0),5,"Enable banana treatment in Water & waste. Sewage must reach this bed through closed service containers or a sewage line. Each finished bed treats one delivered sewage every four game hours, with no power, water or food output."),
+      actionGoal("supplies","Five private toilet visits",v.circular.toilet_visits,5,"Let residents visit during their own daily routines. Keep one fresh water delivered to the toilet per visit, with room in its separate greywater and sewage buffers."),
       actionGoal("supplies","Catch rain in our cistern",+v.progress.rain_caught,1,"Rain falls 14:00–17:00 on two days out of three. A completed cistern catches it when there is space. In Supplies → Where water is → Pipes & pumps, connect it to a household or kitchen to reduce carrying. Residents install the kit; pumping uses shared energy."),
-      actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Twelve greywater becomes eight reclaimed water over six hours."),
-      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. Keep a planted plot growing. Carry reclaimed water manually, or install a separate irrigation line from the reed bed in Supplies → Where water is → Pipes & pumps."),
+      actionGoal("supplies","Filter eight irrigation water",Math.floor(v.circular.water_reused),8,"Keep greywater filtration enabled. Neighbours deliver closed containers to the reed bed, or install a greywater line from a home or kitchen. Twelve delivered greywater becomes eight irrigation over six hours; the bed reserves its own output and input-return space."),
+      actionGoal("supplies","Use reclaimed irrigation",+v.progress.reclaimed_irrigation,1,"A garden or cultivated material plot uses reclaimed water first when it needs watering. If food reserves are healthy, ask a neighbour to Tend garden in People; routine food work pauses at a healthy pantry. Neighbours carry reclaimed water, or install a separate irrigation line from the reed bed in Supplies → Where water is → Pipes & pumps."),
     ],
   },
   {

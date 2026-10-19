@@ -99,6 +99,8 @@ fn class(kind: Kind) -> Option<water::Class> {
     match kind {
         Kind::Fresh => Some(water::Class::Fresh),
         Kind::Irrigation => Some(water::Class::Irrigation),
+        Kind::Greywater => Some(water::Class::Greywater),
+        Kind::Sewage => Some(water::Class::Sewage),
         _ => None,
     }
 }
@@ -286,7 +288,7 @@ fn propose(
     from: i32,
     to: i32,
 ) -> Result<(Plan, [Anchor; 2]), &'static str> {
-    let water_class = class(kind).ok_or("Install fresh-water or irrigation pipes here.")?;
+    let water_class = class(kind).ok_or("Choose a supported liquid class for this line.")?;
     let plan = utilities::plan(v, kind, from, to)?;
     let endpoints = utilities::endpoints(v, kind);
     let anchor = |id| -> Result<Anchor, &'static str> {
@@ -723,6 +725,11 @@ pub fn valid(v: &Village) -> bool {
         let source_ok = match p.plan.kind {
             Kind::Fresh => matches!(p.anchors[0].kind.as_str(), "camp" | "well"),
             Kind::Irrigation => p.anchors[0].kind == "wetland",
+            Kind::Greywater => matches!(
+                p.anchors[0].kind.as_str(),
+                "camp" | "home" | "kitchen" | "eco_toilet"
+            ),
+            Kind::Sewage => p.anchors[0].kind == "eco_toilet",
             _ => false,
         };
         let receiver_ok = match p.plan.kind {
@@ -739,6 +746,11 @@ pub fn valid(v: &Village) -> bool {
             Kind::Irrigation => matches!(
                 p.anchors[1].kind.as_str(),
                 "garden" | "greenhouse" | "source_timber" | "source_bamboo"
+            ),
+            Kind::Greywater => p.anchors[1].kind == "wetland",
+            Kind::Sewage => matches!(
+                p.anchors[1].kind.as_str(),
+                "biodigester" | "banana_treatment"
             ),
             _ => false,
         };
@@ -875,7 +887,7 @@ impl Game {
     pub fn water_connection_quote(&self, kind: &str, from: i32, to: i32) -> String {
         let v = self.app.world().resource::<Village>();
         match Kind::parse(kind)
-            .ok_or("Choose fresh water or irrigation.")
+            .ok_or("Choose fresh water, irrigation, greywater or sealed sewage.")
             .and_then(|k| {
                 if v.pipes.lines.iter().any(|p| {
                     p.live()
@@ -898,7 +910,7 @@ impl Game {
     }
     pub fn queue_water_connection(&mut self, kind: &str, from: i32, to: i32) -> String {
         let Some(kind) = Kind::parse(kind) else {
-            return "Choose fresh water or irrigation.".into();
+            return "Choose fresh water, irrigation, greywater or sealed sewage.".into();
         };
         match queue(
             &mut self.app.world_mut().resource_mut::<Village>(),

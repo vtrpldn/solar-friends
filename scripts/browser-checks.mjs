@@ -7,6 +7,7 @@ import {checkLivingLandControls} from './living-land-browser-checks.mjs';
 import {checkUtilityRoutes} from './utility-routes-browser-checks.mjs';
 import {checkWaterControls} from './water-browser-checks.mjs';
 import {checkPipeControls} from './pipes-browser-checks.mjs';
+import {checkSanitationControls} from './sanitation-browser-checks.mjs';
 import {checkProcessControls} from './process-browser-checks.mjs';
 import {checkFreshnessControls} from './freshness-browser-checks.mjs';
 import assert from 'node:assert/strict';
@@ -76,6 +77,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await checkUtilityRoutes({page,saved,capture});
   await checkWaterControls({page,saved,capture});
   await checkPipeControls({page,saved,capture});
+  await checkSanitationControls({page,saved,capture});
   // Earned full-story checkpoints come from verify-quests, not completion cheats.
   async function storyCheckpoint(chapter){
     await page.locator('#dev-import-file').setInputFiles(`artifacts/story/solar-chapter-${chapter}.json`);
@@ -259,7 +261,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.getByRole('button',{name:'Meet Iara',exact:true}).click();
   await page.getByRole('button',{name:'Help build',exact:true}).click();
   assert((await page.locator('#person .response').textContent()).includes('No stage is ready'),'Refusals must be visible in the resident panel');
-  await page.getByRole('button',{name:'Fetch & deliver water',exact:true}).click();
+  await page.getByRole('button',{name:'Water & sanitation',exact:true}).click();
   assert((await page.locator('#person .response').textContent()).includes('Happy'));
   assert(await page.locator('#person .response').isVisible());
   assert(await page.getByRole('button',{name:'Resume time',exact:true}).isVisible());

@@ -1,19 +1,28 @@
-//! Located fresh water and irrigation. Sealed waste is never ordinary cargo.
+//! Located liquids. Sealed waste is never ordinary materials or food cargo.
 use crate::*;
 use simulation::Id;
 pub const LOAD: f64 = 12.;
+pub const LIQUIDS: usize = 4;
 const EPS: f64 = 0.000_001;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Class {
     Fresh,
     Irrigation,
+    Greywater,
+    Sewage,
 }
 impl Class {
+    pub const ALL: [Self; LIQUIDS] = [Self::Fresh, Self::Irrigation, Self::Greywater, Self::Sewage];
+    pub fn sealed(self) -> bool {
+        matches!(self, Self::Greywater | Self::Sewage)
+    }
     pub fn index(self) -> usize {
         match self {
             Self::Fresh => 0,
             Self::Irrigation => 1,
+            Self::Greywater => 2,
+            Self::Sewage => 3,
         }
     }
 }
@@ -21,6 +30,7 @@ impl Class {
 #[serde(tag = "kind", content = "id", rename_all = "snake_case")]
 pub enum Owner {
     Camp,
+    Service,
     Building(usize),
     Source(usize),
     Ground,
@@ -31,8 +41,8 @@ pub struct Tank {
     pub owner: Owner,
     pub x: f32,
     pub y: f32,
-    pub capacity: [f64; 2],
-    pub water: [f64; 2],
+    pub capacity: [f64; LIQUIDS],
+    pub water: [f64; LIQUIDS],
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Trip {
@@ -53,18 +63,21 @@ pub struct State {
     pub schema: u32,
     pub tanks: Vec<Tank>,
     pub trips: Vec<Trip>,
-    pub opening: [f64; 2],
-    pub received: [f64; 2],
-    pub consumed: [f64; 2],
+    pub opening: [f64; LIQUIDS],
+    pub received: [f64; LIQUIDS],
+    pub consumed: [f64; LIQUIDS],
+    pub external: [f64; LIQUIDS],
+    pub sandbox_disposed: [f64; LIQUIDS],
 }
-fn caps(kind: &str) -> Option<[f64; 2]> {
+fn caps(kind: &str) -> Option<[f64; LIQUIDS]> {
     Some(match kind {
-        "well" => [75., 0.],
-        "home" => [8., 0.],
-        "kitchen" => [6., 0.],
-        "eco_toilet" => [8., 0.],
-        "garden" | "greenhouse" => [4., 4.],
-        "wetland" => [0., 60.],
+        "well" => [75., 0., 0., 0.],
+        "home" => [8., 0., 24., 0.],
+        "kitchen" => [6., 0., 24., 0.],
+        "eco_toilet" => [8., 0., 16., 16.],
+        "garden" | "greenhouse" => [4., 4., 0., 0.],
+        "wetland" => [0., 60., 24., 0.],
+        "biodigester" | "banana_treatment" => [0., 0., 0., 8.],
         _ => return None,
     })
 }
@@ -74,8 +87,11 @@ pub fn tank(v: &Village, id: Id) -> Option<&Tank> {
 pub(crate) fn owner_tank(v: &Village, owner: Owner) -> Option<&Tank> {
     v.water_supply.tanks.iter().find(|p| p.owner == owner)
 }
-fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; 2])> {
-    let mut out = vec![(Owner::Camp, CAMP.0, CAMP.1, [40., 60.])];
+fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; LIQUIDS])> {
+    let mut out = vec![
+        (Owner::Camp, CAMP.0, CAMP.1, [40., 60., 120., 80.]),
+        (Owner::Service, 1., 13., [0., 0., LOAD, LOAD]),
+    ];
     out.extend(v.buildings.iter().filter_map(|b| {
         if b.progress < 100. && building_work::original_progress(v, b.id) != Some(100.) {
             return None;
@@ -93,7 +109,7 @@ fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; 2])> {
             .iter()
             .enumerate()
             .filter(|(_, s)| s.active && s.material < 2)
-            .map(|(i, s)| (Owner::Source(i), s.x as f32, s.y as f32, [4., 4.])),
+            .map(|(i, s)| (Owner::Source(i), s.x as f32, s.y as f32, [4., 4., 0., 0.])),
     );
     out
 }
@@ -119,7 +135,11 @@ pub(crate) fn free(v: &Village, p: &Tank, class: Class, except: Option<usize>) -
     (p.water[class.index()] - claimed(v, p.id, class, except)).max(0.)
 }
 pub(crate) fn room(v: &Village, p: &Tank, class: Class) -> f64 {
-    (p.capacity[class.index()] - p.water[class.index()] - incoming(v, p.id, class)).max(0.)
+    (p.capacity[class.index()]
+        - p.water[class.index()]
+        - incoming(v, p.id, class)
+        - processes::liquid_reservation(v, p.id, class))
+    .max(0.)
 }
 pub(crate) fn open(v: &Village, p: &Tank) -> bool {
     match p.owner {
@@ -151,6 +171,8 @@ pub fn total(v: &Village, class: Class) -> f64 {
 pub fn summaries(v: &mut Village) {
     v.water = total(v, Class::Fresh) as f32;
     v.circular.reclaimed = total(v, Class::Irrigation) as f32;
+    v.circular.greywater = total(v, Class::Greywater) as f32;
+    v.circular.waste = total(v, Class::Sewage) as f32;
 }
 pub fn capacity(v: &Village) -> f32 {
     if v.water_supply.schema == 0 {
@@ -167,8 +189,16 @@ pub fn capacity(v: &Village) -> f32 {
             .sum::<f64>() as f32
     }
 }
+pub fn storage_capacity(v: &Village, class: Class) -> f64 {
+    v.water_supply
+        .tanks
+        .iter()
+        .filter(|p| p.owner != Owner::Service)
+        .map(|p| p.capacity[class.index()])
+        .sum()
+}
 pub fn sync(v: &mut Village) {
-    if v.water_supply.schema != 1 {
+    if v.water_supply.schema != 2 {
         return;
     }
     let wanted = wanted(v);
@@ -185,10 +215,8 @@ pub fn sync(v: &mut Village) {
         .map(|p| p.id)
         .collect();
     for id in retire {
-        let n = [
-            incoming(v, id, Class::Fresh),
-            incoming(v, id, Class::Irrigation),
-        ];
+        let n = Class::ALL
+            .map(|class| incoming(v, id, class) + processes::liquid_reservation(v, id, class));
         let p = v
             .water_supply
             .tanks
@@ -208,71 +236,164 @@ pub fn sync(v: &mut Village) {
                 x,
                 y,
                 capacity,
-                water: [0.; 2],
+                water: [0.; LIQUIDS],
             });
         }
     }
-    let referenced: Vec<_> = v
+    let mut referenced: Vec<_> = v
         .water_supply
         .trips
         .iter()
         .flat_map(|h| h.from.into_iter().chain([h.to, h.recovery]))
         .collect();
+    referenced.extend(
+        v.processes
+            .batches
+            .iter()
+            .filter(|b| b.active())
+            .flat_map(|b| b.input_tank.into_iter().chain(b.recovery)),
+    );
     v.water_supply.tanks.retain(|p| {
         p.owner != Owner::Ground || p.water.iter().any(|n| *n > 0.) || referenced.contains(&p.id)
     });
     summaries(v);
 }
+fn stage(v: &mut Village, class: Class, amount: f64, future_return: Option<(Owner, f64)>) -> bool {
+    let mut left = amount;
+    let put = |v: &mut Village, id: Id, left: &mut f64, limit: f64| {
+        let p = tank(v, id).unwrap();
+        let future = future_return
+            .filter(|(owner, _)| *owner == p.owner)
+            .map_or(0., |(_, n)| n);
+        let n = (*left).min(limit).min((room(v, p, class) - future).max(0.));
+        v.water_supply
+            .tanks
+            .iter_mut()
+            .find(|p| p.id == id)
+            .unwrap()
+            .water[class.index()] += n;
+        *left -= n;
+    };
+    let mut destinations: Vec<_> = v
+        .water_supply
+        .tanks
+        .iter()
+        .filter(|p| !matches!(p.owner, Owner::Ground | Owner::Service))
+        .map(|p| p.id)
+        .collect();
+    if class == Class::Fresh {
+        for id in &destinations {
+            let p = tank(v, *id).unwrap();
+            if p.owner != Owner::Camp && p.capacity[0] < 75. {
+                put(v, *id, &mut left, 4.);
+            }
+        }
+    } else if class.sealed() {
+        let treatment = |v: &Village, id: Id| {
+            tank(v, id)
+                .and_then(|p| match p.owner {
+                    Owner::Building(id) => v.buildings.iter().find(|b| b.id == id),
+                    _ => None,
+                })
+                .map_or(2, |b| match (class, b.kind.as_str()) {
+                    (Class::Greywater, "wetland") if v.circular.filter_water => 0,
+                    (Class::Sewage, "biodigester") if v.circular.auto_feed => 0,
+                    (Class::Sewage, "banana_treatment") if v.circular.banana_treatment => 1,
+                    _ => 2,
+                })
+        };
+        destinations.sort_by_key(|id| {
+            (
+                treatment(v, *id),
+                future_return.is_some_and(|(owner, _)| tank(v, *id).unwrap().owner == owner),
+            )
+        });
+        for (index, id) in destinations.iter().enumerate() {
+            let group = treatment(v, *id);
+            if group > 1 {
+                continue;
+            }
+            let limit = if class == Class::Greywater {
+                12.
+            } else if group == 0 {
+                2.
+            } else {
+                let remaining = destinations[index..]
+                    .iter()
+                    .filter(|id| treatment(v, **id) == 1)
+                    .count();
+                (left / remaining as f64).min(4.)
+            };
+            put(v, *id, &mut left, limit);
+        }
+    }
+    for id in destinations {
+        put(v, id, &mut left, f64::INFINITY);
+    }
+    while left > EPS {
+        if v.water_supply.tanks.len() >= 2048 {
+            return false;
+        }
+        let Some(id) = v.simulation.allocate() else {
+            return false;
+        };
+        let n = left.min([75., 60., 120., 80.][class.index()]);
+        let mut contents = [0.; LIQUIDS];
+        contents[class.index()] = n;
+        v.water_supply.tanks.push(Tank {
+            id,
+            owner: Owner::Ground,
+            x: CAMP.0 + 0.7,
+            y: CAMP.1,
+            capacity: contents,
+            water: contents,
+        });
+        left -= n;
+    }
+    true
+}
 pub fn initialise(v: &mut Village) -> bool {
-    let amounts = [f64::from(v.water), f64::from(v.circular.reclaimed)];
+    let amounts = [
+        f64::from(v.water),
+        f64::from(v.circular.reclaimed),
+        f64::from(v.circular.greywater),
+        f64::from(v.circular.waste),
+    ];
     if amounts
         .iter()
         .any(|n| !n.is_finite() || *n < 0. || *n > 150000.)
     {
         return false;
     }
+    let owner = |kind: &str| {
+        v.buildings
+            .iter()
+            .find(|b| b.kind == kind && b.progress >= 100.)
+            .map(|b| Owner::Building(b.id))
+    };
+    let returns = [
+        None,
+        None,
+        (v.circular.filtration > 0.)
+            .then(|| owner("wetland").map(|o| (o, 12.)))
+            .flatten(),
+        (v.circular.digestion > 0.)
+            .then(|| owner("biodigester").map(|o| (o, 2.)))
+            .flatten(),
+    ];
+    let mut opening = amounts;
+    for i in 0..LIQUIDS {
+        opening[i] += returns[i].map_or(0., |(_, n)| n);
+    }
     v.water_supply = State {
-        schema: 1,
-        opening: amounts,
+        schema: 2,
+        opening,
         ..State::default()
     };
     sync(v);
-    for class in [Class::Fresh, Class::Irrigation] {
-        let mut left = amounts[class.index()];
-        // Authored scenes can explicitly stage already supplied consumer buffers.
-        // New playable buildings always receive empty containers through sync.
-        if class == Class::Fresh {
-            for p in &mut v.water_supply.tanks {
-                if !matches!(p.owner, Owner::Camp | Owner::Ground) && p.capacity[0] < 75. {
-                    let n = left.min(p.capacity[0].min(4.));
-                    p.water[0] = n;
-                    left -= n;
-                }
-            }
-        }
-        for p in &mut v.water_supply.tanks {
-            let n = left.min(p.capacity[class.index()] - p.water[class.index()]);
-            p.water[class.index()] += n;
-            left -= n;
-        }
-        while left > EPS {
-            // Explicit authored/test supplies beyond fixed containers remain
-            // in real, separate arrival barrels rather than a shared counter.
-            let Some(id) = v.simulation.allocate() else {
-                return false;
-            };
-            let amount = left.min(if class == Class::Fresh { 75. } else { 60. });
-            let mut contents = [0.; 2];
-            contents[class.index()] = amount;
-            v.water_supply.tanks.push(Tank {
-                id,
-                owner: Owner::Ground,
-                x: CAMP.0 + 0.7,
-                y: CAMP.1,
-                capacity: contents,
-                water: contents,
-            });
-            left -= amount;
+    for class in Class::ALL {
+        if !stage(v, class, amounts[class.index()], returns[class.index()]) {
+            return false;
         }
     }
     summaries(v);
@@ -282,6 +403,54 @@ pub fn available(v: &Village, owner: Owner, class: Class) -> f32 {
     owner_tank(v, owner)
         .filter(|p| open(v, p))
         .map_or(0., |p| free(v, p, class, None) as f32)
+}
+pub fn local(v: &Village, owner: Owner, class: Class) -> f64 {
+    owner_tank(v, owner)
+        .filter(|p| open(v, p))
+        .map_or(0., |p| free(v, p, class, None))
+}
+pub fn local_room(v: &Village, owner: Owner, class: Class) -> f64 {
+    owner_tank(v, owner)
+        .filter(|p| open(v, p))
+        .map_or(0., |p| room(v, p, class))
+}
+pub fn room_after_release(v: &Village, owner: Owner, class: Class, released: f64) -> f64 {
+    owner_tank(v, owner).filter(|p| open(v, p)).map_or(0., |p| {
+        (p.capacity[class.index()]
+            - p.water[class.index()]
+            - incoming(v, p.id, class)
+            - processes::liquid_reservation(v, p.id, class)
+            + released)
+            .max(0.)
+    })
+}
+pub fn seal(v: &mut Village, tank: Id, class: Class, amount: f64) {
+    assert!(self::tank(v, tank).is_some_and(|p| free(v, p, class, None) >= amount));
+    v.water_supply
+        .tanks
+        .iter_mut()
+        .find(|p| p.id == tank)
+        .unwrap()
+        .water[class.index()] -= amount;
+    summaries(v);
+}
+pub fn finish_sealed(v: &mut Village, class: Class, amount: f64) {
+    v.water_supply.consumed[class.index()] += amount;
+    summaries(v);
+}
+pub fn recover_sealed(v: &mut Village, b: &processes::Batch) {
+    let (class, amount) = processes::liquid_input(b.kind).unwrap();
+    let p = v
+        .water_supply
+        .tanks
+        .iter_mut()
+        .find(|p| Some(p.id) == b.recovery)
+        .unwrap();
+    p.x = b.x as f32;
+    p.y = b.y as f32;
+    p.capacity[class.index()] = amount;
+    p.water[class.index()] = amount;
+    summaries(v);
 }
 pub fn irrigation(v: &Village, owner: Owner) -> f32 {
     let n = available(v, owner, Class::Irrigation);
@@ -325,6 +494,9 @@ pub fn irrigate(v: &mut Village, owner: Owner) -> bool {
 }
 pub fn add(v: &mut Village, owner: Owner, class: Class, amount: f64) -> f64 {
     sync(v);
+    produce(v, owner, class, amount)
+}
+pub fn produce(v: &mut Village, owner: Owner, class: Class, amount: f64) -> f64 {
     let Some(id) = owner_tank(v, owner).map(|p| p.id) else {
         return 0.;
     };
@@ -338,6 +510,14 @@ pub fn add(v: &mut Village, owner: Owner, class: Class, amount: f64) -> f64 {
     v.water_supply.received[class.index()] += n;
     summaries(v);
     n
+}
+/// Sandbox can ignore excess household waste, like its free fresh-water refill.
+/// These explicit mode-only conversions remain visible in the liquid account.
+pub fn sandbox_excess(v: &mut Village, class: Class, amount: f64) {
+    assert!(v.mode == modes::Mode::Sandbox && class.sealed() && amount >= 0.);
+    v.water_supply.received[class.index()] += amount;
+    v.water_supply.consumed[class.index()] += amount;
+    v.water_supply.sandbox_disposed[class.index()] += amount;
 }
 pub fn rain(v: &mut Village, minutes: f32) {
     sync(v);
@@ -437,7 +617,7 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
                 220.
             },
         ),
-        Owner::Ground => (0., false, 0.),
+        Owner::Ground | Owner::Service => (0., false, 0.),
     }
 }
 fn surplus(v: &Village, p: &Tank, class: Class, except: Option<usize>) -> f64 {
@@ -479,10 +659,22 @@ fn deficit(v: &Village, p: &Tank) -> Option<(f64, bool, f32)> {
     (missing > EPS).then_some((missing, irrigation, urgency))
 }
 pub fn has_work(v: &Village) -> bool {
-    !v.water_supply.trips.is_empty() || v.water_supply.tanks.iter().any(|p| deficit(v, p).is_some())
+    !v.water_supply.trips.is_empty()
+        || v.water_supply.tanks.iter().any(|p| deficit(v, p).is_some())
+        || [Class::Greywater, Class::Sewage].into_iter().any(|class| {
+            v.water_supply
+                .tanks
+                .iter()
+                .any(|p| sealed_deficit(v, p, class).is_some())
+                && v.water_supply
+                    .tanks
+                    .iter()
+                    .any(|p| service_source(v, p) && free(v, p, class, None) > EPS)
+        })
 }
 pub fn approach(v: &Village, p: &Tank, resident: usize) -> Option<[f32; 2]> {
     match p.owner {
+        Owner::Service => tap(v, resident),
         Owner::Building(id) => {
             spacing::approach(v, v.buildings.iter().find(|b| b.id == id)?, resident)
                 .map(|p| [p.0, p.1])
@@ -510,7 +702,11 @@ fn tap(v: &Village, resident: usize) -> Option<[f32; 2]> {
     None
 }
 fn near(p: &Tank, point: [f32; 2]) -> bool {
-    (point[0] - p.x).hypot(point[1] - p.y) <= 3.51
+    if p.owner == Owner::Service {
+        point[0] == 1. && (1.69..=24.31).contains(&point[1])
+    } else {
+        (point[0] - p.x).hypot(point[1] - p.y) <= 3.51
+    }
 }
 #[derive(Clone)]
 pub struct Quote {
@@ -522,6 +718,99 @@ pub struct Quote {
     pub dropoff: [f32; 2],
     pub minutes: f32,
     pub urgency: f32,
+}
+fn service_source(v: &Village, p: &Tank) -> bool {
+    open(v, p)
+        && match p.owner {
+            Owner::Camp | Owner::Ground => true,
+            Owner::Building(id) => v.buildings.iter().any(|b| {
+                b.id == id && matches!(b.kind.as_str(), "home" | "kitchen" | "eco_toilet")
+            }),
+            _ => false,
+        }
+}
+fn sealed_deficit(v: &Village, p: &Tank, class: Class) -> Option<(f64, f32)> {
+    if !class.sealed() || !open(v, p) {
+        return None;
+    }
+    let (desired, urgency) = match p.owner {
+        Owner::Service => (LOAD, 140.),
+        Owner::Building(id) if !v.processes.paused.contains(&id) => {
+            let kind = v.buildings.iter().find(|b| b.id == id)?.kind.as_str();
+            match (class, kind) {
+                (Class::Greywater, "wetland") if v.circular.filter_water => (12., 640.),
+                (Class::Sewage, "biodigester")
+                    if v.circular.auto_feed
+                        && v.circular.biogas
+                            + production::held_biogas(v) as f32
+                            + processes::held_gas(v)
+                            < 12. =>
+                {
+                    (2., 610.)
+                }
+                (Class::Sewage, "banana_treatment") if v.circular.banana_treatment => (4., 520.),
+                _ => return None,
+            }
+        }
+        _ => return None,
+    };
+    let missing =
+        (desired - p.water[class.index()] - incoming(v, p.id, class)).min(room(v, p, class));
+    (missing > EPS).then_some((missing, urgency))
+}
+fn service_quotes(v: &Village, r: &Resident, options: &mut Vec<Quote>) {
+    for class in [Class::Greywater, Class::Sewage] {
+        for to in &v.water_supply.tanks {
+            let Some((missing, urgency)) = sealed_deficit(v, to, class) else {
+                continue;
+            };
+            let Some(dropoff) = approach(v, to, r.id) else {
+                continue;
+            };
+            let minimum = missing.clamp(EPS, 6.);
+            for from in v
+                .water_supply
+                .tanks
+                .iter()
+                .filter(|p| p.id != to.id && service_source(v, p))
+            {
+                let amount = missing.min(LOAD).min(free(v, from, class, None));
+                if amount
+                    < if from.owner == Owner::Ground {
+                        EPS
+                    } else {
+                        minimum
+                    }
+                {
+                    continue;
+                }
+                let Some(pickup) = approach(v, from, r.id) else {
+                    continue;
+                };
+                let Ok((first, _)) = navigation::work_route(v, [r.x, r.y], pickup) else {
+                    continue;
+                };
+                let Ok(last) = navigation::route(v, pickup, dropoff) else {
+                    continue;
+                };
+                let pressure = if from.water[class.index()] >= from.capacity[class.index()] * 0.8 {
+                    400.
+                } else {
+                    0.
+                };
+                options.push(Quote {
+                    from: Some(from.id),
+                    to: to.id,
+                    class,
+                    amount,
+                    pickup,
+                    dropoff,
+                    minutes: first.minutes + last.minutes + 6.,
+                    urgency: urgency + pressure,
+                });
+            }
+        }
+    }
 }
 pub fn quote(v: &Village, r: &Resident) -> Option<Quote> {
     if let Some(h) = v.water_supply.trips.iter().find(|h| h.resident == r.id) {
@@ -630,6 +919,7 @@ pub fn quote(v: &Village, r: &Resident) -> Option<Quote> {
             }
         }
     }
+    service_quotes(v, r, &mut options);
     options.sort_by(|a, b| {
         (b.urgency - b.minutes * 1.5)
             .total_cmp(&(a.urgency - a.minutes * 1.5))
@@ -665,7 +955,7 @@ pub fn interrupt(v: &mut Village, r: &Resident) {
     if h.carrying {
         // A separate, reserved recovery identity survives even when no new
         // identities remain. Putting down liquid creates no supply receipt.
-        let mut water = [0.; 2];
+        let mut water = [0.; LIQUIDS];
         water[h.class.index()] = h.amount;
         let p = v
             .water_supply
@@ -679,6 +969,14 @@ pub fn interrupt(v: &mut Village, r: &Resident) {
         p.water = water;
     }
     summaries(v);
+}
+fn carrying_reason(class: Class) -> &'static str {
+    match class {
+        Class::Fresh => "Carrying fresh water to its local container.",
+        Class::Irrigation => "Carrying reclaimed irrigation to a growing plot.",
+        Class::Greywater => "Carrying a closed greywater container to its destination.",
+        Class::Sewage => "Carrying a closed sewage container to its destination.",
+    }
 }
 pub fn advance(
     v: &mut Village,
@@ -709,8 +1007,8 @@ pub fn advance(
             owner: Owner::Ground,
             x: r.x.clamp(0.3, 27.7),
             y: r.y.clamp(0.3, 27.7),
-            capacity: [0.; 2],
-            water: [0.; 2],
+            capacity: [0.; LIQUIDS],
+            water: [0.; LIQUIDS],
         });
         v.water_supply.trips.push(Trip {
             id,
@@ -774,13 +1072,11 @@ pub fn advance(
     (r.target_x, r.target_y) = (p[0], p[1]);
     r.remaining = 10.;
     r.reason = if h.carrying {
-        if h.class == Class::Fresh {
-            "Carrying fresh water to its local container."
-        } else {
-            "Carrying reclaimed irrigation to a growing plot."
-        }
+        carrying_reason(h.class)
     } else if h.from.is_none() {
         "Collecting treated water at the neighbouring farm's tap."
+    } else if h.class.sealed() {
+        "Collecting a closed service container at its actual site."
     } else {
         "Collecting a water load from its actual container."
     }
@@ -828,12 +1124,7 @@ pub fn advance(
             .unwrap();
         row.carrying = true;
         row.handling = 3.;
-        r.reason = if h.class == Class::Fresh {
-            "Carrying fresh water to its local container."
-        } else {
-            "Carrying reclaimed irrigation to a growing plot."
-        }
-        .into();
+        r.reason = carrying_reason(h.class).into();
         (r.target_x, r.target_y) = (h.dropoff[0], h.dropoff[1]);
         walking::clear(r);
     } else {
@@ -843,7 +1134,12 @@ pub fn advance(
             .iter_mut()
             .find(|p| p.id == h.to)
             .unwrap();
-        p.water[h.class.index()] += h.amount;
+        if p.owner == Owner::Service {
+            v.water_supply.consumed[h.class.index()] += h.amount;
+            v.water_supply.external[h.class.index()] += h.amount;
+        } else {
+            p.water[h.class.index()] += h.amount;
+        }
         v.water_supply.trips.retain(|p| p.resident != r.id);
         r.remaining = 0.;
         walking::clear(r);
@@ -857,7 +1153,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     if v.version == 3 {
         return s.schema == 0 && s.tanks.is_empty() && s.trips.is_empty();
     }
-    if s.schema != 1 || s.tanks.len() > 2048 || s.trips.len() > 5 {
+    if s.schema != 2 || s.tanks.len() > 2048 || s.trips.len() > 5 {
         return false;
     }
     let mut owners = vec![];
@@ -874,7 +1170,10 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
                 .any(|x| !x.is_finite() || *x < 0.)
             || p.capacity[0] > 75.
             || p.capacity[1] > 60.
-            || (0..2).any(|i| p.water[i] > p.capacity[i] + EPS)
+            || p.capacity[2] > 120.
+            || p.capacity[3] > 80.
+            || p.owner == Owner::Service && p.water != [0.; LIQUIDS]
+            || (0..LIQUIDS).any(|i| p.water[i] > p.capacity[i] + EPS)
         {
             return false;
         }
@@ -888,9 +1187,11 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             }
             owners.push(p.owner);
         }
-        for class in [Class::Fresh, Class::Irrigation] {
+        for class in Class::ALL {
             if claimed(v, p.id, class, None) > p.water[class.index()] + EPS
-                || p.water[class.index()] + incoming(v, p.id, class)
+                || p.water[class.index()]
+                    + incoming(v, p.id, class)
+                    + processes::liquid_reservation(v, p.id, class)
                     > p.capacity[class.index()] + EPS
             {
                 return false;
@@ -909,7 +1210,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || workers.contains(&h.resident)
             || recoveries.contains(&h.recovery)
             || tank(v, h.recovery).is_none_or(|p| {
-                p.owner != Owner::Ground || p.water != [0.; 2] || p.capacity != [0.; 2]
+                p.owner != Owner::Ground || p.water != [0.; LIQUIDS] || p.capacity != [0.; LIQUIDS]
             })
             || h.from == Some(h.recovery)
             || h.to == h.recovery
@@ -942,21 +1243,53 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         workers.push(h.resident);
         recoveries.push(h.recovery);
     }
-    for class in [Class::Fresh, Class::Irrigation] {
+    for class in Class::ALL {
         let i = class.index();
-        if [s.opening[i], s.received[i], s.consumed[i]]
-            .iter()
-            .any(|x| !x.is_finite() || !(0.0..=1e9).contains(x))
-            || (s.opening[i] + s.received[i] - s.consumed[i] - total(v, class)).abs() > 0.001
+        if [
+            s.opening[i],
+            s.received[i],
+            s.consumed[i],
+            s.external[i],
+            s.sandbox_disposed[i],
+        ]
+        .iter()
+        .any(|x| !x.is_finite() || !(0.0..=1e9).contains(x))
+            || (s.opening[i] + s.received[i]
+                - s.consumed[i]
+                - total(v, class)
+                - processes::sealed_liquid(v, class))
+            .abs()
+                > 0.001
+            || s.external[i] + s.sandbox_disposed[i] > s.consumed[i] + EPS
+            || !class.sealed() && (s.external[i] != 0. || s.sandbox_disposed[i] != 0.)
         {
             return false;
         }
     }
     v.water == total(v, Class::Fresh) as f32
         && v.circular.reclaimed == total(v, Class::Irrigation) as f32
+        && v.circular.greywater == total(v, Class::Greywater) as f32
+        && v.circular.waste == total(v, Class::Sewage) as f32
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    serde_json::json!({"tanks":v.water_supply.tanks,"trips":v.water_supply.trips,"opening":v.water_supply.opening,"received":v.water_supply.received,"consumed":v.water_supply.consumed,"present":[total(v,Class::Fresh),total(v,Class::Irrigation)],"capacity":capacity(v),"load":LOAD,"note":"Fresh water and irrigation are separate local stores. A neighbour must collect and deliver a load before its destination can use it. The manual fallback is treated water from the neighbouring farm's tap."})
+    let tanks: Vec<_> = v
+        .water_supply
+        .tanks
+        .iter()
+        .map(|p| {
+            let mut row = serde_json::to_value(p).expect("liquid container");
+            row["incoming"] = serde_json::json!(Class::ALL.map(|class| incoming(v, p.id, class)));
+            row["reserved_pickup"] =
+                serde_json::json!(Class::ALL.map(|class| claimed(v, p.id, class, None)));
+            row["reserved_processing"] = serde_json::json!(
+                Class::ALL.map(|class| processes::liquid_reservation(v, p.id, class))
+            );
+            row["room"] = serde_json::json!(Class::ALL.map(|class| room(v, p, class)));
+            row["open"] = serde_json::json!(open(v, p));
+            row
+        })
+        .collect();
+    serde_json::json!({"tanks":tanks,"trips":v.water_supply.trips,"opening":v.water_supply.opening,"received":v.water_supply.received,"consumed":v.water_supply.consumed,"external":v.water_supply.external,"sandbox_disposed":v.water_supply.sandbox_disposed,"classes":Class::ALL,"capacities":Class::ALL.map(|class| storage_capacity(v,class)),"present":Class::ALL.map(|class| total(v,class)+processes::sealed_liquid(v,class)),"sealed":Class::ALL.map(|class| processes::sealed_liquid(v,class)),"stored_and_carried":Class::ALL.map(|class| total(v,class)),"capacity":capacity(v),"load":LOAD,"note":"Fresh water, irrigation, greywater and sewage remain separate local contents. Neighbours deliver closed service containers to local treatment or the neighbouring service point; off-site handoffs return no village products. Installed compatible lines require resident work and pump power."})
 }
 #[wasm_bindgen]
 impl Game {
@@ -965,10 +1298,24 @@ impl Game {
     }
 }
 #[cfg(test)]
+pub fn fixture_liquid(v: &mut Village, class: Class, amount: f64) {
+    sync(v);
+    v.water_supply.trips.retain(|h| h.class != class);
+    for p in &mut v.water_supply.tanks {
+        p.water[class.index()] = 0.;
+    }
+    v.water_supply.opening[class.index()] = amount + processes::sealed_liquid(v, class);
+    v.water_supply.received[class.index()] = 0.;
+    v.water_supply.consumed[class.index()] = 0.;
+    v.water_supply.external[class.index()] = 0.;
+    v.water_supply.sandbox_disposed[class.index()] = 0.;
+    assert!(stage(v, class, amount, None));
+    sync(v);
+}
+#[cfg(test)]
 pub fn fixture(v: &mut Village, fresh: f32, irrigation: f32) {
-    v.water = fresh;
-    v.circular.reclaimed = irrigation;
-    assert!(initialise(v));
+    fixture_liquid(v, Class::Fresh, f64::from(fresh));
+    fixture_liquid(v, Class::Irrigation, f64::from(irrigation));
 }
 
 #[cfg(test)]
@@ -1016,5 +1363,7 @@ pub fn fixture_at(v: &mut Village, owner: Owner, class: Class, amount: f64) {
     summaries(v);
 }
 
+#[cfg(test)]
+mod sanitation_tests;
 #[cfg(test)]
 mod tests;

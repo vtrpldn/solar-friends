@@ -1,4 +1,4 @@
-//! Owned passive batches. Shared fluid stores become connected services in Stage 5.
+//! Owned passive batches with local delivered inputs and reserved recovery space.
 use crate::*;
 use simulation::Id;
 
@@ -49,6 +49,8 @@ pub struct Batch {
     pub remaining: f32,
     pub phase: Phase,
     pub treated: f32,
+    pub input_tank: Option<Id>,
+    pub recovery: Option<Id>,
 }
 impl Batch {
     pub fn active(&self) -> bool {
@@ -68,7 +70,7 @@ pub struct State {
 impl Default for State {
     fn default() -> Self {
         Self {
-            schema: 1,
+            schema: 2,
             batches: vec![],
             paused: vec![],
         }
@@ -105,6 +107,46 @@ pub fn held_gas(v: &Village) -> f32 {
 pub fn held_irrigation(v: &Village) -> f32 {
     held(v, Kind::Filtration) as f32 * 8.
 }
+pub fn liquid_input(kind: Kind) -> Option<(water::Class, f64)> {
+    match kind {
+        Kind::Digestion => Some((water::Class::Sewage, 2.)),
+        Kind::Filtration => Some((water::Class::Greywater, 12.)),
+        _ => None,
+    }
+}
+pub fn sealed_liquid(v: &Village, class: water::Class) -> f64 {
+    v.processes
+        .batches
+        .iter()
+        .filter(|b| b.active())
+        .filter_map(|b| liquid_input(b.kind))
+        .filter(|(c, _)| *c == class)
+        .map(|(_, amount)| amount)
+        .sum()
+}
+pub fn liquid_reservation(v: &Village, tank: Id, class: water::Class) -> f64 {
+    v.processes
+        .batches
+        .iter()
+        .filter(|b| b.active())
+        .map(|b| {
+            let returns = liquid_input(b.kind)
+                .filter(|(c, _)| *c == class && b.input_tank == Some(tank))
+                .map_or(0., |(_, amount)| amount);
+            let output = if b.kind == Kind::Filtration
+                && class == water::Class::Irrigation
+                && b.building
+                    .and_then(|id| water::owner_tank(v, water::Owner::Building(id)))
+                    .is_some_and(|p| p.id == tank)
+            {
+                8.
+            } else {
+                0.
+            };
+            returns + output
+        })
+        .sum()
+}
 fn spawn(
     v: &mut Village,
     kind: Kind,
@@ -116,9 +158,37 @@ fn spawn(
     if v.processes.batches.iter().filter(|b| b.active()).count() >= 256 {
         return false;
     }
+    let input_tank = if liquid_input(kind).is_some() {
+        let Some(tank) = building.and_then(|id| water::owner_tank(v, water::Owner::Building(id)))
+        else {
+            return false;
+        };
+        Some(tank.id)
+    } else {
+        None
+    };
+    if v.simulation
+        .next_id
+        .checked_add(if input_tank.is_some() { 2 } else { 1 })
+        .is_none()
+    {
+        return false;
+    }
     let Some(id) = v.simulation.allocate() else {
         return false;
     };
+    let recovery = input_tank.map(|_| {
+        let recovery = v.simulation.allocate().unwrap();
+        v.water_supply.tanks.push(water::Tank {
+            id: recovery,
+            owner: water::Owner::Ground,
+            x: x as f32,
+            y: y as f32,
+            capacity: [0.; water::LIQUIDS],
+            water: [0.; water::LIQUIDS],
+        });
+        recovery
+    });
     v.processes.batches.push(Batch {
         id,
         kind,
@@ -130,6 +200,8 @@ fn spawn(
         remaining,
         phase: Phase::Processing,
         treated: 0.,
+        input_tank,
+        recovery,
     });
     true
 }
@@ -193,10 +265,10 @@ pub fn cancel(v: &mut Village, id: Id) -> bool {
     batch.finished = Some(v.minutes);
     match b.kind {
         Kind::Digestion => {
-            v.circular.waste += 2.;
+            water::recover_sealed(v, &b);
             assert!(organics::recover(v, &b));
         }
-        Kind::Filtration => v.circular.greywater += 12.,
+        Kind::Filtration => water::recover_sealed(v, &b),
         _ => {}
     }
     summaries(v);
@@ -273,7 +345,14 @@ pub fn advance(v: &mut Village, minutes: f32) {
             Kind::Digestion => {
                 v.circular.biogas + production::held_biogas(v) as f32 + held_gas(v) <= 12.
             }
-            Kind::Filtration => v.circular.reclaimed + held_irrigation(v) <= 60.,
+            Kind::Filtration => {
+                water::room_after_release(
+                    v,
+                    water::Owner::Building(before.building.unwrap()),
+                    water::Class::Irrigation,
+                    8.,
+                ) >= 8.
+            }
             _ => true,
         };
         if !space {
@@ -309,6 +388,9 @@ pub fn advance(v: &mut Village, minutes: f32) {
         let b = v.processes.batches.iter_mut().find(|b| b.id == id).unwrap();
         b.phase = Phase::Complete;
         b.finished = Some(v.minutes);
+        if let Some((class, amount)) = liquid_input(before.kind) {
+            water::finish_sealed(v, class, amount);
+        }
         match before.kind {
             Kind::Digestion => {
                 v.circular.biogas += 4.;
@@ -372,7 +454,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         let ready = match kind {
             Kind::Digestion => {
                 v.circular.auto_feed
-                    && v.circular.waste >= 2.
+                    && water::local(v, water::Owner::Building(building), water::Class::Sewage) >= 2.
                     && organics::available(v, logistics::Owner::Pantry(building), economy::SCRAPS)
                         >= 2
                     && v.circular.biogas + production::held_biogas(v) as f32 + held_gas(v) + 4.
@@ -380,8 +462,13 @@ pub fn advance(v: &mut Village, minutes: f32) {
             }
             Kind::Filtration => {
                 v.circular.filter_water
-                    && v.circular.greywater >= 12.
-                    && v.circular.reclaimed + held_irrigation(v) + 8. <= 60.
+                    && water::local(v, water::Owner::Building(building), water::Class::Greywater)
+                        >= 12.
+                    && water::local_room(
+                        v,
+                        water::Owner::Building(building),
+                        water::Class::Irrigation,
+                    ) >= 8.
             }
             Kind::Banana => v.circular.banana_treatment,
             _ => false,
@@ -389,7 +476,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if ready && spawn(v, kind, Some(building), x, y, kind.duration()) {
             match kind {
                 Kind::Digestion => {
-                    v.circular.waste -= 2.;
+                    let tank = v.processes.batches.last().unwrap().input_tank.unwrap();
+                    water::seal(v, tank, water::Class::Sewage, 2.);
                     logistics::spend(
                         v,
                         Some(logistics::Owner::Pantry(building)),
@@ -397,7 +485,10 @@ pub fn advance(v: &mut Village, minutes: f32) {
                         2,
                     );
                 }
-                Kind::Filtration => v.circular.greywater -= 12.,
+                Kind::Filtration => {
+                    let tank = v.processes.batches.last().unwrap().input_tank.unwrap();
+                    water::seal(v, tank, water::Class::Greywater, 12.);
+                }
                 _ => {}
             }
         }
@@ -411,8 +502,20 @@ pub fn advance(v: &mut Village, minutes: f32) {
         .map(|b| b.id)
         .collect();
     for id in banana_ids {
-        let amount = (minutes / 240.).min(v.circular.waste);
-        v.circular.waste -= amount;
+        let building = v
+            .processes
+            .batches
+            .iter()
+            .find(|b| b.id == id)
+            .unwrap()
+            .building
+            .unwrap();
+        let amount = water::draw(
+            v,
+            water::Owner::Building(building),
+            water::Class::Sewage,
+            f64::from(minutes) / 240.,
+        ) as f32;
         v.circular.waste_treated += amount;
         v.processes
             .batches
@@ -437,7 +540,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
 }
 pub fn valid(v: &Village) -> bool {
     let p = &v.processes;
-    if p.schema != 1 || p.batches.len() > 320 || p.paused.len() > 256 {
+    if p.schema != 2 || p.batches.len() > 320 || p.paused.len() > 256 {
         return false;
     }
     if v.version == 3 {
@@ -457,9 +560,42 @@ pub fn valid(v: &Village) -> bool {
     }) {
         return false;
     }
+    let mut input_tanks = std::collections::HashSet::new();
+    let mut recovery_tanks = std::collections::HashSet::new();
     let good = p.batches.iter().all(|b| {
         b.id.0 > 0
             && b.id.0 < v.simulation.next_id
+            && match liquid_input(b.kind) {
+                None => b.input_tank.is_none() && b.recovery.is_none(),
+                Some((class, amount)) => {
+                    b.input_tank
+                        .zip(b.recovery)
+                        .is_some_and(|(input, recovery)| {
+                            input.0 > 0
+                                && recovery.0 > 0
+                                && input.0 < v.simulation.next_id
+                                && recovery.0 < v.simulation.next_id
+                                && input != recovery
+                                && input != b.id
+                                && recovery != b.id
+                                && recovery_tanks.insert(recovery)
+                                && (!b.active()
+                                    || (input_tanks.insert(input)
+                                        && water::tank(v, input).is_some_and(|p| {
+                                            p.capacity[class.index()] >= amount
+                                                && (p.owner == water::Owner::Ground
+                                                    || b.building.is_some_and(|id| {
+                                                        p.owner == water::Owner::Building(id)
+                                                    }))
+                                        })
+                                        && water::tank(v, recovery).is_some_and(|p| {
+                                            p.owner == water::Owner::Ground
+                                                && p.water == [0.; water::LIQUIDS]
+                                                && p.capacity == [0.; water::LIQUIDS]
+                                        })))
+                        })
+                }
+            }
             && b.created.is_finite()
             && (0.0..=v.minutes).contains(&b.created)
             && b.finished.is_some() == !b.active()
@@ -510,10 +646,13 @@ pub fn valid(v: &Village) -> bool {
         && v.circular.filtration == next(Kind::Filtration)
         && v.circular.curing == next(Kind::Curing)
         && v.circular.pending_compost == held(v, Kind::Curing) * 2
-        && v.circular.waste + held_waste(v) <= 80.
-        && v.circular.greywater + held_greywater(v) <= 120.
+        && f64::from(v.circular.waste) + f64::from(held_waste(v))
+            <= water::storage_capacity(v, water::Class::Sewage) + 0.001
+        && f64::from(v.circular.greywater) + f64::from(held_greywater(v))
+            <= water::storage_capacity(v, water::Class::Greywater) + 0.001
         && v.circular.biogas + production::held_biogas(v) as f32 + held_gas(v) <= 12.
-        && v.circular.reclaimed + held_irrigation(v) <= 60.
+        && f64::from(v.circular.reclaimed) + f64::from(held_irrigation(v))
+            <= water::storage_capacity(v, water::Class::Irrigation) + 0.001
 }
 fn reason(v: &Village, b: &Batch) -> &'static str {
     if !b.active() {
@@ -527,7 +666,9 @@ fn reason(v: &Village, b: &Batch) -> &'static str {
     } else if b.phase == Phase::AwaitingOutput {
         "Waiting for output space."
     } else if b.kind == Kind::Banana {
-        if v.circular.waste > 0. {
+        if b.building.is_some_and(|id| {
+            water::local(v, water::Owner::Building(id), water::Class::Sewage) > 0.
+        }) {
             "Treating sealed waste through the planted bed; no food or water outlet."
         } else {
             "Waiting for sealed toilet waste."
@@ -564,17 +705,23 @@ fn station_reason(v: &Village, kind: Kind, id: usize) -> &'static str {
             "Make room for four cooking gas. Kitchens use stored gas before another batch can start."
         }
         Kind::Digestion
-            if v.circular.waste < 2.
+            if water::local(v, water::Owner::Building(id), water::Class::Sewage) < 2.
                 || organics::available(v, logistics::Owner::Pantry(id), economy::SCRAPS) < 2 =>
         {
             "Waiting for two sealed waste and two scraps delivered to this digester."
         }
         Kind::Digestion => "Ready to digest when time resumes.",
         Kind::Filtration if !v.circular.filter_water => "Automatic filtration is paused.",
-        Kind::Filtration if v.circular.reclaimed + held_irrigation(v) + 8. > 60. => {
+        Kind::Filtration
+            if water::local_room(v, water::Owner::Building(id), water::Class::Irrigation) < 8. =>
+        {
             "Make room for eight irrigation water. Gardens use reclaimed water first."
         }
-        Kind::Filtration if v.circular.greywater < 12. => "Waiting for twelve greywater.",
+        Kind::Filtration
+            if water::local(v, water::Owner::Building(id), water::Class::Greywater) < 12. =>
+        {
+            "Waiting for twelve greywater delivered to this reed bed."
+        }
         Kind::Filtration => "Ready to filter when time resumes.",
         Kind::Banana if !v.circular.banana_treatment => "Automatic banana treatment is paused.",
         Kind::Banana => "Waiting for sealed toilet waste.",

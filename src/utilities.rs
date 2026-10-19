@@ -26,7 +26,7 @@ impl Kind {
         match self {
             Self::Fresh => matches!(kind, "camp" | "well"),
             Self::Irrigation => kind == "wetland",
-            Self::Greywater => matches!(kind, "home" | "kitchen" | "eco_toilet"),
+            Self::Greywater => matches!(kind, "camp" | "home" | "kitchen" | "eco_toilet"),
             Self::Sewage => kind == "eco_toilet",
             Self::Electricity => matches!(kind, "solar_farm" | "hydro"),
         }
@@ -140,7 +140,7 @@ fn hydro_ports(v: &Village, b: &Building) -> Vec<Port> {
 }
 pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
     let mut result = vec![];
-    if kind == Kind::Fresh {
+    if matches!(kind, Kind::Fresh | Kind::Greywater) {
         result.push(Endpoint {
             id: -1,
             kind: "camp".into(),

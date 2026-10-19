@@ -47,25 +47,56 @@ impl Default for Circular {
     }
 }
 pub fn household_at(v: &mut Village, owner: water::Owner, amount: f32) {
-    let used = water::draw(v, owner, water::Class::Fresh, f64::from(amount)) as f32;
-    v.circular.greywater =
-        (v.circular.greywater + used * 0.7).min(120. - processes::held_greywater(v));
+    let amount = f64::from(amount.max(0.));
+    let room = water::local_room(v, owner, water::Class::Greywater);
+    let allowed = if v.mode == modes::Mode::Sandbox {
+        amount
+    } else {
+        amount.min(room / 0.7)
+    };
+    let used = water::draw(v, owner, water::Class::Fresh, allowed);
+    let created = used * 0.7;
+    let delivered = water::produce(v, owner, water::Class::Greywater, created);
+    if v.mode == modes::Mode::Sandbox && created > delivered {
+        water::sandbox_excess(v, water::Class::Greywater, created - delivered);
+    }
+}
+pub fn washing_ready(v: &Village, owner: water::Owner, amount: f64) -> bool {
+    washing_blocker(v, owner, amount).is_none()
+}
+pub fn washing_blocker(v: &Village, owner: water::Owner, amount: f64) -> Option<&'static str> {
+    if water::local(v, owner, water::Class::Fresh) < amount {
+        Some(
+            "Waiting for fresh water delivered here. Reclaimed irrigation cannot be used for cooking or handwashing.",
+        )
+    } else if v.mode != modes::Mode::Sandbox
+        && water::local_room(v, owner, water::Class::Greywater) < amount * 0.7
+    {
+        Some(
+            "The local greywater buffer is full. Neighbours need to deliver a closed container to a reed bed or the neighbouring service point, or install a greywater line.",
+        )
+    } else {
+        None
+    }
+}
+pub fn usable_toilet(v: &Village, id: usize) -> bool {
+    let owner = water::Owner::Building(id);
+    washing_ready(v, owner, 1.)
+        && (v.mode == modes::Mode::Sandbox
+            || water::local_room(v, owner, water::Class::Sewage) >= 1.)
 }
 #[cfg(test)]
 pub fn household_water(v: &mut Village, amount: f32) {
     household_at(v, water::Owner::Camp, amount);
 }
 pub fn due(v: &Village, r: &Resident) -> bool {
-    v.buildings
-        .iter()
-        .any(|b| b.kind == "eco_toilet" && b.progress >= 100. && b.next_visit <= v.minutes)
-        && v.minutes.rem_euclid(1440.) >= 450. + r.id as f32 * 45.
+    v.buildings.iter().any(|b| {
+        b.kind == "eco_toilet"
+            && b.progress >= 100.
+            && b.next_visit <= v.minutes
+            && usable_toilet(v, b.id)
+    }) && v.minutes.rem_euclid(1440.) >= 450. + r.id as f32 * 45.
         && r.last_sanitation_day < (v.minutes / 1440.) as i32
-        && v.circular.waste + processes::held_waste(v) + 1. <= 80.
-        && v.buildings.iter().any(|b| {
-            b.kind == "eco_toilet"
-                && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 1.
-        })
 }
 pub fn use_toilet(v: &mut Village, r: &mut Resident) {
     let id = spacing::building(r, v);
@@ -77,13 +108,17 @@ pub fn use_toilet(v: &mut Village, r: &mut Resident) {
             && b.kind == "eco_toilet"
             && b.progress >= 100.
             && b.next_visit <= v.minutes
-            && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 1.
+            && usable_toilet(v, b.id)
     }) else {
         return;
     };
     v.buildings[index].next_visit = v.minutes + 12.;
     r.last_sanitation_day = (v.minutes / 1440.) as i32;
-    v.circular.waste += 1.;
+    let owner = water::Owner::Building(v.buildings[index].id);
+    let stored = water::produce(v, owner, water::Class::Sewage, 1.);
+    if v.mode == modes::Mode::Sandbox && stored < 1. {
+        water::sandbox_excess(v, water::Class::Sewage, 1. - stored);
+    }
     v.circular.toilet_visits = v.circular.toilet_visits.saturating_add(1);
     v.buildings[index].visits = v.buildings[index].visits.saturating_add(1);
     household_at(v, water::Owner::Building(v.buildings[index].id), 1.);
@@ -96,10 +131,17 @@ pub fn valid(v: &Village) -> bool {
     if c.biogas + production::held_biogas(v) as f32 > 12. {
         return false;
     }
+    let capacity = |class, legacy| {
+        if v.version == 3 {
+            legacy
+        } else {
+            water::storage_capacity(v, class) as f32 + 0.001
+        }
+    };
     [
-        (c.waste, 80.),
-        (c.greywater, 120.),
-        (c.reclaimed, 60.),
+        (c.waste, capacity(water::Class::Sewage, 80.)),
+        (c.greywater, capacity(water::Class::Greywater, 120.)),
+        (c.reclaimed, capacity(water::Class::Irrigation, 60.)),
         (c.biogas, 12.),
         (c.digestion, 480.),
         (c.filtration, 360.),
@@ -176,7 +218,7 @@ mod tests {
         let mut g = setup();
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.circular.waste = 4.;
+            crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 4.);
             crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
             advance(&mut v, 1.);
             assert_eq!(v.circular.waste, 2.);
@@ -212,7 +254,7 @@ mod tests {
         let mut q = g.app.world_mut().query::<&Resident>();
         let mut r = q.iter(g.app.world()).next().unwrap().clone();
         let mut v = g.app.world().resource::<Village>().clone();
-        v.circular.greywater = 24.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Greywater, 24.);
         let fresh = v.water;
         advance(&mut v, 1.);
         advance(&mut v, 360.);
@@ -242,7 +284,7 @@ mod tests {
         let g = setup();
         let mut v = g.app.world().resource::<Village>().clone();
         v.circular.biogas = 12.;
-        v.circular.waste = 4.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 4.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 4);
         advance(&mut v, 1.);
         assert_eq!(v.circular.digestion, 0.);
@@ -281,7 +323,7 @@ mod tests {
         let mut v = g.app.world().resource::<Village>().clone();
         v.circular.auto_feed = false;
         v.circular.filter_water = false;
-        v.circular.waste = 7.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 7.);
         let outputs = (
             v.water,
             v.food,
@@ -316,7 +358,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.circular.auto_feed = false;
-            v.circular.waste = 4.;
+            crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 4.);
             advance(&mut v, 240.);
         }
         g.configure_banana_treatment(false);
@@ -350,7 +392,7 @@ mod tests {
             assert_eq!(g.place("banana_treatment", x, 10), "ok");
         }
         let mut v = g.app.world().resource::<Village>().clone();
-        v.circular.waste = 3.;
+        crate::water::fixture_liquid(&mut v, crate::water::Class::Sewage, 3.);
         crate::organics::fixture(&mut v, crate::economy::SCRAPS, 2);
         advance(&mut v, 120.);
         assert_eq!(v.circular.waste, 0.);

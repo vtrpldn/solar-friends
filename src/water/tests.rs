@@ -59,12 +59,13 @@ fn checkpoint(g: &mut Game) {
     assert_eq!(h.snapshot(), saved);
 }
 fn reconciled(v: &Village) {
-    for class in [Class::Fresh, Class::Irrigation] {
+    for class in Class::ALL {
         let i = class.index();
         assert!(
             (v.water_supply.opening[i] + v.water_supply.received[i]
                 - v.water_supply.consumed[i]
-                - total(v, class))
+                - total(v, class)
+                - processes::sealed_liquid(v, class))
             .abs()
                 < 0.0001
         );
@@ -319,8 +320,8 @@ fn small_recoverable_loads_can_be_collected_and_sync_never_discards_a_residue() 
         owner: Owner::Ground,
         x: 10.7,
         y: 13.,
-        capacity: [0.25, 0.],
-        water: [0.25, 0.],
+        capacity: [0.25, 0., 0., 0.],
+        water: [0.25, 0., 0., 0.],
     });
     v.water_supply.received[0] += 0.25;
     summaries(&mut v);
