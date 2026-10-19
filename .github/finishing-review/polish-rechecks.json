@@ -1,0 +1,27 @@
+{
+  "status": "targeted checks passed; final full validation pending",
+  "nativeProductionTests": 19,
+  "newNativeTests": 2,
+  "strictLint": "passed",
+  "landRegression": "passed: three deposit types retain their material after pinning",
+  "storyRouteRegression": "passed: food cycle routes to Pantry",
+  "desktopBrowser": {
+    "startedAt": "2026-10-19T00:47:48.487Z",
+    "finishedAt": "2026-10-19T00:52:06.357Z",
+    "status": "PASS",
+    "errors": [],
+    "report": "artifacts/finishing/polish-browser-report.json"
+  },
+  "liveRechecks": {
+    "deposits": "Plot15,21 now reports local earth20/52; extraction overlays stay visible while placing",
+    "production": "Idle frame reserve names one missing fitting beside each eligible station",
+    "craft": "Real request accepts an eligible batch; pausing the workshop gives an actionable refusal",
+    "screenshots": [
+      "deposit-inspection-after.png",
+      "extraction-overlay-after.png",
+      "production-blocker-after.png",
+      "craft-refusal-after.png"
+    ]
+  },
+  "harnessFix": "Use visible Journal control after Land views focuses a selector; keyboard shortcuts remain suppressed while editing."
+}

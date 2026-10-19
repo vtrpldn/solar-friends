@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-16",
+  "tool": "Built-in image_gen",
+  "key": "finishing-toilet",
+  "paths": [
+    "/Users/paladini/Documents/veeware/solar-friends/web/art/eco-toilet.png",
+    "/Users/paladini/Documents/veeware/solar-friends/web/art/home-gable.png"
+  ],
+  "prompt": "Use case: precise-object-edit. Image 1 is the edit target, Solar Friends ecological toilet hut; image 2 is the existing house STYLE reference. Correct the toilet hut's adult headroom: at its unchanged narrow ground footprint the turquoise doorway is too short for a resident. Repaint the hut with substantially taller, slender cream walls and bamboo posts, and a tall full-height turquoise door. Increase wall and door HEIGHT by about 45 percent relative to the unchanged ground width/depth; raise the roof bodily without enlarging its footprint or changing its pitch. Keep the basin, blue barrel, service hatch, simple tropical leaves, stone perimeter, terracotta roof and vent pipe, but keep these accessories compact so they do not dictate the hut's width. The taller hut must read as a human-scale walk-in toilet, not a miniature. Same warm painted Brazilian game illustration as the house, broad shading, simplified materials, warm edges, upper-left daylight, no photoreal grain. Preserve a coherent fixed 2:1 orthographic camera: ground rectangle, wall lintels and horizontal eaves use ±1/2 slopes; ridge parallel to the long eaves, vertical posts, centered front gable. Make the entire sprite tall and slender within the square canvas, with transparent side margins and no clipping. No people, text, grid, extra platform, new objects or opaque ground patch. Genuine transparency including all gaps.",
+  "status": "installed-after-candidate-review",
+  "output": "web/art/eco-toilet-tall.png"
+}

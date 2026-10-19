@@ -1,0 +1,792 @@
+{
+  "status": "baseline-complete-stalls-under-investigation",
+  "commit": "27ee38304f731feaf306d10209914b1b3508f5ab",
+  "wasm_sha256": "50d76d4d240454ced9d8cd1411caced24d13bcf7c90e336253354361e12047a3",
+  "hardware": {
+    "model": "Mac15,7",
+    "chip": "Apple M3 Pro",
+    "ram_bytes": 38654705664
+  },
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "viewport": {
+    "width": 1600,
+    "height": 900,
+    "dpr": 1.600000023841858
+  },
+  "renderer_diagnostic": {
+    "webgl": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+    "limitation": "Detached WebGL diagnostic does not establish the Canvas2D backend."
+  },
+  "fixture": "artifacts/utility-balance/connected-before.json",
+  "fixture_scope": "Earned campaign checkpoint imported through normal Settings into isolated origin 4193. Not evidence of manual Story progression. Started with 25 buildings covering all 22 types, five residents and 13 utility lines; ended with 26 buildings.",
+  "started_at": "2026-10-19T01:02:38.169Z",
+  "ended_at": "2026-10-19T01:32:45.627Z",
+  "active_minutes": 30.07597666666667,
+  "measurement": {
+    "windowMs": 300000,
+    "completed": [
+      {
+        "startedAt": "2026-10-19T01:02:38.169Z",
+        "activeMs": 300007.89999999997,
+        "samples": 32191,
+        "median": 9,
+        "p95": 17,
+        "max": 533.1999999999998,
+        "over100": 5,
+        "costs": {
+          "simulation": {
+            "samples": 32191,
+            "median": 2.3000000000000003,
+            "p95": 7,
+            "max": 19.199999928474426
+          },
+          "sample": {
+            "samples": 32191,
+            "median": 1.2000000000000002,
+            "p95": 1.5,
+            "max": 10.5
+          },
+          "paint": {
+            "samples": 32191,
+            "median": 2.8000000000000003,
+            "p95": 3.8000000000000003,
+            "max": 276.60000002384186
+          },
+          "total": {
+            "samples": 32191,
+            "median": 6.300000000000001,
+            "p95": 12.5,
+            "max": 280
+          }
+        },
+        "inputEvents": 409,
+        "maxInputDelay": 24.800000071525574,
+        "maxInputDuration": 560,
+        "start": {
+          "at": "2026-10-19T01:02:38.169Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 62,
+            "bytes": 19463680,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 16082622,
+            "total": 24264666
+          }
+        },
+        "end": {
+          "at": "2026-10-19T01:07:37.561Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 236,
+            "bytes": 50266624,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 17257611,
+            "total": 85844483
+          }
+        }
+      },
+      {
+        "startedAt": "2026-10-19T01:07:37.573Z",
+        "activeMs": 300008.20000000007,
+        "samples": 32767,
+        "median": 9,
+        "p95": 17,
+        "max": 175,
+        "over100": 1,
+        "costs": {
+          "simulation": {
+            "samples": 32767,
+            "median": 2.4000000000000004,
+            "p95": 5.800000000000001,
+            "max": 15.899999976158142
+          },
+          "sample": {
+            "samples": 32767,
+            "median": 1.2000000000000002,
+            "p95": 1.5,
+            "max": 10.5
+          },
+          "paint": {
+            "samples": 32767,
+            "median": 1.9000000000000001,
+            "p95": 3.5,
+            "max": 47.10000002384186
+          },
+          "total": {
+            "samples": 32767,
+            "median": 5.800000000000001,
+            "p95": 11.700000000000001,
+            "max": 52.39999997615814
+          }
+        },
+        "inputEvents": 285,
+        "maxInputDelay": 22.399999976158142,
+        "maxInputDuration": 240,
+        "start": {
+          "at": "2026-10-19T01:07:37.573Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 236,
+            "bytes": 50266624,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 17257611,
+            "total": 85844483
+          }
+        },
+        "end": {
+          "at": "2026-10-19T01:12:37.557Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 290,
+            "bytes": 50321408,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 25229104,
+            "total": 89852240
+          }
+        }
+      },
+      {
+        "startedAt": "2026-10-19T01:12:37.566Z",
+        "activeMs": 300006.5,
+        "samples": 28620,
+        "median": 9,
+        "p95": 19,
+        "max": 174.40000000002328,
+        "over100": 29,
+        "costs": {
+          "simulation": {
+            "samples": 28620,
+            "median": 2.5,
+            "p95": 13,
+            "max": 165.60000002384186
+          },
+          "sample": {
+            "samples": 28620,
+            "median": 1.2000000000000002,
+            "p95": 1.5,
+            "max": 9.199999928474426
+          },
+          "paint": {
+            "samples": 28620,
+            "median": 2.4000000000000004,
+            "p95": 3.8000000000000003,
+            "max": 67.10000002384186
+          },
+          "total": {
+            "samples": 28620,
+            "median": 6.4,
+            "p95": 17.7,
+            "max": 172.10000002384186
+          }
+        },
+        "inputEvents": 112,
+        "maxInputDelay": 31.199999928474426,
+        "maxInputDuration": 104,
+        "start": {
+          "at": "2026-10-19T01:12:37.567Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 290,
+            "bytes": 50321408,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 25229104,
+            "total": 89852240
+          }
+        },
+        "end": {
+          "at": "2026-10-19T01:17:37.552Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 294,
+            "bytes": 50316288,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 45746697,
+            "total": 90250401
+          }
+        }
+      },
+      {
+        "startedAt": "2026-10-19T01:17:37.560Z",
+        "activeMs": 300003.6000000001,
+        "samples": 29743,
+        "median": 9,
+        "p95": 18,
+        "max": 299.79999999993015,
+        "over100": 41,
+        "costs": {
+          "simulation": {
+            "samples": 29743,
+            "median": 2.7,
+            "p95": 8.5,
+            "max": 285.3000000715256
+          },
+          "sample": {
+            "samples": 29743,
+            "median": 1.3,
+            "p95": 1.5,
+            "max": 10.200000047683716
+          },
+          "paint": {
+            "samples": 29743,
+            "median": 1.9000000000000001,
+            "p95": 3.6,
+            "max": 49.799999952316284
+          },
+          "total": {
+            "samples": 29743,
+            "median": 6.7,
+            "p95": 14.200000000000001,
+            "max": 294.10000002384186
+          }
+        },
+        "inputEvents": 390,
+        "maxInputDelay": 72.79999995231628,
+        "maxInputDuration": 160,
+        "start": {
+          "at": "2026-10-19T01:17:37.560Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 294,
+            "bytes": 50316288,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 45746697,
+            "total": 90250401
+          }
+        },
+        "end": {
+          "at": "2026-10-19T01:22:41.111Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 222,
+            "bytes": 50280448,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 51709509,
+            "total": 96148461
+          }
+        }
+      },
+      {
+        "startedAt": "2026-10-19T01:22:41.119Z",
+        "activeMs": 300004.09999999986,
+        "samples": 30287,
+        "median": 9,
+        "p95": 17,
+        "max": 108.0999999998603,
+        "over100": 1,
+        "costs": {
+          "simulation": {
+            "samples": 30287,
+            "median": 2.4000000000000004,
+            "p95": 9.3,
+            "max": 22.300000071525574
+          },
+          "sample": {
+            "samples": 30287,
+            "median": 1.2000000000000002,
+            "p95": 1.5,
+            "max": 8.399999976158142
+          },
+          "paint": {
+            "samples": 30287,
+            "median": 2.4000000000000004,
+            "p95": 3.7,
+            "max": 79.39999997615814
+          },
+          "total": {
+            "samples": 30287,
+            "median": 6.2,
+            "p95": 14,
+            "max": 82.29999995231628
+          }
+        },
+        "inputEvents": 131,
+        "maxInputDelay": 13.600000023841858,
+        "maxInputDuration": 144,
+        "start": {
+          "at": "2026-10-19T01:22:41.119Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 222,
+            "bytes": 50280448,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 51709509,
+            "total": 96148461
+          }
+        },
+        "end": {
+          "at": "2026-10-19T01:27:41.110Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 394,
+            "bytes": 49615360,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 43016054,
+            "total": 96066018
+          }
+        }
+      },
+      {
+        "startedAt": "2026-10-19T01:27:41.123Z",
+        "activeMs": 300007.40000000014,
+        "samples": 31717,
+        "median": 9,
+        "p95": 17,
+        "max": 108.60000000009313,
+        "over100": 2,
+        "costs": {
+          "simulation": {
+            "samples": 31717,
+            "median": 2.5,
+            "p95": 7.9,
+            "max": 28.399999976158142
+          },
+          "sample": {
+            "samples": 31717,
+            "median": 1.2000000000000002,
+            "p95": 1.4000000000000001,
+            "max": 8.100000023841858
+          },
+          "paint": {
+            "samples": 31717,
+            "median": 1.5,
+            "p95": 3.4000000000000004,
+            "max": 99.69999992847443
+          },
+          "total": {
+            "samples": 31717,
+            "median": 6.5,
+            "p95": 13.5,
+            "max": 108.19999992847443
+          }
+        },
+        "inputEvents": 129,
+        "maxInputDelay": 19.300000071525574,
+        "maxInputDuration": 136,
+        "start": {
+          "at": "2026-10-19T01:27:41.123Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 394,
+            "bytes": 49615360,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 43016054,
+            "total": 96066018
+          }
+        },
+        "end": {
+          "at": "2026-10-19T01:32:41.104Z",
+          "visibility": "visible",
+          "viewport": {
+            "width": 1600,
+            "height": 900,
+            "dpr": 1.600000023841858
+          },
+          "cache": {
+            "entries": 290,
+            "bytes": 50321408,
+            "budget": 50331648
+          },
+          "heap": {
+            "used": 25488777,
+            "total": 92951997
+          }
+        }
+      }
+    ],
+    "current": {
+      "startedAt": "2026-10-19T01:32:41.116Z",
+      "activeMs": 4520.899999999907,
+      "samples": 312,
+      "median": 16,
+      "p95": 25,
+      "max": 106,
+      "over100": 1,
+      "costs": {
+        "simulation": {
+          "samples": 312,
+          "median": 7.9,
+          "p95": 8.8,
+          "max": 11.5
+        },
+        "sample": {
+          "samples": 312,
+          "median": 1.3,
+          "p95": 5,
+          "max": 8.399999976158142
+        },
+        "paint": {
+          "samples": 312,
+          "median": 3,
+          "p95": 4.7,
+          "max": 13.600000023841858
+        },
+        "total": {
+          "samples": 312,
+          "median": 12.200000000000001,
+          "p95": 18,
+          "max": 27.700000047683716
+        }
+      },
+      "inputEvents": 0,
+      "maxInputDelay": 0,
+      "maxInputDuration": 0,
+      "start": {
+        "at": "2026-10-19T01:32:41.116Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 290,
+          "bytes": 50321408,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 25488777,
+          "total": 92951997
+        }
+      },
+      "end": {
+        "at": "2026-10-19T01:32:45.633Z",
+        "visibility": "visible",
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1.600000023841858
+        },
+        "cache": {
+          "entries": 290,
+          "bytes": 50321408,
+          "budget": 50331648
+        },
+        "heap": {
+          "used": 28147478,
+          "total": 91415006
+        }
+      }
+    },
+    "eventTiming": {
+      "available": true,
+      "thresholdMs": 16,
+      "recent": [
+        {
+          "name": "mouseleave",
+          "target": "projects-panel",
+          "duration": 24,
+          "inputDelay": 0.10000002384185791
+        },
+        {
+          "name": "mouseleave",
+          "target": "village-book",
+          "duration": 24,
+          "inputDelay": 0.10000002384185791
+        },
+        {
+          "name": "mouseover",
+          "target": "world",
+          "duration": 24,
+          "inputDelay": 0.10000002384185791
+        },
+        {
+          "name": "mouseenter",
+          "target": "world",
+          "duration": 24,
+          "inputDelay": 0.10000002384185791
+        },
+        {
+          "name": "pointerout",
+          "target": "world",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "pointerleave",
+          "target": "world",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "pointerover",
+          "target": "zoom-in",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "pointerenter",
+          "target": "DIV",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "pointerenter",
+          "target": "zoom-in",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "mouseout",
+          "target": "world",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "mouseleave",
+          "target": "world",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "mouseover",
+          "target": "zoom-in",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "mouseenter",
+          "target": "DIV",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "mouseenter",
+          "target": "zoom-in",
+          "duration": 56,
+          "inputDelay": 16.299999952316284
+        },
+        {
+          "name": "pointerdown",
+          "target": "zoom-in",
+          "duration": 48,
+          "inputDelay": 14.899999976158142
+        },
+        {
+          "name": "mousedown",
+          "target": "zoom-in",
+          "duration": 48,
+          "inputDelay": 15
+        },
+        {
+          "name": "pointerup",
+          "target": "zoom-in",
+          "duration": 120,
+          "inputDelay": 15.399999976158142
+        },
+        {
+          "name": "mouseup",
+          "target": "zoom-in",
+          "duration": 120,
+          "inputDelay": 15.5
+        },
+        {
+          "name": "click",
+          "target": "zoom-in",
+          "duration": 120,
+          "inputDelay": 15.5
+        },
+        {
+          "name": "pointerout",
+          "target": "zoom-in",
+          "duration": 48,
+          "inputDelay": 15.600000023841858
+        },
+        {
+          "name": "pointerleave",
+          "target": "zoom-in",
+          "duration": 48,
+          "inputDelay": 15.600000023841858
+        },
+        {
+          "name": "pointerover",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 15.600000023841858
+        },
+        {
+          "name": "pointerenter",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 15.600000023841858
+        },
+        {
+          "name": "mouseout",
+          "target": "zoom-in",
+          "duration": 48,
+          "inputDelay": 15.600000023841858
+        },
+        {
+          "name": "mouseleave",
+          "target": "zoom-in",
+          "duration": 48,
+          "inputDelay": 15.699999928474426
+        },
+        {
+          "name": "mouseover",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 15.699999928474426
+        },
+        {
+          "name": "mouseenter",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 15.699999928474426
+        },
+        {
+          "name": "pointerdown",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 14.099999904632568
+        },
+        {
+          "name": "mousedown",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 14.199999928474426
+        },
+        {
+          "name": "pointerup",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 14.399999976158142
+        },
+        {
+          "name": "mouseup",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 14.5
+        },
+        {
+          "name": "click",
+          "target": "center",
+          "duration": 48,
+          "inputDelay": 14.5
+        }
+      ]
+    }
+  },
+  "actions": [
+    "1x normal play, natural night and automatic 16x sleep acceleration",
+    "Repeated zoom in/out, center and native camera drag",
+    "Opened Buildings, Construction, Trade, Power, People, Water/weather and upkeep panels",
+    "Brief journal reading pause excluded from active measurement",
+    "Placed Cistern 26; purchased missing supplies with earned funds; residents hauled and completed it; capacity 183 to 258",
+    "Disabled and restored Street light 18 through normal Power control",
+    "8x at approximately 01:12:55-01:18:00, normal speed around rain, resumed 8x approximately 01:18:50-01:20:13, then 1x with natural sleep acceleration",
+    "Observed Wet season Rainfall at Day 88 14:52 (1x) and 15:06 (8x)",
+    "Saved Day 91 26-building village, returned to menu, reloaded and Continued; mode/buildings/quest progress retained"
+  ],
+  "findings": [
+    {
+      "id": "PERF01",
+      "status": "fix-implemented-browser-recheck-pending",
+      "severity": "material polish",
+      "observed": "All six window frame p95 values 17-19ms meet targets, but recurring >100ms simulation spikes at 8x remain. Window stall counts 5,1,29,41,1,2. Initial Continue includes 533ms loading gap; largest paint cost 276.6ms during early camera/lighting cache warming.",
+      "next": "Profile expensive simulation functions and recheck exact behavior after any optimization.",
+      "diagnosis": "Separate source-named release profile: pipes::anchored accounts for about 1331ms of 2266ms inclusive simulation samples in the short 6979ms capture. It rebuilt power::endpoints and all approach-port geometry per cable endpoint per step, although anchor validation only consumes identity, position, size and kind. Original stripped-profile function indices cannot be mapped to the reordered named build.",
+      "fix": "Direct electrical_node identity lookup with a shared endpoint_kind helper. Port geometry remains in planning/reporting. No cache, simulation cadence or flow changes.",
+      "rechecks": {
+        "native": "19 pipe tests, 24 power tests, 10 electricity tests passed; strict clippy passed",
+        "parity": "cable-anchor-parity.json: 3840 old/new ticks and 32 exact full-state checkpoints match; materials/water/energy balance",
+        "timing_limit": "The Node timing comparison overlapped native checks, so its timing is diagnostic only; live browser acceptance remains pending."
+      }
+    }
+  ],
+  "limits": [
+    "No crash or stuck construction observed. This baseline does not close the intermittent-stall acceptance requirement.",
+    "Event Timing only captures entries above 16ms; duplicated pointer/mouse events are not independent user actions.",
+    "No simultaneous cargo/campaign/browser-suite workload during baseline.",
+    "Files named rain-point and rain-live were captured before/after rainfall; direct evidence is wet-observed and wet-fast.",
+    "Normal user origins and first-hour Story save were preserved."
+  ],
+  "hosted_check": {
+    "run": "https://github.com/vtrpldn/solar-friends/actions/runs/39182986000",
+    "head": "27ee38304f731feaf306d10209914b1b3508f5ab",
+    "status": "not-started-account-blocked",
+    "reason": "Recent account payments have failed or spending limit needs to be increased."
+  },
+  "retainedStartingObservation": {
+    "file": "artifacts/finishing/dense-observed-start-save.json",
+    "sha256": "6b3fa3a0b55c3b9079adc79f1c7725cffcded30099cfee6ea5f34f90993aa543",
+    "at": "2026-10-19T01:02:41.825Z",
+    "note": "Read-only full native snapshot captured about four seconds after Continue. The source campaign fixture path is regenerated by later validation; this retained observation and the baseline end snapshot preserve the measured village."
+  }
+}

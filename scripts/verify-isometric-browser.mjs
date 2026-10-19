@@ -6,20 +6,37 @@ const output='artifacts/isometric';await mkdir(output,{recursive:true});
 const server=await serve(),base=`http://127.0.0.1:${server.address().port}`,browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1500,height:1050}}),errors=[],screenshots=[];
 page.on('pageerror',e=>errors.push(e.message));
+// A candidate can use a night source that is absent from the runtime registry.
+// Keep the fixture out of the real candidate list and verify its asset is loaded.
+let independentNightLoaded=false;
+page.on('response',response=>{if(response.url().endsWith('/art/eco-toilet-night.png')&&response.ok())independentNightLoaded=true;});
+await page.route('**/artwork/finishing-candidates.json',async route=>{
+ const candidates=JSON.parse(await readFile('web/artwork/finishing-candidates.json','utf8'));
+ const {allBuildingArt}=await import('../web/building-art.js');
+ candidates.push({id:'night-loading-regression',label:'Test-only night loader',key:'eco_toilet',art:{...allBuildingArt.eco_toilet,nightFile:'eco-toilet-night.png'},issue:'Test fixture only'});
+ await route.fulfill({contentType:'application/json',body:JSON.stringify(candidates)});
+});
 await page.addInitScript(()=>{window.worldFilters=[];const proto=CanvasRenderingContext2D.prototype,descriptor=Object.getOwnPropertyDescriptor(proto,'filter');Object.defineProperty(proto,'filter',{...descriptor,set(value){if(this.canvas.id==='world'&&value!=='none')window.worldFilters.push(value);descriptor.set.call(this,value);}});});
 try{
  await page.goto(base+'/artwork/projection.html');
- await page.waitForFunction(()=>document.querySelector('#status')?.dataset.drift);
+ await page.waitForFunction(()=>document.querySelector('#status')?.dataset.drift,null,{timeout:120000});
  assert.equal(await page.locator('figure').count(),27);
+ assert(independentNightLoaded,'Candidate night files outside the runtime registry must be decoded too');
  assert(Number.isFinite(Number(await page.locator('#status').getAttribute('data-drift'))));
  await page.locator('#guides').uncheck();
+ const workStates=['built','blueprint','construction','pack','rebuild','salvage','demolish'];
  for(const lighting of ['day','night']){
   await page.locator('#light').selectOption(lighting);
-  for(let group=0;group<3;group++){
-   await page.evaluate(group=>{[...document.querySelectorAll('figure')].forEach((el,j)=>el.style.display=j>=group*9&&j<(group+1)*9?'block':'none');},group);
-   const file=`${output}/${lighting}-${group}.png`;await page.locator('#buildings').screenshot({path:file});screenshots.push(file);
+  for(const workState of workStates){
+   await page.locator('#stage').selectOption(workState);
+   assert.equal(await page.locator(`figure canvas[data-work-state="${workState}"]`).count(),27);
+   for(let group=0;group<3;group++){
+    await page.evaluate(group=>{[...document.querySelectorAll('figure')].forEach((el,j)=>el.style.display=j>=group*9&&j<(group+1)*9?'block':'none');},group);
+    const file=`${output}/${lighting}-${workState==='built'?'':workState+'-'}${group}.png`;await page.locator('#buildings').screenshot({path:file});screenshots.push(file);
+   }
   }
  }
+ await page.locator('#stage').selectOption('built');
  await page.evaluate(()=>document.querySelectorAll('figure').forEach(el=>el.style.display=''));
  await page.locator('#light').selectOption('day');await page.locator('#guides').check();
  await page.getByRole('button',{name:'Inspect Community shed',exact:true}).click();
@@ -51,6 +68,6 @@ try{
  const expected=await page.evaluate(()=>document.querySelector('#world').toDataURL('image/png').split(',')[1]);
  assert.deepEqual(await readFile(await download.path()),Buffer.from(expected,'base64'),'Downloaded scene must match the visible night world');
  assert.deepEqual(errors,[]);
- await writeFile(`${output}/browser-review.json`,JSON.stringify({variants:27,views:54,status:'captures-only-not-visual-approval',occlusion,errors,screenshots},null,2));
- console.log('PASS: captured all 54 renderer views, exercised enlarged guides and planted day/night previews, checked light occlusion; no browser errors. Visual quality is not certified by this test.');
+ await writeFile(`${output}/browser-review.json`,JSON.stringify({variants:27,views:27*2*workStates.length,workStates,status:'captures-only-not-visual-approval',occlusion,errors,screenshots},null,2));
+ console.log('PASS: captured all 378 renderer state views, exercised enlarged guides and planted day/night previews, checked light occlusion; no browser errors. Visual quality is not certified by this test.');
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

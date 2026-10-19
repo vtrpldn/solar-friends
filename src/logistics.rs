@@ -1327,7 +1327,7 @@ fn claim(v: &mut Village, r: &mut Resident) -> bool {
     let Some((c, a, b, path, _)) = best else {
         for p in &mut v.logistics.as_mut().unwrap().stores {
             if destinations.contains(&p.id) {
-                p.blocker=Some("No clear hauling route. Leave an accessible path around the pickup and receiving plot.".into());
+                p.blocker=Some("Waiting for a carrier who can reach the pickup and receiving plot. If this persists, leave clear access around both.".into());
             }
         }
         return false;

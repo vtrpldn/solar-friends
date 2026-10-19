@@ -2,13 +2,23 @@ import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
-import {landTiles} from '../web/land-map.js';
+import {landTiles,landPreviewKind,sourceLandLayer} from '../web/land-map.js';
 import {sourceDeposit} from '../web/resource-sites.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot());
 assert(g.set_simulation_seed(17));
 const first=g.snapshot(),report=JSON.parse(g.land_report());
 assert.equal(g.land_report(),g.land_report());assert.equal(g.snapshot(),first);
+// Pinning a restorable plot must not replace the chosen deposit inspection with a garden query.
+for(const [layer,kind] of [['earth','source_earth'],['stone','source_stone'],['salvage','source_salvage']]){
+ assert.equal(sourceLandLayer(kind),layer);
+ const patch=report.deposits.find(d=>d.material===({earth:2,stone:3,salvage:4})[layer]);
+ const preview=JSON.parse(g.land_preview(landPreviewKind(layer,null,{size:2}),patch.x+2,patch.y+2));
+ assert.equal(preview.deposit.id,patch.id,'A pinned deposit cell keeps its actual material and reserve');
+}
+assert.equal(landPreviewKind('fertility',null,{size:3}),'source_timber');
+assert.equal(landPreviewKind('earth','home',{size:2}),'home');
+assert.equal(sourceLandLayer('source_timber'),undefined);
 assert.equal(report.deposits.length,9);assert(report.cells.length>400);
 for(const [layer,material] of [['earth',2],['stone',3],['salvage',4]]){
  const cells=landTiles(report,layer);assert(cells.length>10);

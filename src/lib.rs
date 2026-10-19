@@ -685,7 +685,7 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
                 "cook" => "We need a kitchen, three food and one water first.",
                 "compost" => "Two scraps need to reach a compost station before a neighbour can turn them.",
                 "craft" => {
-                    "We need an open workshop with room for a batch, eight available timber, and fewer than 25 tool uses already stored or ordered. Inputs must be delivered before crafting."
+                    return production::tool_request_blocker(v);
                 }
                 "eat" => "We need food or a prepared meal first.",
                 _ => "That task is not available yet.",

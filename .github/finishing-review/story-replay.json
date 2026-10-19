@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-10-16T21:57:30Z",
+  "origin": "http://127.0.0.1:4194/?performance",
+  "candidateCommit": "dfb8b69",
+  "scope": "Fresh Story through ordinary controls; interrupted exploratory run, retained as functional-flow evidence rather than first-hour pacing acceptance.",
+  "checkpoints": [
+    {
+      "targetMinutes": 5,
+      "observedAt": "2026-10-16T22:02:24Z",
+      "goal": "Bring in our first harvest",
+      "explanation": "Build a garden and ask Iara to tend it; one work session per request, three moist growing hours, request harvest if pantry is healthy.",
+      "state": "Day 1 22:13, cistern and first home complete, garden and kitchen placed, 3/5 beds, 28 food, 57 water, R$2120.",
+      "judgment": "Combined needs order exposes pump plus rooftop equipment up front. Pickup saved R$40 and avoided next-day waiting. Early construction advances while reading and placing food buildings."
+    }
+  ],
+  "events": [
+    {
+      "observedAt": "2026-10-16T22:03:00Z",
+      "note": "Night garden visit refused because Iara needed to eat/rest. Portrait separately showed asleep. No request was silently accepted."
+    },
+    {
+      "observedAt": "2026-10-16T22:04:00Z",
+      "note": "Accepted farm request paused explicitly for breakfast; panel said it would continue afterwards."
+    },
+    {
+      "observedAt": "2026-10-16T22:05:00Z",
+      "note": "Request marked Finished; first bed visibly planted. Bento scheduled as bamboo carpenter for R$240/shift and subsequently left the village."
+    }
+  ],
+  "status": "Interrupted exploratory replay; not accepted as an uninterrupted first-hour pacing session.",
+  "timingLimitation": "Long gaps and timeouts in browser control interrupted the 15/30/60 minute checkpoints. Do not count unattended elapsed time as manual play.",
+  "verifiedFlows": [
+    "Arrival, free blueprints and resident construction",
+    "Focused pump/panel/battery purchase and resident pickup",
+    "Breakfast pauses an accepted farm request; request later finishes and the bed is planted",
+    "Bento leaves for paid bamboo-carpentry work and contributes income",
+    "Luz collects missing kitchen plumbing; construction and a cooked meal complete chapter one",
+    "Save village, Main menu, Continue preserves chapter two, six buildings and shared fund; Continue starts at 1x"
+  ],
+  "checkpoint": "Paused on chapter two; separate origin 4194 protects user saves"
+}

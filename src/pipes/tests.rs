@@ -1,4 +1,67 @@
 use super::*;
+
+#[test]
+fn electrical_anchor_identity_matches_full_port_lookup_without_mutation() {
+    let g = scene();
+    let base = g.app.world().resource::<Village>();
+    let prototype = base.power.network.nodes[0].clone();
+    for (kind, owner) in [
+        (electricity::Kind::Solar, prototype.owner),
+        (electricity::Kind::Roof, prototype.owner),
+        (electricity::Kind::Pump, electricity::Owner::Pump(Id(999))),
+        (electricity::Kind::Battery, electricity::Owner::Ground),
+        (electricity::Kind::Battery, electricity::Owner::Carrier(0)),
+        (
+            electricity::Kind::Consumer,
+            electricity::Owner::Building(999),
+        ),
+    ] {
+        let mut v = base.clone();
+        let mut node = prototype.clone();
+        node.kind = kind;
+        node.owner = owner;
+        v.power.network.nodes = vec![node.clone()];
+        let before = serde_json::to_string(&v).unwrap();
+        let endpoints = power::endpoints(&v);
+        for label in [
+            "well",
+            "kitchen",
+            "solar_farm",
+            "pump",
+            "battery",
+            "missing",
+        ] {
+            let anchor = Anchor {
+                kind: label.into(),
+                x: node.x,
+                y: node.y,
+                size: node.size,
+                endpoint: node.id,
+            };
+            for mutation in 0..6 {
+                let mut a = anchor.clone();
+                let mut id = i64::from(node.id.0);
+                match mutation {
+                    1 => a.x += 1,
+                    2 => a.y += 1,
+                    3 => a.size += 1,
+                    4 => a.endpoint = Id(999),
+                    5 => id = -1,
+                    _ => {}
+                }
+                let previous = endpoints.iter().any(|e| {
+                    e.id == id
+                        && i64::from(a.endpoint.0) == id
+                        && (e.x, e.y, e.size, e.kind.as_str())
+                            == (a.x, a.y, a.size, a.kind.as_str())
+                });
+                assert_eq!(anchored(&v, Kind::Electricity, id, &a), previous);
+            }
+        }
+        assert_eq!(serde_json::to_string(&v).unwrap(), before);
+    }
+}
+
 fn scene() -> Game {
     let mut g = Game::new();
     g.start_fixture_mode("sandbox");

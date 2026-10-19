@@ -1,0 +1,10 @@
+{
+  "prompt": "Use case: lighting-weather. Image 1 is the exact EDIT TARGET: the taller painted ecological toilet sprite. Image 2 is a STYLE reference for the existing game's night palette. Change ONLY lighting of image 1 to cool blue moonlight, matching image 2's navy-blue shadows, muted plum terracotta and restrained blue edge light. Let a tiny warm amber glow show through the existing crescent-shaped door cutout only; do not add windows or lamps. Preserve every shape, height, width, camera, crop, foot position, bamboo joint, leaf, tile, vent and transparent edge from image 1. Do not rearrange or redraw the structure. Same square canvas and exact complete silhouette; leave all transparent pixels and empty background transparent. No new ground patch, extra light fixture, text or watermark.",
+  "paths": [
+    "web/art/eco-toilet-tall.png",
+    "web/art/home-gable-night.png"
+  ],
+  "tool": "Built-in image_gen",
+  "status": "installed-after-candidate-review",
+  "output": "web/art/eco-toilet-tall-night.png"
+}

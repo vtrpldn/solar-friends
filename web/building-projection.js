@@ -6,11 +6,11 @@
 // Keep these landmarks visible in the projection review; do not infer a pass
 // merely from the requested camera in an image-generation prompt.
 export const buildingProjection = {
-  shed:{"size":1254,"right":[[193,865,635,1082],[390,218,881,464],[105,544,623,804]],"left":[[635,1082,1061,884],[659,763,1070,563]],"upright":[635,802,635,1082],"rightLabels":["Left/front post feet","Roof ridge","Near roof eave"],"leftLabels":["Front/right post feet","Front crossbeam"]},
+  shed:{"size":1254,"right":[[193,865,635,1082],[155,558,625,800]],"left":[[635,1082,1061,884],[650,760,1068,553]],"upright":[635,802,635,1082],"rightLabels":["Post feet","Near eave beam"],"leftLabels":["Post feet","Front crossbeam"],"heldOut":{"right":[[390,216,879,461]],"left":[]}},
   goat_pasture:{size:1280,right:[[156,704,505,899],[518,372,854,555]],left:[[749,918,1107,743],[906,548,1075,461]],upright:[855,580,855,730]},
   apiary:{size:1280,right:[[273,312,692,538],[461,176,889,404]],left:[[697,834,850,754],[414,591,535,529]],upright:[704,854,704,1036]},
   hydro:{size:1280,right:[[304,744,566,873],[359,685,629,819]],left:[[563,872,740,792],[650,787,826,707]],upright:[620,584,620,818]},
-  eco_toilet:{size:1280,right:[[237,975,609,1168],[345,879,614,1014]],left:[[609,1168,1087,974],[664,975,938,864]],upright:[626,725,626,1028]},
+  eco_toilet:{"size":1254,"right":[[215,974,607,1175],[500,482,598,532]],"left":[[607,1175,1070,1000],[615,1142,1062,972]],"upright":[615,520,615,1080],"rightLabels":["Plinth edge","Door lintel"],"leftLabels":["Plinth edge","Upper plinth edge"],"heldOut":{"right":[[500,101,786,263],[300,347,610,510]],"left":[[659,495,904,414]]}},
   banana_treatment:{size:1280,right:[[92,743,630,1137],[92,667,630,1063]],left:[[630,1137,1173,754],[630,1063,1173,677]],upright:[632,1062,632,1128]},
   wetland:{size:1774,right:[[357,511,989,797],[366,428,990,710]],left:[[989,797,1355,571],[998,710,1343,500]],upright:[990,713,990,789]},
   biodigester:{size:1280,right:[[868,899,961,937],[880,752,971,789]],left:[[961,937,1164,858],[973,867,1172,789]],upright:[956,690,956,888]},

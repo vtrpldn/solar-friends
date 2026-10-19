@@ -184,10 +184,13 @@ pub fn reserved(v: &Village, x: i32, y: i32) -> bool {
 }
 fn anchored(v: &Village, kind: Kind, id: i64, a: &Anchor) -> bool {
     if kind == Kind::Electricity {
-        return power::endpoints(v).iter().any(|e| {
-            e.id == id
-                && a.endpoint.0 as i64 == id
-                && (e.x, e.y, e.size, e.kind.as_str()) == (a.x, a.y, a.size, a.kind.as_str())
+        // Anchors depend on identity and geometry, not the available approach
+        // ports. Rebuilding every port here repeats placement scans per cable
+        // endpoint on every simulation step.
+        return power::electrical_node(v, id).is_some_and(|n| {
+            i64::from(a.endpoint.0) == id
+                && (n.x, n.y, n.size) == (a.x, a.y, a.size)
+                && power::endpoint_kind(v, n) == Some(a.kind.as_str())
         });
     }
     owner(id)

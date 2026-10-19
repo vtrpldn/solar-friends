@@ -1,0 +1,556 @@
+{
+  "startedAt": "2026-10-16T20:58:03.360Z",
+  "baselineCommit": "ccca832b6b63a919e195dabfd0b3dc989fa2fe87",
+  "scope": "All27activevariants reviewed in day/night context. All36day/nightwork-state matrices have now been visually inspected, alongside the built contexts, crop workbench and live Story interactions. Mechanical geometry checks support this qualitative review and do not certify painted geometry as mathematically perfect.",
+  "browser": "Codex in-app browser",
+  "build": "iteration via live server 4187",
+  "findings": [
+    {
+      "id": "ART-01",
+      "kind": "shed",
+      "severity": "polish",
+      "issue": "Oversized roof tile detail",
+      "status": "installed-context-verified"
+    },
+    {
+      "id": "ART-02",
+      "kind": "eco_toilet",
+      "severity": "proportion",
+      "issue": "Doorway shorter than resident",
+      "status": "installed-context-verified"
+    }
+  ],
+  "buildings": [
+    {
+      "kind": "shed",
+      "name": "Community shed",
+      "file": "starter-shed-refined.png",
+      "nightFile": "starter-shed-refined.png",
+      "status": "installed-context-reviewed",
+      "sourceHash": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+      "context": {
+        "day": "context-day-0.png",
+        "night": "context-night-0.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "orchard",
+      "name": "Fruit orchard",
+      "file": "orchard.png",
+      "nightFile": "orchard.png",
+      "status": "context-review-complete",
+      "sourceHash": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+      "context": {
+        "day": "context-day-1.png",
+        "night": "context-night-1.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Grouped foliage and mulch contacts fit plot; fruit scale is stylized consistently.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "goat_pasture",
+      "name": "Goat pasture",
+      "file": "goat-pasture.png",
+      "nightFile": "goat-pasture.png",
+      "status": "context-review-complete",
+      "sourceHash": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+      "context": {
+        "day": "context-day-2.png",
+        "night": "context-night-2.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Coherent fence, goat and shelter scale; no floating fence feet.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "apiary",
+      "name": "Stingless bee apiary",
+      "file": "apiary.png",
+      "nightFile": "apiary.png",
+      "status": "context-review-complete",
+      "sourceHash": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+      "context": {
+        "day": "context-day-3.png",
+        "night": "context-night-3.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Hives accessible at working height; compact overhead weather roof.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "hydro",
+      "name": "River generator",
+      "file": "hydro.png",
+      "nightFile": "hydro-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+      "context": {
+        "day": "context-day-4.png",
+        "night": "context-night-4.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Small machine shelter and wheel, not a walk-in human doorway.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "eco_toilet",
+      "name": "Ecological toilet",
+      "file": "eco-toilet-tall.png",
+      "nightFile": "eco-toilet-tall-night.png",
+      "status": "installed-context-reviewed",
+      "sourceHash": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+      "context": {
+        "day": "context-day-5.png",
+        "night": "context-night-5.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Painted refinement installed; independent roof traces included in drift check. Actual village states remain to review.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "banana_treatment",
+      "name": "Banana treatment bed",
+      "file": "banana-treatment.png",
+      "nightFile": "banana-treatment-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+      "context": {
+        "day": "context-day-6.png",
+        "night": "context-night-6.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "wetland",
+      "name": "Reed bed",
+      "file": "wetland.png",
+      "nightFile": "wetland-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
+      "context": {
+        "day": "context-day-7.png",
+        "night": "context-night-7.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Rectangular planted bed occupies rear of its square plot; clear ground contact.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "biodigester",
+      "name": "Biodigester",
+      "file": "biodigester.png",
+      "nightFile": "biodigester-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+      "context": {
+        "day": "context-day-8.png",
+        "night": "context-night-8.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Service cabinet is equipment-scale; tank contacts and pipe curves coherent.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "warehouse",
+      "name": "Storage house",
+      "file": "warehouse.png",
+      "nightFile": "warehouse-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+      "context": {
+        "day": "context-day-9.png",
+        "night": "context-night-9.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "solar_farm",
+      "name": "Solar farm",
+      "file": "solar-farm.png",
+      "nightFile": "solar-farm-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+      "context": {
+        "day": "context-day-10.png",
+        "night": "context-night-10.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "streetlight",
+      "name": "Street light",
+      "file": "streetlight.png",
+      "nightFile": "streetlight-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+      "context": {
+        "day": "context-day-11.png",
+        "night": "context-night-11.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "home",
+      "name": "Home",
+      "file": "village-atlas-isometric.png",
+      "nightFile": "village-atlas-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "context": {
+        "day": "context-day-12.png",
+        "night": "context-night-12.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "kitchen",
+      "name": "Kitchen",
+      "file": "village-atlas-isometric.png",
+      "nightFile": "village-atlas-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "context": {
+        "day": "context-day-13.png",
+        "night": "context-night-13.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "grove",
+      "name": "Banana grove",
+      "file": "village-atlas-isometric.png",
+      "nightFile": "village-atlas-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "context": {
+        "day": "context-day-14.png",
+        "night": "context-night-14.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "garden",
+      "name": "Garden",
+      "file": "garden-simple-isometric.png",
+      "nightFile": "garden-simple-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+      "context": {
+        "day": "context-day-15.png",
+        "night": "context-night-15.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "greenhouse",
+      "name": "Greenhouse",
+      "file": "greenhouse-isometric.png",
+      "nightFile": "greenhouse-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+      "context": {
+        "day": "context-day-16.png",
+        "night": "context-night-16.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "well",
+      "name": "Cistern",
+      "file": "cistern-isometric.png",
+      "nightFile": "cistern-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+      "context": {
+        "day": "context-day-17.png",
+        "night": "context-night-17.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "compost",
+      "name": "Compost station",
+      "file": "compost-isometric.png",
+      "nightFile": "compost-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+      "context": {
+        "day": "context-day-18.png",
+        "night": "context-night-18.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "square",
+      "name": "Community square",
+      "file": "square-isometric.png",
+      "nightFile": "square-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+      "context": {
+        "day": "context-day-19.png",
+        "night": "context-night-19.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Seat and table heights coherent with resident; no pergola.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "workshop",
+      "name": "Workshop",
+      "file": "workshop-isometric.png",
+      "nightFile": "workshop-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+      "context": {
+        "day": "context-day-20.png",
+        "night": "context-night-20.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Coherent steep gable, open front and usable workbench; roof pitch differs intentionally from homes.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "coop",
+      "name": "Chicken coop",
+      "file": "coop-isometric.png",
+      "nightFile": "coop-isometric-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+      "context": {
+        "day": "context-day-21.png",
+        "night": "context-night-21.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Bird-scale entrance and ramp; appropriate beside a human.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "home-veranda",
+      "name": "Home \u00b7 veranda",
+      "file": "home-veranda.png",
+      "nightFile": "home-veranda-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+      "context": {
+        "day": "context-day-22.png",
+        "night": "context-night-22.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "home-gable",
+      "name": "Home \u00b7 gable",
+      "file": "home-gable.png",
+      "nightFile": "home-gable-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+      "context": {
+        "day": "context-day-23.png",
+        "night": "context-night-23.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "home-courtyard",
+      "name": "Home \u00b7 entry terrace",
+      "file": "home-courtyard.png",
+      "nightFile": "home-courtyard-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+      "context": {
+        "day": "context-day-24.png",
+        "night": "context-night-24.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "adobe-gable",
+      "name": "Adobe home \u00b7 gable",
+      "file": "adobe-gable.png",
+      "nightFile": "adobe-gable-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+      "context": {
+        "day": "context-day-25.png",
+        "night": "context-night-25.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    },
+    {
+      "kind": "adobe-veranda",
+      "name": "Adobe home \u00b7 veranda",
+      "file": "adobe-veranda.png",
+      "nightFile": "adobe-veranda-night.png",
+      "status": "context-review-complete",
+      "sourceHash": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+      "context": {
+        "day": "context-day-26.png",
+        "night": "context-night-26.png"
+      },
+      "style": "reviewed",
+      "geometry": "visually reviewed roof/frame/ground where architectural",
+      "proportions": "reviewed",
+      "notes": "Illustrated materials, ground contact and proportions coherent beside home and resident in the captured day/night views.",
+      "groundContact": "Reviewed beside the gameplay ground/road; mechanical outline checks cover the registered source at four zooms.",
+      "stateReview": "Applicable shared work-state matrices visually reviewed in day and night; geometry, footprint contact and label placement retained."
+    }
+  ],
+  "families": [
+    "Buildings",
+    "Vegetation",
+    "Terrain",
+    "Portraits",
+    "Animations",
+    "Animals",
+    "Crops",
+    "Land & supplies"
+  ],
+  "additionalReview": {
+    "statesCaptured": 378,
+    "states": [
+      "built",
+      "blueprint",
+      "construction",
+      "pack",
+      "rebuild",
+      "salvage",
+      "demolish"
+    ],
+    "sharedRenderer": "web/building-state-art.js",
+    "reviewed": "All 27 day blueprint/construction views and night construction/rebuild views reviewed; all common work labels and full-opacity removal modes reviewed in the first group. Geometry is shared by every work overlay. Powered and empty-battery village scenes compared live; roof-powered homes remain lit while shared lamps switch off.",
+    "residentWorkSheets": [
+      "iara",
+      "bento",
+      "luz",
+      "caua",
+      "nina"
+    ],
+    "crops": "All six crop families now exposed in 120 day/night growth views; representative garden and greenhouse states reviewed.",
+    "powerEvidence": [
+      "unpowered-night-village.png",
+      "powered-night-village.png"
+    ],
+    "lightingScope": "Inspector work matrices show the chosen source lighting. Actual powered/unpowered behavior was checked in the village scenes, not inferred from the source inspector."
+  },
+  "completion": "No unresolved visible distortion, floating contact, clipped silhouette or material-style mismatch found in the reviewed coverage.",
+  "finalStateReview": {
+    "matrices": "artifacts/isometric/{day,night}-{blueprint,construction,pack,rebuild,salvage,demolish}-{0,1,2}.png",
+    "views": 324,
+    "builtContextViews": 54,
+    "live": "Earned Story: placement and selection, resident carrying/building/farming, adjacent storage road, local extraction, adobe construction, source growth, rain, private rooftops, connected/unconnected lamp and commissioned night lighting. Protected scenes separately compared charged and empty shared power.",
+    "limitation": "Inspector source-lighting selection is independent of circuit availability; actual power behavior was checked in the village."
+  }
+}

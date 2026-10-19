@@ -37,7 +37,7 @@ try {
       const width=sprite.width*2;ctx.drawImage(frame,64-width/2,118-width*FRAME_ANCHOR,width,width);grid.append(canvas);
     });$('sheets').append(section);
   }
-  for(const night of [false,true])for(const kind of ['garden','greenhouse'])for(const crop of ['lettuce','beans','tomatoes'])for(const phase of ['Empty','Young','Growing','Mature','Dry']){
+  for(const night of [false,true])for(const kind of ['garden','greenhouse'])for(const crop of Object.keys(cropTypes))for(const phase of ['Empty','Young','Growing','Mature','Dry']){
     const figure=document.createElement('figure'),canvas=document.createElement('canvas');canvas.width=480;canvas.height=500;
     const ctx=canvas.getContext('2d');ctx.scale(2,2);
     const c={kind:crop,growth:cropTypes[crop].minutes*(phase==='Young'?.15:phase==='Growing'?.6:1),moisture:phase==='Dry'?0:100,planted:phase!=='Empty',harvests:0};

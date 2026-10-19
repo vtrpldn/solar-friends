@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 process.chdir(root);
 const output = path.join(root,'artifacts/dev-check');
 const results = [], screenshots = [], errors = [];
+const keepGoing=process.argv.includes('--keep-going');
 let server, browser;
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 await mkdir(output,{recursive:true});
@@ -18,15 +19,15 @@ async function command(label, executable, args) {
   console.log(`→ ${label}`);
   const started=Date.now();let log='';
   const code=await new Promise((resolve,reject)=>{
-    const timeout=['verify-housing-balance.mjs','verify-seasonal-balance.mjs','verify-utility-balance.mjs'].includes(label)?1_800_000:600_000;
+    const timeout=label==='verify-economy.mjs'?3_600_000:['verify-housing-balance.mjs','verify-seasonal-balance.mjs','verify-utility-balance.mjs'].includes(label)?1_800_000:600_000;
     const child=spawn(executable,args,{env,cwd:root,stdio:['ignore','pipe','pipe'],timeout});
     const append=data=>{log+=data;process.stdout.write(data);};
     child.stdout.on('data',append);child.stderr.on('data',append);
-    child.on('error',reject);child.on('close',resolve);
+    child.on('error',reject);child.on('close',(exitCode,signal)=>{if(signal)append(`\nStopped by ${signal}; command limit ${timeout/1000} seconds.\n`);resolve(exitCode);});
   });
   const filename=`check-${results.length+1}.txt`;await writeFile(path.join(output,filename),log);
   results.push({label,status:code===0?'PASS':'FAIL',seconds:(Date.now()-started)/1000,log:filename});
-  if(code!==0)throw new Error(`${label} failed (exit ${code}).`);
+  if(code!==0){process.exitCode=1;if(!keepGoing)throw new Error(`${label} failed (exit ${code}).`);}
 }
 async function jsFiles(dir) {
   const files=[];
@@ -40,7 +41,8 @@ async function jsFiles(dir) {
 try {
   if(!process.argv.includes('--browser-only')) {
     await command('Rust formatting','cargo',['fmt','--check']);
-    await command('Rust behavior','cargo',['test','--locked']);
+    await command('Rust behavior','cargo',['test','--locked','--all-targets']);
+    await command('Rust documentation','cargo',['test','--locked','--doc']);
     await command('Rust lint','cargo',['clippy','--locked','--all-targets','--','-D','warnings']);
     await command('Build WebAssembly','bash',['scripts/build.sh']);
     for(const file of [...await jsFiles('web'), ...await jsFiles('scripts')]) await command(`Syntax: ${file}`,process.execPath,['--check',file]);

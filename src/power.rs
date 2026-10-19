@@ -462,6 +462,17 @@ mod hydro_tests {
     }
 }
 
+pub(crate) fn endpoint_kind<'a>(v: &'a Village, n: &electricity::Node) -> Option<&'a str> {
+    if n.kind == electricity::Kind::Roof {
+        return None;
+    }
+    match n.owner {
+        Owner::Building(id) => Some(v.buildings.iter().find(|b| b.id == id)?.kind.as_str()),
+        Owner::Pump(_) => Some("pump"),
+        Owner::Ground => Some("battery"),
+        Owner::Carrier(_) => None,
+    }
+}
 pub fn endpoints(v: &Village) -> Vec<utilities::Endpoint> {
     v.power
         .network
@@ -469,12 +480,7 @@ pub fn endpoints(v: &Village) -> Vec<utilities::Endpoint> {
         .iter()
         .filter(|n| n.kind != electricity::Kind::Roof)
         .filter_map(|n| {
-            let kind = match n.owner {
-                Owner::Building(id) => v.buildings.iter().find(|b| b.id == id)?.kind.clone(),
-                Owner::Pump(_) => "pump".into(),
-                Owner::Ground => "battery".into(),
-                Owner::Carrier(_) => return None,
-            };
+            let kind = endpoint_kind(v, n)?.to_owned();
             let ports = if kind == "hydro" {
                 utilities::hydro_ports(
                     v,

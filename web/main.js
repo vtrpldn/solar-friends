@@ -1,3 +1,4 @@
+import {constructionOpacity,drawBuildingState} from './building-state-art.js';
 import {paintImage} from './paint-cache.js';
 import { performanceMeter } from './dev/performance.js';
 import { sampleFrame } from './frame-state.js';
@@ -191,7 +192,9 @@ let width = 0,
   lastTask = null,
   toastTimer;
 let response = "",
+  responseContext = null,
   encouragable = false;
+const requestContext = r => JSON.stringify([r.help?.id,r.help?.phase,r.help?.reason,r.task,r.trip?.phase]);
 const modeStores = Object.fromEntries(['story','sandbox'].map(mode => [mode,new VillageStorage(undefined,`${SAVE_KEY}-${mode}`)]));
 let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
@@ -590,46 +593,16 @@ function building(b) {
 
   const project=state.village.economy.projects.find(p=>p.building===b.id);
   const stages=state.environment.economy.projects.find(p=>p.building===b.id)?.stages.length||1;
-  buildingSprite(b.kind,b.x,b.y,work?.stage==='rebuild'?.45:complete?1:.16+.65*((project?.stage||0)/stages),b.id);
+  buildingSprite(b.kind,b.x,b.y,constructionOpacity(complete,work,project?.stage||0,stages),b.id);
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     const registration=placementArt(b.kind,buildingArt[b.kind]);
     ctx.save();if(work?.stage==='rebuild')ctx.globalAlpha*=.45;
     drawCrops(ctx,b,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,nightAmount(state.village.minutes),state.environment.economy.processes.growing.find(plot=>plot.building===b.id)?.health??1);
     ctx.restore();
   }
-  if(work){
-    const total=work.stage==='pack'?24:work.stage==='rebuild'?36:work.action==='demolish'?18:54;
-    ctx.fillStyle='#f6e7be';ctx.font=`${10*scale}px Georgia`;ctx.textAlign='center';
-    ctx.fillText(work.stage==='pack'?'Packing':work.stage==='rebuild'?'Rebuilding':work.action==='salvage'?'Salvaging':'Demolishing',p.x,p.y+29*scale);
-    ctx.fillRect(p.x-28*scale,p.y+9*scale,56*scale,5*scale);ctx.fillStyle='#9b7447';ctx.fillRect(p.x-28*scale,p.y+9*scale,56*scale*work.work/total,5*scale);
-    return;
-  }
-  if (!complete) {
-    const s = scale;
-    // Upright posts and beams follow the same ground axes as the building.
-    const corners = footprintCorners(b.kind,b.x,b.y).map(([x,y])=>iso(x,y));
-    const scaffoldHeight = (b.kind === "garden" ? 15 : (project?.stage||0)===0?20:65) * s;
-    for (let i = 0; i < corners.length; i++) {
-      const a = corners[i],
-        next = corners[(i + 1) % corners.length];
-      line(a.x, a.y, a.x, a.y - scaffoldHeight, "#ae8757", 2.5 * s);
-      line(
-        a.x,
-        a.y - scaffoldHeight,
-        next.x,
-        next.y - scaffoldHeight,
-        "#bd965f",
-        2.5 * s,
-      );
-    }
-    ctx.fillStyle = "#fffcf0";
-    ctx.font=`${10*s}px 'DM Sans',sans-serif`;ctx.textAlign='center';
-    const stage=state.environment.economy.projects.find(project=>project.building===b.id);
-    ctx.fillText(stage?.paused?'Paused':stage?.stage||'Blueprint',p.x,p.y+30*s);
-    ctx.fillRect(p.x - 27 * s, p.y + 9 * s, 54 * s, 5 * s);
-    ctx.fillStyle = "#7c9859";
-    ctx.fillRect(p.x - 27 * s, p.y + 9 * s, (54 * s * b.progress) / 100, 5 * s);
-  }
+  if(complete&&!work)return;
+  const stageInfo=state.environment.economy.projects.find(project=>project.building===b.id);
+  drawBuildingState(ctx,{work,complete,progress:b.progress,point:p,corners:footprintCorners(b.kind,b.x,b.y).map(([x,y])=>iso(x,y)),scale,kind:b.kind,stage:project?.stage||0,label:stageInfo?.paused?'Paused':stageInfo?.stage||'Blueprint'});
 }
 function resident(r) {
   const p = iso(r.x, r.y),
@@ -886,6 +859,7 @@ function selectPerson(id) {
   if (tool) setTool(null);
   selected = id;
   response = "";
+  responseContext = null;
   encouragable = false;
   $("#person").hidden = false;
   const r = state.residents.find((p) => p.id === id);
@@ -937,7 +911,7 @@ function selectPerson(id) {
   $('#person .cancel-help').onclick=()=>{
     const result=game.cancel_help(id);
     response=result==='ok'?'Request cancelled.':result;
-    encouragable=false;state=JSON.parse(game.snapshot());updateUI();save();
+    encouragable=false;state=JSON.parse(game.snapshot());responseContext=requestContext(state.residents.find(r=>r.id===id));updateUI();save();
   };
   updateUI();
 }
@@ -946,6 +920,7 @@ function request(task, encourage) {
   response = game.request(selected, task, encourage);
   encouragable = response.includes("talk about why");
   state = JSON.parse(game.snapshot());
+  responseContext = requestContext(state.residents.find(r=>r.id===selected));
   updateUI();
   save();
   $(encouragable ? "#person .persuade" : "#person .response").scrollIntoView({ block: "nearest" });
@@ -1418,6 +1393,7 @@ function updateUI() {
     const activity=(r.requested ? 'Your request · ' : '') + (!r.trip && r.task!=='sleep' && Math.hypot(r.x-r.target_x,r.y-r.target_y)>.08 ? 'On the way · ' : '') + activityLabel(r);
     const activityEl=$("#person .person-activity");
     if(activityEl.textContent!==activity)activityEl.textContent=activity;
+    if(response&&responseContext!==null&&responseContext!==requestContext(r)){response="";encouragable=false;responseContext=null;}
     $("#person .response").hidden = !response;
     const reply=$("#person .response");
     if(reply.textContent!==response)reply.textContent=response;

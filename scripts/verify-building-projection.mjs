@@ -30,7 +30,7 @@ for(const[key,art]of Object.entries(allBuildingArt)){
   const project=(x,y)=>{const[u,v]=[x,y];return[u,vertical*v+shear*u];};
   for(const[direction,slope]of [['right',.5],['left',-.5]]){
     assert(measurement[direction].length>=2,'Use separate painted edges for each direction');
-    for(const[x,y,X,Y]of measurement[direction]){
+    for(const[x,y,X,Y]of [...measurement[direction],...(measurement.heldOut?.[direction]||[])]){
       const p=project(x,y),q=project(X,Y);
       const error=Math.abs(q[1]-p[1]-slope*(q[0]-p[0]))*art.width/measurement.size*placementArt(key,art).scale;
       largest=Math.max(largest,error);

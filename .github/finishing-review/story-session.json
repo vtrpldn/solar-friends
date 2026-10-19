@@ -1,0 +1,24 @@
+{
+  "startedAt": "2026-10-16T21:18:00Z",
+  "origin": "http://127.0.0.1:4193/?performance",
+  "mode": "Fresh Story through ordinary controls; separate origin from user saves",
+  "observations": [
+    {
+      "elapsedMinutes": 0,
+      "note": "Started fresh Story, read first chapter, inspected resident needs and selected cistern. Initial goal advanced after arrivals."
+    },
+    {
+      "note": "Cistern placed, Construction reached 50% and explicitly identified one missing pump. Review town supplies prefilled exactly one pump."
+    },
+    {
+      "note": "Chose resident pickup: R$180 including fuel versus R$220 next-day delivery. Iara accepted and left. Completion was observed only after the stalled diagnostic call."
+    },
+    {
+      "note": "A diagnostic call blocked for approximately 32 minutes. Village advanced unattended to day 6. Exclude this interval from hands-on playtest duration; 15/30-minute manual checkpoints were missed. Fresh uninterrupted first-hour replay still required."
+    },
+    {
+      "note": "After resuming, first home placed through normal controls. Iara explicitly accepted Help build, named Home at 6,14, carried stone then frames; Construction advanced from foundation to structure 25%."
+    }
+  ],
+  "status": "interrupted exploratory session; not the required uninterrupted first-hour evidence"
+}
