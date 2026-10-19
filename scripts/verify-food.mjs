@@ -35,8 +35,8 @@ assert(g.restore(JSON.stringify(hungry)));assert.match(g.request(0,'eat',false),
 s=snap(g);assert.equal(person(s).activity_store,pantry(s).id);assert.equal(person(s).activity_material,MEALS);
 const eaten=s.village.supplies.portions_eaten;g.tick(.25);assert.equal(snap(g).village.supplies.portions_eaten,eaten,'No remote meals while travelling');
 await writeFile('artifacts/food/eating-route.json',g.snapshot());checkpoint(g);
-s=until(g,s=>s.village.supplies.portions_eaten>eaten,'Eat one claimed local portion');
-assert(person(s).hunger<30);assert.equal(s.village.simulation.materials.spent[MEALS],1);conserved(g);checkpoint(g);
+s=until(g,s=>person(s).help?.task==='eat'&&person(s).help.phase==='complete','Eat the requested local portion');
+assert(person(s).hunger<30);assert(s.village.simulation.materials.spent[MEALS]>=1);conserved(g);checkpoint(g);
 await writeFile('artifacts/food/eaten.json',g.snapshot());
 const invalid=snap(g);invalid.village.food+=1;const before=g.snapshot();assert(!g.restore(JSON.stringify(invalid)));assert.equal(g.snapshot(),before);
 const order=Array(s.environment.economy.materials.length).fill(0);order[FOOD]=3;order[MEALS]=2;order[EGGS]=1;

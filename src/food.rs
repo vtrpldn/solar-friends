@@ -55,6 +55,12 @@ pub fn needs(v: &Village, building: usize) -> Bundle {
         }
         _ => {}
     }
+    if let Some(site) = production::pantry_site(v, building) {
+        let inputs = production::needs(v, site);
+        for i in 0..COUNT {
+            n[i] = n[i].max(inputs[i]);
+        }
+    }
     n
 }
 pub fn pantry(v: &Village, building: usize) -> Option<&Store> {

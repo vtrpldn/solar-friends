@@ -126,7 +126,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
             }
         } else if v.circular.waste >= 2.
             && v.progress.scraps >= 2
-            && v.circular.biogas <= 8.
+            && v.circular.biogas + production::held_biogas(v) as f32 <= 8.
             && v.circular.pending_compost == 0
         {
             v.circular.waste -= 2.;
@@ -157,6 +157,9 @@ pub fn advance(v: &mut Village, minutes: f32) {
 }
 pub fn valid(v: &Village) -> bool {
     let c = &v.circular;
+    if c.biogas + production::held_biogas(v) as f32 > 12. {
+        return false;
+    }
     [
         (c.waste, 80.),
         (c.greywater, 120.),
@@ -174,7 +177,8 @@ pub fn valid(v: &Village) -> bool {
         && c.waste_treated >= 0.
         && matches!(c.pending_compost, 0 | 2)
         && ((c.pending_compost == 0 && c.curing == 0.) || (c.pending_compost == 2 && c.curing > 0.))
-        && (c.digestion == 0. || (c.pending_compost == 0 && c.biogas <= 8.))
+        && (c.digestion == 0.
+            || (c.pending_compost == 0 && c.biogas + production::held_biogas(v) as f32 <= 8.))
         && (c.filtration == 0. || c.reclaimed <= 52.)
 }
 #[wasm_bindgen]

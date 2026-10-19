@@ -135,7 +135,8 @@ pub fn free(v: &Village, i: usize) -> u32 {
             .iter()
             .filter(|p| !closing(v, p.owner))
             .map(|p| usable(v, p, i))
-            .sum();
+            .sum::<u32>()
+            .saturating_sub(production::unclaimed(v, i));
     }
     let accessible = s
         .stores
@@ -280,8 +281,9 @@ pub fn sync(v: &mut Village) {
             .sites
             .iter()
             .filter(|s| {
-                s.building
-                    .is_none_or(|id| v.buildings.iter().any(|b| b.id == id))
+                s.kind != production::Kind::Kitchen
+                    && s.building
+                        .is_none_or(|id| v.buildings.iter().any(|b| b.id == id))
             })
             .map(|s| (Owner::Production(s.id), s.x, s.y, production::BUFFER)),
     );
@@ -796,12 +798,12 @@ fn candidates(v: &Village) -> Vec<Candidate> {
             }
         }
     }
-    for b in v
-        .production
-        .batches
-        .iter()
-        .filter(|b| b.active() && !b.committed && production::operational(v, b.site))
-    {
+    for b in v.production.batches.iter().filter(|b| {
+        b.material != economy::MEALS
+            && b.active()
+            && !b.committed
+            && production::operational(v, b.site)
+    }) {
         let Some(to) = s
             .stores
             .iter()
@@ -1205,7 +1207,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 6
+    if v.version != 7
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1294,7 +1296,8 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             Owner::Production(id) => {
                 p.capacity == production::BUFFER
                     && production::site(v, id).is_some_and(|s| {
-                        (s.x, s.y) == (p.x, p.y)
+                        s.kind != production::Kind::Kitchen
+                            && (s.x, s.y) == (p.x, p.y)
                             && s.building.is_none_or(|id| {
                                 v.buildings.iter().any(|b| {
                                     b.id == id

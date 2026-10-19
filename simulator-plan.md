@@ -10,8 +10,13 @@ Make village planning depend on where resources are, how people spend their time
 
 Implementation is active. The stages below remain the complete scope; the progress section records delivered parts and outstanding work. The existing [construction economy plan](plan.md) remains the record of delivered economy work.
 
+## Why
+
+Give layout, resource choices, and community time lasting consequences. A warehouse near a workshop should save walking; buying roof tiles should save labour at a cash cost; keeping fertile land open should help the village through a dry period. Residents should still have time for their own lives once the player has organised a working village.
+
 ## Contents
 
+- [Six-system roadmap](#six-system-roadmap)
 - [Design rules](#design-rules)
 - [Existing systems and proposed extensions](#existing-systems-and-proposed-extensions)
 - [Implementation order](#implementation-order)
@@ -25,6 +30,26 @@ Implementation is active. The stages below remain the complete scope; the progre
 - [Stage 7 Story integration and balance](#stage-7-story-integration-and-balance)
 - [First playable release](#first-playable-release)
 - [Verification and completion](#verification-and-completion)
+- [Implementation progress](#implementation-progress)
+
+## Six-system roadmap
+
+These are the six gameplay systems in scope. Foundation work comes first, and Story teaching and balance accompany every system. The numbered implementation stages below describe the dependencies in detail.
+
+| System | First playable change | Player decision | Completion check |
+| --- | --- | --- | --- |
+| 1. Physical resources and hauling | Located stores, carried goods, construction staging and useful roads | Where to put storage and which project receives scarce materials first | The same supplied project finishes sooner with a useful layout; every item remains accounted for through interruptions and relocation |
+| 2. Resident time and autonomous work | A shared work queue with travel, outside shifts, needs and leisure | Whether to spend a resident's available time building, producing locally or earning money outside | Requests visibly progress, essential needs remain protected and changing work preferences affects both income and completion forecasts |
+| 3. Building production | Saved batches with delivered inputs, attended work, passive processing and bounded reserves | Whether to buy prepared goods or invest in local production and its supply route | A batch consumes inputs and produces outputs once; pauses, full stores, cancellation and reloads preserve its state |
+| 4. Living land | Persistent soil, moisture, shade, local deposits and restoration | Which land to cultivate, extract from, build on or protect | Placement changes yields or costs; depletion and soil changes persist; poor choices retain a recovery path |
+| 5. Connected utilities | Installed water, irrigation, sewage and electrical connections with local capacity | Whether to invest in a shared network or use smaller local and manual alternatives | Disconnected consumers cannot draw from distant stores; shortages pause processes without losing their inputs |
+| 6. Long-term change | Seeded seasons, equipment wear, maintenance, gradual skills and firm market quotes | What to reserve or repair before conditions change, and when to produce or purchase | A village survives multiple seasonal cycles with visible warnings, recoverable failures and time for leisure |
+
+Build and release them in that order. Within production, finish construction materials and tools, then located food and saved cooking, gathering food handoffs, perishability, and passive processes. Within utilities, introduce water first, sewage second and electricity third. Long-term effects use those systems rather than introducing separate resource counters.
+
+For each release, provide the simulation rules, player controls, visible feedback, a protected dev scenario, and evidence for its completion check. A working subsystem does not complete the whole roadmap. Existing partial delivery is recorded under [Implementation progress](#implementation-progress).
+
+One integrated playtest should follow a housing expansion: compare buying tiles with producing them locally, choose storage and hauling routes, retain enough resident time for food and outside income, protect productive soil, connect the new home, then maintain those services through a dry period. Run the same starting village with alternative decisions and compare time, funds, resource use and leisure. Use those results to tune the game before requiring the sequence in Story.
 
 ## Design rules
 
@@ -197,4 +222,8 @@ Completion requires all six systems, the redesigned Story introductions, configu
 - Food recovery checks now cover a full village store, inaccessible food, exact ground-pile consumption and authored fixture bootstrap. Hungry residents can eat freshly gathered food at the patch when storage is full; kitchens wait for net output room and fed coops reserve space for their eggs. Kitchens keep a bounded pantry instead of returning it to camp between pots. Routine pantry deliveries and optional hen feed no longer outrank project inputs. Cultivated food forests yield six ingredients per gathering batch versus two for wild forage, with pending batches included in demand estimates. Native tests and public replays cover these boundaries; campaign pacing and desktop regressions are still being reviewed before this food increment is considered verified.
 
 - Food increment verification: 217 native tests, formatting, strict lint and the WebAssembly build pass. All 37 public gameplay/art checks pass on the same build. The thirteen-chapter Story completes in 93 game days through all eighteen building kinds with exact chapter reloads; its locally supplied adobe home takes 11.2 days from blueprint. Four two-week scenarios recover food and retain at least 62% of each resident's in-village waking time for leisure. The desktop suite passes with fifty captures and no browser errors, including food purchases, kitchen locations, requested eating, shared routines and saved-village isolation. These are measured baselines, not the final campaign balance.
-- Stage 3 remains active: cooking still needs a saved recipe and committed-input batch, gatherings need an attended food handoff, and perishability and the remaining passive-process integration are outstanding. The land, connected utility, long-term change and campaign/balance stages retain their full scope.
+- Stage 3 remains active: gatherings need an attended food handoff, and perishability and the remaining passive-process integration are outstanding. The land, connected utility, long-term change and campaign/balance stages retain their full scope.
+
+- Saved cooking: kitchens use their existing pantry for a saved recipe, delivered ingredients, committed inputs and attended labour. A pot retains its work through breaks, requires fresh water, and returns held food, eggs and biogas once on cancellation. Native checks cover these transitions, exact reloads, reserved output space, recipe switches and malformed saves. Gathering handoffs, perishability, passive processes and Stages 4–7 remain in scope.
+
+- Kitchen controls now expose bounded meal reserves, local pantry contents, recipe choices, saved labour, water blockers, pause/resume and cancellation. Building interactions request cooking at the selected kitchen. The inventory save version is 7. All 225 native checks and strict lint pass; dedicated public replays cover actual ingredient trips, interruptions, exact continuation, local output, cooking credit and food/egg/gas recovery. Focused desktop checks and manual review cover those controls and protected saves. All 38 public gameplay/art checks pass on the same WebAssembly build. The full thirteen-chapter Story completes in 96 game days through all eighteen building kinds with exact chapter checkpoints; its local adobe home takes 11 game days. Three 24-day construction scenarios finish with at least 58% in-village waking leisure. The full desktop suite passes with 53 captures and no browser errors, including the new pantry controls and protected-save checks. All 94 game and development scripts pass syntax checks. These are measured baselines; gathering handoffs, perishability, passive processes, combined balance and Stages 4–7 remain outstanding.

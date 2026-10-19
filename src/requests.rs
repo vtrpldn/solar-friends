@@ -60,7 +60,11 @@ fn continuous(task: &str) -> bool {
 }
 pub(crate) fn related(task: &str, requested: &str) -> bool {
     task == requested
-        || (task == "haul" && matches!(requested, "build" | "building_work" | "prepare" | "craft"))
+        || (task == "haul"
+            && matches!(
+                requested,
+                "build" | "building_work" | "prepare" | "craft" | "cook"
+            ))
 }
 fn owns_activity(r: &Resident) -> bool {
     r.requested
@@ -84,7 +88,7 @@ pub fn observe(r: &mut Resident, v: &Village) {
     let Some(q) = r.help.as_ref().filter(|q| q.active()).cloned() else {
         return;
     };
-    if matches!(q.task.as_str(), "prepare" | "craft")
+    if matches!(q.task.as_str(), "prepare" | "craft" | "cook")
         && let Some(id) = q.batch
     {
         match production::batch(v, id).map(|b| b.phase) {
@@ -364,11 +368,13 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         } else {
             "haul"
         }
-    } else if (matches!(q.task.as_str(), "prepare" | "craft")
+    } else if (matches!(q.task.as_str(), "prepare" | "craft" | "cook")
         && q.batch
             .and_then(|id| production::batch(v, id))
             .is_some_and(|b| {
-                !b.committed && !production::ready(v, b) && production::operational(v, b.site)
+                !b.committed
+                    && !production::inputs_ready(v, b)
+                    && production::operational(v, b.site)
             }))
         || (q.task == "building_work"
             && q.building
@@ -383,7 +389,7 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         worker.task = "haul".into();
         worker.requested = true;
         if logistics::quote(v, &worker).is_none() {
-            let reason = if matches!(q.task.as_str(), "prepare" | "craft") {
+            let reason = if matches!(q.task.as_str(), "prepare" | "craft" | "cook") {
                 "The batch inputs need a clear route to the production worksite. Check access and reserved supplies.".into()
             } else if q.task == "build" {
                 supply_wait(v, q.building.unwrap())
@@ -392,7 +398,7 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             };
             return wait(r, Phase::Blocked, &reason);
         }
-    } else if matches!(task, "prepare" | "craft") {
+    } else if matches!(task, "prepare" | "craft" | "cook") {
         let Some(batch) = q.batch.and_then(|id| production::batch(v, id)) else {
             return wait(
                 r,
@@ -404,7 +410,11 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
             return wait(
                 r,
                 Phase::Blocked,
-                "The batch is waiting for staged inputs or an open worksite. Check production and hauling.",
+                if batch.material == economy::MEALS && v.water < 1. {
+                    "The saved pot needs one fresh water before cooking can continue."
+                } else {
+                    "The batch is waiting for staged inputs or an open worksite. Check production and hauling."
+                },
             );
         }
     } else if task == "source" {
@@ -443,7 +453,7 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
         "Continuing the work you asked me to help with.",
         true,
     );
-    if matches!(task, "prepare" | "craft")
+    if matches!(task, "prepare" | "craft" | "cook")
         && !q.batch.is_some_and(|id| production::assign_batch(r, v, id))
     {
         return wait(
@@ -478,7 +488,7 @@ pub fn resume(r: &mut Resident, v: &Village) -> bool {
     if task != "eat" {
         r.activity_material = q.material;
     }
-    if !continuous(&q.task) && !matches!(q.task.as_str(), "prepare" | "craft") {
+    if !continuous(&q.task) && !matches!(q.task.as_str(), "prepare" | "craft" | "cook") {
         r.remaining = q.remaining;
     }
     if walking::supports(task) {
@@ -540,13 +550,13 @@ pub fn matches_haul(
     match (q.task.as_str(), q.building) {
         ("build", Some(id)) => to == logistics::Owner::Site(id),
         ("building_work", Some(id)) => {
-            matches!(from,logistics::Owner::Warehouse(b)|logistics::Owner::Site(b) if b==id)
+            matches!(from,logistics::Owner::Warehouse(b)|logistics::Owner::Site(b)|logistics::Owner::Pantry(b) if b==id)
                 || matches!(from,logistics::Owner::Production(site) if production::building(v,site)==Some(id))
         }
-        ("prepare" | "craft", _) => q
+        ("prepare" | "craft" | "cook", _) => q
             .batch
             .and_then(|id| production::batch(v, id))
-            .is_some_and(|b| to == logistics::Owner::Production(b.site)),
+            .is_some_and(|b| to == production::owner(v, b.site)),
         _ => true,
     }
 }
@@ -557,9 +567,14 @@ pub fn enqueue_at(
     encourage: bool,
     at: Option<usize>,
 ) -> String {
-    let tools = if task == "craft" {
-        let Some(id) = production::order_tools(v, at) else {
-            return "That workshop cannot start a tool batch. Check its supplies, space and other work.".into();
+    let tools = if matches!(task, "craft" | "cook") {
+        let ordered = if task == "cook" {
+            production::order_meals(v, at)
+        } else {
+            production::order_tools(v, at)
+        };
+        let Some(id) = ordered else {
+            return if task=="cook"{"That kitchen cannot queue a pot. Check ingredients, pantry space, existing meals and paused work."}else{"That workshop cannot start a tool batch. Check its supplies, space and other work."}.into();
         };
         Some(id)
     } else {
@@ -613,7 +628,7 @@ pub fn enqueue_at(
     } else {
         None
     };
-    let material = if matches!(task, "prepare" | "craft") {
+    let material = if matches!(task, "prepare" | "craft" | "cook") {
         batch
             .and_then(|id| production::batch(v, id))
             .map(|b| b.material)
@@ -694,10 +709,11 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
                     .get(i)
                     .is_some_and(|s| !q.active() || s.active)
             } else {
-                matches!(q.task.as_str(), "prepare" | "craft") && i < economy::COUNT
+                matches!(q.task.as_str(), "prepare" | "craft" | "cook") && i < economy::COUNT
             }
         })
-        && (matches!(q.task.as_str(), "source" | "prepare" | "craft") == q.material.is_some())
+        && (matches!(q.task.as_str(), "source" | "prepare" | "craft" | "cook")
+            == q.material.is_some())
         && q.building.is_none_or(|id| {
             v.buildings
                 .iter()
@@ -712,22 +728,26 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
                     _ => true,
                 })
         })
-        && (!matches!(q.task.as_str(), "prepare" | "craft")
+        && (!matches!(q.task.as_str(), "prepare" | "craft" | "cook")
             || q.material.is_some_and(|i| {
-                if q.task == "craft" {
+                if q.task == "cook" {
+                    i == economy::MEALS
+                } else if q.task == "craft" {
                     i == economy::TOOLS
                 } else {
                     (5..=8).contains(&i)
                 }
             }))
         && q.batch.is_none_or(|id| {
-            matches!(q.task.as_str(), "prepare" | "craft")
+            matches!(q.task.as_str(), "prepare" | "craft" | "cook")
                 && id.0 < v.simulation.next_id
                 && production::batch(v, id).map_or(!q.active(), |b| {
                     Some(b.material) == q.material && production::matches_task(b.material, &q.task)
                 })
         })
-        && (!matches!(q.task.as_str(), "prepare" | "craft") || !q.active() || q.batch.is_some())
+        && (!matches!(q.task.as_str(), "prepare" | "craft" | "cook")
+            || !q.active()
+            || q.batch.is_some())
         && (q.task != "building_work"
             || !q.active()
             || q.building.is_some_and(|id| {
@@ -1028,10 +1048,7 @@ mod tests {
             assert!(!(a.requested && a.task == "cook" && b.requested && b.task == "cook"));
             a.help.unwrap().phase == Phase::Complete && b.help.unwrap().phase == Phase::Complete
         });
-        assert_eq!(
-            g.app.world().resource::<Village>().supplies.meals_cooked,
-            10
-        );
+        assert_eq!(g.app.world().resource::<Village>().supplies.meals_cooked, 5);
         checkpoint(&mut g);
     }
     #[test]
@@ -1056,13 +1073,7 @@ mod tests {
             person(g, 0).help.unwrap().phase == Phase::Blocked
         });
         assert_eq!(g.app.world().resource::<Village>().supplies.meals_cooked, 0);
-        assert!(
-            person(&mut g, 0)
-                .help
-                .unwrap()
-                .reason
-                .contains("could not finish")
-        );
+        assert!(person(&mut g, 0).help.unwrap().reason.contains("inputs"));
         checkpoint(&mut g);
     }
     #[test]

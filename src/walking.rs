@@ -58,7 +58,7 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
     if r.task == "water" {
         return bank(v, r.id).ok_or("Leave a clear place to collect water along the village bank.");
     }
-    if matches!(r.task.as_str(), "prepare" | "craft") {
+    if matches!(r.task.as_str(), "prepare" | "craft" | "cook") {
         let id = r
             .activity_batch
             .ok_or("This activity no longer has a production batch.")?;

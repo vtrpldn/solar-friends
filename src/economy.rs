@@ -558,6 +558,9 @@ pub(crate) fn gross_needs(v: &Village) -> Bundle {
         needs[TOOLS] += 12;
     }
     for (i, n) in needs.iter_mut().enumerate() {
+        if i == MEALS && !ready(v, "kitchen") {
+            continue;
+        }
         *n = n.saturating_add(crate::production::input_demand(v, i));
         *n = if i == TOOLS {
             (*n).max(v.production.targets[i])

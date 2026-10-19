@@ -1089,11 +1089,16 @@ function updateBuildingPanel() {
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
   const utility = b && ["solar_farm", "streetlight", "hydro", "banana_treatment", "wetland", "biodigester", "warehouse"].includes(b.kind);
   $("#building-visits").hidden = utility;
-  $('#building-visits h3').textContent=b?.kind==='workshop'?'Ask a neighbour to craft':'Ask a neighbour to visit';
+  $('#building-visits h3').textContent=b?.kind==='kitchen'?'Ask a neighbour to cook':b?.kind==='workshop'?'Ask a neighbour to craft':'Ask a neighbour to visit';
   if(b?.kind==='workshop'&&b.progress>=100){
     const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
     const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
     $('#building-activity').textContent=site?.paused?'Worksite paused. Resume it in Construction → Preparing materials.':batch?`Saved batch #${batch.id}: ${batch.output} ${state.environment.economy.materials[batch.material].name.toLowerCase()} · ${Math.floor(batch.work/10*100)}% prepared. ${worker?worker.name+(worker.task==='haul'?' is bringing the inputs.':worker.task==='craft'?' is helping with this batch.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Construction → Preparing materials.`:'No batch queued. Ask a neighbour to craft, or set a village reserve in Construction → Preparing materials.';
+  }
+  if(b?.kind==='kitchen'&&b.progress>=100){
+    const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
+    const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
+    $('#building-activity').textContent=site?.paused?'Kitchen paused. Resume it in Supplies → Kitchen.':batch?`Saved pot #${batch.id}: ${batch.output} meals · ${Math.floor(batch.work/10*100)}% cooked. ${batch.phase==='awaiting_water'?'Waiting for one fresh water.':worker?worker.name+(worker.task==='haul'?' is bringing ingredients.':worker.task==='cook'?' is helping with this pot.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Supplies → Kitchen.`:'No pot queued. Ask a neighbour to cook, or set a meal reserve in Supplies → Kitchen.';
   }
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
   if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
@@ -1134,17 +1139,13 @@ function updateSupplies(v) {
   $("#pantry-flow").textContent = `${Math.floor(s.gathered)} ingredients gathered / ${Math.floor(s.used)} used · ${s.eggs_laid} eggs laid · ${s.meals_cooked} meals cooked · ${s.portions_eaten} portions eaten`;
   $("#use-eggs").checked = s.use_eggs;
   $("#feed-hens").checked = s.feed_hens;
-  const kitchenPantries=(v.logistics?.stores||[]).filter(p=>p.owner.kind==='pantry'&&v.buildings.some(b=>b.id===p.owner.id&&b.kind==='kitchen'&&b.progress>=100));
-  const localEggPot=kitchenPantries.some(p=>s.use_eggs&&p.items[18]>=2&&p.items[16]>=2);
-  const localPot=localEggPot||kitchenPantries.some(p=>p.items[16]>=3);
+  const pots=v.production.batches.filter(b=>b.material===17&&!['complete','cancelled'].includes(b.phase));
   $("#kitchen-status").textContent = !v.buildings.some(b => b.kind === "kitchen" && b.progress >= 100)
     ? "Build a kitchen to stretch your harvest into meals."
-    : v.meals >= 8 ? "Enough meals for now. The kitchen can take a break."
-    : v.water < 1 ? "Cooking needs water. Residents can collect it from the river."
+    : pots.length ? `${pots.length} saved ${pots.length===1?'pot':'pots'} in progress. Ingredients and work stay with each kitchen through breaks.`
+    : v.meals >= v.production.targets[17] ? "The meal reserve is covered. Neighbours can take a break or help with another chore."
     : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
-    : state.environment.economy.capacity-state.environment.economy.used<(localEggPot?3:2) ? "Make room for cooked portions. Eat stored food or clear some supplies first."
-    : !localPot ? "Waiting for ingredients at the kitchen. Neighbours carry them from stores and harvest plots during community hours."
-    : localEggPot ? "Next pot: egg meals from the kitchen pantry." : "Next pot: simple meals from the kitchen pantry.";
+    : "Neighbours queue a pot when the reserve needs topping up and there is room for its meals.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
     : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop during community hours."}`;
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${state.environment.water_capacity} water. ${state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon." : "Rain today from 14:00 to 17:00."} Gardens pause safely when dry.`;
