@@ -147,7 +147,7 @@ export const quests = [
     reward: "Workshop + greenhouse · tools & seedlings",
     building: "workshop",
     after:
-      "Build a workshop and a greenhouse. Eight free timber crafts twelve tool uses for 25% faster construction; moist greenhouse beds raise seedlings.",
+      "Build a workshop and a greenhouse. Delivering eight timber to its workbench lets a neighbour craft twelve tool uses. Tools must reach a project to give 25% faster construction; moist greenhouse beds raise seedlings.",
     objectives: (v) => [
       goal("Build a storage house",count(v,"warehouse"),1,"Incoming orders and queued salvage also reserve space. A storage house adds 300 receiving spaces. Buildings offers resident demolition, salvage and moving; clear stock before dismantling a store.","warehouse"),
       actionGoal("town", "Bring home an outside-job contribution", +v.economy.work_day.some(day=>day>=0),1,"Enable one personal occupation in Town. Residents leave for their 09:00–17:00 shift and contribute its income after returning. Jobs are optional; you may disable them after this lesson."),
@@ -182,7 +182,7 @@ export const quests = [
     after: "A resilient garden makes room for a fuller table. Build a chicken coop and keep food aside for the hens.",
     objectives: v => [
       goal("Build a workshop", count(v,"workshop"),1,"Finish a workshop in Projects, then let Bento make tools.","workshop"),
-      goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight free timber at the workshop. Ask Bento to craft during normal work hours.","workshop"),
+      goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight timber available and ask Bento to craft during community hours. He brings inputs to an open workshop and resumes the saved batch after breaks. Finished tools travel onward to projects and harvests.","workshop"),
       goal("Build a compost station",count(v,"compost"),1,"Kitchen scraps become compost for our gardens.","compost"),
       goal("Bring in an enriched harvest",v.progress.enriched_harvests,1,"Make compost from kitchen scraps. The next garden harvest uses it automatically.","garden"),
       goal("Build a greenhouse",count(v,"greenhouse"),1,"Order the covering and finish a greenhouse. Its protected beds raise seedlings.","greenhouse"),

@@ -3,7 +3,8 @@ use crate::{Game, Village, event, ready};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub const COUNT: usize = 15;
+pub const COUNT: usize = 16;
+pub const TOOLS: usize = 15;
 pub const CAPACITY: u32 = 600;
 pub const NAMES: [&str; COUNT] = [
     "timber",
@@ -21,6 +22,7 @@ pub const NAMES: [&str; COUNT] = [
     "panels",
     "batteries",
     "pumps",
+    "tools",
 ];
 const LABELS: [&str; COUNT] = [
     "Timber",
@@ -38,9 +40,10 @@ const LABELS: [&str; COUNT] = [
     "Solar panels",
     "Battery equipment",
     "Pump",
+    "Tool supplies",
 ];
 const PRICES: [i64; COUNT] = [
-    700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000,
+    700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900,
 ];
 pub type Bundle = [u32; COUNT];
 #[derive(Clone, Serialize, Deserialize)]
@@ -129,7 +132,7 @@ fn uncommitted_day() -> i32 {
 impl Default for Economy {
     fn default() -> Self {
         Self {
-            stock: [0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0],
+            stock: [0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0],
             money: 300000,
             ledger: vec![Entry {
                 minute: 480.,
@@ -501,6 +504,9 @@ pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
         p.stage += 1;
         p.labour = 0.;
         p.committed = false;
+        if p.stage >= stages.len() {
+            crate::progression::use_tool(v, id);
+        }
         rebalance(v);
     }
     v.buildings[bindex].progress >= 100.
@@ -534,12 +540,15 @@ pub(crate) fn gross_needs(v: &Village) -> Bundle {
     }
     // One small tool batch is maintenance demand, never an open-ended timber stockpile.
     if ready(v, "workshop") && v.progress.use_tools && v.progress.tool_uses <= 2 {
-        needs[0] += 8;
+        needs[TOOLS] += 12;
     }
     for (i, n) in needs.iter_mut().enumerate() {
-        *n = n
-            .saturating_add(crate::production::input_demand(v, i))
-            .saturating_add(v.production.targets[i]);
+        *n = n.saturating_add(crate::production::input_demand(v, i));
+        *n = if i == TOOLS {
+            (*n).max(v.production.targets[i])
+        } else {
+            n.saturating_add(v.production.targets[i])
+        };
     }
     needs
 }
@@ -560,7 +569,10 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
         }
     }
     if let Some(batch) = crate::production::jobs(v).next() {
-        return Some(("prepare".into(), batch.material));
+        return Some((
+            crate::production::task(batch.material).into(),
+            batch.material,
+        ));
     }
     if storage(v) >= capacity(v) {
         return None;
@@ -1292,6 +1304,7 @@ mod tests {
     #[test]
     fn workshop_unlocks_tiles_and_improves_salvage_without_double_consumption() {
         let mut g = Game::new();
+        g.set_tools_enabled(false);
         g.app
             .world_mut()
             .resource_mut::<Village>()
@@ -1463,15 +1476,17 @@ mod tests {
         v.economy.sources[0].growth = 1.;
         v.economy.sources[0].remaining = 32.;
         crate::logistics::fixture_stock(&mut v, 0, 0);
-        assert_eq!(shortage(&v)[0], 8);
+        assert_eq!(shortage(&v)[TOOLS], 12);
+        assert_eq!(crate::production::demand(&v)[0], 8);
         assert_eq!(local_job(&v), Some(("source".into(), 0)));
         finish_job(&mut v, "source", 0);
         finish_job(&mut v, "source", 0);
         assert_eq!(v.wood, 8.);
         assert!(local_job(&v).is_none());
-        v.progress.tool_uses = 12;
+        crate::logistics::fixture_stock(&mut v, TOOLS, 12);
+        rebalance(&mut v);
         assert_eq!(shortage(&v)[0], 0);
-        v.progress.tool_uses = 0;
+        crate::logistics::fixture_stock(&mut v, TOOLS, 0);
         crate::logistics::fixture_stock(&mut v, 0, 0);
         v.progress.use_tools = false;
         assert_eq!(shortage(&v)[0], 0);

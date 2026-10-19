@@ -46,7 +46,7 @@ assert(g.restore(g.snapshot()));
 delete fixture.village.power;restore(fixture);
 assert.deepEqual(snapshot().village.power,{stored:0,disabled:[]});
 const farm=fixture.village.buildings.find(b=>b.kind==='solar_farm');
-farm.progress=0;fixture.village.minutes=720;fixture.village.economy.projects=[{building:farm.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(15).fill(0),consumed:Array(15).fill(0)}];restore(fixture);
+farm.progress=0;fixture.village.minutes=720;fixture.village.economy.projects=[{building:farm.id,recipe:'standard',priority:1,paused:false,stage:0,labour:0,committed:false,reserved:Array(16).fill(0),consumed:Array(16).fill(0)}];restore(fixture);
 p=snapshot().environment.power;assert.equal(p.capacity,0);assert.equal(p.generation,0);assert.equal(p.grid_level,0);
 
 // Construction uses the public placement API and reserves mixed materials without charging for the blueprint.

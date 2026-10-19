@@ -1,0 +1,66 @@
+import assert from 'node:assert/strict';
+
+export async function checkToolControls({page,saved,capture}){
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/tools/start.json');
+  await page.waitForFunction(()=>{const v=window.solarDev.snapshot().village;return v.minutes===540&&v.buildings.length===2&&!v.progress.use_tools;});
+  await page.locator('#dev-close').click();
+  if(!await page.locator('#village-book').isVisible())await page.getByRole('button',{name:'Village',exact:true}).click();
+  await page.getByRole('button',{name:'Buildings',exact:true}).click();
+  await page.locator('#building-choice').selectOption('0');
+  assert.equal(await page.locator('#building-visits h3').textContent(),'Ask a neighbour to craft');
+  const initial=await page.evaluate(()=>window.solarDev.snapshot());
+  await page.locator('#building-neighbours [data-visitor="0"]').click();
+  let state=await page.evaluate(()=>window.solarDev.snapshot());
+  const help=state.residents.find(r=>r.id===0).help,batchId=help.batch;
+  assert.equal(help.task,'craft');assert.equal(help.building,0);
+  assert.equal(state.village.production.batches.find(b=>b.id===batchId).material,15);
+  assert((await page.locator('#building-activity').textContent()).includes('Iara is bringing the inputs'));
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  if(!await page.locator('#preparation-recipes').isVisible())await page.getByText('Preparing materials',{exact:true}).click();
+  let working;
+  for(let window=0;window<96;window++){
+    await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('15');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+    state=await page.evaluate(()=>window.solarDev.snapshot());working=state.village.production.batches.find(b=>b.id===batchId);
+    if(working.work>0)break;
+  }
+  assert(working.committed&&working.work>0&&working.work<10,'Delivered timber starts an attended saved batch');
+  assert.equal(state.village.progress.tool_uses,0);
+  await page.getByRole('button',{name:'Pause Workshop 1',exact:true}).click();
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('10');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  assert.equal(await page.evaluate(id=>window.solarDev.snapshot().village.production.batches.find(b=>b.id===id).work,batchId),working.work);
+  await capture('Tool batch retains committed timber and partial work while paused','tools-batch.png');
+  await page.getByRole('button',{name:'Cancel batch at Workshop 1',exact:true}).click();
+  state=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(state.village.wood,initial.village.wood);assert.equal(state.village.progress.tool_uses,0);
+  await page.getByRole('spinbutton',{name:'Tool supplies reserve',exact:true}).fill('12');
+  await page.getByRole('button',{name:'Set tool supplies reserve',exact:true}).click();
+  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().village.production.targets[15]),12);
+  await page.getByRole('button',{name:'Trade',exact:true}).click();
+  await page.locator('[name="town-transport"][value="delivery"]').check();
+  await page.locator('#town-clear').click();
+  await page.getByRole('button',{name:'Add one tool supplies',exact:true}).click();
+  assert.equal(await page.locator('#buy-15').inputValue(),'1');
+  await capture('Buy tool supplies as an alternative to local crafting','tools-town.png');
+  const funds=await page.evaluate(()=>window.solarDev.snapshot().village.economy.money);
+  await page.locator('#town-order').click();
+  state=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(state.village.economy.orders.at(-1).items[15],1);
+  assert.equal(state.village.economy.money,funds-6900);
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1440');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  state=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(state.village.economy.orders.at(-1).status,'delivered');
+  assert.equal(state.village.logistics.stores.find(p=>p.owner.kind==='camp').items[15],1);
+  assert.equal(state.village.progress.tool_uses,1);
+  await page.getByRole('button',{name:'Supplies',exact:true}).click();
+  const useTools=page.getByRole('checkbox',{name:'Use delivered tools',exact:true});
+  assert(!await useTools.isChecked());await useTools.check();
+  assert(await page.evaluate(()=>window.solarDev.snapshot().village.progress.use_tools));
+  await useTools.uncheck();assert(!await page.evaluate(()=>window.solarDev.snapshot().village.progress.use_tools));
+  if(!await page.locator('#material-inventory').isVisible())await page.getByText('Construction materials',{exact:true}).click();
+  assert((await page.locator('.material-slot[data-item="15"]').textContent()).includes('1 free'));
+  assert((await page.locator('#storage-locations').textContent()).includes('1 tool supplies'));
+  await page.locator('.material-slot[data-item="15"]').scrollIntoViewIfNeeded();
+  await capture('Purchased tool supplies belong to the arrival store','tools-arrival.png');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+}

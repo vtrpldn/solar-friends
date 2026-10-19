@@ -175,7 +175,7 @@ fn shared_construction_and_contribution_unlock_workshop_once() {
         v.economy.orders.push(economy::Order {
             pickup_by: Some(4),
             id: 0,
-            items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            items: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             paid: 6700,
             dispatch: 1.,
             arrival: 2.,
@@ -202,7 +202,13 @@ fn tools_cost_timber_and_can_be_conserved() {
     unlock(&mut g);
     ready_building(&mut g, "workshop", 8, 8);
     let wood = g.app.world().resource::<Village>().wood;
-    finish_task(&mut g, 1, "craft");
+    assert!(g.request(1, "craft", false).contains("Happy"));
+    for _ in 0..10000 {
+        if g.app.world().resource::<Village>().progress.tools_crafted > 0 {
+            break;
+        }
+        g.tick(0.25);
+    }
     assert_eq!(g.app.world().resource::<Village>().wood, wood - 8.);
     assert_eq!(g.app.world().resource::<Village>().progress.tool_uses, 12);
     finish_task(&mut g, 3, "gather");
@@ -319,11 +325,11 @@ fn a_running_gathering_survives_save_and_reload() {
 fn tools_accelerate_building_and_spend_one_use_on_completion() {
     let mut g = setup();
     assert_eq!(g.place("home", 8, 8), "ok");
-    g.app
-        .world_mut()
-        .resource_mut::<Village>()
-        .progress
-        .tool_uses = 12;
+    logistics::fixture_stock(
+        &mut g.app.world_mut().resource_mut::<Village>(),
+        economy::TOOLS,
+        12,
+    );
     logistics::fixture_stage(&mut g.app.world_mut().resource_mut::<Village>(), 0);
     let v = g.app.world().resource::<Village>().clone();
     let mut q = g.app.world_mut().query::<&mut Resident>();

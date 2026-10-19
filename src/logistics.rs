@@ -151,6 +151,7 @@ pub fn sync_totals(v: &mut Village) {
     v.wood = totals[0] as f32;
     v.economy.stock = totals;
     v.economy.stock[0] = 0;
+    v.progress.tool_uses = totals[economy::TOOLS];
 }
 pub(crate) fn create(v: &mut Village, owner: Owner, x: f32, y: f32, capacity: u32) -> Option<Id> {
     let id = v.simulation.allocate()?;
@@ -238,7 +239,9 @@ pub fn sync(v: &mut Village) {
             && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Warehouse(b.id), b.x as f32, b.y as f32, 300));
-        } else if b.progress < 100. && building_work::original_progress(v, b.id) != Some(100.) {
+        } else if (b.progress < 100. && building_work::original_progress(v, b.id) != Some(100.))
+            || ecology::farm(b)
+        {
             wanted.push((Owner::Site(b.id), b.x as f32, b.y as f32, 150));
         }
     }
@@ -436,7 +439,7 @@ pub fn rebalance(v: &mut Village) {
     }
 }
 fn needs(v: &Village, owner: Owner) -> Bundle {
-    match owner {
+    let mut items = match owner {
         Owner::Site(id) => v
             .economy
             .projects
@@ -455,7 +458,34 @@ fn needs(v: &Village, owner: Owner) -> Bundle {
             .unwrap_or([0; COUNT]),
         Owner::Production(id) => production::needs(v, id),
         _ => [0; COUNT],
+    };
+    if let Owner::Site(id) = owner
+        && tool_target(v, id)
+    {
+        items[economy::TOOLS] = 1;
     }
+    items
+}
+fn tool_target(v: &Village, id: usize) -> bool {
+    v.progress.use_tools
+        && building_work::job(v, id).is_none()
+        && v.buildings.iter().any(|b| {
+            b.id == id
+                && ((b.progress < 100.
+                    && v.economy
+                        .projects
+                        .iter()
+                        .any(|p| p.building == id && !p.paused))
+                    || (b.progress >= 100. && ecology::farm(b) && b.crop.planted))
+        })
+}
+pub fn site_tools(v: &Village, id: usize) -> u32 {
+    v.logistics
+        .as_ref()
+        .and_then(|s| s.stores.iter().find(|p| p.owner == Owner::Site(id)))
+        .map_or(0, |p| {
+            p.items[economy::TOOLS].saturating_sub(pickup_reserved(v, p.id, economy::TOOLS))
+        })
 }
 fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> {
     // A put-down load can lie in a narrow walkable corridor. Pick it up where
@@ -641,6 +671,39 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                         rank: (1, 3 - p.priority, p.building as u32),
                     });
                 }
+            }
+        }
+    }
+    // Tool supplies are optional: absence never blocks a construction stage.
+    // Each worksite receives one use, through the same claimed cargo routes.
+    for to in s
+        .stores
+        .iter()
+        .filter(|p| matches!(p.owner,Owner::Site(id) if tool_target(v,id)))
+    {
+        let pending = s
+            .shipments
+            .iter()
+            .filter(|h| h.to == to.id && h.material == economy::TOOLS)
+            .map(|h| h.amount)
+            .sum::<u32>();
+        let missing = 1u32.saturating_sub(to.items[economy::TOOLS] + pending);
+        for from in s
+            .stores
+            .iter()
+            .filter(|p| general(p.owner) && !closing(v, p.owner) && p.id != to.id)
+        {
+            let amount = missing
+                .min(usable(v, from, economy::TOOLS))
+                .min(room(v, to.owner));
+            if amount > 0 {
+                out.push(Candidate {
+                    from: from.id,
+                    to: to.id,
+                    material: economy::TOOLS,
+                    amount,
+                    rank: (1, 4, to.id.0),
+                });
             }
         }
     }
@@ -1044,7 +1107,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
-    if v.version != 4
+    if v.version != 5
         || s.schema != 1
         || s.stores.len() > 2048
         || s.shipments.len() > 5
@@ -1103,7 +1166,9 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             Owner::Site(id) => {
                 p.capacity == 150
                     && v.buildings.iter().any(|b| {
-                        b.id == id && b.progress < 100. && (p.x, p.y) == (b.x as f32, b.y as f32)
+                        b.id == id
+                            && (b.progress < 100. || ecology::farm(b))
+                            && (p.x, p.y) == (b.x as f32, b.y as f32)
                     })
             }
             Owner::Source(i) => {
@@ -1132,7 +1197,8 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             return false;
         }
     }
-    if !owners.contains(&Owner::Camp)
+    if v.progress.tool_uses != total(v, economy::TOOLS)
+        || !owners.contains(&Owner::Camp)
         || (0..COUNT).any(|i| {
             if i == 0 {
                 v.wood != total(v, i) as f32
@@ -1255,12 +1321,14 @@ pub fn fixture_finish(v: &mut Village, id: usize) {
         .find(|b| b.id == id)
         .unwrap()
         .progress = 100.;
+    production::sync(v);
     sync(v);
 }
 #[cfg(test)]
 pub fn fixture_stage(v: &mut Village, id: usize) {
     sync(v);
-    let required = needs(v, Owner::Site(id));
+    let mut required = needs(v, Owner::Site(id));
+    required[economy::TOOLS] = required[economy::TOOLS].min(total(v, economy::TOOLS));
     let site = v
         .logistics
         .as_ref()

@@ -6,6 +6,17 @@ use simulation::Id;
 
 pub const BUFFER: u32 = 60;
 const LABOUR: f32 = 10.;
+const PRODUCTS: [usize; 5] = [5, 6, 7, economy::TOOLS, 8];
+pub fn task(material: usize) -> &'static str {
+    if material == economy::TOOLS {
+        "craft"
+    } else {
+        "prepare"
+    }
+}
+pub fn matches_task(material: usize, activity: &str) -> bool {
+    task(material) == activity
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Phase {
@@ -35,6 +46,8 @@ pub struct Batch {
     pub output: u32,
     pub work: f32,
     pub committed: bool,
+    #[serde(default)]
+    pub manual: bool,
     pub phase: Phase,
     pub created: f32,
     pub finished: Option<f32>,
@@ -101,6 +114,7 @@ fn recipe(material: usize, workshop: bool) -> Option<(Bundle, u32)> {
         5 => (&[(0, 2), (8, 1)], 1),
         6 => (&[(2, 2)], 2),
         7 if workshop => (&[(2, 2), (0, 1)], 2),
+        economy::TOOLS if workshop => (&[(0, 8)], 12),
         8 if workshop => (&[(4, 1), (3, 1)], 2),
         8 => (&[(4, 2)], 1),
         _ => return None,
@@ -173,8 +187,15 @@ pub fn reserved_space(v: &Village) -> u32 {
     v.production
         .batches
         .iter()
-        .filter(|b| b.active() && b.committed)
-        .map(|b| b.inputs.iter().sum::<u32>().max(b.output))
+        .filter(|b| b.active())
+        .map(|b| {
+            let inputs = b.inputs.iter().sum::<u32>();
+            if b.committed {
+                inputs.max(b.output)
+            } else {
+                b.output.saturating_sub(inputs)
+            }
+        })
         .sum()
 }
 pub fn input_demand(v: &Village, i: usize) -> u32 {
@@ -216,7 +237,7 @@ fn expanded_demand(v: &Village, ignore_queued: Option<usize>) -> Bundle {
     let mut need = [0; COUNT];
     // Prepared goods precede their fitting dependency; each owned or queued
     // input is credited once after all upstream requirements have been added.
-    for i in [5, 6, 7, 8] {
+    for i in PRODUCTS {
         need[i] = gross[i].saturating_sub(supplied(i));
         if let Some((inputs, output)) = recipe(i, workshop) {
             for j in 0..COUNT {
@@ -224,7 +245,7 @@ fn expanded_demand(v: &Village, ignore_queued: Option<usize>) -> Bundle {
             }
         }
     }
-    for i in (0..COUNT).filter(|i| !(5..=8).contains(i)) {
+    for i in (0..COUNT).filter(|i| !PRODUCTS.contains(i)) {
         need[i] = gross[i].saturating_sub(supplied(i));
     }
     need
@@ -277,7 +298,7 @@ pub fn sync(v: &mut Village) {
     // committed work, and allow at most one final recipe-sized surplus.
     for _ in 0..3 {
         let mut cancel = vec![];
-        for material in [5, 6, 7, 8] {
+        for material in PRODUCTS {
             let committed: u32 = v
                 .production
                 .batches
@@ -291,7 +312,7 @@ pub fn sync(v: &mut Village) {
                 .production
                 .batches
                 .iter()
-                .filter(|b| b.active() && !b.committed && b.material == material)
+                .filter(|b| b.active() && !b.committed && !b.manual && b.material == material)
             {
                 if remaining == 0 {
                     cancel.push(b.id);
@@ -361,46 +382,104 @@ pub fn dispatch(v: &mut Village) {
             continue;
         }
         let need = demand(v);
-        for material in [5, 6, 7, 8] {
-            let Some((inputs, output)) = recipe(material, building(v, id).is_some()) else {
-                continue;
-            };
-            if need[material] == 0 || !(0..COUNT).all(|i| economy::free(v, i) >= inputs[i]) {
-                continue;
+        for material in PRODUCTS {
+            if need[material] > 0 && spawn(v, id, material, false).is_some() {
+                break;
             }
-            let Some(p) = store(v, id) else {
-                continue;
-            };
-            let existing: u32 = (0..COUNT).map(|i| inputs[i].min(present(v, id, i))).sum();
-            let footprint = inputs.iter().sum::<u32>().max(output);
-            if logistics::room(v, p.owner) + existing < footprint {
-                continue;
-            }
-            let Some(batch_id) = v.simulation.allocate() else {
-                return;
-            };
-            let phase = if (0..COUNT).all(|i| present(v, id, i) >= inputs[i]) {
-                Phase::Ready
-            } else {
-                Phase::AwaitingInputs
-            };
-            v.production.batches.push(Batch {
-                id: batch_id,
-                site: id,
-                material,
-                inputs,
-                output,
-                work: 0.,
-                committed: false,
-                phase,
-                created: v.minutes,
-                finished: None,
-            });
-            v.logistics.as_mut().unwrap().retry_after = [0.; 5];
-            break;
         }
     }
 }
+fn can_spawn(v: &Village, id: Id, material: usize) -> bool {
+    if !operational(v, id) || pending(v, id).is_some() {
+        return false;
+    }
+    let Some((inputs, output)) = recipe(material, building(v, id).is_some()) else {
+        return false;
+    };
+    if !(0..COUNT).all(|i| economy::free(v, i) >= inputs[i]) {
+        return false;
+    }
+    let Some(p) = store(v, id) else {
+        return false;
+    };
+    let existing: u32 = (0..COUNT).map(|i| inputs[i].min(present(v, id, i))).sum();
+    let inputs_total = inputs.iter().sum::<u32>();
+    economy::capacity(v).saturating_sub(economy::storage(v)) >= output.saturating_sub(inputs_total)
+        && logistics::room(v, p.owner) + existing >= inputs_total.max(output)
+}
+fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
+    if !can_spawn(v, id, material) {
+        return None;
+    }
+    let (inputs, output) = recipe(material, building(v, id).is_some())?;
+    let batch_id = v.simulation.allocate()?;
+    let phase = if (0..COUNT).all(|i| present(v, id, i) >= inputs[i]) {
+        Phase::Ready
+    } else {
+        Phase::AwaitingInputs
+    };
+    v.production.batches.push(Batch {
+        id: batch_id,
+        site: id,
+        material,
+        inputs,
+        output,
+        work: 0.,
+        committed: false,
+        manual,
+        phase,
+        created: v.minutes,
+        finished: None,
+    });
+    v.logistics.as_mut()?.retry_after = [0.; 5];
+    Some(batch_id)
+}
+pub fn can_order_tools(v: &Village) -> bool {
+    v.production
+        .batches
+        .iter()
+        .any(|b| b.active() && b.material == economy::TOOLS && operational(v, b.site))
+        || (economy::quantity(v, economy::TOOLS)
+            + future(v, economy::TOOLS)
+            + economy::incoming(v, economy::TOOLS)
+            <= 24
+            && v.production
+                .sites
+                .iter()
+                .any(|s| can_spawn(v, s.id, economy::TOOLS)))
+}
+pub fn order_tools(v: &mut Village, at: Option<usize>) -> Option<Id> {
+    if let Some(b) = v.production.batches.iter().find(|b| {
+        b.active()
+            && b.material == economy::TOOLS
+            && operational(v, b.site)
+            && at.is_none_or(|id| building(v, b.site) == Some(id))
+    }) {
+        return Some(b.id);
+    }
+    if economy::quantity(v, economy::TOOLS)
+        + future(v, economy::TOOLS)
+        + economy::incoming(v, economy::TOOLS)
+        > 24
+    {
+        return None;
+    }
+    let ids: Vec<_> = v
+        .production
+        .sites
+        .iter()
+        .filter(|s| at.is_none_or(|id| s.building == Some(id)))
+        .map(|s| s.id)
+        .collect();
+    for id in ids {
+        if let Some(b) = spawn(v, id, economy::TOOLS, true) {
+            logistics::rebalance(v);
+            return Some(b);
+        }
+    }
+    None
+}
+
 pub fn ready(v: &Village, b: &Batch) -> bool {
     b.active()
         && operational(v, b.site)
@@ -425,10 +504,12 @@ pub fn assign_batch(r: &mut Resident, v: &Village, id: Id) -> bool {
     let Some((x, y)) = approach(v, id, r.id) else {
         return false;
     };
-    r.task = "prepare".into();
+    r.task = task(b.material).into();
     r.activity_batch = Some(id);
     r.activity_material = Some(b.material);
-    r.activity_building = None;
+    r.activity_building = (b.material == economy::TOOLS)
+        .then(|| building(v, b.site))
+        .flatten();
     r.target_x = x;
     r.target_y = y;
     r.remaining = LABOUR - b.work;
@@ -442,7 +523,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         return false;
     };
     if !work_time(v.minutes)
-        || r.task != "prepare"
+        || !matches_task(b.material, &r.task)
         || (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08
         || seconds <= 0.
         || !seconds.is_finite()
@@ -510,7 +591,11 @@ fn finish(v: &mut Village, id: Id) -> bool {
         b.output
     ));
     v.production.accounting.outputs[b.material] += u64::from(b.output);
-    v.progress.prepared_batches = v.progress.prepared_batches.saturating_add(1);
+    if b.material == economy::TOOLS {
+        v.progress.tools_crafted = v.progress.tools_crafted.saturating_add(1);
+    } else {
+        v.progress.prepared_batches = v.progress.prepared_batches.saturating_add(1);
+    }
     true
 }
 pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
@@ -536,7 +621,7 @@ pub fn cancel_batch(v: &mut Village, id: Id) -> bool {
 }
 pub fn view(v: &Village) -> serde_json::Value {
     let recipes:Vec<_>=v.production.sites.iter().map(|s|{
-        let recipes:Vec<_>=[5,6,7,8].into_iter().filter_map(|i|recipe(i,s.building.is_some()).map(|(inputs,output)|serde_json::json!({"material":i,"inputs":inputs,"output":output}))).collect();
+        let recipes:Vec<_>=PRODUCTS.into_iter().filter_map(|i|recipe(i,s.building.is_some()).map(|(inputs,output)|serde_json::json!({"material":i,"inputs":inputs,"output":output}))).collect();
         serde_json::json!({"site":s.id,"recipes":recipes,"reserved_space":site_space(v,Owner::Production(s.id))})
     }).collect();
     serde_json::json!({"sites":v.production.sites,"batches":v.production.batches,"targets":v.production.targets,"accounting":v.production.accounting,
@@ -552,7 +637,7 @@ pub fn finish_frame<'a>(v: &mut Village, residents: impl IntoIterator<Item = &'a
                 .into_iter()
                 .flatten(),
         );
-        if r.task == "prepare"
+        if matches!(r.task.as_str(), "prepare" | "craft")
             && r.trip.is_none()
             && r.remaining > 0.
             && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.08
@@ -624,7 +709,7 @@ pub fn valid(v: &Village) -> bool {
         || p.targets
             .iter()
             .enumerate()
-            .any(|(i, n)| *n > 30 || (*n > 0 && !(5..=8).contains(&i)))
+            .any(|(i, n)| *n > 30 || (*n > 0 && !PRODUCTS.contains(&i)))
     {
         return false;
     }
@@ -660,6 +745,7 @@ pub fn valid(v: &Village) -> bool {
             && ids.insert(b.id)
             && b.id.0 < v.simulation.next_id
             && (!b.active() || active.insert(b.site))
+            && (!b.manual || b.material == economy::TOOLS)
             && b.inputs == inputs
             && b.output == output
             && b.work.is_finite()
@@ -703,7 +789,7 @@ impl Game {
         view(self.app.world().resource::<Village>()).to_string()
     }
     pub fn set_production_target(&mut self, material: usize, n: u32) -> String {
-        if !(5..=8).contains(&material) || n > 30 {
+        if !PRODUCTS.contains(&material) || n > 30 {
             return "Choose a prepared material and a village reserve of 0–30 units.".into();
         }
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -801,6 +887,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.progress.completed = [true; 4];
+            v.progress.use_tools = false;
             v.arrived = true;
             v.minutes = 540.;
             v.food = 80.;
@@ -1326,5 +1413,142 @@ mod tests {
         assert_eq!(economy::free(v, 0), 0);
         assert_eq!(economy::free(v, 2), 0);
         checkpoint(&mut g);
+    }
+    fn tool_scene() -> Game {
+        let mut g = scene();
+        assert_eq!(g.set_production_target(7, 0), "ok");
+        g
+    }
+    #[test]
+    fn tools_use_staged_inputs_and_output_space_through_checkpoint_and_cancellation() {
+        let mut g = tool_scene();
+        assert!(g.request(0, "craft", false).contains("Happy"));
+        let id = worker(&mut g).help.unwrap().batch.unwrap();
+        let mut r = worker(&mut g);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let before = economy::quantity(&v, 0);
+            fixture_inputs(&mut v, id);
+            assert!(assign_batch(&mut r, &v, id));
+            assert!(!work(&mut v, &r, 4.));
+            assert_eq!(economy::quantity(&v, 0), before);
+            (r.x, r.y) = (r.target_x, r.target_y);
+            assert!(!work(&mut v, &r, 4.));
+            assert_eq!(economy::quantity(&v, 0), before - 8);
+            assert_eq!(reserved_space(&v), 12);
+            assert_eq!(v.progress.tool_uses, 0);
+        }
+        checkpoint(&mut g);
+        let mut cancelled = Game::new();
+        assert!(cancelled.restore(&g.snapshot()));
+        let timber = cancelled.app.world().resource::<Village>().wood;
+        assert_eq!(cancelled.cancel_production_batch(id.0), "ok");
+        assert_eq!(
+            cancelled.app.world().resource::<Village>().wood,
+            timber + 8.
+        );
+        assert_ne!(cancelled.cancel_production_batch(id.0), "ok");
+        checkpoint(&mut cancelled);
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            assert!(work(&mut v, &r, 6.));
+            assert_eq!(economy::quantity(&v, economy::TOOLS), 12);
+            assert_eq!(
+                store(&v, batch(&v, id).unwrap().site).unwrap().items[economy::TOOLS],
+                12
+            );
+            assert_eq!(v.production.accounting.outputs[economy::TOOLS], 12);
+            assert_eq!(v.progress.tools_crafted, 1);
+            assert!(!work(&mut v, &r, 10.));
+        }
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn tools_must_reach_the_actual_worksite_and_each_use_is_spent_once() {
+        let mut g = tool_scene();
+        assert_eq!(g.place("garden", 12, 10), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        let id = v.buildings.last().unwrap().id;
+        logistics::fixture_stock(&mut v, economy::TOOLS, 2);
+        v.progress.use_tools = true;
+        assert_eq!(logistics::site_tools(&v, id), 0);
+        assert!(!progression::use_tool(&mut v, id));
+        assert_eq!(v.progress.tool_uses, 2);
+        logistics::fixture_stage(&mut v, id);
+        assert_eq!(logistics::site_tools(&v, id), 1);
+        assert!(progression::use_tool(&mut v, id));
+        assert!(!progression::use_tool(&mut v, id));
+        assert_eq!(v.progress.tool_uses, 1);
+        assert_eq!(
+            v.simulation.materials.as_ref().unwrap().spent[economy::TOOLS],
+            1
+        );
+        assert!(
+            economy::can_build(&v, id),
+            "Optional tools cannot block ordinary construction"
+        );
+        assert!(economy::build(&mut v, id, 1000.));
+        assert_eq!(v.progress.tool_uses, 1);
+    }
+    #[test]
+    fn expanding_tool_output_reserves_room_before_inputs_are_spent() {
+        let mut g = tool_scene();
+        assert_eq!(g.place("workshop", 15, 5), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        logistics::fixture_finish(&mut v, 1);
+        economy::rebalance(&mut v);
+        let room = economy::capacity(&v) - economy::storage(&v);
+        economy::add(&mut v, 2, room);
+        let timber = economy::quantity(&v, 0);
+        assert!(order_tools(&mut v, Some(0)).is_none());
+        assert_eq!(economy::quantity(&v, 0), timber);
+        economy::remove(&mut v, 2, 4);
+        let id = order_tools(&mut v, Some(0)).unwrap();
+        assert_eq!(reserved_space(&v), 4);
+        assert_eq!(economy::storage(&v), economy::capacity(&v));
+        assert!(
+            order_tools(&mut v, Some(1)).is_none(),
+            "A second station cannot overbook output room"
+        );
+        assert!(cancel_batch(&mut v, id));
+        assert_eq!(economy::capacity(&v) - economy::storage(&v), 4);
+        assert!(order_tools(&mut v, Some(1)).is_some());
+    }
+    #[test]
+    fn a_workshop_visit_binds_its_requested_batch_to_the_selected_building() {
+        let mut g = tool_scene();
+        assert_eq!(g.place("workshop", 15, 5), "ok");
+        logistics::fixture_finish(&mut g.app.world_mut().resource_mut::<Village>(), 1);
+        assert!(g.visit_building(0, 1).contains("Happy"));
+        let q = worker(&mut g).help.unwrap();
+        assert_eq!(q.building, Some(1));
+        assert_eq!(q.material, Some(economy::TOOLS));
+        assert_eq!(
+            building(
+                g.app.world().resource::<Village>(),
+                batch(g.app.world().resource::<Village>(), q.batch.unwrap())
+                    .unwrap()
+                    .site
+            ),
+            Some(1)
+        );
+        let before = g.snapshot();
+        assert!(
+            g.visit_building(0, 0)
+                .contains("already helping at workshop 2")
+        );
+        assert_eq!(g.snapshot(), before);
+        assert!(g.visit_building(0, 1).contains("already accepted"));
+        assert_eq!(g.snapshot(), before);
+        checkpoint(&mut g);
+    }
+    #[test]
+    fn a_forged_tool_summary_cannot_add_distant_tools() {
+        let mut g = tool_scene();
+        let before = g.snapshot();
+        let mut forged: serde_json::Value = serde_json::from_str(&before).unwrap();
+        forged["village"]["progress"]["tool_uses"] = 12.into();
+        assert!(!g.restore(&forged.to_string()));
+        assert_eq!(g.snapshot(), before);
     }
 }

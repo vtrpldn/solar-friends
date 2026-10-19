@@ -1002,13 +1002,13 @@ function updateQuests() {
   const has = (kind) =>
     v.buildings.some((b) => b.kind === kind && b.progress >= 100);
   $("#village-craft").hidden =
-    !has("compost") && !has("workshop") && !has("square") && !p.gathering_until;
+    !has("compost") && !has("square") && !p.gathering_until;
   $("#compost-stock").hidden = !has("compost");
   $("#compost-stock").textContent =
     `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched ${p.enriched_harvests === 1 ? "harvest" : "harvests"}`;
-  $("#tools-control").hidden = !has("workshop");
+  $("#tools-control").hidden = !has("workshop") && p.tool_uses===0;
   $("#tools-stock").textContent =
-    `${p.tool_uses} tool uses · ${p.tools_crafted} sets crafted`;
+    `${p.tool_uses} tool ${p.tool_uses===1?'use':'uses'} owned across the village · ${p.tools_crafted} ${p.tools_crafted===1?'batch':'batches'} crafted`;
   $("#use-tools").checked = p.use_tools;
   $("#gathering-control").hidden = !has("square") && !p.gathering_until;
   $("#gathering-status").textContent =
@@ -1042,7 +1042,7 @@ const buildingPurposes = {
   grove: "Gather two fruit for the pantry.",
   coop: "Care for hens: improve connection and advance a fed batch by 30 daylight minutes.",
   compost: "Turn two scraps into one compost.",
-  workshop: "Use eight timber to make twelve tool uses.",
+  workshop: "Deliver eight timber to this workbench to craft twelve tool supplies. Finished tools must be carried to projects and planted beds.",
   square: "Meet neighbours: recover connection and energy. The square also hosts community gatherings.",
 };
 function updateBuildingPanel() {
@@ -1068,7 +1068,7 @@ function updateBuildingPanel() {
   $("#building-purpose").textContent = b ? buildingPurposes[b.kind] : "Place your first building to get started.";
   if(b?.kind==='workshop'){
     const tools=state.village.progress.tool_uses, timber=state.environment.economy.materials[0].available;
-    $('#building-purpose').textContent=`${tools}/36 tool uses ready. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'Eight unreserved timber makes twelve more tool uses.'}`;
+    $('#building-purpose').textContent=`${tools} tool uses owned across the village. ${tools>24?'Enough tools for now; neighbours can take a break.':timber<8?'The next batch needs eight unreserved timber.':'A saved batch needs eight timber delivered here. Follow its progress in Construction → Preparing materials.'}`;
   }
   $("#building-power").textContent=b?connectionLabel(state.environment.power.connections.find(c=>c.id===b.id),state.environment.power):"";
   const farming = b && ["garden", "greenhouse"].includes(b.kind);
@@ -1078,7 +1078,7 @@ function updateBuildingPanel() {
     $("#next-crop").value = c.next_kind;
     $("#replant-crop").checked = c.replant;
     const yieldBase = spec.yield - (c.kind === "tomatoes" && c.harvests > 0 && state.village.progress.compost === 0 ? 2 : 0);
-    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.progress.tool_uses > 0 ? 2 : 0);
+    const bonus = (state.village.progress.compost > 0 ? 3 : 0) + (state.village.progress.use_tools && state.village.logistics?.stores.some(p=>p.owner.kind==='site'&&p.owner.id===b.id&&p.items[15]>0) ? 2 : 0);
     $("#crop-status").textContent = `${spec.name} · ${!c.planted ? (c.replant ? "ready to plant" : "replanting paused") : c.growth >= cropDuration(c) ? "ready to harvest" : `${Math.floor(c.growth / cropDuration(c) * 100)}% grown${c.moisture <= 0 ? " · needs water" : ""}`}. Expected harvest: ${yieldBase+bonus}–${yieldBase+bonus+3} food.`;
     $("#crop-details").textContent = `Soil moisture: ${Math.ceil(c.moisture)} minutes${c.kind === "beans" ? " (beans use half as fast)" : ""}. Harvest size depends on the gardener. ${spec.note}.`;
     $("#nursery-status").textContent = b.kind === "greenhouse" ? `One seedling per 8 moist growing hours · ${state.village.seedlings}/12 stored. Seedlings give outdoor beds a 25% growth head start. Watering uses 2 reclaimed irrigation water first, then fresh water and lasts twice as long; rain cannot water this bed.` : `${state.village.seedlings} seedlings available for a 25% head start on the next planting.`;
@@ -1089,6 +1089,12 @@ function updateBuildingPanel() {
     : `${b.visits} visits completed. ${b.next_visit > state.village.minutes && !["home", "square"].includes(b.kind) ? "Production recovers in " + Math.ceil(b.next_visit - state.village.minutes) + " game minutes." : "Ready for a visit."}`;
   const utility = b && ["solar_farm", "streetlight", "hydro", "banana_treatment", "wetland", "biodigester", "warehouse"].includes(b.kind);
   $("#building-visits").hidden = utility;
+  $('#building-visits h3').textContent=b?.kind==='workshop'?'Ask a neighbour to craft':'Ask a neighbour to visit';
+  if(b?.kind==='workshop'&&b.progress>=100){
+    const site=state.village.production.sites.find(s=>s.building===b.id),batch=site&&state.village.production.batches.find(q=>q.site===site.id&&!['complete','cancelled'].includes(q.phase));
+    const worker=batch&&state.residents.find(r=>r.activity_batch===batch.id||r.help?.batch===batch.id&&r.help.finished==null);
+    $('#building-activity').textContent=site?.paused?'Worksite paused. Resume it in Construction → Preparing materials.':batch?`Saved batch #${batch.id}: ${batch.output} ${state.environment.economy.materials[batch.material].name.toLowerCase()} · ${Math.floor(batch.work/10*100)}% prepared. ${worker?worker.name+(worker.task==='haul'?' is bringing the inputs.':worker.task==='craft'?' is helping with this batch.':"’s request is saved through their break."):'Neighbours will continue during community hours.'} Track it in Construction → Preparing materials.`:'No batch queued. Ask a neighbour to craft, or set a village reserve in Construction → Preparing materials.';
+  }
   if (utility) $("#building-activity").textContent = b.progress < 100 ? "Open Village → Construction for materials and installation. It connects when construction finishes." : ["solar_farm","streetlight","hydro"].includes(b.kind)?"Works automatically. Manage shared lighting in Power.":"Works automatically. Open Supplies for its stores and processing controls.";
   if(crew)$("#building-activity").textContent="Closed for crew work. Stored crops and equipment return with a completed move.";
   for (const button of $("#building-neighbours").querySelectorAll("button")) button.disabled = !b || b.progress < 100 || !!state.residents.find(r=>r.id===Number(button.dataset.visitor))?.trip;

@@ -189,10 +189,10 @@ pub fn claim_available(
             task,
             building,
             material,
-            if task == "prepare" {
+            if matches!(task, "prepare" | "craft") {
                 r.help
                     .as_ref()
-                    .filter(|q| q.active() && q.task == "prepare")
+                    .filter(|q| q.active() && matches!(q.task.as_str(), "prepare" | "craft"))
                     .and_then(|q| q.batch)
                     .or(r.activity_batch)
             } else {
@@ -377,20 +377,11 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
     }
     for batch in production::jobs(v) {
         add(
-            "prepare",
+            production::task(batch.material),
             None,
             Some(batch.id),
             610.,
             "Preparing a staged batch at its worksite.",
-        );
-    }
-    if v.progress.use_tools && v.progress.tool_uses == 0 && available(v, "craft") {
-        add(
-            "craft",
-            None,
-            None,
-            660.,
-            "Making tools to help with our next shared project.",
         );
     }
     if available(v, "compost") && v.progress.compost < 4 {
