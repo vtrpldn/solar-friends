@@ -217,10 +217,12 @@ impl Game {
             || !v.buildings.is_empty()
             || !v.economy.sources.is_empty()
             || !v.economy.orders.is_empty()
+            || !v.land.soil.is_empty()
+            || v.economy.land != resource_sites::LAND
         {
             return false;
         }
-        v.simulation.seed = seed;
+        crate::land::reseed(&mut v, seed);
         true
     }
 }

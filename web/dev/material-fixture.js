@@ -2,6 +2,7 @@
 export function resetMaterialLocations(state) {
   if(state.village.logistics?.shipments?.length)throw new Error('Finish or interrupt cargo before restaging a material fixture.');
   state.village.version=3;
+  delete state.village.land;
   state.village.processes={schema:1,batches:[],paused:[]};
   state.village.freshness={schema:1,expired:Array(19).fill(0)};
   Object.assign(state.village.progress,{gathering_delivery:null,gathering_until:0,invited:0,attended:0});

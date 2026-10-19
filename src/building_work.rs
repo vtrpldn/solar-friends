@@ -262,6 +262,14 @@ pub fn work(v: &mut Village, id: usize, effort: f32) -> bool {
     let Some(index) = v.building_jobs.iter().position(|j| j.building == id) else {
         return false;
     };
+    if v.building_jobs[index].stage == Stage::Rebuild
+        && v.building_jobs[index].work == 0.
+        && effort > 0.
+    {
+        let b = v.buildings.iter().find(|b| b.id == id).unwrap();
+        let (kind, x, y) = (b.kind.clone(), b.x, b.y);
+        land::disturb(v, &kind, x, y);
+    }
     let needed = total(&v.building_jobs[index]);
     v.building_jobs[index].work = (v.building_jobs[index].work + effort).min(needed);
     if v.building_jobs[index].work < needed {

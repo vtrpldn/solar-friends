@@ -84,6 +84,7 @@ pub struct Order {
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Source {
+    pub deposit: Option<crate::simulation::Id>,
     pub material: usize,
     pub x: i32,
     pub y: i32,
@@ -500,6 +501,11 @@ pub fn build(v: &mut Village, id: usize, work: f32) -> bool {
     let p = &v.economy.projects[index];
     let current = p.stage;
     if !p.committed {
+        if current == 0 {
+            let b = &v.buildings[bindex];
+            let (kind, x, y) = (b.kind.clone(), b.x, b.y);
+            crate::land::disturb(v, &kind, x, y);
+        }
         for (i, &n) in stages[current].items.iter().enumerate() {
             if v.logistics.is_some() {
                 crate::logistics::spend(v, Some(crate::logistics::Owner::Site(id)), i, n);
