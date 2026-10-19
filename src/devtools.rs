@@ -67,6 +67,7 @@ impl Game {
             .iter(self.app.world())
             .cloned()
             .collect();
+        navigation::refresh(&mut v);
         workforce::refresh(&mut v, people.iter());
         let residents: Vec<_> = people
             .iter()
@@ -96,7 +97,7 @@ impl Game {
                     "encouraged_blocker": request_blocker(&v, r, task, true)})
                 })
                 .collect();
-                serde_json::json!({"resident": r, "next": {"task": next.task, "reason": next.reason,
+                serde_json::json!({"resident": r, "work_offers": workforce::offers(&v,r), "next": {"task": next.task, "reason": next.reason,
                 "destination": [next.target_x, next.target_y]}, "alternatives": alternatives})
             })
             .collect();

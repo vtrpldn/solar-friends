@@ -48,6 +48,7 @@ pub fn gate(v: &Village, id: usize) -> (f32, f32) {
     (10., 27.6)
 }
 pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
+    walking::clear(r);
     if purpose == Purpose::Overnight {
         sleep::pause(r);
     }

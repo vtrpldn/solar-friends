@@ -231,6 +231,20 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   const requested=await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0));
   assert.equal(requested.task,'water');assert(requested.requested,'A real click must assign the task');
   await capture('Accepted helping request with paused-time guidance','helping-request.png');
+  assert(requested.help?.id);assert(['travelling','working'].includes(requested.help.phase));
+  assert.equal(await page.locator('#person .help-phase').textContent(),'On the way');
+  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  for(let minute=0;minute<60 && await page.locator('#person .help-phase').textContent()!=='Finished';minute++){
+    await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
+  }
+  assert.equal(await page.locator('#person .help-phase').textContent(),'Finished');
+  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).help.id),requested.help.id);
+  await capture('Helping request finishes through real resident work','helping-request-complete.png');
+  await page.getByRole('button',{name:'Forage food',exact:true}).click();
+  await page.getByRole('button',{name:'Cancel request',exact:true}).click();
+  assert.equal(await page.locator('#person .help-phase').textContent(),'Cancelled');
+  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).help.phase),'cancelled');
+
   await page.getByRole('button',{name:'Close resident details',exact:true}).click();
   await page.getByRole('button',{name:'Village',exact:true}).click();
   await page.getByRole('button',{name:'Buildings',exact:true}).click();
@@ -243,6 +257,33 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
     assert(!await page.locator('#building-visits').isVisible(),'Automatic utilities must not offer resident visits');
   }
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/forecasts/project.json');
+  await page.waitForFunction(()=>window.solarDev.snapshot().village.buildings.length===1&&window.solarDev.snapshot().village.buildings[0].kind==='garden');
+  await page.locator('#dev-close').click();
+  if(!await page.locator('#village-book').isVisible())await page.getByRole('button',{name:'Village',exact:true}).click();
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  const forecastBefore=await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot()));
+  await page.getByRole('button',{name:'Forecast workweek',exact:true}).click();
+  await page.locator('#project-forecast-status').filter({hasText:'Projected shared fund'}).waitFor({timeout:30000});
+  assert((await page.locator('.project-forecast-result').textContent()).includes('If current plans hold'));
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.solarDev.snapshot())),forecastBefore,'Forecast controls never advance the live village');
+  await capture('Conditional workweek forecast with unchanged live project','workweek-forecast.png');
+  await page.locator('[data-project="0"][data-action="pause"]').click();
+  assert((await page.locator('#project-forecast-status').textContent()).includes('Plans changed'));
+  assert.equal(await page.locator('.project-forecast-result').count(),0,'A plan change removes old completion dates');
+  await page.getByRole('button',{name:'Recalculate forecast',exact:true}).click();
+  await page.locator('#project-forecast-status').filter({hasText:'Projected shared fund'}).waitFor({timeout:30000});
+  assert((await page.locator('.project-forecast-result').textContent()).includes('paused'));
+  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await page.locator('#dev-button').click();
+  await page.locator('#dev-import-file').setInputFiles('artifacts/forecasts/project.json');
+  await page.waitForFunction(()=>!window.solarDev.snapshot().village.economy.projects[0].paused);
+  await page.locator('#dev-close').click();
+  await page.getByRole('button',{name:'Village',exact:true}).click();
+  await page.getByRole('button',{name:'Construction',exact:true}).click();
+  assert(await page.getByRole('button',{name:'Forecast workweek',exact:true}).isVisible());
+  assert.equal(await page.locator('.project-forecast-result').count(),0,'Imported villages cannot inherit the previous scene forecast');
   await page.locator('#dev-button').click();
   for(const [id,expected] of [['hungry','gather'],['harvest','garden'],['cook',null],['coop',null],['night',null],['rain',null],['after-rain',null],['dry-afternoon',null],['arrival',null],['village',null],['circular',null],['circular-night',null],['art',null],['art-night',null]]) {
     await page.locator('#dev-scenario').selectOption(id);await page.locator('#dev-load').click();
@@ -307,6 +348,18 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#storage-locations').scrollIntoViewIfNeeded();
   await capture('Located storage after two resident deliveries','physical-storage.png');
   await page.getByRole('button',{name:'Close supplies',exact:true}).click();await page.locator('#dev-button').click();
+  // Preferences go through the resident panel and remain in native state.
+  await page.locator('#dev-close').click();
+  await page.locator('[data-citizen="0"]').click();
+  await page.locator('#person .work-preferences summary').click();
+  await page.getByLabel('Iara: Hauling preference',{exact:true}).selectOption('2');
+  await page.getByLabel('Iara: Materials preference',{exact:true}).selectOption('0');
+  const workPreferences=await page.evaluate(()=>window.solarDev.snapshot().village.workforce.preferences[0]);
+  assert.deepEqual(workPreferences,[1,2,1,0,1]);
+  assert((await page.locator('.work-preference-response').textContent()).includes('next chore'));
+  await capture('Resident work preferences in the village','resident-work.png');
+  await page.getByRole('button',{name:'Close resident details',exact:true}).click();
+  await page.locator('#dev-button').click();
   // Circular infrastructure uses actual player controls and real simulation time.
   await page.locator('#dev-scenario').selectOption('circular');await page.locator('#dev-load').click();await page.locator('#dev-close').click();
   await page.locator('#open-village').click();await page.getByRole('button',{name:'Supplies',exact:true}).click();

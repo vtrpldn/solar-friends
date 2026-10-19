@@ -118,6 +118,10 @@
       <aside id="projects-panel" class="panel economy-panel" hidden aria-label="Construction projects">
         <button class="panel-close" data-close-panel aria-label="Close projects">×</button>
         <span class="eyebrow">ONE STAGE AT A TIME</span><h2>Construction</h2><p id="project-summary"></p>
+        <section class="project-forecast" id="project-forecast" aria-label="Village work forecast">
+          <div><button id="project-forecast-run" type="button">Forecast workweek</button><button id="project-forecast-cancel" type="button" hidden>Cancel forecast</button></div>
+          <p id="project-forecast-status" role="status"></p><small id="project-forecast-assumptions" hidden></small>
+        </section>
         <div id="project-list"></div>
 
         <details class="economy-section"><summary>Preparing materials</summary><div id="preparation-recipes"></div></details>

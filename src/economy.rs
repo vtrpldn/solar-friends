@@ -612,16 +612,16 @@ pub fn local_job(v: &Village) -> Option<(String, usize)> {
     }
     None
 }
-pub fn finish_job(v: &mut Village, task: &str, target: usize) {
+pub fn finish_job(v: &mut Village, task: &str, target: usize) -> bool {
     let Some((expected, index)) = local_job(v) else {
-        return;
+        return false;
     };
     if expected != task || index != target {
-        return;
+        return false;
     }
     if task == "source" {
         if crate::resource_sites::finish(v, index) {
-            return;
+            return true;
         }
         let i = v.economy.sources[index].material;
         let mut n = (if i == 0 { 8 } else { 4 })
@@ -631,10 +631,10 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
             n = n.min(crate::logistics::source_space(v, index));
         }
         if n == 0 {
-            return;
+            return false;
         }
         if i == 0 && n < 8 {
-            return;
+            return false;
         }
         crate::resource_sites::harvested(v, index, n);
         if v.logistics.is_some() {
@@ -654,7 +654,7 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
         if storage(v) - inputs.iter().sum::<u32>() + yield_ > capacity(v)
             || !preparation_space(v, inputs, yield_)
         {
-            return;
+            return false;
         }
         for (i, &n) in inputs.iter().enumerate() {
             remove(v, i, n);
@@ -663,6 +663,7 @@ pub fn finish_job(v: &mut Village, task: &str, target: usize) {
         v.progress.prepared_batches = v.progress.prepared_batches.saturating_add(1);
     }
     rebalance(v);
+    true
 }
 pub fn advance(v: &mut Village, minutes: f32) {
     crate::resource_sites::advance(v, minutes);
@@ -1154,6 +1155,7 @@ impl Game {
                 r.remaining = 0.;
             }
         }
+        self.sync_help();
         "ok".into()
     }
 }

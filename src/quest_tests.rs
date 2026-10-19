@@ -443,6 +443,7 @@ fn rain_needs_completed_storage_and_dry_days_pause_crops() {
 #[test]
 fn water_collection_works_before_cistern_and_only_after_arrival() {
     let mut g = setup();
+    g.app.world_mut().resource_mut::<Village>().minutes = 540.;
     g.app.world_mut().resource_mut::<Village>().water = 0.;
     assert!(g.request(4, "water", false).contains("Happy"));
     g.tick(0.2);
