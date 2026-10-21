@@ -1,0 +1,265 @@
+---
+description: Build a player-facing map and scenario creator on a shared world and scenario foundation.
+---
+
+# Map and scenario builder implementation plan
+
+Status: proposed implementation plan. Delivery target: the desktop game, starting with 64×64 maps and the existing five friends.
+
+## Why
+
+Players should be able to design a Brazilian countryside property, decide what the friends arrive with, and create a playable ecovila story or challenge. A map might offer fertile clearings but distant water; a scenario might ask the community to become self-sufficient before the dry season. Both should be possible through ordinary game controls, without developer tools, JSON editing, or programming.
+
+The first release should deliver the complete loop: create, edit, save, test, revise, export, import, and play. Its foundation must keep authored content separate from a living village so editing a river, testing a quest, or sharing a scenario cannot corrupt another game.
+
+## Product scope and player journey
+
+Add **Create** and **Scenarios** to the main menu. Keep Story and Sandbox as the familiar ways to play. Create opens a full-screen game editor; Scenarios opens installed scenarios and their saved playthroughs. No development URL or debug flag is required.
+
+Distinguish two creations in plain language:
+
+- **Map:** the property itself, including land, river, vegetation, deposits, and arrival locations. Players can reuse a map in different scenarios or start an ordinary Sandbox on it.
+- **Scenario:** a map plus starting buildings, supplies, the friends' initial circumstances, simulation rules, and optional objectives and events. It can be an open-ended village, a guided story, or a challenge.
+
+The creation flow is **Choose a starting point → Shape the land → Set up the village → Add a story if wanted → Test → Save and share**. These are workspace tabs, not mandatory forms; players can return to any step. A map-only creation uses a validated default arrival preset when launched in Sandbox. That preset previews its camp, shed, and storage placement rather than overwriting authored terrain unexpectedly.
+
+Start with an open property, a generated property, or a small set of prepared templates. Generating a new landscape previews the result before replacing the current land. Regeneration, object deletion, and moving the camp are undoable.
+
+### First release boundaries
+
+| Include | Defer to a separate expansion |
+| --- | --- |
+| 64×64 properties, with dimensions represented explicitly in the format | Larger or rectangular maps and resizing existing maps |
+| Current flat 2:1 isometric projection and approved artwork | Elevation, cliffs, excavation, bridges, free camera rotation |
+| Editable rivers, habitats, soil, vegetation, and resource deposits | Flood simulation and unrestricted hydrological modelling |
+| All existing buildings and supported appearances, roads, resource plots, and utilities | Arbitrary imported artwork, new building types, and unsupported building rotations |
+| Initial setup for the existing five friends | Custom characters, arbitrary populations, new occupations, and scripted immigration |
+| Linear chapters, optional goals, simple event sequences, and explicit outcomes | General scripting, branching campaigns, and multi-map campaigns |
+| A local library, independent saves, and file sharing | Accounts, an online gallery, ratings, moderation, and collaborative editing |
+
+The builder uses instant authoring actions. When the scenario starts, construction, demolition, salvage, hauling, work, and resident needs follow the selected gameplay rules. Editing remains a separate activity from playing.
+
+## Existing foundations and refactors
+
+The current code has useful rendering, simulation, placement, and validation systems. The development scenario system should provide regression examples, rather than become the public editor format.
+
+| Current code | Constraint | Required change |
+| --- | --- | --- |
+| `src/lib.rs`, `web/terrain.js`, `web/habitats.js`, `src/land/habitat.rs` | Dimensions, river shape, and habitat geography are constants or duplicated formulas. | Introduce an authoritative world definition and shared world queries; render the resulting geography. |
+| `src/land.rs` | Deposits use nine fixed regions; validation expects those exact regions. The starter fertility patch still uses coordinates 4–16. | Store authored deposits and soil baselines. Validate their structure, bounds, and conservation instead of requiring the default generator output. |
+| `src/land/vegetation.rs` | Validation expects the seed's exact tree list. The original clearing exclusion remains tied to old coordinates. | Give authored vegetation stable identities and validate species, scale, bounds, and density. Make clearings explicit template content. |
+| `src/modes.rs`, `src/founding.rs` | New games construct a default village and then reset selected systems and add founding buildings. | Compile a definition into a fresh village through one controlled initialization path. |
+| `web/dev/scenarios.js`, `web/dev/material-fixture.js`, `web/dev/center-layout.js` | Scenes modify snapshots, translate coordinates, and delete or rebuild owned resources and derived systems. | Replace this technique incrementally with supported scenario definitions. Never expose the version-3 fixture reset path to player imports. |
+| `src/navigation.rs`, `src/logistics.rs`, `web/frame-state.js` | Navigation and render caches assume terrain is mostly static. | Add explicit geometry and appearance revisions, including invalidation after undo. |
+| `src/mobility.rs`, `src/water.rs` | The town gate is found at fixed edges and the neighbour water service is positioned relative to a fixed side. | Represent arrival, departure, and outside-service access as validated world anchors. |
+| `src/progression.rs`, `web/quests.js` | Thirteen indexed chapters, completion arrays, objective functions, and unlock mappings are embedded in code. | Add stable objective IDs and a native condition evaluator, then migrate Story incrementally behind an adapter. |
+| `src/sandbox.rs`, `src/modes.rs` | Several simulation choices are inferred from Story versus Sandbox. | Separate rule profiles from scenario content and session type. |
+| `web/main.js`, `web/village-storage.js` | Startup, rendering, input, previews, and saves share one controller; storage has one slot per mode. | Extract session ownership, rendering/input boundaries, and a multi-project storage repository. |
+
+The recent camp and camera centering work remains useful: `Village.camp` is a real anchor, and founding buildings already use relative offsets. Complete that refactor by removing the remaining invisible geography tied to the previous map layout. Center a new map's camp and camera by default, while allowing an author to place both independently.
+
+Avoid a general engine rewrite. Extract responsibilities needed by the first playable editor, preserving existing APIs behind adapters until their callers migrate. Do not gate the first useful map builder on converting all thirteen Story chapters, all developer fixtures, or all UI panels.
+
+Suggested module boundaries are `src/world/` for geometry and authored land, `src/scenarios/` for definitions/compilation/validation/runtime progress, `web/editor/` for tools and transactions, and separate web modules for session ownership, the shared world renderer, and content storage. Introduce each boundary when its first feature needs it; existing simulation systems keep their domain responsibilities.
+
+## Data and runtime design
+
+### Separate definitions from playthrough state
+
+| Record | Owns | Does not own |
+| --- | --- | --- |
+| `MapDefinition` | Bounds, resolved terrain and water data, habitat and soil baselines, geological deposits, natural vegetation, arrival and outside-access anchors | Resident jobs, depletion during play, shipments, achievements |
+| `ScenarioDefinition` | An exact map revision, starting settlement and inventories, cast setup, rules, objectives, events, briefing, and camera start | Live work queues, cache contents, completed rewards from a test |
+| `EditorProject` | Editable definitions, title, local identity, revision, recovery checkpoints, and editor view state | The current playtest's simulation changes |
+| `ScenarioRuntime` | Active goals, measured progress, timers, triggered events, choices, and granted effects | Editable authoring definitions |
+| `GameSave` | A running village and its scenario runtime, plus the exact content revision and compatible ruleset version | A mutable link to whichever draft the author edits next |
+
+Use stable string keys for materials, species, buildings, variants, goals, and authored entities. Translate them to runtime IDs during compilation. Public files must not depend on array positions such as a material index or a chapter number.
+
+Persist the resolved 64×64 map along with the seed and generator version. A future generator update must not silently redraw an exported property. Keep separate random streams for geography, decoration, climate, and scenario events so adding flowers does not change the upcoming weather.
+
+Store schema versions independently for authoring documents and game saves. Each run embeds, or durably retains, its frozen scenario revision. Editing a draft or importing a newer revision affects new runs only. Compatibility declarations also cover ruleset changes: retaining scenario bytes alone cannot guarantee identical behaviour under a different simulation version.
+
+### Introduce a deterministic scenario compiler
+
+Create a native definition-to-game API with structured errors and warnings. Its ordered responsibilities are:
+
+1. Parse bounded data, resolve versions and catalog keys, validate references, and resolve the rule profile before any initialization grants or replenishment can occur.
+2. Instantiate world geometry, environmental baselines, and access anchors.
+3. Allocate runtime identities and place buildings, plots, roads, and utility infrastructure.
+4. Create storage, tanks, equipment, and production sites through domain constructors.
+5. Allocate starting supplies to owners, assign food ages and equipment condition, and establish conservation baselines once.
+6. Initialize the five residents, their valid starting locations, rules, and scenario progress.
+7. Derive shade, navigation, networks, capacities, and initial reports.
+8. Validate the assembled village, then atomically make it the requested session.
+
+A failed compilation leaves the current editor draft and active village intact. Drafts can be incomplete and still saved; only launching a playtest or a playable release requires resolving blocking errors.
+
+Extract parsing, migration, validation, and installation from the current `restore` method. Loading a running game must preserve its ownership, work, dates, and history; compiling a new scenario must initialize those fields deliberately. Do not use a save migration to replenish or normalize player-authored content.
+
+### Make world queries authoritative
+
+Introduce shared queries for bounds, land and water, banks, flow suitability, soil, footprints, entrances, approach spots, navigation, and outside access. Rust owns gameplay answers; JavaScript consumes world data and native validation results rather than reproducing geography formulas. Update river ripples, rain and wet-ground masks, minimap colouring, and land overlays alongside the terrain renderer; they must all follow the same authored water geometry.
+
+Expose catalog metadata needed by both the builder and normal gameplay: footprint, supported appearances, valid surfaces, access points, utility ports, configurable starting state, and storage compatibility. Editor placement bypasses cost, labour, and unlock checks while retaining physical placement and access checks.
+
+Use distinct revisions for geometry, vegetation/shade, terrain appearance, utilities, and rules. Update dependent caches when a relevant revision changes. One brush stroke is one transaction; expensive rebuilds occur once per transaction or use a bounded preview during dragging. Preserve the existing lightweight frame-state sampling instead of serializing the entire world for every pointer movement.
+
+## Player editing tools
+
+### Workspace and interaction
+
+The map stays central. Use the game's existing palette, typography, sprites, sounds, and control styling. Provide a compact tool belt, a contextual inspector, and a persistent top strip with the project name, saved state, **Undo**, **Redo**, **Test**, and **Back**. Keep the primary action in the same position across inspectors and dialogs.
+
+Support pan, zoom, center on camp, minimap navigation, grid toggle, selection, multi-selection, erase, brush size, and cell inspection. Provide keyboard equivalents, visible focus, labelled icons, and status feedback that does not depend only on colour. Shortcuts must not fire while typing. Escape cancels the active stroke or placement before closing a panel; Delete acts on the current selection.
+
+Group a drag or brush stroke into one undo step. Copying objects assigns new identities and remaps internal references. Deleting a referenced building or zone explains which goals or connections will be affected; the draft may keep a visible unresolved reference, but nothing should be silently retargeted. A quick move, undo, and redo must restore exactly the same document.
+
+### Land and ecology
+
+Offer selectable terrain and habitat brushes, soil presets, river drawing, and nature placement. The inspector explains gameplay effects such as fertility, retention, shade, extraction, and building suitability. Show live overlay layers for terrain, water access, fertility, deposits, shade, walkability, utilities, and goal regions.
+
+River drawing authors a connected course and derives its banks and water cells together. Require valid inlet/outlet and usable bank geometry for the supported river model. Hydro eligibility depends on flowing channel data and accessible banks, never simply a blue-painted tile. For the first release, eligible bank segments must also match the existing generator sprite's orientation, footprint, and worker approach; mark them explicitly in the placement overlay. Other bends remain valid river scenery without offering unsupported hydro placement. Lakes, bridges, and isolated waterways wait until their simulation rules exist.
+
+Place individual plants or paint clusters of approved species. Brushes have density and spacing limits, with restrained variation within the art catalog's scale ranges. Include a clear-meadow brush and preserve open land around the default camp. Separate natural plants, decorative ground cover, renewable production plots, and finite geological deposits; a decorative rock should not implicitly become a stone reserve.
+
+Authors place geological patches and choose finite starting quantities within supported limits. Establishing a quarry remains a gameplay decision unless the scenario explicitly includes one. Changing a deposit does not create unexplained loose stock. Soil and water presets use consistent physical meanings; cosmetic paint cannot disagree with growth, shade, routes, or placement.
+
+### Village and starting conditions
+
+Provide the full building catalog and supported house appearances, roads, material plots, pipes, cables, batteries, and related equipment. Use the real game renderer and footprint previews. Do not stretch sprites, add grey platforms, mirror directional artwork, or invent unsupported rotations to fit an editor selection.
+
+Buildings may start completed or as unstarted projects. Arbitrary partly consumed construction stages are deferred; they would require exposing reservations and work accounting. Completed structures receive an explicit inherited-material/salvage policy and equipment baseline. New blueprints reserve materials only when the scenario runs under normal rules.
+
+Configure crops and animals through valid states such as empty bed, planted crop, mature harvest, or stocked enclosure. Validate housing and feed requirements. Configure starting equipment condition and stored power within actual capacities.
+
+Assign food and materials to selected stores and water to compatible tanks. Offer **Distribute automatically** with a preview of the resulting owners and capacity. If stock does not fit, report the shortage rather than creating invisible stores or deleting overflow. Starting food freshness is explicit and all liquids retain their separate classes.
+
+Configure initial funds, date, season, climate seed, and supported climate presets. Date and season must agree with the simulation calendar. Visual day/night/rain inspection is a preview; it does not advance the draft's crops, food ages, needs, or timers. An intentionally dry opening uses a supported climate setting with clear duration; event-driven weather waits for a supported domain API.
+
+Place and configure the existing five friends: starting position, reasonable need levels, learned skills, work preferences, and outside-job participation. Keep their existing occupations and working hours in the first release. Explain that needs and autonomy still govern their actions. Do not expose internal tasks, destination IDs, or forced behaviour scripts.
+
+Offer **Relaxed**, **Simulation**, and **Custom** rule presets assembled from supported systems: materials and labour, logistics, living land, utilities, climate, maintenance, learning, market behaviour, and building access. Explain each choice's consequences. An unlocked building is distinct from a free building; custom objectives are independent of both.
+
+## Scenario goals and events
+
+Present a journal editor with an introduction, ordered chapters, required goals, optional goals, and completion text. Let authors preview exactly what players will read. Each goal selects a supported condition and its parameters; no expressions or code are entered.
+
+The initial condition catalog should cover:
+
+- Complete or operate specified buildings, including targets inside a named region.
+- Harvest, produce, deliver, purchase, or sell an amount, measured through actual simulation activity.
+- Keep accessible food, water, shelter, sanitation, or electricity at a stated level.
+- Maintain an outcome for a continuous duration, using resident welfare or service reliability where the engine measures it.
+- Reach a fund balance, finish a prior goal, or reach a game date.
+
+The condition model must make timing and credit explicit: whether starting assets count; whether a counter covers the run or only activity after activation; whether a stock target means currently available stock; and whether a duration is continuous or accumulated. Supported combinations use simple **All** or **Any** groups with bounded nesting. Linear chapters and optional objectives are enough for the first release.
+
+Reuse `src/outcomes.rs` and domain counters where possible, first removing their assumptions that measurement runs only in Story. Subscribe to the metrics needed by a scenario independently of its rule preset. Evaluate progress natively and send status, descriptions, and action links to the journal. UI wording must never implement a second completion rule. Give goals stable IDs and store progress by ID.
+
+Events use a guided **When → If → Then** form. Initial triggers are scenario start, chapter/goal completion, game time, or a supported threshold. Initial effects are a message, a building unlock, a recorded fund grant, or an explicit supply delivery. Each delivery has a real destination and defined behaviour when capacity or access is missing. Add more effects only with a domain API that preserves accounting and saves correctly.
+
+Events fire once by default. Repetition, where supported, requires a cooldown, maximum count, and bounded processing per simulation step. Define ordering for simultaneous events; prevent same-step loops. An effect records its identity and result so loading a save cannot repeat a payment or delivery. Use simulation time for deadlines and cooldowns, including 16× speed and pauses.
+
+Success and failure are optional. Completion can leave the village playable. Challenge deadlines may show a failure result and allow restart or an explicitly separate unrestricted continuation; that continuation cannot claim the original challenge was completed. Detect cycles, missing references, and obvious unlock deadlocks. Warn about probable supply or service bottlenecks without claiming to prove that every scenario is solvable.
+
+## Drafts, testing, saves, and sharing
+
+Extract a session controller with explicit menu, play, edit, and playtest states. It owns WASM instances, time controls, autosave destinations, view state, and cleanup. Rename the current preview variable named `sandbox` so it cannot be confused with the actual Sandbox mode.
+
+**Test** freezes the current draft revision, compiles a fresh instance, and enters the normal game with a clear test banner and **Restart test** / **Return to editor** controls. Returning restores the exact draft, selection, camera, and undo history. Restarting recreates the same authored state and random seeds. Test saves use their own recovery slot; they never write to a normal Story, Sandbox, or scenario run.
+
+Keep the first release's test loop one-way. Do not automatically apply the lived-in results of a playtest to the authoring document. Likewise, postpone **Turn my current village into a scenario** until there is an explicit conversion contract for cargo, reservations, work, food ages, depletion, and achievements.
+
+Create a storage repository, using IndexedDB for projects, revisions, thumbnails, and multiple scenario runs. Retain the recovery principles in `VillageStorage`: a failed write cannot destroy the last good record. Autosave completed editing transactions, keep bounded recovery checkpoints, show saving failures, and provide manual export. Recover the latest durable transaction after a crash. Resolve concurrent edits from another tab without silently replacing either copy.
+
+The library offers create, rename, duplicate, edit, play, continue, export, import, and delete. Projects, frozen releases, and playthroughs have separate IDs. Deleting a draft cannot silently remove a run; a run retains the content needed to continue. Keep Story and Sandbox saves recoverable during storage migration. Broader historical save support is not a prerequisite, but unsupported files remain untouched and exportable.
+
+Use self-contained map and scenario packages with schema, compatible game/ruleset version, content revision, title, description, author display name, and an embedded resolved map. Thumbnails are derived locally. Import into a new library entry by default; replacing an existing creation is explicit. Keep source authorship when duplicating a shared scenario.
+
+Imported content is data only: supported IDs and plain text, no JavaScript, HTML execution, filesystem paths, or arbitrary remote assets. Bound file size, dimensions, entity counts, text, objective depth, and event work before allocation. Validate in the native compiler as well as the UI. A malformed or newer unsupported package produces an actionable message and leaves current saves unchanged. File sharing needs no accounts or server; an online workshop remains a separate project.
+
+## Validation and feedback
+
+Run cheap checks during edits and full checks before testing or exporting a playable release. Display problems in a small review panel with **Show on map** or **Open goal** actions.
+
+| Severity | Examples | Behaviour |
+| --- | --- | --- |
+| Error | Unknown building key, invalid river, overlapping buildings, missing spawn/exit, stock beyond capacity, invalid utility port, dangling required goal reference, event dependency cycle | Draft saves remain available; launching/exporting as playable is blocked. |
+| Warning | Long travel distances, insufficient overnight beds, no sustainable water, little food before crops mature, rare material shortage, expensive power demand, very dense foliage | Explain the consequence; authors can intentionally keep the challenge. |
+| Information | Some starting assets already satisfy a goal, an optional system is disabled, a preset grants free construction | Make the resulting gameplay clear without treating it as a defect. |
+
+Check spawn and exit connectivity, critical building access, camp footprint clearance, valid stores and liquid classes, utility connectivity where required, and objective dependencies. Replace fixed camp-relative fallback destinations with queries for reachable foraging, rest, return, and neighbour-water locations; a valid camp near an edge or river must not send a resident outside the property or into water. Failures must identify cells, objects, or authored goals using player-facing names. Remove engine stack traces, numeric IDs, and raw JSON from ordinary error messages.
+
+## Implementation stages and exit criteria
+
+### Stage 0 Baseline and contracts
+
+Record the current centered 64×64 Story and Sandbox starts, representative established villages, and existing performance. Specify the document formats, supported content, rule semantics, trigger timing, and storage/session lifecycle. Inventory fixed geometry and five-resident assumptions. Reconcile related documentation that still describes a 32×32 map.
+
+**Exit:** agreed example map/scenario documents, an explicit compatibility policy, and regression fixtures covering current quantities, starters, camp/camera, and save behaviour. No UI redesign or broad simulation rewrite is needed here.
+
+### Stage 1 Shared definitions and compilation
+
+Implement stable content catalogs, definition parsing, structured validation, and the native compiler for the current default geography. Extract rule presets and restore responsibilities. Represent existing Story and Sandbox starts as definitions; move two representative developer scenes to the same path.
+
+**Exit:** the same definition produces the same initial state, ticks normally, and saves/restores exactly. Initial resources have correct ownership and conservation baselines. Invalid compilation makes no changes to the active session. Default Story/Sandbox behaviour remains covered by regression checks.
+
+### Stage 2 A small player editor with isolated testing
+
+Extract rendering/input and session boundaries from `web/main.js`. Add the Create entry, project storage, recovery autosave, command-based undo/redo, selection, camp/camera markers, and a small building/road palette on the existing map. Wire **Test → Restart test → Return to editor** through the compiler.
+
+**Exit:** a player can place a shed and warehouse, save the project, test it, return, undo a move, close the app, and reopen the draft. Their normal village remains unchanged. This is the first playable milestone, before the complete terrain or quest toolsets.
+
+### Stage 3 Editable geography and world queries
+
+Replace fixed river/habitat/deposit/vegetation assumptions with authored data and authoritative queries. Move outside-service anchors into the world definition. Add terrain, river, habitat, soil, vegetation, and deposit tools, generation presets, and revision-aware cache rebuilding. Express old starter clearings and soil bonuses explicitly in the default template.
+
+**Exit:** relocating a river changes visible banks, routes, placement, and hydro eligibility consistently. Undo restores those answers. A non-default property compiles, runs, saves, and reloads; generated and painted landscapes remain visually quiet and readable.
+
+### Stage 4 Complete settlement and rules authoring
+
+Expand to every building and supported appearance, material plots, crops, animal states, utility routes/equipment, completed structures versus blueprints, located starting stock, the five friends, date/climate, and rule presets. Add full spatial and ownership validation.
+
+**Exit:** an author can create both a sparse arrival and a populated village without developer helpers. Starting stock, water, batteries, and salvage values are intentional and conserved. All building previews agree with actual game placement and artwork.
+
+### Stage 5 Goals and bounded events
+
+Implement the condition evaluator, stable progress records, event ledger, and journal/event editors. Adapt one existing Story chapter to prove semantic parity while keeping the remaining chapters behind their current adapter. Move additional Story chapters only as their behaviour is covered; the entire campaign conversion is not a blocker for the builder release.
+
+**Exit:** a custom scenario supports a complete sequence of goals, an optional goal, a sustained condition, an unlock, a delivery, and a completion outcome. Saving before and after each trigger neither duplicates nor loses effects. Pausing and fast-forwarding preserve deadline semantics. The official chapter used for comparison still behaves as before.
+
+### Stage 6 Library and portable sharing
+
+Finish the project/scenario browser, multiple named runs, frozen revisions, thumbnails, import/export, format upgrades, and recovery flows. Add file bounds and hostile-input checks. Provide clear distinction between editable drafts, playable releases, and saved games.
+
+**Exit:** export a creation, import it into clean browser storage, play it, save, reload, and finish its goals. Editing or deleting the source draft cannot alter the imported run. Failed imports and interrupted writes preserve all existing records.
+
+### Stage 7 Examples and release quality
+
+Use the actual player editor to author at least three complete examples: **First clearing** for a gentle arrival; **Before the dry season** for water and farming tradeoffs; and **An inherited village** for storage, access, maintenance, and utilities. Also include a blank map preset. These are authored creations, not hidden snapshot patches.
+
+Run the end-to-end authoring journey with people unfamiliar with the development tools. Check instructions, tool discoverability, button placement, inspector spacing, input cancellation, error recovery, and journal readability. Play each example through its intended completion and several in-game days beyond it.
+
+**Exit:** a regular player can create, test, share, import, and complete a meaningful scenario without documentation about engine internals. Art, performance, and save-integrity gates below pass on the supported desktop setup.
+
+## Verification and release gates
+
+- **Definitions and imports:** deterministic compilation, stable round trips, content/version resolution, unknown keys, missing references, invalid numbers, oversized arrays, and failed-import isolation. Generated tests should exercise combinations of edits and malformed documents.
+- **Editing:** exact undo/redo of whole strokes, multi-object moves, linked deletions, duplicates, river edits, and stock allocation. Recovery reloads the latest completed transaction and the previous valid checkpoint if the latest one is corrupt.
+- **Simulation:** native placement/preview agreement; path and hydro changes after terrain edits; storage/material/water/equipment accounting; food ages; resident access and outside travel; valid save/reload during work. Keep existing Story and Sandbox regression coverage.
+- **Objectives:** initial versus earned credit, counters since activation, continuous-window reset, simultaneous completions, deadlines at pause/1×/16×, event caps, unavailable delivery capacity, and exactly-once effects across reloads. Automated checks detect structural impossibilities; example playthroughs assess actual difficulty and recovery paths.
+- **Sessions and persistence:** editing and testing never overwrite a normal save; repeated tests start identically; switching modes frees inactive instances; old runs pin content; failed/quota-limited writes and concurrent-tab edits do not silently lose work.
+- **Art:** use existing calibrated sprites and the 2:1 projection in editor and game. Review every building/appearance and nature species against roads, footprints, residents, terrain transitions, and representative neighbours at several zoom levels, in day/night/rain views. Keep foundations aligned without platforms or distortion. Default vegetation density must preserve the calmer landscape direction.
+- **Performance:** measure a typical and a maximum-supported 64×64 map during brush drags, multi-selection, undo/redo, compile, save, camera movement, and 1×/16× play. Set entity/history limits using the Stage 0 baseline. Proposed targets on the reference desktop are responsive feedback within 100 ms for ordinary edits and approximately 60 fps while panning typical maps; confirm feasibility before making them release promises. Long operations show progress, preserve the previous revision, and allow cancellation before installation. Do not rebuild a full 4096-pixel terrain surface or copy a full save on every pointer event.
+- **Player experience:** desktop walkthroughs cover blank creation, a deliberate validation failure, repair, playtest, return, crash recovery, export/import, and scenario completion. Verify keyboard focus, tooltips, non-colour feedback, readable controls, and consistent actions. Mobile layouts and phone checks remain outside scope.
+
+Reuse the current native tests and scripts such as `verify-centered-starts.mjs`, `verify-modes.mjs`, `verify-story-objectives.mjs`, landscape/navigation/utility checks, and art projection checks. Extend them around the new definition/compiler API; a developer fixture merely restoring successfully is not sufficient evidence of a playable authored scenario.
+
+## Work order and scope control
+
+Stages 0 and 1 establish the contract; Stage 2 makes it visible and useful immediately. Stage 3 removes geography constraints before full terrain tools ship. Stage 4 completes open-ended map/scenario creation. Stage 5 adds guided play. Stages 6 and 7 turn the feature into a reliable, shareable player release.
+
+After the schema and compiler contract settle, renderer/editor work, objective evaluation, and persistence work can proceed in parallel behind those interfaces. Deliver each slice with tests and a small ready commit; avoid combining the renderer extraction, world rewrite, and quest rewrite into a single change.
+
+The highest-risk dependencies are arbitrary river geometry, initialization of owned supplies and equipment, persisted objective/event semantics, and isolation of drafts from runs. Prove each with a small end-to-end example before expanding its palette. Defer population generalization, new terrain physics, custom art, online services, and full campaign migration until the complete local creation loop is reliable.
