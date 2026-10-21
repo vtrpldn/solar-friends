@@ -15,7 +15,7 @@ export function makeArtPreview(fresh,established,{night=false}={}) {
   v.power={stored:24,disabled:[]};v.circular=structuredClone(fresh.village.circular);
   v.food=100;v.water=100;v.meals=10;v.wood=110;
   v.progress.completed.fill(true);v.progress.later_completed.fill(true);
-  v.progress.gathering_delivery=null;v.progress.gathering_until=0;v.progress.invited=0;v.progress.attended=0;
+  v.progress.gathering_delivery=null;v.progress.gathering_until=0;v.progress.invited=[];v.progress.attended=[];
   v.situations=structuredClone(fresh.village.situations);
   const template=established.village.buildings[0],adobeKeys=Object.keys(adobeVariants);
   const candidates=[];

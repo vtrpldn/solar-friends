@@ -103,7 +103,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
         "square" => {
             personality::company(r, 25.);
             r.energy = (r.energy + 8.).min(100.);
-            v.progress.social_mask |= 1 << r.id;
+            v.progress.social_people.insert(r.id);
         }
         "garden" | "greenhouse" | "orchard" | "goat_pasture" | "apiary" => ecology::tend(v, r),
         "kitchen" if !situations::protected(v, r.id, "cook") => {

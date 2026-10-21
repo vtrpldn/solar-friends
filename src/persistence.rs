@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=39)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=40)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -82,6 +82,13 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     if matches!(original_version, Some(3 | 23..=26 | 29..=39))
         && !resident_appearance::migrate(&mut raw)
     {
+        return None;
+    }
+    let legacy_social = matches!(original_version, Some(3 | 23..=26 | 29..=40));
+    if legacy_social && !social_participation::migrate(&mut raw) {
+        return None;
+    }
+    if !social_participation::valid_raw(&raw, legacy_social) {
         return None;
     }
     fn canonical_keys(value: &serde_json::Value) -> bool {
@@ -225,10 +232,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
     let p = &v.progress;
     if !situations::valid(v)
         || p.tracked >= progression::CHAPTER_COUNT
-        || p.hobby_mask > 31
-        || p.social_mask > 31
-        || p.invited > 31
-        || p.attended > 31
+        || !social_participation::valid(v)
         || p.tool_uses > 1_000_000
         || p.gathering_day < -1
         || !p.gathering_until.is_finite()

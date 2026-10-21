@@ -385,11 +385,14 @@ fn gathered_neighbours_cannot_serve_expired_portions_or_receive_shared_meal_rewa
             .food_lots[0];
         lot.produced = 1980.5;
         lot.expires = 6300.5;
-        assert!(gatherings::advance(&mut v, 31));
+        assert!(gatherings::advance(
+            &mut v,
+            &[0, 1, 2, 3, 4].into_iter().collect()
+        ));
         v.minutes = 6300.75;
         advance(&mut v);
-        v.progress.attended = 0b00111;
-        gatherings::advance(&mut v, 31);
+        v.progress.attended = [0, 1, 2].into_iter().collect();
+        gatherings::advance(&mut v, &[0, 1, 2, 3, 4].into_iter().collect());
         assert!(!gatherings::served(&v));
         assert_eq!(v.meals, 0);
         assert_eq!(v.supplies.portions_eaten, 0);
@@ -397,7 +400,7 @@ fn gathered_neighbours_cannot_serve_expired_portions_or_receive_shared_meal_rewa
         gatherings::finish(&mut v, false);
         let p = v.progress.gathering_delivery.as_ref().unwrap();
         assert_eq!(p.phase, gatherings::Phase::Failed);
-        assert_eq!(p.attended.count_ones(), 3);
+        assert_eq!(p.attended.len(), 3);
         assert_eq!(v.progress.gatherings, 0);
         assert!(v.progress.friendships.is_empty());
         conserved(&v);

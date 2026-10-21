@@ -24,8 +24,8 @@ pub struct Plan {
     pub deadline: f32,
     pub started: Option<f32>,
     pub finished: Option<f32>,
-    pub invited: u8,
-    pub attended: u8,
+    pub invited: crate::participation::Set,
+    pub attended: crate::participation::Set,
     pub spent_before: u64,
     pub spent_after: Option<u64>,
 }
@@ -130,16 +130,19 @@ pub fn eligible(r: &Resident) -> bool {
         && r.hunger <= 75.
         && !matches!(r.task.as_str(), "arrive" | "sleep")
 }
-fn mask<'a>(people: impl IntoIterator<Item = &'a Resident>) -> u8 {
+pub(crate) fn eligible_people<'a>(
+    people: impl IntoIterator<Item = &'a Resident>,
+) -> participation::Set {
     people
         .into_iter()
         .filter(|r| eligible(r))
-        .fold(0, |m, r| m | (1 << r.id))
+        .map(|r| r.id)
+        .collect()
 }
 fn reset(v: &mut Village) {
     v.progress.gathering_until = 0.;
-    v.progress.invited = 0;
-    v.progress.attended = 0;
+    v.progress.invited.clear();
+    v.progress.attended.clear();
 }
 pub fn cancel(v: &mut Village) -> bool {
     let Some(p) = v
@@ -150,14 +153,14 @@ pub fn cancel(v: &mut Village) -> bool {
     else {
         return false;
     };
-    p.attended = v.progress.attended;
+    p.attended = v.progress.attended.clone();
     p.phase = Phase::Cancelled;
     p.finished = Some(v.minutes);
     reset(v);
     true
 }
 /// Return true only when the invitation starts, so the caller can interrupt work safely.
-pub fn advance(v: &mut Village, available: u8) -> bool {
+pub fn advance(v: &mut Village, available: &participation::Set) -> bool {
     let Some(p) = active(v).cloned() else {
         return false;
     };
@@ -174,9 +177,9 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
         return false;
     }
     if p.phase == Phase::Serving {
-        v.progress.gathering_delivery.as_mut().unwrap().attended = v.progress.attended;
+        v.progress.gathering_delivery.as_mut().unwrap().attended = v.progress.attended.clone();
         if p.spent_after.is_none()
-            && v.progress.attended.count_ones() >= 3
+            && v.progress.attended.len() >= 3
             && held(v, p.store, MEALS) == PORTIONS
         {
             assert!(logistics::spend_at(v, p.store, MEALS, PORTIONS));
@@ -194,8 +197,8 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
         v.progress.gathering_delivery.as_mut().unwrap().phase = Phase::Preparing;
         return false;
     }
-    let invited = p.invited & available;
-    if invited.count_ones() < 3 || !(480.0..1080.).contains(&(v.minutes % 1440.)) {
+    let invited: participation::Set = p.invited.intersection(available).copied().collect();
+    if invited.len() < 3 || !(480.0..1080.).contains(&(v.minutes % 1440.)) {
         v.progress.gathering_delivery.as_mut().unwrap().phase = Phase::Ready;
         return false;
     }
@@ -204,7 +207,7 @@ pub fn advance(v: &mut Village, available: u8) -> bool {
     plan.started = Some(v.minutes);
     v.progress.gathering_day = (v.minutes / 1440.).floor() as i32;
     v.progress.invited = invited;
-    v.progress.attended = 0;
+    v.progress.attended.clear();
     v.progress.gathering_until = v.minutes + 120.;
     event(
         v,
@@ -222,7 +225,7 @@ pub fn finish(v: &mut Village, success: bool) {
         } else {
             Phase::Failed
         };
-        p.attended = v.progress.attended;
+        p.attended = v.progress.attended.clone();
         p.finished = Some(v.minutes);
     }
     reset(v);
@@ -246,8 +249,8 @@ pub(crate) fn fixture_table(v: &mut Village) {
 pub fn valid(v: &Village) -> bool {
     let Some(p) = &v.progress.gathering_delivery else {
         return v.progress.gathering_until == 0.
-            && v.progress.invited == 0
-            && v.progress.attended == 0;
+            && v.progress.invited.is_empty()
+            && v.progress.attended.is_empty();
     };
     let day = (p.created / 1440.).floor();
     p.id.0 > 0
@@ -255,9 +258,10 @@ pub fn valid(v: &Village) -> bool {
         && p.building < v.economy.next_building
         && p.store.0 > 0
         && p.store.0 < v.simulation.next_id
-        && p.invited <= 31
-        && p.invited.count_ones() >= 3
-        && p.attended & !p.invited == 0
+        && participation::owned(v, &p.invited)
+        && participation::owned(v, &p.attended)
+        && p.invited.len() >= 3
+        && p.attended.is_subset(&p.invited)
         && p.created.is_finite()
         && (0.0..=v.minutes).contains(&p.created)
         && p.deadline == (day + 1.) * 1440. + 1080.
@@ -276,7 +280,7 @@ pub fn valid(v: &Village) -> bool {
         && p.spent_before <= 9_007_199_254_740_986
         && p.spent_after.is_none_or(|spent| {
             p.started.is_some()
-                && p.attended.count_ones() >= 3
+                && p.attended.len() >= 3
                 && spent >= p.spent_before + u64::from(PORTIONS)
                 && v.simulation
                     .materials
@@ -289,26 +293,26 @@ pub fn valid(v: &Village) -> bool {
                 p.started.is_none()
                     && p.spent_after.is_none()
                     && v.progress.gathering_until == 0.
-                    && v.progress.invited == 0
-                    && v.progress.attended == 0
+                    && v.progress.invited.is_empty()
+                    && v.progress.attended.is_empty()
             }
             Phase::Serving => {
                 p.started
                     .is_some_and(|t| v.progress.gathering_until == t + 120.)
-                    && v.progress.invited.count_ones() >= 3
-                    && v.progress.invited & !p.invited == 0
-                    && v.progress.attended & !v.progress.invited == 0
+                    && v.progress.invited.len() >= 3
+                    && v.progress.invited.is_subset(&p.invited)
+                    && v.progress.attended.is_subset(&v.progress.invited)
             }
             Phase::Complete => {
                 p.spent_after.is_some()
                     && v.progress.gathering_until == 0.
-                    && v.progress.invited == 0
-                    && v.progress.attended == 0
+                    && v.progress.invited.is_empty()
+                    && v.progress.attended.is_empty()
             }
             Phase::Failed | Phase::Cancelled => {
                 v.progress.gathering_until == 0.
-                    && v.progress.invited == 0
-                    && v.progress.attended == 0
+                    && v.progress.invited.is_empty()
+                    && v.progress.attended.is_empty()
             }
         }
 }
@@ -350,13 +354,13 @@ impl Game {
             return "Leave room for the shared table's supplies.".into();
         };
         let building = building.id;
-        let invited = mask(
+        let invited = eligible_people(
             self.app
                 .world_mut()
                 .query::<&Resident>()
                 .iter(self.app.world()),
         );
-        if invited.count_ones() < 3 {
+        if invited.len() < 3 {
             return "At least three neighbours need to be rested and fed.".into();
         }
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -373,7 +377,7 @@ impl Game {
             started: None,
             finished: None,
             invited,
-            attended: 0,
+            attended: Default::default(),
             spent_before: v.simulation.materials.as_ref().unwrap().spent[MEALS],
             spent_after: None,
         });
@@ -475,6 +479,105 @@ mod tests {
         freshness::fixture_reseed(v);
     }
     #[test]
+    fn a_legacy_live_gathering_migrates_without_restarting_its_delivery_or_attendance() {
+        let mut g = scene();
+        assert_eq!(g.host_gathering(), "ok");
+        for _ in 0..4000 {
+            if g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .gathering_delivery
+                .as_ref()
+                .unwrap()
+                .phase
+                == Phase::Serving
+            {
+                break;
+            }
+            g.tick(0.25);
+        }
+        assert_eq!(
+            g.app
+                .world()
+                .resource::<Village>()
+                .progress
+                .gathering_delivery
+                .as_ref()
+                .unwrap()
+                .phase,
+            Phase::Serving
+        );
+        let saved = g.snapshot();
+        let mut old: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        old["village"]["version"] = 40.into();
+        fn mask(value: &serde_json::Value) -> serde_json::Value {
+            value
+                .as_array()
+                .unwrap()
+                .iter()
+                .fold(0u64, |mask, id| mask | (1 << id.as_u64().unwrap()))
+                .into()
+        }
+        let progress = old["village"]["progress"].as_object_mut().unwrap();
+        for (field, old) in [
+            ("hobby_people", "hobby_mask"),
+            ("social_people", "social_mask"),
+            ("invited", "invited"),
+            ("attended", "attended"),
+        ] {
+            let value = mask(&progress.remove(field).unwrap());
+            progress.insert(old.into(), value);
+        }
+        let plan = progress["gathering_delivery"].as_object_mut().unwrap();
+        for field in ["invited", "attended"] {
+            let value = mask(&plan[field]);
+            plan.insert(field.into(), value);
+        }
+        assert!(g.restore(&old.to_string()));
+        assert_eq!(g.snapshot(), saved);
+        let mut copy = Game::new();
+        assert!(copy.restore(&saved));
+        for _ in 0..600 {
+            g.tick(0.25);
+            copy.tick(0.25);
+        }
+        assert_eq!(g.snapshot(), copy.snapshot());
+    }
+
+    #[test]
+    fn sparse_invitees_are_tracked_by_identity_through_serving_and_finish() {
+        let mut g = scene();
+        assert_eq!(g.host_gathering(), "ok");
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        fixture_table(&mut v);
+        let ids: participation::Set = [42, 900, 1200].into_iter().collect();
+        v.skills.people = ids
+            .iter()
+            .map(|&id| (id, skills::Person::default()))
+            .collect();
+        v.progress.gathering_delivery.as_mut().unwrap().invited = ids.clone();
+        assert!(advance(&mut v, &ids));
+        assert_eq!(v.progress.invited, ids);
+        assert!(valid(&v));
+        v.progress.attended = [42, 900].into_iter().collect();
+        advance(&mut v, &ids);
+        assert!(!served(&v));
+        v.progress.attended.insert(1200);
+        advance(&mut v, &ids);
+        assert!(served(&v));
+        assert_eq!(v.supplies.portions_eaten, PORTIONS);
+        finish(&mut v, true);
+        assert!(v.progress.invited.is_empty());
+        assert!(v.progress.attended.is_empty());
+        assert_eq!(
+            v.progress.gathering_delivery.as_ref().unwrap().attended,
+            ids
+        );
+        assert!(valid(&v));
+    }
+
+    #[test]
     fn residents_really_deliver_the_meals_before_the_invitation_and_serve_once() {
         let mut g = scene();
         assert_eq!(g.host_gathering(), "ok");
@@ -514,7 +617,7 @@ mod tests {
         assert_eq!(p.phase, Phase::Complete);
         assert_eq!(v.progress.gatherings, 1);
         assert!(p.spent_after.is_some());
-        assert!(p.attended.count_ones() >= 3);
+        assert!(p.attended.len() >= 3);
         let spent = p.spent_after;
         for _ in 0..8 {
             g.tick(0.25);
@@ -546,7 +649,7 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             stage_table(&mut v);
-            assert!(!advance(&mut v, 0b00011));
+            assert!(!advance(&mut v, &[0, 1].into_iter().collect()));
             assert_eq!(active(&v).unwrap().phase, Phase::Ready);
             let table = food::pantry(&v, 0).unwrap();
             assert_eq!(food::available(&v, table, MEALS, None), 0);
@@ -555,17 +658,17 @@ mod tests {
         checkpoint(&mut g);
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            assert!(advance(&mut v, 0b00111));
+            assert!(advance(&mut v, &[0, 1, 2].into_iter().collect()));
             assert_eq!(v.progress.gathering_until, v.minutes + 120.);
             assert_eq!(v.meals, 10);
-            v.progress.attended = 0b00011;
-            advance(&mut v, 0b00111);
+            v.progress.attended = [0, 1].into_iter().collect();
+            advance(&mut v, &[0, 1, 2].into_iter().collect());
             assert_eq!(v.meals, 10);
-            v.progress.attended = 0b00111;
-            advance(&mut v, 0b00111);
+            v.progress.attended = [0, 1, 2].into_iter().collect();
+            advance(&mut v, &[0, 1, 2].into_iter().collect());
             assert_eq!(v.meals, 5);
             assert_eq!(v.supplies.portions_eaten, 5);
-            advance(&mut v, 0b00111);
+            advance(&mut v, &[0, 1, 2].into_iter().collect());
             assert_eq!(v.meals, 5);
         }
         checkpoint(&mut g);
@@ -717,7 +820,7 @@ mod tests {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             stage_table(&mut v);
             v.minutes = 2520.;
-            advance(&mut v, 31);
+            advance(&mut v, &[0, 1, 2, 3, 4].into_iter().collect());
             assert_eq!(v.meals, 10);
             assert_eq!(
                 v.progress.gathering_delivery.as_ref().unwrap().phase,
@@ -873,7 +976,7 @@ mod tests {
         assert_eq!(g.queue_building_work(0, "move", 16, 6), "ok");
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            advance(&mut v, 31);
+            advance(&mut v, &[0, 1, 2, 3, 4].into_iter().collect());
             assert_eq!(v.meals, 10);
             assert_eq!(
                 v.progress.gathering_delivery.as_ref().unwrap().phase,
@@ -894,6 +997,10 @@ mod tests {
             ("building", serde_json::json!(999)),
             ("spent_after", serde_json::json!(5)),
             ("invited", serde_json::json!(3)),
+            ("invited", serde_json::json!([0, 0, 1, 2])),
+            ("invited", serde_json::json!([0, 1, 2, 900])),
+            ("attended", serde_json::json!([0, 0])),
+            ("attended", serde_json::json!([900])),
         ] {
             let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
             bad["village"]["progress"]["gathering_delivery"][field] = value;

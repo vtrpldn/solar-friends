@@ -54,8 +54,8 @@ for(let frame=0;frame<5000;frame++){
 }
 s=snap(g);assert(serving);assert.equal(plan(s).phase,'complete');assert.equal(s.village.progress.gatherings,1);assert(plan(s).spent_after>=5);assert.equal(s.village.supplies.portions_eaten,5);
 assert.equal(s.environment.economy.materials[MEALS].reserved,0);assert.equal(gatheringInfo(s.village).active,false);
-const attendees=plan(s).attended;assert(attendees.toString(2).replaceAll('0','').length>=3);
-for(let i=0;i<5;i++)for(let j=0;j<5;j++)assert.equal((s.village.progress.friendships[i]?.[j]??0),Number(i!==j&&(attendees&(1<<i))!==0&&(attendees&(1<<j))!==0));
+const attendees=plan(s).attended;assert(attendees.length>=3);
+for(let i=0;i<5;i++)for(let j=0;j<5;j++)assert.equal((s.village.progress.friendships[i]?.[j]??0),Number(i!==j&&attendees.includes(i)&&attendees.includes(j)));
 checkpoint(g);conserved(g);await writeFile('artifacts/gathering/complete.json',g.snapshot());
 const moving=new Game();assert(moving.restore(await readFile('artifacts/gathering/table.json','utf8')));
 assert.equal(moving.queue_building_work(0,'move',18,18),'ok');moving.tick(.25);

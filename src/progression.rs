@@ -62,7 +62,7 @@ pub struct Progress {
     pub parts_exchanged: bool,
     pub night_lights: bool,
     pub river_night: bool,
-    pub hobby_mask: u8,
+    pub hobby_people: crate::participation::Set,
     pub eggs_collected: u32,
     pub milk_collected: u32,
     pub honey_collected: u32,
@@ -71,7 +71,7 @@ pub struct Progress {
     pub tracked: usize,
     pub fruit: u32,
     pub timber: u32,
-    pub social_mask: u8,
+    pub social_people: crate::participation::Set,
     pub shared_builds: u32,
     pub scraps: u32,
     pub compost: u32,
@@ -85,8 +85,8 @@ pub struct Progress {
     pub gathering_delivery: Option<crate::gatherings::Plan>,
     pub gathering_until: f32,
     pub gathering_day: i32,
-    pub invited: u8,
-    pub attended: u8,
+    pub invited: crate::participation::Set,
+    pub attended: crate::participation::Set,
     pub friendships: crate::relationships::Graph,
 }
 impl Default for Progress {
@@ -108,7 +108,7 @@ impl Default for Progress {
             parts_exchanged: false,
             night_lights: false,
             river_night: false,
-            hobby_mask: 0,
+            hobby_people: Default::default(),
             eggs_collected: 0,
             milk_collected: 0,
             honey_collected: 0,
@@ -117,7 +117,7 @@ impl Default for Progress {
             tracked: 0,
             fruit: 0,
             timber: 0,
-            social_mask: 0,
+            social_people: Default::default(),
             shared_builds: 0,
             scraps: 0,
             compost: 0,
@@ -131,8 +131,8 @@ impl Default for Progress {
             gathering_delivery: None,
             gathering_until: 0.,
             gathering_day: -1,
-            invited: 0,
-            attended: 0,
+            invited: Default::default(),
+            attended: Default::default(),
             friendships: crate::relationships::Graph::new(),
         }
     }
@@ -227,7 +227,11 @@ pub fn update(v: &mut Village) {
         crate::outcomes::earned(v, crate::outcomes::NIGHT)
             && crate::outcomes::earned(v, crate::outcomes::SERVICES),
         v.situations.resolved_count > 0
-            && v.progress.hobby_mask == 31
+            && !v.skills.people.is_empty()
+            && v.skills
+                .people
+                .keys()
+                .all(|id| v.progress.hobby_people.contains(id))
             && v.progress.outcomes.leisure_day,
         homes >= 2
             && crate::outcomes::earned(v, crate::outcomes::DRY)

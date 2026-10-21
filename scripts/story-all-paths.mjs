@@ -119,7 +119,7 @@ build('grove');timber=source(0);const bamboo=source(1);await complete(1);
 build('square','standard',false,[8,16]);
 // A shared table beside homes and the kitchen keeps actual guest and food trips short.
 for(const [x,y] of [[10,7],[10,8],[11,8],[11,9],[11,10],[11,11],...[11,12,13,14,15,16,17,18].map(y=>[10,y])])assert.equal(g.toggle_road(x,y),'ok');
-until(s=>s.village.progress.social_mask===31&&g.host_gathering()==='ok','welcome supper');
+until(s=>s.village.progress.social_people.length===s.residents.length&&g.host_gathering()==='ok','welcome supper');
 await complete(2);
 build('warehouse');
 // Expand a real street network as the village grows. Keep blueprints, stores,

@@ -373,20 +373,26 @@ fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
     let v = g.app.world().resource::<Village>();
     assert_eq!(v.progress.gatherings, 1);
     assert!(v.progress.welcome_supper);
-    let attended = v.progress.gathering_delivery.as_ref().unwrap().attended;
-    assert!(attended.count_ones() >= 3);
+    let attended = v
+        .progress
+        .gathering_delivery
+        .as_ref()
+        .unwrap()
+        .attended
+        .clone();
+    assert!(attended.len() >= 3);
     for i in 0..5 {
         for j in 0..5 {
             assert_eq!(
                 relationships::strength(&v.progress, i, j),
-                u32::from(i != j && attended & (1 << i) != 0 && attended & (1 << j) != 0)
+                u32::from(i != j && attended.contains(&i) && attended.contains(&j))
             );
         }
     }
     // A three-person supper is valid. The chapter separately teaches five
     // cooked meals; neighbours who missed supper can eat normal stored portions.
     for id in 0..5 {
-        if attended & (1 << id) == 0 {
+        if !attended.contains(&id) {
             for mut r in g
                 .app
                 .world_mut()
@@ -453,7 +459,7 @@ fn old_saves_gain_defaults_and_invalid_progress_is_rejected_atomically() {
     let before = g.snapshot();
     for (key, value) in [
         ("tracked", 13),
-        ("social_mask", 32),
+        ("social_people", 32),
         ("tool_uses", 37),
         ("gathering_until", 999999),
     ] {

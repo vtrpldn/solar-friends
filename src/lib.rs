@@ -51,6 +51,7 @@ mod simulation;
 mod situations;
 mod skills;
 mod sleep;
+mod social_participation;
 mod spacing;
 mod supplies;
 mod town_pickup;
@@ -62,7 +63,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 40;
+pub const SAVE_VERSION: u32 = 41;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -621,7 +622,7 @@ fn choose(r: &mut Resident, v: &Village) {
                 .any(|p| p.task == "arrive"))
     {
         leisure::choose(r, v)
-    } else if v.progress.gathering_until > v.minutes && v.progress.invited & (1 << r.id) != 0 {
+    } else if v.progress.gathering_until > v.minutes && v.progress.invited.contains(&r.id) {
         (
             "gathering",
             "Sharing food and stories in our community square.",
@@ -788,13 +789,15 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         v.mornings += 1;
         event(&mut v, "A new morning. The community is waking up.");
     }
-    let available_neighbours = people
-        .iter()
-        .filter(|r| gatherings::eligible(r))
-        .fold(0u8, |m, r| m | (1 << r.id));
-    if gatherings::advance(&mut v, available_neighbours) {
+    let gathering_started = if gatherings::active(&v).is_some() {
+        let available_neighbours = gatherings::eligible_people(people.iter());
+        gatherings::advance(&mut v, &available_neighbours)
+    } else {
+        false
+    };
+    if gathering_started {
         for mut r in &mut people {
-            if v.progress.invited & (1 << r.id) != 0 {
+            if v.progress.invited.contains(&r.id) {
                 logistics::interrupt(&mut v, &r);
                 water::interrupt(&mut v, &r);
                 assign(
@@ -808,23 +811,23 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         }
     }
     if v.progress.gathering_until > 0. && v.minutes >= v.progress.gathering_until {
-        let attended = v.progress.attended;
-        let success = attended.count_ones() >= 3 && gatherings::served(&v);
+        let attended = v.progress.attended.clone();
+        let success = attended.len() >= 3 && gatherings::served(&v);
         if success {
             v.progress.gatherings += 1;
             v.progress.welcome_supper = true;
-            v.meals_served += attended.count_ones();
+            v.meals_served += attended.len() as u32;
             let participants: Vec<_> = people
                 .iter()
-                .filter(|r| attended & (1 << r.id) != 0)
+                .filter(|r| attended.contains(&r.id))
                 .map(|r| r.id)
                 .collect();
             for mut r in &mut people {
-                if attended & (1 << r.id) != 0 {
+                if attended.contains(&r.id) {
                     personality::company(&mut r, 25.);
                     r.hunger = (r.hunger - 35.).max(0.);
                     for &other in &participants {
-                        if other != r.id && attended & (1 << other) != 0 {
+                        if other != r.id && attended.contains(&other) {
                             relationships::remember(&mut v, r.id, other);
                         }
                     }
@@ -837,7 +840,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         } else {
             event(
                 &mut v,
-                if attended.count_ones() >= 3 {
+                if attended.len() >= 3 {
                     "Neighbours reached the shared table, but five fresh meals were no longer available. Prepare fresh portions for another day."
                 } else {
                     "Too few neighbours made it to the square. Try gathering closer to home tomorrow."
@@ -1082,7 +1085,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             situations::recovered(&mut v, r.id, dt * MINUTES_PER_SECOND);
         }
         if r.task == "gathering" && v.progress.gathering_until > v.minutes {
-            v.progress.attended |= 1 << r.id;
+            v.progress.attended.insert(r.id);
         }
         if r.task == "restore" && restoration::work(&mut v, &r, dt * MINUTES_PER_SECOND) {
             r.remaining = 0.;
@@ -1146,7 +1149,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             let mut completed_batch = false;
             match r.task.as_str() {
                 task if leisure::hobby(task) => {
-                    v.progress.hobby_mask |= 1 << r.id;
+                    v.progress.hobby_people.insert(r.id);
                 }
                 "visit" => {
                     interactions::finish(&mut v, &mut r);
@@ -1223,7 +1226,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 }
                 "socialize" => {
                     completed_batch = true;
-                    v.progress.social_mask |= 1 << r.id;
+                    v.progress.social_people.insert(r.id);
                 }
                 "eat" => {
                     let fed = food::eat(&mut v, &mut r);

@@ -23,5 +23,15 @@ const orchard=structuredClone(s);orchard.village.buildings=[{kind:'orchard',id:0
 assert.equal(goalRoute(orchard,quests[1].objectives(orchard.village)[0]).type,'project','Choosing the orchard path must not prompt a food forest instead');
 const homes={village:{buildings:[{kind:'home',id:0,progress:100},{kind:'home',id:1,progress:0}],economy:{projects:[{building:0,recipe:'adobe'},{building:1,recipe:'standard'}]},building_jobs:[]},environment:{economy:{projects:[{kind:'home',building:1,recipe:'standard'}]}}};
 assert.deepEqual(goalRoute(homes,{build:'home',recipe:'adobe',target:1}),{type:'visit',id:0},'Review the completed material method even while a different home is under construction');
+// Goal counters follow sparse authored identities rather than five visual slots.
+for(const population of [1,3,12]){
+ const roster=structuredClone(v),ids=Array.from({length:population},(_,i)=>42+i*101);
+ roster.skills.people=Object.fromEntries(ids.map(id=>[id,structuredClone(v.skills.people[0])]));
+ roster.progress.social_people=ids.slice(0,-1);roster.progress.hobby_people=ids;
+ const goals=quests.flatMap(q=>[...q.objectives(roster),...q.options(roster)]);
+ const social=goals.find(o=>o.label==='Make time for every neighbour'),hobby=goals.find(o=>o.label==='Let everyone enjoy a hobby');
+ assert.equal(social.target,population);assert.equal(social.value,population-1);
+ assert.equal(hobby.target,population);assert.equal(hobby.value,population);
+}
 const before=g.snapshot();g.story_outcomes_report();assert.equal(g.snapshot(),before);g.free();
 console.log(`PASS: thirteen outcome chapters, ${optional} separate optional lessons, all ${storyBuildingKinds.length} building types taught, native observation targets, meaningful orchard and recipe routes, finite progress and read-only reports.`);
