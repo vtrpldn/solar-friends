@@ -58,7 +58,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 34;
+pub const SAVE_VERSION: u32 = 35;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -104,6 +104,10 @@ const TASKS: &[&str] = &[
 pub struct Resident {
     pub id: usize,
     pub name: String,
+    #[serde(default)]
+    pub pronouns: String,
+    #[serde(default)]
+    pub biography: String,
     pub trait_name: String,
     pub favorite: String,
     pub routine_preferences: resident_preferences::Preferences,

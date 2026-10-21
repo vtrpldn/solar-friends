@@ -2,6 +2,7 @@ use super::*;
 
 pub(super) fn check(d: &Definition) -> Report {
     let mut r = Report::default();
+    residents::check(d, &mut r);
     if d.format != FORMAT || d.schema != SCHEMA {
         r.push(
             "schema",
@@ -342,6 +343,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         schema: SCHEMA,
         definition: d.clone(),
         buildings: BTreeMap::new(),
+        residents: residents::bindings(&d),
     }));
     v.simulation.seed = d.map.seed;
     v.economy.land = land::opening_reserves(&v);
@@ -444,8 +446,10 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         schema: SCHEMA,
         definition: d.clone(),
         buildings,
+        residents: residents::bindings(&d),
     }));
-    let residents = initialization::founding_residents(v.camp);
+    let mut residents = initialization::founding_residents(v.camp);
+    residents::apply(&d, &mut residents);
     navigation::refresh(&mut v);
     for resident in &residents {
         if !navigation::clear(&v, resident.x, resident.y)

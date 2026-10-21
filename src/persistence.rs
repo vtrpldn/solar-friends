@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=33)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=34)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -211,7 +211,11 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
     }
     let mut ids = std::collections::HashSet::new();
     if save.residents.iter().any(|r| {
-        r.id >= 5
+        r.name.trim().is_empty()
+            || r.name.chars().count() > 80
+            || r.pronouns.chars().count() > 40
+            || r.biography.chars().count() > 600
+            || r.id >= 5
             || !ids.insert(r.id)
             || [r.energy, r.hunger, r.social, r.happiness]
                 .iter()

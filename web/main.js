@@ -1,3 +1,4 @@
+import {residentStory} from './resident-story.js';
 import {loadRegionalArt} from './regional-art.js';
 import {terrainRevision} from './terrain-revision.js';
 import {ContentLibrary} from './content-library.js';
@@ -829,7 +830,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2><p class="traits">${escapeHtml(r.trait_name)}</p></div></div><p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">Ask for a hand</p><p class="request-guide">Choose one chore. They’ll help once, then return to their own routine. Meals, rest and outside commitments still come first.</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel this request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
+    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2>${r.pronouns?`<p>${escapeHtml(r.pronouns)}</p>`:""}<p class="traits">${escapeHtml(r.trait_name)}</p></div></div>${r.biography?`<p class="person-biography">${escapeHtml(r.biography)}</p>`:""}<p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection"].map((n) => `<div class="stat" data-stat="${n}"><span>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">Ask for a hand</p><p class="request-guide">Choose one chore. They’ll help once, then return to their own routine. Meals, rest and outside commitments still come first.</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="cancel-help">Cancel this request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><button class="resume-request" hidden>Resume time</button><div class="requests">${[
       ["garden", "Tend the farm"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -941,7 +942,7 @@ function goalValue(value){return Number.isInteger(value)?value:Number(value).toF
 function optionalMarkup(v,q,chapter,locked){
   const options=q.options?.(v)||[];
   if(!options.length)return '';
-  return `<details class="journal-options" data-choices="${chapter}"><summary>Other paths · optional</summary><p>Choose what helps our village. These paths do not block the next chapter. Markers reflect the current village; completed chapters and measured outcomes stay credited.</p>${options.map((o,index)=>`<section class="journal-option ${o.done?'done':''}"><span aria-hidden="true">${o.guide?'·':o.done?'✓':'◇'}</span><div><b>${o.label}</b><small>${o.guide?'Guide':`${goalValue(o.value)}/${o.target}${o.unit?' '+o.unit:''}`}</small><p>${o.hint}</p><button data-quest-option="${chapter}:${index}" ${locked?'disabled':''}>${o.guide?'Explore this guide':o.done?'Review':'Explore this path'}</button></div></section>`).join('')}</details>`;
+  return `<details class="journal-options" data-choices="${chapter}"><summary>Other paths · optional</summary><p>Choose what helps our village. These paths do not block the next chapter. Markers reflect the current village; completed chapters and measured outcomes stay credited.</p>${options.map((o,index)=>`<section class="journal-option ${o.done?'done':''}"><span aria-hidden="true">${o.guide?'·':o.done?'✓':'◇'}</span><div><b>${o.label}</b><small>${o.guide?'Guide':`${goalValue(o.value)}/${o.target}${o.unit?' '+o.unit:''}`}</small><p>${escapeHtml(residentStory(state,o.hint))}</p><button data-quest-option="${chapter}:${index}" ${locked?'disabled':''}>${o.guide?'Explore this guide':o.done?'Review':'Explore this path'}</button></div></section>`).join('')}</details>`;
 }
 function objectiveMarkup(objectives, completed = false) {
   const current = completed ? -1 : objectives.findIndex((o) => !o.done);
@@ -976,16 +977,14 @@ function updateQuests() {
   $("#goal-next").textContent = finished ? `${quests.length}/${quests.length} chapters complete · keep growing` : done ? "Follow our next chapter →" : next ? `${next.label} · ${next.value}/${next.target}` : "Let village life unfold";
   $("#goal-meter").value = completedCount; $("#goal-meter").max = objectives.length;
   $("#goal-meter").setAttribute("aria-label", `${quest.title}: ${completedCount} of ${objectives.length} objectives`);
-  $("#goal-shortcut").title = done ? quest.after : next?.hint || quest.story;
+  $("#goal-shortcut").title = residentStory(state,done ? quest.after : next?.hint || quest.story);
   $("#goal-shortcut").onclick = () => done ? openJournal() : showPanel("goals-panel");
   $("#tutorial-count").textContent = `${quest.theme} · CHAPTER ${id + 1} OF ${quests.length}`;
   $("#tutorial-title").textContent = quest.title;
-  $("#tutorial-copy").textContent = done
-    ? quest.after
-    : next?.hint || quest.story;
+  $("#tutorial-copy").textContent = residentStory(state,done ? quest.after : next?.hint || quest.story);
   $("#quest-speaker").textContent = done
     ? "✓ Quest complete"
-    : `A wish from ${quest.person}`;
+    : `A wish from ${residentStory(state,quest.person)}`;
   $("#quest-reward").textContent =
     `${done ? "Unlocked" : "Reward"}: ${quest.reward}`;
   $("#quest-progress").value = done
@@ -1022,12 +1021,12 @@ function updateQuests() {
           locked = !questAvailable(v,i);
         return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}" ${i===journalPage?'':'hidden'}>
       <div class="quest-card-art ${q.art}">${i ? `<canvas data-quest-art="${q.art}" role="img" aria-label="${allBuildingArt[q.art]?.name || q.theme} illustration"></canvas>` : "<span>☀</span>"}</div>
-      <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${q.story}</p>
-      ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."}</p>` : ""}
+      <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${escapeHtml(residentStory(state,q.story))}</p>
+      ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${escapeHtml(residentStory(state,q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."))}</p>` : ""}
       ${objectiveMarkup(q.objectives(v), completions[i])}
       ${optionalMarkup(v,q,i,locked)}
       <p class="journal-reward"><b>${completions[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
-      ${completions[i] ? `<p class="quest-after">${q.after}</p>` : ""}
+      ${completions[i] ? `<p class="quest-after">${escapeHtml(residentStory(state,q.after))}</p>` : ""}
       <button data-track="${i}" ${locked ? "disabled" : ""}>${locked ? `Complete ${quests[i-1]?.title} first` : i === id ? "Following this quest" : completions[i] ? "Explore the reward →" : "Follow this quest →"}</button></div></article>`;
       })
       .join(""),

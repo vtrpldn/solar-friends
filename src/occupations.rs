@@ -40,6 +40,20 @@ pub const JOBS: [Job; 5] = [
         income: 22000,
     },
 ];
+pub fn resident_name(v: &Village, id: usize) -> String {
+    v.workforce_peers
+        .get(&id)
+        .and_then(Option::as_ref)
+        .map(|p| p.name.clone())
+        .or_else(|| {
+            v.scenario
+                .as_ref()
+                .and_then(|o| o.definition.start.residents.as_ref())
+                .and_then(|people| people.iter().find(|p| p.slot() == Some(id)))
+                .map(|p| p.name.clone())
+        })
+        .unwrap_or_else(|| NAMES.get(id).unwrap_or(&"Resident").to_string())
+}
 pub fn available(v: &Village, id: usize) -> bool {
     id < 5
         && v.economy.outside_jobs[id]
@@ -48,7 +62,7 @@ pub fn available(v: &Village, id: usize) -> bool {
         && v.economy.work_day[id] != (v.minutes / 1440.) as i32
 }
 pub fn view(v: &Village) -> serde_json::Value {
-    serde_json::json!((0..5).map(|id| serde_json::json!({"id":id,"name":NAMES[id],"title":JOBS[id].title,"place":JOBS[id].place,"description":JOBS[id].description,"income":JOBS[id].income,"enabled":v.economy.outside_jobs[id],"paid_today":v.economy.work_day[id]==(v.minutes/1440.) as i32,"committed_today":v.economy.outside_committed_days[id]==(v.minutes/1440.) as i32})).collect::<Vec<_>>())
+    serde_json::json!((0..5).map(|id| serde_json::json!({"id":id,"name":resident_name(v,id),"title":JOBS[id].title,"place":JOBS[id].place,"description":JOBS[id].description,"income":JOBS[id].income,"enabled":v.economy.outside_jobs[id],"paid_today":v.economy.work_day[id]==(v.minutes/1440.) as i32,"committed_today":v.economy.outside_committed_days[id]==(v.minutes/1440.) as i32})).collect::<Vec<_>>())
 }
 pub fn migrate(save: &mut Save) {
     let e = &mut save.village.economy;

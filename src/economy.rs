@@ -1272,7 +1272,7 @@ pub fn finish_outside(v: &mut Village, id: usize) {
             job.income,
             format!(
                 "{} · {} contribution",
-                crate::occupations::NAMES[id],
+                crate::occupations::resident_name(v, id),
                 job.title
             ),
         );
@@ -1280,7 +1280,7 @@ pub fn finish_outside(v: &mut Village, id: usize) {
             v,
             format!(
                 "{} returned from their {} shift with R$ {} for the shared fund.",
-                crate::occupations::NAMES[id],
+                crate::occupations::resident_name(v, id),
                 job.title.to_lowercase(),
                 job.income / 100
             ),

@@ -124,7 +124,6 @@ impl Game {
             maintenance::sync(&mut v);
             founding::start(&mut v);
         }
-        drop(v);
         if founding {
             let dx = MAP_SIZE as f32 / 2. - CAMP.0;
             let dy = MAP_SIZE as f32 / 2. - CAMP.1;

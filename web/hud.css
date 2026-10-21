@@ -302,3 +302,5 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 .person .help-order .help-time{font-size:10px;color:var(--muted)}
 .person .help-order .cancel-help{margin-top:12px}
 .person .resume-request{width:100%;min-height:40px}
+/* Player-authored names and stories must fit the resident journal. */
+.person .person-heading h2,.person .person-heading p,.person .person-biography{overflow-wrap:anywhere}.person .person-biography{white-space:pre-wrap}

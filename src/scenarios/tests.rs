@@ -550,3 +550,75 @@ fn invalid_weather_is_rejected_without_installing_a_world() {
         assert_eq!(g.snapshot(), before);
     }
 }
+
+#[test]
+fn authored_residents_keep_identity_when_reordered_and_preserve_personal_details() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    let people = d.start.residents.as_mut().unwrap();
+    people[0].name = "João <vizinho>".into();
+    people[0].pronouns = "ele/dele".into();
+    people[0].biography = "Trouxe sementes e vontade de aprender.".into();
+    people[0].routine_preferences = resident_preferences::NINA_V1;
+    people.reverse();
+    let (g, _) = compile(d).unwrap_or_else(|_| panic!("valid authored cast"));
+    let person = g
+        .app
+        .world()
+        .iter_entities()
+        .find_map(|e| e.get::<Resident>().filter(|p| p.id == 0))
+        .unwrap();
+    assert_eq!(person.name, "João <vizinho>");
+    assert_eq!(person.pronouns, "ele/dele");
+    assert_eq!(person.biography, "Trouxe sementes e vontade de aprender.");
+    assert_eq!(person.routine_preferences, resident_preferences::NINA_V1);
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(v.scenario.as_ref().unwrap().residents["resident-iara"], 0);
+}
+
+#[test]
+fn authored_resident_errors_do_not_silently_replace_the_cast() {
+    let mut d = Definition::builtin(modes::Mode::Story);
+    let people = d.start.residents.as_mut().unwrap();
+    people[1].id = people[0].id.clone();
+    people[2].preset_version = 999;
+    people[3].name = " ".into();
+    assert!(compile(d).is_err());
+}
+
+#[test]
+fn authored_identity_bindings_survive_saves_and_reject_forged_ownership() {
+    let d = Definition::builtin(modes::Mode::Sandbox);
+    let (mut g, _) = compile(d).unwrap_or_else(|_| panic!("valid cast"));
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    let mut forged: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    forged["village"]["scenario"]["residents"]["resident-iara"] = 1.into();
+    assert!(!g.restore(&forged.to_string()));
+    assert_eq!(g.snapshot(), saved);
+    let mut old: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    old["village"]["version"] = 34.into();
+    old["village"]["scenario"]["definition"]["start"]
+        .as_object_mut()
+        .unwrap()
+        .remove("residents");
+    old["village"]["scenario"]
+        .as_object_mut()
+        .unwrap()
+        .remove("residents");
+    for person in old["residents"].as_array_mut().unwrap() {
+        person.as_object_mut().unwrap().remove("pronouns");
+        person.as_object_mut().unwrap().remove("biography");
+    }
+    assert!(g.restore(&old.to_string()));
+    let migrated: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+    assert_eq!(migrated["village"]["version"], 35);
+    assert_eq!(
+        migrated["residents"][0]["routine_preferences"],
+        old["residents"][0]["routine_preferences"]
+    );
+    assert_eq!(
+        migrated["residents"][0]["energy"],
+        old["residents"][0]["energy"]
+    );
+}

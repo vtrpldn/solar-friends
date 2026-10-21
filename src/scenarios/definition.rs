@@ -127,6 +127,8 @@ impl Rules {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Start {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub residents: Option<Vec<super::residents::Person>>,
     pub minutes: f32,
     pub funds: i64,
     pub fresh_water: f32,
@@ -178,6 +180,8 @@ pub struct Origin {
     pub schema: u32,
     pub definition: Definition,
     pub buildings: BTreeMap<String, usize>,
+    #[serde(default)]
+    pub residents: BTreeMap<String, usize>,
 }
 
 pub const HOME_APPEARANCES: [&str; 6] = [
@@ -277,6 +281,7 @@ impl Definition {
             },
             rules: Rules::for_mode(mode),
             start: Start {
+                residents: Some(super::residents::founders()),
                 minutes: 480.,
                 funds: if sandbox { 10_000_000 } else { 300_000 },
                 fresh_water: if sandbox { 40. } else { 32. },

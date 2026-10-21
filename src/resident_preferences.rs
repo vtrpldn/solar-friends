@@ -85,8 +85,10 @@ mod tests {
         let mut person = initialization::founding_residents(CAMP).remove(0);
         person.social = 90.;
         person.energy = 60.;
-        let mut v = Village::default();
-        v.minutes = 480.;
+        let mut v = Village {
+            minutes: 480.,
+            ..Village::default()
+        };
         let baseline = leisure::choose(&person, &v);
         sleep::prepare(&mut person, 480.);
         let bedtime = person.sleep.bedtime;

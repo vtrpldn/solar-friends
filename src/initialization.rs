@@ -72,6 +72,8 @@ pub(crate) fn founding_residents(camp: (f32, f32)) -> Vec<Resident> {
         |(id, (name, traits, favorite, routine_preferences))| Resident {
             id,
             name: name.into(),
+            pronouns: String::new(),
+            biography: String::new(),
             trait_name: traits.into(),
             favorite: favorite.into(),
             routine_preferences,

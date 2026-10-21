@@ -6,6 +6,7 @@ mod biomes;
 mod compile;
 pub(crate) use biomes::Biome;
 mod definition;
+mod residents;
 pub(crate) use definition::*;
 
 #[derive(Clone, Serialize)]
@@ -99,6 +100,7 @@ pub(crate) fn valid_origin(v: &Village) -> bool {
         && !compile::check(d).has_errors()
         && d.map.camp.map(|n| n as f32) == [v.camp.0, v.camp.1]
         && d.map.seed == v.simulation.seed
+        && origin.residents == residents::bindings(d)
         && origin.buildings.len() == d.start.buildings.len()
         && d.start.buildings.iter().all(|b| {
             origin
@@ -164,7 +166,7 @@ impl Game {
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "max_buildings":MAX_BUILDINGS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"resident_routines":resident_preferences::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
+            "max_buildings":MAX_BUILDINGS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"resident_routines":resident_preferences::catalog(),"resident_presets":residents::founders(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
         .to_string()
     }
 
