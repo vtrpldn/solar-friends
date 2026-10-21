@@ -264,7 +264,7 @@ mod tests {
                             .iter()
                             .any(|b| b.material == economy::MEALS && b.active())
                     );
-                    assert_eq!(v.situations.cooking[0][r.id], 0);
+                    assert_eq!(v.situations.cooking[0].get(&r.id).copied().unwrap_or(0), 0);
                 }
                 "well" => {
                     assert_eq!(v.water, water - 1.);

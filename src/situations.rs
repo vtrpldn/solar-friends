@@ -16,7 +16,7 @@ pub struct Situation {
     pub opened: f32,
     pub response: Option<Response>,
     pub agreed: Option<f32>,
-    pub helpers: u8,
+    pub helpers: crate::participation::Set,
     pub recovery: f32,
     pub worry: f32,
     pub resolved: Option<f32>,
@@ -27,7 +27,7 @@ pub struct Situation {
 #[serde(default)]
 pub struct Situations {
     pub day: u32,
-    pub cooking: [[u32; 5]; 3],
+    pub cooking: [std::collections::BTreeMap<usize, u32>; 3],
     pub active: Option<Situation>,
     pub resolved_count: u32,
 }
@@ -37,7 +37,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
     let elapsed = day.saturating_sub(v.situations.day).min(3);
     for _ in 0..elapsed {
         v.situations.cooking.rotate_right(1);
-        v.situations.cooking[0] = [0; 5];
+        v.situations.cooking[0].clear();
     }
     v.situations.day = day;
     if let Some(s) = &mut v.situations.active {
@@ -56,14 +56,14 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 2
             };
             if (!s.story_check_in || s.response.is_some())
-                && s.helpers.count_ones() >= helpers
+                && s.helpers.len() >= helpers
                 && s.recovery >= 72.
                 && v.minutes - s.agreed.unwrap_or(s.opened) >= 1440.
             {
                 s.resolved = Some(v.minutes);
                 s.worry = 0.;
                 v.situations.resolved_count = v.situations.resolved_count.saturating_add(1);
-                v.situations.cooking = [[0; 5]; 3];
+                v.situations.cooking = Default::default();
                 event(
                     v,
                     "A lighter kitchen, a happier neighbour. The collective found a better rhythm.",
@@ -75,16 +75,26 @@ pub fn advance(v: &mut Village, minutes: f32) {
     if !v.arrived || !ready(v, "kitchen") {
         return;
     }
-    let totals: [u32; 5] =
-        std::array::from_fn(|id| v.situations.cooking.iter().map(|day| day[id]).sum());
-    let total: u32 = totals.iter().sum();
-    let concerned_resident = (0..5).find(|&id| {
-        totals[id] >= 6
-            && totals[id] * 5 >= total * 3
+    let total: u64 = v
+        .situations
+        .cooking
+        .iter()
+        .flat_map(|day| day.values())
+        .map(|n| u64::from(*n))
+        .sum();
+    let concerned_resident = v.skills.people.keys().copied().find(|id| {
+        let work: u32 = v
+            .situations
+            .cooking
+            .iter()
+            .map(|day| day.get(id).copied().unwrap_or(0))
+            .sum();
+        work >= 6
+            && u64::from(work) * 5 >= total * 3
             && v.situations
                 .cooking
                 .iter()
-                .filter(|day| day[id] > 0)
+                .filter(|day| day.get(id).copied().unwrap_or(0) > 0)
                 .count()
                 >= 2
     });
@@ -102,7 +112,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         opened: v.minutes,
         response: None,
         agreed: None,
-        helpers: 0,
+        helpers: Default::default(),
         recovery: 0.,
         worry: if story_check_in { 0. } else { 4. },
         resolved: None,
@@ -118,12 +128,16 @@ pub fn advance(v: &mut Village, minutes: f32) {
 }
 
 pub fn cooked(v: &mut Village, id: usize) {
-    v.situations.cooking[0][id] = v.situations.cooking[0][id].saturating_add(1).min(1000);
+    if !v.skills.people.contains_key(&id) {
+        return;
+    }
+    let count = v.situations.cooking[0].entry(id).or_default();
+    *count = count.saturating_add(1).min(1000);
     if let Some(s) = &mut v.situations.active
         && s.resolved.is_none()
     {
         if id != s.resident {
-            s.helpers |= 1 << id;
+            s.helpers.insert(id);
         } else {
             // Returning the whole burden to the same person undoes the recovery.
             s.recovery = (s.recovery - 36.).max(0.);
@@ -186,7 +200,7 @@ pub fn respond(v: &mut Village, response: &str) -> String {
     }
     s.response = Some(response);
     s.agreed = Some(v.minutes);
-    s.helpers = 0;
+    s.helpers.clear();
     s.recovery = 0.;
     event(
         v,
@@ -205,11 +219,14 @@ pub fn respond(v: &mut Village, response: &str) -> String {
 pub fn valid(v: &Village) -> bool {
     let s = &v.situations;
     s.day <= (v.minutes / 1440.) as u32
-        && s.cooking.iter().flatten().all(|n| *n <= 1000)
+        && s.cooking.iter().all(|day| {
+            day.iter()
+                .all(|(id, n)| v.skills.people.contains_key(id) && *n <= 1000)
+        })
         && s.active.as_ref().is_none_or(|a| {
-            a.resident < 5
-                && a.helpers <= 31
-                && a.helpers & (1 << a.resident) == 0
+            v.skills.people.contains_key(&a.resident)
+                && crate::participation::owned(v, &a.helpers)
+                && !a.helpers.contains(&a.resident)
                 && a.opened.is_finite()
                 && (0.0..=v.minutes).contains(&a.opened)
                 && a.recovery.is_finite()
@@ -276,24 +293,51 @@ mod tests {
     }
     fn concerned_village() -> Village {
         let mut v = village();
-        v.situations.cooking[0][2] = 3;
-        v.situations.cooking[1][2] = 3;
+        v.situations.cooking[0].insert(2, 3);
+        v.situations.cooking[1].insert(2, 3);
         advance(&mut v, 0.);
         assert!(v.situations.active.is_some());
         v
     }
     #[test]
+    fn sparse_cooks_and_helpers_keep_their_own_history() {
+        let mut v = village();
+        v.skills.people = [42, 900, 1200]
+            .into_iter()
+            .map(|id| (id, crate::skills::Person::default()))
+            .collect();
+        v.situations.cooking[0].insert(900, 3);
+        v.situations.cooking[1].insert(900, 3);
+        advance(&mut v, 0.);
+        assert_eq!(v.situations.active.as_ref().unwrap().resident, 900);
+        assert_eq!(respond(&mut v, "share_shifts"), "ok");
+        cooked(&mut v, 42);
+        cooked(&mut v, 42);
+        recovered(&mut v, 900, 72.);
+        v.minutes += 1440.;
+        advance(&mut v, 0.);
+        assert_eq!(v.situations.resolved_count, 0);
+        cooked(&mut v, 1200);
+        advance(&mut v, 0.);
+        assert_eq!(v.situations.resolved_count, 1);
+        assert!(valid(&v));
+        let before = serde_json::to_string(&v.situations).unwrap();
+        cooked(&mut v, 0);
+        assert_eq!(serde_json::to_string(&v.situations).unwrap(), before);
+    }
+
+    #[test]
     fn concern_requires_repeated_unequal_work_not_a_busy_afternoon() {
         let mut v = village();
-        v.situations.cooking[0][2] = 6;
+        v.situations.cooking[0].insert(2, 6);
         advance(&mut v, 0.);
         assert!(v.situations.active.is_none());
-        v.situations.cooking[0] = [2; 5];
-        v.situations.cooking[1] = [4; 5];
+        v.situations.cooking[0] = (0..5).map(|id| (id, 2)).collect();
+        v.situations.cooking[1] = (0..5).map(|id| (id, 4)).collect();
         advance(&mut v, 0.);
         assert!(v.situations.active.is_none());
-        v.situations.cooking = [[0; 5]; 3];
-        v.situations.cooking[1][2] = 6;
+        v.situations.cooking = Default::default();
+        v.situations.cooking[1].insert(2, 6);
         v.minutes += 3. * 1440.;
         advance(&mut v, 0.);
         assert!(v.situations.active.is_none());
@@ -457,6 +501,7 @@ mod tests {
             assert_eq!(saved, restored.snapshot());
         }
         let mut legacy: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        legacy["village"]["version"] = 41.into();
         legacy["village"]
             .as_object_mut()
             .unwrap()

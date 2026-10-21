@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=40)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=41)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -89,6 +89,13 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
         return None;
     }
     if !social_participation::valid_raw(&raw, legacy_social) {
+        return None;
+    }
+    let legacy_history = matches!(original_version, Some(3 | 23..=26 | 29..=41));
+    if legacy_history && !roster_history::migrate(&mut raw) {
+        return None;
+    }
+    if !roster_history::valid_raw(&raw, legacy_history) {
         return None;
     }
     fn canonical_keys(value: &serde_json::Value) -> bool {

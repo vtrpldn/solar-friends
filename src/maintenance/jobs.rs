@@ -375,7 +375,7 @@ pub fn queue(v: &mut Village, equipment: Equipment) -> Result<Id, &'static str> 
         spent: None,
     });
     logistics::sync(v);
-    v.logistics.as_mut().unwrap().retry_after = [0.; 5];
+    v.logistics.as_mut().unwrap().retry_after.clear();
     Ok(id)
 }
 pub fn cancel(v: &mut Village, id: Id) -> bool {

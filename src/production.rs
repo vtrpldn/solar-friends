@@ -649,7 +649,7 @@ fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
         created: v.minutes,
         finished: None,
     });
-    v.logistics.as_mut()?.retry_after = [0.; 5];
+    v.logistics.as_mut()?.retry_after.clear();
     Some(batch_id)
 }
 pub fn can_order_tools(v: &Village) -> bool {

@@ -13,7 +13,7 @@ export function situationView(v, residents) {
   const name = escape(residents.find(r => r.id === s.resident)?.name || 'Our neighbour');
   const resolved = s.resolved !== null;
   const agreed = s.response !== null;
-  const helpers = residents.filter(r => s.helpers & (1 << r.id)).map(r => escape(r.name));
+  const helpers = residents.filter(r => s.helpers.includes(r.id)).map(r => escape(r.name));
   const needed = s.response === 'day_off' ? 1 : 2;
   const day = Math.min(100, Math.floor((v.minutes - (s.agreed ?? s.opened)) / 1440 * 100));
   return {
@@ -29,7 +29,7 @@ export function situationView(v, residents) {
       <button data-situation-response="day_off"><b>Protect a day off</b><span>Cover meals and pause this neighbour’s work. A fuller rest, with slower projects.</span></button></div>
       <p class="hint">You can also leave this undecided and share tasks yourself. A promise alone won’t settle it.</p>`}
       <div class="situation-progress"><h3>Change we can feel</h3>
-      <p>${helpers.length >= needed ? '✓' : '○'} ${Math.min(helpers.length, needed)}/${needed} neighbours cooked${helpers.length ? ` · ${helpers.join(', ')}` : ''}</p>
+      <p>${helpers.length >= needed ? '✓' : '○'} ${Math.min(helpers.length, needed)}/${needed} ${needed===1?'neighbour':'neighbours'} cooked${helpers.length ? ` · ${helpers.join(', ')}` : ''}</p>
       <p>${s.recovery >= 72 ? '✓' : '○'} ${Math.min(72, Math.floor(s.recovery))}/72 minutes of rest or company</p>
       <p>${day >= 100 ? '✓' : '○'} A full day to settle · ${day}%</p></div>
       <p class="hint">Rest and company ease the concern. More cooking by ${name} takes away some of that recovery. Sleep alone doesn’t replace free time.</p>`}`,

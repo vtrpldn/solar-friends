@@ -42,7 +42,7 @@ for(let tick=0;tick<days*1920;tick++){
   const care=v.situations.active;
   if(care&&care.resolved==null){
     if(care.response==null)assert.equal(game.respond_situation('share_shifts'),'ok');
-    const helper=s.residents.find(r=>r.id!==care.resident&&!(care.helpers&(1<<r.id))&&!r.trip);
+    const helper=s.residents.find(r=>r.id!==care.resident&&!care.helpers.includes(r.id)&&!r.trip);
     if(helper&&(!helper.help||helper.help.finished!=null))game.request(helper.id,'cook',false);
   }
   if(tick%1920===0){

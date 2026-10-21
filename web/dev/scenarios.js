@@ -62,7 +62,7 @@ export function makeScenario(id, fresh, established) {
   v.simulation=structuredClone(fresh.village.simulation);v.simulation.materials=null;
   v.wood = 110; v.food = 100; v.water = 100; v.meals = 10;
   v.supplies.eggs = 0;
-  v.situations = { day: 1, cooking: [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]], active: null, resolved_count: 0 };
+  v.situations = { day: 1, cooking: [{},{},{}], active: null, resolved_count: 0 };
   for (const r of state.residents) {
     r.energy = 90; r.hunger = 20; r.social = 80; r.task = 'idle';
     r.reason = 'Ready for a development scenario.'; r.remaining = 0;
@@ -147,7 +147,7 @@ export function makeScenario(id, fresh, established) {
     const r = state.residents.find(r => r.id === 0);
     r.x = r.target_x = garden.x + .75; r.y = r.target_y = garden.y + .75;
   }
-  if (id === 'cook') v.situations.cooking = [[0,0,4,0,0],[0,0,4,0,0],[0,0,0,0,0]];
+  if (id === 'cook') v.situations.cooking = [{2:4},{2:4},{}];
   if (id === 'coop') v.buildings.find(b => b.kind === 'coop').poultry.remaining = .75;
   if (['night','power','power-outage'].includes(id)) v.minutes = 1440 + 1260;
   if(id==='power')v.power.stored=28;

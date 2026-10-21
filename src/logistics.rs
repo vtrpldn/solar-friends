@@ -59,16 +59,16 @@ pub struct State {
     pub schema: u32,
     pub stores: Vec<Store>,
     pub shipments: Vec<Shipment>,
-    pub retry_after: [f32; 5],
+    pub retry_after: std::collections::BTreeMap<usize, f32>,
     pub layout: u32,
 }
 impl Default for State {
     fn default() -> Self {
         Self {
-            schema: 1,
+            schema: 2,
             stores: vec![],
             shipments: vec![],
-            retry_after: [0.; 5],
+            retry_after: Default::default(),
             layout: 0,
         }
     }
@@ -303,7 +303,7 @@ pub fn sync(v: &mut Village) {
     if v.logistics.as_ref().unwrap().layout != stamp {
         let s = v.logistics.as_mut().unwrap();
         s.layout = stamp;
-        s.retry_after = [0.; 5];
+        s.retry_after.clear();
         for p in &mut s.stores {
             p.blocker = None;
         }
@@ -1274,9 +1274,10 @@ fn candidates(v: &Village) -> Vec<Candidate> {
     out
 }
 pub fn pending(v: &Village, id: usize) -> bool {
-    v.logistics
-        .as_ref()
-        .is_some_and(|s| v.minutes >= s.retry_after[id])
+    v.skills.people.contains_key(&id)
+        && v.logistics
+            .as_ref()
+            .is_some_and(|s| v.minutes >= s.retry_after.get(&id).copied().unwrap_or(0.))
         && !candidates(v).is_empty()
 }
 type Plan = (Candidate, [f32; 2], [f32; 2], navigation::Route, f32);
@@ -1502,7 +1503,11 @@ pub fn advance(
         .any(|h| h.resident == r.id)
         && !claim(v, r)
     {
-        v.logistics.as_mut().unwrap().retry_after[r.id] = v.minutes + 30.;
+        v.logistics
+            .as_mut()
+            .unwrap()
+            .retry_after
+            .insert(r.id, v.minutes + 30.);
         assign(
             r,
             v,
@@ -1643,15 +1648,15 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         return v.version == 3;
     };
     if v.version != SAVE_VERSION
-        || s.schema != 1
+        || s.schema != 2
         || s.stores.len() > 2048
-        || s.shipments.len() > 5
+        || s.shipments.len() > residents.len()
         || s.shipments
             .iter()
             .any(|h| h.amount == 0 || h.amount > LOAD || h.material >= COUNT)
-        || s.retry_after
-            .iter()
-            .any(|n| !n.is_finite() || *n < 0. || *n > v.minutes + 31.)
+        || s.retry_after.iter().any(|(id, n)| {
+            !v.skills.people.contains_key(id) || !n.is_finite() || *n < 0. || *n > v.minutes + 31.
+        })
     {
         return false;
     }
@@ -1798,7 +1803,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     let mut workers = std::collections::HashSet::new();
     let mut recoveries = std::collections::HashSet::new();
     for h in &s.shipments {
-        if h.resident >= 5
+        if !v.skills.people.contains_key(&h.resident)
             || !workers.insert(h.resident)
             || !recoveries.insert(h.recovery)
             || s.shipments
@@ -1858,7 +1863,7 @@ impl Game {
         };
         p.target = target;
         p.managed = true;
-        v.logistics.as_mut().unwrap().retry_after = [0.; 5];
+        v.logistics.as_mut().unwrap().retry_after.clear();
         "ok".into()
     }
     pub fn logistics_report(&self) -> String {
@@ -1989,6 +1994,20 @@ mod tests {
             }
         }
         panic!("supplied starter garden did not complete: {}", g.snapshot());
+    }
+    #[test]
+    fn sparse_retry_timers_hold_only_their_own_resident() {
+        let mut g = scene(5, 5);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.skills.people.insert(900, skills::Person::default());
+        assert!(pending(&v, 900));
+        let retry = v.minutes + 30.;
+        v.logistics.as_mut().unwrap().retry_after.insert(900, retry);
+        assert!(!pending(&v, 900));
+        assert!(pending(&v, 0));
+        assert!(!pending(&v, 1200));
+        v.minutes += 30.;
+        assert!(pending(&v, 900));
     }
     #[test]
     fn bounded_compost_inputs_arrive_before_optional_pantry_topups() {

@@ -66,7 +66,7 @@ fn a_saved_pot_commits_local_inputs_once_and_requires_attended_work() {
         assert_eq!(v.meals, 5);
         assert_eq!(food::pantry(&v, 0).unwrap().items[economy::MEALS], 5);
         assert_eq!(v.water, 39.);
-        assert_eq!(v.situations.cooking[0][r.id], 1);
+        assert_eq!(v.situations.cooking[0].get(&r.id).copied().unwrap_or(0), 1);
         assert_eq!(v.progress.scraps, 1);
         assert!(
             simulation::view(&v)["materials"]
@@ -239,7 +239,7 @@ fn incoming_pantry_supplies_leave_room_for_the_committed_pot() {
         sync(&mut v);
         assert_eq!(batch(&v, id).unwrap().phase, Phase::Complete);
         assert_eq!(v.meals, 5);
-        assert_eq!(v.situations.cooking[0][r.id], 1);
+        assert_eq!(v.situations.cooking[0].get(&r.id).copied().unwrap_or(0), 1);
         assert_eq!(v.water, 39.);
         assert_eq!(
             food::pantry(&v, 0).unwrap().items.iter().sum::<u32>(),

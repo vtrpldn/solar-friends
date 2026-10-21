@@ -403,7 +403,7 @@ mod tests {
         let s = v.situations.active.as_ref().unwrap();
         assert!(s.story_check_in);
         assert_eq!(s.resident, 2);
-        assert_eq!(v.situations.cooking, [[0; 5]; 3]);
+        assert!(v.situations.cooking.iter().all(|day| day.is_empty()));
         assert_eq!(v.situations.resolved_count, 0);
         assert_eq!(crate::situations::respond(&mut v, "day_off"), "ok");
         crate::situations::advance(&mut v, 1440.);
@@ -423,7 +423,11 @@ mod tests {
         v.mode = Mode::Story;
         v.progress.completed.fill(true);
         v.progress.later_completed[..7].fill(true);
-        v.situations.cooking = [[3, 0, 0, 0, 0], [3, 0, 0, 0, 0], [0; 5]];
+        v.situations.cooking = [
+            [(0, 3)].into_iter().collect(),
+            [(0, 3)].into_iter().collect(),
+            Default::default(),
+        ];
         crate::situations::advance(&mut v, 1.);
         let s = v.situations.active.as_ref().unwrap();
         assert_eq!(s.resident, 0);

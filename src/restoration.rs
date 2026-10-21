@@ -345,7 +345,7 @@ pub fn queue(v: &mut Village, x: i32, y: i32) -> Result<Id, String> {
     v.restoration.reverse();
     v.restoration.push(j);
     logistics::sync(v);
-    v.logistics.as_mut().unwrap().retry_after = [0.; 5];
+    v.logistics.as_mut().unwrap().retry_after.clear();
     Ok(id)
 }
 pub fn view(v: &Village) -> serde_json::Value {

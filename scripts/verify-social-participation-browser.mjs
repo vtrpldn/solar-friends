@@ -14,7 +14,7 @@ try{
  if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
  await page.locator('#dev-import-file').setInputFiles({name:'old-participation.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(legacy))});
  await page.waitForFunction(()=>window.solarDev.snapshot().village.events.at(-1)==='Legacy participation browser check');
- const after=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(after.village.version,41);assert.deepEqual(after.village.progress.hobby_people,[0,2,4]);assert.deepEqual(after.village.progress.social_people,[1,3]);
+ const after=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(after.village.version,42);assert.deepEqual(after.village.progress.hobby_people,[0,2,4]);assert.deepEqual(after.village.progress.social_people,[1,3]);
  for(const field of ['invited','attended','gathering_delivery'])assert.deepEqual(after.village.progress[field],source.village.progress[field]);
  assert.deepEqual(after.residents,source.residents);
  for(const field of ['economy','skills','workforce','simulation','logistics','supplies'])assert.deepEqual(after.village[field],source.village[field]);

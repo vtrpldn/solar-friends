@@ -24,7 +24,7 @@ function maintain(g,s){
  if(v.minutes-previous>=1440){lastCare.set(g,v.minutes);buyServiceParts(g,s);checkpoint(g,phase+' daily');}
  const care=v.situations.active;if(care&&care.resolved==null){
   if(care.response==null)assert.equal(g.respond_situation('share_shifts'),'ok');
-  const helper=s.residents.find(r=>r.id!==care.resident&&!r.trip&&!(care.helpers&(1<<r.id))&&(!r.help||r.help.finished!=null));
+  const helper=s.residents.find(r=>r.id!==care.resident&&!r.trip&&!care.helpers.includes(r.id)&&(!r.help||r.help.finished!=null));
   if(helper)g.request(helper.id,'cook',false);
  }
 }
