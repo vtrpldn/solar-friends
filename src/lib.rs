@@ -53,6 +53,7 @@ mod utilities;
 mod walking;
 mod water;
 mod workforce;
+mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
@@ -259,10 +260,6 @@ fn river_center(y: f32) -> f32 {
 fn river_bank(x: i32, y: i32) -> bool {
     x as f32 >= river_center(y as f32) - 2.3
 }
-fn hydro_site(x: i32, y: i32) -> bool {
-    let centre = river_center(y as f32);
-    x as f32 >= centre - 1.35 && (x as f32) < centre - 0.35
-}
 fn ready(v: &Village, kind: &str) -> bool {
     v.buildings
         .iter()
@@ -413,7 +410,7 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
         .filter(|index| index % 5 == id)
         .map(|index| (4.5 + (index % 7) as f32 * 3., 5.5 + (index / 7) as f32 * 3.))
         .filter(|&(x, y)| {
-            !river_bank(x as i32, y as i32)
+            !world::bank(v, x as i32, y as i32)
                 && v.buildings.iter().all(|b| {
                     (x - (b.x as f32 + 0.5)).abs() > 1.75 || (y - (b.y as f32 + 0.5)).abs() > 1.75
                 })
@@ -1012,7 +1009,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         }
         let d = (r.target_x - r.x).hypot(r.target_y - r.y);
         if d > 0.08 {
-            spacing::walk(&mut r, &neighbours, dt);
+            spacing::walk(&v, &mut r, &neighbours, dt);
             r.energy = (r.energy - dt * 0.035).max(0.);
             continue;
         }
@@ -1472,7 +1469,9 @@ impl Game {
             v.roads.remove(index);
             return "ok".into();
         }
-        if !(1..=MAP_SIZE - 2).contains(&x) || !(1..=MAP_SIZE - 2).contains(&y) || river_bank(x, y)
+        if !(1..=MAP_SIZE - 2).contains(&x)
+            || !(1..=MAP_SIZE - 2).contains(&y)
+            || world::bank(&v, x, y)
         {
             return "Place roads inside the lot, away from the riverbank.".into();
         }

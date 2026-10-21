@@ -51,7 +51,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         || v.roads.iter().any(|&(x, y)| {
             !(1..=MAP_SIZE - 2).contains(&x)
                 || !(1..=MAP_SIZE - 2).contains(&y)
-                || river_bank(x, y)
+                || crate::world::bank(v, x, y)
                 || !road_tiles.insert((x, y))
         })
     {
@@ -146,7 +146,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         || [v.camp.0, v.camp.1]
             .iter()
             .any(|n| !n.is_finite() || !(1.0..=(MAP_SIZE - 2) as f32).contains(n))
-        || river_bank(v.camp.0 as i32, v.camp.1 as i32)
+        || crate::world::bank(v, v.camp.0 as i32, v.camp.1 as i32)
         || save.residents.len() != 5
         || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
         || !v.minutes.is_finite()
@@ -226,9 +226,9 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
             || !(1..=MAP_SIZE - 2).contains(&b.x)
             || !(1..=MAP_SIZE - 2).contains(&b.y)
             || if b.kind == "hydro" {
-                !hydro_site(b.x, b.y)
+                !crate::world::hydro(v, b.x, b.y)
             } else {
-                river_bank(b.x, b.y)
+                !crate::world::inland_footprint(v, &b.kind, b.x, b.y)
             }
             || !b.progress.is_finite()
             || !(0.0..=100.).contains(&b.progress)

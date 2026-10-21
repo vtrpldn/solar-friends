@@ -1,5 +1,5 @@
 //! Player-established cultivation and finite extraction plots.
-use crate::{Game, MAP_SIZE, Resident, Village, economy, event, interactions, river_bank};
+use crate::{Game, MAP_SIZE, Resident, Village, economy, event, interactions};
 use wasm_bindgen::prelude::*;
 pub const LAND: [f32; 3] = [140., 96., 24.];
 pub fn default_land() -> [f32; 3] {
@@ -45,7 +45,7 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     if plot.iter().any(|&(plot_x, plot_y)| {
         !(1..MAP_SIZE - 1).contains(&plot_x)
             || !(1..MAP_SIZE - 1).contains(&plot_y)
-            || river_bank(plot_x, plot_y)
+            || crate::world::bank(v, plot_x, plot_y)
     }) {
         return Err("Choose an inland clearing inside the village.");
     }
@@ -324,7 +324,7 @@ pub fn valid(v: &Village) -> bool {
             if plot.iter().any(|&(plot_x, plot_y)| {
                 !(1..MAP_SIZE - 1).contains(&plot_x)
                     || !(1..MAP_SIZE - 1).contains(&plot_y)
-                    || river_bank(plot_x, plot_y)
+                    || crate::world::bank(v, plot_x, plot_y)
                     || ((plot_x as f32 - crate::camp(&v).0).abs() < 1.5
                         && (plot_y as f32 - crate::camp(&v).1).abs() < 1.5)
                     || v.roads.contains(&(plot_x, plot_y))

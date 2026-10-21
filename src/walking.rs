@@ -216,7 +216,7 @@ fn step(
         }
     };
     if (r.x - point[0]).hypot(r.y - point[1]) > 0.001 {
-        spacing::walk(r, neighbours, dt * speed);
+        spacing::walk(v, r, neighbours, dt * speed);
     }
     if !allowed([r.x, r.y]) || (r.x - old[0]).hypot(r.y - old[1]) < 0.00001 {
         (r.x, r.y) = (old[0], old[1]);

@@ -76,7 +76,7 @@ pub(crate) fn clear(v: &Village, x: i32, y: i32) -> bool {
     base_clear(v, x, y) && !crate::power::batteries::reserved(v, x, y, None)
 }
 pub(crate) fn base_clear(v: &Village, x: i32, y: i32) -> bool {
-    !river_bank(x, y) && unoccupied(v, x, y)
+    !crate::world::bank(v, x, y) && unoccupied(v, x, y)
 }
 fn unoccupied(v: &Village, x: i32, y: i32) -> bool {
     (1..MAP_SIZE - 1).contains(&x)

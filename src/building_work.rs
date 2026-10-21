@@ -81,9 +81,9 @@ pub fn placement(
         || x + radius >= MAP_SIZE
         || y + radius >= MAP_SIZE
         || if kind == "hydro" {
-            !hydro_site(x, y)
+            !crate::world::hydro(v, x, y)
         } else {
-            river_bank(x + radius - 1, y)
+            !crate::world::inland_footprint(v, kind, x, y)
         }
     {
         return Err(if kind == "hydro" {

@@ -32,6 +32,8 @@ pub struct Map {
     pub camp: [i32; 2],
     pub camera: [f32; 2],
     pub clearings: Vec<Clearing>,
+    #[serde(default = "world::default_river")]
+    pub river: Option<world::River>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -210,6 +212,7 @@ impl Definition {
                 id: "founding-property".into(),
                 revision: 1,
                 generator: "property-v1".into(),
+                river: world::default_river(),
                 width: MAP_SIZE,
                 height: MAP_SIZE,
                 seed: simulation::State::default().seed,

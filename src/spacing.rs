@@ -3,6 +3,7 @@ use super::*;
 
 pub const PERSONAL_SPACE: f32 = 1.1;
 
+#[cfg(test)]
 pub fn land(x: f32, y: f32) -> bool {
     (0.3..=MAP_SIZE as f32 - 0.3).contains(&x)
         && (0.3..=MAP_SIZE as f32 - 0.3).contains(&y)
@@ -48,7 +49,7 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
             let p = (x + radius * angle.cos(), y + radius * angle.sin());
             if navigation::clear(v, p.0, p.1)
                 && navigation::exit_segment(v, [x, y], [p.0, p.1])
-                && !river_bank(p.0.floor() as i32, p.1.floor() as i32)
+                && !world::bank(v, p.0.floor() as i32, p.1.floor() as i32)
                 && v.buildings.iter().all(|b| clear_plot(b, p.0, p.1))
                 && spots
                     .iter()
@@ -106,7 +107,7 @@ pub fn building(r: &Resident, v: &Village) -> Option<usize> {
     })
 }
 
-pub fn walk(r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) {
+pub fn walk(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) {
     let dx = r.target_x - r.x;
     let dy = r.target_y - r.y;
     let distance = dx.hypot(dy);
@@ -138,15 +139,15 @@ pub fn walk(r: &mut Resident, neighbours: &[(usize, f32, f32)], dt: f32) {
     let step = (dt * 0.7).min(distance);
     let p = (r.x + sx / length * step, r.y + sy / length * step);
     let direct = (r.x + ux * step, r.y + uy * step);
-    if land(p.0, p.1) {
+    if world::walkable(v, p.0, p.1) {
         (r.x, r.y) = p;
-    } else if land(direct.0, direct.1) {
+    } else if world::walkable(v, direct.0, direct.1) {
         (r.x, r.y) = direct;
-    } else if land(direct.0, r.y) {
+    } else if world::walkable(v, direct.0, r.y) {
         // Follow a bank corner along one axis rather than waiting forever for
         // a diagonal step to cross a non-land tile.
         r.x = direct.0;
-    } else if land(r.x, direct.1) {
+    } else if world::walkable(v, r.x, direct.1) {
         r.y = direct.1;
     }
 }
@@ -168,7 +169,7 @@ mod tests {
             if (r.x - r.target_x).hypot(r.y - r.target_y) < 0.08 {
                 break;
             }
-            walk(&mut r, &[], 0.25);
+            walk(&Village::default(), &mut r, &[], 0.25);
             assert!(land(r.x, r.y));
         }
         assert!((r.x - r.target_x).hypot(r.y - r.target_y) < 0.08);
@@ -311,7 +312,7 @@ mod tests {
             let neighbours: Vec<_> = people.iter().map(|r| (r.id, r.x, r.y)).collect();
             for r in &mut people {
                 if (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08 {
-                    walk(r, &neighbours, 0.25);
+                    walk(&Village::default(), r, &neighbours, 0.25);
                 }
             }
             closest = closest.min((people[0].x - people[1].x).hypot(people[0].y - people[1].y));

@@ -18,7 +18,7 @@ fn source_clear(s: &economy::Source, x: f32, y: f32) -> bool {
 pub fn clear(v: &Village, x: f32, y: f32) -> bool {
     x.is_finite()
         && y.is_finite()
-        && spacing::land(x, y)
+        && world::walkable(v, x, y)
         && power::batteries::clear_at(v, x, y)
         && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y))
         && v.economy
@@ -42,7 +42,7 @@ fn departure_path(v: &Village, path: &[[f32; 2]]) -> bool {
     if path.iter().flatten().any(|n| !n.is_finite()) {
         return false;
     }
-    let mut land = spacing::land(from[0], from[1]);
+    let mut land = world::walkable(v, from[0], from[1]);
     if !land
         && !v
             .buildings
@@ -63,7 +63,7 @@ fn departure_path(v: &Village, path: &[[f32; 2]]) -> bool {
             *out |= !bounds.contains(to);
         }
         for [x, y] in geometry::land_points(from, to) {
-            if spacing::land(x, y) {
+            if world::walkable(v, x, y) {
                 land = true;
             } else if land {
                 return false;
@@ -124,7 +124,7 @@ pub(crate) fn segment(v: &Village, a: [f32; 2], b: [f32; 2]) -> bool {
         && geometry::obstacles(v).all(|bounds| !bounds.intersects(a, b))
         && geometry::land_points(a, b)
             .into_iter()
-            .all(|p| spacing::land(p[0], p[1]))
+            .all(|p| world::walkable(v, p[0], p[1]))
 }
 fn point(cell: usize) -> [f32; 2] {
     [

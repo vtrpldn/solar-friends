@@ -87,7 +87,7 @@ fn target(v: &Village, x: i32, y: i32) -> Result<Job, &'static str> {
         for b in j.y - j.size / 2..j.y - j.size / 2 + j.size {
             if !(0..MAP_SIZE).contains(&a)
                 || !(0..MAP_SIZE).contains(&b)
-                || river_bank(a, b)
+                || crate::world::bank(v, a, b)
                 || v.roads.contains(&(a, b))
                 || building_work::reserved(v, a, b, None)
                 || power::batteries::reserved(v, a, b, None)
@@ -416,7 +416,7 @@ pub fn valid(v: &Village) -> bool {
                         p.active
                             && Some(i) != j.source
                             && contains(resource_sites::size(p.material), p.x, p.y, a, b)
-                    }) || river_bank(a, b)
+                    }) || crate::world::bank(v, a, b)
                         || !(0..MAP_SIZE).contains(&a)
                         || !(0..MAP_SIZE).contains(&b)
                         || v.roads.contains(&(a, b))

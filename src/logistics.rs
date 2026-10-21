@@ -781,7 +781,7 @@ fn doorway(v: &Village, p: &Store, to: [f32; 2]) -> bool {
         let t = i as f32 / steps as f32;
         let x = p.x + (to[0] - p.x) * t;
         let y = p.y + (to[1] - p.y) * t;
-        (spacing::land(x, y) || river_structure)
+        (world::walkable(v, x, y) || river_structure)
             && v.buildings
                 .iter()
                 .filter(|b| !matches!(p.owner,Owner::Site(id)|Owner::Warehouse(id)|Owner::Pantry(id) if id==b.id)
@@ -1458,7 +1458,7 @@ fn walk(
         1.
     };
     if (r.x - target[0]).hypot(r.y - target[1]) > 0.001 {
-        spacing::walk(r, neighbours, dt * speed);
+        spacing::walk(v, r, neighbours, dt * speed);
     }
     if !navigation::segment(v, [old.0, old.1], [r.x, r.y])
         || !navigation::segment(v, [r.x, r.y], target)

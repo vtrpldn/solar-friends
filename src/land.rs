@@ -1,5 +1,7 @@
 //! Seeded ground and persistent, spatially bounded extraction reserves.
-use crate::{Game, MAP_SIZE, Village, interactions, resource_sites, river_bank, simulation};
+#[cfg(test)]
+use crate::river_bank;
+use crate::{Game, MAP_SIZE, Village, interactions, resource_sites, simulation};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 mod habitat;
@@ -96,7 +98,7 @@ pub fn initialise(v: &mut Village) -> bool {
     }
     let mut state = State {
         schema: 3,
-        vegetation: vegetation::generate(v.simulation.seed),
+        vegetation: vegetation::generate_for(v),
         water: vec![0.; (MAP_SIZE * MAP_SIZE) as usize],
         seed: v.simulation.seed,
         ..State::default()
@@ -175,7 +177,7 @@ pub fn initialise(v: &mut Village) -> bool {
 pub fn reseed(v: &mut Village, seed: u32) {
     v.simulation.seed = seed;
     v.land.seed = seed;
-    v.land.vegetation = vegetation::generate(seed);
+    v.land.vegetation = vegetation::generate_for(v);
     vegetation::rebuild(v);
     for (i, d) in v.land.deposits.iter_mut().enumerate() {
         d.maximum = quantities(seed, d.material)[i % 3];
@@ -240,7 +242,7 @@ pub fn ground(v: &Village, x: i32, y: i32) -> Ground {
     let index = (y * MAP_SIZE + x) as u32;
     let starter = (4..=16).contains(&x) && (4..=16).contains(&y);
     let sample = |domain| simulation::sample(v.land.seed, domain, index) as f64 / u32::MAX as f64;
-    let profile = habitat(v.land.seed, x as f32, y as f32);
+    let profile = habitat::for_village(v, x as f32, y as f32);
     let base_fertility = if starter {
         0.72
     } else {
@@ -284,7 +286,10 @@ pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
     let impact = if crate::sandbox::land(v) { impact } else { 0. };
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
-            if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
+            if !(0..MAP_SIZE).contains(&a)
+                || !(0..MAP_SIZE).contains(&b)
+                || crate::world::bank(v, a, b)
+            {
                 continue;
             }
             if let Some(s) = v.land.soil.iter_mut().find(|s| s.x == a && s.y == b) {
@@ -309,7 +314,10 @@ pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
 pub fn restore_soil(v: &mut Village, n: i32, x: i32, y: i32, fraction: f32) {
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
-            if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
+            if !(0..MAP_SIZE).contains(&a)
+                || !(0..MAP_SIZE).contains(&b)
+                || crate::world::bank(v, a, b)
+            {
                 continue;
             }
             if !v.land.soil.iter().any(|s| s.x == a && s.y == b) {
@@ -365,7 +373,7 @@ pub fn valid(v: &Village) -> bool {
     for s in &v.land.soil {
         if !(0..MAP_SIZE).contains(&s.x)
             || !(0..MAP_SIZE).contains(&s.y)
-            || river_bank(s.x, s.y)
+            || crate::world::bank(v, s.x, s.y)
             || last.is_some_and(|key| key >= (s.y, s.x))
             || !s.nutrients.is_finite()
             || !(0.0..=1.25).contains(&s.nutrients)
@@ -390,7 +398,7 @@ pub fn valid(v: &Village) -> bool {
 pub fn view(v: &Village) -> serde_json::Value {
     let cells: Vec<_> = (0..MAP_SIZE)
         .flat_map(|y| (0..MAP_SIZE).map(move |x| (x, y)))
-        .filter(|&(x, y)| !river_bank(x, y))
+        .filter(|&(x, y)| !crate::world::bank(v, x, y))
         .map(|(x, y)| serde_json::json!({"x":x,"y":y,"ground":ground(v,x,y)}))
         .collect();
     serde_json::json!({"seed":v.land.seed,"revision":v.land.revision,"deposits":v.land.deposits,"cells":cells})
@@ -425,7 +433,10 @@ impl Game {
         let mut rows = vec![];
         for a in x - n / 2..x - n / 2 + n {
             for b in y - n / 2..y - n / 2 + n {
-                if !(0..MAP_SIZE).contains(&a) || !(0..MAP_SIZE).contains(&b) || river_bank(a, b) {
+                if !(0..MAP_SIZE).contains(&a)
+                    || !(0..MAP_SIZE).contains(&b)
+                    || crate::world::bank(v, a, b)
+                {
                     return "{}".into();
                 }
                 rows.push(ground(v, a, b));

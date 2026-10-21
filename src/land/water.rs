@@ -8,17 +8,22 @@ pub struct RootZone {
     pub covered: bool,
 }
 
-fn cells(n: i32, x: i32, y: i32) -> impl Iterator<Item = (i32, i32)> {
+fn cells(v: &Village, n: i32, x: i32, y: i32) -> std::vec::IntoIter<(i32, i32)> {
     let valid = (1..MAP_SIZE - 1).contains(&x) && (1..MAP_SIZE - 1).contains(&y);
     let (x, y) = if valid { (x, y) } else { (0, 0) };
     (x - n / 2..x - n / 2 + n)
         .flat_map(move |a| (y - n / 2..y - n / 2 + n).map(move |b| (a, b)))
         .filter(move |&(a, b)| {
-            valid && (0..MAP_SIZE).contains(&a) && (0..MAP_SIZE).contains(&b) && !river_bank(a, b)
+            valid
+                && (0..MAP_SIZE).contains(&a)
+                && (0..MAP_SIZE).contains(&b)
+                && !crate::world::bank(v, a, b)
         })
+        .collect::<Vec<_>>()
+        .into_iter()
 }
 pub fn wetness(v: &Village, n: i32, x: i32, y: i32) -> f32 {
-    let values: Vec<_> = cells(n, x, y)
+    let values: Vec<_> = cells(v, n, x, y)
         .map(|(a, b)| v.land.water[(b * MAP_SIZE + a) as usize])
         .collect();
     if values.is_empty() {
@@ -28,7 +33,7 @@ pub fn wetness(v: &Village, n: i32, x: i32, y: i32) -> f32 {
     }
 }
 pub fn water_plot(v: &mut Village, n: i32, x: i32, y: i32, wetness: f32) {
-    for (a, b) in cells(n, x, y) {
+    for (a, b) in cells(v, n, x, y) {
         v.land.water[(b * MAP_SIZE + a) as usize] = wetness.clamp(0., 1.);
     }
     v.land.revision = v.land.revision.saturating_add(1);
@@ -100,7 +105,7 @@ pub fn plot_water(v: &mut Village, n: i32, x: i32, y: i32, minutes: f32, profile
     let mut wet = 0.;
     let mut count = 0;
     let weather = crate::climate::at(v, v.minutes);
-    for (a, b) in cells(n, x, y) {
+    for (a, b) in cells(v, n, x, y) {
         wet += step_cell(v, a, b, minutes, profile, weather);
         count += 1;
     }
@@ -117,7 +122,7 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
         if b.progress < 100. {
             continue;
         }
-        for (x, y) in cells(interactions::footprint_size(&b.kind), b.x, b.y) {
+        for (x, y) in cells(v, interactions::footprint_size(&b.kind), b.x, b.y) {
             let i = (y * MAP_SIZE + x) as usize;
             tended[i] = ecology::farm(b) || b.kind == "orchard";
             covered[i] = !matches!(
@@ -128,7 +133,7 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
     }
     for s in &v.economy.sources {
         if s.active && s.material < 2 {
-            for (x, y) in cells(resource_sites::size(s.material), s.x, s.y) {
+            for (x, y) in cells(v, resource_sites::size(s.material), s.x, s.y) {
                 tended[(y * MAP_SIZE + x) as usize] = true;
             }
         }
@@ -136,7 +141,7 @@ pub fn advance_fallow(v: &mut Village, minutes: f32) {
     for y in 0..MAP_SIZE {
         for x in 0..MAP_SIZE {
             let i = (y * MAP_SIZE + x) as usize;
-            if !tended[i] && !river_bank(x, y) {
+            if !tended[i] && !crate::world::bank(v, x, y) {
                 step_cell(
                     v,
                     x,
@@ -162,7 +167,9 @@ pub fn moisture_valid(v: &Village) -> bool {
                 && (*n == 0. || {
                     let x = i as i32 % MAP_SIZE;
                     let y = i as i32 / MAP_SIZE;
-                    (0..MAP_SIZE).contains(&x) && (0..MAP_SIZE).contains(&y) && !river_bank(x, y)
+                    (0..MAP_SIZE).contains(&x)
+                        && (0..MAP_SIZE).contains(&y)
+                        && !crate::world::bank(v, x, y)
                 })
         })
         && v.buildings
@@ -197,8 +204,8 @@ pub fn moisture_valid(v: &Village) -> bool {
 pub fn condition(v: &Village, n: i32, x: i32, y: i32) -> Ground {
     if !crate::sandbox::land(v) {
         return Ground {
-            biome: habitat(v.land.seed, x as f32, y as f32).0,
-            geology: habitat(v.land.seed, x as f32, y as f32).1,
+            biome: habitat::for_village(v, x as f32, y as f32).0,
+            geology: habitat::for_village(v, x as f32, y as f32).1,
             fertility: 0.72,
             retention: 1.,
             cover: 0.35,
@@ -209,8 +216,8 @@ pub fn condition(v: &Village, n: i32, x: i32, y: i32) -> Ground {
         };
     }
     let mut out = Ground {
-        biome: habitat(v.land.seed, x as f32, y as f32).0,
-        geology: habitat(v.land.seed, x as f32, y as f32).1,
+        biome: habitat::for_village(v, x as f32, y as f32).0,
+        geology: habitat::for_village(v, x as f32, y as f32).1,
         fertility: 0.,
         retention: 0.,
         cover: 0.,
@@ -220,7 +227,7 @@ pub fn condition(v: &Village, n: i32, x: i32, y: i32) -> Ground {
         shade: 0.,
     };
     let mut count = 0.;
-    for (a, b) in cells(n, x, y) {
+    for (a, b) in cells(v, n, x, y) {
         let g = ground(v, a, b);
         count += 1.;
         out.fertility += g.fertility;
@@ -296,7 +303,7 @@ pub fn harvest_soil(v: &mut Village, n: i32, x: i32, y: i32, compost: bool) {
     if !crate::sandbox::land(v) {
         return;
     }
-    for (a, b) in cells(n, x, y) {
+    for (a, b) in cells(v, n, x, y) {
         if !v.land.soil.iter().any(|s| s.x == a && s.y == b) {
             let g = ground(v, a, b);
             v.land.soil.push(Soil {

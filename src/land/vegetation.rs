@@ -134,8 +134,18 @@ pub fn clear(v: &mut Village, n: i32, x: i32, y: i32) {
         rebuild(v);
     }
 }
+pub fn generate_for(v: &Village) -> Vec<Tree> {
+    let mut trees = generate(v.simulation.seed);
+    if v.scenario.as_ref().is_some_and(|o| {
+        o.definition.map.river.as_ref().map(|r| &r.centers)
+            != crate::world::default_river().as_ref().map(|r| &r.centers)
+    }) {
+        trees.retain(|t| !crate::world::bank(v, t.x.floor() as i32, t.y.floor() as i32));
+    }
+    trees
+}
 pub fn valid(v: &Village) -> bool {
-    let expected = generate(v.land.seed);
+    let expected = generate_for(v);
     expected.len() == v.land.vegetation.len()
         && expected.iter().zip(&v.land.vegetation).all(|(a, b)| {
             a.index == b.index

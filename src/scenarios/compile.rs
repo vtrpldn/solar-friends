@@ -33,8 +33,11 @@ pub(super) fn check(d: &Definition) -> Report {
             "This game version supports 64 by 64 properties using its current landscape generator.",
         );
     }
+    if !world::valid(&d.map.river) {
+        r.push("map.river", "invalid_river", "Use a supported perennial river with 64 finite row centers and a connected course, or no river.");
+    }
     if d.map.camp.iter().any(|n| !(8..=MAP_SIZE - 8).contains(n))
-        || river_bank(d.map.camp[0], d.map.camp[1])
+        || world::bank_in(&d.map, d.map.camp[0], d.map.camp[1])
     {
         r.push(
             "map.camp",
@@ -247,6 +250,11 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         events: vec![d.description.clone()],
         ..Default::default()
     };
+    v.scenario = Some(Origin {
+        schema: SCHEMA,
+        definition: d.clone(),
+        buildings: BTreeMap::new(),
+    });
     v.simulation.seed = d.map.seed;
     let mut buildings = BTreeMap::new();
     for (i, b) in d.start.buildings.iter().enumerate() {
@@ -305,7 +313,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     for (i, &[x, y]) in d.start.roads.iter().enumerate() {
         if !(1..MAP_SIZE - 1).contains(&x)
             || !(1..MAP_SIZE - 1).contains(&y)
-            || river_bank(x, y)
+            || world::bank(&v, x, y)
             || !roads.insert([x, y])
             || v.buildings.iter().any(|b| interactions::occupies(b, x, y))
         {

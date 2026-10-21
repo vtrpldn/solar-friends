@@ -877,7 +877,7 @@ pub fn valid(v: &Village) -> bool {
         if cells.iter().any(|c| {
             !(1..MAP_SIZE - 1).contains(&c[0])
                 || !(1..MAP_SIZE - 1).contains(&c[1])
-                || river_bank(c[0], c[1])
+                || world::bank(v, c[0], c[1])
                 || !seen.insert(*c)
                 || p.live() && !utilities::clear(v, c[0], c[1])
         }) || cells

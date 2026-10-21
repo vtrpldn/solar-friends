@@ -463,7 +463,7 @@ pub fn valid(v: &Village) -> bool {
     v.power.network.nodes.iter().all(|n| {
         (matches!(n.owner, Owner::Ground | Owner::Carrier(_))
             && n.size == 1
-            && !river_bank(n.x, n.y))
+            && !crate::world::bank(v, n.x, n.y))
             || wanted.iter().any(|&(owner, kind, x, y, size, capacity)| {
                 (n.owner, n.kind, n.x, n.y, n.size, n.capacity)
                     == (owner, kind, x, y, size, capacity)

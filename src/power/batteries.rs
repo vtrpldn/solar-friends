@@ -456,12 +456,13 @@ pub fn valid(v: &Village) -> bool {
             || j.carrier.is_some_and(|id| id >= 5)
             || (j.action == Action::Move) != j.destination.is_some()
             || j.destination.is_some_and(|d| {
-                d.iter().any(|n| !(1..MAP_SIZE - 1).contains(n)) || river_bank(d[0], d[1])
+                d.iter().any(|n| !(1..MAP_SIZE - 1).contains(n))
+                    || crate::world::bank(v, d[0], d[1])
             })
             || j.recovered > 1
             || (j.recovered > 0 && (j.action != Action::Salvage || j.phase != Phase::Complete))
             || j.origin.iter().any(|n| !(1..MAP_SIZE - 1).contains(n))
-            || river_bank(j.origin[0], j.origin[1])
+            || crate::world::bank(v, j.origin[0], j.origin[1])
             || (j.phase == Phase::Carrying) != j.carrier.is_some()
         {
             return false;

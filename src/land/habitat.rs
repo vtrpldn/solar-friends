@@ -2,9 +2,24 @@
 use crate::river_center;
 /// Name, substrate, fertility, water retention and living ground cover.
 pub fn habitat(seed: u32, x: f32, y: f32) -> (&'static str, &'static str, f32, f32, f32) {
+    profile(seed, x, y, Some(river_center(y)))
+}
+pub fn for_village(
+    v: &crate::Village,
+    x: f32,
+    y: f32,
+) -> (&'static str, &'static str, f32, f32, f32) {
+    profile(v.land.seed, x, y, crate::world::center(v, y))
+}
+fn profile(
+    seed: u32,
+    x: f32,
+    y: f32,
+    river: Option<f32>,
+) -> (&'static str, &'static str, f32, f32, f32) {
     let phase = (seed % 997) as f32 / 997. * std::f32::consts::TAU;
     let wave = (y * 0.13 + phase).sin() * 2.;
-    if x > river_center(y) - 4.5 {
+    if river.is_some_and(|center| (x - center).abs() < 4.5) {
         ("River meadow", "Alluvial silt", 0.88, 1.32, 0.85)
     } else if x > 21. + wave * 0.6 && (8.0..20.).contains(&y) {
         ("Rocky woodland", "Granite and quartz", 0.44, 0.70, 0.36)

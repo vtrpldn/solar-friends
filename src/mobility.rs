@@ -30,7 +30,7 @@ pub fn departure_time(minutes: f32) -> bool {
 pub fn gate(v: &Village, id: usize) -> (f32, f32) {
     let preferred = crate::camp(v).1 + (id as f32 - 2.) * 1.25;
     let clear =
-        |x, y| spacing::land(x, y) && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y));
+        |x, y| world::walkable(v, x, y) && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y));
     for offset in 0..MAP_SIZE {
         for sign in [1., -1.] {
             let y = preferred + offset as f32 * sign;
@@ -192,7 +192,7 @@ pub fn advance(
             }
         }
     } else if (r.target_x - r.x).hypot(r.target_y - r.y) > 0.08 {
-        spacing::walk(r, neighbours, dt);
+        spacing::walk(v, r, neighbours, dt);
         r.energy = (r.energy - dt * 0.035).max(0.);
         r.hunger = (r.hunger + dt * 0.13).min(100.);
         r.social = (r.social - dt * 0.035).max(0.);
