@@ -4,7 +4,7 @@ export async function checkCultivationControls({page,saved,capture}){
   async function load(name){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/cultivation/${name}.json`);
-    await page.waitForFunction(name=>{const v=window.solarDev.snapshot().village;return v.version===29&&(name==='shade'?v.buildings.some(b=>b.kind==='solar_farm')&&v.buildings.some(b=>b.kind==='grove'):v.buildings.some(b=>b.kind==='garden'&&b.crop.planted)&&v.land.soil.some(s=>s.nutrients<.5));},name);
+    await page.waitForFunction(name=>{const v=window.solarDev.snapshot().village;return v.version===30&&(name==='shade'?v.buildings.some(b=>b.kind==='solar_farm')&&v.buildings.some(b=>b.kind==='grove'):v.buildings.some(b=>b.kind==='garden'&&b.crop.planted)&&v.land.soil.some(s=>s.nutrients<.5));},name);
     await page.locator('#dev-close').click();
     await page.locator('#center').click();
   }

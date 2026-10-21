@@ -1,5 +1,7 @@
 // Explicit fixture authoring only. Playable saves retain their located ownership.
 export function resetMaterialLocations(state) {
+  // Deliberate fixture reconstruction must not impersonate the source scenario.
+  delete state.village.scenario;
   if(state.village.maintenance?.jobs?.some(j=>j.finished==null))throw new Error('Finish or cancel equipment service before restaging a material fixture.');
   state.village.maintenance={schema:1,enabled:false,records:[],jobs:[]};
   state.village.market={schema:1,enabled:false,last_period:0,used:0};

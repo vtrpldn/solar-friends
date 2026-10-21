@@ -212,7 +212,8 @@ impl Game {
     }
     pub fn set_simulation_seed(&mut self, seed: u32) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if v.arrived
+        if v.scenario.is_some()
+            || v.arrived
             || v.minutes != 480.
             || !v.buildings.is_empty()
             || !v.economy.sources.is_empty()

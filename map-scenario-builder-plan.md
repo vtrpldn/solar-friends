@@ -4,7 +4,7 @@ description: Build player-facing map, scenario, and resident creators on shared 
 
 # Map and scenario builder implementation plan
 
-Status: proposed implementation plan. Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and player-created residents. The original five friends remain a ready-made cast.
+Status: implementation in progress. Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and player-created residents. The original five friends remain a ready-made cast.
 
 ## Why
 
@@ -339,3 +339,23 @@ Stages 0 and 1 establish the contract; Stage 2 makes it visible and useful immed
 After the schema and compiler contract settle, renderer/editor work, resident foundations and art prototypes, objective evaluation, and persistence work can proceed in parallel behind those interfaces. Complete the roster contract before population-dependent scenario rules. Deliver each slice with tests and a small ready commit; avoid combining the renderer extraction, world rewrite, character migration, and quest rewrite into a single change.
 
 The highest-risk dependencies are arbitrary river geometry, initialization of owned supplies and equipment, stable resident identity across existing systems, consistent modular character animation, persisted objective/event semantics, and isolation of drafts from runs. Prove each with a small end-to-end example before expanding its palette. Custom residents and the required population generalization are part of this release. Defer unlimited populations, life-stage simulation, new terrain physics, arbitrary imported art, online services, and full campaign migration until the complete local creation loop is reliable.
+
+## Implementation progress
+
+The complete release scope above remains the objective. The native foundation is implemented; the player workspace and subsequent content systems are still required.
+
+| Stage | Current state | Evidence and remaining work |
+| --- | --- | --- |
+| 0 Baseline and contracts | In progress | The pre-change native baseline passed 513 tests. Current Story/Sandbox starting quantities, ownership, camp, and buildings are covered by compiler regression tests. Biome art samples and character composition prototypes remain open. |
+| 1 Shared definitions and compilation | Implemented for current default geography | `src/scenarios/` defines and validates versioned authoring data, catalogs, frozen run provenance, and stable building references. `src/initialization.rs` assembles fresh worlds; `src/persistence.rs` validates saves before installation. Story/Sandbox starts and the fresh-arrival/Sandbox-planning developer scenes use this path. The current engine passes 518 native tests, `verify-scenario-compiler.mjs`, `verify-centered-starts.mjs` (39 scenes), and `verify-modes.mjs`. |
+| 2 Player editor and isolated testing | Pending | Player entry point, shared rendering/input boundaries, project repository, transactions, recovery, and edit/test navigation. |
+| 3 Geography and three biomes | Pending | Explicit world geometry, resolved authored land, optional rivers, three complete biome/climate/species profiles, assets, and editing tools. The initial compiler currently accepts the pinned default generator only. |
+| 4 Resident creator | Pending | Stable roster identities, replacement of five-person assumptions, appearance parts/composition, creator, and character presets. |
+| 5 Settlement and rules authoring | Pending | Full starting-state controls, utilities, farming/animal configuration, located liquid supplies, and population-aware feedback. The native compiler already supports buildings/blueprints, house appearances, roads, located material supplies, and rule profiles. |
+| 6 Goals and events | Pending | Authored goals, event ledger, journal editor, role bindings, and Story adapter. |
+| 7 Library and sharing | Pending | Durable project/resident/scenario library, frozen releases, independent runs, import/export, and recovery. |
+| 8 Examples and release quality | Pending | Three biome scenarios, custom-cast examples, desktop user journeys, full visual review, long simulations, and measured release limits. |
+
+Playable saves now use version 30; version 29 villages migrate without changing their existing camp or ownership. Authoring schema 1 is separate from the save schema. Authored content currently passes through `scenario_template`, `scenario_catalog`, `validate_scenario`, and `load_scenario`; it does not pass through development-fixture restaging. Starting gifted buildings have no paid-material salvage credit.
+
+The local WASM baseline at the start of implementation sampled 300 steps per scene: median tick/full-snapshot/frame-sample times were 1.49/2.53/0.15 ms for arrival, 2.66/2.61/0.35 ms for the established village, and 1.47/2.38/0.29 ms for autonomy. This single run shared the machine with native tests and is a comparison reference, not a desktop frame-rate or final performance result.

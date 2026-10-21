@@ -15,7 +15,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -58,6 +58,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         return None;
     }
     if !logistics::valid(v, &save.residents)
+        || !scenarios::valid_origin(v)
         || !workforce::valid(v)
         || !skills::valid(v)
         || !market::valid(v)

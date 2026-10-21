@@ -1,6 +1,7 @@
 //! Existing property handed to the group when a new game mode begins.
 use crate::*;
 
+#[cfg(test)]
 pub fn start(v: &mut Village) {
     let (cx, cy) = crate::camp(v);
     land::disturb_plot(v, 10, cx as i32, cy as i32, 0.05);

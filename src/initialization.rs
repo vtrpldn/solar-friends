@@ -4,6 +4,7 @@ use crate::*;
 impl Default for Village {
     fn default() -> Self {
         Self {
+            scenario: None,
             mode: modes::Mode::Story,
             sandbox_rules: sandbox::Rules::default(),
             simulation: simulation::State::default(),
@@ -100,17 +101,109 @@ pub(crate) fn founding_residents(camp: (f32, f32)) -> Vec<Resident> {
 }
 
 /// Domain state is assembled before the new ECS instance becomes observable.
-pub(crate) fn create(mut village: Village, residents: Vec<Resident>) -> Result<Game, String> {
-    simulation::start_materials(&mut village);
+pub(crate) fn create(village: Village, residents: Vec<Resident>) -> Result<Game, String> {
+    build(village, residents, None).map_err(|report| report.issues[0].message.clone())
+}
+
+pub(crate) struct OpeningStore {
+    pub owner: logistics::Owner,
+    pub items: economy::Bundle,
+    pub path: String,
+}
+
+pub(crate) fn create_authored(
+    village: Village,
+    residents: Vec<Resident>,
+    opening: &[OpeningStore],
+) -> Result<Game, scenarios::Report> {
+    build(village, residents, Some(opening))
+}
+
+fn build(
+    mut village: Village,
+    residents: Vec<Resident>,
+    opening: Option<&[OpeningStore]>,
+) -> Result<Game, scenarios::Report> {
+    use scenarios::Report;
     if !land::initialise(&mut village) {
-        return Err("The starting land could not be initialized.".into());
+        return Err(Report::error(
+            "map",
+            "invalid_land",
+            "The starting land could not be initialized.",
+        ));
+    }
+    if let Some(origin) = &village.scenario {
+        let clearings = origin.definition.map.clearings.clone();
+        for c in clearings {
+            land::disturb_plot(&mut village, c.size, c.x, c.y, c.disturbance);
+        }
+        let buildings = village.buildings.clone();
+        for b in buildings.iter().filter(|b| b.progress >= 100.) {
+            land::disturb(&mut village, &b.kind, b.x, b.y);
+        }
+        for (x, y) in village.roads.clone() {
+            land::disturb_plot(&mut village, 1, x, y, 0.18);
+        }
     }
     if !logistics::initialise(&mut village) {
-        return Err("Starting supplies do not fit the available storage.".into());
+        return Err(Report::error(
+            "start.inventories",
+            "storage_capacity",
+            "Starting supplies do not fit the available storage.",
+        ));
     }
     production::sync(&mut village);
+    if let Some(opening) = opening {
+        for inventory in opening {
+            let Some(store) = village
+                .logistics
+                .as_mut()
+                .unwrap()
+                .stores
+                .iter_mut()
+                .find(|p| p.owner == inventory.owner)
+            else {
+                return Err(Report::error(
+                    &inventory.path,
+                    "incompatible_store",
+                    "This building does not provide the selected supply storage. Choose a completed storage house, pantry, or project site.",
+                ));
+            };
+            if inventory.items.iter().sum::<u32>() > store.capacity {
+                return Err(Report::error(
+                    &inventory.path,
+                    "storage_capacity",
+                    "Reduce these supplies or assign them to additional storage.",
+                ));
+            }
+            store.items = inventory.items;
+            for (i, n) in store.items.into_iter().enumerate() {
+                freshness::add(&mut store.food_lots, i, n, village.minutes);
+            }
+        }
+        logistics::sync_totals(&mut village);
+        if economy::storage(&village) > economy::capacity(&village) {
+            return Err(Report::error(
+                "start.inventories",
+                "storage_capacity",
+                "Add general storage or reduce the village's combined starting supplies.",
+            ));
+        }
+        if !power::initialise(&mut village) {
+            return Err(Report::error(
+                "start.buildings",
+                "invalid_equipment",
+                "The starting electrical equipment could not be initialized.",
+            ));
+        }
+    }
+    simulation::start_materials(&mut village);
     if !water::initialise(&mut village) {
-        return Err("Starting water does not fit compatible tanks.".into());
+        return Err(Report::error(
+            "start.fresh_water",
+            "water_capacity",
+            "Starting water does not fit compatible tanks.",
+        ));
     }
     maintenance::sync(&mut village);
     let mut app = App::new();

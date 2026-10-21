@@ -14,6 +14,7 @@ An isometric Brazilian ecovila where five residents balance community work with 
 - [Construction economy](#construction-economy)
 - [Village simulation plan](simulator-plan.md)
 - [Remaining finishing steps](finishing-plan.md)
+- [Map and scenario builder implementation](map-scenario-builder-plan.md)
 - [Completed gameplay and artwork playtest](playtest.md)
 - [Farming and animal care](#farming-and-animal-care)
 - [Equipment upkeep](#equipment-upkeep)
@@ -41,7 +42,7 @@ Choose a free blueprint in Build and click a clearing. Open Projects to inspect 
 
 Chicken coops need stone footings, prepared frames, roof tiles and fittings, and shelter three hens each once residents finish construction. Hens roam and peck near their coop from 06:00 to 18:30, then roost indoors. Their movement follows game speed and pauses with the village; coops and their flocks return when loading a save. Each completed coop consumes two delivered fodder, or three ingredients while reserving six for residents, and produces three eggs after twelve daylight hours. Night pauses production. Hungry hens wait safely. Feeding reserves room for at most twelve eggs across all coops, including batches underway.
 
-Gardens need planting, watering, moist growth, and harvesting. Lettuce takes three game hours; beans take six; tomatoes take five before the first of three harvests. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents forage food, collect needed building materials from player-established plots, carry water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. Story starts on a 32×32 map (1,024 cells) with a community shed and storage house. The opening chapter introduces a cistern, the first home, a garden harvest and a cooked meal; later chapters expand the village.
+Gardens need planting, watering, moist growth, and harvesting. Lettuce takes three game hours; beans take six; tomatoes take five before the first of three harvests. Each watering costs two water and keeps soil moist for four game hours. Dry crops pause without dying. Residents forage food, collect needed building materials from player-established plots, carry water, cook, rest, and socialize. Food forests add fruit to gathering. Multiple builders accelerate shared construction. Story starts on a 64×64 map (4,096 cells) with a community shed and storage house. The opening chapter introduces a cistern, the first home, a garden harvest and a cooked meal; later chapters expand the village.
 
 Arrival barrels store 40 water. Each completed cistern adds 75 capacity and catches rain. During the opening fourteen days, afternoon rain runs from 14:00 to 17:00 on two days out of every three; every third day stays dry. Seeded seasonal weather then varies its timing and strength. Rain also waters planted gardens. Residents can fetch treated water from the neighbouring farm before a cistern exists; river water and treated household water remain separate contents. The resource panel shows capacity, weather, and garden needs; beds show crop stages and cisterns show the shared storage level.
 
@@ -51,7 +52,7 @@ Drag to pan, scroll to zoom, press Space to pause, and use the bottom controls f
 
 A day lasts eight minutes at 1×. Breakfast starts at 06:30, lunch at noon, dinner at 18:00, and residents have individual preferred bedtimes, adjusted earlier when tired and later when rested (20:00–23:30). Each locks a 6–9 hour sleep target based on energy when settling down; travel and interruptions do not count as sleep. When everyone is actually asleep or working off-site, time automatically advances at 16× and restores the player’s selected speed when someone wakes or begins returning. Pauses and open dialogs still stop time. Village work has no shared shift window. Residents choose supplied projects and useful chores while their energy, hunger and social needs allow; rest, food, sleep and outside commitments can interrupt work. Requests follow the same need checks. Optional outside jobs depart from 09:00 (until 10:00 if morning needs delay departure), run until 17:00 and then return to the village. Residents spend free time on nature walks, birdwatching, gentle stretches, daydreaming, and stargazing after 20:00. Hobbies restore energy, use individual quiet spots, and survive reloading. The lighting changes continuously at dawn and dusk. Existing walking, looking, stretching, and sitting animations accompany these activities.
 
-New villages restart after confirmation and retain a backup for their mode. The current game writes version 29 saves; older playable saves do not import. Development fixtures use a separate authored format. Old browser keys remain untouched.
+New villages restart after confirmation and retain a backup for their mode. The current game writes version 30 saves and imports version 29 villages without replacing their camp, stock ownership, or work history. New starts retain a frozen scenario definition independently of editor drafts. Development fixtures use a separate authored format. Old browser keys remain untouched.
 
 ## Game modes
 
@@ -198,7 +199,7 @@ Gatherings cost five prepared meals and require at least three rested, fed neigh
 
 Tools add two food to gardening harvests or make construction 25% faster. Each finished task or building consumes one use. The community panel lets you conserve tools, inspect compost supplies, and host gatherings. Residents can make compost and tools autonomously or on request. Tool stock is capped at 36 uses.
 
-The journal, unlocks, tools, friendships and economy persist together in version 3 village saves. Activity milestones remain credited after supplies are consumed, and seven-chapter saves retain their achievements while gaining the next chapters. Sandbox remains free with every building unlocked.
+The journal, unlocks, tools, friendships and economy persist together in the village save. Activity milestones remain credited after supplies are consumed. Sandbox unlocks every building and offers independent material, land, and utility constraints in Settings.
 
 The care chapter offers Luz a personal-time check-in if no cooking concern has arisen, so balanced play never requires deliberately overworking a resident. The agreement still needs actual cooking cover, rest and a full day; accepting it alone does not complete the chapter.
 

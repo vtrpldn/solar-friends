@@ -8,7 +8,7 @@ const output='artifacts/farming';await mkdir(output,{recursive:true});
 const g=new Game(),snap=()=>JSON.parse(g.snapshot()),fresh=snap();
 assert(g.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));
 const established=snap();assert(g.restore(JSON.stringify(makeScenario('farming',fresh,established))));
-assert.equal(snap().village.version,29);
+assert.equal(snap().village.version,30);
 const names=Object.keys(cropTypes);assert.equal(names.length,6);
 for(const kind of names){assert(g.configure_crop(5,kind,true));const out=JSON.parse(g.crop_outlook(5));assert.equal(out.crop,'fodder','An already planted crop is preserved');assert.equal(cropDuration({kind,harvests:0}),cropTypes[kind].minutes);}
 assert(g.configure_crop(5,'fodder',true));

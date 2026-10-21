@@ -41,6 +41,7 @@ mod resource_sites;
 mod restoration;
 mod sandbox;
 mod sanitation;
+mod scenarios;
 mod simulation;
 mod situations;
 mod skills;
@@ -55,7 +56,7 @@ mod workforce;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 29;
+pub const SAVE_VERSION: u32 = 30;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -161,6 +162,8 @@ pub struct Building {
 }
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scenario: Option<scenarios::Origin>,
     #[serde(default)]
     pub mode: modes::Mode,
     #[serde(default = "sandbox::legacy")]

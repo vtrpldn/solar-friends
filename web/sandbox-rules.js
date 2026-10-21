@@ -1,5 +1,5 @@
 // Old Sandbox exports modelled land and utilities while construction was free.
-export function constrained(v,key){return v.mode!=='sandbox'||(v.sandbox_rules?.[key]??key!=='logistics');}
+export function constrained(v,key){return (!v.scenario&&v.mode!=='sandbox')||(v.sandbox_rules?.[key]??key!=='logistics');}
 export const usesLogistics=v=>constrained(v,'logistics');
 export const usesLand=v=>constrained(v,'land');
 export const usesUtilities=v=>constrained(v,'utilities');

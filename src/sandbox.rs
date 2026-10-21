@@ -18,13 +18,13 @@ pub fn legacy() -> Rules {
     }
 }
 pub fn logistics(v: &Village) -> bool {
-    v.mode != modes::Mode::Sandbox || v.sandbox_rules.logistics
+    (v.scenario.is_none() && v.mode != modes::Mode::Sandbox) || v.sandbox_rules.logistics
 }
 pub fn land(v: &Village) -> bool {
-    v.mode != modes::Mode::Sandbox || v.sandbox_rules.land
+    (v.scenario.is_none() && v.mode != modes::Mode::Sandbox) || v.sandbox_rules.land
 }
 pub fn utilities(v: &Village) -> bool {
-    v.mode != modes::Mode::Sandbox || v.sandbox_rules.utilities
+    (v.scenario.is_none() && v.mode != modes::Mode::Sandbox) || v.sandbox_rules.utilities
 }
 pub fn valid(v: &Village) -> bool {
     v.sandbox_rules.supplied_energy.is_finite()

@@ -62,7 +62,16 @@ impl Game {
 
     /// Starts a fresh mode; invalid input leaves the running village untouched.
     pub fn start_mode(&mut self, mode: &str) -> bool {
-        self.initialise_mode(mode, true)
+        let mode = match mode {
+            "story" => Mode::Story,
+            "sandbox" => Mode::Sandbox,
+            _ => return false,
+        };
+        let Ok((candidate, _)) = scenarios::compile(scenarios::Definition::builtin(mode)) else {
+            return false;
+        };
+        *self = candidate;
+        true
     }
 }
 impl Game {
@@ -70,6 +79,7 @@ impl Game {
     pub(crate) fn start_fixture_mode(&mut self, mode: &str) -> bool {
         self.initialise_mode(mode, false)
     }
+    #[cfg(test)]
     fn initialise_mode(&mut self, mode: &str, founding: bool) -> bool {
         let mode = match mode {
             "story" => Mode::Story,
