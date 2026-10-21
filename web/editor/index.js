@@ -1,3 +1,4 @@
+import {planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
 import {clearingStroke} from './brush.js';
 import init,{Game} from '../pkg/solar_friends.js';
 import {ContentLibrary,LibraryConflict} from '../content-library.js';
@@ -68,6 +69,7 @@ function renderSelection(){
   if(!current)return;
   const d=current.doc.value,b=d.start.buildings.find(b=>b.id===map.view.selected),panel=$('creator-selection');
   if(!b){panel.innerHTML='<h2>Our property</h2><p>Select a building to inspect it. Choose Move to carry a building to another cell.</p>';return;}
+  if(map.selection().length>1){panel.innerHTML=`<h2>${map.selection().length} buildings</h2><p>Move this group together, or place a copy with its starting supplies. Shift-click toggles buildings in the group.</p><div class="creator-selection-actions"><button data-selection-action="move">Move group</button><button data-selection-action="duplicate">Copy group</button><button data-selection-action="remove">Remove group</button></div>`;return;}
   const entry=catalog.buildings.find(e=>e.id===b.kind),appearances=(entry?.appearances||[]).filter(key=>key.startsWith('adobe-')===(b.recipe==='adobe'));
   panel.innerHTML=`<h2>${escape(title(b.kind))}</h2><div class="creator-coordinates"><div class="creator-field"><label for="creator-object-x">Column</label><input id="creator-object-x" type="number" min="1" max="62" step="1" value="${b.x}"></div><div class="creator-field"><label for="creator-object-y">Row</label><input id="creator-object-y" type="number" min="1" max="62" step="1" value="${b.y}"></div></div><div class="creator-field"><label for="creator-object-state">Starts as</label><select id="creator-object-state"><option value="completed" ${b.state==='completed'?'selected':''}>Completed building</option><option value="blueprint" ${b.state==='blueprint'?'selected':''}>Construction project</option></select></div><div class="creator-field"><label for="creator-object-recipe">Construction materials</label><select id="creator-object-recipe">${(entry?.recipes||[]).map(key=>`<option value="${key}" ${b.recipe===key?'selected':''}>${{standard:'Prepared materials',local:'Local materials',adobe:'Adobe and bamboo'}[key]}</option>`).join('')}</select></div>${appearances.length?`<div class="creator-field"><label for="creator-object-appearance">Appearance</label><select id="creator-object-appearance">${appearances.map(key=>`<option value="${key}" ${(b.appearance||'home')===key?'selected':''}>${escape(title(key))}</option>`).join('')}</select></div>`:''}<div class="creator-selection-actions"><button data-selection-action="move">Move on map</button><button data-selection-action="duplicate">Duplicate</button><button data-selection-action="remove">Remove</button></div>`;
 }
@@ -85,18 +87,20 @@ function renderReview(){
 function setTool(tool){
   map.setTool(tool);
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
-  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select a building · drag to pan · Delete removes the selection',pan:'Drag to move around the property',move:'Drag a building to another cell',road:'Drag to paint one path · the whole stroke can be undone',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
+  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
 function removeBuilding(id){
-  change('Remove building',d=>{d.start.buildings=d.start.buildings.filter(b=>b.id!==id);});
+  const ids=map.selection().includes(id)?map.selection():[id];
+  change(ids.length>1?'Remove building group':'Remove building',d=>{d.start.buildings=d.start.buildings.filter(b=>!ids.includes(b.id));});
   map.select(null);
-  if(current.doc.value.start.inventories.some(p=>p.owner.building===id)){$('creator-supplies').open=true;toast('Choose a new location for the starting supplies that were stored here.');}
+  if(current.doc.value.start.inventories.some(p=>ids.includes(p.owner.building))){$('creator-supplies').open=true;toast('Starting supplies still reference removed buildings. Choose new supply locations before testing.');}
 }
 function mapAction(action){
   if(!current||busy)return;
   if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});
   else if(action.type==='meadow')change('Clear a meadow',d=>{d.map.clearings=clearingStroke(d.map.clearings,action.cells,action.size);},{valid:true});
-  else if(action.type==='move')change('Move building',d=>{const b=d.start.buildings.find(b=>b.id===action.id);if(b){b.x=action.x;b.y=action.y;}},{valid:true});
+  else if(action.type==='move')change(action.ids.length>1?'Move building group':'Move building',d=>moveBuildings(d,action.ids,action.dx,action.dy),{valid:true});
+  else if(action.type==='duplicate'&&map.copy){const copy=map.copy,anchor=copy.buildings[0];if(change('Copy building group',d=>placeBuildingCopy(d,copy,action.x-anchor.x,action.y-anchor.y),{valid:true})){setTool('select');map.select(null);for(const b of copy.buildings)map.select(b.id,true);map.copy=null;}}
   else if(action.type==='erase'){
     if(action.id)removeBuilding(action.id);
     else change('Remove a road',d=>{d.start.roads=d.start.roads.filter(([x,y])=>x!==action.x||y!==action.y);});
@@ -113,11 +117,11 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
-  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,tool:'select',grid:true};
+  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
     const tool=['select','pan','move','road','meadow','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,tool,grid:view.grid!==false};
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,grid:view.grid!==false};
   }
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
@@ -197,8 +201,7 @@ function wire(){
     if(action==='move')setTool('move');
     if(action==='remove')removeBuilding(id);
     if(action==='duplicate'){
-      const b=current.doc.value.start.buildings.find(b=>b.id===id);
-      if(b&&change('Duplicate building',d=>{d.start.buildings.push({...clone(b),id:crypto.randomUUID(),x:b.x+4});},{valid:true}))toast('A copy was placed beside the original. Choose Move to reposition it.');
+      try{map.copy=planBuildingCopy(current.doc.value,map.selection());if(map.copy.buildings.length)setTool('duplicate');}catch(error){toast(error.message);}
     }
   };
   $('creator-supply-locations').onchange=e=>{

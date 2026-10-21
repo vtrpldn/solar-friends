@@ -14,6 +14,28 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled);
  const projectURL=page.url();
+ const cellPoint=async(x,y)=>page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
+ const clickCell=async(x,y)=>{const p=await cellPoint(x,y);await page.mouse.click(p.x,p.y);};
+ await clickCell(30,29);await page.keyboard.down('Shift');await clickCell(36,29);await page.keyboard.up('Shift');
+ await page.getByRole('heading',{name:'2 buildings',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Move group',exact:true}).click();
+ const from=await cellPoint(30,29),to=await cellPoint(28,29);
+ await page.mouse.move(from.x,from.y);await page.mouse.down();await page.mouse.move(to.x,to.y,{steps:4});await page.mouse.up();
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Move building group');
+ await page.locator('#creator-undo').click();
+ await page.getByRole('button',{name:'Copy group',exact:true}).click();
+ await clickCell(26,27);
+ await page.getByText('Leave a little room between buildings.',{exact:true}).waitFor();
+ await clickCell(30,35);
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Copy building group');
+ await page.locator('#creator-undo').click();
+ await page.keyboard.press('Escape');
+ await page.waitForFunction(()=>document.querySelector('[data-tool=select]').getAttribute('aria-pressed')==='true');
+ const a=await cellPoint(30,29),b=await cellPoint(36,29);
+ await page.keyboard.down('Shift');await page.mouse.move(Math.min(a.x,b.x)-15,Math.min(a.y,b.y)-15);await page.mouse.down();await page.mouse.move(Math.max(a.x,b.x)+15,Math.max(a.y,b.y)+15,{steps:4});await page.mouse.up();await page.keyboard.up('Shift');
+ await page.getByRole('heading',{name:'2 buildings',exact:true}).waitFor();await page.keyboard.press('Escape');
+
+
  await page.locator('[data-tool=meadow]').click();
  const brushPoints=await page.locator('#creator-map').evaluate(canvas=>{
   const origin=JSON.parse(canvas.dataset.origin),scale=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();
