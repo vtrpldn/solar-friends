@@ -23,7 +23,7 @@ pub(crate) fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
         || y >= back + size as f32 + 0.2
 }
 pub fn free_spot(v: &Village, p: (f32, f32), id: usize) -> bool {
-    !v.workforce_peers.iter().flatten().any(|r| {
+    !v.workforce_peers.values().flatten().any(|r| {
         r.id != id
             && r.trip.is_none()
             && r.remaining > 0.

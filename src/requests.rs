@@ -926,7 +926,8 @@ mod tests {
             g.app.world().resource::<Village>().supplies.gathered,
             2.,
             "{}",
-            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[&0])
+                .unwrap()
         );
         assert_eq!(person(&mut g, 0).help.unwrap().id, id);
         for _ in 0..80 {
@@ -936,7 +937,8 @@ mod tests {
             g.app.world().resource::<Village>().supplies.gathered,
             2.,
             "{}",
-            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[&0])
+                .unwrap()
         );
         checkpoint(&mut g);
     }
@@ -972,7 +974,8 @@ mod tests {
             g.app.world().resource::<Village>().supplies.gathered,
             2.,
             "{}",
-            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[&0])
+                .unwrap()
         );
     }
     #[test]
@@ -1202,7 +1205,8 @@ mod tests {
             g.app.world().resource::<Village>().supplies.gathered,
             2.,
             "{}",
-            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[0]).unwrap()
+            serde_json::to_string(&g.app.world().resource::<Village>().workforce_peers[&0])
+                .unwrap()
         );
     }
     #[test]

@@ -6,7 +6,7 @@ use simulation::Id;
 
 pub fn held(v: &Village, store: Id, material: usize, except: Option<usize>) -> u32 {
     v.workforce_peers
-        .iter()
+        .values()
         .flatten()
         .filter(|r| {
             Some(r.id) != except
@@ -544,7 +544,7 @@ mod tests {
         b.task = "eat".into();
         b.remaining = 5.;
         assert!(assign(&mut a, &v));
-        v.workforce_peers[0] = Some(a);
+        v.workforce_peers.insert(0, Some(a));
         assert!(!assign(&mut b, &v));
         assert_eq!(economy::free(&v, FOOD), 0);
         conserved(&v);
@@ -583,7 +583,7 @@ mod tests {
                 r.energy = 90.;
                 r.hunger = 10.;
                 crate::assign(&mut r, &v, "eat", "test", false);
-                v.workforce_peers[r.id] = Some(r.clone());
+                v.workforce_peers.insert(r.id, Some(r.clone()));
             }
         }
         let before = g.snapshot();

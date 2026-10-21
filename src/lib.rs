@@ -57,7 +57,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 31;
+pub const SAVE_VERSION: u32 = 32;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -200,9 +200,9 @@ pub struct Village {
     #[serde(default)]
     pub pipes: pipes::State,
     #[serde(skip)]
-    pub activity_claims: [Option<workforce::Claim>; 5],
+    pub activity_claims: std::collections::BTreeMap<usize, Option<workforce::Claim>>,
     #[serde(skip)]
-    pub workforce_peers: [Option<Resident>; 5],
+    pub workforce_peers: std::collections::BTreeMap<usize, Option<Resident>>,
     pub version: u32,
     pub map_size: i32,
     #[serde(default = "legacy_camp")]
@@ -600,7 +600,7 @@ fn choose(r: &mut Resident, v: &Village) {
     } else if !v.arrived
         && (r.task == "arrive"
             || v.workforce_peers
-                .iter()
+                .values()
                 .flatten()
                 .any(|p| p.task == "arrive"))
     {
@@ -970,11 +970,12 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     || (r.task != "socialize" && r.social < 35.)
                     || (workforce::eating(&v, r.id) && autonomy::meal_due(&r, v.minutes))))
         {
-            v.workforce_peers[r.id] = Some(r.clone());
+            v.workforce_peers.insert(r.id, Some(r.clone()));
             choose(&mut r, &v);
         }
-        v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
-        v.workforce_peers[r.id] = Some(r.clone());
+        v.activity_claims
+            .insert(r.id, workforce::Claim::from_resident(&r));
+        v.workforce_peers.insert(r.id, Some(r.clone()));
         if r.task != "haul" {
             logistics::interrupt(&mut v, &r);
         }
@@ -997,8 +998,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         requests::observe(&mut r, &v);
         if walking::supports(&r.task) {
             let travelling = walking::advance(&v, &mut r, &neighbours, dt);
-            v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
-            v.workforce_peers[r.id] = Some(r.clone());
+            v.activity_claims
+                .insert(r.id, workforce::Claim::from_resident(&r));
+            v.workforce_peers.insert(r.id, Some(r.clone()));
             requests::observe(&mut r, &v);
             if travelling {
                 continue;
@@ -1220,8 +1222,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
             requests::completed_batch(&mut r, &v, completed_batch);
         }
-        v.workforce_peers[r.id] = Some(r.clone());
-        v.activity_claims[r.id] = workforce::Claim::from_resident(&r);
+        v.workforce_peers.insert(r.id, Some(r.clone()));
+        v.activity_claims
+            .insert(r.id, workforce::Claim::from_resident(&r));
         let comfort = if shelter(&v, r.id).is_some() { 8. } else { 0. };
         r.happiness = (r.energy * 0.30 + (100. - r.hunger) * 0.35 + r.social * 0.25 + comfort
             - situations::concern(&v, r.id))

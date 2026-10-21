@@ -1,16 +1,19 @@
 //! Shared work offers and reservations derived from residents' saved activities.
 use crate::*;
+use std::collections::BTreeMap;
 
 pub const CATEGORIES: [&str; 5] = ["construction", "hauling", "food", "materials", "care"];
 #[derive(Clone, Serialize, Deserialize)]
 pub struct State {
-    pub preferences: [[u8; 5]; 5],
+    pub schema: u32,
+    pub preferences: BTreeMap<usize, [u8; 5]>,
     pub days: Vec<Day>,
 }
 impl Default for State {
     fn default() -> Self {
         Self {
-            preferences: [[1; 5]; 5],
+            schema: 2,
+            preferences: (0..5).map(|id| (id, [1; 5])).collect(),
             days: vec![],
         }
     }
@@ -18,7 +21,7 @@ impl Default for State {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Day {
     pub day: u32,
-    pub residents: [[f64; 5]; 5],
+    pub residents: BTreeMap<usize, [f64; 5]>,
 }
 #[derive(Clone)]
 pub struct Claim {
@@ -49,18 +52,67 @@ fn category(task: &str) -> Option<usize> {
 }
 pub fn valid(v: &Village) -> bool {
     let s = &v.workforce;
-    s.preferences.iter().flatten().all(|n| *n <= 2)
+    s.schema == 2
+        && s.preferences.values().flatten().all(|n| *n <= 2)
         && s.days.len() <= 8
         && s.days.windows(2).all(|p| p[0].day < p[1].day)
         && s.days.iter().all(|d| {
-            f64::from(d.day) * 1440. <= f64::from(v.minutes)
-                && d.residents.iter().all(|row| {
+            d.residents.keys().eq(s.preferences.keys())
+                && f64::from(d.day) * 1440. <= f64::from(v.minutes)
+                && d.residents.values().all(|row| {
                     row.iter().all(|n| n.is_finite() && *n >= 0.)
                         && row.iter().sum::<f64>()
                             <= (f64::from(v.minutes) - f64::from(d.day) * 1440.).min(1440.) + 0.001
                 })
         })
 }
+pub fn matches_residents(v: &Village, residents: &[Resident]) -> bool {
+    let mut seen = std::collections::HashSet::new();
+    v.workforce.preferences.len() == residents.len()
+        && residents
+            .iter()
+            .all(|r| v.workforce.preferences.contains_key(&r.id) && seen.insert(r.id))
+}
+pub fn migrate(raw: &mut serde_json::Value) -> bool {
+    if raw["village"]["workforce"].is_null() {
+        return true;
+    }
+    let state = &mut raw["village"]["workforce"];
+    if state["schema"] == 2 {
+        return true;
+    }
+    if !state["schema"].is_null() {
+        return false;
+    }
+    fn keyed(value: &serde_json::Value) -> Option<serde_json::Value> {
+        let rows = value.as_array()?;
+        if rows.len() != 5 {
+            return None;
+        }
+        Some(serde_json::Value::Object(
+            rows.iter()
+                .enumerate()
+                .map(|(id, row)| (id.to_string(), row.clone()))
+                .collect(),
+        ))
+    }
+    let Some(preferences) = keyed(&state["preferences"]) else {
+        return false;
+    };
+    let Some(days) = state["days"].as_array_mut() else {
+        return false;
+    };
+    for day in days {
+        let Some(rows) = keyed(&day["residents"]) else {
+            return false;
+        };
+        day["residents"] = rows;
+    }
+    state["preferences"] = preferences;
+    state["schema"] = 2.into();
+    true
+}
+
 pub fn record<'a>(
     v: &mut Village,
     from: f64,
@@ -79,35 +131,42 @@ pub fn record<'a>(
         if v.workforce.days.last().is_none_or(|d| d.day != day) {
             v.workforce.days.push(Day {
                 day,
-                residents: [[0.; 5]; 5],
+                residents: v
+                    .workforce
+                    .preferences
+                    .keys()
+                    .map(|id| (*id, [0.; 5]))
+                    .collect(),
             });
             if v.workforce.days.len() > 8 {
                 v.workforce.days.remove(0);
             }
         }
         for &(id, c) in &activities {
-            v.workforce.days.last_mut().unwrap().residents[id][c] += end - cursor;
+            v.workforce
+                .days
+                .last_mut()
+                .unwrap()
+                .residents
+                .entry(id)
+                .or_insert([0.; 5])[c] += end - cursor;
         }
         cursor = end;
     }
 }
 pub fn refresh<'a>(v: &mut Village, people: impl IntoIterator<Item = &'a Resident>) {
-    v.activity_claims = std::array::from_fn(|_| None);
-    v.workforce_peers = std::array::from_fn(|_| None);
+    v.activity_claims.clear();
+    v.workforce_peers.clear();
     for r in people {
-        if r.id < 5 {
-            v.workforce_peers[r.id] = Some(r.clone());
-        }
-        if r.id < 5 && r.trip.is_none() && r.remaining > 0. {
-            v.activity_claims[r.id] = Claim::from_resident(r);
-        }
+        v.workforce_peers.insert(r.id, Some(r.clone()));
+        v.activity_claims.insert(r.id, Claim::from_resident(r));
     }
 }
+
 fn count(v: &Village, id: usize, task: &str) -> f32 {
     v.activity_claims
         .iter()
-        .enumerate()
-        .filter(|(i, t)| *i != id && t.as_ref().is_some_and(|c| c.task == task))
+        .filter(|(i, t)| **i != id && t.as_ref().is_some_and(|c| c.task == task))
         .count() as f32
 }
 fn projected(v: &Village, id: usize) -> (f32, f32) {
@@ -132,8 +191,7 @@ fn projected(v: &Village, id: usize) -> (f32, f32) {
     let gathered = v
         .activity_claims
         .iter()
-        .enumerate()
-        .filter(|(i, c)| *i != id && c.as_ref().is_some_and(|c| c.task == "gather"))
+        .filter(|(i, c)| **i != id && c.as_ref().is_some_and(|c| c.task == "gather"))
         .map(|(_, c)| food::forage_yield(v, c.as_ref().unwrap().building))
         .sum::<u32>() as f32;
     let shared = if gatherings::active(v).is_some_and(|p| p.spent_after.is_none()) {
@@ -179,9 +237,8 @@ fn occupied(
 ) -> usize {
     v.activity_claims
         .iter()
-        .enumerate()
         .filter(|(id, c)| {
-            *id != r.id
+            **id != r.id
                 && c.as_ref().is_some_and(|c| {
                     c.task == task
                         && c.building == building
@@ -227,14 +284,14 @@ pub fn claim_available(
 /// not send the whole village after the same last ingredient and interrupt all
 /// foraging at once.
 pub fn eating(v: &Village, id: usize) -> bool {
-    if let Some(r) = v.workforce_peers.get(id).and_then(Option::as_ref) {
+    if let Some(r) = v.workforce_peers.get(&id).and_then(Option::as_ref) {
         return food::meal(v, r).is_some();
     }
     v.food.floor() + (v.meals + food::other_portions(v)) as f32 > count(v, id, "eat")
 }
 fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f32 {
     let c = category(task).unwrap();
-    let preference = f32::from(v.workforce.preferences[r.id][c]) - 1.;
+    let preference = f32::from(v.workforce.preferences.get(&r.id).map_or(1, |row| row[c])) - 1.;
     // Bounded bonuses let urgent food and water win over normal preferences.
     // Workload includes travel, so a neighbour with a long route gets a turn off.
     let recent: f64 = v
@@ -243,7 +300,7 @@ fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f3
         .iter()
         .rev()
         .take(2)
-        .map(|d| d.residents[r.id][c])
+        .map(|d| d.residents.get(&r.id).map_or(0., |row| row[c]))
         .sum();
     let total: f64 = v
         .simulation
@@ -251,7 +308,7 @@ fn score(v: &Village, r: &Resident, task: &str, urgency: f32, travel: f32) -> f3
         .iter()
         .rev()
         .take(2)
-        .map(|d| d.residents[r.id][0] + d.residents[r.id][1])
+        .map(|d| d.residents.get(r.id).map_or(0., |row| row[0] + row[1]))
         .sum();
     let experience = skills::task(task).map_or(0., |s| (skills::factor(v, r.id, s) - 1.) * 200.);
     urgency + preference * 160. + experience + if r.favorite == task { 35. } else { 0. }
@@ -719,7 +776,7 @@ fn assigned_to(v: &Village, r: &Resident, job: &Offer) -> bool {
     let mut better = 0;
     for peer in v
         .workforce_peers
-        .iter()
+        .values()
         .flatten()
         .filter(|peer| peer.id != r.id && willing(v, peer, &job.task))
     {
@@ -783,14 +840,24 @@ impl Game {
         let Some(c) = CATEGORIES.iter().position(|c| *c == category) else {
             return "Unknown work preference.".into();
         };
-        if resident >= 5 || level > 2 {
+        if !self
+            .app
+            .world()
+            .resource::<Village>()
+            .workforce
+            .preferences
+            .contains_key(&resident)
+            || level > 2
+        {
             return "Choose a resident and a valid work preference.".into();
         }
         self.app
             .world_mut()
             .resource_mut::<Village>()
             .workforce
-            .preferences[resident][c] = level;
+            .preferences
+            .get_mut(&resident)
+            .unwrap()[c] = level;
         "ok".into()
     }
     pub fn work_report(&mut self) -> String {
@@ -838,16 +905,16 @@ mod tests {
     #[test]
     fn preferences_change_real_choices_but_urgent_water_and_rest_win() {
         let (_, mut v, mut r) = scene();
-        v.workforce.preferences[0][2] = 2;
-        v.workforce.preferences[0][4] = 0;
+        v.workforce.preferences.get_mut(&0).unwrap()[2] = 2;
+        v.workforce.preferences.get_mut(&0).unwrap()[4] = 0;
         choose(&mut r, &v);
         assert_eq!(r.task, "gather");
-        v.workforce.preferences[0][2] = 0;
-        v.workforce.preferences[0][4] = 2;
+        v.workforce.preferences.get_mut(&0).unwrap()[2] = 0;
+        v.workforce.preferences.get_mut(&0).unwrap()[4] = 2;
         choose(&mut r, &v);
         assert_eq!(r.task, "water");
         crate::water::fixture_fresh(&mut v, 5.);
-        v.workforce.preferences[0][4] = 0;
+        v.workforce.preferences.get_mut(&0).unwrap()[4] = 0;
         choose(&mut r, &v);
         assert_eq!(r.task, "water");
         r.energy = 10.;
@@ -864,16 +931,19 @@ mod tests {
         let before = offers(&v, &r);
         let gather = before.iter().find(|o| o.task == "gather").unwrap();
         let initial = gather.score;
-        v.activity_claims[1] = Some(Claim {
-            task: "gather".into(),
-            building: None,
-            material: None,
-            batch: None,
-        });
+        v.activity_claims.insert(
+            1,
+            Some(Claim {
+                task: "gather".into(),
+                building: None,
+                material: None,
+                batch: None,
+            }),
+        );
         assert!(!offers(&v, &r).iter().any(|o| o.task == "gather"));
-        v.activity_claims[1] = None;
+        v.activity_claims.insert(1, None);
         record(&mut v, 540., 570., [&r]); // idle is not a chore
-        assert_eq!(v.workforce.days[0].residents[0], [0.; 5]);
+        assert_eq!(v.workforce.days[0].residents[&0], [0.; 5]);
         r.task = "gather".into();
         r.activity_store = None;
         record(&mut v, 540., 570., [&r]);
@@ -917,12 +987,15 @@ mod tests {
             spacing::approach(&v, b, r.id).unwrap()
         );
         for id in [1, 2] {
-            v.activity_claims[id] = Some(Claim {
-                task: "build".into(),
-                building: Some(1),
-                material: None,
-                batch: None,
-            });
+            v.activity_claims.insert(
+                id,
+                Some(Claim {
+                    task: "build".into(),
+                    building: Some(1),
+                    material: None,
+                    batch: None,
+                }),
+            );
         }
         choose(&mut r, &v);
         assert_eq!(
@@ -930,7 +1003,7 @@ mod tests {
             Some(0),
             "Two workers already cover the high priority site"
         );
-        v.activity_claims[1] = None;
+        v.activity_claims.insert(1, None);
         choose(&mut r, &v);
         assert_eq!(
             r.activity_building,
@@ -973,7 +1046,7 @@ mod tests {
         assert_eq!(g.set_work_preference(0, "hauling", 2), "ok");
         let before = g.snapshot();
         let report: serde_json::Value = serde_json::from_str(&g.work_report()).unwrap();
-        assert_eq!(report["preferences"][0][1], 2);
+        assert_eq!(report["preferences"]["0"][1], 2);
         assert_eq!(g.snapshot(), before);
         assert_ne!(g.set_work_preference(5, "hauling", 2), "ok");
         assert_ne!(g.set_work_preference(0, "hauling", 3), "ok");
@@ -982,7 +1055,7 @@ mod tests {
         assert!(restored.restore(&before));
         assert_eq!(restored.snapshot(), before);
         let mut bad: serde_json::Value = serde_json::from_str(&before).unwrap();
-        bad["village"]["workforce"]["preferences"][0][1] = serde_json::json!(9);
+        bad["village"]["workforce"]["preferences"]["0"][1] = serde_json::json!(9);
         assert!(!restored.restore(&bad.to_string()));
         assert_eq!(restored.snapshot(), before);
     }
@@ -993,8 +1066,8 @@ mod tests {
         r.activity_store = None;
         record(&mut v, 1430., 1450., [&r]);
         assert_eq!(v.workforce.days.len(), 2);
-        assert_eq!(v.workforce.days[0].residents[0][1], 10.);
-        assert_eq!(v.workforce.days[1].residents[0][1], 10.);
+        assert_eq!(v.workforce.days[0].residents[&0][1], 10.);
+        assert_eq!(v.workforce.days[1].residents[&0][1], 10.);
         for day in 2..12 {
             record(
                 &mut v,
@@ -1007,7 +1080,7 @@ mod tests {
         assert_eq!(v.workforce.days[0].day, 4);
         v.minutes = 16000.;
         assert!(valid(&v));
-        v.workforce.days[0].residents[0][1] = 1441.;
+        v.workforce.days[0].residents.get_mut(&0).unwrap()[1] = 1441.;
         assert!(!valid(&v));
     }
     #[test]
@@ -1042,12 +1115,15 @@ mod tests {
         assert!(production::jobs(&v).any(|b| b.material == economy::MEALS));
         assert_eq!(projected(&v, 4), (3., 5.));
         for id in 0..2 {
-            v.activity_claims[id] = Some(Claim {
-                task: "cook".into(),
-                building: Some(0),
-                material: Some(economy::MEALS),
-                batch: Some(batch),
-            });
+            v.activity_claims.insert(
+                id,
+                Some(Claim {
+                    task: "cook".into(),
+                    building: Some(0),
+                    material: Some(economy::MEALS),
+                    batch: Some(batch),
+                }),
+            );
         }
         assert_eq!(projected(&v, 4), (3., 5.));
         assert!(!urgent_food(&v, 4));
@@ -1059,24 +1135,176 @@ mod tests {
         crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (2.) as u32);
         crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
         assert!(urgent_food(&v, 0));
-        v.activity_claims[0] = Some(Claim {
-            task: "gather".into(),
-            building: None,
-            material: None,
-            batch: None,
-        });
+        v.activity_claims.insert(
+            0,
+            Some(Claim {
+                task: "gather".into(),
+                building: None,
+                material: None,
+                batch: None,
+            }),
+        );
         assert!(urgent_food(&v, 1));
-        v.activity_claims[1] = Some(Claim {
-            task: "gather".into(),
-            building: None,
-            material: None,
-            batch: None,
-        });
+        v.activity_claims.insert(
+            1,
+            Some(Claim {
+                task: "gather".into(),
+                building: None,
+                material: None,
+                batch: None,
+            }),
+        );
         assert!(!urgent_food(&v, 2));
-        v.activity_claims[0] = None;
+        v.activity_claims.insert(0, None);
         assert!(
             urgent_food(&v, 2),
             "Interrupted foraging releases the expected food"
         );
+    }
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::*;
+    #[test]
+    fn sparse_ids_keep_preferences_claims_spacing_peers_and_chore_history() {
+        let mut v = Village::default();
+        v.workforce.preferences = [(7, [0; 5]), (42, [2; 5])].into_iter().collect();
+        let mut people = initialization::founding_residents(CAMP);
+        people.truncate(2);
+        people[0].id = 42;
+        people[1].id = 7;
+        people[0].task = "haul".into();
+        people[1].task = "garden".into();
+        for r in &mut people {
+            r.remaining = 30.;
+        }
+        refresh(&mut v, people.iter());
+        assert_eq!(
+            v.workforce_peers.keys().copied().collect::<Vec<_>>(),
+            vec![7, 42]
+        );
+        assert_eq!(count(&v, 42, "haul"), 0.);
+        assert_eq!(count(&v, 7, "haul"), 1.);
+        assert!(matches_residents(&v, &people));
+        record(&mut v, 1430., 1450., people.iter());
+        v.minutes = 1450.;
+        assert!(valid(&v));
+        for day in &v.workforce.days {
+            assert_eq!(day.residents[&42][1], 10.);
+            assert_eq!(day.residents[&7][2], 10.);
+        }
+        assert!(score(&v, &people[0], "haul", 100., 0.) > score(&v, &people[1], "haul", 100., 0.));
+        people.reverse();
+        refresh(&mut v, people.iter());
+        assert_eq!(v.workforce_peers[&42].as_ref().unwrap().task, "haul");
+        assert!(matches_residents(&v, &people));
+        refresh(&mut v, std::iter::empty());
+        assert!(v.workforce_peers.is_empty());
+        assert!(v.activity_claims.is_empty());
+    }
+    #[test]
+    fn legacy_work_preferences_and_time_history_migrate_exactly() {
+        let mut g = Game::new();
+        assert_eq!(g.set_work_preference(2, "care", 2), "ok");
+        g.tick(0.25);
+        let mut worker = initialization::founding_residents(CAMP).remove(2);
+        worker.task = "water".into();
+        record(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            480.,
+            480.5,
+            [&worker],
+        );
+        assert_eq!(
+            g.app.world().resource::<Village>().workforce.days[0].residents[&2][4],
+            0.5
+        );
+        let expected = g.snapshot();
+        let mut raw: serde_json::Value = serde_json::from_str(&expected).unwrap();
+        raw["village"]["version"] = 31.into();
+        let state = &mut raw["village"]["workforce"];
+        state.as_object_mut().unwrap().remove("schema");
+        state["preferences"] = serde_json::Value::Array(
+            (0..5)
+                .map(|id| state["preferences"][id.to_string()].clone())
+                .collect(),
+        );
+        for day in state["days"].as_array_mut().unwrap() {
+            day["residents"] = serde_json::Value::Array(
+                (0..5)
+                    .map(|id| day["residents"][id.to_string()].clone())
+                    .collect(),
+            );
+        }
+        let mut old30 = raw.clone();
+        old30["village"]["version"] = 30.into();
+        old30["village"]["skills"]["schema"] = 1.into();
+        old30["village"]["skills"]["people"] = serde_json::Value::Array(
+            (0..5)
+                .map(|id| old30["village"]["skills"]["people"][id.to_string()].clone())
+                .collect(),
+        );
+        let mut older = Game::new();
+        assert!(older.restore(&old30.to_string()));
+        assert_eq!(older.snapshot(), expected);
+        let mut restored = Game::new();
+        assert!(restored.restore(&raw.to_string()));
+        assert_eq!(restored.snapshot(), expected);
+        for _ in 0..20 {
+            g.tick(0.25);
+            restored.tick(0.25);
+            older.tick(0.25);
+        }
+        assert_eq!(restored.snapshot(), g.snapshot());
+        assert_eq!(older.snapshot(), g.snapshot());
+    }
+    #[test]
+    fn missing_orphan_and_aliased_work_records_are_rejected_without_installation() {
+        let mut g = Game::new();
+        g.tick(0.25);
+        let before = g.snapshot();
+        let base: serde_json::Value = serde_json::from_str(&before).unwrap();
+        for mode in 0..6 {
+            let mut raw = base.clone();
+            let state = &mut raw["village"]["workforce"];
+            match mode {
+                0 => {
+                    state["preferences"].as_object_mut().unwrap().remove("0");
+                }
+                1 => {
+                    let row = state["preferences"]["0"].clone();
+                    state["preferences"]
+                        .as_object_mut()
+                        .unwrap()
+                        .insert("00".into(), row);
+                }
+                2 => {
+                    state["days"][0]["residents"]
+                        .as_object_mut()
+                        .unwrap()
+                        .remove("0");
+                }
+                3 => {
+                    let row = state["days"][0]["residents"]["0"].clone();
+                    state["days"][0]["residents"]
+                        .as_object_mut()
+                        .unwrap()
+                        .insert("42".into(), row);
+                }
+                5 => {
+                    let row = state["days"][0]["residents"]["0"].clone();
+                    state["days"][0]["residents"]
+                        .as_object_mut()
+                        .unwrap()
+                        .insert("00".into(), row);
+                }
+                _ => {
+                    raw["village"].as_object_mut().unwrap().remove("workforce");
+                }
+            }
+            assert!(!g.restore(&raw.to_string()));
+            assert_eq!(g.snapshot(), before);
+        }
     }
 }

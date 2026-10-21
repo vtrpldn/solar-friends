@@ -45,7 +45,7 @@ fn waiting(v: &Village, id: usize) -> String {
     if !economy::can_build(v, id) {
         return "Reserved supplies did not reach the site within this window. Review outside shifts, helping requests, storage access and receiving room.".into();
     }
-    if !v.workforce_peers.iter().flatten().any(|r| {
+    if !v.workforce_peers.values().flatten().any(|r| {
         spacing::approach(v, b, r.id)
             .is_some_and(|(x, y)| navigation::work_route(v, [r.x, r.y], [x, y]).is_ok())
     }) {

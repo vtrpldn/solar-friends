@@ -346,7 +346,7 @@ pub fn queue(v: &mut Village, equipment: Equipment) -> Result<Id, &'static str> 
     let id = v.simulation.allocate().unwrap();
     let referenced: Vec<_> = v
         .workforce_peers
-        .iter()
+        .values()
         .flatten()
         .filter(|r| r.task == "utility")
         .filter_map(|r| r.activity_material)

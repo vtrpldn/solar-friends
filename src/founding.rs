@@ -169,7 +169,7 @@ mod tests {
                     |&(x, y)| (r.target_x - x).hypot(r.target_y - y) >= spacing::PERSONAL_SPACE
                 ));
                 spots.push((r.target_x, r.target_y));
-                v.workforce_peers[r.id] = Some(r.clone());
+                v.workforce_peers.insert(r.id, Some(r.clone()));
             }
         }
     }

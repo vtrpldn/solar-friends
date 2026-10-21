@@ -380,8 +380,8 @@ mod tests {
         far.id = 1;
         far.x += 2.5;
         far.energy = 28.1;
-        v.workforce.preferences[0][2] = 0;
-        v.workforce.preferences[1][2] = 2;
+        v.workforce.preferences.get_mut(&0).unwrap()[2] = 0;
+        v.workforce.preferences.get_mut(&1).unwrap()[2] = 2;
         workforce::refresh(&mut v, [&near, &far]);
         let remote = workforce::offers(&v, &far)
             .into_iter()
@@ -680,12 +680,15 @@ mod tests {
         assert_eq!(r.task, "garden");
         assert_eq!(r.activity_building, Some(0));
         assert!(r.reason.contains("goats"));
-        v.activity_claims[1] = Some(workforce::Claim {
-            task: "garden".into(),
-            building: Some(0),
-            material: None,
-            batch: None,
-        });
+        v.activity_claims.insert(
+            1,
+            Some(workforce::Claim {
+                task: "garden".into(),
+                building: Some(0),
+                material: None,
+                batch: None,
+            }),
+        );
         r.remaining = 0.;
         choose(&mut r, &v);
         assert_ne!(

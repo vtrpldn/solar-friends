@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=30)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=31)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -38,15 +38,26 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     if matches!(original_version, Some(3 | 23..=26 | 29..=30)) && !skills::migrate(&mut raw) {
         return None;
     }
-    if raw["village"]["skills"]["people"]
-        .as_object()
-        .is_some_and(|people| {
-            people.keys().any(|key| {
+    if matches!(original_version, Some(3 | 23..=26 | 29..=31)) && !workforce::migrate(&mut raw) {
+        return None;
+    }
+    if original_version.is_some_and(|v| v >= 32) && !raw["village"]["workforce"].is_object() {
+        return None;
+    }
+    fn canonical_keys(value: &serde_json::Value) -> bool {
+        value.as_object().is_none_or(|people| {
+            people.keys().all(|key| {
                 key.parse::<usize>()
                     .ok()
-                    .is_none_or(|id| id.to_string() != *key)
+                    .is_some_and(|id| id.to_string() == *key)
             })
         })
+    }
+    if !canonical_keys(&raw["village"]["skills"]["people"])
+        || !canonical_keys(&raw["village"]["workforce"]["preferences"])
+        || raw["village"]["workforce"]["days"]
+            .as_array()
+            .is_some_and(|days| days.iter().any(|d| !canonical_keys(&d["residents"])))
     {
         return None;
     }
@@ -85,6 +96,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
     if !logistics::valid(v, &save.residents)
         || !scenarios::valid_origin(v)
         || !workforce::valid(v)
+        || !workforce::matches_residents(v, &save.residents)
         || !skills::valid(v)
         || !skills::matches_residents(v, &save.residents)
         || !market::valid(v)

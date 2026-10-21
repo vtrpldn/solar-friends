@@ -295,9 +295,12 @@ pub fn advance(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], 
             .iter()
             .filter(|(id, x, y)| {
                 *id != r.id
-                    && v.workforce_peers[*id].as_ref().is_some_and(|p| {
-                        p.trip.is_none() && (p.x - p.target_x).hypot(p.y - p.target_y) <= 0.08
-                    })
+                    && v.workforce_peers
+                        .get(id)
+                        .and_then(Option::as_ref)
+                        .is_some_and(|p| {
+                            p.trip.is_none() && (p.x - p.target_x).hypot(p.y - p.target_y) <= 0.08
+                        })
                     && (*x - r.x).hypot(*y - r.y) < 5.
             })
             .map(|(_, x, y)| [*x, *y])

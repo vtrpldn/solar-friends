@@ -351,7 +351,7 @@ const extras=[
  v=>[...lessons[1].objectives(v).slice(2),...lessons[5].objectives(v).slice(0,2)],
  v=>lessons[2].objectives(v).slice(1,3),
  v=>[...lessons[3].objectives(v).filter(o=>o.label!=='Receive a town delivery'),
-  actionGoal('people','Set a broad work preference',+v.workforce.preferences.some(row=>row.some(n=>n!==1)),1,'Open a neighbour in People and choose Often, As needed or Avoid for building, hauling, food, materials or care. These guide shared jobs; needs, sleep, agreements and outside shifts still come first. Watch who takes the next available job.'),
+  actionGoal('people','Set a broad work preference',+Object.values(v.workforce.preferences).some(row=>row.some(n=>n!==1)),1,'Open a neighbour in People and choose Often, As needed or Avoid for building, hauling, food, materials or care. These guide shared jobs; needs, sleep, agreements and outside shifts still come first. Watch who takes the next available job.'),
   guide('preparation','Compare the next working week','Use Forecast workweek in Construction before committing more projects. It replays actual supplied work, routes, needs and outside shifts on a copy. The result is conditional: future purchases or changed plans require another forecast.'),
  ],
  v=>[...lessons[4].objectives(v),

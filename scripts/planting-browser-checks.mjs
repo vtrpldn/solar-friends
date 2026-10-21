@@ -4,7 +4,7 @@ export async function checkPlantingControls({page,saved,capture}){
   async function load(file){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/planting/${file}.json`);
-    await page.waitForFunction(file=>{const s=window.solarDev.snapshot();return s.village.version===31&&(file==='forestry-cargo'?s.village.logistics.shipments.some(h=>h.carrying&&h.material===22):file==='vegetable-cargo'?s.village.logistics.shipments.some(h=>h.carrying&&h.material===21):file==='planting-work'?s.residents.some(r=>r.task==='source'&&r.activity_material===0)&&!s.village.economy.sources[0].planted:s.village.economy.sources.length===2&&s.village.logistics.shipments.length===0);},file);
+    await page.waitForFunction(file=>{const s=window.solarDev.snapshot();return s.village.version===32&&(file==='forestry-cargo'?s.village.logistics.shipments.some(h=>h.carrying&&h.material===22):file==='vegetable-cargo'?s.village.logistics.shipments.some(h=>h.carrying&&h.material===21):file==='planting-work'?s.residents.some(r=>r.task==='source'&&r.activity_material===0)&&!s.village.economy.sources[0].planted:s.village.economy.sources.length===2&&s.village.logistics.shipments.length===0);},file);
     await page.locator('#dev-close').click();
   }
   async function supplies(){await page.locator('[data-hud-resource="food"]').click();await page.getByRole('tab',{name:'Ecology',exact:true}).click();if(!await page.locator('[data-planting-supplies]').evaluate(el=>el.open))await page.locator('[data-planting-supplies] summary').click();await page.locator('[data-planting-supplies]').scrollIntoViewIfNeeded();}
