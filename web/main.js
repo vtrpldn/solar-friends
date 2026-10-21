@@ -1,8 +1,8 @@
+import {paintWorldGround,paintWorldTree,paintWorldBuilding} from './world-renderer.js';
 import {constructionOpacity,drawBuildingState} from './building-state-art.js';
 import {paintImage} from './paint-cache.js';
 import { performanceMeter } from './dev/performance.js';
 import { sampleFrame } from './frame-state.js';
-import {natureArt as natureDetails} from './nature-art.js';
 import {usesLogistics,usesUtilities,installSandboxRulesUI} from './sandbox-rules.js';
 import {renderResidentSkills} from './resident-skills.js';
 import {drawElectricalConnections,electricalOverlayRevision} from './electricity-ui.js';
@@ -21,7 +21,7 @@ import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-pr
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies, placementArt } from './building-footprints.js';
 import { installBuildMenu, paintIcon } from './build-menu.js';
-import { unlitFilter, buildingLighting, lightingLayers, connectionLabel, updatePowerUI } from './power.js';
+import { buildingLighting, connectionLabel, updatePowerUI } from './power.js';
 import { drawNightEmission, paintDepthLight } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { weatherSummary, updateClimateForecast } from './climate-ui.js';
@@ -32,7 +32,7 @@ import { advanceResidentAnimation, drawResidentAnimation, residentActivity, idle
 import { RESIDENT_WIDTH, FRAME_ANCHOR, preparedFrames } from './sprite-frames.js';
 import {farmNames,farmNotes,updateAgricultureUI} from './agriculture-ui.js';
 import { drawCrops, loadCropArt, cropTypes, cropDuration } from './crop-art.js';
-import { buildingArt, allBuildingArt, buildingArtKey, drawBuildingArt, nightAmount } from './building-art.js?v=night-1';
+import { buildingArt, allBuildingArt, buildingArtKey, nightAmount } from './building-art.js?v=night-1';
 import { situationView } from "./situations.js";
 import { flock, drawChicken, loadChickenArt } from "./chickens.js?v=painted-hens-1";
 import { quests, buildingUnlocked, questStatus, goalRoute, unlockQuest, questCompleted, questAvailable, completedQuests } from "./quests.js?v=modes-1";
@@ -52,8 +52,6 @@ import init, { Game } from "./pkg/solar_friends.js";
 import {
   paintTerrain,
   soilAppearance,
-  GROUND_START,
-  GROUND_SIZE,
   MAP_SIZE,
   riverCenter,
   riverBank,
@@ -164,12 +162,6 @@ let groundLayer,
 const forestArt = new Image();
 forestArt.src = "art/mata-atlantica-atlas.png";
 const natureArt=new Image();natureArt.src="art/landscape-details.png";
-const forestSpecies = [
-  { name: "Jequitibá-rosa", width: 145 },
-  { name: "Juçara", width: 112 },
-  { name: "Embaúba", width: 113 },
-  { name: "Pau-brasil", width: 125 },
-];
 let game,
   state,
   selected = null,
@@ -471,28 +463,7 @@ function drawPlacementGrid() {
   ctx.restore();
 }
 function tree(x, y, s = 1, species = 0) {
-  const p = iso(x, y);
-  if(p.x < -180*scale || p.x>width+180*scale || p.y< -30*scale || p.y>height+220*scale)return;
-  if(species>=4){
-    if(!natureArt.complete||!natureArt.naturalWidth)return;
-    const art=natureDetails[species-4];if(!art)return;
-    const [cx,cy,cw,ch]=art.cell,w=art.width*s*scale,h=w*art.aspect;
-    ctx.save();paintImage(ctx,natureArt,cx*natureArt.width,cy*natureArt.height,cw*natureArt.width,ch*natureArt.height,p.x-w/2,p.y-h*art.anchor,w,h,unlitFilter(nightAmount(state.village.minutes)));ctx.restore();return;
-  }
-  const w = forestSpecies[species].width * s * scale;
-  const cell = forestArt.width / 2;
-  contactShadow(p.x, p.y + 2 * scale, 23 * s * scale, 11.5 * s * scale, 0.16);
-  ctx.drawImage(
-    forestArt,
-    (species % 2) * cell,
-    Math.floor(species / 2) * cell,
-    cell,
-    cell,
-    p.x - w / 2,
-    p.y - w * 0.85,
-    w,
-    w,
-  );
+  paintWorldTree(ctx,{x,y,size:s,species},{project:iso,scale,width,height,forest:forestArt,details:natureArt,night:nightAmount(state.village.minutes)});
 }
 function materialSite(site,alpha=1){
   if(!site.active)return;
@@ -512,15 +483,8 @@ function materialSite(site,alpha=1){
 }
 
 function sprite(kind, x, y, alpha = 1, id) {
-  const art=allBuildingArt[kind];if(!art)return;
-  const p=iso(x,y),night=nightAmount(state.village.minutes),registration=placementArt(kind,art);
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
-  const level=buildingLighting(state.environment.power,id,kind,complete);
-  for(const layer of lightingLayers(night,level,alpha)){
-    ctx.save();const filteredArt={...art,renderFilter:layer.source==='night'&&art.nightTint?art.nightTint:layer.filter};
-    drawBuildingArt(ctx,(layer.source==='night'?nightBuildingImages:buildingImages)[kind],filteredArt,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);
-    ctx.restore();
-  }
+  paintWorldBuilding(ctx,{key:kind,x,y,alpha},{project:iso,scale,images:buildingImages,nightImages:nightBuildingImages,night:nightAmount(state.village.minutes),light:buildingLighting(state.environment.power,id,kind,complete)});
 }
 function buildingSprite(kind, x, y, alpha = 1, id) {
   if(kind==='home'&&id==null&&$('#home-material-method').value==='adobe'){sprite(['adobe-gable','adobe-veranda'][state.village.buildings.filter(b=>b.kind==='home').length%2],x,y,alpha,id);return;}
@@ -685,23 +649,7 @@ function render() {
     groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil,state.village.land.seed);
     groundKey = key;
   }
-  ctx.save();
-  ctx.transform(
-    TILE_HALF_WIDTH * scale,
-    TILE_HALF_HEIGHT * scale,
-    -TILE_HALF_WIDTH * scale,
-    TILE_HALF_HEIGHT * scale,
-    origin.x,
-    origin.y,
-  );
-  ctx.drawImage(
-    groundLayer,
-    GROUND_START,
-    GROUND_START,
-    GROUND_SIZE,
-    GROUND_SIZE,
-  );
-  ctx.restore();
+  paintWorldGround(ctx,groundLayer,origin,scale);
   // Sparse currents move along the channel in world coordinates.
   for (let i = 0; i < Math.ceil(MAP_SIZE*1.1); i++) {
     const y = ((i * 0.93 + time * 0.12) % MAP_SIZE) - 0.5;

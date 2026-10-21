@@ -1,0 +1,42 @@
+// Shared painted-world primitives. Editor and game use the same projection,
+// sprite registration, vegetation crops, and building lighting.
+import {TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from './projection.js';
+import {GROUND_START,GROUND_SIZE} from './terrain.js';
+import {natureArt} from './nature-art.js';
+import {paintImage} from './paint-cache.js';
+import {allBuildingArt,drawBuildingArt} from './building-art.js?v=night-1';
+import {placementArt} from './building-footprints.js';
+import {lightingLayers,unlitFilter} from './power.js';
+export const forestSpecies=[{name:'Jequitibá-rosa',width:145},{name:'Juçara',width:112},{name:'Embaúba',width:113},{name:'Pau-brasil',width:125}];
+
+export function paintWorldGround(ctx,ground,origin,scale){
+  ctx.save();ctx.transform(TILE_HALF_WIDTH*scale,TILE_HALF_HEIGHT*scale,-TILE_HALF_WIDTH*scale,TILE_HALF_HEIGHT*scale,origin.x,origin.y);
+  ctx.drawImage(ground,GROUND_START,GROUND_START,GROUND_SIZE,GROUND_SIZE);ctx.restore();
+}
+export function paintContactShadow(ctx,x,y,rx,ry,opacity=.2){
+  ctx.save();ctx.translate(x,y);ctx.scale(rx,ry);
+  const shade=ctx.createRadialGradient(0,0,.1,0,0,1);
+  shade.addColorStop(0,`rgba(53,65,31,${opacity})`);shade.addColorStop(1,'rgba(53,65,31,0)');
+  ctx.fillStyle=shade;ctx.fillRect(-1,-1,2,2);ctx.restore();
+}
+export function paintWorldTree(ctx,{x,y,size=1,species=0},{project,scale,width,height,forest,details,night=0}){
+  const p=project(x,y);
+  if(p.x< -180*scale||p.x>width+180*scale||p.y< -30*scale||p.y>height+220*scale)return;
+  if(species>=4){
+    const art=natureArt[species-4];if(!art||!details?.complete||!details.naturalWidth)return;
+    const [cx,cy,cw,ch]=art.cell,w=art.width*size*scale,h=w*art.aspect;
+    ctx.save();paintImage(ctx,details,cx*details.width,cy*details.height,cw*details.width,ch*details.height,p.x-w/2,p.y-h*art.anchor,w,h,unlitFilter(night));ctx.restore();return;
+  }
+  if(!forestSpecies[species]||!forest?.naturalWidth)return;
+  const w=forestSpecies[species].width*size*scale,cell=forest.width/2;
+  paintContactShadow(ctx,p.x,p.y+2*scale,23*size*scale,11.5*size*scale,.16);
+  ctx.drawImage(forest,(species%2)*cell,Math.floor(species/2)*cell,cell,cell,p.x-w/2,p.y-w*.85,w,w);
+}
+export function paintWorldBuilding(ctx,{key,x,y,alpha=1},{project,scale,images,nightImages=images,night=0,light=1}){
+  const art=allBuildingArt[key];if(!art)return;
+  const p=project(x,y),registration=placementArt(key,art);
+  for(const layer of lightingLayers(night,light,alpha)){
+    const filtered={...art,renderFilter:layer.source==='night'&&art.nightTint?art.nightTint:layer.filter};
+    ctx.save();drawBuildingArt(ctx,(layer.source==='night'?nightImages:images)[key],filtered,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);ctx.restore();
+  }
+}
