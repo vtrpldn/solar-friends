@@ -1,0 +1,264 @@
+//! Decode and validate privately before a running world can be replaced.
+use crate::*;
+
+pub(crate) fn decode(data: &str) -> Option<Save> {
+    let Ok(mut raw) = serde_json::from_str::<serde_json::Value>(data) else {
+        return None;
+    };
+    if raw["village"]["version"] == 23 {
+        raw["village"]["version"] = SAVE_VERSION.into();
+        if raw["village"]["skills"].is_null() && raw["village"]["mode"] == "sandbox" {
+            raw["village"]["skills"] = serde_json::to_value(skills::State {
+                enabled: false,
+                ..Default::default()
+            })
+            .unwrap();
+        }
+    }
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26)) {
+        raw["village"]["version"] = SAVE_VERSION.into();
+    }
+    if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
+        raw["village"]["market"] = serde_json::to_value(market::State {
+            enabled: false,
+            ..Default::default()
+        })
+        .unwrap();
+    }
+    if raw["village"]["version"] == 3 {
+        organics::author_fixture(&mut raw);
+    }
+    let Ok(save) = serde_json::from_value::<Save>(raw) else {
+        return None;
+    };
+    validate(save)
+}
+
+pub(crate) fn validate(mut save: Save) -> Option<Save> {
+    if save.village.economy.outside_committed_day < -1
+        || save.village.economy.outside_committed_day > (save.village.minutes / 1440.) as i32
+    {
+        return None;
+    }
+    occupations::migrate(&mut save);
+    resource_sites::retire_legacy(&mut save.village, &mut save.residents);
+    if save.village.version == 3 && !land::initialise(&mut save.village) {
+        return None;
+    }
+    let v = &save.village;
+    let mut road_tiles = std::collections::HashSet::new();
+    if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
+        || v.roads.iter().any(|&(x, y)| {
+            !(1..=MAP_SIZE - 2).contains(&x)
+                || !(1..=MAP_SIZE - 2).contains(&y)
+                || river_bank(x, y)
+                || !road_tiles.insert((x, y))
+        })
+    {
+        return None;
+    }
+    if !logistics::valid(v, &save.residents)
+        || !workforce::valid(v)
+        || !skills::valid(v)
+        || !market::valid(v)
+        || !production::valid(v)
+        || !freshness::valid(v)
+        || !processes::valid(v)
+        || !land::valid(v)
+        || !restoration::valid(v)
+        || !water::valid(v, &save.residents)
+        || !pipes::valid(v)
+        || !gatherings::valid(v)
+        || !simulation::valid(v)
+        || !building_work::valid(v)
+        || !supplies::valid(v)
+        || !power::valid(v)
+        || !economy::valid(v)
+        || !sanitation::valid(v)
+        || !maintenance::valid(v)
+    {
+        return None;
+    }
+    if !town_pickup::valid(v, &save.residents) {
+        return None;
+    }
+    let mut work_ids = std::collections::HashSet::new();
+    let all_ids = v
+        .building_jobs
+        .iter()
+        .filter_map(|j| j.id)
+        .chain(v.production.sites.iter().map(|s| s.id))
+        .chain(v.production.batches.iter().map(|b| b.id))
+        .chain(
+            v.logistics
+                .iter()
+                .flat_map(|s| s.stores.iter().map(|p| p.id)),
+        )
+        .chain(
+            v.logistics
+                .iter()
+                .flat_map(|s| s.shipments.iter().map(|h| h.id)),
+        )
+        .chain(v.progress.gathering_delivery.iter().map(|p| p.id))
+        .chain(v.processes.batches.iter().map(|p| p.id))
+        .chain(v.land.deposits.iter().map(|d| d.id))
+        .chain(v.restoration.iter().map(|j| j.id))
+        .chain(v.maintenance.jobs.iter().map(|j| j.id))
+        .chain(v.water_supply.tanks.iter().map(|p| p.id))
+        .chain(v.water_supply.trips.iter().map(|p| p.id))
+        .chain(v.pipes.lines.iter().map(|p| p.id))
+        .chain(v.power.network.nodes.iter().map(|n| n.id))
+        .chain(v.power.battery_jobs.iter().map(|j| j.id))
+        .chain(
+            save.residents
+                .iter()
+                .filter_map(|r| r.help.as_ref().map(|q| q.id)),
+        );
+    if !all_ids.into_iter().all(|id| work_ids.insert(id))
+        || save
+            .residents
+            .iter()
+            .any(|r| !requests::valid(v, r) || !walking::valid(v, r))
+    {
+        return None;
+    }
+    let p = &v.progress;
+    if !situations::valid(v)
+        || p.tracked >= progression::CHAPTER_COUNT
+        || p.hobby_mask > 31
+        || p.social_mask > 31
+        || p.invited > 31
+        || p.attended > 31
+        || p.tool_uses > 1_000_000
+        || p.gathering_day < -1
+        || !p.gathering_until.is_finite()
+        || p.gathering_until < 0.
+        || (p.gathering_until > 0.
+            && (p.gathering_until <= v.minutes || p.gathering_until > v.minutes + 120.))
+    {
+        return None;
+    }
+    if !outcomes::valid(v)
+        || !sandbox::valid(v)
+        || !matches!(v.version, 3 | SAVE_VERSION)
+        || (v.map_size != MAP_SIZE && v.map_size != 20)
+        || [v.camp.0, v.camp.1]
+            .iter()
+            .any(|n| !n.is_finite() || !(1.0..=(MAP_SIZE - 2) as f32).contains(n))
+        || river_bank(v.camp.0 as i32, v.camp.1 as i32)
+        || save.residents.len() != 5
+        || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
+        || !v.minutes.is_finite()
+        || v.minutes < 0.
+        || [v.wood, v.food, v.water]
+            .iter()
+            .any(|n| !n.is_finite() || *n < 0.)
+    {
+        return None;
+    }
+    let mut ids = std::collections::HashSet::new();
+    if save.residents.iter().any(|r| {
+        r.id >= 5
+            || !ids.insert(r.id)
+            || [r.energy, r.hunger, r.social, r.happiness]
+                .iter()
+                .any(|n| !n.is_finite() || !(0.0..=100.).contains(n))
+            || [r.x, r.y, r.target_x, r.target_y]
+                .iter()
+                .any(|n| !n.is_finite() || !(0.0..=MAP_SIZE as f32).contains(n))
+            || !r.remaining.is_finite()
+            || !r.work_check_at.is_finite()
+            || !(0.0..=v.minutes).contains(&r.work_check_at)
+            || !(0.0..=100.).contains(&r.remaining)
+            || r.visit_building
+                .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
+            || r.activity_building
+                .is_some_and(|id| !v.buildings.iter().any(|b| b.id == id))
+            || r.activity_material.is_some_and(|i| {
+                if r.task == "source" {
+                    v.economy.sources.get(i).is_none_or(|s| !s.active)
+                } else if r.task == "restore" {
+                    u32::try_from(i).ok().is_none_or(|id| {
+                        restoration::job(v, simulation::Id(id)).is_none_or(|j| !j.active())
+                    })
+                } else if r.task == "utility" {
+                    u32::try_from(i)
+                        .ok()
+                        .is_none_or(|id| !utilities::crew_exists(v, simulation::Id(id)))
+                } else {
+                    i >= economy::COUNT
+                }
+            })
+            || r.activity_store.is_some_and(|id| {
+                r.task != "eat"
+                    || !v
+                        .logistics
+                        .as_ref()
+                        .is_some_and(|s| s.stores.iter().any(|p| p.id == id))
+            })
+            || r.activity_batch.is_some_and(|id| {
+                production::batch(v, id).is_none_or(|b| {
+                    !production::matches_task(b.material, &r.task)
+                        || Some(b.material) != r.activity_material
+                })
+            })
+            || r.last_sanitation_day < -1
+            || r.last_sanitation_day > (v.minutes / 1440.) as i32
+            || (r.task == "building_work"
+                && r.activity_building
+                    .is_none_or(|id| building_work::job(v, id).is_none()))
+            || (r.task == "restore" && r.activity_material.is_none())
+            || (r.task == "utility" && r.activity_material.is_none())
+            || !TASKS.contains(&r.task.as_str())
+            || !mobility::valid(v, r)
+            || !sleep::valid(r, v.minutes)
+    }) {
+        return None;
+    }
+    if v.buildings.iter().any(|b| {
+        !b.next_visit.is_finite()
+            || b.next_visit < 0.
+            || !ecology::valid(b)
+            || !agriculture::valid(v, b)
+            || b.contributors > 31
+            || economy::recipe(&b.kind, "standard").is_none()
+            || !(1..=MAP_SIZE - 2).contains(&b.x)
+            || !(1..=MAP_SIZE - 2).contains(&b.y)
+            || if b.kind == "hydro" {
+                !hydro_site(b.x, b.y)
+            } else {
+                river_bank(b.x, b.y)
+            }
+            || !b.progress.is_finite()
+            || !(0.0..=100.).contains(&b.progress)
+    }) {
+        return None;
+    }
+    if !logistics::valid(v, &save.residents) {
+        return None;
+    }
+    if save.village.version == 3 {
+        save.village.freshness = freshness::State::default();
+        if !logistics::initialise(&mut save.village) {
+            return None;
+        }
+        save.village.version = SAVE_VERSION;
+        if !power::initialise(&mut save.village) {
+            return None;
+        }
+        if !water::initialise(&mut save.village) {
+            return None;
+        }
+        if !processes::initialise(&mut save.village) {
+            return None;
+        }
+        if !water::valid(&save.village, &save.residents)
+            || !processes::valid(&save.village)
+            || !power::valid(&save.village)
+        {
+            return None;
+        }
+        economy::rebalance(&mut save.village);
+    }
+    Some(save)
+}
