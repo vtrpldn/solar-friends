@@ -114,6 +114,14 @@ impl Game {
         serde_json::to_string(&definition).unwrap()
     }
 
+    pub fn generate_property(&self, seed: u32) -> String {
+        let mut map = Definition::builtin(modes::Mode::Sandbox).map;
+        map.seed = seed;
+        map.nature = Some(land::vegetation::default_nature(seed, map.camp));
+        map.deposits = Some(land::default_deposits(seed));
+        serde_json::to_string(&map).unwrap()
+    }
+
     pub fn scenario_catalog(&self) -> String {
         let buildings: Vec<_> = progression::BUILDINGS.iter().map(|kind| {
             let recipes: Vec<_> = ["standard", "local", "adobe"].into_iter()
@@ -122,7 +130,7 @@ impl Game {
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "max_buildings":MAX_BUILDINGS,"materials":economy::NAMES,"buildings":buildings})
+            "max_buildings":MAX_BUILDINGS,"nature":land::vegetation::SPECIES,"materials":economy::NAMES,"buildings":buildings})
         .to_string()
     }
 

@@ -1,5 +1,71 @@
 //! The visible perimeter forest and its shade share one seeded, persistent model.
 use super::*;
+#[derive(Serialize)]
+pub struct Species {
+    pub key: &'static str,
+    pub name: &'static str,
+    pub art_index: usize,
+    pub crown_radius: f32,
+    pub shade_strength: f32,
+    pub min_size: f32,
+    pub max_size: f32,
+    pub spacing: f32,
+}
+pub const SPECIES: [Species; 12] = [
+    species("jequitiba-rosa", "Jequitibá-rosa", 0, 2.8, 0.65, 1.7),
+    species("jucara", "Juçara", 1, 1.8, 0.45, 1.5),
+    species("embauba", "Embaúba", 2, 2.8, 0.65, 1.7),
+    species("pau-brasil", "Pau-brasil", 3, 2.8, 0.65, 1.7),
+    species("forest-ferns", "Forest ferns", 4, 0., 0., 0.6),
+    species("bromeliads", "Bromeliads", 5, 0., 0., 0.6),
+    species("meadow-wildflowers", "Meadow wildflowers", 6, 0., 0., 0.6),
+    species("dry-grasses", "Dry grasses", 7, 0., 0., 0.6),
+    species("granite-outcrop", "Granite outcrop", 8, 0., 0., 0.9),
+    species("quartz-stones", "Quartz stones", 9, 0., 0., 0.8),
+    species("clay-ironstone", "Clay and ironstone", 10, 0., 0., 0.9),
+    species("mossy-stones", "Mossy river stones", 11, 0., 0., 0.8),
+];
+const fn species(
+    key: &'static str,
+    name: &'static str,
+    art_index: usize,
+    crown_radius: f32,
+    shade_strength: f32,
+    spacing: f32,
+) -> Species {
+    Species {
+        key,
+        name,
+        art_index,
+        crown_radius,
+        shade_strength,
+        min_size: 0.65,
+        max_size: 1.15,
+        spacing,
+    }
+}
+pub fn species_index(key: &str) -> Option<usize> {
+    SPECIES.iter().position(|s| s.key == key)
+}
+pub fn default_nature(seed: u32, camp: [i32; 2]) -> Vec<crate::scenarios::NatureObject> {
+    generate(seed)
+        .into_iter()
+        .filter(|t| {
+            let inside = t.x >= camp[0] as f32 - 5.5
+                && t.x < camp[0] as f32 + 4.5
+                && t.y >= camp[1] as f32 - 5.5
+                && t.y < camp[1] as f32 + 4.5;
+            !inside && !crate::river_bank(t.x.floor() as i32, t.y.floor() as i32)
+        })
+        .map(|t| crate::scenarios::NatureObject {
+            id: format!("nature-{}", t.index),
+            species: SPECIES[t.species].key.into(),
+            x: t.x,
+            y: t.y,
+            size: t.size,
+        })
+        .collect()
+}
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Tree {
     pub index: u32,
@@ -66,10 +132,10 @@ pub fn generate(seed: u32) -> Vec<Tree> {
         .collect()
 }
 fn crown(t: &Tree) -> Option<(f32, f32)> {
-    (t.species < 4).then_some((
-        if t.species == 1 { 1.8 } else { 2.8 } * t.size,
-        if t.species == 1 { 0.45 } else { 0.65 },
-    ))
+    SPECIES
+        .get(t.species)
+        .filter(|s| s.crown_radius > 0.)
+        .map(|s| (s.crown_radius * t.size, s.shade_strength))
 }
 
 fn exposure(trees: &[Tree], x: i32, y: i32) -> f32 {
@@ -135,6 +201,26 @@ pub fn clear(v: &mut Village, n: i32, x: i32, y: i32) {
     }
 }
 pub fn generate_for(v: &Village) -> Vec<Tree> {
+    if let Some(objects) = v
+        .scenario
+        .as_ref()
+        .and_then(|o| o.definition.map.nature.as_ref())
+    {
+        return objects
+            .iter()
+            .enumerate()
+            .filter_map(|(i, p)| {
+                Some(Tree {
+                    index: i as u32,
+                    x: p.x,
+                    y: p.y,
+                    size: p.size,
+                    species: species_index(&p.species)?,
+                    cleared: false,
+                })
+            })
+            .collect();
+    }
     let mut trees = generate(v.simulation.seed);
     if v.scenario.as_ref().is_some_and(|o| {
         o.definition.map.river.as_ref().map(|r| &r.centers)

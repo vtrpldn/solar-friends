@@ -43,6 +43,16 @@ try{
 
  const cellPoint=async(x,y)=>page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
  const clickCell=async(x,y)=>{const p=await cellPoint(x,y);await page.mouse.click(p.x,p.y);};
+ await page.locator('#creator-species').selectOption('jucara');await page.locator('#creator-brush-size').selectOption('1');
+ await page.locator('#creator-nature-size').focus();for(let n=0;n<3;n++)await page.locator('#creator-nature-size').press('ArrowLeft');
+ assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
+ await clickCell(34,35);await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Plant natural cluster');
+ await page.locator('[data-tool=thin-nature]').click();await clickCell(34,35);
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Thin natural vegetation');
+ await page.locator('#creator-undo').click();
+ await page.screenshot({path:'/private/tmp/solar-nature-editor.png'});
+ await page.locator('#creator-brush-size').selectOption('3');
+
  await page.locator('#creator-river-enabled').uncheck();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Remove river');
  assert.equal(await overview.getAttribute('data-bank-cells'),'0');
@@ -101,6 +111,7 @@ try{
  await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  assert.equal(await page.locator('#creator-land-layer').inputValue(),'fertility');
  assert.equal(await page.locator('#creator-title').inputValue(),'Our first property');
+ assert.equal(await page.locator('#creator-species').inputValue(),'jucara');assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
  assert.equal(await page.locator('#creator-undo').isEnabled(),true);
  await page.locator('#creator-test').click();
  await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
@@ -116,6 +127,7 @@ try{
  assert.equal(page.url(),projectURL);
  assert.equal(await page.locator('#creator-land-layer').inputValue(),'fertility');
  assert.equal(await page.locator('#creator-title').inputValue(),'Our first property');
+ assert.equal(await page.locator('#creator-species').inputValue(),'jucara');assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
  assert.equal(await page.evaluate(()=>JSON.stringify({...localStorage})),original);
  await page.setViewportSize({width:1280,height:800});await page.screenshot({path:'/private/tmp/solar-creator-1280.png'});
  assert.deepEqual(errors,[]);

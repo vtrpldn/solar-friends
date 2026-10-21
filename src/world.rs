@@ -123,6 +123,7 @@ mod tests {
     #[test]
     fn moved_course_drives_routes_building_roads_corridors_and_saves() {
         let mut d = definition();
+        d.map.nature = None;
         d.map.river = Some(River {
             schema: 1,
             centers: vec![20.; 64],
@@ -155,6 +156,7 @@ mod tests {
         let mut d = definition();
         let mut centers = vec![20.; 64];
         centers[9] = 19.;
+        d.map.nature = None;
         d.map.river = Some(River { schema: 1, centers });
         let g = compile(d);
         let v = g.app.world().resource::<Village>();
@@ -189,6 +191,7 @@ mod tests {
                 .collect(),
         ] {
             let mut d = definition();
+            d.map.nature = None;
             d.map.river = Some(River { schema: 1, centers });
             let report = g.load_scenario(&serde_json::to_string(&d).unwrap());
             assert!(report.contains("invalid_river"));

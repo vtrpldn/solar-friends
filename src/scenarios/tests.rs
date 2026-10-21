@@ -340,3 +340,71 @@ fn empty_geology_and_invalid_patch_imports_are_atomic() {
         assert_eq!(g.snapshot(), before);
     }
 }
+
+#[test]
+fn explicit_nature_preserves_identity_geometry_and_real_shade_on_opening_soil() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    d.map.nature = Some(vec![NatureObject {
+        id: "our-tree".into(),
+        species: "jequitiba-rosa".into(),
+        x: 32.,
+        y: 35.,
+        size: 1.,
+    }]);
+    let (mut g, _) =
+        compile(d.clone()).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(v.land.vegetation.len(), 1);
+    assert!(!v.land.vegetation[0].cleared);
+    assert!(land::ground(v, 32, 35).shade > 0.3);
+    let tree = v.land.vegetation[0].clone();
+    let cloned = v.clone();
+    assert!(std::sync::Arc::ptr_eq(
+        v.scenario.as_ref().unwrap(),
+        cloned.scenario.as_ref().unwrap()
+    ));
+    let raw = g.snapshot();
+    let mut copy = Game::new();
+    assert!(copy.restore(&raw));
+    assert_eq!(copy.snapshot(), raw);
+    d.map.seed += 1;
+    let (second, _) =
+        compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    assert_eq!(
+        second.app.world().resource::<Village>().land.vegetation[0],
+        tree
+    );
+}
+#[test]
+fn nature_catalog_generation_and_invalid_objects_are_bounded_and_read_only() {
+    let mut g = Game::new();
+    let before = g.snapshot();
+    assert_eq!(g.generate_property(42), g.generate_property(42));
+    assert_ne!(g.generate_property(42), g.generate_property(43));
+    assert_eq!(g.snapshot(), before);
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    for (species, size) in [("unknown-species", 1.), ("jucara", 2.)] {
+        d.map.nature = Some(vec![NatureObject {
+            id: "tree".into(),
+            species: species.into(),
+            x: 32.,
+            y: 35.,
+            size,
+        }]);
+        assert!(g.load_scenario(&encoded(&d)).contains("invalid_nature"));
+        assert_eq!(g.snapshot(), before);
+    }
+    d.map.nature = Some(
+        (0..9)
+            .map(|i| NatureObject {
+                id: format!("tree-{i}"),
+                species: "jucara".into(),
+                x: 32.,
+                y: 35.,
+                size: 1.,
+            })
+            .collect(),
+    );
+    assert!(g.load_scenario(&encoded(&d)).contains("invalid_nature"));
+    assert_eq!(g.snapshot(), before);
+}

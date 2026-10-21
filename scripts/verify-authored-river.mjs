@@ -14,7 +14,7 @@ try{
  assert(drawn.centers.every((x,i)=>i===0||Math.abs(x-drawn.centers[i-1])<=1));
  const straight={schema:1,centers:Array(64).fill(20)};
  for(const river of [initial.map.river,null,straight,drawn]){
-  const d=structuredClone(initial);d.map.river=river;
+  const d=structuredClone(initial);d.map.river=river;if(d.map.nature)d.map.nature=d.map.nature.filter(p=>!riverBank(Math.floor(p.x),Math.floor(p.y),d.map));
   assert.equal(JSON.parse(game.load_scenario(JSON.stringify(d))).ok,true);
   const geometry=JSON.parse(game.world_geometry()),report=JSON.parse(game.land_report());
   const bank=new Set(geometry.banks.map(p=>p.join(',')));

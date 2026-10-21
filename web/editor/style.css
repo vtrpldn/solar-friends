@@ -24,3 +24,4 @@
 .creator-minimap{position:absolute;right:14px;bottom:18px;width:178px;padding:6px;background:#81613c;border:3px solid #5a4029;border-radius:5px;box-shadow:0 3px 0 #48352255;color:#f8e8b9}.creator-minimap span{display:block;font-size:10px;margin-bottom:5px}.creator-minimap canvas{width:160px;height:160px;display:block;cursor:crosshair;outline-offset:3px}#creator-hint{max-width:calc(100% - 220px)}
 
 .creator-geopatch{border-top:1px solid #c5ad7b;margin-top:14px;padding-top:7px}.creator-geopatch .creator-field{margin:5px 0}.creator-geopatch h3{margin:8px 0}
+#creator-nature-size{accent-color:#84984f;cursor:ew-resize}

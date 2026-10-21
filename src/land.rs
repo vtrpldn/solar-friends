@@ -326,6 +326,10 @@ pub fn disturb(v: &mut Village, kind: &str, x: i32, y: i32) {
     disturb_plot(v, n, x, y, impact);
 }
 pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
+    disturb_soil(v, n, x, y, impact);
+    vegetation::clear(v, n, x, y);
+}
+pub fn disturb_soil(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
     let impact = if crate::sandbox::land(v) { impact } else { 0. };
     for a in x - n / 2..x - n / 2 + n {
         for b in y - n / 2..y - n / 2 + n {
@@ -350,7 +354,6 @@ pub fn disturb_plot(v: &mut Village, n: i32, x: i32, y: i32, impact: f32) {
             }
         }
     }
-    vegetation::clear(v, n, x, y);
     v.land.soil.sort_by_key(|s| (s.y, s.x));
     v.land.revision = v.land.revision.saturating_add(1);
 }

@@ -133,9 +133,14 @@ fn build(
         ));
     }
     if let Some(origin) = &village.scenario {
+        let explicit_nature = origin.definition.map.nature.is_some();
         let clearings = origin.definition.map.clearings.clone();
         for c in clearings {
-            land::disturb_plot(&mut village, c.size, c.x, c.y, c.disturbance);
+            if explicit_nature {
+                land::disturb_soil(&mut village, c.size, c.x, c.y, c.disturbance);
+            } else {
+                land::disturb_plot(&mut village, c.size, c.x, c.y, c.disturbance);
+            }
         }
         let buildings = village.buildings.clone();
         for b in buildings.iter().filter(|b| b.progress >= 100.) {

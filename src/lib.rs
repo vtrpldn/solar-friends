@@ -164,7 +164,7 @@ pub struct Building {
 #[derive(Resource, Clone, Serialize, Deserialize)]
 pub struct Village {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub scenario: Option<scenarios::Origin>,
+    pub scenario: Option<std::sync::Arc<scenarios::Origin>>,
     #[serde(default)]
     pub mode: modes::Mode,
     #[serde(default = "sandbox::legacy")]

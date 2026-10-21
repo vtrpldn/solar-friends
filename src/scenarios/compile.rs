@@ -102,6 +102,34 @@ pub(super) fn check(d: &Definition) -> Report {
             r.push("map.deposits","invalid_deposits","Use up to 64 uniquely named earth, stone or reclaimed patches inside the property, within the supported finite reserves.");
         }
     }
+    if let Some(objects) = &d.map.nature {
+        let mut ids = HashSet::new();
+        let mut density = std::collections::HashMap::new();
+        if objects.len() > 1000
+            || objects.iter().any(|p| {
+                let Some(index) = land::vegetation::species_index(&p.species) else {
+                    return true;
+                };
+                let species = &land::vegetation::SPECIES[index];
+                let count = density
+                    .entry((p.x.floor() as i32, p.y.floor() as i32))
+                    .or_insert(0);
+                *count += 1;
+                !valid_key(&p.id)
+                    || !ids.insert(&p.id)
+                    || !p.x.is_finite()
+                    || !p.y.is_finite()
+                    || !p.size.is_finite()
+                    || !(-2.0..=66.0).contains(&p.x)
+                    || !(-2.0..=66.0).contains(&p.y)
+                    || !(species.min_size..=species.max_size).contains(&p.size)
+                    || *count > 8
+                    || world::bank_in(&d.map, p.x.floor() as i32, p.y.floor() as i32)
+            })
+        {
+            r.push("map.nature","invalid_nature","Use known species with unique identities, supported sizes and bounded density on inland ground.");
+        }
+    }
     if !d.start.minutes.is_finite() || !(0.0..=5_000_000.).contains(&d.start.minutes) {
         r.push(
             "start.minutes",
@@ -277,11 +305,11 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         events: vec![d.description.clone()],
         ..Default::default()
     };
-    v.scenario = Some(Origin {
+    v.scenario = Some(std::sync::Arc::new(Origin {
         schema: SCHEMA,
         definition: d.clone(),
         buildings: BTreeMap::new(),
-    });
+    }));
     v.simulation.seed = d.map.seed;
     v.economy.land = land::opening_reserves(&v);
     let mut buildings = BTreeMap::new();
@@ -379,11 +407,11 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
             path: format!("start.inventories.{i}"),
         });
     }
-    v.scenario = Some(Origin {
+    v.scenario = Some(std::sync::Arc::new(Origin {
         schema: SCHEMA,
         definition: d.clone(),
         buildings,
-    });
+    }));
     let residents = initialization::founding_residents(v.camp);
     navigation::refresh(&mut v);
     for resident in &residents {

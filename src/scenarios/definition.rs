@@ -36,6 +36,18 @@ pub struct Map {
     pub river: Option<world::River>,
     #[serde(default)]
     pub deposits: Option<Vec<GeologicalPatch>>,
+    #[serde(default)]
+    pub nature: Option<Vec<NatureObject>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NatureObject {
+    pub id: String,
+    pub species: String,
+    pub x: f32,
+    pub y: f32,
+    pub size: f32,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -235,6 +247,7 @@ impl Definition {
                 revision: 1,
                 generator: "property-v1".into(),
                 river: world::default_river(),
+                nature: Some(land::vegetation::default_nature(simulation::State::default().seed,[middle,middle])),
                 deposits: Some(land::default_deposits(simulation::State::default().seed)),
                 width: MAP_SIZE,
                 height: MAP_SIZE,
