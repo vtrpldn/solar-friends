@@ -164,7 +164,7 @@ impl Game {
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "max_buildings":MAX_BUILDINGS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
+            "max_buildings":MAX_BUILDINGS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"resident_routines":resident_preferences::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
         .to_string()
     }
 

@@ -56,47 +56,51 @@ impl Default for Village {
 }
 
 pub(crate) fn founding_residents(camp: (f32, f32)) -> Vec<Resident> {
+    use resident_preferences::{BENTO_V1, CAUA_V1, IARA_V1, LUZ_V1, NINA_V1};
     let dx = camp.0 - CAMP.0;
     let dy = camp.1 - CAMP.1;
     [
-        ("Iara", "Patient · gardener", "garden"),
-        ("Bento", "Practical · builder", "build"),
-        ("Luz", "Sociable · cook", "cook"),
-        ("Cauã", "Curious · forager", "gather"),
-        ("Nina", "Thoughtful · caretaker", "water"),
+        ("Iara", "Patient · gardener", "garden", IARA_V1),
+        ("Bento", "Practical · builder", "build", BENTO_V1),
+        ("Luz", "Sociable · cook", "cook", LUZ_V1),
+        ("Cauã", "Curious · forager", "gather", CAUA_V1),
+        ("Nina", "Thoughtful · caretaker", "water", NINA_V1),
     ]
     .into_iter()
     .enumerate()
-    .map(|(id, (name, traits, favorite))| Resident {
-        id,
-        name: name.into(),
-        trait_name: traits.into(),
-        favorite: favorite.into(),
-        energy: 88. - id as f32 * 3.,
-        hunger: 22. + id as f32 * 3.,
-        social: 70.,
-        happiness: 75.,
-        x: 7.5 + id as f32 * 1.25 + dx,
-        y: 18.5 + id as f32 * 0.15 + dy,
-        target_x: CAMP.0 + (id as f32 - 2.) * 1.25 + dx,
-        target_y: CAMP.1 + dy,
-        task: "arrive".into(),
-        reason: "Walking into the clearing with our founding group.".into(),
-        remaining: 0.,
-        requested: false,
-        work_check_at: 0.,
-        help: None,
-        activity_batch: None,
-        activity_store: None,
-        walking: walking::State::default(),
-        last_meal_slot: -1,
-        last_sanitation_day: -1,
-        visit_building: None,
-        activity_building: None,
-        activity_material: None,
-        trip: None,
-        sleep: sleep::Routine::default(),
-    })
+    .map(
+        |(id, (name, traits, favorite, routine_preferences))| Resident {
+            id,
+            name: name.into(),
+            trait_name: traits.into(),
+            favorite: favorite.into(),
+            routine_preferences,
+            energy: 88. - id as f32 * 3.,
+            hunger: 22. + id as f32 * 3.,
+            social: 70.,
+            happiness: 75.,
+            x: 7.5 + id as f32 * 1.25 + dx,
+            y: 18.5 + id as f32 * 0.15 + dy,
+            target_x: CAMP.0 + (id as f32 - 2.) * 1.25 + dx,
+            target_y: CAMP.1 + dy,
+            task: "arrive".into(),
+            reason: "Walking into the clearing with our founding group.".into(),
+            remaining: 0.,
+            requested: false,
+            work_check_at: 0.,
+            help: None,
+            activity_batch: None,
+            activity_store: None,
+            walking: walking::State::default(),
+            last_meal_slot: -1,
+            last_sanitation_day: -1,
+            visit_building: None,
+            activity_building: None,
+            activity_material: None,
+            trip: None,
+            sleep: sleep::Routine::default(),
+        },
+    )
     .collect()
 }
 

@@ -37,6 +37,7 @@ mod processes;
 mod production;
 mod progression;
 mod requests;
+mod resident_preferences;
 mod resource_sites;
 mod restoration;
 mod sandbox;
@@ -57,7 +58,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 33;
+pub const SAVE_VERSION: u32 = 34;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -105,6 +106,7 @@ pub struct Resident {
     pub name: String,
     pub trait_name: String,
     pub favorite: String,
+    pub routine_preferences: resident_preferences::Preferences,
     pub energy: f32,
     pub hunger: f32,
     pub social: f32,

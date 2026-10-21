@@ -6,7 +6,7 @@ export async function checkBatteryControls({page,saved,capture}){
     const expected=JSON.parse(await readFile(`artifacts/electricity/batteries/${name}.json`,'utf8'));
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/electricity/batteries/${name}.json`);
-    await page.waitForFunction(({minutes,phase})=>{const v=window.solarDev.snapshot().village;return v.version===33&&v.minutes===minutes&&v.power.battery_jobs.at(-1)?.phase===phase;},{minutes:expected.village.minutes,phase:expected.village.power.battery_jobs.at(-1)?.phase});
+    await page.waitForFunction(({minutes,phase})=>{const v=window.solarDev.snapshot().village;return v.version===34&&v.minutes===minutes&&v.power.battery_jobs.at(-1)?.phase===phase;},{minutes:expected.village.minutes,phase:expected.village.power.battery_jobs.at(-1)?.phase});
     await page.locator('#dev-close').click();await page.evaluate(()=>window.solarDev.fixedView());
   }
   async function show(){

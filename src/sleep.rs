@@ -28,8 +28,7 @@ impl Default for Routine {
 pub fn duration(energy: f32) -> f32 {
     ((360. + (100. - energy.clamp(0., 100.)) * 1.8) / 15.).round() * 15.
 }
-fn bedtime(id: usize, energy: f32) -> f32 {
-    let preferred = [1290., 1335., 1260., 1380., 1305.][id];
+fn bedtime(preferred: f32, energy: f32) -> f32 {
     let shift = if energy < 60. {
         -(60. - energy) * 1.5
     } else {
@@ -61,11 +60,13 @@ pub fn prepare(r: &mut Resident, now: f32) {
         let plan_day = if previous { (day - 1).max(0) } else { day };
         r.sleep = Routine {
             day: plan_day,
-            bedtime: plan_day as f32 * 1440. + bedtime(r.id, r.energy),
+            bedtime: plan_day as f32 * 1440.
+                + bedtime(r.routine_preferences.preferred_bedtime, r.energy),
             ..Routine::default()
         };
     } else if now.rem_euclid(1440.) < 1080. && r.sleep.started_at.is_none() {
-        r.sleep.bedtime = day as f32 * 1440. + bedtime(r.id, r.energy);
+        r.sleep.bedtime =
+            day as f32 * 1440. + bedtime(r.routine_preferences.preferred_bedtime, r.energy);
     }
 }
 pub fn due(r: &Resident, now: f32) -> bool {
@@ -75,7 +76,8 @@ pub fn due(r: &Resident, now: f32) -> bool {
     if r.sleep.day >= 0 {
         return now >= r.sleep.bedtime;
     }
-    now.rem_euclid(1440.) >= bedtime(r.id, r.energy) || now.rem_euclid(1440.) < 360.
+    now.rem_euclid(1440.) >= bedtime(r.routine_preferences.preferred_bedtime, r.energy)
+        || now.rem_euclid(1440.) < 360.
 }
 pub fn pause(r: &mut Resident) {
     if r.sleep.started_at.is_some() && r.sleep.slept_minutes < r.sleep.duration_minutes {
@@ -194,10 +196,10 @@ mod tests {
     }
     #[test]
     fn individual_bedtimes_adjust_to_energy_and_sleep_crosses_midnight() {
-        let early = bedtime(2, 60.);
-        let late = bedtime(3, 60.);
+        let early = bedtime(1260., 60.);
+        let late = bedtime(1380., 60.);
         assert!(early < late);
-        assert!(bedtime(0, 20.) < bedtime(0, 90.));
+        assert!(bedtime(1290., 20.) < bedtime(1290., 90.));
         let mut r = person(3, 60.);
         prepare(&mut r, 1320.);
         assert!(!due(&r, 1350.));

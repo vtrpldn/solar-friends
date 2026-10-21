@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=32)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=33)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -48,6 +48,11 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
         return None;
     }
     if original_version.is_some_and(|v| v >= 33) && !raw["village"]["simulation"].is_object() {
+        return None;
+    }
+    if matches!(original_version, Some(3 | 23..=26 | 29..=33))
+        && !resident_preferences::migrate(&mut raw)
+    {
         return None;
     }
     fn canonical_keys(value: &serde_json::Value) -> bool {
@@ -260,6 +265,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
             || !TASKS.contains(&r.task.as_str())
             || !mobility::valid(v, r)
             || !sleep::valid(r, v.minutes)
+            || !r.routine_preferences.valid()
     }) {
         return None;
     }
