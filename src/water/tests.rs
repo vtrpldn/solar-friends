@@ -459,3 +459,59 @@ fn sparse_carriers_move_owned_water_and_unknown_carriers_cannot_claim_it() {
     assert!(v.skills.people[&900].experience[skills::Skill::Logistics as usize] > 0);
     reconciled(&v);
 }
+
+#[test]
+fn sparse_residents_use_the_shared_service_tap_and_population_water_targets() {
+    let mut g = scene();
+    let world = g.app.world_mut();
+    let mut r = world
+        .query::<&Resident>()
+        .iter(world)
+        .next()
+        .unwrap()
+        .clone();
+    r.id = 900;
+    r.task = "water".into();
+    r.remaining = 10.;
+    let mut v = world.resource_mut::<Village>();
+    v.skills.people = [(900, skills::Person::default())].into_iter().collect();
+    let camp = v
+        .water_supply
+        .tanks
+        .iter()
+        .find(|p| p.owner == Owner::Camp)
+        .unwrap();
+    assert_eq!(demand(&v, camp).0, 8.);
+    v.skills.people = (0..12)
+        .map(|id| (900 + id * 101, skills::Person::default()))
+        .collect();
+    let camp = v
+        .water_supply
+        .tanks
+        .iter()
+        .find(|p| p.owner == Owner::Camp)
+        .unwrap();
+    assert_eq!(demand(&v, camp).0, 40.);
+    let q = quote(&v, &r).unwrap();
+    assert!(q.from.is_none());
+    assert_eq!(q.pickup[0], 1.);
+    assert!((1.69..=24.31).contains(&q.pickup[1]));
+    assert!(assign_target(&v, &mut r));
+    let mut carried = false;
+    let mut started = false;
+    for _ in 0..3000 {
+        advance(&mut v, &mut r, &[], 0.25);
+        if let Some(h) = v.water_supply.trips.iter().find(|h| h.resident == 900) {
+            started = true;
+            carried |= h.carrying;
+            assert!(valid(&v, &[r.clone()]));
+        } else if started {
+            break;
+        }
+    }
+    assert!(carried);
+    assert!(v.water_supply.trips.is_empty());
+    assert!(total(&v, Class::Fresh) > 0.);
+    reconciled(&v);
+    assert!(tap(&v, 0).is_none());
+}

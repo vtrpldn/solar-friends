@@ -571,13 +571,17 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
             // is housed, refill their actual household buffers instead of
             // shuttling a reserve into an unused camp and back out again.
             let people = if pipes::uses_camp(v) {
-                5
+                v.skills.people.len()
             } else {
-                (0..5).filter(|&r| shelter(v, r).is_none()).count()
+                v.skills
+                    .people
+                    .keys()
+                    .filter(|&&r| shelter(v, r).is_none())
+                    .count()
             };
             let essential = people as f64 * 2.4;
             (
-                people as f64 * 8.,
+                (people as f64 * 8.).min(p.capacity[0]),
                 false,
                 if p.water[0] + incoming(v, p.id, Class::Fresh) < essential {
                     1100.
@@ -595,8 +599,11 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
             Some("kitchen") => (6., false, if p.water[0] < 1. { 1080. } else { 260. }),
             Some("eco_toilet") => (8., false, if p.water[0] < 1. { 1050. } else { 200. }),
             Some("home") => {
-                let people = (0..5)
-                    .filter(|&r| shelter(v, r).is_some_and(|b| b.id == id))
+                let people = v
+                    .skills
+                    .people
+                    .keys()
+                    .filter(|&&r| shelter(v, r).is_some_and(|b| b.id == id))
                     .count();
                 (
                     if people > 0 { 8. } else { 0. },
@@ -696,13 +703,17 @@ pub fn approach(v: &Village, p: &Tank, resident: usize) -> Option<[f32; 2]> {
     }
 }
 fn tap(v: &Village, resident: usize) -> Option<[f32; 2]> {
+    roster::slot(v, resident)?;
     for offset in 0..=10 {
         for sign in [1., -1.] {
             let p = [
                 1.,
-                13. + (resident as f32 - 2.) * 0.65 + offset as f32 * sign,
+                13. + roster::offset(v, resident, 0.65) + offset as f32 * sign,
             ];
-            if navigation::clear(v, p[0], p[1]) && spacing::free_spot(v, (p[0], p[1]), resident) {
+            if (1.69..=24.31).contains(&p[1])
+                && navigation::clear(v, p[0], p[1])
+                && spacing::free_spot(v, (p[0], p[1]), resident)
+            {
                 return Some(p);
             }
         }
@@ -1257,9 +1268,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
             || h.from
                 .and_then(|id| tank(v, id))
                 .is_some_and(|p| !near(p, h.pickup))
-            || h.from.is_none()
-                && (h.pickup[0] != 1.
-                    || (h.pickup[1] - (13. + (h.resident as f32 - 2.) * 0.65)).abs() > 10.001)
+            || h.from.is_none() && (h.pickup[0] != 1. || !(1.69..=24.31).contains(&h.pickup[1]))
             || h.from.is_none() && h.class != Class::Fresh
             || !residents.iter().any(|r| {
                 r.id == h.resident && r.task == "water" && r.trip.is_none() && r.remaining > 0.

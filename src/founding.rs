@@ -90,9 +90,10 @@ pub fn quiet_spot_at(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)>
         (0.85, 0.85),
         (0., 0.),
     ];
-    (0..5)
+    let slot = roster::slot(v, id)?;
+    (0..SPOTS.len())
         .map(|n| {
-            let (x, y) = SPOTS[(n + id) % 5];
+            let (x, y) = SPOTS[(n + slot) % SPOTS.len()];
             (b.x as f32 + x, b.y as f32 + y)
         })
         .find(|p| navigation::clear(v, p.0, p.1) && spacing::free_spot(v, *p, id))

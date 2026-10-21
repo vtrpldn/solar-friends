@@ -231,7 +231,9 @@ pub fn approach(v: &Village, id: Id, resident: usize) -> Option<[f32; 2]> {
     let centre = [cell[0] as f32, cell[1] as f32];
     for radius in [0.7, 1.1] {
         for turn in 0..8 {
-            let angle = (resident as f32 / 5. + turn as f32 / 8.) * std::f32::consts::TAU;
+            let angle = (roster::slot(v, resident)? as f32 / v.skills.people.len() as f32
+                + turn as f32 / 8.)
+                * std::f32::consts::TAU;
             let q = [
                 centre[0] + radius * angle.cos(),
                 centre[1] + radius * angle.sin(),

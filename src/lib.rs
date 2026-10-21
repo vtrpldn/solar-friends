@@ -44,6 +44,7 @@ mod resident_appearance;
 mod resident_preferences;
 mod resource_sites;
 mod restoration;
+mod roster;
 mod roster_history;
 mod sandbox;
 mod sanitation;
@@ -283,7 +284,7 @@ fn shelter(v: &Village, id: usize) -> Option<&Building> {
     v.buildings
         .iter()
         .filter(|b| b.kind == "home" && b.progress >= 100.)
-        .nth(id / 3)
+        .nth(roster::slot(v, id)? / 3)
 }
 fn sleeping_time(minutes: f32, r: &Resident) -> bool {
     sleep::due(r, minutes)
@@ -325,7 +326,11 @@ fn available(v: &Village, task: &str) -> bool {
         "water" => water::has_work(v),
         "compost" => v.buildings.iter().any(|b| organics::can_turn(v, b.id)),
         "restore" => v.restoration.iter().any(|j| restoration::ready(v, j)),
-        "utility" => (0..5).any(|id| !utilities::crew_jobs(v, id).is_empty()),
+        "utility" => v
+            .skills
+            .people
+            .keys()
+            .any(|&id| !utilities::crew_jobs(v, id).is_empty()),
         "craft" => production::can_order_tools(v),
         "eat" => food::owned_portions(v) > 0,
         "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
@@ -340,7 +345,10 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
         return p;
     }
     if task == "water" {
-        return (1., crate::camp(v).1 + (id as f32 - 2.) * 0.65);
+        return (
+            1.,
+            (crate::camp(v).1 + roster::offset(v, id, 0.65)).clamp(0.3, MAP_SIZE as f32 - 0.3),
+        );
     }
     if task == "sleep" || task == "rest" {
         return shelter(v, id)
@@ -351,20 +359,20 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
                     spacing::approach(v, b, id)
                 }
             })
-            .unwrap_or((crate::camp(v).0 + (id as f32 - 2.) * 1.25, crate::camp(v).1));
+            .unwrap_or_else(|| roster::camp_spot(v, id));
     }
     if task == "gather" && !ready(v, "grove") {
         return (
             crate::camp(v).0 - 7.,
-            crate::camp(v).1 - 2. + id as f32 * 1.25,
+            crate::camp(v).1 - 2. + roster::slot(v, id).unwrap_or(0) as f32 * 1.25,
         );
     }
     destination_building(v, task, id)
         .and_then(|b| spacing::approach(v, b, id))
-        .unwrap_or((
-            crate::camp(v).0 + (id as f32 - 2.) * 1.25,
-            crate::camp(v).1 + 0.5,
-        ))
+        .unwrap_or_else(|| {
+            let (x, y) = roster::camp_spot(v, id);
+            (x, (y + 0.5).min(MAP_SIZE as f32 - 0.3))
+        })
 }
 fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a Building> {
     if task == "gathering" {
@@ -411,21 +419,30 @@ fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a
     }
     // Small teams can still build together while several projects or gardens
     // receive attention instead of everyone choosing the first one.
+    let slot = roster::slot(v, id)?;
     let group = if matches!(task, "build" | "garden") {
-        id / 2
+        slot / 2
     } else {
-        id
+        slot
     };
     Some(eligible[group % eligible.len()])
 }
 // Each resident has a separate set of quiet spots, spaced three tiles apart.
 // Derive the choice from saved time so loading a village keeps the same routine.
 fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
+    let slot = roster::slot(v, id)?;
+    let count = v.skills.people.len();
+    let (cx, cy) = crate::camp(v);
     let spots: Vec<_> = (0..49)
-        .filter(|index| index % 5 == id)
-        .map(|index| (4.5 + (index % 7) as f32 * 3., 5.5 + (index / 7) as f32 * 3.))
+        .filter(|index| index % count == slot)
+        .map(|index| {
+            (
+                cx - 5.5 + (index % 7) as f32 * 3.,
+                cy - 7.5 + (index / 7) as f32 * 3.,
+            )
+        })
         .filter(|&(x, y)| {
-            !world::bank(v, x as i32, y as i32)
+            world::walkable(v, x, y)
                 && v.buildings.iter().all(|b| {
                     (x - (b.x as f32 + 0.5)).abs() > 1.75 || (y - (b.y as f32 + 0.5)).abs() > 1.75
                 })
@@ -434,8 +451,8 @@ fn idle_destination(v: &Village, id: usize) -> Option<(f32, f32)> {
     if spots.is_empty() {
         return None;
     }
-    let visit = (v.minutes / (90. + id as f32 * 13.)).floor() as usize;
-    Some(spots[(visit + id) % spots.len()])
+    let visit = (v.minutes / (90. + slot as f32 * 13.)).floor() as usize;
+    Some(spots[(visit + slot) % spots.len()])
 }
 
 fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bool) {
@@ -517,10 +534,8 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         r.activity_building = None;
         r.task = "rest".into();
         r.reason = "Taking a break where there is room. That building is too crowded.".into();
-        (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((
-            crate::camp(v).0 + (r.id as f32 - 2.) * 1.25,
-            crate::camp(v).1,
-        ));
+        (r.target_x, r.target_y) =
+            idle_destination(v, r.id).unwrap_or_else(|| roster::camp_spot(v, r.id));
         return;
     }
     if task == "eat" {
@@ -568,7 +583,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
             }
         }
     } else if task == "idle" || leisure::hobby(task) {
-        r.remaining = 24. + r.id as f32 * 2.;
+        r.remaining = 24. + roster::slot(v, r.id).unwrap_or(0) as f32 * 2.;
         (r.target_x, r.target_y) = if founding::weather_shelter(v) && task == "daydream" {
             founding::quiet_spot(v, r.id)
         } else {

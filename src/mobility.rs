@@ -28,7 +28,7 @@ pub fn departure_time(minutes: f32) -> bool {
     (540.0..600.).contains(&minutes.rem_euclid(1440.))
 }
 pub fn gate(v: &Village, id: usize) -> (f32, f32) {
-    let preferred = crate::camp(v).1 + (id as f32 - 2.) * 1.25;
+    let preferred = crate::camp(v).1 + roster::offset(v, id, 1.25);
     let clear =
         |x, y| world::walkable(v, x, y) && v.buildings.iter().all(|b| spacing::clear_plot(b, x, y));
     for offset in 0..MAP_SIZE {
@@ -48,6 +48,9 @@ pub fn gate(v: &Village, id: usize) -> (f32, f32) {
     (10., MAP_SIZE as f32 - 0.4)
 }
 pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
+    if roster::slot(v, r.id).is_none() {
+        return;
+    }
     walking::clear(r);
     if purpose == Purpose::Overnight {
         sleep::pause(r);

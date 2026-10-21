@@ -36,12 +36,14 @@ pub fn free_spot(v: &Village, p: (f32, f32), id: usize) -> bool {
     })
 }
 fn remaining_spot(v: &Village, spots: &[(f32, f32)], id: usize) -> Option<(f32, f32)> {
+    let slot = roster::slot(v, id)?;
     (0..spots.len())
-        .map(|i| spots[(i + id) % spots.len()])
+        .map(|i| spots[(i + slot) % spots.len()])
         .find(|p| free_spot(v, *p, id))
 }
 
 pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32)> {
+    let slot = roster::slot(v, id)?;
     let mut spots: Vec<(f32, f32)> = vec![];
     for radius in [0.7, 1.4, 2.1, 2.8, 3.5] {
         for angle in [90f32, 45., 0., 135., -45., 180., 225., -90.] {
@@ -56,7 +58,7 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
                     .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
             {
                 spots.push(p);
-                if spots.len() > id && free_spot(v, p, id) {
+                if spots.len() > slot && free_spot(v, p, id) {
                     return Some(p);
                 }
             }
@@ -66,6 +68,7 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
 }
 
 pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
+    let slot = roster::slot(v, id)?;
     let mut spots: Vec<(f32, f32)> = Vec::new();
     // Start along the visible front of the building, then try the sides.
     // Wider rings leave room around neighbours and the edge of the lot.
@@ -85,7 +88,7 @@ pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
                     .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
             {
                 spots.push(p);
-                if spots.len() > id && free_spot(v, p, id) {
+                if spots.len() > slot && free_spot(v, p, id) {
                     return Some(p);
                 }
             }

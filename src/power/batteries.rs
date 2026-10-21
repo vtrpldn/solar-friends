@@ -182,7 +182,9 @@ pub fn approach(v: &Village, id: Id, resident: usize) -> Option<[f32; 2]> {
         [n.x, n.y]
     };
     for turn in 0..8 {
-        let a = (resident as f32 / 5. + turn as f32 / 8.) * std::f32::consts::TAU;
+        let a = (roster::slot(v, resident)? as f32 / v.skills.people.len() as f32
+            + turn as f32 / 8.)
+            * std::f32::consts::TAU;
         let p = [
             point[0] as f32 + a.cos() * 0.9,
             point[1] as f32 + a.sin() * 0.9,
