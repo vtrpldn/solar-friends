@@ -1,3 +1,4 @@
+import {canonical,difference,validateChanges,applyChanges,signature,sameSignature,validSignature} from './journal.js';
 // Drafts may be unplayable while editing. Native scenario validation decides
 // when they can run; this module only owns atomic edits and their undo history.
 const MAX_DOCUMENT_BYTES=2*1024*1024;
@@ -7,11 +8,7 @@ const encoder=new TextEncoder();
 const bytes=value=>encoder.encode(value).length;
 
 function encode(value){
-  const raw=JSON.stringify(value,(_key,item)=>{
-    if(typeof item==='number'&&!Number.isFinite(item))throw Error('Use a finite number for this value.');
-    if(['undefined','function','symbol','bigint'].includes(typeof item))throw Error('Drafts can contain only serializable values.');
-    return item;
-  });
+  const raw=canonical(value);
   if(!raw||bytes(raw)>MAX_DOCUMENT_BYTES)throw Error('This draft is too large to save.');
   return raw;
 }
@@ -20,7 +17,18 @@ function definition(raw){
   if(value?.format!=='solar-friends-scenario'||!Number.isInteger(value.schema)||!value.map||!value.start||!value.rules)throw Error('This is not a scenario draft.');
   return value;
 }
-function historySize(step){return bytes(step.before)+bytes(step.after)+bytes(step.label);}
+function historySize(step){return bytes(canonical(step));}
+function stepFor(label,before,after){
+  const a=definition(before),b=definition(after),step={label,before:signature(before),after:signature(after),changes:difference(a,b,before.length+after.length)};
+  if(historySize(step)>MAX_HISTORY_BYTES)step.changes=[{path:[],before:{exists:true,value:a},after:{exists:true,value:b}}];
+  return step;
+}
+function applyStep(raw,step,forward){
+  if(!sameSignature(signature(raw),forward?step.before:step.after))throw Error('History does not match the draft.');
+  const next=encode(applyChanges(definition(raw),step.changes,forward));definition(next);
+  if(!sameSignature(signature(next),forward?step.after:step.before))throw Error('History does not restore the draft.');
+  return next;
+}
 
 export class EditorDocument extends EventTarget{
   #raw;
@@ -53,7 +61,7 @@ export class EditorDocument extends EventTarget{
     const after=encode(draft);
     definition(after);
     if(after===this.#raw)return false;
-    this.#past.push({label,before:this.#raw,after});
+    this.#past.push(stepFor(label,this.#raw,after));
     this.#raw=after;
     this.#future=[];
     this.#trim();
@@ -61,17 +69,19 @@ export class EditorDocument extends EventTarget{
     return true;
   }
   undo(){
-    const step=this.#past.pop();
+    const step=this.#past.at(-1);
     if(!step)return false;
-    this.#raw=step.before;
+    const raw=applyStep(this.#raw,step,false);
+    this.#past.pop();this.#raw=raw;
     this.#future.push(step);
     this.#changed();
     return true;
   }
   redo(){
-    const step=this.#future.pop();
+    const step=this.#future.at(-1);
     if(!step)return false;
-    this.#raw=step.after;
+    const raw=applyStep(this.#raw,step,true);
+    this.#future.pop();this.#raw=raw;
     this.#past.push(step);
     this.#changed();
     return true;
@@ -93,7 +103,7 @@ export class EditorDocument extends EventTarget{
       schema:1,
       revision:this.#revision,
       definition:this.value,
-      history:structuredClone({past:this.#past,future:this.#future}),
+      history:structuredClone({format:2,past:this.#past,future:this.#future}),
     };
   }
   static restore(checkpoint){
@@ -103,25 +113,31 @@ export class EditorDocument extends EventTarget{
     doc.#savedRevision=checkpoint.revision;
     if(checkpoint.history){
       try{
-        const {past,future}=checkpoint.history;
+        let {past,future,format=1}=checkpoint.history;
         if(!Array.isArray(past)||!Array.isArray(future)||past.length+future.length>MAX_HISTORY_STEPS)throw Error('Invalid history.');
+        if(![1,2].includes(format))throw Error('Unsupported history.');
         let size=0;
-        for(const step of [...past,...future]){
-          if(typeof step?.label!=='string'||step.label.length>160||typeof step.before!=='string'||typeof step.after!=='string')throw Error('Invalid edit.');
-          if(bytes(step.before)>MAX_DOCUMENT_BYTES||bytes(step.after)>MAX_DOCUMENT_BYTES)throw Error('Invalid edit size.');
-          definition(step.before);definition(step.after);
-          size+=historySize(step);
-          if(size>MAX_HISTORY_BYTES)throw Error('Invalid history size.');
-        }
+        const normalize=step=>{
+          if(typeof step?.label!=='string'||!step.label.trim()||step.label.length>160)throw Error('Invalid edit.');
+          if(format===1){
+            if(typeof step.before!=='string'||typeof step.after!=='string')throw Error('Invalid legacy history.');
+            size+=bytes(step.before)+bytes(step.after)+bytes(step.label);
+            if(size>MAX_HISTORY_BYTES)throw Error('Invalid legacy history size.');
+            const before=definition(encode(definition(step.before))),after=definition(encode(definition(step.after)));
+            return stepFor(step.label,encode(before),encode(after));
+          }
+          if(Object.keys(step).sort().join(',')!=='after,before,changes,label'||!validSignature(step.before,MAX_DOCUMENT_BYTES)||!validSignature(step.after,MAX_DOCUMENT_BYTES))throw Error('Invalid edit fields.');
+          validateChanges(step.changes,encode);return step;
+        };
+        past=past.map(normalize);future=future.map(normalize);
+        if([...past,...future].reduce((n,step)=>n+historySize(step),0)>MAX_HISTORY_BYTES)throw Error('Invalid history size.');
         let cursor=doc.#raw;
         for(const step of [...past].reverse()){
-          if(step.after!==cursor)throw Error('Undo history does not match the draft.');
-          cursor=step.before;
+          cursor=applyStep(cursor,step,false);
         }
         cursor=doc.#raw;
         for(const step of [...future].reverse()){
-          if(step.before!==cursor)throw Error('Redo history does not match the draft.');
-          cursor=step.after;
+          cursor=applyStep(cursor,step,true);
         }
         doc.#past=structuredClone(past);doc.#future=structuredClone(future);
       }catch{
