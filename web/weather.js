@@ -28,7 +28,7 @@ export function weatherSites(buildings) {
   return sites.filter(p=>!buildings.some(b=>occupies(b,p.x,p.y)));
 }
 
-export function drawGroundWeather(ctx, {conditions, buildings, project, scale, time, reducedMotion}) {
+export function drawGroundWeather(ctx, {conditions, buildings, project, scale, time, reducedMotion,map}) {
   const counts={puddles:0,splashes:0,ripples:0};
   if (!conditions.wet && !conditions.rain) return counts;
   const clear=weatherSites(buildings);
@@ -36,7 +36,7 @@ export function drawGroundWeather(ctx, {conditions, buildings, project, scale, t
   // Small shallow pools sit on the ground plane, underneath buildings and
   // residents. The same seeded positions survive panning, zooming and pause.
   for(const site of clear.filter(p=>p.id<Math.round(34*(MAP_SIZE/28)**2))) {
-    if(riverBank(site.x,site.y)||conditions.wet<=.01)continue;
+    if(riverBank(Math.floor(site.x),Math.floor(site.y),map)||conditions.wet<=.01)continue;
     const p=project(site.x,site.y),radius=(10+site.phase*17)*scale;
     ctx.save();ctx.translate(p.x,p.y);ctx.scale(1,.5);
     const sheen=ctx.createRadialGradient(0,0,1,0,0,radius);
@@ -51,7 +51,7 @@ export function drawGroundWeather(ctx, {conditions, buildings, project, scale, t
   if(conditions.rain&&!reducedMotion) {
     for(const site of clear.filter(p=>p.id<Math.round(160*(MAP_SIZE/28)**2))) {
       const phase=(time*1.6+site.phase)%1;if(phase>.45)continue;
-      const p=project(site.x,site.y),water=riverBank(site.x,site.y),r=(1.5+phase*(water?16:8))*scale;
+      const p=project(site.x,site.y),water=riverBank(Math.floor(site.x),Math.floor(site.y),map),r=(1.5+phase*(water?16:8))*scale;
       ctx.strokeStyle=`rgba(213,231,226,${conditions.rain*(1-phase/.45)*(water?.36:.32)})`;
       ctx.lineWidth=.75*scale;ctx.beginPath();ctx.ellipse(p.x,p.y,r,r*.5,0,0,Math.PI*2);ctx.stroke();
       if(water)counts.ripples++;else counts.splashes++;

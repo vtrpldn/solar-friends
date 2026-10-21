@@ -6,15 +6,24 @@ export const GROUND_SIZE = 69;
 const RESOLUTION = 4096;
 
 export const MAP_SIZE = 64;
-export function riverCenter(y) {
-  return (MAP_SIZE - 2.2) + Math.sin(y * 0.22) * 0.65;
+// Gameplay masks use the same row sample as Rust; visual curves interpolate
+// between those samples so painted banks and currents remain smooth.
+export function riverCenter(y,map){
+  if(map?.river===null)return null;
+  const rows=map?.river?.centers;
+  return rows?rows[Math.max(0,Math.min(MAP_SIZE-1,Math.floor(y)))]:((MAP_SIZE-2.2)+Math.sin(y*.22)*.65);
 }
-export function hydroCell(y){return Math.ceil(riverCenter(y)-1.35);}
-export function riverBank(x, y) {
-  return x >= riverCenter(y) - 2.3;
+export function riverCurve(y,map){
+  const rows=map?.river?.centers;if(!rows)return riverCenter(y,map);
+  const row=Math.max(0,Math.min(MAP_SIZE-1,y)),a=Math.floor(row),b=Math.min(MAP_SIZE-1,a+1);
+  return rows[a]+(rows[b]-rows[a])*(row-a);
 }
+export function hydroCell(y,map){const c=riverCenter(y,map);return c===null?null:Math.ceil(c-1.35);}
+export function hydroSite(x,y,map){const c=riverCenter(y,map);return c!==null&&x>=c-1.35&&x<c-.35&&[-1,1].every(d=>Math.abs(riverCenter(y+d,map)-c)<=.25);}
+export function riverBank(x,y,map){const c=riverCenter(y,map);return c!==null&&(map?.river?Math.abs(x-c)<=2.3:x>=c-2.3);}
 
-function paintRiver(g) {
+function paintRiver(g,map) {
+  if(riverCenter(0,map)===null)return;
   const unit = RESOLUTION / GROUND_SIZE;
   const trace = (offset = 0) => {
     g.beginPath();
@@ -23,7 +32,7 @@ function paintRiver(g) {
       y <= GROUND_START + GROUND_SIZE + 1;
       y += 0.12
     ) {
-      const p = groundPoint(riverCenter(y) + offset, y);
+      const p = groundPoint(riverCurve(y,map) + offset, y);
       if (y === GROUND_START - 1) g.moveTo(...p);
       else g.lineTo(...p);
     }
@@ -50,7 +59,7 @@ function paintRiver(g) {
     const y = GROUND_START + i * 0.33;
     const side = i % 2 ? 1 : -1;
     const [x, py] = groundPoint(
-      riverCenter(y) + side * (1.28 + Math.sin(i * 2.1) * 0.13),
+      riverCurve(y,map) + side * (1.28 + Math.sin(i * 2.1) * 0.13),
       y,
     );
     g.fillStyle = i % 3 ? "#a2a482" : "#d5cbaa";
@@ -59,7 +68,7 @@ function paintRiver(g) {
     g.fill();
     g.strokeStyle = "#c1dbcd66";
     g.lineWidth = 1.5;
-    const [wx, wy] = groundPoint(riverCenter(y) + Math.sin(i * 1.7) * 0.7, y);
+    const [wx, wy] = groundPoint(riverCurve(y,map) + Math.sin(i * 1.7) * 0.7, y);
     g.beginPath();
     g.moveTo(wx - 6, wy);
     g.quadraticCurveTo(wx, wy - 4, wx + 9, wy + 2);
@@ -103,22 +112,22 @@ function paintedTexture(g,texture,side){
     g.drawImage(texture,side*half,0,half,texture.height,0,0,tile,tile);g.restore();
   }
 }
-function paintHabitats(g,seed){
+function paintHabitats(g,seed,map){
   const unit=RESOLUTION/GROUND_SIZE;
   for(let y=0;y<MAP_SIZE;y+=2)for(let x=0;x<MAP_SIZE;x+=2){
-    const name=habitatAt(seed,x,y);if(name==='Flower meadow')continue;
+    const name=habitatAt(seed,x,y,map);if(name==='Flower meadow')continue;
     const [px,py]=groundPoint(x,y),radius=unit*2.4,patch=g.createRadialGradient(px,py,0,px,py,radius);
     patch.addColorStop(0,habitatColors[name]+'20');patch.addColorStop(1,habitatColors[name]+'00');
     g.fillStyle=patch;g.fillRect(px-radius,py-radius,radius*2,radius*2);
   }
 }
-export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0) {
+export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0,map) {
   const ground = surface();
   const g = ground.getContext("2d");
   paintedTexture(g,texture,0);
   // Quiet the repeated leaf texture so buildings and planted plots stay legible.
   g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
-  paintHabitats(g,seed);
+  paintHabitats(g,seed,map);
   paintSoil(g,soil);
   const paths = surface();
   const p = paths.getContext("2d");
@@ -136,7 +145,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   p.globalCompositeOperation = "source-in";
   paintedTexture(p,texture,1);
   g.drawImage(paths, 0, 0);
-  paintRiver(g);
+  paintRiver(g,map);
 
   // Irregular meadow edges dissolve into the map surround instead of forming
   // a hard, board-game diamond. The complete buildable area stays opaque.

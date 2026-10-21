@@ -16,6 +16,20 @@ try{
  const projectURL=page.url();
  const cellPoint=async(x,y)=>page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
  const clickCell=async(x,y)=>{const p=await cellPoint(x,y);await page.mouse.click(p.x,p.y);};
+ await page.locator('#creator-river-enabled').uncheck();
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Remove river');
+ await page.locator('#creator-undo').click();
+ await page.locator('[data-tool=river]').click();
+ for(let n=0;n<6;n++)await page.locator('#creator-zoom-out').click();
+ const riverA=await cellPoint(45,15),riverB=await cellPoint(45,20);
+ await page.mouse.move(riverA.x,riverA.y);await page.mouse.down();await page.mouse.move(riverB.x,riverB.y,{steps:8});await page.mouse.up();
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Shape river course');
+ assert.equal(await page.locator('#creator-test').isEnabled(),true);
+ await page.screenshot({path:'/private/tmp/solar-creator-river.png'});
+ await page.locator('#creator-undo').click();await page.locator('#creator-redo').click();
+ for(let n=0;n<6;n++)await page.locator('#creator-zoom-in').click();
+ await page.locator('[data-tool=select]').click();
+
  await clickCell(30,29);await page.keyboard.down('Shift');await clickCell(36,29);await page.keyboard.up('Shift');
  await page.getByRole('heading',{name:'2 buildings',exact:true}).waitFor();
  await page.getByRole('button',{name:'Move group',exact:true}).click();
@@ -63,6 +77,10 @@ try{
  await page.locator('#creator-test').click();
  await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
  assert.match(await page.locator('.creation-session').innerText(),/Playtest · Our first property/);
+ const mini=await page.locator('#village-map').evaluate(c=>{const ctx=c.getContext('2d'),at=(x,y)=>[...ctx.getImageData(Math.floor((x+.5)*c.width/64),Math.floor((y+.5)*c.height/64),1,1).data].slice(0,3);return {course:at(45,18),oldBank:at(61,18)};});
+ assert.deepEqual(mini.course,[116,167,160]);assert.notDeepEqual(mini.oldBank,[116,167,160]);
+ await page.screenshot({path:'/private/tmp/solar-river-playtest.png'});
+
  await page.getByRole('button',{name:'Save checkpoint',exact:true}).click();
  await page.getByRole('button',{name:'Restart test',exact:true}).click();
  await page.getByRole('button',{name:'Return to editor',exact:true}).click();

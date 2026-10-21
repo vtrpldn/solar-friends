@@ -56,7 +56,7 @@ import {
   paintTerrain,
   soilAppearance,
   MAP_SIZE,
-  riverCenter,
+  riverCenter,riverCurve,
   riverBank,
 } from "./terrain.js?v=manual-roads-1";
 const $ = (s) => document.querySelector(s);
@@ -644,7 +644,8 @@ function render() {
   scale = Math.max(0.18, scale);
   origin = { x: width * 0.5 + pan.x, y: height * 0.5 - (MAP_SIZE - 1) * 17 * scale + pan.y };
   canvas.dataset.cameraCenter=JSON.stringify(unproject(width/2,height/2,origin,scale));
-  const weatherView = {conditions:weather,buildings:state.village.buildings,project:iso,scale,time:weatherTime,width,height,reducedMotion:reducedMotion.matches};
+  const worldMap=state.village.scenario?.definition?.map;
+  const weatherView = {map:worldMap,conditions:weather,buildings:state.village.buildings,project:iso,scale,time:weatherTime,width,height,reducedMotion:reducedMotion.matches};
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#dfe6c9";
   ctx.fillRect(0, 0, width, height);
@@ -655,18 +656,18 @@ function render() {
   const standingTrees=terrainSample.trees;
   const onScreenTree=f=>{const p=iso(f.x,f.y),margin=220*scale;return p.x>=-margin&&p.x<=width+margin&&p.y>=-margin&&p.y<=height+margin;};
   for(const [key,value] of Object.entries({forestSeed:state.village.land.seed,forestCount:standingTrees.length,soilCells:soil.length}))if(canvas.dataset[key]!==String(value))canvas.dataset[key]=String(value);
-  const key = JSON.stringify([state.village.land.seed,visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
+  const key = JSON.stringify([state.village.land.seed,worldMap?.river,visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
   if (groundKey !== key) {
-    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil,state.village.land.seed);
+    groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil,state.village.land.seed,worldMap);
     groundKey = key;
   }
   paintWorldGround(ctx,groundLayer,origin,scale);
   // Sparse currents move along the channel in world coordinates.
-  for (let i = 0; i < Math.ceil(MAP_SIZE*1.1); i++) {
+  for (let i = 0; riverCenter(0,worldMap)!==null && i < Math.ceil(MAP_SIZE*1.1); i++) {
     const y = ((i * 0.93 + time * 0.12) % MAP_SIZE) - 0.5;
     const offset = Math.sin(i * 2.3) * 0.7;
-    const a = iso(riverCenter(y) + offset, y);
-    const b = iso(riverCenter(y + 0.35) + offset, y + 0.35);
+    const a = iso(riverCurve(y,worldMap) + offset, y);
+    const b = iso(riverCurve(y + 0.35,worldMap) + offset, y + 0.35);
     line(a.x, a.y, b.x, b.y, "#d2eee34d", Math.max(0.6, scale));
   }
   landMap?.draw({tile,pointer:pointer?uniso(pointer.x,pointer.y):null,tool});

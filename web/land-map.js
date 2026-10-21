@@ -2,7 +2,7 @@ import {landLayers as layers,landTiles} from './land-layers.js';
 export {landTiles} from './land-layers.js';
 import {installRestorationUI} from './restoration-ui.js';
 import {MAP_SIZE,riverBank} from './terrain.js';
-const groundCells=Array.from({length:MAP_SIZE*MAP_SIZE},(_,i)=>({x:i%MAP_SIZE,y:Math.floor(i/MAP_SIZE)})).filter(c=>!riverBank(c.x,c.y));
+const groundCells=Array.from({length:MAP_SIZE*MAP_SIZE},(_,i)=>({x:i%MAP_SIZE,y:Math.floor(i/MAP_SIZE)}));
 export const sourceLandLayer=tool=>({source_earth:'earth',source_stone:'stone',source_salvage:'salvage'})[tool];
 export const landPreviewKind=(layer,tool,marked)=>tool||({earth:'source_earth',stone:'source_stone',salvage:'source_salvage'})[layer]||(marked?(marked.size===3?'source_timber':'garden'):'road');
 export function installLandMap(api){
@@ -16,14 +16,14 @@ export function installLandMap(api){
   return {close,pin(point,tool){if(panel.hidden)return false;return soil.pin(point,tool);},isOpen:()=>!panel.hidden,drawFocus(tile){if(panel.hidden)return;for(const j of api.snapshot().village.restoration||[]){if(j.finished!=null)continue;for(let x=j.x-Math.floor(j.size/2);x<j.x-Math.floor(j.size/2)+j.size;x++)for(let y=j.y-Math.floor(j.size/2);y<j.y-Math.floor(j.size/2)+j.size;y++)tile(x,y,'#78a35a22','#8eae6b');}const marked=soil.focus()||focus;if(!marked)return;const n=marked.size;for(let x=marked.x-Math.floor(n/2);x<marked.x-Math.floor(n/2)+n;x++)for(let y=marked.y-Math.floor(n/2);y<marked.y-Math.floor(n/2)+n;y++)tile(x,y,'#fff3b51a','#fff3b5');},draw({tile,pointer,tool}){
     if(panel.hidden){
       const layer=sourceLandLayer(tool);if(!layer)return;
-      const land=api.snapshot().village.land,next=JSON.stringify([layer,land.seed,land.deposits.map(d=>d.remaining)]);
-      if(next!==placementKey){placementKey=next;placementTiles=landTiles({cells:groundCells,deposits:land.deposits},layer);}
+      const v=api.snapshot().village,land=v.land,next=JSON.stringify([layer,land.seed,v.scenario?.definition?.map.river,land.deposits.map(d=>d.remaining)]);
+      if(next!==placementKey){placementKey=next;placementTiles=landTiles({cells:groundCells.filter(c=>!riverBank(c.x,c.y,v.scenario?.definition?.map)),deposits:land.deposits},layer);}
       for(const cell of placementTiles)tile(cell.x,cell.y,cell.fill,'#f7e7ae99');
       return;
     }
     if(tool)soil.clear();soil.update();
     pointer=soil.point()||pointer;
-    const v=api.snapshot().village,next=JSON.stringify([v.land.seed,v.land.revision,v.restoration,v.land.soil,v.land.deposits,v.buildings.map(b=>[b.kind,b.x,b.y,b.progress>=100]),v.economy.sources.map(s=>[s.active,s.x,s.y,Math.floor(s.growth*100),s.remaining])]),now=performance.now();
+    const v=api.snapshot().village,next=JSON.stringify([v.scenario?.definition?.map.river,v.land.seed,v.land.revision,v.restoration,v.land.soil,v.land.deposits,v.buildings.map(b=>[b.kind,b.x,b.y,b.progress>=100]),v.economy.sources.map(s=>[s.active,s.x,s.y,Math.floor(s.growth*100),s.remaining])]),now=performance.now();
     if(next!==key||v.minutes!==sampledMinute&&now-sampledAt>=250){key=next;sampledMinute=v.minutes;sampledAt=now;report=JSON.parse(api.game().land_report());tiles=landTiles(report,select.value);previewKey='';}
     for(const cell of tiles)tile(cell.x,cell.y,cell.fill,cell.stroke);
     const marked=soil.focus();if(marked)pointer={x:marked.x,y:marked.y};

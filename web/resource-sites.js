@@ -23,7 +23,7 @@ export function sourcePlacementReason(v,material,x,y){
     if(usesLand(v)&&deposit.remaining<=0)return 'This local deposit is exhausted. Choose another patch or buy supplies in town.';
   }
   for(let X=a;X<a+n;X++)for(let Y=b;Y<b+n;Y++){
-    if(X<1||Y<1||X>=MAP_SIZE-1||Y>=MAP_SIZE-1||riverBank(X,Y))return 'Choose an inland clearing inside the village.';
+    if(X<1||Y<1||X>=MAP_SIZE-1||Y>=MAP_SIZE-1||riverBank(X,Y,v.scenario?.definition?.map))return 'Choose an inland clearing inside the village.';
     if((v.restoration||[]).some(j=>j.finished==null&&X>=j.x-Math.floor(j.size/2)&&X<j.x-Math.floor(j.size/2)+j.size&&Y>=j.y-Math.floor(j.size/2)&&Y<j.y-Math.floor(j.size/2)+j.size))return 'That ground is reserved for soil restoration.';
     if(v.pipes?.lines.some(p=>p.phase!=='retired'&&p.plan.cells.some(([x,y])=>x===X&&y===Y)))return 'Remove the utility line on this plot before placing a material plot.';
     if(batteryReserved(v,X,Y))return 'Keep buildings, paths, other plots and the arrival clearing free.';

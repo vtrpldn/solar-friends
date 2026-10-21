@@ -57,7 +57,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     else{showPanel('supplies-panel',resource==='materials'?'stores':resource==='water'?'water':'pantry');if(resource==='materials'){$('#materials-stores').open=true;$('#materials-stores').scrollIntoView({block:'nearest'});}}
   };
   const map=$('#village-map'),ctx=map.getContext('2d');
-  let mapCentre={x:MAP_SIZE/2,y:MAP_SIZE/2},buildingKey='',mapTerrain=null,mapSeed=null;
+  let mapCentre={x:MAP_SIZE/2,y:MAP_SIZE/2},buildingKey='',mapTerrain=null,mapSeed=null,mapGeometryKey=null;
   map.onclick=event=>{const rect=map.getBoundingClientRect();mapCentre={x:(event.clientX-rect.left)/rect.width*MAP_SIZE,y:(event.clientY-rect.top)/rect.height*MAP_SIZE};focusAt(mapCentre.x,mapCentre.y);};
   map.onkeydown=event=>{const delta={ArrowLeft:[-2,0],ArrowRight:[2,0],ArrowUp:[0,-2],ArrowDown:[0,2]}[event.key];if(!delta)return;event.preventDefault();event.stopPropagation();mapCentre={x:Math.max(0,Math.min(MAP_SIZE,mapCentre.x+delta[0])),y:Math.max(0,Math.min(MAP_SIZE,mapCentre.y+delta[1]))};focusAt(mapCentre.x,mapCentre.y);};
   const portraits=new Map();
@@ -91,10 +91,12 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
   }
   function drawMap(state,selected){
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
-    if(!mapTerrain||mapSeed!==state.village.land.seed){
+    const worldMap=state.village.scenario?.definition?.map,geometryKey=JSON.stringify(worldMap?.river);
+    if(!mapTerrain||mapSeed!==state.village.land.seed||geometryKey!==mapGeometryKey){
+      mapGeometryKey=geometryKey;
       mapTerrain=document.createElement('canvas');mapTerrain.width=map.width;mapTerrain.height=map.height;mapSeed=state.village.land.seed;
       const ground=mapTerrain.getContext('2d');ground.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
-      for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ground.fillStyle=riverBank(x,y)?'#74a7a0':habitatColors[habitatAt(mapSeed,x,y)];ground.fillRect(x,y,1,1);}
+      for(let x=0;x<MAP_SIZE;x++)for(let y=0;y<MAP_SIZE;y++){ground.fillStyle=riverBank(x,y,worldMap)?'#74a7a0':habitatColors[habitatAt(mapSeed,x,y,worldMap)];ground.fillRect(x,y,1,1);}
     }
     ctx.drawImage(mapTerrain,0,0,MAP_SIZE,MAP_SIZE);
     ctx.fillStyle='#d3b181';for(const [x,y] of state.village.roads)ctx.fillRect(x-.45,y-.45,.9,.9);

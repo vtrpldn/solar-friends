@@ -55,7 +55,7 @@ export class EditorMap {
     this.canvas.focus();this.canvas.setPointerCapture(e.pointerId);
     const p=this.point(e),cell=this.cell(p),pan=e.button===1||e.button===2||this.view.tool==='pan';
     this.drag={point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
-    if(!pan&&['road','meadow'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
+    if(!pan&&['road','meadow','river'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
     if(!pan&&this.view.tool==='move'){const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}}
   }
   motion(e){
@@ -108,8 +108,8 @@ export class EditorMap {
     canvas.dataset.center=JSON.stringify(view.center);
     c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);
     const land=this.snapshot.village.land,roads=this.document.start.roads;
-    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil]);
-    if(this.groundKey!==key){this.ground=paintTerrain(art.terrain,roads,[],soil,land.seed);this.groundKey=key;}
+    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river]);
+    if(this.groundKey!==key){this.ground=paintTerrain(art.terrain,roads,[],soil,land.seed,this.document.map);this.groundKey=key;}
     paintWorldGround(c,this.ground,this.origin,this.scale);
     for(const tile of this.landOverlay||[])this.polygon(footprintCorners('road',tile.x,tile.y),tile.fill,tile.stroke);
     if(view.grid){

@@ -1,6 +1,6 @@
 import {landLayers,landTiles} from '../land-layers.js';
 import {planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
-import {clearingStroke} from './brush.js';
+import {clearingStroke,riverStroke} from './brush.js';
 import init,{Game} from '../pkg/solar_friends.js';
 import {ContentLibrary,LibraryConflict} from '../content-library.js';
 import {EditorDocument} from './document.js';
@@ -63,6 +63,7 @@ function refresh(){
   map.landOverlay=landTiles(landReport,map.view.layer);
   map.set(d,snapshot);
   inspectGround(hoverCell);
+  $('creator-river-enabled').checked=d.map.river!==null;
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
   $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
@@ -101,7 +102,7 @@ function renderReview(){
 function setTool(tool){
   map.setTool(tool);landSampleKey='';inspectGround(hoverCell);
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
-  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
+  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',river:'Drag to shape the channel · steep bends cannot host hydro · one undo step',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
 function removeBuilding(id){
   const ids=map.selection().includes(id)?map.selection():[id];
@@ -112,6 +113,7 @@ function removeBuilding(id){
 function mapAction(action){
   if(!current||busy)return;
   if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});
+  else if(action.type==='river')change('Shape river course',d=>{d.map.river=riverStroke(d.map.river,action.cells);});
   else if(action.type==='meadow')change('Clear a meadow',d=>{d.map.clearings=clearingStroke(d.map.clearings,action.cells,action.size);},{valid:true});
   else if(action.type==='move')change(action.ids.length>1?'Move building group':'Move building',d=>moveBuildings(d,action.ids,action.dx,action.dy),{valid:true});
   else if(action.type==='duplicate'&&map.copy){const copy=map.copy,anchor=copy.buildings[0];if(change('Copy building group',d=>placeBuildingCopy(d,copy,action.x-anchor.x,action.y-anchor.y),{valid:true})){setTool('select');map.select(null);for(const b of copy.buildings)map.select(b.id,true);map.copy=null;}}
@@ -134,7 +136,7 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true,layer:'none'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
-    const tool=['select','pan','move','road','meadow','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
+    const tool=['select','pan','move','road','meadow','river','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
     map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,layer:Object.hasOwn(landLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
   }
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
@@ -193,6 +195,7 @@ async function showLibrary(){
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
+  $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
   $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=landTiles(landReport,map.view.layer);$('creator-land-legend').textContent=landLayers[map.view.layer]?.legend||'Point at a cell to inspect the land.';map.render();current.viewDirty=true;scheduleSave();};
   $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};

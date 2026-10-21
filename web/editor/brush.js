@@ -21,3 +21,22 @@ export function clearingStroke(existing,cells,size){
   if(result.length>64)throw Error('This property supports 64 clearing stamps. Use a larger brush or undo a previous clearing.');
   return result;
 }
+
+// One channel crosses every map row. Keep its course connected and within the
+// supported slope; bends remain scenery when unsuitable for the hydro sprite.
+export function riverStroke(river,cells){
+  if(!cells.length)return river;
+  const samples=new Map(cells.filter(p=>p.every(Number.isFinite)).map(([x,y])=>[Math.max(0,Math.min(63,Math.round(y))),Math.max(2,Math.min(63,x))]));
+  if(!samples.size)return river;
+  const points=[...samples].sort((a,b)=>a[0]-b[0]);
+  const centers=river?.centers?.slice()||Array(64).fill(points[0][1]);
+  for(let i=0;i<points.length;i++){
+    const [row,x]=points[i];centers[row]=x;
+    if(i){const [from,start]=points[i-1];for(let y=from+1;y<row;y++)centers[y]=start+(x-start)*(y-from)/(row-from);}
+  }
+  const first=points[0][0],last=points.at(-1)[0];
+  for(let y=first+1;y<=last;y++)centers[y]=Math.max(centers[y-1]-1,Math.min(centers[y-1]+1,centers[y]));
+  for(let y=first-1;y>=0;y--)centers[y]=Math.max(centers[y+1]-1,Math.min(centers[y+1]+1,centers[y]));
+  for(let y=last+1;y<64;y++)centers[y]=Math.max(centers[y-1]-1,Math.min(centers[y-1]+1,centers[y]));
+  return {schema:1,centers};
+}
