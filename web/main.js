@@ -1,3 +1,6 @@
+import {ContentLibrary} from './content-library.js';
+import {PlayerSession} from './player-session.js';
+let playerSession=null;
 import {paintWorldGround,paintWorldTree,paintWorldBuilding} from './world-renderer.js';
 import {constructionOpacity,drawBuildingState} from './building-state-art.js';
 import {paintImage} from './paint-cache.js';
@@ -237,6 +240,10 @@ function save(manual = false) {
     if (manual) toast("Preview only. Return to your village to save progress.");
     return;
   }
+  if(playerSession){
+    playerSession.save().then(()=>{ $("#save-status").textContent="Scenario checkpoint saved";$("#save-warning").hidden=true;if(manual)toast("Scenario checkpoint saved."); }).catch(error=>{ $("#save-status").textContent="Scenario saving unavailable";$("#save-warning").hidden=false;if(manual)toast(error.message); });
+    return;
+  }
   try {
     storage.write(game.snapshot());
     $("#save-warning").hidden = true;
@@ -294,6 +301,8 @@ function openMainMenu() {
   $('#main-menu').showModal();
 }
 function enterVillage(candidate,mode) {
+  playerSession?.dispose({freeGame:false});playerSession=null;
+  document.querySelector(".creation-session")?.remove();document.body.classList.remove("in-creation-run");
   game.free();game=candidate;storage=modeStores[mode];gameActive=true;
   state=JSON.parse(game.snapshot());
   residentAnimations.clear();selected=null;tool=null;pointer=null;cameraTarget=null;
@@ -363,6 +372,8 @@ function installMenu() {
   };
   $('#open-main-menu').onclick=openMainMenu;
   $('.brand').onclick=event=>{if(!artworkPreview&&!directScenario){event.preventDefault();openMainMenu();}};
+  $('#menu-create').onclick=()=>{location.href='./editor.html';};
+  $('#menu-scenarios').onclick=()=>{location.href='./editor.html?library=1';};
   $('#menu-settings').onclick=()=>$('#settings').click();
   $('#menu-help').onclick=openHelp;
 }
@@ -1869,6 +1880,26 @@ function setup() {
 }
 // Both the workbench and automated checks use this interface. Mutations require
 // a sandbox; the original Game object stays untouched until it is restored.
+function installCreationSession(){
+  const session=playerSession;
+  document.body.classList.add('in-creation-run');
+  const bar=document.createElement('nav');bar.className='creation-session';bar.setAttribute('aria-label','Scenario session');
+  const label=document.createElement('strong');label.textContent=session.isTest?'Playtest · '+session.record.title:session.record.title;bar.append(label);
+  const button=(text,action)=>{const b=document.createElement('button');b.textContent=text;b.onclick=async()=>{b.disabled=true;try{await action();}catch(error){toast(error.message);}finally{b.disabled=false;}};bar.append(b);};
+  button('Save checkpoint',()=>session.save());
+  if(session.isTest)button('Restart test',async()=>{await session.restartTest();refreshDevScene();if(!paused)togglePause();});
+  button(session.isTest?'Return to editor':'Scenario library',async()=>{
+    if(!paused)togglePause();
+    await session.finishTest();
+    location.href=session.isTest&&session.record.projectId?'./editor.html?project='+encodeURIComponent(session.record.projectId):'./editor.html?library=1';
+  });
+  document.body.append(bar);
+  refreshDevScene();
+  if(session.isTest&&!paused)togglePause();
+  const camera=session.record.definition.map.camera;
+  if(camera){const point=iso(camera[0],camera[1]);pan.x+=width/2-point.x;pan.y+=height/2-point.y;render();}
+  if(session.recovered)toast('Recovered your last scenario checkpoint.');
+}
 function refreshDevScene() {
   economyUI?.resetForVillage();
   setZoom(zoom);
@@ -1878,7 +1909,7 @@ function refreshDevScene() {
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
   clearTimeout(toastTimer); $("#toast").hidden = true;
   closePanels(); $("#person").hidden = true; $("#placement").hidden = true;
-  for (const id of ['import-save', 'restore-backup', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario;
+  for (const id of ['import-save', 'restore-backup', 'new-scenario']) $("#" + id).disabled = !!sandbox || artworkPreview || !!directScenario || !!playerSession;
   updateUI(); render();
 }
 const devAPI = {
@@ -2005,14 +2036,21 @@ try {
     $("#export-recovery").hidden = false;
     toast("This save could not load. Your original data is preserved; export it in Settings.");
   }
+  const runId=new URLSearchParams(location.search).get('run');
+  if(runId&&!artworkPreview&&!directScenario){
+    const library=new ContentLibrary();
+    try{playerSession=await PlayerSession.open(library,runId,Game);game.free();game=playerSession.game;}
+    catch(error){library.close();toast(error.message);}
+  }
   state = JSON.parse(game.snapshot());
-  gameActive=artworkPreview || !!directScenario;
+  gameActive=artworkPreview || !!directScenario || !!playerSession;
   setup();
   installMenu();
   devTools = installDevTools(devAPI);
   window.solarDev = Object.freeze(devAPI);
   if (directScenario) { await devAPI.loadScenario(directScenario); devTools.open(); }
-  if(!artworkPreview && !directScenario) openMainMenu();
+  if(!artworkPreview && !directScenario && !playerSession) openMainMenu();
+  if(playerSession) installCreationSession();
   if (artworkPreview) {
     const notice = document.createElement('a');
     notice.href = './';
