@@ -44,7 +44,7 @@ if(process.env.SOLAR_CONDITION_BASELINE){
   const old=new OldGame(),fresh=new Game();startEmptySandbox(old);startEmptySandbox(fresh);
   for(const [kind,x,y] of [['workshop',6,6],['solar_farm',12,6],['home',18,12]]){assert.equal(old.place(kind,x,y),'ok');assert.equal(fresh.place(kind,x,y),'ok');}
   for(let tick=0;tick<1920;tick++){old.tick(.25);fresh.tick(.25);}
-  const current=JSON.parse(fresh.snapshot());assert.equal(current.village.version,30);delete current.village.maintenance;delete current.environment.economy.pickup_minutes;current.village.version=JSON.parse(old.snapshot()).village.version;
+  const current=JSON.parse(fresh.snapshot());assert.equal(current.village.version,31);delete current.village.maintenance;delete current.environment.economy.pickup_minutes;current.village.version=JSON.parse(old.snapshot()).village.version;
   assert.deepEqual(current,JSON.parse(old.snapshot()),'Disabled groundwork preserves the released farming simulation');
   baselineMinutes=1440;old.free();fresh.free();
 }

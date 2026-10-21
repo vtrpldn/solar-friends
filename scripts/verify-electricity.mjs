@@ -20,7 +20,7 @@ v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress
 v.economy.stock.fill(0);v.economy.stock[2]=8;v.economy.money=2000000;v.economy.outside_jobs.fill(false);v.power.stored=10;
 for(const r of authored.residents)Object.assign(r,{task:'idle',trip:null,help:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_building:null,activity_material:null,activity_batch:null,activity_store:null});
 assert(g.restore(JSON.stringify(resetMaterialLocations(authored))));
-assert.equal(snap(g).village.version,30);
+assert.equal(snap(g).village.version,31);
 assert.equal(g.set_production_target(17,0),'ok');
 await writeFile(`${output}/before.json`,g.snapshot());
 const port=building=>snap(g).village.power.network.nodes.find(n=>n.owner.kind==='building'&&n.owner.id===building).id;

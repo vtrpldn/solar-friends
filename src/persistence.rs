@@ -5,6 +5,10 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     let Ok(mut raw) = serde_json::from_str::<serde_json::Value>(data) else {
         return None;
     };
+    let original_version = raw["village"]["version"].as_u64();
+    if original_version.is_some_and(|v| v >= 31) && !raw["village"]["skills"].is_object() {
+        return None;
+    }
     if raw["view_only"] == true {
         return None;
     }
@@ -18,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=30)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -30,6 +34,21 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     }
     if raw["village"]["version"] == 3 {
         organics::author_fixture(&mut raw);
+    }
+    if matches!(original_version, Some(3 | 23..=26 | 29..=30)) && !skills::migrate(&mut raw) {
+        return None;
+    }
+    if raw["village"]["skills"]["people"]
+        .as_object()
+        .is_some_and(|people| {
+            people.keys().any(|key| {
+                key.parse::<usize>()
+                    .ok()
+                    .is_none_or(|id| id.to_string() != *key)
+            })
+        })
+    {
+        return None;
     }
     let Ok(save) = serde_json::from_value::<Save>(raw) else {
         return None;
@@ -67,6 +86,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         || !scenarios::valid_origin(v)
         || !workforce::valid(v)
         || !skills::valid(v)
+        || !skills::matches_residents(v, &save.residents)
         || !market::valid(v)
         || !production::valid(v)
         || !freshness::valid(v)
