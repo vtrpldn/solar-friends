@@ -1,3 +1,4 @@
+import {relationshipStrength} from './relationships.js';
 import {residentStory} from './resident-story.js';
 import {loadRegionalArt} from './regional-art.js';
 import {terrainRevision} from './terrain-revision.js';
@@ -1333,12 +1334,12 @@ function updateUI() {
     }
     const friendships = state.village.progress.friendships;
     const friends = state.residents.filter(
-      (other) => other.id !== r.id && friendships[r.id * 5 + other.id] > 0,
+      (other) => other.id !== r.id && relationshipStrength(friendships,r.id,other.id) > 0,
     );
     $(".friendship-note").textContent = friends.length
       ? "Shared memories: " +
         friends
-          .map((other) => `${other.name} (${friendships[r.id * 5 + other.id]})`)
+          .map((other) => `${other.name} (${relationshipStrength(friendships,r.id,other.id)})`)
           .join(", ")
       : "Friendships grow when neighbours attend gatherings together.";
     $('[data-task="building_work"]').hidden=!(state.village.building_jobs||[]).length;

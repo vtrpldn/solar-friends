@@ -1,4 +1,3 @@
-import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import init,{Game} from '../web/pkg/solar_friends.js';
@@ -13,7 +12,14 @@ function until(g,test,label,limit=5000){
   for(let frame=0;frame<limit;frame++){const s=snap(g);if(test(s))return s;g.tick(.25);}
   throw Error(label+': '+JSON.stringify({plan:plan(snap(g)),residents:snap(g).residents.map(r=>[r.name,r.task,r.reason])}));
 }
-const g=new Game();startEmptySandbox(g);
+const g=new Game();
+// Keep this transport fixture compact through the authoring API. The standard
+// player start is centered at 32,32; these test buildings/approaches use 10,13.
+const definition=JSON.parse(g.scenario_template('sandbox'));
+definition.map.camp=[10,13];definition.map.camera=[10,13];
+definition.map.clearings=[{x:10,y:13,size:10,disturbance:.05}];
+definition.start.buildings=[];definition.start.roads=[];definition.start.inventories=[];
+assert(JSON.parse(g.load_scenario(JSON.stringify(definition))).ok);
 assert.equal(g.place('square',6,6),'ok');assert.equal(g.place('kitchen',14,6),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',arrived:true,minutes:540,food:60,meals:10,water:40});
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),use_tools:false});
@@ -49,7 +55,7 @@ for(let frame=0;frame<5000;frame++){
 s=snap(g);assert(serving);assert.equal(plan(s).phase,'complete');assert.equal(s.village.progress.gatherings,1);assert(plan(s).spent_after>=5);assert.equal(s.village.supplies.portions_eaten,5);
 assert.equal(s.environment.economy.materials[MEALS].reserved,0);assert.equal(gatheringInfo(s.village).active,false);
 const attendees=plan(s).attended;assert(attendees.toString(2).replaceAll('0','').length>=3);
-for(let i=0;i<5;i++)for(let j=0;j<5;j++)assert.equal(s.village.progress.friendships[i*5+j],Number(i!==j&&(attendees&(1<<i))!==0&&(attendees&(1<<j))!==0));
+for(let i=0;i<5;i++)for(let j=0;j<5;j++)assert.equal((s.village.progress.friendships[i]?.[j]??0),Number(i!==j&&(attendees&(1<<i))!==0&&(attendees&(1<<j))!==0));
 checkpoint(g);conserved(g);await writeFile('artifacts/gathering/complete.json',g.snapshot());
 const moving=new Game();assert(moving.restore(await readFile('artifacts/gathering/table.json','utf8')));
 assert.equal(moving.queue_building_work(0,'move',18,18),'ok');moving.tick(.25);

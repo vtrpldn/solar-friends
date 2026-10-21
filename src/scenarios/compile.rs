@@ -3,6 +3,7 @@ use super::*;
 pub(super) fn check(d: &Definition) -> Report {
     let mut r = Report::default();
     residents::check(d, &mut r);
+    relationships::check(d, &mut r);
     if d.format != FORMAT || d.schema != SCHEMA {
         r.push(
             "schema",
@@ -450,6 +451,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     }));
     let mut residents = initialization::founding_residents(v.camp);
     residents::apply(&d, &mut residents, &mut v);
+    relationships::apply(&d, &mut v);
     navigation::refresh(&mut v);
     for resident in &residents {
         if !navigation::clear(&v, resident.x, resident.y)

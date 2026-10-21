@@ -304,3 +304,5 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 .person .resume-request{width:100%;min-height:40px}
 /* Player-authored names and stories must fit the resident journal. */
 .person .person-heading h2,.person .person-heading p,.person .person-biography{overflow-wrap:anywhere}.person .person-biography{white-space:pre-wrap}
+
+.person .friendship-note{overflow-wrap:anywhere}

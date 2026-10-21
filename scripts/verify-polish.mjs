@@ -27,7 +27,7 @@ assert.equal(placementReason(poor,'home',20,8,32),'');
 assert.deepEqual(milestones(null, village), []);
 assert.deepEqual(milestones(village, structuredClone(village)), []);
 const next = structuredClone(village); next.buildings[0].progress = 100; next.harvests++;
-next.progress.friendships[1] = 1;
+next.progress.friendships[0] = {1:1};
 assert.deepEqual(milestones(village,next).map(e => e.kind), ['building','harvest','friendship']);
 const questBefore = structuredClone(village); questBefore.progress.completed[0] = false;
 assert.equal(milestones(questBefore,village).find(e => e.kind === 'quest').quest, 0);

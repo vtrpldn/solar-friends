@@ -36,6 +36,7 @@ mod power;
 mod processes;
 mod production;
 mod progression;
+mod relationships;
 mod requests;
 mod resident_preferences;
 mod resource_sites;
@@ -58,7 +59,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 36;
+pub const SAVE_VERSION: u32 = 37;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -808,14 +809,18 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             v.progress.gatherings += 1;
             v.progress.welcome_supper = true;
             v.meals_served += attended.count_ones();
+            let participants: Vec<_> = people
+                .iter()
+                .filter(|r| attended & (1 << r.id) != 0)
+                .map(|r| r.id)
+                .collect();
             for mut r in &mut people {
                 if attended & (1 << r.id) != 0 {
                     r.social = (r.social + 25.).min(100.);
                     r.hunger = (r.hunger - 35.).max(0.);
-                    for other in 0..5 {
+                    for &other in &participants {
                         if other != r.id && attended & (1 << other) != 0 {
-                            let bond = &mut v.progress.friendships[r.id * 5 + other];
-                            *bond = bond.saturating_add(1);
+                            relationships::remember(&mut v, r.id, other);
                         }
                     }
                 }
@@ -1149,10 +1154,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     {
                         for &(other, building) in &square_visitors {
                             if other != r.id && building == id {
-                                let bond = &mut v.progress.friendships[r.id * 5 + other];
-                                *bond = bond.saturating_add(1);
-                                let reverse = &mut v.progress.friendships[other * 5 + r.id];
-                                *reverse = reverse.saturating_add(1);
+                                relationships::remember(&mut v, r.id, other);
+                                relationships::remember(&mut v, other, r.id);
                             }
                         }
                     }

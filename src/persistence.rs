@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=35)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=36)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -60,6 +60,15 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     {
         return None;
     }
+    if matches!(original_version, Some(3 | 23..=26 | 29..=36)) && !relationships::migrate(&mut raw)
+    {
+        return None;
+    }
+    if original_version.is_some_and(|v| v >= 37)
+        && !raw["village"]["progress"]["friendships"].is_object()
+    {
+        return None;
+    }
     fn canonical_keys(value: &serde_json::Value) -> bool {
         value.as_object().is_none_or(|people| {
             people.keys().all(|key| {
@@ -69,14 +78,18 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             })
         })
     }
-    if [
-        "outside_jobs",
-        "outside_committed_days",
-        "work_day",
-        "outside_professions",
-    ]
-    .iter()
-    .any(|field| !canonical_keys(&raw["village"]["economy"][field]))
+    if !canonical_keys(&raw["village"]["progress"]["friendships"])
+        || raw["village"]["progress"]["friendships"]
+            .as_object()
+            .is_some_and(|rows| rows.values().any(|row| !canonical_keys(row)))
+        || [
+            "outside_jobs",
+            "outside_committed_days",
+            "work_day",
+            "outside_professions",
+        ]
+        .iter()
+        .any(|field| !canonical_keys(&raw["village"]["economy"][field]))
         || raw["village"]["simulation"]["days"]
             .as_array()
             .is_some_and(|days| days.iter().any(|d| !canonical_keys(&d["residents"])))
@@ -112,6 +125,9 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         return None;
     }
     let v = &save.village;
+    if !relationships::valid(v, &save.residents) {
+        return None;
+    }
     let mut road_tiles = std::collections::HashSet::new();
     if v.roads.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
         || v.roads.iter().any(|&(x, y)| {

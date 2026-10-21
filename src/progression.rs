@@ -87,7 +87,7 @@ pub struct Progress {
     pub gathering_day: i32,
     pub invited: u8,
     pub attended: u8,
-    pub friendships: [u32; 25],
+    pub friendships: crate::relationships::Graph,
 }
 impl Default for Progress {
     fn default() -> Self {
@@ -133,7 +133,7 @@ impl Default for Progress {
             gathering_day: -1,
             invited: 0,
             attended: 0,
-            friendships: [0; 25],
+            friendships: crate::relationships::Graph::new(),
         }
     }
 }
@@ -285,6 +285,7 @@ mod tests {
     fn seven_chapter_saves_keep_credit_and_open_the_water_chapter() {
         let mut g = Game::new();
         let mut old: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        old["village"]["version"] = 36.into();
         old["village"]["progress"] = serde_json::json!({
             "completed": vec![true; 4], "later_completed": vec![true; 3], "tracked": 6
         });

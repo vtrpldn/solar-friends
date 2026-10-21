@@ -378,7 +378,7 @@ fn welcome_supper_requires_real_attendance_and_grows_mutual_friendships() {
     for i in 0..5 {
         for j in 0..5 {
             assert_eq!(
-                v.progress.friendships[i * 5 + j],
+                relationships::strength(&v.progress, i, j),
                 u32::from(i != j && attended & (1 << i) != 0 && attended & (1 << j) != 0)
             );
         }
@@ -442,6 +442,7 @@ fn old_saves_gain_defaults_and_invalid_progress_is_rejected_atomically() {
     let mut g = setup();
     ready_building(&mut g, "home", 8, 8);
     let mut old: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+    old["village"]["version"] = 36.into();
     old["village"].as_object_mut().unwrap().remove("progress");
     old["village"]["buildings"][0]
         .as_object_mut()
@@ -564,7 +565,7 @@ fn a_gathering_without_attendance_does_not_credit_a_quest_or_friendship() {
     let v = g.app.world().resource::<Village>();
     assert_eq!(v.progress.gatherings, 0);
     assert!(!v.progress.welcome_supper);
-    assert_eq!(v.progress.friendships, [0; 25]);
+    assert!(v.progress.friendships.is_empty());
     assert_eq!(
         v.progress.gathering_delivery.as_ref().unwrap().phase,
         gatherings::Phase::Failed

@@ -129,6 +129,8 @@ impl Rules {
 pub struct Start {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub residents: Option<Vec<super::residents::Person>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub relationships: Vec<super::relationships::Bond>,
     pub minutes: f32,
     pub funds: i64,
     pub fresh_water: f32,
@@ -282,6 +284,7 @@ impl Definition {
             rules: Rules::for_mode(mode),
             start: Start {
                 residents: Some(super::residents::founders()),
+                relationships:vec![],
                 minutes: 480.,
                 funds: if sandbox { 10_000_000 } else { 300_000 },
                 fresh_water: if sandbox { 40. } else { 32. },

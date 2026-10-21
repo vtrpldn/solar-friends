@@ -399,7 +399,7 @@ fn gathered_neighbours_cannot_serve_expired_portions_or_receive_shared_meal_rewa
         assert_eq!(p.phase, gatherings::Phase::Failed);
         assert_eq!(p.attended.count_ones(), 3);
         assert_eq!(v.progress.gatherings, 0);
-        assert!(v.progress.friendships.iter().all(|n| *n == 0));
+        assert!(v.progress.friendships.is_empty());
         conserved(&v);
     }
     checkpoint(&mut g);

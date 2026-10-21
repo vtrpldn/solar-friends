@@ -1,3 +1,4 @@
+import {newFriendships} from './relationships.js';
 import {sourceMaterial,sourcePlacementReason,sourceOccupies,sourceConflicts} from './resource-sites.js';
 import { occupies,footprintSize } from './building-footprints.js';
 import { MAP_SIZE, riverBank,hydroSite } from './terrain.js';
@@ -48,7 +49,7 @@ export function milestones(before, after) {
   (after.progress.later_completed || []).forEach((done,i)=> {
     if(done && !before.progress.later_completed?.[i])messages.push({kind:'quest',quest:i+4});
   });
-  if (after.progress.friendships.some((value, i) => value > 0 && !before.progress.friendships[i])) messages.push({ kind: 'friendship' });
+  if (newFriendships(before.progress.friendships,after.progress.friendships)) messages.push({ kind: 'friendship' });
   return messages;
 }
 

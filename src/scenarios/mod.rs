@@ -6,6 +6,7 @@ mod biomes;
 mod compile;
 pub(crate) use biomes::Biome;
 mod definition;
+mod relationships;
 mod residents;
 pub(crate) use definition::*;
 

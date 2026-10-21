@@ -656,3 +656,39 @@ fn authored_occupations_are_independent_of_founder_preset_and_can_be_absent() {
             .any(|i| i.code == "invalid_job_schedule")
     );
 }
+
+#[test]
+fn starting_relationships_follow_authored_identity_not_cast_order_or_names() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    let people = d.start.residents.as_mut().unwrap();
+    people[0].name = "Sam".into();
+    people[1].name = "Sam".into();
+    people.reverse();
+    d.start.relationships.push(relationships::Bond {
+        from: "resident-iara".into(),
+        to: "resident-bento".into(),
+        memories: 8,
+    });
+    let (mut g, _) = compile(d.clone()).unwrap_or_else(|_| panic!("valid starting friendship"));
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(crate::relationships::strength(&v.progress, 0, 1), 8);
+    assert_eq!(crate::relationships::strength(&v.progress, 1, 0), 8);
+    assert_eq!(crate::relationships::strength(&v.progress, 0, 2), 0);
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    for (from, to, n) in [
+        ("resident-bento", "resident-iara", 8),
+        ("missing", "resident-iara", 1),
+        ("resident-iara", "resident-iara", 1),
+        ("resident-luz", "resident-nina", 101),
+    ] {
+        let mut invalid = d.clone();
+        invalid.start.relationships.push(relationships::Bond {
+            from: from.into(),
+            to: to.into(),
+            memories: n,
+        });
+        assert!(compile(invalid).is_err());
+    }
+}

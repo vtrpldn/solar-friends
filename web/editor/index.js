@@ -1,3 +1,4 @@
+import {RelationshipsEditor} from './relationships.js';
 import {ResidentsEditor} from './residents.js';
 import {BiomeEditor} from './biome-editor.js';
 import {WeatherEditor} from './weather.js';
@@ -23,7 +24,7 @@ const ruleNames={logistics:'Materials, hauling and resident work',land:'Living s
 let newBiome="mata-atlantica";
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let minimap,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -79,6 +80,7 @@ function refresh(){
   geologyEditor.render(d,landReport);
   weatherEditor.render(d);
   residentsEditor.render(d);
+  relationshipsEditor.render(d);
   biomeEditor.render(d);
   minimap.canvas.title=report.ok?'Native land overview':'Last valid land preview · resolve draft issues before testing';
   $('creator-land-legend').textContent=overlayLegend();
@@ -346,6 +348,7 @@ try{
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
+  relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change});
   residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,change});
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
