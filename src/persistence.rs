@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=36)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=37)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -67,6 +67,13 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     if original_version.is_some_and(|v| v >= 37)
         && !raw["village"]["progress"]["friendships"].is_object()
     {
+        return None;
+    }
+    if matches!(original_version, Some(3 | 23..=26 | 29..=37)) && !participation::migrate(&mut raw)
+    {
+        return None;
+    }
+    if !participation::valid_raw(&raw) {
         return None;
     }
     fn canonical_keys(value: &serde_json::Value) -> bool {
@@ -310,7 +317,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
             || b.next_visit < 0.
             || !ecology::valid(b)
             || !agriculture::valid(v, b)
-            || b.contributors > 31
+            || !participation::owned(v, &b.contributors)
             || economy::recipe(&b.kind, "standard").is_none()
             || !(1..=MAP_SIZE - 2).contains(&b.x)
             || !(1..=MAP_SIZE - 2).contains(&b.y)

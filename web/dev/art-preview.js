@@ -32,7 +32,7 @@ export function makeArtPreview(fresh,established,{night=false}={}) {
     const id=v.buildings.length,[x,y]=position;
     const crop=structuredClone(template.crop);
     if(['garden','greenhouse'].includes(kind))Object.assign(crop,{planted:true,kind:'lettuce',next_kind:'lettuce',growth:180,moisture:240,harvests:0});
-    v.buildings.push({...structuredClone(template),id,kind,x,y,progress:100,contributors:0,next_visit:0,visits:0,crop,poultry:{remaining:0}});
+    v.buildings.push({...structuredClone(template),id,kind,x,y,progress:100,contributors:[],next_visit:0,visits:0,crop,poultry:{remaining:0}});
     const stages=fresh.environment.economy.recipes.find(r=>r.kind===kind)?.[recipe];
     if(!stages)throw new Error(`No preview construction recipe for ${key}`);
     v.economy.projects.push({building:id,recipe,appearance,priority:1,paused:false,stage:stages.length,labour:0,committed:false,reserved:Array(v.economy.stock.length).fill(0),consumed:Array(v.economy.stock.length).fill(0)});

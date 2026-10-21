@@ -368,6 +368,57 @@ mod tests {
         assert_eq!(v.skills.people[&1].experience[3], 3);
     }
     #[test]
+    fn production_contribution_sets_migrate_and_continue_without_double_learning() {
+        let (mut g, a) = kitchen();
+        assert!(!production::work(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            &a,
+            5.
+        ));
+        let mut old: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        old["village"]["version"] = 37.into();
+        for building in old["village"]["buildings"].as_array_mut().unwrap() {
+            building["contributors"] = 0.into();
+        }
+        old["village"]["production"]["batches"][0]["contributors"] = 1.into();
+        assert!(g.restore(&old.to_string()));
+        let migrated = g.snapshot();
+        let mut copy = Game::new();
+        assert!(copy.restore(&migrated));
+        assert_eq!(copy.snapshot(), migrated);
+        let current: serde_json::Value = serde_json::from_str(&migrated).unwrap();
+        for value in [
+            serde_json::json!([0, 0]),
+            serde_json::json!([42]),
+            serde_json::Value::Null,
+        ] {
+            let mut bad = current.clone();
+            bad["village"]["production"]["batches"][0]["contributors"] = value;
+            assert!(!g.restore(&bad.to_string()));
+            assert_eq!(g.snapshot(), migrated);
+        }
+        let mut b = a.clone();
+        b.id = 1;
+        assert!(production::work(
+            &mut g.app.world_mut().resource_mut::<Village>(),
+            &b,
+            5.
+        ));
+        assert!(production::work(
+            &mut copy.app.world_mut().resource_mut::<Village>(),
+            &b,
+            5.
+        ));
+        assert_eq!(g.snapshot(), copy.snapshot());
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(v.skills.people[&0].experience[3], 3);
+        assert_eq!(v.skills.people[&1].experience[3], 3);
+        let v = &mut g.app.world_mut().resource_mut::<Village>();
+        assert!(!production::work(v, &b, 5.));
+        assert_eq!(v.skills.people[&0].experience[3], 3);
+        assert_eq!(v.skills.people[&1].experience[3], 3);
+    }
+    #[test]
     fn service_learning_requires_the_completed_supplied_job() {
         let mut g = Game::new();
         g.start_fixture_mode("sandbox");

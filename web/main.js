@@ -2060,6 +2060,17 @@ try {
     const notice = document.createElement('a');
     notice.href = './';
     notice.className = 'artwork-preview-notice';
+    if(residentPreview){
+      // This maintained pose fixture occupies its own clearing, independently
+      // of the normal centered start. Frame the actual cast after projection.
+      render();
+      const people=state.residents.filter(r=>!residentIsAway(r));
+      if(people.length){
+        const xs=people.map(r=>r.x),ys=people.map(r=>r.y);
+        const point=iso((Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2);
+        pan.x+=width/2-point.x;pan.y+=height*.48-point.y;render();
+      }
+    }
     notice.textContent = `${previewParams.has('art-draft') ? 'ART DRAFT · ' : ''}${residentPreview?'Resident animation':`${nightPreview?'Night artwork':'Artwork'} · ${state.village.buildings.length} building variants`} preview · Return to your village ↗`;
     document.body.append(notice);
     togglePause();

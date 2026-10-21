@@ -18,11 +18,11 @@
       "requested": false,
       "social": 90,
       "target_x": 8,
-      "target_y": 12.5,
+      "target_y": 20.0,
       "task": "idle",
       "trait_name": "Patient · gardener",
       "x": 8,
-      "y": 12.5
+      "y": 20.0
     },
     {
       "energy": 90,
@@ -37,11 +37,11 @@
       "requested": false,
       "social": 90,
       "target_x": 9.4,
-      "target_y": 12.5,
+      "target_y": 20.0,
       "task": "idle",
       "trait_name": "Practical · builder",
       "x": 9.4,
-      "y": 12.5
+      "y": 20.0
     },
     {
       "energy": 90,
@@ -56,11 +56,11 @@
       "requested": false,
       "social": 90,
       "target_x": 10.8,
-      "target_y": 12.5,
+      "target_y": 20.0,
       "task": "idle",
       "trait_name": "Sociable · cook",
       "x": 10.8,
-      "y": 12.5
+      "y": 20.0
     },
     {
       "energy": 90,
@@ -75,11 +75,11 @@
       "requested": false,
       "social": 90,
       "target_x": 12.2,
-      "target_y": 12.5,
+      "target_y": 20.0,
       "task": "idle",
       "trait_name": "Curious · forager",
       "x": 12.2,
-      "y": 12.5
+      "y": 20.0
     },
     {
       "energy": 90,
@@ -94,11 +94,11 @@
       "requested": false,
       "social": 90,
       "target_x": 13.6,
-      "target_y": 12.5,
+      "target_y": 20.0,
       "task": "idle",
       "trait_name": "Thoughtful · caretaker",
       "x": 13.6,
-      "y": 12.5
+      "y": 20.0
     }
   ],
   "village": {
@@ -251,7 +251,7 @@
     ],
     "food": 132,
     "harvests": 10,
-    "map_size": 32,
+    "map_size": 64,
     "meals": 5,
     "meals_served": 45,
     "minutes": 7828,

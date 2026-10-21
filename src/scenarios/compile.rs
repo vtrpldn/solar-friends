@@ -364,7 +364,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
             x: b.x,
             y: b.y,
             progress: if completed { 100. } else { 0. },
-            contributors: 0,
+            contributors: crate::participation::Set::new(),
             next_visit: 0.,
             visits: 0,
             crop: Default::default(),

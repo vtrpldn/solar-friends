@@ -70,7 +70,7 @@ pub struct Batch {
     pub work: f32,
     pub last_worker: Option<usize>,
     #[serde(default)]
-    pub contributors: u8,
+    pub contributors: crate::participation::Set,
     pub committed: bool,
     pub biogas: bool,
     #[serde(default)]
@@ -641,7 +641,7 @@ fn spawn(v: &mut Village, id: Id, material: usize, manual: bool) -> Option<Id> {
         output,
         work: 0.,
         last_worker: None,
-        contributors: 0,
+        contributors: crate::participation::Set::new(),
         committed: false,
         biogas,
         manual,
@@ -952,9 +952,9 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         .unwrap();
     b.work = (b.work + work).min(LABOUR);
     if let Some(person) = b.last_worker {
-        b.contributors |= 1 << person;
+        b.contributors.insert(person);
     }
-    b.contributors |= 1 << r.id;
+    b.contributors.insert(r.id);
     b.last_worker = Some(r.id);
     b.phase = Phase::Processing;
     finish(v, id)
@@ -993,21 +993,20 @@ fn finish(v: &mut Village, id: Id) -> bool {
         b.output
     ));
     v.production.accounting.outputs[b.material] += u64::from(b.output);
-    let contributors = b.contributors | b.last_worker.map_or(0, |id| 1 << id);
-    for person in 0..5 {
-        if contributors & (1 << person) != 0 {
-            skills::award(
-                v,
-                person,
-                if b.material == economy::MEALS {
-                    skills::Skill::Cooking
-                } else {
-                    skills::Skill::Craft
-                },
-                3,
-            );
-        }
+    let mut contributors = b.contributors.clone();
+    if let Some(id) = b.last_worker {
+        contributors.insert(id);
     }
+    crate::participation::award(
+        v,
+        &contributors,
+        if b.material == economy::MEALS {
+            skills::Skill::Cooking
+        } else {
+            skills::Skill::Craft
+        },
+        3,
+    );
     if b.material == economy::MEALS {
         sanitation::household_at(v, water::Owner::Building(building(v, b.site).unwrap()), 1.);
         v.supplies.used += b.inputs[economy::FOOD] as f32;
@@ -1259,7 +1258,7 @@ pub fn valid(v: &Village) -> bool {
             return false;
         };
         b.id.0 > 0
-            && b.contributors <= 31
+            && crate::participation::owned(v, &b.contributors)
             && ids.insert(b.id)
             && b.id.0 < v.simulation.next_id
             && (!b.active() || active.insert(b.site))

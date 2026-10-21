@@ -29,6 +29,7 @@ mod navigation;
 mod occupations;
 mod organics;
 mod outcomes;
+mod participation;
 mod persistence;
 mod pipes;
 mod planting;
@@ -59,7 +60,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 37;
+pub const SAVE_VERSION: u32 = 38;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -156,7 +157,7 @@ pub struct Building {
     pub y: i32,
     pub progress: f32,
     #[serde(default)]
-    pub contributors: u8,
+    pub contributors: participation::Set,
     #[serde(default)]
     pub next_visit: f32,
     #[serde(default)]
@@ -1112,7 +1113,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             let helpers = builders.iter().filter(|&&id| Some(id) == building).count();
             if let Some(id) = building.filter(|id| economy::can_build(&v, *id)) {
                 if let Some(b) = v.buildings.iter_mut().find(|b| b.id == id) {
-                    b.contributors |= 1 << r.id;
+                    b.contributors.insert(r.id);
                 }
                 let completed = economy::build(
                     &mut v,
@@ -1124,17 +1125,13 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 );
                 if completed {
                     let b = v.buildings.iter().find(|b| b.id == id).unwrap();
-                    let shared = b.contributors.count_ones() >= 2;
+                    let shared = b.contributors.len() >= 2;
                     let label = b.kind.clone();
-                    let contributors = b.contributors;
+                    let contributors = b.contributors.clone();
                     if shared {
                         v.progress.shared_builds += 1;
                     }
-                    for person in 0..5 {
-                        if contributors & (1 << person) != 0 {
-                            skills::award(&mut v, person, skills::Skill::Building, 6);
-                        }
-                    }
+                    participation::award(&mut v, &contributors, skills::Skill::Building, 6);
                     event(&mut v, format!("Our {label} is ready. Built together!"));
                 }
             } else {
@@ -1516,7 +1513,7 @@ impl Game {
             x,
             y,
             progress: 0.,
-            contributors: 0,
+            contributors: crate::participation::Set::new(),
             next_visit: 0.,
             visits: 0,
             crop: ecology::Crop::default(),
@@ -1844,7 +1841,7 @@ mod tests {
                 x: x.floor() as i32,
                 y: y.floor() as i32,
                 progress: if id % 2 == 0 { 100. } else { 0. },
-                contributors: 0,
+                contributors: crate::participation::Set::new(),
                 next_visit: 0.,
                 visits: 0,
                 crop: ecology::Crop::default(),

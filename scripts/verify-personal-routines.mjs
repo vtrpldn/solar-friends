@@ -6,7 +6,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const game=new Game();
 try{
  const baseline=JSON.parse(game.snapshot()),catalog=JSON.parse(game.scenario_catalog()).resident_routines;
- assert.equal(baseline.village.version,37);assert.equal(catalog.hobbies.length,4);assert.deepEqual(catalog.bedtime,{earliest:1200,latest:1410,step:15});
+ assert.equal(baseline.village.version,38);assert.equal(catalog.hobbies.length,4);assert.deepEqual(catalog.bedtime,{earliest:1200,latest:1410,step:15});
  assert.deepEqual(baseline.residents.map(r=>r.routine_preferences.preferred_bedtime),[1290,1335,1260,1380,1305]);
  for(const [minute,expected]of [[480,'stretch'],[720,'birdwatch']]){
   const d=structuredClone(baseline);d.village.minutes=minute;d.village.arrived=true;

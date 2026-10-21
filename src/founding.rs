@@ -15,7 +15,7 @@ pub fn start(v: &mut Village) {
             x,
             y,
             progress: 100.,
-            contributors: 0,
+            contributors: crate::participation::Set::new(),
             next_visit: 0.,
             visits: 0,
             crop: Default::default(),

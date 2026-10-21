@@ -263,7 +263,7 @@ mod tests {
             x: 10,
             y: 10,
             progress: 100.,
-            contributors: 0,
+            contributors: crate::participation::Set::new(),
             crop: Default::default(),
             poultry: Default::default(),
             agriculture: Default::default(),
