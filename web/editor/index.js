@@ -1,3 +1,4 @@
+import {creationFile,freezeCreation,MAX_CREATION_BYTES} from './files.js';
 import {resolvedNature,plantStroke,thinStroke} from './nature.js';
 import {riverBank} from '../terrain.js';
 import {GeologyEditor} from './geology.js';
@@ -25,7 +26,8 @@ const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
 function status(text){$('creator-save-status').textContent=text;}
 function download(definition){
-  const url=URL.createObjectURL(new Blob([JSON.stringify(definition,null,2)],{type:'application/json'})),a=document.createElement('a');
+  const exported=report.ok?freezeCreation(definition,{terrain:terrainBase,snapshot:map.snapshot,catalog}):definition;
+  const url=URL.createObjectURL(new Blob([creationFile(exported)],{type:'application/json'})),a=document.createElement('a');
   a.href=url;a.download=(definition.title||'our-village').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.solar-scenario';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function cacheRecovery(ctx,checkpoint,view){try{sessionStorage.setItem(recoveryKey(ctx.id),JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view}));}catch{/* The durable library remains the primary save. */}}
@@ -192,7 +194,7 @@ async function openProject(record){
 }
 async function newProject(preset,source=null){
   if(current)await save();
-  const id=crypto.randomUUID(),d=source?clone(source):JSON.parse(engine.scenario_template('story'));
+  const id=crypto.randomUUID();let d=source?clone(source):JSON.parse(engine.scenario_template('story'));
   d.id=id;d.map.id='map-'+id;d.revision=1;d.map.revision=1;
   if(!source){d.title='Our new ecovila';d.description='A new beginning, shaped together.';d.rules.mode='sandbox';}
   if(preset==='generated'){const generated=JSON.parse(engine.generate_property(crypto.getRandomValues(new Uint32Array(1))[0]));d.map={...generated,id:d.map.id};}
@@ -200,6 +202,8 @@ async function newProject(preset,source=null){
     const items={};for(const p of d.start.inventories)for(const [key,n]of Object.entries(p.items))items[key]=(items[key]||0)+n;
     d.start.buildings=[];d.start.roads=[];d.start.inventories=[{owner:{kind:'camp'},items}];
   }
+  const prepared=new Game();
+  try{const checked=JSON.parse(prepared.load_scenario(JSON.stringify(d)));if(checked.ok)d=freezeCreation(d,{terrain:JSON.parse(prepared.terrain_template()),snapshot:JSON.parse(prepared.report_state()),catalog});}finally{prepared.free();}
   attach(d,{id});await save();
 }
 async function copyCurrent(){
@@ -274,7 +278,7 @@ function wire(){
   $('creator-undo').onclick=()=>current?.doc.undo();$('creator-redo').onclick=()=>current?.doc.redo();
   $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
   $('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
-  $('creator-export').onclick=()=>{if(current)download(current.doc.value);};
+  $('creator-export').onclick=()=>{try{if(current)download(current.doc.value);}catch(error){toast(error.message);}};
   $('creator-library').onclick=()=>showLibrary().catch(e=>toast(e.message));
   $('creator-library-close').onclick=()=>{if(current)$('creator-library-dialog').close();else location.assign('./');};
   $('creator-library-dialog').addEventListener('cancel',e=>{if(!current){e.preventDefault();location.assign('./');}});
@@ -303,7 +307,7 @@ function wire(){
   $('creator-import').onchange=async e=>{
     const file=e.target.files[0];if(!file)return;
     try{
-      if(file.size>2*1024*1024)throw Error('This creation file is too large.');
+      if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const raw=await file.text(),checked=JSON.parse(engine.validate_scenario(raw));
       const blocked=new Set(['file_too_large','unsupported_format','invalid_json','invalid_definition','unsupported_map','unknown_building','invalid_appearance','invalid_material','too_many_objects','too_many_stores','duplicate_building','invalid_identity']);
       if(checked.issues.some(i=>blocked.has(i.code)))throw Error(checked.issues.find(i=>blocked.has(i.code)).message);
