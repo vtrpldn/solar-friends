@@ -48,11 +48,16 @@ try{
  await page.waitForFunction(()=>document.querySelector('#creator-redo').title==='Clear a meadow');
  await page.locator('#creator-redo').click();
 
+ await page.locator('#creator-land-layer').selectOption('fertility');
+ const inspected=await cellPoint(25,34);await page.mouse.move(inspected.x,inspected.y);
+ await page.waitForFunction(()=>document.querySelector('#creator-ground-detail').textContent.includes('Solar exposure'));
+ assert.match(await page.locator('#creator-land-legend').innerText(),/lower to higher fertility/);
  await page.locator('#creator-title').fill('Our first property');await page.locator('#creator-title').blur();
  await page.locator('#creator-save').click();
  await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');
  await page.screenshot({path:'/private/tmp/solar-creator-1600.png'});
  await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
+ assert.equal(await page.locator('#creator-land-layer').inputValue(),'fertility');
  assert.equal(await page.locator('#creator-title').inputValue(),'Our first property');
  assert.equal(await page.locator('#creator-undo').isEnabled(),true);
  await page.locator('#creator-test').click();
@@ -63,6 +68,7 @@ try{
  await page.getByRole('button',{name:'Return to editor',exact:true}).click();
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  assert.equal(page.url(),projectURL);
+ assert.equal(await page.locator('#creator-land-layer').inputValue(),'fertility');
  assert.equal(await page.locator('#creator-title').inputValue(),'Our first property');
  assert.equal(await page.evaluate(()=>JSON.stringify({...localStorage})),original);
  await page.setViewportSize({width:1280,height:800});await page.screenshot({path:'/private/tmp/solar-creator-1280.png'});

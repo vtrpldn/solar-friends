@@ -1,3 +1,4 @@
+import {landLayers,landTiles} from '../land-layers.js';
 import {planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
 import {clearingStroke} from './brush.js';
 import init,{Game} from '../pkg/solar_friends.js';
@@ -12,6 +13,7 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
+let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
@@ -57,13 +59,25 @@ function refresh(){
   const d=current.doc.value;
   report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
   const snapshot=JSON.parse(engine.snapshot());
+  landReport=JSON.parse(engine.land_report());landSampleKey='';
+  map.landOverlay=landTiles(landReport,map.view.layer);
   map.set(d,snapshot);
+  inspectGround(hoverCell);
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
   $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
   for(const [key,label]of Object.entries(ruleNames)){$('creator-rule-'+key).checked=d.rules[key];$('creator-rule-'+key).setAttribute('aria-label',label);}
   renderSelection();renderSupplies();renderReview();
   if(current.doc.dirty)status('Changes to save');
+}
+function inspectGround(point){
+  hoverCell=point;if(!current||!point)return;
+  const key=[current.doc.revision,point.x,point.y,map.view.tool].join(':');if(key===landSampleKey)return;landSampleKey=key;
+  const sample=JSON.parse(engine.land_preview(allBuildingArt[map.view.tool]?map.view.tool:'road',point.x,point.y)),g=sample.ground;
+  $('creator-cell').textContent=`Cell ${point.x}, ${point.y}`;
+  if(!g){$('creator-ground-detail').textContent='This footprint crosses a protected riverbank or map edge. Choose an inland plot.';return;}
+  const deposits=landReport.deposits.filter(d=>point.x>=d.x&&point.x<d.x+d.width&&point.y>=d.y&&point.y<d.y+d.height);
+  $('creator-ground-detail').innerHTML=`<p><b>${escape(g.biome)}</b><br>${escape(g.geology)}</p><dl><dt>Inspected footprint</dt><dd>${sample.cells} ${sample.cells===1?'cell':'cells'}</dd><dt>Fertility</dt><dd>${Math.round(g.fertility*100)}%</dd><dt>Water retention</dt><dd>×${g.retention.toFixed(2)}</dd><dt>Moisture</dt><dd>${Math.round(g.moisture*100)}%</dd><dt>Tree shade</dt><dd>${Math.round(g.shade*100)}%</dd><dt>Solar exposure</dt><dd>${Math.round(sample.solar_exposure*100)}%</dd><dt>Crop growth</dt><dd>×${sample.growth_multiplier.toFixed(2)}</dd><dt>Disturbance</dt><dd>${Math.round(g.disturbance*100)}%</dd></dl>${deposits.map(d=>`<p>${escape(catalog.materials[d.material])}: ${d.remaining} remaining of ${d.maximum}</p>`).join('')}${report.ok?'':'<p>Draft has unresolved issues. Ground preview uses the last valid setup.</p>'}`;
 }
 function renderSelection(){
   if(!current)return;
@@ -85,7 +99,7 @@ function renderReview(){
   $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':''}</div>`).join(''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
 }
 function setTool(tool){
-  map.setTool(tool);
+  map.setTool(tool);landSampleKey='';inspectGround(hoverCell);
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
   $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
@@ -117,15 +131,15 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
-  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true};
+  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true,layer:'none'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
     const tool=['select','pan','move','road','meadow','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,grid:view.grid!==false};
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,layer:Object.hasOwn(landLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
   }
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
-  refresh();setTool(map.view.tool);$('creator-grid').checked=map.view.grid;
+  refresh();setTool(map.view.tool);$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=landLayers[map.view.layer]?.legend||'Point at a cell to inspect the land.';$('creator-grid').checked=map.view.grid;
   status(revision===null?'New creation · save to keep it':'Saved on this device');
   if(doc.historyRecovered)toast('The creation was recovered. Its damaged undo history was cleared.');
 }
@@ -179,6 +193,7 @@ async function showLibrary(){
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
+  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=landTiles(landReport,map.view.layer);$('creator-land-legend').textContent=landLayers[map.view.layer]?.legend||'Point at a cell to inspect the land.';map.render();current.viewDirty=true;scheduleSave();};
   $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-buildings').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
@@ -272,7 +287,7 @@ function wire(){
 try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
-  map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;renderSelection();scheduleSave();}},hover:p=>{$('creator-cell').textContent=`Cell ${p.x}, ${p.y}`;}});
+  map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;renderSelection();scheduleSave();}},hover:inspectGround});
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
   for(const canvas of document.querySelectorAll('[data-palette]')){const key=canvas.dataset.palette;paintIcon(canvas,key,art.images[key],allBuildingArt[key]);}
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');

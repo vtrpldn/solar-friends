@@ -111,6 +111,7 @@ export class EditorMap {
     const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil]);
     if(this.groundKey!==key){this.ground=paintTerrain(art.terrain,roads,[],soil,land.seed);this.groundKey=key;}
     paintWorldGround(c,this.ground,this.origin,this.scale);
+    for(const tile of this.landOverlay||[])this.polygon(footprintCorners('road',tile.x,tile.y),tile.fill,tile.stroke);
     if(view.grid){
       c.strokeStyle='#fff9d34d';c.lineWidth=.7;c.beginPath();
       for(let n=-.5;n<MAP_SIZE;n++)for(const points of [[[n,-.5],[n,MAP_SIZE-.5]],[[-.5,n],[MAP_SIZE-.5,n]]]){const a=this.project(...points[0]),b=this.project(...points[1]);c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);}
