@@ -120,6 +120,15 @@ function paintHabitats(g,seed,map){
     patch.addColorStop(0,habitatColors[name]+'20');patch.addColorStop(1,habitatColors[name]+'00');
     g.fillStyle=patch;g.fillRect(px-radius,py-radius,radius*2,radius*2);
   }
+  // Preserve small authored cells between the coarse landscape samples.
+  if(map?.terrain)for(let y=0;y<MAP_SIZE;y++)for(let x=0;x<MAP_SIZE;x++){
+    const name=habitatAt(seed,x,y,map),sample=habitatAt(seed,x-x%2,y-y%2,map);
+    if(name===sample)continue;
+    const [px,py]=groundPoint(x,y),r=unit*.8,patch=g.createRadialGradient(px,py,0,px,py,r);
+    patch.addColorStop(0,habitatColors[name]+'55');patch.addColorStop(1,habitatColors[name]+'00');
+    g.fillStyle=patch;g.fillRect(px-r,py-r,r*2,r*2);
+  }
+
 }
 export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0,map) {
   const ground = surface();

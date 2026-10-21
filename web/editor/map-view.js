@@ -1,3 +1,4 @@
+import {terrainRevision} from '../terrain-revision.js';
 import {strokeCells} from './brush.js';
 import {project,unproject,TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from '../projection.js';
 import {paintTerrain,soilAppearance,MAP_SIZE} from '../terrain.js';
@@ -55,7 +56,7 @@ export class EditorMap {
     this.canvas.focus();this.canvas.setPointerCapture(e.pointerId);
     const p=this.point(e),cell=this.cell(p),pan=e.button===1||e.button===2||this.view.tool==='pan';
     this.drag={point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
-    if(!pan&&['road','meadow','river','nature','thin-nature'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
+    if(!pan&&['road','meadow','river','nature','thin-nature','habitat'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
     if(!pan&&this.view.tool==='move'){const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}}
   }
   motion(e){
@@ -108,7 +109,7 @@ export class EditorMap {
     canvas.dataset.center=JSON.stringify(view.center);canvas.dataset.overlayCells=String(this.landOverlay?.length||0);
     c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);
     const land=this.snapshot.village.land,roads=this.document.start.roads;
-    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river]);
+    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river,terrainRevision(this.document.map)]);
     if(this.groundKey!==key){this.ground=paintTerrain(art.terrain,roads,[],soil,land.seed,this.document.map);this.groundKey=key;}
     paintWorldGround(c,this.ground,this.origin,this.scale);
     for(const tile of this.landOverlay||[])this.polygon(footprintCorners('road',tile.x,tile.y),tile.fill,tile.stroke);
@@ -117,7 +118,7 @@ export class EditorMap {
       for(let n=-.5;n<MAP_SIZE;n++)for(const points of [[[n,-.5],[n,MAP_SIZE-.5]],[[-.5,n],[MAP_SIZE-.5,n]]]){const a=this.project(...points[0]),b=this.project(...points[1]);c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);}
       c.stroke();
     }
-    if(this.stroke)for(const [x,y]of this.stroke.values()){const size=['meadow','nature','thin-nature'].includes(view.tool)?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
+    if(this.stroke)for(const [x,y]of this.stroke.values()){const size=['meadow','nature','thin-nature','habitat'].includes(view.tool)?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
     const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));
     for(const b of structures)objects.push({depth:b.x+b.y,draw:()=>{

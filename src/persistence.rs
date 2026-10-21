@@ -5,6 +5,9 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     let Ok(mut raw) = serde_json::from_str::<serde_json::Value>(data) else {
         return None;
     };
+    if raw["view_only"] == true {
+        return None;
+    }
     if raw["village"]["version"] == 23 {
         raw["village"]["version"] = SAVE_VERSION.into();
         if raw["village"]["skills"].is_null() && raw["village"]["mode"] == "sandbox" {

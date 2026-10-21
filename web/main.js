@@ -1,3 +1,4 @@
+import {terrainRevision} from './terrain-revision.js';
 import {ContentLibrary} from './content-library.js';
 import {PlayerSession} from './player-session.js';
 let playerSession=null;
@@ -656,7 +657,7 @@ function render() {
   const standingTrees=terrainSample.trees;
   const onScreenTree=f=>{const p=iso(f.x,f.y),margin=220*scale;return p.x>=-margin&&p.x<=width+margin&&p.y>=-margin&&p.y<=height+margin;};
   for(const [key,value] of Object.entries({forestSeed:state.village.land.seed,forestCount:standingTrees.length,soilCells:soil.length}))if(canvas.dataset[key]!==String(value))canvas.dataset[key]=String(value);
-  const key = JSON.stringify([state.village.land.seed,worldMap?.river,visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
+  const key = JSON.stringify([state.village.land.seed,worldMap?.river,terrainRevision(worldMap),visibleRoads,state.village.economy.sources.filter(s=>s.active).map(s=>[s.x,s.y]),soil]);
   if (groundKey !== key) {
     groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil,state.village.land.seed,worldMap);
     groundKey = key;

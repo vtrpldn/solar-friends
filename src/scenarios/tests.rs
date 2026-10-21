@@ -408,3 +408,80 @@ fn nature_catalog_generation_and_invalid_objects_are_bounded_and_read_only() {
     assert!(g.load_scenario(&encoded(&d)).contains("invalid_nature"));
     assert_eq!(g.snapshot(), before);
 }
+
+#[test]
+fn authored_terrain_freezes_baselines_and_changes_real_growing_conditions() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    d.rules.land = true;
+    let (original, _) =
+        compile(d.clone()).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    let before = original.land_report();
+    let mut cells: Vec<TerrainCell> = serde_json::from_str(&original.terrain_template()).unwrap();
+    assert_eq!(cells.len(), 4096);
+    d.map.terrain = Some(cells.clone());
+    let (same, _) =
+        compile(d.clone()).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    assert_eq!(same.land_report(), before);
+    cells[12 * 64 + 12] = TerrainCell {
+        habitat: "rocky-woodland".into(),
+        fertility: 0.44,
+        retention: 0.7,
+        cover: 0.36,
+    };
+    d.map.terrain = Some(cells);
+    let (mut changed, _) =
+        compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    let v = changed.app.world().resource::<Village>();
+    let soil = land::ground(v, 12, 12);
+    assert_eq!(soil.biome, "Rocky woodland");
+    assert_eq!(soil.fertility, 0.44);
+    assert_eq!(soil.retention, 0.7);
+    assert!(land::growth(&soil) < land::growth(&land::ground(v, 12, 13)));
+    let saved = changed.snapshot();
+    let mut loaded = Game::new();
+    assert!(loaded.restore(&saved));
+    assert_eq!(loaded.snapshot(), saved);
+}
+#[test]
+fn malformed_terrain_does_not_replace_the_current_village() {
+    let mut g = Game::new();
+    let before = g.snapshot();
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    let mut cells: Vec<TerrainCell> = serde_json::from_str(&g.terrain_template()).unwrap();
+    cells[0].habitat = "unsupported-habitat".into();
+    d.map.terrain = Some(cells.clone());
+    assert!(g.load_scenario(&encoded(&d)).contains("invalid_terrain"));
+    assert_eq!(g.snapshot(), before);
+    cells[0].habitat = "flower-meadow".into();
+    cells[0].retention = 9.;
+    d.map.terrain = Some(cells.clone());
+    assert!(g.load_scenario(&encoded(&d)).contains("invalid_terrain"));
+    assert_eq!(g.snapshot(), before);
+    cells.pop();
+    d.map.terrain = Some(cells);
+    assert!(g.load_scenario(&encoded(&d)).contains("invalid_terrain"));
+    assert_eq!(g.snapshot(), before);
+}
+
+#[test]
+fn live_reports_omit_frozen_maps_without_changing_rules_or_becoming_saves() {
+    let mut d = Definition::builtin(modes::Mode::Story);
+    d.rules.logistics = false;
+    d.rules.land = false;
+    d.rules.utilities = false;
+    let (mut g, _) =
+        compile(d.clone()).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    d.map.terrain = Some(serde_json::from_str(&g.terrain_template()).unwrap());
+    assert!(g.load_scenario(&encoded(&d)).contains("\"ok\":true"));
+    let before = g.snapshot();
+    let report = g.report_state();
+    assert!(report.len() * 2 < before.len());
+    let mut full: serde_json::Value = serde_json::from_str(&before).unwrap();
+    let view: serde_json::Value = serde_json::from_str(&report).unwrap();
+    full["village"].as_object_mut().unwrap().remove("scenario");
+    assert_eq!(view["village"], full["village"]);
+    assert_eq!(view["environment"], full["environment"]);
+    assert_eq!(view["residents"], full["residents"]);
+    assert!(!g.restore(&report));
+    assert_eq!(g.snapshot(), before);
+}

@@ -4,7 +4,7 @@ use crate::river_bank;
 use crate::{Game, MAP_SIZE, Village, interactions, resource_sites, simulation};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-mod habitat;
+pub mod habitat;
 pub mod vegetation;
 pub use habitat::habitat;
 mod water;
@@ -283,15 +283,24 @@ fn sync(v: &mut Village) {
 }
 pub fn ground(v: &Village, x: i32, y: i32) -> Ground {
     let index = (y * MAP_SIZE + x) as u32;
-    let starter = (4..=16).contains(&x) && (4..=16).contains(&y);
+    let authored = habitat::authored(v, x, y);
+    let starter = authored.is_none() && (4..=16).contains(&x) && (4..=16).contains(&y);
     let sample = |domain| simulation::sample(v.land.seed, domain, index) as f64 / u32::MAX as f64;
     let profile = habitat::for_village(v, x as f32, y as f32);
-    let base_fertility = if starter {
+    let base_fertility = if let Some(cell) = authored {
+        cell.fertility
+    } else if starter {
         0.72
     } else {
         profile.2 + (sample(51) as f32 - 0.5) * 0.08
     };
-    let base_cover = if starter { 0.35 } else { profile.4 };
+    let base_cover = if let Some(cell) = authored {
+        cell.cover
+    } else if starter {
+        0.35
+    } else {
+        profile.4
+    };
     let edit = v.land.soil.iter().find(|s| s.x == x && s.y == y);
     let nutrients = edit.map_or(1., |s| s.nutrients);
     let disturbance = edit.map_or(0., |s| s.disturbance);
@@ -299,7 +308,9 @@ pub fn ground(v: &Village, x: i32, y: i32) -> Ground {
         biome: profile.0,
         geology: profile.1,
         fertility: (base_fertility * nutrients * (1. - disturbance * 0.3)).clamp(0., 1.),
-        retention: if starter {
+        retention: if let Some(cell) = authored {
+            cell.retention
+        } else if starter {
             1.
         } else {
             (profile.3 + (sample(52) as f32 - 0.5) * 0.08).clamp(0.65, 1.35)

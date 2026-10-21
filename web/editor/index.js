@@ -18,7 +18,7 @@ const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,geologyEditor,geometry=null;
+let minimap,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -64,7 +64,8 @@ function refresh(){
   if(!current)return;
   const d=current.doc.value;
   report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
-  const snapshot=JSON.parse(engine.snapshot());
+  const snapshot=JSON.parse(engine.report_state());
+  terrainBase=JSON.parse(engine.terrain_template());
   landReport=JSON.parse(engine.land_report());geometry=JSON.parse(engine.world_geometry());landSampleKey='';
   map.landOverlay=overlayTiles();
   map.set(d,snapshot);
@@ -118,8 +119,9 @@ function renderReview(){
 }
 function setTool(tool){
   map.setTool(tool);landSampleKey='';inspectGround(hoverCell);
+  if(tool==='habitat'){$('creator-ground').open=true;$('creator-ground').scrollIntoView({block:'nearest'});}
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
-  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',nature:'Drag to plant a spaced cluster · brush width controls its area · one undo step','thin-nature':'Drag to remove natural objects · no materials are granted · one undo step',river:'Drag to shape the channel · steep bends cannot host hydro · one undo step',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
+  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',habitat:'Drag to paint habitat and baseline soil · existing plants stay in place · one undo step',nature:'Drag to plant a spaced cluster · brush width controls its area · one undo step','thin-nature':'Drag to remove natural objects · no materials are granted · one undo step',river:'Drag to shape the channel · steep bends cannot host hydro · one undo step',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
 function removeBuilding(id){
   const ids=map.selection().includes(id)?map.selection():[id];
@@ -130,6 +132,10 @@ function removeBuilding(id){
 function mapAction(action){
   if(!current||busy)return;
   if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});
+  else if(action.type==='habitat'){
+    const preset=catalog.habitats.find(h=>h.key===$('creator-habitat').value),start=Math.floor(action.size/2);
+    change('Paint habitat and soil',d=>{d.map.terrain=Array.from({length:4096},(_,i)=>d.map.terrain?.[i]||terrainBase[i]);for(const [x,y]of action.cells)for(let a=x-start;a<x-start+action.size;a++)for(let b=y-start;b<y-start+action.size;b++)if(a>=0&&a<64&&b>=0&&b<64&&!riverBank(a,b,d.map))d.map.terrain[b*64+a]={habitat:preset.key,fertility:preset.fertility,retention:preset.retention,cover:preset.cover};});
+  }
   else if(action.type==='nature'){
     const definition=current.doc.value,existing=resolvedNature(definition,map.snapshot,catalog.nature),added=plantStroke(definition,existing,catalog.nature,map.natureSpecies.key,map.natureSize||1,action.cells,action.size);
     if(!added.length){toast('Choose inland ground with room between plants, away from buildings, roads and the arrival camp.');return;}
@@ -156,13 +162,14 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
-  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true,layer:'none'};
+  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true,layer:'none',habitatPreset:'flower-meadow'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
-    const tool=['select','pan','move','road','meadow','river','nature','thin-nature','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
+    const tool=['select','pan','move','road','meadow','river','nature','thin-nature','habitat','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
   }
   map.brushSize=[1,3,5,9].includes(view?.brushSize)?view.brushSize:3;map.natureSpecies=catalog.nature.find(s=>s.key===view?.natureSpeciesKey)||catalog.nature[0];map.natureSize=Number.isFinite(view?.natureSize)?Math.max(map.natureSpecies.min_size,Math.min(map.natureSpecies.max_size,view.natureSize)):1;
+  $('creator-habitat').value=map.view.habitatPreset;
   $('creator-brush-size').value=map.brushSize;$('creator-species').value=map.natureSpecies.key;$('creator-nature-size').value=map.natureSize;$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
@@ -220,6 +227,7 @@ async function showLibrary(){
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
+  $('creator-habitat').onchange=()=>{map.view.habitatPreset=$('creator-habitat').value;setTool('habitat');};
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();};
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
@@ -317,11 +325,12 @@ function wire(){
 try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
-  map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;renderSelection();scheduleSave();}},hover:inspectGround});
+  map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify(map.selection());if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
   minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
   for(const canvas of document.querySelectorAll('[data-palette]')){const key=canvas.dataset.palette;paintIcon(canvas,key,art.images[key],allBuildingArt[key]);}
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');
+  for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   wire();const id=new URLSearchParams(location.search).get('project');

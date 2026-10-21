@@ -130,6 +130,21 @@ pub(super) fn check(d: &Definition) -> Report {
             r.push("map.nature","invalid_nature","Use known species with unique identities, supported sizes and bounded density on inland ground.");
         }
     }
+    if let Some(cells) = &d.map.terrain {
+        if cells.len() != (MAP_SIZE * MAP_SIZE) as usize
+            || cells.iter().any(|c| {
+                land::habitat::by_key(&c.habitat).is_none()
+                    || !c.fertility.is_finite()
+                    || !(0.0..=1.0).contains(&c.fertility)
+                    || !c.retention.is_finite()
+                    || !(0.65..=1.35).contains(&c.retention)
+                    || !c.cover.is_finite()
+                    || !(0.0..=1.0).contains(&c.cover)
+            })
+        {
+            r.push("map.terrain","invalid_terrain","Use a complete 64 by 64 terrain grid with known habitats and supported fertility, retention and living cover.");
+        }
+    }
     if !d.start.minutes.is_finite() || !(0.0..=5_000_000.).contains(&d.start.minutes) {
         r.push(
             "start.minutes",

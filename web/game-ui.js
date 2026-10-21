@@ -1,3 +1,4 @@
+import {terrainRevision} from './terrain-revision.js';
 import {habitatAt,habitatColors} from './habitats.js';
 import {usesLogistics} from './sandbox-rules.js';
 import {paintIcon} from './build-menu.js';
@@ -91,7 +92,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
   }
   function drawMap(state,selected){
     ctx.clearRect(0,0,map.width,map.height);ctx.save();ctx.scale(map.width/MAP_SIZE,map.height/MAP_SIZE);
-    const worldMap=state.village.scenario?.definition?.map,geometryKey=JSON.stringify(worldMap?.river);
+    const worldMap=state.village.scenario?.definition?.map,geometryKey=JSON.stringify([worldMap?.river,terrainRevision(worldMap)]);
     if(!mapTerrain||mapSeed!==state.village.land.seed||geometryKey!==mapGeometryKey){
       mapGeometryKey=geometryKey;
       mapTerrain=document.createElement('canvas');mapTerrain.width=map.width;mapTerrain.height=map.height;mapSeed=state.village.land.seed;

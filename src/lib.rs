@@ -1340,34 +1340,12 @@ impl Game {
         .to_string()
     }
     pub fn snapshot(&mut self) -> String {
-        let mut village = self.app.world().resource::<Village>().clone();
-        let residents: Vec<_> = self
-            .app
-            .world_mut()
-            .query::<&Resident>()
-            .iter(self.app.world())
-            .cloned()
-            .collect();
-        workforce::refresh(&mut village, residents.iter());
-        let mut economy = economy::view(&village);
-        economy["pickup_drivers"] = serde_json::json!(residents.iter().map(|r| serde_json::json!({"id":r.id,"name":r.name,"blocker":town_pickup::blocker(&village,r)})).collect::<Vec<_>>());
-        economy["pickup_capacity"] = town_pickup::CAPACITY.into();
-        economy["pickup_minutes"] = town_pickup::drive_minutes(&village).into();
-        economy["pickup_fee"] = 2000.into();
-        serde_json::json!({
-            "environment": {
-                "skills": skills::view(&village),
-                "raining": climate::at(&village,village.minutes).raining,
-                "weather": climate::view(&village),
-                "water_capacity": ecology::capacity(&village),
-                "power": power::supply(&village),
-                "economy": economy,
-                "dry_day": !climate::day(&village,(village.minutes/1440.) as u32).rain_expected,
-            },
-            "village": village,
-            "residents": residents,
-        })
-        .to_string()
+        self.state_snapshot(false)
+    }
+    /// Read-only live reports. Frozen authoring content is retained by the view,
+    /// while saves and exports continue to use snapshot().
+    pub fn report_state(&mut self) -> String {
+        self.state_snapshot(true)
     }
     pub fn set_power_enabled(&mut self, building: usize, enabled: bool) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
@@ -1662,6 +1640,42 @@ impl Default for Game {
 }
 
 impl Game {
+    fn state_snapshot(&mut self, view_only: bool) -> String {
+        let mut village = self.app.world().resource::<Village>().clone();
+        let residents: Vec<_> = self
+            .app
+            .world_mut()
+            .query::<&Resident>()
+            .iter(self.app.world())
+            .cloned()
+            .collect();
+        workforce::refresh(&mut village, residents.iter());
+        let mut economy = economy::view(&village);
+        economy["pickup_drivers"] = serde_json::json!(residents.iter().map(|r| serde_json::json!({"id":r.id,"name":r.name,"blocker":town_pickup::blocker(&village,r)})).collect::<Vec<_>>());
+        economy["pickup_capacity"] = town_pickup::CAPACITY.into();
+        economy["pickup_minutes"] = town_pickup::drive_minutes(&village).into();
+        economy["pickup_fee"] = 2000.into();
+        let environment = serde_json::json!({
+            "skills": skills::view(&village),
+            "raining": climate::at(&village,village.minutes).raining,
+            "weather": climate::view(&village),
+            "water_capacity": ecology::capacity(&village),
+            "power": power::supply(&village),
+            "economy": economy,
+            "dry_day": !climate::day(&village,(village.minutes/1440.) as u32).rain_expected,
+        });
+        let reference=village.scenario.as_ref().map(|o|serde_json::json!({"id":o.definition.id,"revision":o.definition.revision,"map":o.definition.map.id,"map_revision":o.definition.map.revision}));
+        if view_only {
+            village.scenario = None;
+        }
+        let mut result =
+            serde_json::json!({"environment":environment,"village":village,"residents":residents});
+        if view_only {
+            result["view_only"] = true.into();
+            result["scenario_ref"] = serde_json::to_value(reference).unwrap();
+        }
+        result.to_string()
+    }
     fn request_at(&mut self, id: usize, task: &str, encourage: bool, at: Option<usize>) -> String {
         let mut v = self.app.world().resource::<Village>().clone();
         let people: Vec<_> = self

@@ -1,5 +1,79 @@
 //! Broad, reproducible habitats connect the painted landscape to growing conditions.
 use crate::river_center;
+#[derive(serde::Serialize)]
+pub struct Habitat {
+    pub key: &'static str,
+    pub name: &'static str,
+    pub geology: &'static str,
+    pub fertility: f32,
+    pub retention: f32,
+    pub cover: f32,
+}
+pub const HABITATS: [Habitat; 6] = [
+    Habitat {
+        key: "river-meadow",
+        name: "River meadow",
+        geology: "Alluvial silt",
+        fertility: 0.88,
+        retention: 1.32,
+        cover: 0.85,
+    },
+    Habitat {
+        key: "rocky-woodland",
+        name: "Rocky woodland",
+        geology: "Granite and quartz",
+        fertility: 0.44,
+        retention: 0.70,
+        cover: 0.36,
+    },
+    Habitat {
+        key: "clay-terraces",
+        name: "Clay terraces",
+        geology: "Red clay and ironstone",
+        fertility: 0.62,
+        retention: 1.28,
+        cover: 0.48,
+    },
+    Habitat {
+        key: "atlantic-forest",
+        name: "Atlantic forest",
+        geology: "Deep forest loam",
+        fertility: 0.90,
+        retention: 1.18,
+        cover: 0.92,
+    },
+    Habitat {
+        key: "dry-woodland",
+        name: "Dry woodland",
+        geology: "Sandy weathered soil",
+        fertility: 0.50,
+        retention: 0.76,
+        cover: 0.46,
+    },
+    Habitat {
+        key: "flower-meadow",
+        name: "Flower meadow",
+        geology: "Mixed loam",
+        fertility: 0.74,
+        retention: 1.00,
+        cover: 0.65,
+    },
+];
+pub fn by_key(key: &str) -> Option<&'static Habitat> {
+    HABITATS.iter().find(|h| h.key == key)
+}
+pub fn authored(v: &crate::Village, x: i32, y: i32) -> Option<&crate::scenarios::TerrainCell> {
+    if !(0..crate::MAP_SIZE).contains(&x) || !(0..crate::MAP_SIZE).contains(&y) {
+        return None;
+    }
+    v.scenario
+        .as_ref()?
+        .definition
+        .map
+        .terrain
+        .as_ref()?
+        .get((y * crate::MAP_SIZE + x) as usize)
+}
 /// Name, substrate, fertility, water retention and living ground cover.
 pub fn habitat(seed: u32, x: f32, y: f32) -> (&'static str, &'static str, f32, f32, f32) {
     profile(seed, x, y, Some(river_center(y)))
@@ -9,6 +83,17 @@ pub fn for_village(
     x: f32,
     y: f32,
 ) -> (&'static str, &'static str, f32, f32, f32) {
+    if let Some(cell) = authored(v, x.floor() as i32, y.floor() as i32) {
+        if let Some(h) = by_key(&cell.habitat) {
+            return (
+                h.name,
+                h.geology,
+                cell.fertility,
+                cell.retention,
+                cell.cover,
+            );
+        }
+    }
     profile(v.land.seed, x, y, crate::world::center(v, y))
 }
 fn profile(

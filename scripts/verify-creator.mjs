@@ -14,6 +14,16 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled);
  const projectURL=page.url();
+ const terrainPixels=await page.evaluate(async()=>{
+  const {Game}=await import('/pkg/solar_friends.js'),{paintTerrain,GROUND_START,GROUND_SIZE}=await import('/terrain.js');
+  const g=new Game(),d=JSON.parse(g.scenario_template('sandbox'));g.load_scenario(JSON.stringify(d));d.map.terrain=JSON.parse(g.terrain_template());g.free();
+  const image=new Image();image.src='/art/terrain-atlas.png';await image.decode();
+  const at=c=>[...c.getContext('2d').getImageData(Math.floor((35-GROUND_START)*c.width/GROUND_SIZE),Math.floor((36-GROUND_START)*c.height/GROUND_SIZE),1,1).data];
+  let canvas=paintTerrain(image,[],[],[],d.map.seed,d.map),before=at(canvas);canvas.width=canvas.height=1;
+  d.map.terrain[36*64+35].habitat='rocky-woodland';canvas=paintTerrain(image,[],[],[],d.map.seed,d.map);const after=at(canvas);canvas.width=canvas.height=1;return {before,after};
+ });
+ assert.notDeepEqual(terrainPixels.before,terrainPixels.after,'A single authored cell between coarse terrain samples is visible');
+
  await page.locator('#creator-geology summary').click();
  await page.locator('#geology-0-x').fill('2');await page.locator('#geology-0-x').blur();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Edit geological patch');
@@ -43,6 +53,13 @@ try{
 
  const cellPoint=async(x,y)=>page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
  const clickCell=async(x,y)=>{const p=await cellPoint(x,y);await page.mouse.click(p.x,p.y);};
+ await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('#creator-brush-size').selectOption('1');
+ await clickCell(35,36);await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');
+ await page.waitForFunction(()=>document.querySelector('#creator-ground-detail').textContent.includes('Rocky woodland'));
+ assert.match(await page.locator('#creator-ground-detail').innerText(),/×0.70/);
+ await page.locator('#creator-undo').click();await page.locator('#creator-redo').click();
+ await page.screenshot({path:'/private/tmp/solar-terrain-editor.png'});
+
  await page.locator('#creator-species').selectOption('jucara');await page.locator('#creator-brush-size').selectOption('1');
  await page.locator('#creator-nature-size').focus();for(let n=0;n<3;n++)await page.locator('#creator-nature-size').press('ArrowLeft');
  assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
@@ -111,6 +128,7 @@ try{
  await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  assert.equal(await page.locator('#creator-land-layer').inputValue(),'fertility');
  assert.equal(await page.locator('#creator-title').inputValue(),'Our first property');
+ assert.equal(await page.locator('#creator-habitat').inputValue(),'rocky-woodland');
  assert.equal(await page.locator('#creator-species').inputValue(),'jucara');assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
  assert.equal(await page.locator('#creator-undo').isEnabled(),true);
  await page.locator('#creator-test').click();
@@ -127,6 +145,7 @@ try{
  assert.equal(page.url(),projectURL);
  assert.equal(await page.locator('#creator-land-layer').inputValue(),'fertility');
  assert.equal(await page.locator('#creator-title').inputValue(),'Our first property');
+ assert.equal(await page.locator('#creator-habitat').inputValue(),'rocky-woodland');
  assert.equal(await page.locator('#creator-species').inputValue(),'jucara');assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
  assert.equal(await page.evaluate(()=>JSON.stringify({...localStorage})),original);
  await page.setViewportSize({width:1280,height:800});await page.screenshot({path:'/private/tmp/solar-creator-1280.png'});

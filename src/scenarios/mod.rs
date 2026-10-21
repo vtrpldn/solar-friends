@@ -114,6 +114,30 @@ impl Game {
         serde_json::to_string(&definition).unwrap()
     }
 
+    pub fn terrain_template(&self) -> String {
+        let v = self.app.world().resource::<Village>();
+        let mut base = v.clone();
+        base.land.soil.clear();
+        let cells: Vec<_> = (0..MAP_SIZE)
+            .flat_map(|y| (0..MAP_SIZE).map(move |x| (x, y)))
+            .map(|(x, y)| {
+                let ground = land::ground(&base, x, y);
+                TerrainCell {
+                    habitat: land::habitat::HABITATS
+                        .iter()
+                        .find(|h| h.name == ground.biome)
+                        .unwrap()
+                        .key
+                        .into(),
+                    fertility: ground.fertility,
+                    retention: ground.retention,
+                    cover: ground.cover,
+                }
+            })
+            .collect();
+        serde_json::to_string(&cells).unwrap()
+    }
+
     pub fn generate_property(&self, seed: u32) -> String {
         let mut map = Definition::builtin(modes::Mode::Sandbox).map;
         map.seed = seed;
@@ -130,7 +154,7 @@ impl Game {
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "max_buildings":MAX_BUILDINGS,"nature":land::vegetation::SPECIES,"materials":economy::NAMES,"buildings":buildings})
+            "max_buildings":MAX_BUILDINGS,"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
         .to_string()
     }
 
