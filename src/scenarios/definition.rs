@@ -131,6 +131,11 @@ pub struct Start {
     pub residents: Option<Vec<super::residents::Person>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub relationships: Vec<super::relationships::Bond>,
+    #[serde(
+        default,
+        skip_serializing_if = "super::experience::Policy::is_balanced"
+    )]
+    pub resident_balance: super::experience::Policy,
     pub minutes: f32,
     pub funds: i64,
     pub fresh_water: f32,
@@ -285,6 +290,7 @@ impl Definition {
             start: Start {
                 residents: Some(super::residents::founders()),
                 relationships:vec![],
+                resident_balance:super::experience::Policy::Balanced,
                 minutes: 480.,
                 funds: if sandbox { 10_000_000 } else { 300_000 },
                 fresh_water: if sandbox { 40. } else { 32. },

@@ -1889,6 +1889,7 @@ function installCreationSession(){
   document.body.classList.add('in-creation-run');
   const bar=document.createElement('nav');bar.className='creation-session';bar.setAttribute('aria-label','Scenario session');
   const label=document.createElement('strong');label.textContent=session.isTest?'Playtest · '+session.record.title:session.record.title;bar.append(label);
+  if(session.record.definition.start.resident_balance==='unrestricted'){const note=document.createElement('small');note.textContent='Unrestricted starting skills';bar.append(note);}
   const button=(text,action)=>{const b=document.createElement('button');b.textContent=text;b.onclick=async()=>{b.disabled=true;try{await action();}catch(error){toast(error.message);}finally{b.disabled=false;}};bar.append(b);};
   button('Save checkpoint',()=>session.save());
   if(session.isTest)button('Restart test',async()=>{await session.restartTest();refreshDevScene();if(!paused)togglePause();});

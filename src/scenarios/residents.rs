@@ -18,6 +18,10 @@ pub struct Person {
     pub outside_shifts: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub personality: Option<personality::Profile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience: Option<experience::Experience>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub work_preferences: BTreeMap<experience::Group, experience::Bias>,
     pub routine_preferences: resident_preferences::Preferences,
 }
 impl Person {
@@ -43,6 +47,8 @@ pub fn founders() -> Vec<Person> {
             preset_version: 1,
             name: r.name,
             personality: None,
+            experience: None,
+            work_preferences: BTreeMap::new(),
             occupation: Some(occupations::FOUNDING_PROFESSIONS[r.id]),
             outside_shifts: false,
             pronouns: String::new(),
@@ -111,6 +117,7 @@ pub fn apply(d: &Definition, people: &mut [Resident], v: &mut Village) {
                 v.economy
                     .outside_jobs
                     .insert(person.id, definition.outside_shifts);
+                experience::apply(definition, person.id, v);
                 person.name = definition.name.clone();
                 person.pronouns = definition.pronouns.clone();
                 person.biography = definition.biography.clone();

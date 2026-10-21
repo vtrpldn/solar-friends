@@ -4,6 +4,7 @@ pub(super) fn check(d: &Definition) -> Report {
     let mut r = Report::default();
     residents::check(d, &mut r);
     relationships::check(d, &mut r);
+    experience::check(d, &mut r);
     if d.format != FORMAT || d.schema != SCHEMA {
         r.push(
             "schema",

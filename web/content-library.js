@@ -3,7 +3,7 @@ export class LibraryConflict extends Error {
   constructor(){super('Another tab changed this creation. Reload it or save your work as a copy.');this.name='LibraryConflict';}
 }
 const clone=value=>structuredClone(value);
-const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId});
+const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition)?.start?.resident_balance??'balanced'});
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
 export class ContentLibrary extends EventTarget {

@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 pub const COUNT: usize = 6;
 pub const MAX: u16 = 160;
+pub const THRESHOLDS: [u16; 5] = [12, 32, 60, 100, 160];
 pub const LABELS: [&str; COUNT] = [
     "Building",
     "Hauling",
@@ -87,7 +88,7 @@ pub fn task(task: &str) -> Option<Skill> {
     })
 }
 pub fn level(xp: u16) -> u8 {
-    [12, 32, 60, 100, 160].iter().filter(|&&n| xp >= n).count() as u8
+    THRESHOLDS.iter().filter(|&&n| xp >= n).count() as u8
 }
 pub fn factor(v: &Village, resident: usize, skill: Skill) -> f32 {
     if !v.skills.enabled {
@@ -137,14 +138,28 @@ pub fn view(v: &Village) -> serde_json::Value {
             .iter()
             .map(|(id, p)| {
                 let current_day = p.day == (v.minutes / 1440.) as u32;
+                let background = v.scenario.as_ref().and_then(|origin| {
+                    origin
+                        .definition
+                        .start
+                        .residents
+                        .as_ref()
+                        .and_then(|people| {
+                            people
+                                .iter()
+                                .find(|p| origin.residents.get(&p.id) == Some(id))
+                        })
+                        .and_then(|p| p.experience.as_ref())
+                        .map(|experience| experience.background.label())
+                });
                 let entries: Vec<_> = p.experience.iter().enumerate().map(|(i,&xp)| {
             let rank = level(xp);
-            let next = [12,32,60,100,160].get(rank as usize).copied();
+            let next = THRESHOLDS.get(rank as usize).copied();
             serde_json::json!({"name":LABELS[i],"experience":xp,"level":rank,"next":next,
                 "bonus_percent":if v.skills.enabled {rank*3} else {0},
                 "enough_today":current_day && (p.today[i]>=6 || p.today.iter().sum::<u8>()>=12)})
         }).collect();
-                serde_json::json!({"id":id,"skills":entries})
+                serde_json::json!({"id":id,"background":background,"skills":entries})
             })
             .collect();
     serde_json::json!({"enabled":v.skills.enabled,"daily_domain_limit":6,"daily_total_limit":12,"maximum_bonus":15,"people":people})

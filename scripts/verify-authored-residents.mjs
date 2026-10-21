@@ -13,7 +13,7 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.locator('#creator-residents > summary').click();
  const person=page.locator('[data-resident="resident-iara"]');
- await person.locator('summary').click();
+ await person.locator(':scope > summary').click();
  const name='João <vizinho>',bio='<img src=x onerror=alert(1)> Trouxe sementes.';
  for(const [field,value]of [['name',name],['pronouns','ele/dele'],['biography',bio],['preferred_bedtime','23:00'],['favourite_hobby','stretch'],['occupation','water_technician'],['social_style','outgoing'],['work_interest','building']]){
   const input=person.locator(`[data-resident-field=${field}]`);
@@ -22,7 +22,7 @@ try{
  await page.locator('#creator-undo').click();assert.equal(await person.locator('[data-resident-field=work_interest]').inputValue(),'gardening');
  await page.locator('#creator-redo').click();assert.equal(await person.locator('[data-resident-field=work_interest]').inputValue(),'building');
  await person.locator('[data-resident-field=outside_shifts]').check();
- const bento=page.locator('[data-resident="resident-bento"]');await bento.locator('summary').click();
+ const bento=page.locator('[data-resident="resident-bento"]');await bento.locator(':scope > summary').click();
  await bento.locator('[data-resident-field=occupation]').selectOption('none');
  assert(await bento.locator('[data-resident-field=outside_shifts]').isDisabled());
  await page.locator('#creator-save').click();

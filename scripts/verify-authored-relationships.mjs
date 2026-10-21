@@ -12,7 +12,7 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.locator('#creator-residents > summary').click();
  for(const id of ['iara','bento']){
-  const person=page.locator(`[data-resident="resident-${id}"]`);await person.locator('summary').click();
+  const person=page.locator(`[data-resident="resident-${id}"]`);await person.locator(':scope > summary').click();
   await person.locator('[data-resident-field=name]').fill('Sam');await person.locator('[data-resident-field=name]').dispatchEvent('change');
  }
  await page.locator('#creator-residents > summary').click();
