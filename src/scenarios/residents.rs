@@ -16,6 +16,8 @@ pub struct Person {
     pub occupation: Option<occupations::Profession>,
     #[serde(default)]
     pub outside_shifts: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personality: Option<personality::Profile>,
     pub routine_preferences: resident_preferences::Preferences,
 }
 impl Person {
@@ -40,6 +42,7 @@ pub fn founders() -> Vec<Person> {
             preset: PRESETS[r.id].into(),
             preset_version: 1,
             name: r.name,
+            personality: None,
             occupation: Some(occupations::FOUNDING_PROFESSIONS[r.id]),
             outside_shifts: false,
             pronouns: String::new(),
@@ -112,6 +115,9 @@ pub fn apply(d: &Definition, people: &mut [Resident], v: &mut Village) {
                 person.pronouns = definition.pronouns.clone();
                 person.biography = definition.biography.clone();
                 person.routine_preferences = definition.routine_preferences;
+                if let Some(profile) = definition.personality {
+                    profile.apply(person);
+                }
             }
         }
     }

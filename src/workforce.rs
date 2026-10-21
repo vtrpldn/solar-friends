@@ -903,6 +903,21 @@ mod tests {
         (g, v, r)
     }
     #[test]
+    fn authored_interest_changes_ordinary_work_preferences_but_not_urgent_needs() {
+        let v = Village::default();
+        let mut person = initialization::founding_residents(CAMP).remove(0);
+        person.id = 42;
+        person.name = "Sam".into();
+        assert!(score(&v, &person, "garden", 100., 0.) > score(&v, &person, "build", 100., 0.));
+        personality::Profile {
+            social_style: personality::SocialStyle::Reserved,
+            work_interest: personality::Interest::Building,
+        }
+        .apply(&mut person);
+        assert!(score(&v, &person, "build", 100., 0.) > score(&v, &person, "garden", 100., 0.));
+        assert!(score(&v, &person, "water", 500., 0.) > score(&v, &person, "build", 100., 0.));
+    }
+    #[test]
     fn preferences_change_real_choices_but_urgent_water_and_rest_win() {
         let (_, mut v, mut r) = scene();
         v.workforce.preferences.get_mut(&0).unwrap()[2] = 2;

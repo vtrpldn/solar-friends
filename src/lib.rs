@@ -31,6 +31,7 @@ mod organics;
 mod outcomes;
 mod participation;
 mod persistence;
+mod personality;
 mod pipes;
 mod planting;
 mod power;
@@ -60,7 +61,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 38;
+pub const SAVE_VERSION: u32 = 39;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -112,6 +113,7 @@ pub struct Resident {
     pub biography: String,
     pub trait_name: String,
     pub favorite: String,
+    pub social_style: personality::SocialStyle,
     pub routine_preferences: resident_preferences::Preferences,
     pub energy: f32,
     pub hunger: f32,
@@ -817,7 +819,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 .collect();
             for mut r in &mut people {
                 if attended & (1 << r.id) != 0 {
-                    r.social = (r.social + 25.).min(100.);
+                    personality::company(&mut r, 25.);
                     r.hunger = (r.hunger - 35.).max(0.);
                     for &other in &participants {
                         if other != r.id && attended & (1 << other) != 0 {
@@ -927,7 +929,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         }
         let sleeping = r.task == "sleep";
         r.hunger = (r.hunger + dt * if sleeping { 0.045 } else { 0.13 }).min(100.);
-        r.social = (r.social - dt * 0.035).max(0.);
+        personality::lose_connection(&mut r, dt * 0.035);
         let household =
             shelter(&v, r.id).map_or(water::Owner::Camp, |b| water::Owner::Building(b.id));
         sanitation::household_at(&mut v, household, dt * if sleeping { 0.002 } else { 0.009 });
@@ -1064,7 +1066,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
             "rest" => r.energy = (r.energy + dt * 0.65).min(100.),
             "socialize" | "gathering" => {
-                r.social = (r.social + dt * 1.3).min(100.);
+                personality::company(&mut r, dt * 1.3);
                 r.energy = (r.energy + dt * 0.12).min(100.);
             }
             task if leisure::hobby(task) => {

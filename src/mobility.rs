@@ -181,7 +181,7 @@ pub fn advance(
                 0.13
             })
         .min(100.);
-        r.social = (r.social - dt * 0.035).max(0.);
+        personality::lose_connection(r, dt * 0.035);
         if trip.purpose == Purpose::Overnight {
             r.energy = (r.energy + dt * 0.20).min(100.);
         } else {
@@ -199,7 +199,7 @@ pub fn advance(
         spacing::walk(v, r, neighbours, dt);
         r.energy = (r.energy - dt * 0.035).max(0.);
         r.hunger = (r.hunger + dt * 0.13).min(100.);
-        r.social = (r.social - dt * 0.035).max(0.);
+        personality::lose_connection(r, dt * 0.035);
         let household =
             shelter(v, r.id).map_or(water::Owner::Camp, |b| water::Owner::Building(b.id));
         sanitation::household_at(v, household, dt * 0.009);

@@ -101,7 +101,7 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
     match kind.as_str() {
         "home" | "shed" => r.energy = (r.energy + 18.).min(100.),
         "square" => {
-            r.social = (r.social + 25.).min(100.);
+            personality::company(r, 25.);
             r.energy = (r.energy + 8.).min(100.);
             v.progress.social_mask |= 1 << r.id;
         }

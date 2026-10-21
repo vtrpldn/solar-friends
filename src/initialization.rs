@@ -76,6 +76,7 @@ pub(crate) fn founding_residents(camp: (f32, f32)) -> Vec<Resident> {
             biography: String::new(),
             trait_name: traits.into(),
             favorite: favorite.into(),
+            social_style: personality::SocialStyle::Balanced,
             routine_preferences,
             energy: 88. - id as f32 * 3.,
             hunger: 22. + id as f32 * 3.,

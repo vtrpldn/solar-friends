@@ -692,3 +692,31 @@ fn starting_relationships_follow_authored_identity_not_cast_order_or_names() {
         assert!(compile(invalid).is_err());
     }
 }
+
+#[test]
+fn authored_personality_and_interests_are_independent_of_appearance_and_jobs() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    let person = &mut d.start.residents.as_mut().unwrap()[0];
+    person.personality = Some(personality::Profile {
+        social_style: personality::SocialStyle::Reserved,
+        work_interest: personality::Interest::Building,
+    });
+    d.start.residents.as_mut().unwrap().reverse();
+    let (mut g, _) = compile(d).unwrap_or_else(|_| panic!("valid profile"));
+    let mut q = g.app.world_mut().query::<&Resident>();
+    let r = q.iter(g.app.world()).find(|r| r.id == 0).unwrap();
+    assert_eq!(r.social_style, personality::SocialStyle::Reserved);
+    assert_eq!(r.favorite, "build");
+    assert_eq!(r.trait_name, "Reserved · builder");
+    assert_eq!(r.energy, 88.);
+    assert_eq!(r.routine_preferences, resident_preferences::IARA_V1);
+    assert_eq!(
+        occupations::job(g.app.world().resource::<Village>(), 0)
+            .unwrap()
+            .title,
+        "Plant nursery assistant"
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+}
