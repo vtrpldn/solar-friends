@@ -1,27 +1,28 @@
 ---
-description: Build a player-facing map and scenario creator on a shared world and scenario foundation.
+description: Build player-facing map, scenario, and resident creators on shared world and character foundations.
 ---
 
 # Map and scenario builder implementation plan
 
-Status: proposed implementation plan. Delivery target: the desktop game, starting with 64×64 maps and the existing five friends.
+Status: proposed implementation plan. Delivery target: the desktop game, with 64×64 maps and player-created residents. The original five friends remain a ready-made cast.
 
 ## Why
 
-Players should be able to design a Brazilian countryside property, decide what the friends arrive with, and create a playable ecovila story or challenge. A map might offer fertile clearings but distant water; a scenario might ask the community to become self-sufficient before the dry season. Both should be possible through ordinary game controls, without developer tools, JSON editing, or programming.
+Players should be able to design a Brazilian countryside property, create the people who will live there, decide what they arrive with, and create a playable ecovila story or challenge. A map might offer fertile clearings but distant water; a scenario might ask the community to become self-sufficient before the dry season. These should be possible through ordinary game controls, without developer tools, JSON editing, or programming.
 
 The first release should deliver the complete loop: create, edit, save, test, revise, export, import, and play. Its foundation must keep authored content separate from a living village so editing a river, testing a quest, or sharing a scenario cannot corrupt another game.
 
 ## Product scope and player journey
 
-Add **Create** and **Scenarios** to the main menu. Keep Story and Sandbox as the familiar ways to play. Create opens a full-screen game editor; Scenarios opens installed scenarios and their saved playthroughs. No development URL or debug flag is required.
+Add **Create** and **Scenarios** to the main menu. Keep Story and Sandbox as the familiar ways to play. Create offers map/scenario projects and a **Residents** creator with reusable character presets; Scenarios opens installed scenarios and their saved playthroughs. Resident creation is also available directly while choosing a scenario's cast or starting a new Sandbox. No development URL or debug flag is required.
 
-Distinguish two creations in plain language:
+Distinguish three creations in plain language:
 
 - **Map:** the property itself, including land, river, vegetation, deposits, and arrival locations. Players can reuse a map in different scenarios or start an ordinary Sandbox on it.
 - **Scenario:** a map plus starting buildings, supplies, the friends' initial circumstances, simulation rules, and optional objectives and events. It can be an open-ended village, a guided story, or a challenge.
+- **Resident:** a reusable character with a name, appearance, personality, interests, abilities, and an optional outside occupation. Adding a preset to a village creates an independent person with their own progress and relationships.
 
-The creation flow is **Choose a starting point → Shape the land → Set up the village → Add a story if wanted → Test → Save and share**. These are workspace tabs, not mandatory forms; players can return to any step. A map-only creation uses a validated default arrival preset when launched in Sandbox. That preset previews its camp, shed, and storage placement rather than overwriting authored terrain unexpectedly.
+The creation flow is **Choose a starting point → Shape the land → Create the residents → Set up the village → Add a story if wanted → Test → Save and share**. These are workspace tabs, not mandatory forms; players can return to any step. A map-only creation uses a validated default arrival preset when launched in Sandbox, with the original friends or a custom cast. That preset previews its camp, shed, and storage placement rather than overwriting authored terrain unexpectedly.
 
 Start with an open property, a generated property, or a small set of prepared templates. Generating a new landscape previews the result before replacing the current land. Regeneration, object deletion, and moving the camp are undoable.
 
@@ -33,7 +34,7 @@ Start with an open property, a generated property, or a small set of prepared te
 | Current flat 2:1 isometric projection and approved artwork | Elevation, cliffs, excavation, bridges, free camera rotation |
 | Editable rivers, habitats, soil, vegetation, and resource deposits | Flood simulation and unrestricted hydrological modelling |
 | All existing buildings and supported appearances, roads, resource plots, and utilities | Arbitrary imported artwork, new building types, and unsupported building rotations |
-| Initial setup for the existing five friends | Custom characters, arbitrary populations, new occupations, and scripted immigration |
+| Create and customize residents; original-friend presets; configurable founding rosters within a tested population limit | Unlimited populations, children/aging simulation, arbitrary occupation scripts, and scripted immigration |
 | Linear chapters, optional goals, simple event sequences, and explicit outcomes | General scripting, branching campaigns, and multi-map campaigns |
 | A local library, independent saves, and file sharing | Accounts, an online gallery, ratings, moderation, and collaborative editing |
 
@@ -54,13 +55,15 @@ The current code has useful rendering, simulation, placement, and validation sys
 | `src/mobility.rs`, `src/water.rs` | The town gate is found at fixed edges and the neighbour water service is positioned relative to a fixed side. | Represent arrival, departure, and outside-service access as validated world anchors. |
 | `src/progression.rs`, `web/quests.js` | Thirteen indexed chapters, completion arrays, objective functions, and unlock mappings are embedded in code. | Add stable objective IDs and a native condition evaluator, then migrate Story incrementally behind an adapter. |
 | `src/sandbox.rs`, `src/modes.rs` | Several simulation choices are inferred from Story versus Sandbox. | Separate rule profiles from scenario content and session type. |
+| `src/lib.rs`, `src/economy.rs`, `src/workforce.rs`, `src/skills.rs`, `src/progression.rs`, `src/simulation.rs` | Resident state uses five-element arrays, fixed relationship grids, numeric-slot abilities, and participation bitmasks. | Introduce stable resident IDs and roster-backed state; store capabilities and preferences as character data. Audit every reader, writer, and validator before accepting custom rosters. |
+| `src/occupations.rs`, `src/sleep.rs`, `web/main.js`, `web/resident-animation.js`, `web/sprite-frames.js` | Jobs, bedtimes, portraits, colours, and sprite selection assume the original cast. | Use occupation and appearance catalogs, resident-owned routines, and a shared portrait/animation composition system. |
 | `web/main.js`, `web/village-storage.js` | Startup, rendering, input, previews, and saves share one controller; storage has one slot per mode. | Extract session ownership, rendering/input boundaries, and a multi-project storage repository. |
 
 The recent camp and camera centering work remains useful: `Village.camp` is a real anchor, and founding buildings already use relative offsets. Complete that refactor by removing the remaining invisible geography tied to the previous map layout. Center a new map's camp and camera by default, while allowing an author to place both independently.
 
 Avoid a general engine rewrite. Extract responsibilities needed by the first playable editor, preserving existing APIs behind adapters until their callers migrate. Do not gate the first useful map builder on converting all thirteen Story chapters, all developer fixtures, or all UI panels.
 
-Suggested module boundaries are `src/world/` for geometry and authored land, `src/scenarios/` for definitions/compilation/validation/runtime progress, `web/editor/` for tools and transactions, and separate web modules for session ownership, the shared world renderer, and content storage. Introduce each boundary when its first feature needs it; existing simulation systems keep their domain responsibilities.
+Suggested module boundaries are `src/world/` for geometry and authored land, `src/scenarios/` for definitions/compilation/validation/runtime progress, `src/residents/` for character definitions and roster services, `web/editor/` for tools and transactions, and separate web modules for session ownership, the shared world renderer, character composition, and content storage. Introduce each boundary when its first feature needs it; existing simulation systems keep their domain responsibilities.
 
 ## Data and runtime design
 
@@ -69,12 +72,15 @@ Suggested module boundaries are `src/world/` for geometry and authored land, `sr
 | Record | Owns | Does not own |
 | --- | --- | --- |
 | `MapDefinition` | Bounds, resolved terrain and water data, habitat and soil baselines, geological deposits, natural vegetation, arrival and outside-access anchors | Resident jobs, depletion during play, shipments, achievements |
+| `ResidentDefinition` | Versioned identity text, appearance recipe, supported traits/interests, initial skills, preferred routine, and occupation key | Live needs, earned experience, active work, relationships with people in another village |
 | `ScenarioDefinition` | An exact map revision, starting settlement and inventories, cast setup, rules, objectives, events, briefing, and camera start | Live work queues, cache contents, completed rewards from a test |
 | `EditorProject` | Editable definitions, title, local identity, revision, recovery checkpoints, and editor view state | The current playtest's simulation changes |
 | `ScenarioRuntime` | Active goals, measured progress, timers, triggered events, choices, and granted effects | Editable authoring definitions |
 | `GameSave` | A running village and its scenario runtime, plus the exact content revision and compatible ruleset version | A mutable link to whichever draft the author edits next |
 
 Use stable string keys for materials, species, buildings, variants, goals, and authored entities. Translate them to runtime IDs during compilation. Public files must not depend on array positions such as a material index or a chapter number.
+
+Separate a resident preset ID, an authored cast-member ID, and a live resident ID. Preserve references when names or roster order change; duplicate names are allowed. A scenario embeds the exact resident definitions it uses, so modifying a library preset cannot alter an existing draft or run. Initial friendships belong to the scenario and reference cast-member IDs, not global presets. Appearance changes never change identity or transfer another person's abilities.
 
 Persist the resolved 64×64 map along with the seed and generator version. A future generator update must not silently redraw an exported property. Keep separate random streams for geography, decoration, climate, and scenario events so adding flowers does not change the upcoming weather.
 
@@ -89,7 +95,7 @@ Create a native definition-to-game API with structured errors and warnings. Its 
 3. Allocate runtime identities and place buildings, plots, roads, and utility infrastructure.
 4. Create storage, tanks, equipment, and production sites through domain constructors.
 5. Allocate starting supplies to owners, assign food ages and equipment condition, and establish conservation baselines once.
-6. Initialize the five residents, their valid starting locations, rules, and scenario progress.
+6. Initialize the authored roster from its resident definitions, validate starting locations and relationships, and initialize rules and scenario progress.
 7. Derive shade, navigation, networks, capacities, and initial reports.
 8. Validate the assembled village, then atomically make it the requested session.
 
@@ -137,9 +143,44 @@ Assign food and materials to selected stores and water to compatible tanks. Offe
 
 Configure initial funds, date, season, climate seed, and supported climate presets. Date and season must agree with the simulation calendar. Visual day/night/rain inspection is a preview; it does not advance the draft's crops, food ages, needs, or timers. An intentionally dry opening uses a supported climate setting with clear duration; event-driven weather waits for a supported domain API.
 
-Place and configure the existing five friends: starting position, reasonable need levels, learned skills, work preferences, and outside-job participation. Keep their existing occupations and working hours in the first release. Explain that needs and autonomy still govern their actions. Do not expose internal tasks, destination IDs, or forced behaviour scripts.
+Choose original-friend presets, create new residents, or mix both in the starting cast. Configure starting position, reasonable need levels, learned skills, work preferences, and outside-job participation through the resident creator below. Explain that needs and autonomy still govern their actions. Do not expose internal tasks, destination IDs, or forced behaviour scripts.
 
 Offer **Relaxed**, **Simulation**, and **Custom** rule presets assembled from supported systems: materials and labour, logistics, living land, utilities, climate, maintenance, learning, market behaviour, and building access. Explain each choice's consequences. An unlocked building is distinct from a free building; custom objectives are independent of both.
+
+## Resident creator
+
+### Creating a person
+
+Provide a character screen with a large animated preview, a matching portrait, and compact **Identity**, **Appearance**, **Personality**, and **Experience** tabs. Players can create from scratch, start from a preset, duplicate a resident, or randomize selected categories while locking the others. Include undo/redo, reset category, and an in-world scale preview beside a doorway and another resident.
+
+| Area | Player controls and behaviour |
+| --- | --- |
+| Identity | Name, optional pronouns, and a short biography. Names support accents. Text is stored as plain text; biographies do not execute behaviour. |
+| Appearance | Skin tone, supported face/body variants, hairstyle and colour, facial hair, tops, bottoms, shoes, hats, and compatible accessories. Offer approved palettes and valid combinations with immediate preview. |
+| Personality | A small set of compatible traits with visible effects and tradeoffs, plus favourite hobbies and social preferences. Cosmetic choices never determine abilities or temperament. |
+| Experience | Starting skill levels and a practical background selected from supported catalogs. Show how skills affect real work; basic survival chores remain available to everyone. |
+| Routine and work | Preferred bedtime within supported bounds, community-work preferences, and an optional occupation chosen independently of appearance. Occupations initially use the supported working hours, income, and behaviour rather than arbitrary scripts or editable salaries. |
+| Starting relationships | Optional friendships between cast members, edited from the roster view. Validate references and the relationship model's symmetry/range rules. |
+
+Keep personality, starting skills, and occupations distinct. A background can suggest defaults, but changing clothes or a portrait cannot change someone's cooking yield. Traits must connect to measurable choice, preference, or recovery behaviour; free-form labels are descriptive only. Retain the established six-to-nine-hour energy-based sleep rule and needs-based refusals.
+
+Offer a balanced creation preset that budgets starting skills and limits trait stacking. Scenario authors may explicitly choose unrestricted setup; label that choice in the scenario description. Provide forgiving defaults and optional detail rather than requiring players to fill every field.
+
+The default founding group remains five, but custom rosters are data-driven. Support at least one resident and a published, tested maximum established through 64×64 and 16× benchmarks. Empty casts can be saved as drafts but cannot start a playable village. Resource, bed, gathering, and service checks use the selected population. Do not add unlimited population support simply by replacing a constant.
+
+Keep the official Story's original cast as its default. Custom scenarios can bind dialogue speakers and required roles to authored residents or supported capabilities instead of assuming Iara, Bento, or another fixed slot exists. A missing required role produces an actionable error. Let a regular player rename a resident or edit appearance from People during a run; apply that cosmetic change only to the selected live person, preserving needs, skills, cargo, work, relationships, and identity. Starting-stat and cast edits remain creation-time actions.
+
+### Character architecture and artwork
+
+Replace all resident-indexed arrays and bitmasks with collections keyed by stable IDs, retaining fixed arrays only for actual fixed catalogs such as skill types. Cover skills, claims, work records, relationships, gatherings, building contributions, income commitments, sleep, hobbies, housing, situations, and UI selection. Numeric IDs and list order must not imply a special ability, portrait, occupation, or preferred bedtime. Original-friend definitions preserve their current personalities and specialties as explicit data.
+
+Derive per-person destinations and group sizes from the roster and available space. Small rosters must not wait for absent friends; larger supported rosters must keep personal space, share shelter, eat, sleep, work, commute, and trigger automatic 16× speed correctly. Migrate the current five-person save format by preserving identities and their associated history, including jobs and work in progress.
+
+Custom appearance requires new production artwork. Establish a shared pose/template specification with consistent proportions, contact anchors, lighting, outlines, and palette before producing customization parts. Build compatible painted body, face, hair, clothing, and accessory layers, with per-pose occlusion and masks for controlled colour changes. Body variants need complete authored poses; never create them by stretching the existing sheets or tinting the entire sprite.
+
+Use one versioned appearance recipe for both portraits and every in-world animation: walking, working, cooking, watering, tending, feeding, sitting, sleeping, and idle gestures. Preview supported facings and day/night lighting. Equipment such as a watering can belongs to the activity, while an authored hat belongs to the character. Validate compatibility so unsupported combinations are unavailable with a clear explanation instead of clipping or falling back to another character.
+
+Prototype several visibly different residents through the complete animation set early. Review them beside the original cast, buildings, and ground texture before expanding the palette. Character creation is not complete with a customizable portrait and an unchanged original sprite. Precompose/cache frames by appearance recipe, asset version, and pose; bound cache memory and regenerate only affected recipes. Packaged characters reference bundled approved parts; arbitrary image uploads and runtime image generation remain outside this release.
 
 ## Scenario goals and events
 
@@ -173,9 +214,9 @@ Keep the first release's test loop one-way. Do not automatically apply the lived
 
 Create a storage repository, using IndexedDB for projects, revisions, thumbnails, and multiple scenario runs. Retain the recovery principles in `VillageStorage`: a failed write cannot destroy the last good record. Autosave completed editing transactions, keep bounded recovery checkpoints, show saving failures, and provide manual export. Recover the latest durable transaction after a crash. Resolve concurrent edits from another tab without silently replacing either copy.
 
-The library offers create, rename, duplicate, edit, play, continue, export, import, and delete. Projects, frozen releases, and playthroughs have separate IDs. Deleting a draft cannot silently remove a run; a run retains the content needed to continue. Keep Story and Sandbox saves recoverable during storage migration. Broader historical save support is not a prerequisite, but unsupported files remain untouched and exportable.
+The library offers create, rename, duplicate, edit, play, continue, export, import, and delete. Include a resident preset collection with portrait thumbnails, search, duplicate, import/export, and **Add to cast**. Duplicate residents receive new identities; adding one preset twice produces two independent people. Projects, frozen releases, and playthroughs have separate IDs. Deleting a draft or resident preset cannot silently remove or change a run; a run retains the content needed to continue. Keep Story and Sandbox saves recoverable during storage migration. Broader historical save support is not a prerequisite, but unsupported files remain untouched and exportable.
 
-Use self-contained map and scenario packages with schema, compatible game/ruleset version, content revision, title, description, author display name, and an embedded resolved map. Thumbnails are derived locally. Import into a new library entry by default; replacing an existing creation is explicit. Keep source authorship when duplicating a shared scenario.
+Use self-contained map, scenario, and resident packages with schema, compatible game/ruleset and asset-catalog versions, content revision, title, description, and author display name. Scenarios embed the resolved map and their cast definitions; resident packages contain the appearance recipe and starting character definition without another village's runtime history. Thumbnails are derived locally. Import into a new library entry by default; replacing an existing creation is explicit. Keep source authorship when duplicating shared content. Reject unsupported appearance parts with a clear compatibility message rather than silently changing the character.
 
 Imported content is data only: supported IDs and plain text, no JavaScript, HTML execution, filesystem paths, or arbitrary remote assets. Bound file size, dimensions, entity counts, text, objective depth, and event work before allocation. Validate in the native compiler as well as the UI. A malformed or newer unsupported package produces an actionable message and leaves current saves unchanged. File sharing needs no accounts or server; an online workshop remains a separate project.
 
@@ -185,7 +226,7 @@ Run cheap checks during edits and full checks before testing or exporting a play
 
 | Severity | Examples | Behaviour |
 | --- | --- | --- |
-| Error | Unknown building key, invalid river, overlapping buildings, missing spawn/exit, stock beyond capacity, invalid utility port, dangling required goal reference, event dependency cycle | Draft saves remain available; launching/exporting as playable is blocked. |
+| Error | Unknown building or appearance key, invalid river, overlapping buildings, empty or oversized playable cast, missing spawn/exit, stock beyond capacity, invalid utility port, dangling resident/goal reference, impossible required group size, event dependency cycle | Draft saves remain available; launching/exporting as playable is blocked. |
 | Warning | Long travel distances, insufficient overnight beds, no sustainable water, little food before crops mature, rare material shortage, expensive power demand, very dense foliage | Explain the consequence; authors can intentionally keep the challenge. |
 | Information | Some starting assets already satisfy a goal, an optional system is disabled, a preset grants free construction | Make the resulting gameplay clear without treating it as a defect. |
 
@@ -195,7 +236,7 @@ Check spawn and exit connectivity, critical building access, camp footprint clea
 
 ### Stage 0 Baseline and contracts
 
-Record the current centered 64×64 Story and Sandbox starts, representative established villages, and existing performance. Specify the document formats, supported content, rule semantics, trigger timing, and storage/session lifecycle. Inventory fixed geometry and five-resident assumptions. Reconcile related documentation that still describes a 32×32 map.
+Record the current centered 64×64 Story and Sandbox starts, representative established villages, and existing performance. Specify the document formats, supported content, rule semantics, trigger timing, and storage/session lifecycle. Inventory fixed geometry and five-resident assumptions, and define original-friend presets and the supported appearance/trait/occupation catalogs. Prototype the character artwork composition approach before promising its full palette. Reconcile related documentation that still describes a 32×32 map.
 
 **Exit:** agreed example map/scenario documents, an explicit compatibility policy, and regression fixtures covering current quantities, starters, camp/camera, and save behaviour. No UI redesign or broad simulation rewrite is needed here.
 
@@ -217,27 +258,35 @@ Replace fixed river/habitat/deposit/vegetation assumptions with authored data an
 
 **Exit:** relocating a river changes visible banks, routes, placement, and hydro eligibility consistently. Undo restores those answers. A non-default property compiles, runs, saves, and reloads; generated and painted landscapes remain visually quiet and readable.
 
-### Stage 4 Complete settlement and rules authoring
+### Stage 4 Resident foundations and character creator
 
-Expand to every building and supported appearance, material plots, crops, animal states, utility routes/equipment, completed structures versus blueprints, located starting stock, the five friends, date/climate, and rule presets. Add full spatial and ownership validation.
+First introduce resident definitions, stable IDs, data-driven personalities/capabilities/routines, reusable occupation catalogs, and roster-backed collections. Replace five-person arrays, masks, hardcoded names, and population thresholds, and migrate current saves without transferring history between people. Validate one-person and larger rosters, including food portions, shelter positions, social needs, gathering helpers, and role-bound goals.
+
+Then finish the approved body/hair/clothing/accessory art sets and portrait/world composition pipeline. Build the creator, preset library integration, cast editing, randomization with locks, balanced/unrestricted setup, and live cosmetic editing from People. Keep the original cast as presets and Story defaults. The editor can continue using those presets while the creator is being built, but custom characters are required for the complete release.
+
+**Exit:** players can create visibly distinct people with different supported personalities, skills, hobbies, and occupations, assemble a custom roster, and test it. Reordering the cast or changing appearance transfers no abilities or history. Portraits and all animation clips agree. One resident, the default five, and the measured maximum all run, save, reload, and respect personal space. The first prototype across all poses passes art review before the asset catalog expands.
+
+### Stage 5 Complete settlement and rules authoring
+
+Expand to every building and supported appearance, material plots, crops, animal states, utility routes/equipment, completed structures versus blueprints, located starting stock, authored resident rosters, date/climate, and rule presets. Add full spatial and ownership validation, including population-dependent supply and housing feedback.
 
 **Exit:** an author can create both a sparse arrival and a populated village without developer helpers. Starting stock, water, batteries, and salvage values are intentional and conserved. All building previews agree with actual game placement and artwork.
 
-### Stage 5 Goals and bounded events
+### Stage 6 Goals and bounded events
 
-Implement the condition evaluator, stable progress records, event ledger, and journal/event editors. Adapt one existing Story chapter to prove semantic parity while keeping the remaining chapters behind their current adapter. Move additional Story chapters only as their behaviour is covered; the entire campaign conversion is not a blocker for the builder release.
+Implement the condition evaluator, stable progress records, event ledger, and journal/event editors. Support authored speakers and role bindings, and validate goals requiring particular people or group sizes against the cast. Adapt one existing Story chapter to prove semantic parity while keeping the remaining chapters behind their current adapter. Move additional Story chapters only as their behaviour is covered; the entire campaign conversion is not a blocker for the builder release.
 
 **Exit:** a custom scenario supports a complete sequence of goals, an optional goal, a sustained condition, an unlock, a delivery, and a completion outcome. Saving before and after each trigger neither duplicates nor loses effects. Pausing and fast-forwarding preserve deadline semantics. The official chapter used for comparison still behaves as before.
 
-### Stage 6 Library and portable sharing
+### Stage 7 Library and portable sharing
 
-Finish the project/scenario browser, multiple named runs, frozen revisions, thumbnails, import/export, format upgrades, and recovery flows. Add file bounds and hostile-input checks. Provide clear distinction between editable drafts, playable releases, and saved games.
+Finish the project/scenario browser and resident preset library, multiple named runs, frozen revisions, thumbnails, import/export, format upgrades, and recovery flows. Add file bounds and hostile-input checks. Provide clear distinction between editable drafts, reusable residents, playable releases, and saved games.
 
-**Exit:** export a creation, import it into clean browser storage, play it, save, reload, and finish its goals. Editing or deleting the source draft cannot alter the imported run. Failed imports and interrupted writes preserve all existing records.
+**Exit:** export a scenario with a custom cast, import it into clean browser storage, play it, save, reload, and finish its goals with matching characters and portraits. Independently export/import a resident preset and add it to another cast without carrying over runtime history. Editing or deleting the source draft/preset cannot alter the imported run. Failed imports and interrupted writes preserve all existing records.
 
-### Stage 7 Examples and release quality
+### Stage 8 Examples and release quality
 
-Use the actual player editor to author at least three complete examples: **First clearing** for a gentle arrival; **Before the dry season** for water and farming tradeoffs; and **An inherited village** for storage, access, maintenance, and utilities. Also include a blank map preset. These are authored creations, not hidden snapshot patches.
+Use the actual player editor to author at least three complete examples: **First clearing** for a gentle arrival; **Before the dry season** for water and farming tradeoffs; and **An inherited village** for storage, access, maintenance, and utilities. At least one uses an entirely custom cast and another mixes original-friend presets with new residents. Also include a blank map preset and a small set of reusable custom resident presets. These are authored creations, not hidden snapshot patches.
 
 Run the end-to-end authoring journey with people unfamiliar with the development tools. Check instructions, tool discoverability, button placement, inspector spacing, input cancellation, error recovery, and journal readability. Play each example through its intended completion and several in-game days beyond it.
 
@@ -247,19 +296,20 @@ Run the end-to-end authoring journey with people unfamiliar with the development
 
 - **Definitions and imports:** deterministic compilation, stable round trips, content/version resolution, unknown keys, missing references, invalid numbers, oversized arrays, and failed-import isolation. Generated tests should exercise combinations of edits and malformed documents.
 - **Editing:** exact undo/redo of whole strokes, multi-object moves, linked deletions, duplicates, river edits, and stock allocation. Recovery reloads the latest completed transaction and the previous valid checkpoint if the latest one is corrupt.
+- **Resident identity and behaviour:** duplicate appearances/names remain independent; reorder/delete/duplicate operations cannot retarget relationships, wages, requests, quests, or work. A rename or appearance change leaves skills, ongoing sleep, needs, and income commitments unchanged. Test one resident, five, and the supported maximum; group-size goals and gathering portions use the actual participants. Trait effects are real, bounded, and independent of cosmetic choices. Save/import preserves character definitions, learned progress, relationships, and once-only job payments.
 - **Simulation:** native placement/preview agreement; path and hydro changes after terrain edits; storage/material/water/equipment accounting; food ages; resident access and outside travel; valid save/reload during work. Keep existing Story and Sandbox regression coverage.
 - **Objectives:** initial versus earned credit, counters since activation, continuous-window reset, simultaneous completions, deadlines at pause/1×/16×, event caps, unavailable delivery capacity, and exactly-once effects across reloads. Automated checks detect structural impossibilities; example playthroughs assess actual difficulty and recovery paths.
 - **Sessions and persistence:** editing and testing never overwrite a normal save; repeated tests start identically; switching modes frees inactive instances; old runs pin content; failed/quota-limited writes and concurrent-tab edits do not silently lose work.
-- **Art:** use existing calibrated sprites and the 2:1 projection in editor and game. Review every building/appearance and nature species against roads, footprints, residents, terrain transitions, and representative neighbours at several zoom levels, in day/night/rain views. Keep foundations aligned without platforms or distortion. Default vegetation density must preserve the calmer landscape direction.
-- **Performance:** measure a typical and a maximum-supported 64×64 map during brush drags, multi-selection, undo/redo, compile, save, camera movement, and 1×/16× play. Set entity/history limits using the Stage 0 baseline. Proposed targets on the reference desktop are responsive feedback within 100 ms for ordinary edits and approximately 60 fps while panning typical maps; confirm feasibility before making them release promises. Long operations show progress, preserve the previous revision, and allow cancellation before installation. Do not rebuild a full 4096-pixel terrain surface or copy a full save on every pointer event.
+- **Art:** use calibrated building sprites and the 2:1 projection in editor and game. Review every building/appearance and nature species against roads, footprints, residents, terrain transitions, and representative neighbours at several zoom levels, in day/night/rain views. For residents, verify every customization part in every supported pose and use pairwise combination coverage plus diverse complete characters to catch layer/occlusion problems. Check matching portraits, body proportions, foot contact, facing, carried objects, lighting, and animation transitions beside the original cast. Keep foundations aligned without platforms or distortion. Default vegetation density must preserve the calmer landscape direction.
+- **Performance:** measure a typical and a maximum-supported 64×64 map during brush drags, multi-selection, undo/redo, compile, save, camera movement, and 1×/16× play. Include both shared and unique resident appearances, creator preview latency, animation cache memory, and the maximum supported roster. Set population/entity/history limits using the Stage 0 baseline and validate them before release. Proposed targets on the reference desktop are responsive feedback within 100 ms for ordinary edits and approximately 60 fps while panning typical maps; confirm feasibility before making them release promises. Long operations show progress, preserve the previous revision, and allow cancellation before installation. Do not rebuild a full 4096-pixel terrain surface or copy a full save on every pointer event.
 - **Player experience:** desktop walkthroughs cover blank creation, a deliberate validation failure, repair, playtest, return, crash recovery, export/import, and scenario completion. Verify keyboard focus, tooltips, non-colour feedback, readable controls, and consistent actions. Mobile layouts and phone checks remain outside scope.
 
 Reuse the current native tests and scripts such as `verify-centered-starts.mjs`, `verify-modes.mjs`, `verify-story-objectives.mjs`, landscape/navigation/utility checks, and art projection checks. Extend them around the new definition/compiler API; a developer fixture merely restoring successfully is not sufficient evidence of a playable authored scenario.
 
 ## Work order and scope control
 
-Stages 0 and 1 establish the contract; Stage 2 makes it visible and useful immediately. Stage 3 removes geography constraints before full terrain tools ship. Stage 4 completes open-ended map/scenario creation. Stage 5 adds guided play. Stages 6 and 7 turn the feature into a reliable, shareable player release.
+Stages 0 and 1 establish the contract; Stage 2 makes it visible and useful immediately. Stage 3 removes geography constraints before full terrain tools ship. Stage 4 delivers custom residents and their underlying roster/artwork refactors. Stage 5 completes settlement setup; Stage 6 adds guided play. Stages 7 and 8 turn the feature into a reliable, shareable player release.
 
-After the schema and compiler contract settle, renderer/editor work, objective evaluation, and persistence work can proceed in parallel behind those interfaces. Deliver each slice with tests and a small ready commit; avoid combining the renderer extraction, world rewrite, and quest rewrite into a single change.
+After the schema and compiler contract settle, renderer/editor work, resident foundations and art prototypes, objective evaluation, and persistence work can proceed in parallel behind those interfaces. Complete the roster contract before population-dependent scenario rules. Deliver each slice with tests and a small ready commit; avoid combining the renderer extraction, world rewrite, character migration, and quest rewrite into a single change.
 
-The highest-risk dependencies are arbitrary river geometry, initialization of owned supplies and equipment, persisted objective/event semantics, and isolation of drafts from runs. Prove each with a small end-to-end example before expanding its palette. Defer population generalization, new terrain physics, custom art, online services, and full campaign migration until the complete local creation loop is reliable.
+The highest-risk dependencies are arbitrary river geometry, initialization of owned supplies and equipment, stable resident identity across existing systems, consistent modular character animation, persisted objective/event semantics, and isolation of drafts from runs. Prove each with a small end-to-end example before expanding its palette. Custom residents and the required population generalization are part of this release. Defer unlimited populations, life-stage simulation, new terrain physics, arbitrary imported art, online services, and full campaign migration until the complete local creation loop is reliable.
