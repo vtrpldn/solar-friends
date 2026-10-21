@@ -105,7 +105,7 @@ export class EditorMap {
     this.origin={x:width/2-anchor.x,y:height/2-anchor.y};
     this.project=(x,y)=>project(x,y,this.origin,this.scale);
     canvas.dataset.origin=JSON.stringify(this.origin);canvas.dataset.scale=this.scale;
-    canvas.dataset.center=JSON.stringify(view.center);
+    canvas.dataset.center=JSON.stringify(view.center);canvas.dataset.overlayCells=String(this.landOverlay?.length||0);
     c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);
     const land=this.snapshot.village.land,roads=this.document.start.roads;
     const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river]);
@@ -143,6 +143,7 @@ export class EditorMap {
     if(this.drag?.toggle&&this.drag.moved&&view.tool==='select'&&this.pointer){
       const end=this.project(this.pointer.x,this.pointer.y),start=this.drag.point;c.fillStyle='#f4df9a33';c.strokeStyle='#fff3c4';c.lineWidth=2;c.fillRect(start.x,start.y,end.x-start.x,end.y-start.y);c.strokeRect(start.x,start.y,end.x-start.x,end.y-start.y);
     }
+    this.onRender?.();
     canvas.style.cursor=view.tool==='select'?'grab':view.tool==='pan'?'grab':'crosshair';
   }
 }

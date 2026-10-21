@@ -1,3 +1,4 @@
+import {EditorMinimap} from './minimap.js';
 import {landLayers,landTiles} from '../land-layers.js';
 import {planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
 import {clearingStroke,riverStroke} from './brush.js';
@@ -13,6 +14,8 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
+const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
+let minimap,geometry=null;
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -59,9 +62,12 @@ function refresh(){
   const d=current.doc.value;
   report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
   const snapshot=JSON.parse(engine.snapshot());
-  landReport=JSON.parse(engine.land_report());landSampleKey='';
-  map.landOverlay=landTiles(landReport,map.view.layer);
+  landReport=JSON.parse(engine.land_report());geometry=JSON.parse(engine.world_geometry());landSampleKey='';
+  map.landOverlay=overlayTiles();
   map.set(d,snapshot);
+  minimap.set(landReport,geometry);
+  minimap.canvas.title=report.ok?'Native land overview':'Last valid land preview · resolve draft issues before testing';
+  $('creator-land-legend').textContent=overlayLegend();
   inspectGround(hoverCell);
   $('creator-river-enabled').checked=d.map.river!==null;
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
@@ -71,6 +77,13 @@ function refresh(){
   renderSelection();renderSupplies();renderReview();
   if(current.doc.dirty)status('Changes to save');
 }
+function overlayTiles(){
+  if(!geometry)return [];
+  const layer=map.view.layer;
+  if(layer==='banks'||layer==='hydro')return (layer==='banks'?geometry.banks:geometry.hydro_sites).map(([x,y])=>({x,y,fill:layer==='banks'?'#497fbd88':'#e8ba55bb',stroke:layer==='banks'?'#aecfe0':'#fff0ad'}));
+  return landTiles(landReport,layer);
+}
+function overlayLegend(){const message=(waterLayers[map.view.layer]||landLayers[map.view.layer])?.legend||'Point at a cell to inspect the land.';return report.ok?message:'Draft incomplete · last valid land preview. '+message;}
 function inspectGround(point){
   hoverCell=point;if(!current||!point)return;
   const key=[current.doc.revision,point.x,point.y,map.view.tool].join(':');if(key===landSampleKey)return;landSampleKey=key;
@@ -137,11 +150,11 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
     const tool=['select','pan','move','road','meadow','river','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,layer:Object.hasOwn(landLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
   }
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
-  refresh();setTool(map.view.tool);$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=landLayers[map.view.layer]?.legend||'Point at a cell to inspect the land.';$('creator-grid').checked=map.view.grid;
+  refresh();setTool(map.view.tool);$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=overlayLegend();$('creator-grid').checked=map.view.grid;
   status(revision===null?'New creation · save to keep it':'Saved on this device');
   if(doc.historyRecovered)toast('The creation was recovered. Its damaged undo history was cleared.');
 }
@@ -196,7 +209,7 @@ async function showLibrary(){
 }
 function wire(){
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
-  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=landTiles(landReport,map.view.layer);$('creator-land-legend').textContent=landLayers[map.view.layer]?.legend||'Point at a cell to inspect the land.';map.render();current.viewDirty=true;scheduleSave();};
+  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();map.render();current.viewDirty=true;scheduleSave();};
   $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-buildings').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
@@ -291,6 +304,7 @@ try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
   map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;renderSelection();scheduleSave();}},hover:inspectGround});
+  minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
   for(const canvas of document.querySelectorAll('[data-palette]')){const key=canvas.dataset.palette;paintIcon(canvas,key,art.images[key],allBuildingArt[key]);}
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');

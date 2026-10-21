@@ -14,10 +14,21 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled);
  const projectURL=page.url();
+ const overview=page.locator('#creator-minimap');await overview.click({position:{x:120,y:60}});
+ await page.waitForFunction(()=>JSON.parse(document.querySelector('#creator-map').dataset.center)[0]>40);
+ const beforeArrow=JSON.parse(await page.locator('#creator-map').getAttribute('data-center'));
+ await overview.press('ArrowLeft');const afterArrow=JSON.parse(await page.locator('#creator-map').getAttribute('data-center'));assert.equal(afterArrow[0],beforeArrow[0]-4);
+ await overview.press('Home');assert.deepEqual(JSON.parse(await page.locator('#creator-map').getAttribute('data-center')),[32,32]);
+ await page.locator('#creator-land-layer').selectOption('banks');
+ assert.equal(await page.locator('#creator-map').getAttribute('data-overlay-cells'),await overview.getAttribute('data-bank-cells'));
+ await page.locator('#creator-land-layer').selectOption('hydro');assert.match(await page.locator('#creator-land-legend').innerText(),/aligned with the generator/);
+ await page.locator('#creator-land-layer').selectOption('none');
+
  const cellPoint=async(x,y)=>page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
  const clickCell=async(x,y)=>{const p=await cellPoint(x,y);await page.mouse.click(p.x,p.y);};
  await page.locator('#creator-river-enabled').uncheck();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Remove river');
+ assert.equal(await overview.getAttribute('data-bank-cells'),'0');
  await page.locator('#creator-undo').click();
  await page.locator('[data-tool=river]').click();
  for(let n=0;n<6;n++)await page.locator('#creator-zoom-out').click();
