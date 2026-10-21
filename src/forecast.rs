@@ -39,8 +39,9 @@ fn waiting(v: &Village, id: usize) -> String {
     if missing {
         return requests::supply_wait(v, id);
     }
-    if v.economy.outside_jobs.iter().all(|enabled| *enabled) {
-        return "All five neighbours have outside shifts. Keep someone available when they have the energy for hauling and construction.".into();
+    if !v.economy.outside_jobs.is_empty() && v.economy.outside_jobs.values().all(|enabled| *enabled)
+    {
+        return "All neighbours have outside shifts. Keep someone available when they have the energy for hauling and construction.".into();
     }
     if !economy::can_build(v, id) {
         return "Reserved supplies did not reach the site within this window. Review outside shifts, helping requests, storage access and receiving room.".into();

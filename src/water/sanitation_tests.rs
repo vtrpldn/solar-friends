@@ -19,7 +19,10 @@ fn scene() -> Game {
         v.mode = modes::Mode::Story;
         v.arrived = true;
         v.minutes = 540.;
-        v.economy.outside_jobs.fill(false);
+        v.economy
+            .outside_jobs
+            .values_mut()
+            .for_each(|enabled| *enabled = false);
         v.progress.completed.fill(true);
         v.progress.later_completed.fill(true);
         v.production.targets[economy::MEALS] = 0;

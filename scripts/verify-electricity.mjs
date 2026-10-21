@@ -17,10 +17,10 @@ for(const [kind,x,y] of [['solar_farm',5,5],['workshop',12,5],['streetlight',18,
 const authored=snap(g),v=authored.village;
 Object.assign(v,{mode:'story',arrived:true,minutes:540,food:60,meals:12,wood:8});
 v.progress.completed.fill(true);v.progress.later_completed.fill(true);v.progress.use_tools=false;
-v.economy.stock.fill(0);v.economy.stock[2]=8;v.economy.money=2000000;v.economy.outside_jobs.fill(false);v.power.stored=10;
+v.economy.stock.fill(0);v.economy.stock[2]=8;v.economy.money=2000000;Object.keys(v.economy.outside_jobs).forEach(id=>v.economy.outside_jobs[id]=false);v.power.stored=10;
 for(const r of authored.residents)Object.assign(r,{task:'idle',trip:null,help:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_building:null,activity_material:null,activity_batch:null,activity_store:null});
 assert(g.restore(JSON.stringify(resetMaterialLocations(authored))));
-assert.equal(snap(g).village.version,35);
+assert.equal(snap(g).village.version,36);
 assert.equal(g.set_production_target(17,0),'ok');
 await writeFile(`${output}/before.json`,g.snapshot());
 const port=building=>snap(g).village.power.network.nodes.find(n=>n.owner.kind==='building'&&n.owner.id===building).id;

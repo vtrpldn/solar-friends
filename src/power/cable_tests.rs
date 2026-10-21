@@ -22,7 +22,10 @@ fn scene_with(extra: &[(&str, i32, i32)]) -> Game {
         v.arrived = true;
         v.minutes = 540.;
         v.economy.money = 2000000;
-        v.economy.outside_jobs.fill(false);
+        v.economy
+            .outside_jobs
+            .values_mut()
+            .for_each(|enabled| *enabled = false);
         v.progress.completed.fill(true);
         v.progress.later_completed.fill(true);
         v.progress.use_tools = false;

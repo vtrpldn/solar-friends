@@ -521,7 +521,7 @@ mod tests {
     #[test]
     fn outside_commitments_interrupt_a_long_lonely_leisure_activity() {
         let (mut g, mut v, mut r) = scene();
-        v.economy.outside_jobs[0] = true;
+        *v.economy.outside_jobs.get_mut(&0).unwrap() = true;
         r.task = "socialize".into();
         r.social = 20.;
         r.remaining = 100.;
@@ -536,7 +536,7 @@ mod tests {
         let (_, mut v, mut r) = scene();
         logistics::fixture_stock(&mut v, economy::FOOD, 0);
         logistics::fixture_stock(&mut v, economy::MEALS, 0);
-        v.economy.outside_jobs[0] = true;
+        *v.economy.outside_jobs.get_mut(&0).unwrap() = true;
         choose(&mut r, &v);
         assert_eq!(r.task, "outside");
         r.trip = None;

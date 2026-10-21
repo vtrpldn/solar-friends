@@ -300,7 +300,7 @@ fn logistics_outcomes_unlock_workshop_and_tool_contribution_is_once_only() {
             status: "delivered".into(),
         });
         v.economy.next_order = 1;
-        v.economy.work_day[4] = 0;
+        *v.economy.work_day.get_mut(&4).unwrap() = 0;
         // Stage the independent observed logistics milestones; this fixture
         // verifies construction collaboration and the once-only contribution.
         v.progress.outcomes.order_received = true;

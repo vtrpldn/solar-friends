@@ -58,7 +58,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 35;
+pub const SAVE_VERSION: u32 = 36;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -304,7 +304,11 @@ fn available(v: &Village, task: &str) -> bool {
             .batches
             .iter()
             .any(|b| b.active() && b.material != economy::TOOLS),
-        "outside" => (0..5).any(|id| occupations::available(v, id)),
+        "outside" => v
+            .economy
+            .outside_jobs
+            .keys()
+            .any(|&id| occupations::available(v, id)),
         "garden" => v.buildings.iter().any(|b| {
             ecology::needs_tending(v, b, water::irrigation(v, water::Owner::Building(b.id)))
         }),
@@ -1722,7 +1726,7 @@ impl Game {
             requests::enqueue_at(&mut v, &mut r, task, encourage, at)
         };
         if task == "outside" {
-            v.economy.outside_committed_days[id] = (v.minutes / 1440.) as i32;
+            *v.economy.outside_committed_days.get_mut(&id).unwrap() = (v.minutes / 1440.) as i32;
         }
         self.app.insert_resource(v);
         message

@@ -167,7 +167,7 @@ pub fn observe(r: &mut Resident, v: &Village) {
         return;
     } else if q.task == "outside"
         && r.trip.is_none()
-        && v.economy.work_day[r.id] >= (q.created / 1440.) as i32
+        && v.economy.work_day[&r.id] >= (q.created / 1440.) as i32
     {
         finish(
             r,
@@ -1281,7 +1281,8 @@ mod tests {
             .world_mut()
             .resource_mut::<Village>()
             .economy
-            .outside_jobs[0] = true;
+            .outside_jobs
+            .insert(0, true);
         g.request(0, "gather", false);
         assert!(
             person(&mut g, 0)
@@ -1299,12 +1300,13 @@ mod tests {
             .world_mut()
             .resource_mut::<Village>()
             .economy
-            .outside_jobs[0] = false;
+            .outside_jobs
+            .insert(0, false);
         checkpoint(&mut g);
         until(&mut g, |g| {
             person(g, 0).help.unwrap().phase == Phase::Complete
         });
-        assert_eq!(g.app.world().resource::<Village>().economy.work_day[0], 0);
+        assert_eq!(g.app.world().resource::<Village>().economy.work_day[&0], 0);
         assert!(g.app.world().resource::<Village>().minutes >= 1020.);
     }
     #[test]
@@ -1314,7 +1316,8 @@ mod tests {
             .world_mut()
             .resource_mut::<Village>()
             .economy
-            .outside_jobs[0] = true;
+            .outside_jobs
+            .insert(0, true);
         let funds = g.app.world().resource::<Village>().economy.money;
         assert!(g.request(0, "outside", false).contains("Happy"));
         let return_at = person(&mut g, 0).trip.unwrap().return_at;
@@ -1323,7 +1326,7 @@ mod tests {
         checkpoint(&mut g);
         until(&mut g, |g| {
             person(g, 0).trip.is_none()
-                && g.app.world().resource::<Village>().economy.work_day[0] == 0
+                && g.app.world().resource::<Village>().economy.work_day[&0] == 0
         });
         assert_eq!(
             g.app.world().resource::<Village>().economy.money,
@@ -1338,7 +1341,8 @@ mod tests {
             .world_mut()
             .resource_mut::<Village>()
             .economy
-            .outside_jobs[0] = true;
+            .outside_jobs
+            .insert(0, true);
         {
             let v = g.app.world().resource::<Village>().clone();
             let mut q = g.app.world_mut().query::<&mut Resident>();
@@ -1365,7 +1369,7 @@ mod tests {
         let mut hungry = scene();
         {
             let mut v = hungry.app.world_mut().resource_mut::<Village>();
-            v.economy.outside_jobs[0] = true;
+            *v.economy.outside_jobs.get_mut(&0).unwrap() = true;
             crate::logistics::fixture_stock(&mut v, crate::economy::FOOD, (0.) as u32);
             crate::logistics::fixture_stock(&mut v, crate::economy::MEALS, 0);
         }

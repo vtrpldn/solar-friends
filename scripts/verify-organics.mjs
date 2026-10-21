@@ -9,7 +9,7 @@ const snap=g=>JSON.parse(g.snapshot()),g=new Game();startEmptySandbox(g);
 for(const [kind,x,y] of [['compost',8,8],['garden',12,8],['kitchen',5,11]])assert.equal(g.place(kind,x,y),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',minutes:540,arrived:true,food:36,meals:16,water:40});
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),compost:0,scraps:2,use_tools:false});
-fixture.village.economy.outside_jobs=Array(5).fill(false);
+fixture.village.economy.outside_jobs=Object.fromEntries(Array.from({length:5},(_,id)=>[id,false]));
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{},last_meal_slot:0});
 assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));
 // The last two scraps may be at different locations; a full recipe must still be deliverable.

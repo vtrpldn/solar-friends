@@ -612,7 +612,7 @@ fn authored_identity_bindings_survive_saves_and_reject_forged_ownership() {
     }
     assert!(g.restore(&old.to_string()));
     let migrated: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
-    assert_eq!(migrated["village"]["version"], 35);
+    assert_eq!(migrated["village"]["version"], SAVE_VERSION);
     assert_eq!(
         migrated["residents"][0]["routine_preferences"],
         old["residents"][0]["routine_preferences"]
@@ -620,5 +620,39 @@ fn authored_identity_bindings_survive_saves_and_reject_forged_ownership() {
     assert_eq!(
         migrated["residents"][0]["energy"],
         old["residents"][0]["energy"]
+    );
+}
+
+#[test]
+fn authored_occupations_are_independent_of_founder_preset_and_can_be_absent() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    let people = d.start.residents.as_mut().unwrap();
+    people[0].occupation = Some(occupations::Profession::WaterTechnician);
+    people[0].outside_shifts = true;
+    people[1].occupation = Some(occupations::Profession::None);
+    people.reverse();
+    let (mut g, _) = compile(d.clone()).unwrap_or_else(|_| panic!("valid occupations"));
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(occupations::job(v, 0).unwrap().income, 22000);
+    assert!(v.economy.outside_jobs[&0]);
+    assert!(occupations::job(v, 1).is_none());
+    assert!(!g.set_resident_job(1, true));
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    d.start
+        .residents
+        .as_mut()
+        .unwrap()
+        .iter_mut()
+        .find(|p| p.preset == "bento")
+        .unwrap()
+        .outside_shifts = true;
+    let error = compile(d).err().unwrap();
+    assert!(
+        error
+            .issues
+            .iter()
+            .any(|i| i.code == "invalid_job_schedule")
     );
 }

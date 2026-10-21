@@ -11,7 +11,7 @@ await mkdir(output,{recursive:true});await mkdir('artifacts/logistics',{recursiv
 const start=snap().village.minutes,from=Number(process.env.SOLAR_STORY_RESUME_CHAPTER||0),input=process.env.SOLAR_STORY_FROM;
 if(input){assert(Number.isInteger(from)&&from>0&&from<=12);const raw=await readFile(input,'utf8');assert(game.restore(raw));assert.equal(game.snapshot(),raw);assert(quests.slice(0,from).every((_,i)=>questCompleted(snap().village,i)));console.log('Diagnostic continuation from earned chapter '+from);}
 
-assert.equal(snap().village.version,35);
+assert.equal(snap().village.version,36);
 if(!input){assert(!snap().village.progress.completed.some(Boolean));assert.equal(snap().village.buildings.length,0);}
 const checkpoints=[],pacing=[],orders=[],housingSetup=process.env.SOLAR_STORY_HOUSING_SETUP==='1';
 let lastMaintenance=-Infinity,lastFoodOrder=-Infinity,savedCare=false;

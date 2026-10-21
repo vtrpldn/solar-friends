@@ -13,11 +13,11 @@ function until(g,test,label,limit=12000){for(let frame=0;frame<limit;frame++){co
 const g=new Game();startEmptySandbox(g);for(const [kind,x,y] of [['biodigester',5,5],['biodigester',10,5],['wetland',15,5],['banana_treatment',20,5]])assert.equal(g.place(kind,x,y),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',arrived:true,minutes:1320,food:36,meals:0,water:40});
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),scraps:4,use_tools:false});
-Object.assign(fixture.village.circular,{waste:8,greywater:24,biogas:0,banana_treatment:false});fixture.village.economy.outside_jobs=Array(5).fill(false);
+Object.assign(fixture.village.circular,{waste:8,greywater:24,biogas:0,banana_treatment:false});fixture.village.economy.outside_jobs=Object.fromEntries(Array.from({length:5},(_,id)=>[id,false]));
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});
 assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));
 const staged=snap(g);for(const id of [0,1])stageFixtureMaterial(staged,{kind:'pantry',id},20,2);assert(g.restore(JSON.stringify(staged)));
-g.tick(.25);let s=snap(g);assert.equal(s.village.version,35);assert(owned(s,0)&&owned(s,1)&&owned(s,2));
+g.tick(.25);let s=snap(g);assert.equal(s.village.version,36);assert(owned(s,0)&&owned(s,1)&&owned(s,2));
 assert.notEqual(owned(s,0).id,owned(s,1).id);assert.equal(owned(s,0).remaining,480);assert.equal(owned(s,1).remaining,480);assert.equal(s.environment.economy.processes.reserved_gas,8);assert.equal(s.village.circular.waste,4);assert.equal(s.village.progress.scraps,0);
 advanceGame(g,120);s=snap(g);assert.equal(owned(s,0).remaining,360);assert.equal(owned(s,1).remaining,360);checkpoint(g);
 await writeFile('artifacts/processes/working.json',g.snapshot());
@@ -48,7 +48,7 @@ until(finished,s=>s.village.progress.compost===4,'Detached stores cure once afte
 await writeFile('artifacts/processes/finished.json',finished.snapshot());
 // Planted treatment is an independent continuous process with no fuel outlet.
 const bananaGame=new Game();startEmptySandbox(bananaGame);assert.equal(bananaGame.place('banana_treatment',20,5),'ok');
-const bananaFixture=snap(bananaGame);bananaFixture.village.mode='story';bananaFixture.village.minutes=1320;bananaFixture.village.arrived=true;bananaFixture.village.circular.waste=4;bananaFixture.village.circular.banana_treatment=true;bananaFixture.village.economy.outside_jobs.fill(false);
+const bananaFixture=snap(bananaGame);bananaFixture.village.mode='story';bananaFixture.village.minutes=1320;bananaFixture.village.arrived=true;bananaFixture.village.circular.waste=4;bananaFixture.village.circular.banana_treatment=true;Object.keys(bananaFixture.village.economy.outside_jobs).forEach(id=>bananaFixture.village.economy.outside_jobs[id]=false);
 assert(bananaGame.restore(JSON.stringify(resetMaterialLocations(bananaFixture))));bananaGame.tick(.25);const banana=snap(bananaGame),treated=banana.village.circular.waste_treated,gas=banana.village.circular.biogas;
 advanceGame(bananaGame,120);s=snap(bananaGame);assert(Math.abs(s.village.circular.waste_treated-treated-.5)<.001);assert.equal(s.village.circular.biogas,gas);assert.equal(owned(s,0).kind,'banana');checkpoint(bananaGame);
 const good=bananaGame.snapshot();for(const field of ['remaining','building','id']){const bad=snap(bananaGame),b=bad.village.processes.batches.find(b=>active(b)&&b.kind==='banana');b[field]=field==='remaining'?1:field==='building'?999:bad.village.logistics.stores[0].id;assert(!bananaGame.restore(JSON.stringify(bad)));assert.equal(bananaGame.snapshot(),good);}

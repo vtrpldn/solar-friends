@@ -38,7 +38,10 @@ fn recovered() -> Game {
             v.progress.use_tools = false;
             v.production.targets[economy::MEALS] = 0;
             v.economy.money = 2000000;
-            v.economy.outside_jobs.fill(false);
+            v.economy
+                .outside_jobs
+                .values_mut()
+                .for_each(|enabled| *enabled = false);
             logistics::fixture_stock(&mut v, economy::FOOD, 60);
             logistics::fixture_stock(&mut v, economy::MEALS, 12);
         }
@@ -497,7 +500,8 @@ fn free_preview_equipment_cannot_be_salvaged_into_purchased_hardware() {
         .resource_mut::<Village>()
         .economy
         .outside_jobs
-        .fill(false);
+        .values_mut()
+        .for_each(|enabled| *enabled = false);
     assert_eq!(g.queue_building_work(0, "demolish", 0, 0), "ok");
     until(
         &mut g,

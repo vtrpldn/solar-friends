@@ -12,9 +12,20 @@ pub struct Person {
     pub pronouns: String,
     #[serde(default)]
     pub biography: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub occupation: Option<occupations::Profession>,
+    #[serde(default)]
+    pub outside_shifts: bool,
     pub routine_preferences: resident_preferences::Preferences,
 }
 impl Person {
+    pub fn profession(&self) -> occupations::Profession {
+        self.occupation.unwrap_or_else(|| {
+            self.slot()
+                .map(|id| occupations::FOUNDING_PROFESSIONS[id])
+                .unwrap_or(occupations::Profession::None)
+        })
+    }
     pub fn slot(&self) -> Option<usize> {
         (self.preset_version == 1)
             .then(|| PRESETS.iter().position(|p| *p == self.preset))
@@ -29,6 +40,8 @@ pub fn founders() -> Vec<Person> {
             preset: PRESETS[r.id].into(),
             preset_version: 1,
             name: r.name,
+            occupation: Some(occupations::FOUNDING_PROFESSIONS[r.id]),
+            outside_shifts: false,
             pronouns: String::new(),
             biography: String::new(),
             routine_preferences: r.routine_preferences,
@@ -51,6 +64,13 @@ pub fn check(d: &Definition, r: &mut Report) {
             || !p.routine_preferences.valid()
         {
             r.push(&format!("start.residents.{i}"),"invalid_resident","Use a unique resident identity, a name of 1–80 characters, pronouns up to 40 characters, a biography up to 600 characters and supported routines.");
+        }
+        if p.outside_shifts && p.profession() == occupations::Profession::None {
+            r.push(
+                &format!("start.residents.{i}.outside_shifts"),
+                "invalid_job_schedule",
+                "Choose an outside occupation before scheduling shifts.",
+            );
         }
         if p.slot().is_none() {
             r.push(&format!("start.residents.{i}.preset"),"unsupported_resident_preset","This resident preset or its artwork version is unavailable. Keep the original creation.");
@@ -75,13 +95,19 @@ pub fn bindings(d: &Definition) -> BTreeMap<String, usize> {
         })
         .unwrap_or_default()
 }
-pub fn apply(d: &Definition, people: &mut [Resident]) {
+pub fn apply(d: &Definition, people: &mut [Resident], v: &mut Village) {
     if let Some(definitions) = &d.start.residents {
         for definition in definitions {
             if let Some(person) = definition
                 .slot()
                 .and_then(|slot| people.iter_mut().find(|r| r.id == slot))
             {
+                v.economy
+                    .outside_professions
+                    .insert(person.id, definition.profession());
+                v.economy
+                    .outside_jobs
+                    .insert(person.id, definition.outside_shifts);
                 person.name = definition.name.clone();
                 person.pronouns = definition.pronouns.clone();
                 person.biography = definition.biography.clone();

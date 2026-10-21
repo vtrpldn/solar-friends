@@ -10,7 +10,7 @@ function scene(crops=false,stock=true){
  const g=new Game();startEmptySandbox(g);
  if(crops){assert.equal(g.place('greenhouse',5,5),'ok');assert.equal(g.place('garden',8,5),'ok');}
  const f=snap(g),v=f.village;Object.assign(v,{mode:'story',minutes:540,arrived:true,food:60,meals:16,seedlings:0});
- v.economy.money=300000;v.economy.outside_jobs.fill(false);v.economy.stock[22]=stock?4:0;v.economy.stock[23]=1;
+ v.economy.money=300000;Object.keys(v.economy.outside_jobs).forEach(id=>v.economy.outside_jobs[id]=false);v.economy.stock[22]=stock?4:0;v.economy.stock[23]=1;
  Object.assign(v.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true)});
  for(const r of f.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});
  if(crops)Object.assign(v.buildings[0].crop,{planted:true,moisture:480,growth:0,nursery:0});

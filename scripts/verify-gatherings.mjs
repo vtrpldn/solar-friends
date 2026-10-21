@@ -17,7 +17,7 @@ const g=new Game();startEmptySandbox(g);
 assert.equal(g.place('square',6,6),'ok');assert.equal(g.place('kitchen',14,6),'ok');
 const fixture=snap(g);Object.assign(fixture.village,{mode:'story',arrived:true,minutes:540,food:60,meals:10,water:40});
 Object.assign(fixture.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),use_tools:false});
-fixture.village.economy.outside_jobs=Array(5).fill(false);
+fixture.village.economy.outside_jobs=Object.fromEntries(Array.from({length:5},(_,id)=>[id,false]));
 for(const r of fixture.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});
 assert(g.restore(JSON.stringify(resetMaterialLocations(fixture))));assert.equal(g.set_production_target(MEALS,0),'ok');
 await writeFile('artifacts/gathering/start.json',g.snapshot());

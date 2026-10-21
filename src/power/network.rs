@@ -498,7 +498,10 @@ mod tests {
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
             v.minutes = 1260.;
-            v.economy.outside_jobs.fill(false);
+            v.economy
+                .outside_jobs
+                .values_mut()
+                .for_each(|enabled| *enabled = false);
             sync(&mut v);
             for n in &mut v.power.network.nodes {
                 n.charge = match n.kind {
@@ -719,7 +722,10 @@ mod tests {
         let id;
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.economy.outside_jobs.fill(false);
+            v.economy
+                .outside_jobs
+                .values_mut()
+                .for_each(|enabled| *enabled = false);
             sync(&mut v);
             let n = v
                 .power

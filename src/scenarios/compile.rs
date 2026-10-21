@@ -449,7 +449,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         residents: residents::bindings(&d),
     }));
     let mut residents = initialization::founding_residents(v.camp);
-    residents::apply(&d, &mut residents);
+    residents::apply(&d, &mut residents, &mut v);
     navigation::refresh(&mut v);
     for resident in &residents {
         if !navigation::clear(&v, resident.x, resident.y)

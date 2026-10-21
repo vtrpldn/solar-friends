@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=34)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=35)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -55,6 +55,11 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     {
         return None;
     }
+    if matches!(original_version, Some(3 | 23..=26 | 29..=35))
+        && !occupations::migrate_records(&mut raw)
+    {
+        return None;
+    }
     fn canonical_keys(value: &serde_json::Value) -> bool {
         value.as_object().is_none_or(|people| {
             people.keys().all(|key| {
@@ -64,9 +69,17 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             })
         })
     }
-    if raw["village"]["simulation"]["days"]
-        .as_array()
-        .is_some_and(|days| days.iter().any(|d| !canonical_keys(&d["residents"])))
+    if [
+        "outside_jobs",
+        "outside_committed_days",
+        "work_day",
+        "outside_professions",
+    ]
+    .iter()
+    .any(|field| !canonical_keys(&raw["village"]["economy"][field]))
+        || raw["village"]["simulation"]["days"]
+            .as_array()
+            .is_some_and(|days| days.iter().any(|d| !canonical_keys(&d["residents"])))
         || !canonical_keys(&raw["village"]["skills"]["people"])
         || !canonical_keys(&raw["village"]["workforce"]["preferences"])
         || raw["village"]["workforce"]["days"]
@@ -91,6 +104,9 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         return None;
     }
     occupations::migrate(&mut save);
+    if !occupations::matches_residents(&save.village.economy, &save.residents) {
+        return None;
+    }
     resource_sites::retire_legacy(&mut save.village, &mut save.residents);
     if save.village.version == 3 && !land::initialise(&mut save.village) {
         return None;

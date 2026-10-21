@@ -18,7 +18,7 @@ function scene(kitchen=true,eggs=0){
   Object.assign(s.village.supplies,{eggs,use_eggs:eggs>0,feed_hens:false});
   Object.assign(s.village.circular,{biogas:eggs?3:0,use_biogas:true});
   Object.assign(s.village.progress,{completed:Array(4).fill(true),later_completed:Array(9).fill(true),use_tools:false});
-  s.village.economy.outside_jobs=Array(5).fill(false);
+  s.village.economy.outside_jobs=Object.fromEntries(Array.from({length:5},(_,id)=>[id,false]));
   for(const r of s.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,requested:false,energy:90,hunger:0,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null,activity_store:null,activity_material:null,activity_building:null,walking:{}});
   assert(g.restore(JSON.stringify(resetMaterialLocations(s))));assert.equal(g.set_production_target(MEALS,0),'ok');return g;
 }

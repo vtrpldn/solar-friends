@@ -598,7 +598,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('391');await page.locator('#dev-advance').click();
   work=await page.evaluate(()=>window.solarDev.snapshot());
   assert.equal(work.village.economy.money,occupationFunds+40000);
-  assert.deepEqual(work.village.economy.outside_jobs,[false,true,false,false,false]);
+  assert.deepEqual(Object.values(work.village.economy.outside_jobs),[false,true,false,false,false]);
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-scenario').selectOption('cook');await page.locator('#dev-load').click();
   await page.waitForFunction(()=>window.solarDev.scenario()==='cook');

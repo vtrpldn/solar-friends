@@ -3,7 +3,7 @@ import {Game} from '../pkg/solar_friends.js';
 export function withAutonomyScene(state){
   const staged=structuredClone(state),v=staged.village;
   v.minutes=1440+570;
-  v.economy.outside_jobs.fill(false);v.economy.outside_jobs[4]=true;
+  Object.keys(v.economy.outside_jobs).forEach(id=>v.economy.outside_jobs[id]=false);v.economy.outside_jobs[4]=true;
   for(const r of staged.residents){
     Object.assign(r,{remaining:0,task:'idle',requested:false,help:null,work_check_at:0});
     r.energy=r.id===0?20:90;

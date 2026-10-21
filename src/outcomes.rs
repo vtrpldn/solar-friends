@@ -533,7 +533,7 @@ mod tests {
         assert_eq!(v.progress.outcomes.net_spending, order.paid);
         {
             let mut v = g.app.world_mut().resource_mut::<Village>();
-            v.economy.outside_committed_days[0] = 0;
+            *v.economy.outside_committed_days.get_mut(&0).unwrap() = 0;
             economy::finish_outside(&mut v, 0);
             assert_eq!(v.progress.outcomes.net_spending, order.paid);
         }

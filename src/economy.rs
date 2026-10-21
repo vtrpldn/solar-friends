@@ -2,6 +2,7 @@
 use crate::skills;
 use crate::{Game, Village, event, ready, restoration};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
 
 pub const COUNT: usize = 29;
@@ -158,18 +159,17 @@ pub struct Economy {
     pub next_order: u32,
     #[serde(default, skip_serializing)]
     pub outside_work: bool,
-    #[serde(default)]
-    pub outside_jobs: [bool; 5],
-    #[serde(default = "uncommitted_days")]
-    pub outside_committed_days: [i32; 5],
+    pub outside_jobs: BTreeMap<usize, bool>,
+    pub outside_professions: BTreeMap<usize, crate::occupations::Profession>,
+    pub outside_committed_days: BTreeMap<usize, i32>,
     #[serde(default = "uncommitted_day", skip_serializing)]
     pub outside_committed_day: i32,
-    pub work_day: [i32; 5],
+    pub work_day: BTreeMap<usize, i32>,
     pub exchange_day: i32,
     pub last_delivery: f32,
 }
-fn uncommitted_days() -> [i32; 5] {
-    [-1; 5]
+pub fn founding_records<T: Clone>(value: T) -> BTreeMap<usize, T> {
+    (0..5).map(|id| (id, value.clone())).collect()
 }
 fn uncommitted_day() -> i32 {
     -1
@@ -195,10 +195,11 @@ impl Default for Economy {
             next_building: 0,
             next_order: 0,
             outside_work: false,
-            outside_jobs: [false; 5],
-            outside_committed_days: [-1; 5],
+            outside_jobs: founding_records(false),
+            outside_professions: crate::occupations::founding_professions(),
+            outside_committed_days: founding_records(-1),
             outside_committed_day: -1,
-            work_day: [-1; 5],
+            work_day: founding_records(-1),
             exchange_day: -1,
             last_delivery: 0.,
         }
@@ -819,7 +820,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         })
         .collect();
     let day = (v.minutes / 1440.) as i32;
-    serde_json::json!({"food_reserve":crate::food::summary(v),"market":crate::market::view(v),"production":crate::production::view(v),"freshness":crate::freshness::view(v),"processes":crate::processes::view(v),"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"salvage_reserved":v.building_jobs.iter().flat_map(|j|j.returns).sum::<u32>(),"shortage":shortage(v),"outside_work":v.economy.outside_jobs[4],"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":((v.food-36.).max(0.).floor() as u32).min(free(v,FOOD)),"next_delivery":crate::market::delivery(v,v.minutes+120.,crate::market::active(v,crate::market::today(v))),"property":"Player-managed land · planted timber, cultivated bamboo and finite earth, stone and reclaimed reserves","source_options":crate::resource_sites::options(),"source_status":crate::resource_sites::view(v)})
+    serde_json::json!({"food_reserve":crate::food::summary(v),"market":crate::market::view(v),"production":crate::production::view(v),"freshness":crate::freshness::view(v),"processes":crate::processes::view(v),"preparation":preparation,"workshop":ready(v,"workshop"),"materials":materials,"projects":projects,"recipes":recipes,"money":v.economy.money,"used":storage(v),"capacity":capacity(v),"salvage_reserved":v.building_jobs.iter().flat_map(|j|j.returns).sum::<u32>(),"shortage":shortage(v),"outside_work":v.economy.outside_jobs.get(&4).copied().unwrap_or(false),"jobs":crate::occupations::view(v),"exchange_available":v.economy.exchange_day!=day,"saleable_food":((v.food-36.).max(0.).floor() as u32).min(free(v,FOOD)),"next_delivery":crate::market::delivery(v,v.minutes+120.,crate::market::active(v,crate::market::today(v))),"property":"Player-managed land · planted timber, cultivated bamboo and finite earth, stone and reclaimed reserves","source_options":crate::resource_sites::options(),"source_status":crate::resource_sites::view(v)})
 }
 pub fn valid(v: &Village) -> bool {
     let e = &v.economy;
@@ -835,7 +836,7 @@ pub fn valid(v: &Village) -> bool {
         return false;
     }
     if e.outside_committed_days
-        .iter()
+        .values()
         .any(|d| *d < -1 || *d > (v.minutes / 1440.) as i32)
         || e.money < 0
         || e.money > 1_000_000_000
@@ -851,7 +852,7 @@ pub fn valid(v: &Village) -> bool {
         || e.exchange_day < -1
         || e.exchange_day > (v.minutes / 1440.) as i32
         || e.work_day
-            .iter()
+            .values()
             .any(|d| *d < -1 || *d > (v.minutes / 1440.) as i32)
     {
         return false;
@@ -1079,7 +1080,10 @@ impl Game {
     }
     pub fn set_resident_job(&mut self, resident: usize, enabled: bool) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        let Some(job) = v.economy.outside_jobs.get_mut(resident) else {
+        if enabled && crate::occupations::job(&v, resident).is_none() {
+            return false;
+        }
+        let Some(job) = v.economy.outside_jobs.get_mut(&resident) else {
             return false;
         };
         *job = enabled;
@@ -1252,21 +1256,15 @@ impl Game {
 }
 pub fn finish_outside(v: &mut Village, id: usize) {
     let day = (v.minutes / 1440.) as i32;
-    if id < 5 && v.economy.outside_committed_days[id] == day && v.economy.work_day[id] != day {
-        v.economy.work_day[id] = day;
-        skills::award(
-            v,
-            id,
-            [
-                skills::Skill::Farming,
-                skills::Skill::Building,
-                skills::Skill::Cooking,
-                skills::Skill::Farming,
-                skills::Skill::Care,
-            ][id],
-            2,
-        );
-        let job = crate::occupations::JOBS[id];
+    let Some(profession) = crate::occupations::profession(v, id) else {
+        return;
+    };
+    let job = profession.definition().unwrap();
+    if v.economy.outside_committed_days.get(&id) == Some(&day)
+        && v.economy.work_day.get(&id).is_some_and(|paid| *paid != day)
+    {
+        *v.economy.work_day.get_mut(&id).unwrap() = day;
+        skills::award(v, id, profession.skill(), 2);
         ledger(
             v,
             job.income,
@@ -1496,13 +1494,13 @@ mod tests {
         g.set_outside_work(true);
         let mut v = g.app.world_mut().resource_mut::<Village>();
         let money = v.economy.money;
-        v.economy.outside_committed_days[4] = 0;
+        *v.economy.outside_committed_days.get_mut(&4).unwrap() = 0;
         finish_outside(&mut v, 4);
         finish_outside(&mut v, 4);
         finish_outside(&mut v, 0);
         assert_eq!(v.economy.money, money + 22000);
         v.minutes += 1440.;
-        v.economy.outside_committed_days[4] = 1;
+        *v.economy.outside_committed_days.get_mut(&4).unwrap() = 1;
         finish_outside(&mut v, 4);
         assert_eq!(v.economy.money, money + 44000);
     }

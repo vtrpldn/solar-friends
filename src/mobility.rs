@@ -93,8 +93,11 @@ pub fn begin(r: &mut Resident, v: &Village, purpose: Purpose) {
     if purpose == Purpose::Work {
         r.reason = format!(
             "Walking out for my {} shift at {}. Back at 17:00.",
-            occupations::JOBS[r.id].title.to_lowercase(),
-            occupations::JOBS[r.id].place
+            occupations::job(v, r.id)
+                .map(|j| j.title)
+                .unwrap_or("outside work")
+                .to_lowercase(),
+            occupations::job(v, r.id).map(|j| j.place).unwrap_or("town")
         );
     }
 }
@@ -138,7 +141,8 @@ pub fn advance(
         }
     }
     if trip.purpose == Purpose::Work && trip.phase == Phase::Leaving {
-        v.economy.outside_committed_days[r.id] = (trip.return_at / 1440.).floor() as i32;
+        *v.economy.outside_committed_days.get_mut(&r.id).unwrap() =
+            (trip.return_at / 1440.).floor() as i32;
     }
     if trip.phase != Phase::Returning && v.minutes >= trip.return_at {
         if trip.phase == Phase::Away {
@@ -213,8 +217,11 @@ pub fn advance(
         if trip.purpose == Purpose::Work {
             r.reason = format!(
                 "Working as a {} at {} until 17:00. Lunch is provided there.",
-                occupations::JOBS[r.id].title.to_lowercase(),
-                occupations::JOBS[r.id].place
+                occupations::job(v, r.id)
+                    .map(|j| j.title)
+                    .unwrap_or("outside work")
+                    .to_lowercase(),
+                occupations::job(v, r.id).map(|j| j.place).unwrap_or("town")
             );
         }
     } else {
@@ -267,6 +274,9 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
     {
         return false;
     }
+    if t.purpose == Purpose::Work && occupations::job(v, r.id).is_none() {
+        return false;
+    }
     if t.purpose == Purpose::Work && (t.return_at.rem_euclid(1440.) - 1020.).abs() > 0.01 {
         return false;
     }
@@ -281,7 +291,7 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
     }
     if t.purpose == Purpose::Work
         && t.phase != Phase::Returning
-        && v.economy.outside_committed_days[r.id] != (t.return_at / 1440.) as i32
+        && v.economy.outside_committed_days.get(&r.id) != Some(&((t.return_at / 1440.) as i32))
     {
         return false;
     }
@@ -415,7 +425,7 @@ mod tests {
                 .world()
                 .resource::<Village>()
                 .economy
-                .outside_committed_days[0],
+                .outside_committed_days[&0],
             0
         );
         let before = g.snapshot();

@@ -209,7 +209,7 @@ pub fn update(v: &mut Village) {
                 .outcomes
                 .shortest_delivery
                 .is_some_and(|n| n <= 30.)
-            && (v.economy.work_day.iter().any(|day| *day >= 0)
+            && (v.economy.work_day.values().any(|day| *day >= 0)
                 || v.progress.surplus_sold
                 || v.progress.parts_exchanged
                 || v.progress.outcomes.resources_sold),

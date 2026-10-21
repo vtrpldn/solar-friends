@@ -21,7 +21,7 @@ function scene(grey=12,sewage=0){
   const g=new Game();startEmptySandbox(g);
   for(const [kind,x,y]of [['home',5,5],['kitchen',12,5],['wetland',18,5],['eco_toilet',5,11],['biodigester',12,11],['banana_treatment',18,11],['solar_farm',5,18]])assert.equal(g.place(kind,x,y),'ok');
   const f=snap(g),v=f.village;Object.assign(v,{mode:'story',arrived:true,minutes:540,water:0,food:60,meals:12,seedlings:0});
-  Object.assign(v.circular,{greywater:grey,waste:sewage,auto_feed:false,filter_water:false,banana_treatment:false});v.production.targets[17]=0;v.economy.outside_jobs.fill(false);v.economy.money=20000000;v.power.stored=10;v.progress.completed.fill(true);v.progress.later_completed.fill(true);
+  Object.assign(v.circular,{greywater:grey,waste:sewage,auto_feed:false,filter_water:false,banana_treatment:false});v.production.targets[17]=0;Object.keys(v.economy.outside_jobs).forEach(id=>v.economy.outside_jobs[id]=false);v.economy.money=20000000;v.power.stored=10;v.progress.completed.fill(true);v.progress.later_completed.fill(true);
   for(const r of f.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,trip:null,help:null,energy:90,hunger:0,social:90,last_meal_slot:0,last_sanitation_day:0,activity_building:null,activity_material:null,activity_store:null,activity_batch:null,walking:{},x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});
   assert(g.restore(JSON.stringify(resetMaterialLocations(f))));
   const staged=snap(g);if(grey)stageFixtureWater(staged,{kind:'building',id:0},'greywater',grey);if(sewage)stageFixtureWater(staged,{kind:'building',id:3},'sewage',sewage);assert(g.restore(JSON.stringify(staged)));return g;

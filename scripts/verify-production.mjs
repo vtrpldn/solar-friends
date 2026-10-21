@@ -10,7 +10,7 @@ function scene(x=6,y=6){
  const g=new Game();startEmptySandbox(g);assert.equal(g.place('workshop',x,y),'ok');
  const s=snap(g);Object.assign(s.village,{mode:'story',arrived:true,minutes:540,food:80,meals:10,water:40});
  s.village.progress.completed=Array(4).fill(true);s.village.progress.later_completed=Array(9).fill(true);
- s.village.economy.stock[7]=0;s.village.economy.outside_jobs=Array(5).fill(false);
+ s.village.economy.stock[7]=0;s.village.economy.outside_jobs=Object.fromEntries(Array.from({length:5},(_,id)=>[id,false]));
  for(const r of s.residents)Object.assign(r,{task:'idle',trip:null,remaining:0,energy:90,hunger:10,social:90,last_meal_slot:0,x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13,activity_batch:null});
  assert(g.restore(JSON.stringify(resetMaterialLocations(s))));return g;
 }

@@ -181,7 +181,10 @@ mod tests {
             let saved: Save = serde_json::from_str(&g.snapshot()).unwrap();
             let mut v = saved.village;
             v.minutes = minute;
-            v.economy.outside_jobs.fill(false);
+            v.economy
+                .outside_jobs
+                .values_mut()
+                .for_each(|enabled| *enabled = false);
             let stage = economy::recipe("garden", "standard").unwrap()[0].items;
             for (i, n) in stage.into_iter().enumerate().filter(|(_, n)| *n > 0) {
                 logistics::receive(&mut v, logistics::Owner::Site(0), i, n);

@@ -7,7 +7,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const output='artifacts/landscape';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot());
 function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();}
-function readyState(g,minute){const s=snap(g);s.village.minutes=minute;s.village.arrived=true;s.village.economy.outside_jobs.fill(false);for(const r of s.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,energy:90,hunger:5,social:90,last_meal_slot:-1,x:7.5+r.id*1.25,y:15,target_x:7.5+r.id*1.25,target_y:15});return s;}
+function readyState(g,minute){const s=snap(g);s.village.minutes=minute;s.village.arrived=true;Object.keys(s.village.economy.outside_jobs).forEach(id=>s.village.economy.outside_jobs[id]=false);for(const r of s.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,energy:90,hunger:5,social:90,last_meal_slot:-1,x:7.5+r.id*1.25,y:15,target_x:7.5+r.id*1.25,target_y:15});return s;}
 const report={map:MAP_SIZE,modes:[],habitats:[],species:[],work:[],shelter:[],checks:[]};
 assert.equal(MAP_SIZE,64);
 for(const mode of ['story','sandbox']){

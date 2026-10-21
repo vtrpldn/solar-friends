@@ -345,7 +345,7 @@ mod tests {
         let mut g = Game::new();
         let mut v = g.app.world_mut().resource_mut::<Village>();
         v.minutes = 1020.;
-        v.economy.outside_committed_days[2] = 0;
+        *v.economy.outside_committed_days.get_mut(&2).unwrap() = 0;
         economy::finish_outside(&mut v, 2);
         assert_eq!(v.skills.people[&2].experience[3], 2);
         let money = v.economy.money;

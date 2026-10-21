@@ -1303,7 +1303,8 @@ function updateUI() {
     const r = state.residents.find((r) => r.id === selected);
     const job=env.economy.jobs.find(j=>j.id===r.id);
     $('#person .occupation-title').textContent=job.title;
-    $('#person .occupation-income').textContent=`R$ ${job.income/100} for the shared fund · 09:00–17:00`;
+    $('#person .occupation-income').textContent=job.available?`R$ ${job.income/100} for the shared fund · 09:00–17:00`:'No outside shift scheduled';
+    $('#person .occupation-toggle').disabled=!job.available;
     $('#person .occupation-description').textContent=job.description;
     $('#person .occupation-toggle').checked=job.enabled;
     const workToday=v.workforce.days.find(day=>day.day===Math.floor(v.minutes/1440))?.residents[r.id]?.reduce((sum,n)=>sum+n,0)||0;

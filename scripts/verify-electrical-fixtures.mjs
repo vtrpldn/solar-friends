@@ -8,7 +8,7 @@ const game=new Game(),fresh=JSON.parse(game.snapshot());
 assert(game.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));
 const established=JSON.parse(game.snapshot()),original=JSON.stringify({fresh,established});
 for(const name of ['night','power','power-outage','circular-night','art-night']){
-  const prepared=makeScenario(name,fresh,established);assert.equal(prepared.village.version,35);
+  const prepared=makeScenario(name,fresh,established);assert.equal(prepared.village.version,36);
   assert.equal(JSON.stringify({fresh,established}),original,'Preview authoring preserves the original villages');
   assert(game.restore(JSON.stringify(prepared)));
   let s=JSON.parse(game.snapshot());const lines=s.village.pipes.lines;

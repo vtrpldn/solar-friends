@@ -16,7 +16,7 @@ function until(g,test,label,limit=5*1920){for(let frame=0;frame<limit;frame++){i
 const g=new Game();startEmptySandbox(g);
 for(const [kind,x,y]of [['well',5,5],['kitchen',12,5],['solar_farm',5,18]])assert.equal(g.place(kind,x,y),'ok');
 const f=snap(g),v=f.village;Object.assign(v,{mode:'story',arrived:true,minutes:540,food:60,meals:12,water:80,seedlings:0});
-v.economy.stock.fill(0);v.economy.money=20000000;v.economy.outside_jobs.fill(false);v.supplies.eggs=0;Object.assign(v.progress,{compost:0,scraps:0,tool_uses:0});v.power.stored=10;v.progress.completed.fill(true);v.progress.later_completed.fill(true);
+v.economy.stock.fill(0);v.economy.money=20000000;Object.keys(v.economy.outside_jobs).forEach(id=>v.economy.outside_jobs[id]=false);v.supplies.eggs=0;Object.assign(v.progress,{compost:0,scraps:0,tool_uses:0});v.power.stored=10;v.progress.completed.fill(true);v.progress.later_completed.fill(true);
 for(const r of f.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,trip:null,help:null,energy:90,hunger:0,social:90,last_meal_slot:0,activity_building:null,activity_material:null,activity_store:null,activity_batch:null,walking:{},x:10+(r.id-2)*1.25,y:13,target_x:10+(r.id-2)*1.25,target_y:13});
 assert(g.restore(JSON.stringify(resetMaterialLocations(f))));
 const before=g.snapshot(),quote=JSON.parse(g.water_connection_quote('fresh',0,1));assert(quote.allowed);g.water_connections();g.utility_preview('fresh',0,1);assert.equal(g.snapshot(),before,'Planning reads cannot spend, move water or allocate identities');
