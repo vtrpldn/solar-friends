@@ -1,3 +1,4 @@
+import {residentLookIndex} from '../resident-look.js';
 import {loadRegionalArt} from '../regional-art.js';
 import {terrainRevision} from '../terrain-revision.js';
 import {strokeCells} from './brush.js';
@@ -129,7 +130,7 @@ export class EditorMap {
       if(b.state!=='completed')drawBuildingState(c,{complete:false,progress:0,point:this.project(b.x,b.y),corners:footprintCorners(b.kind,b.x,b.y).map(([x,y])=>this.project(x,y)),scale:this.scale,kind:b.kind});
     }});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
-      const p=this.project(resident.x,resident.y),frame=preparedFrames(art.residents[resident.id],{referenceRow:2})?.[8],size=RESIDENT_WIDTH*this.scale;
+      const p=this.project(resident.x,resident.y),frame=preparedFrames(art.residents[residentLookIndex(resident)],{referenceRow:2})?.[8],size=RESIDENT_WIDTH*this.scale;
       paintContactShadow(c,p.x,p.y+2*this.scale,10*this.scale,4*this.scale,.25);
       if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);
     }});

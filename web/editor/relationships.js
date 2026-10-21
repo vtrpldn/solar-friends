@@ -14,12 +14,12 @@ export class RelationshipsEditor{
   host.addEventListener('click',event=>{if(event.target.closest('[data-clear-bonds]'))change('Clear starting friendships',d=>{delete d.start.relationships;});});
  }
  render(d){
-  const people=d.start.residents??this.presets,bonds=d.start.relationships??[],signature=JSON.stringify([people.map(p=>[p.id,p.name,p.preset,p.preset_version]),bonds]);
+  const people=d.start.residents??this.presets,bonds=d.start.relationships??[],signature=JSON.stringify([people.map(p=>[p.id,p.name,p.preset,p.preset_version,p.appearance]),bonds]);
   if(signature===this.signature)return;this.signature=signature;
   this.host.innerHTML='<p>Shared memories from before arrival. Gatherings and visits to the square can build new memories during play.</p>'+people.flatMap((from,i)=>people.slice(i+1).map(to=>{
    const bond=bonds.find(b=>b.from===from.id&&b.to===to.id||b.from===to.id&&b.to===from.id);
-   const person=p=>`<span class="creator-bond-person"><canvas width="48" height="54" data-bond-portrait="${escape(p.preset)}" aria-hidden="true"></canvas><span>${escape(p.name)}</span></span>`;
-   const named=p=>`${p.name} (${this.presets.find(base=>base.preset===p.preset)?.name??p.preset} appearance)`;
+   const person=p=>`<span class="creator-bond-person"><canvas width="48" height="54" data-bond-portrait="${escape(p.appearance?.preset??p.preset)}" aria-hidden="true"></canvas><span>${escape(p.name)}</span></span>`;
+   const named=p=>`${p.name} (${this.presets.find(base=>base.preset===(p.appearance?.preset??p.preset))?.name??p.preset} appearance)`;
    return `<label class="creator-field"><span class="creator-bond-pair">${person(from)} ↔ ${person(to)}</span><input aria-label="Shared memories: ${escape(named(from))} and ${escape(named(to))}" type="number" min="0" max="100" step="1" value="${bond?.memories??0}" data-bond-from="${escape(from.id)}" data-bond-to="${escape(to.id)}"></label>`;
   })).join('')+`<button type="button" data-clear-bonds ${bonds.length?'':'disabled'}>Clear shared history</button>`;
   for(const canvas of this.host.querySelectorAll('[data-bond-portrait]')){

@@ -40,6 +40,7 @@ mod production;
 mod progression;
 mod relationships;
 mod requests;
+mod resident_appearance;
 mod resident_preferences;
 mod resource_sites;
 mod restoration;
@@ -61,7 +62,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 39;
+pub const SAVE_VERSION: u32 = 40;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -111,6 +112,7 @@ pub struct Resident {
     pub pronouns: String,
     #[serde(default)]
     pub biography: String,
+    pub appearance: resident_appearance::Look,
     pub trait_name: String,
     pub favorite: String,
     pub social_style: personality::SocialStyle,
@@ -1609,9 +1611,12 @@ impl Game {
         }
         economy::contribute(&mut v, 12000, "Shared tool library");
         v.progress.tool_library = true;
+        let planner = occupations::resident_name(&v, 1);
         event(
             &mut v,
-            "A shared fund contribution supports our first tool library. Bento has a plan!",
+            format!(
+                "A shared fund contribution supports our first tool library. {planner} has a plan!"
+            ),
         );
         progression::update(&mut v);
         "ok".into()

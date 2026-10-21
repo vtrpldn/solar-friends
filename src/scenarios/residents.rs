@@ -22,6 +22,8 @@ pub struct Person {
     pub experience: Option<experience::Experience>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub work_preferences: BTreeMap<experience::Group, experience::Bias>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub appearance: Option<resident_appearance::Look>,
     pub routine_preferences: resident_preferences::Preferences,
 }
 impl Person {
@@ -47,6 +49,7 @@ pub fn founders() -> Vec<Person> {
             preset_version: 1,
             name: r.name,
             personality: None,
+            appearance: None,
             experience: None,
             work_preferences: BTreeMap::new(),
             occupation: Some(occupations::FOUNDING_PROFESSIONS[r.id]),
@@ -80,6 +83,9 @@ pub fn check(d: &Definition, r: &mut Report) {
                 "invalid_job_schedule",
                 "Choose an outside occupation before scheduling shifts.",
             );
+        }
+        if p.appearance.is_some_and(|look| !look.valid()) {
+            r.push(&format!("start.residents.{i}.appearance"),"unsupported_resident_appearance","This resident look or artwork revision is unavailable. Keep the original creation.");
         }
         if p.slot().is_none() {
             r.push(&format!("start.residents.{i}.preset"),"unsupported_resident_preset","This resident preset or its artwork version is unavailable. Keep the original creation.");
@@ -119,6 +125,9 @@ pub fn apply(d: &Definition, people: &mut [Resident], v: &mut Village) {
                     .insert(person.id, definition.outside_shifts);
                 experience::apply(definition, person.id, v);
                 person.name = definition.name.clone();
+                if let Some(appearance) = definition.appearance {
+                    person.appearance = appearance;
+                }
                 person.pronouns = definition.pronouns.clone();
                 person.biography = definition.biography.clone();
                 person.routine_preferences = definition.routine_preferences;

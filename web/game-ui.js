@@ -79,6 +79,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
     for(const r of state.residents){
       let button=portraits.get(r.id);
       if(!button){button=document.createElement('button');button.dataset.citizen=r.id;button.innerHTML=`${avatar(r.id)}<span class="citizen-status" aria-hidden="true"></span>`;button.onclick=()=>selectPerson(r.id);$('#resident-strip').append(button);portraits.set(r.id,button);paintPortraits();}
+      const look=JSON.stringify(r.appearance);if(button.dataset.look!==look){button.querySelector('.avatar').outerHTML=avatar(r.id);button.dataset.look=look;paintPortraits();}
       const away=r.trip?.phase==='away',asleep=r.task==='sleep'&&(away||Math.hypot(r.x-r.target_x,r.y-r.target_y)<=.08)&&r.sleep?.started_at!=null;
       const condition=away&&r.trip.purpose==='pickup'?'Collecting supplies':away&&r.trip.purpose==='work'?'At work':asleep?'Asleep':r.trip?'Travelling':r.hunger>75?'Hungry':r.energy<25?'Tired':'In the village';
       button.title=`${r.name} · ${condition} · Energy ${Math.round(r.energy)}`;

@@ -720,3 +720,30 @@ fn authored_personality_and_interests_are_independent_of_appearance_and_jobs() {
     assert!(g.restore(&saved));
     assert_eq!(g.snapshot(), saved);
 }
+
+#[test]
+fn appearance_choices_can_repeat_without_retargeting_authored_residents() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    for p in d.start.residents.as_mut().unwrap() {
+        p.appearance = Some(resident_appearance::Look {
+            preset: resident_appearance::Preset::Nina,
+            version: 1,
+        });
+    }
+    d.start.residents.as_mut().unwrap().reverse();
+    let (mut g, _) = compile(d).unwrap_or_else(|_| panic!("supported independent looks"));
+    let mut q = g.app.world_mut().query::<&Resident>();
+    let people: Vec<_> = q.iter(g.app.world()).collect();
+    assert!(
+        people
+            .iter()
+            .all(|p| p.appearance.preset == resident_appearance::Preset::Nina)
+    );
+    let iara = people.iter().find(|p| p.id == 0).unwrap();
+    assert_eq!(iara.name, "Iara");
+    assert_eq!(iara.favorite, "garden");
+    assert_eq!(iara.routine_preferences, resident_preferences::IARA_V1);
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+}

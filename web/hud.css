@@ -306,3 +306,5 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 .person .person-heading h2,.person .person-heading p,.person .person-biography{overflow-wrap:anywhere}.person .person-biography{white-space:pre-wrap}
 
 .person .friendship-note{overflow-wrap:anywhere}
+
+.resident-identity-dialog{width:460px;max-width:calc(100vw - 100px)}.resident-identity-dialog form{display:grid;gap:14px}.resident-identity-dialog canvas{justify-self:center}.resident-identity-dialog label{display:grid;gap:6px;font-size:13px}.resident-identity-dialog input,.resident-identity-dialog select{font:inherit;padding:8px;background:#faf0d3;color:#4e4028;border:1px solid #b39866;border-radius:4px}.resident-identity-actions{display:flex;justify-content:flex-end;gap:10px}.person .edit-resident-identity{margin:12px 0}
