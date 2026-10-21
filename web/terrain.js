@@ -1,3 +1,4 @@
+import {regionalGround} from './regional-art.js';
 import {habitatAt,habitatColors} from "./habitats.js";
 // Paint terrain once per village layout. Frames reuse this texture while panning
 // and zooming; the simulation's isometric coordinates stay unchanged.
@@ -104,12 +105,12 @@ function paintSoil(g,soil){
     }
   }
 }
-function paintedTexture(g,texture,side){
-  const tile=32*RESOLUTION/GROUND_SIZE,half=texture.width/2;
+function paintedTexture(g,texture,side,row=0,rows=1,tileCells=32){
+  const tile=tileCells*RESOLUTION/GROUND_SIZE,half=texture.width/2;
   for(let y=0;y<RESOLUTION;y+=tile)for(let x=0;x<RESOLUTION;x+=tile){
     const flipX=Math.round(x/tile)%2,flipY=Math.round(y/tile)%2;
     g.save();g.translate(x+(flipX?tile:0),y+(flipY?tile:0));g.scale(flipX?-1:1,flipY?-1:1);
-    g.drawImage(texture,side*half,0,half,texture.height,0,0,tile,tile);g.restore();
+    g.drawImage(texture,side*half,row*texture.height/rows,half,texture.height/rows,0,0,tile,tile);g.restore();
   }
 }
 function paintHabitats(g,seed,map){
@@ -133,7 +134,10 @@ function paintHabitats(g,seed,map){
 export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0,map) {
   const ground = surface();
   const g = ground.getContext("2d");
-  paintedTexture(g,texture,0);
+  const regional=regionalGround(map);
+  if(regional?.image)texture=regional.image;
+  const row=regional?.image?regional.row:0,rows=regional?.image?2:1;
+  paintedTexture(g,texture,0,row,rows,regional?.image?8:32);
   // Quiet the repeated leaf texture so buildings and planted plots stay legible.
   g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
   paintHabitats(g,seed,map);
@@ -152,7 +156,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   }
   p.shadowBlur = 0;
   p.globalCompositeOperation = "source-in";
-  paintedTexture(p,texture,1);
+  paintedTexture(p,texture,1,row,rows,regional?.image?8:32);
   g.drawImage(paths, 0, 0);
   paintRiver(g,map);
 

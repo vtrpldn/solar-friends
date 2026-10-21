@@ -1,3 +1,4 @@
+use super::Biome;
 use crate::*;
 use std::collections::BTreeMap;
 
@@ -26,6 +27,8 @@ pub struct Map {
     pub id: String,
     pub revision: u32,
     pub generator: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub biome: Option<Biome>,
     pub width: i32,
     pub height: i32,
     pub seed: u32,
@@ -260,6 +263,7 @@ impl Definition {
                 id: "founding-property".into(),
                 revision: 1,
                 generator: "property-v1".into(),
+                biome: None,
                 river: world::default_river(),
                 terrain: None,
                 nature: Some(land::vegetation::default_nature(simulation::State::default().seed,[middle,middle])),

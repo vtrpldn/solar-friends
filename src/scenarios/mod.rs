@@ -2,7 +2,9 @@
 use crate::*;
 use std::collections::{BTreeMap, HashSet};
 
+mod biomes;
 mod compile;
+pub(crate) use biomes::Biome;
 mod definition;
 pub(crate) use definition::*;
 
@@ -49,6 +51,10 @@ impl Report {
             .iter()
             .any(|i| matches!(i.severity, Severity::Error))
     }
+}
+
+pub(crate) fn biome_weather(id: &str) -> Option<climate::Profile> {
+    biomes::get(id).map(|p| p.weather)
 }
 
 pub(crate) fn valid_key(key: &str) -> bool {
@@ -138,6 +144,10 @@ impl Game {
         serde_json::to_string(&cells).unwrap()
     }
 
+    pub fn generate_biome_property(&self, biome: &str, seed: u32) -> String {
+        serde_json::to_string(&biomes::generate(biome, seed)).unwrap()
+    }
+
     pub fn generate_property(&self, seed: u32) -> String {
         let mut map = Definition::builtin(modes::Mode::Sandbox).map;
         map.seed = seed;
@@ -154,7 +164,7 @@ impl Game {
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "max_buildings":MAX_BUILDINGS,"weather":climate::Profile::default(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
+            "max_buildings":MAX_BUILDINGS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
         .to_string()
     }
 

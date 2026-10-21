@@ -1,0 +1,75 @@
+{
+  "tool": "Built-in image_gen",
+  "status": "Initial integrated palette reviewed at gameplay scale in day and night. Full release art sweep remains open.",
+  "references": [
+    {
+      "path": "web/art/mata-atlantica-atlas.png",
+      "role": "Existing painted vegetation style reference"
+    },
+    {
+      "path": "/private/tmp/solar-creator-weather.png",
+      "role": "Current runtime scale reference"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.jardimbotanico.df.gov.br/educacao-ambiental/flora-cerrado",
+      "use": "Open irregular branching, corky bark and varied savanna formations; game coefficients are not environmental measurements."
+    },
+    {
+      "url": "https://www.gov.br/insa/pt-br/semiarido-brasileiro",
+      "use": "Living dry woodland, vegetation changes and climatic variability; do not depict Caatinga as empty desert."
+    },
+    {
+      "url": "https://www.infoteca.cnptia.embrapa.br/infoteca/handle/doc/132354?locale=pt_BR",
+      "use": "Caatinga plant identities including umbuzeiro, jurema-preta, mandacaru and macambira."
+    },
+    {
+      "url": "https://www.infoteca.cnptia.embrapa.br/infoteca/handle/doc/899861",
+      "use": "Embrapa native Cerrado tree reference includes pequi and barbatimao."
+    }
+  ],
+  "prompts": [
+    {
+      "output": "web/art/caatinga-vegetation-v1.png",
+      "initial": "Use case: stylized-concept. Asset type: Solar Friends Caatinga vegetation sprite atlas. Input image is STYLE REFERENCE ONLY: existing Mata Atlantica atlas, preserve warm painted shading, grouped leaves, readable brushwork, crisp illustrated contours and upper-left daylight. Generate a NEW square 2 by 2 atlas with exactly four isolated plants on true transparent background. Each equal square cell has its own complete uncropped silhouette centered horizontally, ground-contact baseline at 86% of that cell, at least 12% transparent side margins. Top left: one mature umbuzeiro, low spreading umbrella canopy of small muted green leaves, stout branching pale warm-gray trunk, open branching visible. Top right: one jurema-preta, smaller airy irregular spreading crown of fine paired leaves, multiple slender gnarled brown trunks, some visible bare twig tips. Bottom left: one mandacaru cactus, tall deep green ribbed upright central stem with a few sturdy upright candelabra branches, no desert scene. Bottom right: one low macambira rosette with long narrow arching stiff olive green leaves, not agave. Elevated orthographic 2:1 game camera, vertical trunks. Same apparent material/leaf-detail scale as reference. These are native dry woodland plants, NOT a barren desert and NOT tropical rainforest clones. Tiny natural leaf litter and roots only at contact, no rectangular ground, no opaque soil island, no platform, no labels, no grid, no shadows crossing cell edges. Each plant should fill about 72% of its own cell height except natural shorter macambira. Actual alpha transparency including internal canopy gaps. Canvas square.",
+      "correction": "Use case: precise-object-edit. Correct the attached Caatinga sprite atlas layout ONLY, preserving all four plants, painted art style, lighting and anatomy. The existing plants nearly touch cell boundaries; provide much more transparent padding so no leaf touches another cell. Square 2 by 2 equal cell atlas. Uniformly make each entire plant smaller inside its own cell, with horizontal center at 25% or 75% of canvas. Root baseline of top row at 42% canvas height, bottom row at 92%; every plant must have at least 8% of the FULL CANVAS width of transparent empty space from its left and right cell edges. Top-left umbuzeiro and top-right jurema each occupy at most 32% canvas width and at most 35% canvas height; bottom-left mandacaru at most 25% width and 35% height; bottom-right macambira at most 30% width and 25% height. No missing parts, no repainting as a different species. True transparent background including internal gaps. No ground tile, no labels, no borders. This is one sprite sheet with FOUR widely separated isolated sprites, not a scene.",
+      "correctionInput": "exec-a0ea00af-ce29-49eb-b3e1-538beb7b4462.png",
+      "selected": "exec-733263d8-4b86-477c-8590-21fab62fa113.png"
+    },
+    {
+      "output": "web/art/cerrado-vegetation-v1.png",
+      "initial": "Use case: stylized-concept. Asset type: Solar Friends Cerrado vegetation sprite atlas, NEW artwork. Reference image is STYLE ONLY, match its warm painted grouped leaves, broad illustrated shading, legible contours and upper-left daylight. Square 2 by 2 equal cell sheet, four complete isolated sprites on genuine alpha transparency. Top-left one pequi tree: low broad irregular branching crown, short thick gnarled corky dark warm-brown trunk and twisting branches visible through divided clusters of tough olive green leaves. Top-right one barbatimao tree: open low branching savanna tree, fissured reddish brown bark, crooked small branches, fine rounded paired leaves, airy crown clearly different from pequi and rainforest trees. Bottom-left one small clump of native Cerrado golden straw and green bunchgrasses, narrow loose arching blades and a few delicate seed stalks, no exotic pampas plumes. Bottom-right one small native campo shrub, low sparse woody branching stems with a few clusters of small green leaves and tiny restrained cream flowers. Orthographic elevated 2:1 game camera, vertical stems. Wide transparent margins: each plant must remain strictly inside its own quadrant with at least 10 percent of cell width empty on left and right; baseline at 90 percent of its cell height. Natural scale is configured in game, do not add trees behind grasses or force all plants same size. No scenery, no ground tile, no opaque soil patches, no giant tropical leaves, no palm trees, no border, no labels, no watermark. Preserve transparent gaps between branches.",
+      "correction": "Use case: precise-object-edit. Image 1 is the Cerrado sprite atlas to EDIT. Image 2 is a LAYOUT REFERENCE ONLY: its four separated sprites have enough transparent space around each plant. Repaint Image 1 with the SAME four Cerrado plants and same warm painted style but fix the crowded layout. Preserve pequi at top left, barbatimao at top right, native bunchgrass bottom left and small campo shrub bottom right. The trees currently cross the quadrant edges: make both trees much smaller with at least 15 percent of their OWN CELL width empty on every side. All FOUR full silhouettes including leaf tips must fit strictly inside their equal square quadrant with at least 12 percent transparent padding, no overlaps. Same cell root baselines as layout reference. No touching center dividing line, no root crossing the halfway horizontal line, no painted ground or square base. Keep true alpha background and internal leaf/branch gaps. Keep anatomy, colors, upper-left light, grouped leaves, irregular corky trunks. The grass should have finer delicate seed stems rather than bushy plumes. Only these four plants, no text, no frame.",
+      "correctionInput": "exec-c5ca30b4-a3be-44d7-aa3f-e7f56e8cbfdd.png",
+      "selected": "exec-4ae04c58-8ea3-4963-bf86-9f1e2b2165c3.png"
+    },
+    {
+      "output": "web/art/regional-ground-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: Solar Friends painted ground texture atlas. Create one square opaque image divided into FOUR perfectly equal square texture panels in a 2x2 layout, absolutely no separators, no text. Input is style reference only for warm illustrated paint quality. TOP LEFT: quiet Cerrado savanna ground seen straight from overhead, muted olive-green and straw-gold short grass mixed with subtle warm red-brown soil, a few tiny pebbles and delicate low grass strokes, broad low contrast variations, NO trees, bushes, large objects or shadows. TOP RIGHT: quiet compacted red-brown earth walking-path texture with a few tiny stones, same painted scale as top-left. BOTTOM LEFT: living Caatinga ground seen straight overhead, warm buff and pale clay-brown soil mixed with small irregular green and dry grass cover, fine scattered fallen leaves and a few tiny light stones, restrained low-contrast broad painted variation, NOT sand dunes or barren cracked desert. BOTTOM RIGHT: pale warm ochre compacted earth walking-path texture, a few tiny light pebbles, same painted scale as bottom-left. Each panel must be a flat seamless tile filling its entire quadrant edge to edge. Broad readable painted shading matching game sprite reference, no photorealism or glossy digital noise. No perspective, no isolated tile diamonds, no rectangular border, no vignette, no scenery, no buildings, no plants casting shadows.",
+      "selected": "exec-b887aab6-502a-4b70-8b50-4fe839b81821.png"
+    }
+  ],
+  "findings": [
+    "Initial vegetation sheets crowded their cell edges and were excluded. Revised sheets preserve complete silhouettes with transparent separation.",
+    "Independent display widths keep low plants and cactus separate from tree scale.",
+    "Dedicated painted ground panels are new artwork, not recoloured Atlantic Forest ground.",
+    "Regional seasons and soil coefficients are provisional game balance parameters; biome-switch previews and full release validation remain required.",
+    "The terrain uses new painted source panels at an 8-cell texture repeat; the initial 32-cell repeat exaggerated leaf and grass scale."
+  ],
+  "fingerprints": {
+    "cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290"
+  },
+  "evidence": {
+    "command": "node scripts/verify-creator-biomes.mjs",
+    "captures": [
+      "/private/tmp/solar-biome-cerrado-game.png",
+      "/private/tmp/solar-biome-caatinga-game.png",
+      "/private/tmp/solar-biome-cerrado-night.png",
+      "/private/tmp/solar-biome-caatinga-night.png"
+    ],
+    "review": "Inspected actual runtime captures. Tree/cactus/low-plant scales remain distinct beside residents and inherited buildings. Corrected oversized ground leaf litter by using smaller world texture tiles. New sprites use measured horizontal root contacts and vertical alpha baselines. Night tint preserves silhouettes and ground contacts. No foundation platform or sprite stretching was added.",
+    "mechanical": "node scripts/verify-regional-art.mjs checks complete alpha silhouettes, measured anchors and bounded display sizes."
+  }
+}

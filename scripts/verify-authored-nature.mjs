@@ -6,7 +6,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const game=new Game(),loaded=new Game();
 try{
  const d=JSON.parse(game.scenario_template('sandbox')),catalog=JSON.parse(game.scenario_catalog()).nature;
- assert.equal(catalog.length,12);assert(d.map.nature.length>100);
+ assert.equal(catalog.length,20);assert.deepEqual(catalog.slice(0,4).map(s=>s.key),["jequitiba-rosa","jucara","embauba","pau-brasil"]);assert.deepEqual(catalog.slice(12).map(s=>s.key),["pequi","barbatimao","cerrado-bunchgrass","campo-shrub","umbuzeiro","jurema-preta","mandacaru","macambira"]);assert(d.map.nature.length>100);
  const original=game.snapshot(),generated=game.generate_property(42);assert.equal(game.generate_property(42),generated);assert.notEqual(game.generate_property(43),generated);assert.equal(game.snapshot(),original);
  d.map.nature=[];
  const plants=plantStroke(d,[],catalog,'jequitiba-rosa',1,[[26,34],[26,35],[26,36]],3);

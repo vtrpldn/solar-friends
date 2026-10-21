@@ -9,7 +9,7 @@ pub struct Habitat {
     pub retention: f32,
     pub cover: f32,
 }
-pub const HABITATS: [Habitat; 6] = [
+pub const HABITATS: [Habitat; 8] = [
     Habitat {
         key: "river-meadow",
         name: "River meadow",
@@ -57,6 +57,22 @@ pub const HABITATS: [Habitat; 6] = [
         fertility: 0.74,
         retention: 1.00,
         cover: 0.65,
+    },
+    Habitat {
+        key: "cerrado-savanna",
+        name: "Cerrado savanna",
+        geology: "Weathered red soil",
+        fertility: 0.48,
+        retention: 0.88,
+        cover: 0.58,
+    },
+    Habitat {
+        key: "caatinga-woodland",
+        name: "Caatinga woodland",
+        geology: "Stony dry woodland soil",
+        fertility: 0.55,
+        retention: 0.80,
+        cover: 0.45,
     },
 ];
 pub fn by_key(key: &str) -> Option<&'static Habitat> {

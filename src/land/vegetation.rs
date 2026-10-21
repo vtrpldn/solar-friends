@@ -11,7 +11,7 @@ pub struct Species {
     pub max_size: f32,
     pub spacing: f32,
 }
-pub const SPECIES: [Species; 12] = [
+pub const SPECIES: [Species; 20] = [
     species("jequitiba-rosa", "Jequitibá-rosa", 0, 2.8, 0.65, 1.7),
     species("jucara", "Juçara", 1, 1.8, 0.45, 1.5),
     species("embauba", "Embaúba", 2, 2.8, 0.65, 1.7),
@@ -24,6 +24,14 @@ pub const SPECIES: [Species; 12] = [
     species("quartz-stones", "Quartz stones", 9, 0., 0., 0.8),
     species("clay-ironstone", "Clay and ironstone", 10, 0., 0., 0.9),
     species("mossy-stones", "Mossy river stones", 11, 0., 0., 0.8),
+    species("pequi", "Pequi", 12, 2.1, 0.48, 2.2),
+    species("barbatimao", "Barbatimão", 13, 1.8, 0.38, 2.0),
+    species("cerrado-bunchgrass", "Cerrado bunchgrass", 14, 0., 0., 0.65),
+    species("campo-shrub", "Campo shrub", 15, 0.6, 0.12, 0.9),
+    species("umbuzeiro", "Umbuzeiro", 16, 2.1, 0.5, 2.2),
+    species("jurema-preta", "Jurema-preta", 17, 1.7, 0.32, 1.8),
+    species("mandacaru", "Mandacaru", 18, 0.55, 0.12, 1.0),
+    species("macambira", "Macambira", 19, 0., 0., 0.65),
 ];
 const fn species(
     key: &'static str,

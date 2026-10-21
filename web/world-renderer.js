@@ -1,3 +1,4 @@
+import {regionalNatureArt,regionalImages} from './regional-art.js';
 // Shared painted-world primitives. Editor and game use the same projection,
 // sprite registration, vegetation crops, and building lighting.
 import {TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from './projection.js';
@@ -22,6 +23,12 @@ export function paintContactShadow(ctx,x,y,rx,ry,opacity=.2){
 export function paintWorldTree(ctx,{x,y,size=1,species=0},{project,scale,width,height,forest,details,night=0}){
   const p=project(x,y);
   if(p.x< -180*scale||p.x>width+180*scale||p.y< -30*scale||p.y>height+220*scale)return;
+  if(species>=12){
+    const art=regionalNatureArt[species-12],image=art&&regionalImages[art.file];if(!image)return;
+    const [cx,cy,cw,ch]=art.cell,w=art.width*size*scale,h=w*art.aspect;
+    if(art.shadow)paintContactShadow(ctx,p.x,p.y,art.shadow*size*scale,art.shadow*.5*size*scale,.14);
+    ctx.save();paintImage(ctx,image,cx*image.width,cy*image.height,cw*image.width,ch*image.height,p.x-w*art.anchorX,p.y-h*art.anchor,w,h,unlitFilter(night));ctx.restore();return;
+  }
   if(species>=4){
     const art=natureArt[species-4];if(!art||!details?.complete||!details.naturalWidth)return;
     const [cx,cy,cw,ch]=art.cell,w=art.width*size*scale,h=w*art.aspect;

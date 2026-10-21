@@ -43,7 +43,15 @@ impl Profile {
 fn profile(v: &Village) -> Profile {
     v.scenario
         .as_ref()
-        .and_then(|o| o.definition.rules.weather)
+        .and_then(|o| {
+            o.definition.rules.weather.or_else(|| {
+                o.definition
+                    .map
+                    .biome
+                    .as_ref()
+                    .and_then(|b| crate::scenarios::biome_weather(&b.id))
+            })
+        })
         .unwrap_or_default()
 }
 fn wet_in(profile: Profile, day: u32) -> bool {

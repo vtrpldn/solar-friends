@@ -1,3 +1,4 @@
+import {loadRegionalArt} from '../regional-art.js';
 import {terrainRevision} from '../terrain-revision.js';
 import {strokeCells} from './brush.js';
 import {project,unproject,TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from '../projection.js';
@@ -13,6 +14,7 @@ export async function loadEditorArt(){
   const images=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,image(art.file)]));
   const terrain=image('terrain-atlas.png'),forest=image('mata-atlantica-atlas.png'),details=image('landscape-details.png');
   const residents=['iara','bento','luz','caua','nina'].map(name=>image(`animations/${name}.png`));
+  await loadRegionalArt();
   await Promise.all([...Object.values(images),terrain,forest,details,...residents].map(i=>i.decode()));
   return {images,terrain,forest,details,residents};
 }
@@ -109,7 +111,7 @@ export class EditorMap {
     canvas.dataset.center=JSON.stringify(view.center);canvas.dataset.overlayCells=String(this.landOverlay?.length||0);
     c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);
     const land=this.snapshot.village.land,roads=this.document.start.roads;
-    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river,terrainRevision(this.document.map)]);
+    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river,this.document.map.biome,terrainRevision(this.document.map)]);
     if(this.groundKey!==key){this.ground=paintTerrain(art.terrain,roads,[],soil,land.seed,this.document.map);this.groundKey=key;}
     paintWorldGround(c,this.ground,this.origin,this.scale);
     for(const tile of this.landOverlay||[])this.polygon(footprintCorners('road',tile.x,tile.y),tile.fill,tile.stroke);

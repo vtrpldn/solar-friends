@@ -33,6 +33,22 @@ pub(super) fn check(d: &Definition) -> Report {
             "This game version supports 64 by 64 properties using its current landscape generator.",
         );
     }
+    if let Some(biome) = &d.map.biome {
+        if !biomes::get(&biome.id).is_some_and(|p| p.version == biome.version) {
+            r.push(
+                "map.biome",
+                "unsupported_biome",
+                "This biome or its content version is unavailable. Keep the original creation.",
+            );
+        }
+        if d.map.terrain.is_none() || d.map.nature.is_none() || d.map.deposits.is_none() {
+            r.push(
+                "map.biome",
+                "unresolved_biome",
+                "A regional property needs its resolved terrain, natural plants and finite reserves.",
+            );
+        }
+    }
     if d.rules.weather.as_ref().is_some_and(|p| !p.valid()) {
         r.push("rules.weather", "invalid_weather", "Use a 7–90 day season, 0–100 percent rain chances, 0.5–2 drying factors and at most 14 days of beginner weather.");
     }
