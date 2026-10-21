@@ -229,8 +229,8 @@ pub fn initialise(v: &mut Village) -> bool {
     if create(
         v,
         Owner::Camp,
-        crate::camp(&v).0,
-        crate::camp(&v).1,
+        crate::camp(v).0,
+        crate::camp(v).1,
         economy::CAPACITY,
     )
     .is_none()
@@ -1692,7 +1692,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
         }
         owners.push(p.owner);
         let anchored = match p.owner {
-            Owner::Camp => p.capacity == economy::CAPACITY && (p.x, p.y) == crate::camp(&v),
+            Owner::Camp => p.capacity == economy::CAPACITY && (p.x, p.y) == crate::camp(v),
             Owner::Warehouse(id) => {
                 p.capacity == 300
                     && v.buildings.iter().any(|b| {

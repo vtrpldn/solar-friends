@@ -33,6 +33,9 @@ pub(super) fn check(d: &Definition) -> Report {
             "This game version supports 64 by 64 properties using its current landscape generator.",
         );
     }
+    if d.rules.weather.as_ref().is_some_and(|p| !p.valid()) {
+        r.push("rules.weather", "invalid_weather", "Use a 7–90 day season, 0–100 percent rain chances, 0.5–2 drying factors and at most 14 days of beginner weather.");
+    }
     if !world::valid(&d.map.river) {
         r.push("map.river", "invalid_river", "Use a supported perennial river with 64 finite row centers and a connected course, or no river.");
     }
@@ -130,8 +133,8 @@ pub(super) fn check(d: &Definition) -> Report {
             r.push("map.nature","invalid_nature","Use known species with unique identities, supported sizes and bounded density on inland ground.");
         }
     }
-    if let Some(cells) = &d.map.terrain {
-        if cells.len() != (MAP_SIZE * MAP_SIZE) as usize
+    if let Some(cells) = &d.map.terrain
+        && (cells.len() != (MAP_SIZE * MAP_SIZE) as usize
             || cells.iter().any(|c| {
                 land::habitat::by_key(&c.habitat).is_none()
                     || !c.fertility.is_finite()
@@ -140,10 +143,9 @@ pub(super) fn check(d: &Definition) -> Report {
                     || !(0.65..=1.35).contains(&c.retention)
                     || !c.cover.is_finite()
                     || !(0.0..=1.0).contains(&c.cover)
-            })
-        {
-            r.push("map.terrain","invalid_terrain","Use a complete 64 by 64 terrain grid with known habitats and supported fertility, retention and living cover.");
-        }
+            }))
+    {
+        r.push("map.terrain","invalid_terrain","Use a complete 64 by 64 terrain grid with known habitats and supported fertility, retention and living cover.");
     }
     if !d.start.minutes.is_finite() || !(0.0..=5_000_000.).contains(&d.start.minutes) {
         r.push(

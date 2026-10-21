@@ -81,7 +81,7 @@ struct Asset {
 fn assets(v: &Village) -> Vec<Asset> {
     let mut result = vec![Asset {
         equipment: Equipment::Truck,
-        location: [crate::camp(&v).0, crate::camp(&v).1],
+        location: [crate::camp(v).0, crate::camp(v).1],
         sheltered: false,
     }];
     result.extend(v.buildings.iter().filter_map(|b| {

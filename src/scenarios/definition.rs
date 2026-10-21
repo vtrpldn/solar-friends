@@ -98,6 +98,8 @@ pub struct Rules {
     pub land: bool,
     pub utilities: bool,
     pub climate: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weather: Option<climate::Profile>,
     pub maintenance: bool,
     pub learning: bool,
     pub market: bool,
@@ -111,6 +113,7 @@ impl Rules {
             land: constrained,
             utilities: constrained,
             climate: constrained,
+            weather: None,
             maintenance: constrained,
             learning: constrained,
             market: constrained,

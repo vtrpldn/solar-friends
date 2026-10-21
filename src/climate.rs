@@ -4,6 +4,52 @@ use crate::*;
 pub const SEASON_DAYS: u32 = 21;
 const INTRO_DAYS: u32 = 14;
 
+/// Game-calendar parameters, frozen with an authored scenario. These are not
+/// meteorological measurements; regional presets can choose their own balance.
+#[derive(Clone, Copy, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Profile {
+    pub season_days: u32,
+    pub wet_rain_chance: u32,
+    pub dry_rain_chance: u32,
+    pub wet_evaporation: f32,
+    pub dry_evaporation: f32,
+    pub intro_days: u32,
+}
+impl Default for Profile {
+    fn default() -> Self {
+        Self {
+            season_days: SEASON_DAYS,
+            wet_rain_chance: 70,
+            dry_rain_chance: 18,
+            wet_evaporation: 0.9,
+            dry_evaporation: 1.25,
+            intro_days: INTRO_DAYS,
+        }
+    }
+}
+impl Profile {
+    pub fn valid(&self) -> bool {
+        (7..=90).contains(&self.season_days)
+            && self.wet_rain_chance <= 100
+            && self.dry_rain_chance <= 100
+            && self.wet_evaporation.is_finite()
+            && self.dry_evaporation.is_finite()
+            && (0.5..=2.).contains(&self.wet_evaporation)
+            && (0.5..=2.).contains(&self.dry_evaporation)
+            && self.intro_days <= 14
+    }
+}
+fn profile(v: &Village) -> Profile {
+    v.scenario
+        .as_ref()
+        .and_then(|o| o.definition.rules.weather)
+        .unwrap_or_default()
+}
+fn wet_in(profile: Profile, day: u32) -> bool {
+    (day / profile.season_days).is_multiple_of(2)
+}
+
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct State {
     pub enabled: bool,
@@ -34,24 +80,31 @@ pub struct Weather {
     pub evaporation: f32,
 }
 
-fn wet_season(day: u32) -> bool {
-    (day / SEASON_DAYS).is_multiple_of(2)
+pub fn season_is_wet(v: &Village, day: u32) -> bool {
+    wet_in(profile(v), day)
 }
 fn seasonal(v: &Village, day: u32) -> bool {
-    v.climate.enabled && (v.mode == modes::Mode::Sandbox || day >= INTRO_DAYS)
+    v.climate.enabled && (v.mode == modes::Mode::Sandbox || day >= profile(v).intro_days)
 }
-pub fn seasonal_rain(seed: u32, day: u32) -> bool {
-    simulation::sample(seed, 40, day) % 100 < if wet_season(day) { 70 } else { 18 }
+pub fn seasonal_rain(v: &Village, day: u32) -> bool {
+    let p = profile(v);
+    simulation::sample(v.simulation.seed, 40, day) % 100
+        < if wet_in(p, day) {
+            p.wet_rain_chance
+        } else {
+            p.dry_rain_chance
+        }
 }
 fn rainy_day(v: &Village, day: u32) -> bool {
     if !seasonal(v, day) {
         return day % 3 != 2;
     }
-    seasonal_rain(v.simulation.seed, day)
+    seasonal_rain(v, day)
 }
 pub fn day(v: &Village, day: u32) -> Day {
     let seasonal = seasonal(v, day);
-    let wet = wet_season(day);
+    let p = profile(v);
+    let wet = wet_in(p, day);
     let expected = rainy_day(v, day);
     let sample = |domain| simulation::sample(v.simulation.seed, domain, day);
     let start = if seasonal {
@@ -74,8 +127,8 @@ pub fn day(v: &Village, day: u32) -> Day {
     Day {
         day,
         season: if wet { "wet" } else { "dry" },
-        season_day: day % SEASON_DAYS + 1,
-        days_until_change: SEASON_DAYS - day % SEASON_DAYS,
+        season_day: day % p.season_days + 1,
+        days_until_change: p.season_days - day % p.season_days,
         rain_expected: expected,
         rain_start: start,
         rain_end: start + duration,
@@ -92,7 +145,11 @@ pub fn day(v: &Village, day: u32) -> Day {
             0.65
         },
         evaporation: if seasonal {
-            if wet { 0.9 } else { 1.25 }
+            if wet {
+                p.wet_evaporation
+            } else {
+                p.dry_evaporation
+            }
         } else {
             1.
         },
@@ -148,10 +205,11 @@ pub fn view(v: &Village) -> serde_json::Value {
     let today = (v.minutes / 1440.) as u32;
     serde_json::json!({
         "enabled": v.climate.enabled,
-        "season_days": SEASON_DAYS,
+        "season_days": profile(v).season_days,
+        "profile": profile(v),
         "current": at(v, v.minutes),
         "forecast": (0..7).map(|offset| day(v, today.saturating_add(offset))).collect::<Vec<_>>(),
-        "note": "A compressed game calendar. Forecasts use the saved village seed. Dry weather dries soil faster and lowers river output; irrigation keeps plants growing. New Story villages have two weeks of familiar afternoon weather."
+        "note": "A compressed game calendar. Forecasts use the saved village seed. Dry weather dries soil faster and lowers river output; irrigation keeps plants growing. Beginner afternoon weather is controlled by this scenario’s weather profile."
     })
 }
 #[wasm_bindgen]

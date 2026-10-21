@@ -68,8 +68,8 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
         }
     }
     if plot.iter().any(|&(plot_x, plot_y)| {
-        ((plot_x as f32 - crate::camp(&v).0).abs() < 1.5
-            && (plot_y as f32 - crate::camp(&v).1).abs() < 1.5)
+        ((plot_x as f32 - crate::camp(v).0).abs() < 1.5
+            && (plot_y as f32 - crate::camp(v).1).abs() < 1.5)
             || crate::building_work::reserved(v, plot_x, plot_y, None)
             || crate::restoration::reserved(v, plot_x, plot_y)
             || crate::power::batteries::reserved(v, plot_x, plot_y, None)
@@ -330,8 +330,8 @@ pub fn valid(v: &Village) -> bool {
                 !(1..MAP_SIZE - 1).contains(&plot_x)
                     || !(1..MAP_SIZE - 1).contains(&plot_y)
                     || crate::world::bank(v, plot_x, plot_y)
-                    || ((plot_x as f32 - crate::camp(&v).0).abs() < 1.5
-                        && (plot_y as f32 - crate::camp(&v).1).abs() < 1.5)
+                    || ((plot_x as f32 - crate::camp(v).0).abs() < 1.5
+                        && (plot_y as f32 - crate::camp(v).1).abs() < 1.5)
                     || v.roads.contains(&(plot_x, plot_y))
                     || v.buildings
                         .iter()

@@ -1,3 +1,4 @@
+import {WeatherEditor} from './weather.js';
 import {creationFile,freezeCreation,MAX_CREATION_BYTES} from './files.js';
 import {resolvedNature,plantStroke,thinStroke} from './nature.js';
 import {riverBank} from '../terrain.js';
@@ -19,7 +20,7 @@ const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let minimap,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -73,6 +74,7 @@ function refresh(){
   map.set(d,snapshot);
   minimap.set(landReport,geometry);
   geologyEditor.render(d,landReport);
+  weatherEditor.render(d);
   minimap.canvas.title=report.ok?'Native land overview':'Last valid land preview · resolve draft issues before testing';
   $('creator-land-legend').textContent=overlayLegend();
   inspectGround(hoverCell);
@@ -336,6 +338,7 @@ try{
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
+  weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,change});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   wire();const id=new URLSearchParams(location.search).get('project');
   if(id){const record=await library.getProject(id);if(record)await openProject(record);else{await showLibrary();$('creator-library-status').textContent='This creation is no longer in the library. Independent villages remain available.';}}

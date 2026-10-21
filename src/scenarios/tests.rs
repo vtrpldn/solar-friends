@@ -485,3 +485,68 @@ fn live_reports_omit_frozen_maps_without_changing_rules_or_becoming_saves() {
     assert!(!g.restore(&report));
     assert_eq!(g.snapshot(), before);
 }
+
+#[test]
+fn authored_weather_drives_the_first_day_forecast_and_survives_save_reload() {
+    let mut d = Definition::builtin(modes::Mode::Story);
+    d.rules.weather = Some(climate::Profile {
+        season_days: 7,
+        wet_rain_chance: 0,
+        dry_rain_chance: 100,
+        wet_evaporation: 0.7,
+        dry_evaporation: 1.8,
+        intro_days: 0,
+    });
+    let (mut g, _) =
+        compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    let v = g.app.world().resource::<Village>();
+    for index in 0..28 {
+        let forecast = climate::day(v, index);
+        let wet = (index / 7) % 2 == 0;
+        assert_eq!(forecast.rain_expected, !wet);
+        assert_eq!(forecast.season_day, index % 7 + 1);
+        assert_eq!(forecast.days_until_change, 7 - index % 7);
+        assert_eq!(forecast.evaporation, if wet { 0.7 } else { 1.8 });
+        let weather = climate::at(v, index as f32 * 1440. + forecast.rain_start + 15.);
+        assert_eq!(weather.raining, !wet);
+        assert_eq!(weather.evaporation, forecast.evaporation);
+    }
+    let saved = g.snapshot();
+    let mut restored = Game::new();
+    assert!(restored.restore(&saved));
+    assert_eq!(restored.snapshot(), saved);
+    assert_eq!(restored.weather_report(), g.weather_report());
+}
+
+#[test]
+fn invalid_weather_is_rejected_without_installing_a_world() {
+    let mut g = Game::new();
+    let before = g.snapshot();
+    for (key, value) in [
+        ("season_days", 0_f64),
+        ("season_days", 91.),
+        ("wet_rain_chance", 101.),
+        ("dry_rain_chance", 101.),
+        ("wet_evaporation", 0.49),
+        ("dry_evaporation", 2.01),
+        ("intro_days", 15.),
+    ] {
+        let mut d = serde_json::to_value(Definition::builtin(modes::Mode::Story)).unwrap();
+        d["rules"]["weather"] = serde_json::to_value(climate::Profile::default()).unwrap();
+        d["rules"]["weather"][key] = if value.fract() == 0. {
+            serde_json::json!(value as u32)
+        } else {
+            serde_json::json!(value)
+        };
+        let result = report(&g.load_scenario(&d.to_string()));
+        assert_eq!(result["ok"], false);
+        assert!(
+            result["issues"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|i| i["code"] == "invalid_weather")
+        );
+        assert_eq!(g.snapshot(), before);
+    }
+}

@@ -157,8 +157,8 @@ pub fn advance(
         trip.phase = Phase::Returning;
         r.task = "return".into();
         (r.target_x, r.target_y) =
-            spacing::material_spot(v, crate::camp(&v).0, crate::camp(&v).1, r.id)
-                .unwrap_or(crate::camp(&v));
+            spacing::material_spot(v, crate::camp(v).0, crate::camp(v).1, r.id)
+                .unwrap_or(crate::camp(v));
         r.reason = match trip.purpose {
             Purpose::Work => "Back from work. Walking into the village for the evening.",
             Purpose::Pickup => "Back with the town supplies. Walking into the village.",

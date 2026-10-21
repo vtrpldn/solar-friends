@@ -333,10 +333,7 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
                     spacing::approach(v, b, id)
                 }
             })
-            .unwrap_or((
-                crate::camp(&v).0 + (id as f32 - 2.) * 1.25,
-                crate::camp(&v).1,
-            ));
+            .unwrap_or((crate::camp(v).0 + (id as f32 - 2.) * 1.25, crate::camp(v).1));
     }
     if task == "gather" && !ready(v, "grove") {
         return (
@@ -347,8 +344,8 @@ fn destination(v: &Village, task: &str, id: usize) -> (f32, f32) {
     destination_building(v, task, id)
         .and_then(|b| spacing::approach(v, b, id))
         .unwrap_or((
-            crate::camp(&v).0 + (id as f32 - 2.) * 1.25,
-            crate::camp(&v).1 + 0.5,
+            crate::camp(v).0 + (id as f32 - 2.) * 1.25,
+            crate::camp(v).1 + 0.5,
         ))
 }
 fn destination_building<'a>(v: &'a Village, task: &str, id: usize) -> Option<&'a Building> {
@@ -503,8 +500,8 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
         r.task = "rest".into();
         r.reason = "Taking a break where there is room. That building is too crowded.".into();
         (r.target_x, r.target_y) = idle_destination(v, r.id).unwrap_or((
-            crate::camp(&v).0 + (r.id as f32 - 2.) * 1.25,
-            crate::camp(&v).1,
+            crate::camp(v).0 + (r.id as f32 - 2.) * 1.25,
+            crate::camp(v).1,
         ));
         return;
     }
@@ -538,7 +535,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
             {
                 (b.x as f32, b.y as f32)
             } else {
-                crate::camp(&v)
+                crate::camp(v)
             };
             if let Some(point) = spacing::material_spot(v, base.0, base.1, r.id) {
                 (r.target_x, r.target_y) = point;

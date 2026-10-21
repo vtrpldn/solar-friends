@@ -92,8 +92,8 @@ fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; LIQUIDS])> {
     let mut out = vec![
         (
             Owner::Camp,
-            crate::camp(&v).0,
-            crate::camp(&v).1,
+            crate::camp(v).0,
+            crate::camp(v).1,
             [40., 60., 120., 80.],
         ),
         (Owner::Service, 1., crate::camp(v).1, [0., 0., LOAD, LOAD]),
@@ -349,8 +349,8 @@ fn stage(v: &mut Village, class: Class, amount: f64, future_return: Option<(Owne
         v.water_supply.tanks.push(Tank {
             id,
             owner: Owner::Ground,
-            x: crate::camp(&v).0 + 0.7,
-            y: crate::camp(&v).1,
+            x: crate::camp(v).0 + 0.7,
+            y: crate::camp(v).1,
             capacity: contents,
             water: contents,
         });

@@ -83,16 +83,16 @@ pub fn for_village(
     x: f32,
     y: f32,
 ) -> (&'static str, &'static str, f32, f32, f32) {
-    if let Some(cell) = authored(v, x.floor() as i32, y.floor() as i32) {
-        if let Some(h) = by_key(&cell.habitat) {
-            return (
-                h.name,
-                h.geology,
-                cell.fertility,
-                cell.retention,
-                cell.cover,
-            );
-        }
+    if let Some(cell) = authored(v, x.floor() as i32, y.floor() as i32)
+        && let Some(h) = by_key(&cell.habitat)
+    {
+        return (
+            h.name,
+            h.geology,
+            cell.fertility,
+            cell.retention,
+            cell.cover,
+        );
     }
     profile(v.land.seed, x, y, crate::world::center(v, y))
 }

@@ -60,9 +60,6 @@ pub fn today(v: &Village) -> u32 {
 pub fn active(v: &Village, day: u32) -> bool {
     v.market.enabled && (v.mode == modes::Mode::Sandbox || day >= INTRO_DAYS)
 }
-fn wet(day: u32) -> bool {
-    (day / climate::SEASON_DAYS).is_multiple_of(2)
-}
 pub fn prices(v: &Village, day: u32, enabled: bool) -> [i64; economy::COUNT] {
     std::array::from_fn(|i| {
         let base = economy::PRICES[i];
@@ -71,21 +68,21 @@ pub fn prices(v: &Village, day: u32, enabled: bool) -> [i64; economy::COUNT] {
         }
         let seasonal = match i {
             0..=3 | 5..=7 => {
-                if wet(day) {
+                if climate::season_is_wet(v, day) {
                     5
                 } else {
                     -3
                 }
             }
             9 | 14 | economy::FODDER => {
-                if wet(day) {
+                if climate::season_is_wet(v, day) {
                     -3
                 } else {
                     5
                 }
             }
             economy::FOOD | economy::SEEDLINGS => {
-                if wet(day) {
+                if climate::season_is_wet(v, day) {
                     -4
                 } else {
                     4
@@ -131,7 +128,7 @@ pub fn delivery(v: &Village, dispatch: f32, enabled: bool) -> f32 {
     let day = (basic / 1440.) as u32;
     let delayed = enabled
         && (v.mode == modes::Mode::Sandbox || day >= INTRO_DAYS)
-        && climate::seasonal_rain(v.simulation.seed, day)
+        && climate::seasonal_rain(v, day)
         && simulation::sample(v.simulation.seed, 112, day).is_multiple_of(4);
     basic + if delayed { 1440. } else { 0. }
 }
@@ -261,7 +258,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let enabled = active(v, day);
         let (material, stock) = offer(v, day / WEEK);
         let prices = prices(v, day, enabled);
-        serde_json::json!({"day":day,"season":if wet(day){"wet"}else{"dry"},"prices":prices,
+        serde_json::json!({"day":day,"season":if climate::season_is_wet(v, day){"wet"}else{"dry"},"prices":prices,
             "delivery":delivery(v,day as f32*1440.+600.,enabled),
             "offer":if enabled {Some(serde_json::json!({"material":material,"stock":stock,"remaining":if remaining {available(v,day/WEEK)}else{stock},"unit_price":prices[material]*90/100}))}else{None}})
     };

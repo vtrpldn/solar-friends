@@ -130,7 +130,7 @@ fn nearest(
         placeable(v, p[0], p[1], Some(id))
             && navigation::route(
                 v,
-                [crate::camp(&v).0, crate::camp(&v).1],
+                [crate::camp(v).0, crate::camp(v).1],
                 [p[0] as f32, p[1] as f32],
             )
             .is_ok()

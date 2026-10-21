@@ -416,7 +416,7 @@ pub fn sync(v: &mut Village) {
     if v.logistics.is_none() {
         return;
     }
-    let mut wanted = vec![(None, crate::camp(&v).0, crate::camp(&v).1, Kind::Camp)];
+    let mut wanted = vec![(None, crate::camp(v).0, crate::camp(v).1, Kind::Camp)];
     wanted.extend(
         v.buildings
             .iter()
@@ -1238,7 +1238,7 @@ pub fn valid(v: &Village) -> bool {
                     Kind::Camp => true,
                 })
             || (!closing(v, s.id) && store(v, s.id).is_none())
-            || s.building.is_none() && (s.x, s.y) != crate::camp(&v)
+            || s.building.is_none() && (s.x, s.y) != crate::camp(v)
     }) {
         return false;
     }
