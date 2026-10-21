@@ -22,7 +22,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=31)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=32)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -44,6 +44,12 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     if original_version.is_some_and(|v| v >= 32) && !raw["village"]["workforce"].is_object() {
         return None;
     }
+    if matches!(original_version, Some(3 | 23..=26 | 29..=32)) && !simulation::migrate(&mut raw) {
+        return None;
+    }
+    if original_version.is_some_and(|v| v >= 33) && !raw["village"]["simulation"].is_object() {
+        return None;
+    }
     fn canonical_keys(value: &serde_json::Value) -> bool {
         value.as_object().is_none_or(|people| {
             people.keys().all(|key| {
@@ -53,7 +59,10 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             })
         })
     }
-    if !canonical_keys(&raw["village"]["skills"]["people"])
+    if raw["village"]["simulation"]["days"]
+        .as_array()
+        .is_some_and(|days| days.iter().any(|d| !canonical_keys(&d["residents"])))
+        || !canonical_keys(&raw["village"]["skills"]["people"])
         || !canonical_keys(&raw["village"]["workforce"]["preferences"])
         || raw["village"]["workforce"]["days"]
             .as_array()

@@ -1,7 +1,8 @@
 //! Persisted identities, observed resident time, and material accounting.
 use crate::*;
+use std::collections::{BTreeMap, BTreeSet};
 
-pub const SCHEMA: u32 = 1;
+pub const SCHEMA: u32 = 2;
 pub const CATEGORIES: [&str; 8] = [
     "travel",
     "village_work",
@@ -34,7 +35,7 @@ pub struct Day {
     pub day: u32,
     pub first: f64,
     pub last: f64,
-    pub residents: [[f64; 8]; 5],
+    pub residents: BTreeMap<usize, [f64; 8]>,
 }
 
 #[derive(Clone, Default, Serialize, Deserialize)]
@@ -133,7 +134,15 @@ pub fn activity(r: &Resident) -> usize {
 }
 
 pub fn record_time(state: &mut State, from: f64, until: f64, activities: &[(usize, usize)]) {
-    if until <= from {
+    let mut ids = BTreeSet::new();
+    if !from.is_finite()
+        || !until.is_finite()
+        || from < 0.
+        || activities
+            .iter()
+            .any(|(id, category)| *category >= CATEGORIES.len() || !ids.insert(*id))
+        || until <= from
+    {
         return;
     }
     let mut cursor = from;
@@ -145,7 +154,7 @@ pub fn record_time(state: &mut State, from: f64, until: f64, activities: &[(usiz
                 day,
                 first: cursor,
                 last: cursor,
-                residents: [[0.; 8]; 5],
+                residents: activities.iter().map(|(id, _)| (*id, [0.; 8])).collect(),
             });
             if state.days.len() > 8 {
                 state.days.remove(0);
@@ -153,11 +162,43 @@ pub fn record_time(state: &mut State, from: f64, until: f64, activities: &[(usiz
         }
         let entry = state.days.last_mut().unwrap();
         for &(resident, category) in activities {
-            entry.residents[resident][category] += end - cursor;
+            entry.residents.entry(resident).or_insert([0.; 8])[category] += end - cursor;
         }
         entry.last = end;
         cursor = end;
     }
+}
+
+pub fn migrate(raw: &mut serde_json::Value) -> bool {
+    if raw["village"]["simulation"].is_null() {
+        return true;
+    }
+    let state = &mut raw["village"]["simulation"];
+    if state["schema"] == SCHEMA {
+        return true;
+    }
+    if state["schema"] != 1 {
+        return false;
+    }
+    let Some(days) = state["days"].as_array_mut() else {
+        return false;
+    };
+    for day in days {
+        let Some(rows) = day["residents"].as_array() else {
+            return false;
+        };
+        if rows.len() != 5 {
+            return false;
+        }
+        day["residents"] = serde_json::Value::Object(
+            rows.iter()
+                .enumerate()
+                .map(|(id, row)| (id.to_string(), row.clone()))
+                .collect(),
+        );
+    }
+    state["schema"] = SCHEMA.into();
+    true
 }
 
 pub fn valid(v: &Village) -> bool {
@@ -180,7 +221,8 @@ pub fn valid(v: &Village) -> bool {
             || d.last < d.first
             || d.last > start + 1440.
             || d.last > f64::from(v.minutes) + 0.001
-            || d.residents.iter().any(|row| {
+            || !d.residents.keys().eq(v.skills.people.keys())
+            || d.residents.values().any(|row| {
                 row.iter().any(|n| !n.is_finite() || *n < 0.)
                     || row.iter().sum::<f64>() > d.last - d.first + 0.001
             })
@@ -236,8 +278,8 @@ mod tests {
         let mut state = State::default();
         record_time(&mut state, 1439.5, 1440.5, &[(0, 0), (1, 7)]);
         assert_eq!(state.days.len(), 2);
-        assert_eq!(state.days[0].residents[0][0], 0.5);
-        assert_eq!(state.days[1].residents[1][7], 0.5);
+        assert_eq!(state.days[0].residents[&0][0], 0.5);
+        assert_eq!(state.days[1].residents[&1][7], 0.5);
         let before = state.days.clone();
         record_time(&mut state, 1440.5, 1440.5, &[(0, 0)]);
         assert_eq!(state.days, before);
@@ -263,7 +305,7 @@ mod tests {
             g.tick(0.25);
         }
         let s = g.app.world().resource::<Village>();
-        for row in s.simulation.days[0].residents {
+        for row in s.simulation.days[0].residents.values() {
             assert_eq!(row.iter().sum::<f64>(), 60.);
         }
         let mut restored = Game::new();
@@ -362,7 +404,7 @@ mod tests {
             assert_eq!(g.snapshot(), before);
         }
         let mut s: serde_json::Value = serde_json::from_str(&before).unwrap();
-        s["village"]["simulation"]["days"][0]["residents"][0][0] = (-1).into();
+        s["village"]["simulation"]["days"][0]["residents"]["0"][0] = (-1).into();
         assert!(!g.restore(&s.to_string()));
         assert_eq!(g.snapshot(), before);
         assert_eq!(sample(17, 1, 9), sample(17, 1, 9));
@@ -374,5 +416,120 @@ mod tests {
         assert_eq!(seed.snapshot(), saved);
         seed.tick(0.25);
         assert!(!seed.set_simulation_seed(19));
+    }
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::*;
+    #[test]
+    fn sparse_ids_split_midnight_and_reject_duplicate_or_invalid_observations() {
+        let mut s = State::default();
+        record_time(&mut s, 1439.5, 1440.5, &[(42, 7), (7, 0)]);
+        assert_eq!(
+            s.days[0].residents.keys().copied().collect::<Vec<_>>(),
+            vec![7, 42]
+        );
+        assert_eq!(s.days[0].residents[&42][7], 0.5);
+        assert_eq!(s.days[1].residents[&7][0], 0.5);
+        let before = serde_json::to_string(&s).unwrap();
+        for activity in [vec![(42, 0), (42, 1)], vec![(7, 8)]] {
+            record_time(&mut s, 1440.5, 1441., &activity);
+            assert_eq!(serde_json::to_string(&s).unwrap(), before);
+        }
+        for (a, b) in [(f64::NAN, 1441.), (1440.5, f64::INFINITY), (-1., 0.)] {
+            record_time(&mut s, a, b, &[(42, 7)]);
+            assert_eq!(serde_json::to_string(&s).unwrap(), before);
+        }
+        let mut shuffled = State::default();
+        record_time(&mut shuffled, 1439.5, 1440.5, &[(7, 0), (42, 7)]);
+        assert_eq!(shuffled.days, s.days);
+    }
+    #[test]
+    fn supported_old_time_arrays_migrate_without_changing_accounts_or_continuation() {
+        let mut reference = Game::new();
+        for _ in 0..40 {
+            reference.tick(0.25);
+        }
+        let saved = reference.snapshot();
+        for version in [30, 31, 32] {
+            let mut raw: serde_json::Value = serde_json::from_str(&saved).unwrap();
+            raw["village"]["version"] = version.into();
+            let state = &mut raw["village"]["simulation"];
+            state["schema"] = 1.into();
+            for day in state["days"].as_array_mut().unwrap() {
+                day["residents"] = serde_json::Value::Array(
+                    (0..5)
+                        .map(|id| day["residents"][id.to_string()].clone())
+                        .collect(),
+                );
+            }
+            if version <= 31 {
+                let work = &mut raw["village"]["workforce"];
+                work.as_object_mut().unwrap().remove("schema");
+                work["preferences"] = serde_json::Value::Array(
+                    (0..5)
+                        .map(|id| work["preferences"][id.to_string()].clone())
+                        .collect(),
+                );
+                for day in work["days"].as_array_mut().unwrap() {
+                    day["residents"] = serde_json::Value::Array(
+                        (0..5)
+                            .map(|id| day["residents"][id.to_string()].clone())
+                            .collect(),
+                    );
+                }
+            }
+            if version <= 30 {
+                let skills = &mut raw["village"]["skills"];
+                skills["schema"] = 1.into();
+                skills["people"] = serde_json::Value::Array(
+                    (0..5)
+                        .map(|id| skills["people"][id.to_string()].clone())
+                        .collect(),
+                );
+            }
+            let mut copy = Game::new();
+            assert!(copy.restore(&raw.to_string()));
+            assert_eq!(copy.snapshot(), saved);
+            let mut control = Game::new();
+            assert!(control.restore(&saved));
+            for _ in 0..20 {
+                control.tick(0.25);
+                copy.tick(0.25);
+            }
+            assert_eq!(copy.snapshot(), control.snapshot());
+        }
+    }
+    #[test]
+    fn missing_or_aliased_time_rows_do_not_replace_a_running_world() {
+        let mut g = Game::new();
+        g.tick(0.25);
+        let before = g.snapshot();
+        let source: serde_json::Value = serde_json::from_str(&before).unwrap();
+        for mode in 0..4 {
+            let mut raw = source.clone();
+            let rows = raw["village"]["simulation"]["days"][0]["residents"]
+                .as_object_mut()
+                .unwrap();
+            match mode {
+                0 => {
+                    rows.remove("0");
+                }
+                1 => {
+                    let row = rows["0"].clone();
+                    rows.insert("00".into(), row);
+                }
+                2 => {
+                    let row = rows.remove("0").unwrap();
+                    rows.insert("42".into(), row);
+                }
+                _ => {
+                    raw["village"].as_object_mut().unwrap().remove("simulation");
+                }
+            }
+            assert!(!g.restore(&raw.to_string()));
+            assert_eq!(g.snapshot(), before);
+        }
     }
 }

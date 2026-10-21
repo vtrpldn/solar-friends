@@ -11,7 +11,7 @@ assert.equal(snap().village.buildings[0].progress,100,'Real resident constructio
 const before=g.snapshot(),report=JSON.parse(g.simulation_report());g.dev_inspect();assert.equal(g.snapshot(),before,'Inspection is read-only');
 assert(report.materials.every(m=>m.difference===0),'Real construction conserves the material account');
 const observed=snap().village.minutes-480;
-for(const row of report.days[0].residents)assert(Math.abs(row.reduce((sum,n)=>sum+n,0)-observed)<.001);
+for(const row of Object.values(report.days[0].residents))assert(Math.abs(row.reduce((sum,n)=>sum+n,0)-observed)<.001);
 assert(!g.set_simulation_seed(99));assert.equal(report.seed,42);
 const restored=new Game();assert(restored.restore(before));assert.equal(restored.snapshot(),before);
 advanceGame(g,60);advanceGame(restored,60);assert.equal(restored.snapshot(),g.snapshot());

@@ -126,6 +126,20 @@ fn services(v: &Village) -> bool {
             .filter(|b| b.kind == "eco_toilet" && b.progress >= 100.)
             .all(|b| sanitation::usable_toilet(v, b.id))
 }
+fn complete_leisure_day(day: &simulation::Day, people: &[Resident]) -> bool {
+    let start = f64::from(day.day) * 1440.;
+    !people.is_empty()
+        && day.residents.len() == people.len()
+        && day.first <= start + 0.001
+        && day.last >= start + 1440. - 0.001
+        && people.iter().all(|person| {
+            day.residents.get(&person.id).is_some_and(|r| {
+                let awake = r[0] + r[1] + r[3] + r[4] + r[5] + r[6];
+                awake >= 120. && (r[4] + r[5] + r[6]) / awake > 0.5
+            })
+        })
+}
+
 pub fn observe(v: &mut Village, people: &[Resident]) {
     if v.mode != modes::Mode::Story {
         return;
@@ -155,15 +169,11 @@ pub fn observe(v: &mut Village, people: &[Resident]) {
         .any(|j| j.finished.is_some() && !j.cancelled);
     v.progress.outcomes.order_received |= v.economy.orders.iter().any(|o| o.status == "delivered");
     if !v.progress.outcomes.leisure_day {
-        v.progress.outcomes.leisure_day = v.simulation.days.iter().any(|day| {
-            let start = f64::from(day.day) * 1440.;
-            day.first <= start + 0.001
-                && day.last >= start + 1440. - 0.001
-                && day.residents.iter().all(|r| {
-                    let awake = r[0] + r[1] + r[3] + r[4] + r[5] + r[6];
-                    awake >= 120. && (r[4] + r[5] + r[6]) / awake > 0.5
-                })
-        });
+        v.progress.outcomes.leisure_day = v
+            .simulation
+            .days
+            .iter()
+            .any(|day| complete_leisure_day(day, people));
     }
     let healthy =
         v.arrived && people.len() == 5 && people.iter().all(|r| r.hunger <= 65. && r.energy >= 25.);
@@ -439,7 +449,9 @@ mod tests {
             day: 0,
             first: 600.,
             last: 1440.,
-            residents: [[0., 0., 0., 0., 0., 0., 840., 0.]; 5],
+            residents: (0..5)
+                .map(|id| (id, [0., 0., 0., 0., 0., 0., 840., 0.]))
+                .collect(),
         }];
         observe(&mut v, &people);
         assert!(!v.progress.outcomes.leisure_day);
@@ -447,11 +459,13 @@ mod tests {
             day: 0,
             first: 0.,
             last: 1440.,
-            residents: [[0., 600., 0., 0., 0., 0., 360., 480.]; 5],
+            residents: (0..5)
+                .map(|id| (id, [0., 600., 0., 0., 0., 0., 360., 480.]))
+                .collect(),
         };
         observe(&mut v, &people);
         assert!(!v.progress.outcomes.leisure_day);
-        for row in &mut v.simulation.days[0].residents {
+        for row in v.simulation.days[0].residents.values_mut() {
             row[1] = 360.;
             row[6] = 600.;
         }
@@ -728,5 +742,49 @@ mod tests {
         let mut copy = Game::new();
         assert!(copy.restore(&saved));
         assert_eq!(copy.snapshot(), saved);
+    }
+}
+
+#[cfg(test)]
+mod resident_identity_tests {
+    use super::*;
+    #[test]
+    fn leisure_uses_the_actual_nonempty_cast_without_slot_or_order_assumptions() {
+        for count in [1, 5, 12] {
+            let template = initialization::founding_residents(CAMP).remove(0);
+            let mut people: Vec<_> = (0..count)
+                .map(|n| {
+                    let mut p = template.clone();
+                    p.id = (n + 1) * 7;
+                    p
+                })
+                .collect();
+            let mut day = simulation::Day {
+                day: 0,
+                first: 0.,
+                last: 1440.,
+                residents: people
+                    .iter()
+                    .map(|p| (p.id, [0., 360., 0., 0., 0., 0., 600., 480.]))
+                    .collect(),
+            };
+            assert!(complete_leisure_day(&day, &people));
+            people.reverse();
+            assert!(complete_leisure_day(&day, &people));
+            day.residents.get_mut(&people[0].id).unwrap()[1] = 600.;
+            day.residents.get_mut(&people[0].id).unwrap()[6] = 360.;
+            assert!(!complete_leisure_day(&day, &people));
+            day.residents.remove(&people[0].id);
+            assert!(!complete_leisure_day(&day, &people));
+        }
+        assert!(!complete_leisure_day(
+            &simulation::Day {
+                day: 0,
+                first: 0.,
+                last: 1440.,
+                residents: Default::default()
+            },
+            &[]
+        ));
     }
 }

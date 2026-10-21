@@ -44,7 +44,7 @@ for(let frame=0;frame<4*1920;frame++){
 }
 assert(rested&&ate&&connected,'Residents recover the needs they started with');
 assert(worked&&completedAt,'Self care leaves room for the approved village project');
-const end=snap(),leisure=end.village.simulation.days.slice(1,-1).reduce((totals,d)=>{d.residents.forEach((r,i)=>r.forEach((n,j)=>totals[i][j]+=n));return totals;},Array.from({length:5},()=>Array(8).fill(0))).map(r=>(r[4]+r[5]+r[6])/r.reduce((sum,n,i)=>sum+([0,1,3,4,5,6].includes(i)?n:0),0));
+const end=snap(),leisure=Object.values(end.village.simulation.days.slice(1,-1).reduce((totals,d)=>{Object.entries(d.residents).forEach(([i,r])=>r.forEach((n,j)=>totals[i][j]+=n));return totals;},Object.fromEntries(end.residents.map(r=>[r.id,Array(8).fill(0)])))).map(r=>(r[4]+r[5]+r[6])/r.reduce((sum,n,i)=>sum+([0,1,3,4,5,6].includes(i)?n:0),0));
 assert.equal(end.residents[2].help.id,request);
 assert.equal(end.residents[2].help.phase,'complete','An accepted request resumes after social recovery and finishes');
 console.log('Observed leisure ratios',leisure);

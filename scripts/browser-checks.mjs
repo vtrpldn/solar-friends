@@ -477,7 +477,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert((await page.locator('#dev-inspection').textContent()).includes('60.0 game minutes observed'));
   const observed=await page.evaluate(()=>window.solarDev.snapshot());
   const latest=observed.village.simulation.days.at(-1);
-  for(const times of latest.residents)assert(Math.abs(times.reduce((sum,n)=>sum+n,0)-60)<.001);
+  for(const times of Object.values(latest.residents))assert(Math.abs(times.reduce((sum,n)=>sum+n,0)-60)<.001);
   const inspectionBefore=JSON.stringify(observed);
   await page.locator('#dev-inspect').click();
   assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
