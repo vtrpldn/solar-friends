@@ -14,6 +14,18 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled);
  const projectURL=page.url();
+ await page.locator('[data-tool=meadow]').click();
+ const brushPoints=await page.locator('#creator-map').evaluate(canvas=>{
+  const origin=JSON.parse(canvas.dataset.origin),scale=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();
+  return [[25,34],[27,34]].map(([x,y])=>({x:r.left+origin.x+(x-y)*34*scale,y:r.top+origin.y+(x+y)*17*scale}));
+ });
+ await page.mouse.move(brushPoints[0].x,brushPoints[0].y);await page.mouse.down();
+ await page.mouse.move(brushPoints[1].x,brushPoints[1].y,{steps:4});await page.mouse.up();
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Clear a meadow');
+ await page.locator('#creator-undo').click();
+ await page.waitForFunction(()=>document.querySelector('#creator-redo').title==='Clear a meadow');
+ await page.locator('#creator-redo').click();
+
  await page.locator('#creator-title').fill('Our first property');await page.locator('#creator-title').blur();
  await page.locator('#creator-save').click();
  await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');

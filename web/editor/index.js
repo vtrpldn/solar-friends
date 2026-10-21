@@ -1,3 +1,4 @@
+import {clearingStroke} from './brush.js';
 import init,{Game} from '../pkg/solar_friends.js';
 import {ContentLibrary,LibraryConflict} from '../content-library.js';
 import {EditorDocument} from './document.js';
@@ -46,8 +47,8 @@ function save(){
 }
 function change(label,edit,{valid=false}={}){
   if(!current||busy)return false;
-  if(valid){const draft=current.doc.value;edit(draft);const result=JSON.parse(engine.validate_scenario(JSON.stringify(draft)));if(!result.ok){toast(result.issues.find(i=>i.severity==='error')?.message||'Choose a clear plot.');return false;}}
-  try{return current.doc.transact(label,edit);}catch(error){toast(error.message);return false;}
+  try{if(valid){const draft=current.doc.value;edit(draft);const result=JSON.parse(engine.validate_scenario(JSON.stringify(draft)));if(!result.ok){toast(result.issues.find(i=>i.severity==='error')?.message||'Choose a clear plot.');return false;}}
+  return current.doc.transact(label,edit);}catch(error){toast(error.message);return false;}
 }
 function field(id,value){if(document.activeElement!==$(id))$(id).value=value;}
 function refresh(){
@@ -84,7 +85,7 @@ function renderReview(){
 function setTool(tool){
   map.setTool(tool);
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
-  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select a building · drag to pan · Delete removes the selection',pan:'Drag to move around the property',move:'Drag a building to another cell',road:'Drag to paint one path · the whole stroke can be undone',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
+  $('creator-hint').textContent=allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select a building · drag to pan · Delete removes the selection',pan:'Drag to move around the property',move:'Drag a building to another cell',road:'Drag to paint one path · the whole stroke can be undone',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
 function removeBuilding(id){
   change('Remove building',d=>{d.start.buildings=d.start.buildings.filter(b=>b.id!==id);});
@@ -94,6 +95,7 @@ function removeBuilding(id){
 function mapAction(action){
   if(!current||busy)return;
   if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});
+  else if(action.type==='meadow')change('Clear a meadow',d=>{d.map.clearings=clearingStroke(d.map.clearings,action.cells,action.size);},{valid:true});
   else if(action.type==='move')change('Move building',d=>{const b=d.start.buildings.find(b=>b.id===action.id);if(b){b.x=action.x;b.y=action.y;}},{valid:true});
   else if(action.type==='erase'){
     if(action.id)removeBuilding(action.id);
@@ -114,7 +116,7 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,tool:'select',grid:true};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
-    const tool=['select','pan','move','road','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
+    const tool=['select','pan','move','road','meadow','camp','camera','erase',...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
     map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selected:typeof view.selected==='string'?view.selected:null,tool,grid:view.grid!==false};
   }
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
@@ -173,6 +175,7 @@ async function showLibrary(){
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
+  $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-buildings').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-grid').onchange=()=>{map.view.grid=$('creator-grid').checked;map.render();scheduleSave();};

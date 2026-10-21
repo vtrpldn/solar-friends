@@ -1,3 +1,4 @@
+import {strokeCells} from './brush.js';
 import {project,unproject,TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from '../projection.js';
 import {paintTerrain,soilAppearance,MAP_SIZE} from '../terrain.js';
 import {allBuildingArt} from '../building-art.js?v=night-1';
@@ -20,6 +21,7 @@ export class EditorMap {
   constructor(canvas,art,{action,viewChanged,hover}){
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.art=art;
     this.action=action;this.viewChanged=viewChanged;this.hover=hover;
+    this.brushSize=3;
     this.view={center:[32,32],zoom:1.3,selected:null,tool:'select',grid:true};
     this.observer=new ResizeObserver(()=>this.render());this.observer.observe(canvas);
     canvas.addEventListener('contextmenu',e=>e.preventDefault());
@@ -48,7 +50,7 @@ export class EditorMap {
     this.canvas.focus();this.canvas.setPointerCapture(e.pointerId);
     const p=this.point(e),cell=this.cell(p),pan=e.button===1||e.button===2||this.view.tool==='pan';
     this.drag={point:p,center:[...this.view.center],moved:false,pan};
-    if(!pan&&this.view.tool==='road'){this.stroke=new Map();this.stroke.set(`${cell.x},${cell.y}`,[cell.x,cell.y]);}
+    if(!pan&&['road','meadow'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
     if(!pan&&this.view.tool==='move'){const b=this.hit(cell);if(b){this.drag.building=b;this.select(b.id);}}
   }
   motion(e){
@@ -60,7 +62,7 @@ export class EditorMap {
       if(this.drag.pan||(this.view.tool==='select'&&this.drag.moved)){
         this.drag.pan=true;
         this.view.center=[this.drag.center[0]-(dx/(TILE_HALF_WIDTH*this.scale)+dy/(TILE_HALF_HEIGHT*this.scale))/2,this.drag.center[1]-(dy/(TILE_HALF_HEIGHT*this.scale)-dx/(TILE_HALF_WIDTH*this.scale))/2];
-      }else if(this.stroke&&this.pointer.x>=1&&this.pointer.y>=1&&this.pointer.x<63&&this.pointer.y<63){this.stroke.set(`${this.pointer.x},${this.pointer.y}`,[this.pointer.x,this.pointer.y]);}
+      }else if(this.stroke){const next=[this.pointer.x,this.pointer.y];for(const p of strokeCells(this.strokeLast,next))this.stroke.set(p.join(','),p);this.strokeLast=next;}
     }
     this.render();
   }
@@ -68,7 +70,7 @@ export class EditorMap {
     if(!this.drag)return;
     const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;
     if(drag.pan){this.centerAt(...this.view.center);return;}
-    if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:'road',cells});return;}
+    if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
     if(drag.building){this.action({type:'move',id:drag.building.id,x:cell.x,y:cell.y});return;}
     if(drag.moved)return;
     if(this.view.tool==='select'||this.view.tool==='move')this.select(this.hit(cell)?.id||null);
@@ -101,7 +103,7 @@ export class EditorMap {
       for(let n=-.5;n<MAP_SIZE;n++)for(const points of [[[n,-.5],[n,MAP_SIZE-.5]],[[-.5,n],[MAP_SIZE-.5,n]]]){const a=this.project(...points[0]),b=this.project(...points[1]);c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);}
       c.stroke();
     }
-    if(this.stroke)for(const [x,y]of this.stroke.values())this.polygon(footprintCorners('road',x,y),'#f1c96766','#fff0b4');
+    if(this.stroke)for(const [x,y]of this.stroke.values()){const size=view.tool==='meadow'?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
     const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));
     for(const b of structures)objects.push({depth:b.x+b.y,draw:()=>{
