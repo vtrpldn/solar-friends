@@ -4,7 +4,7 @@ description: Build player-facing map, scenario, and resident creators on shared 
 
 # Map and scenario builder implementation plan
 
-Status: proposed implementation plan. Delivery target: the desktop game, with 64×64 maps and player-created residents. The original five friends remain a ready-made cast.
+Status: proposed implementation plan. Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and player-created residents. The original five friends remain a ready-made cast.
 
 ## Why
 
@@ -24,13 +24,14 @@ Distinguish three creations in plain language:
 
 The creation flow is **Choose a starting point → Shape the land → Create the residents → Set up the village → Add a story if wanted → Test → Save and share**. These are workspace tabs, not mandatory forms; players can return to any step. A map-only creation uses a validated default arrival preset when launched in Sandbox, with the original friends or a custom cast. That preset previews its camp, shed, and storage placement rather than overwriting authored terrain unexpectedly.
 
-Start with an open property, a generated property, or a small set of prepared templates. Generating a new landscape previews the result before replacing the current land. Regeneration, object deletion, and moving the camp are undoable.
+Start with an open property, a generated property, or a small set of prepared templates, then choose its Brazilian biome. The first release must support **Mata Atlântica, Cerrado, and Caatinga**, each through the ordinary creation interface. Generating a new landscape previews the result before replacing the current land. Regeneration, object deletion, and moving the camp are undoable.
 
 ### First release boundaries
 
 | Include | Defer to a separate expansion |
 | --- | --- |
 | 64×64 properties, with dimensions represented explicitly in the format | Larger or rectangular maps and resizing existing maps |
+| At least three complete biome presets: Mata Atlântica, Cerrado, and Caatinga, with distinct artwork and environmental behaviour | Additional biome packs and detailed simulation of transitions between regional biomes |
 | Current flat 2:1 isometric projection and approved artwork | Elevation, cliffs, excavation, bridges, free camera rotation |
 | Editable rivers, habitats, soil, vegetation, and resource deposits | Flood simulation and unrestricted hydrological modelling |
 | All existing buildings and supported appearances, roads, resource plots, and utilities | Arbitrary imported artwork, new building types, and unsupported building rotations |
@@ -49,6 +50,7 @@ The current code has useful rendering, simulation, placement, and validation sys
 | `src/lib.rs`, `web/terrain.js`, `web/habitats.js`, `src/land/habitat.rs` | Dimensions, river shape, and habitat geography are constants or duplicated formulas. | Introduce an authoritative world definition and shared world queries; render the resulting geography. |
 | `src/land.rs` | Deposits use nine fixed regions; validation expects those exact regions. The starter fertility patch still uses coordinates 4–16. | Store authored deposits and soil baselines. Validate their structure, bounds, and conservation instead of requiring the default generator output. |
 | `src/land/vegetation.rs` | Validation expects the seed's exact tree list. The original clearing exclusion remains tied to old coordinates. | Give authored vegetation stable identities and validate species, scale, bounds, and density. Make clearings explicit template content. |
+| `src/climate.rs`, `src/land/habitat.rs`, `src/land/vegetation.rs`, `web/nature-art.js`, `web/terrain.js` | Climate uses one seasonal profile and introductory rain schedule; local habitats, species selection, shade, and landscape artwork assume the current property. | Introduce versioned biome/climate and species catalogs. Distinguish regional biome from local habitat, and resolve flora, shade, terrain visuals, and forecasts through shared metadata. |
 | `src/modes.rs`, `src/founding.rs` | New games construct a default village and then reset selected systems and add founding buildings. | Compile a definition into a fresh village through one controlled initialization path. |
 | `web/dev/scenarios.js`, `web/dev/material-fixture.js`, `web/dev/center-layout.js` | Scenes modify snapshots, translate coordinates, and delete or rebuild owned resources and derived systems. | Replace this technique incrementally with supported scenario definitions. Never expose the version-3 fixture reset path to player imports. |
 | `src/navigation.rs`, `src/logistics.rs`, `web/frame-state.js` | Navigation and render caches assume terrain is mostly static. | Add explicit geometry and appearance revisions, including invalidation after undo. |
@@ -71,14 +73,15 @@ Suggested module boundaries are `src/world/` for geometry and authored land, `sr
 
 | Record | Owns | Does not own |
 | --- | --- | --- |
-| `MapDefinition` | Bounds, resolved terrain and water data, habitat and soil baselines, geological deposits, natural vegetation, arrival and outside-access anchors | Resident jobs, depletion during play, shipments, achievements |
+| `BiomeDefinition` | Versioned habitat/species palettes, generator defaults, compatible climate profiles, terrain art references, and bounded environmental parameters | A universal soil or geology value for every property, or a running weather history |
+| `MapDefinition` | Biome/profile revision, bounds, resolved terrain and water data, habitat and soil baselines, geological deposits, natural vegetation, arrival and outside-access anchors | Resident jobs, depletion during play, shipments, achievements |
 | `ResidentDefinition` | Versioned identity text, appearance recipe, supported traits/interests, initial skills, preferred routine, and occupation key | Live needs, earned experience, active work, relationships with people in another village |
 | `ScenarioDefinition` | An exact map revision, starting settlement and inventories, cast setup, rules, objectives, events, briefing, and camera start | Live work queues, cache contents, completed rewards from a test |
 | `EditorProject` | Editable definitions, title, local identity, revision, recovery checkpoints, and editor view state | The current playtest's simulation changes |
 | `ScenarioRuntime` | Active goals, measured progress, timers, triggered events, choices, and granted effects | Editable authoring definitions |
 | `GameSave` | A running village and its scenario runtime, plus the exact content revision and compatible ruleset version | A mutable link to whichever draft the author edits next |
 
-Use stable string keys for materials, species, buildings, variants, goals, and authored entities. Translate them to runtime IDs during compilation. Public files must not depend on array positions such as a material index or a chapter number.
+Use stable string keys for biomes, climate profiles, materials, species, buildings, variants, goals, and authored entities. Translate them to runtime IDs during compilation. Public files must not depend on array positions such as a material index or a chapter number. Saves and exported creations retain the selected biome/profile revisions and authored overrides; unsupported revisions receive a compatibility error rather than silently falling back to Mata Atlântica.
 
 Separate a resident preset ID, an authored cast-member ID, and a live resident ID. Preserve references when names or roster order change; duplicate names are allowed. A scenario embeds the exact resident definitions it uses, so modifying a library preset cannot alter an existing draft or run. Initial friendships belong to the scenario and reference cast-member IDs, not global presets. Appearance changes never change identity or transfer another person's abilities.
 
@@ -125,11 +128,33 @@ Group a drag or brush stroke into one undo step. Copying objects assigns new ide
 
 Offer selectable terrain and habitat brushes, soil presets, river drawing, and nature placement. The inspector explains gameplay effects such as fertility, retention, shade, extraction, and building suitability. Show live overlay layers for terrain, water access, fertility, deposits, shade, walkability, utilities, and goal regions.
 
-River drawing authors a connected course and derives its banks and water cells together. Require valid inlet/outlet and usable bank geometry for the supported river model. Hydro eligibility depends on flowing channel data and accessible banks, never simply a blue-painted tile. For the first release, eligible bank segments must also match the existing generator sprite's orientation, footprint, and worker approach; mark them explicitly in the placement overlay. Other bends remain valid river scenery without offering unsupported hydro placement. Lakes, bridges, and isolated waterways wait until their simulation rules exist.
+River presence is optional in every biome. A property without a river remains valid when its arrival setup provides attainable water access and compatible goals. River drawing authors a connected course and derives its banks and water cells together; require valid inlet/outlet and usable bank geometry only when a river exists. Hydro eligibility depends on flowing channel data and accessible banks, never simply a blue-painted tile. For the first release, eligible bank segments must also match the existing generator sprite's orientation, footprint, and worker approach; mark them explicitly in the placement overlay. Other bends remain valid river scenery without offering unsupported hydro placement. Initial presets support no river or an explicitly authored perennial river. Seasonal channels that dry out, lakes, bridges, and isolated waterways wait until their complete visual, navigation, water-access, and generation rules exist.
 
 Place individual plants or paint clusters of approved species. Brushes have density and spacing limits, with restrained variation within the art catalog's scale ranges. Include a clear-meadow brush and preserve open land around the default camp. Separate natural plants, decorative ground cover, renewable production plots, and finite geological deposits; a decorative rock should not implicitly become a stone reserve.
 
 Authors place geological patches and choose finite starting quantities within supported limits. Establishing a quarry remains a gameplay decision unless the scenario explicitly includes one. Changing a deposit does not create unexplained loose stock. Soil and water presets use consistent physical meanings; cosmetic paint cannot disagree with growth, shade, routes, or placement.
+
+### Brazilian biome presets
+
+At least three biomes are a release requirement for both map generation and scenario authoring. Give each a selection card with a landscape preview, supported local habitats, water/climate summary, and suggested planning challenges. Biomes are regional settings; a meadow, riverbank, or rocky patch is a local habitat inside that setting. Painting a habitat must not change the entire property's climate.
+
+The launch choices are distinct Brazilian biomes in the [IBGE classification](https://www.ibge.gov.br/geociencias/informacoes-ambientais/vegetacao/15842-biomas.html). The following are proposed game profiles, with parameters to be researched and balanced for a representative locality rather than presented as universal properties of an entire biome.
+
+| Biome | Landscape and art direction | Proposed planning emphasis |
+| --- | --- | --- |
+| **Mata Atlântica** | Adapt the current painted forest vocabulary into native canopy groups, layered undergrowth, shaded edges, and readable open clearings. | Plan cultivation around shade and available clearings; balance rain capture, storage, and solar exposure. |
+| **Cerrado** | A distinct palette of open grassland, savanna woodland, characteristic branching trees, and riparian vegetation where water exists. | Prepare for contrasting wet/dry periods, protect water access, and place crops and soil cover deliberately. |
+| **Caatinga** | Native dry-forest and shrub forms, branching silhouettes, cacti and other appropriate plants, with varied living ground cover. | Prioritize reliable drinking water, rain storage, efficient irrigation, soil cover, and realistic purchases while local production develops. |
+
+Use Brazilian primary references to choose representative species and climate characteristics before producing assets. The [MMA overview](https://www.gov.br/mma/pt-br/assuntos/biodiversidade-e-biomas/biodiversidade) describes the broad forest/savanna distinctions; [INSA's account of the Semiárido](https://www.gov.br/insa/pt-br/semiarido-brasileiro) documents Caatinga vegetation and variable rainfall. Preserve regional biodiversity and variation instead of treating Caatinga as bare desert, Cerrado as empty pasture, or every Atlantic Forest property as uniformly fertile.
+
+Differentiate the presets through systems the game can actually measure: rainfall timing/probability, dry periods, evaporation, soil retention and fertility ranges, plant shade, cloud effects on solar supply, and supported river-flow variation. Show their consequences in forecasts, growth, water demand, and the land inspector. Keep compressed seasonal lengths and balance coefficients labelled as game rules. Soil and geological deposits remain spatially authored; the biome name alone does not dictate a uniform mineral reserve or fertile ground.
+
+Refactor the current shared 21-day seasonal cycle and fourteen-day introductory weather policy into explicit profiles. A custom Caatinga scenario must not accidentally receive the current introductory afternoon rain on two days out of three. Any beginner weather assistance is an explicit scenario option shown to the author. Natural flora uses biome-appropriate palettes; cultivated crops, timber, and bamboo use supported planting and irrigation rules, with town purchases available when local supply is unsuitable. Do not silently grant resources or require every building, such as hydro, to be viable on every property.
+
+Create dedicated ground, tree, shrub, grass, and detail assets for the new palettes using the established painted style, projection, scale, and ground-contact rules. A tinted copy of the current forest does not count as a completed biome. Species metadata must describe crown/shade and supported sizes independently of numeric index. Keep density restrained and the camp readable in all three environments. Existing buildings and custom residents must fit naturally against every ground palette.
+
+Switching a draft's biome previews the changed defaults, incompatible nature assets, and climate settings before applying one undoable transaction. Preserve authored buildings, cast, supplies, and goals; offer explicit remapping of incompatible flora and keep unresolved choices visible. Never regenerate the land or change a running village's biome as a side effect of choosing a new profile. One primary biome with compatible local habitats is sufficient for the first release; mixed regional biome mosaics are not required.
 
 ### Village and starting conditions
 
@@ -141,7 +166,7 @@ Configure crops and animals through valid states such as empty bed, planted crop
 
 Assign food and materials to selected stores and water to compatible tanks. Offer **Distribute automatically** with a preview of the resulting owners and capacity. If stock does not fit, report the shortage rather than creating invisible stores or deleting overflow. Starting food freshness is explicit and all liquids retain their separate classes.
 
-Configure initial funds, date, season, climate seed, and supported climate presets. Date and season must agree with the simulation calendar. Visual day/night/rain inspection is a preview; it does not advance the draft's crops, food ages, needs, or timers. An intentionally dry opening uses a supported climate setting with clear duration; event-driven weather waits for a supported domain API.
+Configure initial funds, date, season, climate seed, and supported climate presets, defaulting to the selected biome's profile. Date and season must agree with that profile's calendar. Explicit climate overrides remain available to scenario authors and are shown in the briefing. Visual day/night/rain inspection is a preview; it does not advance the draft's crops, food ages, needs, or timers. An intentionally dry opening uses a supported climate setting with clear duration; event-driven weather waits for a supported domain API.
 
 Choose original-friend presets, create new residents, or mix both in the starting cast. Configure starting position, reasonable need levels, learned skills, work preferences, and outside-job participation through the resident creator below. Explain that needs and autonomy still govern their actions. Do not expose internal tasks, destination IDs, or forced behaviour scripts.
 
@@ -236,7 +261,7 @@ Check spawn and exit connectivity, critical building access, camp footprint clea
 
 ### Stage 0 Baseline and contracts
 
-Record the current centered 64×64 Story and Sandbox starts, representative established villages, and existing performance. Specify the document formats, supported content, rule semantics, trigger timing, and storage/session lifecycle. Inventory fixed geometry and five-resident assumptions, and define original-friend presets and the supported appearance/trait/occupation catalogs. Prototype the character artwork composition approach before promising its full palette. Reconcile related documentation that still describes a 32×32 map.
+Record the current centered 64×64 Story and Sandbox starts, representative established villages, and existing performance. Specify the document formats, supported content, rule semantics, trigger timing, and storage/session lifecycle. Inventory fixed geometry and five-resident assumptions, and define original-friend presets and the supported appearance/trait/occupation catalogs. Research representative localities, flora, and climate references for Mata Atlântica, Cerrado, and Caatinga; approve a small landscape art sample for each. Prototype the character artwork composition approach before promising its full palette. Reconcile related documentation that still describes a 32×32 map.
 
 **Exit:** agreed example map/scenario documents, an explicit compatibility policy, and regression fixtures covering current quantities, starters, camp/camera, and save behaviour. No UI redesign or broad simulation rewrite is needed here.
 
@@ -254,9 +279,9 @@ Extract rendering/input and session boundaries from `web/main.js`. Add the Creat
 
 ### Stage 3 Editable geography and world queries
 
-Replace fixed river/habitat/deposit/vegetation assumptions with authored data and authoritative queries. Move outside-service anchors into the world definition. Add terrain, river, habitat, soil, vegetation, and deposit tools, generation presets, and revision-aware cache rebuilding. Express old starter clearings and soil bonuses explicitly in the default template.
+Replace fixed river/habitat/deposit/vegetation assumptions with authored data and authoritative queries. Move outside-service anchors into the world definition. Add terrain, river, habitat, soil, vegetation, and deposit tools, generation presets, and revision-aware cache rebuilding. Implement versioned biome/climate/species profiles and the three launch biome palettes, including no-river properties, optional introduction-weather assistance, and undoable biome switching. Express old starter clearings and soil bonuses explicitly in the default template.
 
-**Exit:** relocating a river changes visible banks, routes, placement, and hydro eligibility consistently. Undo restores those answers. A non-default property compiles, runs, saves, and reloads; generated and painted landscapes remain visually quiet and readable.
+**Exit:** relocating a river changes visible banks, routes, placement, and hydro eligibility consistently. Undo restores those answers. Each of Mata Atlântica, Cerrado, and Caatinga supports generated and hand-edited properties that compile, run, save, and reload with the correct art and environmental profile. A no-river property has valid water access and clear hydro restrictions. Generated and painted landscapes remain visually quiet and readable.
 
 ### Stage 4 Resident foundations and character creator
 
@@ -286,7 +311,7 @@ Finish the project/scenario browser and resident preset library, multiple named 
 
 ### Stage 8 Examples and release quality
 
-Use the actual player editor to author at least three complete examples: **First clearing** for a gentle arrival; **Before the dry season** for water and farming tradeoffs; and **An inherited village** for storage, access, maintenance, and utilities. At least one uses an entirely custom cast and another mixes original-friend presets with new residents. Also include a blank map preset and a small set of reusable custom resident presets. These are authored creations, not hidden snapshot patches.
+Use the actual player editor to author at least three complete examples: **First clearing** in Mata Atlântica for a gentle arrival; **Before the dry season** in Cerrado for water and farming tradeoffs; and **An inherited village** in Caatinga for water storage, access, maintenance, and utilities. At least one uses an entirely custom cast and another mixes original-friend presets with new residents. Include a blank/generation preset for each biome and a small set of reusable custom resident presets. These are authored creations, not hidden snapshot patches.
 
 Run the end-to-end authoring journey with people unfamiliar with the development tools. Check instructions, tool discoverability, button placement, inspector spacing, input cancellation, error recovery, and journal readability. Play each example through its intended completion and several in-game days beyond it.
 
@@ -298,6 +323,7 @@ Run the end-to-end authoring journey with people unfamiliar with the development
 - **Editing:** exact undo/redo of whole strokes, multi-object moves, linked deletions, duplicates, river edits, and stock allocation. Recovery reloads the latest completed transaction and the previous valid checkpoint if the latest one is corrupt.
 - **Resident identity and behaviour:** duplicate appearances/names remain independent; reorder/delete/duplicate operations cannot retarget relationships, wages, requests, quests, or work. A rename or appearance change leaves skills, ongoing sleep, needs, and income commitments unchanged. Test one resident, five, and the supported maximum; group-size goals and gathering portions use the actual participants. Trait effects are real, bounded, and independent of cosmetic choices. Save/import preserves character definitions, learned progress, relationships, and once-only job payments.
 - **Simulation:** native placement/preview agreement; path and hydro changes after terrain edits; storage/material/water/equipment accounting; food ages; resident access and outside travel; valid save/reload during work. Keep existing Story and Sandbox regression coverage.
+- **Biomes:** all three named launch biomes are selectable without dev controls and have distinct approved landscapes and climate data. Test a generated and hand-edited map per biome, deterministic seeds, undoable profile changes, profile-preserving save/import, and explicit climate overrides. Run each through a complete wet/dry cycle across representative seeds; verify forecasts, irrigation demand, shade, and energy behaviour against the chosen parameters. Include a no-river scenario with attainable water goals and no phantom hydro output. Reject missing biome/species versions without replacing existing content. Review buildings, all resident appearances, terrain transitions, and vegetation scale in every biome; a renamed or recoloured copy alone cannot pass.
 - **Objectives:** initial versus earned credit, counters since activation, continuous-window reset, simultaneous completions, deadlines at pause/1×/16×, event caps, unavailable delivery capacity, and exactly-once effects across reloads. Automated checks detect structural impossibilities; example playthroughs assess actual difficulty and recovery paths.
 - **Sessions and persistence:** editing and testing never overwrite a normal save; repeated tests start identically; switching modes frees inactive instances; old runs pin content; failed/quota-limited writes and concurrent-tab edits do not silently lose work.
 - **Art:** use calibrated building sprites and the 2:1 projection in editor and game. Review every building/appearance and nature species against roads, footprints, residents, terrain transitions, and representative neighbours at several zoom levels, in day/night/rain views. For residents, verify every customization part in every supported pose and use pairwise combination coverage plus diverse complete characters to catch layer/occlusion problems. Check matching portraits, body proportions, foot contact, facing, carried objects, lighting, and animation transitions beside the original cast. Keep foundations aligned without platforms or distortion. Default vegetation density must preserve the calmer landscape direction.
@@ -308,7 +334,7 @@ Reuse the current native tests and scripts such as `verify-centered-starts.mjs`,
 
 ## Work order and scope control
 
-Stages 0 and 1 establish the contract; Stage 2 makes it visible and useful immediately. Stage 3 removes geography constraints before full terrain tools ship. Stage 4 delivers custom residents and their underlying roster/artwork refactors. Stage 5 completes settlement setup; Stage 6 adds guided play. Stages 7 and 8 turn the feature into a reliable, shareable player release.
+Stages 0 and 1 establish the contract; Stage 2 makes it visible and useful immediately. Stage 3 removes geography constraints and delivers at least three complete Brazilian biome presets before full terrain tools ship. Stage 4 delivers custom residents and their underlying roster/artwork refactors. Stage 5 completes settlement setup; Stage 6 adds guided play. Stages 7 and 8 turn the feature into a reliable, shareable player release.
 
 After the schema and compiler contract settle, renderer/editor work, resident foundations and art prototypes, objective evaluation, and persistence work can proceed in parallel behind those interfaces. Complete the roster contract before population-dependent scenario rules. Deliver each slice with tests and a small ready commit; avoid combining the renderer extraction, world rewrite, character migration, and quest rewrite into a single change.
 
