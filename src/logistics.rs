@@ -1320,6 +1320,9 @@ fn plan(v: &Village, r: &Resident) -> Option<Plan> {
 }
 /// The same two reachable routes used when a resident claims a load.
 pub fn quote(v: &Village, r: &Resident) -> Option<(f32, f32)> {
+    if !v.skills.people.contains_key(&r.id) {
+        return None;
+    }
     plan(v, r).map(|(c, _, _, _, minutes)| {
         let urgency = match c.rank.0 {
             0 => 850.,
@@ -1487,6 +1490,9 @@ pub fn advance(
     neighbours: &[(usize, f32, f32)],
     dt: f32,
 ) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     if v.logistics.is_none() {
         return false;
     }
@@ -1994,6 +2000,27 @@ mod tests {
             }
         }
         panic!("supplied starter garden did not complete: {}", g.snapshot());
+    }
+    #[test]
+    fn unknown_carriers_cannot_quote_or_claim_material_shipments() {
+        let mut g = scene(5, 5);
+        let world = g.app.world_mut();
+        let mut r = world
+            .query::<&Resident>()
+            .iter(world)
+            .next()
+            .unwrap()
+            .clone();
+        r.task = "haul".into();
+        let mut v = world.resource_mut::<Village>();
+        assert!(quote(&v, &r).is_some());
+        r.id = 1200;
+        let actor = serde_json::to_value(&r).unwrap();
+        let before = serde_json::to_value(&*v).unwrap();
+        assert!(quote(&v, &r).is_none());
+        assert!(!advance(&mut v, &mut r, &[], 0.25));
+        assert_eq!(serde_json::to_value(&r).unwrap(), actor);
+        assert_eq!(serde_json::to_value(&*v).unwrap(), before);
     }
     #[test]
     fn sparse_retry_timers_hold_only_their_own_resident() {

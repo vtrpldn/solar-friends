@@ -821,6 +821,9 @@ fn service_quotes(v: &Village, r: &Resident, options: &mut Vec<Quote>) {
     }
 }
 pub fn quote(v: &Village, r: &Resident) -> Option<Quote> {
+    if !v.skills.people.contains_key(&r.id) {
+        return None;
+    }
     if let Some(h) = v.water_supply.trips.iter().find(|h| h.resident == r.id) {
         return Some(Quote {
             from: h.from,
@@ -949,6 +952,9 @@ pub fn target(v: &Village, r: &Resident) -> Result<[f32; 2], &'static str> {
         .ok_or("No water delivery has a clear route and receiving room.")
 }
 pub fn assign_target(v: &Village, r: &mut Resident) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     let Ok(p) = target(v, r) else {
         return false;
     };
@@ -996,6 +1002,9 @@ pub fn advance(
     neighbours: &[(usize, f32, f32)],
     dt: f32,
 ) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     if r.task != "water" {
         interrupt(v, r);
         return false;
@@ -1171,7 +1180,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     if v.version == 3 {
         return s.schema == 0 && s.tanks.is_empty() && s.trips.is_empty();
     }
-    if s.schema != 2 || s.tanks.len() > 2048 || s.trips.len() > 5 {
+    if s.schema != 2 || s.tanks.len() > 2048 || s.trips.len() > residents.len() {
         return false;
     }
     let mut owners = vec![];
@@ -1224,7 +1233,7 @@ pub fn valid(v: &Village, residents: &[Resident]) -> bool {
     for h in &s.trips {
         if h.id.0 == 0
             || h.id.0 >= v.simulation.next_id
-            || h.resident >= 5
+            || !v.skills.people.contains_key(&h.resident)
             || workers.contains(&h.resident)
             || recoveries.contains(&h.recovery)
             || tank(v, h.recovery).is_none_or(|p| {

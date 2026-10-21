@@ -192,6 +192,9 @@ pub fn approach(v: &Village, id: Id, resident: usize) -> Option<[f32; 2]> {
     logistics::approaches(v, p, resident)
 }
 pub fn assign_target(r: &mut Resident, v: &Village, id: Id) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     let Some(j) = job(v, id).filter(|j| ready(v, j)) else {
         return false;
     };
@@ -220,7 +223,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
         return false;
     };
     if r.task != "utility"
-        || r.id >= 5
+        || !v.skills.people.contains_key(&r.id)
         || !minutes.is_finite()
         || minutes <= 0.
         || (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08

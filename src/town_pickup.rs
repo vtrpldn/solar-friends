@@ -16,7 +16,9 @@ pub fn ordered_minutes(v: &Village, id: u32) -> f32 {
 }
 
 pub fn blocker(v: &Village, r: &Resident) -> Option<String> {
-    let reason = if !v.arrived || r.task == "arrive" {
+    let reason = if !v.skills.people.contains_key(&r.id) {
+        "Choose a resident to drive."
+    } else if !v.arrived || r.task == "arrive" {
         "Wait until everyone has reached the village."
     } else if !(480.0..960.).contains(&v.minutes.rem_euclid(1440.)) {
         "Town pickups leave between 08:00 and 16:00."
@@ -244,6 +246,34 @@ mod tests {
             g.tick(0.25);
         }
         panic!("Pickup did not finish");
+    }
+    #[test]
+    fn sparse_drivers_own_their_pickups_and_unknown_drivers_are_rejected() {
+        let mut g = healthy();
+        assert_eq!(g.order_supplies_pickup(&bundle(), 0), "ok");
+        let world = g.app.world_mut();
+        let mut r = world
+            .query::<&Resident>()
+            .iter(world)
+            .find(|r| r.id == 0)
+            .unwrap()
+            .clone();
+        r.id = 900;
+        let mut v = world.resource_mut::<Village>();
+        v.skills.people.insert(900, skills::Person::default());
+        v.economy.orders.last_mut().unwrap().pickup_by = Some(900);
+        assert!(economy::valid(&v));
+        assert!(valid(&v, &[r.clone()]));
+        let mut unknown = r.clone();
+        unknown.id = 1200;
+        assert_eq!(
+            blocker(&v, &unknown).as_deref(),
+            Some("Choose a resident to drive.")
+        );
+        let person = v.skills.people.remove(&900).unwrap();
+        assert!(!economy::valid(&v));
+        v.skills.people.insert(900, person);
+        assert!(!valid(&v, &[unknown]));
     }
     #[test]
     fn pickup_returns_same_day_once_and_survives_each_trip_phase() {

@@ -194,6 +194,9 @@ pub fn approach(v: &Village, id: Id, resident: usize) -> Option<[f32; 2]> {
     None
 }
 pub fn assign_target(r: &mut Resident, v: &Village, id: Id) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     let Some(p) = approach(v, id, r.id) else {
         return false;
     };
@@ -256,6 +259,9 @@ pub fn interrupt(v: &mut Village, r: &Resident) {
     );
 }
 pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     let Some(j) = r
         .activity_material
         .and_then(|id| u32::try_from(id).ok())
@@ -453,7 +459,8 @@ pub fn valid(v: &Village) -> bool {
             || j.finished.is_some() != !j.active()
             || j.finished
                 .is_some_and(|t| !t.is_finite() || !(j.created..=v.minutes).contains(&t))
-            || j.carrier.is_some_and(|id| id >= 5)
+            || j.carrier
+                .is_some_and(|id| !v.skills.people.contains_key(&id))
             || (j.action == Action::Move) != j.destination.is_some()
             || j.destination.is_some_and(|d| {
                 d.iter().any(|n| !(1..MAP_SIZE - 1).contains(n))

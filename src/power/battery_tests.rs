@@ -533,3 +533,56 @@ fn free_preview_equipment_cannot_be_salvaged_into_purchased_hardware() {
     );
     check(&mut g);
 }
+
+#[test]
+fn sparse_battery_carriers_keep_charge_and_unknown_people_cannot_touch_the_job() {
+    let mut g = recovered();
+    let bank = bank(&g);
+    assert_eq!(g.queue_battery_work(bank.0, "move", 14, 20), "ok");
+    let id = job(&g).id;
+    let world = g.app.world_mut();
+    let mut r = world
+        .query::<&Resident>()
+        .iter(world)
+        .next()
+        .unwrap()
+        .clone();
+    r.id = 900;
+    let mut v = world.resource_mut::<Village>();
+    v.skills.people.insert(900, skills::Person::default());
+    assert!(batteries::assign_target(&mut r, &v, id));
+    [r.x, r.y] = [r.target_x, r.target_y];
+    let mut unknown = r.clone();
+    unknown.id = 1200;
+    let before = serde_json::to_value(&*v).unwrap();
+    let actor = serde_json::to_value(&unknown).unwrap();
+    assert!(!batteries::assign_target(&mut unknown, &v, id));
+    assert!(!batteries::work(&mut v, &unknown, 1000.));
+    assert_eq!(serde_json::to_value(&*v).unwrap(), before);
+    assert_eq!(serde_json::to_value(&unknown).unwrap(), actor);
+    let charge = batteries::bank(&v, bank).unwrap().charge;
+    assert!(!batteries::work(&mut v, &r, 1000.));
+    assert_eq!(batteries::job(&v, id).unwrap().phase, Phase::Carrying);
+    assert_eq!(
+        batteries::bank(&v, bank).unwrap().owner,
+        Owner::Carrier(900)
+    );
+    assert!(network::valid(&v));
+    assert!(batteries::valid(&v));
+    let person = v.skills.people.remove(&900).unwrap();
+    assert!(!network::valid(&v));
+    assert!(!batteries::valid(&v));
+    v.skills.people.insert(900, person);
+    assert!(batteries::assign_target(&mut r, &v, id));
+    [r.x, r.y] = [r.target_x, r.target_y];
+    assert!(!batteries::work(&mut v, &r, 1.));
+    assert_eq!(batteries::job(&v, id).unwrap().phase, Phase::Installing);
+    assert!(batteries::assign_target(&mut r, &v, id));
+    [r.x, r.y] = [r.target_x, r.target_y];
+    assert!(batteries::work(&mut v, &r, 1000.));
+    assert_eq!(batteries::bank(&v, bank).unwrap().owner, Owner::Ground);
+    assert_eq!(batteries::bank(&v, bank).unwrap().charge, charge);
+    assert!(network::valid(&v));
+    assert!(batteries::valid(&v));
+    assert!(v.skills.people[&900].experience[skills::Skill::Care as usize] > 0);
+}

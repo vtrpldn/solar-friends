@@ -833,6 +833,9 @@ pub fn approach(v: &Village, id: Id, resident: usize) -> Option<(f32, f32)> {
     }
 }
 pub fn assign_batch(r: &mut Resident, v: &Village, id: Id) -> bool {
+    if !v.skills.people.contains_key(&r.id) {
+        return false;
+    }
     let Some(b) = batch(v, id).filter(|b| ready(v, b)) else {
         return false;
     };
@@ -874,7 +877,7 @@ pub fn work(v: &mut Village, r: &Resident, seconds: f32) -> bool {
         || (r.x - r.target_x).hypot(r.y - r.target_y) > 0.08
         || seconds <= 0.
         || !seconds.is_finite()
-        || r.id >= 5
+        || !v.skills.people.contains_key(&r.id)
     {
         return false;
     }
@@ -1269,7 +1272,7 @@ pub fn valid(v: &Village) -> bool {
             && b.work.is_finite()
             && (0.0..=LABOUR).contains(&b.work)
             && match b.last_worker {
-                Some(id) => id < 5 && b.work > 0.,
+                Some(id) => v.skills.people.contains_key(&id) && b.work > 0.,
                 None => b.work == 0.,
             }
             && b.created.is_finite()

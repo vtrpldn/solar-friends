@@ -567,3 +567,29 @@ fn disabling_condition_cancels_service_without_refunding_used_parts_or_healing_t
     assert_eq!(v.simulation.materials.as_ref().unwrap().spent, spent);
     checkpoint(&mut g);
 }
+
+#[test]
+fn sparse_service_workers_receive_credit_and_unknown_workers_leave_jobs_unchanged() {
+    let mut g = scene();
+    g.set_resident_learning(true);
+    let id = queued(&mut g, Equipment::Truck);
+    stock(&mut g, id, true);
+    let mut r = worker(&mut g, id);
+    r.id = 900;
+    let mut v = g.app.world_mut().resource_mut::<Village>();
+    v.skills.people.insert(900, skills::Person::default());
+    assert!(assign_target(&mut r, &v, id));
+    [r.x, r.y] = [r.target_x, r.target_y];
+    let mut unknown = r.clone();
+    unknown.id = 1200;
+    let actor = serde_json::to_value(&unknown).unwrap();
+    let before = serde_json::to_value(&*v).unwrap();
+    assert!(!assign_target(&mut unknown, &v, id));
+    assert_eq!(serde_json::to_value(&unknown).unwrap(), actor);
+    assert!(!work(&mut v, &unknown, 1000.));
+    assert_eq!(serde_json::to_value(&*v).unwrap(), before);
+    assert!(work(&mut v, &r, 1000.));
+    assert!(job(&v, id).unwrap().finished.is_some());
+    assert_eq!(performance(&v, Equipment::Truck), 1.);
+    assert!(v.skills.people[&900].experience[skills::Skill::Care as usize] > 0);
+}

@@ -461,6 +461,9 @@ pub fn valid(v: &Village) -> bool {
     }
     let wanted = wanted(v);
     v.power.network.nodes.iter().all(|n| {
+        if matches!(n.owner, Owner::Carrier(id) if !v.skills.people.contains_key(&id)) {
+            return false;
+        }
         (matches!(n.owner, Owner::Ground | Owner::Carrier(_))
             && n.size == 1
             && !crate::world::bank(v, n.x, n.y))

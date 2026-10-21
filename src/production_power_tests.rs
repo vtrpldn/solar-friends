@@ -301,3 +301,46 @@ fn failed_powered_tools_preserve_batches_and_slow_hand_tools_can_finish() {
     assert!(work_for(&mut g, &r, 18.));
     checkpoint(&mut g);
 }
+
+#[test]
+fn sparse_workers_finish_batches_and_unknown_workers_cannot_mutate_them() {
+    let (mut g, _, id) = scene(false);
+    let mut r = worker(&mut g, id);
+    r.id = 900;
+    let mut v = g.app.world_mut().resource_mut::<Village>();
+    v.skills.people.insert(900, skills::Person::default());
+    assert!(assign_batch(&mut r, &v, id));
+    [r.x, r.y] = [r.target_x, r.target_y];
+    let mut unknown = r.clone();
+    unknown.id = 1200;
+    let before = serde_json::to_value(&*v).unwrap();
+    let actor = serde_json::to_value(&unknown).unwrap();
+    assert!(!assign_batch(&mut unknown, &v, id));
+    assert_eq!(serde_json::to_value(&unknown).unwrap(), actor);
+    assert!(!work(&mut v, &unknown, 3.));
+    assert_eq!(serde_json::to_value(&*v).unwrap(), before);
+    assert!(!work(&mut v, &r, 3.));
+    assert_eq!(batch(&v, id).unwrap().last_worker, Some(900));
+    assert!(valid(&v));
+    v.production
+        .batches
+        .iter_mut()
+        .find(|b| b.id == id)
+        .unwrap()
+        .last_worker = Some(1200);
+    assert!(!valid(&v));
+    v.production
+        .batches
+        .iter_mut()
+        .find(|b| b.id == id)
+        .unwrap()
+        .last_worker = Some(900);
+    assert!(work(&mut v, &r, 7.));
+    assert_eq!(batch(&v, id).unwrap().phase, Phase::Complete);
+    assert!(v.skills.people[&900].experience[skills::Skill::Craft as usize] > 0);
+    assert_eq!(
+        batch(&v, id).unwrap().contributors,
+        [900].into_iter().collect()
+    );
+    assert!(valid(&v));
+}

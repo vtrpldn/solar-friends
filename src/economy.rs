@@ -938,7 +938,8 @@ pub fn valid(v: &Village) -> bool {
             || o.pickup_minutes
                 .is_some_and(|n| !n.is_finite() || !(120.0..=240.).contains(&n))
             || o.pickup_minutes.is_some() != o.pickup_by.is_some()
-            || o.pickup_by.is_some_and(|id| id >= 5)
+            || o.pickup_by
+                .is_some_and(|id| !v.skills.people.contains_key(&id))
             || (o.pickup_by.is_some()
                 && (!matches!(o.status.as_str(), "collecting" | "delivered")
                     || o.items.iter().sum::<u32>() > crate::town_pickup::CAPACITY))

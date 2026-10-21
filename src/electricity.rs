@@ -53,9 +53,9 @@ impl Node {
                 Kind::Consumer | Kind::Pump => self.capacity == 0.,
                 Kind::Battery => [4., 18., 36.].contains(&self.capacity),
             }
+            // The village network validates resident membership for carried batteries.
             && match self.owner {
                 Owner::Pump(id) => id.0 > 0 && id.0 < next && id != self.id,
-                Owner::Carrier(id) => id < 5,
                 _ => true,
             }
             && matches!(

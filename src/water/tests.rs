@@ -410,3 +410,52 @@ fn an_incoming_essential_load_lowers_reserve_urgency_for_other_consumers() {
         "Promised essential water leaves the other carrier free to supply the kitchen"
     );
 }
+
+#[test]
+fn sparse_carriers_move_owned_water_and_unknown_carriers_cannot_claim_it() {
+    let mut g = scene();
+    g.set_resident_learning(true);
+    let world = g.app.world_mut();
+    let mut r = world
+        .query::<&Resident>()
+        .iter(world)
+        .next()
+        .unwrap()
+        .clone();
+    r.id = 900;
+    r.task = "water".into();
+    r.remaining = 10.;
+    let mut v = world.resource_mut::<Village>();
+    v.skills.people.insert(900, skills::Person::default());
+    assert_eq!(add(&mut v, Owner::Building(0), Class::Fresh, 24.), 24.);
+    let mut unknown = r.clone();
+    unknown.id = 1200;
+    let before = serde_json::to_value(&*v).unwrap();
+    let actor = serde_json::to_value(&unknown).unwrap();
+    assert!(quote(&v, &unknown).is_none());
+    assert!(!assign_target(&v, &mut unknown));
+    assert!(!advance(&mut v, &mut unknown, &[], 0.25));
+    assert_eq!(serde_json::to_value(&*v).unwrap(), before);
+    assert_eq!(serde_json::to_value(&unknown).unwrap(), actor);
+    assert!(assign_target(&v, &mut r));
+    let mut carried = false;
+    let mut started = false;
+    for _ in 0..3000 {
+        advance(&mut v, &mut r, &[], 0.25);
+        if let Some(h) = v.water_supply.trips.iter().find(|h| h.resident == 900) {
+            started = true;
+            carried |= h.carrying;
+            assert!(valid(&v, &[r.clone()]));
+            let person = v.skills.people.remove(&900).unwrap();
+            assert!(!valid(&v, &[r.clone()]));
+            v.skills.people.insert(900, person);
+        } else if started {
+            break;
+        }
+    }
+    assert!(carried);
+    assert!(v.water_supply.trips.is_empty());
+    assert_eq!(total(&v, Class::Fresh), 24.);
+    assert!(v.skills.people[&900].experience[skills::Skill::Logistics as usize] > 0);
+    reconciled(&v);
+}
