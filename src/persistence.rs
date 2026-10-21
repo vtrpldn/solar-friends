@@ -35,6 +35,9 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
 }
 
 pub(crate) fn validate(mut save: Save) -> Option<Save> {
+    if !scenarios::valid_origin(&save.village) {
+        return None;
+    }
     if save.village.economy.outside_committed_day < -1
         || save.village.economy.outside_committed_day > (save.village.minutes / 1440.) as i32
     {

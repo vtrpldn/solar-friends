@@ -34,6 +34,28 @@ pub struct Map {
     pub clearings: Vec<Clearing>,
     #[serde(default = "world::default_river")]
     pub river: Option<world::River>,
+    #[serde(default)]
+    pub deposits: Option<Vec<GeologicalPatch>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GeologicalPatch {
+    pub id: String,
+    pub material: String,
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+    pub quantity: u32,
+}
+impl GeologicalPatch {
+    pub fn material_index(&self) -> Option<usize> {
+        economy::NAMES
+            .iter()
+            .position(|key| *key == self.material)
+            .filter(|i| (2..5).contains(i))
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -213,6 +235,7 @@ impl Definition {
                 revision: 1,
                 generator: "property-v1".into(),
                 river: world::default_river(),
+                deposits: Some(land::default_deposits(simulation::State::default().seed)),
                 width: MAP_SIZE,
                 height: MAP_SIZE,
                 seed: simulation::State::default().seed,

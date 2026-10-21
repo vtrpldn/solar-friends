@@ -81,8 +81,49 @@ fn quantities(seed: u32, material: usize) -> [u32; 3] {
     let b = third - spread + simulation::sample(seed, 42, material as u32) % (2 * spread + 1);
     [a, b, total - a - b]
 }
+pub fn default_deposits(seed: u32) -> Vec<crate::scenarios::GeologicalPatch> {
+    (2..5)
+        .flat_map(|material| {
+            quantities(seed, material)
+                .into_iter()
+                .enumerate()
+                .map(move |(part, quantity)| {
+                    let (x, y, width, height) = REGIONS[(material - 2) * 3 + part];
+                    crate::scenarios::GeologicalPatch {
+                        id: format!("{}-{}", crate::economy::NAMES[material], part + 1),
+                        material: crate::economy::NAMES[material].into(),
+                        x,
+                        y,
+                        width,
+                        height,
+                        quantity,
+                    }
+                })
+        })
+        .collect()
+}
+fn templates(v: &Village) -> Vec<crate::scenarios::GeologicalPatch> {
+    v.scenario
+        .as_ref()
+        .and_then(|o| o.definition.map.deposits.clone())
+        .unwrap_or_else(|| default_deposits(v.simulation.seed))
+}
+pub fn opening_reserves(v: &Village) -> [f32; 3] {
+    let mut totals = [0.; 3];
+    for patch in templates(v) {
+        if let Some(material) = patch.material_index() {
+            totals[material - 2] += patch.quantity as f32;
+        }
+    }
+    totals
+}
 pub fn initialise(v: &mut Village) -> bool {
-    let Some(end) = v.simulation.next_id.checked_add(9) else {
+    if !crate::scenarios::valid_origin(v) {
+        return false;
+    }
+    let patches = templates(v);
+    let totals = opening_reserves(v);
+    let Some(end) = v.simulation.next_id.checked_add(patches.len() as u32) else {
         return false;
     };
     if v.buildings.iter().any(|b| !crate::ecology::valid(b))
@@ -90,9 +131,11 @@ pub fn initialise(v: &mut Village) -> bool {
             .sources
             .iter()
             .any(|s| !s.moisture.is_finite() || !(0.0..=1440.).contains(&s.moisture))
-        || v.economy.land.iter().enumerate().any(|(i, n)| {
-            !n.is_finite() || *n < 0. || *n > resource_sites::LAND[i] || n.fract() != 0.
-        })
+        || v.economy
+            .land
+            .iter()
+            .enumerate()
+            .any(|(i, n)| !n.is_finite() || *n < 0. || *n > totals[i] || n.fract() != 0.)
     {
         return false;
     }
@@ -103,24 +146,24 @@ pub fn initialise(v: &mut Village) -> bool {
         seed: v.simulation.seed,
         ..State::default()
     };
-    for material in 2..5 {
-        let mut depleted =
-            resource_sites::LAND[material - 2] as u32 - v.economy.land[material - 2] as u32;
-        for (part, maximum) in quantities(state.seed, material).into_iter().enumerate() {
-            let (x, y, width, height) = REGIONS[(material - 2) * 3 + part];
-            let used = depleted.min(maximum);
-            depleted -= used;
-            state.deposits.push(Deposit {
-                id: simulation::Id(v.simulation.next_id + state.deposits.len() as u32),
-                material,
-                x,
-                y,
-                width,
-                height,
-                maximum,
-                remaining: maximum - used,
-            });
-        }
+    let mut depleted =
+        std::array::from_fn::<_, 3, _>(|i| totals[i] as u32 - v.economy.land[i] as u32);
+    for patch in patches {
+        let Some(material) = patch.material_index() else {
+            return false;
+        };
+        let used = depleted[material - 2].min(patch.quantity);
+        depleted[material - 2] -= used;
+        state.deposits.push(Deposit {
+            id: simulation::Id(v.simulation.next_id + state.deposits.len() as u32),
+            material,
+            x: patch.x,
+            y: patch.y,
+            width: patch.width,
+            height: patch.height,
+            maximum: patch.quantity,
+            remaining: patch.quantity - used,
+        });
     }
     v.simulation.next_id = end;
     v.land = state;
@@ -345,10 +388,11 @@ pub fn restore_soil(v: &mut Village, n: i32, x: i32, y: i32, fraction: f32) {
     v.land.revision = v.land.revision.saturating_add(1);
 }
 pub fn valid(v: &Village) -> bool {
+    let patches = templates(v);
     if v.land.schema != 3
         || !vegetation::valid(v)
         || v.land.seed != v.simulation.seed
-        || v.land.deposits.len() != 9
+        || v.land.deposits.len() != patches.len()
         || v.land.soil.len() > (MAP_SIZE * MAP_SIZE) as usize
         || !water::moisture_valid(v)
     {
@@ -356,14 +400,17 @@ pub fn valid(v: &Village) -> bool {
     }
     let mut ids = std::collections::HashSet::new();
     for (index, d) in v.land.deposits.iter().enumerate() {
-        let material = index / 3 + 2;
-        let (x, y, width, height) = REGIONS[index];
+        let patch = &patches[index];
+        let Some(material) = patch.material_index() else {
+            return false;
+        };
+        let (x, y, width, height) = (patch.x, patch.y, patch.width, patch.height);
         if d.id.0 == 0
             || d.id.0 >= v.simulation.next_id
             || !ids.insert(d.id)
             || d.material != material
             || (d.x, d.y, d.width, d.height) != (x, y, width, height)
-            || d.maximum != quantities(v.land.seed, material)[index % 3]
+            || d.maximum != patch.quantity
             || d.remaining > d.maximum
         {
             return false;

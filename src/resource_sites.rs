@@ -49,7 +49,12 @@ pub fn location(v: &Village, material: usize, x: i32, y: i32) -> Result<(), &'st
     }) {
         return Err("Choose an inland clearing inside the village.");
     }
-    if material == 3 && (x < 17 || y < 17) {
+    if material == 3
+        && v.scenario
+            .as_ref()
+            .is_none_or(|o| o.definition.map.deposits.is_none())
+        && (x < 17 || y < 17)
+    {
         return Err("Stone-bearing ground is in the southeast of the property.");
     }
     if material >= 2 {
@@ -336,7 +341,11 @@ pub fn valid(v: &Village) -> bool {
                         .iter()
                         .take(i)
                         .any(|other| occupies(other, plot_x, plot_y))
-            }) || s.material == 3 && (s.x < 17 || s.y < 17)
+            }) || s.material == 3
+                && v.scenario
+                    .as_ref()
+                    .is_none_or(|o| o.definition.map.deposits.is_none())
+                && (s.x < 17 || s.y < 17)
             {
                 return false;
             }

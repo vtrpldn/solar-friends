@@ -275,3 +275,68 @@ fn rule_profiles_apply_before_initialization_and_origins_survive_as_immutable_co
     );
     assert!(g.app.world().resource::<Village>().scenario.is_none());
 }
+
+#[test]
+fn authored_deposits_are_finite_located_and_preserved_without_inventory_grants() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    d.rules.land = true;
+    d.map.deposits = Some(vec![GeologicalPatch {
+        id: "our-stone".into(),
+        material: "stone".into(),
+        x: 5,
+        y: 5,
+        width: 4,
+        height: 4,
+        quantity: 40,
+    }]);
+    let (mut g, _) =
+        compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(v.land.deposits.len(), 1);
+    assert_eq!(v.economy.land, [0., 40., 0.]);
+    assert_eq!(land::deposit(v, 3, 6, 6).unwrap().remaining, 40);
+    assert!(resource_sites::location(v, 3, 6, 6).is_ok());
+    assert!(resource_sites::location(v, 3, 24, 24).is_err());
+    let stock = v.economy.stock;
+    let id = v.land.deposits[0].id;
+    land::extract(&mut g.app.world_mut().resource_mut::<Village>(), id, 7);
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(v.economy.stock, stock);
+    assert_eq!(v.economy.land, [0., 33., 0.]);
+    let raw = g.snapshot();
+    let mut loaded = Game::new();
+    assert!(loaded.restore(&raw));
+    assert_eq!(loaded.snapshot(), raw);
+    let mut forged: serde_json::Value = serde_json::from_str(&raw).unwrap();
+    forged["village"]["land"]["deposits"][0]["maximum"] = 41.into();
+    assert!(!loaded.restore(&forged.to_string()));
+    assert_eq!(loaded.snapshot(), raw);
+}
+#[test]
+fn empty_geology_and_invalid_patch_imports_are_atomic() {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    d.map.deposits = Some(vec![]);
+    let (mut g, _) =
+        compile(d.clone()).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+    assert!(g.app.world().resource::<Village>().land.deposits.is_empty());
+    assert_eq!(g.app.world().resource::<Village>().economy.land, [0.; 3]);
+    let before = g.snapshot();
+    for (material, x, width, quantity) in [
+        ("stone", i32::MAX, 4, 40),
+        ("timber", 5, 4, 40),
+        ("stone", 5, 4, 97),
+        ("stone", 5, 0, 40),
+    ] {
+        d.map.deposits = Some(vec![GeologicalPatch {
+            id: "patch".into(),
+            material: material.into(),
+            x,
+            y: 5,
+            width,
+            height: 4,
+            quantity,
+        }]);
+        assert!(g.load_scenario(&encoded(&d)).contains("invalid_deposits"));
+        assert_eq!(g.snapshot(), before);
+    }
+}

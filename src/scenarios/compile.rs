@@ -75,6 +75,33 @@ pub(super) fn check(d: &Definition) -> Report {
             "Keep clearing brushes within the property and their supported sizes.",
         );
     }
+    if let Some(patches) = &d.map.deposits {
+        let mut keys = HashSet::new();
+        let mut totals = [0u64; 3];
+        let invalid = patches.len() > 64
+            || patches.iter().any(|p| {
+                let Some(material) = p.material_index() else {
+                    return true;
+                };
+                totals[material - 2] += u64::from(p.quantity);
+                !valid_key(&p.id)
+                    || !keys.insert(&p.id)
+                    || p.quantity == 0
+                    || p.width < 1
+                    || p.height < 1
+                    || p.x < 0
+                    || p.y < 0
+                    || i64::from(p.x) + i64::from(p.width) > i64::from(MAP_SIZE)
+                    || i64::from(p.y) + i64::from(p.height) > i64::from(MAP_SIZE)
+            })
+            || totals
+                .iter()
+                .enumerate()
+                .any(|(i, n)| *n > resource_sites::LAND[i] as u64);
+        if invalid {
+            r.push("map.deposits","invalid_deposits","Use up to 64 uniquely named earth, stone or reclaimed patches inside the property, within the supported finite reserves.");
+        }
+    }
     if !d.start.minutes.is_finite() || !(0.0..=5_000_000.).contains(&d.start.minutes) {
         r.push(
             "start.minutes",
@@ -256,6 +283,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         buildings: BTreeMap::new(),
     });
     v.simulation.seed = d.map.seed;
+    v.economy.land = land::opening_reserves(&v);
     let mut buildings = BTreeMap::new();
     for (i, b) in d.start.buildings.iter().enumerate() {
         let path = format!("start.buildings.{i}");

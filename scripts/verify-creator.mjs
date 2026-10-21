@@ -14,6 +14,23 @@ try{
  await page.locator('[data-preset=camp]').click();
  await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled);
  const projectURL=page.url();
+ await page.locator('#creator-geology summary').click();
+ await page.locator('#geology-0-x').fill('2');await page.locator('#geology-0-x').blur();
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Edit geological patch');
+ await page.locator('#creator-undo').click();
+ await page.getByRole('button',{name:'Clear geology',exact:true}).click();
+ assert.equal(await page.locator('.creator-geopatch').count(),0);
+ await page.locator('#creator-new-patch').selectOption('stone');
+ await page.getByRole('button',{name:'Add patch',exact:true}).click();
+ await page.locator('#geology-0-x').fill('5');await page.locator('#geology-0-x').blur();
+ await page.locator('#geology-0-y').fill('5');await page.locator('#geology-0-y').blur();
+ assert.equal(await page.locator('#geology-0-quantity').inputValue(),'12');
+ await page.getByRole('button',{name:'Show patch',exact:true}).click();
+ assert.equal(await page.locator('#creator-land-layer').inputValue(),'stone');
+ assert.equal(await page.locator('#creator-new-patch').inputValue(),'stone');
+ await page.screenshot({path:'/private/tmp/solar-geology-editor.png'});
+ await page.locator('#creator-center').click();await page.locator('#creator-geology summary').click();
+
  const overview=page.locator('#creator-minimap');await overview.click({position:{x:120,y:60}});
  await page.waitForFunction(()=>JSON.parse(document.querySelector('#creator-map').dataset.center)[0]>40);
  const beforeArrow=JSON.parse(await page.locator('#creator-map').getAttribute('data-center'));

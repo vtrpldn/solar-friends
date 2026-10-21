@@ -1,3 +1,4 @@
+import {GeologyEditor} from './geology.js';
 import {EditorMinimap} from './minimap.js';
 import {landLayers,landTiles} from '../land-layers.js';
 import {planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
@@ -15,7 +16,7 @@ const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,geometry=null;
+let minimap,geologyEditor,geometry=null;
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -66,6 +67,7 @@ function refresh(){
   map.landOverlay=overlayTiles();
   map.set(d,snapshot);
   minimap.set(landReport,geometry);
+  geologyEditor.render(d,landReport);
   minimap.canvas.title=report.ok?'Native land overview':'Last valid land preview · resolve draft issues before testing';
   $('creator-land-legend').textContent=overlayLegend();
   inspectGround(hoverCell);
@@ -308,6 +310,7 @@ try{
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
   for(const canvas of document.querySelectorAll('[data-palette]')){const key=canvas.dataset.palette;paintIcon(canvas,key,art.images[key],allBuildingArt[key]);}
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');
+  geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   wire();const id=new URLSearchParams(location.search).get('project');
   if(id){const record=await library.getProject(id);if(record)await openProject(record);else{await showLibrary();$('creator-library-status').textContent='This creation is no longer in the library. Independent villages remain available.';}}
   else await showLibrary();

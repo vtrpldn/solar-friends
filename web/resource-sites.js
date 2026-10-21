@@ -16,7 +16,7 @@ export function sourceDeposit(v,material,x,y){
 export function sourcePlacementReason(v,material,x,y){
   if(material<0||material>4)return 'Unknown material plot.';
   const n=sourceSize(material),a=x-Math.floor(n/2),b=y-Math.floor(n/2);
-  if(material===3&&(x<17||y<17))return 'Stone-bearing ground is in the southeast of the property.';
+  if(material===3&&!v.scenario?.definition?.map.deposits&&(x<17||y<17))return 'Stone-bearing ground is in the southeast of the property.';
   if(material>=2){
     const deposit=sourceDeposit(v,material,x,y);
     if(!deposit)return 'No matching deposit here. Check the land map for another patch.';
