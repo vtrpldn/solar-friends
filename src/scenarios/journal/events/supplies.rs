@@ -63,7 +63,14 @@ pub fn blocker(v: &Village, count: u32, building: Option<&str>) -> Option<&'stat
             "The destination no longer has a receiving store. The delivery stays queued; it is never redirected.",
         );
     };
-    if logistics::closing(v, p.owner) {
+    if logistics::closing(v, p.owner)
+        || building.is_some_and(|key| {
+            v.scenario
+                .as_ref()
+                .and_then(|origin| origin.buildings.get(key))
+                .is_some_and(|id| building_work::job(v, *id).is_some())
+        })
+    {
         return Some("Finish or cancel work on the destination before receiving this delivery.");
     }
     if logistics::room(v, p.owner) < count {

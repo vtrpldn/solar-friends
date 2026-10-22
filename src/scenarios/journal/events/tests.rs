@@ -704,6 +704,37 @@ fn supply_events_bind_real_buildings_and_reject_impossible_source_deliveries() {
     }
     // Real move work closes the store to external support until it is cancelled.
     d.journal.as_mut().unwrap().events[0].trigger = EventTrigger::Date { minute: 481. };
+    let mut unfinished = d.clone();
+    unfinished
+        .start
+        .buildings
+        .iter_mut()
+        .find(|b| b.id == "starting-warehouse")
+        .unwrap()
+        .state = BuildingState::Blueprint;
+    let mut site = game(unfinished);
+    let site_id = site
+        .app
+        .world()
+        .resource::<Village>()
+        .scenario
+        .as_ref()
+        .unwrap()
+        .buildings["starting-warehouse"];
+    assert_eq!(site.queue_building_work(site_id, "demolish", 0, 0), "ok");
+    for _ in 0..4 {
+        site.tick(0.25);
+    }
+    assert_eq!(report(&site)["events"][0]["status"], "waiting_for_delivery");
+    assert!(
+        report(&site)["events"][0]["delivery_blocker"]
+            .as_str()
+            .unwrap()
+            .contains("Finish or cancel")
+    );
+    assert_eq!(site.cancel_building_work(site_id), "ok");
+    site.tick(0.25);
+    assert_eq!(report(&site)["events"][0]["status"], "applied");
     let mut pending = game(d);
     let id = pending
         .app

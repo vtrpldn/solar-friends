@@ -31,7 +31,7 @@ export class JournalEditor{
      if(value==='delivered'){const store=d.start.buildings.find(b=>b.kind==='warehouse'&&b.state==='completed');if(store)example.building=store.id;}
      if(value==='goal')example.goal=d.journal.chapters.flatMap(c=>c.goals).find(g=>g.id!==input.closest('[data-journal-goal]')?.dataset.journalGoal)?.id??'';
      for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,example);
-    }else if(key==='building'&&parent.kind==='delivered'){if(value)parent.building=value;else delete parent.building;}else if(key==='region'){if(value)parent.region=value;else delete parent.region;}else if(key==='cents')parent[key]=Math.round(Number(value)*100);
+    }else if(key==='building'&&['delivered','deliver_supplies'].includes(parent.kind)){if(value)parent.building=value;else delete parent.building;}else if(key==='region'){if(value)parent.region=value;else delete parent.region;}else if(key==='cents')parent[key]=Math.round(Number(value)*100);
     else if(key==='day'||key==='time'){
      const day=key==='day'?Number(value):Math.floor(parent.minute/1440)+1,time=key==='time'?value:`${String(Math.floor(parent.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(parent.minute%60)).padStart(2,'0')}`,[hours,minutes]=time.split(':').map(Number);
      parent.minute=(day-1)*1440+hours*60+minutes;
