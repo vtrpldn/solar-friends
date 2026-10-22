@@ -1,0 +1,1037 @@
+{
+  "schema": 1,
+  "sourceSha256": "0655ff0e59d13e55bd643855c74f199a2c0c032aa9c45ed493234a596ec4dcc8",
+  "controls": {
+    "purchase": {
+      "plumbing": 1,
+      "pumps": 1
+    },
+    "placements": [
+      [
+        "well",
+        27,
+        32,
+        "village"
+      ],
+      [
+        "kitchen",
+        32,
+        34,
+        "food"
+      ],
+      [
+        "garden",
+        35,
+        34,
+        "food"
+      ]
+    ],
+    "preferredSpeed": 8
+  },
+  "finishedAt": 5427.7490234375,
+  "observations": [
+    {
+      "elapsedSeconds": 5.166,
+      "minute": 599.9864501953125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 0
+        },
+        {
+          "kind": "kitchen",
+          "progress": 2.8019330501556396
+        },
+        {
+          "kind": "garden",
+          "progress": 0
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 11.586,
+      "minute": 651.591552734375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 33.333335876464844
+        },
+        {
+          "kind": "garden",
+          "progress": 22.209375381469727
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 16.76,
+      "minute": 798.78857421875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 65.29332733154297
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 21.903,
+      "minute": 922.9857177734375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 27.06,
+      "minute": 1046.5869140625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 32.252,
+      "minute": 1170.404296875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 37.381,
+      "minute": 1294.6214599609375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 42.515,
+      "minute": 1417.8359375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 47.674,
+      "minute": 1600.6832275390625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 52.821,
+      "minute": 1823.0137939453125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 57.953,
+      "minute": 1946.228271484375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 63.128,
+      "minute": 2069.641845703125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 68.266,
+      "minute": 2193.862060546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 73.409,
+      "minute": 2317.276611328125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 78.535,
+      "minute": 2440.29052734375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 83.661,
+      "minute": 2563.08935546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 88.845,
+      "minute": 2686.730224609375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 93.974,
+      "minute": 2810.946044921875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 99.11,
+      "minute": 2934.16162109375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 104.288,
+      "minute": 3173.3955078125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 109.41,
+      "minute": 3313.597412109375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 114.619,
+      "minute": 3436.62451171875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 119.762,
+      "minute": 3561.8388671875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 66.89640045166016
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 124.913,
+      "minute": 3685.256103515625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 130.147,
+      "minute": 3808.4736328125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 135.316,
+      "minute": 3933.87255859375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 140.503,
+      "minute": 4058.108154296875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 145.678,
+      "minute": 4182.83935546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 150.804,
+      "minute": 4306.59716796875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 155.954,
+      "minute": 4488.1279296875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 161.119,
+      "minute": 4688.875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 166.251,
+      "minute": 4813.01904296875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 171.413,
+      "minute": 4935.99560546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 176.585,
+      "minute": 5060.095703125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 181.718,
+      "minute": 5184.0341796875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 186.868,
+      "minute": 5306.99072265625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 192.022,
+      "minute": 5430.7529296875,
+      "finished": 5427.7490234375,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    }
+  ],
+  "saveReloadExact": true,
+  "editorUnchanged": true,
+  "scratchRunRemoved": true,
+  "scope": "Full completion through public UI; read-only snapshot observation; no direct simulation commands, forced work, stock changes or runtime patches."
+}

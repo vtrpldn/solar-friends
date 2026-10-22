@@ -17,9 +17,10 @@
     "web/examples/residents/cecilia.solar-resident": "a21a379165bb2da8d5a0ea17a949be8ab4bc087ded0f842e9118821b653ac11e"
   },
   "remaining": [
-    "Public-input completion and unfamiliar-player usability review",
+    "Unfamiliar-player usability review",
     "Mixed original/custom cast in Caatinga example",
     "Full modular appearance creation",
     "All biome art/balance/performance/save-integrity release gates"
-  ]
+  ],
+  "publicControlPlaythrough": "assets/scenario-reviews/before-the-dry-season-public-controls.json"
 }
