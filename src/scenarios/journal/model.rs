@@ -31,6 +31,8 @@ pub enum GoalCondition {
         building: String,
         count: u32,
         credit: BuildingCredit,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        region: Option<String>,
     },
     Stored {
         material: String,

@@ -37,6 +37,8 @@ pub struct Map {
     pub camp: [i32; 2],
     pub camera: [f32; 2],
     pub clearings: Vec<Clearing>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub regions: Vec<Region>,
     #[serde(default = "world::default_river")]
     pub river: Option<world::River>,
     #[serde(default)]
@@ -47,6 +49,26 @@ pub struct Map {
     pub terrain: Option<Vec<TerrainCell>>,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Region {
+    pub id: String,
+    pub title: String,
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+}
+impl Region {
+    pub fn contains_building(&self, b: &Building) -> bool {
+        let size = interactions::footprint_size(&b.kind);
+        let (x, y) = (b.x - size / 2, b.y - size / 2);
+        x >= self.x
+            && y >= self.y
+            && x + size <= self.x + self.width
+            && y + size <= self.y + self.height
+    }
+}
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TerrainCell {
@@ -287,6 +309,7 @@ impl Definition {
                 seed: simulation::State::default().seed,
                 camp: [middle, middle],
                 camera: [middle as f32, middle as f32],
+                regions: vec![],
                 clearings: vec![Clearing { x: middle, y: middle, size: 10, disturbance: 0.05 }],
             },
             rules: Rules::for_mode(mode),

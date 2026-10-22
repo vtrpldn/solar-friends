@@ -2,6 +2,29 @@ use super::*;
 
 pub(super) fn check(d: &Definition) -> Report {
     let mut r = Report::default();
+    let mut regions = HashSet::new();
+    if d.map.regions.len() > 32 {
+        r.push(
+            "map.regions",
+            "region_limit",
+            "Use at most 32 named map regions.",
+        );
+    }
+    for region in &d.map.regions {
+        if !valid_key(&region.id)
+            || !regions.insert(&region.id)
+            || region.title.trim().is_empty()
+            || region.title.chars().count() > 100
+            || !(0..MAP_SIZE).contains(&region.x)
+            || !(0..MAP_SIZE).contains(&region.y)
+            || !(1..=MAP_SIZE).contains(&region.width)
+            || !(1..=MAP_SIZE).contains(&region.height)
+            || i64::from(region.x) + i64::from(region.width) > i64::from(MAP_SIZE)
+            || i64::from(region.y) + i64::from(region.height) > i64::from(MAP_SIZE)
+        {
+            r.push("map.regions","invalid_region","Give each region a unique identity, a name up to 100 characters and a positive rectangle entirely inside the property.");
+        }
+    }
     journal::check(d, &mut r);
     residents::check(d, &mut r);
     relationships::check(d, &mut r);

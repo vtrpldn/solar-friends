@@ -43,6 +43,13 @@ pub fn check(d: &Definition, report: &mut Report) {
                     "Enable seasonal weather before requiring a dry-season outcome.",
                 );
             }
+            if !regions_exist(&goal.condition, d) {
+                report.push(
+                    "journal.chapters",
+                    "missing_goal_region",
+                    "Choose an existing named region for each regional building goal.",
+                );
+            }
             if !condition(&goal.condition, 0, &mut nodes) {
                 report.push("journal.chapters", "invalid_condition", "Use supported goal conditions, positive bounded targets and nonempty groups nested at most four levels.");
             }
@@ -162,5 +169,17 @@ fn needs_climate(condition: &GoalCondition) -> bool {
             conditions.iter().any(needs_climate)
         }
         _ => false,
+    }
+}
+
+fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
+    match c {
+        GoalCondition::Buildings {
+            region: Some(id), ..
+        } => d.map.regions.iter().any(|r| r.id == *id),
+        GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
+            conditions.iter().all(|c| regions_exist(c, d))
+        }
+        _ => true,
     }
 }

@@ -44,6 +44,7 @@ fn current_assets_credit_and_post_activation_buildings_are_distinct() {
                 building: "shed".into(),
                 count: 1,
                 credit: BuildingCredit::Present,
+                region: None,
             },
         )],
     )]));
@@ -56,6 +57,7 @@ fn current_assets_credit_and_post_activation_buildings_are_distinct() {
                 building: "shed".into(),
                 count: 1,
                 credit: BuildingCredit::AfterActivation,
+                region: None,
             },
         )],
     )]));
@@ -204,6 +206,7 @@ fn invalid_journals_reject_cycles_missing_references_future_deadlocks_and_limits
             building: "castle".into(),
             count: 1,
             credit: BuildingCredit::Present,
+            region: None,
         },
         GoalCondition::Date { minute: f32::NAN },
     ] {
@@ -391,5 +394,155 @@ fn maintained_outcomes_credit_only_current_post_activation_observations() {
             )]))
             .is_err()
         );
+    }
+}
+
+#[test]
+fn regional_buildings_require_the_entire_native_footprint() {
+    let mut d = scenario(vec![chapter(
+        "one",
+        vec![goal(
+            "home",
+            GoalCondition::Buildings {
+                building: "home".into(),
+                count: 1,
+                credit: BuildingCredit::AfterActivation,
+                region: Some("homes".into()),
+            },
+        )],
+    )]);
+    d.map.regions.push(Region {
+        id: "homes".into(),
+        title: "Our homes".into(),
+        x: 24,
+        y: 24,
+        width: 2,
+        height: 2,
+    });
+    let mut g = game(d.clone());
+    assert_eq!(g.place("home", 26, 25), "ok");
+    g.tick(0.25);
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    let mut inside = game(d.clone());
+    assert_eq!(inside.place("home", 25, 25), "ok");
+    inside.tick(0.25);
+    assert!(state(&mut inside)["finished_at"].is_number());
+    assert!(
+        state(&mut inside)["chapters"][0]["goals"][0]["condition"]["description"]
+            .as_str()
+            .unwrap()
+            .contains("Our homes")
+    );
+    assert_eq!(
+        state(&mut inside)["chapters"][0]["goals"][0]["condition"]["action"]["region"],
+        "homes"
+    );
+    let saved = inside.snapshot();
+    assert!(inside.restore(&saved));
+    assert_eq!(inside.snapshot(), saved);
+    let original = g.snapshot();
+    d.map.regions.clear();
+    assert!(
+        !serde_json::from_str::<serde_json::Value>(
+            &g.load_scenario(&serde_json::to_string(&d).unwrap())
+        )
+        .unwrap()["ok"]
+            .as_bool()
+            .unwrap()
+    );
+    assert_eq!(g.snapshot(), original);
+    d.journal = None;
+    for region in [
+        Region {
+            id: "a".into(),
+            title: "A".into(),
+            x: 63,
+            y: 0,
+            width: 2,
+            height: 1,
+        },
+        Region {
+            id: "a".into(),
+            title: "A".into(),
+            x: 0,
+            y: 0,
+            width: i32::MAX,
+            height: 1,
+        },
+        Region {
+            id: "a".into(),
+            title: "".into(),
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1,
+        },
+    ] {
+        d.map.regions = vec![region];
+        assert!(compile(d.clone()).is_err());
+    }
+    d.map.regions = vec![
+        Region {
+            id: "a".into(),
+            title: "A".into(),
+            x: 0,
+            y: 0,
+            width: 64,
+            height: 64
+        };
+        2
+    ];
+    assert!(compile(d.clone()).is_err());
+    d.map.regions = (0..32)
+        .map(|i| Region {
+            id: format!("r{i}"),
+            title: format!("Area {i}"),
+            x: 0,
+            y: 0,
+            width: 64,
+            height: 64,
+        })
+        .collect();
+    assert!(compile(d.clone()).is_ok());
+    d.map.regions.push(Region {
+        id: "last".into(),
+        title: "Last".into(),
+        x: 1,
+        y: 1,
+        width: 1,
+        height: 1,
+    });
+    assert!(compile(d).is_err());
+}
+
+#[test]
+fn region_edges_follow_one_two_and_three_cell_building_anchors() {
+    for kind in ["well", "home", "shed"] {
+        let size = interactions::footprint_size(kind);
+        let mut g = game(Definition::builtin(modes::Mode::Sandbox));
+        assert_eq!(g.place(kind, 25, 25), "ok");
+        let v = g.app.world().resource::<Village>();
+        let b = v
+            .buildings
+            .iter()
+            .find(|b| b.kind == kind && b.x == 25 && b.y == 25)
+            .unwrap();
+        let mut region = Region {
+            id: "a".into(),
+            title: "A".into(),
+            x: 25 - size / 2,
+            y: 25 - size / 2,
+            width: size,
+            height: size,
+        };
+        assert!(region.contains_building(b));
+        region.x += 1;
+        assert!(!region.contains_building(b));
+        region.x -= 1;
+        region.height -= 1;
+        assert!(!region.contains_building(b));
     }
 }

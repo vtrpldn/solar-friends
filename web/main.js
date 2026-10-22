@@ -202,7 +202,7 @@ let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
 const villagePanels = new Set(["building-panel","supplies-panel","projects-panel","town-panel","power-panel"]);
 let lastVillagePanel = "building-panel";
-let journalPage = 0;
+let journalPage = 0, scenarioGoalRegion = null;
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
 let pendingRemoval = null, movingBuilding = null, movingBattery = null;
@@ -670,6 +670,10 @@ function render() {
     groundKey = key;
   }
   paintWorldGround(ctx,groundLayer,origin,scale);
+  const goalRegion=tool&&worldMap?.regions?.find(r=>r.id===scenarioGoalRegion);
+  canvas.dataset.goalRegion=goalRegion?.id??'';
+  if(goalRegion){const {x,y,width:w,height:h}=goalRegion;polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]].map(([x,y])=>{const p=iso(x,y);return [p.x,p.y];}),'#ebc55935','#ffe5a1');const p=iso(x+(w-1)/2,y-.5);ctx.fillStyle='#49351e';ctx.font='bold 14px Georgia';ctx.textAlign='center';ctx.fillText(goalRegion.title,p.x,p.y-10);}
+
   // Sparse currents move along the channel in world coordinates.
   for (let i = 0; riverCenter(0,worldMap)!==null && i < Math.ceil(MAP_SIZE*1.1); i++) {
     const y = ((i * 0.93 + time * 0.12) % MAP_SIZE) - 0.5;
@@ -972,6 +976,7 @@ function updateQuests() {
     journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,onAction:({action,credited})=>{
       if(action.kind==='goal'){const report=JSON.parse(game.scenario_journal()),index=report.chapters.findIndex(c=>c.goals.some(g=>g.id===action.goal));if(index>=0){journalPage=index;updateQuests();[...document.querySelectorAll('[data-scenario-goal]')].find(el=>el.dataset.scenarioGoal===action.goal)?.scrollIntoView({block:'nearest'});}return;}
       questAction({type:action.kind==='trade'?'town':credited?'build':'plan',kind:action.building}).run();
+      const region=state.village.scenario?.definition?.map.regions?.find(r=>r.id===action.region);if(region){scenarioGoalRegion=region.id;const p=iso(region.x+(region.width-1)/2,region.y+(region.height-1)/2);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.4-p.y,dt:1/60};}
     }});return;
   }
   resetScenarioJournalUI();
@@ -1417,6 +1422,7 @@ function updateUI() {
   gameUI?.update(state,!!sandbox||artworkPreview||!!directScenario,selected);
 }
 function setTool(kind) {
+  scenarioGoalRegion=null;
   movingBuilding = null;
   movingBattery = null;
   $('#relocation-guidance').hidden=true;

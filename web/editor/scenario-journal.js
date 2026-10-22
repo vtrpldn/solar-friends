@@ -21,7 +21,7 @@ export class JournalEditor{
      const example=structuredClone(catalog.journal.conditions.find(c=>c.example.kind===value).example);
      if(value==='goal')example.goal=d.journal.chapters.flatMap(c=>c.goals).find(g=>g.id!==input.closest('[data-journal-goal]').dataset.journalGoal)?.id??'';
      for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,example);
-    }else if(key==='cents')parent[key]=Math.round(Number(value)*100);
+    }else if(key==='region'){if(value)parent.region=value;else delete parent.region;}else if(key==='cents')parent[key]=Math.round(Number(value)*100);
     else if(key==='day'||key==='time'){
      const day=key==='day'?Number(value):Math.floor(parent.minute/1440)+1,time=key==='time'?value:`${String(Math.floor(parent.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(parent.minute%60)).padStart(2,'0')}`,[hours,minutes]=time.split(':').map(Number);
      parent.minute=(day-1)*1440+hours*60+minutes;
@@ -54,6 +54,11 @@ export class JournalEditor{
   const kinds=this.catalog.journal.conditions.map(option=>`<option value="${option.example.kind}" ${c.kind===option.example.kind?'selected':''} ${depth>=limits.condition_depth&&['all','any'].includes(option.example.kind)?'disabled':''}>${escape(option.name)}</option>`).join('');
   let html=`<label class="creator-field">Condition<select data-journal-path="${path}.kind">${kinds}</select></label>`;
   if(c.kind==='buildings')html+=select(path+'.building','Building',c.building,this.catalog.buildings.map(b=>[b.id,allBuildingArt[b.id]?.name??b.id.replaceAll('_',' ')]))+field(path+'.count','Completed buildings',c.count,{type:'number',min:1,max:target.buildings,step:1})+select(path+'.credit','Which buildings count?',c.credit,[['present','All completed buildings, including the starting settlement'],['after_activation','Completed after this goal starts, and still standing']]);
+  if(c.kind==='buildings'){
+   const regions=this.definition.map.regions??[],options=[['','Anywhere on the map'],...regions.map(r=>[r.id,r.title])];
+   if(c.region&&!regions.some(r=>r.id===c.region))options.push([c.region,'Missing region · choose another area']);
+   html+=select(path+'.region','Where must the full footprint fit?',c.region??'',options)+(c.region?'':'<p>Draw named regions on the map to target a particular area.</p>');
+  }
   if(c.kind==='stored')html+=select(path+'.material','Material',c.material,this.catalog.materials.map(m=>[m,m.replaceAll('_',' ')]))+field(path+'.count','Unreserved units at stores',c.count,{type:'number',min:1,max:target.stored,step:1})+'<p>Incoming orders and reserved materials do not count.</p>';
   if(c.kind==='funds')html+=field(path+'.cents','Shared fund · R$',c.cents/100,{type:'number',min:0,max:target.funds/100,step:.01});
   if(c.kind==='date')html+=field(path+'.day','Day',Math.floor(c.minute/1440)+1,{type:'number',min:1,max:Math.floor(target.date/1440)+1,step:1})+field(path+'.time','Time',`${String(Math.floor(c.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(c.minute%60)).padStart(2,'0')}`,{type:'time',step:60});

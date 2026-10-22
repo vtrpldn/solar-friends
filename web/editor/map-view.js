@@ -58,7 +58,7 @@ export class EditorMap {
     if(!this.document||!this.origin)return;
     this.canvas.focus();this.canvas.setPointerCapture(e.pointerId);
     const p=this.point(e),cell=this.cell(p),pan=e.button===1||e.button===2||this.view.tool==='pan';
-    this.drag={point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
+    this.drag={cell,point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
     if(!pan&&['road','meadow','river','nature','thin-nature','habitat'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
     if(!pan&&this.view.tool==='move'){const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}}
   }
@@ -78,6 +78,7 @@ export class EditorMap {
   up(e){
     if(!this.drag)return;
     const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;
+    if(this.view.tool==='region'&&!drag.pan){const x=Math.max(0,Math.min(63,Math.min(drag.cell.x,cell.x))),y=Math.max(0,Math.min(63,Math.min(drag.cell.y,cell.y))),right=Math.max(0,Math.min(63,Math.max(drag.cell.x,cell.x))),bottom=Math.max(0,Math.min(63,Math.max(drag.cell.y,cell.y)));this.action({type:'region',rectangle:{x,y,width:right-x+1,height:bottom-y+1}});return;}
     if(drag.pan){this.centerAt(...this.view.center);return;}
     if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
     if(drag.building){this.action({type:'move',id:drag.building.id,ids:this.selection(),dx:cell.x-drag.building.x,dy:cell.y-drag.building.y,x:cell.x,y:cell.y});return;}
@@ -121,6 +122,10 @@ export class EditorMap {
       for(let n=-.5;n<MAP_SIZE;n++)for(const points of [[[n,-.5],[n,MAP_SIZE-.5]],[[-.5,n],[MAP_SIZE-.5,n]]]){const a=this.project(...points[0]),b=this.project(...points[1]);c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);}
       c.stroke();
     }
+    const regions=[...(this.document.map.regions??[])];
+    if(view.tool==='region'&&this.drag&&!this.drag.pan&&this.pointer){const a=this.drag.cell,b=this.pointer;regions.push({title:'New region',x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(a.x-b.x)+1,height:Math.abs(a.y-b.y)+1});}
+    for(const region of regions){const {x,y,width:w,height:h}=region;this.polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]],'#d9af4822','#e8c05a');const p=this.project(x+(w-1)/2,y-.5);c.font='bold 12px sans-serif';c.textAlign='center';c.fillStyle='#4f3920';c.fillText(region.title,p.x,p.y-8);}
+    canvas.dataset.regionCount=String(this.document.map.regions?.length??0);
     if(this.stroke)for(const [x,y]of this.stroke.values()){const size=['meadow','nature','thin-nature','habitat'].includes(view.tool)?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
     const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));

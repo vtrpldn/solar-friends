@@ -112,6 +112,7 @@ fn measure(
             building,
             count,
             credit,
+            region,
         } => {
             let n = v
                 .buildings
@@ -119,6 +120,15 @@ fn measure(
                 .filter(|b| {
                     b.kind == *building
                         && b.progress >= 100.
+                        && region.as_ref().is_none_or(|id| {
+                            v.scenario.as_ref().is_some_and(|s| {
+                                s.definition
+                                    .map
+                                    .regions
+                                    .iter()
+                                    .any(|r| r.id == *id && r.contains_building(b))
+                            })
+                        })
                         && (*credit == BuildingCredit::Present
                             || record.building_baseline.binary_search(&b.id).is_err())
                 })
@@ -129,6 +139,19 @@ fn measure(
                 format!(
                     "Have {count} {building} buildings completed after activation and still standing"
                 )
+            };
+            let label = if let Some(region) = region.as_ref().and_then(|id| {
+                v.scenario
+                    .as_ref()?
+                    .definition
+                    .map
+                    .regions
+                    .iter()
+                    .find(|r| r.id == *id)
+            }) {
+                format!("{label}, with the full footprint inside {}", region.title)
+            } else {
+                label
             };
             (n as f64, f64::from(*count), label)
         }
@@ -252,7 +275,15 @@ fn measure(
         None
     };
     let action = match c {
-        GoalCondition::Buildings { building, .. } => json!({"kind":"build","building":building}),
+        GoalCondition::Buildings {
+            building, region, ..
+        } => {
+            let mut action = json!({"kind":"build","building":building});
+            if let Some(region) = region {
+                action["region"] = json!(region);
+            }
+            action
+        }
         GoalCondition::Stored { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Funds { .. } => json!({"kind":"trade"}),
         GoalCondition::Harvests { .. } => json!({"kind":"build","building":"garden"}),
