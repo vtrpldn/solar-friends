@@ -55,6 +55,22 @@ fn waiting(v: &Village, id: usize) -> String {
     "Supplied work did not finish within this window. Review outside shifts, helping requests and competing projects.".into()
 }
 
+fn needs_sample(game: &mut Game) -> serde_json::Value {
+    let people: Vec<_> = game
+        .app
+        .world_mut()
+        .query::<&Resident>()
+        .iter(game.app.world())
+        .cloned()
+        .collect();
+    let v = game.app.world().resource::<Village>();
+    serde_json::json!({"minute":v.minutes,
+        "summary":scenarios::setup::summarize(v),
+        "access":scenarios::setup::access(v,&people),
+        "hungry":people.iter().filter(|p|p.hunger>=70.).count(),
+        "low_energy":people.iter().filter(|p|p.energy<=25.).count()})
+}
+
 #[wasm_bindgen]
 impl Game {
     /// No command is sent to the live village. Dates assume that the player
@@ -103,7 +119,11 @@ impl Game {
         // Tick at the same bounded step as play. Inspect native state rather
         // than serialising every frame; only the final report crosses to JS.
         let frames = u32::from(days) * 1920;
+        let mut needs = Vec::new();
         for frame in 0..=frames {
+            if frame % 80 == 0 || frame == frames {
+                needs.push(needs_sample(&mut copy));
+            }
             let v = copy.app.world().resource::<Village>();
             for p in projects
                 .iter_mut()
@@ -137,7 +157,7 @@ impl Game {
         }
         serde_json::json!({"schema":1,"based_at":based_at,"through":v.minutes,"days":days,
             "funds_before":before_funds,"funds_projected":v.economy.money,"projects":projects,
-            "paid_orders":paid_orders,
+            "paid_orders":paid_orders,"needs":needs,
             "assumptions":"Current plans, work preferences, outside shifts and requests stay unchanged. Residents work according to energy, needs and personal commitments. Paid orders and local production continue; no new purchases or player actions are assumed. Dates are rounded to half-hour windows and are conditional, not promises."}).to_string()
     }
 }
@@ -196,6 +216,8 @@ mod tests {
         let mut g = scene();
         let before = g.snapshot();
         let r = report(&mut g, 1);
+        assert_eq!(r["needs"].as_array().unwrap().len(), 25);
+        assert_eq!(r["needs"][0], needs_sample(&mut g));
         let expected = r["projects"][0]["completed_at"].as_f64().unwrap();
         let bounds = r["projects"][0]["window"].as_array().unwrap();
         assert!(bounds[0].as_f64().unwrap() <= expected && bounds[1].as_f64().unwrap() >= expected);
@@ -210,6 +232,10 @@ mod tests {
                 completed = Some(v.minutes);
             }
         }
+        assert_eq!(
+            r["needs"].as_array().unwrap().last().unwrap(),
+            &needs_sample(&mut g)
+        );
         assert_eq!(completed.unwrap() as f64, expected);
         assert_eq!(
             g.app.world().resource::<Village>().economy.money,

@@ -200,7 +200,7 @@ fn review_access(v: &Village, d: &Definition, people: &[Resident], r: &mut Repor
         }
     }
 }
-fn access(
+pub(crate) fn access(
     v: &Village,
     people: &[Resident],
 ) -> BTreeMap<journal::services::Kind, journal::services::Reading> {
