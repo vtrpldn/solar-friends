@@ -21,8 +21,8 @@ export function recoveredDraft(file,validate,{source:requested=null}={}){
   if(checkpoint?.schema!==1||!checkpoint.definition)continue;
   const definition=structuredClone(checkpoint.definition),checked=validate(JSON.stringify(definition));
   if(draftImportIssue(checked))continue;
-  try{new EditorDocument(definition);}catch{continue;}
-  return {definition,source,playable:checked.ok,attribution:structuredClone(record.attribution??[])};
+  let doc;try{doc=Number.isSafeInteger(checkpoint.revision)?EditorDocument.restore(checkpoint):new EditorDocument(definition);}catch{continue;}
+  return {definition,checkpoint:doc.checkpoint(),view:structuredClone(source==='current'?record.view:record.previous?.view),historyRecovered:doc.historyRecovered,source,playable:checked.ok,attribution:structuredClone(record.attribution??[])};
  }
  throw Error('Neither draft checkpoint can open in this game version. Keep the original backup; nothing was imported.');
 }

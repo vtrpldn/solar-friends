@@ -17,7 +17,7 @@ export function chooseRecoveryCheckpoint(file,{Game,validate}){
   label.append(input,text);fieldset.append(label);
  }
  dialog.append(fieldset);
- const note=document.createElement('p');note.textContent=file.kind==='project'?'Draft recovery keeps the selected definition. Undo history and editor view are not imported.':'Village recovery keeps the selected progress and its frozen restart scenario.';dialog.append(note);
+ const note=document.createElement('p');note.textContent=file.kind==='project'?'Draft recovery keeps the selected definition, supported undo history and editor view. Damaged undo history is cleared.':'Village recovery keeps the selected progress and its frozen restart scenario.';dialog.append(note);
  const actions=document.createElement('div');actions.className='dialog-actions';const cancel=document.createElement('button'),confirm=document.createElement('button');cancel.textContent='Cancel';cancel.id='creator-recovery-cancel';confirm.textContent='Recover a copy';confirm.id='creator-recovery-confirm';actions.append(cancel,confirm);dialog.append(actions);
  return new Promise(resolve=>{
   let result=null;cancel.onclick=()=>dialog.close();confirm.onclick=()=>{result=selected.value;dialog.close();};

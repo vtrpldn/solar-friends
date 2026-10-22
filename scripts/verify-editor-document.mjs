@@ -47,5 +47,18 @@ try{
   for(let n=0;n<100;n++)bounded.transact('Rename',draft=>{draft.title='Property '+n;});
   const checkpoint=bounded.checkpoint();assert.equal(checkpoint.history.past.length,64);
   assert.equal(EditorDocument.restore(checkpoint).value.title,'Property 99');
+  const branch=new EditorDocument(initial);
+  branch.transact('Name the property',d=>{d.title='Recovered title';});
+  branch.transact('Place a road',d=>{d.start.roads.push([31,31]);});
+  branch.transact('Write the future',d=>{d.description='Future description';});branch.undo();
+  const beforeFork=branch.checkpoint(),fork=EditorDocument.fork(beforeFork,'independent-recovery');
+  const bound=d=>{assert.equal(d.id,'independent-recovery');assert.equal(d.map.id,'map-independent-recovery');};
+  bound(fork.value);assert.equal(fork.undoLabel,'Place a road');assert.equal(fork.redoLabel,'Write the future');
+  assert.equal(fork.value.title,'Recovered title');fork.undo();bound(fork.value);assert.deepEqual(fork.value.start.roads,initial.start.roads);
+  fork.undo();bound(fork.value);assert.equal(fork.value.title,initial.title);
+  fork.redo();fork.redo();fork.redo();bound(fork.value);assert.equal(fork.value.description,'Future description');
+  assert.deepEqual(branch.checkpoint(),beforeFork);assert(JSON.parse(game.validate_scenario(JSON.stringify(fork.value))).ok);
+  const damagedFork=structuredClone(beforeFork);damagedFork.history.past[0].after={};
+  const safeFork=EditorDocument.fork(damagedFork,'damaged-journal-copy');assert(safeFork.historyRecovered);assert.equal(safeFork.value.title,'Recovered title');assert(!safeFork.canUndo);
   console.log('PASS: atomic editor transactions, complete-stroke undo/redo, history reopening/recovery, branching, save acknowledgements, stable references, and bounded history.');
 }finally{game.free();}

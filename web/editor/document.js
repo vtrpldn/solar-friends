@@ -148,6 +148,26 @@ export class EditorDocument extends EventTarget{
     }
     return doc;
   }
+  static fork(checkpoint,id){
+    if(typeof id!=='string'||!id||id.length>100)throw Error('Choose a supported identity for the recovered draft.');
+    const source=EditorDocument.restore(checkpoint),copy=new EditorDocument(source.value);
+    const rebind=raw=>{const d=definition(raw);d.id=id;d.map.id='map-'+id;d.revision=1;d.map.revision=1;return encode(d);};
+    copy.#raw=rebind(source.#raw);copy.#saved=copy.#raw;
+    let cursor=source.#raw;
+    for(const step of [...source.#past].reverse()){
+      const before=applyStep(cursor,step,false);copy.#past.unshift(stepFor(step.label,rebind(before),rebind(cursor)));cursor=before;
+    }
+    cursor=source.#raw;
+    for(const step of [...source.#future].reverse()){
+      const after=applyStep(cursor,step,true);copy.#future.unshift(stepFor(step.label,rebind(cursor),rebind(after)));cursor=after;
+    }
+    copy.historyRecovered=source.historyRecovered;
+    // Revalidate the combined imported journal against the existing total
+    // byte/step limits before publishing the independent document.
+    const checked=EditorDocument.restore(copy.checkpoint());
+    checked.historyRecovered ||= copy.historyRecovered;
+    return checked;
+  }
   #changed(){this.#revision++;this.dispatchEvent(new Event('change'));}
   #trim(){
     let size=this.#past.reduce((sum,step)=>sum+historySize(step),0);
