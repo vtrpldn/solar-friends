@@ -19,5 +19,13 @@ try{
   assert.deepEqual(JSON.parse(await readFile(await download.path(),'utf8')),{format:'solar-friends-recovery',schema:1,kind,record});
  }
  const retained=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary();try{return {project:await l.getProject('damaged-draft'),run:await l.getRun('future-village')};}finally{l.close();}});
- assert.deepEqual(retained,fixtures);assert.deepEqual(errors,[]);console.log('PASS: public backups preserve damaged/future draft and village records, unknown fields, history and previous checkpoints without mutation or native validation.');
+ assert.deepEqual(retained,fixtures);
+ const backup=await page.evaluate(async()=>{const {Game}=await import('/pkg/solar_friends.js'),g=new Game();try{return {format:'solar-friends-recovery',schema:1,kind:'project',record:{format:'solar-friends-project',schema:1,id:'original-backup',checkpoint:{schema:1,definition:null},previous:{checkpoint:{schema:1,definition:JSON.parse(g.scenario_template('sandbox'))}},attribution:[]}};}finally{g.free();}});
+ await page.locator('#creator-import').setInputFiles({name:'recover.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+ await page.locator('#creator-library-dialog').waitFor({state:'hidden'});await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
+ assert(!page.url().includes('original-backup'));
+ const recoveryCheck=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary();try{const heads=await l.listProjects();return {count:heads.length,original:await l.getProject('damaged-draft'),copy:await l.getProject(new URL(location.href).searchParams.get('project'))};}finally{l.close();}});
+ assert.equal(recoveryCheck.count,2);assert.deepEqual(recoveryCheck.original,fixtures.project);assert(recoveryCheck.copy.checkpoint.definition.start.residents.length>0);
+ const refusal=await page.evaluate(async()=>{const {recoveredDraft}=await import('/editor/record-recovery.js');let rejected=0;for(const file of [{format:'solar-friends-recovery',schema:99,kind:'project'},{format:'solar-friends-recovery',schema:1,kind:'run'}])try{recoveredDraft(file,()=>({ok:true}));}catch{rejected++;}return rejected;});assert.equal(refusal,2);
+ assert.deepEqual(errors,[]);console.log('PASS: public backups preserve damaged/future draft and village records, unknown fields, history and previous checkpoints without mutation; previous-checkpoint import creates an independent validated draft and rejects unsupported envelopes.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

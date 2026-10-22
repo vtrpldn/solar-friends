@@ -9,3 +9,15 @@ export function downloadRecoveryRecord(kind,record){
  const text=recoveryRecord(kind,record),url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
  try{const a=document.createElement('a');a.href=url;a.download=`solar-friends-${kind}-backup.json`;a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),1000);}
 }
+// Import only understood envelopes. The retained original remains the recovery
+// authority; this operation extracts a validated definition into a new draft.
+export function recoveredDraft(file,validate){
+ if(file?.format!=='solar-friends-recovery'||file.schema!==1||file.kind!=='project'||file.record?.format!=='solar-friends-project'||file.record.schema!==1)throw Error('This backup needs another game version or is not a draft backup. Keep the original file.');
+ const record=file.record;
+ for(const [source,checkpoint]of [['current',record.checkpoint],['previous',record.previous?.checkpoint]]){
+  if(checkpoint?.schema!==1||!checkpoint.definition)continue;
+  const definition=structuredClone(checkpoint.definition),checked=validate(JSON.stringify(definition));
+  if(checked?.ok)return {definition,source,attribution:structuredClone(record.attribution??[])};
+ }
+ throw Error('Neither draft checkpoint can open in this game version. Keep the original backup; nothing was imported.');
+}
