@@ -323,6 +323,12 @@ async function showLibrary({reset=false}={}){
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
+  $('creator-repair-index').onclick=async e=>{
+    e.stopPropagation();const button=e.currentTarget;button.disabled=true;
+    try{const result=await library.rebuildIndex();await showLibrary();$('creator-library-status').textContent=`Checked ${result.scanned} saved records · repaired ${result.repaired} library entries.${result.skipped?' Some records could not be indexed; their stored data is unchanged.':''}`;}
+    catch(error){$('creator-library-status').textContent=error.message;}finally{button.disabled=false;}
+  };
+
   mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,definition:current.doc.value,valid:report.ok,terrain:terrainBase,snapshot:map.snapshot,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;refresh();}});
 
   $('creator-route-tools').onclick=()=>{const details=$('creator-routes');details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};

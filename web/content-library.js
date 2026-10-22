@@ -84,6 +84,33 @@ export class ContentLibrary extends EventTarget {
     return result;
   }
   #changed(kind,id,revision){const detail={kind,id,revision};this.#channel?.postMessage(detail);this.dispatchEvent(new CustomEvent('change',{detail}));}
+  async rebuildIndex(){
+    const db=await this.#db(),stores=['projects','runs','residents','releases','maps'];
+    const result=await new Promise((resolve,reject)=>{
+      const tx=db.transaction([...stores,'heads'],'readwrite'),heads=tx.objectStore('heads');
+      const result={scanned:0,repaired:0,skipped:0};let error;
+      for(const store of stores){
+        const request=tx.objectStore(store).openCursor();
+        request.onsuccess=()=>{
+          const cursor=request.result;if(!cursor)return;result.scanned++;
+          const record=cursor.value;
+          if(typeof record?.id!=='string'||!record.id){result.skipped++;cursor.continue();return;}
+          try{
+            const kind=recordKind(store),next=header(kind,record);
+            if(typeof next.title!=='string'||!next.title.trim())next.title='Untitled saved '+kind;
+            const previous=heads.get(next.key);
+            previous.onsuccess=()=>{
+              if(JSON.stringify(previous.result)!==JSON.stringify(next)){heads.put(next);result.repaired++;}
+              cursor.continue();
+            };
+          }catch(cause){error=cause;tx.abort();}
+        };
+      }
+      tx.oncomplete=()=>resolve(result);
+      tx.onabort=()=>reject(error||tx.error||Error('The library index could not be repaired. Saved records are unchanged.'));
+    });
+    this.#changed('heads',null,null);return result;
+  }
   async getPreview(kind,id){if(!['project','release','run','map'].includes(kind))return null;const row=await this.#read('previews',`${kind}:${id}`);return safeThumbnail(row?.image);}
   listMaps(){return this.#list('map');}
   getMap(id){return this.#read('maps',id);}
