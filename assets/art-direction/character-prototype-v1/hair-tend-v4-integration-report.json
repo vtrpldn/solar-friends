@@ -1,0 +1,39 @@
+{
+  "result": "PASS",
+  "scope": "Activity hair/body draft only; equipment, grips, temporal polish and full character/player integration remain",
+  "denied": [
+    "base:8",
+    "idle:8",
+    "activities:0",
+    "incomplete",
+    "swapped-body",
+    "wrong-pose",
+    "wrong-sheet",
+    "wrong-hash",
+    "rejected: This hair layer fails its authored pose bounds."
+  ],
+  "used": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "hashes": [
+    "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+    "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+    "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+    "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b"
+  ],
+  "coverage": {
+    "8": 1,
+    "9": 1,
+    "10": 1,
+    "11": 1
+  },
+  "selectedFiles": {
+    "8": "hair-curls-activities-8-candidate-v1.png",
+    "9": "hair-curls-activities-9-candidate-v1.png",
+    "10": "hair-curls-activities-10-candidate-v1.png",
+    "11": "hair-curls-activities-10-candidate-v1.png"
+  }
+}

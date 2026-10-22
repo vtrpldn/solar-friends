@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "status": "Tending hair/body draft; complete creator and temporal polish unfinished",
+  "why": "Kneeling heads require lower cap registration than watering; preserve unchanged bodies and whole-canvas coordinates.",
+  "generations": [
+    {
+      "index": 8,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as short close-fitting brown curls, then make EVERYTHING ELSE genuinely transparent. Keep the EXACT1254x1254 full-body canvas registration. This is a KNEELING head: the cap belongs near the MIDDLE of the canvas at x605..890,y375..575, never near the top. Match the green silhouette and lower fringe exactly, with opaque hair covering the entire crown, short sides above ears, high fringe leaving both eyes visible. Image2 supplies ONLY restrained dark warm-brown curl material/scale and upper-left lighting, not position or silhouette. Use fewer curl groups to stay close-fitting, no bulky long hairstyle, ear loops, tendrils, orange gloss or added volume. Remove all green, guide marks, body, skin, face, ears, eyebrows, eyes, hands, clothes, boots and faint body remnants. Every pixel outside the small cap must be alpha0, particularly everything below y650. Do not center, shift, zoom, resize, crop or normalize. No tools, props, text, shadow, stool or background. Output hair only at the exact green-template position for overlay on the unchanged kneeling body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-8-silhouette-guide.png",
+          "sha256": "be3e6bde0726aafd9070697c1bd63b8c159ed8505f91576e94138898fd44cd7b"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c8b71ab8-f6e4-400c-9e7c-6fe56251a935.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png",
+      "sha256": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea"
+    },
+    {
+      "index": 9,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as short close-fitting brown curls, then make EVERYTHING ELSE genuinely transparent. Keep the EXACT1254x1254 full-body canvas registration. This is a KNEELING head: the cap belongs near the MIDDLE of the canvas at x605..890,y410..610, never near the top. Match the green silhouette and lower fringe exactly, with opaque hair covering the entire crown, short sides above ears, high fringe leaving both eyes visible. Image2 supplies ONLY restrained dark warm-brown curl material/scale and upper-left lighting, not position or silhouette. Use fewer curl groups to stay close-fitting, no bulky long hairstyle, ear loops, tendrils, orange gloss or added volume. Remove all green, guide marks, body, skin, face, ears, eyebrows, eyes, hands, clothes, boots and faint body remnants. Every pixel outside the small cap must be alpha0, particularly everything below y650. Do not center, shift, zoom, resize, crop or normalize. No tools, props, text, shadow, stool or background. Output hair only at the exact green-template position for overlay on the unchanged kneeling body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-9-silhouette-guide.png",
+          "sha256": "5368b924e8a7752200b5a16d1eaa80a26202246db93726dd9c59925ec679f3d3"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-8fcf0129-ac1f-40a6-8e67-5529a15777c8.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png",
+      "sha256": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180"
+    },
+    {
+      "index": 10,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as short close-fitting brown curls, then make EVERYTHING ELSE genuinely transparent. Keep the EXACT1254x1254 full-body canvas registration. This is a KNEELING head: the cap belongs near the MIDDLE of the canvas at x645..930,y420..620, never near the top. Match the green silhouette and lower fringe exactly, with opaque hair covering the entire crown, short sides above ears, high fringe leaving both eyes visible. Image2 supplies ONLY restrained dark warm-brown curl material/scale and upper-left lighting, not position or silhouette. Use fewer curl groups to stay close-fitting, no bulky long hairstyle, ear loops, tendrils, orange gloss or added volume. Remove all green, guide marks, body, skin, face, ears, eyebrows, eyes, hands, clothes, boots and faint body remnants. Every pixel outside the small cap must be alpha0, particularly everything below y650. Do not center, shift, zoom, resize, crop or normalize. No tools, props, text, shadow, stool or background. Output hair only at the exact green-template position for overlay on the unchanged kneeling body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-10-silhouette-guide.png",
+          "sha256": "314bda145c5260a580473bcb5d43614869e574b9543f488dfd5df8fdeba6d3be"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-48c8f7ba-e1c5-4be1-9faf-2b1cc83e5358.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-10-candidate-v1.png",
+      "sha256": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0"
+    }
+  ],
+  "visualReview": "Inspected original/composed key poses, actual twelve sequence samples, two-way breathing transitions and world scenes in both facings/day/night. Crowns covered and faces readable. Existing body crossfade ghosting and curl-volume variation remain; equipment and grips incomplete.",
+  "reuse": "Pose11 uses the unchanged pose10 cap.",
+  "rejected": "The unchanged watering7 cap fails all tending head regions; preserved v1 diagnostic.",
+  "checks": [
+    "tend, cook, water integration PASS",
+    "fixed .98 bounds",
+    "original lower-body and painted-body pixels outside head unchanged",
+    "wrong pose/sheet/hash/body/incomplete provider refused"
+  ]
+}
