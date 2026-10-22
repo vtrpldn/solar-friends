@@ -127,9 +127,13 @@ pub fn kit(plan: &Plan) -> Bundle {
     k[14] = 1;
     k
 }
+/// An installed opening asset owns its kit without fabricating purchase receipts.
+pub fn installed(v: &Village, p: &Line) -> bool {
+    p.spent.is_some() || scenarios::routes::owns(v, p.id)
+}
 pub fn needs(v: &Village, id: Id) -> Bundle {
     line(v, id)
-        .filter(|p| p.live() && p.spent.is_none())
+        .filter(|p| p.live() && !installed(v, p))
         .map_or([0; COUNT], |p| p.kit)
 }
 pub fn held(v: &Village, owner: Owner, i: usize) -> u32 {
@@ -142,7 +146,7 @@ pub fn demand(v: &Village, i: usize) -> u32 {
     v.pipes
         .lines
         .iter()
-        .filter(|p| p.live() && p.spent.is_none())
+        .filter(|p| p.live() && !installed(v, p))
         .map(|p| p.kit[i])
         .sum()
 }
@@ -150,7 +154,7 @@ pub fn unclaimed(v: &Village, i: usize) -> u32 {
     v.pipes
         .lines
         .iter()
-        .filter(|p| p.live() && p.spent.is_none())
+        .filter(|p| p.live() && !installed(v, p))
         .map(|p| {
             let store = v
                 .logistics
@@ -222,7 +226,7 @@ pub fn ready(v: &Village, p: &Line) -> bool {
     {
         return false;
     }
-    p.spent.is_some()
+    installed(v, p)
         || (0..COUNT).all(|i| organics::available(v, Owner::Utility(p.id), i) >= p.kit[i])
 }
 pub fn approach(v: &Village, id: Id, resident: usize) -> Option<[f32; 2]> {
@@ -305,7 +309,7 @@ pub fn reconcile(v: &mut Village) {
         .map(|p| {
             (
                 p.id,
-                p.spent.is_some(),
+                installed(v, p),
                 present_owner(v, p.plan.kind, p.plan.from)
                     && present_owner(v, p.plan.kind, p.plan.to),
             )
@@ -323,7 +327,7 @@ pub fn reconcile(v: &mut Village) {
         }
     }
 }
-fn propose(
+pub(crate) fn propose(
     v: &Village,
     kind: Kind,
     from: i64,
@@ -387,6 +391,22 @@ fn queue_replacement(
         return Err("This connection is already planned or installed.");
     }
     let (plan, anchors) = propose(v, kind, from, to)?;
+    queue_plan(v, plan, anchors, previous, true)
+}
+pub(crate) fn queue_plan(
+    v: &mut Village,
+    plan: Plan,
+    anchors: [Anchor; 2],
+    previous: Option<Id>,
+    rebalance: bool,
+) -> Result<Id, &'static str> {
+    let kind = plan.kind;
+    if v.pipes.lines.iter().filter(|p| p.live()).count() >= 64 || v.pipes.lines.len() >= 256 {
+        return Err("Finish or remove an existing utility connection first.");
+    }
+    if v.pipes.lines.iter().any(|p|p.live() && p.phase != Phase::Removing && same_pair(p,kind,plan.from,plan.to)) {
+        return Err("This connection is already planned or installed.");
+    }
     let identities = if previous.is_some() || kind == Kind::Electricity {
         2
     } else {
@@ -434,10 +454,13 @@ fn queue_replacement(
             power::replace_pump(v, previous, id);
         }
     }
-    economy::rebalance(v);
+    if rebalance {
+        economy::rebalance(v);
+    }
     Ok(id)
 }
 pub fn remove(v: &mut Village, id: Id) -> bool {
+    let paid = line(v, id).is_some_and(|p| installed(v, p));
     let Some(p) = v
         .pipes
         .lines
@@ -448,7 +471,7 @@ pub fn remove(v: &mut Village, id: Id) -> bool {
     };
     p.replacement = false;
     p.paused = false;
-    if p.spent.is_some() {
+    if paid {
         p.phase = Phase::Removing;
         p.removal_work = 0.;
     } else {
@@ -518,7 +541,7 @@ pub fn work(v: &mut Village, r: &Resident, minutes: f32) -> bool {
             return true;
         }
     } else {
-        if p.spent.is_none() {
+        if !installed(v, &p) {
             let mut paid = [[0; 2]; COUNT];
             for (i, range) in paid.iter_mut().enumerate() {
                 if p.kit[i] > 0 {
@@ -763,10 +786,15 @@ pub fn uses_camp(v: &Village) -> bool {
     })
 }
 pub fn prune(v: &mut Village, people: &[Resident]) {
+    // Retain at most 64 authored route records, including retired assets, so
+    // frozen ownership bindings remain auditable after ordinary history pruning.
+    let authored: std::collections::HashSet<_> = v.scenario.as_ref()
+        .map(|o| o.routes.values().copied().collect()).unwrap_or_default();
     let mut history = 0;
     v.pipes.lines.reverse();
     v.pipes.lines.retain(|p| {
         if p.live()
+            || authored.contains(&p.id)
             || p.replacement
             || people
                 .iter()
@@ -817,12 +845,12 @@ pub fn valid(v: &Village) -> bool {
             })
             .abs()
                 > 0.001
-            || p.phase == Phase::AwaitingInputs && (p.spent.is_some() || p.work != 0.)
+            || p.phase == Phase::AwaitingInputs && (installed(v, p) || p.work != 0.)
             || matches!(p.phase, Phase::Installing | Phase::Active | Phase::Removing)
-                && p.spent.is_none()
+                && !installed(v, p)
             || p.phase == Phase::Installing && (p.work <= 0. || p.work >= p.labour())
             || p.phase == Phase::Active && p.work != p.labour()
-            || p.spent.is_none() && (p.work != 0. || p.transferred != 0. || p.removal_work != 0.)
+            || !installed(v, p) && (p.work != 0. || p.transferred != 0. || p.removal_work != 0.)
             || p.replacement && !matches!(p.phase, Phase::Removing | Phase::Retired)
             || p.plan.road_cells > p.plan.cells.len()
             || !matches!(p.phase, Phase::Removing | Phase::Retired) && p.removal_work != 0.

@@ -1,3 +1,4 @@
+import {paintUtilityRoute} from '../utility-lines-art.js';
 import {hitStartingBank} from './batteries.js';
 import {batteryImage,drawBattery} from '../battery-art.js';
 import {loadChickenArt,flock,drawChicken} from '../chickens.js';
@@ -136,6 +137,10 @@ export class EditorMap {
       for(let n=-.5;n<MAP_SIZE;n++)for(const points of [[[n,-.5],[n,MAP_SIZE-.5]],[[-.5,n],[MAP_SIZE-.5,n]]]){const a=this.project(...points[0]),b=this.project(...points[1]);c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);}
       c.stroke();
     }
+    const lines=(this.snapshot.village.pipes?.lines??[]).filter(p=>p.phase!=='retired');
+    c.save();c.lineJoin='round';c.lineCap='round';
+    for(const p of lines)paintUtilityRoute(c,this.project,this.scale,p.plan,({fresh:'#7bb8c8',irrigation:'#9dbb68',greywater:'#b99dbb',sewage:'#c6a06a',electricity:'#e0c46b'})[p.plan.kind],p.phase!=='active',{pump:p.plan.kind!=='electricity'});
+    c.restore();canvas.dataset.utilityCount=String(lines.length);
     const regions=[...(this.document.map.regions??[])];
     if(view.tool==='region'&&this.drag&&!this.drag.pan&&this.pointer){const a=this.drag.cell,b=this.pointer;regions.push({title:'New region',x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(a.x-b.x)+1,height:Math.abs(a.y-b.y)+1});}
     for(const region of regions){const {x,y,width:w,height:h}=region;this.polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]],'#d9af4822','#e8c05a');const p=this.project(x+(w-1)/2,y-.5);c.font='bold 12px sans-serif';c.textAlign='center';c.fillStyle='#4f3920';c.fillText(region.title,p.x,p.y-8);}

@@ -336,6 +336,7 @@ mod tests {
         v.scenario = Some(std::sync::Arc::new(Origin {
             schema: SCHEMA,
             batteries: BTreeMap::new(),
+        routes: BTreeMap::new(),
             definition: d.clone(),
             buildings: BTreeMap::new(),
             residents: bindings(&d),

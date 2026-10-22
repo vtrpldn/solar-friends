@@ -1238,7 +1238,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
         .pipes
         .lines
         .iter()
-        .filter(|p| p.live() && !p.paused && p.spent.is_none())
+        .filter(|p| p.live() && !p.paused && !pipes::installed(v, p))
     {
         let Some(to) = s.stores.iter().find(|p| p.owner == Owner::Utility(line.id)) else {
             continue;

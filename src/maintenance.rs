@@ -99,7 +99,7 @@ fn assets(v: &Village) -> Vec<Asset> {
         } else if n.kind == electricity::Kind::Pump {
             // Planned ports do not own a pump yet. A commissioned pump keeps
             // its record when relocation gives its node a replacement line.
-            let owned=matches!(n.owner,electricity::Owner::Pump(id) if pipes::line(v,id).is_some_and(|p|p.spent.is_some()));
+            let owned=matches!(n.owner,electricity::Owner::Pump(id) if pipes::line(v,id).is_some_and(|p|pipes::installed(v,p)));
             if !owned && !v.maintenance.records.iter().any(|r|r.equipment==Equipment::Pump(n.id)) {return None;}
             Equipment::Pump(n.id)
         } else {

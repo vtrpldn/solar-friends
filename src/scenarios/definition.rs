@@ -169,6 +169,8 @@ pub struct Start {
     pub resource_sites: Vec<super::sites::StartingSite>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub batteries: Vec<super::batteries::GroundBank>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub routes: Vec<super::routes::Route>,
     pub buildings: Vec<Structure>,
     pub roads: Vec<[i32; 2]>,
     pub inventories: Vec<Inventory>,
@@ -243,6 +245,8 @@ pub struct Origin {
     pub buildings: BTreeMap<String, usize>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub batteries: BTreeMap<String, simulation::Id>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub routes: BTreeMap<String, simulation::Id>,
     #[serde(default)]
     pub residents: BTreeMap<String, usize>,
 }
@@ -356,6 +360,7 @@ impl Definition {
                 liquids:None,
                 resource_sites:vec![],
                 batteries:vec![],
+                routes:vec![],
                 buildings: [("shed", -2, -3), ("warehouse", 4, -3)]
                     .into_iter()
                     .map(|(kind, dx, dy)| Structure {

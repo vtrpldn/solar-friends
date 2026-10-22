@@ -222,6 +222,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         || !supplies::valid(v)
         || !power::valid(v)
         || !scenarios::batteries::valid_opening(v)
+        || !scenarios::routes::valid_opening(v)
         || !economy::valid(v)
         || !sanitation::valid(v)
         || !maintenance::valid(v)
