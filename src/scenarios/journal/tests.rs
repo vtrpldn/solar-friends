@@ -828,3 +828,130 @@ fn returning_resident_pickups_credit_purchases_once() {
     assert!(g.restore(&saved));
     assert_eq!(g.snapshot(), saved);
 }
+
+#[test]
+fn physical_local_deliveries_credit_dropoff_and_preserve_activation_boundaries() {
+    let condition = || GoalCondition::Delivered {
+        material: "walls".into(),
+        count: 2,
+        credit: CounterCredit::AfterActivation,
+        building: Some("starting-warehouse".into()),
+    };
+    let mut d = scenario(vec![
+        chapter("first", vec![goal("first-load", condition())]),
+        chapter("second", vec![goal("next-load", condition())]),
+    ]);
+    assert!(compile(d.clone()).is_err());
+    d.rules.logistics = true;
+    let mut run = goal(
+        "all-loads",
+        GoalCondition::Delivered {
+            material: "walls".into(),
+            count: 4,
+            credit: CounterCredit::Run,
+            building: Some("starting-warehouse".into()),
+        },
+    );
+    run.optional = true;
+    d.journal.as_mut().unwrap().chapters[0].goals.push(run);
+    let mut g = game(d.clone());
+    let destination = g
+        .app
+        .world()
+        .resource::<Village>()
+        .scenario
+        .as_ref()
+        .unwrap()
+        .buildings["starting-warehouse"];
+    let mut reserve = [0u32; economy::COUNT];
+    reserve[6] = 2;
+    assert_eq!(
+        g.set_storage_target(destination, &serde_json::to_string(&reserve).unwrap()),
+        "ok"
+    );
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    let mut carrying = false;
+    for _ in 0..4000 {
+        g.tick(0.25);
+        carrying = g
+            .app
+            .world()
+            .resource::<Village>()
+            .logistics
+            .as_ref()
+            .unwrap()
+            .shipments
+            .iter()
+            .any(|h| h.carrying && h.material == 6);
+        if carrying {
+            break;
+        }
+    }
+    assert!(carrying);
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.,
+        "Collecting the load is not delivery"
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    for mutation in ["missing", "orphan", "overflow", "baseline"] {
+        let mut broken: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        let journal = &mut broken["village"]["progress"]["scenario_journal"];
+        match mutation {
+            "missing" => journal["delivery"] = serde_json::Value::Null,
+            "orphan" => journal["delivery"]["totals"] = serde_json::json!({"camp:food":0}),
+            "overflow" => {
+                journal["delivery"]["totals"]["building:starting-warehouse:walls"] =
+                    serde_json::json!(9_007_199_254_740_991u64)
+            }
+            _ => journal["goals"]["first-load"]["delivery_baseline"] = serde_json::json!({}),
+        }
+        assert!(!g.restore(&broken.to_string()), "{mutation}");
+        assert_eq!(g.snapshot(), saved);
+    }
+    for _ in 0..4000 {
+        g.tick(0.25);
+        if state(&mut g)["chapters"][0]["completed_at"].is_number() {
+            break;
+        }
+    }
+    assert!(state(&mut g)["chapters"][0]["completed_at"].is_number());
+    assert_eq!(
+        state(&mut g)["chapters"][1]["goals"][0]["condition"]["value"],
+        0.
+    );
+    reserve[6] = 4;
+    assert_eq!(
+        g.set_storage_target(destination, &serde_json::to_string(&reserve).unwrap()),
+        "ok"
+    );
+    let saved = g.snapshot();
+    let mut copy = Game::new();
+    assert!(copy.restore(&saved));
+    assert_eq!(copy.snapshot(), saved);
+    for _ in 0..4000 {
+        g.tick(0.25);
+        copy.tick(0.25);
+        if state(&mut g)["finished_at"].is_number() {
+            break;
+        }
+    }
+    assert!(state(&mut g)["finished_at"].is_number());
+    assert_eq!(g.snapshot(), copy.snapshot());
+    assert!(state(&mut g)["chapters"][0]["goals"][1]["completed_at"].is_number());
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Delivered {
+        material: "walls".into(),
+        count: 1,
+        credit: CounterCredit::Run,
+        building: Some("starting-shed".into()),
+    };
+    assert!(
+        compile(d).is_err(),
+        "A completed shed has no receiving inventory"
+    );
+}

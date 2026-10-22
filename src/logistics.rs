@@ -3,7 +3,26 @@ use crate::*;
 use economy::{Bundle, COUNT};
 use simulation::Id;
 
-const LOAD: u32 = 12;
+pub(crate) const LOAD: u32 = 12;
+pub(crate) fn pantry_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "kitchen"
+            | "coop"
+            | "grove"
+            | "square"
+            | "compost"
+            | "biodigester"
+            | "goat_pasture"
+            | "apiary"
+            | "orchard"
+    )
+}
+pub(crate) fn receives_at_building(kind: &str, completed: bool) -> bool {
+    !completed
+        || pantry_kind(kind)
+        || matches!(kind, "warehouse" | "workshop" | "garden" | "greenhouse")
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", content = "id", rename_all = "snake_case")]
 pub enum Owner {
@@ -310,18 +329,8 @@ pub fn sync(v: &mut Village) {
     }
     let mut wanted = vec![];
     for b in &v.buildings {
-        if matches!(
-            b.kind.as_str(),
-            "kitchen"
-                | "coop"
-                | "grove"
-                | "square"
-                | "compost"
-                | "biodigester"
-                | "goat_pasture"
-                | "apiary"
-                | "orchard"
-        ) && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
+        if pantry_kind(&b.kind)
+            && (b.progress >= 100. || building_work::original_progress(v, b.id) == Some(100.))
         {
             wanted.push((Owner::Pantry(b.id), b.x as f32, b.y as f32, 60));
         } else if b.kind == "warehouse"
@@ -1256,18 +1265,26 @@ fn candidates(v: &Village) -> Vec<Candidate> {
             if missing == 0 {
                 continue;
             }
-            for from in s.stores.iter().filter(|p| p.owner == Owner::Camp) {
-                let n = missing
-                    .min(from.items[i].saturating_sub(held(s, from.id, i)))
-                    .min(economy::free(v, i))
-                    .min(LOAD);
+            for from in s.stores.iter().filter(|p| {
+                p.id != to.id
+                    && matches!(p.owner, Owner::Camp | Owner::Warehouse(_))
+                    && !closing(v, p.owner)
+            }) {
+                // A reserve can draw from another storage house. Preserve that
+                // house's own reserve and all already claimed outgoing loads.
+                let available = usable(v, from, i).saturating_sub(if from.managed {
+                    from.target[i]
+                } else {
+                    0
+                });
+                let n = missing.min(available).min(economy::free(v, i)).min(LOAD);
                 if n > 0 {
                     out.push(Candidate {
                         from: from.id,
                         to: to.id,
                         material: i,
                         amount: n,
-                        rank: (3, 0, to.id.0),
+                        rank: (3, u32::from(from.owner != Owner::Camp), to.id.0),
                     });
                 }
             }
@@ -1612,6 +1629,7 @@ pub fn advance(
         );
         s.shipments.remove(index);
         outcomes::delivered(v, owner, h.material, h.delivery_started);
+        scenarios::journal::delivery::received(v, owner, h.material, h.amount);
         if useful {
             skills::award(v, r.id, skills::Skill::Logistics, h.amount.min(3) as u8);
         }
@@ -2756,6 +2774,105 @@ mod tests {
         assert!(
             navigation::segment(&v, [r.x, r.y], point),
             "Avoiding a neighbour cannot strand cargo behind a plot corner"
+        );
+    }
+}
+
+#[cfg(test)]
+mod targeted_storage_tests {
+    use super::*;
+    #[test]
+    fn warehouse_reserves_pull_from_existing_storage_without_spending_its_reserve() {
+        let mut d = scenarios::Definition::builtin(modes::Mode::Sandbox);
+        d.rules.logistics = true;
+        d.start.buildings.push(scenarios::Structure {
+            id: "second-store".into(),
+            kind: "warehouse".into(),
+            x: 25,
+            y: 25,
+            state: scenarios::BuildingState::Completed,
+            recipe: "standard".into(),
+            appearance: None,
+        });
+        let mut g = scenarios::compile(d)
+            .unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()))
+            .0;
+        let v = g.app.world().resource::<Village>();
+        let origin = v.scenario.as_ref().unwrap();
+        let first = origin.buildings["starting-warehouse"];
+        let second = origin.buildings["second-store"];
+        let stores = &v.logistics.as_ref().unwrap().stores;
+        let source = stores
+            .iter()
+            .find(|p| p.owner == Owner::Warehouse(first))
+            .unwrap();
+        let source_id = source.id;
+        let stock = source.items[0];
+        let destination_id = stores
+            .iter()
+            .find(|p| p.owner == Owner::Warehouse(second))
+            .unwrap()
+            .id;
+        assert!(stock >= 8);
+        assert_eq!(
+            stores
+                .iter()
+                .find(|p| p.owner == Owner::Camp)
+                .unwrap()
+                .items[0],
+            0
+        );
+        let mut target = [0u32; COUNT];
+        target[0] = 8;
+        assert_eq!(
+            g.set_storage_target(second, &serde_json::to_string(&target).unwrap()),
+            "ok"
+        );
+        let candidate = |v: &Village| {
+            candidates(v)
+                .into_iter()
+                .find(|c| c.from == source_id && c.to == destination_id && c.material == 0)
+        };
+        let v = g.app.world().resource::<Village>();
+        assert_eq!(candidate(v).unwrap().amount, 8);
+        assert_eq!(
+            v.logistics
+                .as_ref()
+                .unwrap()
+                .stores
+                .iter()
+                .find(|p| p.id == source_id)
+                .unwrap()
+                .items[0],
+            stock
+        );
+        assert_eq!(
+            v.logistics
+                .as_ref()
+                .unwrap()
+                .stores
+                .iter()
+                .find(|p| p.id == destination_id)
+                .unwrap()
+                .items[0],
+            0
+        );
+        target[0] = stock;
+        assert_eq!(
+            g.set_storage_target(first, &serde_json::to_string(&target).unwrap()),
+            "ok"
+        );
+        assert!(candidate(g.app.world().resource::<Village>()).is_none());
+        target[0] = stock - 4;
+        assert_eq!(
+            g.set_storage_target(first, &serde_json::to_string(&target).unwrap()),
+            "ok"
+        );
+        assert_eq!(
+            candidate(g.app.world().resource::<Village>())
+                .unwrap()
+                .amount,
+            4
         );
     }
 }

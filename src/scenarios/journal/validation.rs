@@ -36,8 +36,11 @@ pub fn check(d: &Definition, report: &mut Report) {
             {
                 report.push("journal.chapters", "invalid_goal", "Give every goal a unique identity, a title up to 100 characters and description up to 1,000 characters.");
             }
+            if !delivery::targets_valid(&goal.condition, d) {
+                report.push("journal.chapters","missing_delivery_destination","Choose an existing starting building with a receiving inventory, a construction blueprint, or the arrival store.");
+            }
             if !d.rules.logistics && needs_production(&goal.condition) {
-                report.push("journal.chapters","disabled_production_goal","Enable materials, hauling and resident work before requiring prepared-material production.");
+                report.push("journal.chapters","disabled_production_goal","Enable materials, hauling and resident work before requiring preparation or resident deliveries.");
             }
             if !d.rules.climate && needs_climate(&goal.condition) {
                 report.push(
@@ -114,6 +117,9 @@ fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> bool {
         }
         GoalCondition::Funds { cents } => (0..=1_000_000_000).contains(cents),
         GoalCondition::Date { minute } => minute.is_finite() && (0.0..=5_000_000.).contains(minute),
+        GoalCondition::Delivered {
+            material, count, ..
+        } => economy::NAMES.contains(&material.as_str()) && (1..=1_000_000).contains(count),
         GoalCondition::Traded {
             material, count, ..
         } => {
@@ -205,7 +211,7 @@ fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
 
 fn needs_production(c: &GoalCondition) -> bool {
     match c {
-        GoalCondition::Produced { .. } => true,
+        GoalCondition::Produced { .. } | GoalCondition::Delivered { .. } => true,
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
             conditions.iter().any(needs_production)
         }

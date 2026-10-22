@@ -20,6 +20,7 @@ fn activate(chapter: &Chapter, state: &mut State, v: &Village) {
                 building_baseline: buildings.clone(),
                 production_baseline: production_baselines(&goal.condition, v),
                 trade_baseline: trade::baselines(&goal.condition, state.trade.as_ref()),
+                delivery_baseline: delivery::baselines(&goal.condition, state.delivery.as_ref()),
             },
         );
     }
@@ -36,6 +37,7 @@ pub fn initialize(v: &mut Village) {
         last_sample: v.minutes,
         finished_at: None,
         trade: trade::requested(journal).then(trade::Ledger::default),
+        delivery: delivery::initialize(journal),
         chapters: journal
             .chapters
             .iter()
@@ -74,7 +76,15 @@ pub fn advance(v: &mut Village) {
             let record = &state.goals[&goal.id];
             if record.activated_at.is_some()
                 && record.completed_at.is_none()
-                && measure(&goal.condition, record, &previous, v, state.trade.as_ref()).0
+                && measure(
+                    &goal.condition,
+                    record,
+                    &previous,
+                    v,
+                    state.trade.as_ref(),
+                    state.delivery.as_ref(),
+                )
+                .0
             {
                 state.goals.get_mut(&goal.id).unwrap().completed_at = Some(v.minutes);
             }
@@ -109,6 +119,7 @@ fn measure(
     goals: &HashSet<String>,
     v: &Village,
     trade_ledger: Option<&trade::Ledger>,
+    delivery_ledger: Option<&delivery::Ledger>,
 ) -> (bool, serde_json::Value) {
     use serde_json::json;
     let (value, target, label) = match c {
@@ -200,6 +211,66 @@ fn measure(
                         "during this run"
                     } else {
                         "after this goal activates"
+                    }
+                ),
+            )
+        }
+        GoalCondition::Delivered {
+            material,
+            count,
+            credit,
+            building,
+        } => {
+            let key = delivery::key(building.as_deref(), material);
+            let total = delivery_ledger
+                .and_then(|l| l.totals.get(&key))
+                .copied()
+                .unwrap_or(0);
+            let baseline = if *credit == CounterCredit::AfterActivation {
+                record.delivery_baseline.get(&key).copied().unwrap_or(0)
+            } else {
+                0
+            };
+            let target = building
+                .as_ref()
+                .and_then(|id| {
+                    v.scenario
+                        .as_ref()?
+                        .definition
+                        .start
+                        .buildings
+                        .iter()
+                        .find(|b| b.id == *id)
+                })
+                .map_or_else(
+                    || "the arrival store".into(),
+                    |b| {
+                        let runtime = v.scenario.as_ref().and_then(|s| s.buildings.get(&b.id));
+                        v.buildings
+                            .iter()
+                            .find(|live| Some(&live.id) == runtime)
+                            .map_or_else(
+                                || format!("the removed starting {}", b.kind.replace('_', " ")),
+                                |live| {
+                                    format!(
+                                        "{} at ({}, {})",
+                                        live.kind.replace('_', " "),
+                                        live.x,
+                                        live.y
+                                    )
+                                },
+                            )
+                    },
+                );
+            (
+                total.saturating_sub(baseline) as f64,
+                f64::from(*count),
+                format!(
+                    "Carry {count} units of {material} to {target} {}",
+                    if *credit == CounterCredit::Run {
+                        "during this playthrough"
+                    } else {
+                        "after this goal starts"
                     }
                 ),
             )
@@ -311,7 +382,7 @@ fn measure(
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
             let results: Vec<_> = conditions
                 .iter()
-                .map(|c| measure(c, record, goals, v, trade_ledger))
+                .map(|c| measure(c, record, goals, v, trade_ledger, delivery_ledger))
                 .collect();
             let all = matches!(c, GoalCondition::All { .. });
             let complete = if all {
@@ -334,6 +405,7 @@ fn measure(
         GoalCondition::Harvests { .. } => ("harvests", "count"),
         GoalCondition::Produced { .. } => ("produced", "count"),
         GoalCondition::Traded { .. } => ("traded", "count"),
+        GoalCondition::Delivered { .. } => ("delivered", "count"),
         GoalCondition::Maintain { .. } => ("maintain", "duration_minutes"),
         _ => unreachable!(),
     };
@@ -362,6 +434,11 @@ fn measure(
         GoalCondition::Produced { material, .. } => {
             json!({"kind":"production","material":material})
         }
+        GoalCondition::Delivered {
+            material, building, ..
+        } => {
+            json!({"kind":"delivery","material":material,"destination":building.as_ref().and_then(|id|v.scenario.as_ref()?.buildings.get(id))})
+        }
         GoalCondition::Traded { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Stored { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Funds { .. } => json!({"kind":"trade"}),
@@ -387,7 +464,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let goals:Vec<_>=chapter.goals.iter().map(|goal| {
             let record=&state.goals[&goal.id];
             let status=if record.completed_at.is_some(){"complete"}else if record.activated_at.is_some(){"active"}else{"locked"};
-            let condition=if record.activated_at.is_some(){measure(&goal.condition,record,&completed,v,state.trade.as_ref()).1}else{serde_json::Value::Null};
+            let condition=if record.activated_at.is_some(){measure(&goal.condition,record,&completed,v,state.trade.as_ref(),state.delivery.as_ref()).1}else{serde_json::Value::Null};
             serde_json::json!({"id":goal.id,"title":goal.title,"description":goal.description,"optional":goal.optional,"status":status,"activated_at":record.activated_at,"completed_at":record.completed_at,"condition":condition})
         }).collect();
         serde_json::json!({"id":chapter.id,"title":chapter.title,"description":chapter.description,"completed_at":state.chapters[&chapter.id],"goals":goals})
@@ -402,6 +479,9 @@ pub fn valid(v: &Village) -> bool {
     let Some(state) = &v.progress.scenario_journal else {
         return false;
     };
+    if !delivery::valid(state.delivery.as_ref(), journal, v) {
+        return false;
+    }
     if state.trade.is_some() != trade::requested(journal)
         || state
             .trade
@@ -453,6 +533,15 @@ pub fn valid(v: &Village) -> bool {
             {
                 return false;
             }
+            let delivery_expected = delivery::baselines(&goal.condition, state.delivery.as_ref());
+            if active
+                && (record.delivery_baseline.len() != delivery_expected.len()
+                    || record.delivery_baseline.iter().any(|(key, value)| {
+                        delivery_expected.get(key).is_none_or(|total| value > total)
+                    }))
+            {
+                return false;
+            }
             let trade_expected = trade::baselines(&goal.condition, state.trade.as_ref());
             if active
                 && (record.trade_baseline.len() != trade_expected.len()
@@ -493,6 +582,7 @@ pub fn valid(v: &Village) -> bool {
                 || !record.building_baseline.is_empty()
                 || !record.production_baseline.is_empty()
                 || !record.trade_baseline.is_empty()
+                || !record.delivery_baseline.is_empty()
             {
                 return false;
             }

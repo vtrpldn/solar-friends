@@ -188,7 +188,7 @@ impl Game {
         let buildings: Vec<_> = progression::BUILDINGS.iter().map(|kind| {
             let recipes: Vec<_> = ["standard", "local", "adobe"].into_iter()
                 .filter(|recipe| economy::recipe(kind, recipe).is_some()).collect();
-            serde_json::json!({"id":kind,"size":interactions::footprint_size(kind),"recipes":recipes,
+            serde_json::json!({"id":kind,"receives_deliveries":logistics::receives_at_building(kind,true),"size":interactions::footprint_size(kind),"recipes":recipes,
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
