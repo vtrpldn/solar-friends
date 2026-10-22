@@ -1,24 +1,21 @@
+import {createAppearanceCache} from '../appearance-cache.js';
 import {unlitFilter} from '../power.js';
 import {prototypeAppearanceRecipe,validatePrototypeAppearanceRecipe} from '../character-appearance-recipe.js';
 import {paintPreparedResidentPortrait} from '../resident-portrait.js';
 import {bodyMaterialPalettes} from '../character-materials.js';
 import {residentClips} from '../resident-animation.js';
 // Review-only until parts, equipment and native recipes pass the release gates.
-export function createComposedAppearanceReview({reviews,materials,maxClips=12}){
- if(!Number.isInteger(maxClips)||maxClips<1||maxClips>24)throw Error('Choose a bounded appearance review cache.');
- const owned=new Map(Object.entries(reviews)),cache=new Map();let epoch=0;
+export function createComposedAppearanceReview({reviews,materials,maxClips=12,maxConcurrent=2,maxQueued=48}){
+ const owned=new Map(Object.entries(reviews)),cache=createAppearanceCache({maxEntries:maxClips,maxConcurrent,maxQueued,compose:({review,checked})=>review.composeMaterials(materials.provider(checked.materials))});
  return {
-  async provider(clip,recipe=prototypeAppearanceRecipe()){
+  provider(clip,recipe=prototypeAppearanceRecipe()){
    const keyClip=clip==='sleep'?'sit':clip,review=owned.get(keyClip);
-   if(!review)throw Error('This appearance animation is unavailable.');
-   const checked=validatePrototypeAppearanceRecipe(recipe),key=keyClip+':'+JSON.stringify(checked);
-   if(cache.has(key)){const provider=cache.get(key);cache.delete(key);cache.set(key,provider);return provider;}
-   const started=epoch,provider=await review.composeMaterials(materials.provider(checked.materials));
-   if(started===epoch){cache.set(key,provider);while(cache.size>maxClips)cache.delete(cache.keys().next().value);}
-   return provider;
+   if(!review)return Promise.reject(Error('This appearance animation is unavailable.'));
+   let checked;try{checked=validatePrototypeAppearanceRecipe(recipe);}catch(error){return Promise.reject(error);}
+   return cache.get(keyClip+':'+JSON.stringify(checked),{review,checked});
   },
-  clear(){epoch++;cache.clear();},
-  cacheInfo:()=>({clips:cache.size,frames:cache.size*4,maximumFrames:maxClips*4,rgbaBytes:cache.size*4*256*256*4}),
+  clear:()=>cache.clear(),
+  cacheInfo:()=>{const info=cache.info();return {...info,clips:info.entries,frames:info.entries*4,maximumFrames:maxClips*4,rgbaBytes:info.entries*4*256*256*4};},
  };
 }
 export async function installComposedAppearanceReview({reviews,materials,scene,before}){

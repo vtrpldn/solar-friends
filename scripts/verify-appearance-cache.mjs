@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {createAppearanceCache} from '../web/appearance-cache.js';
+const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
+const jobs=[],calls=[];
+const cache=createAppearanceCache({maxEntries:2,maxConcurrent:2,maxQueued:3,compose:input=>{calls.push(input);return new Promise((resolve,reject)=>jobs.push({input,resolve,reject}));}});
+const a=cache.get('a','A'),duplicate=cache.get('a','unused'),b=cache.get('b','B');assert.equal(a,duplicate);await flush();assert.deepEqual(calls,['A','B']);
+const c=cache.get('c','C'),d=cache.get('d','D'),e=cache.get('e','E');assert.equal(cache.get('c','unused'),c);await assert.rejects(cache.get('overflow','never'),/busy/);assert.deepEqual(cache.info(),{entries:0,active:2,queued:3,pending:5,maxEntries:2,maxConcurrent:2,maxQueued:3});
+jobs[0].resolve({id:'A'});await a;await flush();assert.deepEqual(calls,['A','B','C']);assert.equal((await cache.get('a','unused')).id,'A');jobs[1].resolve({id:'B'});await b;await flush();jobs[2].resolve({id:'C'});await c;await flush();jobs[3].resolve({id:'D'});await d;await flush();jobs[4].resolve({id:'E'});await e;await flush();assert.equal(cache.info().entries,2);assert.equal(cache.info().pending,0);assert.equal(cache.info().active,0);
+// Active and queued work still settles for its original consumers after clear,
+// but neither can refill the new generation or satisfy a new-generation key.
+const old=cache.get('old','old'),other=cache.get('other','other'),queued=cache.get('queued','old queued');await flush();cache.clear();const next=cache.get('old','new');assert.notEqual(old,next);assert.equal(cache.info().entries,0);jobs[5].resolve('old value');jobs[6].resolve('other value');assert.equal(await old,'old value');assert.equal(await other,'other value');await flush();assert.equal(jobs[7].input,'old queued');jobs[7].resolve('queued value');assert.equal(await queued,'queued value');await flush();assert.equal(cache.info().entries,0);assert.equal(jobs[8].input,'new');jobs[8].resolve('new value');assert.equal(await next,'new value');await flush();assert.equal(await cache.get('old','unused'),'new value');
+let attempts=0;const retry=createAppearanceCache({compose:()=>{if(++attempts===1)throw Error('decode failed');return 'recovered';}});await assert.rejects(retry.get('retry',{}),/decode failed/);assert.equal(await retry.get('retry',{}),'recovered');await flush();assert.equal(retry.info().pending,0);
+for(const options of [{maxEntries:0},{maxEntries:25},{maxConcurrent:0},{maxConcurrent:5},{maxQueued:0},{maxQueued:129}])assert.throws(()=>createAppearanceCache({compose:()=>{},...options}),/bounded/);
+await assert.rejects(cache.get('',{}),/canonical/);
+// LRU reads retain the recently used recipe, evicting the older one.
+const counts=new Map(),lru=createAppearanceCache({maxEntries:2,compose:key=>{counts.set(key,(counts.get(key)??0)+1);return {key};}});await lru.get('one','one');await lru.get('two','two');await lru.get('one','one');await lru.get('three','three');await lru.get('one','one');await lru.get('two','two');assert.equal(counts.get('one'),1);assert.equal(counts.get('two'),2);
+console.log('PASS: shared pending work, bounded active/queued compositions, explicit overload, FIFO admission, LRU reuse, clear generations, failure retry and invalid limit refusal.');
