@@ -25,7 +25,7 @@ impl Equipment {
             Self::Truck => (0.45, 0.015),
         }
     }
-    fn label(self) -> &'static str {
+    pub(crate) fn label(self) -> &'static str {
         match self {
             Self::Pump(_) => "Water pump",
             Self::Workshop(_) => "Workshop tools",
@@ -113,6 +113,42 @@ fn assets(v: &Village) -> Vec<Asset> {
         })
     }));
     result
+}
+/// Physical equipment present before any authored overrides.
+pub(crate) fn starting_assets(v: &Village) -> Vec<(Equipment, [f32; 2])> {
+    assets(v)
+        .into_iter()
+        .map(|a| (a.equipment, a.location))
+        .collect()
+}
+/// Seed current physical condition without accumulated wear or service history.
+/// Disabled maintenance retains the baseline without aging it.
+pub(crate) fn seed_condition(
+    v: &mut Village,
+    equipment: Equipment,
+    condition: f64,
+    deferred: bool,
+) -> bool {
+    if !condition.is_finite()
+        || !(0.0..=100.).contains(&condition)
+        || !assets(v).iter().any(|a| a.equipment == equipment)
+    {
+        return false;
+    }
+    let record = Record {
+        equipment,
+        commissioned: v.minutes,
+        condition,
+        exposure_minutes: 0.,
+        use_units: 0.,
+        automatic_deferred: deferred,
+    };
+    if let Some(r) = v.maintenance.records.iter_mut().find(|r| r.equipment == equipment) {
+        *r = record;
+    } else {
+        v.maintenance.records.push(record);
+    }
+    true
 }
 pub fn sync(v: &mut Village) {
     if !v.maintenance.enabled && v.maintenance.records.is_empty() && v.maintenance.jobs.is_empty() {

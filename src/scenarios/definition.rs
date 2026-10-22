@@ -171,6 +171,10 @@ pub struct Start {
     pub batteries: Vec<super::batteries::GroundBank>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub routes: Vec<super::routes::Route>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub equipment: Vec<super::equipment::StartingCondition>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub automatic_service: Option<bool>,
     pub buildings: Vec<Structure>,
     pub roads: Vec<[i32; 2]>,
     pub inventories: Vec<Inventory>,
@@ -361,6 +365,8 @@ impl Definition {
                 resource_sites:vec![],
                 batteries:vec![],
                 routes:vec![],
+                equipment:vec![],
+                automatic_service:None,
                 buildings: [("shed", -2, -3), ("warehouse", 4, -3)]
                     .into_iter()
                     .map(|(kind, dx, dy)| Structure {

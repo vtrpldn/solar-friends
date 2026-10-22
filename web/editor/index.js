@@ -1,3 +1,4 @@
+import {EquipmentEditor} from './equipment.js';
 import {RoutesEditor,routeNames,dependentRoutes,hitStartingRoute} from './routes.js';
 import {hitStartingBank,newStartingBank,bankFields,buildingBatteryFields} from './batteries.js';
 import {startingAnimalFields,setStartingAnimalField} from './animals.js';
@@ -35,7 +36,7 @@ const ruleNames={logistics:'Materials, hauling and resident work',land:'Living s
 let newBiome="mata-atlantica";
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -92,6 +93,7 @@ function refresh(){
   weatherEditor.render(d);
   liquidsEditor.render(d,report);
   routesEditor.render(d,report);
+  equipmentEditor.render(d);
   regionsEditor.render(d);
   journalEditor.render(d,report);
   residentsEditor.render(d);
@@ -406,6 +408,7 @@ try{
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
+  equipmentEditor=new EquipmentEditor($('creator-equipment-fields'),{engine,catalog:catalog.equipment,change,focus:(x,y)=>map.centerAt(x,y)});
   routesEditor=new RoutesEditor($('creator-routes-fields'),{engine,Game,catalog,change,buildingName:title,notify:toast,focus:(x,y)=>map.centerAt(x,y),select:id=>{setTool('select');if(id)map.selectRoute(id);else map.select(null);},preview:plan=>{map.utilityPreview=plan;map.render();},draw:()=>setTool('route-path')});
   liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});

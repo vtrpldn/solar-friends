@@ -228,6 +228,7 @@ fn build(
     scenarios::liquids::install(&mut village)?;
     scenarios::batteries::install(&mut village)?;
     scenarios::routes::install(&mut village)?;
+    scenarios::equipment::install(&mut village)?;
     maintenance::sync(&mut village);
     let mut app = App::new();
     app.insert_resource(Step::default())
