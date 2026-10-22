@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "scope": "One static draft pose only; visual approval and remaining activity poses separate",
+  "unchanged": 60659,
+  "foreground": 439,
+  "visibleTool": 2594,
+  "bounds": [
+    136,
+    123,
+    246,
+    201
+  ],
+  "source": {
+    "sha256": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+    "width": 1254,
+    "height": 1254
+  },
+  "refused": [
+    "hash",
+    "pose",
+    "source-size",
+    "body-binding",
+    "changed-body-alpha",
+    "changed-body-pixels",
+    "overlapping-appearance",
+    "unsupported-animation-pose"
+  ]
+}

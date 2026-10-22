@@ -1,0 +1,11 @@
+import {loadCharacterImageSource} from '../character-image-source.js';
+import {registeredEquipmentFrame} from '../character-equipment.js';
+import {prototypeAppearanceRecipe} from '../character-appearance-recipe.js';
+export async function installEquipmentReview({frames,binding,materials,appearance,scene,before}){
+ const registration=await(await fetch('/art/characters/prototype-v1/water-equipment-pose-4-v1.json')).json(),equipment=await loadCharacterImageSource('/art/characters/prototype-v1/'+registration.file),section=document.createElement('section');section.id='equipment-pose-review';section.innerHTML='<h2>Watering can · first equipment pose</h2><p>Draft activity layer on watering pose 1 only. Original body, painted colours, hair and foreground hands keep their own pixels. Other watering poses and temporal continuity remain unfinished; excluded from player choices.</p>';
+ const grid=document.createElement('div');grid.className='body-review-scenes';section.append(grid);const recipe=prototypeAppearanceRecipe({skin:'copper',shirt:'teal',shorts:'sage',shoes:'graphite'}),painted=materials.provider(recipe.materials).frameForPose('activities',4),hair=await appearance.provider('water',recipe),frame=await registeredEquipmentFrame({body:frames.activities[4],binding,appearanceBody:painted,appearanceFrame:hair.frameForPose('activities',4),equipment,registration,sheet:'activities',index:4});
+ const detail=document.createElement('canvas');detail.width=detail.height=512;detail.getContext('2d').drawImage(frame,0,0,512,512);section.append(detail);
+ const provider={frameForPose:(sheet,index)=>{if(sheet!=='activities'||index!==4)throw Error('Only the first watering pose has equipment artwork.');return frame;}};
+ for(const facing of [1,-1])for(const night of [0,1]){const figure=document.createElement('figure'),canvas=document.createElement('canvas'),label=document.createElement('figcaption');canvas.width=900;canvas.height=420;label.textContent=`${facing===1?'Right':'Left'} · ${night?'night':'day'}`;scene(canvas,night,{hairProvider:provider,hairMode:'water',hairSeconds:0,facingOverride:facing});figure.append(canvas,label);grid.append(figure);}
+ before.before(section);section.dataset.ready='true';return {registration,equipment,frame,recipe,painted,hairFrame:hair.frameForPose('activities',4),provider};
+}

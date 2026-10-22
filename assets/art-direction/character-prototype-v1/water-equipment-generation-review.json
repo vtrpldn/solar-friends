@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen.imagegen",
+  "scope": "One static watering pose, not a completed activity clip or approved player appearance",
+  "inputs": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/hair-activities-4-body.png",
+      "role": "Exact whole prepared body placement and painted style reference"
+    },
+    {
+      "path": "/private/tmp/solar-composed-recipe-review.png",
+      "role": "Inspected real ground, resident, buildings and day/night context; not passed to generator"
+    }
+  ],
+  "calls": [
+    {
+      "prompt": "Use case: precise-object-edit. Asset: Solar Friends resident activity EQUIPMENT layer, a painted blue metal watering can. Input 1 is a placement and scale reference ONLY, a 1254x1254 prepared resident frame. Output an identically framed square TRANSPARENT canvas with ONLY the watering can, NO PERSON, no arms, no hands, no clothing, no ground. Preserve the entire input coordinate space: do not crop or center the can. At the reference scale, the near hand grips at (789,622), the far hand is at (940,681). Paint the watering can aligned under these hands: arched carry handle passing through (789,622), rounded muted blue metal reservoir roughly x795..1015 y665..850, long pouring spout extending toward x1160 y830, modest rose nozzle aimed down-right. Can is held at waist level rather than on the ground. Keep full spout within canvas, large transparent margin above and left. Upper-left sunlight, broad warm painted shading, soft illustrated edges, restrained highlights, same artist and material detail as the supplied resident. No glossy plastic, no photorealism, no outlines or guide marks, no text, no fingers or body fragments, no water stream. True transparent interior of handle and outside silhouette. This is one watering can layer in the exact full-body coordinate space, not a centered inventory icon.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-4-body.png"
+      ],
+      "output": "assets/art-direction/character-prototype-v1/watering-can-pose-4-rejected-v1.png",
+      "status": "rejected",
+      "finding": "Reservoir and handle too large and too low, excessive detailed patina."
+    },
+    {
+      "prompt": "Use case: precise-object-edit. Create a corrected equipment-only layer for Solar Friends. Image 1 is the unmodified resident placement/paint style reference. Image 2 is the REJECTED watering can: its reservoir is far too large, too low and too textured. Paint ONLY one smaller blue watering can on a square transparent full-frame canvas, preserving image 1's entire canvas/coordinate space. No resident/body/hands. Precise composition in percentages of full canvas: carry handle arch spans x61%..75%, y47%..59%, its upper grip passes through x64% y49.5%; reservoir spans x65%..81%, y54%..68%; pouring spout extends from x80% y60% to rose nozzle at x94% y66%. The far hand at x75% y54% will support the rim; do not paint the hand. Entire can and spout fit within x59%..97%, y46%..70%. All remaining space is transparent. Reservoir height is 14% of canvas, about one sixth the resident's height, not a bucket as tall as their legs. Simplified warm painted shading, broad blue values, subtle upper-left highlights, very restrained patina, no metal shine or micro-texture. It must look painted by the same artist as the resident. Transparent handle opening, no water stream, no floor/shadow/platform, no labels or guide marks. Do not crop to the object or center it.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-4-body.png",
+        "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1c5de258-abdc-47a7-af7f-44f1eb946786.png"
+      ],
+      "output": "web/art/characters/prototype-v1/watering-can-pose-4-candidate-v2.png",
+      "status": "static draft retained for review",
+      "finding": "Smaller blue can reads beside the unchanged body at world scale. Near hand crosses handle and far hand is near the rim, with source-bound foreground occlusion. Static first hold pose, not pouring or animation approval. Metal highlights remain stronger than body shading and need full-clip style review."
+    }
+  ],
+  "evidence": [
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-4-v1-scenes.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-4-v1-report.json"
+  ],
+  "remaining": [
+    "Other three watering poses",
+    "Pouring motion and temporal continuity",
+    "Cooking, tending and feeding equipment",
+    "Other modular appearance options and final style approval",
+    "Native/player integration"
+  ]
+}
