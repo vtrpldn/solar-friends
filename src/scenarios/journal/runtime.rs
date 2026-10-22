@@ -11,6 +11,7 @@ pub(super) fn observation(conditions: &[&GoalCondition], state: &State, v: &Vill
         .collect();
     buildings.sort_unstable();
     GoalState {
+        wellbeing: wellbeing::watches(conditions, v.minutes),
         activated_at: Some(v.minutes),
         completed_at: None,
         harvest_baseline: v.harvests,
@@ -59,7 +60,8 @@ pub(super) fn valid_watch(
                 .iter()
                 .all(|(key, value)| current.get(key).is_some_and(|limit| value <= limit))
     }
-    baseline_shape(record, v)
+    wellbeing::valid_watch(record, conditions, v)
+        && baseline_shape(record, v)
         && bounded(
             &record.production_baseline,
             conditions
@@ -411,6 +413,7 @@ pub(super) fn measure(
                 ),
             )
         }
+        GoalCondition::Wellbeing { .. } => return wellbeing::measure(c, record, v),
         GoalCondition::Maintain { outcome, minutes } => {
             // Credit only the post-activation portion of the current consecutive
             // observed period. Earlier best periods and unobserved time never count.
@@ -616,6 +619,7 @@ pub fn valid(v: &Village) -> bool {
                 || !record.production_baseline.is_empty()
                 || !record.trade_baseline.is_empty()
                 || !record.delivery_baseline.is_empty()
+                || !record.wellbeing.is_empty()
             {
                 return false;
             }

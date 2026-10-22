@@ -526,10 +526,15 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
             ));
         }
     }
+    let opening_people = residents.clone();
     let mut game = initialization::create_authored(v, residents, &opening)?;
     super::farming::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
     super::orchards::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
     journal::initialize(&mut game.app.world_mut().resource_mut::<Village>());
+    journal::wellbeing::observe(
+        &mut game.app.world_mut().resource_mut::<Village>(),
+        &opening_people,
+    );
     {
         let v = game.app.world().resource::<Village>();
         if v.water_supply

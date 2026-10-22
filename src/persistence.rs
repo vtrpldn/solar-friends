@@ -286,6 +286,7 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
         return None;
     }
     if !scenarios::journal::valid(v)
+        || !scenarios::journal::wellbeing::valid_people(v, &save.residents)
         || !outcomes::valid(v)
         || !sandbox::valid(v)
         || !matches!(v.version, 3 | SAVE_VERSION)
