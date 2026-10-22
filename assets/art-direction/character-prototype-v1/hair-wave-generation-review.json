@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "status": "Production draft only; not a complete player hairstyle",
+  "why": "Review the whole waving atlas and preserve the near hand in front of hair, without fitting body sprites or hiding faint extraction residue.",
+  "generations": [
+    {
+      "key": "hair_wave9_composite_v1",
+      "prompt": "Edit image1 while preserving its EXACT 1254x1254 transparent full-body canvas, every body/face/hand/clothing/shoe pixel location and original proportions. Add short warm brown rounded curls over the entire bald scalp, matching image2 painted curl style and volume. Image2 is hairstyle/material reference only, NOT placement. THIS head is slightly rightward: hair cap approximately x530..835, y105..335, with crown fully covered, short sides above ears, and fringe above eyebrows leaving eyes and face visible. No ear loops or dangling tendrils. Preserve the raised right-side hand and all features. Warm hand-painted countryside game style, upper-left light, broad soft curl shading. Output the same complete waving person with only the scalp changed. Do not center, shift or resize the person or cap. No props, stool, guides, text or background; genuine transparency.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-9-body.png",
+          "sha256": "2dbf1d41c6f87fa86a2b86dc3368b1fc6deac5c9669b7ca294daf15502ff1785"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-cfe55783-a561-468d-abe1-556ce4005764.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-wave-9-composite-candidate-v1.png",
+      "verdict": "Reference only: generated body is not installed.",
+      "sha256": "66b5c1b9154ce483eda7779956ac291a5b915e6744cb382710974369b166f247"
+    },
+    {
+      "key": "hair_wave9_v1",
+      "prompt": "Extract ONLY the short brown curly hair from this exact full-body sprite on its existing 1254x1254 transparent canvas. Keep exact current hair coordinates, silhouette and scale: roughly x520..835 y100..335. Remove the whole person except hair: no face, skin, ears, eyebrows, eyes, hands, clothing or shoes. No skin-colored arcs, dangling ear loops, stool, text, background, or stray translucent body remnants. Preserve the opaque painted brown curl cap with transparent space below its existing fringe. Do not zoom, center, shift, enlarge or shrink the hair. Output just the hair at its exact upper-center full-body canvas position; all other pixels truly transparent.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-wave-9-composite-candidate-v1.png",
+          "sha256": "66b5c1b9154ce483eda7779956ac291a5b915e6744cb382710974369b166f247"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-fa3d3fcf-6c5a-4a1a-b69d-dfaaff650669.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v1.png",
+      "verdict": "Rejected: dangling curl/ear loop below cap.",
+      "sha256": "9c4d219582faf4e64eeb3232d73f36664c9568b494b4d1bd8f91a5280b979612"
+    },
+    {
+      "key": "hair_wave9_v2",
+      "prompt": "Small precise edit of this transparent1254x1254 registered hair sprite. Remove ONLY the dangling crescent-shaped ear loop below the lower-left curls (approximately x540..610, y300..365). Finish that side as a short rounded curl edge above y310. Keep ALL other hair, crown, fringe, scale, exact position and canvas unchanged. Do not enlarge, recenter or shift. Preserve the warm brown painted curls and genuine transparency. No skin, ear, face or other objects. The result is the same cap with the small lower-left dangling loop erased and a natural short curled edge.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v1.png",
+          "sha256": "9c4d219582faf4e64eeb3232d73f36664c9568b494b4d1bd8f91a5280b979612"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-27840798-cbf2-40e6-8904-b329b85926d5.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v2.png",
+      "verdict": "Rejected: almost-invisible body remnants changed658 channels below prepared y128.",
+      "sha256": "ec7ccd15ab016288c065046ffbaeb619aafa5687cc6028b671b1475e48c9e331"
+    },
+    {
+      "key": "hair_wave9_v3",
+      "prompt": "Clean this registered 1254x1254 transparent hair-only sprite without changing the visible hair at all. There are faint almost-invisible remnants of the original full person in the supposedly transparent space. Completely erase those remnants: every pixel below y350 must have alpha ZERO, as must all pixels outside the small hair silhouette located around x520..840,y100..320. Preserve the visible cap pixels, exact location, size, brown curl material and canvas. No recentering, zooming, moving or redesigning. Output ONLY this existing small cap with genuinely fully transparent empty canvas, no translucent body/arms/legs/boots, no skin, dust, shadow, ear loop or marks. Keep the cap whole and opaque, including its brown interior. This is a precision transparency cleanup; do not regenerate a different hairstyle.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v2.png",
+          "sha256": "ec7ccd15ab016288c065046ffbaeb619aafa5687cc6028b671b1475e48c9e331"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b643021a-91c3-4417-b7ba-eb3bdcb2d9cf.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v3.png",
+      "verdict": "Rejected visually despite pixel/bounds pass: brighter orange/high-contrast curls conflict with other poses.",
+      "sha256": "6ec966dbb2899069b0bb86ea9c3efcf76882181130959e36bf610f570f2884c9"
+    },
+    {
+      "key": "hair_wave9_v4",
+      "prompt": "Edit image1 only: match its hair palette and painted shading to image2. Image1 is too orange, bright and high-contrast. Use image2 subdued dark warm brown, soft broad curl shading and restrained highlights. Keep image1 EXACT1254-square canvas, current cap silhouette, position, scale and curl arrangement unchanged; image2 is ONLY color/material reference, do not copy its shape or coordinates. Keep short sides, no ear loop. Preserve fully transparent empty canvas: no pixels outside the existing small cap around x520..840,y100..320, no body remnants, and every pixel below y350 must remain alpha0. No body, face, ears, props, text or background. Only adjust the cap colors to the same soft brown hand-painted game style as image2.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v3.png",
+          "sha256": "6ec966dbb2899069b0bb86ea9c3efcf76882181130959e36bf610f570f2884c9"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-f218465b-cd21-494a-8a4b-a0194d3141c1.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v4.png",
+      "verdict": "Registered lab draft: subdued brown palette, original bounds pass, unchanged lower-body pixels; temporal review incomplete.",
+      "sha256": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da"
+    }
+  ],
+  "reused": "Unmodified hair-curls-single-candidate-v3.png in idle8/10/11",
+  "registration": "web/art/characters/prototype-v1/hair-wave-v1-registration.json",
+  "foreground": "web/art/characters/prototype-v1/body-idle-10-foreground-v1.json",
+  "integration": "assets/art-direction/character-prototype-v1/hair-wave-v3-integration-report.json",
+  "limits": [
+    "28/48 hair pose drafts only; remaining20 and full customization unfinished.",
+    "The current wave animation samples only atlas8/10/11; atlas9 is separately rendered and checked, not credited as observed animation.",
+    "Temporal/body ghosting and full semantic foreground approval remain open.",
+    "All PNG revisions came from the built-in generator. No code pixel repair, local fitting/clipping or threshold relaxation.",
+    "Native recipes, portraits, regular player integration and broader builder recovery/feasibility/biome/performance gates remain."
+  ]
+}

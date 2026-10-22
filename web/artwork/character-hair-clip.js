@@ -1,6 +1,10 @@
 import {registeredHairFrame} from './character-single-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from '../character-atlas-part.js';
-const clips={breathe:{sheet:'base',indices:[8,9,10,11],duration:5,label:'breathing'},walk:{sheet:'base',indices:[0,1,2,3],duration:.5,label:'walking'},work:{sheet:'base',indices:[4,5,6,7],duration:.8,label:'working'},sit:{sheet:'base',indices:[12,13,14,15],duration:5,label:'seated / sleeping'},look:{sheet:'idle',indices:[0,1,2,3],duration:5,label:'looking around'},stretch:{sheet:'idle',indices:[4,5,6,7],duration:3.75,label:'stretching'}};
+import {residentClips} from '../resident-animation.js';
+const labels={breathe:'breathing',walk:'walking',work:'working',sit:'seated / sleeping',look:'looking around',stretch:'stretching',wave:'waving'};
+// Share animation ownership and duration with gameplay; all four authored atlas
+// poses are reviewed even when an animation intentionally skips one of them.
+const clips=Object.fromEntries(Object.entries(labels).map(([name,label])=>{const {sheet,row,frames,fps}=residentClips[name];return [name,{sheet,indices:Array.from({length:4},(_,i)=>row*4+i),duration:frames.length/fps,label}];}));
 export function hairClipProvider(frames,clip){
  const spec=Object.hasOwn(clips,clip)?clips[clip]:null;
  if(!spec||!(frames instanceof Map)||frames.size!==4||spec.indices.some(i=>frames.get(i)?.width!==256||frames.get(i)?.height!==256||typeof frames.get(i)?.getContext!=='function'))throw Error('Provide every registered frame for the supported hair clip.');

@@ -1,0 +1,53 @@
+{
+  "result": "PASS",
+  "scope": "Four waving atlas poses and one foreground mask draft (animation samples only 8/10/11); not full occlusion or complete character approval.",
+  "rejectedBodyChannels": 658,
+  "animationUsed": [
+    8,
+    10,
+    11
+  ],
+  "poseDenied": [
+    "base:10",
+    "idle:4",
+    "idle:12",
+    "activities:10"
+  ],
+  "foregroundStats": {
+    "painted": 2370,
+    "maxAlpha": 253,
+    "nearOpaque": 1605
+  },
+  "definitionMatches": true,
+  "denied": [
+    "unknown-field",
+    "wrong-pose",
+    "wrong-size",
+    "sparse-points",
+    "outside-frame",
+    "zero-area",
+    "source-binding",
+    "changed-body"
+  ],
+  "aliasSafe": true,
+  "roundTripExact": true,
+  "disjoint": true,
+  "foregroundPixelsExact": true,
+  "protectedPixels": 2370,
+  "protectedExact": true,
+  "fixtureProtected": true,
+  "bodyUnchanged": true,
+  "bodyIntegrity": true,
+  "coverage": {
+    "8": 0.9965611719973161,
+    "9": 1,
+    "10": 1,
+    "11": 0.9965611719973161
+  },
+  "partHashes": {
+    "8": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "9": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da",
+    "10": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "11": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+  }
+}
