@@ -238,6 +238,7 @@ pub(super) fn measure(
             };
             (n as f64, f64::from(*count), label)
         }
+        GoalCondition::Operating { .. } => return operations::measure(c, v),
         GoalCondition::Crops { .. }
         | GoalCondition::Orchards { .. }
         | GoalCondition::Livestock { .. }

@@ -41,6 +41,9 @@ pub fn check(d: &Definition, report: &mut Report) {
             {
                 report.push("journal.chapters", "invalid_goal", "Give every goal a unique identity, a title up to 100 characters and description up to 1,000 characters.");
             }
+            if !operations::setup_valid(&goal.condition, d) {
+                report.push("journal.chapters", "unsupported_operation_rules", "Enable material logistics for production, material logistics and local utilities for treatment, or local utilities for generation and lighting goals.");
+            }
             if !services::setup_valid(&goal.condition, d) {
                 report.push("journal.chapters","unsupported_service_setup","Accessible food requires materials and hauling; water, sanitation and lighting require connected local utilities. A housed-person target cannot exceed this founding cast.");
             }
@@ -126,6 +129,7 @@ pub(super) fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> b
         GoalCondition::Buildings {
             building, count, ..
         } => progression::BUILDINGS.contains(&building.as_str()) && (1..=256).contains(count),
+        GoalCondition::Operating { .. } => operations::valid(c),
         GoalCondition::Crops { .. }
         | GoalCondition::Orchards { .. }
         | GoalCondition::Livestock { .. }
@@ -221,6 +225,9 @@ pub(super) fn needs_climate(condition: &GoalCondition) -> bool {
 pub(super) fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
     match c {
         GoalCondition::Buildings {
+            region: Some(id), ..
+        }
+        | GoalCondition::Operating {
             region: Some(id), ..
         }
         | GoalCondition::Crops {

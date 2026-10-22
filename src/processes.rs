@@ -88,6 +88,10 @@ fn open(v: &Village, b: &Batch) -> bool {
         Kind::Curing => true,
     }
 }
+/// A real committed process that can advance, excluding paused/output-blocked work.
+pub(crate) fn operating_at(v: &Village, building: usize) -> bool {
+    v.processes.batches.iter().any(|b| b.building == Some(building) && b.phase == Phase::Processing && open(v,b) && if b.kind == Kind::Banana { water::local(v, water::Owner::Building(building), water::Class::Sewage) > 0. } else { b.remaining > 0. })
+}
 pub fn held(v: &Village, kind: Kind) -> u32 {
     v.processes
         .batches

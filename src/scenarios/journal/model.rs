@@ -50,6 +50,13 @@ pub enum GoalCondition {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         region: Option<String>,
     },
+    Operating {
+        building: String,
+        state: operations::Stage,
+        count: u32,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        region: Option<String>,
+    },
     Crops {
         crop: String,
         count: u32,

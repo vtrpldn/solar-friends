@@ -65,6 +65,10 @@ pub fn sync(v: &mut Village) {
 pub fn initialise(v: &mut Village) -> bool {
     network::initialise(v)
 }
+/// Read the same per-building generation rate used by the electrical frame.
+pub(crate) fn generator_rate(v: &Village, building: usize) -> f64 {
+    network::node(v, Owner::Building(building)).map_or(0., |n| network::generation(v, n, v.minutes))
+}
 pub fn supply(v: &Village) -> Supply {
     let active = |kind: &str| {
         v.buildings

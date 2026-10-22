@@ -69,6 +69,7 @@ pub fn check(d: &crate::scenarios::Definition, report: &mut Report) {
             if !super::super::validation::condition(condition, 0, &mut nodes)
                 || !super::super::validation::regions_exist(condition, d)
                 || !services::setup_valid(condition, d)
+                || !operations::setup_valid(condition, d)
                 || !wellbeing::references_valid(condition, d)
                 || !delivery::targets_valid(condition, d)
                 || !d.rules.logistics && super::super::validation::needs_production(condition)

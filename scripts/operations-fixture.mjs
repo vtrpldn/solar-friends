@@ -1,0 +1,11 @@
+import {hydroCell} from '../web/terrain.js';
+// Declared owned assets and delivered supplies, with no earned production history.
+export function operationScenario(engine){
+ const d=JSON.parse(engine.scenario_template('sandbox')),base=d.start.buildings[0];d.rules.logistics=true;d.rules.utilities=true;d.map.nature=[];d.start.minutes=1200;
+ for(const [id,kind,x,y]of [['our-kitchen','kitchen',25,25],['our-workshop','workshop',20,25],['our-wetland','wetland',25,29],['our-banana','banana_treatment',20,29],['our-solar','solar_farm',25,34],['our-lamp','streetlight',28,34],['our-hydro','hydro',hydroCell(10,d.map),10]])d.start.buildings.push({...base,id,kind,x,y,...(['solar_farm','hydro'].includes(kind)?{battery:{charge:kind==='solar_farm'?12:0,owned:true}}:{})});
+ for(const inventory of d.start.inventories)inventory.items={};d.start.inventories[0].items={food:12};d.start.inventories.find(i=>i.owner.kind==='camp').items={timber:32};d.start.inventories.push({owner:{kind:'building',building:'our-kitchen'},items:{food:6}});
+ d.start.fresh_water=12;d.start.liquids=[{owner:{kind:'camp'},contents:{fresh:8}},{owner:{kind:'building',building:'our-kitchen'},contents:{fresh:4}},{owner:{kind:'building',building:'our-wetland'},contents:{greywater:12}},{owner:{kind:'building',building:'our-banana'},contents:{sewage:2}}];
+ const from={kind:'building',id:'our-solar'},to={kind:'building',id:'our-lamp'},route=JSON.parse(engine.scenario_route_preview(JSON.stringify(d),'electricity',JSON.stringify(from),JSON.stringify(to)));if(!route.allowed)throw Error(JSON.stringify(route));d.start.routes=[{id:'our-cable',kind:'electricity',from,to,state:'completed',cells:route.cells}];
+ d.map.regions=[{id:'kitchen-yard',title:'Our kitchen yard',x:24,y:24,width:2,height:2}];return d;
+}
+export const operationGoals=()=>[['kitchen','ready'],['kitchen','underway'],['wetland','underway'],['banana_treatment','underway'],['hydro','generating'],['streetlight','lit']].map(([building,state],i)=>({id:`operation-${i}`,title:['A supplied kitchen','A meal under way','Greywater being treated','Banana bed working','River power now','A fully supplied night light'][i],description:'Require actual current operation.',optional:false,condition:{kind:'operating',building,state,count:1,...(i===0?{region:'kitchen-yard'}:{})}}));
