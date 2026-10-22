@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "status": "production-guide foundation; one-pose coordinate draft; excluded from gameplay",
+  "status": "all-48 coordinate draft reviewed; compatible painted parts, masks and gameplay approval remain open",
   "file": "web/art/characters/prototype-v1/body-attachments-draft.json",
-  "sha256": "fde9a7d2f4065bbf07dde011427c8cc664a4c0cafc53dd9eaceee15162b1ba2e",
+  "sha256": "4271d42d40aa033c08ff6c6d4f8a6b0599f28f7766392b77173fd4eb1a2c5f96",
   "sources": {
     "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
     "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
@@ -11,18 +11,217 @@
   "preparedFrameDigests": 48,
   "recordedPoses": [
     {
+      "sheet": "base",
+      "index": 0
+    },
+    {
+      "sheet": "base",
+      "index": 1
+    },
+    {
+      "sheet": "base",
+      "index": 2
+    },
+    {
+      "sheet": "base",
+      "index": 3
+    },
+    {
+      "sheet": "base",
+      "index": 4
+    },
+    {
+      "sheet": "base",
+      "index": 5
+    },
+    {
+      "sheet": "base",
+      "index": 6
+    },
+    {
+      "sheet": "base",
+      "index": 7
+    },
+    {
+      "sheet": "base",
+      "index": 8
+    },
+    {
+      "sheet": "base",
+      "index": 9
+    },
+    {
+      "sheet": "base",
+      "index": 10
+    },
+    {
+      "sheet": "base",
+      "index": 11
+    },
+    {
+      "sheet": "base",
+      "index": 12
+    },
+    {
+      "sheet": "base",
+      "index": 13
+    },
+    {
+      "sheet": "base",
+      "index": 14
+    },
+    {
+      "sheet": "base",
+      "index": 15
+    },
+    {
+      "sheet": "idle",
+      "index": 0
+    },
+    {
+      "sheet": "idle",
+      "index": 1
+    },
+    {
+      "sheet": "idle",
+      "index": 2
+    },
+    {
+      "sheet": "idle",
+      "index": 3
+    },
+    {
+      "sheet": "idle",
+      "index": 4
+    },
+    {
+      "sheet": "idle",
+      "index": 5
+    },
+    {
+      "sheet": "idle",
+      "index": 6
+    },
+    {
+      "sheet": "idle",
+      "index": 7
+    },
+    {
+      "sheet": "idle",
+      "index": 8
+    },
+    {
+      "sheet": "idle",
+      "index": 9
+    },
+    {
+      "sheet": "idle",
+      "index": 10
+    },
+    {
+      "sheet": "idle",
+      "index": 11
+    },
+    {
+      "sheet": "idle",
+      "index": 12
+    },
+    {
+      "sheet": "idle",
+      "index": 13
+    },
+    {
+      "sheet": "idle",
+      "index": 14
+    },
+    {
+      "sheet": "idle",
+      "index": 15
+    },
+    {
+      "sheet": "activities",
+      "index": 0
+    },
+    {
+      "sheet": "activities",
+      "index": 1
+    },
+    {
+      "sheet": "activities",
+      "index": 2
+    },
+    {
+      "sheet": "activities",
+      "index": 3
+    },
+    {
+      "sheet": "activities",
+      "index": 4
+    },
+    {
+      "sheet": "activities",
+      "index": 5
+    },
+    {
+      "sheet": "activities",
+      "index": 6
+    },
+    {
+      "sheet": "activities",
+      "index": 7
+    },
+    {
       "sheet": "activities",
       "index": 8
+    },
+    {
+      "sheet": "activities",
+      "index": 9
+    },
+    {
+      "sheet": "activities",
+      "index": 10
+    },
+    {
+      "sheet": "activities",
+      "index": 11
+    },
+    {
+      "sheet": "activities",
+      "index": 12
+    },
+    {
+      "sheet": "activities",
+      "index": 13
+    },
+    {
+      "sheet": "activities",
+      "index": 14
+    },
+    {
+      "sheet": "activities",
+      "index": 15
     }
   ],
-  "authoredThrough": "scripts/author-body-attachment-guides.mjs uses the actual lab controls and Export, preserving unmarked pose slots.",
-  "visualReview": "Inspected kneeling body overlay. The initial neck point sat on the shoulder; corrected to the visible neck base. Visible grip points follow both painted hands. These remain draft anchors until tested with compatible painted parts.",
+  "authoredThrough": "scripts/author-body-attachment-guides.mjs applies manually traced body-attachment-landmarks.mjs through the actual guide controls and Export. The measured prepared-frame binding hash is pinned and must match before authoring.",
+  "visualReview": "Inspected all three coordinate and overlay sheets. First-pass neck points leaned toward collar edges on several standing/seated/reaching poses; adjusted to the painted neck base and reviewed corrected overlays. Head and grip points contact painted body pixels. Part-specific precision, handed equipment and front/back occlusion remain unapproved.",
   "mechanicalScope": "Import rejects changed source/frame bindings, malformed data and unsupported fields. Complete gate means all-48 coordinate coverage only; synthetic verifier coordinates are not authored art.",
   "remaining": [
-    "Author/review the other 47 poses",
+    "Refine semantic precision with compatible painted parts",
     "Compatible face/hair/clothing/accessory/body art",
     "Equipment, seating and front/back occlusion masks",
     "All animation loops, facings, world scale and lighting with actual parts",
     "Typed native recipes, portraits, player integration and global cache/performance gates"
+  ],
+  "boards": [
+    "attachment-base-coordinates.png",
+    "attachment-base-attachments.png",
+    "attachment-idle-coordinates.png",
+    "attachment-idle-attachments.png",
+    "attachment-activities-coordinates.png",
+    "attachment-activities-attachments.png"
+  ],
+  "referenceOnly": [
+    "attachment-base-neck-reference.png"
   ]
 }
