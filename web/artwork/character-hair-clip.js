@@ -2,7 +2,7 @@ import {loadCharacterImageSource} from '../character-image-source.js';
 import {registeredHairFrame} from './character-single-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from '../character-atlas-part.js';
 import {residentClips} from '../resident-animation.js';
-const labels={breathe:'breathing',walk:'walking',work:'working',sit:'seated / sleeping',look:'looking around',stretch:'stretching',wave:'waving',relax:'relaxing',cook:'cooking',water:'watering',tend:'tending'};
+const labels={breathe:'breathing',walk:'walking',work:'working',sit:'seated / sleeping',look:'looking around',stretch:'stretching',wave:'waving',relax:'relaxing',cook:'cooking',water:'watering',tend:'tending',feed:'feeding'};
 // Share animation ownership and duration with gameplay; all four authored atlas
 // poses are reviewed even when an animation intentionally skips one of them.
 const clips=Object.fromEntries(Object.entries(labels).map(([name,label])=>{const {sheet,row,frames,fps,loop}=residentClips[name];return [name,{sheet,indices:Array.from({length:4},(_,i)=>row*4+i),duration:frames.length/fps,loop:loop===true,label}];}));

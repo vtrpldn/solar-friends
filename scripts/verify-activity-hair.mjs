@@ -3,7 +3,7 @@ import {writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 // Extend only after reviewing the actual head/equipment geometry of each group.
-const cases={tend:{bodyStartRow:160,rejected:{index:8,file:'hair-curls-activities-7-candidate-v2.png'}},cook:{bodyStartRow:96,rejected:{index:0,file:'hair-curls-activities-0-candidate-v1.png'}},water:{bodyStartRow:96,rejected:{index:7,file:'hair-curls-base-1-candidate-v1.png'}}},clip=process.argv[2];
+const cases={feed:{bodyStartRow:96,rejected:{index:12,file:'hair-curls-activities-12-candidate-v1.png'}},tend:{bodyStartRow:160,rejected:{index:8,file:'hair-curls-activities-7-candidate-v2.png'}},cook:{bodyStartRow:96,rejected:{index:0,file:'hair-curls-activities-0-candidate-v1.png'}},water:{bodyStartRow:96,rejected:{index:7,file:'hair-curls-base-1-candidate-v1.png'}}},clip=process.argv[2];
 if(!Object.hasOwn(cases,clip))throw Error('Choose a registered activity hair review.');
 const server=await serve();let browser;
 try{
@@ -26,5 +26,5 @@ try{
   return {denied,used:[...used].sort((a,b)=>a-b),hashes,coverage,selectedFiles:Object.fromEntries(Object.entries(review.registration.poses).map(([i,p])=>[i,p.file])),...Object.fromEntries(Object.entries({details,transitions,raw,scenes}).map(([key,c])=>[key,c.toDataURL('image/png').split(',')[1]]))};
  },{clip,spec,checks:cases[clip]});
  assert.deepEqual(result.denied,[`base:${spec.indices[0]}`,`idle:${spec.indices[0]}`,`activities:${spec.indices[0]===0?4:0}`,'incomplete','swapped-body','wrong-pose','wrong-sheet','wrong-hash','rejected: This hair layer fails its authored pose bounds.']);assert.deepEqual(result.used,spec.indices);assert.equal(result.hashes.length,4);assert.ok(Object.values(result.coverage).every(v=>v>=.98));assert.deepEqual(errors,[]);
- const root='assets/art-direction/character-prototype-v1/';for(const key of ['details','transitions','raw','scenes']){await writeFile(root+`hair-${clip}-v4-${key}.png`,Buffer.from(result[key],'base64'));delete result[key];}await writeFile(root+`hair-${clip}-v4-integration-report.json`,JSON.stringify({result:'PASS',scope:'Activity hair/body draft only; equipment, grips, temporal polish and full character/player integration remain',...result},null,2)+'\n');console.log(result);
+ const root='assets/art-direction/character-prototype-v1/',prefix=clip==='feed'?'hair-feed-integration-v1':`hair-${clip}-v4`;for(const key of ['details','transitions','raw','scenes']){await writeFile(root+`${prefix}-${key}.png`,Buffer.from(result[key],'base64'));delete result[key];}await writeFile(root+`${prefix}-integration-report.json`,JSON.stringify({result:'PASS',scope:'Activity hair/body draft only; equipment, grips, temporal polish and full character/player integration remain',...result},null,2)+'\n');console.log(result);
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

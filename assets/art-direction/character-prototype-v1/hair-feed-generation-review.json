@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Feeding draft incomplete; no clip registration or player activation",
+  "status": "Registered feeding hair/body draft; full creator unfinished",
   "why": "Test unchanged reuse before authoring pose-bound caps; reject visible errors even when bounds pass.",
   "generations": [
     {
@@ -138,6 +138,74 @@
       "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dc2e1966-f0b2-47f4-ab4d-199919547842.png",
       "candidate": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v3.png",
       "sha256": "5670529e96376e11d98708e0a8deda1487e0cfaf801e9ca9ad330fe97b947114"
+    },
+    {
+      "index": 12,
+      "version": "bodyref_v1",
+      "prompt": "Add short closely fitting dark warm-brown curls to the bald person in image1. Preserve the complete person, EXACT pose, face, hands, skin, clothing, shoes, proportions, location and scale on the1254-square transparent canvas. This is a reference for a separate hair layer, so no crop, zoom, shift or recenter. Image2 supplies only the soft painted curl material and small grouped scale. Cover the ENTIRE scalp, especially the rear/left crown, with short curls; keep BOTH eyes, eyebrows and ears clearly visible. High short fringe, no tendrils, bulky volume, bald crescent or orange shine. Keep the existing warm illustrated game art, broad soft upper-left light. Do not add props, tools or shadows. Full body with only hair added, true transparent background.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-12-body.png",
+          "sha256": "abfa3d741b62b7c4fba03fb6a7b71adeb49f4689d03d215cc56ad1787e1eb37b"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png",
+          "sha256": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4c2e5edb-4ffe-4986-a18d-af4a88a16233.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-feed-12-painted-reference-v1.png",
+      "sha256": "8f408b3d2f6d3808e421801b705b306c2b38bd33ec426de12fbf0d0669021d5f",
+      "verdict": "Reference only; never replace original body"
+    },
+    {
+      "index": 12,
+      "version": "v4",
+      "prompt": "Extract ONLY the existing brown curly hair in image1 as a separate transparent layer. Keep its EXACT size, position, shape, crop and painted appearance on the SAME1254x1254 canvas. Do not move, enlarge, recenter or restyle the hair. Delete the entire person including face, ears, eyes, eyebrows, neck, body, hands, shirt, shorts, legs and shoes. Keep only the existing hair pixels, including the left/rear crown and short side above the ear. Where skin was visible must be alpha0. No face-colored remnants, background, shadow or new marks; EVERY pixel outside the small hair cap must be truly transparent, especially all pixels below y330. This layer overlays the unchanged original body at its original coordinates, so do not normalize, crop or zoom.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-feed-12-painted-reference-v1.png",
+          "sha256": "8f408b3d2f6d3808e421801b705b306c2b38bd33ec426de12fbf0d0669021d5f"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b1b89d21-0006-4993-9993-389f28e86c7a.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v4.png",
+      "sha256": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2",
+      "verdict": "Registered hair/body draft; temporal curl consistency and equipment remain unfinished"
+    },
+    {
+      "index": 14,
+      "version": "bodyref_v1",
+      "prompt": "Add short closely fitting dark warm-brown curls to the bald person in image1. Preserve the complete person, EXACT pose, face, hands, skin, clothing, shoes, proportions, location and scale on the1254-square transparent canvas. This is a reference for a separate hair layer, so no crop, zoom, shift or recenter. Image2 supplies only the soft painted curl material and small grouped scale. Cover the ENTIRE scalp, especially the rear/left crown, with short curls; keep BOTH eyes, eyebrows and ears clearly visible. High short fringe, no tendrils, bulky volume, bald crescent or orange shine. Keep the existing warm illustrated game art, broad soft upper-left light. Do not add props, tools or shadows. Full body with only hair added, true transparent background.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-14-body.png",
+          "sha256": "d31af9660c75844f7a7ad101249de29a79644a63dfe77f93f813451c67b4a1af"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png",
+          "sha256": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-81f07d45-71b2-4703-98e7-b25e9778d4ef.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-feed-14-painted-reference-v1.png",
+      "sha256": "780476bec7b62d0667ad97e83cbd9192be880f37eb162f8962f7efa0bec7983c",
+      "verdict": "Reference only; never replace original body"
+    },
+    {
+      "index": 14,
+      "version": "v4",
+      "prompt": "Extract ONLY the existing brown curly hair in image1 as a separate transparent layer. Keep its EXACT size, position, shape, crop and painted appearance on the SAME1254x1254 canvas. Do not move, enlarge, recenter or restyle the hair. Delete the entire person including face, ears, eyes, eyebrows, neck, body, hands, shirt, shorts, legs and shoes. Keep only the existing hair pixels, including the left/rear crown and short side above the ear. Where skin was visible must be alpha0. No face-colored remnants, background, shadow or new marks; EVERY pixel outside the small hair cap must be truly transparent, especially all pixels below y330. This layer overlays the unchanged original body at its original coordinates, so do not normalize, crop or zoom.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-feed-14-painted-reference-v1.png",
+          "sha256": "780476bec7b62d0667ad97e83cbd9192be880f37eb162f8962f7efa0bec7983c"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e094df13-9106-4564-bc30-af99b508cee5.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v4.png",
+      "sha256": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9",
+      "verdict": "Registered hair/body draft; temporal curl consistency and equipment remain unfinished"
     }
   ],
   "review": [
@@ -145,8 +213,9 @@
     "v2 cooking reuse: caps expose rear scalp; poses12/15 bounds fail.",
     "v3 generated v1: pose12 displaced, eye obscured and bounds fail; pose14 rear scalp exposed despite passing bounds. Poses13/15 promising draft key poses only.",
     "v4 generated revisions: bounds pass, but pose12 still exposes scalp and obscures eye; pose14 still exposes rear crown. Neither accepted.",
-    "v5 guide-only generation: oversized/misregistered; bounds fail 12/14. Rejected."
+    "v5 guide-only generation: oversized/misregistered; bounds fail 12/14. Rejected.",
+    "v6: extracted caps12/14 cover crowns and expose eyes on unchanged bodies. All four original bounds pass; short rear curls follow ear perimeter. Curl-volume variation and existing body crossfade ghosting still require temporal work."
   ],
-  "next": "Revise reference strategy using a full-body painted reference before cap extraction; do not repeat guide-only prompts or transform failed sprite pixels.",
+  "next": "Complete activity equipment/grips and temporal art review; implement remaining appearance parts and player creator integration.",
   "remaining": "Feeding, temporal polish, equipment, all other appearance parts, native recipes, portraits, player integration, performance and wider builder release gates."
 }
