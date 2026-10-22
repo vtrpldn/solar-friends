@@ -1,0 +1,1356 @@
+{
+  "result": "PASS",
+  "sourceHashes": {
+    "web/artwork/character-equipped-model.js": "43708b84987b88d62493aee4c2e7cb8f544a544c477e32ff2ddfd6a70cfb100f",
+    "web/artwork/character-body-lab.js": "6783c1d1f5021dc977fcea4d06c6b6a9bd0b3f1a13ed2ba44b70a5ae4b4299bc",
+    "web/artwork/character-composed-review.js": "6ee23c0b42586f10e1ce8557efdb096b253fbac6d0ea25247c1a5a1f67accfcb",
+    "web/character-equipment.js": "d22787c4c840b531732a288e9b8da843a35b45162c7eb94f6814d2af4e071c9b",
+    "web/resident-animation.js": "3952db6bf3a6ac825907f69f6e1c50ffa44c2ae95db83573250c8ae2cfe1584e",
+    "scripts/verify-equipped-appearance.mjs": "87f39933d2d26ee06e238967864af06049b0473a99cb693e8f7732c3c201c0a1",
+    "web/pkg/solar_friends_bg.wasm": "afd6e6f5c5b7478bec1c24bffa8471a0b8eb4043c6830128abe42053cba97c14"
+  },
+  "scope": "Review-only integrated appearance/equipment, not production artwork approval",
+  "portraitChecks": 4,
+  "playback": "Public play/pause, change interruption, static sleep refusal and a recorded three-second feeding cycle with 13 decoded samples",
+  "checked": [
+    {
+      "recipe": 0,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 0,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 1,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 2,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 3,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 4,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 5,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 6,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 7,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 8,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 9,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 10,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 11,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 12,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 13,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 14,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 15,
+      "equipment": true
+    },
+    {
+      "recipe": 0,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 0,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 1,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 2,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 3,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "work",
+      "sheet": "base",
+      "index": 4,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "work",
+      "sheet": "base",
+      "index": 5,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "work",
+      "sheet": "base",
+      "index": 6,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "work",
+      "sheet": "base",
+      "index": 7,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 12,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 13,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 14,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 8,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 9,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 10,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 11,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "sleep",
+      "sheet": "base",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 0,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 1,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 2,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 3,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 4,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 5,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 6,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 7,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 8,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 9,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 10,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 11,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 12,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 13,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 14,
+      "equipment": false
+    },
+    {
+      "recipe": 0,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 0,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 1,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 2,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 3,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 4,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 5,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 6,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 7,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 8,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 9,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 10,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 11,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 12,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 13,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 14,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 15,
+      "equipment": true
+    },
+    {
+      "recipe": 1,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 0,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 1,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 2,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 3,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "work",
+      "sheet": "base",
+      "index": 4,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "work",
+      "sheet": "base",
+      "index": 5,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "work",
+      "sheet": "base",
+      "index": 6,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "work",
+      "sheet": "base",
+      "index": 7,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 12,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 13,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 14,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 8,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 9,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 10,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 11,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "sleep",
+      "sheet": "base",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 0,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 1,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 2,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 3,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 4,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 5,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 6,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 7,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 8,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 9,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 10,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 11,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 12,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 13,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 14,
+      "equipment": false
+    },
+    {
+      "recipe": 1,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 0,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 1,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 2,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "cook",
+      "sheet": "activities",
+      "index": 3,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 4,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 5,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 6,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "water",
+      "sheet": "activities",
+      "index": 7,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 8,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 9,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 10,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "tend",
+      "sheet": "activities",
+      "index": 11,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 12,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 13,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 14,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "feed",
+      "sheet": "activities",
+      "index": 15,
+      "equipment": true
+    },
+    {
+      "recipe": 2,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 0,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 1,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 2,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "walk",
+      "sheet": "base",
+      "index": 3,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "work",
+      "sheet": "base",
+      "index": 4,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "work",
+      "sheet": "base",
+      "index": 5,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "work",
+      "sheet": "base",
+      "index": 6,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "work",
+      "sheet": "base",
+      "index": 7,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 12,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 13,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 14,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "sit",
+      "sheet": "base",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 8,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 9,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 10,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "breathe",
+      "sheet": "base",
+      "index": 11,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "sleep",
+      "sheet": "base",
+      "index": 15,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 0,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 1,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 2,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "look",
+      "sheet": "idle",
+      "index": 3,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 4,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 5,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 6,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "stretch",
+      "sheet": "idle",
+      "index": 7,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 8,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 9,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 10,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "wave",
+      "sheet": "idle",
+      "index": 11,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 12,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 13,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 14,
+      "equipment": false
+    },
+    {
+      "recipe": 2,
+      "clip": "relax",
+      "sheet": "idle",
+      "index": 15,
+      "equipment": false
+    }
+  ],
+  "denied": [
+    "unknown",
+    "feed",
+    "cook"
+  ],
+  "cache": {
+    "entries": 1,
+    "active": 0,
+    "queued": 0,
+    "pending": 0,
+    "maxEntries": 12,
+    "maxConcurrent": 2,
+    "maxQueued": 48,
+    "clips": 1,
+    "frames": 6,
+    "frameCountIsUpperBound": true,
+    "cacheLabel": "equipment poses",
+    "maximumFrames": 72,
+    "rgbaBytes": 1572864
+  },
+  "equipmentSources": {
+    "cook": [
+      {
+        "index": 0,
+        "source": {
+          "sha256": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 1,
+        "source": {
+          "sha256": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 2,
+        "source": {
+          "sha256": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 3,
+        "source": {
+          "sha256": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+          "width": 1254,
+          "height": 1254
+        }
+      }
+    ],
+    "water": [
+      {
+        "index": 4,
+        "source": {
+          "sha256": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 5,
+        "source": {
+          "sha256": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 6,
+        "source": {
+          "sha256": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 7,
+        "source": {
+          "sha256": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+          "width": 1254,
+          "height": 1254
+        }
+      }
+    ],
+    "tend": [
+      {
+        "index": 8,
+        "source": {
+          "sha256": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 9,
+        "source": {
+          "sha256": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 10,
+        "source": {
+          "sha256": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+          "width": 1254,
+          "height": 1254
+        }
+      },
+      {
+        "index": 11,
+        "source": {
+          "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+          "width": 1254,
+          "height": 1254
+        }
+      }
+    ],
+    "feed": [
+      {
+        "index": 12,
+        "source": {
+          "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+          "width": 1254,
+          "height": 1254
+        },
+        "parts": [
+          {
+            "id": "basket",
+            "file": "feeding-basket-pose-14-candidate-v2.png",
+            "source": {
+              "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+              "width": 1254,
+              "height": 1254
+            }
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "source": {
+          "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+          "width": 1254,
+          "height": 1254
+        },
+        "parts": [
+          {
+            "id": "basket",
+            "file": "feeding-basket-pose-14-candidate-v2.png",
+            "source": {
+              "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-1",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-2",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-3",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-4",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "source": {
+          "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+          "width": 1254,
+          "height": 1254
+        },
+        "parts": [
+          {
+            "id": "basket",
+            "file": "feeding-basket-pose-14-candidate-v2.png",
+            "source": {
+              "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-1",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-2",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-3",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-4",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "source": {
+          "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+          "width": 1254,
+          "height": 1254
+        },
+        "parts": [
+          {
+            "id": "basket",
+            "file": "feeding-basket-pose-14-candidate-v2.png",
+            "source": {
+              "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-1",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-2",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-3",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "id": "grain-4",
+            "file": "feed-grains-hold-candidate-v2.png",
+            "source": {
+              "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+              "width": 1254,
+              "height": 1254
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
