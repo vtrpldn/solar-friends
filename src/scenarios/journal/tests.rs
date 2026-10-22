@@ -636,3 +636,195 @@ fn actual_preparation_counts_completed_output_with_per_goal_activation_credit() 
     };
     assert!(compile(d).is_err());
 }
+
+#[test]
+fn trade_credit_tracks_receipts_and_sales_not_orders_refunds_or_starting_stock() {
+    let trade_goal = |id, direction, credit| {
+        goal(
+            id,
+            GoalCondition::Traded {
+                direction,
+                material: "plumbing".into(),
+                count: 2,
+                credit,
+            },
+        )
+    };
+    let d = scenario(vec![
+        chapter(
+            "purchase",
+            vec![trade_goal(
+                "receive",
+                TradeDirection::Purchase,
+                CounterCredit::AfterActivation,
+            )],
+        ),
+        chapter(
+            "sale",
+            vec![trade_goal(
+                "sell",
+                TradeDirection::Sale,
+                CounterCredit::AfterActivation,
+            )],
+        ),
+    ]);
+    let mut g = game(d);
+    let mut items = [0u32; economy::COUNT];
+    items[9] = 2;
+    let raw = serde_json::to_string(&items).unwrap();
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    assert_eq!(g.order_supplies(&raw), "ok");
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    assert_eq!(g.cancel_order(0), "ok");
+    g.tick(0.25);
+    assert!(state(&mut g)["chapters"][0]["completed_at"].is_null());
+    assert_eq!(g.sell_material(9, 2), "ok");
+    g.tick(0.25);
+    assert_eq!(g.order_supplies(&raw), "ok");
+    for _ in 0..4000 {
+        g.tick(0.25);
+        if state(&mut g)["chapters"][0]["completed_at"].is_number() {
+            break;
+        }
+    }
+    assert!(state(&mut g)["chapters"][0]["completed_at"].is_number());
+    assert_eq!(
+        state(&mut g)["chapters"][1]["goals"][0]["condition"]["value"],
+        0.
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    for mutation in ["missing", "count", "retired", "baseline"] {
+        let mut broken: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        let journal = &mut broken["village"]["progress"]["scenario_journal"];
+        match mutation {
+            "missing" => journal["trade"] = serde_json::Value::Null,
+            "count" => journal["trade"]["purchased"][9] = serde_json::json!(999),
+            "retired" => journal["trade"]["retired_purchased"][9] = serde_json::json!(1),
+            _ => journal["goals"]["sell"]["trade_baseline"] = serde_json::json!({}),
+        }
+        assert!(!g.restore(&broken.to_string()), "{mutation}");
+        assert_eq!(g.snapshot(), saved);
+    }
+    assert_ne!(g.sell_material(9, 0), "ok");
+    assert_eq!(g.snapshot(), saved);
+    assert_eq!(g.sell_material(9, 2), "ok");
+    g.tick(0.25);
+    assert!(state(&mut g)["finished_at"].is_number());
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+}
+
+#[test]
+fn trade_totals_survive_completed_order_history_retirement() {
+    let mut g = game(scenario(vec![chapter(
+        "long",
+        vec![goal(
+            "many",
+            GoalCondition::Traded {
+                direction: TradeDirection::Purchase,
+                material: "plumbing".into(),
+                count: 1000,
+                credit: CounterCredit::Run,
+            },
+        )],
+    )]));
+    let mut items = [0u32; economy::COUNT];
+    items[9] = 1;
+    let raw = serde_json::to_string(&items).unwrap();
+    for i in 0..125 {
+        if i % 3 == 0 {
+            assert_eq!(g.order_supplies(&raw), "ok");
+            let id = g.app.world().resource::<Village>().economy.next_order - 1;
+            assert_eq!(g.cancel_order(id), "ok");
+        }
+        assert_eq!(g.sell_material(9, 1), "ok");
+        assert_eq!(g.order_supplies(&raw), "ok");
+        {
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            v.minutes = v.economy.orders.last().unwrap().arrival;
+            economy::advance(&mut v, 0.);
+            advance(&mut v);
+        }
+        if i % 20 == 0 {
+            let saved = g.snapshot();
+            assert!(g.restore(&saved));
+            assert_eq!(g.snapshot(), saved);
+        }
+    }
+    let v = g.app.world().resource::<Village>();
+    assert!(v.economy.orders.len() <= 100);
+    let ledger = v
+        .progress
+        .scenario_journal
+        .as_ref()
+        .unwrap()
+        .trade
+        .as_ref()
+        .unwrap();
+    assert_eq!(ledger.purchased[9], 125);
+    assert_eq!(ledger.sold[9], 125);
+    assert!(ledger.retired_purchased[9] > 0);
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        125.
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+}
+
+#[test]
+fn returning_resident_pickups_credit_purchases_once() {
+    let mut g = game(scenario(vec![chapter(
+        "pickup",
+        vec![goal(
+            "receive",
+            GoalCondition::Traded {
+                direction: TradeDirection::Purchase,
+                material: "plumbing".into(),
+                count: 2,
+                credit: CounterCredit::AfterActivation,
+            },
+        )],
+    )]));
+    for _ in 0..800 {
+        g.tick(0.25);
+        if g.app.world().resource::<Village>().arrived {
+            break;
+        }
+    }
+    let mut items = [0u32; economy::COUNT];
+    items[9] = 2;
+    assert_eq!(
+        g.order_supplies_pickup(&serde_json::to_string(&items).unwrap(), 0),
+        "ok"
+    );
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    for _ in 0..4000 {
+        g.tick(0.25);
+        if state(&mut g)["finished_at"].is_number() {
+            break;
+        }
+    }
+    assert!(state(&mut g)["finished_at"].is_number());
+    let saved = g.snapshot();
+    town_pickup::finish(&mut g.app.world_mut().resource_mut::<Village>(), 0, 0);
+    assert_eq!(g.snapshot(), saved);
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+}

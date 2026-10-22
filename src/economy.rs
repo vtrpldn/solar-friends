@@ -750,6 +750,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
         for (i, &n) in items.iter().enumerate() {
             add(v, i, n);
         }
+        crate::scenarios::journal::trade::received(v, &items);
         v.economy.last_delivery = v.minutes;
         event(
             v,
@@ -992,14 +993,21 @@ pub(crate) fn place_order(
             return Err("Wait for a delivery or cancel an undispatched order first.".into());
         }
         let mut discard = v.economy.orders.len().saturating_sub(79);
+        let mut retired = [0u64; COUNT];
         v.economy.orders.retain(|o| {
             if discard > 0 && matches!(o.status.as_str(), "delivered" | "cancelled") {
                 discard -= 1;
+                if o.status == "delivered" {
+                    for (total, n) in retired.iter_mut().zip(o.items) {
+                        *total += u64::from(n);
+                    }
+                }
                 false
             } else {
                 true
             }
         });
+        crate::scenarios::journal::trade::retired(v, &retired);
     }
     let id = v.economy.next_order;
     v.economy.next_order = next_order;
@@ -1105,6 +1113,7 @@ impl Game {
             return "Sell 1–20 stored, unreserved units. Project reservations and incoming orders cannot be sold.".into();
         }
         remove(&mut v, material, n);
+        crate::scenarios::journal::trade::sold(&mut v, material, n);
         if v.mode == crate::modes::Mode::Story {
             v.progress.outcomes.resources_sold = true;
         }
@@ -1123,6 +1132,7 @@ impl Game {
                 .into();
         }
         remove(&mut v, FOOD, n);
+        crate::scenarios::journal::trade::sold(&mut v, FOOD, n);
         v.progress.surplus_sold = true;
         ledger(
             &mut v,

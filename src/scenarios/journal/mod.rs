@@ -8,6 +8,7 @@ pub const MAX_CONDITION_DEPTH: usize = 4;
 pub const MAX_GROUP_SIZE: usize = 8;
 mod model;
 mod runtime;
+pub(crate) mod trade;
 mod validation;
 pub use model::*;
 pub use runtime::{advance, initialize, valid, view};
@@ -18,12 +19,13 @@ mod tests;
 pub fn catalog() -> serde_json::Value {
     let example =
         |name: &str, condition: GoalCondition| serde_json::json!({"name":name,"example":condition});
-    serde_json::json!({"schema":1,"supported_modes":["sandbox"],"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
+    serde_json::json!({"schema":1,"supported_modes":["sandbox"],"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"trade_materials":economy::NAMES.into_iter().filter(|name|*name!=economy::NAMES[economy::SCRAPS]).collect::<Vec<_>>(),"trade_directions":[TradeDirection::Purchase,TradeDirection::Sale],"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"traded":1_000_000,"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
         example("Completed standing buildings",GoalCondition::Buildings{building:"home".into(),count:1,credit:BuildingCredit::Present,region:None}),
         example("Unreserved material at stores",GoalCondition::Stored{material:"timber".into(),count:12}),
         example("Community fund balance",GoalCondition::Funds{cents:30_000}),
         example("Game date",GoalCondition::Date{minute:1440.}),
         example("Harvest count",GoalCondition::Harvests{count:1,credit:CounterCredit::AfterActivation}),
+        example("Completed town trade",GoalCondition::Traded{direction:TradeDirection::Purchase,material:"plumbing".into(),count:2,credit:CounterCredit::AfterActivation}),
         example("Prepared material production",GoalCondition::Produced{material:"walls".into(),count:2,credit:CounterCredit::AfterActivation}),
         example("Maintain an observed village outcome",GoalCondition::Maintain{outcome:ObservedOutcome::Pantry,minutes:60}),
         example("Prior goal completion",GoalCondition::Goal{goal:"another-goal".into()}),

@@ -19,6 +19,7 @@ fn activate(chapter: &Chapter, state: &mut State, v: &Village) {
                 harvest_baseline: v.harvests,
                 building_baseline: buildings.clone(),
                 production_baseline: production_baselines(&goal.condition, v),
+                trade_baseline: trade::baselines(&goal.condition, state.trade.as_ref()),
             },
         );
     }
@@ -34,6 +35,7 @@ pub fn initialize(v: &mut Village) {
         schema: 1,
         last_sample: v.minutes,
         finished_at: None,
+        trade: trade::requested(journal).then(trade::Ledger::default),
         chapters: journal
             .chapters
             .iter()
@@ -72,7 +74,7 @@ pub fn advance(v: &mut Village) {
             let record = &state.goals[&goal.id];
             if record.activated_at.is_some()
                 && record.completed_at.is_none()
-                && measure(&goal.condition, record, &previous, v).0
+                && measure(&goal.condition, record, &previous, v, state.trade.as_ref()).0
             {
                 state.goals.get_mut(&goal.id).unwrap().completed_at = Some(v.minutes);
             }
@@ -106,6 +108,7 @@ fn measure(
     record: &GoalState,
     goals: &HashSet<String>,
     v: &Village,
+    trade_ledger: Option<&trade::Ledger>,
 ) -> (bool, serde_json::Value) {
     use serde_json::json;
     let (value, target, label) = match c {
@@ -201,6 +204,42 @@ fn measure(
                 ),
             )
         }
+        GoalCondition::Traded {
+            direction,
+            material,
+            count,
+            credit,
+        } => {
+            let baseline = if *credit == CounterCredit::AfterActivation {
+                record
+                    .trade_baseline
+                    .get(&direction.key(material))
+                    .copied()
+                    .unwrap_or(0)
+            } else {
+                0
+            };
+            let amount = trade_ledger
+                .map_or(0, |l| l.amount(*direction, material))
+                .saturating_sub(baseline);
+            (
+                amount as f64,
+                f64::from(*count),
+                format!(
+                    "{} {count} units of {material} {}",
+                    if *direction == TradeDirection::Purchase {
+                        "Receive a town purchase of"
+                    } else {
+                        "Sell"
+                    },
+                    if *credit == CounterCredit::Run {
+                        "during this playthrough"
+                    } else {
+                        "after this goal starts"
+                    }
+                ),
+            )
+        }
         GoalCondition::Produced {
             material,
             count,
@@ -272,7 +311,7 @@ fn measure(
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
             let results: Vec<_> = conditions
                 .iter()
-                .map(|c| measure(c, record, goals, v))
+                .map(|c| measure(c, record, goals, v, trade_ledger))
                 .collect();
             let all = matches!(c, GoalCondition::All { .. });
             let complete = if all {
@@ -294,6 +333,7 @@ fn measure(
         GoalCondition::Date { .. } => ("date", "minutes"),
         GoalCondition::Harvests { .. } => ("harvests", "count"),
         GoalCondition::Produced { .. } => ("produced", "count"),
+        GoalCondition::Traded { .. } => ("traded", "count"),
         GoalCondition::Maintain { .. } => ("maintain", "duration_minutes"),
         _ => unreachable!(),
     };
@@ -322,6 +362,7 @@ fn measure(
         GoalCondition::Produced { material, .. } => {
             json!({"kind":"production","material":material})
         }
+        GoalCondition::Traded { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Stored { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Funds { .. } => json!({"kind":"trade"}),
         GoalCondition::Harvests { .. } => json!({"kind":"build","building":"garden"}),
@@ -346,7 +387,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         let goals:Vec<_>=chapter.goals.iter().map(|goal| {
             let record=&state.goals[&goal.id];
             let status=if record.completed_at.is_some(){"complete"}else if record.activated_at.is_some(){"active"}else{"locked"};
-            let condition=if record.activated_at.is_some(){measure(&goal.condition,record,&completed,v).1}else{serde_json::Value::Null};
+            let condition=if record.activated_at.is_some(){measure(&goal.condition,record,&completed,v,state.trade.as_ref()).1}else{serde_json::Value::Null};
             serde_json::json!({"id":goal.id,"title":goal.title,"description":goal.description,"optional":goal.optional,"status":status,"activated_at":record.activated_at,"completed_at":record.completed_at,"condition":condition})
         }).collect();
         serde_json::json!({"id":chapter.id,"title":chapter.title,"description":chapter.description,"completed_at":state.chapters[&chapter.id],"goals":goals})
@@ -361,6 +402,14 @@ pub fn valid(v: &Village) -> bool {
     let Some(state) = &v.progress.scenario_journal else {
         return false;
     };
+    if state.trade.is_some() != trade::requested(journal)
+        || state
+            .trade
+            .as_ref()
+            .is_some_and(|ledger| !trade::valid(ledger, v))
+    {
+        return false;
+    }
     if state.schema != 1
         || !state.last_sample.is_finite()
         || state.last_sample != v.minutes
@@ -404,6 +453,17 @@ pub fn valid(v: &Village) -> bool {
             {
                 return false;
             }
+            let trade_expected = trade::baselines(&goal.condition, state.trade.as_ref());
+            if active
+                && (record.trade_baseline.len() != trade_expected.len()
+                    || record.trade_baseline.iter().any(|(key, value)| {
+                        trade_expected
+                            .get(key)
+                            .is_none_or(|current| value > current)
+                    }))
+            {
+                return false;
+            }
             let expected = production_baselines(&goal.condition, v);
             if active
                 && (record.production_baseline.len() != expected.len()
@@ -432,6 +492,7 @@ pub fn valid(v: &Village) -> bool {
                 || record.harvest_baseline != 0
                 || !record.building_baseline.is_empty()
                 || !record.production_baseline.is_empty()
+                || !record.trade_baseline.is_empty()
             {
                 return false;
             }

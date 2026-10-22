@@ -114,6 +114,13 @@ fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> bool {
         }
         GoalCondition::Funds { cents } => (0..=1_000_000_000).contains(cents),
         GoalCondition::Date { minute } => minute.is_finite() && (0.0..=5_000_000.).contains(minute),
+        GoalCondition::Traded {
+            material, count, ..
+        } => {
+            economy::NAMES.contains(&material.as_str())
+                && material != economy::NAMES[economy::SCRAPS]
+                && (1..=1_000_000).contains(count)
+        }
         GoalCondition::Produced {
             material, count, ..
         } => {

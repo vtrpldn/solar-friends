@@ -48,6 +48,12 @@ pub enum GoalCondition {
         count: u32,
         credit: CounterCredit,
     },
+    Traded {
+        direction: TradeDirection,
+        material: String,
+        count: u32,
+        credit: CounterCredit,
+    },
     Produced {
         material: String,
         count: u32,
@@ -106,6 +112,23 @@ pub enum BuildingCredit {
 }
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+pub enum TradeDirection {
+    Purchase,
+    Sale,
+}
+impl TradeDirection {
+    pub fn key(self, material: &str) -> String {
+        format!(
+            "{}:{material}",
+            match self {
+                Self::Purchase => "purchase",
+                Self::Sale => "sale",
+            }
+        )
+    }
+}
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum CounterCredit {
     Run,
     AfterActivation,
@@ -117,6 +140,8 @@ pub struct State {
     pub schema: u32,
     pub last_sample: f32,
     pub finished_at: Option<f32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub trade: Option<trade::Ledger>,
     pub chapters: BTreeMap<String, Option<f32>>,
     pub goals: BTreeMap<String, GoalState>,
 }
@@ -129,4 +154,6 @@ pub struct GoalState {
     pub building_baseline: Vec<usize>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub production_baseline: BTreeMap<String, u64>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub trade_baseline: BTreeMap<String, u64>,
 }

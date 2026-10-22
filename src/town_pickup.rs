@@ -89,6 +89,7 @@ pub fn finish(v: &mut Village, order: u32, driver: usize) {
     for (material, quantity) in items.into_iter().enumerate() {
         economy::add(v, material, quantity);
     }
+    crate::scenarios::journal::trade::received(v, &items);
     v.economy.last_delivery = v.minutes;
     economy::rebalance(v);
     event(
