@@ -1,3 +1,4 @@
+import {renderScenarioJournal,resetScenarioJournalUI} from './scenario-journal-ui.js';
 import {residentLookIndex} from './resident-look.js';
 import {installResidentIdentity} from './resident-identity.js';
 import {relationshipStrength} from './relationships.js';
@@ -961,12 +962,19 @@ function objectiveMarkup(objectives, completed = false) {
 function openJournal() {
   if(tool)setTool(null);
   closePanels();selected=null;$('#person').hidden=true;
-  journalPage = state.village.progress.tracked;
+  if(state.village.scenario?.definition?.journal){const report=JSON.parse(game.scenario_journal());const active=report.chapters.findIndex(c=>c.completed_at===null);journalPage=active<0?report.chapters.length-1:active;}else journalPage = state.village.progress.tracked;
   updateQuests();
   $("#quest-dialog").showModal();
   $('[data-panel="goals-panel"]').setAttribute('aria-expanded','true');
 }
 function updateQuests() {
+  if(state.village.scenario?.definition?.journal){
+    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,onAction:({action,credited})=>{
+      if(action.kind==='goal'){const report=JSON.parse(game.scenario_journal()),index=report.chapters.findIndex(c=>c.goals.some(g=>g.id===action.goal));if(index>=0){journalPage=index;updateQuests();[...document.querySelectorAll('[data-scenario-goal]')].find(el=>el.dataset.scenarioGoal===action.goal)?.scrollIntoView({block:'nearest'});}return;}
+      questAction({type:action.kind==='trade'?'town':credited?'build':'plan',kind:action.building}).run();
+    }});return;
+  }
+  resetScenarioJournalUI();
   const v = state.village,
     p = v.progress;
   const completions = completedQuests(v);
@@ -1230,8 +1238,9 @@ function updateUI() {
   sandboxRulesUI?.update();
   $('#mode-badge').textContent=free?'Sandbox':'Story';
   $('#mode-label').textContent=`${free?'SANDBOX':'STORY'}`;
-  $('.goal-tracker').hidden=free;
-  $('[data-panel="goals-panel"]').hidden=free;
+  const authoredJournal=!!state.village.scenario?.definition?.journal;
+  $('.goal-tracker').hidden=free&&!authoredJournal;
+  $('[data-panel="goals-panel"]').hidden=free&&!authoredJournal;
   $('[data-panel="projects-panel"]').hidden=false;
   // Trade also holds optional supplier settings in free Sandbox.
   $('[data-panel="town-panel"]').hidden=false;

@@ -1,0 +1,78 @@
+import {allBuildingArt} from '../building-art.js?v=night-1';
+const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const freshGoal=()=>({id:'goal-'+crypto.randomUUID(),title:'A place to stay',description:'Finish a home for our neighbours.',optional:false,condition:{kind:'buildings',building:'home',count:1,credit:'present'}});
+const freshChapter=()=>({id:'chapter-'+crypto.randomUUID(),title:'Our beginning',description:'Make a place where we can live together.',goals:[freshGoal()]});
+const pathValue=(journal,path)=>path.split('.').reduce((value,key)=>value[key],journal);
+const field=(path,label,value,{type='text',min,max,step,multiline=false}={})=>`<label class="creator-field">${label}${multiline?`<textarea data-journal-path="${path}" maxlength="${max??1000}" rows="3">${escape(value)}</textarea>`:`<input data-journal-path="${path}" type="${type}" value="${escape(value)}" ${min!==undefined?`min="${min}"`:''} ${max!==undefined?`${type==='text'?'maxlength':'max'}="${max}"`:''} ${step!==undefined?`step="${step}"`:''}>`}</label>`;
+const select=(path,label,value,options)=>`<label class="creator-field">${label}<select data-journal-path="${path}">${options.map(([key,name])=>`<option value="${escape(key)}" ${String(value)===String(key)?'selected':''}>${escape(name)}</option>`).join('')}</select></label>`;
+export class JournalEditor{
+ constructor(host,{catalog,change,undo,redo,history}){
+  Object.assign(this,{host,catalog,change,history});this.chapter=null;
+  this.dialog=document.createElement('dialog');this.dialog.id='creator-journal-dialog';this.dialog.setAttribute('aria-labelledby','creator-journal-title');
+  this.dialog.innerHTML='<button class="dialog-close" aria-label="Close journal editor">×</button><h2 id="creator-journal-title">Shape our story</h2><p>Chapters unfold in order. Required goals open the next chapter; optional goals can continue later. Changes stay in this draft.</p><div class="creator-journal-layout"><nav aria-label="Scenario chapters"></nav><div data-journal-form></div></div><p data-journal-errors role="status"></p><div class="dialog-actions"><button data-journal-undo>Undo</button><button data-journal-redo>Redo</button><button data-journal-done>Done</button></div>';
+  document.body.append(this.dialog);this.form=this.dialog.querySelector('[data-journal-form]');this.nav=this.dialog.querySelector('nav');
+  this.dialog.querySelector('.dialog-close').onclick=this.dialog.querySelector('[data-journal-done]').onclick=()=>this.dialog.close();this.dialog.querySelector('[data-journal-undo]').onclick=undo;this.dialog.querySelector('[data-journal-redo]').onclick=redo;
+  this.dialog.onchange=e=>{
+   const path=e.target.dataset.journalPath;if(!path)return;
+   const input=e.target,value=input.type==='checkbox'?input.checked:input.type==='number'?Number(input.value):input.value;
+   change('Edit scenario journal',d=>{
+    const keys=path.split('.'),key=keys.pop(),parent=keys.length?pathValue(d.journal,keys.join('.')):d.journal;
+    if(key==='kind'){
+     const example=structuredClone(catalog.journal.conditions.find(c=>c.example.kind===value).example);
+     if(value==='goal')example.goal=d.journal.chapters.flatMap(c=>c.goals).find(g=>g.id!==input.closest('[data-journal-goal]').dataset.journalGoal)?.id??'';
+     for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,example);
+    }else if(key==='cents')parent[key]=Math.round(Number(value)*100);
+    else if(key==='day'||key==='time'){
+     const day=key==='day'?Number(value):Math.floor(parent.minute/1440)+1,time=key==='time'?value:`${String(Math.floor(parent.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(parent.minute%60)).padStart(2,'0')}`,[hours,minutes]=time.split(':').map(Number);
+     parent.minute=(day-1)*1440+hours*60+minutes;
+    }else parent[key]=value;
+   });
+  };
+  const click=e=>{
+   const button=e.target.closest('[data-journal-action]');if(!button)return;const action=button.dataset.journalAction;
+   if(action==='open'){this.dialog.showModal();this.render(this.definition,this.report);this.dialog.scrollTop=0;return;}
+   if(action==='choose'){this.chapter=button.dataset.chapter;this.render(this.definition,this.report);return;}
+   change('Change journal '+action,d=>{
+    if(action==='enable'){const chapter=freshChapter();d.journal={schema:1,introduction:'Our shared beginning.',completion:'Our village story continues.',chapters:[chapter]};this.chapter=chapter.id;this.reveal=chapter.goals[0].id;return;}
+    if(action==='disable'){delete d.journal;this.dialog.close();return;}
+    const chapters=d.journal.chapters,index=chapters.findIndex(c=>c.id===this.chapter),chapter=chapters[index];
+    if(action==='add-chapter'){if(chapters.length>=catalog.journal.limits.chapters)return;const next=freshChapter();chapters.push(next);this.chapter=next.id;this.reveal=next.goals[0].id;}
+    if(action==='remove-chapter'){chapters.splice(index,1);this.chapter=chapters[Math.max(0,index-1)]?.id??null;}
+    if(action==='up'&&index>0)[chapters[index-1],chapters[index]]=[chapter,chapters[index-1]];
+    if(action==='down'&&index<chapters.length-1)[chapters[index+1],chapters[index]]=[chapter,chapters[index+1]];
+    if(action==='add-goal'&&chapter.goals.length<catalog.journal.limits.goals_per_chapter&&chapters.reduce((n,c)=>n+c.goals.length,0)<catalog.journal.limits.goals){const goal=freshGoal();chapter.goals.push(goal);this.reveal=goal.id;}
+    if(action==='remove-goal')chapter.goals=chapter.goals.filter(g=>g.id!==button.dataset.goal);
+    if(action==='add-condition'){const condition=pathValue(d.journal,button.dataset.path);if(condition.conditions.length<catalog.journal.limits.group_size)condition.conditions.push({kind:'funds',cents:0});}
+    if(action==='remove-condition')pathValue(d.journal,button.dataset.path).conditions.splice(Number(button.dataset.index),1);
+   });
+  };
+  host.onclick=click;this.dialog.addEventListener('click',click);
+  this.dialog.addEventListener('close',()=>host.querySelector('[data-journal-action=open]')?.focus());
+ }
+ condition(c,path,goal,depth=0){
+  const limits=this.catalog.journal.limits,target=this.catalog.journal.target_limits;
+  const kinds=this.catalog.journal.conditions.map(option=>`<option value="${option.example.kind}" ${c.kind===option.example.kind?'selected':''} ${depth>=limits.condition_depth&&['all','any'].includes(option.example.kind)?'disabled':''}>${escape(option.name)}</option>`).join('');
+  let html=`<label class="creator-field">Condition<select data-journal-path="${path}.kind">${kinds}</select></label>`;
+  if(c.kind==='buildings')html+=select(path+'.building','Building',c.building,this.catalog.buildings.map(b=>[b.id,allBuildingArt[b.id]?.name??b.id.replaceAll('_',' ')]))+field(path+'.count','Completed buildings',c.count,{type:'number',min:1,max:target.buildings,step:1})+select(path+'.credit','Which buildings count?',c.credit,[['present','All completed buildings, including the starting settlement'],['after_activation','Completed after this goal starts, and still standing']]);
+  if(c.kind==='stored')html+=select(path+'.material','Material',c.material,this.catalog.materials.map(m=>[m,m.replaceAll('_',' ')]))+field(path+'.count','Unreserved units at stores',c.count,{type:'number',min:1,max:target.stored,step:1})+'<p>Incoming orders and reserved materials do not count.</p>';
+  if(c.kind==='funds')html+=field(path+'.cents','Shared fund · R$',c.cents/100,{type:'number',min:0,max:target.funds/100,step:.01});
+  if(c.kind==='date')html+=field(path+'.day','Day',Math.floor(c.minute/1440)+1,{type:'number',min:1,max:Math.floor(target.date/1440)+1,step:1})+field(path+'.time','Time',`${String(Math.floor(c.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(c.minute%60)).padStart(2,'0')}`,{type:'time',step:60});
+  if(c.kind==='harvests')html+=field(path+'.count','Completed harvests',c.count,{type:'number',min:1,max:target.harvests,step:1})+select(path+'.credit','Which harvests count?',c.credit,[['run','All harvests during this playthrough'],['after_activation','Only harvests after this goal starts']]);
+  if(c.kind==='goal')html+=select(path+'.goal','Earlier goal',c.goal,[['','Choose a goal'],...this.definition.journal.chapters.flatMap(chapter=>chapter.goals.filter(g=>g.id!==goal.id).map(g=>[g.id,`${chapter.title} · ${g.title}`]))]);
+  if(['all','any'].includes(c.kind))html+=`<p>${c.kind==='all'?'Every condition must be met.':'At least one condition must be met.'}</p>`+c.conditions.map((child,i)=>`<fieldset><legend>Condition ${i+1}</legend>${this.condition(child,`${path}.conditions.${i}`,goal,depth+1)}<button data-journal-action="remove-condition" data-path="${path}" data-index="${i}">Remove condition</button></fieldset>`).join('')+`<button data-journal-action="add-condition" data-path="${path}" ${c.conditions.length>=limits.group_size||depth>=limits.condition_depth?'disabled':''}>Add condition</button>`;
+  return html;
+ }
+ render(definition,report){
+  this.definition=definition;this.report=report;const j=definition.journal;
+  this.host.innerHTML=j?'<p>A journal guides this village through its own chapters.</p><button data-journal-action="open">Edit village journal</button><button data-journal-action="disable">Remove journal</button>':'<p>Add chapters and goals for players to follow.</p><button data-journal-action="enable">Add village journal</button>';
+  if(!j){if(this.dialog.open)this.dialog.close();return;}if(!this.dialog.open)return;
+  if(!j.chapters.some(c=>c.id===this.chapter))this.chapter=j.chapters[0]?.id??null;
+  const focused=document.activeElement?.dataset.journalPath,scroll=this.form.scrollTop,open=new Set([...this.form.querySelectorAll('[data-journal-goal][open]')].map(el=>el.dataset.journalGoal));
+  this.nav.innerHTML=j.chapters.map((c,i)=>`<button data-journal-action="choose" data-chapter="${escape(c.id)}" aria-pressed="${c.id===this.chapter}">${i+1}. ${escape(c.title)}</button>`).join('')+`<button data-journal-action="add-chapter" ${j.chapters.length>=this.catalog.journal.limits.chapters?'disabled':''}>Add chapter</button>`;
+  const index=j.chapters.findIndex(c=>c.id===this.chapter),c=j.chapters[index],base=`chapters.${index}`;
+  this.form.innerHTML=field('introduction','Introduction',j.introduction,{multiline:true,max:2000})+field('completion','Completion message',j.completion,{multiline:true,max:1000})+(c?field(base+'.title','Chapter title',c.title,{max:100})+field(base+'.description','Chapter description',c.description,{multiline:true,max:1000})+`<div class="creator-journal-order"><button data-journal-action="up" ${index<=0?'disabled':''}>Earlier</button><button data-journal-action="down" ${index===j.chapters.length-1?'disabled':''}>Later</button><button data-journal-action="remove-chapter">Remove chapter</button></div>`+c.goals.map((g,i)=>`<details data-journal-goal="${escape(g.id)}" ${open.has(g.id)||g.id===this.reveal?'open':''}><summary>${escape(g.title)}</summary>${field(`${base}.goals.${i}.title`,'Goal title',g.title,{max:100})}${field(`${base}.goals.${i}.description`,'Goal description',g.description,{multiline:true,max:1000})}<label><input type="checkbox" data-journal-path="${base}.goals.${i}.optional" ${g.optional?'checked':''}> Optional goal</label>${this.condition(g.condition,`${base}.goals.${i}.condition`,g)}<button data-journal-action="remove-goal" data-goal="${escape(g.id)}">Remove goal</button></details>`).join('')+`<button data-journal-action="add-goal" ${c.goals.length>=this.catalog.journal.limits.goals_per_chapter||j.chapters.reduce((n,c)=>n+c.goals.length,0)>=this.catalog.journal.limits.goals?'disabled':''}>Add goal</button>`:'<p>Add a chapter to continue shaping this journal.</p>');
+  this.reveal=null;this.form.scrollTop=scroll;if(focused)this.form.querySelector(`[data-journal-path="${focused}"]`)?.focus({preventScroll:true});
+  this.dialog.querySelector('[data-journal-errors]').textContent=(report?.issues??[]).filter(i=>i.path.startsWith('journal')).map(i=>i.message).join(' ');
+  const state=this.history();this.dialog.querySelector('[data-journal-undo]').disabled=!state.undo;this.dialog.querySelector('[data-journal-redo]').disabled=!state.redo;
+ }
+}
