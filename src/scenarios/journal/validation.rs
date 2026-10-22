@@ -37,6 +37,9 @@ pub fn check(d: &Definition, report: &mut Report) {
             {
                 report.push("journal.chapters", "invalid_goal", "Give every goal a unique identity, a title up to 100 characters and description up to 1,000 characters.");
             }
+            if !services::setup_valid(&goal.condition, d) {
+                report.push("journal.chapters","unsupported_service_setup","Accessible food requires materials and hauling; water, sanitation and lighting require connected local utilities. A housed-person target cannot exceed this founding cast.");
+            }
             if !wellbeing::references_valid(&goal.condition, d) {
                 report.push("journal.chapters","missing_wellbeing_resident","Choose an existing cast member or everyone for each wellbeing condition. Removing a friend leaves their goals for you to repair.");
             }
@@ -148,6 +151,7 @@ pub(super) fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> b
                 && (1..=1_000_000).contains(count)
         }
         GoalCondition::Harvests { count, .. } => (1..=1_000_000).contains(count),
+        GoalCondition::Service { .. } => services::valid_condition(c),
         GoalCondition::Wellbeing { .. } => wellbeing::valid_condition(c),
         GoalCondition::Maintain { outcome, minutes } => {
             (15..=outcomes::TARGETS[outcome.index()] as u32).contains(minutes)

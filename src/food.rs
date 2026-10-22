@@ -92,9 +92,9 @@ pub fn summary(v: &Village) -> serde_json::Value {
         .sum::<u32>();
     serde_json::json!({"owned":owned,"unclaimed_at_stores":unclaimed,"carried":carried,"committed_to_cooking":cooking,"note":"Ingredients, prepared meals, milk and honey can be eaten directly. Eggs need cooking. Store totals do not guarantee a clear path; carried supplies and committed cooking inputs are separate."})
 }
-/// Observe actual reachable stores; cargo and cooking inputs cannot feed a
-/// pantry achievement. A resident's own claimed meal still establishes access.
-pub fn observed_access(v: &Village, people: &[Resident]) -> (u32, bool) {
+/// The common access policy for friends present on the property. When all are
+/// away, one visitor checks the property from the arrival clearing.
+pub(crate) fn service_participants(v: &Village, people: &[Resident]) -> Vec<Resident> {
     let mut participants: Vec<_> = people
         .iter()
         .filter(|r| r.trip.is_none())
@@ -102,11 +102,20 @@ pub fn observed_access(v: &Village, people: &[Resident]) -> (u32, bool) {
         .collect();
     if participants.is_empty() {
         let Some(mut visitor) = people.first().cloned() else {
-            return (0, false);
+            return vec![];
         };
         (visitor.x, visitor.y) = crate::camp(v);
         visitor.trip = None;
         participants.push(visitor);
+    }
+    participants
+}
+/// Observe actual reachable stores; cargo and cooking inputs cannot feed a
+/// pantry achievement. A resident's own claimed meal still establishes access.
+pub fn observed_access(v: &Village, people: &[Resident]) -> (u32, bool) {
+    let participants = service_participants(v, people);
+    if participants.is_empty() {
+        return (0, false);
     }
     let mut fed = vec![false; participants.len()];
     let mut total = 0;

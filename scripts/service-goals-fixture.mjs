@@ -1,0 +1,8 @@
+// Authored source data for native and public editor verification, never a live-state patch.
+export function serviceScenario(engine){
+ const d=JSON.parse(engine.scenario_template('sandbox'));d.rules.logistics=true;d.rules.utilities=true;d.start.minutes=1200;const base=d.start.buildings[0];
+ for(const [id,kind,x,y]of [['our-solar','solar_farm',25,25],['our-lamp','streetlight',28,25],['our-toilet','eco_toilet',20,25],['our-home-one','home',25,29],['our-home-two','home',20,29]])d.start.buildings.push({...base,id,kind,x,y,...(kind==='solar_farm'?{battery:{charge:12,owned:true}}:{})});
+ d.start.fresh_water=20;d.start.liquids=[{owner:{kind:'camp'},contents:{fresh:12}},{owner:{kind:'building',building:'our-toilet'},contents:{fresh:4}},{owner:{kind:'building',building:'our-home-one'},contents:{fresh:2}},{owner:{kind:'building',building:'our-home-two'},contents:{fresh:2}}];
+ const from={kind:'building',id:'our-solar'},to={kind:'building',id:'our-lamp'},p=JSON.parse(engine.scenario_route_preview(JSON.stringify(d),'electricity',JSON.stringify(from),JSON.stringify(to)));if(!p.allowed)throw Error(JSON.stringify(p));d.start.routes=[{id:'our-cable',kind:'electricity',from,to,state:'completed',cells:p.cells}];return d;
+}
+export const serviceGoals=()=>[['food',12,60],['fresh_water',6,15],['housed_residents',5,15],['toilets',1,15],['night_lights',1,15]].map(([service,minimum,minutes],i)=>({id:`service-${i}`,title:['Keep a pantry reserve','Keep fresh water close','A bed for every friend','Private daily routines','A lit path at night'][i],description:'Keep the settlement working for our friends.',optional:false,condition:{kind:'service',service,minimum,minutes}}));

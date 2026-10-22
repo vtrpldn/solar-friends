@@ -105,6 +105,11 @@ pub enum GoalCondition {
         count: u32,
         credit: CounterCredit,
     },
+    Service {
+        service: services::Kind,
+        minimum: f64,
+        minutes: u32,
+    },
     Wellbeing {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         resident: Option<String>,
@@ -209,6 +214,8 @@ pub struct State {
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GoalState {
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub services: BTreeMap<String, services::Watch>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub wellbeing: BTreeMap<String, wellbeing::Watch>,
     pub activated_at: Option<f32>,

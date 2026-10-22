@@ -12,6 +12,7 @@ pub(super) fn observation(conditions: &[&GoalCondition], state: &State, v: &Vill
     buildings.sort_unstable();
     GoalState {
         wellbeing: wellbeing::watches(conditions, v.minutes),
+        services: services::watches(conditions, v.minutes),
         activated_at: Some(v.minutes),
         completed_at: None,
         harvest_baseline: v.harvests,
@@ -60,7 +61,8 @@ pub(super) fn valid_watch(
                 .iter()
                 .all(|(key, value)| current.get(key).is_some_and(|limit| value <= limit))
     }
-    wellbeing::valid_watch(record, conditions, v)
+    services::valid_watch(record, conditions, v)
+        && wellbeing::valid_watch(record, conditions, v)
         && baseline_shape(record, v)
         && bounded(
             &record.production_baseline,
@@ -413,6 +415,7 @@ pub(super) fn measure(
                 ),
             )
         }
+        GoalCondition::Service { .. } => return services::measure(c, record, v),
         GoalCondition::Wellbeing { .. } => return wellbeing::measure(c, record, v),
         GoalCondition::Maintain { outcome, minutes } => {
             // Credit only the post-activation portion of the current consecutive
@@ -549,7 +552,7 @@ pub fn valid(v: &Village) -> bool {
     let Some(state) = &v.progress.scenario_journal else {
         return false;
     };
-    if !events::valid(journal, state, v) {
+    if !services::valid_state(v) || !events::valid(journal, state, v) {
         return false;
     }
     if !delivery::valid(state.delivery.as_ref(), journal, v) {
@@ -620,6 +623,7 @@ pub fn valid(v: &Village) -> bool {
                 || !record.trade_baseline.is_empty()
                 || !record.delivery_baseline.is_empty()
                 || !record.wellbeing.is_empty()
+                || !record.services.is_empty()
             {
                 return false;
             }

@@ -531,7 +531,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     super::farming::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
     super::orchards::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
     journal::initialize(&mut game.app.world_mut().resource_mut::<Village>());
-    journal::wellbeing::observe(
+    journal::observe(
         &mut game.app.world_mut().resource_mut::<Village>(),
         &opening_people,
     );

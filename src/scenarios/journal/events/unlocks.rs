@@ -59,6 +59,22 @@ fn possible(
                     .count()
                     >= *count as usize
         }
+        GoalCondition::Service {
+            service, minimum, ..
+        } => {
+            let kind = match service {
+                services::Kind::HousedResidents => Some("home"),
+                services::Kind::Toilets => Some("eco_toilet"),
+                services::Kind::NightLights => Some("streetlight"),
+                _ => None,
+            };
+            kind.is_none_or(|kind| {
+                unlocked.contains(kind)
+                    || d.start.buildings.iter().filter(|b| b.kind == kind).count() as f64
+                        * if kind == "home" { HOME_BEDS as f64 } else { 1. }
+                        >= *minimum
+            })
+        }
         GoalCondition::Produced { material, .. } => match material.as_str() {
             "tools" | "tiles" => available("workshop", unlocked, d),
             "meals" => available("kitchen", unlocked, d),
