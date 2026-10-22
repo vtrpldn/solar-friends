@@ -8,6 +8,31 @@ fn report(raw: &str) -> serde_json::Value {
 }
 
 #[test]
+fn frozen_cast_membership_survives_cosmetics_but_rejects_replacement_or_missing_people() {
+    for authored in [false, true] {
+        let mut d = Definition::builtin(modes::Mode::Sandbox);
+        if authored {
+            d.start.residents = Some(residents::founders());
+        }
+        let (mut g, _) = compile(d).unwrap_or_else(|_| panic!("valid default cast"));
+        let mut save: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        save.residents[0].name = "Renamed friend".into();
+        assert!(matches_residents(&save.village, &save.residents));
+        let valid = serde_json::to_string(&save).unwrap();
+        assert!(g.restore(&valid));
+        let before = g.snapshot();
+        save.residents[0].id = 900;
+        assert!(!matches_residents(&save.village, &save.residents));
+        assert!(!g.restore(&serde_json::to_string(&save).unwrap()));
+        assert_eq!(g.snapshot(), before);
+        save.residents.remove(0);
+        assert!(!matches_residents(&save.village, &save.residents));
+        assert!(!g.restore(&serde_json::to_string(&save).unwrap()));
+        assert_eq!(g.snapshot(), before);
+    }
+}
+
+#[test]
 fn both_official_modes_compile_with_the_original_located_supplies_and_freshness() {
     for mode in [modes::Mode::Story, modes::Mode::Sandbox] {
         let d = Definition::builtin(mode);

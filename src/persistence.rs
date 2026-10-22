@@ -140,7 +140,9 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
 }
 
 pub(crate) fn validate(mut save: Save) -> Option<Save> {
-    if !scenarios::valid_origin(&save.village) {
+    if !scenarios::valid_origin(&save.village)
+        || !scenarios::matches_residents(&save.village, &save.residents)
+    {
         return None;
     }
     if save.village.economy.outside_committed_day < -1
@@ -260,7 +262,10 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
             .iter()
             .any(|n| !n.is_finite() || !(1.0..=(MAP_SIZE - 2) as f32).contains(n))
         || crate::world::bank(v, v.camp.0 as i32, v.camp.1 as i32)
-        || save.residents.len() != 5
+        // This is a decoding safety bound, not the player creator's release limit.
+        // Complete record ownership remains authoritative for every saved person.
+        || save.residents.is_empty()
+        || save.residents.len() > 64
         || v.buildings.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
         || !v.minutes.is_finite()
         || v.minutes < 0.
@@ -277,7 +282,6 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
             || r.name.chars().count() > 80
             || r.pronouns.chars().count() > 40
             || r.biography.chars().count() > 600
-            || r.id >= 5
             || !ids.insert(r.id)
             || [r.energy, r.hunger, r.social, r.happiness]
                 .iter()

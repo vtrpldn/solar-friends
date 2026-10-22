@@ -224,6 +224,43 @@ mod tests {
         d
     }
     #[test]
+    fn sparse_runtime_identities_restore_without_becoming_array_positions() {
+        fn remap<T>(records: BTreeMap<usize, T>) -> BTreeMap<usize, T> {
+            records
+                .into_iter()
+                .map(|(id, p)| (42 + id * 101, p))
+                .collect()
+        }
+        let d = cast(2);
+        let mut v = Village::default();
+        let mut people = create(&d, &mut v);
+        apply(&d, &mut people, &mut v);
+        for person in &mut people {
+            person.id = 42 + person.id * 101;
+        }
+        v.skills.people = remap(v.skills.people);
+        v.workforce.preferences = remap(v.workforce.preferences);
+        v.economy.outside_jobs = remap(v.economy.outside_jobs);
+        v.economy.outside_professions = remap(v.economy.outside_professions);
+        v.economy.outside_committed_days = remap(v.economy.outside_committed_days);
+        v.economy.work_day = remap(v.economy.work_day);
+        let mut g = initialization::create(v, people).unwrap();
+        let checkpoint = g.snapshot();
+        let mut restored = Game::new();
+        assert!(restored.restore(&checkpoint));
+        assert_eq!(restored.snapshot(), checkpoint);
+        for _ in 0..20 {
+            g.tick(0.25);
+            restored.tick(0.25);
+        }
+        assert_eq!(restored.snapshot(), g.snapshot());
+        let save: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert_eq!(
+            save.residents.iter().map(|r| r.id).collect::<Vec<_>>(),
+            [42, 143]
+        );
+    }
+    #[test]
     fn repeated_templates_keep_separate_experience_jobs_relationships_and_names() {
         let mut d = cast(12);
         let definitions = d.start.residents.as_mut().unwrap();
@@ -361,6 +398,38 @@ mod tests {
                 assert!(saved.village.progress.social_people.is_empty());
                 assert_ne!(saved.residents[0].task, "socialize");
             }
+            let checkpoint = g.snapshot();
+            let mut restored = Game::new();
+            assert!(restored.restore(&checkpoint), "restore {count} residents");
+            assert_eq!(restored.snapshot(), checkpoint);
+            let raw: serde_json::Value = serde_json::from_str(&checkpoint).unwrap();
+            for invalid in ["empty", "duplicate", "missing_record", "orphan_record"] {
+                let mut broken = raw.clone();
+                match invalid {
+                    "empty" => broken["residents"] = serde_json::json!([]),
+                    "duplicate" => {
+                        let duplicate = broken["residents"][0].clone();
+                        broken["residents"].as_array_mut().unwrap().push(duplicate);
+                    }
+                    "missing_record" => {
+                        broken["village"]["skills"]["people"]
+                            .as_object_mut()
+                            .unwrap()
+                            .remove("0");
+                    }
+                    _ => {
+                        let record = broken["village"]["skills"]["people"]["0"].clone();
+                        broken["village"]["skills"]["people"]["900"] = record;
+                    }
+                }
+                assert!(!restored.restore(&broken.to_string()), "{count}: {invalid}");
+                assert_eq!(restored.snapshot(), checkpoint, "atomic {invalid}");
+            }
+            for _ in 0..20 {
+                g.tick(0.25);
+                restored.tick(0.25);
+            }
+            assert_eq!(restored.snapshot(), g.snapshot());
         }
     }
 }

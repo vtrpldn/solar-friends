@@ -112,6 +112,20 @@ pub(crate) fn valid_origin(v: &Village) -> bool {
         })
 }
 
+/// A frozen scenario owns its cast even after cosmetic edits during play.
+pub(crate) fn matches_residents(v: &Village, people: &[Resident]) -> bool {
+    let Some(origin) = &v.scenario else {
+        return true;
+    };
+    let expected: HashSet<_> = if origin.definition.start.residents.is_none() {
+        (0..5).collect()
+    } else {
+        origin.residents.values().copied().collect()
+    };
+    let actual: HashSet<_> = people.iter().map(|r| r.id).collect();
+    expected == actual && actual.len() == people.len()
+}
+
 #[wasm_bindgen]
 impl Game {
     /// A reusable authoring document. This is not a playable save file.
