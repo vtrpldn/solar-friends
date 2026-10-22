@@ -1,3 +1,4 @@
+import {installLibraryDiscovery} from './library-discovery.js';
 import {RELEASE_FORMAT,freezeReleaseDefinition} from '../release-package.js';
 import {canonical} from './journal.js';
 import {ensureStart} from './arrival.js';
@@ -39,6 +40,7 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let newBiome="mata-atlantica";
+let libraryDiscovery;
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
@@ -289,7 +291,7 @@ async function launch(definition,record,sessionKind,releaseId=null,releasePackag
     location.assign(`./?run=${encodeURIComponent(run.id)}`);return true;
   }finally{candidate.free();}
 }
-async function showLibrary(){
+async function showLibrary({reset=false}={}){
   if(current)await save();
   const [projects,runs,releases]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases()]);
   $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row"><div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
@@ -301,6 +303,9 @@ async function showLibrary(){
   const villages=runs.filter(r=>r.sessionKind==='scenario');
   $('creator-runs-heading').hidden=!villages.length;
   $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row"><div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button></div>`).join('');
+  $('creator-library-title').textContent=projects.length+releases.length+villages.length?'Creation library':'Create a village';
+  if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length===0;
+  libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages);if(reset)libraryDiscovery.reset();
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
@@ -373,7 +378,7 @@ function wire(){
       await save();const frozen=freezeReleaseDefinition(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog});
       if(canonical(frozen)!==canonical(current.doc.value)){current.doc.transact('Resolve landscape for frozen release',d=>Object.assign(d,frozen));await save();}
       const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,validate:raw=>JSON.parse(engine.validate_scenario(raw))});
-      $('creator-release-dialog').close();await showLibrary();toast(`Version ${record.package.content_revision} is saved independently.`);
+      $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
     }catch(error){$('creator-release-status').textContent=error.message;}finally{busy=false;$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current)refresh();}
   };
   $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
@@ -413,7 +418,7 @@ function wire(){
     try{
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const raw=await file.text(),checked=JSON.parse(engine.validate_scenario(raw));let content;try{content=JSON.parse(raw);}catch{throw Error(checked.issues[0]?.message||'This file is not a readable creation.');}
-      if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)));await showLibrary();toast('Imported as a separate frozen release.');return;}
+      if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)));await showLibrary({reset:true});toast('Imported as a separate frozen release.');return;}
       const blocked=new Set(['file_too_large','unsupported_format','invalid_json','invalid_definition','unsupported_map','unknown_building','invalid_appearance','invalid_material','too_many_objects','too_many_stores','duplicate_building','invalid_identity','unsupported_resident_preset','unsupported_resident_appearance']);
       if(checked.issues.some(i=>blocked.has(i.code)))throw Error(checked.issues.find(i=>blocked.has(i.code)).message);
       await newProject('import',JSON.parse(raw));toast(checked.ok?'The creation was imported as a separate project.':'Imported as a draft. Review its issues before testing.');

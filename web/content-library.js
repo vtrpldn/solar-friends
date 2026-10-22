@@ -6,7 +6,7 @@ export class LibraryConflict extends Error {
 }
 const clone=value=>structuredClone(value);
 const recordKind=store=>({projects:'project',runs:'run',residents:'resident',releases:'release'})[store];
-const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition??record.package?.definition)?.start?.resident_balance??'balanced',contentRevision:record.package?.content_revision,author:record.package?.author,compatibility:record.package?.compatibility});
+const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition??record.package?.definition)?.start?.resident_balance??'balanced',contentRevision:record.package?.content_revision??record.release?.content_revision,author:record.package?.author??record.release?.author,compatibility:record.package?.compatibility??record.release?.compatibility});
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
 export class ContentLibrary extends EventTarget {
