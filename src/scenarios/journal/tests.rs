@@ -22,6 +22,7 @@ fn scenario(chapters: Vec<Chapter>) -> Definition {
         schema: 1,
         introduction: "Our own beginning".into(),
         completion: "Keep enjoying village life.".into(),
+        events: vec![],
         chapters,
     });
     d

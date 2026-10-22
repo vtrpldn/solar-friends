@@ -30,10 +30,7 @@ pub fn requested(journal: &Journal) -> bool {
             _ => false,
         }
     }
-    journal
-        .chapters
-        .iter()
-        .any(|c| c.goals.iter().any(|g| needed(&g.condition)))
+    journal.conditions().any(needed)
 }
 pub fn received(v: &mut Village, items: &economy::Bundle) {
     let Some(ledger) = v

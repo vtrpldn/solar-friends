@@ -7,6 +7,7 @@ pub const MAX_CONDITION_NODES: usize = 256;
 pub const MAX_CONDITION_DEPTH: usize = 4;
 pub const MAX_GROUP_SIZE: usize = 8;
 pub(crate) mod delivery;
+pub(crate) mod events;
 mod model;
 mod runtime;
 pub(crate) mod trade;
@@ -20,7 +21,7 @@ mod tests;
 pub fn catalog() -> serde_json::Value {
     let example =
         |name: &str, condition: GoalCondition| serde_json::json!({"name":name,"example":condition});
-    serde_json::json!({"schema":1,"supported_modes":["sandbox"],"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"trade_materials":economy::NAMES.into_iter().filter(|name|*name!=economy::NAMES[economy::SCRAPS]).collect::<Vec<_>>(),"trade_directions":[TradeDirection::Purchase,TradeDirection::Sale],"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"delivered":1_000_000,"traded":1_000_000,"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
+    serde_json::json!({"schema":1,"supported_modes":["sandbox"],"events":events::catalog(),"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"trade_materials":economy::NAMES.into_iter().filter(|name|*name!=economy::NAMES[economy::SCRAPS]).collect::<Vec<_>>(),"trade_directions":[TradeDirection::Purchase,TradeDirection::Sale],"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"delivered":1_000_000,"traded":1_000_000,"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
         example("Completed standing buildings",GoalCondition::Buildings{building:"home".into(),count:1,credit:BuildingCredit::Present,region:None}),
         example("Unreserved material at stores",GoalCondition::Stored{material:"timber".into(),count:12}),
         example("Community fund balance",GoalCondition::Funds{cents:30_000}),
@@ -50,11 +51,7 @@ pub fn needs_outcomes(v: &Village) -> bool {
     v.scenario
         .as_ref()
         .and_then(|s| s.definition.journal.as_ref())
-        .is_some_and(|j| {
-            j.chapters
-                .iter()
-                .any(|c| c.goals.iter().any(|g| needed(&g.condition)))
-        })
+        .is_some_and(|j| j.conditions().any(needed))
 }
 
 fn production_baselines(condition: &GoalCondition, v: &Village) -> BTreeMap<String, u64> {

@@ -6,6 +6,16 @@ pub struct Journal {
     pub introduction: String,
     pub chapters: Vec<Chapter>,
     pub completion: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub events: Vec<events::EventDefinition>,
+}
+impl Journal {
+    pub fn conditions(&self) -> impl Iterator<Item = &GoalCondition> {
+        self.chapters
+            .iter()
+            .flat_map(|c| c.goals.iter().map(|g| &g.condition))
+            .chain(self.events.iter().flat_map(|e| e.conditions()))
+    }
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -153,6 +163,8 @@ pub struct State {
     pub delivery: Option<delivery::Ledger>,
     pub chapters: BTreeMap<String, Option<f32>>,
     pub goals: BTreeMap<String, GoalState>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub events: BTreeMap<String, events::EventRecord>,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

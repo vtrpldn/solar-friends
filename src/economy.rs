@@ -452,6 +452,26 @@ fn ledger(v: &mut Village, amount: i64, note: String) {
         v.economy.ledger.remove(0);
     }
 }
+/// External scenario support is a recorded grant, with no partial payment.
+pub(crate) fn scenario_grant(v: &mut Village, cents: i64, title: &str) -> bool {
+    if !(1..=100_000_000).contains(&cents)
+        || v.economy
+            .money
+            .checked_add(cents)
+            .is_none_or(|total| total > 1_000_000_000)
+    {
+        return false;
+    }
+    ledger(
+        v,
+        cents,
+        format!(
+            "Scenario support: {}",
+            title.chars().take(40).collect::<String>()
+        ),
+    );
+    true
+}
 pub fn plan(v: &mut Village, id: usize) {
     let appearance = if v.buildings.iter().any(|b| b.id == id && b.kind == "home") {
         v.economy

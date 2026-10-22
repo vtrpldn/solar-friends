@@ -2,7 +2,7 @@ use super::*;
 fn definition(v: &Village) -> Option<&Journal> {
     v.scenario.as_ref()?.definition.journal.as_ref()
 }
-fn activate(chapter: &Chapter, state: &mut State, v: &Village) {
+pub(super) fn observation(conditions: &[&GoalCondition], state: &State, v: &Village) -> GoalState {
     let mut buildings: Vec<_> = v
         .buildings
         .iter()
@@ -10,20 +10,77 @@ fn activate(chapter: &Chapter, state: &mut State, v: &Village) {
         .map(|b| b.id)
         .collect();
     buildings.sort_unstable();
-    for goal in &chapter.goals {
-        state.goals.insert(
-            goal.id.clone(),
-            GoalState {
-                activated_at: Some(v.minutes),
-                completed_at: None,
-                harvest_baseline: v.harvests,
-                building_baseline: buildings.clone(),
-                production_baseline: production_baselines(&goal.condition, v),
-                trade_baseline: trade::baselines(&goal.condition, state.trade.as_ref()),
-                delivery_baseline: delivery::baselines(&goal.condition, state.delivery.as_ref()),
-            },
-        );
+    GoalState {
+        activated_at: Some(v.minutes),
+        completed_at: None,
+        harvest_baseline: v.harvests,
+        building_baseline: buildings,
+        production_baseline: conditions
+            .iter()
+            .flat_map(|c| production_baselines(c, v))
+            .collect(),
+        trade_baseline: conditions
+            .iter()
+            .flat_map(|c| trade::baselines(c, state.trade.as_ref()))
+            .collect(),
+        delivery_baseline: conditions
+            .iter()
+            .flat_map(|c| delivery::baselines(c, state.delivery.as_ref()))
+            .collect(),
     }
+}
+fn activate(chapter: &Chapter, state: &mut State, v: &Village) {
+    for goal in &chapter.goals {
+        let record = observation(&[&goal.condition], state, v);
+        state.goals.insert(goal.id.clone(), record);
+    }
+}
+pub(super) fn baseline_shape(record: &GoalState, v: &Village) -> bool {
+    record.building_baseline.len() <= ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
+        && !record
+            .building_baseline
+            .windows(2)
+            .any(|pair| pair[0] >= pair[1])
+        && !record
+            .building_baseline
+            .iter()
+            .any(|id| *id >= v.economy.next_building)
+        && record.harvest_baseline <= v.harvests
+}
+pub(super) fn valid_watch(
+    record: &GoalState,
+    conditions: &[&GoalCondition],
+    state: &State,
+    v: &Village,
+) -> bool {
+    fn bounded(actual: &BTreeMap<String, u64>, current: BTreeMap<String, u64>) -> bool {
+        actual.len() == current.len()
+            && actual
+                .iter()
+                .all(|(key, value)| current.get(key).is_some_and(|limit| value <= limit))
+    }
+    baseline_shape(record, v)
+        && bounded(
+            &record.production_baseline,
+            conditions
+                .iter()
+                .flat_map(|c| production_baselines(c, v))
+                .collect(),
+        )
+        && bounded(
+            &record.trade_baseline,
+            conditions
+                .iter()
+                .flat_map(|c| trade::baselines(c, state.trade.as_ref()))
+                .collect(),
+        )
+        && bounded(
+            &record.delivery_baseline,
+            conditions
+                .iter()
+                .flat_map(|c| delivery::baselines(c, state.delivery.as_ref()))
+                .collect(),
+        )
 }
 pub fn initialize(v: &mut Village) {
     let Some(origin) = v.scenario.clone() else {
@@ -34,6 +91,7 @@ pub fn initialize(v: &mut Village) {
     };
     let mut state = State {
         schema: 1,
+        events: BTreeMap::new(),
         last_sample: v.minutes,
         finished_at: None,
         trade: trade::requested(journal).then(trade::Ledger::default),
@@ -50,6 +108,7 @@ pub fn initialize(v: &mut Village) {
             .collect(),
     };
     activate(&journal.chapters[0], &mut state, v);
+    state.events = events::initialize(journal, &state, v);
     v.progress.scenario_journal = Some(state);
     advance(v);
 }
@@ -110,10 +169,11 @@ pub fn advance(v: &mut Village) {
             }
         }
     }
+    events::advance(journal, &mut state, v);
     state.last_sample = v.minutes;
     v.progress.scenario_journal = Some(state);
 }
-fn measure(
+pub(super) fn measure(
     c: &GoalCondition,
     record: &GoalState,
     goals: &HashSet<String>,
@@ -469,7 +529,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         }).collect();
         serde_json::json!({"id":chapter.id,"title":chapter.title,"description":chapter.description,"completed_at":state.chapters[&chapter.id],"goals":goals})
     }).collect();
-    serde_json::json!({"schema":1,"introduction":journal.introduction,"completion":journal.completion,"finished_at":state.finished_at,"chapters":chapters})
+    serde_json::json!({"schema":1,"introduction":journal.introduction,"completion":journal.completion,"finished_at":state.finished_at,"chapters":chapters,"events":events::view(journal,state,v)})
 }
 
 pub fn valid(v: &Village) -> bool {
@@ -479,6 +539,9 @@ pub fn valid(v: &Village) -> bool {
     let Some(state) = &v.progress.scenario_journal else {
         return false;
     };
+    if !events::valid(journal, state, v) {
+        return false;
+    }
     if !delivery::valid(state.delivery.as_ref(), journal, v) {
         return false;
     }
@@ -520,45 +583,8 @@ pub fn valid(v: &Village) -> bool {
             let Some(record) = state.goals.get(&goal.id) else {
                 return false;
             };
-            if record.building_baseline.len() > ((MAP_SIZE - 2) * (MAP_SIZE - 2)) as usize
-                || record
-                    .building_baseline
-                    .windows(2)
-                    .any(|pair| pair[0] >= pair[1])
-                || record
-                    .building_baseline
-                    .iter()
-                    .any(|&id| id >= v.economy.next_building)
-                || record.harvest_baseline > v.harvests
-            {
-                return false;
-            }
-            let delivery_expected = delivery::baselines(&goal.condition, state.delivery.as_ref());
-            if active
-                && (record.delivery_baseline.len() != delivery_expected.len()
-                    || record.delivery_baseline.iter().any(|(key, value)| {
-                        delivery_expected.get(key).is_none_or(|total| value > total)
-                    }))
-            {
-                return false;
-            }
-            let trade_expected = trade::baselines(&goal.condition, state.trade.as_ref());
-            if active
-                && (record.trade_baseline.len() != trade_expected.len()
-                    || record.trade_baseline.iter().any(|(key, value)| {
-                        trade_expected
-                            .get(key)
-                            .is_none_or(|current| value > current)
-                    }))
-            {
-                return false;
-            }
-            let expected = production_baselines(&goal.condition, v);
-            if active
-                && (record.production_baseline.len() != expected.len()
-                    || record.production_baseline.iter().any(|(key, value)| {
-                        expected.get(key).is_none_or(|current| value > current)
-                    }))
+            if !baseline_shape(record, v)
+                || active && !valid_watch(record, &[&goal.condition], state, v)
             {
                 return false;
             }

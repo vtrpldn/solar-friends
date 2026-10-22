@@ -3,6 +3,7 @@ pub fn check(d: &Definition, report: &mut Report) {
     let Some(journal) = &d.journal else {
         return;
     };
+    events::check(d, report);
     if journal.schema != 1
         || journal.introduction.chars().count() > 2000
         || journal.completion.chars().count() > 1000
@@ -103,7 +104,7 @@ pub fn check(d: &Definition, report: &mut Report) {
 fn text(value: &str, max: usize) -> bool {
     !value.trim().is_empty() && value.chars().count() <= max
 }
-fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> bool {
+pub(super) fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> bool {
     *nodes += 1;
     if depth > MAX_CONDITION_DEPTH || *nodes > MAX_CONDITION_NODES {
         return false;
@@ -149,7 +150,7 @@ fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> bool {
         }
     }
 }
-fn references<'a>(c: &'a GoalCondition, out: &mut Vec<&'a str>) {
+pub(super) fn references<'a>(c: &'a GoalCondition, out: &mut Vec<&'a str>) {
     match c {
         GoalCondition::Goal { goal } => out.push(goal),
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
@@ -184,7 +185,7 @@ fn cycle<'a>(
     false
 }
 
-fn needs_climate(condition: &GoalCondition) -> bool {
+pub(super) fn needs_climate(condition: &GoalCondition) -> bool {
     match condition {
         GoalCondition::Maintain {
             outcome: ObservedOutcome::Dry,
@@ -197,7 +198,7 @@ fn needs_climate(condition: &GoalCondition) -> bool {
     }
 }
 
-fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
+pub(super) fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
     match c {
         GoalCondition::Buildings {
             region: Some(id), ..
@@ -209,7 +210,7 @@ fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
     }
 }
 
-fn needs_production(c: &GoalCondition) -> bool {
+pub(super) fn needs_production(c: &GoalCondition) -> bool {
     match c {
         GoalCondition::Produced { .. } | GoalCondition::Delivered { .. } => true,
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {

@@ -31,10 +31,8 @@ fn visit(condition: &GoalCondition, only_activation: bool, result: &mut BTreeMap
 }
 pub fn initialize(journal: &Journal) -> Option<Ledger> {
     let mut totals = BTreeMap::new();
-    for chapter in &journal.chapters {
-        for goal in &chapter.goals {
-            visit(&goal.condition, false, &mut totals);
-        }
+    for condition in journal.conditions() {
+        visit(condition, false, &mut totals);
     }
     (!totals.is_empty()).then_some(Ledger { totals })
 }
