@@ -1,5 +1,6 @@
+import {chooseRecoveryCheckpoint} from './recovery-dialog.js';
 import {draftImportIssue} from './draft-import.js';
-import {downloadRecoveryRecord,recoveredDraft,recoveredVillage} from './record-recovery.js';
+import {downloadRecoveryRecord} from './record-recovery.js';
 import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
 import {MapSharingControls} from './map-sharing-controls.js';
 import {creationThumbnail} from './thumbnail.js';
@@ -445,8 +446,12 @@ function wire(){
     try{
       if(file.size>32*1024*1024)throw Error('This creation file is too large.');
       const raw=await file.text();let content;try{content=JSON.parse(raw);}catch{throw Error('This file is not a readable creation.');}
-      if(content.format==='solar-friends-recovery'&&content.kind==='run'){const recovered=recoveredVillage(content,Game);if(current)await save();await library.importRecoveredRun(recovered);await showLibrary({reset:true});toast(recovered.source==='previous'?'Recovered the previous village checkpoint as a separate save.':'Recovered as a separate saved village.');return;}
-      if(content.format==='solar-friends-recovery'){const recovered=recoveredDraft(content,data=>JSON.parse(engine.validate_scenario(data)));await newProject('import',recovered.definition,recovered.attribution);toast(!recovered.playable?'Recovered as a separate draft. Review its issues before playing.':recovered.source==='previous'?'Recovered the previous checkpoint as a separate draft. The original backup is unchanged.':'Recovered as a separate draft. The original backup is unchanged.');return;}
+      if(content.format==='solar-friends-recovery'){
+        const recovered=await chooseRecoveryCheckpoint(content,{Game,validate:data=>JSON.parse(engine.validate_scenario(data))});if(!recovered)return;
+        if(content.kind==='run'){if(current)await save();await library.importRecoveredRun(recovered);await showLibrary({reset:true});toast('Recovered as a separate saved village.');}
+        else{await newProject('import',recovered.definition,recovered.attribution);toast(recovered.playable?'Recovered as a separate draft.':'Recovered as a separate draft. Review its issues before playing.');}
+        return;
+      }
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const checked=JSON.parse(engine.validate_scenario(raw));
       if(content.format===MAP_FORMAT){const accepted=validateMapPackage(content,mapSharing.validate);if(current)await save();const thumbnail=mapSharing.preview(accepted);await library.importMap(accepted,mapSharing.validate,thumbnail);await showLibrary({reset:true});toast('Imported as a separate reusable map.');return;}

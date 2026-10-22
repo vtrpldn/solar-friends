@@ -13,10 +13,11 @@ export function downloadRecoveryRecord(kind,record){
 }
 // Import only understood envelopes. The retained original remains the recovery
 // authority; this operation extracts a validated definition into a new draft.
-export function recoveredDraft(file,validate){
+export function recoveredDraft(file,validate,{source:requested=null}={}){
  if(file?.format!=='solar-friends-recovery'||file.schema!==1||file.kind!=='project'||file.record?.format!=='solar-friends-project'||file.record.schema!==1)throw Error('This backup needs another game version or is not a draft backup. Keep the original file.');
  const record=file.record;
  for(const [source,checkpoint]of [['current',record.checkpoint],['previous',record.previous?.checkpoint]]){
+  if(requested&&source!==requested)continue;
   if(checkpoint?.schema!==1||!checkpoint.definition)continue;
   const definition=structuredClone(checkpoint.definition),checked=validate(JSON.stringify(definition));
   if(draftImportIssue(checked))continue;
@@ -25,11 +26,12 @@ export function recoveredDraft(file,validate){
  }
  throw Error('Neither draft checkpoint can open in this game version. Keep the original backup; nothing was imported.');
 }
-export function recoveredVillage(file,Game){
+export function recoveredVillage(file,Game,{source:requested=null}={}){
  if(file?.format!=='solar-friends-recovery'||file.schema!==1||file.kind!=='run'||file.record?.format!=='solar-friends-run'||file.record.schema!==1||file.record.sessionKind!=='scenario')throw Error('This backup is not a supported saved village. Keep the original file.');
  const record=file.record,game=new Game();
  try{
   for(const [source,snapshot]of [['current',record.snapshot],['previous',record.previousSnapshot]]){
+   if(requested&&source!==requested)continue;
    if(typeof snapshot!=='string'||snapshot.length>16*1024*1024||!game.restore(snapshot))continue;
    const restored=JSON.parse(game.snapshot()),definition=restored.village?.scenario?.definition;
    if(!definition)continue;
