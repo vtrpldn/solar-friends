@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "status": "Feeding draft incomplete; no clip registration or player activation",
+  "why": "Test unchanged reuse before authoring pose-bound caps; reject visible errors even when bounds pass.",
+  "generations": [
+    {
+      "index": 12,
+      "version": 1,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as close-fitting short brown curls, and make EVERYTHING ELSE truly transparent. Preserve the EXACT 1254x1254 full-body canvas registration and green silhouette position, size, outer contour and high fringe. This cap is at the top of the unchanged full-body canvas, approximately x495..820,y90..305. Image2 supplies ONLY restrained dark warm-brown painted curls, grouped detail and upper-left lighting, never its position. Cover the entire green crown opaquely, keeping both eyes and eyebrows visible and ears free. No bulky extra volume, tendrils, orange glossy highlights, ear loops or long sideburns. Remove all green, guide marks, body, skin, face, ears, eyes, eyebrows, hands, clothes and boots. Every pixel outside the cap must be alpha0, especially everything below y340. Do not recenter, shift, zoom, resize, crop or normalize. No props, text, background, shadow or faint body remnants. Output only the hair cap at the exact guide location to overlay on the original feeding body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-12-silhouette-guide.png",
+          "sha256": "6241d61c892d658230867659744419f6eeb85a891e5da75749deebdf537c98cf"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dc8487cf-80d4-4feb-b3fc-be639c3dc8a5.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v1.png",
+      "sha256": "5d8dcf7be2b6490a87e77bdced48eedb3fa3b1e5f38e7780b7f9deddec97566f"
+    },
+    {
+      "index": 13,
+      "version": 1,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as close-fitting short brown curls, and make EVERYTHING ELSE truly transparent. Preserve the EXACT 1254x1254 full-body canvas registration and green silhouette position, size, outer contour and high fringe. This cap is at the top of the unchanged full-body canvas, approximately x495..820,y90..305. Image2 supplies ONLY restrained dark warm-brown painted curls, grouped detail and upper-left lighting, never its position. Cover the entire green crown opaquely, keeping both eyes and eyebrows visible and ears free. No bulky extra volume, tendrils, orange glossy highlights, ear loops or long sideburns. Remove all green, guide marks, body, skin, face, ears, eyes, eyebrows, hands, clothes and boots. Every pixel outside the cap must be alpha0, especially everything below y340. Do not recenter, shift, zoom, resize, crop or normalize. No props, text, background, shadow or faint body remnants. Output only the hair cap at the exact guide location to overlay on the original feeding body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-13-silhouette-guide.png",
+          "sha256": "e9cc02602fed1b969535effe3fd306572f78a7bedcfa3cc30ddf5272f2e8825f"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0e9187e9-a4d7-4e8a-8f51-6704d6b5fbb5.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-13-candidate-v1.png",
+      "sha256": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74"
+    },
+    {
+      "index": 14,
+      "version": 1,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as close-fitting short brown curls, and make EVERYTHING ELSE truly transparent. Preserve the EXACT 1254x1254 full-body canvas registration and green silhouette position, size, outer contour and high fringe. This cap is at the top of the unchanged full-body canvas, approximately x495..820,y90..305. Image2 supplies ONLY restrained dark warm-brown painted curls, grouped detail and upper-left lighting, never its position. Cover the entire green crown opaquely, keeping both eyes and eyebrows visible and ears free. No bulky extra volume, tendrils, orange glossy highlights, ear loops or long sideburns. Remove all green, guide marks, body, skin, face, ears, eyes, eyebrows, hands, clothes and boots. Every pixel outside the cap must be alpha0, especially everything below y340. Do not recenter, shift, zoom, resize, crop or normalize. No props, text, background, shadow or faint body remnants. Output only the hair cap at the exact guide location to overlay on the original feeding body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-14-silhouette-guide.png",
+          "sha256": "564d6514c0b21506074ba1af97edae393895517727688fddc1645f0ca9f97b62"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7234b349-f788-446b-a598-ac860b91befa.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v1.png",
+      "sha256": "f6962f0cbdfc14ddc23887df483734da6f1ab4807b16b043c056459325e0a7b1"
+    },
+    {
+      "index": 15,
+      "version": 1,
+      "prompt": "Paint ONLY the green scalp-cap template in image1 as close-fitting short brown curls, and make EVERYTHING ELSE truly transparent. Preserve the EXACT 1254x1254 full-body canvas registration and green silhouette position, size, outer contour and high fringe. This cap is at the top of the unchanged full-body canvas, approximately x495..820,y90..305. Image2 supplies ONLY restrained dark warm-brown painted curls, grouped detail and upper-left lighting, never its position. Cover the entire green crown opaquely, keeping both eyes and eyebrows visible and ears free. No bulky extra volume, tendrils, orange glossy highlights, ear loops or long sideburns. Remove all green, guide marks, body, skin, face, ears, eyes, eyebrows, hands, clothes and boots. Every pixel outside the cap must be alpha0, especially everything below y340. Do not recenter, shift, zoom, resize, crop or normalize. No props, text, background, shadow or faint body remnants. Output only the hair cap at the exact guide location to overlay on the original feeding body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-15-silhouette-guide.png",
+          "sha256": "358eb1a8abe0cd7d5658e9a2c7ade946e992ee1b62c9be0d1d2aaca86a38eb6d"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a77de33d-b552-4b1a-8087-1d83f61bd23e.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png",
+      "sha256": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38"
+    },
+    {
+      "index": 12,
+      "version": 2,
+      "prompt": "Correct image2's hair cap using image1's green geometry. Output hair ONLY on transparent 1254x1254 canvas. EXACT same canvas registration as image1. The previous cap is too far RIGHT, too big, and covers the eyes. The correct entire cap spans x500..775,y95..285. Paint the ENTIRE green shape, including its LEFT crown and rear edge, as short opaque warm dark-brown curls matching image2's soft painted material. Follow the green outer silhouette and high fringe precisely, leaving eyes, eyebrows and ears exposed. Do not extrapolate extra volume or center the cap. Remove ALL green, body, skin, ears, face, eyes, hands, clothing, boots and guide marks. Outside the small cap every pixel must be alpha0, especially below y330. No body remnants, text, props, shadow or background. No crop, zoom, resize, normalization. Canvas location is essential.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-12-silhouette-guide.png",
+          "sha256": "6241d61c892d658230867659744419f6eeb85a891e5da75749deebdf537c98cf"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v1.png",
+          "sha256": "5d8dcf7be2b6490a87e77bdced48eedb3fa3b1e5f38e7780b7f9deddec97566f"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d8a223dd-ba07-49d1-87a3-5eb5593afa47.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v2.png",
+      "sha256": "2649fb7bd9a25d8181a678b61148b73513362faab55c032cf4d4028a2c527d70"
+    },
+    {
+      "index": 14,
+      "version": 2,
+      "prompt": "Correct image2's hair cap using image1's green geometry. Output hair ONLY on transparent 1254x1254 canvas. EXACT same canvas registration as image1. The previous cap leaves the LEFT crown bald. The correct entire cap spans x530..810,y105..295. Paint the ENTIRE green shape, including its LEFT crown and rear edge, as short opaque warm dark-brown curls matching image2's soft painted material. Follow the green outer silhouette and high fringe precisely, leaving eyes, eyebrows and ears exposed. Do not extrapolate extra volume or center the cap. Remove ALL green, body, skin, ears, face, eyes, hands, clothing, boots and guide marks. Outside the small cap every pixel must be alpha0, especially below y330. No body remnants, text, props, shadow or background. No crop, zoom, resize, normalization. Canvas location is essential.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-14-silhouette-guide.png",
+          "sha256": "564d6514c0b21506074ba1af97edae393895517727688fddc1645f0ca9f97b62"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v1.png",
+          "sha256": "f6962f0cbdfc14ddc23887df483734da6f1ab4807b16b043c056459325e0a7b1"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b5b1aa1d-7c67-4295-a6b7-29120be2eb57.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v2.png",
+      "sha256": "0150cfe63d7f93f034e49a9202abdc49f7a0a80e8579743aa06e5494b242b818"
+    },
+    {
+      "index": 12,
+      "version": 3,
+      "prompt": "Replace ONLY the green template with a painted short brown curly scalp cap, then REMOVE the whole person and all green leaving hair alone on transparent1254x1254 canvas. Copy the EXACT green silhouette location, including upper and LEFT edge, and the HIGH lower fringe. Never infer location from an unrelated hairstyle. Exact cap extent x495..780,y90..285; left/rear scalp must be covered; fringe must stop ABOVE eyebrows, not hang over eyes. Short closely grouped brown curls, warm illustrated countryside game painting, broad soft upper-left lighting, restrained detail and dark warm-brown palette, no orange gloss. Keep within the green contour with no extra bulky volume. True alpha0 everywhere except hair. Remove body, skin, ears, face, eyes, eyebrows, hands, clothing, shoes and green. No faint remnants or shadows. No center, crop, zoom, resize or normalization. Hair-only layer must occupy EXACT template coordinates.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-12-silhouette-guide.png",
+          "sha256": "6241d61c892d658230867659744419f6eeb85a891e5da75749deebdf537c98cf"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4f68ee98-0f96-49df-8524-3085dd2e6f24.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v3.png",
+      "sha256": "dd81002401ff7ecb43a8cf88082337bb186c1fe4c8bab59405079ff606bef988"
+    },
+    {
+      "index": 14,
+      "version": 3,
+      "prompt": "Replace ONLY the green template with a painted short brown curly scalp cap, then REMOVE the whole person and all green leaving hair alone on transparent1254x1254 canvas. Copy the EXACT green silhouette location, including upper and LEFT edge, and the HIGH lower fringe. Never infer location from an unrelated hairstyle. Exact cap extent x525..815,y100..295; cover the entire rear/left crown, do not leave a bald crescent. Short closely grouped brown curls, warm illustrated countryside game painting, broad soft upper-left lighting, restrained detail and dark warm-brown palette, no orange gloss. Keep within the green contour with no extra bulky volume. True alpha0 everywhere except hair. Remove body, skin, ears, face, eyes, eyebrows, hands, clothing, shoes and green. No faint remnants or shadows. No center, crop, zoom, resize or normalization. Hair-only layer must occupy EXACT template coordinates.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-14-silhouette-guide.png",
+          "sha256": "564d6514c0b21506074ba1af97edae393895517727688fddc1645f0ca9f97b62"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dc2e1966-f0b2-47f4-ab4d-199919547842.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v3.png",
+      "sha256": "5670529e96376e11d98708e0a8deda1487e0cfaf801e9ca9ad330fe97b947114"
+    }
+  ],
+  "review": [
+    "v1 standing reuse: pose13 bounds fail; visible scalp/volume mismatch elsewhere.",
+    "v2 cooking reuse: caps expose rear scalp; poses12/15 bounds fail.",
+    "v3 generated v1: pose12 displaced, eye obscured and bounds fail; pose14 rear scalp exposed despite passing bounds. Poses13/15 promising draft key poses only.",
+    "v4 generated revisions: bounds pass, but pose12 still exposes scalp and obscures eye; pose14 still exposes rear crown. Neither accepted.",
+    "v5 guide-only generation: oversized/misregistered; bounds fail 12/14. Rejected."
+  ],
+  "next": "Revise reference strategy using a full-body painted reference before cap extraction; do not repeat guide-only prompts or transform failed sprite pixels.",
+  "remaining": "Feeding, temporal polish, equipment, all other appearance parts, native recipes, portraits, player integration, performance and wider builder release gates."
+}
