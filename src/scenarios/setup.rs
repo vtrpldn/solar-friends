@@ -127,7 +127,75 @@ fn issue(
         entity: authored.map(|s| s.id.clone()),
     });
 }
-pub fn review(v: &Village, d: &Definition, r: &mut Report) {
+fn review_access(v: &Village, d: &Definition, people: &[Resident], r: &mut Report) {
+    for b in &v.buildings {
+        let name = match b.kind.as_str() {
+            "shed" => "Shared shed",
+            "home" => "Home",
+            "garden" => "Garden",
+            "well" => "Cistern",
+            "kitchen" => "Community kitchen",
+            "grove" => "Food forest",
+            "warehouse" => "General storage",
+            "compost" => "Compost",
+            "square" => "Village square",
+            "workshop" => "Workshop",
+            "greenhouse" => "Greenhouse",
+            "coop" => "Chicken coop",
+            "solar_farm" => "Solar farm",
+            "streetlight" => "Streetlight",
+            "eco_toilet" => "Ecological toilet",
+            "wetland" => "Planted wetland",
+            "banana_treatment" => "Banana sewage treatment",
+            "biodigester" => "Biodigester",
+            "hydro" => "River generator",
+            "orchard" => "Orchard",
+            "goat_pasture" => "Goat pasture",
+            "apiary" => "Apiary",
+            _ => continue,
+        };
+        let mut nearest: Option<f32> = None;
+        for person in people {
+            let Some((x, y)) = spacing::approach(v, b, person.id) else {
+                continue;
+            };
+            if let Ok((route, _)) = navigation::work_route(v, [person.x, person.y], [x, y]) {
+                nearest = Some(nearest.map_or(route.minutes, |n| n.min(route.minutes)));
+                // Ordinary nearby layouts do not need routes for the whole cast.
+                if route.minutes <= 90. {
+                    break;
+                }
+            }
+        }
+        match nearest {
+            None => issue(
+                r,
+                Severity::Warning,
+                "opening_building_access",
+                "start.buildings",
+                format!(
+                    "{name} has no reachable work approach from the starting group. Move it onto connected land or clear a path around its plot; residents may be unable to use its stock, care for it or work there."
+                ),
+                Some(b),
+                d,
+            ),
+            Some(minutes) if minutes > 90. => issue(
+                r,
+                Severity::Warning,
+                "opening_building_travel",
+                "start.buildings",
+                format!(
+                    "{name} is about {minutes:.0} game minutes on foot from the closest starting resident. Consider placing it nearer or adding roads; this is an opening route estimate, not a work schedule."
+                ),
+                Some(b),
+                d,
+            ),
+            _ => {}
+        }
+    }
+}
+pub fn review(v: &Village, d: &Definition, people: &[Resident], r: &mut Report) {
+    review_access(v, d, people, r);
     let s = summarize(v);
     if s.unhoused > 0 {
         issue(

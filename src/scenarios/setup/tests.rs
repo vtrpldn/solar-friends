@@ -274,3 +274,66 @@ fn full_material_storage_warns_without_invalidating_an_intentional_challenge() {
             .any(|i| i.code == "opening_storage_full" && matches!(i.severity, Severity::Warning))
     );
 }
+
+#[test]
+fn opening_access_uses_real_routes_and_keeps_challenges_playable() {
+    let mut d = definition(5);
+    d.map.nature = Some(Vec::new());
+    d.map.deposits = Some(Vec::new());
+    d.map.river = Some(world::River {
+        schema: 1,
+        centers: vec![20.; MAP_SIZE as usize],
+    });
+    building(&mut d, "isolated-cistern", "well", 10, 10);
+    let (mut game, report) = compiled(d.clone());
+    let issue = report
+        .issues
+        .iter()
+        .find(|i| {
+            i.code == "opening_building_access" && i.entity.as_deref() == Some("isolated-cistern")
+        })
+        .expect("Disconnected cistern must be located in the review");
+    assert_eq!(issue.at, Some([10, 10]));
+    assert!(
+        issue
+            .message
+            .starts_with("Cistern has no reachable work approach")
+    );
+    assert!(report.ok);
+    let before = game.snapshot();
+    assert!(game.restore(&before));
+    assert_eq!(game.snapshot(), before);
+    d.map.river = None;
+    let (_, connected) = compiled(d);
+    assert!(
+        !connected
+            .issues
+            .iter()
+            .any(|i| i.code == "opening_building_access"
+                && i.entity.as_deref() == Some("isolated-cistern"))
+    );
+}
+
+#[test]
+fn long_opening_routes_use_the_closest_actual_starting_resident() {
+    let mut d = definition(5);
+    d.map.river = None;
+    building(&mut d, "distant-cistern", "well", 3, 3);
+    let (_, far) = compiled(d.clone());
+    assert!(
+        far.issues
+            .iter()
+            .any(|i| i.code == "opening_building_travel"
+                && i.entity.as_deref() == Some("distant-cistern"))
+    );
+    d.start.resident_setup.push(super::super::arrival::Setup {
+        resident: "friend-4".into(),
+        position: Some([6., 6.]),
+        needs: None,
+    });
+    let (_, near) = compiled(d);
+    assert!(!near.issues.iter().any(|i| matches!(
+        i.code.as_str(),
+        "opening_building_travel" | "opening_building_access"
+    ) && i.entity.as_deref() == Some("distant-cistern")));
+}

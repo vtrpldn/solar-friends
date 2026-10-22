@@ -393,7 +393,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
                 "Add compatible water storage or reduce the starting water amount.",
             ));
         }
-        super::setup::review(v, &d, &mut report);
+        super::setup::review(v, &d, &opening_people, &mut report);
         let residents = game
             .app
             .world_mut()
