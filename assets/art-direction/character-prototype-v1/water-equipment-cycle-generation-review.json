@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen.imagegen",
+  "scope": "Four-pose watering equipment draft; not approved production animation or player appearance",
+  "calls": [
+    {
+      "pose": 5,
+      "prompt": "Use case: precise-object-edit. Solar Friends watering animation equipment layer, SECOND pose. Image 1 is the exact full-frame resident pose placement reference; never output or repaint that person. Image 2 is the watering-can design and previous full-frame equipment pose: preserve its SAME blue can, reservoir proportions, handle, long spout, rose nozzle, painted texture, highlights and physical size. On an identically framed 1254x1254 transparent square, repaint ONLY that can in the next pose: carry-handle grip should meet the near hand around (818,666); far hand at (975,705) supports the rim/upper side. Relative to image 2, the held can moves slightly right and down, and tips about five degrees clockwise to begin lowering its spout. Do not enlarge it, redesign it, center it or crop to it. Keep entire spout/rose inside the canvas with at least 20 pixels margin. Soft upper-left painted sunlight; no new patina or sharp specular glints. Exact same artist and visual weight as the blue can reference. True transparency including handle opening; output ONLY equipment, no hands, arms, skin, body, ground, shadow or water stream. Blank transparent space remains above/left. This is an authored pose in shared full-body coordinates, not an inventory icon.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-5-body.png",
+        "web/art/characters/prototype-v1/watering-can-pose-4-candidate-v2.png"
+      ],
+      "output": "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png",
+      "status": "retained draft",
+      "finding": "Same can reads as the beginning of a tip, foreground hand contact reviewed."
+    },
+    {
+      "pose": 6,
+      "prompt": "Use case: precise-object-edit. Solar Friends watering equipment, THIRD animation pose. Image 1 is the exact resident pose/whole-canvas placement guide; output no person. Image 2 is the SAME blue painted watering can from the preceding animation pose, keep its design, size, reservoir volume, handle, spout, rose nozzle, texture and upper-left light. Output ONLY this can on an identically framed 1254x1254 transparent square. Its carry handle should be held by the near hand at (833,656), with far hand (960,715) near the rim. Can begins a clearer pour: tip the same can clockwise around the near-hand grip, about 15 degrees more than image 2, lowering the rose toward the lower right. Maintain the reservoir's physical size; no growth, squeezing, redesign or independent auto-centering. Keep reservoir below the hands and spout clear of the legs; entire silhouette has 20+ transparent pixels to each frame edge. Same soft painted game style, blue broad shading and restrained warm highlights. True transparent handle hole and outside silhouette. No hands/body/arms, no ground, no water stream, no labels or guides. Preserve full body frame coordinates rather than cropping to object.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-6-body.png",
+        "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png"
+      ],
+      "output": "web/art/characters/prototype-v1/watering-can-pose-6-candidate-v1.png",
+      "status": "retained draft",
+      "finding": "More pronounced tip. Expanded authored forearm mask to prevent the handle painting over skin."
+    },
+    {
+      "pose": 7,
+      "prompt": "Use case: precise-object-edit. Solar Friends watering equipment, FOURTH animation pose. Image 1 is exact resident placement/pose guide only, output no person. Image 2 is the same blue painted watering can design from pose 2: preserve its real physical size, reservoir volume, arched handle, spout, round rose, paint, light and shading. Output ONLY equipment on the exact whole 1254x1254 transparent square. The resident leans forward with lowered hands: near hand grip around (896,789), far hand at (980,809). Paint this same can held lower and tipped clockwise about 35 degrees from upright, rose aimed down-right toward the garden. The reservoir must hang below/left of the grip so the handle is held at the two nearby hands; do not paint a can floating to their side. Spout/rose should end around (1170,1050), within the canvas; full can stays above y1190 and left of x1230. Preserve a believable reservoir size roughly 280x240 at this reference scale, no oversized bucket, no squashing. True transparent opening and backdrop, NO person/hands/body/arms, NO ground/shadow, NO water stream, NO labels/guide marks. Soft warm illustrated game paint, same upper-left light and visual weight as preceding can. Keep canvas framing fixed, no inventory-icon centering or crop.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-7-body.png",
+        "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png"
+      ],
+      "output": "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v1.png",
+      "status": "retained draft",
+      "finding": "Lowered can remains visible above the ground anchor. Expanded forearm mask; lowest grip still reads closer to a rim grasp and needs refinement."
+    }
+  ],
+  "evidence": [
+    "assets/art-direction/character-prototype-v1/water-equipment-cycle-v1-transitions.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-5-v1-scenes.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-5-v1-report.json",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-6-v1-scenes.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-6-v1-report.json",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-7-v1-scenes.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-7-v1-report.json"
+  ],
+  "visualReview": {
+    "style": "Same blue metal can with warm painted highlights across the poses, but material highlights need final comparison with the body.",
+    "geometry": "No body sprite warp or automatic prop fitting. Entire authored can layers retain shared 1254-square framing and source hashes.",
+    "ground": "Four real renderer views per pose beside current Bento, home, shed, warehouse and terrain; both facings, day/night.",
+    "temporal": "The 19-sample real-animation board visibly shows doubled body/tool silhouettes during crossfades. Exact loop return passes, but this does not approve temporal quality.",
+    "remaining": [
+      "Crossfade ghosting / animation production choice",
+      "Lowest-pose grip refinement",
+      "Water stream/effect review",
+      "Final material/style review",
+      "Cooking/tending/feeding equipment",
+      "Native recipes and player integration"
+    ]
+  }
+}
