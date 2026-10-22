@@ -1,0 +1,14 @@
+import {sourceKinds,sourceOccupies} from '../resource-sites.js';
+export {sourceKinds};
+export const siteNames=['Timber plot','Bamboo stand','Earth extraction','Stone extraction','Reclaimed-material site'];
+const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function newStartingSite(material,x,y,id=crypto.randomUUID()){
+ return {id,material,x,y,stage:['timber','bamboo'].includes(material)?'empty':'extraction',auto_replant:['timber','bamboo'].includes(material),auto_harvest:true,soil_wetness:0};
+}
+export function hitStartingSite(definition,x,y){return [...(definition.start.resource_sites??[])].reverse().find(s=>sourceOccupies({...s,material:['timber','bamboo','earth','stone','salvage'].indexOf(s.material),active:true},x,y));}
+export function siteFields(site,catalog){
+ const material=catalog.materials.indexOf(site.material),renewable=material<2;
+ return `<h2>${escape(siteNames[material]||site.material)}</h2><p>${renewable?'Inherited plants create no harvested supplies until residents collect them.':'This site draws from the mapped deposit beneath its footprint. Reserves are separate from owned supplies.'}</p><div class="creator-coordinates">${['x','y'].map(k=>`<label class="creator-field">${k==='x'?'Column':'Row'}<input type="number" min="1" max="62" step="1" data-start-site="${k}" value="${escape(site[k])}"></label>`).join('')}</div>${renewable?`<label class="creator-field">Starting plants<select data-start-site="stage">${catalog.cultivation_stages.map(p=>`<option value="${p.id}" ${p.id===site.stage?'selected':''}>${escape(p.name)}</option>`).join('')}</select></label><label class="creator-field">Initial root-zone wetness · %<input type="number" min="0" max="100" step="1" data-start-site="soil_wetness" value="${escape(site.soil_wetness*100)}"></label><label class="creator-rule"><input type="checkbox" data-start-site="auto_replant" ${site.auto_replant?'checked':''}>Replant automatically</label>`:''}<label class="creator-rule"><input type="checkbox" data-start-site="auto_harvest" ${site.auto_harvest?'checked':''}>Harvest when projects need materials</label><div class="creator-selection-actions"><button data-site-action="move">Move on map</button><button data-site-action="duplicate">Duplicate</button><button data-site-action="remove">Remove</button></div>`;
+}
+export function setSiteField(site,key,value){site[key]=key==='soil_wetness'?Number(value)/100:['x','y'].includes(key)?Number(value):value;}
+export function sitePreview(site){const material=['timber','bamboo','earth','stone','salvage'].indexOf(site.material),maximum=material===0?32:material===1?24:1;return {material,x:site.x,y:site.y,active:true,planted:['growing','mature'].includes(site.stage),growth:['mature','extraction'].includes(site.stage)?1:0,remaining:['mature','extraction'].includes(site.stage)?maximum:0,maximum,harvests:0};}
