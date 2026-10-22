@@ -88,3 +88,6 @@
 #creator-recovery-dialog fieldset label{display:flex;align-items:center;gap:8px;line-height:1.4;}
 #creator-recovery-dialog input[type="radio"]{flex:none;margin:0;}
 #creator-recovery-dialog label:has(input:disabled){opacity:.65;}
+/* Keep the sticky close control in its own rail while the library scrolls. */
+#creator-library-dialog{padding-right:72px}
+#creator-library-dialog>.dialog-close{right:auto;margin-right:-56px}

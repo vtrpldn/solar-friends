@@ -88,7 +88,7 @@ export class ContentLibrary extends EventTarget {
     const db=await this.#db(),stores=['projects','runs','residents','releases','maps'];
     const result=await new Promise((resolve,reject)=>{
       const tx=db.transaction([...stores,'heads'],'readwrite'),heads=tx.objectStore('heads');
-      const result={scanned:0,repaired:0,skipped:0};let error;
+      const result={scanned:0,repaired:0,skipped:0,missing:0};let error;
       for(const store of stores){
         const request=tx.objectStore(store).openCursor();
         request.onsuccess=()=>{
@@ -106,6 +106,15 @@ export class ContentLibrary extends EventTarget {
           }catch(cause){error=cause;tx.abort();}
         };
       }
+      // Keep orphaned metadata: it may identify an exported backup. Existence
+      // checks use keys only, never load village snapshots a second time.
+      const orphaned=heads.openCursor();
+      orphaned.onsuccess=()=>{
+        const cursor=orphaned.result;if(!cursor)return;const entry=cursor.value,store=stores.find(store=>recordKind(store)===entry.kind);
+        if(!store||typeof entry.id!=='string'){cursor.continue();return;}
+        const exists=tx.objectStore(store).getKey(entry.id);
+        exists.onsuccess=()=>{if(exists.result===undefined){result.missing++;if(entry.missingBody!==true){cursor.update({...entry,missingBody:true});result.repaired++;}}cursor.continue();};
+      };
       tx.oncomplete=()=>resolve(result);
       tx.onabort=()=>reject(error||tx.error||Error('The library index could not be repaired. Saved records are unchanged.'));
     });
@@ -121,6 +130,7 @@ export class ContentLibrary extends EventTarget {
     });
   }
   async getPreview(kind,id){if(!['project','release','run','map'].includes(kind))return null;const row=await this.#read('previews',`${kind}:${id}`);return safeThumbnail(row?.image);}
+  getEntryDetails(kind,id){if(!['project','run','resident','release','map'].includes(kind))throw Error('Unknown library collection.');return this.#read('heads',`${kind}:${id}`);}
   listMaps(){return this.#list('map');}
   getMap(id){return this.#read('maps',id);}
   deleteMap(id,expectedRevision){return this.#write('maps',id,expectedRevision,()=>null);}
