@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "status": "prototype reviewed; excluded from gameplay",
+  "scope": "Four material regions across 48 poses of one neutral body family. Not a finished modular resident creator.",
+  "bindings": {
+    "web/character-materials.js": "de19c8ad7f3757a76a1fb21345f98c73a9cf6e27be979662de299983ff010a84",
+    "web/art/characters/prototype-v1/body-materials-v1.json": "805525ce4468b630271873341ba1a18e2787d0072586acbaff813e87b37aac50"
+  },
+  "boards": [
+    "material-mask-base-regions.png",
+    "material-mask-base-palette.png",
+    "material-mask-idle-regions.png",
+    "material-mask-idle-palette.png",
+    "material-mask-activities-regions.png",
+    "material-mask-activities-palette.png"
+  ],
+  "visualReview": "Pose boards reviewed with shared world scale and day/night scenes. Removed hue cutoff after it left garment highlights undyed; connected cream regions now retain isolated facial whites while dyeing collars.",
+  "verification": "48 masks, 192 isolated material changes, unchanged sources/masks/alpha, default legacy pixel equality across 13 clips and both facings; character creator and body-set regressions pass.",
+  "cacheScope": "Bounded per-model LRU. Report counts logical RGBA canvas bytes only, not total browser/GPU memory.",
+  "remaining": [
+    "Other body types and final skin palette coverage",
+    "Attachment sockets and independently authored shape parts",
+    "Equipment, seating and occlusion",
+    "Native recipes, portraits and player integration",
+    "Global cache and maximum-roster performance"
+  ]
+}

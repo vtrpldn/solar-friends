@@ -89,7 +89,7 @@ export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, wid
   buffer.globalCompositeOperation = 'lighter';
   for (const pose of animation.layers) {
     if (pose.weight <= 0) continue;
-    const frame = preparedFrames(sheets[pose.sheet], {referenceRow:pose.sheet === 'base' ? 2 : 0})?.[pose.row*4+pose.frame];
+    const frame = typeof sheets.frameForPose === 'function' ? sheets.frameForPose(pose.sheet,pose.row*4+pose.frame) : preparedFrames(sheets[pose.sheet], {referenceRow:pose.sheet === 'base' ? 2 : 0})?.[pose.row*4+pose.frame];
     if (!frame) continue;
     buffer.globalAlpha = pose.weight;
     buffer.drawImage(frame, 0, 0, surface.width, surface.height);

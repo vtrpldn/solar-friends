@@ -1,0 +1,560 @@
+{
+  "schema": 1,
+  "status": "prototype-only; four-material colour composition reviewed on one neutral body family; not gameplay approved",
+  "coordinateSpace": "prepared body frames, 256 by 256; the body transform owns every pixel",
+  "sheets": {
+    "base": {
+      "file": "body-neutral-base.png",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+      "regions": [
+        {
+          "shirtTop": 82,
+          "waist": 144,
+          "shoes": 208,
+          "head": [
+            155,
+            54,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 144,
+          "shoes": 208,
+          "head": [
+            154,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 144,
+          "shoes": 208,
+          "head": [
+            154,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 144,
+          "shoes": 208,
+          "head": [
+            153,
+            54,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 85,
+          "waist": 149,
+          "shoes": 208,
+          "head": [
+            146,
+            56,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 83,
+          "waist": 150,
+          "shoes": 208,
+          "head": [
+            148,
+            58,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 84,
+          "waist": 151,
+          "shoes": 208,
+          "head": [
+            151,
+            62,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 110,
+          "waist": 171,
+          "shoes": 208,
+          "head": [
+            173,
+            96,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 98,
+          "waist": 160,
+          "shoes": 208,
+          "head": [
+            147,
+            73,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 106,
+          "waist": 170,
+          "shoes": 208,
+          "head": [
+            153,
+            86,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 103,
+          "waist": 161,
+          "shoes": 208,
+          "head": [
+            148,
+            77,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 107,
+          "waist": 166,
+          "shoes": 208,
+          "head": [
+            150,
+            78,
+            30,
+            33
+          ]
+        }
+      ]
+    },
+    "idle": {
+      "file": "body-neutral-idle-candidate-v2.png",
+      "sha256": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+      "regions": [
+        {
+          "shirtTop": 78,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            148,
+            49,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            148,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 148,
+          "shoes": 208,
+          "head": [
+            147,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 154,
+          "shoes": 208,
+          "head": [
+            147,
+            54,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 151,
+          "shoes": 208,
+          "head": [
+            150,
+            75,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 148,
+          "shoes": 208,
+          "head": [
+            147,
+            52,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 148,
+          "shoes": 208,
+          "head": [
+            148,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 151,
+          "shoes": 208,
+          "head": [
+            150,
+            54,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 150,
+          "shoes": 208,
+          "head": [
+            149,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 148,
+          "shoes": 208,
+          "head": [
+            148,
+            52,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 93,
+          "waist": 155,
+          "shoes": 208,
+          "head": [
+            149,
+            65,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 93,
+          "waist": 157,
+          "shoes": 208,
+          "head": [
+            150,
+            66,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 93,
+          "waist": 159,
+          "shoes": 208,
+          "head": [
+            150,
+            66,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 93,
+          "waist": 155,
+          "shoes": 208,
+          "head": [
+            149,
+            65,
+            30,
+            33
+          ]
+        }
+      ]
+    },
+    "activities": {
+      "file": "body-neutral-activities-candidate-v1.png",
+      "sha256": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+      "regions": [
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            151,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            151,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            151,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            153,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 149,
+          "shoes": 208,
+          "head": [
+            151,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 82,
+          "waist": 150,
+          "shoes": 208,
+          "head": [
+            151,
+            53,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 85,
+          "waist": 152,
+          "shoes": 208,
+          "head": [
+            155,
+            56,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 90,
+          "waist": 157,
+          "shoes": 208,
+          "head": [
+            158,
+            62,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 125,
+          "waist": 194,
+          "shoes": 218,
+          "head": [
+            147,
+            110,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 132,
+          "waist": 198,
+          "shoes": 218,
+          "head": [
+            152,
+            117,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 134,
+          "waist": 199,
+          "shoes": 218,
+          "head": [
+            154,
+            119,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 134,
+          "waist": 199,
+          "shoes": 218,
+          "head": [
+            154,
+            119,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 146,
+          "shoes": 208,
+          "head": [
+            148,
+            49,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 79,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            149,
+            51,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            149,
+            50,
+            30,
+            33
+          ]
+        },
+        {
+          "shirtTop": 78,
+          "waist": 147,
+          "shoes": 208,
+          "head": [
+            149,
+            50,
+            30,
+            33
+          ]
+        }
+      ]
+    }
+  },
+  "normalization": {
+    "version": 1,
+    "size": 256,
+    "anchor": 0.95,
+    "baseReferenceRow": 2,
+    "otherReferenceRow": 0
+  }
+}
