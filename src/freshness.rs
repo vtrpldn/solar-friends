@@ -115,7 +115,12 @@ fn discard(lots: &mut Vec<Lot>, now: f32) -> [u32; COUNT] {
     });
     expired
 }
-fn valid_lots(v: &Village, lots: &[Lot], items: &economy::Bundle) -> bool {
+fn valid_lots(
+    v: &Village,
+    lots: &[Lot],
+    items: &economy::Bundle,
+    past: &std::collections::HashSet<(usize, u32)>,
+) -> bool {
     if lots.len() > 4096 {
         return false;
     }
@@ -127,7 +132,7 @@ fn valid_lots(v: &Village, lots: &[Lot], items: &economy::Bundle) -> bool {
             || l.amount > 600
             || !l.produced.is_finite()
             || !l.expires.is_finite()
-            || l.produced < 0.
+            || l.produced < 0. && !past.contains(&(l.material, l.produced.to_bits()))
             || l.produced > v.minutes
             || l.expires != l.produced + life
             || l.expires <= l.produced
@@ -158,15 +163,16 @@ pub fn valid(v: &Village) -> bool {
     let Some(s) = &v.logistics else {
         return v.version == 3;
     };
+    let past = scenarios::supplies::past_dates(v);
     s.stores
         .iter()
-        .all(|p| valid_lots(v, &p.food_lots, &p.items))
+        .all(|p| valid_lots(v, &p.food_lots, &p.items, &past))
         && s.shipments.iter().all(|h| {
             let mut items = [0; COUNT];
             if h.carrying {
                 items[h.material] = h.amount;
             }
-            valid_lots(v, &h.food_lots, &items)
+            valid_lots(v, &h.food_lots, &items, &past)
         })
         && v.production.batches.iter().all(|b| {
             let items = if b.active() && b.committed {
@@ -174,7 +180,7 @@ pub fn valid(v: &Village) -> bool {
             } else {
                 [0; COUNT]
             };
-            valid_lots(v, &b.food_lots, &items)
+            valid_lots(v, &b.food_lots, &items, &past)
         })
 }
 pub fn advance(v: &mut Village) {

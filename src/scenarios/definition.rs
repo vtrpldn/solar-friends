@@ -191,6 +191,15 @@ pub enum BuildingState {
 pub struct Inventory {
     pub owner: InventoryOwner,
     pub items: BTreeMap<String, u32>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub food_lots: Vec<StartingFood>,
+}
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StartingFood {
+    pub material: String,
+    pub amount: u32,
+    pub age_minutes: f32,
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(
@@ -334,8 +343,8 @@ impl Definition {
                     .collect(),
                 roads: vec![],
                 inventories: vec![
-                    Inventory { owner: InventoryOwner::Building("starting-warehouse".into()), items: named(indoor) },
-                    Inventory { owner: InventoryOwner::Camp, items: named(items) },
+                    Inventory { owner: InventoryOwner::Building("starting-warehouse".into()), items: named(indoor), food_lots: vec![] },
+                    Inventory { owner: InventoryOwner::Camp, items: named(items), food_lots: vec![] },
                 ],
             },
         }

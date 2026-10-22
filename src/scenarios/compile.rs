@@ -296,6 +296,9 @@ pub(super) fn check(d: &Definition) -> Report {
                 "List each starting supply location only once.",
             );
         }
+        if !super::supplies::valid_food(p, d.start.minutes) {
+            r.push(&path,"invalid_starting_food","Food batches need perishable materials, positive quantities that fit their stock, and supported ages shorter than the food’s shelf life. Unspecified units start fresh.");
+        }
         if p.items.len() > economy::COUNT
             || p.items
                 .iter()
@@ -455,6 +458,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         opening.push(initialization::OpeningStore {
             building,
             items,
+            food_lots: super::supplies::resolved_food(inventory, d.start.minutes),
             path: format!("start.inventories.{i}"),
         });
     }

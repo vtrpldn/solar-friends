@@ -119,6 +119,7 @@ pub(crate) fn create(village: Village, residents: Vec<Resident>) -> Result<Game,
 pub(crate) struct OpeningStore {
     pub building: Option<usize>,
     pub items: economy::Bundle,
+    pub food_lots: Vec<freshness::Lot>,
     pub path: String,
 }
 
@@ -197,9 +198,7 @@ fn build(
                 ));
             }
             store.items = inventory.items;
-            for (i, n) in store.items.into_iter().enumerate() {
-                freshness::add(&mut store.food_lots, i, n, village.minutes);
-            }
+            store.food_lots = inventory.food_lots.clone();
         }
         logistics::sync_totals(&mut village);
         if economy::storage(&village) > economy::capacity(&village) {
