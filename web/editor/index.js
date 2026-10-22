@@ -1,3 +1,4 @@
+import {startingCropFields,setStartingCropField} from './farming.js';
 import {LiquidsEditor} from './liquids.js';
 import {SuppliesEditor} from './supplies.js';
 import {RegionsEditor} from './regions.js';
@@ -124,8 +125,10 @@ function renderSelection(){
   const d=current.doc.value,b=d.start.buildings.find(b=>b.id===map.view.selected),panel=$('creator-selection');
   if(!b){panel.innerHTML='<h2>Our property</h2><p>Select a building to inspect it. Choose Move to carry a building to another cell.</p>';return;}
   if(map.selection().length>1){panel.innerHTML=`<h2>${map.selection().length} buildings</h2><p>Move this group together, or place a copy with its starting supplies. Shift-click toggles buildings in the group.</p><div class="creator-selection-actions"><button data-selection-action="move">Move group</button><button data-selection-action="duplicate">Copy group</button><button data-selection-action="remove">Remove group</button></div>`;return;}
+  const cropFocus=document.activeElement?.dataset.startCrop;
   const entry=catalog.buildings.find(e=>e.id===b.kind),appearances=(entry?.appearances||[]).filter(key=>key.startsWith('adobe-')===(b.recipe==='adobe'));
-  panel.innerHTML=`<h2>${escape(title(b.kind))}</h2><div class="creator-coordinates"><div class="creator-field"><label for="creator-object-x">Column</label><input id="creator-object-x" type="number" min="1" max="62" step="1" value="${b.x}"></div><div class="creator-field"><label for="creator-object-y">Row</label><input id="creator-object-y" type="number" min="1" max="62" step="1" value="${b.y}"></div></div><div class="creator-field"><label for="creator-object-state">Starts as</label><select id="creator-object-state"><option value="completed" ${b.state==='completed'?'selected':''}>Completed building</option><option value="blueprint" ${b.state==='blueprint'?'selected':''}>Construction project</option></select></div><div class="creator-field"><label for="creator-object-recipe">Construction materials</label><select id="creator-object-recipe">${(entry?.recipes||[]).map(key=>`<option value="${key}" ${b.recipe===key?'selected':''}>${{standard:'Prepared materials',local:'Local materials',adobe:'Adobe and bamboo'}[key]}</option>`).join('')}</select></div>${appearances.length?`<div class="creator-field"><label for="creator-object-appearance">Appearance</label><select id="creator-object-appearance">${appearances.map(key=>`<option value="${key}" ${(b.appearance||'home')===key?'selected':''}>${escape(title(key))}</option>`).join('')}</select></div>`:''}<div class="creator-selection-actions"><button data-selection-action="move">Move on map</button><button data-selection-action="duplicate">Duplicate</button><button data-selection-action="remove">Remove</button></div>`;
+  panel.innerHTML=`<h2>${escape(title(b.kind))}</h2><div class="creator-coordinates"><div class="creator-field"><label for="creator-object-x">Column</label><input id="creator-object-x" type="number" min="1" max="62" step="1" value="${b.x}"></div><div class="creator-field"><label for="creator-object-y">Row</label><input id="creator-object-y" type="number" min="1" max="62" step="1" value="${b.y}"></div></div><div class="creator-field"><label for="creator-object-state">Starts as</label><select id="creator-object-state"><option value="completed" ${b.state==='completed'?'selected':''}>Completed building</option><option value="blueprint" ${b.state==='blueprint'?'selected':''}>Construction project</option></select></div><div class="creator-field"><label for="creator-object-recipe">Construction materials</label><select id="creator-object-recipe">${(entry?.recipes||[]).map(key=>`<option value="${key}" ${b.recipe===key?'selected':''}>${{standard:'Prepared materials',local:'Local materials',adobe:'Adobe and bamboo'}[key]}</option>`).join('')}</select></div>${appearances.length?`<div class="creator-field"><label for="creator-object-appearance">Appearance</label><select id="creator-object-appearance">${appearances.map(key=>`<option value="${key}" ${(b.appearance||'home')===key?'selected':''}>${escape(title(key))}</option>`).join('')}</select></div>`:''}${startingCropFields(b,catalog.farming)}<div class="creator-selection-actions"><button data-selection-action="move">Move on map</button><button data-selection-action="duplicate">Duplicate</button><button data-selection-action="remove">Remove</button></div>`;
+  if(cropFocus)[...panel.querySelectorAll('[data-start-crop]')].find(input=>input.dataset.startCrop===cropFocus)?.focus({preventScroll:true});
 }
 function renderSupplies(){suppliesEditor.render(current.doc.value,report);}
 function renderReview(){
@@ -263,6 +266,7 @@ function wire(){
   $('creator-biomes').onclick=e=>{const b=e.target.closest('[data-biome]');if(!b)return;newBiome=b.dataset.biome;for(const choice of $('creator-biomes').querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===b));};
   $('creator-rules').onchange=e=>{if(e.target.dataset.rule)change('Change village rules',d=>{d.rules[e.target.dataset.rule]=e.target.checked;});};
   $('creator-selection').onchange=e=>{
+    if(e.target.dataset.startCrop){const field=e.target.dataset.startCrop,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;change('Configure starting crops',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.crop)setStartingCropField(b,field,value);});return;}
     const id=map.view.selected,key={'creator-object-x':'x','creator-object-y':'y','creator-object-state':'state','creator-object-recipe':'recipe','creator-object-appearance':'appearance'}[e.target.id];
     if(key)change('Edit '+title(current.doc.value.start.buildings.find(b=>b.id===id)?.kind),d=>{
       const b=d.start.buildings.find(b=>b.id===id);if(!b)return;b[key]=['x','y'].includes(key)?Number(e.target.value):e.target.value;
@@ -270,11 +274,12 @@ function wire(){
     });
   };
   $('creator-selection').onclick=e=>{
+    const cropAction=e.target.closest('[data-crop-action]')?.dataset.cropAction;if(cropAction){const id=map.view.selected;change('Configure starting crops',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(cropAction==='reset')delete b.crop;else b.crop=structuredClone(catalog.farming.example);});return;}
     const action=e.target.closest('[data-selection-action]')?.dataset.selectionAction,id=map.view.selected;if(!action)return;
     if(action==='move')setTool('move');
     if(action==='remove')removeBuilding(id);
     if(action==='duplicate'){
-      try{map.copy=planBuildingCopy(current.doc.value,map.selection());if(map.copy.buildings.length)setTool('duplicate');}catch(error){toast(error.message);}
+      try{map.copy=planBuildingCopy(current.doc.value,map.selection());map.copy.cropViews=Object.fromEntries(map.copy.buildings.map(b=>[b.id,structuredClone(map.snapshot.village.buildings.find(p=>p.kind===b.kind&&p.x===b.x&&p.y===b.y)?.crop)]));if(map.copy.buildings.length)setTool('duplicate');}catch(error){toast(error.message);}
     }
   };
   $('creator-issues').onclick=e=>{

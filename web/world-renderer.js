@@ -1,3 +1,4 @@
+import {drawCrops} from './crop-art.js';
 import {regionalNatureArt,regionalImages} from './regional-art.js';
 // Shared painted-world primitives. Editor and game use the same projection,
 // sprite registration, vegetation crops, and building lighting.
@@ -46,4 +47,12 @@ export function paintWorldBuilding(ctx,{key,x,y,alpha=1},{project,scale,images,n
     const filtered={...art,renderFilter:layer.source==='night'&&art.nightTint?art.nightTint:layer.filter};
     ctx.save();drawBuildingArt(ctx,(layer.source==='night'?nightImages:images)[key],filtered,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);ctx.restore();
   }
+}
+
+export function paintWorldCrops(ctx,building,{project,scale,night=0,health=1,alpha=1}){
+  if(!building?.crop||!['garden','greenhouse'].includes(building.kind))return;
+  const p=project(building.x,building.y),registration=placementArt(building.kind,allBuildingArt[building.kind]);
+  ctx.save();ctx.globalAlpha*=alpha;
+  drawCrops(ctx,building,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,night,health);
+  ctx.restore();
 }

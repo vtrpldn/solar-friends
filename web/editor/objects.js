@@ -12,7 +12,7 @@ export function moveBuildings(definition,ids,dx,dy){
   for(const b of definition.start.buildings)if(selected.has(b.id)){b.x+=dx;b.y+=dy;}
 }
 export function placeBuildingCopy(definition,copy,dx,dy){
-  definition.start.buildings.push(...copy.buildings.map(b=>({...b,x:b.x+dx,y:b.y+dy})));
+  definition.start.buildings.push(...copy.buildings.map(b=>({...structuredClone(b),x:b.x+dx,y:b.y+dy})));
   definition.start.inventories.push(...structuredClone(copy.inventories));
   if(copy.liquids?.length){(definition.start.liquids??=[]).push(...structuredClone(copy.liquids));syncStartingFresh(definition);}
 }

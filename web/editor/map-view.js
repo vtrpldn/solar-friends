@@ -1,3 +1,4 @@
+import {loadCropArt} from '../crop-art.js';
 import {residentLookIndex} from '../resident-look.js';
 import {loadRegionalArt} from '../regional-art.js';
 import {terrainRevision} from '../terrain-revision.js';
@@ -6,7 +7,7 @@ import {project,unproject,TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from '../projection.
 import {paintTerrain,soilAppearance,MAP_SIZE} from '../terrain.js';
 import {allBuildingArt} from '../building-art.js?v=night-1';
 import {footprintCorners,occupies} from '../building-footprints.js';
-import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintContactShadow} from '../world-renderer.js';
+import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops,paintContactShadow} from '../world-renderer.js';
 import {drawBuildingState} from '../building-state-art.js';
 import {preparedFrames,FRAME_ANCHOR,RESIDENT_WIDTH} from '../sprite-frames.js';
 
@@ -15,7 +16,7 @@ export async function loadEditorArt(){
   const images=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,image(art.file)]));
   const terrain=image('terrain-atlas.png'),forest=image('mata-atlantica-atlas.png'),details=image('landscape-details.png');
   const residents=['iara','bento','luz','caua','nina'].map(name=>image(`animations/${name}.png`));
-  await loadRegionalArt();
+  await Promise.all([loadRegionalArt(),loadCropArt()]);
   await Promise.all([...Object.values(images),terrain,forest,details,...residents].map(i=>i.decode()));
   return {images,terrain,forest,details,residents};
 }
@@ -132,6 +133,10 @@ export class EditorMap {
     for(const b of structures)objects.push({depth:b.x+b.y,draw:()=>{
       if(this.selection().includes(b.id))this.polygon(footprintCorners(b.kind,b.x,b.y),'#efc86d55','#ffe39a');
       paintWorldBuilding(c,{key:keyFor(b),x:b.x,y:b.y,alpha:b.state==='completed'?1:.2},{project:this.project,scale:this.scale,images:art.images});
+      if(b.state==='completed'){
+        const resolved=this.snapshot.village.buildings.find(p=>p.kind===b.kind&&p.x===b.x&&p.y===b.y);
+        if(resolved)paintWorldCrops(c,resolved,{project:this.project,scale:this.scale,health:this.snapshot.environment.economy.processes?.growing?.find(p=>p.building===resolved.id)?.health??1});
+      }
       if(b.state!=='completed')drawBuildingState(c,{complete:false,progress:0,point:this.project(b.x,b.y),corners:footprintCorners(b.kind,b.x,b.y).map(([x,y])=>this.project(x,y)),scale:this.scale,kind:b.kind});
     }});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
@@ -148,7 +153,7 @@ export class EditorMap {
       paintWorldBuilding(c,{key:view.tool,x:this.pointer.x,y:this.pointer.y,alpha:.45},{project:this.project,scale:this.scale,images:art.images});
     }
     if(this.drag?.building&&this.pointer){const anchor=this.drag.building;for(const b of structures.filter(b=>this.selection().includes(b.id)))this.polygon(footprintCorners(b.kind,b.x+this.pointer.x-anchor.x,b.y+this.pointer.y-anchor.y),'#f4df9a66','#fff3c4');}
-    if(view.tool==='duplicate'&&this.copy&&this.pointer){const anchor=this.copy.buildings[0];for(const b of this.copy.buildings){const x=b.x+this.pointer.x-anchor.x,y=b.y+this.pointer.y-anchor.y;this.polygon(footprintCorners(b.kind,x,y),'#f4df9a66','#fff3c4');paintWorldBuilding(c,{key:keyFor(b),x,y,alpha:.45},{project:this.project,scale:this.scale,images:art.images});}}
+    if(view.tool==='duplicate'&&this.copy&&this.pointer){const anchor=this.copy.buildings[0];for(const b of this.copy.buildings){const x=b.x+this.pointer.x-anchor.x,y=b.y+this.pointer.y-anchor.y;this.polygon(footprintCorners(b.kind,x,y),'#f4df9a66','#fff3c4');paintWorldBuilding(c,{key:keyFor(b),x,y,alpha:.45},{project:this.project,scale:this.scale,images:art.images});const crop=this.copy.cropViews?.[b.id];if(b.state==='completed'&&crop)paintWorldCrops(c,{kind:b.kind,x,y,crop},{project:this.project,scale:this.scale,alpha:.45});}}
     if(this.drag?.toggle&&this.drag.moved&&view.tool==='select'&&this.pointer){
       const end=this.project(this.pointer.x,this.pointer.y),start=this.drag.point;c.fillStyle='#f4df9a33';c.strokeStyle='#fff3c4';c.lineWidth=2;c.fillRect(start.x,start.y,end.x-start.x,end.y-start.y);c.strokeRect(start.x,start.y,end.x-start.x,end.y-start.y);
     }
