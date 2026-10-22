@@ -2817,6 +2817,7 @@ mod targeted_storage_tests {
         d.start.buildings.push(scenarios::Structure {
             crop: None,
             orchard: None,
+            animals: None,
             id: "second-store".into(),
             kind: "warehouse".into(),
             x: 25,

@@ -611,7 +611,9 @@ pub fn offers(v: &Village, r: &Resident) -> Vec<Offer> {
 /// Existing living systems get attention before optional expansion. Routine
 /// planting and pantry top-ups retain their lower priority and bounded demand.
 fn garden_priority(v: &Village, b: &Building, resident: usize) -> (f32, &'static str) {
-    if b.kind == "goat_pasture" && b.agriculture.cared_until <= v.minutes {
+    if agriculture::livestock_material(b).is_some() && !b.agriculture.stocked {
+        (520., "Settling the delivered animals into their new home.")
+    } else if b.kind == "goat_pasture" && b.agriculture.cared_until <= v.minutes {
         (
             960.,
             "Feeding and checking our goats before starting more construction.",

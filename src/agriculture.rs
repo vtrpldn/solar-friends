@@ -6,11 +6,16 @@ use logistics::Owner;
 pub(crate) const ORCHARD_ESTABLISH_MINUTES: f32 = 8640.;
 pub(crate) const ORCHARD_FRUIT_MINUTES: f32 = 2880.;
 pub(crate) const ORCHARD_BASE_FRUIT: u32 = 8;
+pub(crate) fn goat_yield(welfare: f32) -> u32 {
+    if welfare >= 40. { 4 } else { 2 }
+}
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Plot {
     pub enabled: bool,
+    pub stocked: bool,
+    pub stocking_requested: bool,
     pub growth: f32,
     pub cared_until: f32,
     pub welfare: f32,
@@ -24,6 +29,8 @@ impl Default for Plot {
     fn default() -> Self {
         Self {
             enabled: true,
+            stocked: true,
+            stocking_requested: false,
             growth: 0.,
             cared_until: 0.,
             welfare: 70.,
@@ -33,6 +40,13 @@ impl Default for Plot {
             previous_crop: String::new(),
             fruiting: false,
         }
+    }
+}
+pub fn livestock_material(b: &Building) -> Option<usize> {
+    match b.kind.as_str() {
+        "goat_pasture" => Some(economy::GOATS),
+        "apiary" => Some(economy::BEES),
+        _ => None,
     }
 }
 pub fn kind(b: &Building) -> bool {
@@ -59,6 +73,7 @@ pub fn flowers(v: &Village, b: &Building) -> usize {
 pub fn pollinated(v: &Village, b: &Building) -> bool {
     v.buildings.iter().any(|h| {
         h.kind == "apiary"
+            && h.agriculture.stocked
             && h.agriculture.enabled
             && open(v, h)
             && h.agriculture.cared_until > v.minutes
@@ -85,6 +100,9 @@ pub fn wanted(v: &Village, id: usize) -> bool {
     if !open(v, b) {
         return false;
     }
+    if livestock_material(b).is_some() && !b.agriculture.stocked {
+        return b.agriculture.stocking_requested;
+    }
     match b.kind.as_str() {
         "goat_pasture" => {
             b.agriculture.cared_until <= v.minutes
@@ -98,21 +116,34 @@ pub fn wanted(v: &Village, id: usize) -> bool {
     }
 }
 pub fn needs(v: &Village, owner: Owner, items: &mut economy::Bundle) {
-    if let Owner::Pantry(id) = owner
-        && let Some(_) = v
-            .buildings
-            .iter()
-            .find(|b| b.id == id && b.kind == "goat_pasture" && open(v, b))
-    {
-        items[FODDER] = 6;
+    let Owner::Pantry(id) = owner else { return };
+    let Some(b) = v.buildings.iter().find(|b| b.id == id && open(v, b)) else {
+        return;
+    };
+    if let Some(material) = livestock_material(b) {
+        if !b.agriculture.stocked {
+            if b.agriculture.stocking_requested {
+                items[material] = 1;
+            }
+            return;
+        }
+        if b.kind == "goat_pasture" {
+            items[FODDER] = 6;
+        }
     }
 }
+
 pub fn ready(v: &Village, b: &Building) -> bool {
     if !open(v, b) || !wanted(v, b.id) {
         return false;
     }
     let p = &b.agriculture;
     let owner = Owner::Pantry(b.id);
+    if let Some(material) = livestock_material(b)
+        && !p.stocked
+    {
+        return p.stocking_requested && organics::available(v, owner, material) >= 1;
+    }
     if b.kind == "goat_pasture" && p.cared_until <= v.minutes {
         return organics::available(v, owner, FODDER) >= 2
             && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 2.;
@@ -154,6 +185,26 @@ pub fn tend(v: &mut Village, id: usize) -> bool {
     };
     let b = v.buildings[index].clone();
     let owner = Owner::Pantry(id);
+    if let Some(material) = livestock_material(&b)
+        && !b.agriculture.stocked
+    {
+        let Some(store) = v
+            .logistics
+            .as_ref()
+            .and_then(|s| s.stores.iter().find(|p| p.owner == owner))
+            .map(|p| p.id)
+        else {
+            return false;
+        };
+        if !logistics::spend_at(v, store, material, 1) {
+            return false;
+        }
+        let p = &mut v.buildings[index].agriculture;
+        p.stocked = true;
+        p.stocking_requested = false;
+        event(v, "A resident has settled the animals into their new home.");
+        return true;
+    }
     if b.agriculture.pending > 0 && (b.kind == "orchard" || b.agriculture.cared_until > v.minutes) {
         let material = match b.kind.as_str() {
             "goat_pasture" => MILK,
@@ -210,7 +261,11 @@ pub fn advance(v: &mut Village, minutes: f32) {
     let sun = (daylight(v.minutes) - daylight(start)).max(0.);
     for index in 0..v.buildings.len() {
         let b = v.buildings[index].clone();
-        if !kind(&b) || !open(v, &b) || (!b.agriculture.enabled && b.kind != "goat_pasture") {
+        if !kind(&b)
+            || !open(v, &b)
+            || !b.agriculture.stocked
+            || (!b.agriculture.enabled && b.kind != "goat_pasture")
+        {
             continue;
         }
         let p = &b.agriculture;
@@ -257,7 +312,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
                     p.growth = (p.growth + attended).min(1440.);
                     if p.growth >= 1439.9 {
                         p.growth = 0.;
-                        p.pending = if p.welfare >= 40. { 4 } else { 2 };
+                        p.pending = goat_yield(p.welfare);
                     }
                 }
             }
@@ -318,7 +373,14 @@ pub fn valid(v: &Village, b: &Building) -> bool {
         "apiary" => 3,
         _ => 0,
     };
-    p.growth.is_finite()
+    (!p.stocking_requested || livestock_material(b).is_some() && !p.stocked && b.progress >= 100.)
+        && (p.stocked
+            || livestock_material(b).is_some()
+                && p.growth == 0.
+                && p.cared_until == 0.
+                && p.pending == 0
+                && p.harvested == 0)
+        && p.growth.is_finite()
         && (0.0..=duration).contains(&p.growth)
         && p.cared_until.is_finite()
         && (0.0..=v.minutes + 2880.).contains(&p.cared_until)
@@ -337,6 +399,17 @@ fn status(v: &Village, b: &Building) -> &'static str {
     }
     if b.progress < 100. {
         return "Under construction";
+    }
+    if let Some(material) = livestock_material(b)
+        && !p.stocked
+    {
+        return if !p.stocking_requested {
+            "Empty enclosure: choose Settle animals to request stocking"
+        } else if organics::available(v, Owner::Pantry(b.id), material) < 1 {
+            "Waiting for the purchased animals to be delivered here"
+        } else {
+            "Waiting for a resident to settle the animals"
+        };
     }
     if b.kind == "goat_pasture" && p.cared_until <= v.minutes {
         if organics::available(v, Owner::Pantry(b.id), FODDER) < 2 {
@@ -397,6 +470,17 @@ fn status(v: &Village, b: &Building) -> &'static str {
 }
 #[wasm_bindgen]
 impl Game {
+    pub fn request_animal_stocking(&mut self, id: usize, requested: bool) -> bool {
+        let mut v = self.app.world_mut().resource_mut::<Village>();
+        let Some(b) = v.buildings.iter().find(|b| {
+            b.id == id && livestock_material(b).is_some() && !b.agriculture.stocked && open(&v, b)
+        }) else {
+            return false;
+        };
+        let index = v.buildings.iter().position(|p| p.id == b.id).unwrap();
+        v.buildings[index].agriculture.stocking_requested = requested;
+        true
+    }
     pub fn configure_agriculture(&mut self, id: usize, enabled: bool) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
         let Some(b) = v.buildings.iter_mut().find(|b| b.id == id && kind(b)) else {

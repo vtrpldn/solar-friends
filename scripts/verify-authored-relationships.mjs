@@ -35,7 +35,7 @@ try{
  await page.waitForFunction(previous=>location.href!==previous,previousUrl);await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled&&document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
  assert.equal(await bond.inputValue(),'8');
  await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
- const state=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(state.village.version,43);
+ const state=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(state.village.version,44);
  assert.deepEqual(state.village.progress.friendships,{0:{1:8},1:{0:8}});
  assert.equal(state.village.scenario.definition.start.relationships[0].from,'resident-iara');
  await page.locator('[data-panel=community-panel]').click();await page.locator('#residents [data-resident="0"]').click();

@@ -9,6 +9,18 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     if original_version.is_some_and(|v| v >= 31) && !raw["village"]["skills"].is_object() {
         return None;
     }
+    if original_version.is_some_and(|v| v >= 44)
+        && raw["village"]["buildings"]
+            .as_array()
+            .is_none_or(|buildings| {
+                buildings.iter().any(|b| {
+                    !b["agriculture"]["stocked"].is_boolean()
+                        || !b["agriculture"]["stocking_requested"].is_boolean()
+                })
+            })
+    {
+        return None;
+    }
     if raw["view_only"] == true {
         return None;
     }
@@ -22,7 +34,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=42)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=43)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {

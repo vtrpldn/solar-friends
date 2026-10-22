@@ -218,6 +218,7 @@ fn blueprints_supported_appearances_and_located_inputs_compile_without_free_salv
         Structure {
             crop: None,
             orchard: None,
+            animals: None,
             id: "future-garden".into(),
             kind: "garden".into(),
             x: 38,
@@ -229,6 +230,7 @@ fn blueprints_supported_appearances_and_located_inputs_compile_without_free_salv
         Structure {
             crop: None,
             orchard: None,
+            animals: None,
             id: "adobe-house".into(),
             kind: "home".into(),
             x: 26,

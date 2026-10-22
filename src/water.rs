@@ -620,7 +620,13 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
                     if p.water[0] < 1. { 600. } else { 180. },
                 )
             }
-            Some("goat_pasture") => (6., false, if p.water[0] < 2. { 1050. } else { 180. }),
+            Some("goat_pasture")
+                if v.buildings
+                    .iter()
+                    .any(|b| b.id == id && b.agriculture.stocked) =>
+            {
+                (6., false, if p.water[0] < 2. { 1050. } else { 180. })
+            }
             Some("garden" | "greenhouse" | "orchard") => (
                 4.,
                 true,

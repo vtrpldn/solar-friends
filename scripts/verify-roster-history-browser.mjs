@@ -4,7 +4,7 @@ import {serve} from './serve.mjs';
 const server=await serve();let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(`http://127.0.0.1:${server.address().port}/?dev-scenario=cook`);await page.waitForFunction(()=>window.solarDev?.scenario()==='cook'&&window.solarDev.snapshot().village.version===43);
+ await page.goto(`http://127.0.0.1:${server.address().port}/?dev-scenario=cook`);await page.waitForFunction(()=>window.solarDev?.scenario()==='cook'&&window.solarDev.snapshot().village.version===44);
  if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
  await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();
  const before=await page.evaluate(()=>window.solarDev.snapshot()),old=structuredClone(before);assert(before.village.situations.active);
@@ -13,7 +13,7 @@ try{
  old.village.logistics.schema=1;old.village.logistics.retry_after=[old.village.minutes+20,0,0,0,0];old.village.events.push('Legacy roster history browser check');
  await page.locator('#dev-import-file').setInputFiles({name:'old-roster-history.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(old))});
  await page.waitForFunction(()=>window.solarDev.snapshot().village.events.at(-1)==='Legacy roster history browser check');
- const after=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(after.village.version,43);assert.equal(after.village.logistics.schema,2);
+ const after=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(after.village.version,44);assert.equal(after.village.logistics.schema,2);
  assert.deepEqual(after.village.situations.cooking,before.village.situations.cooking);assert.deepEqual(after.village.situations.active.helpers,[1]);assert.equal(after.village.situations.active.recovery,36);
  assert.deepEqual(after.village.logistics.retry_after,{0:old.village.minutes+20});assert.deepEqual(after.residents,before.residents);
  for(const field of ['economy','skills','workforce','simulation'])assert.deepEqual(after.village[field],before.village[field]);

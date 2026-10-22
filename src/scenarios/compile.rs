@@ -214,6 +214,7 @@ pub(super) fn check(d: &Definition) -> Report {
     super::liquids::check(d, &mut r);
     super::farming::check(d, &mut r);
     super::orchards::check(d, &mut r);
+    super::animals::check(d, &mut r);
     super::sites::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
@@ -408,10 +409,14 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
                 .as_ref()
                 .map_or_else(Default::default, |c| super::farming::resolve(c, &b.kind)),
             poultry: Default::default(),
-            agriculture: b
-                .orchard
-                .as_ref()
-                .map_or_else(Default::default, super::orchards::resolve),
+            agriculture: b.orchard.as_ref().map_or_else(
+                || {
+                    b.animals.as_ref().map_or_else(Default::default, |a| {
+                        super::animals::resolve(a, &b.kind, d.start.minutes)
+                    })
+                },
+                super::orchards::resolve,
+            ),
         });
         if !completed || b.kind == "home" || b.recipe != "standard" {
             let appearance = b

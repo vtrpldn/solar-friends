@@ -65,7 +65,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 43;
+pub const SAVE_VERSION: u32 = 44;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
