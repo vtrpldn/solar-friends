@@ -4,7 +4,7 @@ const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const hobbies=[['nature_walk','Nature walks'],['birdwatch','Birdwatching'],['stretch','Stretching'],['daydream','Daydreaming']];
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
 export class ResidentsEditor{
-  constructor(host,{presets,occupations,personality,experience,appearances,maximum,change,savePreset,openPresets,source,art,undo,redo,history}){
+  constructor(host,{presets,occupations,personality,experience,appearances,maximum,change,savePreset,openPresets,source,art,undo,redo,history,catalog}){
     this.forms=new Map();this.maximum=maximum;this.host=host;this.presets=presets;this.occupations=occupations;this.personality=personality;this.experience=experience;this.appearances=appearances;
     host.addEventListener('click',event=>{
       const button=event.target.closest('[data-add-resident],[data-duplicate-resident],[data-remove-resident],[data-save-resident-preset],[data-open-resident-presets],[data-open-character]');if(!button)return;
@@ -37,7 +37,7 @@ export class ResidentsEditor{
       });
     };
     host.addEventListener('change',changeField);
-    this.creator=new CharacterCreator({art,source:()=>source().start.residents??this.presets,groups:()=>this.forms,changeField,undo,redo,history});
+    this.creator=new CharacterCreator({art,source:()=>source().start.residents??this.presets,groups:()=>this.forms,changeField,undo,redo,history,catalog,editPerson:(label,edit)=>{const id=this.creator.id;return change(label,d=>{d.start.residents??=structuredClone(this.presets);const person=d.start.residents.find(p=>p.id===id);if(person){const next=edit(person);for(const key of Object.keys(person))if(!Object.hasOwn(next,key))delete person[key];Object.assign(person,next);}});}});
   }
   render(definition){
     const people=definition.start.residents??this.presets;
