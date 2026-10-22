@@ -95,7 +95,10 @@ fn relaxed_rule_notes_replace_finite_resource_warnings_and_disabled_modes_are_di
     let (mut game, r) = compiled(d.clone());
     let before = game.snapshot();
     let api: serde_json::Value = serde_json::from_str(&game.scenario_setup_report()).unwrap();
-    assert!(api["access"].as_object().unwrap().is_empty());
+    assert!(api["access"].get("food").is_none());
+    assert!(api["access"].get("fresh_water").is_none());
+    assert!(api["access"].get("toilets").is_none());
+    assert!(api["access"].get("housed_residents").is_some());
     assert_eq!(game.snapshot(), before);
     assert!(
         r.issues
@@ -418,4 +421,76 @@ fn opening_service_review_distinguishes_owned_unreachable_and_partial_reserves()
         serde_json::from_str(&connected.scenario_setup_report()).unwrap();
     assert_eq!(reading["access"]["food"]["value"], 12.);
     assert_eq!(reading["access"]["fresh_water"]["value"], 5.5);
+}
+
+#[test]
+fn housing_and_toilet_review_use_assigned_routes_and_local_buffers() {
+    let mut d = definition(5);
+    d.map.nature = Some(Vec::new());
+    d.map.deposits = Some(Vec::new());
+    d.map.river = Some(world::River {
+        schema: 1,
+        centers: vec![20.; MAP_SIZE as usize],
+    });
+    building(&mut d, "isolated-home", "home", 10, 10);
+    building(&mut d, "reachable-home", "home", 25, 25);
+    building(&mut d, "our-toilet", "eco_toilet", 25, 30);
+    let (mut game, report) = compiled(d.clone());
+    assert!(report.issues.iter().any(
+        |i| i.code == "opening_housing_access" && i.entity.as_deref() == Some("isolated-home")
+    ));
+    assert!(
+        report
+            .issues
+            .iter()
+            .any(|i| i.code == "opening_toilet_supplies"
+                && i.entity.as_deref() == Some("our-toilet")
+                && i.message.contains("fresh water"))
+    );
+    let before = game.snapshot();
+    let reading: serde_json::Value = serde_json::from_str(&game.scenario_setup_report()).unwrap();
+    assert_eq!(reading["summary"]["beds"], 6);
+    assert_eq!(reading["summary"]["unhoused"], 0);
+    assert_eq!(reading["summary"]["ecological_toilets"], 1);
+    assert_eq!(reading["access"]["housed_residents"]["value"], 2.);
+    assert_eq!(reading["access"]["toilets"]["value"], 0.);
+    assert_eq!(game.snapshot(), before);
+    d.start.fresh_water = 4.;
+    d.start.liquids = Some(vec![StartingLiquids {
+        owner: InventoryOwner::Building("our-toilet".into()),
+        contents: [("fresh".into(), 4.)].into(),
+    }]);
+    for blocked in [None, Some("greywater"), Some("sewage")] {
+        let mut test = d.clone();
+        if let Some(class) = blocked {
+            test.start.liquids.as_mut().unwrap()[0]
+                .contents
+                .insert(class.into(), 16.);
+        }
+        let (mut g, report) = compiled(test);
+        let reading: serde_json::Value = serde_json::from_str(&g.scenario_setup_report()).unwrap();
+        assert_eq!(
+            reading["access"]["toilets"]["value"],
+            if blocked.is_some() { 0. } else { 1. }
+        );
+        assert_eq!(
+            report
+                .issues
+                .iter()
+                .any(|i| i.code == "opening_toilet_supplies"),
+            blocked.is_some()
+        );
+    }
+    d.map.river = None;
+    let (mut connected, report) = compiled(d);
+    assert!(
+        !report
+            .issues
+            .iter()
+            .any(|i| i.code == "opening_housing_access")
+    );
+    let reading: serde_json::Value =
+        serde_json::from_str(&connected.scenario_setup_report()).unwrap();
+    assert_eq!(reading["access"]["housed_residents"]["value"], 5.);
+    assert_eq!(reading["access"]["toilets"]["value"], 1.);
 }

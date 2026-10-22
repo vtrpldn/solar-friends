@@ -91,3 +91,5 @@
 /* Keep the sticky close control in its own rail while the library scrolls. */
 #creator-library-dialog{padding-right:72px}
 #creator-library-dialog>.dialog-close{right:auto;margin-right:-56px}
+
+.creator-issue button+button{margin-left:7px}

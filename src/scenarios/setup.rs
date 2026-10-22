@@ -5,6 +5,7 @@ pub struct Summary {
     pub population: usize,
     pub beds: usize,
     pub unhoused: usize,
+    pub ecological_toilets: usize,
     pub shared_shed: bool,
     pub edible_portions: u32,
     pub shared_meal_portions: usize,
@@ -74,6 +75,11 @@ pub fn summarize(v: &Village) -> Summary {
         population,
         beds,
         unhoused: population.saturating_sub(beds),
+        ecological_toilets: v
+            .buildings
+            .iter()
+            .filter(|b| b.kind == "eco_toilet" && b.progress >= 100.)
+            .count(),
         shared_shed: ready(v, "shed"),
         edible_portions: food::owned_portions(v),
         shared_meal_portions: population,
@@ -198,12 +204,13 @@ fn access(
     v: &Village,
     people: &[Resident],
 ) -> BTreeMap<journal::services::Kind, journal::services::Reading> {
-    let mut kinds = Vec::new();
+    let mut kinds = vec![journal::services::Kind::HousedResidents];
     if sandbox::logistics(v) {
         kinds.push(journal::services::Kind::Food);
     }
     if sandbox::utilities(v) {
         kinds.push(journal::services::Kind::FreshWater);
+        kinds.push(journal::services::Kind::Toilets);
     }
     journal::services::current_readings(v, people, &kinds)
 }
@@ -260,6 +267,39 @@ pub fn review(v: &Village, d: &Definition, people: &[Resident], r: &mut Report) 
         }
     }
 
+    if let Some(housing) = readings.get(&journal::services::Kind::HousedResidents)
+        && housing.value < s.population.min(s.beds) as f64
+    {
+        issue(
+            r,
+            Severity::Warning,
+            "opening_housing_access",
+            "start.buildings",
+            format!(
+                "{:.0} of {} friends can reach their assigned completed home, despite {} completed bed spaces. Move the isolated home or clear its approach; spare beds elsewhere do not change the current assignments.",
+                housing.value, s.population, s.beds
+            ),
+            journal::services::inaccessible_assigned_home(v, people),
+            d,
+        );
+    }
+    if sandbox::utilities(v) {
+        for b in v.buildings.iter().filter(|b| {
+            b.kind == "eco_toilet" && b.progress >= 100. && !sanitation::usable_toilet(v, b.id)
+        }) {
+            let reason = sanitation::washing_blocker(v, water::Owner::Building(b.id), 1.)
+                .unwrap_or("The local sewage buffer is full. Leave room for toilet use or arrange sewage treatment.");
+            issue(
+                r,
+                Severity::Warning,
+                "opening_toilet_supplies",
+                "start.liquids",
+                format!("Ecological toilet is not ready to use. {reason}"),
+                Some(b),
+                d,
+            );
+        }
+    }
     if s.unhoused > 0 {
         issue(
             r,

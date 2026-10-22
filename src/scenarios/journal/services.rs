@@ -145,26 +145,31 @@ fn open(v: &Village, b: &Building) -> bool {
 fn reach(v: &Village, p: &Resident, target: Option<[f32; 2]>) -> bool {
     target.is_some_and(|target| navigation::work_route(v, [p.x, p.y], target).is_ok())
 }
+fn home_usable(v: &Village, p: &Resident, b: &Building, routes: bool) -> bool {
+    open(v, b)
+        && (!routes || {
+            let mut visitor = p.clone();
+            if p.trip.is_some() {
+                (visitor.x, visitor.y) = camp(v);
+            }
+            reach(
+                v,
+                &visitor,
+                spacing::approach(v, b, p.id).map(|p| [p.0, p.1]),
+            )
+        })
+}
 fn housing(v: &Village, people: &[Resident], routes: bool) -> f64 {
     people
         .iter()
-        .filter(|p| {
-            shelter(v, p.id).is_some_and(|b| {
-                open(v, b)
-                    && (!routes || {
-                        let mut visitor = (*p).clone();
-                        if p.trip.is_some() {
-                            (visitor.x, visitor.y) = camp(v);
-                        }
-                        reach(
-                            v,
-                            &visitor,
-                            spacing::approach(v, b, p.id).map(|p| [p.0, p.1]),
-                        )
-                    })
-            })
-        })
+        .filter(|p| shelter(v, p.id).is_some_and(|b| home_usable(v, p, b, routes)))
         .count() as f64
+}
+pub fn inaccessible_assigned_home<'a>(v: &'a Village, people: &[Resident]) -> Option<&'a Building> {
+    people.iter().find_map(|p| {
+        let b = shelter(v, p.id)?;
+        (!home_usable(v, p, b, true)).then_some(b)
+    })
 }
 pub(super) struct Frame<'a> {
     people: &'a [Resident],

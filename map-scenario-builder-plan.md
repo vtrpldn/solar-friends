@@ -977,3 +977,15 @@ The compiler adds non-blocking food/water access warnings when owned reserves ar
 Native coverage verifies completely isolated stores/tanks, partial camp-accessible reserves, correct 2.0-of-5.5 water guidance, restored access after removing the barrier, unchanged snapshots and omitted readings under automatic supplies. The release-WASM/editor journey observes 12 owned versus 2 reachable food portions and 5.5 owned versus 2 reachable water units, exercises both repair links, removes the barrier, and verifies corrected readings after save/reload. The rendered panel was inspected. Existing population/setup/undo/export/reopen/playtest checks pass. All 761 native tests, strict all-target linting, release compilation, changed-file formatting, JavaScript syntax and diff checks pass.
 
 Longer-horizon feasibility/sustainability, housing/sanitation access presentation, complete modular character artwork/native/player integration, remaining recovery auditing and the original biome/balance/usability/global-performance release gates remain required. The full builder goal remains in progress.
+
+### Reachable homes and ready ecological toilets
+
+Opening needs now separates completed overnight bed capacity from friends who can actually reach their assigned homes. The compiler warns about inaccessible assigned homes and focuses their location; spare beds elsewhere do not imply reassignment. Ecological toilet readiness uses the existing sanitation and journal service predicates, including local fresh water, greywater/sewage room and actual routes. Disabled utility management omits the finite toilet reading. Missing toilets remain a valid starting choice.
+
+Located liquid warnings offer both **Show on map** and **Review starting liquids**, with spacing between the actions. A player can repair the initial allocation through the ordinary liquid editor. These queries inspect the current opening setup without advancing time or changing a snapshot; they do not forecast daily sanitation capacity or housing sustainability.
+
+**Why:** completed buildings and theoretical capacity can conceal inaccessible homes or unusable facilities. Scenario authors need the same service rules as play, plus direct ways to repair the setup.
+
+Native setup coverage verifies assigned homes across a river, spare capacity, missing fresh water, full greywater/sewage buffers and restored routes. The rebuilt browser journey verifies both repair buttons, actual liquid editing, route repair, read-only inspection and durable save/reload. The opening-needs and warning layouts were visually inspected. Existing opening setup and food/water browser regressions pass, as do focused native setup tests, strict all-target linting, release compilation and changed-file formatting/syntax checks. Longer-horizon feasibility, complete modular character artwork/native/player integration, remaining recovery auditing and the biome/balance/usability/global-performance release gates remain open.
+
+All 762 native tests pass (239.32 seconds); the shared journal service tests also pass independently. This increment does not close the remaining release gates above.
