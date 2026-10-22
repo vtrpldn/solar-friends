@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "objective": "Stage 4 modular resident body pose production",
+  "status": "Body-only prototype coverage reviewed; not production appearance artwork and not enabled in gameplay",
+  "tool": "Built-in image_gen.imagegen, transparent background",
+  "references": [
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "role": "Existing neutral body identity and painted-style source, reused without modification",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f"
+    },
+    {
+      "path": "web/art/animations/bento-idle.png",
+      "role": "Current idle pose/layout reference; not an outfit reference",
+      "sha256": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943"
+    },
+    {
+      "path": "web/art/animations/bento-activities.png",
+      "role": "Current activity pose/layout reference; equipment intentionally omitted from body layer",
+      "sha256": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530"
+    },
+    {
+      "path": "web/art/animations/bento.png",
+      "role": "Current base pose and runtime scale comparison; not evidence of user approval",
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-idle-candidate-v1.png",
+      "sha256": "bce9067058bc34542deefa3c44bd11f5cbdfed6ee7fd08f9bf8519f82858826b",
+      "output": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c6e45cb5-7d5f-4d49-bbd9-5ea573decac2.png",
+      "inputs": [
+        "web/art/characters/prototype-v1/body-neutral-base.png",
+        "web/art/animations/bento-idle.png"
+      ],
+      "prompt": "Use case: identity-preserve game sprite production. Asset: Solar Friends neutral modular-body IDLE ANIMATION ATLAS, transparent 4 by 4 sheet. Input 1 is BODY IDENTITY AND STYLE REFERENCE: preserve exactly its adult proportions, bald head, warm medium brown skin, friendly face, cream sleeveless undershirt, cream mid-thigh shorts, dark brown closed work shoes, and warm broad painted shading. Input 2 is POSE AND ATLAS LAYOUT REFERENCE ONLY: use its sixteen idle gesture poses and row/column order, NOT its curly hair, blue shirt, belt or clothing. Make the same bald person as input 1 in all sixteen positions from input 2. Row 1: four quiet breathing/looking around standing poses. Row 2: neutral standing, shoulders lifted and eyes closed, both arms raised stretching above head with closed fists, return to neutral. Row 3: standing, right arm raised part-way to wave, right hand fully raised with open palm waving, return to neutral. Row 4: standing, both hands on hips, relaxed hands-on-hips weight shift, return to neutral. Preserve fixed three-quarter game camera facing right, hand-painted contours and upper-left daylight, consistent scale and adult anatomy in every cell. Complete uncropped silhouette in every cell, including both hands when stretching. Keep clear transparent gutters separating all sixteen people. No hair, hats, jewelry, tools, furniture, ground, background, color panels, cast shadows, guide marks, labels, text or extra figures. This is production anatomy/reference artwork for later clothing and hair layers; do not change the neutral body into a different character, do not make the head larger or body younger. TRUE alpha transparency. Output square 4x4 atlas.",
+      "verdict": "Needs correction; not selected by the body review",
+      "findings": [
+        "Sixteen separate poses extracted, but row 4 column 1 ends at y=1253 on a 1254-pixel canvas, leaving only one pixel of outer padding.",
+        "Retained as a rejected margin reference. No acceptance threshold was lowered."
+      ]
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png",
+      "sha256": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+      "output": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-72e32838-bc8c-4721-a607-96593a56a4e0.png",
+      "inputs": [
+        "web/art/characters/prototype-v1/body-neutral-idle-candidate-v1.png"
+      ],
+      "prompt": "Precise production edit of the supplied neutral Solar Friends idle body atlas. The edit target is this entire 4x4 sheet. Preserve the SAME sixteen bald adult figures, same exact identity, warm medium-brown skin, cream sleeveless undershirt and shorts, brown shoes, all facial expressions and arm poses, same right-facing camera and painted style. Correct ONLY the insufficient transparent margins: the first figure in the bottom row nearly touches the lower canvas edge. Give EVERY complete figure generous clear transparent space on all four sides of its own cell, at least about eight percent of the cell height above and below the silhouette. Make all sixteen figures uniformly a little smaller within their own tiles if necessary, with unchanged anatomy and relative proportions. Do not shorten legs, enlarge heads, stretch bodies or crop shoes/hands. The seated/sleeping poses are not in this idle sheet; retain the actual idle poses exactly: look around in row 1, stretch in row 2, wave in row 3, hands-on-hips relax in row 4. Do not add any figures or change row/column ordering. All four bottom-row pairs of shoes must be fully painted with a visible closed contour and substantial transparent space below their soles; nothing may touch the outer image border. Keep a regular square 4x4 atlas, consistent physical body size across cells and clean true alpha transparency. No props, hair, hats, furniture, ground, shadows, labels, guide marks, checkerboard or opaque backdrop. This is a margin correction, not a character redesign.",
+      "verdict": "Suitable for body-only production prototype; no gameplay or complete-character approval",
+      "findings": [
+        "Margin correction passes the outer-edge and normalized-frame bounds gate.",
+        "Standing height matches base and activity sheets after the existing uniform per-sheet normalization.",
+        "Bald head, cream garments, brown shoes, painted shading and adult proportions were compared beside current Bento.",
+        "Wave row 3 retains the original reference poses; current wave sampling uses columns 1, 3, 3, 4, 1. Unused in-between poses and final loops still require full production review."
+      ]
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+      "sha256": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+      "output": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-89a730a8-8843-455c-9a44-eff71ad9840a.png",
+      "inputs": [
+        "web/art/characters/prototype-v1/body-neutral-base.png",
+        "web/art/animations/bento-activities.png"
+      ],
+      "prompt": "Use case: identity-preserve game animation production. Asset: Solar Friends neutral modular BODY ACTIVITY atlas, 4 by 4 on true transparent alpha. Input 1 is the exact BODY IDENTITY AND PAINTED STYLE reference: same bald adult Brazilian neighbour with warm medium-brown skin, friendly face, cream sleeveless undershirt, cream mid-thigh shorts and dark brown closed work shoes. Preserve that build, face, head/body proportion, clothing, upper-left light and warm painted contour treatment in every pose. Input 2 is the ACTIVITY POSE/LAYOUT reference ONLY. Copy its sixteen body/arm/leg poses in the same 4x4 order, but NOT the blue clothes, hair or any equipment. Row 1: four standing cooking/stirring hand positions. Row 2: four standing pouring/watering arm positions and mild torso lean. Row 3: four kneeling garden-tending positions, one knee down and the other raised, free hand reaching toward the ground. Row 4: four standing animal-feeding hand positions, first hand close to the waist then gradually reaching forward with an open palm. REMOVE EVERY PROP: no saucepan, spoon, watering can, trowel, basket, food, plants, ground or cast shadow. Keep empty gripping hands in the same locations; tools and activity equipment will be separate registered layers later. Do not replace removed equipment with clothing, deformed hands or blobs. Keep both complete hands, feet and head inside each cell, with transparent gaps between limbs. Same adult identity and physical scale in all sixteen frames, and the same right-facing three-quarter orthographic game camera. Do not redesign the person, enlarge the head, shrink legs or normalize kneeling figures to standing height. Broad illustrated shading and readable restrained detail, no photorealism, no glossy 3D. Generous transparent gutters, no text, labels, grid, watermark or extra figures. Output a square 4x4 atlas.",
+      "verdict": "Suitable for body-only production prototype; equipment and occlusion incomplete",
+      "findings": [
+        "Sixteen cooking, watering, kneeling/tending and feeding body poses extract successfully with the shared standing scale.",
+        "Activity props are absent by design and must be authored separately; empty gripping hands are not a finished gameplay animation.",
+        "Kneeling posture, shoe contact, face scale and material palette were inspected beside the active activity reference."
+      ]
+    }
+  ],
+  "evidence": {
+    "report": "assets/art-direction/character-prototype-v1/body-set-report.json",
+    "baseBoard": "assets/art-direction/character-prototype-v1/body-set-base-review.png",
+    "idleBoard": "assets/art-direction/character-prototype-v1/body-set-idle-review.png",
+    "activityBoard": "assets/art-direction/character-prototype-v1/body-set-activities-review.png",
+    "surface": "web/artwork/character-body-lab.html",
+    "checks": "node scripts/verify-character-body-set.mjs",
+    "measured": {
+      "poses": 48,
+      "standingHeights": {
+        "base": 220,
+        "idle": 220,
+        "activities": 220
+      },
+      "crossSheetStatureRatio": 1
+    },
+    "scope": "Actual pose extraction, animation sampling, common resident width, native opening land and shared ground/building/tree rendering, left/right facing and unlit night comparison. No simulation or playable appearance catalogs changed."
+  },
+  "remaining": [
+    "Co-authored pose-specific body/face/hair/clothing/accessory masks and attachment landmarks",
+    "Activity equipment, seating furniture and hand/front-back occlusion",
+    "Additional genuinely authored body/face/hair variants and controlled material palettes",
+    "Complete compatible recipes, portraits, bounded caching, runtime integration and full gameplay/art QA"
+  ],
+  "next": "Use the complete body pose set as the reference for registered, co-authored masks and parts. Do not reuse either rejected hair overlay or enable incomplete body-only actors as a finished character creator."
+}
