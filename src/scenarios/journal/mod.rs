@@ -9,6 +9,7 @@ pub const MAX_GROUP_SIZE: usize = 8;
 pub(crate) mod delivery;
 pub(crate) mod events;
 pub(crate) mod land_use;
+pub(crate) mod challenge;
 mod model;
 mod runtime;
 mod observation;

@@ -783,14 +783,14 @@ fn request_blocker(v: &Village, r: &Resident, task: &str, encourage: bool) -> Op
     None
 }
 fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resident>) {
-    let dt = step.0;
+    let (dt, boundary) = scenarios::journal::challenge::step(&v, step.0);
     if dt <= 0. {
         return;
     }
     water::sync(&mut v);
     modes::replenish(&mut v);
     let before = v.minutes;
-    v.minutes += dt * MINUTES_PER_SECOND;
+    v.minutes = boundary.unwrap_or(v.minutes + dt * MINUTES_PER_SECOND);
     maintenance::advance(&mut v, dt * MINUTES_PER_SECOND);
     freshness::advance(&mut v);
     let activities: Vec<_> = people

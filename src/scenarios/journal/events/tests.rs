@@ -8,6 +8,7 @@ fn definition(
     d.rules.logistics = true;
     d.start.funds = funds;
     d.journal = Some(Journal {
+        challenge: None,
         schema: 1,
         introduction: "Our story".into(),
         completion: "Keep living here".into(),

@@ -2,6 +2,8 @@ use super::*;
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Journal {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub challenge: Option<challenge::Definition>,
     pub schema: u32,
     pub introduction: String,
     pub chapters: Vec<Chapter>,
@@ -197,6 +199,8 @@ pub enum CounterCredit {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct State {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub failed_at: Option<f32>,
     pub schema: u32,
     pub last_sample: f32,
     pub finished_at: Option<f32>,

@@ -94,6 +94,7 @@ pub fn initialize(v: &mut Village) {
         return;
     };
     let mut state = State {
+        failed_at: None,
         schema: 1,
         events: BTreeMap::new(),
         locked_buildings: journal.locked_buildings.iter().cloned().collect(),
@@ -175,6 +176,7 @@ pub fn advance(v: &mut Village) {
         }
     }
     events::advance(journal, &mut state, v);
+    challenge::finish(journal, &mut state, v.minutes);
     state.last_sample = v.minutes;
     v.progress.scenario_journal = Some(state);
 }
@@ -542,7 +544,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         }).collect();
         serde_json::json!({"id":chapter.id,"title":chapter.title,"description":chapter.description,"completed_at":state.chapters[&chapter.id],"goals":goals})
     }).collect();
-    serde_json::json!({"schema":1,"introduction":journal.introduction,"completion":journal.completion,"finished_at":state.finished_at,"chapters":chapters,"events":events::view(journal,state,v)})
+    serde_json::json!({"challenge":challenge::view(journal,state),"schema":1,"introduction":journal.introduction,"completion":journal.completion,"finished_at":state.finished_at,"chapters":chapters,"events":events::view(journal,state,v)})
 }
 
 pub fn valid(v: &Village) -> bool {
@@ -552,6 +554,9 @@ pub fn valid(v: &Village) -> bool {
     let Some(state) = &v.progress.scenario_journal else {
         return false;
     };
+    if !challenge::valid(journal, state, v.minutes) {
+        return false;
+    }
     if !services::valid_state(v) || !events::valid(journal, state, v) {
         return false;
     }

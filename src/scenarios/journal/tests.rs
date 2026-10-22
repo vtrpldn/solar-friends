@@ -19,6 +19,7 @@ fn chapter(id: &str, goals: Vec<Goal>) -> Chapter {
 fn scenario(chapters: Vec<Chapter>) -> Definition {
     let mut d = Definition::builtin(modes::Mode::Sandbox);
     d.journal = Some(Journal {
+        challenge: None,
         schema: 1,
         introduction: "Our own beginning".into(),
         completion: "Keep enjoying village life.".into(),
@@ -956,4 +957,41 @@ fn physical_local_deliveries_credit_dropoff_and_preserve_activation_boundaries()
         compile(d).is_err(),
         "A completed shed has no receiving inventory"
     );
+}
+
+#[test]
+fn challenge_deadline_is_inclusive_and_failure_freezes_exactly() {
+    let mut d = scenario(vec![chapter("opening", vec![goal("date", GoalCondition::Date { minute: 601. })])]);
+    d.start.minutes = 600.;
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 600.5, failure_message: "Time to reconsider.".into() });
+    let mut g = game(d.clone());
+    g.tick(0.25);
+    assert_eq!(state(&mut g)["challenge"]["status"], "failed");
+    let saved = g.snapshot();
+    g.tick(0.25);
+    assert_eq!(g.snapshot(), saved);
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    let mut corrupted: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    // A fabricated earlier failure cannot pass the native save validator.
+    corrupted["village"]["progress"]["scenario_journal"]["failed_at"] = serde_json::json!(600.25);
+    assert!(!g.restore(&corrupted.to_string()));
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Date { minute: 600.5 };
+    let mut winner = game(d);
+    winner.tick(0.25);
+    assert_eq!(state(&mut winner)["challenge"]["status"], "succeeded");
+    let won = winner.snapshot();
+    winner.tick(0.25);
+    assert_ne!(winner.snapshot(), won);
+    let saved = winner.snapshot();
+    assert!(winner.restore(&saved));
+}
+
+#[test]
+fn challenge_rejects_deadlines_at_arrival_and_empty_failure_messages() {
+    let mut d = scenario(vec![chapter("opening", vec![goal("date", GoalCondition::Date { minute: 900. })])]);
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: d.start.minutes, failure_message: "Too soon.".into() });
+    assert!(compile(d.clone()).is_err());
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 900., failure_message: String::new() });
+    assert!(compile(d).is_err());
 }
