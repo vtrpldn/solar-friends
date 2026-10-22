@@ -1,3 +1,4 @@
+import {installComposedAppearanceReview} from './character-composed-review.js';
 import {loadCharacterImageSource} from '../character-image-source.js';
 import {installAttachmentEditor} from './character-attachment-editor.js';
 import {installSingleHairReview} from './character-single-hair.js';
@@ -68,5 +69,6 @@ try{
  window.waterHairReview=await installHairClipReview({clip:'water',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.tendHairReview=await installHairClipReview({clip:'tend',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.feedHairReview=await installHairClipReview({clip:'feed',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
+ window.composedAppearanceReview=await installComposedAppearanceReview({reviews:Object.fromEntries(['breathe','walk','work','sit','look','stretch','wave','relax','cook','water','tend','feed'].map(clip=>[clip,window[clip+'HairReview']])),materials:materialModel,scene,before:$('body-attachment-open')});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

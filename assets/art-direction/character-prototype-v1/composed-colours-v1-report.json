@@ -1,0 +1,327 @@
+{
+  "result": "PASS",
+  "scope": "Combined prototype colours/hair only; final art, equipment, native recipes, player integration and global performance incomplete",
+  "clips": [
+    "cook",
+    "water",
+    "tend",
+    "feed",
+    "walk",
+    "work",
+    "sit",
+    "breathe",
+    "sleep",
+    "look",
+    "stretch",
+    "wave",
+    "relax"
+  ],
+  "checked": [
+    {
+      "sheet": "base",
+      "index": 8,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 9,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 10,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 11,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 0,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 1,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 2,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 3,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 4,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 5,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 6,
+      "foreground": true,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 7,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "base",
+      "index": 12,
+      "foreground": false,
+      "activity": true
+    },
+    {
+      "sheet": "base",
+      "index": 13,
+      "foreground": false,
+      "activity": true
+    },
+    {
+      "sheet": "base",
+      "index": 14,
+      "foreground": false,
+      "activity": true
+    },
+    {
+      "sheet": "base",
+      "index": 15,
+      "foreground": false,
+      "activity": true
+    },
+    {
+      "sheet": "idle",
+      "index": 0,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 1,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 2,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 3,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 4,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 5,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 6,
+      "foreground": true,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 7,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 8,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 9,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 10,
+      "foreground": true,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 11,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 12,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 13,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 14,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "idle",
+      "index": 15,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 0,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 1,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 2,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 3,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 4,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 5,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 6,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 8,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 9,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 10,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 11,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 12,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 13,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 14,
+      "foreground": false,
+      "activity": false
+    },
+    {
+      "sheet": "activities",
+      "index": 15,
+      "foreground": false,
+      "activity": false
+    }
+  ],
+  "denied": [
+    "changed-alpha",
+    "changed-size",
+    "unknown-clip",
+    "unknown-palette"
+  ],
+  "cache": {
+    "clips": 2,
+    "frames": 8,
+    "maximumFrames": 8,
+    "rgbaBytes": 2097152
+  },
+  "cleared": {
+    "clips": 0,
+    "frames": 0,
+    "maximumFrames": 8,
+    "rgbaBytes": 0
+  }
+}
