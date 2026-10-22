@@ -1,3 +1,4 @@
+import {LiquidsEditor} from './liquids.js';
 import {SuppliesEditor} from './supplies.js';
 import {RegionsEditor} from './regions.js';
 import {JournalEditor} from './scenario-journal.js';
@@ -28,7 +29,7 @@ const ruleNames={logistics:'Materials, hauling and resident work',land:'Living s
 let newBiome="mata-atlantica";
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let minimap,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -83,6 +84,7 @@ function refresh(){
   minimap.set(landReport,geometry);
   geologyEditor.render(d,landReport);
   weatherEditor.render(d);
+  liquidsEditor.render(d,report);
   regionsEditor.render(d);
   journalEditor.render(d,report);
   residentsEditor.render(d);
@@ -93,6 +95,7 @@ function refresh(){
   inspectGround(hoverCell);
   $('creator-biome-name').textContent='64 × 64 cells · '+(catalog.biomes.find(b=>b.id===d.map.biome?.id)?.name||'Mata Atlântica');
   $('creator-river-enabled').checked=d.map.river!==null;
+  $('creator-water').readOnly=Array.isArray(d.start.liquids);$('creator-water').title=d.start.liquids?'Edit the fresh-water allocations in Starting liquids.':'';
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
   $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
@@ -127,7 +130,7 @@ function renderSelection(){
 function renderSupplies(){suppliesEditor.render(current.doc.value,report);}
 function renderReview(){
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
-  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':''}</div>`).join(''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
+  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join(''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
 }
 function setTool(tool){
   map.setTool(tool);landSampleKey='';inspectGround(hoverCell);
@@ -139,6 +142,7 @@ function removeBuilding(id){
   const ids=map.selection().includes(id)?map.selection():[id];
   change(ids.length>1?'Remove building group':'Remove building',d=>{d.start.buildings=d.start.buildings.filter(b=>!ids.includes(b.id));});
   map.select(null);
+  if(current.doc.value.start.liquids?.some(p=>ids.includes(p.owner.building))){$('creator-liquids').open=true;toast('Starting liquids still reference removed containers. Choose compatible storage before testing.');}
   if(current.doc.value.start.inventories.some(p=>ids.includes(p.owner.building))){$('creator-supplies').open=true;toast('Starting supplies still reference removed buildings. Choose new supply locations before testing.');}
 }
 function mapAction(action){
@@ -276,6 +280,7 @@ function wire(){
   $('creator-issues').onclick=e=>{
     const button=e.target.closest('[data-issue]');
     if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity)map.select(issue.entity);}
+    if(e.target.matches('[data-issue-liquids]')){$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}
     if(e.target.matches('[data-issue-supplies]')){$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
   };
   $('creator-undo').onclick=()=>current?.doc.undo();$('creator-redo').onclick=()=>current?.doc.redo();
@@ -340,6 +345,7 @@ try{
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
+  liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change,maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});
   journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
