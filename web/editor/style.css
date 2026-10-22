@@ -97,3 +97,6 @@
 .creator-outlook-table{width:100%;font-size:10px;border-collapse:collapse}.creator-outlook-table caption{text-align:left;margin:8px 0}.creator-outlook-table th,.creator-outlook-table td{text-align:right;padding:6px 3px;border-bottom:1px solid #c5ad7b}.creator-outlook-table th:first-child{text-align:left}
 
 .creator-outlook-table th,.creator-outlook-table td{vertical-align:top}.creator-outlook-table th:first-child{overflow-wrap:anywhere}.creator-outlook-table small{display:block;margin-top:3px;font-size:inherit;line-height:1.4}
+.creator-outlook-project{padding:10px 0;border-top:1px solid #b69b64}
+.creator-outlook-project h5{margin:0;font:inherit;font-weight:bold}
+.creator-outlook-project p{margin:6px 0 10px}

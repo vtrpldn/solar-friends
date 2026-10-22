@@ -17,3 +17,16 @@ let opened=false,scrolled=false;globalThis.document={getElementById:id=>{assert.
 root.onclick({target:{closest:selector=>selector==='[data-outlook-open]'?{dataset:{outlookOpen:'creator-residents'}}:null}});assert(opened&&scrolled);
 root.onclick({target:{closest:selector=>selector==='[data-outlook-open]'?{dataset:{outlookOpen:'untrusted-target'}}:null}});delete globalThis.document;
 console.log('PASS: per-step summaries, durations, stable resident IDs, escaped names, zero-time shortage, optional stock rows and scoped repair navigation.');
+const {projectMarkup}=await import('../web/editor/outlook-projects.js');
+const tools={escape:s=>String(s).replaceAll('<','&lt;').replaceAll('>','&gt;'),time:n=>`minute ${n}`},places=new Map([['42',{id:'authored-home',name:'<Home>',x:25,y:26}]]);
+const projects=projectMarkup([{building:42,window:null,blocker:'Missing <glass>'},{building:900,window:[600,630],blocker:null}],places,tools);
+assert.match(projects,/&lt;Home&gt;/);assert.match(projects,/Column 25 · Row 26/);assert.match(projects,/Missing &lt;glass&gt;/);assert.match(projects,/minute 600 to minute 630/);assert.match(projects,/data-outlook-project="42"/);assert.doesNotMatch(projects,/data-outlook-project="900"/);assert.doesNotMatch(projects,/<glass>/);assert.match(projectMarkup([],places,tools),/No construction projects/);
+let metadata={runtime:42,id:'original',name:'Home',x:25,y:25},reviewed;const projectRoot={innerHTML:''},projectWorkers=[];let revision='first';
+const controller=new ScenarioOutlook(projectRoot,{source:()=>({key:revision,valid:true,snapshot:()=>'',projects:()=>[metadata]}),reviewProject:p=>reviewed=p,workerFactory:()=>{const w={postMessage(){},terminate(){}};projectWorkers.push(w);return w;}});
+controller.start();metadata.id='changed';projectWorkers[0].onmessage({data:{report:{days:1,based_at:480,through:1920,needs:[sample],funds_projected:0,projects:[{building:42,completed_at:null,blocker:'Wait'}]}}});
+const clickProject=id=>projectRoot.onclick({target:{closest:selector=>selector==='[data-outlook-project]'?{dataset:{outlookProject:id}}:null}});clickProject('42');assert.equal(reviewed.id,'original');reviewed=null;clickProject('999');assert.equal(reviewed,null);revision='second';controller.observe();clickProject('42');assert.equal(reviewed,null);controller.stop();
+console.log('PASS: native project outcomes, escaped labels/blockers, completion windows, frozen authored worksite navigation and stale/unknown target refusal.');
+
+const {projectPlaces:bindPlaces}=await import('../web/editor/outlook-projects.js');
+assert.deepEqual(bindPlaces(JSON.stringify({village:{scenario:{buildings:{b:42,a:900,missing:5}}}}),[{id:'a',kind:'home',x:20,y:21},{id:'b',kind:'home',x:25,y:26}],()=> 'Home'),[{runtime:42,id:'b',name:'Home',x:25,y:26},{runtime:900,id:'a',name:'Home',x:20,y:21}]);
+console.log('PASS: checkpoint-authored bindings distinguish repeated building kinds independently of array order.');

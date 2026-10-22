@@ -1,3 +1,4 @@
+import {projectPlaces} from './outlook-projects.js';
 import {ScenarioOutlook} from './outlook.js';
 import {MAX_RECOVERY_FILE_BYTES} from '../recovery-limits.js';
 import {recoveredPackage} from './package-recovery.js';
@@ -520,7 +521,7 @@ function wire(){
 
 try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
-  outlook=new ScenarioOutlook($('creator-outlook'),{source:()=>({key:current?current.id+':'+current.doc.revision:null,valid:!!current&&report.ok,snapshot:()=>engine.snapshot()})});
+  outlook=new ScenarioOutlook($('creator-outlook'),{source:()=>({key:current?current.id+':'+current.doc.revision:null,valid:!!current&&report.ok,snapshot:()=>engine.snapshot(),projects:checkpoint=>projectPlaces(checkpoint,current.doc.value.start.buildings,title)}),reviewProject:p=>{if(!current?.doc.value.start.buildings.some(b=>b.id===p.id))return;setTool('select');map.select(p.id);map.centerAt(p.x,p.y);$('creator-selection').scrollIntoView({block:'nearest'});}});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
   map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank,map.view.selectedRoute,map.view.selectedResident]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
   minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
