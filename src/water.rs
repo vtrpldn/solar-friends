@@ -3,7 +3,8 @@ use crate::*;
 use simulation::Id;
 pub const LOAD: f64 = 12.;
 pub const LIQUIDS: usize = 4;
-const EPS: f64 = 0.000_001;
+pub(crate) const CAMP_CAPACITIES: [f64; LIQUIDS] = [40., 60., 120., 80.];
+pub(crate) const EPS: f64 = 0.000_001;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Class {
@@ -14,6 +15,14 @@ pub enum Class {
 }
 impl Class {
     pub const ALL: [Self; LIQUIDS] = [Self::Fresh, Self::Irrigation, Self::Greywater, Self::Sewage];
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::Fresh => "fresh",
+            Self::Irrigation => "irrigation",
+            Self::Greywater => "greywater",
+            Self::Sewage => "sewage",
+        }
+    }
     pub fn sealed(self) -> bool {
         matches!(self, Self::Greywater | Self::Sewage)
     }
@@ -69,7 +78,7 @@ pub struct State {
     pub external: [f64; LIQUIDS],
     pub sandbox_disposed: [f64; LIQUIDS],
 }
-fn caps(kind: &str) -> Option<[f64; LIQUIDS]> {
+pub(crate) fn building_capacities(kind: &str) -> Option<[f64; LIQUIDS]> {
     Some(match kind {
         "well" => [75., 0., 0., 0.],
         "home" => [8., 0., 24., 0.],
@@ -94,7 +103,7 @@ fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; LIQUIDS])> {
             Owner::Camp,
             crate::camp(v).0,
             crate::camp(v).1,
-            [40., 60., 120., 80.],
+            CAMP_CAPACITIES,
         ),
         (Owner::Service, 1., crate::camp(v).1, [0., 0., LOAD, LOAD]),
     ];
@@ -106,7 +115,7 @@ fn wanted(v: &Village) -> Vec<(Owner, f32, f32, [f64; LIQUIDS])> {
             Owner::Building(b.id),
             b.x as f32,
             b.y as f32,
-            caps(&b.kind)?,
+            building_capacities(&b.kind)?,
         ))
     }));
     out.extend(

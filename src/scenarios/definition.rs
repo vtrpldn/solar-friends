@@ -163,9 +163,18 @@ pub struct Start {
     pub minutes: f32,
     pub funds: i64,
     pub fresh_water: f32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub liquids: Option<Vec<StartingLiquids>>,
     pub buildings: Vec<Structure>,
     pub roads: Vec<[i32; 2]>,
     pub inventories: Vec<Inventory>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StartingLiquids {
+    pub owner: InventoryOwner,
+    pub contents: BTreeMap<String, f64>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -329,6 +338,7 @@ impl Definition {
                 minutes: 480.,
                 funds: if sandbox { 10_000_000 } else { 300_000 },
                 fresh_water: if sandbox { 40. } else { 32. },
+                liquids:None,
                 buildings: [("shed", -2, -3), ("warehouse", 4, -3)]
                     .into_iter()
                     .map(|(kind, dx, dy)| Structure {

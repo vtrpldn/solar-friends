@@ -224,6 +224,7 @@ fn build(
             "Starting water does not fit compatible tanks.",
         ));
     }
+    scenarios::liquids::install(&mut village)?;
     maintenance::sync(&mut village);
     let mut app = App::new();
     app.insert_resource(Step::default())

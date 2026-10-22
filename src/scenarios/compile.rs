@@ -211,6 +211,7 @@ pub(super) fn check(d: &Definition) -> Report {
             "Choose a valid amount of starting fresh water.",
         );
     }
+    super::liquids::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
     {
@@ -332,7 +333,11 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         minutes: d.start.minutes,
         wood: 0.,
         food: 0.,
-        water: d.start.fresh_water,
+        water: if d.start.liquids.is_some() {
+            0.
+        } else {
+            d.start.fresh_water
+        },
         climate: climate::State {
             enabled: d.rules.climate,
         },
