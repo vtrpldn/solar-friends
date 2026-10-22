@@ -1458,6 +1458,7 @@ function togglePause() {
     paused ? "Resume simulation" : "Pause simulation",
   );
   $("#pause").classList.toggle("active", paused);
+  if(paused&&game&&state&&gameUI){state=sampleFrame(game,state,true);reportElapsed=0;updateUI();}
 }
 let paintedState = null, paintedView = "", reportElapsed = Infinity;
 function frame(stamp) {
