@@ -26,7 +26,7 @@ export async function installSingleHairReview({body,binding,scene,before}){
  const frame=await singleHairFrame({body,binding,registration,image,sourceHash});
  const section=document.createElement('section');section.id='single-hair-review';
  const title=document.createElement('h2');title.textContent='Short curls · single standing pose';
- const note=document.createElement('p');note.textContent='Prototype only: base pose 8. Bento and the unchanged neutral body with registered curls, at the same game scale. Both facings and existing night tint. The other 47 poses are unfinished; this is not a playable hairstyle.';
+ const note=document.createElement('p');note.textContent='Prototype only: base pose 8. Bento and the unchanged neutral body with registered curls, at the same game scale. Both facings and existing night tint. Additional pose groups are reviewed separately below; this is not a complete playable hairstyle.';
  section.append(title,note);const grid=document.createElement('div');grid.className='body-review-scenes';
  for(const facing of [1,-1])for(const night of [0,1]){
   const figure=document.createElement('figure'),canvas=document.createElement('canvas'),caption=document.createElement('figcaption');canvas.width=900;canvas.height=420;

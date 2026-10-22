@@ -1,10 +1,10 @@
 import {registeredHairFrame} from './character-single-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from '../character-atlas-part.js';
 import {residentClips} from '../resident-animation.js';
-const labels={breathe:'breathing',walk:'walking',work:'working',sit:'seated / sleeping',look:'looking around',stretch:'stretching',wave:'waving'};
+const labels={breathe:'breathing',walk:'walking',work:'working',sit:'seated / sleeping',look:'looking around',stretch:'stretching',wave:'waving',relax:'relaxing'};
 // Share animation ownership and duration with gameplay; all four authored atlas
 // poses are reviewed even when an animation intentionally skips one of them.
-const clips=Object.fromEntries(Object.entries(labels).map(([name,label])=>{const {sheet,row,frames,fps}=residentClips[name];return [name,{sheet,indices:Array.from({length:4},(_,i)=>row*4+i),duration:frames.length/fps,label}];}));
+const clips=Object.fromEntries(Object.entries(labels).map(([name,label])=>{const {sheet,row,frames,fps,loop}=residentClips[name];return [name,{sheet,indices:Array.from({length:4},(_,i)=>row*4+i),duration:frames.length/fps,loop:loop===true,label}];}));
 export function hairClipProvider(frames,clip){
  const spec=Object.hasOwn(clips,clip)?clips[clip]:null;
  if(!spec||!(frames instanceof Map)||frames.size!==4||spec.indices.some(i=>frames.get(i)?.width!==256||frames.get(i)?.height!==256||typeof frames.get(i)?.getContext!=='function'))throw Error('Provide every registered frame for the supported hair clip.');
@@ -24,8 +24,8 @@ export async function installHairClipReview({clip,frames,binding,scene,before}){
  }
  const fullProvider=hairClipProvider(composed,clip),appearanceProvider=hairClipProvider(appearanceFrames,clip);let includeActivity=true;
  const provider=Object.freeze({frameForPose:(sheet,index)=>(includeActivity?fullProvider:appearanceProvider).frameForPose(sheet,index)}),section=document.createElement('section');section.id=`${clip}-hair-review`;
- const title=document.createElement('h2');title.textContent=`Short curls · ${spec.label} loop`;const note=document.createElement('p');note.textContent=`Prototype only: four ${spec.label} poses. Scrub key poses and crossfades in both facings, by day and night. Curl volume still needs temporal polish. Other pose groups and full character customization remain unfinished; this is excluded from player choices.`;
- const label=document.createElement('label');label.textContent='Loop sample · seconds ';const time=document.createElement('input');time.type='number';time.min='0';time.max=String(spec.duration);time.step='.001';time.value='0';time.id=`${clip}-hair-time`;label.append(time);section.append(title,note,label);
+ const title=document.createElement('h2');title.textContent=`Short curls · ${spec.label} ${spec.loop?'loop':'animation'}`;const note=document.createElement('p');note.textContent=`Prototype only: four ${spec.label} poses. Scrub key poses and crossfades in both facings, by day and night. Curl volume still needs temporal polish. Other pose groups and full character customization remain unfinished; this is excluded from player choices.`;
+ const label=document.createElement('label');label.textContent=spec.loop?'Loop sample · seconds ':'Animation time · seconds ';const time=document.createElement('input');time.type='number';time.min='0';time.max=String(spec.duration);time.step='.001';time.value='0';time.id=`${clip}-hair-time`;label.append(time);section.append(title,note,label);
  let mode=null;if(clip==='sit'){mode=document.createElement('select');mode.id='sit-hair-mode';mode.append(new Option('Sitting loop','sit'),new Option('Asleep · pose 15','sleep'));const modeLabel=document.createElement('label');modeLabel.textContent='Activity ';modeLabel.append(mode);section.append(modeLabel);const activityLabel=document.createElement('label'),checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=true;checkbox.id='sit-activity-visible';activityLabel.append(checkbox,document.createTextNode('Show activity stool'));section.append(activityLabel);checkbox.addEventListener('change',()=>{includeActivity=checkbox.checked;draw();});}
  const grid=document.createElement('div');grid.className='body-review-scenes';const views=[];
  for(const facing of [1,-1])for(const night of [0,1]){const figure=document.createElement('figure'),canvas=document.createElement('canvas'),caption=document.createElement('figcaption');canvas.width=900;canvas.height=420;caption.textContent=`${facing===1?'Right':'Left'} · ${night?'night':'day'} · ${spec.label}`;figure.append(canvas,caption);grid.append(figure);views.push({canvas,night,facing});}

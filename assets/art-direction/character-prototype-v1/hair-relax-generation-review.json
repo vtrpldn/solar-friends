@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "status": "Production draft only; full character creation remains incomplete",
+  "why": "Relaxed idle heads sit lower than standing heads; use correctly registered painted parts while preserving body proportions and pixels.",
+  "generations": [
+    {
+      "key": "hair_relax12_composite_v1",
+      "prompt": "Edit image1 on its EXACT existing1254-square transparent full-body canvas. Replace the green cap and bald scalp inside it with short warm brown rounded curls matching image3. Image1 is the precise scalp geometry guide for idle pose12; image2 is the original same body for preserving all body/face/eye/ear/hand/clothing/shoe positions and proportions. Image3 is ONLY curl identity/material reference, not placement: soft subdued brown, broad painted shading, restrained upper-left highlights, no bright orange or glossy contrast. Hair must occupy the green cap envelope approximately x515..820 y155..365, covering the complete bald crown, leaving forehead and eyes visible, short sides above ears. No dangling ear loops or tendrils. Keep ALL original body parts and full-body composition fixed. No stool, props, text, green or guide lines in the result. Output the complete original relaxed standing person with only the scalp changed to the matching curls. Genuine transparent background. Never center, shift or enlarge the person/cap.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-12-silhouette-guide.png",
+          "sha256": "3c316d9613d1e430c25a9e03c96a32979137967d2bead90ff76b24c3eae82101"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-12-body.png",
+          "sha256": "94fcaf171792b60dc775e1d596c31bf3f229831f53041020b6fb46907d8ce630"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c5ab8f5e-aaf4-4074-a66c-83578bd0fd4c.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-relax-12-composite-candidate-v1.png",
+      "verdict": "Reference only; never installed as replacement body.",
+      "sha256": "da76e0db437f8e28d69469c781314c6e1cfb25b15cd56fb68eeb8047cdac80f6"
+    },
+    {
+      "key": "hair_relax13_composite_v1",
+      "prompt": "Edit image1 on its EXACT existing1254-square transparent full-body canvas. Replace the green cap and bald scalp inside it with short warm brown rounded curls matching image3. Image1 is the precise scalp geometry guide for idle pose13; image2 is the original same body for preserving all body/face/eye/ear/hand/clothing/shoe positions and proportions. Image3 is ONLY curl identity/material reference, not placement: soft subdued brown, broad painted shading, restrained upper-left highlights, no bright orange or glossy contrast. Hair must occupy the green cap envelope approximately x500..810 y160..370, covering the complete bald crown, leaving forehead and eyes visible, short sides above ears. No dangling ear loops or tendrils. Keep ALL original body parts and full-body composition fixed. No stool, props, text, green or guide lines in the result. Output the complete original relaxed standing person with only the scalp changed to the matching curls. Genuine transparent background. Never center, shift or enlarge the person/cap.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-13-silhouette-guide.png",
+          "sha256": "f30a9220535bc9b0a5bd1aafd1cbe08408eed44c534da279ce05d383aa36e513"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-13-body.png",
+          "sha256": "38ce5fccbb6d10ed25622b0fa4f24e75d41013605f94c353c33a42b975659c31"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7b0530a6-b0a8-4389-83fc-89cd11f7420b.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-relax-13-composite-candidate-v1.png",
+      "verdict": "Reference only; never installed as replacement body.",
+      "sha256": "1cd8b52ffbfa63e0da6ea74b6cf1401ef5ffdd5b6cab2e5c0ad97b3e03ba259c"
+    },
+    {
+      "key": "hair_relax14_composite_v1",
+      "prompt": "Edit image1 on its EXACT existing1254-square transparent full-body canvas. Replace the green cap and bald scalp inside it with short warm brown rounded curls matching image3. Image1 is the precise scalp geometry guide for idle pose14; image2 is the original same body for preserving all body/face/eye/ear/hand/clothing/shoe positions and proportions. Image3 is ONLY curl identity/material reference, not placement: soft subdued brown, broad painted shading, restrained upper-left highlights, no bright orange or glossy contrast. Hair must occupy the green cap envelope approximately x500..810 y160..370, covering the complete bald crown, leaving forehead and eyes visible, short sides above ears. No dangling ear loops or tendrils. Keep ALL original body parts and full-body composition fixed. No stool, props, text, green or guide lines in the result. Output the complete original relaxed standing person with only the scalp changed to the matching curls. Genuine transparent background. Never center, shift or enlarge the person/cap.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-14-silhouette-guide.png",
+          "sha256": "378cfc2e3adfd2be00ffa0e43bfa09ec5378bd9bb48ee4b9e1d5f42cb56f54b1"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-14-body.png",
+          "sha256": "ac1c01d2ac037473f5573a509c09ae8a559fa2c089b9a557ede38ee49fb963d7"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-236db285-2a4a-42a6-8536-f8cb35b3d19c.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-relax-14-composite-candidate-v1.png",
+      "verdict": "Reference only; never installed as replacement body.",
+      "sha256": "41ba6e8e8afa45cefa70a35a82fac8c6346cbf96bd687e5a5ecf370efec598f2"
+    },
+    {
+      "key": "hair_relax12_v1",
+      "prompt": "Extract ONLY the brown short curly hair cap from this EXACT1254x1254 full-body sprite. Preserve its exact current full-canvas coordinates, scale, silhouette and soft painted brown colours, roughly x510..815,y155..360. Delete the whole person except hair: no skin, face, ears, eyebrows, eyes, neck, arms, clothes, shoes, or faint body remnants. Short side curls only, no dangling ear loops or tendrils. Keep the complete cap opaque with transparent face opening below its existing fringe. Never center, shift, enlarge, shrink, crop or redesign the cap. All pixels outside the existing small cap must be genuinely fully transparent, especially everything below y420. No stool, props, shadow, text, green or guide marks. Output a small cap at the exact original full-body canvas location with otherwise completely empty transparent canvas.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-relax-12-composite-candidate-v1.png",
+          "sha256": "da76e0db437f8e28d69469c781314c6e1cfb25b15cd56fb68eeb8047cdac80f6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5c6affdc-cbaa-4554-bf36-1d9f65514583.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-12-candidate-v1.png",
+      "verdict": "Registered lab draft; fixed-region coverage1, original lower-body pixels unchanged. Temporal polish remains.",
+      "sha256": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1"
+    },
+    {
+      "key": "hair_relax13_v1",
+      "prompt": "Extract ONLY the brown short curly hair cap from this EXACT1254x1254 full-body sprite. Preserve its exact current full-canvas coordinates, scale, silhouette and soft painted brown colours, roughly x485..800,y145..365. Delete the whole person except hair: no skin, face, ears, eyebrows, eyes, neck, arms, clothes, shoes, or faint body remnants. Short side curls only, no dangling ear loops or tendrils. Keep the complete cap opaque with transparent face opening below its existing fringe. Never center, shift, enlarge, shrink, crop or redesign the cap. All pixels outside the existing small cap must be genuinely fully transparent, especially everything below y420. No stool, props, shadow, text, green or guide marks. Output a small cap at the exact original full-body canvas location with otherwise completely empty transparent canvas.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-relax-13-composite-candidate-v1.png",
+          "sha256": "1cd8b52ffbfa63e0da6ea74b6cf1401ef5ffdd5b6cab2e5c0ad97b3e03ba259c"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-121da45c-bf0c-44fc-adc1-8046af3a8c9b.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-13-candidate-v1.png",
+      "verdict": "Registered lab draft; fixed-region coverage1, original lower-body pixels unchanged. Temporal polish remains.",
+      "sha256": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327"
+    },
+    {
+      "key": "hair_relax14_v1",
+      "prompt": "Extract ONLY the brown short curly hair cap from this EXACT1254x1254 full-body sprite. Preserve its exact current full-canvas coordinates, scale, silhouette and soft painted brown colours, roughly x485..800,y145..365. Delete the whole person except hair: no skin, face, ears, eyebrows, eyes, neck, arms, clothes, shoes, or faint body remnants. Short side curls only, no dangling ear loops or tendrils. Keep the complete cap opaque with transparent face opening below its existing fringe. Never center, shift, enlarge, shrink, crop or redesign the cap. All pixels outside the existing small cap must be genuinely fully transparent, especially everything below y420. No stool, props, shadow, text, green or guide marks. Output a small cap at the exact original full-body canvas location with otherwise completely empty transparent canvas.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-relax-14-composite-candidate-v1.png",
+          "sha256": "41ba6e8e8afa45cefa70a35a82fac8c6346cbf96bd687e5a5ecf370efec598f2"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5cf1d835-b6c0-4e3a-9e5c-bc284de6a85e.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-14-candidate-v1.png",
+      "verdict": "Rejected: oversized cap, crosses face, fixed-region coverage0.952695.",
+      "sha256": "6da0c05a94a3e708059f878fb8d2fe4c7258e173710b67050d8ca3b97b4cc11e"
+    }
+  ],
+  "registration": "web/art/characters/prototype-v1/hair-relax-v1-registration.json",
+  "integration": "assets/art-direction/character-prototype-v1/hair-relax-v3-integration-report.json",
+  "geometry": "assets/art-direction/character-prototype-v1/hair-relax-silhouette-guide.json",
+  "reuse": {
+    "idle14": "Unchanged idle13 cap; independently passes original pose14 region and visual review.",
+    "idle15": "Unchanged idle12 cap; independently passes original pose15 region and visual review."
+  },
+  "limits": [
+    "32/48 hair drafts: all16base and16idle. Activities16 remain.",
+    "Raw atlas poses are checked separately from animation: relax samples12/13/14, not15.",
+    "Crossfade ghosting and curl/pose-volume differences remain. Bounds and source hashes do not prove final art approval.",
+    "No PNG pixel editing, fitting, translation, silhouette clipping or threshold relaxation; only generator-created raster revisions.",
+    "All other appearance options, full equipment/occlusion, portraits, native recipes, regular player integration, cache/performance and broader builder gates remain."
+  ]
+}
