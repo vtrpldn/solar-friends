@@ -59,8 +59,8 @@ export function sampleResidentClip(mode, seconds) {
   const window = Math.min(.45, clip.fps * .09);
   const blend = window ? ease(Math.max(0, ((position % 1) - (1 - window)) / window)) : 0;
   return [
-    { sheet: clip.sheet, row: clip.row, frame: clip.frames[index], weight: 1 - blend },
-    { sheet: clip.sheet, row: clip.row, frame: clip.frames[next], weight: blend },
+    { sheet: clip.sheet, row: clip.row, frame: clip.frames[index], sequenceIndex: index, weight: 1 - blend },
+    { sheet: clip.sheet, row: clip.row, frame: clip.frames[next], sequenceIndex: next, weight: blend },
   ].filter(frame => frame.weight > 0);
 }
 export function advanceResidentAnimation(previous, r, minutes, delta) {
@@ -89,7 +89,7 @@ export function presentedPoseLayers(layers,interpolation='crossfade') {
   const poses=new Map();
   for(const pose of layers){
     if(!Number.isFinite(pose.weight)||pose.weight<=0)continue;
-    const key=pose.sheet+':'+pose.row+':'+pose.frame,previous=poses.get(key);
+    const key=pose.sheet+':'+pose.row+':'+pose.frame+':'+(pose.sequenceIndex??''),previous=poses.get(key);
     if(previous)previous.weight+=pose.weight;
     else poses.set(key,{...pose});
   }
@@ -106,7 +106,7 @@ export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, wid
   buffer.globalCompositeOperation = 'lighter';
   for (const pose of presentedPoseLayers(animation.layers,sheets.interpolation??'crossfade')) {
     if (pose.weight <= 0) continue;
-    const frame = typeof sheets.frameForPose === 'function' ? sheets.frameForPose(pose.sheet,pose.row*4+pose.frame) : preparedFrames(sheets[pose.sheet], {referenceRow:pose.sheet === 'base' ? 2 : 0})?.[pose.row*4+pose.frame];
+    const frame = typeof sheets.frameForPose === 'function' ? sheets.frameForPose(pose.sheet,pose.row*4+pose.frame,pose) : preparedFrames(sheets[pose.sheet], {referenceRow:pose.sheet === 'base' ? 2 : 0})?.[pose.row*4+pose.frame];
     if (!frame) continue;
     buffer.globalAlpha = pose.weight;
     buffer.drawImage(frame, 0, 0, surface.width, surface.height);

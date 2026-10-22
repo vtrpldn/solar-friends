@@ -1,0 +1,382 @@
+{
+  "result": "PASS",
+  "scope": "Four draft equipment poses and real 3-second playback only; final grip/style/cadence approval separate",
+  "samples": [
+    0,
+    0.425,
+    0.47,
+    0.5,
+    0.925,
+    0.97,
+    1,
+    1.425,
+    1.47,
+    1.5,
+    1.925,
+    1.97,
+    2,
+    2.425,
+    2.47,
+    2.5,
+    2.925,
+    2.97,
+    3
+  ],
+  "uniqueKeyPoses": 6,
+  "recordedFramesPerMode": 76,
+  "recording": "Synchronous public-button start, forced final canvas frame, regular samples plus decoded endpoint",
+  "sources": [
+    {
+      "index": 12,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            -28,
+            -39
+          ]
+        }
+      ],
+      "registrationSha256": "deca014e3be3880ac18779db8ee324ad0979900db53aab408b6f93c6334b32e4"
+    },
+    {
+      "index": 13,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            15,
+            -15
+          ]
+        },
+        {
+          "id": "grain-1",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            -18,
+            -4
+          ]
+        },
+        {
+          "id": "grain-2",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            -2,
+            -1
+          ]
+        },
+        {
+          "id": "grain-3",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            -11,
+            10
+          ]
+        },
+        {
+          "id": "grain-4",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            5,
+            13
+          ]
+        }
+      ],
+      "registrationSha256": "3e141fc120bc04ab49e74668463ee82b133dbb2ea1cccaf1bf75b185c53d11d7"
+    },
+    {
+      "index": 14,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "grain-1",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            58,
+            -11
+          ]
+        },
+        {
+          "id": "grain-2",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            74,
+            -8
+          ]
+        },
+        {
+          "id": "grain-3",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            65,
+            3
+          ]
+        },
+        {
+          "id": "grain-4",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            81,
+            6
+          ]
+        }
+      ],
+      "registrationSha256": "3fb47e8cd4f74dbd7d303077b6fe66722286ddd531c78de935782430f38341df"
+    },
+    {
+      "index": 15,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            15,
+            0
+          ]
+        },
+        {
+          "id": "grain-1",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            82,
+            168
+          ]
+        },
+        {
+          "id": "grain-2",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            102,
+            193
+          ]
+        },
+        {
+          "id": "grain-3",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            117,
+            218
+          ]
+        },
+        {
+          "id": "grain-4",
+          "file": "feed-grains-hold-candidate-v2.png",
+          "source": {
+            "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            527,
+            15,
+            10
+          ],
+          "offset": [
+            132,
+            248
+          ]
+        }
+      ],
+      "registrationSha256": "47ee57e0d588915b8977563da3b36d8bbb3f3168cde02b8a1334d915e750bbe5"
+    }
+  ]
+}

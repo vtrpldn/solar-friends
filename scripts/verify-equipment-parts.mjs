@@ -5,8 +5,9 @@ import {serve} from './serve.mjs';
 import {validateEquipmentParts,loadEquipmentArt} from '../web/character-equipment-parts.js';
 const recipe=JSON.parse(await readFile('web/art/characters/prototype-v1/feed-equipment-pose-13-v3.json','utf8'));
 assert.equal(validateEquipmentParts(recipe).length,2);
+const fivePart=JSON.parse(await readFile('web/art/characters/prototype-v1/feed-equipment-pose-13-v5.json','utf8'));assert.equal(validateEquipmentParts(fivePart).length,5);
 for(const [name,change]of [
- ['version',r=>r.schema=1],['empty',r=>r.parts=[]],['too-many',r=>r.parts=Array(5).fill(r.parts[0])],
+ ['version',r=>r.schema=1],['empty',r=>r.parts=[]],['too-many',r=>r.parts=Array(6).fill(r.parts[0])],
  ['duplicate-id',r=>r.parts[1].id=r.parts[0].id],['external',r=>r.parts[1].file='https://example.com/art.png'],
  ['traversal',r=>r.parts[1].file='../art.png'],['hash',r=>r.parts[1].source.sha256='bad'],
  ['size',r=>r.parts[1].source.width--],['offset-shape',r=>r.parts[1].offset=[0]],
@@ -20,8 +21,8 @@ for(const invalid of [{...recipe,schema:3},{...recipe,schema:1},{...recipe,parts
 assert.equal(invalidRequests,0);
 const server=await serve();let browser;
 try{
- browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[],requests=[];
- page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().endsWith('/feeding-basket-pose-14-candidate-v2.png'))requests.push(r.url());});
+ browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[],requests=[],grainRequests=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().endsWith('/feeding-basket-pose-14-candidate-v2.png'))requests.push(r.url());if(r.url().endsWith('/feed-grains-hold-candidate-v2.png'))grainRequests.push(r.url());});
  await page.goto(`http://127.0.0.1:${server.address().port}/artwork/character-body-lab.html`);await page.waitForFunction(()=>document.body.dataset.bodyReviewReady==='true');
  const result=await page.evaluate(async()=>{
   const {registeredEquipmentFrame}=await import('/character-equipment.js'),review=window.feedingEquipmentReview,r=review.poses.get(13),args={body:window.bodyAttachmentReview.frames.activities[13],binding:window.bodyAttachmentReview.binding,appearanceBody:r.painted,appearanceFrame:r.hairFrame,equipment:r.equipment,registration:r.registration,sheet:'activities',index:13},refused=[];
@@ -32,9 +33,10 @@ try{
    ['image',a=>a.equipment.parts[1].image=new Image()],
    ['old-format-parts',a=>a.registration.schema=1],
   ]){const a={...args,registration:structuredClone(r.registration),equipment:{...r.equipment,parts:r.equipment.parts.map(p=>({...p}))}};mutate(a);try{await registeredEquipmentFrame(a);}catch{refused.push(label);}}
+  const grains=[...review.poses.values()].flatMap(p=>p.equipment.parts.slice(1));if(!grains.length||!grains.every(p=>p.image===grains[0].image))throw Error('Feeding kernels must reuse one decoded painted source');
   const poses=[...review.poses].map(([index,p])=>({index,basket:p.registration.parts[0],source:p.equipment.parts[0].image}));
   return {refused,identity:new Set(poses.map(p=>JSON.stringify([p.basket.file,p.basket.source,p.basket.rect]))).size,sharedDecodedImage:poses.every(p=>p.source===poses[0].source),offsets:poses.map(p=>p.basket.offset)};
  });
- assert.deepEqual(result.refused,['missing','file','hash','image','old-format-parts']);assert.equal(result.identity,1);assert(result.sharedDecodedImage);assert.deepEqual(result.offsets,[[-28,-39],[15,-15],[0,0],[15,0]]);assert.equal(requests.length,1);assert.deepEqual(errors,[]);
- console.log('PASS: 16 invalid part recipes, five mismatched-source refusals, one shared painted/decoded basket across four authored placements, and exactly one basket request.');
+ assert.deepEqual(result.refused,['missing','file','hash','image','old-format-parts']);assert.equal(result.identity,1);assert(result.sharedDecodedImage);assert.deepEqual(result.offsets,[[-28,-39],[15,-15],[0,0],[15,0]]);assert.equal(requests.length,1);assert.equal(grainRequests.length,1);assert.deepEqual(errors,[]);
+ console.log('PASS: 16 invalid part recipes, five mismatched-source refusals, five-part bound, one shared decoded basket and kernel source, and one request per shared source.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

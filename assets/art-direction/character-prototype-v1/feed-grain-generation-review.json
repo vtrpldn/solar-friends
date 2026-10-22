@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "scope": "Feeding grain refinement only; review drafts remain outside regular player choices",
+  "tool": "image_gen.imagegen",
+  "calls": [
+    {
+      "revision": 1,
+      "prompt": "Use case: precise-object-edit. Asset: Solar Friends feeding-animation grain overlay only. Image 1 is the EDIT TARGET (old equipment plate): remove its basket completely and remove its three oversized kernels. Image 2 is a GEOMETRY-ONLY guide showing the precise count, tiny physical size, and positions for FOUR new kernels on the unchanged body\u2019s exposed palm. Image 3 is the unchanged body for hand placement only; do not output or repaint the body. Image 4 is the original game feeding sprite, a painted style reference only. Return the same 1254\u00d71254 whole-body coordinate frame, blank TRUE TRANSPARENCY except exactly FOUR SMALL feed grains at guide centres approximately (970,528),(986,531),(977,541),(993,544). Each kernel is only 9 SOURCE PIXELS long and 5 pixels wide, like the guide, not 20\u201330px beans. Preserve huge transparent margins; do not crop, centre, enlarge or shift the little cluster. Paint a plain matte muted ochre/tan seed with one restrained upper-left highlight and a warm brown edge, matching the quiet painted original at game scale. Not gold coins, shiny nuggets, fruit, beans, a mound, or photoreal food. No basket, hand, skin, person, labels, outlines, scenery, guide background, glow, shadow or extra particles. Four separate tiny grains only, at the exact guide scale and locations, on transparent background.",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-77e804d1-ab5c-4e80-b8ed-f448af0be936.png",
+      "output": "web/art/characters/prototype-v1/feed-grains-hold-candidate-v1.png",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/feeding-basket-pose-13-candidate-v2.png",
+          "role": "Edit target; oversized kernels and basket to remove"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-grain-hold-guide-v1.png",
+          "role": "Geometry only"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-13-body.png",
+          "role": "Unchanged hand/pose scale"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/original-feeding-style-reference.png",
+          "role": "Original game painted style"
+        }
+      ],
+      "verdict": "Rejected: four components but 21\u201323 source pixels wide, too large and glossy"
+    },
+    {
+      "revision": 2,
+      "prompt": "Use case: precise-object-edit. Image 1 is the EXACT pixel-size/layout target, a 1254\u00d71254 image containing four very small flat seed shapes on a pale background. Make ONLY the pale background fully transparent and give those same four shapes a subtle hand-painted ochre treatment matching image 2's original game art. Do NOT enlarge, move or reshape the tiny guide silhouettes: each seed remains exactly about 9\u00d75 pixels on this 1254\u00d71254 canvas. These are millet-sized chicken feed, not shiny golden beans or coins. Four plain matte warm-tan grains with a subdued darker edge, barely a single lighter painted mark; avoid bright white sparkle or dark thick outline. All pixels outside the four existing tiny guide shapes must be true transparency. Preserve the full square and original positions (970,528),(986,531),(977,541),(993,544), despite the large empty area. No body, hand, basket, text, scenery, shadow, extra seeds or inset closeup. Do not crop or centre. Exact sparse layout and microscopic guide scale are essential.",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-166183ce-ce94-4731-8bdd-9aedf16dcd52.png",
+      "output": "web/art/characters/prototype-v1/feed-grains-hold-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-grain-hold-guide-v1.png",
+          "role": "Exact small silhouette/layout edit target"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/original-feeding-style-reference.png",
+          "role": "Original game painted style"
+        }
+      ],
+      "verdict": "Only the 11\u00d76-pixel kernel in [980,527,15,10] selected for composition; other kernels remain unused because they exceed the guide scale"
+    }
+  ],
+  "composition": {
+    "sourceRegion": [
+      980,
+      527,
+      15,
+      10
+    ],
+    "opaqueSizeAtAlpha64": [
+      11,
+      6
+    ],
+    "registrationRevision": 5,
+    "method": "One unchanged painted basket plus four copies of one unchanged small painted kernel. Integer atlas rectangles/translations only; full-frame normalization once. Original body/hair/materials/foreground pixels preserved. Internal equipment part bound grows from four to five.",
+    "poses": {
+      "13": "Four kernels rest on the exposed cupped palm",
+      "14": "The same four kernels follow the extended palm",
+      "15": "Four kernels fall below the lowered releasing hand"
+    },
+    "recovery": "Sequence positions 4 and 5 reuse their unchanged body poses with basket-only equipment; the emptied hand does not regain seeds before the next scoop."
+  },
+  "remaining": "Review final palm layering, style and loop cadence; finish other modular appearance choices, portraits/native recipes/player integration and all original builder gates.",
+  "checks": [
+    "Equipment source/request and five-part bounds passed",
+    "All 48 composed appearance poses and preview controls passed",
+    "Held/released center classification and recovery selection passed",
+    "Resident animation regression and distinct sequence phase checks passed",
+    "19 timeline samples, six distinct composed states, exact loop return and public playback controls passed"
+  ],
+  "visualReview": "Inspected corrected transition board: smaller seeds remain on palm before release, scatter below hand, then disappear through retraction. Whole-key-pose cadence still discrete; final production art approval remains open."
+}

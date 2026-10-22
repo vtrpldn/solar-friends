@@ -1,0 +1,54 @@
+{
+  "file": "web/art/characters/prototype-v1/feed-grains-hold-candidate-v2.png",
+  "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+  "alphaThreshold": 64,
+  "width": 1254,
+  "height": 1254,
+  "nontransparent": 782,
+  "components": [
+    {
+      "pixels": 101,
+      "bounds": [
+        963,
+        524,
+        978,
+        533
+      ],
+      "width": 15,
+      "height": 9
+    },
+    {
+      "pixels": 53,
+      "bounds": [
+        982,
+        529,
+        993,
+        535
+      ],
+      "width": 11,
+      "height": 6
+    },
+    {
+      "pixels": 89,
+      "bounds": [
+        971,
+        538,
+        984,
+        546
+      ],
+      "width": 13,
+      "height": 8
+    },
+    {
+      "pixels": 116,
+      "bounds": [
+        987,
+        540,
+        1003,
+        549
+      ],
+      "width": 16,
+      "height": 9
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "result": "PASS",
+  "scope": "One static draft pose only; visual approval and remaining activity poses separate",
+  "unchanged": 63740,
+  "foreground": 276,
+  "visibleTool": 622,
+  "visibleEquipment": 1429,
+  "garmentForeground": 0,
+  "garmentLocations": [],
+  "bounds": [
+    129,
+    119,
+    229,
+    159
+  ],
+  "gripDistances": {
+    "nearHand": 0,
+    "farHand": 16.401219466856723
+  },
+  "source": {
+    "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "width": 1254,
+    "height": 1254
+  },
+  "parts": [
+    {
+      "id": "basket",
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        590,
+        560,
+        320,
+        240
+      ],
+      "offset": [
+        15,
+        0
+      ]
+    },
+    {
+      "id": "grain-1",
+      "file": "feed-grains-hold-candidate-v2.png",
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "offset": [
+        82,
+        168
+      ]
+    },
+    {
+      "id": "grain-2",
+      "file": "feed-grains-hold-candidate-v2.png",
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "offset": [
+        102,
+        193
+      ]
+    },
+    {
+      "id": "grain-3",
+      "file": "feed-grains-hold-candidate-v2.png",
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "offset": [
+        117,
+        218
+      ]
+    },
+    {
+      "id": "grain-4",
+      "file": "feed-grains-hold-candidate-v2.png",
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "offset": [
+        132,
+        248
+      ]
+    }
+  ],
+  "registrationSha256": "47ee57e0d588915b8977563da3b36d8bbb3f3168cde02b8a1334d915e750bbe5",
+  "refused": [
+    "hash",
+    "pose",
+    "source-size",
+    "body-binding",
+    "changed-body-alpha",
+    "changed-body-pixels",
+    "overlapping-appearance",
+    "unsupported-animation-pose"
+  ]
+}

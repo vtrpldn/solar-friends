@@ -3,7 +3,7 @@
 const exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join(',')===[...keys].sort().join(',');
 const filename=value=>typeof value==='string'&&/^[a-z0-9-]+\.png$/.test(value);
 export function validateEquipmentParts(registration){
- if(registration?.schema!==2||!Array.isArray(registration.parts)||registration.parts.length<1||registration.parts.length>4)throw Error('Choose a bounded equipment part recipe.');
+ if(registration?.schema!==2||!Array.isArray(registration.parts)||registration.parts.length<1||registration.parts.length>5)throw Error('Choose a bounded equipment part recipe.');
  const ids=new Set(),size=registration.source?.width;
  for(const part of registration.parts){
   if(!exact(part,['id','file','source','rect','offset'])||!filename(part.file)||typeof part.id!=='string'||!/^[a-z][a-z0-9-]{0,31}$/.test(part.id)||ids.has(part.id)||!exact(part.source,['sha256','width','height'])||!/^[a-f0-9]{64}$/.test(part.source.sha256)||part.source.width!==size||part.source.height!==size||!Number.isInteger(size)||size<256||size>2048||!Array.isArray(part.rect)||part.rect.length!==4||!Array.isArray(part.offset)||part.offset.length!==2||[...part.rect,...part.offset].some(n=>!Number.isSafeInteger(n)))throw Error('This equipment part recipe is not registered.');

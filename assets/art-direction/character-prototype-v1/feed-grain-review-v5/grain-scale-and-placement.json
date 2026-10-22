@@ -1,0 +1,159 @@
+{
+  "result": "PASS",
+  "scope": "Exact registered source size/count and body-contact classification; style and playback require separate visual review",
+  "poses": [
+    {
+      "index": 13,
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "opaqueBounds": [
+        982,
+        529,
+        993,
+        535
+      ],
+      "opaquePixels": 53,
+      "checks": [
+        {
+          "center": [
+            969.5,
+            528
+          ],
+          "bodyAlpha": 252
+        },
+        {
+          "center": [
+            985.5,
+            531
+          ],
+          "bodyAlpha": 252
+        },
+        {
+          "center": [
+            976.5,
+            542
+          ],
+          "bodyAlpha": 253
+        },
+        {
+          "center": [
+            992.5,
+            545
+          ],
+          "bodyAlpha": 253
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "opaqueBounds": [
+        982,
+        529,
+        993,
+        535
+      ],
+      "opaquePixels": 53,
+      "checks": [
+        {
+          "center": [
+            1045.5,
+            521
+          ],
+          "bodyAlpha": 252
+        },
+        {
+          "center": [
+            1061.5,
+            524
+          ],
+          "bodyAlpha": 251
+        },
+        {
+          "center": [
+            1052.5,
+            535
+          ],
+          "bodyAlpha": 252
+        },
+        {
+          "center": [
+            1068.5,
+            538
+          ],
+          "bodyAlpha": 252
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "source": {
+        "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        980,
+        527,
+        15,
+        10
+      ],
+      "opaqueBounds": [
+        982,
+        529,
+        993,
+        535
+      ],
+      "opaquePixels": 53,
+      "checks": [
+        {
+          "center": [
+            1069.5,
+            700
+          ],
+          "bodyAlpha": 0
+        },
+        {
+          "center": [
+            1089.5,
+            725
+          ],
+          "bodyAlpha": 0
+        },
+        {
+          "center": [
+            1104.5,
+            750
+          ],
+          "bodyAlpha": 0
+        },
+        {
+          "center": [
+            1119.5,
+            780
+          ],
+          "bodyAlpha": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import init, { Game } from '../web/pkg/solar_friends.js';
-import { residentClips, residentActivity, sampleResidentClip, advanceResidentAnimation } from '../web/resident-animation.js';
+import { residentClips, residentActivity, sampleResidentClip, advanceResidentAnimation, presentedPoseLayers } from '../web/resident-animation.js';
 const resident = {id:0,x:10,y:10,target_x:10,target_y:10,task:'idle'};
 assert.deepEqual(new Set(Array.from({length:8},(_,i) => residentActivity(resident,i*24))), new Set(['look','stretch','wave','relax']));
 for (const task of ['idle','socialize','gathering']) {
@@ -81,3 +81,10 @@ console.log(`PASS: standing idles, task boundaries, ${transitions} clip transiti
 
 assert.equal(residentActivity({id:0,task:'garden',worksiteKind:'goat_pasture',x:1,y:1,target_x:1,target_y:1},600),'feed');
 assert.equal(residentActivity({id:0,task:'garden',worksiteKind:'apiary',x:1,y:1,target_x:1,target_y:1},600),'tend');
+
+// Repeated body poses retain their distinct equipment phase on the return path.
+assert.equal(sampleResidentClip('feed',.5)[0].frame,sampleResidentClip('feed',2.5)[0].frame);
+assert.equal(sampleResidentClip('feed',.5)[0].sequenceIndex,1);
+assert.equal(sampleResidentClip('feed',2.5)[0].sequenceIndex,5);
+const forward={...sampleResidentClip('feed',.5)[0],weight:.3},returning={...sampleResidentClip('feed',2.5)[0],weight:.4};
+assert.equal(presentedPoseLayers([forward,returning,{sheet:'base',row:0,frame:0,weight:.6}],'keyframes')[0].sheet,'base');
