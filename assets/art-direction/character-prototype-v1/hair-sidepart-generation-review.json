@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "status": "Review drafts only; incomplete hairstyle excluded from player choices",
+  "generations": [
+    {
+      "pose": {
+        "sheet": "base",
+        "index": 8
+      },
+      "prompt": "Use case: precise-object-edit.\nAsset type: Solar Friends modular resident hairstyle, single registered standing pose.\nInput roles: image 1 is the unchanged bald body and exact pose/canvas registration target; image 2 is the existing short-curls layer, a coordinate/coverage reference only, not the requested hairstyle; image 3 is the original Bento sprite, the painted game-style reference; image 4 is a head-area guide only, never finished artwork.\nCreate ONLY a new short straight side-part hairstyle for the head of image 1. Warm dark chestnut brown, a low compact crown, one broad gently swept forelock and two or three large painted direction groups, close sides. Clearly straight/swept hair, not curls, not a tall quiff, no bun. Match the original game's warm illustrated brush shading and upper-left daylight; restrained highlights, readable at 48px character scale. Preserve the exact three-quarter right-facing scalp, forehead/hairline and near-ear opening. Cover the bald scalp completely above the hairline without crossing eyebrows or eyes.\nReturn a 1254 by 1254 transparent PNG in the SAME full-body coordinate space as image 1. All body, face, ears, neck, clothing and boots must be fully transparent. Only the small hair cap near the top of this otherwise empty canvas is painted. Keep its location around x530–790 and y100–285, within x490 y39 width333 height294. Do not enlarge or center the hair as a standalone wig. No skin-coloured backing, head, face fragments, eyebrows, guide rectangle, ground, shadow, text, border or background. Preserve true alpha and ample margins. Do not repaint or include the body.",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-single-body.png",
+          "role": "Unchanged body and exact registration target",
+          "sha256": "d783ae7f722e680766ba53bc6e5e05a3c32944aadd7c07c63fb23f2bc88b99b9"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "role": "Coordinate/coverage only",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-single-style.png",
+          "role": "Original painted style",
+          "sha256": "158968ff05e57e1709b17a427f77a1d39074a7a33cf040f76430127a34bdeb2d"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-single-guide.png",
+          "role": "Head-region geometry only",
+          "sha256": "57ddeaf406bce21b36d87c77a735816a119327f5a6b9d983aed96d318186e379"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1c9307f4-6067-4681-80f3-a98a3148cecb.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+      "verdict": "Retained breathing-pose draft only; not a complete playable hairstyle",
+      "candidateSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+      "registrationReport": "assets/art-direction/character-prototype-v1/hair-sidepart-base-8-candidate-v1-report.json"
+    },
+    {
+      "pose": {
+        "sheet": "base",
+        "index": 9
+      },
+      "prompt": "Use case: precise-object-edit.\nAsset type: Solar Friends modular short side-part hair, breathing pose 9.\nInput roles: image 1 is the unchanged bald resident body and exact registration target for THIS pose; image 2 is the new side-part HAIRSTYLE IDENTITY reference from standing pose 8; image 3 is the original game's painted style reference.\nPaint ONLY the same low compact chestnut-brown side-part hair from image 2, newly registered to the scalp in image 1. Match the exact broad swept forelock, low crown, close sides, part direction, warm colour and restrained upper-left painted highlights of image 2; no curls, quiff, bun or new hairstyle. Follow THIS pose's head tilt and ear location, covering the whole bald scalp above the natural hairline while leaving eyebrows, eyes, face and ear opening transparent. Do not change the hair volume between breathing frames.\nReturn a 1254x1254 true-transparent PNG in the exact same full-body coordinates as image 1. A small hair cap near the top, around the unchanged head; the rest of the full-body canvas is empty alpha. Do NOT center or enlarge the wig. Do not output the body, skin-coloured backing, face, eyebrows, ear, clothing, boots, ground, shadow, labels, guide or background. Warm broad illustrated brush groups matching the game; no glossy plastic or individual strand noise. No scaling/warping of the source body or reference cap; author the painted hair for the target pose.",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-base-9-body.png",
+          "role": "Unchanged body and exact registration target",
+          "sha256": "0f18c5566beba64fa1d1ef3cf1b700c4b98c3d1b3629e3ca00366ad7330ac99e"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Same hairstyle identity, paint and volume",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-single-style.png",
+          "role": "Original game painted style",
+          "sha256": "158968ff05e57e1709b17a427f77a1d39074a7a33cf040f76430127a34bdeb2d"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-6edaace1-9200-47b8-bcf5-38e4ba6ac238.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-base-9-candidate-v1.png",
+      "verdict": "Retained breathing-pose draft only; not a complete playable hairstyle",
+      "candidateSha256": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c",
+      "registrationReport": "assets/art-direction/character-prototype-v1/hair-sidepart-base-9-candidate-v1-report.json"
+    },
+    {
+      "pose": {
+        "sheet": "base",
+        "index": 10
+      },
+      "prompt": "Use case: precise-object-edit.\nAsset type: Solar Friends modular short side-part hair, breathing pose 10.\nInput roles: image 1 is the unchanged bald resident body and exact registration target for THIS pose; image 2 is the new side-part HAIRSTYLE IDENTITY reference from standing pose 8; image 3 is the original game's painted style reference.\nPaint ONLY the same low compact chestnut-brown side-part hair from image 2, newly registered to the scalp in image 1. Match the exact broad swept forelock, low crown, close sides, part direction, warm colour and restrained upper-left painted highlights of image 2; no curls, quiff, bun or new hairstyle. Follow THIS pose's head tilt and ear location, covering the whole bald scalp above the natural hairline while leaving eyebrows, eyes, face and ear opening transparent. Do not change the hair volume between breathing frames.\nReturn a 1254x1254 true-transparent PNG in the exact same full-body coordinates as image 1. A small hair cap near the top, around the unchanged head; the rest of the full-body canvas is empty alpha. Do NOT center or enlarge the wig. Do not output the body, skin-coloured backing, face, eyebrows, ear, clothing, boots, ground, shadow, labels, guide or background. Warm broad illustrated brush groups matching the game; no glossy plastic or individual strand noise. No scaling/warping of the source body or reference cap; author the painted hair for the target pose.",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-base-10-body.png",
+          "role": "Unchanged body and exact registration target",
+          "sha256": "8e79152fe7a1128695710558cbd11c4994300d0aea65f57f0ca7b4599d4196ed"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Same hairstyle identity, paint and volume",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-single-style.png",
+          "role": "Original game painted style",
+          "sha256": "158968ff05e57e1709b17a427f77a1d39074a7a33cf040f76430127a34bdeb2d"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0ec9d519-47fd-4d10-a45e-a549efda0ea1.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-base-10-candidate-v1.png",
+      "verdict": "Retained breathing-pose draft only; not a complete playable hairstyle",
+      "candidateSha256": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8",
+      "registrationReport": "assets/art-direction/character-prototype-v1/hair-sidepart-base-10-candidate-v1-report.json"
+    },
+    {
+      "pose": {
+        "sheet": "base",
+        "index": 11
+      },
+      "prompt": "Use case: precise-object-edit.\nAsset type: Solar Friends modular short side-part hair, breathing pose 11.\nInput roles: image 1 is the unchanged bald resident body and exact registration target for THIS pose; image 2 is the new side-part HAIRSTYLE IDENTITY reference from standing pose 8; image 3 is the original game's painted style reference.\nPaint ONLY the same low compact chestnut-brown side-part hair from image 2, newly registered to the scalp in image 1. Match the exact broad swept forelock, low crown, close sides, part direction, warm colour and restrained upper-left painted highlights of image 2; no curls, quiff, bun or new hairstyle. Follow THIS pose's head tilt and ear location, covering the whole bald scalp above the natural hairline while leaving eyebrows, eyes, face and ear opening transparent. Do not change the hair volume between breathing frames.\nReturn a 1254x1254 true-transparent PNG in the exact same full-body coordinates as image 1. A small hair cap near the top, around the unchanged head; the rest of the full-body canvas is empty alpha. Do NOT center or enlarge the wig. Do not output the body, skin-coloured backing, face, eyebrows, ear, clothing, boots, ground, shadow, labels, guide or background. Warm broad illustrated brush groups matching the game; no glossy plastic or individual strand noise. No scaling/warping of the source body or reference cap; author the painted hair for the target pose.",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-base-11-body.png",
+          "role": "Unchanged body and exact registration target",
+          "sha256": "e572f4d36c1c86ac61c10fd33094b2029003847855261593d5095459a057fa1d"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Same hairstyle identity, paint and volume",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-single-style.png",
+          "role": "Original game painted style",
+          "sha256": "158968ff05e57e1709b17a427f77a1d39074a7a33cf040f76430127a34bdeb2d"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2c997c15-5f7c-4e88-ae7e-b751dae61bd6.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-base-11-candidate-v1.png",
+      "verdict": "Retained breathing-pose draft only; not a complete playable hairstyle",
+      "candidateSha256": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00",
+      "registrationReport": "assets/art-direction/character-prototype-v1/hair-sidepart-base-11-candidate-v1-report.json"
+    }
+  ],
+  "visualFindings": "The swept silhouette is distinct from curls and retains warm broad painted shading. All four static whole-frame compositions keep forehead/eyes clear and cover the scalp without a separate skin backing. Pose 9 has a slightly fuller rear sweep and lower tail; final temporal volume consistency remains open. Three palette boards and both-facing day/night timeline samples were inspected. No per-part fitting, stretching, image rewriting or body repainting was used.",
+  "remaining": "Paint and review the other 44 poses, including hand/head occlusion and activity equipment, before including this hairstyle in complete prototype or player recipes. Final production style/cadence, other appearance categories, native/player integration and original builder gates remain open."
+}

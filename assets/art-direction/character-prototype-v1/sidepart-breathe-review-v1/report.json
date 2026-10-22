@@ -1,0 +1,113 @@
+{
+  "result": "PASS",
+  "scope": "Four partial breathing poses only; no complete hairstyle or production art approval",
+  "sourceHashes": {
+    "web/artwork/character-sidepart-review.js": "db62fc6415859ad9feb748782ff3b73d909cf93b6d64aede648f1376ead6c90a",
+    "web/artwork/character-body-lab.js": "ff12f969a2fb1d8c6a885b74dbd6843edcfeaab920491d309b3039fde5c8dff9",
+    "web/artwork/character-composed-review.js": "dad9699a7d6c6761a96487de3f9bcf25d2bc4e9820a6b9c1e6bbdc3517337b48",
+    "web/artwork/character-single-hair.js": "21f3a620de95d093bfb0bd47bc19ffbc70f713e7432ee518a47decddb67627e1",
+    "web/character-materials.js": "6e83be90869cf7e03b322d26e0ddfdbbfdcaf60e4b8ed3c61f8447d783fb0315",
+    "web/resident-animation.js": "3952db6bf3a6ac825907f69f6e1c50ffa44c2ae95db83573250c8ae2cfe1584e",
+    "web/pkg/solar_friends_bg.wasm": "afd6e6f5c5b7478bec1c24bffa8471a0b8eb4043c6830128abe42053cba97c14",
+    "scripts/verify-sidepart-appearance.mjs": "76511af55de5b6a4ae53e8b33b50a42e82ff60b020d63a658d7068e1597d7bdc",
+    "web/art/characters/prototype-v1/hair-sidepart-breathe-v1-registration.json": "5460a8b078a15444b47058e1d5b400f77e5ac046b42159cdad5c3f8a5a480420"
+  },
+  "portraits": 4,
+  "playback": "Public play/pause, palette interruption and five-second recording with 21 decoded samples",
+  "sources": [
+    {
+      "index": 8,
+      "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+      "registration": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 8,
+        "size": 1254,
+        "bounds": [
+          489.84375,
+          39.1875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      }
+    },
+    {
+      "index": 9,
+      "sha256": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c",
+      "registration": {
+        "file": "hair-sidepart-base-9-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 9,
+        "size": 1254,
+        "bounds": [
+          484.9453125,
+          53.8828125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c"
+      }
+    },
+    {
+      "index": 10,
+      "sha256": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8",
+      "registration": {
+        "file": "hair-sidepart-base-10-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 10,
+        "size": 1254,
+        "bounds": [
+          480.046875,
+          44.0859375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8"
+      }
+    },
+    {
+      "index": 11,
+      "sha256": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00",
+      "registration": {
+        "file": "hair-sidepart-base-11-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 11,
+        "size": 1254,
+        "bounds": [
+          484.9453125,
+          39.1875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00"
+      }
+    }
+  ],
+  "checked": 12,
+  "deniedPoses": 44,
+  "cache": {
+    "entries": 6,
+    "active": 0,
+    "queued": 0,
+    "pending": 0,
+    "maxEntries": 6,
+    "maxConcurrent": 2,
+    "maxQueued": 24,
+    "frames": 24,
+    "maximumFrames": 24,
+    "rgbaBytes": 6291456
+  },
+  "times": [
+    0,
+    1.2,
+    1.25,
+    2.5,
+    3.75,
+    5
+  ]
+}
