@@ -56,6 +56,25 @@ fn waiting(v: &Village, id: usize) -> String {
     "Supplied work did not finish within this window. Review outside shifts, helping requests and competing projects.".into()
 }
 
+fn power_sample(v: &Village) -> serde_json::Value {
+    if !sandbox::utilities(v) {
+        return serde_json::Value::Null;
+    }
+    let supply = power::supply(v);
+    let reduced_lighting = supply
+        .connections
+        .iter()
+        .filter(|c| {
+            c.enabled
+                && matches!(c.source, "grid" | "roof")
+                && supply.darkness > 0.
+                && c.light_level < 0.999
+        })
+        .count();
+    serde_json::json!({"supply":supply,"reduced_lighting":reduced_lighting,
+        "account":v.power.network.account})
+}
+
 fn needs_sample(game: &mut Game) -> serde_json::Value {
     let people: Vec<_> = game
         .app
@@ -68,6 +87,7 @@ fn needs_sample(game: &mut Game) -> serde_json::Value {
     serde_json::json!({"minute":v.minutes,
         "summary":scenarios::setup::summarize(v),
         "access":scenarios::setup::access(v,&people),
+        "power":power_sample(v),
         "hungry":people.iter().filter(|p|p.hunger>=70.).count(),
         "low_energy":people.iter().filter(|p|p.energy<=25.).count()})
 }
@@ -351,5 +371,36 @@ mod tests {
         assert!(spell["minutes"].as_f64().unwrap() > 0.);
         assert_eq!(result["monitoring"]["observations"], 1921);
         assert_eq!(result["monitoring"]["maximum_step_minutes"], 0.75);
+    }
+    #[test]
+    fn power_readings_distinguish_dark_disconnected_loads_and_automatic_rules() {
+        let mut v = Village {
+            mode: modes::Mode::Sandbox,
+            minutes: 0.,
+            ..Default::default()
+        };
+        v.sandbox_rules.utilities = true;
+        v.buildings.push(Building {
+            id: 15,
+            kind: "streetlight".into(),
+            x: 20,
+            y: 20,
+            progress: 100.,
+            contributors: Default::default(),
+            next_visit: 0.,
+            visits: 0,
+            crop: Default::default(),
+            poultry: Default::default(),
+            agriculture: Default::default(),
+        });
+        power::sync(&mut v);
+        assert_eq!(power_sample(&v)["reduced_lighting"], 1);
+        v.minutes = 720.;
+        assert_eq!(power_sample(&v)["reduced_lighting"], 0);
+        v.minutes = 0.;
+        v.power.disabled.push(15);
+        assert_eq!(power_sample(&v)["reduced_lighting"], 0);
+        v.sandbox_rules.utilities = false;
+        assert!(power_sample(&v).is_null());
     }
 }

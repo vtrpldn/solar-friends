@@ -30,3 +30,10 @@ console.log('PASS: native project outcomes, escaped labels/blockers, completion 
 const {projectPlaces:bindPlaces}=await import('../web/editor/outlook-projects.js');
 assert.deepEqual(bindPlaces(JSON.stringify({village:{scenario:{buildings:{b:42,a:900,missing:5}}}}),[{id:'a',kind:'home',x:20,y:21},{id:'b',kind:'home',x:25,y:26}],()=> 'Home'),[{runtime:42,id:'b',name:'Home',x:25,y:26},{runtime:900,id:'a',name:'Home',x:20,y:21}]);
 console.log('PASS: checkpoint-authored bindings distinguish repeated building kinds independently of array order.');
+const {powerMarkup}=await import('../web/editor/outlook-power.js');
+const reading=(stored,reduced,generated,consumed,curtailed)=>({power:{supply:{stored,capacity:36,generation:4,demand:.6},reduced_lighting:reduced,account:{generated,consumed,curtailed}}});
+const energy=powerMarkup([reading(10,0,100,80,5),reading(0,2,105,83,6),reading(4,1,110,87,8)],{number:String});
+assert.match(energy,/<td>10<\/td><td>0<\/td><td>4<\/td>/);assert.match(energy,/in 2 of 3 checks; up to 2 buildings/);assert.match(energy,/generated 10, consumed 7 and discarded 3/);assert.match(energy,/excludes private roof batteries/);assert.match(energy,/excludes attended tool demand/);assert.match(powerMarkup([{power:null}],{number:String}),/Automatic energy rules/);
+console.log('PASS: finite power minima, native reduced-light counts, replay-only account deltas, private-roof/tool caveats and automatic-energy presentation.');
+
+assert.doesNotMatch(powerMarkup([reading(-0,0,0,0,0)],{number:n=>Object.is(n,-0)?'-0':String(n)}),/-0/);
