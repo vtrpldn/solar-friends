@@ -1,4 +1,4 @@
-import {installEquipmentReview,installCookingEquipmentReview} from './character-equipment-review.js';
+import {installEquipmentReview,installCookingEquipmentReview,installTendingEquipmentReview} from './character-equipment-review.js';
 import {installComposedAppearanceReview} from './character-composed-review.js';
 import {loadCharacterImageSource} from '../character-image-source.js';
 import {installAttachmentEditor} from './character-attachment-editor.js';
@@ -73,5 +73,6 @@ try{
  window.composedAppearanceReview=await installComposedAppearanceReview({reviews:Object.fromEntries(['breathe','walk','work','sit','look','stretch','wave','relax','cook','water','tend','feed'].map(clip=>[clip,window[clip+'HairReview']])),materials:materialModel,scene,before:$('body-attachment-open')});
  window.equipmentPoseReview=await installEquipmentReview({frames:frameBank,binding:window.bodyAttachmentReview.binding,materials:materialModel,appearance:window.composedAppearanceReview.model,scene,before:$('body-attachment-open')});
  window.cookingEquipmentReview=await installCookingEquipmentReview({frames:frameBank,binding:window.bodyAttachmentReview.binding,materials:materialModel,appearance:window.composedAppearanceReview.model,scene,before:$('body-attachment-open')});
+ window.tendingEquipmentReview=await installTendingEquipmentReview({frames:frameBank,binding:window.bodyAttachmentReview.binding,materials:materialModel,appearance:window.composedAppearanceReview.model,scene,before:$('body-attachment-open')});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

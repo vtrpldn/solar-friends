@@ -1,0 +1,209 @@
+{
+  "scope": "Four tending equipment drafts; not final character creator or activity approval",
+  "calls": [
+    {
+      "pose": 8,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends resident TENDING equipment layer. Image 1 is a GEOMETRY GUIDE ONLY: gold marks the exact wooden handle, pale blue marks the metal trowel blade, red cross marks the working-hand grip. Image 2 is the unchanged full resident pose for scale, NOT output content. Image 3 is the original Bento animation atlas, STYLE reference only: its third row uses a small plain hand trowel. Paint ONLY one matching hand trowel in the precise full-frame location and angle of image 1. Preserve the 1254x1254 square coordinate frame with all its blank space; do not crop, auto-center, enlarge or move the object. The handle must pass through the red target; the blade projects to its right. Same simple warm brown wood and softly painted dull grey steel as the original, broad warm upper-left highlights and dark readable edges, not shiny chrome or photoreal detail. Thin ordinary short hand tool, not a shovel or dagger. Preserve the guide's small size, silhouette and direction. Output true transparency everywhere except the finished tool, no red marks, no blue outlines, no person/skin/hands/arms/clothing/boots/ground/shadow/dirt/labels. The original hand will be composited above this tool separately. Keep the whole tool clear of the image border and keep the transparent margins exactly as in the geometry reference.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0489acf4-d413-47f2-922e-c0cf33c6493b.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-8.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-8-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original tending tool style, third row"
+        }
+      ],
+      "status": "Reference only: blade crossed the boot; superseded by steeper repaint",
+      "sha256": "9c53c5eb833e47317c773d4fb945455aa295f771dcae0f80dc5810644faa5661"
+    },
+    {
+      "pose": 8,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends tending equipment, first kneeling pose correction. Image 1 is the NEW GEOMETRY GUIDE ONLY: same small trowel dimensions and grip, steeper downward angle, gold handle/blue blade, red hand cross. Image 2 is the exact unchanged resident body placement, not output content. Image 3 is the previous painted trowel, STYLE AND PHYSICAL SIZE reference only. Repaint ONLY that same short wooden-handled, dull grey steel hand trowel at the precise location and 42-degree down-right direction of image 1. Its tip reaches around (894,1209), below the boot sole instead of resting horizontally across the boot. The wooden grip crosses (715,1048). Do NOT enlarge/lengthen the tool, move the hand, shift the body, or recenter the canvas. Preserve the exact 1254x1254 whole-body coordinate square and all blank margins. Match the original warm illustrated game shading, modest upper-left highlights, simple grey metal and brown wood, no chrome/photo texture. Output equipment only on true transparency: no red/blue guide marks, person, hand, arm, clothing, boot, earth, shadow or labels. The unchanged original hand is restored above this layer later. Keep transparent margin below the entire blade; no clipping.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-fef613eb-de9b-4752-bd5b-b5764aecac1a.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-8-v2.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-8-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v1.png",
+          "role": "Previous tool style and size; revise angle only"
+        }
+      ],
+      "status": "Review draft only; not approved for regular player choices",
+      "sha256": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2"
+    },
+    {
+      "pose": 9,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends resident TENDING equipment layer. Image 1 is a GEOMETRY GUIDE ONLY: gold marks the exact wooden handle, pale blue marks the metal trowel blade, red cross marks the working-hand grip. Image 2 is the unchanged full resident pose for scale, NOT output content. Image 3 is the original Bento animation atlas, STYLE reference only: its third row uses a small plain hand trowel. Paint ONLY one matching hand trowel in the precise full-frame location and angle of image 1. Preserve the 1254x1254 square coordinate frame with all its blank space; do not crop, auto-center, enlarge or move the object. The handle must pass through the red target; the blade projects to its right. Same simple warm brown wood and softly painted dull grey steel as the original, broad warm upper-left highlights and dark readable edges, not shiny chrome or photoreal detail. Thin ordinary short hand tool, not a shovel or dagger. Preserve the guide's small size, silhouette and direction. Output true transparency everywhere except the finished tool, no red marks, no blue outlines, no person/skin/hands/arms/clothing/boots/ground/shadow/dirt/labels. The original hand will be composited above this tool separately. Keep the whole tool clear of the image border and keep the transparent margins exactly as in the geometry reference.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0788cd8b-18fc-42b1-a9e9-b1d2f7e1f0a3.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-9.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-9-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original tending tool style, third row"
+        }
+      ],
+      "status": "Reference only: blade crossed the boot; superseded by steeper repaint",
+      "sha256": "9b340af676ebc2045b36baa237837e44e0c111f45d400e7a842f058ce0abca31"
+    },
+    {
+      "pose": 9,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends tending equipment pose 9, ground-clearance correction. Image 1 is the NEW GEOMETRY GUIDE ONLY: gold handle, blue trowel blade, red grip cross. Image 2 is the exact unchanged kneeling body, not output content. Image 3 is this pose's previous painted hand trowel, STYLE AND PHYSICAL SIZE reference only. Repaint ONLY the same small wooden-handled dull grey steel trowel at the precise full-frame position and 30-degree downward-right direction of image 1. The steeper blade points toward the ground below the shoe instead of lying horizontally over the boot. Keep the guide's grip location and short tool dimensions; do NOT enlarge/lengthen the tool, move the hand/body or recenter the canvas. Preserve the exact 1254x1254 whole-body coordinate square and blank margins. Same warm painted game shading, modest upper-left highlights, grey steel and brown wood, no chrome/photo texture. Output equipment only on true transparency: no guide marks, blue tint, person/hand/arm/clothing/boot/ground/shadow or text. Original hand pixels will be restored separately above the tool. No cropping or border clipping.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-3e080b61-75ea-418c-b6ce-4d2b688ad350.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-9-v2.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-9-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v1.png",
+          "role": "Previous tool style and size; revise angle only"
+        }
+      ],
+      "status": "Review draft only; not approved for regular player choices",
+      "sha256": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c"
+    },
+    {
+      "pose": 10,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends resident TENDING equipment layer. Image 1 is a GEOMETRY GUIDE ONLY: gold marks the exact wooden handle, pale blue marks the metal trowel blade, red cross marks the working-hand grip. Image 2 is the unchanged full resident pose for scale, NOT output content. Image 3 is the original Bento animation atlas, STYLE reference only: its third row uses a small plain hand trowel. Paint ONLY one matching hand trowel in the precise full-frame location and angle of image 1. Preserve the 1254x1254 square coordinate frame with all its blank space; do not crop, auto-center, enlarge or move the object. The handle must pass through the red target; the blade projects to its right. Same simple warm brown wood and softly painted dull grey steel as the original, broad warm upper-left highlights and dark readable edges, not shiny chrome or photoreal detail. Thin ordinary short hand tool, not a shovel or dagger. Preserve the guide's small size, silhouette and direction. Output true transparency everywhere except the finished tool, no red marks, no blue outlines, no person/skin/hands/arms/clothing/boots/ground/shadow/dirt/labels. The original hand will be composited above this tool separately. Keep the whole tool clear of the image border and keep the transparent margins exactly as in the geometry reference.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c0797e54-2453-4fd9-b382-c656bb37669b.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-10.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-10-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original tending tool style, third row"
+        }
+      ],
+      "status": "Reference only: blade crossed the boot; superseded by steeper repaint",
+      "sha256": "87482f6dc666b75b926d459420029249a1edbdf2b371af98698c132d74303aa7"
+    },
+    {
+      "pose": 10,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends tending equipment pose 10, ground-clearance correction. Image 1 is the NEW GEOMETRY GUIDE ONLY: gold handle, blue trowel blade, red grip cross. Image 2 is the exact unchanged kneeling body, not output content. Image 3 is this pose's previous painted hand trowel, STYLE AND PHYSICAL SIZE reference only. Repaint ONLY the same small wooden-handled dull grey steel trowel at the precise full-frame position and 25-degree downward-right direction of image 1. The steeper blade points toward the ground below the shoe instead of lying horizontally over the boot. Keep the guide's grip location and short tool dimensions; do NOT enlarge/lengthen the tool, move the hand/body or recenter the canvas. Preserve the exact 1254x1254 whole-body coordinate square and blank margins. Same warm painted game shading, modest upper-left highlights, grey steel and brown wood, no chrome/photo texture. Output equipment only on true transparency: no guide marks, blue tint, person/hand/arm/clothing/boot/ground/shadow or text. Original hand pixels will be restored separately above the tool. No cropping or border clipping.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-bed119c5-4e5f-476c-a0ef-ae2fc54297eb.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-10-v2.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-10-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v1.png",
+          "role": "Previous tool style and size; revise angle only"
+        }
+      ],
+      "status": "Review draft only; not approved for regular player choices",
+      "sha256": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5"
+    },
+    {
+      "pose": 11,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends resident TENDING equipment layer. Image 1 is a GEOMETRY GUIDE ONLY: gold marks the exact wooden handle, pale blue marks the metal trowel blade, red cross marks the working-hand grip. Image 2 is the unchanged full resident pose for scale, NOT output content. Image 3 is the original Bento animation atlas, STYLE reference only: its third row uses a small plain hand trowel. Paint ONLY one matching hand trowel in the precise full-frame location and angle of image 1. Preserve the 1254x1254 square coordinate frame with all its blank space; do not crop, auto-center, enlarge or move the object. The handle must pass through the red target; the blade projects to its right. Same simple warm brown wood and softly painted dull grey steel as the original, broad warm upper-left highlights and dark readable edges, not shiny chrome or photoreal detail. Thin ordinary short hand tool, not a shovel or dagger. Preserve the guide's small size, silhouette and direction. Output true transparency everywhere except the finished tool, no red marks, no blue outlines, no person/skin/hands/arms/clothing/boots/ground/shadow/dirt/labels. The original hand will be composited above this tool separately. Keep the whole tool clear of the image border and keep the transparent margins exactly as in the geometry reference.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-8bf5fddc-a955-47a9-8037-e2f03f056b19.png",
+      "output": "web/art/characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/tend-equipment-guide-11.png",
+          "role": "Code-authored geometry only; not finished artwork"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-11-body.png",
+          "role": "Exact unchanged body and hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original tending tool style, third row"
+        }
+      ],
+      "status": "Review draft only; not approved for regular player choices",
+      "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943"
+    }
+  ],
+  "invariants": "Generated rasters copied unchanged, full-frame uniform placement, unchanged source body/hair/material pixels, source-bound foreground mask restores the working hand.",
+  "visualReview": {
+    "findings": [
+      "Initial poses 8/9/10 placed the blade across the boot. Steeper repaints move their tips below the sole while keeping tool scale, body and hand ownership unchanged.",
+      "The final transition and recorded boards show intact whole-pose silhouettes and visible discrete changes in crouch and tool angle. Legacy crossfade comparison retains head/arm/tool ghosts.",
+      "Tools remain very close to the boot and the interaction ground point. Final clearance/contact and metal-highlight consistency need production review. The fourth pose reads as a small raised forward reach.",
+      "The free hand remains on the knee, so only the working-hand contact is required. All four active drafts measure zero prepared-pixel distance to that target."
+    ],
+    "status": "Review drafts only; final clearance/style/cadence and production integration remain unfinished",
+    "inspected": [
+      "tend-equipment-pose-8-v2-scenes.png",
+      "tend-equipment-pose-10-v2-scenes.png",
+      "tend-equipment-pose-11-v1-scenes.png",
+      "tend-equipment-cycle-v3-transitions.png",
+      "tend-equipment-playback-keyframes-v3-frames.png",
+      "tend-equipment-playback-crossfade-v3-frames.png"
+    ]
+  },
+  "checks": {
+    "pose": "Source/body/pose identity, foreground ownership, unchanged surrounding appearance, alpha margins, grip contact and invalid-input refusals.",
+    "visibility": "Trowels may appear over body pixels. Count actual unoccluded equipment pixels that differ from the body, rather than requiring all small tools to project beyond the body silhouette. Existing water/cook silhouette exposure checks retained. This is not a ground-clearance approval.",
+    "cycle": "Shared actual-renderer cycle verifier extracted from cooking, with separate output directory and evidence revision controls to preserve historical evidence.",
+    "evidence": {
+      "finalCycle": "tend-equipment-cycle-v3-report.json",
+      "priorCycles": "v1 all original tools; v2 first tool repaint only; both retained as historical draft evidence",
+      "playback": "50 decoded recorded frames per presentation, 19 transition samples, four unique keyframes, exact loop return, play/pause and interruption",
+      "regressions": "Cooking shared-cycle extraction, cooking/watering static compositions and full/partial/wrong-row refusal checks pass. Cooking/watering regression captures saved separately under /private/tmp."
+    }
+  }
+}

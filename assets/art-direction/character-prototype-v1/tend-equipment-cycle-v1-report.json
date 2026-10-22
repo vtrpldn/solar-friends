@@ -1,0 +1,64 @@
+{
+  "result": "PASS",
+  "scope": "Four draft equipment poses and real two-second playback only; final grip/style/cadence approval separate",
+  "samples": [
+    0,
+    0.2833333333333333,
+    0.3133333333333333,
+    0.3333333333333333,
+    0.6166666666666667,
+    0.6466666666666666,
+    0.6666666666666666,
+    0.9500000000000001,
+    0.98,
+    1,
+    1.2833333333333334,
+    1.3133333333333332,
+    1.3333333333333333,
+    1.6166666666666665,
+    1.6466666666666667,
+    1.6666666666666667,
+    1.95,
+    1.9800000000000002,
+    2
+  ],
+  "uniqueKeyPoses": 4,
+  "sources": [
+    {
+      "index": 8,
+      "file": "tending-trowel-pose-8-candidate-v1.png",
+      "source": {
+        "sha256": "9c53c5eb833e47317c773d4fb945455aa295f771dcae0f80dc5810644faa5661",
+        "width": 1254,
+        "height": 1254
+      }
+    },
+    {
+      "index": 9,
+      "file": "tending-trowel-pose-9-candidate-v1.png",
+      "source": {
+        "sha256": "9b340af676ebc2045b36baa237837e44e0c111f45d400e7a842f058ce0abca31",
+        "width": 1254,
+        "height": 1254
+      }
+    },
+    {
+      "index": 10,
+      "file": "tending-trowel-pose-10-candidate-v1.png",
+      "source": {
+        "sha256": "87482f6dc666b75b926d459420029249a1edbdf2b371af98698c132d74303aa7",
+        "width": 1254,
+        "height": 1254
+      }
+    },
+    {
+      "index": 11,
+      "file": "tending-trowel-pose-11-candidate-v1.png",
+      "source": {
+        "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+        "width": 1254,
+        "height": 1254
+      }
+    }
+  ]
+}
