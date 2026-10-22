@@ -1,0 +1,15 @@
+{
+  "actualSize": [
+    1254,
+    1254
+  ],
+  "expectedSize": 1254,
+  "sizeMatches": true,
+  "alphaBounds": [
+    489,
+    122,
+    804,
+    403
+  ],
+  "coverage": 0.939317635316002
+}

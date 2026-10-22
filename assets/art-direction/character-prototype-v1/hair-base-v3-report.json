@@ -1,0 +1,223 @@
+{
+  "expectedSize": 1536,
+  "actualSize": [
+    1254,
+    1254
+  ],
+  "sizeMatches": false,
+  "diagnosticCoverage": {
+    "ok": false,
+    "minimumCoverage": 0.98,
+    "poses": [
+      {
+        "pixels": 3994,
+        "inside": 2126,
+        "bounds": [
+          132,
+          59,
+          231,
+          140
+        ],
+        "index": 0,
+        "coverage": 0.5322984476715072,
+        "ok": false
+      },
+      {
+        "pixels": 4056,
+        "inside": 1826,
+        "bounds": [
+          454,
+          61,
+          554,
+          143
+        ],
+        "index": 1,
+        "coverage": 0.45019723865877714,
+        "ok": false
+      },
+      {
+        "pixels": 4034,
+        "inside": 1950,
+        "bounds": [
+          769,
+          61,
+          868,
+          143
+        ],
+        "index": 2,
+        "coverage": 0.48339117501239465,
+        "ok": false
+      },
+      {
+        "pixels": 4065,
+        "inside": 1751,
+        "bounds": [
+          1090,
+          60,
+          1190,
+          143
+        ],
+        "index": 3,
+        "coverage": 0.430750307503075,
+        "ok": false
+      },
+      {
+        "pixels": 4084,
+        "inside": 2287,
+        "bounds": [
+          128,
+          368,
+          229,
+          450
+        ],
+        "index": 4,
+        "coverage": 0.5599902056807052,
+        "ok": false
+      },
+      {
+        "pixels": 4074,
+        "inside": 2240,
+        "bounds": [
+          443,
+          367,
+          544,
+          449
+        ],
+        "index": 5,
+        "coverage": 0.5498281786941581,
+        "ok": false
+      },
+      {
+        "pixels": 4195,
+        "inside": 2099,
+        "bounds": [
+          765,
+          371,
+          869,
+          448
+        ],
+        "index": 6,
+        "coverage": 0.5003575685339691,
+        "ok": false
+      },
+      {
+        "pixels": 4558,
+        "inside": 2907,
+        "bounds": [
+          1099,
+          410,
+          1198,
+          480
+        ],
+        "index": 7,
+        "coverage": 0.6377797279508557,
+        "ok": false
+      },
+      {
+        "pixels": 4063,
+        "inside": 966,
+        "bounds": [
+          121,
+          693,
+          220,
+          777
+        ],
+        "index": 8,
+        "coverage": 0.2377553531873,
+        "ok": false
+      },
+      {
+        "pixels": 4035,
+        "inside": 939,
+        "bounds": [
+          453,
+          691,
+          550,
+          777
+        ],
+        "index": 9,
+        "coverage": 0.23271375464684016,
+        "ok": false
+      },
+      {
+        "pixels": 4142,
+        "inside": 728,
+        "bounds": [
+          765,
+          692,
+          865,
+          776
+        ],
+        "index": 10,
+        "coverage": 0.17576050217286335,
+        "ok": false
+      },
+      {
+        "pixels": 4147,
+        "inside": 705,
+        "bounds": [
+          1081,
+          691,
+          1180,
+          776
+        ],
+        "index": 11,
+        "coverage": 0.17000241138172173,
+        "ok": false
+      },
+      {
+        "pixels": 3882,
+        "inside": 1616,
+        "bounds": [
+          106,
+          1018,
+          204,
+          1097
+        ],
+        "index": 12,
+        "coverage": 0.4162802679031427,
+        "ok": false
+      },
+      {
+        "pixels": 4437,
+        "inside": 1194,
+        "bounds": [
+          460,
+          1041,
+          566,
+          1114
+        ],
+        "index": 13,
+        "coverage": 0.2691007437457742,
+        "ok": false
+      },
+      {
+        "pixels": 4125,
+        "inside": 1537,
+        "bounds": [
+          753,
+          1014,
+          853,
+          1097
+        ],
+        "index": 14,
+        "coverage": 0.3726060606060606,
+        "ok": false
+      },
+      {
+        "pixels": 3917,
+        "inside": 1400,
+        "bounds": [
+          1070,
+          1015,
+          1169,
+          1098
+        ],
+        "index": 15,
+        "coverage": 0.35741639009446,
+        "ok": false
+      }
+    ]
+  },
+  "scope": "Returned-size region and composition diagnostics only. No per-pose correction or production approval; expected canvas size must also match."
+}
