@@ -1,0 +1,29 @@
+{
+  "actualSize": [
+    1254,
+    1254
+  ],
+  "sizeMatches": true,
+  "reports": [
+    {
+      "index": 8,
+      "painted": 32706,
+      "coverage": 0.21818626551703052
+    },
+    {
+      "index": 9,
+      "painted": 33285,
+      "coverage": 0.22694907616043264
+    },
+    {
+      "index": 10,
+      "painted": 32599,
+      "coverage": 0
+    },
+    {
+      "index": 11,
+      "painted": 33122,
+      "coverage": 0
+    }
+  ]
+}

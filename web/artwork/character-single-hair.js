@@ -1,9 +1,13 @@
 import {canonical} from '../editor/journal.js';
 // One source-bound pose for production review, never a playable appearance.
 export async function singleHairFrame({body,binding,registration,image,sourceHash}){
- if(registration.schema!==1||registration.sheet!=='base'||registration.index!==8||registration.size!==1254||registration.partSha256!==sourceHash||canonical(registration.body)!==canonical(binding)||body.width!==256||body.height!==256||image.width!==1254||image.height!==1254)throw Error('Review the changed hair/body registration before composing this pose.');
+ if(registration.index!==8)throw Error('Only base pose 8 is supported by this single-pose review.');
+ return registeredHairFrame({body,binding,registration,image,sourceHash});
+}
+export async function registeredHairFrame({body,binding,registration,image,sourceHash}){
+ if(registration.schema!==1||registration.sheet!=='base'||![8,9,10,11].includes(registration.index)||registration.size!==1254||registration.partSha256!==sourceHash||canonical(registration.body)!==canonical(binding)||body.width!==256||body.height!==256||image.width!==1254||image.height!==1254)throw Error('Review the changed hair/body registration before composing this pose.');
  const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',body.getContext('2d').getImageData(0,0,256,256).data))].map(n=>n.toString(16).padStart(2,'0')).join('');
- if(digest!==binding.frames.base[8])throw Error('The prepared body pose changed.');
+ if(digest!==binding.frames.base[registration.index])throw Error('The prepared body pose changed.');
  const frame=document.createElement('canvas');frame.width=frame.height=256;
  const ctx=frame.getContext('2d');ctx.drawImage(body,0,0);ctx.drawImage(image,0,0,256,256);
  return frame;

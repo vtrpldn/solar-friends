@@ -1,0 +1,40 @@
+{
+  "result": "PASS",
+  "scope": "Four-pose prototype only; no complete hairstyle or player integration",
+  "denied": [
+    "base:0",
+    "base:12",
+    "idle:8",
+    "activities:8",
+    "incomplete",
+    "invalid-frames"
+  ],
+  "poseUse": [
+    10,
+    11,
+    8,
+    9
+  ],
+  "sourceHashes": {
+    "8": "120e846f5ea289eeada25d6bb065e092f9de4190ba59d41a58d2629099dd39a3",
+    "9": "ac5a20ba3fe368167bc2379c795741bc5bd1f81db0cb6c25be63ea1e015f73c7",
+    "10": "f2d5733f865c3e4290a2baddc3d325554b5938964f7d49eba66081abd97a9de0",
+    "11": "0b385b3e8baafcf824d7c4ec50c49aff00e53809ad5a75e03d3999b56fb5f571"
+  },
+  "partHashes": {
+    "8": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "9": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+    "10": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+    "11": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea"
+  },
+  "sampleTimes": [
+    0,
+    1.205,
+    1.25,
+    2.455,
+    2.5,
+    3.705,
+    3.75,
+    4.955
+  ]
+}

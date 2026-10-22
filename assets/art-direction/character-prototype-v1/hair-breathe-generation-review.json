@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen__imagegen",
+  "scope": "Four-pose breathing production draft, not player-integrated or a completed hairstyle. Uniform whole-frame composition; no per-pose fitting or pixel repairs.",
+  "records": [
+    {
+      "id": "breathe-v1",
+      "prompt": "Use case: precise-object-edit. Four registered hair-only layers for game animation.\nInput1 is the EXACT geometry edit target, four bald poses arranged 2x2 on a 1254-square canvas, each cell627square. Input2 is a placement guide of the same bodies with green outer bounds. Input3 is the accepted short curly painted hair material/shape for the TOP LEFT pose, at twice the linear size: its whole canvas1254 corresponds to ONE627 cell here. Match its restrained short curls; no hanging curl or U-shaped loop behind/below the visible ear.\nImagine adding the SAME hairstyle directly onto all four target scalps then return ONLY the added hair. Leave bodies, faces, skin, ears, eyebrows and clothing fully transparent. Keep the exact 1254x1254 canvas and all four target positions; do not recenter any cap within its cell. The bodies' heads move slightly between poses; follow those crowns/forehead hairlines individually. No face/scalp backing, skin-coloured fragments, guide lines or background.\nHair remains approximately within these outer rectangles x,y,width,height: [245,20,167,147], [870,27,167,147], [240,649,167,147], [870,647,167,147]. They are limits, not shapes to fill. Actual caps hug scalp and stop above the ears. Top-left head crown near x335,y55; top-right near x950,y55; bottom-left near x322,y685; bottom-right near x950,y685. Forehead/eyes remain open; visible ears uncovered.\nWarm broad painted dark brown curls, upper-left illumination, matching input3 at game scale. All four represent the same person's same hair, with consistent silhouette, volume and curl clusters. Most of canvas must be transparent empty space. No text, grids, shadows, props, checkerboard, resizing, rearrangement or cropping. Return hair ONLY, not bodies with hair.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-breathe-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-breathe-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d41176dd-daad-474f-baa9-17788a72e842.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-breathe-rejected-v1.png",
+      "verdict": "rejected",
+      "findings": "All four caps are oversized and misregistered across faces/shoulders. Coverage 0.218/0.227/0/0. Do not fit or reuse.",
+      "report": "hair-breathe-atlas-v1-report.json",
+      "composition": "hair-breathe-atlas-v1-composition.png",
+      "candidateSha256": "9830ec9bd59e4b7c4d7837f8a61471c943d280b37562f939e6fe109b13fe9755",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-breathe-body.png": "f3900a17ddf1d9791d91256f67ee68553dfd0fc62b150ff871d88f8e5c696deb",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-breathe-guide.png": "408456ddb8f1b09a728cb963e7f44996a9a9372a6f5001c15cbe5eb15b08f508",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base9-v1",
+      "prompt": "Use case: precise-object-edit. One registered hair-only layer for a game idle pose.\nInput1 is the EXACT bald body target, standing eyes closed, on1254-square transparent canvas. Input2 is the accepted painted short curly hair overlay from the previous idle pose, not a head or body: preserve its hairstyle, brown curl clusters, volume and lighting but repaint its registration to fit input1's slightly shifted/tilted scalp.\nOutput hair ONLY at original coordinates on the same1254-square transparent canvas. Crown around x630,y110. Hair should cover scalp from roughly x500 to785,y95 to270, tapering above/behind the visible ear near x560,y285. No dangling curl, no U-shaped loop below the ear. Keep actual ear, forehead, eyebrows and eyes transparent. No skin, head backing, face, body, clothes or props. Do not center/enlarge the wig. Mostcanvas is emptytransparent. No text, grid, shadows, background, crop or per-object normalization. Warm broad painted shading and upper-left illumination exactly matching input2. This layer will be drawn over input1 without independent fitting.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-9-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-851b67cc-36d9-4323-928c-b050573d7515.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-9-candidate-v1.png",
+      "verdict": "production draft only",
+      "findings": "Scalp/ear fit is usable at displayed scale. Hair front/volume differs slightly from pose8; further temporal polish required.",
+      "report": "hair-breathe-9-v1-report.json",
+      "composition": "hair-breathe-9-v1-composition.png",
+      "candidateSha256": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-9-body.png": "0f18c5566beba64fa1d1ef3cf1b700c4b98c3d1b3629e3ca00366ad7330ac99e",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base10-v1",
+      "prompt": "Use case: precise-object-edit. Registered transparent hair layer.\nInput1 is the exact bald resident pose10 target on1254-square canvas. Input2 is the accepted short curly hairstyle from pose8 at the same canvas scale. Paint the SAME small brown curls onto input1's scalp, following its slightly left-shifted head; preserve the hairstyle shape, curl cluster arrangement, volume and light instead of inventing another wig.\nReturn ONLY the added hair at exact original coordinates. Crown near x630,y110; cap roughly x485\u2013790,y95\u2013310. Taper above/behind the visible ear near x560,y280. No long curl or loop below ear. Forehead, face, eyes, eyebrows, ear and body fully transparent. No skin backing. Keep 1254-square transparent canvas with most pixels empty. Do not center/enlarge/crop/resize the hair. Warm broad painted darkbrown curls matching input2. No text, shadows, guide or background. Overlay must fit input1 without independent correction.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-10-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-32925cef-37b6-4878-9d28-ec806a9189a4.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-10-candidate-v1.png",
+      "verdict": "production draft only",
+      "findings": "Scalp/ear contact fits directly without transforms. Paint and shape close to pose8. Full hairstyle approval remains open.",
+      "report": "hair-breathe-10-v1-report.json",
+      "composition": "hair-breathe-10-v1-composition.png",
+      "candidateSha256": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-10-body.png": "8e79152fe7a1128695710558cbd11c4994300d0aea65f57f0ca7b4599d4196ed",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base11-v1",
+      "prompt": "Use case: precise-object-edit. Registered transparent hair layer.\nInput1 is the exact bald resident pose11 target on1254-square canvas. Input2 is the accepted short curly hairstyle from pose8 at the same canvas scale. Paint the SAME small brown curls onto input1's scalp, following its slight change in head position; preserve the hairstyle silhouette, curl cluster arrangement, volume and light instead of inventing another wig.\nReturn ONLY the added hair at exact original coordinates. Crown near x640,y110; cap roughly x495\u2013800,y95\u2013310. Taper above/behind the visible ear near x570,y280. No long curl or loop below ear. Forehead, face, eyes, eyebrows, ear and body fully transparent. No skin backing. Keep1254-square transparent canvas with most pixels empty. Do not center/enlarge/crop/resize hair. Warm broad painted darkbrown curls matching input2. No text, shadows, guide or background. Overlay must fit input1 without independent correction.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-11-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-43de03a8-884d-462c-a474-7f22b2b7880f.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-11-candidate-v1.png",
+      "verdict": "production draft only",
+      "findings": "Scalp/ear contact fits directly without transforms. Paint and shape close to pose8. Full hairstyle approval remains open.",
+      "report": "hair-breathe-11-v1-report.json",
+      "composition": "hair-breathe-11-v1-composition.png",
+      "candidateSha256": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-11-body.png": "e572f4d36c1c86ac61c10fd33094b2029003847855261593d5095459a057fa1d",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    }
+  ],
+  "integration": {
+    "report": "hair-breathe-v1-integration-report.json",
+    "details": "hair-breathe-v1-details.png",
+    "scenes": "hair-breathe-v1-scenes.png",
+    "visualReview": "Inspected all four key poses and each loop-edge midpoint, both facings, 192px/48px and actual world scenes with existing night tint. No bald crown, ear loop or skin fragments observed. Some hairstyle volume/cluster variation remains, most visible on closed-eye pose. These still boards do not establish complete animation or 48-pose approval."
+  }
+}
