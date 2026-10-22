@@ -1,6 +1,7 @@
 //! Conditional projections replay the real simulation in an isolated village.
 //! The desktop runs this bounded query in a worker, never in its rendering loop.
 use crate::*;
+mod monitor;
 
 #[derive(Serialize)]
 struct Project {
@@ -116,6 +117,8 @@ impl Game {
             .cloned()
             .collect();
         let before_funds = original.economy.money;
+        let mut monitoring = monitor::Monitor::new(original);
+        let mut people = copy.app.world_mut().query::<&Resident>();
         // Tick at the same bounded step as play. Inspect native state rather
         // than serialising every frame; only the final report crosses to JS.
         let frames = u32::from(days) * 1920;
@@ -125,6 +128,7 @@ impl Game {
                 needs.push(needs_sample(&mut copy));
             }
             let v = copy.app.world().resource::<Village>();
+            monitoring.observe(v, people.iter(copy.app.world()));
             for p in projects
                 .iter_mut()
                 .filter(|p| p.completed_at.is_none() && p.blocker.is_none())
@@ -155,9 +159,9 @@ impl Game {
         {
             p.blocker = Some(waiting(v, p.building));
         }
-        serde_json::json!({"schema":1,"based_at":based_at,"through":v.minutes,"days":days,
+        serde_json::json!({"schema":2,"based_at":based_at,"through":v.minutes,"days":days,
             "funds_before":before_funds,"funds_projected":v.economy.money,"projects":projects,
-            "paid_orders":paid_orders,"needs":needs,
+            "paid_orders":paid_orders,"needs":needs,"monitoring":monitoring,
             "assumptions":"Current plans, work preferences, outside shifts and requests stay unchanged. Residents work according to energy, needs and personal commitments. Paid orders and local production continue; no new purchases or player actions are assumed. Dates are rounded to half-hour windows and are conditional, not promises."}).to_string()
     }
 }
@@ -322,5 +326,30 @@ mod tests {
             arrival as f64
         );
         assert!(r["projects"][0]["completed_at"].as_f64().unwrap() > arrival as f64);
+    }
+    #[test]
+    fn a_short_hunger_spell_between_hourly_readings_is_not_lost() {
+        let mut g = scene();
+        for mut r in g
+            .app
+            .world_mut()
+            .query::<&mut Resident>()
+            .iter_mut(g.app.world_mut())
+        {
+            if r.id == 0 {
+                r.hunger = 69.95;
+            }
+        }
+        let result = report(&mut g, 1);
+        assert_eq!(result["needs"][0]["hungry"], 0);
+        assert_eq!(result["needs"][1]["hungry"], 0);
+        let spell = &result["monitoring"]["people"]["0"]["hungry"];
+        let first = spell["first_at"]
+            .as_f64()
+            .expect("Meal preparation briefly crosses hunger 70");
+        assert!(first > 540. && first < 600., "{spell}");
+        assert!(spell["minutes"].as_f64().unwrap() > 0.);
+        assert_eq!(result["monitoring"]["observations"], 1921);
+        assert_eq!(result["monitoring"]["maximum_step_minutes"], 0.75);
     }
 }
