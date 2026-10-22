@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "objective": "Prototype modular residents for map-scenario-builder-plan.md Stage 4",
+  "status": "Needs correction; no candidate is enabled in gameplay",
+  "tool": "Built-in image_gen.imagegen; transparent background",
+  "references": [
+    {
+      "path": "web/art/animations/bento.png",
+      "role": "Existing base pose/style/proportion reference; not evidence of user approval"
+    },
+    {
+      "path": "web/art/animations/bento-activities.png",
+      "role": "Existing activity style and equipment separation reference"
+    },
+    {
+      "path": "/private/tmp/solar-custom-cast-game.png",
+      "role": "Current gameplay scale and neighboring-building comparison; inspected this turn"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+      "output": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-72f3ed97-e219-4093-a5fc-a8b4af0b3ad2.png",
+      "inputs": [
+        "web/art/animations/bento.png"
+      ],
+      "prompt": "Use case: identity-preserve / modular character production prototype.\nAsset type: Solar Friends modular resident BODY layer, one transparent 4 by 4 animation atlas.\nInput image 1 is the EXISTING BENTO BASE ANIMATION SHEET, used as the exact pose, camera, proportion, lighting and painted-style reference. It is not an outfit to retain.\nCreate a new adult Brazilian neighbour body template in exactly the same sixteen poses, one per cell in the identical row/column order. Preserve the friendly illustrated anatomy and relative head/body proportions, face orientation, upper-left daylight, broad hand-painted shading, warm outlines and readable low-detail rendering of the reference. Keep a consistent adult face, medium warm brown skin and medium build across all sixteen frames.\nThe modular body is BALD, with no head hair, facial hair, hat or accessories. Dress the base modestly in a plain close-fitting cream sleeveless undershirt, simple cream mid-thigh shorts, and plain dark brown closed work shoes. This is a neutral dressing template; do not include blue shirt, belt, long trousers or decorative designs.\nRow 1: the four walking poses, matching the reference limb phases.\nRow 2: four working arm poses matching the reference exactly, but REMOVE THE MALLET; retain empty gripping hands in the same positions.\nRow 3: four standing idle/breathing poses matching the reference.\nRow 4: four seated/resting poses, including the final eyes-closed sleeping pose, matching the reference BUT REMOVE THE STOOL. Keep bent legs as seated poses; seating furniture will be a separate layer.\nAll sixteen bodies must be the SAME SIZE and identity, with coherent head, shoulder and limb thickness. Fixed game camera, same three-quarter facing as reference, no perspective change. Complete silhouette within each cell; generous transparent margins and empty gaps between limbs. No tools, stool, ground, shadows, background color, text, labels, grid lines, checkerboard illustration or watermark. True alpha transparency.\nOutput a square atlas with a regular 4x4 layout. This is a technical modular-body prototype, not a redesign of the existing cast. Preserve row-by-row pose correspondence carefully.",
+      "verdict": "Neutral body candidate only; incomplete appearance/animation coverage",
+      "findings": [
+        "Sixteen separate base poses survive the shared sprite extractor.",
+        "Painted treatment and broad pose proportions were compared at the same renderer width beside Bento.",
+        "Tools, stool and hair were removed for future separate layers.",
+        "Only the base animation sheet exists; idle/activity sheets, compatible clothing, hair, skin/face/body variations and occlusion masks are still required."
+      ]
+    },
+    {
+      "path": "web/art/characters/prototype-v1/hair-curls-rejected-v1.png",
+      "sha256": "895948a50450f8b7187dfdae05e748a6d2f0afb16a7b308a93be738ffaa45d10",
+      "output": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-018d723c-e476-43f1-b5d6-3a1b8aac2382.png",
+      "inputs": [
+        "web/art/characters/prototype-v1/body-neutral-base.png"
+      ],
+      "prompt": "Use case: precise-object-edit, technical modular character overlay extraction.\nThe input is a 4x4 Solar Friends body-template atlas. Keep its exact canvas dimensions and the exact head placement in all sixteen cells.\nCreate ONLY a separate HAIR OVERLAY LAYER for these sixteen heads: close-cropped dark brown tight curls, the same restrained painted texture, contour treatment and upper-left light as the original Bento reference style. Each curl cap must fit its corresponding bald head in precisely the same coordinates, angle, size and position as the input image. Include a short natural hairline at the forehead and small sideburns above the ears. Do not cover face, ears or neck. Hair must follow the different working and seated head tilts, especially row 2 columns 3 and 4 and row 4 column 2.\nOutput ONLY the sixteen opaque painted hair caps with true transparent background. Remove the body, face, clothing, shoes, skin and everything else from the OUTPUT; those will be drawn from the unchanged underlying input body. Do NOT draw a new person. Do NOT add a skull or face under the hair. Do NOT reposition, recenter, crop, resize or independently normalize the caps. Preserve the full atlas canvas and four-by-four registration, including all empty areas where bodies used to be. This layer will be alpha-composited directly over the supplied image pixel for pixel. No text, borders, color swatches, checkerboard, labels, shadows or other objects. Keep clean transparency, without loose color specks.",
+      "verdict": "Rejected",
+      "findings": [
+        "Hair caps were enlarged and recentered instead of retaining body-head registration.",
+        "All sixteen poses fail the diagnostic head-region coverage threshold."
+      ]
+    },
+    {
+      "path": "web/art/characters/prototype-v1/hair-curls-rejected-v2.png",
+      "sha256": "5c3f5cd3952e3bf8a9ec04240ca7f37583cafbd0868a043041909c5ed5bfafc5",
+      "output": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-536a6e0f-4c86-422e-9c81-c078f1c59fe6.png",
+      "inputs": [
+        "web/art/characters/prototype-v1/body-neutral-base.png",
+        "web/art/characters/prototype-v1/head-position-guide.png"
+      ],
+      "prompt": "Use case: precise-object-edit / registered modular overlay.\nInput 1 is a Solar Friends BODY ATLAS: exact original pixel coordinates must be retained.\nInput 2 is a TECHNICAL POSITION GUIDE, NOT A STYLE REFERENCE. It shows sixteen green bounding rectangles on the SAME 1254x1254 canvas, one per bald head. The labels beneath the boxes are guide annotations and MUST NOT appear in your output.\nCorrect the failure of the previous overlay: do NOT recenter hair within cells, do NOT enlarge hair to fill each tile. The output is the full unchanged 1254 by 1254 coordinate space. Every single opaque pixel must lie inside the corresponding green rectangle from input 2. Most of the output must remain empty transparent space.\nDraw sixteen small dark brown close-cropped CURLY HAIR CAPS, fitted directly to the bald heads of input 1. Each cap is approximately 65–80 pixels wide and 55–75 pixels tall, within its green rectangle. Follow each head tilt and upper-left daylight. The caps must cover the crown and back of the head, with an open forehead/face area and a notch around the visible ear. Short restrained painted curls, warm brown edges and broad shading matching Solar Friends. No realistic strand noise.\nThis output must contain ONLY the hair caps on real transparent alpha. Remove all body, skin, clothing, shoes, background, green rectangles, numbers, grid, labels and shadows. No face/scalp under the caps. Do not change the canvas size or coordinate system. The caps will be composited over input 1 without translation or scaling. The second input's geometry is mandatory; input 1 supplies style and anatomy.\nFor clarity, the sixteen allowed x,y,width,height rectangles, ordered row-major, are:\n[160,8,80,90],[465,8,80,90],[782,8,80,90],[1100,8,80,90],\n[127,321,80,90],[450,321,80,90],[782,327,80,90],[1101,376,80,90],\n[128,632,80,90],[449,632,80,90],[775,632,80,90],[1095,632,80,90],\n[128,952,80,90],[474,971,80,90],[783,955,80,90],[1097,971,80,90].",
+      "verdict": "Rejected",
+      "findings": [
+        "The guide improves regional coverage but all sixteen poses still fail.",
+        "Opaque ear/skin fragments violate the requested hair-only layer.",
+        "Direct common-transform composition visibly covers faces or necks, leaving bald crowns exposed.",
+        "Do not translate/scale per-frame caps to hide this failure or enable them as a least-bad replacement."
+      ]
+    }
+  ],
+  "evidence": {
+    "pixels": "assets/art-direction/character-prototype-v1/registration-report.json",
+    "board": "assets/art-direction/character-prototype-v1/review-board.png",
+    "surface": "web/artwork/character-prototype.html",
+    "checks": "node scripts/verify-character-parts.mjs",
+    "limitations": [
+      "Head regions are hand-traced approximate diagnostic bounds, not final anatomy attachment landmarks.",
+      "Passing coverage alone cannot establish style, correct occlusion or full production approval.",
+      "The shared compositor is a prototype; no complete accepted layered character is available."
+    ]
+  },
+  "next": "Revise part production around co-authored, pose-specific layer masks and measured attachment landmarks. Retain one body-derived scale and anchor across layers; establish a complete compatible prototype before expanding the palette. All original modular customization requirements remain open."
+}

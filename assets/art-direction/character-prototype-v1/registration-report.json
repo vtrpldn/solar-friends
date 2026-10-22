@@ -1,0 +1,438 @@
+{
+  "body": {
+    "width": 1254,
+    "height": 1254,
+    "frames": 16,
+    "uniformScale": 0.0027564102564102562
+  },
+  "audits": [
+    {
+      "ok": false,
+      "minimumCoverage": 0.98,
+      "poses": [
+        {
+          "pixels": 7791,
+          "inside": 1483,
+          "bounds": [
+            113,
+            75,
+            254,
+            194
+          ],
+          "index": 0,
+          "coverage": 0.19034783724810678,
+          "ok": false
+        },
+        {
+          "pixels": 7812,
+          "inside": 1526,
+          "bounds": [
+            426,
+            75,
+            567,
+            194
+          ],
+          "index": 1,
+          "coverage": 0.1953405017921147,
+          "ok": false
+        },
+        {
+          "pixels": 7876,
+          "inside": 1514,
+          "bounds": [
+            740,
+            75,
+            881,
+            194
+          ],
+          "index": 2,
+          "coverage": 0.19222955815134585,
+          "ok": false
+        },
+        {
+          "pixels": 7897,
+          "inside": 1505,
+          "bounds": [
+            1055,
+            75,
+            1197,
+            194
+          ],
+          "index": 3,
+          "coverage": 0.19057870077244524,
+          "ok": false
+        },
+        {
+          "pixels": 7240,
+          "inside": 2752,
+          "bounds": [
+            102,
+            372,
+            231,
+            483
+          ],
+          "index": 4,
+          "coverage": 0.38011049723756907,
+          "ok": false
+        },
+        {
+          "pixels": 6948,
+          "inside": 2760,
+          "bounds": [
+            421,
+            372,
+            550,
+            483
+          ],
+          "index": 5,
+          "coverage": 0.39723661485319517,
+          "ok": false
+        },
+        {
+          "pixels": 6323,
+          "inside": 2247,
+          "bounds": [
+            735,
+            376,
+            858,
+            482
+          ],
+          "index": 6,
+          "coverage": 0.3553692867309821,
+          "ok": false
+        },
+        {
+          "pixels": 7202,
+          "inside": 4926,
+          "bounds": [
+            1087,
+            393,
+            1216,
+            487
+          ],
+          "index": 7,
+          "coverage": 0.6839766731463482,
+          "ok": false
+        },
+        {
+          "pixels": 7231,
+          "inside": 2458,
+          "bounds": [
+            100,
+            687,
+            229,
+            799
+          ],
+          "index": 8,
+          "coverage": 0.33992532153229155,
+          "ok": false
+        },
+        {
+          "pixels": 6322,
+          "inside": 2404,
+          "bounds": [
+            413,
+            686,
+            541,
+            799
+          ],
+          "index": 9,
+          "coverage": 0.38025941157861437,
+          "ok": false
+        },
+        {
+          "pixels": 7256,
+          "inside": 2462,
+          "bounds": [
+            728,
+            685,
+            858,
+            798
+          ],
+          "index": 10,
+          "coverage": 0.33930540242557883,
+          "ok": false
+        },
+        {
+          "pixels": 6946,
+          "inside": 2337,
+          "bounds": [
+            1050,
+            686,
+            1179,
+            798
+          ],
+          "index": 11,
+          "coverage": 0.33645263460984737,
+          "ok": false
+        },
+        {
+          "pixels": 6921,
+          "inside": 3387,
+          "bounds": [
+            100,
+            990,
+            229,
+            1099
+          ],
+          "index": 12,
+          "coverage": 0.4893801473775466,
+          "ok": false
+        },
+        {
+          "pixels": 7608,
+          "inside": 4522,
+          "bounds": [
+            444,
+            998,
+            576,
+            1098
+          ],
+          "index": 13,
+          "coverage": 0.5943743427970557,
+          "ok": false
+        },
+        {
+          "pixels": 7184,
+          "inside": 2961,
+          "bounds": [
+            730,
+            985,
+            861,
+            1097
+          ],
+          "index": 14,
+          "coverage": 0.41216592427616927,
+          "ok": false
+        },
+        {
+          "pixels": 6477,
+          "inside": 4151,
+          "bounds": [
+            1073,
+            987,
+            1201,
+            1094
+          ],
+          "index": 15,
+          "coverage": 0.6408831249035047,
+          "ok": false
+        }
+      ]
+    },
+    {
+      "ok": false,
+      "minimumCoverage": 0.98,
+      "poses": [
+        {
+          "pixels": 4465,
+          "inside": 3478,
+          "bounds": [
+            163,
+            32,
+            263,
+            123
+          ],
+          "index": 0,
+          "coverage": 0.7789473684210526,
+          "ok": false
+        },
+        {
+          "pixels": 4454,
+          "inside": 3238,
+          "bounds": [
+            475,
+            33,
+            575,
+            123
+          ],
+          "index": 1,
+          "coverage": 0.7269869779973058,
+          "ok": false
+        },
+        {
+          "pixels": 4383,
+          "inside": 3247,
+          "bounds": [
+            789,
+            34,
+            889,
+            124
+          ],
+          "index": 2,
+          "coverage": 0.7408167921514944,
+          "ok": false
+        },
+        {
+          "pixels": 4769,
+          "inside": 3384,
+          "bounds": [
+            1111,
+            33,
+            1212,
+            122
+          ],
+          "index": 3,
+          "coverage": 0.7095827217446006,
+          "ok": false
+        },
+        {
+          "pixels": 4322,
+          "inside": 2959,
+          "bounds": [
+            127,
+            357,
+            227,
+            447
+          ],
+          "index": 4,
+          "coverage": 0.6846367422489588,
+          "ok": false
+        },
+        {
+          "pixels": 4432,
+          "inside": 3040,
+          "bounds": [
+            456,
+            353,
+            553,
+            445
+          ],
+          "index": 5,
+          "coverage": 0.6859205776173285,
+          "ok": false
+        },
+        {
+          "pixels": 4399,
+          "inside": 2820,
+          "bounds": [
+            791,
+            363,
+            891,
+            451
+          ],
+          "index": 6,
+          "coverage": 0.6410547851784496,
+          "ok": false
+        },
+        {
+          "pixels": 4661,
+          "inside": 3238,
+          "bounds": [
+            1115,
+            404,
+            1217,
+            480
+          ],
+          "index": 7,
+          "coverage": 0.6947007080025746,
+          "ok": false
+        },
+        {
+          "pixels": 4346,
+          "inside": 1765,
+          "bounds": [
+            139,
+            687,
+            237,
+            778
+          ],
+          "index": 8,
+          "coverage": 0.40612057063966867,
+          "ok": false
+        },
+        {
+          "pixels": 4323,
+          "inside": 2027,
+          "bounds": [
+            452,
+            686,
+            551,
+            776
+          ],
+          "index": 9,
+          "coverage": 0.46888734674994215,
+          "ok": false
+        },
+        {
+          "pixels": 4340,
+          "inside": 2141,
+          "bounds": [
+            773,
+            686,
+            870,
+            776
+          ],
+          "index": 10,
+          "coverage": 0.4933179723502304,
+          "ok": false
+        },
+        {
+          "pixels": 5233,
+          "inside": 2223,
+          "bounds": [
+            1090,
+            688,
+            1195,
+            769
+          ],
+          "index": 11,
+          "coverage": 0.42480412765144276,
+          "ok": false
+        },
+        {
+          "pixels": 4363,
+          "inside": 2700,
+          "bounds": [
+            133,
+            992,
+            232,
+            1081
+          ],
+          "index": 12,
+          "coverage": 0.618840247536099,
+          "ok": false
+        },
+        {
+          "pixels": 4992,
+          "inside": 2476,
+          "bounds": [
+            487,
+            1015,
+            591,
+            1093
+          ],
+          "index": 13,
+          "coverage": 0.49599358974358976,
+          "ok": false
+        },
+        {
+          "pixels": 4403,
+          "inside": 2860,
+          "bounds": [
+            789,
+            993,
+            887,
+            1080
+          ],
+          "index": 14,
+          "coverage": 0.6495571201453555,
+          "ok": false
+        },
+        {
+          "pixels": 4903,
+          "inside": 2312,
+          "bounds": [
+            1112,
+            1016,
+            1213,
+            1101
+          ],
+          "index": 15,
+          "coverage": 0.47154803181725474,
+          "ok": false
+        }
+      ]
+    }
+  ]
+}
