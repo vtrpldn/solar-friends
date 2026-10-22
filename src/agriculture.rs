@@ -3,6 +3,10 @@ use crate::*;
 use economy::{FODDER, HONEY, MILK, SCRAPS};
 use logistics::Owner;
 
+pub(crate) const ORCHARD_ESTABLISH_MINUTES: f32 = 8640.;
+pub(crate) const ORCHARD_FRUIT_MINUTES: f32 = 2880.;
+pub(crate) const ORCHARD_BASE_FRUIT: u32 = 8;
+
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Plot {
@@ -228,7 +232,11 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 if p.pending > 0 {
                     continue;
                 }
-                let duration = if p.fruiting { 2880. } else { 8640. };
+                let duration = if p.fruiting {
+                    ORCHARD_FRUIT_MINUTES
+                } else {
+                    ORCHARD_ESTABLISH_MINUTES
+                };
                 let growth = (p.growth + wet * land::growth(&soil)).min(duration);
                 let bonus = u32::from(pollinated(v, &b)) * 2;
                 let p = &mut v.buildings[index].agriculture;
@@ -236,7 +244,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 if growth >= duration {
                     p.fruiting = true;
                     p.growth = 0.;
-                    p.pending = 8 + bonus;
+                    p.pending = ORCHARD_BASE_FRUIT + bonus;
                 }
             }
             "goat_pasture" => {
@@ -295,9 +303,9 @@ pub fn valid(v: &Village, b: &Building) -> bool {
     let duration = match b.kind.as_str() {
         "orchard" => {
             if p.fruiting {
-                2880.
+                ORCHARD_FRUIT_MINUTES
             } else {
-                8640.
+                ORCHARD_ESTABLISH_MINUTES
             }
         }
         "goat_pasture" => 1440.,
@@ -402,7 +410,7 @@ impl Game {
         let plots:Vec<_>=v.buildings.iter().filter(|b|kind(b)).map(|b|{
             let p=&b.agriculture;
             let status=status(v,b);
-            serde_json::json!({"building":b.id,"status":status,"ready":ready(v,b),"flowers":flowers(v,b),"pollinated":pollinated(v,b),"fodder_here":organics::available(v,Owner::Pantry(b.id),FODDER),"fresh_water_here":water::available(v,water::Owner::Building(b.id),water::Class::Fresh),"duration":if b.kind=="orchard"{if p.fruiting{2880.}else{8640.}}else if b.kind=="apiary"{720.}else{1440.}})
+            serde_json::json!({"building":b.id,"status":status,"ready":ready(v,b),"flowers":flowers(v,b),"pollinated":pollinated(v,b),"fodder_here":organics::available(v,Owner::Pantry(b.id),FODDER),"fresh_water_here":water::available(v,water::Owner::Building(b.id),water::Class::Fresh),"duration":if b.kind=="orchard"{if p.fruiting{ORCHARD_FRUIT_MINUTES}else{ORCHARD_ESTABLISH_MINUTES}}else if b.kind=="apiary"{720.}else{1440.}})
         }).collect();
         serde_json::json!({"plots":plots,"fodder":economy::quantity(v,FODDER),"milk":economy::quantity(v,MILK),"honey":economy::quantity(v,HONEY)}).to_string()
     }

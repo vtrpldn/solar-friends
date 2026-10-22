@@ -189,6 +189,8 @@ pub struct Structure {
     pub appearance: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub crop: Option<super::farming::StartingCrop>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub orchard: Option<super::orchards::StartingOrchard>,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -352,6 +354,7 @@ impl Definition {
                         recipe: "standard".into(),
                         appearance: None,
                         crop:None,
+                        orchard:None,
                     })
                     .collect(),
                 roads: vec![],

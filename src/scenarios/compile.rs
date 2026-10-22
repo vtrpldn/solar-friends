@@ -213,6 +213,7 @@ pub(super) fn check(d: &Definition) -> Report {
     }
     super::liquids::check(d, &mut r);
     super::farming::check(d, &mut r);
+    super::orchards::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
     {
@@ -406,7 +407,10 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
                 .as_ref()
                 .map_or_else(Default::default, |c| super::farming::resolve(c, &b.kind)),
             poultry: Default::default(),
-            agriculture: Default::default(),
+            agriculture: b
+                .orchard
+                .as_ref()
+                .map_or_else(Default::default, super::orchards::resolve),
         });
         if !completed || b.kind == "home" || b.recipe != "standard" {
             let appearance = b
@@ -500,6 +504,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     }
     let mut game = initialization::create_authored(v, residents, &opening)?;
     super::farming::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
+    super::orchards::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
     journal::initialize(&mut game.app.world_mut().resource_mut::<Village>());
     {
         let v = game.app.world().resource::<Village>();

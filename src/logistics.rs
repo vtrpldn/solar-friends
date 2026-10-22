@@ -2816,6 +2816,7 @@ mod targeted_storage_tests {
         d.rules.logistics = true;
         d.start.buildings.push(scenarios::Structure {
             crop: None,
+            orchard: None,
             id: "second-store".into(),
             kind: "warehouse".into(),
             x: 25,
