@@ -1323,6 +1323,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     power::batteries::prune(&mut v, &residents);
     maintenance::sync(&mut v);
     outcomes::observe(&mut v, &residents);
+    scenarios::journal::advance(&mut v);
     progression::update(&mut v);
 }
 #[wasm_bindgen]

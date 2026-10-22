@@ -254,7 +254,8 @@ pub(crate) fn validate(mut save: Save) -> Option<Save> {
     {
         return None;
     }
-    if !outcomes::valid(v)
+    if !scenarios::journal::valid(v)
+        || !outcomes::valid(v)
         || !sandbox::valid(v)
         || !matches!(v.version, 3 | SAVE_VERSION)
         || (v.map_size != MAP_SIZE && v.map_size != 20)

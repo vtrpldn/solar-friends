@@ -19,6 +19,8 @@ pub struct Definition {
     pub map: Map,
     pub rules: Rules,
     pub start: Start,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub journal: Option<super::journal::Journal>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -264,6 +266,7 @@ impl Definition {
         };
         let key = if sandbox { "sandbox" } else { "story" };
         Self {
+            journal: None,
             format: FORMAT.into(),
             schema: SCHEMA,
             id: format!("builtin-{key}"),

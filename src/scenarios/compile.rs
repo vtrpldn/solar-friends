@@ -2,6 +2,7 @@ use super::*;
 
 pub(super) fn check(d: &Definition) -> Report {
     let mut r = Report::default();
+    journal::check(d, &mut r);
     residents::check(d, &mut r);
     relationships::check(d, &mut r);
     experience::check(d, &mut r);
@@ -472,6 +473,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         }
     }
     let mut game = initialization::create_authored(v, residents, &opening)?;
+    journal::initialize(&mut game.app.world_mut().resource_mut::<Village>());
     {
         let v = game.app.world().resource::<Village>();
         if v.water_supply

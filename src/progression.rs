@@ -47,6 +47,8 @@ fn later_chapters<'de, D: serde::Deserializer<'de>>(
 pub struct Progress {
     pub completed: [bool; 4],
     pub outcomes: crate::outcomes::State,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scenario_journal: Option<crate::scenarios::journal::State>,
     #[serde(deserialize_with = "later_chapters")]
     pub later_completed: [bool; LATER_CHAPTERS],
     pub seedlings_raised: u32,
@@ -94,6 +96,7 @@ impl Default for Progress {
         Self {
             completed: [false; 4],
             outcomes: crate::outcomes::State::default(),
+            scenario_journal: None,
             later_completed: [false; LATER_CHAPTERS],
             seedlings_raised: 0,
             seedlings_used: 0,

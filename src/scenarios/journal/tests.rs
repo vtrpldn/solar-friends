@@ -1,0 +1,305 @@
+use super::*;
+fn goal(id: &str, condition: GoalCondition) -> Goal {
+    Goal {
+        id: id.into(),
+        title: format!("Goal {id}"),
+        description: String::new(),
+        optional: false,
+        condition,
+    }
+}
+fn chapter(id: &str, goals: Vec<Goal>) -> Chapter {
+    Chapter {
+        id: id.into(),
+        title: format!("Chapter {id}"),
+        description: String::new(),
+        goals,
+    }
+}
+fn scenario(chapters: Vec<Chapter>) -> Definition {
+    let mut d = Definition::builtin(modes::Mode::Sandbox);
+    d.journal = Some(Journal {
+        schema: 1,
+        introduction: "Our own beginning".into(),
+        completion: "Keep enjoying village life.".into(),
+        chapters,
+    });
+    d
+}
+fn game(d: Definition) -> Game {
+    compile(d)
+        .unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()))
+        .0
+}
+fn state(g: &mut Game) -> serde_json::Value {
+    serde_json::from_str(&g.scenario_journal()).unwrap()
+}
+#[test]
+fn current_assets_credit_and_post_activation_buildings_are_distinct() {
+    let mut current = game(scenario(vec![chapter(
+        "opening",
+        vec![goal(
+            "shed",
+            GoalCondition::Buildings {
+                building: "shed".into(),
+                count: 1,
+                credit: BuildingCredit::Present,
+            },
+        )],
+    )]));
+    assert!(state(&mut current)["finished_at"].is_number());
+    let mut fresh = game(scenario(vec![chapter(
+        "opening",
+        vec![goal(
+            "new-shed",
+            GoalCondition::Buildings {
+                building: "shed".into(),
+                count: 1,
+                credit: BuildingCredit::AfterActivation,
+            },
+        )],
+    )]));
+    assert!(state(&mut fresh)["finished_at"].is_null());
+    assert_eq!(fresh.place("shed", 25, 25), "ok");
+    fresh.tick(0.25);
+    assert!(state(&mut fresh)["finished_at"].is_number());
+    let checkpoint = fresh.snapshot();
+    assert!(fresh.restore(&checkpoint));
+    assert_eq!(fresh.snapshot(), checkpoint);
+}
+#[test]
+fn prior_goals_and_chapters_advance_in_bounded_observation_order() {
+    let mut g = game(scenario(vec![
+        chapter(
+            "first",
+            vec![
+                goal("fund", GoalCondition::Funds { cents: 0 }),
+                goal(
+                    "follow",
+                    GoalCondition::Goal {
+                        goal: "fund".into(),
+                    },
+                ),
+            ],
+        ),
+        chapter(
+            "second",
+            vec![goal("time", GoalCondition::Date { minute: 480. })],
+        ),
+    ]));
+    let start = state(&mut g);
+    assert!(start["chapters"][0]["goals"][0]["completed_at"].is_number());
+    assert!(start["chapters"][0]["goals"][1]["completed_at"].is_null());
+    g.tick(0.25);
+    let first = state(&mut g);
+    assert!(first["chapters"][0]["completed_at"].is_number());
+    assert!(first["chapters"][1]["goals"][0]["activated_at"].is_number());
+    assert!(first["finished_at"].is_null());
+    g.tick(0.25);
+    assert!(state(&mut g)["finished_at"].is_number());
+}
+#[test]
+fn harvest_credit_uses_the_goal_activation_baseline_and_survives_reload() {
+    let d = scenario(vec![
+        chapter(
+            "wait",
+            vec![goal("morning", GoalCondition::Date { minute: 482. })],
+        ),
+        chapter(
+            "grow",
+            vec![
+                goal(
+                    "earned",
+                    GoalCondition::Harvests {
+                        count: 2,
+                        credit: CounterCredit::AfterActivation,
+                    },
+                ),
+                goal(
+                    "lifetime",
+                    GoalCondition::Harvests {
+                        count: 3,
+                        credit: CounterCredit::Run,
+                    },
+                ),
+            ],
+        ),
+    ]);
+    let mut g = game(d);
+    g.app.world_mut().resource_mut::<Village>().harvests = 3;
+    for _ in 0..3 {
+        g.tick(0.25);
+    }
+    let baseline = g
+        .app
+        .world()
+        .resource::<Village>()
+        .progress
+        .scenario_journal
+        .as_ref()
+        .unwrap()
+        .goals["earned"]
+        .harvest_baseline;
+    assert_eq!(baseline, 3);
+    g.app.world_mut().resource_mut::<Village>().harvests = 4;
+    g.tick(0.25);
+    assert!(state(&mut g)["finished_at"].is_null());
+    let saved = g.snapshot();
+    let mut restored = Game::new();
+    assert!(restored.restore(&saved));
+    assert_eq!(restored.snapshot(), saved);
+    for world in [&mut g, &mut restored] {
+        world.app.world_mut().resource_mut::<Village>().harvests = 5;
+        world.tick(0.25);
+    }
+    assert_eq!(g.snapshot(), restored.snapshot());
+    assert!(state(&mut g)["finished_at"].is_number());
+}
+#[test]
+fn optional_goals_can_finish_later_and_group_progress_is_native() {
+    let mut optional = goal("later", GoalCondition::Date { minute: 482. });
+    optional.optional = true;
+    let mut g = game(scenario(vec![chapter(
+        "one",
+        vec![
+            goal(
+                "main",
+                GoalCondition::All {
+                    conditions: vec![
+                        GoalCondition::Funds { cents: 1 },
+                        GoalCondition::Any {
+                            conditions: vec![
+                                GoalCondition::Stored {
+                                    material: "timber".into(),
+                                    count: 1,
+                                },
+                                GoalCondition::Date { minute: 1_000_000. },
+                            ],
+                        },
+                    ],
+                },
+            ),
+            optional,
+        ],
+    )]));
+    let start = state(&mut g);
+    assert!(start["finished_at"].is_number());
+    assert!(start["chapters"][0]["goals"][1]["completed_at"].is_null());
+    for _ in 0..4 {
+        g.tick(0.25);
+    }
+    assert!(state(&mut g)["chapters"][0]["goals"][1]["completed_at"].is_number());
+}
+#[test]
+fn invalid_journals_reject_cycles_missing_references_future_deadlocks_and_limits() {
+    for condition in [
+        GoalCondition::Goal {
+            goal: "missing".into(),
+        },
+        GoalCondition::Goal {
+            goal: "same".into(),
+        },
+        GoalCondition::All { conditions: vec![] },
+        GoalCondition::Buildings {
+            building: "castle".into(),
+            count: 1,
+            credit: BuildingCredit::Present,
+        },
+        GoalCondition::Date { minute: f32::NAN },
+    ] {
+        assert!(
+            compile(scenario(vec![chapter(
+                "one",
+                vec![goal("same", condition)]
+            )]))
+            .is_err()
+        );
+    }
+    let cyclic = scenario(vec![chapter(
+        "one",
+        vec![
+            goal("a", GoalCondition::Goal { goal: "b".into() }),
+            goal("b", GoalCondition::Goal { goal: "a".into() }),
+        ],
+    )]);
+    assert!(compile(cyclic).is_err());
+    let future = scenario(vec![
+        chapter(
+            "one",
+            vec![goal("a", GoalCondition::Goal { goal: "b".into() })],
+        ),
+        chapter("two", vec![goal("b", GoalCondition::Funds { cents: 0 })]),
+    ]);
+    assert!(compile(future).is_err());
+    let mut deep = GoalCondition::Funds { cents: 0 };
+    for _ in 0..6 {
+        deep = GoalCondition::All {
+            conditions: vec![deep],
+        };
+    }
+    assert!(compile(scenario(vec![chapter("one", vec![goal("deep", deep)])])).is_err());
+}
+#[test]
+fn journal_runtime_corruption_is_atomic_and_normal_saves_remain_unchanged() {
+    let mut ordinary = Game::new();
+    assert!(state(&mut ordinary).is_null());
+    let raw = ordinary.snapshot();
+    assert!(ordinary.restore(&raw));
+    assert_eq!(ordinary.snapshot(), raw);
+    let mut g = game(scenario(vec![chapter(
+        "one",
+        vec![goal("later", GoalCondition::Date { minute: 900. })],
+    )]));
+    let good = g.snapshot();
+    for problem in ["missing", "orphan", "time", "duplicate_baseline", "future"] {
+        let mut broken: serde_json::Value = serde_json::from_str(&good).unwrap();
+        let runtime = &mut broken["village"]["progress"]["scenario_journal"];
+        match problem {
+            "missing" => *runtime = serde_json::Value::Null,
+            "orphan" => {
+                runtime["goals"]["alien"] = runtime["goals"]["later"].clone();
+            }
+            "time" => runtime["last_sample"] = (-1).into(),
+            "duplicate_baseline" => {
+                runtime["goals"]["later"]["building_baseline"] = serde_json::json!([0, 0])
+            }
+            _ => runtime["goals"]["later"]["activated_at"] = 999999.into(),
+        }
+        assert!(!g.restore(&broken.to_string()), "{problem}");
+        assert_eq!(g.snapshot(), good);
+    }
+}
+
+#[test]
+fn stored_targets_do_not_count_paid_incoming_orders_and_reports_do_not_advance_time() {
+    let mut d = scenario(vec![chapter(
+        "stores",
+        vec![goal(
+            "timber",
+            GoalCondition::Stored {
+                material: "timber".into(),
+                count: 101,
+            },
+        )],
+    )]);
+    d.rules.logistics = true;
+    let mut g = game(d);
+    let mut items = [0u32; economy::COUNT];
+    items[0] = 1;
+    assert_eq!(
+        g.order_supplies(&serde_json::to_string(&items).unwrap()),
+        "ok"
+    );
+    g.tick(0.25);
+    let before = g.snapshot();
+    let report = state(&mut g);
+    assert_eq!(
+        report["chapters"][0]["goals"][0]["condition"]["value"],
+        100.
+    );
+    assert_eq!(report["chapters"][0]["goals"][0]["status"], "active");
+    assert!(report["finished_at"].is_null());
+    assert_eq!(g.snapshot(), before);
+    assert!(g.restore(&before));
+    assert_eq!(g.snapshot(), before);
+}
