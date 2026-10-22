@@ -1,0 +1,8 @@
+import assert from 'node:assert/strict';
+import {presentedPoseLayers,residentClips,sampleResidentClip,advanceResidentAnimation} from '../web/resident-animation.js';
+for(const mode of Object.keys(residentClips))for(let step=0;step<=600;step++){
+ const layers=sampleResidentClip(mode,step/100),before=JSON.stringify(layers),selected=presentedPoseLayers(layers,'keyframes');assert.equal(selected.length,1);assert.equal(selected[0].weight,1);assert(layers.some(p=>p.sheet===selected[0].sheet&&p.row===selected[0].row&&p.frame===selected[0].frame));assert.equal(JSON.stringify(layers),before);assert.equal(presentedPoseLayers(layers),layers);
+}
+const a={sheet:'base',row:0,frame:1,weight:.3},b={sheet:'activities',row:1,frame:0,weight:.5};assert.equal(presentedPoseLayers([a,b,{...a}],'keyframes')[0].sheet,'base');assert.equal(presentedPoseLayers([{...a,weight:.5},b],'keyframes')[0].sheet,'base');assert.deepEqual(presentedPoseLayers([{...a,weight:NaN},{...a,weight:-1}],'keyframes'),[]);assert.throws(()=>presentedPoseLayers([a],'warp'),/supported/);
+const resident={id:0,task:'cook',x:2,y:2,target_x:2,target_y:2},previous={mode:'walk',phase:.1,facing:1,transition:.18,x:2,y:2};let state=advanceResidentAnimation(previous,resident,500,0);for(let i=0;i<20;i++){state=advanceResidentAnimation(state,resident,500,.01);const selected=presentedPoseLayers(state.layers,'keyframes');assert.equal(selected.length,1);assert.equal(selected[0].weight,1);}
+console.log('PASS: single intact poses across all 13 animations and activity transitions, no input mutation, duplicate-weight aggregation, stable ties and unchanged legacy layers.');

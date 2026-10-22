@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "status": "Whole-pose ghosting correction verified for draft providers; final animation cadence and artwork incomplete",
+  "sourceHashes": {
+    "web/resident-animation.js": "f92de8c2aa02050c190625df4b20065b8c9cdc98fc7845c978368d2ac90f66e6",
+    "web/artwork/character-composed-review.js": "a029c4e1344b6d273645e49ebeaf4524dad5c39716a6402d3869e3f842b11e9c",
+    "web/artwork/character-equipment-review.js": "09175f11241d4089279aa70e663f5a451fea47d9e6f23961d90523e2fc5eb52a"
+  },
+  "evidence": {
+    "assets/art-direction/character-prototype-v1/water-equipment-cycle-v2-keyframes-transitions.png": "a21a7d9010f5ea0433cbe4bd7d01f3b7de6da6d620cc1f66c4189319baa84c19",
+    "assets/art-direction/character-prototype-v1/water-equipment-playback-keyframes-v1.webm": "95a7e9f4db09f682241b399ab6e02bb30054b56d8b5d209506d5b905111984f5",
+    "assets/art-direction/character-prototype-v1/water-equipment-playback-keyframes-v1-frames.png": "3cac7bea107ba50cd8197531aee0e6e5586d028d5d8ec7daf90753300a60dc50",
+    "assets/art-direction/character-prototype-v1/water-equipment-playback-crossfade-v1.webm": "bccaa0797425b57130f27e788ef5f2e6c9274c39ca99291fd186e04781729223",
+    "assets/art-direction/character-prototype-v1/water-equipment-playback-crossfade-v1-frames.png": "782c56182287ac6b96da67adc668a36eca622c69b0494dcfbf9e57d5676f4b56"
+  },
+  "scope": {
+    "compositor": "104 pixel samples across all 13 draft clips match one exact source pose",
+    "playback": "Real three-second canvas recordings for both modes; 75 successive sampled video frames per mode inspected",
+    "legacy": "Existing providers without a presentation policy keep crossfades; no original cast/sprite artwork changed",
+    "equipment": "All four source-bound equipment/body/hand composites remain unchanged"
+  },
+  "findings": [
+    "Keyframe mode eliminates duplicated/translucent silhouettes caused by opacity blending",
+    "Crossfade comparison retains the earlier ghosting and is available in the same review",
+    "The four-pose watering movement still has discrete steps; pose spacing/cadence needs production review",
+    "The lowest grip and final tool material highlights still need refinement",
+    "No full character creator or player integration approval implied"
+  ],
+  "checks": [
+    "verify-pose-presentation.mjs",
+    "verify-pose-presentation-browser.mjs",
+    "verify-equipment-playback.mjs",
+    "verify-water-equipment-cycle.mjs",
+    "verify-resident-animation.mjs",
+    "verify-composed-appearance.mjs",
+    "verify-appearance-cache.mjs",
+    "verify-character-materials.mjs"
+  ]
+}

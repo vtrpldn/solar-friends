@@ -6,7 +6,7 @@ import {bodyMaterialPalettes} from '../character-materials.js';
 import {residentClips} from '../resident-animation.js';
 // Review-only until parts, equipment and native recipes pass the release gates.
 export function createComposedAppearanceReview({reviews,materials,maxClips=12,maxConcurrent=2,maxQueued=48}){
- const owned=new Map(Object.entries(reviews)),cache=createAppearanceCache({maxEntries:maxClips,maxConcurrent,maxQueued,compose:({review,checked})=>review.composeMaterials(materials.provider(checked.materials))});
+ const owned=new Map(Object.entries(reviews)),cache=createAppearanceCache({maxEntries:maxClips,maxConcurrent,maxQueued,compose:async({review,checked})=>{const provider=await review.composeMaterials(materials.provider(checked.materials));return {interpolation:'keyframes',frameForPose:(sheet,index)=>provider.frameForPose(sheet,index)};}});
  return {
   provider(clip,recipe=prototypeAppearanceRecipe()){
    const keyClip=clip==='sleep'?'sit':clip,review=owned.get(keyClip);

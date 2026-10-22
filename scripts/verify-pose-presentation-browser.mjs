@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';import {chromium} from 'playwright';import {serve} from './serve.mjs';
+const server=await serve();let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/artwork/character-body-lab.html`);await page.waitForFunction(()=>document.body.dataset.bodyReviewReady==='true');
+ const result=await page.evaluate(async()=>{
+  const {drawResidentAnimation,sampleResidentClip,residentClips}=await import('/resident-animation.js'),{prototypeAppearanceRecipe}=await import('/character-appearance-recipe.js'),model=window.composedAppearanceReview.model,canvas=()=>{const c=document.createElement('canvas');c.width=c.height=256;return c;},target=canvas(),surface=canvas(),expected=canvas(),legacy=canvas(),pixels=c=>c.getContext('2d').getImageData(0,0,256,256).data,equal=(a,b)=>a.every((n,i)=>n===b[i]);let checked=0,differences=0;
+  for(const clip of Object.keys(residentClips)){
+   const provider=await model.provider(clip,prototypeAppearanceRecipe());if(provider.interpolation!=='keyframes')throw Error('Draft provider lost its keyframe policy');
+   for(const seconds of [0,.455,.48,.955,.98,1.455,1.48,2.955]){
+    const layers=sampleResidentClip(clip,seconds),pose=layers.reduce((a,b)=>a.weight>=b.weight?a:b),frame=provider.frameForPose(pose.sheet,pose.row*4+pose.frame);target.getContext('2d').clearRect(0,0,256,256);expected.getContext('2d').clearRect(0,0,256,256);legacy.getContext('2d').clearRect(0,0,256,256);drawResidentAnimation(target.getContext('2d'),surface,provider,{layers,facing:1,breath:1},128,256*.95,256);expected.getContext('2d').drawImage(frame,0,0);if(!equal(pixels(target),pixels(expected)))throw Error('Ghost or opacity change in '+clip+' at '+seconds);drawResidentAnimation(legacy.getContext('2d'),surface,{frameForPose:(s,i)=>provider.frameForPose(s,i)},{layers,facing:1,breath:1},128,256*.95,256);if(!equal(pixels(target),pixels(legacy)))differences++;checked++;
+   }
+  }
+  return {checked,differences};
+ });assert.equal(result.checked,104);assert(result.differences>=10);await page.selectOption('#equipment-presentation','crossfade');await page.locator('#equipment-cycle-time').fill('.455');await page.locator('#equipment-cycle-time').dispatchEvent('input');const cross=await page.locator('#equipment-cycle-detail').evaluate(c=>c.toDataURL());await page.selectOption('#equipment-presentation','keyframes');const held=await page.locator('#equipment-cycle-detail').evaluate(c=>c.toDataURL());assert.notEqual(held,cross);await page.locator('#equipment-pose-review').screenshot({path:'/private/tmp/solar-keyframe-equipment-review.png'});assert.deepEqual(errors,[]);console.log('PASS: 104 actual compositor samples across all 13 clips equal one intact source pose, distinct legacy crossfades remain available, and public comparison control switches rendering.');
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

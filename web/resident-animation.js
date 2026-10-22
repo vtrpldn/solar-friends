@@ -81,13 +81,30 @@ export function advanceResidentAnimation(previous, r, minutes, delta) {
     x: r.x, y: r.y, breath: mode === 'walk' || mode === 'work' || mode === 'sleep' ? 1 : 1 + Math.sin(phase * 1.8 + r.id) * .006 };
 }
 
+// Independently painted silhouettes cannot be spatially interpolated by opacity.
+// A provider may opt into whole key poses; legacy sheets retain their blending.
+export function presentedPoseLayers(layers,interpolation='crossfade') {
+  if(interpolation==='crossfade')return layers;
+  if(interpolation!=='keyframes')throw Error('Choose a supported resident pose presentation.');
+  const poses=new Map();
+  for(const pose of layers){
+    if(!Number.isFinite(pose.weight)||pose.weight<=0)continue;
+    const key=pose.sheet+':'+pose.row+':'+pose.frame,previous=poses.get(key);
+    if(previous)previous.weight+=pose.weight;
+    else poses.set(key,{...pose});
+  }
+  let strongest=null;
+  for(const pose of poses.values())if(!strongest||pose.weight>strongest.weight)strongest=pose;
+  return strongest?[{...strongest,weight:1}]:[];
+}
+
 // Additive premultiplied blending on an isolated surface keeps overlapping
 // opaque pixels opaque instead of making the whole resident flash translucent.
 export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, width) {
   const buffer = surface.getContext('2d');
   buffer.clearRect(0, 0, surface.width, surface.height);
   buffer.globalCompositeOperation = 'lighter';
-  for (const pose of animation.layers) {
+  for (const pose of presentedPoseLayers(animation.layers,sheets.interpolation??'crossfade')) {
     if (pose.weight <= 0) continue;
     const frame = typeof sheets.frameForPose === 'function' ? sheets.frameForPose(pose.sheet,pose.row*4+pose.frame) : preparedFrames(sheets[pose.sheet], {referenceRow:pose.sheet === 'base' ? 2 : 0})?.[pose.row*4+pose.frame];
     if (!frame) continue;
