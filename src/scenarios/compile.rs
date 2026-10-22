@@ -514,7 +514,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
             .filter(|b| b.kind == "home" && b.progress >= 100.)
             .count()
             * 3
-            < 5
+            < v.skills.people.len()
         {
             report.issues.push(Issue {
                 severity: Severity::Warning,

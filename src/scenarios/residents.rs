@@ -473,4 +473,33 @@ mod tests {
             assert_eq!(restored.snapshot(), g.snapshot());
         }
     }
+    #[test]
+    fn overnight_bed_feedback_uses_the_actual_authored_cast_and_completed_homes() {
+        for (population, homes, warning) in [
+            (1, 0, true),
+            (1, 1, false),
+            (3, 1, false),
+            (4, 1, true),
+            (5, 2, false),
+            (12, 2, true),
+            (12, 4, false),
+        ] {
+            let mut d = cast(population);
+            for i in 0..homes {
+                let mut b = d.start.buildings[0].clone();
+                b.id = format!("home-{i}");
+                b.kind = "home".into();
+                b.x = 23 + i * 4;
+                b.y = 25;
+                d.start.buildings.push(b);
+            }
+            let (_, report) =
+                compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+            assert_eq!(
+                report.issues.iter().any(|i| i.code == "overnight_beds"),
+                warning,
+                "{population} residents, {homes} homes"
+            );
+        }
+    }
 }
