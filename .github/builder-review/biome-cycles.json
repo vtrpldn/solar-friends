@@ -1,0 +1,349 @@
+{
+  "passed": true,
+  "wasm_sha256": "a98828691f3eb6a3091fa90d036df8e40b0b642696a1ce28a6522423e4aa6ab5",
+  "script_sha256": "02732d8798e302181f48659ee4f8d93601eb41c40b2ff5547b951b3c377d58f5",
+  "scope": "One resident; finite logistics/water, living land and real regional seasons. Maintenance disabled to isolate climate. Not a population, artwork, example-difficulty or full equipment-lifecycle release approval.",
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "seed": 42,
+      "river": true,
+      "days": 42,
+      "definition_sha256": "3504e91b8a21d4bc56a07ac84fcfb11a6f8b879717a0225b8244e16f03501376",
+      "profile": {
+        "dry_evaporation": 1.25,
+        "dry_rain_chance": 18,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.8999999761581421,
+        "wet_rain_chance": 70
+      },
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 12,
+          "rain_observations": 70,
+          "evaporation": [
+            0.8999999761581421
+          ],
+          "hydro": [
+            1.7100000381469727,
+            2.430000066757202
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 4,
+          "rain_observations": 10,
+          "evaporation": [
+            1.25
+          ],
+          "hydro": [
+            1.0800000429153442,
+            1.4760000705718994
+          ]
+        }
+      },
+      "min_food": 0,
+      "max_hunger": 35.20344543457031,
+      "min_energy": 78.37732696533203,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 3535.769337773885,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 17,
+      "harvests_when_lonely": 2
+    },
+    {
+      "biome": "mata-atlantica",
+      "seed": 73,
+      "river": false,
+      "days": 42,
+      "definition_sha256": "d4f14df7a9e4e6e4d285e88b8849456af9e75802b102f1e597895877aee2c18e",
+      "profile": {
+        "dry_evaporation": 1.25,
+        "dry_rain_chance": 18,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.8999999761581421,
+        "wet_rain_chance": 70
+      },
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 14,
+          "rain_observations": 79,
+          "evaporation": [
+            0.8999999761581421
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 4,
+          "rain_observations": 11,
+          "evaporation": [
+            1.25
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        }
+      },
+      "min_food": 0,
+      "max_hunger": 36.726016998291016,
+      "min_energy": 78.37732696533203,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 1561.7296732621974,
+      "solar_output_max": 4.580462455749512,
+      "rain_caught": true,
+      "harvests": 16,
+      "harvests_when_lonely": 2
+    },
+    {
+      "biome": "cerrado",
+      "seed": 42,
+      "river": true,
+      "days": 42,
+      "definition_sha256": "de622f4720bce4d5977831b0cbd7c37bf16d203a50dca91f9c57684224f5daff",
+      "profile": {
+        "dry_evaporation": 1.399999976158142,
+        "dry_rain_chance": 10,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.949999988079071,
+        "wet_rain_chance": 72
+      },
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 14,
+          "rain_observations": 84,
+          "evaporation": [
+            0.949999988079071
+          ],
+          "hydro": [
+            1.7100000381469727,
+            2.430000066757202
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 3,
+          "rain_observations": 7,
+          "evaporation": [
+            1.399999976158142
+          ],
+          "hydro": [
+            1.0800000429153442,
+            1.4760000705718994
+          ]
+        }
+      },
+      "min_food": 0,
+      "max_hunger": 37.53729248046875,
+      "min_energy": 78.37732696533203,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 3533.0466302511745,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 17,
+      "harvests_when_lonely": 2
+    },
+    {
+      "biome": "cerrado",
+      "seed": 73,
+      "river": false,
+      "days": 42,
+      "definition_sha256": "a1ddeb86623f26e71015d3537ab7be8cf552326fb035d54c4becabb26e0896f6",
+      "profile": {
+        "dry_evaporation": 1.399999976158142,
+        "dry_rain_chance": 10,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.949999988079071,
+        "wet_rain_chance": 72
+      },
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 16,
+          "rain_observations": 89,
+          "evaporation": [
+            0.949999988079071
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 2,
+          "rain_observations": 5,
+          "evaporation": [
+            1.399999976158142
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        }
+      },
+      "min_food": 0,
+      "max_hunger": 36.726016998291016,
+      "min_energy": 78.37732696533203,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 1920.959453070397,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 16,
+      "harvests_when_lonely": 2
+    },
+    {
+      "biome": "caatinga",
+      "seed": 42,
+      "river": true,
+      "days": 56,
+      "definition_sha256": "1bbd6e67a841881fe5f628137a3723d49e3ebcbf03925c6094945aeebc4f2ef7",
+      "profile": {
+        "dry_evaporation": 1.600000023841858,
+        "dry_rain_chance": 6,
+        "intro_days": 0,
+        "season_days": 28,
+        "wet_evaporation": 1.0499999523162842,
+        "wet_rain_chance": 45
+      },
+      "checks": 57,
+      "continuations": 8,
+      "seasons": {
+        "wet": {
+          "days": 28,
+          "rain_days": 15,
+          "rain_observations": 87,
+          "evaporation": [
+            1.0499999523162842
+          ],
+          "hydro": [
+            1.7100000381469727,
+            2.430000066757202
+          ]
+        },
+        "dry": {
+          "days": 28,
+          "rain_days": 2,
+          "rain_observations": 5,
+          "evaporation": [
+            1.600000023841858
+          ],
+          "hydro": [
+            1.0800000429153442,
+            1.3680000305175781
+          ]
+        }
+      },
+      "min_food": 0,
+      "max_hunger": 37.736053466796875,
+      "min_energy": 78.37732696533203,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 4697.5086021214565,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 24,
+      "harvests_when_lonely": 2
+    },
+    {
+      "biome": "caatinga",
+      "seed": 73,
+      "river": false,
+      "days": 56,
+      "definition_sha256": "2ce73d98bed89637d0f879758da3b68c5e78fc444a04806be7aa39dc05ec5c41",
+      "profile": {
+        "dry_evaporation": 1.600000023841858,
+        "dry_rain_chance": 6,
+        "intro_days": 0,
+        "season_days": 28,
+        "wet_evaporation": 1.0499999523162842,
+        "wet_rain_chance": 45
+      },
+      "checks": 57,
+      "continuations": 8,
+      "seasons": {
+        "wet": {
+          "days": 28,
+          "rain_days": 12,
+          "rain_observations": 73,
+          "evaporation": [
+            1.0499999523162842
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        },
+        "dry": {
+          "days": 28,
+          "rain_days": 2,
+          "rain_observations": 6,
+          "evaporation": [
+            1.600000023841858
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        }
+      },
+      "min_food": 0,
+      "max_hunger": 40.816162109375,
+      "min_energy": 79.9681625366211,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 2634.074775521829,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 23,
+      "harvests_when_lonely": 3
+    }
+  ],
+  "source_commit": "05aada7",
+  "reproduce": [
+    "bash scripts/build.sh",
+    "node scripts/verify-biome-cycles.mjs"
+  ],
+  "totals": {
+    "simulated_days": 280,
+    "native_ticks": 537600,
+    "conserved_daily_checkpoints": 286,
+    "exact_continuations": 40
+  }
+}
