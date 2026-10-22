@@ -33,11 +33,13 @@ const catalogMaterial=material=>['timber','bamboo','earth','stone','salvage'].in
 const keyFor=b=>b.kind!=='home'?b.kind:b.recipe==='local'?'home-veranda':b.appearance||(b.recipe==='adobe'?'adobe-gable':'home');
 
 export class EditorMap {
-  constructor(canvas,art,{action,viewChanged,hover}){
+  constructor(canvas,art,{action,viewChanged,hover,preview=false}){
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.art=art;
     this.action=action;this.viewChanged=viewChanged;this.hover=hover;
     this.brushSize=3;
     this.view={center:[32,32],zoom:1.3,selected:null,selection:[],tool:'select',grid:true};
+    this.preview=preview;
+    if(preview)return;
     this.observer=new ResizeObserver(()=>this.render());this.observer.observe(canvas);
     canvas.addEventListener('contextmenu',e=>e.preventDefault());
     canvas.addEventListener('pointerdown',e=>this.down(e));
@@ -124,9 +126,9 @@ export class EditorMap {
   }
   render(){
     if(!this.document||!this.snapshot)return;
-    const {canvas,ctx:c,view,art}=this,r=canvas.getBoundingClientRect(),width=r.width,height=r.height;
+    const {canvas,ctx:c,view,art}=this,r=this.preview?{width:480,height:300}:canvas.getBoundingClientRect(),width=r.width,height=r.height;
     if(!width||!height)return;
-    const dpr=Math.min(devicePixelRatio,2),w=Math.round(width*dpr),h=Math.round(height*dpr);
+    const dpr=this.preview?1:Math.min(devicePixelRatio,2),w=Math.round(width*dpr),h=Math.round(height*dpr);
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
     c.setTransform(dpr,0,0,dpr,0,0);
     this.scale=Math.max(.18,Math.min(width/1000,height/800)*view.zoom);
@@ -150,7 +152,7 @@ export class EditorMap {
     c.save();c.lineJoin='round';c.lineCap='round';
     for(const p of lines)paintUtilityRoute(c,this.project,this.scale,p.plan,({fresh:'#7bb8c8',irrigation:'#9dbb68',greywater:'#b99dbb',sewage:'#c6a06a',electricity:'#e0c46b'})[p.plan.kind],p.phase!=='active',{pump:p.plan.kind!=='electricity'});
     c.restore();canvas.dataset.utilityCount=String(lines.length);
-    const regions=[...(this.document.map.regions??[])];
+    const regions=this.preview?[]:[...(this.document.map.regions??[])];
     if(view.tool==='region'&&this.drag&&!this.drag.pan&&this.pointer){const a=this.drag.cell,b=this.pointer;regions.push({title:'New region',x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(a.x-b.x)+1,height:Math.abs(a.y-b.y)+1});}
     for(const region of regions){const {x,y,width:w,height:h}=region;this.polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]],'#d9af4822','#e8c05a');const p=this.project(x+(w-1)/2,y-.5);c.font='bold 12px sans-serif';c.textAlign='center';c.fillStyle='#4f3920';c.fillText(region.title,p.x,p.y-8);}
     canvas.dataset.regionCount=String(this.document.map.regions?.length??0);
@@ -187,7 +189,7 @@ export class EditorMap {
     if(this.utilityPreview){c.save();c.lineJoin='round';c.lineCap='round';paintUtilityRoute(c,this.project,this.scale,this.utilityPreview,this.utilityPreview.allowed===false?'#c65e42':'#fff3a4',true,{pump:this.utilityPreview.kind!=='electricity'});c.restore();}
     for(const port of this.utilityPreview?.ports??[]){const p=this.project(...port.cell);c.beginPath();c.arc(p.x,p.y,5*this.scale,0,Math.PI*2);c.fillStyle=port.supply?'#f3ca70':'#8bd1e4';c.fill();c.strokeStyle='#3a4b38';c.lineWidth=1;c.stroke();}
     if(this.routeStroke)for(const [x,y]of this.routeStroke)this.polygon(footprintCorners('road',x,y),'#f4df9a66','#fff3c4');
-    for(const [label,point,colour]of [['Camp',this.document.map.camp,'#476c44'],['Start view',this.document.map.camera,'#8f603c']]){
+    for(const [label,point,colour]of (this.preview?[]:[['Camp',this.document.map.camp,'#476c44'],['Start view',this.document.map.camera,'#8f603c']])){
       const p=this.project(...point),same=this.document.map.camp.every((n,i)=>n===this.document.map.camera[i]);c.strokeStyle=colour;c.fillStyle='#f5e5ba';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,7,0,Math.PI*2);c.fill();c.stroke();c.font='bold 11px Trebuchet MS';c.textAlign='center';c.fillStyle=colour;c.fillText(label,p.x,p.y+(same&&label==='Camp'?-15:22));
     }
     if(this.pointer&&allBuildingArt[view.tool]){

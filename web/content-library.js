@@ -8,6 +8,7 @@ export class LibraryConflict extends Error {
 const clone=value=>structuredClone(value);
 const recordKind=store=>({projects:'project',runs:'run',residents:'resident',releases:'release'})[store];
 const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition??record.package?.definition)?.start?.resident_balance??'balanced',contentRevision:record.package?.content_revision??record.release?.content_revision,author:record.package?.author??record.release?.author,compatibility:record.package?.compatibility??record.release?.compatibility});
+const safeThumbnail=value=>typeof value==='string'&&value.length<=96*1024&&/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(value)?value:null;
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
 export class ContentLibrary extends EventTarget {
@@ -22,9 +23,9 @@ export class ContentLibrary extends EventTarget {
   }
   async #db(){
     if(!this.#opening)this.#opening=new Promise((resolve,reject)=>{
-      const request=indexedDB.open(this.name,4);let blocked=false;
+      const request=indexedDB.open(this.name,5);let blocked=false;
       request.onupgradeneeded=event=>{
-        for(const name of ['projects','runs','residents','releases','releaseCounters','heads'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:name==='heads'?'key':'id'});
+        for(const name of ['projects','runs','residents','releases','releaseCounters','heads','previews'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:['heads','previews'].includes(name)?'key':'id'});
         const heads=request.transaction.objectStore('heads');if(!heads.indexNames.contains('kind'))heads.createIndex('kind','kind',{unique:false});if(!heads.indexNames.contains('projectId'))heads.createIndex('projectId','projectId',{unique:false});
         if(event.oldVersion<4)enrichRunHeaders(request.transaction);
       };
@@ -55,10 +56,10 @@ export class ContentLibrary extends EventTarget {
       tx.oncomplete=()=>resolve(values.sort((a,b)=>b.updatedAt-a.updatedAt));tx.onabort=()=>reject(tx.error);
     });
   }
-  async #write(store,id,expected,update){
+  async #write(store,id,expected,update,thumbnail){
     const db=await this.#db();
     const result=await new Promise((resolve,reject)=>{
-      const tx=db.transaction([store,'heads'],'readwrite'),records=tx.objectStore(store),request=records.get(id);
+      const tx=db.transaction([store,'heads','previews'],'readwrite'),records=tx.objectStore(store),request=records.get(id);
       let result,error;
       request.onsuccess=()=>{
         try{
@@ -69,8 +70,9 @@ export class ContentLibrary extends EventTarget {
             result.id=id;result.revision=(previous?.revision??0)+1;
             result.updatedAt=Math.max(Date.now(),(previous?.updatedAt??0)+1);
             records.put(result);tx.objectStore('heads').put(header(recordKind(store),result));
+            if(thumbnail!==undefined){const key=`${recordKind(store)}:${id}`,image=safeThumbnail(thumbnail);if(image)tx.objectStore('previews').put({key,image});else tx.objectStore('previews').delete(key);}
           }else{
-            records.delete(id);tx.objectStore('heads').delete(`${recordKind(store)}:${id}`);
+            records.delete(id);tx.objectStore('heads').delete(`${recordKind(store)}:${id}`);tx.objectStore('previews').delete(`${recordKind(store)}:${id}`);
           }
         }catch(cause){error=cause;tx.abort();}
       };
@@ -81,6 +83,7 @@ export class ContentLibrary extends EventTarget {
     return result;
   }
   #changed(kind,id,revision){const detail={kind,id,revision};this.#channel?.postMessage(detail);this.dispatchEvent(new CustomEvent('change',{detail}));}
+  async getPreview(kind,id){if(!['project','release','run'].includes(kind))return null;const row=await this.#read('previews',`${kind}:${id}`);return safeThumbnail(row?.image);}
   listReleases(){return this.#list('release');}
   getRelease(id){return this.#read('releases',id);}
   deleteRelease(id,expectedRevision){return this.#write('releases',id,expectedRevision,()=>null);}
@@ -96,20 +99,20 @@ export class ContentLibrary extends EventTarget {
   deleteResidentPreset(id,expectedRevision){return this.#write('residents',id,expectedRevision,()=>null);}
   getProject(id){return this.#read('projects',id);}
   getRun(id){return this.#read('runs',id);}
-  async saveProject({id,checkpoint,view,attribution},expectedRevision=null){
+  async saveProject({id,checkpoint,view,attribution,thumbnail},expectedRevision=null){
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||!checkpoint.definition?.start)throw Error('This draft checkpoint is not supported.');
     const data=clone({checkpoint,view:safeView(view)});
     return this.#write('projects',id,expectedRevision,previous=>({
       format:'solar-friends-project',schema:1,...data,
       title:checkpoint.definition.title,attribution:clone(attribution??previous?.attribution??[]),
       previous:previous?{checkpoint:{...previous.checkpoint,history:undefined},view:previous.view}:null,
-    }));
+    }),thumbnail);
   }
   deleteProject(id,expectedRevision){return this.#write('projects',id,expectedRevision,()=>null);}
-  async createRelease({projectId,expectedRevision,author,validate}){
+  async createRelease({projectId,expectedRevision,author,validate,thumbnail}){
     const db=await this.#db(),id=crypto.randomUUID();
     const result=await new Promise((resolve,reject)=>{
-      const tx=db.transaction(['projects','releases','releaseCounters','heads'],'readwrite'),projects=tx.objectStore('projects'),heads=tx.objectStore('heads');let result,error;
+      const tx=db.transaction(['projects','releases','releaseCounters','heads','previews'],'readwrite'),projects=tx.objectStore('projects'),heads=tx.objectStore('heads');let result,error;
       const source=projects.get(projectId);
       source.onsuccess=()=>{
         const previous=source.result;
@@ -119,18 +122,18 @@ export class ContentLibrary extends EventTarget {
           const version=(versions.result?.version??0)+1;
           const file=createReleasePackage({id,version,definition:previous.checkpoint.definition,author,credits:previous.attribution??[],validate});
           result={id,revision:1,updatedAt:Date.now(),format:'solar-friends-frozen-release',schema:1,title:file.title,projectId,sourceRevision:previous.revision,package:file};
-          tx.objectStore('releases').add(result);heads.add(header('release',result));tx.objectStore('releaseCounters').put({id:projectId,version});
+          tx.objectStore('releases').add(result);heads.add(header('release',result));if(safeThumbnail(thumbnail))tx.objectStore('previews').put({key:`release:${id}`,image:thumbnail});tx.objectStore('releaseCounters').put({id:projectId,version});
         }catch(cause){error=cause;tx.abort();}};
       };
       tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(error||tx.error||Error('The release could not be saved. Your draft is unchanged.'));
     });
     this.#changed('releases',id,1);return result;
   }
-  async importRelease(file,validate){
+  async importRelease(file,validate,thumbnail){
     const data=validateRelease(file,validate);
-    return this.#write('releases',crypto.randomUUID(),null,()=>({format:'solar-friends-frozen-release',schema:1,title:data.title,projectId:null,sourceRevision:null,package:data}));
+    return this.#write('releases',crypto.randomUUID(),null,()=>({format:'solar-friends-frozen-release',schema:1,title:data.title,projectId:null,sourceRevision:null,package:data}),thumbnail);
   }
-  async createRun({definition,snapshot,projectId=null,sessionKind='scenario',sourceRevision=null,releaseId=null}){
+  async createRun({definition,snapshot,projectId=null,sessionKind='scenario',sourceRevision=null,releaseId=null,thumbnail}){
     if(!['scenario','playtest'].includes(sessionKind)||typeof snapshot!=='string'||snapshot.length>16*1024*1024)throw Error('This playthrough cannot be stored.');
     let release=null;
     if(releaseId){
@@ -139,7 +142,7 @@ export class ContentLibrary extends EventTarget {
       const p=record.package;release={id:record.id,packageId:p.id,content_revision:p.content_revision,author:p.author,compatibility:clone(p.compatibility),credits:clone(p.credits??[])};
     }
     const data=clone({definition,snapshot,projectId,sessionKind,sourceRevision,...(release?{release}:{})});
-    return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,...data}));
+    return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,...data}),thumbnail);
   }
   saveRun(id,snapshot,expectedRevision){
     if(typeof snapshot!=='string'||snapshot.length>16*1024*1024)throw Error('This playthrough is too large to save.');

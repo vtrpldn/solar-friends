@@ -1,3 +1,4 @@
+import {creationThumbnail} from './thumbnail.js';
 import {installLibraryDiscovery} from './library-discovery.js';
 import {RELEASE_FORMAT,freezeReleaseDefinition} from '../release-package.js';
 import {canonical} from './journal.js';
@@ -57,14 +58,18 @@ function download(definition){
 }
 function cacheRecovery(ctx,checkpoint,view){try{sessionStorage.setItem(recoveryKey(ctx.id),JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view}));}catch{/* The durable library remains the primary save. */}}
 function scheduleSave(){clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save().catch(()=>{});},450);}
+function previewOf(definition,snapshot){try{return creationThumbnail(definition,snapshot,art);}catch{return null;}}
+function previewMarkup(kind,id){return `<span class="creator-preview" data-preview-kind="${kind}" data-preview-id="${escape(id)}"><span>No preview yet</span></span>`;}
 function save(){
   clearTimeout(saveTimer);
   if(!current)return Promise.resolve();
-  const ctx=current,checkpoint=ctx.doc.checkpoint(),view=map.state;cacheRecovery(ctx,checkpoint,view);
+  const ctx=current,checkpoint=ctx.doc.checkpoint(),view=map.state;
+  if(ctx.thumbnailRevision!==checkpoint.revision){ctx.thumbnail=report.ok?previewOf(checkpoint.definition,map.snapshot):null;ctx.thumbnailRevision=checkpoint.revision;}
+  const thumbnail=ctx.thumbnail;cacheRecovery(ctx,checkpoint,view);
   if(ctx.conflicted)return Promise.reject(new LibraryConflict());
   if(current===ctx)status('Saving…');
   const operation=saving.catch(()=>{}).then(async()=>{
-    const record=await library.saveProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution},ctx.storageRevision);
+    const record=await library.saveProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution,thumbnail},ctx.storageRevision);
     ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);
     try{
       const key=recoveryKey(ctx.id),cached=JSON.parse(sessionStorage.getItem(key)||'null');
@@ -287,25 +292,26 @@ async function launch(definition,record,sessionKind,releaseId=null,releasePackag
   try{
     const checked=JSON.parse(candidate.load_scenario(JSON.stringify(releasePackage??definition)));
     if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This creation cannot start.');
-    const run=await library.createRun({definition,snapshot:candidate.snapshot(),projectId:record.id,sessionKind,sourceRevision:record.revision,releaseId});
+    const run=await library.createRun({definition,snapshot:candidate.snapshot(),projectId:record.id,sessionKind,sourceRevision:record.revision,releaseId,thumbnail:previewOf(definition,JSON.parse(candidate.report_state()))});
     location.assign(`./?run=${encodeURIComponent(run.id)}`);return true;
   }finally{candidate.free();}
 }
 async function showLibrary({reset=false}={}){
   if(current)await save();
   const [projects,runs,releases]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases()]);
-  $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row"><div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
+  $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row">${previewMarkup('project',p.id)}<div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
   $('creator-releases-heading').hidden=!releases.length;
   $('creator-release-list').innerHTML=releases.map(r=>{
     const compatible=r.compatibility&&Object.entries(catalog.releases.compatibility).every(([key,value])=>r.compatibility[key]===value);
-    return `<div class="creator-library-row creator-release-row" data-release="${escape(r.id)}"><div><b>${escape(r.title)}</b><small>Version ${escape(r.contentRevision)} · ${escape(r.author)}</small><small>${compatible?'Frozen content · independent of the draft':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-play-release="${escape(r.id)}" ${compatible?'':'disabled'}>Play</button><button data-copy-release="${escape(r.id)}" ${compatible?'':'disabled'}>Edit a copy</button><button data-export-release="${escape(r.id)}">Export</button><button class="creator-remove" data-remove-release="${escape(r.id)}" aria-label="Remove release ${escape(r.title)} version ${escape(r.contentRevision)}">×</button></div></div>`;
+    return `<div class="creator-library-row creator-release-row" data-release="${escape(r.id)}">${previewMarkup('release',r.id)}<div><b>${escape(r.title)}</b><small>Version ${escape(r.contentRevision)} · ${escape(r.author)}</small><small>${compatible?'Frozen content · independent of the draft':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-play-release="${escape(r.id)}" ${compatible?'':'disabled'}>Play</button><button data-copy-release="${escape(r.id)}" ${compatible?'':'disabled'}>Edit a copy</button><button data-export-release="${escape(r.id)}">Export</button><button class="creator-remove" data-remove-release="${escape(r.id)}" aria-label="Remove release ${escape(r.title)} version ${escape(r.contentRevision)}">×</button></div></div>`;
   }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario');
   $('creator-runs-heading').hidden=!villages.length;
-  $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row"><div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button></div>`).join('');
+  $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button></div>`).join('');
   $('creator-library-title').textContent=projects.length+releases.length+villages.length?'Creation library':'Create a village';
   if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length===0;
   libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages);if(reset)libraryDiscovery.reset();
+  for(const slot of document.querySelectorAll('[data-preview-id]'))library.getPreview(slot.dataset.previewKind,slot.dataset.previewId).then(image=>{if(!image||!slot.isConnected)return;const img=new Image();img.alt='';img.loading='lazy';img.width=120;img.height=75;img.src=image;slot.replaceChildren(img);slot.title='Opening landscape';}).catch(()=>{/* A missing preview cannot block library actions. */});
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
@@ -377,7 +383,7 @@ function wire(){
     try{
       await save();const frozen=freezeReleaseDefinition(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog});
       if(canonical(frozen)!==canonical(current.doc.value)){current.doc.transact('Resolve landscape for frozen release',d=>Object.assign(d,frozen));await save();}
-      const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,validate:raw=>JSON.parse(engine.validate_scenario(raw))});
+      const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,validate:raw=>JSON.parse(engine.validate_scenario(raw)),thumbnail:previewOf(current.doc.value,map.snapshot)});
       $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
     }catch(error){$('creator-release-status').textContent=error.message;}finally{busy=false;$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current)refresh();}
   };
@@ -418,7 +424,7 @@ function wire(){
     try{
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const raw=await file.text(),checked=JSON.parse(engine.validate_scenario(raw));let content;try{content=JSON.parse(raw);}catch{throw Error(checked.issues[0]?.message||'This file is not a readable creation.');}
-      if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)));await showLibrary({reset:true});toast('Imported as a separate frozen release.');return;}
+      if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();const previewGame=new Game();let thumbnail;try{const loaded=JSON.parse(previewGame.load_scenario(raw));if(loaded.ok)thumbnail=previewOf(content.definition,JSON.parse(previewGame.report_state()));}finally{previewGame.free();}await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)),thumbnail);await showLibrary({reset:true});toast('Imported as a separate frozen release.');return;}
       const blocked=new Set(['file_too_large','unsupported_format','invalid_json','invalid_definition','unsupported_map','unknown_building','invalid_appearance','invalid_material','too_many_objects','too_many_stores','duplicate_building','invalid_identity','unsupported_resident_preset','unsupported_resident_appearance']);
       if(checked.issues.some(i=>blocked.has(i.code)))throw Error(checked.issues.find(i=>blocked.has(i.code)).message);
       await newProject('import',JSON.parse(raw));toast(checked.ok?'The creation was imported as a separate project.':'Imported as a draft. Review its issues before testing.');
