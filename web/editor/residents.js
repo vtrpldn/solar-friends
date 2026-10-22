@@ -1,13 +1,15 @@
+import {CharacterCreator} from './character-creator.js';
 import {addResident,removeResident} from './roster.js';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const hobbies=[['nature_walk','Nature walks'],['birdwatch','Birdwatching'],['stretch','Stretching'],['daydream','Daydreaming']];
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
 export class ResidentsEditor{
-  constructor(host,{presets,occupations,personality,experience,appearances,maximum,change,savePreset,openPresets,source}){
-    this.maximum=maximum;this.host=host;this.presets=presets;this.occupations=occupations;this.personality=personality;this.experience=experience;this.appearances=appearances;
+  constructor(host,{presets,occupations,personality,experience,appearances,maximum,change,savePreset,openPresets,source,art,undo,redo,history}){
+    this.forms=new Map();this.maximum=maximum;this.host=host;this.presets=presets;this.occupations=occupations;this.personality=personality;this.experience=experience;this.appearances=appearances;
     host.addEventListener('click',event=>{
-      const button=event.target.closest('[data-add-resident],[data-duplicate-resident],[data-remove-resident],[data-save-resident-preset],[data-open-resident-presets]');if(!button)return;
+      const button=event.target.closest('[data-add-resident],[data-duplicate-resident],[data-remove-resident],[data-save-resident-preset],[data-open-resident-presets],[data-open-character]');if(!button)return;
       const identity=button.closest('[data-resident]')?.dataset.resident;
+      if(button.hasAttribute('data-open-character')){this.creator.open(identity);return;}
       if(button.hasAttribute('data-open-resident-presets')){void openPresets();return;}
       if(button.hasAttribute('data-save-resident-preset')){const person=(source().start.residents??this.presets).find(p=>p.id===identity);if(person)void savePreset(person);return;}
       const remove=button.hasAttribute('data-remove-resident');
@@ -16,9 +18,9 @@ export class ResidentsEditor{
         else addResident(d,this.presets,this.maximum,{source:identity??null});
       });
     });
-    host.addEventListener('change',event=>{
+    const changeField=event=>{
       if(event.target.matches('[data-resident-policy]')){change('Change starting skill budget',d=>{d.start.resident_balance=event.target.value;});return;}
-      const field=event.target.dataset.residentField,identity=event.target.closest('[data-resident]')?.dataset.resident;
+      const field=event.target.dataset.residentField,identity=event.target.closest('[data-resident],[data-editing-resident]')?.dataset.resident??event.target.closest('[data-editing-resident]')?.dataset.editingResident;
       if(!field||!identity)return;
       let value=field==='outside_shifts'?event.target.checked:event.target.value;
       if(field==='preferred_bedtime'){const [h,m]=value.split(':').map(Number);value=h*60+m;}
@@ -33,16 +35,19 @@ export class ResidentsEditor{
         else if(['social_style','work_interest'].includes(field)){person.personality??=structuredClone(this.personality.founders.find(p=>p.preset===person.preset)?.profile??this.personality.founders[0].profile);person.personality[field]=value;}
         else {person[field]=value;if(field==='occupation'&&value==='none')person.outside_shifts=false;}
       });
-    });
+    };
+    host.addEventListener('change',changeField);
+    this.creator=new CharacterCreator({art,source:()=>source().start.residents??this.presets,groups:()=>this.forms,changeField,undo,redo,history});
   }
   render(definition){
     const people=definition.start.residents??this.presets;
-    const signature=JSON.stringify([people,definition.start.resident_balance,definition.rules.learning]);if(signature===this.signature)return;this.signature=signature;
+    const signature=JSON.stringify([people,definition.start.resident_balance,definition.rules.learning]);if(signature===this.signature){this.creator.update();return;}this.signature=signature;
     const experienceOpen=new Set([...this.host.querySelectorAll('details[data-resident]')].filter(el=>el.querySelector('.creator-experience')?.open).map(el=>el.dataset.resident));
     const open=new Set([...this.host.querySelectorAll('details[open]')].map(el=>el.dataset.resident));
     const unrestricted=definition.start.resident_balance==='unrestricted';
     const policy=`<label class="creator-field">Starting skill setup<select data-resident-policy><option value="balanced" ${unrestricted?'':'selected'}>Balanced</option><option value="unrestricted" ${unrestricted?'selected':''}>Unrestricted</option></select></label><p>${unrestricted?'Up to five levels in every skill. This choice is shown in the scenario library and while playing.':'Six starting levels per resident, with no skill above level three.'}</p>`;
     const controls=`<p>${people.length} / ${this.maximum} residents · ${definition.rules.mode==='story'?'Official Story needs all five founding roles.':'Choose at least one resident to play.'}</p><button type="button" data-add-resident ${people.length>=this.maximum?'disabled':''}>＋ New resident</button><button type="button" data-open-resident-presets>Resident presets</button><p>Removing someone also removes their starting friendships. Undo restores both. Empty casts can be saved as drafts.</p>`;
+    this.forms.clear();
     this.host.innerHTML=controls+policy+people.map(person=>{
       const p=person.routine_preferences;
       const levels=person.experience?.levels??{},background=person.experience?.background??'newcomer';
@@ -63,7 +68,12 @@ export class ResidentsEditor{
       const occupationControls=`<label class="creator-field">Outside occupation<select data-resident-field="occupation">${this.occupations.map(j=>`<option value="${j.key}" ${j.key===occupation?'selected':''}>${escape(j.title)}</option>`).join('')}</select></label><p>${escape(job?.description??'')}${job?.income?` R$ ${job.income/100} per completed shift.`:''}</p><label class="creator-field"><span><input type="checkbox" data-resident-field="outside_shifts" ${person.outside_shifts?'checked':''} ${occupation==='none'?'disabled':''}> Take outside shifts · 09:00–17:00</span></label>`;
       const text=(field,label,max,multiline=false)=>`<label class="creator-field">${label}${multiline?`<textarea rows="3" maxlength="${max}" data-resident-field="${field}">${escape(person[field])}</textarea>`:`<input type="text" maxlength="${max}" data-resident-field="${field}" value="${escape(person[field])}">`}</label>`;
       const hobby=(field,label)=>`<label class="creator-field">${label}<select data-resident-field="${field}">${hobbies.map(([key,name])=>`<option value="${key}" ${p[field]===key?'selected':''}>${name}</option>`).join('')}</select></label>`;
-      return `<details data-resident="${escape(person.id)}" ${open.has(person.id)?'open':''}><summary>${escape(person.name||'Unnamed neighbour')}</summary>${text('name','Name',80)}${text('pronouns','Pronouns · optional',40)}<label class="creator-field">Appearance<select data-resident-field="appearance">${this.appearances.map(look=>`<option value="${look.key}" ${(person.appearance?.preset??person.preset)===look.key?'selected':''}>${escape(look.name)}</option>`).join('')}</select></label>${text('biography','Their story · optional',600,true)}<label class="creator-field">Usual bedtime<input type="time" min="20:00" max="23:30" step="900" data-resident-field="preferred_bedtime" value="${time(p.preferred_bedtime)}"></label>${personalityControls}${hobby('favourite_hobby','Favourite pastime')}${hobby('alternate_hobby','Another pastime')}${occupationControls}${experienceControls}<button type="button" data-save-resident-preset>Save resident preset</button><div class="creator-roster-actions"><button type="button" data-duplicate-resident ${people.length>=this.maximum?'disabled':''}>Duplicate</button><button type="button" data-remove-resident>Remove resident</button></div></details>`;
+      const identityControls=text('name','Name',80)+text('pronouns','Pronouns · optional',40)+text('biography','Their story · optional',600,true);
+      const appearanceControls=`<label class="creator-field">Appearance<select data-resident-field="appearance">${this.appearances.map(look=>`<option value="${look.key}" ${(person.appearance?.preset??person.preset)===look.key?'selected':''}>${escape(look.name)}</option>`).join('')}</select></label><p>Choose a complete character look. Their skills, personality and routines stay the same.</p>`;
+      const routineControls=`<label class="creator-field">Usual bedtime<input type="time" min="20:00" max="23:30" step="900" data-resident-field="preferred_bedtime" value="${time(p.preferred_bedtime)}"></label>${personalityControls}${hobby('favourite_hobby','Favourite pastime')}${hobby('alternate_hobby','Another pastime')}${occupationControls}`;
+      this.forms.set(person.id,{Identity:identityControls,Appearance:appearanceControls,Personality:routineControls,Experience:experienceControls});
+      return `<details data-resident="${escape(person.id)}" ${open.has(person.id)?'open':''}><summary>${escape(person.name||'Unnamed neighbour')}</summary><button type="button" data-open-character>Open character creator</button>${identityControls}${appearanceControls}${routineControls}${experienceControls}<button type="button" data-save-resident-preset>Save resident preset</button><div class="creator-roster-actions"><button type="button" data-duplicate-resident ${people.length>=this.maximum?'disabled':''}>Duplicate</button><button type="button" data-remove-resident>Remove resident</button></div></details>`;
     }).join('');
+    this.creator.update();
   }
 }

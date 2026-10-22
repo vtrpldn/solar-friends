@@ -1,0 +1,68 @@
+import {residentLookIndex,residentLookKeys} from '../resident-look.js';
+import {residentClips,sampleResidentClip,drawResidentAnimation} from '../resident-animation.js';
+import {preparedFrames,RESIDENT_WIDTH} from '../sprite-frames.js';
+import {paintWorldBuilding,paintContactShadow} from '../world-renderer.js';
+import {unlitFilter} from '../power.js';
+const pages=['Identity','Appearance','Personality','Experience'];
+const poses={breathe:'Idle',walk:'Walking',work:'Working',cook:'Cooking',water:'Watering',tend:'Tending',feed:'Feeding',sit:'Sitting',sleep:'Sleeping',look:'Looking around',stretch:'Stretching',wave:'Waving',relax:'Relaxing'};
+export class CharacterCreator{
+ constructor({art,source,groups,changeField,undo,redo,history}){
+  Object.assign(this,{art,source,groups,history});this.cache=new Map();this.id=null;this.page='Identity';this.token=0;this.frame=null;
+  this.motion=matchMedia('(prefers-reduced-motion: reduce)');this.surface=document.createElement('canvas');this.surface.width=this.surface.height=256;
+  this.dialog=document.createElement('dialog');this.dialog.id='character-creator';this.dialog.setAttribute('aria-labelledby','character-creator-title');
+  this.dialog.innerHTML='<button class="dialog-close" aria-label="Close character creator">×</button><h2 id="character-creator-title">Meet our neighbour</h2><p>Changes belong to this creation. Use Undo to restore earlier choices.</p><div class="character-layout"><section class="character-preview"><canvas width="320" height="240" data-character-preview aria-label="Animated resident preview"></canvas><div class="character-portrait"><canvas width="64" height="72" aria-label="Matching resident portrait"></canvas><p data-character-name></p></div><label class="creator-field">Preview activity<select data-character-pose></select></label><label class="creator-field">Facing<select data-character-facing><option value="1">Right</option><option value="-1">Left</option></select></label><label class="creator-field">Lighting<select data-character-light><option value="0">Day</option><option value="1">Night</option></select></label><label><input type="checkbox" data-character-scale> Scale beside a home and neighbour</label><p data-character-preview-status role="status"></p></section><section class="character-settings"><div role="tablist" aria-label="Character settings"></div><div data-character-fields></div></section></div><div class="dialog-actions"><button type="button" data-character-undo>Undo</button><button type="button" data-character-redo>Redo</button><button type="button" data-character-done>Done</button></div>';
+  document.body.append(this.dialog);this.canvas=this.dialog.querySelector('[data-character-preview]');this.portrait=this.dialog.querySelector('.character-portrait canvas');this.fieldHost=this.dialog.querySelector('[data-character-fields]');
+  const pose=this.dialog.querySelector('[data-character-pose]');for(const [key,title]of Object.entries(poses))pose.add(new Option(title,key));
+  const tabs=this.dialog.querySelector('[role=tablist]');
+  for(const name of pages){const tab=document.createElement('button');tab.type='button';tab.role='tab';tab.id='character-tab-'+name;tab.dataset.characterTab=name;tab.setAttribute('aria-controls','character-page-'+name);tab.textContent=name;tabs.append(tab);}
+  tabs.onclick=event=>{const tab=event.target.closest('[data-character-tab]');if(tab)this.select(tab.dataset.characterTab);};
+  tabs.onkeydown=event=>{const current=pages.indexOf(this.page),next=event.key==='ArrowRight'?(current+1)%4:event.key==='ArrowLeft'?(current+3)%4:event.key==='Home'?0:event.key==='End'?3:null;if(next===null)return;event.preventDefault();this.select(pages[next]);tabs.querySelector(`[data-character-tab="${pages[next]}"]`).focus();};
+  this.dialog.querySelector('[data-character-undo]').onclick=undo;this.dialog.querySelector('[data-character-redo]').onclick=redo;
+  this.dialog.onchange=event=>{if(event.target.dataset.residentField)changeField(event);else this.restart();};
+  this.dialog.querySelector('.dialog-close').onclick=this.dialog.querySelector('[data-character-done]').onclick=()=>this.dialog.close();
+  this.dialog.addEventListener('close',()=>{const id=this.id;this.token++;cancelAnimationFrame(this.frame);this.frame=null;this.id=null;this.sheets=null;[...document.querySelectorAll('[data-resident]')].find(el=>el.dataset.resident===id)?.querySelector('[data-open-character]')?.focus({preventScroll:true});});
+  this.motion.addEventListener('change',()=>this.restart());document.addEventListener('visibilitychange',()=>this.restart());
+ }
+ person(){return this.source().find(p=>p.id===this.id);}
+ open(id){this.id=id;this.page='Identity';this.signature=null;this.look=null;this.lookVersion=null;this.dialog.showModal();this.update();this.dialog.scrollTop=0;this.dialog.querySelector('[data-character-tab="Identity"]').focus();}
+ update(){
+  if(!this.dialog.open)return;const state=this.history();this.dialog.querySelector('[data-character-undo]').disabled=!state.undo;this.dialog.querySelector('[data-character-redo]').disabled=!state.redo;const person=this.person();if(!person){this.dialog.close();return;}
+  const signature=JSON.stringify(person);
+  if(signature!==this.signature){
+   const focused=this.dialog.contains(document.activeElement)?document.activeElement.dataset.residentField:null;
+   this.signature=signature;this.fieldHost.dataset.editingResident=person.id;const fields=this.groups().get(person.id);
+   this.fieldHost.innerHTML=pages.map(name=>`<div role="tabpanel" id="character-page-${name}" aria-labelledby="character-tab-${name}" data-character-page="${name}">${fields[name]}</div>`).join('');
+   const experience=this.fieldHost.querySelector('.creator-experience');if(experience)experience.open=true;
+   this.dialog.querySelector('[data-character-name]').textContent=person.name;this.select(this.page);
+   if(focused)this.fieldHost.querySelector(`[data-resident-field="${focused}"]`)?.focus({preventScroll:true});
+  }
+  const look=person.appearance?.preset??person.preset;
+  const version=person.appearance?.version??person.preset_version;
+  if(look!==this.look||version!==this.lookVersion){this.look=look;this.lookVersion=version;void this.load(look,version);}else this.restart();
+ }
+ select(name){this.page=name;for(const tab of this.dialog.querySelectorAll('[role=tab]')){const selected=tab.dataset.characterTab===name;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}for(const panel of this.fieldHost.children)panel.hidden=panel.dataset.characterPage!==name;}
+ async load(look,version){
+  const token=++this.token;this.sheets=null;cancelAnimationFrame(this.frame);this.canvas.getContext('2d').clearRect(0,0,320,240);this.portrait.getContext('2d').clearRect(0,0,64,72);this.status('Loading character poses…');
+  try{
+   const index=residentLookIndex({appearance:{preset:look,version}});
+   if(!this.cache.has(look))this.cache.set(look,(async()=>{const load=async suffix=>{const image=new Image();image.src=new URL(`../art/animations/${residentLookKeys[index]}${suffix}.png`,import.meta.url);await image.decode();return image;};const [idle,activities]=await Promise.all([load('-idle'),load('-activities')]);return {base:this.art.residents[index],idle,activities};})());
+   const sheets=await this.cache.get(look);if(token!==this.token||!this.dialog.open)return;
+   this.sheets=sheets;this.status('Preview only · village time and resident needs stay unchanged.');this.restart();
+  }catch{if(token===this.token){this.cache.delete(look);this.status('These character poses could not load. Keep your draft and try again.');}}
+ }
+ status(text){this.dialog.querySelector('[data-character-preview-status]').textContent=text;}
+ restart(){cancelAnimationFrame(this.frame);this.frame=null;this.start=performance.now();if(this.dialog.open&&this.sheets&&!document.hidden)this.draw(this.start);}
+ draw(now){
+  if(!this.dialog.open||!this.sheets||document.hidden)return;
+  const seconds=this.motion.matches?0:(now-this.start)/1000,mode=this.dialog.querySelector('[data-character-pose]').value,facing=Number(this.dialog.querySelector('[data-character-facing]').value),night=Number(this.dialog.querySelector('[data-character-light]').value),scale=this.dialog.querySelector('[data-character-scale]').checked;
+  const ctx=this.canvas.getContext('2d');ctx.clearRect(0,0,320,240);ctx.fillStyle=night?'#33423c':'#e0e5cb';ctx.fillRect(0,0,320,240);
+  if(scale)paintWorldBuilding(ctx,{key:'home',x:0,y:0},{project:()=>({x:100,y:178}),scale:1,images:this.art.images,night,light:0});
+  const x=scale?220:160,y=scale?195:222,width=scale?RESIDENT_WIDTH:160;
+  paintContactShadow(ctx,x,y,width*.24,width*.065,.18);ctx.save();ctx.filter=unlitFilter(night);
+  drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds),facing,breath:1},x,y,width);ctx.restore();
+  if(scale){const frame=preparedFrames(this.art.residents[1],{referenceRow:2})[8];ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
+  const frame=preparedFrames(this.sheets.base,{referenceRow:2})[8],portrait=this.portrait.getContext('2d');portrait.clearRect(0,0,64,72);portrait.filter=unlitFilter(night);portrait.drawImage(frame,64,12,128,152,0,0,64,72);
+  Object.assign(this.canvas.dataset,{look:this.look,pose:mode,frame:String(sampleResidentClip(mode,seconds)[0].frame),scale:String(scale),night:String(night)});
+  if(!this.motion.matches&&residentClips[mode].fps>0)this.frame=requestAnimationFrame(t=>this.draw(t));
+ }
+}
