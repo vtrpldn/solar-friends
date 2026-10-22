@@ -1,0 +1,2072 @@
+{
+  "schema": 1,
+  "sourceSha256": "396d6d9c1d7a34c4ebb03345e1935e74ecb7be7a2ddae46c9fbd75fd822bce0d",
+  "speed": 16,
+  "placements": [
+    [
+      "well",
+      27,
+      32
+    ],
+    [
+      "kitchen",
+      32,
+      34
+    ],
+    [
+      "garden",
+      35,
+      34
+    ]
+  ],
+  "finishedAt": null,
+  "observations": [
+    {
+      "frame": 0,
+      "minute": 480.79998779296875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 36,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 0
+        },
+        {
+          "kind": "kitchen",
+          "progress": 0
+        },
+        {
+          "kind": "garden",
+          "progress": 0
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 600,
+      "minute": 960.7926635742188,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 31,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 1200,
+      "minute": 1440.817138671875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 28,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 1800,
+      "minute": 1920.846435546875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 28,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 2400,
+      "minute": 2400.875732421875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 23,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 3000,
+      "minute": 2880.905029296875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 20,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 3600,
+      "minute": 3360.934326171875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 20,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 4200,
+      "minute": 3840.963623046875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 17,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 4800,
+      "minute": 4320.92431640625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 21,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 5400,
+      "minute": 4800.80712890625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 21,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 6000,
+      "minute": 5280.68994140625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 18,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 6600,
+      "minute": 5760.57275390625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 22,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 7200,
+      "minute": 6240.45556640625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 20,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 7800,
+      "minute": 6720.33837890625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 15,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 8400,
+      "minute": 7200.22119140625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 20,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 9000,
+      "minute": 7680.10400390625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 19,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 9600,
+      "minute": 8159.98681640625,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 24,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 10200,
+      "minute": 8639.8701171875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 20,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 10800,
+      "minute": 9119.7529296875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 20,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 11400,
+      "minute": 9599.6357421875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 15,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 12000,
+      "minute": 10079.5185546875,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": true,
+        "failed_at": null,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "active"
+      },
+      "food": 22,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 12600,
+      "minute": 10080,
+      "finished": null,
+      "challenge": {
+        "continued_at": null,
+        "deadline": 10080,
+        "eligible": false,
+        "failed_at": 10080,
+        "failure_message": "The dry season arrived before our reserve was ready. Restart to try a different plan, or continue this village freely.",
+        "status": "failed"
+      },
+      "food": 22,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "A cistern for the clearing",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "well",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 1 completed well buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 1,
+              "unit": "count",
+              "value": 0
+            }
+          },
+          {
+            "title": "Beds for the group",
+            "status": "active",
+            "condition": {
+              "action": {
+                "building": "home",
+                "kind": "build"
+              },
+              "complete": false,
+              "description": "Have 2 completed home buildings",
+              "kind": "buildings",
+              "note": null,
+              "target": 2,
+              "unit": "count",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "One manageable garden",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Two harvested crops",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "Fresh water for tomorrow",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    }
+  ],
+  "scope": "Normal native commands and autonomous resident work, no runtime patches or free material changes."
+}

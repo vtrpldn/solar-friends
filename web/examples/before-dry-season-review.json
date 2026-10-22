@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "title": "Before the dry season",
+  "status": "native completion and dry-season continuation passed; public picker and reusable resident controls passed; broader release review open",
+  "file": "before-the-dry-season.solar-scenario",
+  "sha256": "0655ff0e59d13e55bd643855c74f199a2c0c032aa9c45ed493234a596ec4dcc8",
+  "biome": "cerrado",
+  "authoredThrough": "scripts/author-before-dry-season.mjs and shared author-example-scenario.mjs use regular player controls and Export",
+  "cast": "Five new authored identities, names, biographies, balanced backgrounds and existing approved full looks. This does not complete modular appearance art.",
+  "playthrough": "assets/scenario-reviews/before-dry-season-playthrough.json",
+  "finishedAt": 5010.15576171875,
+  "observedThrough": 13438.6982421875,
+  "negativeFinding": "The earlier no-import attempt missed its deadline because a pump and plumbing were absent. That earlier authoring revision is logged in before-dry-season-no-imports.json; its exact source file was not archived. Guidance was corrected through player controls.",
+  "residentPresetFiles": {
+    "web/examples/residents/davi.solar-resident": "882e54d889b4056b3f1418cca6390df9f6ab22c317930ccb45f533f7a966de75",
+    "web/examples/residents/marina.solar-resident": "8ce6eea9b13c7c3405b45bf75b01af130f56be1cfd3551c3fa96eb63f1a5a6d0",
+    "web/examples/residents/cecilia.solar-resident": "a21a379165bb2da8d5a0ea17a949be8ab4bc087ded0f842e9118821b653ac11e"
+  },
+  "remaining": [
+    "Public-input completion and unfamiliar-player usability review",
+    "Mixed original/custom cast in Caatinga example",
+    "Full modular appearance creation",
+    "All biome art/balance/performance/save-integrity release gates"
+  ]
+}

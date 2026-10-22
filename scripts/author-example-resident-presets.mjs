@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import {mkdir,readFile,writeFile} from 'node:fs/promises';import {chromium} from 'playwright';import {serve} from './serve.mjs';
+const server=await serve();let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
+ await page.locator('#creator-import').setInputFiles('web/examples/before-the-dry-season.solar-scenario');await page.locator('#creator-library-dialog').waitFor({state:'hidden'});await page.locator('#creator-residents > summary').click();
+ const presets=[['Marina','marina'],['Davi','davi'],['Cecília','cecilia']];
+ for(const [name]of presets){const row=page.locator('details[data-resident]').filter({has:page.locator(':scope > summary',{hasText:name})});if(!await row.evaluate(el=>el.open))await row.locator(':scope > summary').click();await row.locator('[data-save-resident-preset]').click();await page.locator('#creator-resident-save-dialog [name=author]').fill('Solar Friends');await page.locator('#creator-resident-save-dialog button[type=submit]').click();await page.locator('#creator-resident-save-dialog').waitFor({state:'hidden'});}
+ await page.locator('[data-open-resident-presets]').click();await mkdir('web/examples/residents',{recursive:true});
+ for(const [name,slug]of presets){const row=page.locator('.creator-resident-preset').filter({has:page.getByText(name,{exact:true})});const pending=page.waitForEvent('download');await row.locator('[data-export-resident]').click();const raw=await readFile(await (await pending).path(),'utf8'),file=JSON.parse(raw);assert.equal(file.resident.name,name);assert.equal(file.resident.id,undefined);assert.equal(file.schema,2);await writeFile(`web/examples/residents/${slug}.solar-resident`,raw);}
+ assert.deepEqual(errors,[]);console.log('PASS: three reusable custom resident presets saved and exported through regular player controls, with independent package identities and no runtime resident IDs.');
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
