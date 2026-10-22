@@ -2815,6 +2815,7 @@ mod targeted_storage_tests {
         let mut d = scenarios::Definition::builtin(modes::Mode::Sandbox);
         d.rules.logistics = true;
         d.start.buildings.push(scenarios::Structure {
+            material_recovery: Default::default(),
             crop: None,
             orchard: None,
             animals: None,

@@ -163,23 +163,28 @@ pub fn placement(
     Ok(())
 }
 pub fn salvage(v: &Village, id: usize) -> economy::Bundle {
-    let Some(p) = v.economy.projects.iter().find(|p| p.building == id) else {
-        return [0; economy::COUNT];
-    };
     let Some(b) = v.buildings.iter().find(|b| b.id == id) else {
         return [0; economy::COUNT];
     };
-    let Some(stages) = economy::recipe(&b.kind, &p.recipe) else {
-        return [0; economy::COUNT];
-    };
-    let mut maximum = [0; economy::COUNT];
-    for stage in stages.iter().take(p.stage + usize::from(p.committed)) {
-        for (i, n) in stage.items.iter().enumerate() {
-            maximum[i] += n;
+    let inherited = scenarios::recovery::owned(v, id);
+    let mut consumed = [0; economy::COUNT];
+    if let Some(p) = v.economy.projects.iter().find(|p| p.building == id)
+        && let Some(stages) = economy::recipe(&b.kind, &p.recipe)
+    {
+        for stage in stages.iter().take(p.stage + usize::from(p.committed)) {
+            for (i, n) in stage.items.iter().enumerate() {
+                consumed[i] += n;
+            }
+        }
+        for (i, n) in consumed.iter_mut().enumerate() {
+            *n = (*n).min(p.consumed[i]);
         }
     }
+
     std::array::from_fn(|i| {
-        let n = p.consumed[i].min(maximum[i]);
+        // One structure owns one set of materials, even if a retained receipt
+        // and its authored provenance describe the same construction.
+        let n = consumed[i].max(inherited[i]);
         if i == 13 {
             n.saturating_sub(power::batteries::retained_equipment(v, id)) / 2
         } else {

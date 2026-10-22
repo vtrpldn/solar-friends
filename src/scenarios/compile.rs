@@ -218,6 +218,7 @@ pub(super) fn check(d: &Definition) -> Report {
     super::batteries::check(d, &mut r);
     super::routes::check(d, &mut r);
     super::equipment::check(d, &mut r);
+    super::recovery::check(d, &mut r);
     super::sites::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize

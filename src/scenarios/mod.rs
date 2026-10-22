@@ -6,6 +6,7 @@ mod animals;
 pub(crate) mod batteries;
 pub(crate) mod equipment;
 pub(crate) mod setup;
+pub(crate) mod recovery;
 pub(crate) mod routes;
 mod biomes;
 mod compile;
@@ -208,7 +209,7 @@ impl Game {
             let recipes: Vec<_> = ["standard", "local", "adobe"].into_iter()
                 .filter(|recipe| economy::recipe(kind, recipe).is_some()).collect();
             serde_json::json!({"id":kind,"receives_deliveries":logistics::receives_at_building(kind,true),"receiving_capacity":logistics::receiving_capacity(kind,true),"construction_receiving_capacity":150,"size":interactions::footprint_size(kind),"recipes":recipes,
-                "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
+                "inherited_recovery":recovery::catalog(kind),"appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
             "max_regions":32,"max_buildings":MAX_BUILDINGS,"max_residents":residents::MAX_RESIDENTS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"journal":journal::catalog(),"resident_routines":resident_preferences::catalog(),"resident_personality":personality::catalog(),"resident_experience":experience::catalog(),"resident_appearances":resident_appearance::catalog(),"resident_presets":residents::founders(),"occupations":occupations::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"equipment":equipment::catalog(),"batteries":batteries::catalog(),"routes":{"limit":64,"kinds":["fresh","irrigation","greywater","sewage","electricity"]},"animals":animals::catalog(),"resource_sites":sites::catalog(),"orchards":orchards::catalog(),"farming":farming::catalog(),"liquid_classes":liquids::classes(),"supply_capacity":economy::CAPACITY,"food_freshness":economy::NAMES.iter().enumerate().filter_map(|(i,name)|freshness::lifetime(i).map(|life|serde_json::json!({"material":name,"lifetime_minutes":life}))).collect::<Vec<_>>(),"max_food_batches":economy::CAPACITY,"perishable_materials":economy::NAMES.iter().enumerate().filter(|(i,_)|freshness::lifetime(*i).is_some()).map(|(_,name)|*name).collect::<Vec<_>>(),"buildings":buildings})

@@ -216,6 +216,7 @@ fn blueprints_supported_appearances_and_located_inputs_compile_without_free_salv
     let mut d = Definition::builtin(modes::Mode::Story);
     d.start.buildings.extend([
         Structure {
+            material_recovery: Default::default(),
             crop: None,
             orchard: None,
             animals: None,
@@ -229,6 +230,7 @@ fn blueprints_supported_appearances_and_located_inputs_compile_without_free_salv
             appearance: None,
         },
         Structure {
+            material_recovery: Default::default(),
             crop: None,
             orchard: None,
             animals: None,

@@ -1542,7 +1542,7 @@ function setup() {
     const returns=quote.salvage.map((n,i)=>n?`${n} ${state.environment.economy.materials[i].name.toLowerCase()}`:'').filter(Boolean).join(', ');
     pendingRemoval={id:b.id,action:button.dataset.buildingWork};
     $('#building-work-title').textContent=salvage?'Salvage this building?':'Demolish this building?';
-    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no materials; none were recorded as consumed'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; owned supplies remain recoverable. Cistern contents stay in containers at the original plot. Charged batteries remain as separate equipment; manage their relocation or salvage in Power.`;
+    $('#building-work-note').textContent=`${kinds[b.kind][0]} ${b.id+1}: ${salvage?`careful dismantling takes three times the demolition work. Returns ${returns||'no complete recoverable units'}.`:'fast removal returns no building materials.'} Residents must reach the site and finish the work. Crops and the building are removed; owned supplies remain recoverable. Cistern contents stay in containers at the original plot. Charged batteries remain as separate equipment; manage their relocation or salvage in Power.`;
     $('#building-work-dialog').showModal();
   };
   $('#building-work-close').onclick=()=>{pendingRemoval=null;$('#building-work-dialog').close();};

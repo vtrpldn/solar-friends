@@ -190,6 +190,8 @@ pub struct StartingLiquids {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Structure {
+    #[serde(default, skip_serializing_if = "super::recovery::Policy::is_none")]
+    pub material_recovery: super::recovery::Policy,
     pub id: String,
     pub kind: String,
     pub x: i32,
@@ -370,6 +372,7 @@ impl Definition {
                 buildings: [("shed", -2, -3), ("warehouse", 4, -3)]
                     .into_iter()
                     .map(|(kind, dx, dy)| Structure {
+                        material_recovery: Default::default(),
                         id: format!("starting-{kind}"),
                         kind: kind.into(),
                         x: middle + dx,
