@@ -111,6 +111,15 @@ export class ContentLibrary extends EventTarget {
     });
     this.#changed('heads',null,null);return result;
   }
+  async savePreviewIfCurrent(kind,id,revision,image){
+    const store={project:'projects',run:'runs',release:'releases',map:'maps'}[kind],safe=safeThumbnail(image);
+    if(!store||!safe)return false;const db=await this.#db();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction([store,'previews'],'readwrite'),request=tx.objectStore(store).get(id);let saved=false;
+      request.onsuccess=()=>{if(!request.result||request.result.revision!==revision)return;tx.objectStore('previews').put({key:`${kind}:${id}`,image:safe});saved=true;};
+      tx.oncomplete=()=>resolve(saved);tx.onabort=()=>reject(tx.error||Error('The preview could not be saved.'));
+    });
+  }
   async getPreview(kind,id){if(!['project','release','run','map'].includes(kind))return null;const row=await this.#read('previews',`${kind}:${id}`);return safeThumbnail(row?.image);}
   listMaps(){return this.#list('map');}
   getMap(id){return this.#read('maps',id);}

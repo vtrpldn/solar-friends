@@ -1,3 +1,4 @@
+import {hydrateLibraryPreviews} from './library-previews.js';
 import {chooseRecoveryCheckpoint} from './recovery-dialog.js';
 import {draftImportIssue} from './draft-import.js';
 import {downloadRecoveryRecord} from './record-recovery.js';
@@ -320,7 +321,20 @@ async function showLibrary({reset=false}={}){
   $('creator-library-title').textContent=projects.length+releases.length+villages.length+maps.length?'Creation library':'Create a village';
   if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length+maps.length===0;
   libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages,maps);if(reset)libraryDiscovery.reset();
-  for(const slot of document.querySelectorAll('[data-preview-id]'))library.getPreview(slot.dataset.previewKind,slot.dataset.previewId).then(image=>{if(!image||!slot.isConnected)return;const img=new Image();img.alt='';img.loading='lazy';img.width=120;img.height=75;img.src=image;slot.replaceChildren(img);slot.title='Opening landscape';}).catch(()=>{/* A missing preview cannot block library actions. */});
+  const previewRecords=new Map([...projects.map(r=>['project:'+r.id,r]),...runs.map(r=>['run:'+r.id,r]),...releases.map(r=>['release:'+r.id,r]),...maps.map(r=>['map:'+r.id,r])]);
+  // Start after the dialog opens; the task stops when its rows are replaced or
+  // the library closes. Preview failures never disable content actions.
+  setTimeout(()=>hydrateLibraryPreviews({library,dialog:$('creator-library-dialog'),records:previewRecords,makePreview:(kind,record)=>{
+    if(kind==='map')return mapSharing.preview(record.package);
+    const candidate=new Game();
+    try{
+      let definition=kind==='project'?record.checkpoint?.definition:kind==='release'?record.package?.definition:record.definition;
+      if(kind==='run'){if(!candidate.restore(record.snapshot))return null;definition=JSON.parse(candidate.snapshot()).village.scenario?.definition;}
+      if(!definition)return null;
+      const checked=JSON.parse(candidate.load_scenario(JSON.stringify(kind==='release'?record.package:definition)));
+      return checked.ok?previewOf(definition,JSON.parse(candidate.report_state())):null;
+    }finally{candidate.free();}
+  }}).catch(()=>{}),0);
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
