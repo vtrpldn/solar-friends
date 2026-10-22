@@ -1,0 +1,41 @@
+{
+  "result": "PASS",
+  "scope": "Four working poses and one foreground mask draft only; not full occlusion or complete character approval.",
+  "foregroundStats": {
+    "painted": 2069,
+    "maxAlpha": 253,
+    "nearOpaque": 1860
+  },
+  "definitionMatches": true,
+  "denied": [
+    "unknown-field",
+    "wrong-pose",
+    "wrong-size",
+    "sparse-points",
+    "outside-frame",
+    "zero-area",
+    "source-binding",
+    "changed-body"
+  ],
+  "aliasSafe": true,
+  "roundTripExact": true,
+  "disjoint": true,
+  "foregroundPixelsExact": true,
+  "protectedPixels": 2069,
+  "protectedExact": true,
+  "fixtureProtected": true,
+  "bodyUnchanged": true,
+  "bodyIntegrity": true,
+  "coverage": {
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1
+  },
+  "partHashes": {
+    "4": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+    "5": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+    "6": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+    "7": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2"
+  }
+}

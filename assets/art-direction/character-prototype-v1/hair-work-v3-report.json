@@ -1,0 +1,70 @@
+{
+  "scope": "Diagnostic only; source bounds do not establish visual acceptance or a completed hairstyle.",
+  "minimumCoverage": 0.98,
+  "meetsSourceBounds": true,
+  "report": [
+    {
+      "index": 4,
+      "source": "characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+      "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 36110,
+      "coverage": 1,
+      "meetsSourceBounds": true
+    },
+    {
+      "index": 5,
+      "source": "characters/prototype-v1/hair-curls-base-5-candidate-v3.png",
+      "sha256": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 31844,
+      "coverage": 1,
+      "meetsSourceBounds": true
+    },
+    {
+      "index": 6,
+      "source": "characters/prototype-v1/hair-curls-base-6-candidate-v3.png",
+      "sha256": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 32521,
+      "coverage": 1,
+      "meetsSourceBounds": true
+    },
+    {
+      "index": 7,
+      "source": "characters/prototype-v1/hair-curls-base-7-candidate-v3.png",
+      "sha256": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2",
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 25854,
+      "coverage": 1,
+      "meetsSourceBounds": true
+    }
+  ],
+  "times": [
+    0,
+    0.155,
+    0.2,
+    0.355,
+    0.4,
+    0.5549999999999999,
+    0.6,
+    0.755
+  ],
+  "errors": []
+}

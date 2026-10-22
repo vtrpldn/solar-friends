@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen__imagegen",
+  "scope": "Four working hair poses and one foreground-mask production draft in the lab only; not a complete hairstyle, character creator or player option. Raw parts are never independently fitted, clipped or pixel-repaired.",
+  "records": [
+    {
+      "id": "base-4-v1",
+      "prompt": "Use case: precise-object-edit. Registered modular hair-only layer for a painted game character working pose.\nInput1 is the EXACT bald body target (pose4), on a1254-square transparent canvas. Input2 is the short brown curly hair STYLE/SHAPE reference from a different pose: retain its compact rounded silhouette, warm broad painted curl clusters and upper-left illumination, but place the hair on input1's actual scalp.\nThis head crown is around x650,y150, with forehead/eyes below around y290. Hair begins just ABOVE that actual crown, around y120. Keep a high forehead opening, eyebrows, eyes and visible ear uncovered.\n\nReturn ONLY added hair at exact target coordinates on SAME1254-square true transparent canvas. All body, skin, scalp, face, ears, eyebrows, hands, clothes and props transparent. No skin-coloured backing or fragments. Mostcanvas stays empty transparent. All painted hair lies in outer x,y,width,height rectangle [494.7,83.3,333.1,293.9]; follow the actual scalp rather than filling this rectangle. Shorten back edge above/behind ear, no dangling curl or U-loop below ear. Do not obscure eyes, lower the fringe or expose bald crown.\nNo recentering, cropping, enlargement, independent normalization, text, guide lines, shadows, ground, checkerboard or background. Direct whole-frame overlay on input1 without fitting. Same short hairstyle and readable broad painted shading at48px resident size as input2.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-4-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-73076319-43b0-4875-8dd5-418d5935b3e2.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+      "verdict": "production draft only",
+      "findings": "Direct overlay fits crown/forehead/ear and unchanged bounds pass. Volume differs from other working poses and needs temporal polish.",
+      "candidateSha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-4-body.png": "5bf73dac757835ee400b49fd56b6f636fb3eeed2b0ccb2c4e2eae59ba7d936d6",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-5-v1",
+      "prompt": "Use case: precise-object-edit. Registered modular hair-only layer for a painted game character working pose.\nInput1 is the EXACT bald body target (pose5), on a1254-square transparent canvas. Input2 is the short brown curly hair STYLE/SHAPE reference from a different pose: retain its compact rounded silhouette, warm broad painted curl clusters and upper-left illumination, but place the hair on input1's actual scalp.\nThis head crown is around x650,y150, with forehead/eyes below around y290. Hair begins just ABOVE that actual crown, around y120. Keep a high forehead opening, eyebrows, eyes and visible ear uncovered.\n\nReturn ONLY added hair at exact target coordinates on SAME1254-square true transparent canvas. All body, skin, scalp, face, ears, eyebrows, hands, clothes and props transparent. No skin-coloured backing or fragments. Mostcanvas stays empty transparent. All painted hair lies in outer x,y,width,height rectangle [475.1,88.2,333.1,293.9]; follow the actual scalp rather than filling this rectangle. Shorten back edge above/behind ear, no dangling curl or U-loop below ear. Do not obscure eyes, lower the fringe or expose bald crown.\nNo recentering, cropping, enlargement, independent normalization, text, guide lines, shadows, ground, checkerboard or background. Direct whole-frame overlay on input1 without fitting. Same short hairstyle and readable broad painted shading at48px resident size as input2.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-fa4e4850-75b7-4abe-8a76-8569034144ac.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v1.png",
+      "verdict": "rejected",
+      "findings": "Misregistered/oversized cap, exposed crown or face overlap; source bounds fail. See retained direct overlays and reports.",
+      "candidateSha256": "1baa6ecadd22355d407636d6a68b38bb2c638b3af2f5b4775c1ad0d3cd0f81d4",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-body.png": "a2a421383317544a0ecacda500a2947c2718cfafb207f106ca075c0caba6a21c",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-5-v2",
+      "prompt": "Use case: precise-object-edit. Registered short-hair-only game layer.\nInput1 is the EXACT geometry guide: the GREEN FILLED SHAPE over a bald working body defines the desired hair silhouette, position, crown and forehead opening. Repaint that green area as short brown curls, then return ONLY that added hair. The body is a registration aid and must disappear entirely from output. Follow the green hairline, especially the high forehead and transparent ear notch; do not lower or enlarge the hair.\nInput2 supplies ONLY the warm brown broad painted curl material, readable cluster scale and upper-left light. Its old canvas position is not authoritative; input1's green silhouette IS authoritative. Keep the same restrained short hairstyle.\n\n\nKeep SAME1254x1254 transparent canvas and exact guide coordinates. All pixels outside hair are genuine transparent alpha. NO EARS, skin, scalp backing, face, hands, body, clothing, props or green guide pixels. Ear/face openings are transparent, not skin-coloured. Mostcanvas stays empty. No dangling side curl/ear loop. No crop, resize, recenter, normalization, shadow, ground, labels, grid or background. Preserve warm illustrated painted texture, not a flat green/vector helmet. Output directly overlays original body without fitting.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4ca8ddba-752b-46aa-9d0c-58ae580c32b1.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v2.png",
+      "verdict": "rejected",
+      "findings": "Misregistered/oversized cap, exposed crown or face overlap; source bounds fail. See retained direct overlays and reports.",
+      "candidateSha256": "97b4f8c72ffb933067108cd2862d50fe3174d0aa42ded814cfcf0585417499eb",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-silhouette-guide.png": "8762e80adde6f1d5be40cae270588082f4b3bfa03d0d84f2a94a9292e84f8588",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+      }
+    },
+    {
+      "id": "base-5-v3",
+      "prompt": "Use case: background-extraction. Extract a precisely registered HAIR-ONLY game layer.\nErase absolutely everything EXCEPT the existing short brown curly hair from this complete resident. Remove all body, scalp/skin, face, ears, eyebrows, eyes, arms/hands, clothing and boots. Keep the hair's exact1254-square canvas coordinates, original scale, crown, high forehead opening, ear notch, curl shape and painted material. Do not redraw, move, enlarge, recenter, crop or normalize it.\n\nHair is the small region near x500\u2013800,y120\u2013335. All remaining space, including removed ears/face/hand under/near the cap, must be true transparent alpha. NO skin fragments or opaque head backing. Return SAME1254x1254 mostly empty transparent canvas containing ONLY unchanged brown curls at their original location, not a centered wig. No background, shadows, labels, new objects or recolouring.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-work-5-composite-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-cdf089a5-a680-4081-87ec-bbaa265138ef.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v3.png",
+      "verdict": "production draft only",
+      "findings": "Hair extracted from a generated body-with-hair reference fits the unchanged original body; unchanged bounds pass. Body reference is never used for composition. One raised-hand foreground mask is a separate source-bound layer; full equipment/occlusion approval remains open.",
+      "candidateSha256": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-work-5-composite-candidate-v1.png": "2b5bffa9716557227e9b8ba3021498c8e5f9073510e876efec09aa6a3c1a3766"
+      }
+    },
+    {
+      "id": "base-6-v1",
+      "prompt": "Use case: precise-object-edit. Registered modular hair-only layer for a painted game character working pose.\nInput1 is the EXACT bald body target (pose6), on a1254-square transparent canvas. Input2 is the short brown curly hair STYLE/SHAPE reference from a different pose: retain its compact rounded silhouette, warm broad painted curl clusters and upper-left illumination, but place the hair on input1's actual scalp.\nThis head crown is around x650,y175, with forehead/eyes below around y290. Hair begins just ABOVE that actual crown, around y145. Keep a high forehead opening, eyebrows, eyes and visible ear uncovered.\nThe raised hands/arm pass IN FRONT of the left head edge. Do not draw hands into the hair layer. Hair belongs to the scalp behind that existing foreground hand.\nReturn ONLY added hair at exact target coordinates on SAME1254-square true transparent canvas. All body, skin, scalp, face, ears, eyebrows, hands, clothes and props transparent. No skin-coloured backing or fragments. Mostcanvas stays empty transparent. All painted hair lies in outer x,y,width,height rectangle [489.8,98,333.1,293.9]; follow the actual scalp rather than filling this rectangle. Shorten back edge above/behind ear, no dangling curl or U-loop below ear. Do not obscure eyes, lower the fringe or expose bald crown.\nNo recentering, cropping, enlargement, independent normalization, text, guide lines, shadows, ground, checkerboard or background. Direct whole-frame overlay on input1 without fitting. Same short hairstyle and readable broad painted shading at48px resident size as input2.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a241dc48-0c9b-4845-9179-757d46563e93.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v1.png",
+      "verdict": "rejected",
+      "findings": "Includes an opaque painted ear, exposed bald crown and failed bounds. Must not be installed.",
+      "candidateSha256": "9f810847fd36f3f39eebf5667622aba01a20bedfa1f27b3378ad3bd21b675000",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-body.png": "0fea25ef77cf4a401dd7e3f5588381e12326e0c243fb0da8c3baaedca27cd803",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-6-v2",
+      "prompt": "Use case: precise-object-edit. Registered short-hair-only game layer.\nInput1 is the EXACT geometry guide: the GREEN FILLED SHAPE over a bald working body defines the desired hair silhouette, position, crown and forehead opening. Repaint that green area as short brown curls, then return ONLY that added hair. The body is a registration aid and must disappear entirely from output. Follow the green hairline, especially the high forehead and transparent ear notch; do not lower or enlarge the hair.\nInput2 supplies ONLY the warm brown broad painted curl material, readable cluster scale and upper-left light. Its old canvas position is not authoritative; input1's green silhouette IS authoritative. Keep the same restrained short hairstyle.\nThe raised hand/arm crosses in FRONT of this scalp. Produce the hair-only shape without drawing any hand, finger, ear or skin fragment; the original hand is restored as a separate foreground body layer during composition. Hair is behind it.\n\nKeep SAME1254x1254 transparent canvas and exact guide coordinates. All pixels outside hair are genuine transparent alpha. NO EARS, skin, scalp backing, face, hands, body, clothing, props or green guide pixels. Ear/face openings are transparent, not skin-coloured. Mostcanvas stays empty. No dangling side curl/ear loop. No crop, resize, recenter, normalization, shadow, ground, labels, grid or background. Preserve warm illustrated painted texture, not a flat green/vector helmet. Output directly overlays original body without fitting.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-3b923365-d8e4-4c5d-91a2-56d630946a26.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v2.png",
+      "verdict": "rejected",
+      "findings": "Misregistered/oversized cap, exposed crown or face overlap; source bounds fail. See retained direct overlays and reports.",
+      "candidateSha256": "69999ad73f3049cb65955557ce81433b27868f72b9e04e6496db5a70bcb85e93",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-silhouette-guide.png": "06fab90204328c5c84a8051ff7a23397c7334801d79f92417684669e69d06b8f",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+      }
+    },
+    {
+      "id": "base-6-v3",
+      "prompt": "Use case: background-extraction. Extract a precisely registered HAIR-ONLY game layer.\nErase absolutely everything EXCEPT the existing short brown curly hair from this complete resident. Remove all body, scalp/skin, face, ears, eyebrows, eyes, arms/hands, clothing and boots. Keep the hair's exact1254-square canvas coordinates, original scale, crown, high forehead opening, ear notch, curl shape and painted material. Do not redraw, move, enlarge, recenter, crop or normalize it.\nThe raised hand/arm passes in front of the left scalp. Remove that hand/arm entirely and leave that overlap transparent in the extracted hair layer, preserving only the visible brown hair behind it. Do not paint a hand or ear into the cap.\nHair is the small region near x500\u2013800,y120\u2013335. All remaining space, including removed ears/face/hand under/near the cap, must be true transparent alpha. NO skin fragments or opaque head backing. Return SAME1254x1254 mostly empty transparent canvas containing ONLY unchanged brown curls at their original location, not a centered wig. No background, shadows, labels, new objects or recolouring.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-work-6-composite-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-aeb280da-74cd-4c8e-8c0e-1177d5843740.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v3.png",
+      "verdict": "production draft only",
+      "findings": "Hair extracted from a generated body-with-hair reference fits the unchanged original body; unchanged bounds pass. Body reference is never used for composition. One raised-hand foreground mask is a separate source-bound layer; full equipment/occlusion approval remains open.",
+      "candidateSha256": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-work-6-composite-candidate-v1.png": "09a29cc6d899bc70b140b3da8ff0f33c01fc07a831e47613d2a83128a0e3a987"
+      }
+    },
+    {
+      "id": "base-7-v1",
+      "prompt": "Use case: precise-object-edit. Registered modular hair-only layer for a painted game character working pose.\nInput1 is the EXACT bald body target (pose7), on a1254-square transparent canvas. Input2 is the short brown curly hair STYLE/SHAPE reference from a different pose: retain its compact rounded silhouette, warm broad painted curl clusters and upper-left illumination, but place the hair on input1's actual scalp.\nThis body is BENT FORWARD: the crown is around x770,y330, far LOWER than the reference cap. Follow its forward tilt. Hair begins around y305, forehead opening above the eyes around y470, visible ear near x690,y460. Do not put the cap at the old standing position.\n\nReturn ONLY added hair at exact target coordinates on SAME1254-square true transparent canvas. All body, skin, scalp, face, ears, eyebrows, hands, clothes and props transparent. No skin-coloured backing or fragments. Mostcanvas stays empty transparent. All painted hair lies in outer x,y,width,height rectangle [607.4,269.4,333.1,293.9]; follow the actual scalp rather than filling this rectangle. Shorten back edge above/behind ear, no dangling curl or U-loop below ear. Do not obscure eyes, lower the fringe or expose bald crown.\nNo recentering, cropping, enlargement, independent normalization, text, guide lines, shadows, ground, checkerboard or background. Direct whole-frame overlay on input1 without fitting. Same short hairstyle and readable broad painted shading at48px resident size as input2.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-17f18285-5214-4b47-85d2-cc746474c647.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v1.png",
+      "verdict": "rejected",
+      "findings": "Misregistered/oversized cap, exposed crown or face overlap; source bounds fail. See retained direct overlays and reports.",
+      "candidateSha256": "7aa0134d5c24e7c06e8968468833fef1602f15ed75c2f6704cbcaa18d695c0a4",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-body.png": "346efcc6e4bcc7ead88d7aead9a0e213cf5279d34d8971f6721edc6f947fb293",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-7-v2",
+      "prompt": "Use case: precise-object-edit. Registered short-hair-only game layer.\nInput1 is the EXACT geometry guide: the GREEN FILLED SHAPE over a bald working body defines the desired hair silhouette, position, crown and forehead opening. Repaint that green area as short brown curls, then return ONLY that added hair. The body is a registration aid and must disappear entirely from output. Follow the green hairline, especially the high forehead and transparent ear notch; do not lower or enlarge the hair.\nInput2 supplies ONLY the warm brown broad painted curl material, readable cluster scale and upper-left light. Its old canvas position is not authoritative; input1's green silhouette IS authoritative. Keep the same restrained short hairstyle.\n\nThe head is bent forward, and the green cap sits lower in the canvas and tilts down to the right. Follow this exact lower position and sloping hairline. Do not use a standing cap.\nKeep SAME1254x1254 transparent canvas and exact guide coordinates. All pixels outside hair are genuine transparent alpha. NO EARS, skin, scalp backing, face, hands, body, clothing, props or green guide pixels. Ear/face openings are transparent, not skin-coloured. Mostcanvas stays empty. No dangling side curl/ear loop. No crop, resize, recenter, normalization, shadow, ground, labels, grid or background. Preserve warm illustrated painted texture, not a flat green/vector helmet. Output directly overlays original body without fitting.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-9257ae28-3069-4785-93e7-60ede26777e5.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v2.png",
+      "verdict": "rejected",
+      "findings": "Misregistered/oversized cap, exposed crown or face overlap; source bounds fail. See retained direct overlays and reports.",
+      "candidateSha256": "b8949bca52685c39cb23a208bacc1bd33be5241e3150fc05b091cd923827fab7",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-silhouette-guide.png": "91ed26383f649fb1b3a57549a4f181bf9690530391bcc4414841dadb12e455c1",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+      }
+    },
+    {
+      "id": "base-7-v3",
+      "prompt": "Use case: background-extraction. Extract a registered HAIR-ONLY overlay from this complete illustrated resident.\nErase absolutely everything EXCEPT the short brown curly hair: remove all body, face, scalp/skin, both ears, eyebrows, eyes, arms/hands, shirt/shorts and boots. Leave the hair exactly as it is in the input, at the SAME original1254-square canvas coordinates and same scale. Do not repaint, move, recenter, enlarge, straighten or crop the hair. The head is bent forward; keep the existing sloping high hairline and transparent ear/face openings.\nThe hair is the small region near x650\u2013915,y310\u2013470. All other canvas space, including the removed face/ears under the hair, must be genuine transparent alpha. No skin-coloured backing or fragments. Return a1254x1254 mostly empty transparent canvas containing ONLY the unchanged brown painted curls in their original location. No shadow, label, background or new object. This is a registered game layer, NOT a centered wig picture.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-work-7-composite-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-cd7e263f-9d42-4739-9a57-7b61a02094ee.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v3.png",
+      "verdict": "production draft only",
+      "findings": "Hair extracted from a generated body-with-hair reference fits the unchanged original body; unchanged bounds pass. Body reference is never used for composition. One raised-hand foreground mask is a separate source-bound layer; full equipment/occlusion approval remains open.",
+      "candidateSha256": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-work-7-composite-candidate-v1.png": "8ca68f3b05c56137da9ebe33ffed06c61fff716d6e96a770d0203665abe6ee88"
+      }
+    },
+    {
+      "id": "base-5-composite-reference-v1",
+      "prompt": "Use case: precise-object-edit. Paint short hair onto the exact supplied illustrated body pose.\nInput1 is the EDIT TARGET: the original bald resident body,1254-square transparent canvas. Input2 is the same body with a GREEN HAIR SHAPE defining desired crown, compact silhouette, high forehead opening and ear notch. Input3 is the warm short brown painted curl material reference.\nChange ONLY the bald scalp by painting short curls following input2's green shape. Return the COMPLETE ORIGINAL BODY WITH HAIR ADDED, keeping exact pose, face, ears, arms, hands, clothing, boots, proportions, original placement, ground anchor and1254-square transparent canvas. Do not redraw, rescale, recenter, straighten or crop the body.\n\nKeep eyes, eyebrows, ears and forehead clearly visible. Short restrained curls and upper-left illumination matching input3. No hanging ear-loop/side curl, green guide pixels, extra props, labels, ground, shadows or background. This complete body is a geometry reference for later extracting a hair-only overlay; every non-hair pixel should remain unchanged.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d735b5fb-9b5f-4039-8710-1800b4c44f95.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-work-5-composite-candidate-v1.png",
+      "verdict": "geometry reference only",
+      "findings": "Generated body-with-hair used only as an extraction reference. It is not installed as a body source. Preservation of non-hair pixels is not assumed or claimed; final overlays use the original source-bound prepared body.",
+      "candidateSha256": "2b5bffa9716557227e9b8ba3021498c8e5f9073510e876efec09aa6a3c1a3766",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-body.png": "a2a421383317544a0ecacda500a2947c2718cfafb207f106ca075c0caba6a21c",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-5-silhouette-guide.png": "8762e80adde6f1d5be40cae270588082f4b3bfa03d0d84f2a94a9292e84f8588",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+      }
+    },
+    {
+      "id": "base-6-composite-reference-v1",
+      "prompt": "Use case: precise-object-edit. Paint short hair onto the exact supplied illustrated body pose.\nInput1 is the EDIT TARGET: the original bald resident body,1254-square transparent canvas. Input2 is the same body with a GREEN HAIR SHAPE defining desired crown, compact silhouette, high forehead opening and ear notch. Input3 is the warm short brown painted curl material reference.\nChange ONLY the bald scalp by painting short curls following input2's green shape. Return the COMPLETE ORIGINAL BODY WITH HAIR ADDED, keeping exact pose, face, ears, arms, hands, clothing, boots, proportions, original placement, ground anchor and1254-square transparent canvas. Do not redraw, rescale, recenter, straighten or crop the body.\nThe raised near hand and forearm pass IN FRONT of the left head edge: preserve those original hand/arm pixels and paint the hair behind them, never over the fingers.\nKeep eyes, eyebrows, ears and forehead clearly visible. Short restrained curls and upper-left illumination matching input3. No hanging ear-loop/side curl, green guide pixels, extra props, labels, ground, shadows or background. This complete body is a geometry reference for later extracting a hair-only overlay; every non-hair pixel should remain unchanged.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-cb4e8916-92c5-4d6a-9bbd-be9c57c02137.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-work-6-composite-candidate-v1.png",
+      "verdict": "geometry reference only",
+      "findings": "Generated body-with-hair used only as an extraction reference. It is not installed as a body source. Preservation of non-hair pixels is not assumed or claimed; final overlays use the original source-bound prepared body.",
+      "candidateSha256": "09a29cc6d899bc70b140b3da8ff0f33c01fc07a831e47613d2a83128a0e3a987",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-body.png": "0fea25ef77cf4a401dd7e3f5588381e12326e0c243fb0da8c3baaedca27cd803",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-6-silhouette-guide.png": "06fab90204328c5c84a8051ff7a23397c7334801d79f92417684669e69d06b8f",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+      }
+    },
+    {
+      "id": "base-7-composite-reference-v1",
+      "prompt": "Use case: precise-object-edit. Paint a short hairstyle onto the supplied exact game body pose.\nInput1 is the EDIT TARGET: a bald resident bent forward,1254-square transparent canvas. Input2 shows a GREEN HAIR SHAPE on that same exact body, defining the hair silhouette and high sloping forehead opening. Input3 is the warm painted short brown curly hair material reference.\nChange ONLY the bald scalp by painting short brown curls following input2's green shape. Return the COMPLETE ORIGINAL BODY WITH THAT HAIR ADDED, retaining exact body/face/ears/arms/hands/clothes/boots, pose, proportions, placement, ground anchor,1254-square canvas and transparent background of input1. Do not redraw, rescale, center, crop, straighten or change the bent pose. The crown is near x770,y330 and slopes down to the right; hair sits around x660\u2013915,y305\u2013475. No standing hairstyle at the top of the canvas.\nMake the original eyes, eyebrows and ears clearly visible. Small painted curls and upper-left light matching input3. No dangling curl/ear loop, skin backing, extra objects, guide/green pixels, labels, ground, shadow or background. This is a geometry reference for a modular sprite: preserve every non-hair pixel and exact original canvas coordinates.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-172a9ebf-030a-4a3c-afa8-8fe36f2efdfc.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-work-7-composite-candidate-v1.png",
+      "verdict": "geometry reference only",
+      "findings": "Generated body-with-hair used only as an extraction reference. It is not installed as a body source. Preservation of non-hair pixels is not assumed or claimed; final overlays use the original source-bound prepared body.",
+      "candidateSha256": "8ca68f3b05c56137da9ebe33ffed06c61fff716d6e96a770d0203665abe6ee88",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-body.png": "346efcc6e4bcc7ead88d7aead9a0e213cf5279d34d8971f6721edc6f947fb293",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-7-silhouette-guide.png": "91ed26383f649fb1b3a57549a4f181bf9690530391bcc4414841dadb12e455c1",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+      }
+    }
+  ],
+  "evidence": {
+    "report": "hair-work-v3-report.json",
+    "composition": "hair-work-v3-composition.png",
+    "integrationReport": "hair-work-v3-integration-report.json",
+    "details": "hair-work-v3-details.png",
+    "world": "hair-work-v3-scenes.png",
+    "foreground": "hair-work-v3-maskBoard.png",
+    "foregroundDefinition": "web/art/characters/prototype-v1/body-base-6-foreground-v1.json",
+    "review": "Inspected first/second/final direct overlays, the drawn hairline/foreground guides, final working key poses and loop-edge midpoints in both facings/day-night at 192px and 48px, and actual world scenes beside Bento and buildings. Final crown/eye/ear placement is improved, and raised hand stays in front. Some working cap volume/fringe changes and large original-body pose crossfades remain temporal-polish concerns; no final animation or all-48 approval.",
+    "sourceIntegrity": "Final composition uses original body pixels split into disjoint back/front layers, with exact RGBA reconstruction including fractional alpha. This is renderer layer composition, not an edited PNG or a repair to a misregistered cap. Synthetic overlap board is explicitly a geometry/order test, not finished artwork.",
+    "foregroundDefinitionSha256": "d05d7506b82c84b6ba49804abb39ec68a0099fffbfc9d21a2ff9aa649639b843"
+  }
+}

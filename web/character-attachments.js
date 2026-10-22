@@ -11,11 +11,11 @@ export async function attachmentBinding(frames,sources){
  }
  return result;
 }
-function validateBinding(binding){
+export function validateAttachmentBinding(binding){
  if(!exact(binding,['normalization','size','anchor','sources','frames'])||binding.normalization!==1||binding.size!==256||binding.anchor!==FRAME_ANCHOR||!exact(binding.sources,sheets)||!exact(binding.frames,sheets)||sheets.some(sheet=>!/^[a-f0-9]{64}$/.test(binding.sources[sheet]??'')||!Array.isArray(binding.frames[sheet])||binding.frames[sheet].length!==16||Array.from(binding.frames[sheet]).some(hash=>typeof hash!=='string'||!/^[a-f0-9]{64}$/.test(hash))))throw Error('Use a measured binding for all 48 prepared body frames.');
 }
 export function validateAttachmentRig(value,binding){
- validateBinding(binding);
+ validateAttachmentBinding(binding);
  if(!exact(value,['schema','body','poses'])||value.schema!==1||canonical(value.body)!==canonical(binding)||!exact(value.poses,sheets))throw Error('These guides do not match the exact body sources and prepared frames.');
  for(const sheet of sheets){
   if(!Array.isArray(value.poses[sheet])||value.poses[sheet].length!==16)throw Error('Keep all 48 body pose slots.');
@@ -37,7 +37,7 @@ export function attachmentPoint(point,facing=1){
 }
 export class AttachmentRigDocument extends EventTarget{
  #binding;#value;#past=[];#future=[];
- constructor(binding){super();validateBinding(binding);this.#binding=clone(binding);this.#value={schema:1,body:clone(binding),poses:Object.fromEntries(sheets.map(sheet=>[sheet,Array.from({length:16},()=>Object.fromEntries(attachmentSockets.map(key=>[key,null])))]))};}
+ constructor(binding){super();validateAttachmentBinding(binding);this.#binding=clone(binding);this.#value={schema:1,body:clone(binding),poses:Object.fromEntries(sheets.map(sheet=>[sheet,Array.from({length:16},()=>Object.fromEntries(attachmentSockets.map(key=>[key,null])))]))};}
  get value(){return clone(this.#value);}
  get canUndo(){return this.#past.length>0;}get canRedo(){return this.#future.length>0;}
  get recorded(){return Object.values(this.#value.poses).flat().filter(p=>attachmentSockets.every(key=>p[key]!==null)).length;}
