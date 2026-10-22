@@ -151,6 +151,7 @@ const nightBuildingImages = Object.fromEntries(Object.entries(allBuildingArt).ma
   image.src = `art/${art.nightFile}`;
   return [kind, image];
 }));
+for(const [kind,art]of Object.entries(allBuildingArt))if(art.emptyFile){const image=new Image();image.src=`art/${art.emptyFile}`;buildingImages[kind+':empty']=image;nightBuildingImages[kind+':empty']=image;}
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
 const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
@@ -489,7 +490,7 @@ function materialSite(site,alpha=1){paintResourceSite(ctx,site,{project:iso,scal
 
 function sprite(kind, x, y, alpha = 1, id) {
   const complete=state.village.buildings.find(b=>b.id===id)?.progress>=100;
-  paintWorldBuilding(ctx,{key:kind,x,y,alpha},{project:iso,scale,images:buildingImages,nightImages:nightBuildingImages,night:nightAmount(state.village.minutes),light:buildingLighting(state.environment.power,id,kind,complete)});
+  paintWorldBuilding(ctx,{key:kind,x,y,alpha,emptyAnimals:!complete||state.village.buildings.find(b=>b.id===id)?.agriculture.stocked===false},{project:iso,scale,images:buildingImages,nightImages:nightBuildingImages,night:nightAmount(state.village.minutes),light:buildingLighting(state.environment.power,id,kind,complete)});
 }
 function buildingSprite(kind, x, y, alpha = 1, id) {
   if(kind==='home'&&id==null&&$('#home-material-method').value==='adobe'){sprite(['adobe-gable','adobe-veranda'][state.village.buildings.filter(b=>b.kind==='home').length%2],x,y,alpha,id);return;}
@@ -1522,6 +1523,7 @@ function setup() {
       $("#settings-status").textContent = saveSettings(settings) ? "Saved on this device." : "Applied for this session. Device storage is unavailable.";
     };
   }
+  $("#farm-stocking").onclick=()=>{const b=state.village.buildings.find(b=>b.id===Number($("#building-choice").value));if(b&&game.request_animal_stocking(b.id,!b.agriculture.stocking_requested)){state=JSON.parse(game.snapshot());save();updateUI();}};
   $("#farm-active").onchange=()=>{game.configure_agriculture(Number($("#building-choice").value),$("#farm-active").checked);state=JSON.parse(game.snapshot());save();updateUI();};
   for (const id of ["next-crop", "replant-crop"]) $("#"+id).onchange = () => {
     game.configure_crop(Number($("#building-choice").value), $("#next-crop").value, $("#replant-crop").checked);

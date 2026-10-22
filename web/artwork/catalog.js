@@ -1,3 +1,4 @@
+import {regionalNatureArt} from '../regional-art.js';
 import {natureArt} from '../nature-art.js';
 import {economyArt,economyAtlasFile} from '../economy-art.js';
 import {batteryArt} from '../battery-art.js';
@@ -14,6 +15,7 @@ for (const [kind, art] of Object.entries(allBuildingArt)) {
   add(id, art.name, art.file, 'Buildings', { ...art, file: `../art/${art.file}`, building: true });
   add(`${id}-night`, `${art.name} · night`, art.nightFile, 'Buildings', { ...art, name: `${art.name} · night`, file: `../art/${art.nightFile}`, renderFilter:art.nightTint, building: true });
 }
+add('goat-pasture-empty','Goat pasture · empty','goat-pasture-empty-v1.png','Buildings',{...allBuildingArt.goat_pasture,name:'Goat pasture · empty',file:'../art/goat-pasture-empty-v1.png',building:true});
 ['Jequitibá-rosa','Juçara','Embaúba','Pau-brasil'].forEach((name,i) => add(`forest-${i}`,name,'mata-atlantica-atlas.png','Vegetation',{cell:[i%2/2,Math.floor(i/2)/2,.5,.5],width:[145,112,113,125][i],anchor:.85}));
 ['Meadow','Red earth'].forEach((name,i) => add(`terrain-${i}`,name,'terrain-atlas.png','Terrain',{cell:[i/2,0,.5,1],anchor:.5}));
 ['Iara','Bento','Luz','Cauã','Nina'].forEach((name,i) => add(`portrait-${i}`,name,`animations/${['iara','bento','luz','caua','nina'][i]}.png`,'Portraits',{portrait:true,cell:[0,.5,.25,.25],width:RESIDENT_WIDTH,anchor:FRAME_ANCHOR}));
@@ -44,3 +46,12 @@ add('shed-rejected-model-night','Shed model · rejected night style','starter-sh
 add('shed-earlier-tiles','Shed · earlier large tiles','starter-shed-painted.png','References',{usage:'Reference',width:185,anchor:.8});
 add('toilet-earlier','Ecological toilet · earlier proportions','eco-toilet.png','References',{usage:'Reference',width:100,anchor:.88});
 add('toilet-earlier-night','Ecological toilet · earlier night proportions','eco-toilet-night.png','References',{usage:'Reference',width:100,anchor:.88});
+
+regionalNatureArt.forEach((art,i)=>add(`regional-nature-${i}`,art.name,art.file,'Vegetation',{...art,file:'../art/'+art.file}));
+['Cerrado','Caatinga'].forEach((name,i)=>add(`regional-ground-${i}`,`${name} ground`,'regional-ground-v1.png','Terrain',{cell:[0,i/2,1,.5],anchor:.5}));
+for(const [id,name,file,usage] of [
+ ['resident-neutral-prototype','Neutral resident prototype','body-neutral-base.png','Prototype · not gameplay'],
+ ['resident-hair-rejected-1','Rejected hair prototype 1','hair-curls-rejected-v1.png','Rejected prototype'],
+ ['resident-hair-rejected-2','Rejected hair prototype 2','hair-curls-rejected-v2.png','Rejected prototype'],
+ ['resident-head-guide','Resident head position guide','head-position-guide.png','Reference']
+])add(id,name,'characters/prototype-v1/'+file,'References',{usage});

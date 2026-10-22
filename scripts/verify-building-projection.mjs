@@ -6,7 +6,7 @@ import { buildingProjection } from '../web/building-projection.js';
 import { placementArt } from '../web/building-footprints.js';
 import { readAlpha } from './lib/png-alpha.mjs';
 const review=JSON.parse(readFileSync(new URL('../assets/art-direction/building-projection-review.json',import.meta.url)));
-const files=[...new Set(Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile]))];
+const files=[...new Set(Object.values(allBuildingArt).flatMap(a=>[a.file,a.nightFile,a.emptyFile].filter(Boolean)))];
 assert.deepEqual(Object.keys(review.files).sort(),files.sort(),'Fingerprint every current day/night source');
 for(const file of files){
   const bytes=readFileSync(new URL('../web/art/'+file,import.meta.url));

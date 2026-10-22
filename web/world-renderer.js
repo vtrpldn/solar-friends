@@ -40,12 +40,12 @@ export function paintWorldTree(ctx,{x,y,size=1,species=0},{project,scale,width,h
   paintContactShadow(ctx,p.x,p.y+2*scale,23*size*scale,11.5*size*scale,.16);
   ctx.drawImage(forest,(species%2)*cell,Math.floor(species/2)*cell,cell,cell,p.x-w/2,p.y-w*.85,w,w);
 }
-export function paintWorldBuilding(ctx,{key,x,y,alpha=1},{project,scale,images,nightImages=images,night=0,light=1}){
+export function paintWorldBuilding(ctx,{key,x,y,alpha=1,emptyAnimals=false},{project,scale,images,nightImages=images,night=0,light=1}){
   const art=allBuildingArt[key];if(!art)return;
   const p=project(x,y),registration=placementArt(key,art);
   for(const layer of lightingLayers(night,light,alpha)){
     const filtered={...art,renderFilter:layer.source==='night'&&art.nightTint?art.nightTint:layer.filter};
-    ctx.save();drawBuildingArt(ctx,(layer.source==='night'?nightImages:images)[key],filtered,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);ctx.restore();
+    ctx.save();drawBuildingArt(ctx,(layer.source==='night'?nightImages:images)[emptyAnimals&&art.emptyFile?key+':empty':key],filtered,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,layer.alpha);ctx.restore();
   }
 }
 

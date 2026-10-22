@@ -69,7 +69,8 @@ export function installGameUI({images,residents,avatar,paintPortraits,selectPers
     $('#building-portrait').hidden=!b;
     $('#building-visits').hidden=!b||['solar_farm','streetlight','hydro','banana_treatment','wetland','biodigester','warehouse'].includes(b.kind);
     $('#plan-first-building').hidden=!!b;
-    if(key&&key!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[key],allBuildingArt[key]);buildingKey=key;}
+    const imageKey=key&&allBuildingArt[key]?.emptyFile&&(b.progress<100||b.agriculture.stocked===false)?key+':empty':key;
+    if(key&&imageKey!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[imageKey],allBuildingArt[key]);buildingKey=imageKey;}
   }
   function update(state,developer,selected){
     document.body.classList.toggle('developer-session',developer);

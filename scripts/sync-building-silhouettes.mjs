@@ -5,8 +5,8 @@ import {readAlpha,alphaOutline,convexHull} from './lib/png-alpha.mjs';
 const cache=new Map(),records={};
 async function source(file){if(!cache.has(file)){const bytes=await readFile(new URL('../web/art/'+file,import.meta.url));cache.set(file,{image:readAlpha(bytes),hash:createHash('sha256').update(bytes).digest('hex')});}return cache.get(file);}
 for(const [key,art] of Object.entries(allBuildingArt)){
-  const day=await source(art.file),night=await source(art.nightFile);
-  records[key]={day:day.hash,night:night.hash,hull:convexHull([...alphaOutline(day.image,art.cell),...alphaOutline(night.image,art.cell)])};
+  const day=await source(art.file),night=await source(art.nightFile),empty=art.emptyFile?await source(art.emptyFile):null;
+  records[key]={day:day.hash,night:night.hash,...(empty?{empty:empty.hash}:{}),hull:convexHull([...alphaOutline(day.image,art.cell),...alphaOutline(night.image,art.cell),...(empty?alphaOutline(empty.image,art.cell):[])])};
 }
 const output='// Generated from full day/night source alpha ≥32, matching the art studio.\n// Run node scripts/sync-building-silhouettes.mjs after changing a building PNG.\nexport const buildingSilhouettes = '+JSON.stringify(records)+';\n';
 const file=new URL('../web/building-silhouettes.js',import.meta.url);

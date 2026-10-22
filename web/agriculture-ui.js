@@ -12,12 +12,13 @@ export function updateAgricultureUI(game,state,locate){
   if(plot){
     const p=b.agriculture;
     $('#farm-active').checked=p.enabled;
+    const empty=['goat_pasture','apiary'].includes(b.kind)&&p.stocked===false;$('#farm-active').disabled=empty;$('#farm-stocking').hidden=!empty;$('#farm-stocking').textContent=p.stocking_requested?'Cancel stocking request':'Settle animals';
     $('#farm-active-label').textContent=b.kind==='goat_pasture'?'Produce milk':b.kind==='apiary'?'Keep this hive active':'Grow and harvest fruit';
-    $('#farm-status').textContent=!p.enabled&&b.kind==='goat_pasture'&&!plot.status.startsWith('Milk production paused')?`Milk production paused; daily feed and care continue. ${plot.status}`:plot.status;
+    $('#farm-status').textContent=!empty&&!p.enabled&&b.kind==='goat_pasture'&&!plot.status.startsWith('Milk production paused')?`Milk production paused; daily feed and care continue. ${plot.status}`:plot.status;
     $('#farm-progress').value=plot.duration?p.growth/plot.duration*100:0;
     $('#farm-progress').setAttribute('aria-label',`${farmNames[b.kind]} growth`);
     $('#farm-notes').textContent=farmNotes[b.kind];
-    $('#farm-detail').textContent=b.kind==='goat_pasture'?`Wellbeing ${Math.round(p.welfare)}% · ${plot.fodder_here} fodder and ${Math.floor(plot.fresh_water_here)} fresh water here · ${p.pending} milk waiting · ${p.harvested} collected so far.`:b.kind==='apiary'?`${plot.flowers} nearby flowering plots · ${p.pending} honey waiting · ${p.harvested} collected so far.`:`${p.fruiting?'Established trees':'Young fruit trees'} · ${plot.pollinated?'Pollinated':'No tended apiary nearby'} · ${p.pending} fruit waiting · ${p.harvested} collected so far.`;
+    $('#farm-detail').textContent=empty?`No animals here. Buy ${b.kind==='goat_pasture'?'a pair of dairy goats':'a stingless bee colony'} in Trade or deliver owned animals, then request resident stocking. Feed and production begin after stocking.`:b.kind==='goat_pasture'?`Wellbeing ${Math.round(p.welfare)}% · ${plot.fodder_here} fodder and ${Math.floor(plot.fresh_water_here)} fresh water here · ${p.pending} milk waiting · ${p.harvested} collected so far.`:b.kind==='apiary'?`${plot.flowers} nearby flowering plots · ${p.pending} honey waiting · ${p.harvested} collected so far.`:`${p.fruiting?'Established trees':'Young fruit trees'} · ${plot.pollinated?'Pollinated':'No tended apiary nearby'} · ${p.pending} fruit waiting · ${p.harvested} collected so far.`;
     const workers=state.residents.filter(r=>r.task==='garden'&&r.activity_building===b.id);
     $('#farm-worker').textContent=workers.length?workers.map(r=>`${r.name}: ${Math.hypot(r.x-r.target_x,r.y-r.target_y)>.12?'on the way':'tending this plot'}`).join(' · '):plot.ready?'Neighbours handle care and collection when they have the energy. Ask someone to tend this plot below.':'Neighbours will tend this plot when it is ready. Check the care and supply status above.';
   }

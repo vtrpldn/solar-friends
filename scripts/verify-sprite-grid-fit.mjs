@@ -6,7 +6,7 @@ import {placementArt,footprintSize} from '../web/building-footprints.js';
 import {readAlpha,alphaOutline} from './lib/png-alpha.mjs';
 execFileSync(process.execPath,['scripts/sync-building-silhouettes.mjs','--check']);
 const cache=new Map();let pixels=0;
-for(const [kind,art]of Object.entries(allBuildingArt))for(const file of [art.file,art.nightFile]){
+for(const [kind,art]of Object.entries(allBuildingArt))for(const file of [art.file,art.nightFile,art.emptyFile].filter(Boolean)){
   if(!cache.has(file))cache.set(file,readAlpha(await readFile(new URL('../web/art/'+file,import.meta.url))));
   const image=cache.get(file),points=alphaOutline(image,art.cell),registration=placementArt(kind,art),n=footprintSize(kind),center=(n-1)/2-Math.floor(n/2);
   assert(Object.values(registration).every(Number.isFinite));assert(registration.scale>0);

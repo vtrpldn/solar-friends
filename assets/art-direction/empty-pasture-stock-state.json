@@ -1,0 +1,41 @@
+{
+  "asset": "Goat pasture empty state",
+  "tool": "Built-in image_gen.imagegen",
+  "input_roles": [
+    {
+      "path": "web/art/goat-pasture.png",
+      "role": "Exact edit target and style/geometry reference"
+    }
+  ],
+  "inspected_scale_reference": "web/art/home-gable.png and actual player playtest scenes with residents, starter shed and home",
+  "prompt": "Use case: precise-object-edit. Asset type: Solar Friends game sprite empty state. Input image is the exact edit target and style reference. Remove ONLY the two goats and their contact shadows from inside the fenced pasture; reconstruct the small grassy patches they hid with matching painted grass. Keep every other pixel and the entire structure as unchanged as possible: exact canvas composition, roof silhouette and terracotta tile detail, roof ridge/eaves, wall, bamboo fence posts/rails, gate, trough/water, hay rack/hay, foliage, ground outline, transparency, upper-left light, warm painted edge treatment, orthographic camera, scale and proportions. Do not recenter, crop, zoom, stretch, warp or redesign. This must toggle in place against the original sprite without jumping. Keep full original transparent margins and transparent background; no new platform, text, grid or objects.",
+  "generated_source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ab743d75-1f9e-4d62-924d-7e90553c660e.png",
+  "delivered_path": "web/art/goat-pasture-empty-v1.png",
+  "sha256": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+  "reference_sha256": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+  "canvas": [
+    1254,
+    1254
+  ],
+  "postprocessing": "None; copied generator output without resampling, clipping, warping or transparency edits.",
+  "review": {
+    "verdict": "Accepted for empty pasture state by agent visual review; not a claim of user approval.",
+    "style": "Matches existing pasture warm painted tiles, bamboo rails, hay, trough and broad leaf/grass treatment. Only goats are absent; no new objects or platform.",
+    "geometry": "Roof ridge, eaves, walls, upright posts, fence and gate visually remain aligned with the original structure; no new per-state registration or transform is used. This is not a claim of mathematically exact new geometry.",
+    "registration": "Same 3×3 footprint, width 218, anchor .83 and placement/camera calibration as occupied pasture. Alpha bounds original [75,168,1192,1099], empty [72,168,1194,1104]; grass-edge variation is small at gameplay scale. Full-mask intersection/union .9761598511907706 is recorded as a diagnostic, not visual acceptance by itself.",
+    "states": "Editor, empty gameplay, occupied gameplay after actual resident stocking, and empty/occupied night scene inspected. Existing unlit night tint uses the same source and geometry.",
+    "captures": [
+      "/private/tmp/solar-starting-animals-empty-editor.png",
+      "/private/tmp/solar-starting-animals-empty-play.png",
+      "/private/tmp/solar-starting-animals-stocked-play.png",
+      "/private/tmp/solar-starting-animals-night-play.png"
+    ],
+    "checks": [
+      "verify-artwork.mjs",
+      "verify-sprite-grid-fit.mjs including emptyFile source",
+      "verify-building-projection.mjs fingerprint coverage",
+      "verify-starting-animals-editor.mjs actual stocking and nightfall"
+    ],
+    "limits": "No new goat animation or poultry art; full cross-biome release art review remains open."
+  }
+}
