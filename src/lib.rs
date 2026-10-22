@@ -65,7 +65,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 42;
+pub const SAVE_VERSION: u32 = 43;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -641,7 +641,11 @@ fn choose(r: &mut Resident, v: &Village) {
     } else if v.progress.gathering_until > v.minutes && v.progress.invited.contains(&r.id) {
         (
             "gathering",
-            "Sharing food and stories in our community square.",
+            if gatherings::active(v).is_some_and(|p| p.portions == 1) {
+                "Enjoying a meal at the shared table."
+            } else {
+                "Sharing food and stories in our community square."
+            },
         )
     } else if situations::apply_agreement(r, v) {
         return;
@@ -820,7 +824,11 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                     &mut r,
                     &v,
                     "gathering",
-                    "Meals have reached our shared table. Coming to share food and stories.",
+                    if gatherings::active(&v).is_some_and(|p| p.portions == 1) {
+                        "A meal is ready at the shared table. Taking time to enjoy it."
+                    } else {
+                        "Meals have reached our shared table. Coming to share food and stories."
+                    },
                     true,
                 );
             }
@@ -828,7 +836,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
     }
     if v.progress.gathering_until > 0. && v.minutes >= v.progress.gathering_until {
         let attended = v.progress.attended.clone();
-        let success = attended.len() >= 3 && gatherings::served(&v);
+        let reached = gatherings::attendance_met(&v);
+        let success = reached && gatherings::served(&v);
         if success {
             v.progress.gatherings += 1;
             v.progress.welcome_supper = true;
@@ -840,8 +849,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 .collect();
             for mut r in &mut people {
                 if attended.contains(&r.id) {
-                    personality::company(&mut r, 25.);
-                    r.hunger = (r.hunger - 35.).max(0.);
+                    gatherings::share_meal(&mut r, participants.len());
                     for &other in &participants {
                         if other != r.id && attended.contains(&other) {
                             relationships::remember(&mut v, r.id, other);
@@ -851,13 +859,17 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
             event(
                 &mut v,
-                "Food, stories and closer friendships. A gathering to remember.",
+                if participants.len() > 1 {
+                    "Food, stories and closer friendships. A gathering to remember."
+                } else {
+                    "A quiet meal at the shared table and a change of scenery."
+                },
             );
         } else {
             event(
                 &mut v,
-                if attended.len() >= 3 {
-                    "Neighbours reached the shared table, but five fresh meals were no longer available. Prepare fresh portions for another day."
+                if reached {
+                    "Residents reached the shared table, but the planned fresh meals were no longer available. Prepare fresh portions for another day."
                 } else {
                     "Too few neighbours made it to the square. Try gathering closer to home tomorrow."
                 },

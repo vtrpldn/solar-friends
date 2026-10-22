@@ -285,7 +285,7 @@ const lessons = [
       goal("Keep beds for everyone",count(v,"home"),2,"Two homes provide six beds for our five neighbours.","home"),
       actionGoal("supplies","Keep a healthy food reserve",Math.floor(v.food),18,"Keep eighteen ingredients for household cooking, then let neighbours enjoy their free time. Trade still protects its larger 36-ingredient reserve before accepting a sale.","pantry"),
       actionGoal("supplies","Keep fresh water ready",Math.floor(v.water),20,"Keep twenty fresh water in the cistern. Reclaimed water irrigates plants; drinking and cooking need fresh water.","water"),
-      actionGoal("gathering","Meet again at our square",v.progress.gatherings,2,"Plan another gathering at the square between 08:00 and 18:00. Allow delivery through the following evening and give at least three fed, rested neighbours time to arrive. Follow preparation in Supplies."),
+      actionGoal("gathering","Meet again at our square",v.progress.gatherings,2,"Plan another gathering at the square between 08:00 and 18:00. Allow delivery through the following evening and give the indicated number of fed, rested neighbours time to arrive. Follow preparation in Supplies."),
     ],
   },
 

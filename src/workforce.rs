@@ -194,8 +194,8 @@ fn projected(v: &Village, id: usize) -> (f32, f32) {
         .filter(|(i, c)| **i != id && c.as_ref().is_some_and(|c| c.task == "gather"))
         .map(|(_, c)| food::forage_yield(v, c.as_ref().unwrap().building))
         .sum::<u32>() as f32;
-    let shared = if gatherings::active(v).is_some_and(|p| p.spent_after.is_none()) {
-        gatherings::PORTIONS as f32
+    let shared = if let Some(p) = gatherings::active(v).filter(|p| p.spent_after.is_none()) {
+        p.portions as f32
     } else {
         0.
     };

@@ -3,7 +3,39 @@ use crate::*;
 use economy::MEALS;
 use simulation::Id;
 
+#[cfg(test)]
 pub const PORTIONS: u32 = 5;
+pub fn portions(v: &Village) -> u32 {
+    u32::try_from(v.skills.people.len()).unwrap_or(0)
+}
+pub fn quorum(portions: u32) -> usize {
+    (u64::from(portions) * 3).div_ceil(5) as usize
+}
+pub fn attendance_met(v: &Village) -> bool {
+    active(v).is_some_and(|p| v.progress.attended.len() >= p.required_guests)
+}
+pub fn share_meal(r: &mut Resident, attendees: usize) {
+    if attendees > 1 {
+        personality::company(r, 25.);
+    }
+    r.hunger = (r.hunger - 35.).max(0.);
+}
+pub fn migrate(raw: &mut serde_json::Value) -> bool {
+    let Some(plan) = raw
+        .get_mut("village")
+        .and_then(|v| v.get_mut("progress"))
+        .and_then(|p| p.get_mut("gathering_delivery"))
+        .filter(|p| !p.is_null())
+    else {
+        return true;
+    };
+    let Some(plan) = plan.as_object_mut() else {
+        return false;
+    };
+    plan.entry("portions").or_insert(5.into());
+    plan.entry("required_guests").or_insert(3.into());
+    true
+}
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Phase {
@@ -24,6 +56,8 @@ pub struct Plan {
     pub deadline: f32,
     pub started: Option<f32>,
     pub finished: Option<f32>,
+    pub portions: u32,
+    pub required_guests: usize,
     pub invited: crate::participation::Set,
     pub attended: crate::participation::Set,
     pub spent_before: u64,
@@ -81,11 +115,11 @@ pub fn held(v: &Village, store: Id, material: usize) -> u32 {
             logistics::pickup_reserved(v, s.id, MEALS) + food::held(v, s.id, MEALS, None),
         )
     };
-    let local = available(table).min(PORTIONS);
+    let local = available(table).min(p.portions);
     if at.id == table.id {
         return local;
     }
-    let remaining = PORTIONS.saturating_sub(local + incoming);
+    let remaining = p.portions.saturating_sub(local + incoming);
     if remaining == 0 {
         return 0;
     }
@@ -107,19 +141,19 @@ pub fn held(v: &Village, store: Id, material: usize) -> u32 {
     available(at).min(remaining.saturating_sub(ahead))
 }
 pub fn reserved(v: &Village, material: usize) -> u32 {
-    if active(v).is_some_and(|p| p.spent_after.is_none() && open(v, p.building))
-        && material == MEALS
+    if let Some(p) =
+        active(v).filter(|p| p.spent_after.is_none() && open(v, p.building) && material == MEALS)
     {
-        PORTIONS.min(v.meals)
+        p.portions.min(v.meals)
     } else {
         0
     }
 }
 pub fn needs(v: &Village, building: usize) -> u32 {
-    if active(v)
-        .is_some_and(|p| p.building == building && p.spent_after.is_none() && open(v, building))
+    if let Some(p) =
+        active(v).filter(|p| p.building == building && p.spent_after.is_none() && open(v, building))
     {
-        PORTIONS
+        p.portions
     } else {
         0
     }
@@ -179,26 +213,30 @@ pub fn advance(v: &mut Village, available: &participation::Set) -> bool {
     if p.phase == Phase::Serving {
         v.progress.gathering_delivery.as_mut().unwrap().attended = v.progress.attended.clone();
         if p.spent_after.is_none()
-            && v.progress.attended.len() >= 3
-            && held(v, p.store, MEALS) == PORTIONS
+            && v.progress.attended.len() >= p.required_guests
+            && held(v, p.store, MEALS) == p.portions
         {
-            assert!(logistics::spend_at(v, p.store, MEALS, PORTIONS));
-            v.supplies.portions_eaten = v.supplies.portions_eaten.saturating_add(PORTIONS);
+            assert!(logistics::spend_at(v, p.store, MEALS, p.portions));
+            v.supplies.portions_eaten = v.supplies.portions_eaten.saturating_add(p.portions);
             let spent = v.simulation.materials.as_ref().unwrap().spent[MEALS];
             v.progress.gathering_delivery.as_mut().unwrap().spent_after = Some(spent);
             event(
                 v,
-                "Neighbours have reached the shared table. Five delivered meals are being shared.",
+                format!(
+                    "The shared table is ready. {} delivered meal{} being shared.",
+                    p.portions,
+                    if p.portions == 1 { " is" } else { "s are" }
+                ),
             );
         }
         return false;
     }
-    if held(v, p.store, MEALS) < PORTIONS {
+    if held(v, p.store, MEALS) < p.portions {
         v.progress.gathering_delivery.as_mut().unwrap().phase = Phase::Preparing;
         return false;
     }
     let invited: participation::Set = p.invited.intersection(available).copied().collect();
-    if invited.len() < 3 || !(480.0..1080.).contains(&(v.minutes % 1440.)) {
+    if invited.len() < p.required_guests || !(480.0..1080.).contains(&(v.minutes % 1440.)) {
         v.progress.gathering_delivery.as_mut().unwrap().phase = Phase::Ready;
         return false;
     }
@@ -211,7 +249,11 @@ pub fn advance(v: &mut Village, available: &participation::Set) -> bool {
     v.progress.gathering_until = v.minutes + 120.;
     event(
         v,
-        "The meals have reached the shared table. Neighbours are coming to share food and stories.",
+        if p.portions == 1 {
+            "A prepared meal has reached the table. Time to sit down and enjoy it."
+        } else {
+            "The meals have reached the shared table. Neighbours are coming to share food and stories."
+        },
     );
     true
 }
@@ -232,6 +274,7 @@ pub fn finish(v: &mut Village, success: bool) {
 }
 #[cfg(test)]
 pub(crate) fn fixture_table(v: &mut Village) {
+    let portions = active(v).unwrap().portions;
     let table = active(v).unwrap().store;
     let s = v.logistics.as_mut().unwrap();
     assert!(s.shipments.is_empty());
@@ -241,8 +284,8 @@ pub(crate) fn fixture_table(v: &mut Village) {
         .position(|p| p.owner == logistics::Owner::Camp)
         .unwrap();
     let to = s.stores.iter().position(|p| p.id == table).unwrap();
-    s.stores[from].items[MEALS] -= PORTIONS;
-    s.stores[to].items[MEALS] += PORTIONS;
+    s.stores[from].items[MEALS] -= portions;
+    s.stores[to].items[MEALS] += portions;
     logistics::sync_totals(v);
     freshness::fixture_reseed(v);
 }
@@ -260,7 +303,10 @@ pub fn valid(v: &Village) -> bool {
         && p.store.0 < v.simulation.next_id
         && participation::owned(v, &p.invited)
         && participation::owned(v, &p.attended)
-        && p.invited.len() >= 3
+        && p.portions > 0
+        && p.portions == portions(v)
+        && p.required_guests == quorum(p.portions)
+        && p.invited.len() >= p.required_guests
         && p.attended.is_subset(&p.invited)
         && p.created.is_finite()
         && (0.0..=v.minutes).contains(&p.created)
@@ -280,8 +326,8 @@ pub fn valid(v: &Village) -> bool {
         && p.spent_before <= 9_007_199_254_740_986
         && p.spent_after.is_none_or(|spent| {
             p.started.is_some()
-                && p.attended.len() >= 3
-                && spent >= p.spent_before + u64::from(PORTIONS)
+                && p.attended.len() >= p.required_guests
+                && spent >= p.spent_before + u64::from(p.portions)
                 && v.simulation
                     .materials
                     .as_ref()
@@ -299,7 +345,7 @@ pub fn valid(v: &Village) -> bool {
             Phase::Serving => {
                 p.started
                     .is_some_and(|t| v.progress.gathering_until == t + 120.)
-                    && v.progress.invited.len() >= 3
+                    && v.progress.invited.len() >= p.required_guests
                     && v.progress.invited.is_subset(&p.invited)
                     && v.progress.attended.is_subset(&v.progress.invited)
             }
@@ -347,8 +393,16 @@ impl Game {
         if !(480.0..1080.).contains(&(v.minutes % 1440.)) {
             return "Plan a gathering between 08:00 and 18:00, with time to deliver meals before dusk.".into();
         }
-        if economy::free(v, MEALS) < PORTIONS {
-            return "Set aside five unreserved prepared meals for the gathering.".into();
+        let portions = portions(v);
+        let required_guests = quorum(portions);
+        if portions == 0 {
+            return "A shared meal needs a resident.".into();
+        }
+        if economy::free(v, MEALS) < portions {
+            return format!(
+                "Set aside {portions} unreserved prepared meal{} for the shared table.",
+                if portions == 1 { "" } else { "s" }
+            );
         }
         let Some(store) = food::pantry(v, building.id).map(|p| p.id) else {
             return "Leave room for the shared table's supplies.".into();
@@ -360,8 +414,11 @@ impl Game {
                 .query::<&Resident>()
                 .iter(self.app.world()),
         );
-        if invited.len() < 3 {
-            return "At least three neighbours need to be rested and fed.".into();
+        if invited.len() < required_guests {
+            return format!(
+                "At least {required_guests} resident{} need to be rested and fed.",
+                if required_guests == 1 { "" } else { "s" }
+            );
         }
         let mut v = self.app.world_mut().resource_mut::<Village>();
         let Some(id) = v.simulation.allocate() else {
@@ -376,6 +433,8 @@ impl Game {
             deadline: (day as f32 + 1.) * 1440. + 1080.,
             started: None,
             finished: None,
+            portions,
+            required_guests,
             invited,
             attended: Default::default(),
             spent_before: v.simulation.materials.as_ref().unwrap().spent[MEALS],
@@ -385,7 +444,10 @@ impl Game {
         economy::rebalance(&mut v);
         event(
             &mut v,
-            "A gathering is planned. Neighbours will bring five meals to the shared table by tomorrow evening.",
+            format!(
+                "A shared meal is planned. {portions} prepared meal{} must reach the table by tomorrow evening.",
+                if portions == 1 { "" } else { "s" }
+            ),
         );
         "ok".into()
     }
@@ -479,6 +541,113 @@ mod tests {
         freshness::fixture_reseed(v);
     }
     #[test]
+    fn population_budgets_reserve_deliver_and_spend_once_after_their_actual_quorum() {
+        for count in [1u32, 2, 5, 12] {
+            let mut g = scene();
+            assert_eq!(g.host_gathering(), "ok");
+            let mut v = g.app.world_mut().resource_mut::<Village>();
+            let ids: participation::Set = (0..count as usize).map(|i| 42 + i * 101).collect();
+            v.skills.people = ids
+                .iter()
+                .map(|&id| (id, skills::Person::default()))
+                .collect();
+            let required = quorum(count);
+            let p = v.progress.gathering_delivery.as_mut().unwrap();
+            p.portions = count;
+            p.required_guests = required;
+            p.invited = ids.clone();
+            logistics::fixture_stock(&mut v, MEALS, count + 8);
+            fixture_table(&mut v);
+            assert_eq!(reserved(&v, MEALS), count);
+            assert_eq!(needs(&v, 0), count);
+            assert!(valid(&v));
+            assert!(advance(&mut v, &ids));
+            v.progress.attended = ids.iter().take(required - 1).copied().collect();
+            advance(&mut v, &ids);
+            assert!(!served(&v));
+            assert_eq!(v.meals, count + 8);
+            v.progress.attended = ids.iter().take(required).copied().collect();
+            advance(&mut v, &ids);
+            assert!(served(&v));
+            assert_eq!(v.meals, 8);
+            assert_eq!(v.supplies.portions_eaten, count);
+            assert!(valid(&v));
+            let saved = serde_json::to_value(&*v).unwrap();
+            advance(&mut v, &ids);
+            assert_eq!(serde_json::to_value(&*v).unwrap(), saved);
+            let mut clone = v.clone();
+            v.progress.attended = ids.clone();
+            clone.progress.attended = ids.clone();
+            advance(&mut v, &ids);
+            advance(&mut clone, &ids);
+            finish(&mut v, true);
+            finish(&mut clone, true);
+            assert_eq!(
+                serde_json::to_value(&*v).unwrap(),
+                serde_json::to_value(clone).unwrap()
+            );
+            assert!(valid(&v));
+            assert!(
+                simulation::view(&v)["materials"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .all(|m| m["difference"] == 0.)
+            );
+        }
+    }
+    #[test]
+    fn solo_meals_feed_the_resident_without_inventing_company() {
+        let mut g = scene();
+        let world = g.app.world_mut();
+        let mut r = world
+            .query::<&Resident>()
+            .iter(world)
+            .next()
+            .unwrap()
+            .clone();
+        r.social = 30.;
+        r.hunger = 80.;
+        share_meal(&mut r, 1);
+        assert_eq!(r.social, 30.);
+        assert_eq!(r.hunger, 45.);
+        share_meal(&mut r, 2);
+        assert_eq!(r.social, 55.);
+        assert_eq!(r.hunger, 10.);
+    }
+    #[test]
+    fn legacy_budgets_migrate_and_forged_or_missing_budgets_are_atomic() {
+        let mut g = scene();
+        assert_eq!(g.host_gathering(), "ok");
+        let saved = g.snapshot();
+        let current: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        let mut old = current.clone();
+        old["village"]["version"] = 42.into();
+        let p = old["village"]["progress"]["gathering_delivery"]
+            .as_object_mut()
+            .unwrap();
+        p.remove("portions");
+        p.remove("required_guests");
+        assert!(g.restore(&old.to_string()));
+        assert_eq!(g.snapshot(), saved);
+        for field in ["portions", "required_guests"] {
+            for value in [0, 1, 4, 6, 900] {
+                let mut bad = current.clone();
+                bad["village"]["progress"]["gathering_delivery"][field] = value.into();
+                assert!(!g.restore(&bad.to_string()));
+                assert_eq!(g.snapshot(), saved);
+            }
+            let mut bad = current.clone();
+            bad["village"]["progress"]["gathering_delivery"]
+                .as_object_mut()
+                .unwrap()
+                .remove(field);
+            assert!(!g.restore(&bad.to_string()));
+            assert_eq!(g.snapshot(), saved);
+        }
+    }
+
+    #[test]
     fn a_legacy_live_gathering_migrates_without_restarting_its_delivery_or_attendance() {
         let mut g = scene();
         assert_eq!(g.host_gathering(), "ok");
@@ -556,23 +725,26 @@ mod tests {
             .iter()
             .map(|&id| (id, skills::Person::default()))
             .collect();
-        v.progress.gathering_delivery.as_mut().unwrap().invited = ids.clone();
+        let p = v.progress.gathering_delivery.as_mut().unwrap();
+        p.invited = ids.clone();
+        p.portions = 3;
+        p.required_guests = 2;
         assert!(advance(&mut v, &ids));
         assert_eq!(v.progress.invited, ids);
         assert!(valid(&v));
-        v.progress.attended = [42, 900].into_iter().collect();
+        v.progress.attended = [42].into_iter().collect();
         advance(&mut v, &ids);
         assert!(!served(&v));
-        v.progress.attended.insert(1200);
+        v.progress.attended.insert(900);
         advance(&mut v, &ids);
         assert!(served(&v));
-        assert_eq!(v.supplies.portions_eaten, PORTIONS);
+        assert_eq!(v.supplies.portions_eaten, 3);
         finish(&mut v, true);
         assert!(v.progress.invited.is_empty());
         assert!(v.progress.attended.is_empty());
         assert_eq!(
             v.progress.gathering_delivery.as_ref().unwrap().attended,
-            ids
+            [42, 900].into_iter().collect()
         );
         assert!(valid(&v));
     }
@@ -617,7 +789,7 @@ mod tests {
         assert_eq!(p.phase, Phase::Complete);
         assert_eq!(v.progress.gatherings, 1);
         assert!(p.spent_after.is_some());
-        assert!(p.attended.len() >= 3);
+        assert!(p.attended.len() >= p.required_guests);
         let spent = p.spent_after;
         for _ in 0..8 {
             g.tick(0.25);

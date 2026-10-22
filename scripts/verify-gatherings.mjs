@@ -71,5 +71,15 @@ assert(!restedOvernight);assert.equal(Math.floor(plan(s).started/1440),0);assert
 await writeFile('artifacts/gathering/overnight.json',evening.snapshot());
 const before=g.snapshot(),bad=snap(g);bad.village.progress.gathering_delivery.spent_after=Number.MAX_SAFE_INTEGER;
 assert(!g.restore(JSON.stringify(bad)));assert.equal(g.snapshot(),before);
+// Presentation receives the frozen budget; the full engine still requires the founding five.
+for(const [population,required]of [[1,1],[2,2],[5,3],[12,8]]){
+ const v=structuredClone(s.village);v.skills.people=Object.fromEntries(Array.from({length:population},(_,i)=>[42+i*101,{}]));
+ v.progress.gathering_delivery=null;assert.equal(gatheringInfo(v).portions,population);assert.equal(gatheringInfo(v).required,required);
+ v.progress.gathering_delivery={...plan(s),portions:population,required_guests:required,phase:'preparing',spent_after:null};
+ assert.match(gatheringInfo(v).summary,new RegExp(`0/${population} meals delivered`));
+ v.progress.gathering_delivery.phase='ready';assert(gatheringInfo(v).summary.includes(`Waiting for ${required} fed, rested`));
+ v.progress.gathering_delivery.phase='serving';v.progress.attended=[];assert(gatheringInfo(v).summary.includes(`Meals wait for ${required} arrival`));
+ v.progress.gathering_delivery.phase='complete';if(population===1)assert.doesNotMatch(gatheringInfo(v).summary,/friendship/);
+}
 for(const game of [g,copy,cancelled,rested,moving,dusk,evening])game.free();
 console.log('PASS: shared-table food is physically carried, reserved without premature consumption, recovered through rest/cancellation/moving/dusk, served once after attendance, and exactly replayed with conserved stock.');

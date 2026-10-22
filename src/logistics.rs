@@ -1010,7 +1010,9 @@ fn candidates(v: &Village) -> Vec<Candidate> {
             .filter(|h| h.to == to.id && h.material == economy::MEALS)
             .map(|h| h.amount)
             .sum();
-        let missing = gatherings::PORTIONS.saturating_sub(to.items[economy::MEALS] + incoming);
+        let missing = party
+            .portions
+            .saturating_sub(to.items[economy::MEALS] + incoming);
         for from in s
             .stores
             .iter()

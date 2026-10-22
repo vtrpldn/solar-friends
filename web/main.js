@@ -924,7 +924,7 @@ function questAction(route) {
     if(underway)explanation=gathering.summary;
     onClick=()=>{
       const result=supper?game.host_gathering():game.contribute_tool_library();
-      toast(result==='ok'?(supper?'Welcome supper is planned. Neighbours will bring five meals to the shared table.':'The shared tool library is funded.'):result);
+      toast(result==='ok'?(supper?'Welcome supper is planned. Its prepared meals will reach the shared table.':'The shared tool library is funded.'):result);
       state=JSON.parse(game.snapshot());updateUI();save();
     };
   }
@@ -936,7 +936,7 @@ function questAction(route) {
   if(route?.type==='land_map'){label='Read the land';onClick=()=>{if(!landMap.isOpen())$('#land-map-toggle').click();};}
   if(route?.type==='weather'){label='Read the weather forecast';onClick=()=>$('#weather-open').click();}
   if(route?.type==='situations'){label='Hear our community check-in';onClick=openSituations;}
-  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':'Plan a gathering · 5 meals';onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
+  if(route?.type==='gathering'){const gathering=gatheringInfo(v);label=gathering.active?'Review gathering meals':`Plan a shared meal · ${gathering.portions} meal${gathering.solo?'':'s'}`;onClick=()=>{if(gathering.active){showPanel('supplies-panel','pantry');return;}const result=game.host_gathering();toast(result==='ok'?'The gathering is planned. Neighbours will deliver its meals.':result);state=JSON.parse(game.snapshot());updateUI();save();};}
   return {label,disabled,explanation,run(){
     if($('#quest-dialog').open)$('#quest-dialog').close();
     $('[data-panel="goals-panel"]').setAttribute('aria-expanded','false');
@@ -1067,8 +1067,8 @@ function updateQuests() {
   for(const button of document.querySelectorAll('[data-cancel-gathering]'))button.hidden=!gathering.active;
   $("#host-gathering").disabled = gathering.active || p.gathering_day === Math.floor(v.minutes / 1440);
   $("#host-gathering").textContent = gathering.active
-    ? gathering.preparing ? "Preparing our gathering…" : "Neighbours are gathering…"
-    : p.gathering_day === Math.floor(v.minutes / 1440) ? "Next gathering tomorrow" : "Host a gathering";
+    ? gathering.solo ? gathering.preparing?"Preparing a meal…":"A quiet mealtime…" : gathering.preparing ? "Preparing our gathering…" : "Neighbours are gathering…"
+    : p.gathering_day === Math.floor(v.minutes / 1440) ? gathering.solo?"Next meal tomorrow":"Next gathering tomorrow" : gathering.solo?"Plan a quiet meal":"Host a gathering";
 }
 const buildingPurposes = {
   orchard:'Establish a lasting source of fruit for the village.',
@@ -1653,7 +1653,7 @@ function setup() {
     const result = game.host_gathering();
     toast(
       result === "ok"
-        ? "The gathering is planned. Neighbours will deliver five meals when they have the energy, then the invitation starts."
+        ? "The shared meal is planned. Its prepared portions will reach the table before mealtime starts."
         : result,
     );
     state = JSON.parse(game.snapshot());
