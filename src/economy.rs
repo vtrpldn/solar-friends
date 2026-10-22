@@ -52,7 +52,7 @@ pub const NAMES: [&str; COUNT] = [
     "goats",
     "bees",
 ];
-const LABELS: [&str; COUNT] = [
+pub(crate) const LABELS: [&str; COUNT] = [
     "Timber",
     "Bamboo",
     "Building earth",

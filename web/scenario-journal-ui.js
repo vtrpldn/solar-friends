@@ -23,7 +23,7 @@ export function renderScenarioJournal(report,{title,page,open,onAction,replace})
  replace($('#journal-chapters'),report.chapters.map((c,i)=>`<button data-chapter="${i}" aria-pressed="${i===index}"><span class="chapter-number">${c.completed_at!==null?'✓':i+1}</span><span><b>${escape(c.title)}</b><small>${c.completed_at!==null?'Complete':c.goals.some(g=>g.status==='active')?'In progress':'Upcoming'}</small></span></button>`).join(''));
  const actionButton=(action,credited)=>{
   if(!action)return '';
-  const slot=actions.push({action,credited})-1,name=action.kind==='build'?(credited?'Review buildings':`Build ${allBuildingArt[action.building]?.name??action.building}`):action.kind==='trade'?'Open Trade':'View goal';
+  const slot=actions.push({action,credited})-1,name=action.kind==='build'?(credited?'Review buildings':`Build ${allBuildingArt[action.building]?.name??action.building}`):action.kind==='trade'?'Open Trade':action.kind==='production'?'Review production':'View goal';
   return `<button type="button" data-scenario-action="${slot}">${escape(name)}</button>`;
  };
  const condition=(c,credited)=>{

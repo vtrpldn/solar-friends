@@ -48,6 +48,11 @@ pub enum GoalCondition {
         count: u32,
         credit: CounterCredit,
     },
+    Produced {
+        material: String,
+        count: u32,
+        credit: CounterCredit,
+    },
     Maintain {
         outcome: ObservedOutcome,
         minutes: u32,
@@ -122,4 +127,6 @@ pub struct GoalState {
     pub completed_at: Option<f32>,
     pub harvest_baseline: u32,
     pub building_baseline: Vec<usize>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub production_baseline: BTreeMap<String, u64>,
 }

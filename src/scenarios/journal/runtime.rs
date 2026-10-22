@@ -18,6 +18,7 @@ fn activate(chapter: &Chapter, state: &mut State, v: &Village) {
                 completed_at: None,
                 harvest_baseline: v.harvests,
                 building_baseline: buildings.clone(),
+                production_baseline: production_baselines(&goal.condition, v),
             },
         );
     }
@@ -200,6 +201,39 @@ fn measure(
                 ),
             )
         }
+        GoalCondition::Produced {
+            material,
+            count,
+            credit,
+        } => {
+            let index = economy::NAMES
+                .iter()
+                .position(|key| *key == material)
+                .expect("validated produced material");
+            let baseline = if *credit == CounterCredit::AfterActivation {
+                record
+                    .production_baseline
+                    .get(material)
+                    .copied()
+                    .unwrap_or(0)
+            } else {
+                0
+            };
+            let amount = v.production.accounting.outputs[index].saturating_sub(baseline);
+            (
+                amount as f64,
+                f64::from(*count),
+                format!(
+                    "Produce {count} units of {} {}",
+                    economy::LABELS[index].to_lowercase(),
+                    if *credit == CounterCredit::Run {
+                        "during this playthrough"
+                    } else {
+                        "after this goal starts"
+                    }
+                ),
+            )
+        }
         GoalCondition::Maintain { outcome, minutes } => {
             // Credit only the post-activation portion of the current consecutive
             // observed period. Earlier best periods and unobserved time never count.
@@ -259,6 +293,7 @@ fn measure(
         GoalCondition::Funds { .. } => ("funds", "cents"),
         GoalCondition::Date { .. } => ("date", "minutes"),
         GoalCondition::Harvests { .. } => ("harvests", "count"),
+        GoalCondition::Produced { .. } => ("produced", "count"),
         GoalCondition::Maintain { .. } => ("maintain", "duration_minutes"),
         _ => unreachable!(),
     };
@@ -283,6 +318,9 @@ fn measure(
                 action["region"] = json!(region);
             }
             action
+        }
+        GoalCondition::Produced { material, .. } => {
+            json!({"kind":"production","material":material})
         }
         GoalCondition::Stored { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Funds { .. } => json!({"kind":"trade"}),
@@ -366,6 +404,15 @@ pub fn valid(v: &Village) -> bool {
             {
                 return false;
             }
+            let expected = production_baselines(&goal.condition, v);
+            if active
+                && (record.production_baseline.len() != expected.len()
+                    || record.production_baseline.iter().any(|(key, value)| {
+                        expected.get(key).is_none_or(|current| value > current)
+                    }))
+            {
+                return false;
+            }
             if active {
                 if record.activated_at != Some(activated)
                     || record
@@ -384,6 +431,7 @@ pub fn valid(v: &Village) -> bool {
                 || record.completed_at.is_some()
                 || record.harvest_baseline != 0
                 || !record.building_baseline.is_empty()
+                || !record.production_baseline.is_empty()
             {
                 return false;
             }

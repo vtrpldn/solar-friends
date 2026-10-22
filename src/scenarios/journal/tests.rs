@@ -546,3 +546,93 @@ fn region_edges_follow_one_two_and_three_cell_building_anchors() {
         assert!(!region.contains_building(b));
     }
 }
+
+#[test]
+fn actual_preparation_counts_completed_output_with_per_goal_activation_credit() {
+    let condition = || GoalCondition::Produced {
+        material: "walls".into(),
+        count: 2,
+        credit: CounterCredit::AfterActivation,
+    };
+    let mut d = scenario(vec![
+        chapter("first", vec![goal("first-walls", condition())]),
+        chapter("second", vec![goal("new-walls", condition())]),
+    ]);
+    let mut during_run = goal(
+        "all-walls",
+        GoalCondition::Produced {
+            material: "walls".into(),
+            count: 4,
+            credit: CounterCredit::Run,
+        },
+    );
+    during_run.optional = true;
+    d.journal.as_mut().unwrap().chapters[0]
+        .goals
+        .push(during_run);
+    assert!(
+        compile(d.clone()).is_err(),
+        "Free building rules have no preparation work"
+    );
+    d.rules.logistics = true;
+    let mut g = game(d.clone());
+    assert!(economy::quantity(g.app.world().resource::<Village>(), 6) >= 2);
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    assert_eq!(g.set_production_target(6, 26), "ok");
+    for _ in 0..4000 {
+        g.tick(0.25);
+        if state(&mut g)["chapters"][0]["completed_at"].is_number() {
+            break;
+        }
+    }
+    let report = state(&mut g);
+    assert!(
+        report["chapters"][0]["completed_at"].is_number(),
+        "{}",
+        g.production_report()
+    );
+    assert_eq!(report["chapters"][1]["goals"][0]["condition"]["value"], 0.);
+    assert_eq!(
+        report["chapters"][1]["goals"][0]["condition"]["action"]["kind"],
+        "production"
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    let mut broken: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    broken["village"]["progress"]["scenario_journal"]["goals"]["new-walls"]["production_baseline"]
+        ["walls"] = serde_json::json!(999);
+    assert!(!g.restore(&broken.to_string()));
+    assert_eq!(g.snapshot(), saved);
+    broken = serde_json::from_str(&saved).unwrap();
+    broken["village"]["progress"]["scenario_journal"]["goals"]["new-walls"]["production_baseline"] =
+        serde_json::json!({});
+    assert!(!g.restore(&broken.to_string()));
+    assert_eq!(g.snapshot(), saved);
+    assert_eq!(g.sell_material(6, 2), "ok");
+    assert_eq!(g.set_production_target(6, 30), "ok");
+    for _ in 0..4000 {
+        g.tick(0.25);
+        if state(&mut g)["finished_at"].is_number() {
+            break;
+        }
+    }
+    assert!(
+        state(&mut g)["finished_at"].is_number(),
+        "{}",
+        g.production_report()
+    );
+    assert!(state(&mut g)["chapters"][0]["goals"][1]["completed_at"].is_number());
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Produced {
+        material: "timber".into(),
+        count: 1,
+        credit: CounterCredit::Run,
+    };
+    assert!(compile(d).is_err());
+}

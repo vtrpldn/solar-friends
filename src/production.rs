@@ -8,7 +8,7 @@ pub const BUFFER: u32 = 60;
 const LABOUR: f32 = 10.;
 pub const POWERED_SPEED: f32 = 2.;
 pub const WORKSHOP_ENERGY_PER_HOUR: f64 = 1.2;
-const PRODUCTS: [usize; 6] = [5, 6, 7, economy::TOOLS, 8, economy::MEALS];
+pub const PRODUCTS: [usize; 6] = [5, 6, 7, economy::TOOLS, 8, economy::MEALS];
 pub fn task(material: usize) -> &'static str {
     if material == economy::MEALS {
         "cook"

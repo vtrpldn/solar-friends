@@ -18,12 +18,13 @@ mod tests;
 pub fn catalog() -> serde_json::Value {
     let example =
         |name: &str, condition: GoalCondition| serde_json::json!({"name":name,"example":condition});
-    serde_json::json!({"schema":1,"supported_modes":["sandbox"],"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"target_limits":{"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
+    serde_json::json!({"schema":1,"supported_modes":["sandbox"],"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
         example("Completed standing buildings",GoalCondition::Buildings{building:"home".into(),count:1,credit:BuildingCredit::Present,region:None}),
         example("Unreserved material at stores",GoalCondition::Stored{material:"timber".into(),count:12}),
         example("Community fund balance",GoalCondition::Funds{cents:30_000}),
         example("Game date",GoalCondition::Date{minute:1440.}),
         example("Harvest count",GoalCondition::Harvests{count:1,credit:CounterCredit::AfterActivation}),
+        example("Prepared material production",GoalCondition::Produced{material:"walls".into(),count:2,credit:CounterCredit::AfterActivation}),
         example("Maintain an observed village outcome",GoalCondition::Maintain{outcome:ObservedOutcome::Pantry,minutes:60}),
         example("Prior goal completion",GoalCondition::Goal{goal:"another-goal".into()}),
         example("All conditions",GoalCondition::All{conditions:vec![GoalCondition::Funds{cents:0}]}),
@@ -50,4 +51,29 @@ pub fn needs_outcomes(v: &Village) -> bool {
                 .iter()
                 .any(|c| c.goals.iter().any(|g| needed(&g.condition)))
         })
+}
+
+fn production_baselines(condition: &GoalCondition, v: &Village) -> BTreeMap<String, u64> {
+    fn visit(c: &GoalCondition, v: &Village, result: &mut BTreeMap<String, u64>) {
+        match c {
+            GoalCondition::Produced {
+                material,
+                credit: CounterCredit::AfterActivation,
+                ..
+            } => {
+                if let Some(index) = economy::NAMES.iter().position(|key| *key == material) {
+                    result.insert(material.clone(), v.production.accounting.outputs[index]);
+                }
+            }
+            GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
+                for c in conditions {
+                    visit(c, v, result);
+                }
+            }
+            _ => {}
+        }
+    }
+    let mut result = BTreeMap::new();
+    visit(condition, v, &mut result);
+    result
 }
