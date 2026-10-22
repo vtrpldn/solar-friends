@@ -895,3 +895,9 @@ Cooking/watering/tending integration, syntax and diff checks pass. Hair/body dra
 ### Feeding appearance reference review
 
 Prepared four unchanged feeding body references and scalp-only numeric guides. Tested standing/cooking cap reuse and eight generated candidates. Preserved exact prompts, references/output hashes, untouched original outputs and five diagnostic passes in `hair-feed-generation-review.json`. Poses 13/15 have promising key-pose drafts; poses 12/14 remain unaccepted. Bounds-passing revisions still expose scalp or obscure an eye, so they were not registered. Guide-only retries enlarged/misplaced the caps and failed the unchanged bounds. Next revise the reference strategy with a painted full-body reference before extraction rather than repeat that approach. No failed candidate is activated in gameplay or the registered lab. Coverage remains 44/48 drafts, with all other original creator and builder release requirements still open.
+
+### Appearance source integrity
+
+The body/reference and hair/partitioned-activity review loaders now hash and decode the same downloaded bytes. They no longer hash one request and decode a second URL response, which could change between requests. Temporary object URLs are revoked after decoding, including decode failure; failed HTTP responses are refused. A changing-response browser fixture proves one request owns both the reported hash and actual rendered pixels, with independent original-pixel comparison and cleanup/error assertions.
+
+The focused loader check, all-48 body/source/catalog verification, 192 material-isolation checks, tending integration and seated hair/stool checks pass. This closes the review loader race only; it does not establish final art approval or complete the remaining creator/builder release requirements.

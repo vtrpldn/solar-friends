@@ -1,3 +1,4 @@
+import {loadCharacterImageSource} from '../character-image-source.js';
 import {registeredHairFrame} from './character-single-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from '../character-atlas-part.js';
 import {residentClips} from '../resident-animation.js';
@@ -16,7 +17,7 @@ export async function installHairClipReview({clip,frames,binding,scene,before}){
  if(registration.schema!==1||registration.clip!==clip||registration.sheet!==spec.sheet||Object.keys(registration.poses??{}).sort().join(',')!==spec.indices.map(String).sort().join(','))throw Error('Use the registered four-pose hair set.');
  const sources=new Map(),load=async file=>{
   if(!/^(?:hair-curls-(?:single-candidate-v3|(?:base|idle|activities)-(?:[0-9]|1[0-5])-candidate-v[1-6])|hair-seat-base-1[2-5]-candidate-v1)\.png$/.test(file))throw Error('Unsupported review asset.');
-  if(!sources.has(file)){const bytes=await(await fetch(root+file)).arrayBuffer(),sourceHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join(''),image=new Image();image.src=root+file;await image.decode();sources.set(file,{image,sourceHash});}return sources.get(file);
+  if(!sources.has(file))sources.set(file,await loadCharacterImageSource(root+file));return sources.get(file);
  },composed=new Map(),appearanceFrames=new Map(),activityParts=new Map();for(const index of spec.indices){
   const pose=registration.poses[index],source=await load(pose.file),part=extractRegisteredAtlasPart({...source,registration:{sha256:pose.sha256,size:pose.size,bounds:pose.bounds,sourceRect:pose.sourceRect??[0,0,1254,1254]}});
   const appearance=await registeredHairFrame({body:frames[spec.sheet][index],binding,image:part.frame,sourceHash:source.sourceHash,registration:{schema:1,sheet:spec.sheet,index,size:pose.size,bounds:pose.bounds,partSha256:pose.sha256,body:registration.body,...(pose.foreground!==undefined?{foreground:pose.foreground}:{})}});appearanceFrames.set(index,appearance);

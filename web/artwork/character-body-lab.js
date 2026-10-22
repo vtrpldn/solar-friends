@@ -1,3 +1,4 @@
+import {loadCharacterImageSource} from '../character-image-source.js';
 import {installAttachmentEditor} from './character-attachment-editor.js';
 import {installSingleHairReview} from './character-single-hair.js';
 import {installBreatheHairReview} from './character-breathe-hair.js';
@@ -12,18 +13,17 @@ import {paintTerrain,soilAppearance} from '../terrain.js';
 import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintContactShadow} from '../world-renderer.js';
 import {unlitFilter} from '../power.js';
 const $=id=>document.getElementById(id),files={base:'body-neutral-base.png',idle:'body-neutral-idle-candidate-v2.png',activities:'body-neutral-activities-candidate-v1.png'};
-const load=async src=>{const image=new Image();image.src=src;await image.decode();return image;};
 const pixels=image=>{const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);return ctx.getImageData(0,0,c.width,c.height);};
 function bounds(frame){const p=pixels(frame);let left=p.width,top=p.height,right=0,bottom=0;for(let y=0;y<p.height;y++)for(let x=0;x<p.width;x++)if(p.data[(y*p.width+x)*4+3]>=32){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x+1);bottom=Math.max(bottom,y+1);}return {left,top,right,bottom,height:bottom-top};}
 try{
  await init();const art=await loadEditorArt(),body={},reference={},frameBank={},report={schema:1,status:'prototype-only; no gameplay integration',sheets:{}};
  for(const [sheet,file]of Object.entries(files)){
-  body[sheet]=await load('../art/characters/prototype-v1/'+file);reference[sheet]=sheet==='base'?art.residents[1]:await load('../art/animations/bento-'+sheet+'.png');
+  const bodySource=await loadCharacterImageSource('../art/characters/prototype-v1/'+file),referenceSource=await loadCharacterImageSource('../art/animations/bento'+(sheet==='base'?'':'-'+sheet)+'.png');
+  body[sheet]=bodySource.image;reference[sheet]=referenceSource.image;
   const data=pixels(body[sheet]),referenceRow=sheet==='base'?2:0,layout=locateSpriteFrames(data.data,data.width,data.height,4,4,referenceRow),frames=preparedFrames(body[sheet],{referenceRow});
   frameBank[sheet]=frames;
   const normalized=frames.map(bounds),standing=normalized.slice(referenceRow*4,referenceRow*4+4).map(b=>b.height).sort((a,b)=>a-b);
-  const sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await (await fetch(body[sheet].src)).arrayBuffer()))].map(b=>b.toString(16).padStart(2,'0')).join('');
-  const referenceSha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await (await fetch(reference[sheet].src)).arrayBuffer()))].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const sha256=bodySource.sourceHash,referenceSha256=referenceSource.sourceHash;
   report.sheets[sheet]={file,sha256,referenceFile:'web/art/animations/bento'+(sheet==='base'?'':'-'+sheet)+'.png',referenceSha256,width:data.width,height:data.height,frames:layout.frames.length,uniformScale:layout.scale,standingHeight:standing[2],normalized,sourceBounds:layout.frames.map(({left,top,right,bottom,pivot})=>({left,top,right,bottom,pivot})),sourceClipped:layout.frames.some(f=>f.left<2||f.top<2||f.right>data.width-2||f.bottom>data.height-2)};
  }
  const registration=await (await fetch('../art/characters/prototype-v1/body-materials-v1.json')).json(),sourceHashes=Object.fromEntries(Object.entries(report.sheets).map(([key,s])=>[key,s.sha256])),materialModel=createBodyMaterialModel(frameBank,registration,{sourceHashes});

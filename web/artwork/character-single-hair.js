@@ -1,3 +1,4 @@
+import {loadCharacterImageSource} from '../character-image-source.js';
 import {canonical} from '../editor/journal.js';
 import {auditCharacterPartRegion} from '../character-parts.js';
 import {createBodyForegroundLayers} from '../character-foreground.js';
@@ -20,8 +21,7 @@ export async function registeredHairFrame({body,binding,registration,image,sourc
 }
 export async function installSingleHairReview({body,binding,scene,before}){
  const root='../art/characters/prototype-v1/',file='hair-curls-single-candidate-v3.png';
- const bytes=await(await fetch(root+file)).arrayBuffer(),sourceHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
- const image=new Image();image.src=root+file;await image.decode();
+ const {image,sourceHash}=await loadCharacterImageSource(root+file);
  const registration=await(await fetch(root+'hair-single-v3-registration.json')).json();
  const frame=await singleHairFrame({body,binding,registration,image,sourceHash});
  const section=document.createElement('section');section.id='single-hair-review';
