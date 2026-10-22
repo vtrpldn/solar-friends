@@ -387,6 +387,7 @@ export const questCompleted = (v,id) => id<4 ? v.progress.completed[id] : (v.pro
 export const questAvailable = (v,id) => id===0 || questCompleted(v,id-1);
 export const completedQuests = v => quests.map((_,i)=>questCompleted(v,i));
 export function buildingUnlocked(v,kind) {
+  if(v.progress.scenario_journal?.locked_buildings?.includes(kind))return false;
   return v.mode==='sandbox' || unlockQuest[kind]===undefined || questCompleted(v,unlockQuest[kind]);
 }
 export function questStatus(v,id) {

@@ -1403,14 +1403,14 @@ function updateUI() {
     const unlocked = buildingUnlocked(v, button.dataset.kind);
     button.classList.toggle("locked", !unlocked);
     button.classList.remove("unaffordable");
-    const quest = unlockQuest[button.dataset.kind];
+    const quest = unlockQuest[button.dataset.kind],scenarioLocked=v.progress.scenario_journal?.locked_buildings?.includes(button.dataset.kind);
     if(button.dataset.kind.startsWith('source_')){const option=state.environment.economy.source_options.find(s=>s.key===button.dataset.kind);button.querySelector('small').textContent=instant?'Free plot':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(option.cost/100);button.title=option.description+' · '+recipeSummary(state,option.key);button.setAttribute('aria-label','Place '+option.name);button.setAttribute('aria-pressed',String(button.dataset.kind===tool));continue;}
     button.querySelector("small").textContent = unlocked
       ? button.dataset.kind === "road" ? "Free" : !usesLogistics(v) ? "Free · instant" : "Free blueprint"
-      : "Quest reward";
+      : scenarioLocked?"Story locked":"Quest reward";
     button.title = unlocked
       ? `${kinds[button.dataset.kind][1]} · ${instant?'Free · instant construction':recipeSummary(state,button.dataset.kind,button.dataset.kind==='home'?$('#home-material-method').value:'standard')}`
-      : `Complete ${quests[quest].title} to unlock`;
+      : scenarioLocked?"Follow this scenario’s journal to unlock this building.":`Complete ${quests[quest].title} to unlock`;
     button.setAttribute(
       "aria-label",
       unlocked

@@ -14,6 +14,7 @@ export class JournalEditor{
   document.body.append(this.dialog);this.form=this.dialog.querySelector('[data-journal-form]');this.nav=this.dialog.querySelector('nav');
   this.dialog.querySelector('.dialog-close').onclick=this.dialog.querySelector('[data-journal-done]').onclick=()=>this.dialog.close();this.dialog.querySelector('[data-journal-undo]').onclick=undo;this.dialog.querySelector('[data-journal-redo]').onclick=redo;
   const edit=e=>{
+   const startBuilding=e.target.dataset.startBuilding;if(startBuilding){const available=e.target.checked;change('Change starting building availability',d=>{const locks=new Set(d.journal.locked_buildings??[]);if(available)locks.delete(startBuilding);else locks.add(startBuilding);d.journal.locked_buildings=[...locks];});return;}
    const path=e.target.dataset.journalPath;if(!path)return;
    const input=e.target,value=input.type==='checkbox'?input.checked:input.type==='number'?Number(input.value):input.value;
    change('Edit scenario journal',d=>{
@@ -21,6 +22,7 @@ export class JournalEditor{
     if(key==='kind'&&/events\.\d+\.(when|effect)\.kind$/.test(path)){
      const list=path.endsWith('.when.kind')?catalog.journal.events.trigger_examples:catalog.journal.events.effect_examples,example=structuredClone(list.find(e=>e.kind===value));
      if(value==='goal')example.goal=d.journal.chapters.flatMap(c=>c.goals)[0]?.id??'';
+     if(value==='unlock_building')example.building=d.journal.locked_buildings?.[0]??'';
      if(value==='chapter')example.chapter=d.journal.chapters[0]?.id??'';
      for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,example);
     }else if(key==='kind'){
