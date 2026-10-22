@@ -12,8 +12,9 @@
   "observedThrough": 5760.57275390625,
   "completedWorkedServiceJobs": 3,
   "remaining": [
-    "Public-input completion and unfamiliar-player usability review",
+    "Unfamiliar-player usability review",
     "Full modular resident artwork",
     "Complete biome art/balance/performance/save-integrity release gates"
-  ]
+  ],
+  "publicControlPlaythrough": "assets/scenario-reviews/an-inherited-village-public-controls.json"
 }

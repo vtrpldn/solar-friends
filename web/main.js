@@ -1,3 +1,4 @@
+import {creationPresentation} from './creation-presentation.js';
 import {paintResourceSite} from './resource-site-art.js';
 import {renderScenarioJournal,resetScenarioJournalUI} from './scenario-journal-ui.js';
 import {residentLookIndex} from './resident-look.js';
@@ -1234,7 +1235,9 @@ function openSituations() {
 function updateUI() {
   const free = state.village.mode==='sandbox', instant = !usesLogistics(state.village);
   sandboxRulesUI?.update();
-  $('#mode-badge').textContent=free?'Sandbox':'Story';
+  const creation=creationPresentation(playerSession?state.village.scenario?.definition:null,{playtest:playerSession?.isTest});
+  const title=creation?.title??'Vila Aurora';for(const id of ['#village-heading','#minimap-title'])if($(id).textContent!==title)$(id).textContent=title;if($('#village-heading').title!==title)$('#village-heading').title=title;
+  $('#mode-badge').textContent=creation?.badge??(free?'Sandbox':'Story');
   $('#mode-label').textContent=`${free?'SANDBOX':'STORY'}`;
   const authoredJournal=!!state.village.scenario?.definition?.journal;
   $('.goal-tracker').hidden=free&&!authoredJournal;
@@ -1246,6 +1249,7 @@ function updateUI() {
   $('#new-scenario').textContent=free?'New sandbox':'New story';
   $('#help-intro').textContent=free?(instant?'Sandbox unlocks every building. New buildings are instant and free; pantry, tools and funds replenish. Settings lets you add construction, living-land and utility constraints.':'Sandbox unlocks every building. Supplies and resident labour are needed for new construction; plan projects in Construction and purchases in Trade. Living-land and utility rules are separate choices in Settings.'):'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
   replaceMarkup($('#help-start'),instant?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':free?'<b>Plan your own village.</b> Every building is unlocked. Choose a blueprint in Build, manage its supplies and priority in Construction, and let residents carry and build when they have the energy. Adjust the other simulation rules in Settings.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build when they have the energy.');
+  if(creation){$('#help-intro').textContent=creation.intro;replaceMarkup($('#help-start'),creation.start);}
   economyUI?.update();
   updateSituations();
   const v = state.village;

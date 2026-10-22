@@ -26,7 +26,7 @@
       >
       <div class="village-title">
         <span class="eyebrow" id="mode-label">STORY · OUR LITTLE ECOVILA</span>
-        <h1>Vila Aurora <span>✦</span></h1>
+        <h1 id="village-heading">Vila Aurora <span>✦</span></h1>
       </div>
       <button id="dev-button">Dev Tools</button>
       <span id="mode-badge" class="game-mode-badge">Story</span>
@@ -254,7 +254,7 @@
       <nav class="hud-dock" aria-label="Village controls"><button data-panel="build-panel" aria-controls="build-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg> Build</button><button id="open-village" aria-controls="village-book" aria-expanded="false"><span>Village</span></button><button data-panel="goals-panel" aria-controls="goals-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h12M9 12h12M9 19h12M3 5h1M3 12h1M3 19h1"/></svg> Journal</button><button data-panel="community-panel" aria-controls="community-panel" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M17 13a5 5 0 0 1 4 5v3"/></svg> People</button></nav>
       <nav id="resident-strip" aria-label="Resident portraits"></nav>
       <div class="village-alert"><button id="open-situations"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3 2-6a8 8 0 1 1 17-5Z"/><path d="M8 10h8m-8 4h5"/></svg> <span id="situations-label">Situations</span></button></div>
-      <section class="minimap" aria-label="Village map"><span>Vila Aurora <kbd aria-hidden="true">M</kbd></span><canvas id="village-map" width="224" height="224" tabindex="0" aria-label="Village map. Click to centre the view; arrow keys move the camera."></canvas><button id="land-map-toggle" aria-controls="land-map" aria-expanded="false">Land views</button></section>
+      <section class="minimap" aria-label="Village map"><span><b id="minimap-title">Vila Aurora</b><kbd aria-hidden="true">M</kbd></span><canvas id="village-map" width="224" height="224" tabindex="0" aria-label="Village map. Click to centre the view; arrow keys move the camera."></canvas><button id="land-map-toggle" aria-controls="land-map" aria-expanded="false">Land views</button></section>
       <aside id="land-map" hidden aria-label="Land views">
         <button id="land-map-close" class="panel-close" aria-label="Close land views">×</button>
         <h2>Read the land</h2>

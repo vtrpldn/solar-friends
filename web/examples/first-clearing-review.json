@@ -11,7 +11,7 @@
   "authoredThrough": "scripts/author-first-clearing.mjs uses regular player controls and the Export action; no runtime snapshot patches",
   "verification": "scripts/verify-example-scenarios.mjs: native compilation, 64x64 resolved map, ordered/optional goals, explicit run harvest credit, sustained pantry condition, pause and exact opening restore",
   "remaining": [
-    "Full public-input gameplay completion and usability review",
+    "Unfamiliar-player usability review",
     "Other two biome examples",
     "Custom/mixed casts and reusable resident presets",
     "All example art/performance/save-integrity release gates"
@@ -20,5 +20,6 @@
   "findings": [
     "Initial no-purchase playtest stalled standard homes on imported solar panels/batteries and roof tiles. Opening goal now explains checking shortages and purchasing town parts or choosing supported local recipes.",
     "Paid purchase of two tiles, two panels and two batteries plus real resident work completes the required scenario without injected resources or forced goals."
-  ]
+  ],
+  "publicControlPlaythrough": "assets/scenario-reviews/first-clearing-public-controls.json"
 }

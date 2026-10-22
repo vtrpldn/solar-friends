@@ -1,0 +1,406 @@
+{
+  "schema": 1,
+  "sourceSha256": "cbd0fdd9381fc893c564da261048cfca78df6b0f15dc169591d179d802ca7309",
+  "controls": {
+    "purchase": [
+      [
+        15,
+        3
+      ]
+    ],
+    "placements": [],
+    "preferredSpeed": 8
+  },
+  "finishedAt": 1234.21923828125,
+  "observations": [
+    {
+      "elapsedSeconds": 5.188,
+      "minute": 599.9859619140625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 10.341,
+      "minute": 724.3970336914062,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 15.503,
+      "minute": 847.3945922851562,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 20.683,
+      "minute": 971.9891357421875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 25.881,
+      "minute": 1096.398193359375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 31.041,
+      "minute": 1221.0196533203125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 36.193,
+      "minute": 1344.8370361328125,
+      "finished": 1234.21923828125,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    }
+  ],
+  "saveReloadExact": true,
+  "editorUnchanged": true,
+  "scratchRunRemoved": true,
+  "scope": "Full completion through public UI; read-only snapshot observation; no direct simulation commands, forced work, stock changes or runtime patches."
+}
