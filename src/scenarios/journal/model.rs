@@ -87,6 +87,10 @@ pub enum GoalCondition {
     Date {
         minute: f32,
     },
+    Milestone {
+        milestone: milestones::Kind,
+        count: u32,
+    },
     Harvests {
         count: u32,
         credit: CounterCredit,

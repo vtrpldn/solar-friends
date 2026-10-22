@@ -11,6 +11,7 @@ pub(crate) mod events;
 pub(crate) mod land_use;
 pub(crate) mod challenge;
 pub(crate) mod roles;
+pub(crate) mod milestones;
 mod model;
 mod runtime;
 mod observation;
@@ -28,7 +29,7 @@ mod tests;
 pub fn catalog() -> serde_json::Value {
     let example =
         |name: &str, condition: GoalCondition| serde_json::json!({"name":name,"example":condition});
-    serde_json::json!({"roles":roles::catalog(),"schema":1,"supported_modes":["sandbox"],"events":events::catalog(),"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"services":services::catalog(),"wellbeing":wellbeing::catalog(),"land_use":land_use::catalog(),"trade_materials":economy::NAMES.into_iter().filter(|name|*name!=economy::NAMES[economy::SCRAPS]).collect::<Vec<_>>(),"trade_directions":[TradeDirection::Purchase,TradeDirection::Sale],"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"delivered":1_000_000,"traded":1_000_000,"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
+    serde_json::json!({"milestones":milestones::catalog(),"roles":roles::catalog(),"schema":1,"supported_modes":["sandbox"],"events":events::catalog(),"limits":{"chapters":MAX_CHAPTERS,"goals":MAX_GOALS,"goals_per_chapter":MAX_GOALS_PER_CHAPTER,"condition_nodes":MAX_CONDITION_NODES,"condition_depth":MAX_CONDITION_DEPTH,"group_size":MAX_GROUP_SIZE},"services":services::catalog(),"wellbeing":wellbeing::catalog(),"land_use":land_use::catalog(),"trade_materials":economy::NAMES.into_iter().filter(|name|*name!=economy::NAMES[economy::SCRAPS]).collect::<Vec<_>>(),"trade_directions":[TradeDirection::Purchase,TradeDirection::Sale],"production_materials":production::PRODUCTS.map(|i|economy::NAMES[i]),"target_limits":{"delivered":1_000_000,"traded":1_000_000,"produced":1_000_000,"buildings":256,"stored":economy::CAPACITY,"funds":1_000_000_000,"date":5_000_000,"harvests":1_000_000},"conditions":[
         example("Completed standing buildings",GoalCondition::Buildings{building:"home".into(),count:1,credit:BuildingCredit::Present,region:None}),
         example("Growing or harvest-ready crops",GoalCondition::Crops{crop:"beans".into(),count:1,stage:land_use::CropStage::Planted,region:None}),
         example("Established fruit orchards",GoalCondition::Orchards{count:1,stage:land_use::OrchardStage::Established,region:None}),
@@ -37,6 +38,7 @@ pub fn catalog() -> serde_json::Value {
         example("Unreserved material at stores",GoalCondition::Stored{material:"timber".into(),count:12}),
         example("Community fund balance",GoalCondition::Funds{cents:30_000}),
         example("Game date",GoalCondition::Date{minute:1440.}),
+        example("Founding village milestones",GoalCondition::Milestone{milestone:milestones::Kind::MealsServed,count:1}),
         example("Harvest count",GoalCondition::Harvests{count:1,credit:CounterCredit::AfterActivation}),
         example("Resident-carried local deliveries",GoalCondition::Delivered{material:"walls".into(),count:2,credit:CounterCredit::AfterActivation,building:None}),
         example("Completed town trade",GoalCondition::Traded{direction:TradeDirection::Purchase,material:"plumbing".into(),count:2,credit:CounterCredit::AfterActivation}),
@@ -90,4 +92,10 @@ fn production_baselines(condition: &GoalCondition, v: &Village) -> BTreeMap<Stri
     let mut result = BTreeMap::new();
     visit(condition, v, &mut result);
     result
+}
+
+/// Run-wide conditions share the same native evaluator as authored journals.
+/// The official adapter uses only present buildings and run-wide counters.
+pub(crate) fn measure_run(condition: &GoalCondition, v: &Village) -> (bool, serde_json::Value) {
+    runtime::measure(condition, &GoalState::default(), &HashSet::new(), v, None, None)
 }

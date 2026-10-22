@@ -32,7 +32,7 @@ function until(test,label,limit=24000){
   g.tick(.25);
  }
  const s=snap(),chapter=s.village.progress.tracked;writeFileSync('artifacts/logistics/stalled-story.json',g.snapshot());
- throw new Error(`Timed out: ${label} on day ${1+Math.floor(s.village.minutes/1440)}. ${JSON.stringify({chapter,goals:quests[chapter].objectives(s.village).filter(o=>!o.done),stock:s.environment.economy.shortage,residents:s.residents.map(r=>[r.name,r.task,r.reason]),progress:s.village.progress})}`);
+ throw new Error(`Timed out: ${label} on day ${1+Math.floor(s.village.minutes/1440)}. ${JSON.stringify({chapter,goals:quests[chapter].objectives(s.village,JSON.parse(g.story_opening())).filter(o=>!o.done),stock:s.environment.economy.shortage,residents:s.residents.map(r=>[r.name,r.task,r.reason]),progress:s.village.progress})}`);
 }
 function location(kind){
  const v=snap().village;
@@ -90,7 +90,7 @@ async function complete(chapter){
  // Earlier valid effort may finish two newly unlocked chapters in one tick.
  // Select the next journal page through its real command for reproducible UI checkpoints.
  assert(g.track_quest(Math.min(chapter+1,quests.length-1)));
- const saved=g.snapshot(),s=snap();assert(quests[chapter].objectives(s.village).every(o=>o.done),`Rust and UI agree: ${quests[chapter].title}`);
+ const saved=g.snapshot(),s=snap();assert(quests[chapter].objectives(s.village,JSON.parse(g.story_opening())).every(o=>o.done),`Rust and UI agree: ${quests[chapter].title}`);
  if(!g.restore(saved)){writeFileSync(`${output}/invalid-chapter-${chapter+1}.json`,saved);assert.fail(`reload chapter ${chapter+1}`);}assert.equal(g.snapshot(),saved);
  assert.equal(s.village.progress.tracked,Math.min(chapter+1,quests.length-1));
  if(output)await fs.writeFile(`${output}/solar-${chapter===0?'intro':chapter===12?'complete':`chapter-${chapter+1}`}.json`,saved);
@@ -240,7 +240,7 @@ if(!snap().village.buildings.some(b=>b.kind==='shed'))build('shed');
 until(s=>s.village.maintenance.jobs.some(j=>j.finished!=null&&!j.cancelled),'complete an optional equipment service after natural wear',70*1920);
 await complete(12);
 const s=snap();assert(storyBuildingKinds.every(k=>s.village.buildings.some(b=>b.kind===k&&b.progress===100)));
-for(const quest of quests)for(const objective of quest.objectives(s.village)){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
+for(const quest of quests)for(const objective of quest.objectives(s.village,JSON.parse(g.story_opening()))){if(objective.action)assert.equal(goalRoute(s,objective).type,objective.action);}
 assert.equal(s.village.mode,'story');assert.deepEqual(s.village.progress.later_completed,Array(9).fill(true));
 const optionalLessons=quests.flatMap((q,chapter)=>q.options(s.village).map(o=>({chapter:chapter+1,label:o.label,value:o.value,target:o.target,done:o.done,guide:!!o.guide})));
 assert(optionalLessons.every(o=>o.guide||o.done),'The all-path replay completes every optional lesson: '+JSON.stringify(optionalLessons.filter(o=>!o.guide&&!o.done)));

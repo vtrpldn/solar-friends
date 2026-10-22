@@ -11,6 +11,7 @@ const goal = (label, value, target, hint, build = null) => ({
   hint,
   build,
 });
+const openingGoal=(id,...args)=>({...goal(...args),id});
 const lessons = [
   {
     title: "A Shared Beginning",
@@ -24,36 +25,41 @@ const lessons = [
     after:
       "Our first roots are down. Follow Roots for Tomorrow to grow our food forest.",
     objectives: (v) => [
-      goal(
+      openingGoal(
+        "welcome-friends",
         "Welcome all five neighbours",
-        +v.arrived,
+        0,
         1,
         "Let everyone reach the clearing.",
       ),
-      goal(
+      openingGoal(
+        "first-cistern",
         "Build a cistern",
-        count(v, "well"),
+        0,
         1,
       "Place a free cistern blueprint, then check Construction. Buy its pump in Town. Arrival barrels hold the first fresh water; neighbours can fetch treated water from the neighbouring farm and carry loads to homes, kitchens and growing plots. Rain fills the cistern itself. Supplies shows each container and carrier. Forecast the workweek to compare current supplies and schedules.",
         "well",
       ),
-      goal(
+      openingGoal(
+        "first-home",
         "Build the first home",
-        count(v, "home"),
+        0,
         1,
         "Each home gives three neighbours a bed.",
         "home",
       ),
-      goal(
+      openingGoal(
+        "first-harvest",
         "Bring in our first harvest",
-        v.harvests,
+        0,
         1,
         "Build a garden and ask Iara to tend it. A helping request covers one work session: plant first, then let neighbours water the growing crop. Lettuce takes about three moist growing hours on suitable soil. If the pantry is already healthy, return to the ripe bed and request its harvest. Open Land views beside the minimap to compare fertility and moisture before choosing a clearing.",
         "garden",
       ),
-      goal(
+      openingGoal(
+        "first-cooked-meal",
         "Serve a cooked meal",
-        count(v, "kitchen") ? v.meals_served : 0,
+        0,
         1,
         "Build a kitchen. Three food and one fresh water make five meals. Washing leaves greywater in this kitchen’s buffer; neighbours carry closed containers to the neighbouring service point until local treatment is available. Check Supplies → Ecology → Where waste is if the buffer is full.",
         "kitchen",
@@ -298,7 +304,10 @@ const observed=(v,index,label,hours,hint,action='supplies',page='pantry')=>{
  return {...actionGoal(action,label,Math.floor(best/6)/10,hours,`${hint} The journal checks every fifteen game minutes. A lapse restarts the current period; earlier success still counts. Current: ${(current/60).toFixed(1)} h; best: ${(best/60).toFixed(1)} h.${detail}`,page),unit:'h'};
 };
 const primary=[
- v=>lessons[0].objectives(v).slice(0,5),
+ (v,opening)=>lessons[0].objectives(v).slice(0,5).map(view=>{
+  const measured=opening?.goals.find(goal=>goal.id===view.id);
+  return {...view,value:Math.min(measured?.value??0,measured?.target??view.target),target:measured?.target??view.target,done:!!measured?.complete};
+ }),
  v=>[
   goal('Establish a perennial food source',+(count(v,'grove')>0||count(v,'orchard')>0),1,'Choose a food forest for regular gathering, or an orchard for slower, lasting fruit. Leave access for harvesting and water.', v.buildings.some(b=>b.kind==='orchard')&&!v.buildings.some(b=>b.kind==='grove')?'orchard':'grove'),
   actionGoal('people','Gather fruit from our perennial plants',+(v.progress.fruit>=6||v.progress.orchard_fruit>0),1,'A food forest supplies fruit during gathering. If the pantry is healthy, ask a neighbour for one gathering batch in People. Orchard trees need time and water before their first harvest. Choose the cycle that fits our plans.'),

@@ -1032,3 +1032,19 @@ fn failed_challenge_continuation_is_explicit_permanent_and_saved() {
     assert!(!g.restore(&bad.to_string()));
     assert_eq!(g.snapshot(), saved);
 }
+
+#[test]
+fn village_milestones_count_real_run_counters_without_starting_asset_credit() {
+    let mut d=scenario(vec![chapter("opening",vec![goal("arrive",GoalCondition::Milestone {milestone:milestones::Kind::Arrived,count:1}),goal("meal",GoalCondition::Milestone {milestone:milestones::Kind::MealsServed,count:1})])]);
+    let mut g=game(d.clone());let initial=state(&mut g);assert!(initial["chapters"][0]["goals"].as_array().unwrap().iter().all(|goal| goal["status"]=="active"));
+    {let mut v=g.app.world_mut().resource_mut::<Village>();v.arrived=true;v.meals_served=1;advance(&mut v);}
+    assert!(state(&mut g)["finished_at"].is_number());
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition=GoalCondition::Milestone {milestone:milestones::Kind::Arrived,count:2};assert!(compile(d).is_err());
+}
+
+#[test]
+fn morning_milestone_observes_sunrise_not_the_authored_start_date() {
+    let mut d=scenario(vec![chapter("opening",vec![goal("sunrise",GoalCondition::Milestone {milestone:milestones::Kind::Mornings,count:1})])]);
+    d.start.minutes=600.;let mut g=game(d.clone());assert!(state(&mut g)["finished_at"].is_null());let saved=g.snapshot();g.tick(0.);assert_eq!(g.snapshot(),saved);
+    d.start.minutes=359.5;let mut g=game(d);g.tick(0.25);assert!(state(&mut g)["finished_at"].is_number());let saved=g.snapshot();assert!(g.restore(&saved));assert_eq!(g.snapshot(),saved);
+}

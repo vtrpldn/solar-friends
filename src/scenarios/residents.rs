@@ -101,7 +101,7 @@ pub fn check(d: &Definition, r: &mut Report) {
         );
     }
     if d.rules.mode == modes::Mode::Story && !original_cast(people) {
-        r.push("start.residents", "missing_story_roles", "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom scenario role binding is not available yet.");
+        r.push("start.residents", "missing_story_roles", "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages.");
     }
 }
 fn original_cast(people: &[Person]) -> bool {

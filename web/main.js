@@ -978,7 +978,8 @@ function updateQuests() {
   const id = p.tracked,
     quest = quests[id],
     done = completions[id];
-  const objectives = quest.objectives(v),
+  const opening=JSON.parse(game.story_opening());
+  const objectives = quest.objectives(v,opening),
     next = objectives.find((o) => !o.done);
   const finished=completions.every(Boolean);
   const completedCount = done ? objectives.length : objectives.filter(o => o.done).length;
@@ -1031,8 +1032,8 @@ function updateQuests() {
         return `<article class="quest-card ${completions[i] ? "complete" : ""} ${locked ? "locked" : ""}" ${i===journalPage?'':'hidden'}>
       <div class="quest-card-art ${q.art}">${i ? `<canvas data-quest-art="${q.art}" role="img" aria-label="${allBuildingArt[q.art]?.name || q.theme} illustration"></canvas>` : "<span>☀</span>"}</div>
       <div class="quest-card-content"><span class="eyebrow">${q.theme} · ${status}</span><h3>${q.title}</h3><p class="quest-story">${escapeHtml(residentStory(state,q.story))}</p>
-      ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${escapeHtml(residentStory(state,q.objectives(v).find(o=>!o.done)?.hint || "Let village life unfold."))}</p>` : ""}
-      ${objectiveMarkup(q.objectives(v), completions[i])}
+      ${!completions[i] ? `<p class="quest-guidance"><b>Next step</b> ${escapeHtml(residentStory(state,q.objectives(v,opening).find(o=>!o.done)?.hint || "Let village life unfold."))}</p>` : ""}
+      ${objectiveMarkup(q.objectives(v,opening), completions[i])}
       ${optionalMarkup(v,q,i,locked)}
       <p class="journal-reward"><b>${completions[i] ? "Unlocked" : "Unlocks"}</b> ${q.reward}</p>
       ${completions[i] ? `<p class="quest-after">${escapeHtml(residentStory(state,q.after))}</p>` : ""}

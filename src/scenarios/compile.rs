@@ -26,6 +26,7 @@ pub(super) fn check(d: &Definition) -> Report {
         }
     }
     journal::check(d, &mut r);
+    story_adapter::check(d, &mut r);
     residents::check(d, &mut r);
     relationships::check(d, &mut r);
     experience::check(d, &mut r);

@@ -17,7 +17,7 @@ pub fn check(d: &Definition, report: &mut Report) {
         report.push("journal", "invalid_journal", "Use journal version 1, 1–16 chapters, an introduction up to 2,000 characters and completion text up to 1,000 characters.");
     }
     if d.rules.mode != modes::Mode::Sandbox {
-        report.push("journal", "unsupported_story_adapter", "Use Sandbox rules for an authored journal. The official Story adapter is not available yet.");
+        report.push("journal", "unsupported_story_adapter", "Use Sandbox rules for a custom journal. The official Story uses its campaign adapter.");
     }
     let mut chapters = HashSet::new();
     let mut ids = BTreeMap::new();
@@ -154,6 +154,7 @@ pub(super) fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> b
                 .is_some_and(|i| production::PRODUCTS.contains(&i))
                 && (1..=1_000_000).contains(count)
         }
+        GoalCondition::Milestone { milestone, count } => (1..=milestone.maximum()).contains(count),
         GoalCondition::Harvests { count, .. } => (1..=1_000_000).contains(count),
         GoalCondition::Service { .. } => services::valid_condition(c),
         GoalCondition::Wellbeing { .. } => wellbeing::valid_condition(c),

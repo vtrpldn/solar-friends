@@ -255,6 +255,7 @@ pub(super) fn measure(
                 format!("Keep {count} unreserved {material} units at stores"),
             )
         }
+        GoalCondition::Milestone { milestone, count } => (f64::from(milestone.value(v)), f64::from(*count), format!("{}: reach {count} during this run, including before activation", milestone.label())),
         GoalCondition::Funds { cents } => (
             v.economy.money as f64,
             *cents as f64,
@@ -476,6 +477,7 @@ pub(super) fn measure(
     let (kind, unit) = match c {
         GoalCondition::Buildings { .. } => ("buildings", "count"),
         GoalCondition::Stored { .. } => ("stored", "count"),
+        GoalCondition::Milestone { .. } => ("milestone", "count"),
         GoalCondition::Funds { .. } => ("funds", "cents"),
         GoalCondition::Date { .. } => ("date", "minutes"),
         GoalCondition::Harvests { .. } => ("harvests", "count"),
@@ -519,6 +521,7 @@ pub(super) fn measure(
         GoalCondition::Stored { material, .. } => json!({"kind":"trade","material":material}),
         GoalCondition::Funds { .. } => json!({"kind":"trade"}),
         GoalCondition::Harvests { .. } => json!({"kind":"build","building":"garden"}),
+        GoalCondition::Milestone { milestone: milestones::Kind::MealsServed, .. } => json!({"kind":"build","building":"kitchen"}),
         _ => serde_json::Value::Null,
     };
     (

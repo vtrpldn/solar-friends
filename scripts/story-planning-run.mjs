@@ -58,7 +58,7 @@ function until(test,label,days=12){
   game.tick(.25);
  }
  const s=snap();writeFileSync(`${output}/stalled.json`,game.snapshot());
- throw Error(`Timed out ${label} on day ${1+Math.floor(s.village.minutes/1440)}: ${JSON.stringify({goals:quests[s.village.progress.tracked].objectives(s.village).filter(o=>!o.done),outcomes:s.village.progress.outcomes,shortage:s.environment.economy.shortage,people:s.residents.map(r=>[r.name,r.task,r.reason])})}`);
+ throw Error(`Timed out ${label} on day ${1+Math.floor(s.village.minutes/1440)}: ${JSON.stringify({goals:quests[s.village.progress.tracked].objectives(s.village,JSON.parse(game.story_opening())).filter(o=>!o.done),outcomes:s.village.progress.outcomes,shortage:s.environment.economy.shortage,people:s.residents.map(r=>[r.name,r.task,r.reason])})}`);
 }
 function buy(items,label='Project basket'){
  if(!items.some(Boolean))return;
@@ -89,7 +89,7 @@ function cable(fromBuilding,toBuilding){
 }
 async function chapter(index){
  until(s=>questCompleted(s.village,index),quests[index].title,index===12?44:12);
- const s=snap();assert(quests[index].objectives(s.village).every(o=>o.done),'Native/UI objectives agree: '+quests[index].title);
+ const s=snap();assert(quests[index].objectives(s.village,JSON.parse(game.story_opening())).every(o=>o.done),'Native/UI objectives agree: '+quests[index].title);
  assert(game.track_quest(Math.min(index+1,12)));
  const saved=checkpoint(quests[index].title);
  await writeFile(`${output}/solar-${index===0?'intro':index===12?'complete':`chapter-${index+1}`}.json`,saved);
@@ -170,7 +170,7 @@ until(()=>game.host_gathering()==='ok','plan second gathering');await chapter(12
 const end=snap(),kinds=new Set(end.village.buildings.map(b=>b.kind));
 assert(kinds.size<storyBuildingKinds.length,'The required campaign must not collect every building');
 for(const kind of ['warehouse','workshop','greenhouse','orchard','goat_pasture','apiary','banana_treatment','hydro'])assert(!kinds.has(kind),kind+' remains optional');
-for(const q of quests)for(const objective of [...q.objectives(end.village),...q.options(end.village)]){
+for(const q of quests)for(const objective of [...q.objectives(end.village,JSON.parse(game.story_opening())),...q.options(end.village)]){
  assert(Number.isFinite(objective.value)&&Number.isFinite(objective.target));
  assert(goalRoute(end,objective),'Every required and optional lesson has an actionable route');
 }
