@@ -1,3 +1,4 @@
+import {hitStartingRoute,corridorCells} from './routes.js';
 import {paintUtilityRoute} from '../utility-lines-art.js';
 import {hitStartingBank} from './batteries.js';
 import {batteryImage,drawBattery} from '../battery-art.js';
@@ -42,7 +43,7 @@ export class EditorMap {
     canvas.addEventListener('pointerdown',e=>this.down(e));
     canvas.addEventListener('pointermove',e=>this.motion(e));
     canvas.addEventListener('pointerup',e=>this.up(e));
-    canvas.addEventListener('pointercancel',()=>{this.drag=null;this.stroke=null;this.render();});
+    canvas.addEventListener('pointercancel',()=>{this.drag=null;this.stroke=null;this.routeStroke=null;this.render();});
     canvas.addEventListener('pointerleave',()=>{if(!this.drag){this.pointer=null;this.render();}});
     canvas.addEventListener('wheel',e=>{e.preventDefault();this.setZoom(this.view.zoom-e.deltaY*.001);},{passive:false});
   }
@@ -52,12 +53,13 @@ export class EditorMap {
     this.render();
   }
   get state(){return structuredClone({...this.view,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
-  setTool(tool){this.view.tool=tool;this.stroke=null;this.drag=null;this.render();this.viewChanged(this.state);}
+  setTool(tool){this.view.tool=tool;this.stroke=null;this.routeStroke=null;this.drag=null;this.render();this.viewChanged(this.state);}
   selection(){return (this.view.selection?.length?this.view.selection:[this.view.selected]).filter(id=>this.document?.start.buildings.some(b=>b.id===id));}
-  selectBank(id){this.view.selectedBank=id;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
-  selectSite(id){this.view.selectedBank=null;this.view.selectedSite=id;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectRoute(id){this.view.selectedRoute=id;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectBank(id){this.view.selectedRoute=null;this.view.selectedBank=id;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectSite(id){this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=id;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
   select(id,toggle=false){
-    this.view.selectedBank=null;this.view.selectedSite=null;
+    this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;
     const ids=toggle?new Set(this.selection()):new Set();
     if(id){if(toggle&&ids.has(id))ids.delete(id);else ids.add(id);}
     this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
@@ -72,6 +74,7 @@ export class EditorMap {
     this.canvas.focus();this.canvas.setPointerCapture(e.pointerId);
     const p=this.point(e),cell=this.cell(p),pan=e.button===1||e.button===2||this.view.tool==='pan';
     this.drag={cell,point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
+    if(!pan&&this.view.tool==='route-path')this.routeStroke=[[cell.x,cell.y]];
     if(!pan&&['road','meadow','river','nature','thin-nature','habitat'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
     if(!pan&&this.view.tool==='move'){const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.drag.bank=bank;this.selectBank(bank.id);return;}const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}else{const site=hitStartingSite(this.document,cell.x,cell.y);if(site){this.drag.site=site;this.selectSite(site.id);}}}
   }
@@ -84,7 +87,8 @@ export class EditorMap {
       if(this.drag.pan||(this.view.tool==='select'&&this.drag.moved&&!this.drag.toggle)){
         this.drag.pan=true;
         this.view.center=[this.drag.center[0]-(dx/(TILE_HALF_WIDTH*this.scale)+dy/(TILE_HALF_HEIGHT*this.scale))/2,this.drag.center[1]-(dy/(TILE_HALF_HEIGHT*this.scale)-dx/(TILE_HALF_WIDTH*this.scale))/2];
-      }else if(this.stroke){const next=[this.pointer.x,this.pointer.y];for(const p of strokeCells(this.strokeLast,next))this.stroke.set(p.join(','),p);this.strokeLast=next;}
+      }else if(this.routeStroke){const cells=corridorCells(this.routeStroke.at(-1),[this.pointer.x,this.pointer.y]);for(const cell of cells.slice(1)){const back=this.routeStroke.findIndex(p=>p[0]===cell[0]&&p[1]===cell[1]);if(back>=0)this.routeStroke.length=back+1;else this.routeStroke.push(cell);}}
+      else if(this.stroke){const next=[this.pointer.x,this.pointer.y];for(const p of strokeCells(this.strokeLast,next))this.stroke.set(p.join(','),p);this.strokeLast=next;}
     }
     this.render();
   }
@@ -93,6 +97,7 @@ export class EditorMap {
     const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;
     if(this.view.tool==='region'&&!drag.pan){const x=Math.max(0,Math.min(63,Math.min(drag.cell.x,cell.x))),y=Math.max(0,Math.min(63,Math.min(drag.cell.y,cell.y))),right=Math.max(0,Math.min(63,Math.max(drag.cell.x,cell.x))),bottom=Math.max(0,Math.min(63,Math.max(drag.cell.y,cell.y)));this.action({type:'region',rectangle:{x,y,width:right-x+1,height:bottom-y+1}});return;}
     if(drag.pan){this.centerAt(...this.view.center);return;}
+    if(this.routeStroke){const cells=this.routeStroke;this.routeStroke=null;this.action({type:'route-path',cells});return;}
     if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
     if(drag.bank){this.action({type:'move-bank',x:cell.x,y:cell.y});return;}
     if(drag.site){this.action({type:'move-site',x:cell.x,y:cell.y});return;}
@@ -102,11 +107,11 @@ export class EditorMap {
         const end=this.point(e),left=Math.min(drag.point.x,end.x),right=Math.max(drag.point.x,end.x),top=Math.min(drag.point.y,end.y),bottom=Math.max(drag.point.y,end.y);
         const ids=new Set(this.selection());
         for(const b of this.document.start.buildings){const p=this.project(b.x,b.y);if(p.x>=left&&p.x<=right&&p.y>=top&&p.y<=bottom)ids.add(b.id);}
-        this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
+        this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
       }
       return;
     }
-    if(this.view.tool==='select'||this.view.tool==='move'){const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
+    if(this.view.tool==='select'||this.view.tool==='move'){const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=hitStartingRoute(this.document,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
     else this.action({type:this.view.tool,x:cell.x,y:cell.y,id:this.hit(cell)?.id});
   }
   polygon(points,fill,stroke){
@@ -171,6 +176,11 @@ export class EditorMap {
       if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);
     }});
     objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
+    const selectedRoute=this.document.start.routes?.find(r=>r.id===view.selectedRoute);
+    if(selectedRoute)for(const [x,y]of selectedRoute.cells)this.polygon(footprintCorners('road',x,y),'#efc86d55','#ffe39a');
+    if(this.utilityPreview){c.save();c.lineJoin='round';c.lineCap='round';paintUtilityRoute(c,this.project,this.scale,this.utilityPreview,this.utilityPreview.allowed===false?'#c65e42':'#fff3a4',true,{pump:this.utilityPreview.kind!=='electricity'});c.restore();}
+    for(const port of this.utilityPreview?.ports??[]){const p=this.project(...port.cell);c.beginPath();c.arc(p.x,p.y,5*this.scale,0,Math.PI*2);c.fillStyle=port.supply?'#f3ca70':'#8bd1e4';c.fill();c.strokeStyle='#3a4b38';c.lineWidth=1;c.stroke();}
+    if(this.routeStroke)for(const [x,y]of this.routeStroke)this.polygon(footprintCorners('road',x,y),'#f4df9a66','#fff3c4');
     for(const [label,point,colour]of [['Camp',this.document.map.camp,'#476c44'],['Start view',this.document.map.camera,'#8f603c']]){
       const p=this.project(...point),same=this.document.map.camp.every((n,i)=>n===this.document.map.camera[i]);c.strokeStyle=colour;c.fillStyle='#f5e5ba';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,7,0,Math.PI*2);c.fill();c.stroke();c.font='bold 11px Trebuchet MS';c.textAlign='center';c.fillStyle=colour;c.fillText(label,p.x,p.y+(same&&label==='Camp'?-15:22));
     }
