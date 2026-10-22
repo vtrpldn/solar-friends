@@ -141,6 +141,8 @@ At least three biomes are a release requirement for both map generation and scen
 
 **Minimum supported scope:** players must be able to create, edit, save, share, and play maps and scenarios in all three launch biomes: Mata Atlântica, Cerrado, and Caatinga. Three is a minimum, not a fixed engine limit; adding another biome should extend the versioned content catalogs rather than require a separate editor or scenario format.
 
+Both the map builder and the scenario builder must offer all three biomes to regular players, including blank creations and templates. No launch biome may be restricted to developer tools or prepared scenarios. Resident creation and customization must work in every biome.
+
 **Release acceptance:** deliver one playable example scenario per launch biome, accessible from the regular player interface. For each biome, verify generation, manual terrain editing, resident customization, scenario objectives, save/reload, export/import, and an independent playtest. Review vegetation proportions and building/resident ground contact against each biome's terrain artwork. A biome counts toward the minimum only when this complete player journey works; a selector entry or recoloured landscape alone does not qualify.
 
 **Why:** choosing a region should change the land the friends settle and the planning tradeoffs they face, while keeping the same approachable player creation tools.
