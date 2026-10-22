@@ -1,3 +1,5 @@
+import {draftImportIssue} from './draft-import.js';
+import {EditorDocument} from './document.js';
 // Recovery exports deliberately bypass game/schema validation. A newer or
 // damaged record must remain available without opening or rewriting it.
 export function recoveryRecord(kind,record){
@@ -17,7 +19,9 @@ export function recoveredDraft(file,validate){
  for(const [source,checkpoint]of [['current',record.checkpoint],['previous',record.previous?.checkpoint]]){
   if(checkpoint?.schema!==1||!checkpoint.definition)continue;
   const definition=structuredClone(checkpoint.definition),checked=validate(JSON.stringify(definition));
-  if(checked?.ok)return {definition,source,attribution:structuredClone(record.attribution??[])};
+  if(draftImportIssue(checked))continue;
+  try{new EditorDocument(definition);}catch{continue;}
+  return {definition,source,playable:checked.ok,attribution:structuredClone(record.attribution??[])};
  }
  throw Error('Neither draft checkpoint can open in this game version. Keep the original backup; nothing was imported.');
 }

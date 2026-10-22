@@ -1,3 +1,4 @@
+import {draftImportIssue} from './draft-import.js';
 import {downloadRecoveryRecord,recoveredDraft,recoveredVillage} from './record-recovery.js';
 import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
 import {MapSharingControls} from './map-sharing-controls.js';
@@ -439,13 +440,12 @@ function wire(){
       if(file.size>32*1024*1024)throw Error('This creation file is too large.');
       const raw=await file.text();let content;try{content=JSON.parse(raw);}catch{throw Error('This file is not a readable creation.');}
       if(content.format==='solar-friends-recovery'&&content.kind==='run'){const recovered=recoveredVillage(content,Game);if(current)await save();await library.importRecoveredRun(recovered);await showLibrary({reset:true});toast(recovered.source==='previous'?'Recovered the previous village checkpoint as a separate save.':'Recovered as a separate saved village.');return;}
-      if(content.format==='solar-friends-recovery'){const recovered=recoveredDraft(content,data=>JSON.parse(engine.validate_scenario(data)));await newProject('import',recovered.definition,recovered.attribution);toast(recovered.source==='previous'?'Recovered the previous checkpoint as a separate draft. The original backup is unchanged.':'Recovered as a separate draft. The original backup is unchanged.');return;}
+      if(content.format==='solar-friends-recovery'){const recovered=recoveredDraft(content,data=>JSON.parse(engine.validate_scenario(data)));await newProject('import',recovered.definition,recovered.attribution);toast(!recovered.playable?'Recovered as a separate draft. Review its issues before playing.':recovered.source==='previous'?'Recovered the previous checkpoint as a separate draft. The original backup is unchanged.':'Recovered as a separate draft. The original backup is unchanged.');return;}
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const checked=JSON.parse(engine.validate_scenario(raw));
       if(content.format===MAP_FORMAT){const accepted=validateMapPackage(content,mapSharing.validate);if(current)await save();const thumbnail=mapSharing.preview(accepted);await library.importMap(accepted,mapSharing.validate,thumbnail);await showLibrary({reset:true});toast('Imported as a separate reusable map.');return;}
       if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();const previewGame=new Game();let thumbnail;try{const loaded=JSON.parse(previewGame.load_scenario(raw));if(loaded.ok)thumbnail=previewOf(content.definition,JSON.parse(previewGame.report_state()));}finally{previewGame.free();}await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)),thumbnail);await showLibrary({reset:true});toast('Imported as a separate frozen release.');return;}
-      const blocked=new Set(['file_too_large','unsupported_format','invalid_json','invalid_definition','unsupported_map','unknown_building','invalid_appearance','invalid_material','too_many_objects','too_many_stores','duplicate_building','invalid_identity','unsupported_resident_preset','unsupported_resident_appearance','invalid_resident_credits']);
-      if(checked.issues.some(i=>blocked.has(i.code)))throw Error(checked.issues.find(i=>blocked.has(i.code)).message);
+      const importIssue=draftImportIssue(checked);if(importIssue)throw Error(importIssue.message);
       await newProject('import',JSON.parse(raw));toast(checked.ok?'The creation was imported as a separate project.':'Imported as a draft. Review its issues before testing.');
     }catch(error){$('creator-library-status').textContent=error.message;}finally{e.target.value='';}
   };
