@@ -64,3 +64,7 @@
 .creator-route-list{max-height:190px;overflow:auto;margin:12px 0}.creator-route-list>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin:6px 0}.creator-route-list button{min-width:0;text-align:left}.creator-route-list button[aria-pressed=true]{background:#cbb574;border-color:#886533}#creator-routes .creator-field{font-size:12px}#creator-routes select{max-width:100%}
 
 .creator-equipment-row{border-top:1px solid #c5ad7b;padding:12px 0;margin-top:12px}.creator-equipment-row h3{font-size:13px;margin:4px 0 10px}.creator-equipment-row .creator-field{font-size:12px;font-weight:bold}
+
+.creator-setup-counts{font-size:12px;margin:10px 0}.creator-setup-counts>div{padding:7px 0;border-bottom:1px solid #d0ba8c}.creator-setup-counts dt{font-weight:bold}.creator-setup-counts dd{margin:3px 0 0;color:#705230}.creator-issue[data-severity=information]{border-left:3px solid #82936b;padding-left:8px}
+
+[data-supply-notes],[data-liquids-notes]{color:#7b642c}

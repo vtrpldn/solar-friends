@@ -3,6 +3,8 @@ use crate::*;
 use economy::{FODDER, HONEY, MILK, SCRAPS};
 use logistics::Owner;
 
+pub(crate) const GOAT_CARE_FODDER: u32 = 2;
+pub(crate) const GOAT_CARE_WATER: f32 = 2.;
 pub(crate) const ORCHARD_ESTABLISH_MINUTES: f32 = 8640.;
 pub(crate) const ORCHARD_FRUIT_MINUTES: f32 = 2880.;
 pub(crate) const ORCHARD_BASE_FRUIT: u32 = 8;
@@ -150,8 +152,8 @@ pub fn ready(v: &Village, b: &Building) -> bool {
         return p.stocking_requested && organics::available(v, owner, material) >= 1;
     }
     if b.kind == "goat_pasture" && p.cared_until <= v.minutes {
-        return organics::available(v, owner, FODDER) >= 2
-            && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 2.;
+        return organics::available(v, owner, FODDER) >= GOAT_CARE_FODDER
+            && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= GOAT_CARE_WATER;
     }
     if b.kind == "apiary" && p.cared_until <= v.minutes {
         return true;
@@ -177,8 +179,8 @@ pub fn ready(v: &Village, b: &Building) -> bool {
         }
         "goat_pasture" => {
             p.cared_until <= v.minutes
-                && organics::available(v, owner, FODDER) >= 2
-                && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= 2.
+                && organics::available(v, owner, FODDER) >= GOAT_CARE_FODDER
+                && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= GOAT_CARE_WATER
         }
         "apiary" => p.cared_until <= v.minutes,
         _ => false,
@@ -239,10 +241,10 @@ pub fn tend(v: &mut Village, id: usize) -> bool {
     }
     match b.kind.as_str() {
         "goat_pasture" => {
-            if water::draw(v, water::Owner::Building(id), water::Class::Fresh, 2.) < 2. {
+            if water::draw(v, water::Owner::Building(id), water::Class::Fresh, f64::from(GOAT_CARE_WATER)) < f64::from(GOAT_CARE_WATER) {
                 return false;
             }
-            logistics::spend(v, Some(owner), FODDER, 2);
+            logistics::spend(v, Some(owner), FODDER, GOAT_CARE_FODDER);
             let p = &mut v.buildings[index].agriculture;
             p.cared_until = v.minutes + 1440.;
             p.welfare = (p.welfare + 25.).min(100.);

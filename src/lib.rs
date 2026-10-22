@@ -280,11 +280,12 @@ fn ready(v: &Village, kind: &str) -> bool {
         .iter()
         .any(|b| b.kind == kind && b.progress >= 100.)
 }
+pub(crate) const HOME_BEDS: usize = 3;
 fn shelter(v: &Village, id: usize) -> Option<&Building> {
     v.buildings
         .iter()
         .filter(|b| b.kind == "home" && b.progress >= 100.)
-        .nth(roster::slot(v, id)? / 3)
+        .nth(roster::slot(v, id)? / HOME_BEDS)
 }
 fn sleeping_time(minutes: f32, r: &Resident) -> bool {
     sleep::due(r, minutes)

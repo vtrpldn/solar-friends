@@ -650,6 +650,13 @@ fn demand(v: &Village, p: &Tank) -> (f64, bool, f32) {
         Owner::Ground | Owner::Service => (0., false, 0.),
     }
 }
+/// Current native restocking targets, not a daily-consumption forecast.
+pub(crate) fn fresh_refill_target(v: &Village) -> f64 {
+    v.water_supply.tanks.iter().map(|p| {
+        let (target, irrigation, _) = demand(v, p);
+        if irrigation {0.} else {target}
+    }).sum()
+}
 fn surplus(v: &Village, p: &Tank, class: Class, except: Option<usize>) -> f64 {
     let reserve = match p.owner {
         Owner::Camp | Owner::Ground => 0.,

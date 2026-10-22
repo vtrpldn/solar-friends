@@ -539,22 +539,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
                 "Add compatible water storage or reduce the starting water amount.",
             ));
         }
-        if v.buildings
-            .iter()
-            .filter(|b| b.kind == "home" && b.progress >= 100.)
-            .count()
-            * 3
-            < v.skills.people.len()
-        {
-            report.issues.push(Issue {
-                severity: Severity::Warning,
-                code: "overnight_beds".into(),
-                path: "start.buildings".into(),
-                message: "Some friends will stay elsewhere overnight until homes are ready.".into(),
-                at: None,
-                entity: None,
-            });
-        }
+        super::setup::review(v, &d, &mut report);
         let residents = game
             .app
             .world_mut()

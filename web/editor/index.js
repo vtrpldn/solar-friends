@@ -1,3 +1,4 @@
+import {renderOpeningSetup} from './setup.js';
 import {EquipmentEditor} from './equipment.js';
 import {RoutesEditor,routeNames,dependentRoutes,hitStartingRoute} from './routes.js';
 import {hitStartingBank,newStartingBank,bankFields,buildingBatteryFields} from './batteries.js';
@@ -37,6 +38,7 @@ let newBiome="mata-atlantica";
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let expandedReview=false;
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -149,8 +151,9 @@ function renderSelection(){
 }
 function renderSupplies(){suppliesEditor.render(current.doc.value,report);}
 function renderReview(){
+  renderOpeningSetup($('creator-opening-setup'),engine,report.ok);
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
-  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join(''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
+  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
 }
 function setTool(tool){
   map.setTool(tool);landSampleKey='';inspectGround(hoverCell);
@@ -215,7 +218,7 @@ function mapAction(action){
   }
 }
 function attach(definition,{id,revision=null,checkpoint=null,view=null,record=null}={}){
-  clearTimeout(saveTimer);
+  clearTimeout(saveTimer);expandedReview=false;
   const doc=checkpoint?EditorDocument.restore(checkpoint):new EditorDocument(definition);
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
@@ -337,6 +340,7 @@ function wire(){
     }
   };
   $('creator-issues').onclick=e=>{
+    if(e.target.closest('[data-issue-more]')){expandedReview=true;renderReview();return;}
     const button=e.target.closest('[data-issue]');
     if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity){if(current.doc.value.start.routes?.some(r=>r.id===issue.entity)){map.selectRoute(issue.entity);routesEditor.edit(issue.entity);}else if(current.doc.value.start.batteries?.some(b=>b.id===issue.entity))map.selectBank(issue.entity);else if(current.doc.value.start.resource_sites?.some(s=>s.id===issue.entity))map.selectSite(issue.entity);else map.select(issue.entity);}}
     if(e.target.matches('[data-issue-liquids]')){$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}

@@ -5,6 +5,7 @@ use std::collections::{BTreeMap, HashSet};
 mod animals;
 pub(crate) mod batteries;
 pub(crate) mod equipment;
+pub(crate) mod setup;
 pub(crate) mod routes;
 mod biomes;
 mod compile;
@@ -27,6 +28,7 @@ pub(crate) use definition::*;
 pub enum Severity {
     Error,
     Warning,
+    Information,
 }
 #[derive(Clone, Serialize)]
 pub struct Issue {

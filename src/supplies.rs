@@ -1,6 +1,10 @@
 //! Gentle food production: fed hens lay eggs; kitchens stretch ingredients.
 use super::*;
 
+pub(crate) const HEN_FODDER: u32 = 2;
+pub(crate) const HEN_FOOD: u32 = 3;
+pub(crate) const HEN_FOOD_RESERVE: f32 = 9.;
+
 pub fn urgent(v: &Village) -> bool {
     // Leave a full round of portions while foragers walk to separate patches.
     v.food < 6. && v.meals + food::other_portions(v) < 3
@@ -82,9 +86,9 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if v.buildings[index].poultry.remaining <= 0. {
             let local =
                 food::pantry(v, id).map_or(0, |p| food::available(v, p, economy::FOOD, None));
-            let fodder = organics::available(v, logistics::Owner::Pantry(id), economy::FODDER) >= 2;
+            let fodder = organics::available(v, logistics::Owner::Pantry(id), economy::FODDER) >= HEN_FODDER;
             if !v.supplies.feed_hens
-                || (!fodder && (v.food < 9. || local < 3))
+                || (!fodder && (v.food < HEN_FOOD_RESERVE || local < HEN_FOOD))
                 || reserved_eggs + 3 > 12
             {
                 continue;
@@ -97,10 +101,10 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 } else {
                     economy::FOOD
                 },
-                if fodder { 2 } else { 3 },
+                if fodder { HEN_FODDER } else { HEN_FOOD },
             );
             if !fodder {
-                v.supplies.used += 3.;
+                v.supplies.used += HEN_FOOD as f32;
             }
             v.buildings[index].poultry.remaining = 720.;
             reserved_eggs += 3;
