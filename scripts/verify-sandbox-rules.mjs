@@ -1,3 +1,4 @@
+import {MATERIAL_KEYS} from '../web/materials.js';
 import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
@@ -10,12 +11,12 @@ const output='artifacts/sandbox-rules';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot()),checks=[];
 function checkpoint(g){const raw=g.snapshot(),copy=new Game();assert(copy.restore(raw));assert.equal(copy.snapshot(),raw);for(let i=0;i<4;i++){g.tick(.25);copy.tick(.25);}assert.equal(copy.snapshot(),g.snapshot());copy.free();assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0));const w=JSON.parse(g.water_report());for(let i=0;i<4;i++)assert(Math.abs(w.opening[i]+w.received[i]-w.consumed[i]-w.present[i])<.001);const n=snap(g).village.power.network,a=n.account;assert(Math.abs(a.opening+a.generated-a.consumed-a.curtailed-a.discharged-n.nodes.reduce((sum,p)=>sum+p.charge,0))<.001);}
 function until(g,test,label,limit=3*1920){for(let i=0;i<limit;i++){g.tick(.25);if(i%4===3&&test(snap(g)))return;}throw Error(label+' did not complete');}
-const fresh=new Game();assert.equal(snap(fresh).village.version,44);const story=fresh.snapshot();assert.equal(fresh.configure_sandbox_rules(false,false,false),false);assert.equal(fresh.snapshot(),story);assert.deepEqual(JSON.parse(fresh.sandbox_rules_report()),{editable:false,logistics:true,land:true,utilities:true,supplied_energy:0});fresh.free();
+const fresh=new Game();assert.equal(snap(fresh).village.version,45);const story=fresh.snapshot();assert.equal(fresh.configure_sandbox_rules(false,false,false),false);assert.equal(fresh.snapshot(),story);assert.deepEqual(JSON.parse(fresh.sandbox_rules_report()),{editable:false,logistics:true,land:true,utilities:true,supplied_energy:0});fresh.free();
 const g=new Game();assert(startEmptySandbox(g));const initial=snap(g);assert.deepEqual(initial.village.sandbox_rules,{logistics:false,land:false,utilities:false,supplied_energy:0});
 assert.equal(g.place('home',5,5),'ok');assert.equal(snap(g).village.buildings[0].progress,100);
 assert(g.configure_sandbox_rules(true,false,false));assert.equal(g.place('garden',13,10),'ok');assert.equal(snap(g).village.buildings[1].progress,0);const fund=snap(g).village.economy.money;let hauling=false;
 until(g,s=>{hauling||=s.residents.some(r=>r.task==='haul');return s.village.buildings[1].progress===100;},'Resident-built constrained garden');assert(hauling);assert.equal(snap(g).village.economy.money,fund);checkpoint(g);await writeFile(output+'/construction.json',g.snapshot());checks.push('New projects require actual resident material trips and work, with conserved supplies');
-const basket=Array(29).fill(0);basket[0]=1;assert.equal(g.order_supplies(JSON.stringify(basket)),'ok');const order=structuredClone(snap(g).village.economy.orders.at(-1));
+const basket=Array(MATERIAL_KEYS.length).fill(0);basket[0]=1;assert.equal(g.order_supplies(JSON.stringify(basket)),'ok');const order=structuredClone(snap(g).village.economy.orders.at(-1));
 assert.equal(g.place('workshop',18,16),'ok');const project=snap(g).village.economy.projects.at(-1);assert.equal(g.configure_project(project.building,3,true,'standard'),'ok');const pending=structuredClone(snap(g).village.economy.projects.at(-1));
 assert(g.configure_sandbox_rules(false,false,false));assert.deepEqual(snap(g).village.economy.orders.at(-1),order);assert.deepEqual(snap(g).village.economy.projects.at(-1),pending);assert.equal(snap(g).village.buildings.at(-1).progress,0);checkpoint(g);checks.push('Switching rules preserves confirmed receipts and paused construction');
 for(let mask=0;mask<8;mask++){

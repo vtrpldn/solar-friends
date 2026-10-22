@@ -3,7 +3,7 @@ export async function checkLandControls({page,saved,capture}){
   async function load(file){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
     await page.locator('#dev-import-file').setInputFiles(`artifacts/land/${file}.json`);
-    await page.waitForFunction(file=>{const v=window.solarDev.snapshot().village;return v.version===44&&v.mode==='sandbox'&&(file==='exhausted'?v.economy.sources.length===3&&v.land.deposits.some(d=>d.remaining===0):v.land.soil.length>0&&v.buildings.length===0);},file);
+    await page.waitForFunction(file=>{const v=window.solarDev.snapshot().village;return v.version===45&&v.mode==='sandbox'&&(file==='exhausted'?v.economy.sources.length===3&&v.land.deposits.some(d=>d.remaining===0):v.land.soil.length>0&&v.buildings.length===0);},file);
     await page.locator('#dev-close').click();
   }
   await load('exhausted');

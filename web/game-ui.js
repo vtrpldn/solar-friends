@@ -1,3 +1,4 @@
+import {MATERIAL_KEYS} from './materials.js';
 import {terrainRevision} from './terrain-revision.js';
 import {habitatAt,habitatColors} from './habitats.js';
 import {usesLogistics} from './sandbox-rules.js';
@@ -6,7 +7,7 @@ import {allBuildingArt,buildingArtKey} from './building-art.js';
 import {riverBank,MAP_SIZE} from './terrain.js';
 
 const sheet=new URL('./ui/items.svg',import.meta.url).href;
-export const materialIcons=['timber','bamboo','earth','stone','salvage','frames','walls','tiles','fittings','plumbing','electrical','covering','panels','batteries','pumps','tools','food','meals','eggs','compost','scraps','seedlings','tree_starts','bamboo_starts','fodder','milk','honey','goats','bees'];
+export const materialIcons=MATERIAL_KEYS;
 export const itemIcon=key=>`<svg class="item-icon" aria-hidden="true" viewBox="0 0 48 48"><use href="${sheet}#${key}"/></svg>`;
 const buildingNames={shed:'Community shed',orchard:'Fruit orchard',goat_pasture:'Goat pasture',apiary:'Stingless bee apiary',hydro:'River generator',eco_toilet:'Ecological toilet',banana_treatment:'Banana treatment bed',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost station',square:'Village square',coop:'Chicken coop',workshop:'Workshop',solar_farm:'Solar farm',streetlight:'Street light'};
 

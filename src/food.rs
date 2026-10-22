@@ -162,7 +162,8 @@ pub fn needs(v: &Village, building: usize) -> Bundle {
             }
         }
         "coop"
-            if v.supplies.feed_hens
+            if b.agriculture.stocked
+                && v.supplies.feed_hens
                 && (v.food >= 9. || economy::quantity(v, economy::FODDER) >= 2)
                 && v.supplies.eggs < 12
                 && b.poultry.remaining <= 0. =>

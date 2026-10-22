@@ -744,7 +744,7 @@ pub fn valid(v: &Village, r: &Resident) -> bool {
                     "cook" | "eat" => b.kind == "kitchen",
                     "garden" => matches!(
                         b.kind.as_str(),
-                        "garden" | "greenhouse" | "orchard" | "goat_pasture" | "apiary"
+                        "garden" | "greenhouse" | "orchard" | "goat_pasture" | "apiary" | "coop"
                     ),
                     "craft" => b.kind == "workshop",
                     "compost" => b.kind == "compost",

@@ -1,3 +1,4 @@
+import {MATERIAL_KEYS} from '../web/materials.js';
 import {unlockStory} from './story-fixture.mjs';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
@@ -13,11 +14,13 @@ assert.equal(game.place('coop', 12, 10), 'ok');
 assert.equal(snapshot().village.wood, timber);
 assert.equal(flock(snapshot().village).length, 0);
 assert.notEqual(game.place('coop', 12, 10), 'ok');
+const animals=Array(MATERIAL_KEYS.length).fill(0);animals[MATERIAL_KEYS.indexOf('hens')]=1;assert.equal(game.order_supplies(JSON.stringify(animals)),'ok');
 assert.equal(snapshot().village.wood, timber);
 for (let i = 0; i < 10000 && snapshot().village.buildings[0].progress < 100; i++) game.tick(.25);
 const saved = snapshot();
 assert.equal(saved.village.buildings[0].progress, 100);
-assert.equal(flock(saved.village).length, 3);
+assert.equal(saved.village.simulation.materials.spent[MATERIAL_KEYS.indexOf('hens')],1);
+assert.equal(flock({...saved.village,minutes:600}).length,3);
 const restored = new Game();
 assert.equal(restored.restore(JSON.stringify(saved)), true);
 assert.deepEqual(flock(JSON.parse(restored.snapshot()).village), flock(saved.village));
@@ -25,12 +28,12 @@ const night = {...saved.village, minutes: 1200};
 assert.equal(flock(night).length, 0);
 assert.equal(flock({...night, minutes: 1440 + 420}).length, 3);
 assert.notDeepEqual(flock({...night, minutes: 600}), flock({...night, minutes: 620}));
-const two = {...saved.village, buildings: [...saved.village.buildings, {...saved.village.buildings[0], id: 1, x: 18}]};
+const two = {...saved.village, minutes:600, buildings: [...saved.village.buildings, {...saved.village.buildings[0], id: 1, x: 18}]};
 assert.equal(flock(two).length, 6);
 if (process.argv[2]) await fs.writeFile(process.argv[2], JSON.stringify(saved));
 console.log('PASS: cost, collision, autonomous construction, three hens per coop, night roosting, movement, and save/reload');
 
-assert.deepEqual(flock(saved.village).map(hen => hen.variant), [0, 1, 2]);
+assert.deepEqual(flock({...saved.village,minutes:600}).map(hen => hen.variant), [0, 1, 2]);
 for (let variant = 0; variant < 3; variant++) {
   const standing = chickenFrame({variant, peck: 0});
   const pecking = chickenFrame({variant, peck: 3});

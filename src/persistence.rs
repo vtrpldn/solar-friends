@@ -6,6 +6,11 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
         return None;
     };
     let original_version = raw["village"]["version"].as_u64();
+    let legacy_hens = original_version.is_some_and(|v| v < 45);
+    if legacy_hens {
+        supplies::migrate_hens(&mut raw);
+    }
+
     if original_version.is_some_and(|v| v >= 31) && !raw["village"]["skills"].is_object() {
         return None;
     }
@@ -34,7 +39,7 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
             .unwrap();
         }
     }
-    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=43)) {
+    if matches!(raw["village"]["version"].as_u64(), Some(24..=26 | 29..=44)) {
         raw["village"]["version"] = SAVE_VERSION.into();
     }
     if raw["village"]["market"].is_null() && raw["village"]["mode"] == "sandbox" {
@@ -145,9 +150,21 @@ pub(crate) fn decode(data: &str) -> Option<Save> {
     {
         return None;
     }
-    let Ok(save) = serde_json::from_value::<Save>(raw) else {
+    let Ok(mut save) = serde_json::from_value::<Save>(raw) else {
         return None;
     };
+    if legacy_hens {
+        for i in 0..save.village.economy.orders.len() {
+            if let Some(t) = save.village.economy.orders[i].terms.as_ref() {
+                let price = market::prices(&save.village, t.day, t.active)[economy::HENS];
+                save.village.economy.orders[i]
+                    .terms
+                    .as_mut()
+                    .unwrap()
+                    .prices[economy::HENS] = price;
+            }
+        }
+    }
     validate(save)
 }
 

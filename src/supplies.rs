@@ -64,12 +64,17 @@ pub fn advance(v: &mut Village, minutes: f32) {
         + 3 * v
             .buildings
             .iter()
-            .filter(|b| b.kind == "coop" && b.poultry.remaining > 0.)
+            .filter(|b| b.kind == "coop" && b.agriculture.stocked && b.poultry.remaining > 0.)
             .count() as u32;
     let coops: Vec<_> = v
         .buildings
         .iter()
-        .filter(|b| b.kind == "coop" && b.progress >= 100. && building_work::job(v, b.id).is_none())
+        .filter(|b| {
+            b.kind == "coop"
+                && b.agriculture.stocked
+                && b.progress >= 100.
+                && building_work::job(v, b.id).is_none()
+        })
         .map(|b| b.id)
         .collect();
     for id in coops {
@@ -113,6 +118,69 @@ pub fn advance(v: &mut Village, minutes: f32) {
         }
     }
 }
+/// Extend only material-vector fields; identities, coordinates and quantities stay unchanged.
+pub(crate) fn migrate_hens(raw: &mut serde_json::Value) {
+    fn extend(value: &mut serde_json::Value) {
+        match value {
+            serde_json::Value::Object(fields) => {
+                for (key, value) in fields {
+                    if [
+                        "stock",
+                        "items",
+                        "reserved",
+                        "consumed",
+                        "opening",
+                        "received",
+                        "spent",
+                        "target",
+                        "targets",
+                        "inputs",
+                        "outputs",
+                        "retired_inputs",
+                        "retired_outputs",
+                        "expired",
+                        "prices",
+                        "returns",
+                        "kit",
+                    ]
+                    .contains(&key.as_str())
+                        && let Some(items) = value.as_array_mut()
+                        && items.len() == 29
+                    {
+                        items.push(if items.first().is_some_and(|v| v.is_array()) {
+                            serde_json::json!([0, 0])
+                        } else {
+                            0.into()
+                        });
+                    }
+                    extend(value);
+                }
+            }
+            serde_json::Value::Array(items) => {
+                for item in items {
+                    extend(item);
+                }
+            }
+            _ => {}
+        }
+    }
+    extend(raw);
+    let coops: std::collections::HashSet<_> = raw["village"]["buildings"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|b| b["kind"] == "coop")
+        .filter_map(|b| b["id"].as_u64())
+        .collect();
+    if let Some(projects) = raw["village"]["economy"]["projects"].as_array_mut() {
+        for p in projects {
+            if p["building"].as_u64().is_some_and(|id| coops.contains(&id)) {
+                p["recipe"] = "legacy".into();
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 pub fn can_cook_at(v: &Village, id: usize) -> bool {
     let Some(b) = v
@@ -195,9 +263,12 @@ pub fn valid(v: &Village) -> bool {
         && [s.gathered, s.used]
             .iter()
             .all(|n| n.is_finite() && *n >= 0.)
-        && v.buildings
-            .iter()
-            .all(|b| b.poultry.remaining.is_finite() && (0.0..=720.).contains(&b.poultry.remaining))
+        && v.buildings.iter().all(|b| {
+            b.poultry.remaining.is_finite()
+                && (0.0..=720.).contains(&b.poultry.remaining)
+                && (b.kind == "coop" || b.poultry.remaining == 0.)
+                && (b.agriculture.stocked || b.poultry.remaining == 0.)
+        })
 }
 
 #[cfg(test)]

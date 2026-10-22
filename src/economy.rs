@@ -5,12 +5,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
 
-pub const COUNT: usize = 29;
+pub const COUNT: usize = 30;
 pub const FODDER: usize = 24;
 pub const MILK: usize = 25;
 pub const HONEY: usize = 26;
 pub const GOATS: usize = 27;
 pub const BEES: usize = 28;
+pub const HENS: usize = 29;
 pub const SEEDLINGS: usize = 21;
 pub const TREE_STARTS: usize = 22;
 pub const BAMBOO_STARTS: usize = 23;
@@ -51,6 +52,7 @@ pub const NAMES: [&str; COUNT] = [
     "honey",
     "goats",
     "bees",
+    "hens",
 ];
 pub(crate) const LABELS: [&str; COUNT] = [
     "Timber",
@@ -82,10 +84,11 @@ pub(crate) const LABELS: [&str; COUNT] = [
     "Honey",
     "Pair of dairy goats",
     "Stingless bee colony",
+    "Three laying hens",
 ];
 pub(crate) const PRICES: [i64; COUNT] = [
     700, 400, 150, 350, 500, 1800, 500, 900, 1200, 2400, 3600, 8000, 28000, 42000, 16000, 900, 400,
-    800, 300, 800, 0, 300, 1000, 2000, 200, 700, 1200, 180000, 40000,
+    800, 300, 800, 0, 300, 1000, 2000, 200, 700, 1200, 180000, 40000, 18000,
 ];
 pub type Bundle = [u32; COUNT];
 #[derive(Clone, Serialize, Deserialize)]
@@ -180,7 +183,7 @@ impl Default for Economy {
         Self {
             stock: [
                 0, 12, 36, 18, 4, 8, 12, 14, 10, 5, 2, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 4, 1, 0,
-                0, 0, 0, 0,
+                0, 0, 0, 0, 0,
             ],
             money: 300000,
             ledger: vec![Entry {
@@ -226,6 +229,13 @@ fn stage(name: &'static str, items: &[(usize, u32)], work: f32) -> Stage {
     }
 }
 pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
+    if kind == "coop" && variant == "legacy" {
+        return Some(vec![
+            stage("Footings", &[(3, 2)], 8.),
+            stage("Shelter", &[(5, 2), (7, 2), (8, 1)], 20.),
+        ]);
+    }
+
     if kind == "home" && variant == "adobe" {
         return Some(vec![
             stage("Stone foundation", &[(2, 6), (3, 4)], 12.),
@@ -301,7 +311,11 @@ pub fn recipe(kind: &str, variant: &str) -> Option<Vec<Stage>> {
         ],
         "coop" => vec![
             stage("Footings", &[(3, 2)], 8.),
-            stage("Shelter", &[(5, 2), (7, 2), (8, 1)], 20.),
+            stage(
+                "Shelter & laying hens",
+                &[(5, 2), (7, 2), (8, 1), (HENS, 1)],
+                20.,
+            ),
         ],
         "solar_farm" => vec![
             stage("Supports", &[(3, 6), (8, 3)], 16.),

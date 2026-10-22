@@ -179,7 +179,7 @@ const lessons = [
     title: "Growing Resilience", person: "Bento & Iara", theme: "CRAFT & CULTIVATE",
     art: "greenhouse", building: "coop", reward: "Chicken coop · varied meals",
     story: "“Good tools, living soil, and seedlings under glass. Let's make our harvests more dependable.”",
-    after: "A resilient garden makes room for a fuller table. Build a chicken coop and keep food aside for the hens.",
+    after: "A resilient garden makes room for a fuller table. Build a chicken coop, buy a three-hen group for its final stage, and keep feed aside for them.",
     objectives: v => [
       goal("Build a workshop", count(v,"workshop"),1,"Finish a workshop in Projects, then let Bento make tools.","workshop"),
       goal("Craft a set of tools",v.progress.tools_crafted,1,"Keep eight timber available and ask Bento to craft when they have the energy. He brings inputs to an open workshop and resumes the saved batch after breaks. Finished tools travel onward to projects and harvests.","workshop"),

@@ -102,7 +102,13 @@ impl Game {
             v.economy.stock[1..].fill(24);
             v.economy.stock[economy::TREE_STARTS] = 8;
             v.economy.stock[economy::FODDER] = 0;
-            for i in [economy::MILK, economy::HONEY, economy::GOATS, economy::BEES] {
+            for i in [
+                economy::MILK,
+                economy::HONEY,
+                economy::GOATS,
+                economy::BEES,
+                economy::HENS,
+            ] {
                 v.economy.stock[i] = 0;
             }
             v.economy.stock[economy::BAMBOO_STARTS] = 2;

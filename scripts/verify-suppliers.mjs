@@ -1,3 +1,4 @@
+import {MATERIAL_KEYS} from '../web/materials.js';
 import {startEmptySandbox} from './lib/empty-sandbox.mjs';
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
@@ -8,8 +9,8 @@ import {makeScenario} from '../web/dev/scenarios.js';
 import {resetMaterialLocations} from '../web/dev/material-fixture.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const output='artifacts/suppliers';await mkdir(output,{recursive:true});
-const snap=g=>JSON.parse(g.snapshot()),raw=(material,n)=>JSON.stringify(Array.from({length:29},(_,i)=>i===material?n:0));
-const base=new Game(),fresh=snap(base);assert.equal(fresh.village.version,44);assert(fresh.village.market.enabled&&!fresh.environment.economy.market.active);
+const snap=g=>JSON.parse(g.snapshot()),raw=(material,n)=>JSON.stringify(Array.from({length:MATERIAL_KEYS.length},(_,i)=>i===material?n:0));
+const base=new Game(),fresh=snap(base);assert.equal(fresh.village.version,45);assert(fresh.village.market.enabled&&!fresh.environment.economy.market.active);
 assert(base.restore(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8')));const established=snap(base);
 const g=new Game();assert(g.restore(JSON.stringify(makeScenario('suppliers',fresh,established))));
 const before=g.snapshot(),e=snap(g).environment.economy,offer=e.market.current.offer,data=raw(offer.material,1);

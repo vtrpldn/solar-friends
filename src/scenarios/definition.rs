@@ -268,6 +268,7 @@ impl Definition {
                 economy::HONEY,
                 economy::GOATS,
                 economy::BEES,
+                economy::HENS,
             ] {
                 items[i] = 0;
             }

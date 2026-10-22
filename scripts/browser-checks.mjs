@@ -1,3 +1,4 @@
+import {MATERIAL_KEYS} from '../web/materials.js';
 import {checkSandboxRules} from './sandbox-browser-checks.mjs';
 import {checkStoryControls} from './story-browser-checks.mjs';
 import {checkSupplierControls,checkSupplierSandboxSave} from './supplier-browser-checks.mjs';
@@ -483,7 +484,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(JSON.stringify(await page.evaluate(()=>window.solarDev.snapshot())),inspectionBefore,'Inspection cannot advance or edit the world');
   await page.locator('#dev-inspection details summary').filter({hasText:'Material accounting · seed'}).click();
   const balances=await page.locator('#dev-inspection details tbody tr td:last-child').allTextContents();
-  assert.equal(balances.length,29);assert(balances.every(text=>text==='0'));
+  assert.equal(balances.length,MATERIAL_KEYS.length);assert(balances.every(text=>text==='0'));
   await capture('Observed resident time and reconciled material accounts','simulation-accounting.png');
   // A storage target queues resident trips instead of moving material instantly.
   await page.locator('#dev-close').click();await page.locator('[data-hud-resource="materials"]').click();

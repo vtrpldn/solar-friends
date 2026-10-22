@@ -46,11 +46,15 @@ pub fn livestock_material(b: &Building) -> Option<usize> {
     match b.kind.as_str() {
         "goat_pasture" => Some(economy::GOATS),
         "apiary" => Some(economy::BEES),
+        "coop" => Some(economy::HENS),
         _ => None,
     }
 }
 pub fn kind(b: &Building) -> bool {
-    matches!(b.kind.as_str(), "orchard" | "goat_pasture" | "apiary")
+    matches!(
+        b.kind.as_str(),
+        "orchard" | "goat_pasture" | "apiary" | "coop"
+    )
 }
 fn open(v: &Village, b: &Building) -> bool {
     b.progress >= 100. && building_work::job(v, b.id).is_none()
@@ -104,6 +108,7 @@ pub fn wanted(v: &Village, id: usize) -> bool {
         return b.agriculture.stocking_requested;
     }
     match b.kind.as_str() {
+        "coop" => false,
         "goat_pasture" => {
             b.agriculture.cared_until <= v.minutes
                 || b.agriculture.enabled && economy::quantity(v, MILK) < 8
@@ -420,6 +425,9 @@ fn status(v: &Village, b: &Building) -> &'static str {
         }
         return "Needs a resident to feed and check the goats";
     }
+    if b.kind == "coop" {
+        return "Hens are living here; feeding is controlled in Supplies";
+    }
     if !p.enabled {
         return if b.kind == "goat_pasture" {
             "Milk production paused; daily feed and care continue"
@@ -483,7 +491,11 @@ impl Game {
     }
     pub fn configure_agriculture(&mut self, id: usize, enabled: bool) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        let Some(b) = v.buildings.iter_mut().find(|b| b.id == id && kind(b)) else {
+        let Some(b) = v
+            .buildings
+            .iter_mut()
+            .find(|b| b.id == id && kind(b) && b.kind != "coop")
+        else {
             return false;
         };
         b.agriculture.enabled = enabled;
@@ -494,7 +506,7 @@ impl Game {
         let plots:Vec<_>=v.buildings.iter().filter(|b|kind(b)).map(|b|{
             let p=&b.agriculture;
             let status=status(v,b);
-            serde_json::json!({"building":b.id,"status":status,"ready":ready(v,b),"flowers":flowers(v,b),"pollinated":pollinated(v,b),"fodder_here":organics::available(v,Owner::Pantry(b.id),FODDER),"fresh_water_here":water::available(v,water::Owner::Building(b.id),water::Class::Fresh),"duration":if b.kind=="orchard"{if p.fruiting{ORCHARD_FRUIT_MINUTES}else{ORCHARD_ESTABLISH_MINUTES}}else if b.kind=="apiary"{720.}else{1440.}})
+            serde_json::json!({"building":b.id,"status":status,"ready":ready(v,b),"flowers":flowers(v,b),"pollinated":pollinated(v,b),"fodder_here":organics::available(v,Owner::Pantry(b.id),FODDER),"fresh_water_here":water::available(v,water::Owner::Building(b.id),water::Class::Fresh),"duration":if b.kind=="orchard"{if p.fruiting{ORCHARD_FRUIT_MINUTES}else{ORCHARD_ESTABLISH_MINUTES}}else if matches!(b.kind.as_str(),"apiary"|"coop"){720.}else{1440.}})
         }).collect();
         serde_json::json!({"plots":plots,"fodder":economy::quantity(v,FODDER),"milk":economy::quantity(v,MILK),"honey":economy::quantity(v,HONEY)}).to_string()
     }

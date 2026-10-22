@@ -65,7 +65,7 @@ mod world;
 use progression::Progress;
 
 pub const MAP_SIZE: i32 = 64;
-pub const SAVE_VERSION: u32 = 44;
+pub const SAVE_VERSION: u32 = 45;
 const MINUTES_PER_SECOND: f32 = 3.;
 const CAMP: (f32, f32) = (10., 13.);
 fn legacy_camp() -> (f32, f32) {
@@ -1440,7 +1440,7 @@ impl Game {
         if b.progress < 100. {
             return "Finish construction before using this building.".into();
         }
-        if agriculture::kind(b) {
+        if agriculture::kind(b) && (b.kind != "coop" || !b.agriculture.stocked) {
             return self.request_at(resident, "garden", false, Some(building));
         }
         if matches!(b.kind.as_str(), "workshop" | "kitchen") {

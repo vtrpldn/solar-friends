@@ -1189,7 +1189,8 @@ function updateSupplies(v) {
   $('#egg-control').hidden=!buildingUnlocked(v,'coop');
   const s = v.supplies;
   const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
-  const fed = coops.filter(b => b.poultry.remaining > 0);
+  const occupiedCoops=coops.filter(b=>b.agriculture.stocked!==false);
+  const fed = occupiedCoops.filter(b => b.poultry.remaining > 0);
   const shared=v.progress.gathering_delivery;
   const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(shared.portions,v.meals):0;
   replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"],["milk",state.environment.economy.materials[25].stored,"Fresh milk"],["honey",state.environment.economy.materials[26].stored,"Honey"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
@@ -1206,7 +1207,7 @@ function updateSupplies(v) {
     : v.food < (s.use_eggs && s.eggs >= 2 ? 2 : 3) ? "Waiting for ingredients."
     : "Neighbours queue a pot when the reserve needs topping up and there is room for its meals.";
   $("#coop-status").textContent = !coops.length ? "Build a coop to start producing eggs."
-    : `${fed.length} of ${coops.length} coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop when they have the energy."}`;
+    : !occupiedCoops.length?"Our coops are empty. Deliver a three-hen group, then request stocking in Buildings.": `${fed.length} of ${occupiedCoops.length} occupied coops fed${fed.length ? ` · next eggs in ${Math.ceil(Math.min(...fed.map(b => b.poultry.remaining)) / 60)} daylight hours` : ""}. ${!s.feed_hens ? "New feeding is paused." : s.eggs + fed.length * 3 + 3 > 12 ? "Enough eggs laid or on the way. Feeding pauses until some are used." : v.food < 9 ? "New feeding waits until there are 9 ingredients." : "Neighbours bring feed to each coop when they have the energy."}`;
   const weatherLine=state.environment.weather ? weatherSummary(state.environment.weather,v.minutes) : state.environment.dry_day ? "Dry today; rain returns tomorrow afternoon" : "Rain today from 14:00 to 17:00";
   $("#pantry-weather").textContent = `${Math.floor(v.water)} / ${Math.round(state.environment.water_capacity)} water. ${weatherLine}. Gardens pause safely when dry.`;
   updateClimateForecast(state);

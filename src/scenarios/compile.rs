@@ -236,6 +236,7 @@ pub(super) fn check(d: &Definition) -> Report {
             );
         }
         if !progression::BUILDINGS.contains(&b.kind.as_str())
+            || !matches!(b.recipe.as_str(), "standard" | "local" | "adobe")
             || economy::recipe(&b.kind, &b.recipe).is_none()
         {
             r.push(
@@ -408,7 +409,13 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
                 .crop
                 .as_ref()
                 .map_or_else(Default::default, |c| super::farming::resolve(c, &b.kind)),
-            poultry: Default::default(),
+            poultry: crate::supplies::Poultry {
+                remaining: if b.kind == "coop" {
+                    b.animals.as_ref().map_or(0., |a| a.care_remaining)
+                } else {
+                    0.
+                },
+            },
             agriculture: b.orchard.as_ref().map_or_else(
                 || {
                     b.animals.as_ref().map_or_else(Default::default, |a| {

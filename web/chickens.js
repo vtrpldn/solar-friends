@@ -16,7 +16,7 @@ export function flock(village) {
   const hour = village.minutes % 1440;
   if (hour < 360 || hour >= 1110) return [];
   const daylight = Math.min(1, (hour - 360) / 30, (1110 - hour) / 30);
-  return village.buildings.filter(b => b.kind === "coop" && b.progress >= 100)
+  return village.buildings.filter(b => b.kind === "coop" && b.agriculture?.stocked!==false && b.progress >= 100)
     .flatMap(b => Array.from({ length: 3 }, (_, i) => {
       const phase = village.minutes * 0.045 + b.id * 2.7 + i * 2.1;
       return {
