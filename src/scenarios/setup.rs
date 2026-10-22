@@ -134,6 +134,7 @@ fn issue(
     });
 }
 fn review_access(v: &Village, d: &Definition, people: &[Resident], r: &mut Report) {
+    let routes: Vec<_> = people.iter().map(|_| std::cell::OnceCell::new()).collect();
     for b in &v.buildings {
         let name = match b.kind.as_str() {
             "shed" => "Shared shed",
@@ -160,12 +161,19 @@ fn review_access(v: &Village, d: &Definition, people: &[Resident], r: &mut Repor
             "apiary" => "Apiary",
             _ => continue,
         };
+        let spots: Vec<_> = spacing::approach_spots(v, b).collect();
         let mut nearest: Option<f32> = None;
-        for person in people {
-            let Some((x, y)) = spacing::approach(v, b, person.id) else {
+        for (person, cache) in people.iter().zip(&routes) {
+            let Some((x, y)) = spacing::approach_from_spots(v, &spots, person.id) else {
                 continue;
             };
-            if let Ok((route, _)) = navigation::work_route(v, [person.x, person.y], [x, y]) {
+            let route =
+                match cache.get_or_init(|| navigation::RoutesFrom::new(v, [person.x, person.y])) {
+                    Some(routes) => routes.route([x, y]),
+                    None => navigation::work_route(v, [person.x, person.y], [x, y])
+                        .map(|(route, _)| route),
+                };
+            if let Ok(route) = route {
                 nearest = Some(nearest.map_or(route.minutes, |n| n.min(route.minutes)));
                 // Ordinary nearby layouts do not need routes for the whole cast.
                 if route.minutes <= 90. {

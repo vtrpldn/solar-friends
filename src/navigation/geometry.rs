@@ -66,6 +66,35 @@ pub(super) fn obstacles(v: &Village) -> impl Iterator<Item = Bounds> + '_ {
                 }),
         )
 }
+/// Broad phase for adjacent grid edges and fractional endpoint links.
+/// Indexed endpoints stay within two cells of the bucket centre. Exact
+/// open-bound intersection tests remain authoritative; arbitrary walking
+/// segments continue to use the full obstacle iterator.
+pub(super) struct LocalObstacles {
+    bounds: Vec<Bounds>,
+    nearby: Vec<Vec<usize>>,
+}
+impl LocalObstacles {
+    pub fn new(bounds: Vec<Bounds>) -> Self {
+        let mut nearby = vec![Vec::new(); (MAP_SIZE * MAP_SIZE) as usize];
+        for (index, b) in bounds.iter().enumerate() {
+            let low = b.min.map(|n| (n.floor() as i32 - 2).clamp(0, MAP_SIZE - 1));
+            let high = b.max.map(|n| (n.ceil() as i32 + 2).clamp(0, MAP_SIZE - 1));
+            for y in low[1]..=high[1] {
+                for x in low[0]..=high[0] {
+                    nearby[(y * MAP_SIZE + x) as usize].push(index);
+                }
+            }
+        }
+        Self { bounds, nearby }
+    }
+    pub fn blocks(&self, cell: usize, from: [f32; 2], to: [f32; 2]) -> bool {
+        self.nearby[cell]
+            .iter()
+            .any(|i| self.bounds[*i].intersects(from, to))
+    }
+}
+
 /// The river mask changes only at integer cell boundaries. Check each crossing
 /// and each intervening cell, including segments shorter than a sampling step.
 pub(super) fn land_points(a: [f32; 2], b: [f32; 2]) -> Vec<[f32; 2]> {
@@ -130,5 +159,51 @@ mod tests {
         let mut reverse = land_points([3.1, 3.1], [1.9, 1.9]);
         reverse.reverse();
         assert_eq!(forward, reverse);
+    }
+    #[test]
+    fn adjacent_broad_phase_matches_every_exact_segment_across_the_property() {
+        let mut bounds = vec![
+            Bounds {
+                min: [-0.7, -0.7],
+                max: [0.7, 0.7],
+            },
+            Bounds {
+                min: [62.3, 62.3],
+                max: [63.7, 63.7],
+            },
+            Bounds {
+                min: [10., 10.],
+                max: [12., 12.],
+            },
+        ];
+        let mut seed = 42_u32;
+        for _ in 0..64 {
+            seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+            let x = (seed % 6800) as f32 / 100. - 2.;
+            seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+            let y = (seed % 6800) as f32 / 100. - 2.;
+            bounds.push(Bounds {
+                min: [x - 0.7, y - 0.7],
+                max: [x + 2.7, y + 2.7],
+            });
+        }
+        let index = LocalObstacles::new(bounds.clone());
+        for y in 0..MAP_SIZE {
+            for x in 0..MAP_SIZE {
+                for (dx, dy) in super::super::DIRECTIONS {
+                    let to = [x + dx, y + dy];
+                    if to.iter().any(|n| !(0..MAP_SIZE).contains(n)) {
+                        continue;
+                    }
+                    let from = [x as f32, y as f32];
+                    let to = to.map(|n| n as f32);
+                    assert_eq!(
+                        index.blocks((y * MAP_SIZE + x) as usize, from, to),
+                        bounds.iter().any(|b| b.intersects(from, to)),
+                        "{from:?} → {to:?}"
+                    );
+                }
+            }
+        }
     }
 }

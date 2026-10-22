@@ -67,34 +67,68 @@ pub fn material_spot(v: &Village, x: f32, y: f32, id: usize) -> Option<(f32, f32
     remaining_spot(v, &spots, id)
 }
 
+pub(crate) fn approach_spots<'a>(
+    v: &'a Village,
+    b: &'a Building,
+) -> impl Iterator<Item = (f32, f32)> + 'a {
+    [0.55, 1.2, 1.85]
+        .into_iter()
+        .flat_map(move |extra| {
+            let radius = interactions::radius(&b.kind) as f32 + extra;
+            [45_f32, 0., 90., -45., 135., -90., 180., 225.]
+                .into_iter()
+                .map(move |angle| {
+                    let angle = angle.to_radians();
+                    (
+                        b.x as f32 + radius * angle.cos(),
+                        b.y as f32 + radius * angle.sin(),
+                    )
+                })
+        })
+        .scan(Vec::<(f32, f32)>::new(), move |spots, p| {
+            Some(
+                if navigation::clear(v, p.0, p.1)
+                    && navigation::exit_segment(v, [b.x as f32, b.y as f32], [p.0, p.1])
+                    && v.buildings.iter().all(|other| clear_plot(other, p.0, p.1))
+                    && spots
+                        .iter()
+                        .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
+                {
+                    spots.push(p);
+                    Some(p)
+                } else {
+                    None
+                },
+            )
+        })
+        .flatten()
+}
+
 pub fn approach(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
     let slot = roster::slot(v, id)?;
-    let mut spots: Vec<(f32, f32)> = Vec::new();
-    // Start along the visible front of the building, then try the sides.
-    // Wider rings leave room around neighbours and the edge of the lot.
-    for extra in [0.55, 1.2, 1.85] {
-        let radius = interactions::radius(&b.kind) as f32 + extra;
-        for angle in [45f32, 0., 90., -45., 135., -90., 180., 225.] {
-            let angle = angle.to_radians();
-            let p = (
-                b.x as f32 + radius * angle.cos(),
-                b.y as f32 + radius * angle.sin(),
-            );
-            if navigation::clear(v, p.0, p.1)
-                && navigation::exit_segment(v, [b.x as f32, b.y as f32], [p.0, p.1])
-                && v.buildings.iter().all(|other| clear_plot(other, p.0, p.1))
-                && spots
-                    .iter()
-                    .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
-            {
-                spots.push(p);
-                if spots.len() > slot && free_spot(v, p, id) {
-                    return Some(p);
-                }
-            }
+    let mut spots = Vec::new();
+    // Keep ordinary work lazy; a nearby free slot need not inspect every ring.
+    for p in approach_spots(v, b) {
+        spots.push(p);
+        if spots.len() > slot && free_spot(v, p, id) {
+            return Some(p);
         }
     }
     remaining_spot(v, &spots, id)
+}
+
+pub(crate) fn approach_from_spots(
+    v: &Village,
+    spots: &[(f32, f32)],
+    id: usize,
+) -> Option<(f32, f32)> {
+    let slot = roster::slot(v, id)?;
+    spots
+        .iter()
+        .skip(slot)
+        .copied()
+        .find(|p| free_spot(v, *p, id))
+        .or_else(|| remaining_spot(v, spots, id))
 }
 
 pub fn building(r: &Resident, v: &Village) -> Option<usize> {
@@ -357,5 +391,80 @@ mod tests {
         );
         legacy["residents"][0]["activity_building"] = 99.into();
         assert!(!restored.restore(&legacy.to_string()));
+    }
+}
+
+#[cfg(test)]
+mod approach_batch_tests {
+    use super::*;
+    fn reference(v: &Village, b: &Building, id: usize) -> Option<(f32, f32)> {
+        let slot = roster::slot(v, id)?;
+        let mut spots: Vec<(f32, f32)> = Vec::new();
+        // Start along the visible front of the building, then try the sides.
+        // Wider rings leave room around neighbours and the edge of the lot.
+        for extra in [0.55, 1.2, 1.85] {
+            let radius = interactions::radius(&b.kind) as f32 + extra;
+            for angle in [45f32, 0., 90., -45., 135., -90., 180., 225.] {
+                let angle = angle.to_radians();
+                let p = (
+                    b.x as f32 + radius * angle.cos(),
+                    b.y as f32 + radius * angle.sin(),
+                );
+                if navigation::clear(v, p.0, p.1)
+                    && navigation::exit_segment(v, [b.x as f32, b.y as f32], [p.0, p.1])
+                    && v.buildings.iter().all(|other| clear_plot(other, p.0, p.1))
+                    && spots
+                        .iter()
+                        .all(|q| (p.0 - q.0).hypot(p.1 - q.1) >= PERSONAL_SPACE)
+                {
+                    spots.push(p);
+                    if spots.len() > slot && free_spot(v, p, id) {
+                        return Some(p);
+                    }
+                }
+            }
+        }
+        remaining_spot(v, &spots, id)
+    }
+
+    #[test]
+    fn shared_geometry_preserves_slot_order_and_claims_for_the_whole_cast() {
+        let mut g = Game::new();
+        let mut d: serde_json::Value =
+            serde_json::from_str(&g.scenario_template("sandbox")).unwrap();
+        let people = d["start"]["residents"].as_array().unwrap().clone();
+        d["start"]["residents"] = serde_json::Value::Array(
+            (0..12)
+                .map(|i| {
+                    let mut p = people[i % 5].clone();
+                    p["id"] = format!("person-{i}").into();
+                    p
+                })
+                .collect(),
+        );
+        let result: serde_json::Value =
+            serde_json::from_str(&g.load_scenario(&d.to_string())).unwrap();
+        assert_eq!(result["ok"], true);
+        let mut saved: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        for occupied in [false, true] {
+            if occupied {
+                let mut r = saved.residents[0].clone();
+                r.task = "rest".into();
+                r.remaining = 10.;
+                let b = &saved.village.buildings[1];
+                let p = reference(&saved.village, b, r.id).unwrap();
+                r.target_x = p.0;
+                r.target_y = p.1;
+                saved.village.workforce_peers.insert(r.id, Some(r));
+            }
+            for b in &saved.village.buildings {
+                let spots: Vec<_> = approach_spots(&saved.village, b).collect();
+                for id in (0..12).chain([999]) {
+                    let expected = reference(&saved.village, b, id);
+                    assert_eq!(approach(&saved.village, b, id), expected);
+                    assert_eq!(approach_from_spots(&saved.village, &spots, id), expected);
+                }
+            }
+        }
     }
 }

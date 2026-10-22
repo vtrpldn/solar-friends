@@ -1,0 +1,700 @@
+{
+  "schema": 1,
+  "baseline_commit": "bfbbe6a",
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+    "dpr": 1
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "wasm_sha256": "afd6e6f5c5b7478bec1c24bffa8471a0b8eb4043c6830128abe42053cba97c14",
+  "source_sha256": {
+    "src/navigation.rs": "d58b16db6249b275f7976b168851eb2a176812842f8a16c8869b0934242ba791",
+    "src/navigation/geometry.rs": "3c0881799f89d3505fc2423f8f6b21b29b63e4de99ce5e8181815ed6bbea47c3",
+    "src/spacing.rs": "84054a00f0dba8bbad94533236ec4def32af03c520add65e95b385ff1621ddd0",
+    "src/scenarios/setup.rs": "271fa3f663087ff4eabc927bc28b3367d73b3864ca8e226deccf4fa2ab17bdce",
+    "web/editor/index.js": "d55005e3f9b84814a64b49b22820f3edf32162d99e9e5d5a2ef3a4b514a460f0",
+    "scripts/benchmark-builder.mjs": "3c0bfeaf244a7d841001b8529460185c8650b4afcd05bf6b84014d9450db08c3"
+  },
+  "fixture": "Two starter buildings and 254 streetlights, with a clear arrival area; this is not a mixed-building worst-case fixture.",
+  "before": [
+    {
+      "population": 1,
+      "buildings": 2,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 62.7,
+            "observed_p95_ms": 63.4
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 68.3,
+            "observed_p95_ms": 68.7
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.1,
+            "observed_p95_ms": 12.5
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 60.1,
+            "observed_p95_ms": 65.4
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 65.1,
+            "observed_p95_ms": 70.3
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 11.7,
+            "observed_p95_ms": 13.7
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 56.3,
+            "observed_p95_ms": 57
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 60.9,
+            "observed_p95_ms": 61.5
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 11.3,
+            "observed_p95_ms": 11.6
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.1,
+            "observed_p95_ms": 6
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 15.9,
+            "observed_p95_ms": 16.1
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 4.2,
+            "observed_p95_ms": 4.9
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 15.7,
+            "observed_p95_ms": 15.9
+          },
+          "native_compile": null
+        }
+      }
+    },
+    {
+      "population": 5,
+      "buildings": 2,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 59.5,
+            "observed_p95_ms": 63
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 63.9,
+            "observed_p95_ms": 69.2
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.1,
+            "observed_p95_ms": 12.3
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 58.3,
+            "observed_p95_ms": 59.7
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 63.4,
+            "observed_p95_ms": 64.8
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.2,
+            "observed_p95_ms": 12.7
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 56.6,
+            "observed_p95_ms": 57.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 61.3,
+            "observed_p95_ms": 61.7
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.1,
+            "observed_p95_ms": 12.3
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.2,
+            "observed_p95_ms": 6.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16,
+            "observed_p95_ms": 16.2
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 4.3,
+            "observed_p95_ms": 4.7
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.2
+          },
+          "native_compile": null
+        }
+      }
+    },
+    {
+      "population": 12,
+      "buildings": 2,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 61.3,
+            "observed_p95_ms": 65
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 66.1,
+            "observed_p95_ms": 70
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 13.7,
+            "observed_p95_ms": 13.9
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 60.3,
+            "observed_p95_ms": 60.5
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 65.1,
+            "observed_p95_ms": 65.4
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 13.9,
+            "observed_p95_ms": 14
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 59.3,
+            "observed_p95_ms": 59.9
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 64.4,
+            "observed_p95_ms": 64.5
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 13.7,
+            "observed_p95_ms": 13.9
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.2,
+            "observed_p95_ms": 6.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 15.9,
+            "observed_p95_ms": 16.2
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 4.3,
+            "observed_p95_ms": 4.5
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.3
+          },
+          "native_compile": null
+        }
+      }
+    },
+    {
+      "population": 12,
+      "buildings": 256,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 948.7,
+            "observed_p95_ms": 959.8
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 954.8,
+            "observed_p95_ms": 968.2
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 888.8,
+            "observed_p95_ms": 896
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 952.2,
+            "observed_p95_ms": 969.5
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 958.8,
+            "observed_p95_ms": 975.8
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 894.9,
+            "observed_p95_ms": 912.3
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 948.1,
+            "observed_p95_ms": 953.3
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 955,
+            "observed_p95_ms": 959.8
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 891.5,
+            "observed_p95_ms": 896.5
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 7.1,
+            "observed_p95_ms": 9.3
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 15.2,
+            "observed_p95_ms": 16.2
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 6,
+            "observed_p95_ms": 6.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.1
+          },
+          "native_compile": null
+        }
+      }
+    }
+  ],
+  "after": [
+    {
+      "population": 1,
+      "buildings": 2,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 49.4,
+            "observed_p95_ms": 50.4
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 54.4,
+            "observed_p95_ms": 55.3
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 9.8,
+            "observed_p95_ms": 10.1
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 47,
+            "observed_p95_ms": 47.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 51.8,
+            "observed_p95_ms": 52
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 9.8,
+            "observed_p95_ms": 9.8
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 46.7,
+            "observed_p95_ms": 48.1
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 51.3,
+            "observed_p95_ms": 53
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 9.9,
+            "observed_p95_ms": 9.9
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.2,
+            "observed_p95_ms": 6.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16,
+            "observed_p95_ms": 16.1
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 4.3,
+            "observed_p95_ms": 4.4
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.2,
+            "observed_p95_ms": 17.5
+          },
+          "native_compile": null
+        }
+      }
+    },
+    {
+      "population": 5,
+      "buildings": 2,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 50.7,
+            "observed_p95_ms": 53.6
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 55.6,
+            "observed_p95_ms": 58.7
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 10.8,
+            "observed_p95_ms": 10.8
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 47.9,
+            "observed_p95_ms": 48.4
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 52.9,
+            "observed_p95_ms": 53.4
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 10.7,
+            "observed_p95_ms": 10.8
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 48,
+            "observed_p95_ms": 48.6
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 52.8,
+            "observed_p95_ms": 53.4
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 10.7,
+            "observed_p95_ms": 10.9
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.2,
+            "observed_p95_ms": 6.6
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.4
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 4.4,
+            "observed_p95_ms": 4.6
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.3
+          },
+          "native_compile": null
+        }
+      }
+    },
+    {
+      "population": 12,
+      "buildings": 2,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 52.7,
+            "observed_p95_ms": 54.8
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 58,
+            "observed_p95_ms": 60.1
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.4,
+            "observed_p95_ms": 12.5
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 50.2,
+            "observed_p95_ms": 52
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 55.5,
+            "observed_p95_ms": 57.4
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.4,
+            "observed_p95_ms": 12.9
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 50.4,
+            "observed_p95_ms": 50.7
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 55.5,
+            "observed_p95_ms": 55.7
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 12.4,
+            "observed_p95_ms": 12.6
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.3,
+            "observed_p95_ms": 6.6
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.2
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 4.4,
+            "observed_p95_ms": 4.5
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.4
+          },
+          "native_compile": null
+        }
+      }
+    },
+    {
+      "population": 12,
+      "buildings": 256,
+      "actions": {
+        "funds": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 118.3,
+            "observed_p95_ms": 121.4
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 125.1,
+            "observed_p95_ms": 128.8
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 68.5,
+            "observed_p95_ms": 70
+          }
+        },
+        "undo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 115.8,
+            "observed_p95_ms": 118.3
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 122.3,
+            "observed_p95_ms": 124.8
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 69,
+            "observed_p95_ms": 70.8
+          }
+        },
+        "redo": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 115.1,
+            "observed_p95_ms": 115.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 121.4,
+            "observed_p95_ms": 121.7
+          },
+          "native_compile": {
+            "samples": 5,
+            "median_ms": 68.7,
+            "observed_p95_ms": 68.9
+          }
+        },
+        "zoom": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 7,
+            "observed_p95_ms": 9.5
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.1,
+            "observed_p95_ms": 16.1
+          },
+          "native_compile": null
+        },
+        "pan": {
+          "synchronous": {
+            "samples": 5,
+            "median_ms": 5.9,
+            "observed_p95_ms": 6.2
+          },
+          "two_frame_presentation": {
+            "samples": 5,
+            "median_ms": 16.2,
+            "observed_p95_ms": 16.2
+          },
+          "native_compile": null
+        }
+      }
+    }
+  ],
+  "reproduce": [
+    "bash scripts/build.sh",
+    "node scripts/benchmark-builder.mjs"
+  ],
+  "scope": "Five samples per public control in each case. Headless desktop synchronous handler and two-frame presentation costs; not sustained FPS, pointer-stroke latency, mixed-building worst case, save throughput, unique modular appearance memory or 1×/16× simulation approval. Dense edit latency remains above the proposed 100 ms target."
+}

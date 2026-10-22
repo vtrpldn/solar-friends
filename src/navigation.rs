@@ -143,15 +143,18 @@ fn road(v: &Village, p: [f32; 2]) -> bool {
 pub fn cost(v: &Village, a: [f32; 2], b: [f32; 2]) -> f32 {
     (b[0] - a[0]).hypot(b[1] - a[1]) * if road(v, a) && road(v, b) { 0.6 } else { 1. }
 }
-fn links(v: &Village, p: [f32; 2], free: &[bool]) -> Vec<usize> {
+fn links(v: &Village, p: [f32; 2], grid: &Grid, free: &[bool]) -> Vec<usize> {
     let x = p[0].round() as i32;
     let y = p[1].round() as i32;
+    let origin = cell(x.clamp(0, MAP_SIZE - 1), y.clamp(0, MAP_SIZE - 1)).unwrap();
     let mut choices = vec![];
     for dy in -1..=1 {
         for dx in -1..=1 {
             if let Some(i) = cell(x + dx, y + dy)
                 && free[i]
-                && segment(v, p, point(i))
+                // The caller checked p and free[] checked the grid endpoint.
+                && !grid.obstacles.blocks(origin, p, point(i))
+                && geometry::land_points(p, point(i)).into_iter().all(|p| world::walkable(v, p[0], p[1]))
             {
                 choices.push(i);
             }
@@ -174,6 +177,7 @@ pub struct Grid {
     layout: u32,
     free: Vec<bool>,
     edges: Vec<Vec<(usize, u32)>>,
+    obstacles: geometry::LocalObstacles,
 }
 impl Grid {
     fn new(v: &Village, layout: u32) -> Self {
@@ -184,6 +188,7 @@ impl Grid {
                 clear(v, p[0], p[1])
             })
             .collect();
+        let obstacles = geometry::LocalObstacles::new(geometry::obstacles(v).collect());
         let mut edges = vec![vec![]; size];
         for current in 0..size {
             if !free[current] {
@@ -199,7 +204,11 @@ impl Grid {
                         && dy != 0
                         && (!free[cell(x as i32 + dx, y as i32).unwrap()]
                             || !free[cell(x as i32, y as i32 + dy).unwrap()]))
-                    || !segment(v, point(current), point(next))
+                    // Both endpoints already passed the exact clear() check.
+                    || obstacles.blocks(current, point(current), point(next))
+                    || !geometry::land_points(point(current), point(next))
+                        .into_iter()
+                        .all(|p| world::walkable(v, p[0], p[1]))
                 {
                     continue;
                 }
@@ -213,6 +222,7 @@ impl Grid {
             layout,
             free,
             edges,
+            obstacles,
         }
     }
 }
@@ -270,7 +280,6 @@ pub(crate) fn route_avoiding(
         });
     }
     let grid = grid(v);
-    let size = grid.free.len();
     let crowd_free;
     let free = if people.is_empty() {
         &grid.free
@@ -287,19 +296,35 @@ pub(crate) fn route_avoiding(
             .collect::<Vec<_>>();
         &crowd_free
     };
-    let starts = links(v, from, free)
+    let starts = links(v, from, &grid, free)
         .into_iter()
         .filter(|&i| crowd_clear(from, point(i), people))
         .collect::<Vec<_>>();
-    let goals = links(v, to, free)
+    let goals = links(v, to, &grid, free)
         .into_iter()
         .filter(|&i| crowd_clear(point(i), to, people))
         .collect::<Vec<_>>();
     if starts.is_empty() || goals.is_empty() {
         return Err("There is no clear approach to this route.");
     }
-    let mut distances = vec![u32::MAX; size];
-    let mut previous = vec![None; size];
+    let paths = search(v, from, people, &grid, free, starts);
+    finish_route(v, from, to, people, goals, &paths)
+}
+
+struct Paths {
+    distances: Vec<u32>,
+    previous: Vec<Option<usize>>,
+}
+fn search(
+    v: &Village,
+    from: [f32; 2],
+    people: &[[f32; 2]],
+    grid: &Grid,
+    free: &[bool],
+    starts: Vec<usize>,
+) -> Paths {
+    let mut distances = vec![u32::MAX; grid.free.len()];
+    let mut previous = vec![None; grid.free.len()];
     let mut queue = BinaryHeap::new();
     for start in starts {
         let n = (cost(v, from, point(start)) * 1000.).round() as u32;
@@ -322,6 +347,23 @@ pub(crate) fn route_avoiding(
             }
         }
     }
+    Paths {
+        distances,
+        previous,
+    }
+}
+fn finish_route(
+    v: &Village,
+    from: [f32; 2],
+    to: [f32; 2],
+    people: &[[f32; 2]],
+    goals: Vec<usize>,
+    paths: &Paths,
+) -> Result<Route, &'static str> {
+    let Paths {
+        distances,
+        previous,
+    } = paths;
     let target = goals
         .into_iter()
         .filter(|&i| distances[i] != u32::MAX)
@@ -364,6 +406,51 @@ pub(crate) fn route_avoiding(
     })
 }
 
+/// A short-lived review context. Its immutable village borrow prevents reuse
+/// after geometry or road costs change, and no route history enters a save.
+pub(crate) struct RoutesFrom<'a> {
+    village: &'a Village,
+    from: [f32; 2],
+    grid: Arc<Grid>,
+    paths: Paths,
+}
+impl<'a> RoutesFrom<'a> {
+    pub(crate) fn new(v: &'a Village, from: [f32; 2]) -> Option<Self> {
+        if !clear(v, from[0], from[1]) {
+            return None;
+        }
+        let grid = grid(v);
+        let starts = links(v, from, &grid, &grid.free);
+        if starts.is_empty() {
+            return None;
+        }
+        let paths = search(v, from, &[], &grid, &grid.free, starts);
+        Some(Self {
+            village: v,
+            from,
+            grid,
+            paths,
+        })
+    }
+    pub(crate) fn route(&self, to: [f32; 2]) -> Result<Route, &'static str> {
+        if !clear(self.village, to[0], to[1]) {
+            return Err("The destination approach is blocked.");
+        }
+        if (self.from[0] - to[0]).hypot(self.from[1] - to[1]) < 0.001 {
+            return Ok(Route {
+                points: vec![self.from],
+                distance: 0.,
+                minutes: 0.,
+            });
+        }
+        let goals = links(self.village, to, &self.grid, &self.grid.free);
+        if goals.is_empty() {
+            return Err("There is no clear approach to this route.");
+        }
+        finish_route(self.village, self.from, to, &[], goals, &self.paths)
+    }
+}
+
 #[wasm_bindgen]
 impl Game {
     pub fn route_quote(&self, from_x: f32, from_y: f32, to_x: f32, to_y: f32) -> String {
@@ -380,6 +467,85 @@ impl Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn fractional_grid_links_match_the_original_segment_checks() {
+        let mut g = Game::new();
+        g.start_fixture_mode("sandbox");
+        assert_eq!(g.place("well", 6, 10), "ok");
+        assert_eq!(g.place("garden", 13, 15), "ok");
+        let v = g.app.world().resource::<Village>();
+        let grid = grid(v);
+        for y in 0..MAP_SIZE {
+            for x in 0..MAP_SIZE {
+                for offset in [
+                    [0., 0.],
+                    [-0.49, -0.49],
+                    [0.49, 0.49],
+                    [-0.49, 0.49],
+                    [0.49, -0.49],
+                ] {
+                    let p = [x as f32 + offset[0], y as f32 + offset[1]];
+                    if !clear(v, p[0], p[1]) {
+                        continue;
+                    }
+                    let mut expected = Vec::new();
+                    for dy in -1..=1 {
+                        for dx in -1..=1 {
+                            if let Some(i) =
+                                cell(p[0].round() as i32 + dx, p[1].round() as i32 + dy)
+                                && grid.free[i]
+                                && segment(v, p, point(i))
+                            {
+                                expected.push(i);
+                            }
+                        }
+                    }
+                    assert_eq!(links(v, p, &grid, &grid.free), expected, "{p:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn opening_route_batch_matches_individual_quotes_including_fractional_and_blocked_goals() {
+        let mut g = Game::new();
+        g.start_fixture_mode("sandbox");
+        assert_eq!(g.place("well", 6, 10), "ok");
+        assert_eq!(g.place("garden", 13, 15), "ok");
+        for x in 8..13 {
+            assert_eq!(g.toggle_road(x, 12), "ok");
+        }
+        let saved = g.snapshot();
+        {
+            let v = g.app.world().resource::<Village>();
+            for from in [[8., 10.], [8.55, 10.55]] {
+                let batch = RoutesFrom::new(v, from).unwrap();
+                for x in [2., 6., 8., 8.55, 13., 20., 35., 60.] {
+                    for y in [2., 10., 10.55, 12., 15., 30., 60.] {
+                        let expected = route(v, from, [x, y]);
+                        let actual = batch.route([x, y]);
+                        match (expected, actual) {
+                            (Ok(a), Ok(b)) => assert_eq!(
+                                serde_json::to_value(a).unwrap(),
+                                serde_json::to_value(b).unwrap()
+                            ),
+                            (Err(a), Err(b)) => assert_eq!(a, b),
+                            _ => panic!(
+                                "Batch and individual route disagree at {from:?} → [{x}, {y}]"
+                            ),
+                        }
+                    }
+                }
+            }
+            assert!(RoutesFrom::new(v, [6., 10.]).is_none());
+        }
+        assert_eq!(
+            saved,
+            g.snapshot(),
+            "Opening queries must not change a saved village"
+        );
+    }
+
     #[test]
     fn a_fractional_route_cannot_clip_a_cistern_corner_between_samples() {
         let mut g = Game::new();
