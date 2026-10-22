@@ -7,7 +7,7 @@ export class LibraryConflict extends Error {
 }
 const clone=value=>structuredClone(value);
 const recordKind=store=>({projects:'project',runs:'run',residents:'resident',releases:'release'})[store];
-const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition??record.package?.definition)?.start?.resident_balance??'balanced',contentRevision:record.package?.content_revision??record.release?.content_revision,author:record.package?.author??record.release?.author,compatibility:record.package?.compatibility??record.release?.compatibility});
+const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,residentName:record.file?.resident?.name,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition??record.package?.definition)?.start?.resident_balance??'balanced',contentRevision:record.package?.content_revision??record.release?.content_revision??record.file?.content_revision,author:record.package?.author??record.release?.author??record.file?.author,compatibility:record.package?.compatibility??record.release?.compatibility??record.file?.compatibility});
 const safeThumbnail=value=>typeof value==='string'&&value.length<=96*1024&&/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(value)?value:null;
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
@@ -92,9 +92,9 @@ export class ContentLibrary extends EventTarget {
   listResidentPresets(){return this.#list('resident');}
   getResidentPreset(id){return this.#read('residents',id);}
   saveResidentPreset({id,file},expectedRevision=null){
-    if(file?.format!=='solar-friends-resident'||file.schema!==1||typeof file.resident?.name!=='string'||'id' in file.resident||new TextEncoder().encode(JSON.stringify(file)).length>64*1024)throw Error('This resident preset cannot be stored.');
+    if(file?.format!=='solar-friends-resident'||![1,2].includes(file.schema)||typeof file.resident?.name!=='string'||'id' in file.resident||new TextEncoder().encode(JSON.stringify(file)).length>64*1024)throw Error('This resident preset cannot be stored.');
     const data=clone(file);
-    return this.#write('residents',id,expectedRevision,()=>({format:'solar-friends-resident-preset',schema:1,title:data.resident.name,file:data}));
+    return this.#write('residents',id,expectedRevision,()=>({format:'solar-friends-resident-preset',schema:1,title:data.title??data.resident.name,file:data}));
   }
   deleteResidentPreset(id,expectedRevision){return this.#write('residents',id,expectedRevision,()=>null);}
   getProject(id){return this.#read('projects',id);}

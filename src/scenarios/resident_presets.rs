@@ -6,6 +6,20 @@ struct Preset {
     format: String,
     schema: u32,
     resident: serde_json::Value,
+    #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
+    content_revision: Option<u32>,
+    #[serde(default)]
+    title: Option<String>,
+    #[serde(default)]
+    description: Option<String>,
+    #[serde(default)]
+    author: Option<String>,
+    #[serde(default)]
+    compatibility: Option<releases::Compatibility>,
+    #[serde(default)]
+    credits: Vec<releases::Credit>,
 }
 pub fn validate(raw: &str, unrestricted: bool) -> Report {
     if raw.len() > 64 * 1024 {
@@ -18,11 +32,61 @@ pub fn validate(raw: &str, unrestricted: bool) -> Report {
             "This is not a supported resident preset.",
         );
     };
-    if preset.format != "solar-friends-resident" || preset.schema != 1 {
+    if preset.format != "solar-friends-resident" || !matches!(preset.schema, 1 | 2) {
         return Report::error(
             "schema",
             "unsupported_resident_preset",
             "Keep the original file; this resident preset needs a different format version.",
+        );
+    }
+    if preset.schema == 2 {
+        let supported = preset
+            .compatibility
+            .as_ref()
+            .is_some_and(|c| c.game == 1 && c.ruleset == 1 && c.assets == 1);
+        if !supported {
+            return Report::error(
+                "compatibility",
+                "unsupported_resident_compatibility",
+                "This resident needs a different game, rules or artwork version. Keep its original file.",
+            );
+        }
+        let author = |s: &str| !s.trim().is_empty() && s.chars().count() <= 80;
+        if !preset.id.as_deref().is_some_and(valid_key)
+            || !preset.content_revision.is_some_and(|v| v > 0)
+            || !preset
+                .title
+                .as_deref()
+                .is_some_and(|s| !s.trim().is_empty() && s.chars().count() <= 100)
+            || !preset
+                .description
+                .as_deref()
+                .is_some_and(|s| s.chars().count() <= 1200)
+            || !preset.author.as_deref().is_some_and(author)
+            || preset.credits.len() > 16
+            || preset
+                .credits
+                .iter()
+                .any(|c| !valid_key(&c.release) || c.revision == 0 || !author(&c.author))
+        {
+            return Report::error(
+                "",
+                "invalid_resident_metadata",
+                "Add a resident package identity, positive revision, title, description, author of 1–80 characters and at most sixteen source credits.",
+            );
+        }
+    } else if preset.id.is_some()
+        || preset.content_revision.is_some()
+        || preset.title.is_some()
+        || preset.description.is_some()
+        || preset.author.is_some()
+        || preset.compatibility.is_some()
+        || !preset.credits.is_empty()
+    {
+        return Report::error(
+            "schema",
+            "invalid_resident_metadata",
+            "Versioned resident metadata requires resident package format 2. Keep the original file.",
         );
     }
     let Some(person) = preset.resident.as_object_mut() else {
@@ -95,5 +159,53 @@ mod tests {
         file["schema"] = 999.into();
         assert!(!validate(&file.to_string(), true).ok);
         assert!(!validate(&" ".repeat(64 * 1024 + 1), true).ok);
+    }
+}
+
+#[cfg(test)]
+mod package_tests {
+    use super::*;
+    fn file() -> serde_json::Value {
+        let mut resident = serde_json::to_value(residents::founders().remove(0)).unwrap();
+        resident.as_object_mut().unwrap().remove("id");
+        serde_json::json!({"format":"solar-friends-resident","schema":2,"id":"julia","content_revision":1,"title":"Júlia","description":"A friend with seeds","author":"João","compatibility":{"game":1,"ruleset":1,"assets":1},"resident":resident,"credits":[]})
+    }
+    #[test]
+    fn versioned_packages_validate_metadata_and_all_compatibility_dimensions() {
+        let source = file();
+        assert!(validate(&source.to_string(), false).ok);
+        for key in ["game", "ruleset", "assets"] {
+            let mut future = source.clone();
+            future["compatibility"][key] = 999.into();
+            let report = validate(&future.to_string(), true);
+            assert!(!report.ok);
+            assert_eq!(report.issues[0].code, "unsupported_resident_compatibility");
+        }
+        for key in [
+            "id",
+            "content_revision",
+            "title",
+            "description",
+            "author",
+            "compatibility",
+        ] {
+            let mut missing = source.clone();
+            missing.as_object_mut().unwrap().remove(key);
+            assert!(!validate(&missing.to_string(), true).ok, "{key}");
+        }
+        for (key, value) in [
+            ("author", serde_json::json!(" ")),
+            ("title", serde_json::json!("")),
+            ("content_revision", serde_json::json!(0)),
+            ("id", serde_json::json!("not a key")),
+            ("description", serde_json::json!("x".repeat(1201))),
+        ] {
+            let mut bad = source.clone();
+            bad[key] = value;
+            assert!(!validate(&bad.to_string(), true).ok, "{key}");
+        }
+        let mut bad = source;
+        bad["credits"] = serde_json::json!([{"release":"source","revision":0,"author":"Someone"}]);
+        assert!(!validate(&bad.to_string(), true).ok);
     }
 }
