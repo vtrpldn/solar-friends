@@ -32,7 +32,16 @@ pub struct Situations {
     pub resolved_count: u32,
 }
 
+pub fn helpers_required(population: usize, response: Option<Response>) -> usize {
+    (if response == Some(Response::DayOff) {
+        1usize
+    } else {
+        2
+    })
+    .min(population.saturating_sub(1))
+}
 pub fn advance(v: &mut Village, minutes: f32) {
+    let population = v.skills.people.len();
     let day = (v.minutes / 1440.) as u32;
     let elapsed = day.saturating_sub(v.situations.day).min(3);
     for _ in 0..elapsed {
@@ -50,11 +59,7 @@ pub fn advance(v: &mut Village, minutes: f32) {
             if s.response.is_none() {
                 s.worry = (s.worry + minutes / 360.).min(12.);
             }
-            let helpers = if s.response == Some(Response::DayOff) {
-                1
-            } else {
-                2
-            };
+            let helpers = helpers_required(population, s.response);
             if (!s.story_check_in || s.response.is_some())
                 && s.helpers.len() >= helpers
                 && s.recovery >= 72.
@@ -66,7 +71,11 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 v.situations.cooking = Default::default();
                 event(
                     v,
-                    "A lighter kitchen, a happier neighbour. The collective found a better rhythm.",
+                    if population == 1 {
+                        "Time away from cooking made room for rest. A gentler daily rhythm."
+                    } else {
+                        "A lighter kitchen, a happier neighbour. The collective found a better rhythm."
+                    },
                 );
             }
             return;
@@ -98,7 +107,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
                 .count()
                 >= 2
     });
-    let story_check_in = concerned_resident.is_none()
+    let story_check_in = v.skills.people.contains_key(&2)
+        && concerned_resident.is_none()
         && v.mode == crate::modes::Mode::Story
         && !crate::progression::completed(v, 11)
         && crate::progression::available(v, 11)
@@ -180,10 +190,11 @@ pub fn protected(v: &Village, id: usize, task: &str) -> bool {
 }
 
 pub fn helping(v: &Village, id: usize) -> bool {
-    v.situations
-        .active
-        .as_ref()
-        .is_some_and(|s| s.resolved.is_none() && s.response.is_some() && id != s.resident)
+    v.skills.people.contains_key(&id)
+        && v.situations
+            .active
+            .as_ref()
+            .is_some_and(|s| s.resolved.is_none() && s.response.is_some() && id != s.resident)
 }
 
 pub fn respond(v: &mut Village, response: &str) -> String {
@@ -192,6 +203,7 @@ pub fn respond(v: &mut Village, response: &str) -> String {
         "day_off" => Response::DayOff,
         _ => return "That proposal is not available.".into(),
     };
+    let solo = v.skills.people.len() == 1;
     let Some(s) = &mut v.situations.active else {
         return "There is no concern to discuss.".into();
     };
@@ -204,12 +216,16 @@ pub fn respond(v: &mut Village, response: &str) -> String {
     s.recovery = 0.;
     event(
         v,
-        match response {
-            Response::ShareShifts => {
-                "We agreed to share kitchen shifts. Other neighbours will step in before their usual projects."
-            }
-            Response::DayOff => {
-                "We agreed to protect a day off. Other neighbours will cover the kitchen while our cook rests."
+        if solo {
+            "Time away from cooking is protected. Stored meals and town supplies can help."
+        } else {
+            match response {
+                Response::ShareShifts => {
+                    "We agreed to share kitchen shifts. Other neighbours will step in before their usual projects."
+                }
+                Response::DayOff => {
+                    "We agreed to protect a day off. Other neighbours will cover the kitchen while our cook rests."
+                }
             }
         },
     );
@@ -252,8 +268,16 @@ pub fn apply_agreement(r: &mut Resident, v: &Village) -> bool {
         crate::assign(
             r,
             v,
-            if r.social < 80. { "socialize" } else { "rest" },
-            "The collective is covering the kitchen. This time is mine to enjoy.",
+            if r.social < 80. && v.skills.people.len() > 1 {
+                "socialize"
+            } else {
+                "rest"
+            },
+            if v.skills.people.len() == 1 {
+                "Taking time away from cooking for my own interests."
+            } else {
+                "The collective is covering the kitchen. This time is mine to enjoy."
+            },
             false,
         );
         true
@@ -299,6 +323,77 @@ mod tests {
         assert!(v.situations.active.is_some());
         v
     }
+    #[test]
+    fn small_casts_require_available_helpers_and_real_recovery_time() {
+        for count in [1usize, 2, 5, 12] {
+            for response in ["share_shifts", "day_off"] {
+                let mut v = village();
+                v.skills.people = (0..count)
+                    .map(|i| (900 + i * 101, crate::skills::Person::default()))
+                    .collect();
+                v.situations.cooking[0].insert(900, 3);
+                v.situations.cooking[1].insert(900, 3);
+                advance(&mut v, 0.);
+                assert_eq!(respond(&mut v, response), "ok");
+                let required =
+                    helpers_required(count, v.situations.active.as_ref().unwrap().response);
+                assert_eq!(
+                    required,
+                    if response == "day_off" {
+                        1.min(count - 1)
+                    } else {
+                        2.min(count - 1)
+                    }
+                );
+                recovered(&mut v, 900, 72.);
+                for i in 1..=required {
+                    cooked(&mut v, 900 + i * 101);
+                }
+                advance(&mut v, 0.);
+                assert_eq!(v.situations.resolved_count, 0);
+                v.minutes += 1440.;
+                advance(&mut v, 0.);
+                assert_eq!(v.situations.resolved_count, 1);
+                assert!(valid(&v));
+            }
+        }
+    }
+    #[test]
+    fn solo_rest_is_not_a_free_agreement_and_unknown_helpers_do_not_count() {
+        let mut v = village();
+        v.skills.people = [(900, crate::skills::Person::default())]
+            .into_iter()
+            .collect();
+        v.situations.cooking[0].insert(900, 3);
+        v.situations.cooking[1].insert(900, 3);
+        advance(&mut v, 0.);
+        assert_eq!(respond(&mut v, "day_off"), "ok");
+        let mut g = Game::new();
+        let world = g.app.world_mut();
+        let mut actor = world
+            .query::<&Resident>()
+            .iter(world)
+            .next()
+            .unwrap()
+            .clone();
+        actor.id = 900;
+        actor.social = 20.;
+        assert!(apply_agreement(&mut actor, &v));
+        assert_eq!(actor.task, "rest");
+        assert!(!actor.reason.contains("collective"));
+        assert!(!helping(&v, 0));
+        v.minutes += 1440.;
+        advance(&mut v, 0.);
+        assert_eq!(v.situations.resolved_count, 0);
+        recovered(&mut v, 900, 72.);
+        cooked(&mut v, 900);
+        advance(&mut v, 0.);
+        assert_eq!(v.situations.resolved_count, 0);
+        recovered(&mut v, 900, 36.);
+        advance(&mut v, 0.);
+        assert_eq!(v.situations.resolved_count, 1);
+    }
+
     #[test]
     fn sparse_cooks_and_helpers_keep_their_own_history() {
         let mut v = village();
