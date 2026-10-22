@@ -1,0 +1,42 @@
+{
+  "result": "PASS",
+  "scope": "Source-bound hand-target proximity and same-body comparison, not final activity approval",
+  "versions": [
+    {
+      "revision": 1,
+      "source": {
+        "sha256": "de623da424df993548c634c2ba3b0a01a8915f86473f791b5670bf9a93aacc59",
+        "width": 1254,
+        "height": 1254
+      },
+      "distances": {
+        "nearHand": 0,
+        "farHand": 8.06225774829855
+      }
+    },
+    {
+      "revision": 2,
+      "source": {
+        "sha256": "671216453941fdc8f963c9186211d5c41e623496afb081441d3222159d297b3d",
+        "width": 1254,
+        "height": 1254
+      },
+      "distances": {
+        "nearHand": 0,
+        "farHand": 9.055385138137417
+      }
+    },
+    {
+      "revision": 3,
+      "source": {
+        "sha256": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+        "width": 1254,
+        "height": 1254
+      },
+      "distances": {
+        "nearHand": 0,
+        "farHand": 0
+      }
+    }
+  ]
+}

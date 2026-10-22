@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen.imagegen",
+  "scope": "Lowest watering equipment pose grip correction only; no final activity/player appearance approval",
+  "calls": [
+    {
+      "prompt": "Use case: precise-object-edit. Correct the GRIP in the FOURTH Solar Friends watering equipment pose. Input 1 is the exact unchanged resident body and hand placement guide. Input 2 is the existing blue can, whose high carry arch intersects the forearm instead of being grasped. Keep the SAME blue metal can design, physical reservoir size, long spout, circular rose, painted shading and upper-left light, but repaint its position/orientation and carry handle so a resident can actually hold it. Output ONLY equipment on the exact full 1254x1254 transparent frame, no person or hands. The carry handle's grasping bar must pass THROUGH the closed near fingers at approximately x875..935,y790..825, while the second hand around x980,y809 steadies the handle/upper rim. Keep the carry arch below the forearms: no handle pixels above y765. The reservoir hangs BELOW these grip points, roughly x720..1000,y850..1100, tilted for watering; spout and rose end down-right near (1180,1110), entirely inside x1230/y1210 with transparent margins. Adjust the actual painted 3D can angle to meet both grip and ground constraints, not by making the can a different size. No straps, glove, extra handle, water stream, shadow, floor or labels. Preserve the whole resident-sized canvas with large transparent space above and left; do not center/crop the can. True transparent handle gap. The body is never part of the output. This is a replacement equipment layer, not a complete character.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-7-body.png",
+        "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v1.png"
+      ],
+      "output": "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v2.png",
+      "status": "reference only",
+      "finding": "Near target met, but far hand remains 9.1 prepared pixels from equipment. Not retained as active review pose."
+    },
+    {
+      "prompt": "Use case: precise-object-edit. Correct ONLY the carry HANDLE on the supplied equipment layer. Input 1 is the exact resident hand-position reference, not output content. Input 2 is the watering can edit target. Keep its reservoir, spout, round rose, tilt, position, physical size, paint and lighting unchanged. Repaint the single blue carry loop as a LOWER, BROADER arch whose grasping upper bar passes through BOTH closed hands: near grip (896,789) and far grip (980,809) on the same 1254x1254 full transparent canvas. The current loop meets only the near hand, leaving the far hand about 45 source pixels away. Desired loop centerline: left attachment near (775,850), rising toward (850,800), upper grasping bar through (896,789) then (980,809), returning to its right attachment around (1000,920). The grasping bar is a continuous blue metal strip, not an extra handle or separate stick. Preserve the same loop material/thickness and natural perspective; gap stays transparent. Keep handle entirely below y765 so it does not cross the forearms. The hands will be composited above this blue bar; DO NOT paint fingers, hands, arms or any person. Output equipment only, preserving identical whole-frame size and transparent margins. No text, no guides, no water, no ground, no cropped/centered object. Change only the painted carry loop shape, not the body pose, reservoir or spout.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-7-body.png",
+        "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v2.png"
+      ],
+      "output": "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v3.png",
+      "status": "retained draft grip correction",
+      "finding": "Broader lower carry loop meets both registered hand targets; composited fingers remain above the handle. Static source-bound comparison and actual renderer views inspected. Reservoir/spout remain visually consistent; exact old/new equipment pixel identity is not claimed."
+    }
+  ],
+  "evidence": [
+    "assets/art-direction/character-prototype-v1/water-equipment-grip-v3-comparison.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-grip-v3-report.json",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-7-v3-scenes.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-pose-7-v3-report.json",
+    "assets/art-direction/character-prototype-v1/water-equipment-cycle-v2-keyframes-grip-v3-transitions.png",
+    "assets/art-direction/character-prototype-v1/water-equipment-playback-keyframes-v1-grip-v3.webm",
+    "assets/art-direction/character-prototype-v1/water-equipment-playback-keyframes-v1-grip-v3-frames.png"
+  ],
+  "review": {
+    "style": "Same painted blue metal reservoir/spout design in the four-pose draft, final highlight/material review remains open.",
+    "geometry": "Body, appearance and source-bound foreground masks unchanged. No silhouette fitting or local body warp.",
+    "contact": "Revision 3 has zero prepared-pixel nearest-alpha distance at both registered near/far hand targets, compared with an 8.1-pixel far gap in revision 1 and 9.1 in revision 2. This geometric check supplements rendered visual review.",
+    "world": "Both facings and day/night beside the original resident, buildings and ground; nozzle is very near the ground in the lowered pose.",
+    "temporal": "19 sampled real-animation frames plus 75 successive frames from recorded keyframe playback inspected. Whole poses avoid crossfade ghosts, but four-pose cadence remains discrete.",
+    "remaining": [
+      "Final material/highlight and ground-clearance review",
+      "Water effect review",
+      "Cadence and pose spacing",
+      "Other activity equipment",
+      "Additional modular art, native recipes and player integration"
+    ]
+  }
+}
