@@ -19,6 +19,7 @@ fn chapter(id: &str, goals: Vec<Goal>) -> Chapter {
 fn scenario(chapters: Vec<Chapter>) -> Definition {
     let mut d = Definition::builtin(modes::Mode::Sandbox);
     d.journal = Some(Journal {
+        roles: vec![],
         challenge: None,
         schema: 1,
         introduction: "Our own beginning".into(),

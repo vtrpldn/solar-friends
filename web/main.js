@@ -220,10 +220,10 @@ function avatar(id) {
   const look=residentLookIndex(state.residents.find(r=>r.id===id));
   return `<span class="avatar" style="background:${colors[look]}20"><canvas data-portrait="${look}" width="96" height="108" aria-hidden="true"></canvas></span>`;
 }
-function paintPortraits() {
-  for (const portrait of document.querySelectorAll('[data-portrait]')) {
+function paintPortraits(root=document) {
+  for (const portrait of root.querySelectorAll('[data-portrait]')) {
     const frame=preparedFrames(animations[Number(portrait.dataset.portrait)],{referenceRow:2})?.[8];
-    if(frame) portrait.getContext('2d').drawImage(frame,64,12,128,152,0,0,96,108);
+    if(frame&&portrait._paintedFrame!==frame){portrait.getContext('2d').drawImage(frame,64,12,128,152,0,0,96,108);portrait._paintedFrame=frame;}
   }
 }
 function contactShadow(x, y, rx, ry, opacity = 0.2) {
@@ -961,14 +961,14 @@ function updateQuests() {
   if(state.village.scenario?.definition?.journal){
     const challengeReport=JSON.parse(game.scenario_journal());
     if(challengeReport.challenge?.status==='failed'&&!challengeFailureShown&&!document.querySelector('dialog[open]')){challengeFailureShown=true;queueMicrotask(openJournal);}
-    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,onRestart:async()=>{if(!playerSession)return;try{if(!paused)togglePause();await playerSession.restartScenario();refreshDevScene();updateQuests();}catch(error){toast(error.message);}},onContinue:async()=>{try{if(game.continue_scenario_freely()){state=JSON.parse(game.snapshot());updateQuests();await playerSession?.save();toast('Free continuation · the original challenge remains failed.');}}catch(error){toast(error.message);}},onAction:({action,credited})=>{
+    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,residents:state.residents,avatar,onRestart:async()=>{if(!playerSession)return;try{if(!paused)togglePause();await playerSession.restartScenario();refreshDevScene();updateQuests();}catch(error){toast(error.message);}},onContinue:async()=>{try{if(game.continue_scenario_freely()){state=JSON.parse(game.snapshot());updateQuests();await playerSession?.save();toast('Free continuation · the original challenge remains failed.');}}catch(error){toast(error.message);}},onAction:({action,credited})=>{
       if(action.kind==='goal'){const report=JSON.parse(game.scenario_journal()),index=report.chapters.findIndex(c=>c.goals.some(g=>g.id===action.goal));if(index>=0){journalPage=index;updateQuests();[...document.querySelectorAll('[data-scenario-goal]')].find(el=>el.dataset.scenarioGoal===action.goal)?.scrollIntoView({block:'nearest'});}return;}
       if(['supplies','water','power','housing'].includes(action.kind)){questAction(action.kind==='water'?{type:'supplies',page:'water'}:action.kind==='power'?{type:'power'}:action.kind==='housing'?{type:'build'}:{type:'supplies',page:'pantry'}).run();return;}
       if(action.kind==='people'){questAction({type:'people'}).run();if(Number.isInteger(action.resident)&&state.residents.some(p=>p.id===action.resident))selectPerson(action.resident);return;}
       if(action.kind==='delivery'){questAction({type:'supplies',page:'stores'}).run();$('#materials-stores').open=true;const button=[...document.querySelectorAll('[data-store-target]')].find(el=>Number(el.dataset.storeTarget)===action.destination);(button?.closest('.storage-location')||$('#storage-locations')).scrollIntoView({block:'nearest'});button?.focus({preventScroll:true});return;}
       questAction({type:action.kind==='cultivation'?'visit':action.kind==='land'?'land':action.kind==='trade'?'town':action.kind==='production'?(action.material==='meals'?'supplies':'preparation'):credited?'build':'plan',kind:action.building,id:action.id,page:action.kind==='production'&&action.material==='meals'?'pantry':undefined}).run();
       const region=state.village.scenario?.definition?.map.regions?.find(r=>r.id===action.region);if(region){scenarioGoalRegion=region.id;const p=iso(region.x+(region.width-1)/2,region.y+(region.height-1)/2);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.4-p.y,dt:1/60};}
-    }});return;
+    }});paintPortraits($('#quest-list'));return;
   }
   resetScenarioJournalUI();
   const v = state.village,

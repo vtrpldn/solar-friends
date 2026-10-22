@@ -2,6 +2,8 @@ use super::*;
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Journal {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub roles: Vec<roles::Role>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub challenge: Option<challenge::Definition>,
     pub schema: u32,

@@ -20,12 +20,15 @@ export class JournalEditor{
    const input=e.target,value=input.type==='checkbox'?input.checked:input.type==='number'?Number(input.value):input.value;
    change('Edit scenario journal',d=>{
     const keys=path.split('.'),key=keys.pop(),parent=keys.length?pathValue(d.journal,keys.join('.')):d.journal;
-    if(key==='kind'&&/events\.\d+\.(when|effect)\.kind$/.test(path)){
+    if(key==='speaker_choice'){if(value){const split=value.indexOf(':'),kind=value.slice(0,split);parent.speaker={kind,[kind]:value.slice(split+1)};}else delete parent.speaker;
+    }else if(key==='kind'&&/^roles\.\d+\.binding\.kind$/.test(path)){for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,value==='resident'?{kind:'resident',resident:(d.start.residents??catalog.resident_presets)[0]?.id??''}:{kind:'capability',skill:'growing',minimum_level:1});
+    }else if(key==='kind'&&/events\.\d+\.(when|effect)\.kind$/.test(path)){
      const list=path.endsWith('.when.kind')?catalog.journal.events.trigger_examples:catalog.journal.events.effect_examples,example=structuredClone(list.find(e=>e.kind===value));
      if(value==='goal')example.goal=d.journal.chapters.flatMap(c=>c.goals)[0]?.id??'';
      if(value==='unlock_building')example.building=d.journal.locked_buildings?.[0]??'';
      if(value==='chapter')example.chapter=d.journal.chapters[0]?.id??'';
      for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,example);
+     if(path.endsWith('.effect.kind')&&value!=='message')delete pathValue(d.journal,keys.slice(0,-1).join('.')).speaker;
     }else if(key==='kind'){
 
      const example=structuredClone(catalog.journal.conditions.find(c=>c.example.kind===value).example);

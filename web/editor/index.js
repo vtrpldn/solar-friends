@@ -87,6 +87,7 @@ function refresh(){
   if(!current)return;
   const d=current.doc.value;
   report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
+  if(report.ok)report.roles=JSON.parse(engine.scenario_journal())?.roles??[];
   const snapshot=JSON.parse(engine.report_state());
   terrainBase=JSON.parse(engine.terrain_template());
   landReport=JSON.parse(engine.land_report());geometry=JSON.parse(engine.world_geometry());landSampleKey='';

@@ -3,6 +3,7 @@ pub fn check(d: &Definition, report: &mut Report) {
     let Some(journal) = &d.journal else {
         return;
     };
+    roles::check(d, report);
     events::check(d, report);
     if journal.challenge.as_ref().is_some_and(|c| !c.deadline.is_finite() || c.deadline <= d.start.minutes || c.deadline > 5_000_000. || !text(&c.failure_message, 1000)) {
         report.push("journal.challenge", "invalid_challenge", "Choose a deadline after arrival and no later than minute 5,000,000, with a failure message of 1–1,000 characters.");

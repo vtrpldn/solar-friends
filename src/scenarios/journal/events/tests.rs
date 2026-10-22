@@ -8,6 +8,7 @@ fn definition(
     d.rules.logistics = true;
     d.start.funds = funds;
     d.journal = Some(Journal {
+        roles: vec![],
         challenge: None,
         schema: 1,
         introduction: "Our story".into(),
@@ -31,6 +32,7 @@ fn definition(
 }
 fn event(id: &str, trigger: EventTrigger, effect: EventEffect) -> EventDefinition {
     EventDefinition {
+        speaker: None,
         id: id.into(),
         title: format!("Event {id}"),
         trigger,

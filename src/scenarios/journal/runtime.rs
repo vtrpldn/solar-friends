@@ -545,7 +545,7 @@ pub fn view(v: &Village) -> serde_json::Value {
         }).collect();
         serde_json::json!({"id":chapter.id,"title":chapter.title,"description":chapter.description,"completed_at":state.chapters[&chapter.id],"goals":goals})
     }).collect();
-    serde_json::json!({"challenge":challenge::view(journal,state),"schema":1,"introduction":journal.introduction,"completion":journal.completion,"finished_at":state.finished_at,"chapters":chapters,"events":events::view(journal,state,v)})
+    serde_json::json!({"roles":roles::view(v),"challenge":challenge::view(journal,state),"schema":1,"introduction":journal.introduction,"completion":journal.completion,"finished_at":state.finished_at,"chapters":chapters,"events":events::view(journal,state,v)})
 }
 
 pub fn valid(v: &Village) -> bool {
