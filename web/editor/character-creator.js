@@ -1,3 +1,4 @@
+import {paintResidentPortrait} from '../resident-portrait.js';
 import {characterCategories,randomizeCharacter,resetCharacterCategory} from './character-choices.js';
 import {residentLookIndex,residentLookKeys} from '../resident-look.js';
 import {residentClips,sampleResidentClip,drawResidentAnimation} from '../resident-animation.js';
@@ -66,7 +67,7 @@ export class CharacterCreator{
   paintContactShadow(ctx,x,y,width*.24,width*.065,.18);ctx.save();ctx.filter=unlitFilter(night);
   drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds),facing,breath:1},x,y,width);ctx.restore();
   if(scale){const frame=preparedFrames(this.art.residents[1],{referenceRow:2})[8];ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
-  const frame=preparedFrames(this.sheets.base,{referenceRow:2})[8],portrait=this.portrait.getContext('2d');portrait.clearRect(0,0,64,72);portrait.filter=unlitFilter(night);portrait.drawImage(frame,64,12,128,152,0,0,64,72);
+  paintResidentPortrait(this.portrait,{preset:this.look,version:this.lookVersion},this.art.residents,{filter:unlitFilter(night)});
   Object.assign(this.canvas.dataset,{look:this.look,pose:mode,frame:String(sampleResidentClip(mode,seconds)[0].frame),scale:String(scale),night:String(night)});
   if(!this.motion.matches&&residentClips[mode].fps>0)this.frame=requestAnimationFrame(t=>this.draw(t));
  }
