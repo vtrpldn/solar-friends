@@ -1,7 +1,14 @@
 // Parts inherit the body's transform. Never normalize hair or clothing alone.
 import {locateSpriteFrames,preparedFrames,FRAME_ANCHOR} from './sprite-frames.js';
+export const CHARACTER_PART_MINIMUM_COVERAGE=.98;
+export function auditCharacterPartRegion(pixels,region){
+ if(!Number.isInteger(pixels?.width)||!Number.isInteger(pixels?.height)||pixels.width<1||pixels.height<1||pixels.data?.length!==pixels.width*pixels.height*4||!Array.isArray(region)||region.length!==4||Array.from(region).some(n=>!Number.isFinite(n))||region[0]<0||region[1]<0||region[2]<=0||region[3]<=0||region[0]+region[2]>pixels.width||region[1]+region[3]>pixels.height)throw Error('Provide pixels and a valid authored part region.');
+ const [rx,ry,rw,rh]=region;let painted=0,inside=0;const bounds=[Infinity,Infinity,-Infinity,-Infinity];
+ for(let y=0;y<pixels.height;y++)for(let x=0;x<pixels.width;x++)if(pixels.data[(y*pixels.width+x)*4+3]>=32){painted++;if(x>=rx&&x<rx+rw&&y>=ry&&y<ry+rh)inside++;bounds[0]=Math.min(bounds[0],x);bounds[1]=Math.min(bounds[1],y);bounds[2]=Math.max(bounds[2],x+1);bounds[3]=Math.max(bounds[3],y+1);}
+ return {pixels:painted,inside,bounds:painted?bounds:null,coverage:painted?inside/painted:0,minimumCoverage:CHARACTER_PART_MINIMUM_COVERAGE,ok:painted>0&&inside/painted>=CHARACTER_PART_MINIMUM_COVERAGE};
+}
 export function characterBodyLayout(pixels){return locateSpriteFrames(pixels.data,pixels.width,pixels.height,4,4,2);}
-export function auditCharacterPart(pixels,regions,{minimumCoverage=.98}={}){
+export function auditCharacterPart(pixels,regions,{minimumCoverage=CHARACTER_PART_MINIMUM_COVERAGE}={}){
  if(!Number.isFinite(minimumCoverage)||minimumCoverage<=0||minimumCoverage>1)throw Error('Use a coverage threshold above zero and at most one.');
  if(regions.length!==16||regions.some(b=>b.length!==4||b.some(n=>!Number.isFinite(n))||b[0]<0||b[1]<0||b[2]<=0||b[3]<=0||b[0]+b[2]>pixels.width||b[1]+b[3]>pixels.height))throw Error('Provide sixteen valid authored part regions.');
  const cells=Array.from({length:16},()=>({pixels:0,inside:0,bounds:[Infinity,Infinity,-Infinity,-Infinity]}));

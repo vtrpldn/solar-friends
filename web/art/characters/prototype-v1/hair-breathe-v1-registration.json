@@ -71,22 +71,48 @@
     "8": {
       "file": "hair-curls-single-candidate-v3.png",
       "size": 1254,
-      "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+      "bounds": [
+        489.84375,
+        39.1875,
+        333.09375,
+        293.90625
+      ]
     },
     "9": {
       "file": "hair-curls-base-9-candidate-v1.png",
       "size": 1254,
-      "sha256": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786"
+      "sha256": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+      "bounds": [
+        484.9453125,
+        53.8828125,
+        333.09375,
+        293.90625
+      ]
     },
     "10": {
       "file": "hair-curls-base-10-candidate-v1.png",
       "size": 1254,
-      "sha256": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99"
+      "sha256": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+      "bounds": [
+        480.046875,
+        44.0859375,
+        333.09375,
+        293.90625
+      ]
     },
     "11": {
       "file": "hair-curls-base-11-candidate-v1.png",
       "size": 1254,
-      "sha256": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea"
+      "sha256": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea",
+      "bounds": [
+        484.9453125,
+        39.1875,
+        333.09375,
+        293.90625
+      ]
     }
-  }
+  },
+  "clip": "breathe",
+  "sheet": "base"
 }

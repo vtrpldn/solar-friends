@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "tool": "built-in image_gen__imagegen",
-  "scope": "Walking-pose production experiments only. No walking provider, lab selection or gameplay appearance enabled. All returned pixels preserved; no individual fitting/normalization, clipping repairs or relaxed bounds.",
+  "scope": "Walking/breathing production drafts in the art lab only. No player appearance enabled. All returned pixels preserved; no fitting, clipping repairs or relaxed region thresholds.",
   "records": [
     {
       "id": "base-0-v1",
@@ -187,13 +187,32 @@
       "referenceSha256": {
         "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-boundary-guide.png": "c9947e1235693fa072a172bf36b2985a58b58ab42e4083c69d62f0c26c9f0325"
       }
+    },
+    {
+      "id": "base-3-v6",
+      "prompt": "Use case: precise-object-edit. Exact registered game hair-tip correction.\nThis is a1254-square transparent hair layer annotated with a RED VERTICAL LINE at x885. Repaint the far-right projecting tip so ALL hair stays entirely LEFT of that red line, ending naturally around x875. The part to the right of the line must become fully transparent. Delete the red line. Do NOT simply erase the line and keep the old right tip.\nPreserve the rest of the existing brown painted curls, high forehead opening, back/ear edge, crown, lighting, scale and EXACT original position. No shifting/scaling/cropping/recentering of the rest of the layer. Paint a short naturally rounded edge at the trimmed tip, not a hard vertical cut.\nReturn ONLY corrected hair on the SAME1254-square true transparent canvas, mostly empty space. No skin, head backing, ears, face, body, labels, red pixels, shadows or background. This is a registered overlay; every unaffected point must keep its original coordinates.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-boundary-guide-v6.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-072ebdcf-c3b4-4e7e-9926-dcf00a5772e9.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v6.png",
+      "verdict": "production draft only",
+      "findings": "Repainted outer tip now passes unchanged bounds at coverage1.0. Direct overlay preserves visible eyes and crown contact. Both facings/night/game-scale world scenes reviewed. Walking/idle hairstyle volume differs and blended body silhouettes remain visible in sampled transitions, so temporal polish and complete 48-pose approval remain open.",
+      "candidateSha256": "a23557f24419c86d48a91a79d276b648196e6b98c566666b895bb07cf985780c",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-boundary-guide-v6.png": "07e7bec453f70fdbb4e5a796debf87082914013869ed025c1e246f0411bf3c06"
+      }
     }
   ],
   "evidence": {
-    "latestReport": "hair-walk-v5-report.json",
-    "latestComposition": "hair-walk-v5-composition.png",
-    "latestDetails": "hair-walk-v5-details.png",
-    "review": "Inspected direct overlays of every revision. Inspected initial and latest key poses/loop-edge midpoints in both facings, 192px/48px and existing night tint. Crown/face failures improved after hand-traced silhouette guide and fringe corrections. Pose1 volume remains larger than pose0, and pose3 fails bounds; this is not a finished or accepted walking loop.",
-    "next": "Correct pose3 outer tip without moving its crown/hairline, then repeat full loop/style/world review. Continue other 40 poses and breathing temporal polish; full modular creator and original builder scope remain required."
+    "latestReport": "hair-walk-v6-report.json",
+    "latestComposition": "hair-walk-v6-composition.png",
+    "latestDetails": "hair-walk-v6-details.png",
+    "review": "Inspected the four corrected walking key poses/loop-edge samples, direct overlay, actual world scenes and sampled two-way walking/idle transitions, both facings/day-night at enlarged and 48px scales. All eight registered layers pass unchanged bounds in the shared compositor. Crown/eye contact is improved; volume/cluster variation and multi-silhouette body blends remain temporal-polish concerns. No full-animation or complete character approval.",
+    "next": "Refine temporal consistency, continue the other 40 poses and required modular parts, then native recipes/portraits/player integration/performance and the remaining original builder release gates.",
+    "previousReview": "Inspected direct overlays of every revision. Inspected initial and latest key poses/loop-edge midpoints in both facings, 192px/48px and existing night tint. Crown/face failures improved after hand-traced silhouette guide and fringe corrections. Pose1 volume remains larger than pose0, and pose3 fails bounds; this is not a finished or accepted walking loop.",
+    "integrationReport": "hair-walk-v6-integration-report.json",
+    "worldScenes": "hair-walk-v6-scenes.png",
+    "crossClipTransitions": "hair-walk-v6-transitions.png"
   }
 }

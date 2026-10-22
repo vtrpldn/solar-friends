@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {auditCharacterPartRegion,CHARACTER_PART_MINIMUM_COVERAGE} from '../web/character-parts.js';
+const pixels={width:100,height:1,data:new Uint8ClampedArray(400)};
+for(let i=0;i<100;i++)pixels.data[i*4+3]=255;
+const before=pixels.data.slice();assert.equal(CHARACTER_PART_MINIMUM_COVERAGE,.98);
+assert.equal(auditCharacterPartRegion(pixels,[0,0,98,1]).ok,true);
+assert.equal(auditCharacterPartRegion(pixels,[0,0,97,1]).ok,false);
+assert.equal(auditCharacterPartRegion(pixels,[0,0,97,1],{minimumCoverage:.1}).ok,false,'Callers cannot lower the single-region gate');
+assert.deepEqual(pixels.data,before);
+for(const region of [null,[],[0,0,0,1],[-1,0,100,1],[0,0,101,1],[0,0,100,Infinity],new Array(4)])assert.throws(()=>auditCharacterPartRegion(pixels,region));
+assert.throws(()=>auditCharacterPartRegion({...pixels,data:[]},[0,0,100,1]));
+const empty={width:1,height:1,data:new Uint8ClampedArray([0,0,0,31])};assert.equal(auditCharacterPartRegion(empty,[0,0,1,1]).ok,false);empty.data[3]=32;assert.equal(auditCharacterPartRegion(empty,[0,0,1,1]).ok,true);
+const edge={width:2,height:1,data:new Uint8ClampedArray([0,0,0,255,0,0,0,255])};assert.equal(auditCharacterPartRegion(edge,[.5,0,1.5,1]).inside,1);
+console.log('PASS: fixed 98% threshold, inclusive/exclusive boundaries, empty/alpha threshold, invalid/sparse regions and immutable input.');

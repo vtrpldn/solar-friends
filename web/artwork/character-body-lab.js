@@ -1,6 +1,7 @@
 import {installAttachmentEditor} from './character-attachment-editor.js';
 import {installSingleHairReview} from './character-single-hair.js';
 import {installBreatheHairReview} from './character-breathe-hair.js';
+import {installHairClipReview} from './character-hair-clip.js';
 import {createBodyMaterialModel,bodyMaterialPalettes,defaultBodyMaterials} from '../character-materials.js';
 import init,{Game} from '../pkg/solar_friends.js';
 import {loadEditorArt} from '../editor/map-view.js';
@@ -36,8 +37,8 @@ try{
  const game=new Game();let d,snapshot;
  try{d=JSON.parse(game.scenario_template('sandbox'));d.start.buildings.push({id:'body-review-home',kind:'home',x:28,y:34,state:'completed',recipe:'standard',appearance:null});d.start.roads.push([30,34],[31,34],[32,34]);const checked=JSON.parse(game.load_scenario(JSON.stringify(d)));if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message);snapshot=JSON.parse(game.report_state());}finally{game.free();}
  const land=snapshot.village.land,ground=paintTerrain(art.terrain,d.start.roads,[],soilAppearance(land.soil),land.seed,d.map),surface=document.createElement('canvas');surface.width=surface.height=256;
- function scene(canvas,night,{hairFrame=null,hairProvider=null,hairSeconds=null,facingOverride=null}={}){
-  const ctx=canvas.getContext('2d'),scale=1.3,anchor=project(30,33,{x:0,y:0},scale),origin={x:440-anchor.x,y:315-anchor.y},position=(x,y)=>project(x,y,origin,scale),mode=hairFrame?'single-hair-static':hairProvider?'breathe':$('body-review-clip').value,seconds=hairSeconds??Number($('body-review-time').value),facing=facingOverride??Number($('body-review-facing').value);
+ function scene(canvas,night,{hairFrame=null,hairProvider=null,hairMode='breathe',hairSeconds=null,facingOverride=null}={}){
+  const ctx=canvas.getContext('2d'),scale=1.3,anchor=project(30,33,{x:0,y:0},scale),origin={x:440-anchor.x,y:315-anchor.y},position=(x,y)=>project(x,y,origin,scale),mode=hairFrame?'single-hair-static':hairProvider?hairMode:$('body-review-clip').value,seconds=hairSeconds??Number($('body-review-time').value),facing=facingOverride??Number($('body-review-facing').value);
   ctx.clearRect(0,0,900,420);ctx.fillStyle=night?'#263c4b':'#dfe6c9';ctx.fillRect(0,0,900,420);ctx.save();ctx.filter=unlitFilter(night);paintWorldGround(ctx,ground,origin,scale);ctx.restore();
   const objects=land.vegetation.filter(t=>!t.cleared).map(tree=>({depth:tree.x+tree.y,draw:()=>paintWorldTree(ctx,tree,{project:position,scale,width:900,height:420,forest:art.forest,details:art.details,night})}));
   for(const b of d.start.buildings)objects.push({depth:b.x+b.y,draw:()=>paintWorldBuilding(ctx,{key:b.kind,x:b.x,y:b.y},{project:position,scale,images:art.images,night,light:0})});
@@ -56,5 +57,6 @@ try{
  $('body-review-report').textContent=JSON.stringify(report,null,2);$('body-review-status').textContent=`48 extracted poses · cross-sheet stature ratio ${report.crossSheetStatureRatio.toFixed(3)}. Body-only production review; compatible parts and equipment remain unfinished.`;choose();
  window.singleHairReview=await installSingleHairReview({body:frameBank.base[8],binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.breatheHairReview=await installBreatheHairReview({frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
+ window.walkHairReview=await installHairClipReview({clip:'walk',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}
