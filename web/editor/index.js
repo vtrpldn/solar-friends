@@ -1,3 +1,4 @@
+import {hitStartingBank,newStartingBank,bankFields,buildingBatteryFields} from './batteries.js';
 import {startingAnimalFields,setStartingAnimalField} from './animals.js';
 import {sourceKinds,siteNames,newStartingSite,siteFields,setSiteField,hitStartingSite} from './sites.js';
 import {startingOrchardFields,setStartingOrchardField} from './orchards.js';
@@ -126,13 +127,16 @@ function inspectGround(point){
 function renderSelection(){
   if(!current)return;
   const d=current.doc.value,b=d.start.buildings.find(b=>b.id===map.view.selected),panel=$('creator-selection');
+  const bank=d.start.batteries?.find(p=>p.id===map.view.selectedBank);
+  if(bank){const focus=document.activeElement?.dataset.startBank;panel.innerHTML=bankFields(bank,catalog.batteries);if(focus)[...panel.querySelectorAll('[data-start-bank]')].find(e=>e.dataset.startBank===focus)?.focus({preventScroll:true});return;}
   const site=d.start.resource_sites?.find(s=>s.id===map.view.selectedSite);
   if(site){const focus=document.activeElement?.dataset.startSite;panel.innerHTML=siteFields(site,catalog.resource_sites);if(focus)[...panel.querySelectorAll('[data-start-site]')].find(e=>e.dataset.startSite===focus)?.focus({preventScroll:true});return;}
-  if(!b){panel.innerHTML='<h2>Our property</h2><p>Select a building or material plot to inspect it. Choose Move to carry a building to another cell.</p>';return;}
+  if(!b){panel.innerHTML='<h2>Our property</h2><p>Select a building, battery bank or material plot to inspect it. Choose Move to carry it to another cell.</p>';return;}
   if(map.selection().length>1){panel.innerHTML=`<h2>${map.selection().length} buildings</h2><p>Move this group together, or place a copy with its starting supplies. Shift-click toggles buildings in the group.</p><div class="creator-selection-actions"><button data-selection-action="move">Move group</button><button data-selection-action="duplicate">Copy group</button><button data-selection-action="remove">Remove group</button></div>`;return;}
-  const cropFocus=document.activeElement?.dataset.startCrop,orchardFocus=document.activeElement?.dataset.startOrchard,animalFocus=document.activeElement?.dataset.startAnimal;
+  const cropFocus=document.activeElement?.dataset.startCrop,orchardFocus=document.activeElement?.dataset.startOrchard,animalFocus=document.activeElement?.dataset.startAnimal,bankFocus=document.activeElement?.dataset.buildingBank;
   const entry=catalog.buildings.find(e=>e.id===b.kind),appearances=(entry?.appearances||[]).filter(key=>key.startsWith('adobe-')===(b.recipe==='adobe'));
-  panel.innerHTML=`<h2>${escape(title(b.kind))}</h2><div class="creator-coordinates"><div class="creator-field"><label for="creator-object-x">Column</label><input id="creator-object-x" type="number" min="1" max="62" step="1" value="${b.x}"></div><div class="creator-field"><label for="creator-object-y">Row</label><input id="creator-object-y" type="number" min="1" max="62" step="1" value="${b.y}"></div></div><div class="creator-field"><label for="creator-object-state">Starts as</label><select id="creator-object-state"><option value="completed" ${b.state==='completed'?'selected':''}>Completed building</option><option value="blueprint" ${b.state==='blueprint'?'selected':''}>Construction project</option></select></div><div class="creator-field"><label for="creator-object-recipe">Construction materials</label><select id="creator-object-recipe">${(entry?.recipes||[]).map(key=>`<option value="${key}" ${b.recipe===key?'selected':''}>${{standard:'Prepared materials',local:'Local materials',adobe:'Adobe and bamboo'}[key]}</option>`).join('')}</select></div>${appearances.length?`<div class="creator-field"><label for="creator-object-appearance">Appearance</label><select id="creator-object-appearance">${appearances.map(key=>`<option value="${key}" ${(b.appearance||'home')===key?'selected':''}>${escape(title(key))}</option>`).join('')}</select></div>`:''}${startingCropFields(b,catalog.farming)}${startingOrchardFields(b,catalog.orchards)}${startingAnimalFields(b,catalog.animals)}<div class="creator-selection-actions"><button data-selection-action="move">Move on map</button><button data-selection-action="duplicate">Duplicate</button><button data-selection-action="remove">Remove</button></div>`;
+  panel.innerHTML=`<h2>${escape(title(b.kind))}</h2><div class="creator-coordinates"><div class="creator-field"><label for="creator-object-x">Column</label><input id="creator-object-x" type="number" min="1" max="62" step="1" value="${b.x}"></div><div class="creator-field"><label for="creator-object-y">Row</label><input id="creator-object-y" type="number" min="1" max="62" step="1" value="${b.y}"></div></div><div class="creator-field"><label for="creator-object-state">Starts as</label><select id="creator-object-state"><option value="completed" ${b.state==='completed'?'selected':''}>Completed building</option><option value="blueprint" ${b.state==='blueprint'?'selected':''}>Construction project</option></select></div><div class="creator-field"><label for="creator-object-recipe">Construction materials</label><select id="creator-object-recipe">${(entry?.recipes||[]).map(key=>`<option value="${key}" ${b.recipe===key?'selected':''}>${{standard:'Prepared materials',local:'Local materials',adobe:'Adobe and bamboo'}[key]}</option>`).join('')}</select></div>${appearances.length?`<div class="creator-field"><label for="creator-object-appearance">Appearance</label><select id="creator-object-appearance">${appearances.map(key=>`<option value="${key}" ${(b.appearance||'home')===key?'selected':''}>${escape(title(key))}</option>`).join('')}</select></div>`:''}${startingCropFields(b,catalog.farming)}${startingOrchardFields(b,catalog.orchards)}${startingAnimalFields(b,catalog.animals)}${buildingBatteryFields(b,catalog.batteries)}<div class="creator-selection-actions"><button data-selection-action="move">Move on map</button><button data-selection-action="duplicate">Duplicate</button><button data-selection-action="remove">Remove</button></div>`;
+  if(bankFocus)[...panel.querySelectorAll('[data-building-bank]')].find(e=>e.dataset.buildingBank===bankFocus)?.focus({preventScroll:true});
   if(animalFocus)[...panel.querySelectorAll('[data-start-animal]')].find(input=>input.dataset.startAnimal===animalFocus)?.focus({preventScroll:true});
   if(orchardFocus)[...panel.querySelectorAll('[data-start-orchard]')].find(input=>input.dataset.startOrchard===orchardFocus)?.focus({preventScroll:true});
   if(cropFocus)[...panel.querySelectorAll('[data-start-crop]')].find(input=>input.dataset.startCrop===cropFocus)?.focus({preventScroll:true});
@@ -147,7 +151,7 @@ function setTool(tool){
   const sourceMaterial=sourceKinds.indexOf(tool);if(sourceMaterial>=2){$('creator-land-layer').value=catalog.resource_sites.materials[sourceMaterial];$('creator-land-layer').dispatchEvent(new Event('change'));}
   if(tool==='habitat'){$('creator-ground').open=true;$('creator-ground').scrollIntoView({block:'nearest'});}
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
-  $('creator-hint').textContent=sourceKinds.includes(tool)?`Place ${siteNames[sourceKinds.indexOf(tool)].toLowerCase()} · click a cell · Esc to select`:['move-site','copy-site'].includes(tool)?'Click a cell to place this material plot · Esc cancels':allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a selected building to move the whole group',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',habitat:'Drag to paint habitat and baseline soil · existing plants stay in place · one undo step',nature:'Drag to plant a spaced cluster · brush width controls its area · one undo step','thin-nature':'Drag to remove natural objects · no materials are granted · one undo step',river:'Drag to shape the channel · steep bends cannot host hydro · one undo step',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
+  $('creator-hint').textContent=['battery-bank','move-bank','copy-bank'].includes(tool)?'Click a clear inland cell for the battery bank · Esc cancels':sourceKinds.includes(tool)?`Place ${siteNames[sourceKinds.indexOf(tool)].toLowerCase()} · click a cell · Esc to select`:['move-site','copy-site'].includes(tool)?'Click a cell to place this material plot · Esc cancels':allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a building group, battery bank or material plot to move it',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',habitat:'Drag to paint habitat and baseline soil · existing plants stay in place · one undo step',nature:'Drag to plant a spaced cluster · brush width controls its area · one undo step','thin-nature':'Drag to remove natural objects · no materials are granted · one undo step',river:'Drag to shape the channel · steep bends cannot host hydro · one undo step',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building, battery bank, material plot or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
 function removeBuilding(id){
   const ids=map.selection().includes(id)?map.selection():[id];
@@ -158,7 +162,13 @@ function removeBuilding(id){
 }
 function mapAction(action){
   if(!current||busy)return;
-  if(sourceKinds.includes(action.type)){
+  if(action.type==='battery-bank'){
+    const bank=newStartingBank(action.x,action.y);if(change('Place battery bank',d=>{(d.start.batteries??=[]).push(bank);},{valid:true}))map.selectBank(bank.id);
+  }else if(['move-bank','copy-bank'].includes(action.type)){
+    const original=action.type==='copy-bank'?map.bankCopy:current.doc.value.start.batteries?.find(b=>b.id===map.view.selectedBank);if(!original)return;
+    const bank={...clone(original),x:action.x,y:action.y};if(action.type==='copy-bank')bank.id=crypto.randomUUID();
+    if(change(action.type==='copy-bank'?'Copy battery bank':'Move battery bank',d=>{if(action.type==='copy-bank')(d.start.batteries??=[]).push(bank);else Object.assign(d.start.batteries.find(b=>b.id===bank.id),bank);},{valid:true})){map.bankCopy=null;setTool('select');map.selectBank(bank.id);}
+  }else if(sourceKinds.includes(action.type)){
     const material=catalog.resource_sites.materials[sourceKinds.indexOf(action.type)],site=newStartingSite(material,action.x,action.y);
     if(change('Place '+siteNames[sourceKinds.indexOf(action.type)],d=>{(d.start.resource_sites??=[]).push(site);},{valid:true}))map.selectSite(site.id);
   }
@@ -184,8 +194,9 @@ function mapAction(action){
   else if(action.type==='move')change(action.ids.length>1?'Move building group':'Move building',d=>moveBuildings(d,action.ids,action.dx,action.dy),{valid:true});
   else if(action.type==='duplicate'&&map.copy){const copy=map.copy,anchor=copy.buildings[0];if(change('Copy building group',d=>placeBuildingCopy(d,copy,action.x-anchor.x,action.y-anchor.y),{valid:true})){setTool('select');map.select(null);for(const b of copy.buildings)map.select(b.id,true);map.copy=null;}}
   else if(action.type==='erase'){
-    const site=hitStartingSite(current.doc.value,action.x,action.y);
-    if(site)change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==site.id);});
+    const bank=hitStartingBank(current.doc.value,action.x,action.y),site=hitStartingSite(current.doc.value,action.x,action.y);
+    if(bank)change('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(p=>p.id!==bank.id);});
+    else if(site)change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==site.id);});
     else if(action.id)removeBuilding(action.id);
     else change('Remove a road',d=>{d.start.roads=d.start.roads.filter(([x,y])=>x!==action.x||y!==action.y);});
   }else if(action.type==='camp')change('Move arrival camp',d=>{d.map.camp=[action.x,action.y];},{valid:true});
@@ -204,8 +215,8 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selection:[],tool:'select',grid:true,layer:'none',habitatPreset:'flower-meadow'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
-    const tool=['select','pan','move','road','meadow','river','nature','thin-nature','habitat','camp','camera','erase',...sourceKinds,...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selectedSite:typeof view.selectedSite==='string'?view.selectedSite:null,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
+    const tool=['select','pan','move','road','meadow','river','nature','thin-nature','habitat','camp','camera','erase','battery-bank',...sourceKinds,...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selectedBank:typeof view.selectedBank==='string'?view.selectedBank:null,selectedSite:typeof view.selectedSite==='string'?view.selectedSite:null,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
   }
   map.brushSize=[1,3,5,9].includes(view?.brushSize)?view.brushSize:3;map.natureSpecies=catalog.nature.find(s=>s.key===view?.natureSpeciesKey)||catalog.nature[0];map.natureSize=Number.isFinite(view?.natureSize)?Math.max(map.natureSpecies.min_size,Math.min(map.natureSpecies.max_size,view.natureSize)):1;
   $('creator-habitat').value=map.view.habitatPreset;
@@ -286,6 +297,9 @@ function wire(){
   $('creator-biomes').onclick=e=>{const b=e.target.closest('[data-biome]');if(!b)return;newBiome=b.dataset.biome;for(const choice of $('creator-biomes').querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===b));};
   $('creator-rules').onchange=e=>{if(e.target.dataset.rule)change('Change village rules',d=>{d.rules[e.target.dataset.rule]=e.target.checked;});};
   $('creator-selection').onchange=e=>{
+    if(e.target.dataset.startBank){const key=e.target.dataset.startBank,value=Number(e.target.value),id=map.view.selectedBank;change('Edit battery bank',d=>{const b=d.start.batteries?.find(b=>b.id===id);if(b)b[key]=value;});return;}
+    if(e.target.dataset.buildingBank){const key=e.target.dataset.buildingBank,value=e.target.type==='checkbox'?e.target.checked:Number(e.target.value),id=map.view.selected;change('Edit building battery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.battery)b.battery[key]=value;});return;}
+
     if(e.target.dataset.startAnimal){const key=e.target.dataset.startAnimal,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;change('Configure starting animals',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.animals)setStartingAnimalField(b,key,value);});return;}
     if(e.target.dataset.startSite){const key=e.target.dataset.startSite,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selectedSite;change('Edit material plot',d=>{const site=d.start.resource_sites?.find(s=>s.id===id);if(site)setSiteField(site,key,value);});return;}
     if(e.target.dataset.startOrchard){const field=e.target.dataset.startOrchard,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;change('Configure starting orchard',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.orchard)setStartingOrchardField(b,field,value);});return;}
@@ -297,6 +311,9 @@ function wire(){
     });
   };
   $('creator-selection').onclick=e=>{
+    const buildingBank=e.target.closest('[data-building-bank-action]')?.dataset.buildingBankAction;if(buildingBank){const id=map.view.selected;change('Configure building battery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(buildingBank==='reset')delete b.battery;else b.battery={charge:catalog.batteries.buildings.find(p=>p.id===b.kind).default_charge,owned:true};});return;}
+    const bankAction=e.target.closest('[data-bank-action]')?.dataset.bankAction;if(bankAction){const id=map.view.selectedBank;if(bankAction==='remove'){change('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(b=>b.id!==id);});map.select(null);}else if(bankAction==='duplicate'){map.bankCopy=clone(current.doc.value.start.batteries.find(b=>b.id===id));setTool('copy-bank');}else setTool('move-bank');return;}
+
     const animalAction=e.target.closest('[data-animal-action]')?.dataset.animalAction;if(animalAction){const id=map.view.selected;change('Configure starting animals',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(animalAction==='reset')delete b.animals;else b.animals=clone(catalog.animals.example);});return;}
     const siteAction=e.target.closest('[data-site-action]')?.dataset.siteAction;if(siteAction){const id=map.view.selectedSite;if(siteAction==='remove'){change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==id);});map.select(null);}else if(siteAction==='duplicate'){map.siteCopy=clone(current.doc.value.start.resource_sites.find(s=>s.id===id));setTool('copy-site');}else setTool('move-site');return;}
 
@@ -311,7 +328,7 @@ function wire(){
   };
   $('creator-issues').onclick=e=>{
     const button=e.target.closest('[data-issue]');
-    if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity){if(current.doc.value.start.resource_sites?.some(s=>s.id===issue.entity))map.selectSite(issue.entity);else map.select(issue.entity);}}
+    if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity){if(current.doc.value.start.batteries?.some(b=>b.id===issue.entity))map.selectBank(issue.entity);else if(current.doc.value.start.resource_sites?.some(s=>s.id===issue.entity))map.selectSite(issue.entity);else map.select(issue.entity);}}
     if(e.target.matches('[data-issue-liquids]')){$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}
     if(e.target.matches('[data-issue-supplies]')){$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
   };
@@ -359,6 +376,7 @@ function wire(){
     if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();e.shiftKey?current.doc.redo():current.doc.undo();}
     else if((e.metaKey||e.ctrlKey)&&e.code==='KeyS'){e.preventDefault();save().catch(()=>{});}
     else if(e.code==='Escape'){e.preventDefault();setTool('select');map.select(null);}
+    else if(['Delete','Backspace'].includes(e.code)&&map.view.selectedBank){e.preventDefault();const id=map.view.selectedBank;change('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(b=>b.id!==id);});map.select(null);}
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selectedSite){e.preventDefault();const id=map.view.selectedSite;change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==id);});map.select(null);}
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selected){e.preventDefault();removeBuilding(map.view.selected);}
   });
@@ -370,9 +388,9 @@ function wire(){
 try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
-  map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify([map.selection(),map.view.selectedSite]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
+  map=new EditorMap($('creator-map'),art,{action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
   minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
-  $('creator-sites').innerHTML=sourceKinds.map((kind,i)=>`<button data-tool="${kind}" aria-pressed="false">${escape(siteNames[i])}</button>`).join('');
+  $('creator-sites').innerHTML='<button data-tool="battery-bank" aria-pressed="false">Battery bank</button>'+sourceKinds.map((kind,i)=>`<button data-tool="${kind}" aria-pressed="false">${escape(siteNames[i])}</button>`).join('');
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
   for(const canvas of document.querySelectorAll('[data-palette]')){const key=canvas.dataset.palette;paintIcon(canvas,key,art.images[key],allBuildingArt[key]);}
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');
