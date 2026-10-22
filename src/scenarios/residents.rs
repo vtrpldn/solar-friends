@@ -13,6 +13,8 @@ pub struct Person {
     pub pronouns: String,
     #[serde(default)]
     pub biography: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub source_credits: Vec<releases::Credit>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub occupation: Option<occupations::Profession>,
     #[serde(default)]
@@ -57,6 +59,7 @@ pub fn founders() -> Vec<Person> {
             outside_shifts: false,
             pronouns: String::new(),
             biography: String::new(),
+            source_credits: Vec::new(),
             routine_preferences: r.routine_preferences,
         })
         .collect()
@@ -76,6 +79,16 @@ pub fn check(d: &Definition, r: &mut Report) {
             || !p.routine_preferences.valid()
         {
             r.push(&format!("start.residents.{i}"),"invalid_resident","Use a unique resident identity, a name of 1–80 characters, pronouns up to 40 characters, a biography up to 600 characters and supported routines.");
+        }
+        if p.source_credits.len() > 16
+            || p.source_credits.iter().any(|credit| {
+                !valid_key(&credit.release)
+                    || credit.revision == 0
+                    || credit.author.trim().is_empty()
+                    || credit.author.chars().count() > 80
+            })
+        {
+            r.push(&format!("start.residents.{i}.source_credits"), "invalid_resident_credits", "Keep at most sixteen resident source credits with supported package identities, positive revisions and author names of 1–80 characters.");
         }
         if p.outside_shifts && p.profession() == occupations::Profession::None {
             r.push(
@@ -513,5 +526,50 @@ mod tests {
                 "{population} residents, {homes} homes"
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod provenance_tests {
+    use super::*;
+    #[test]
+    fn resident_authorship_survives_compilation_and_exact_save_without_changing_simulation() {
+        let mut d = Definition::builtin(modes::Mode::Sandbox);
+        d.start.residents = Some(founders());
+        let (mut plain, _) = compile(d.clone()).unwrap_or_else(|_| panic!("builtin compiles"));
+        d.start.residents.as_mut().unwrap()[0]
+            .source_credits
+            .push(releases::Credit {
+                release: "shared-person".into(),
+                revision: 3,
+                author: "João".into(),
+            });
+        let (mut credited, _) =
+            compile(d.clone()).unwrap_or_else(|_| panic!("credited cast compiles"));
+        let before = credited.snapshot();
+        let value: serde_json::Value = serde_json::from_str(&before).unwrap();
+        assert_eq!(
+            value["village"]["scenario"]["definition"]["start"]["residents"][0]["source_credits"]
+                [0]["author"],
+            "João"
+        );
+        assert!(credited.restore(&before));
+        assert_eq!(credited.snapshot(), before);
+        let mut a: serde_json::Value = serde_json::from_str(&plain.snapshot()).unwrap();
+        let mut b: serde_json::Value = serde_json::from_str(&credited.snapshot()).unwrap();
+        a["village"].as_object_mut().unwrap().remove("scenario");
+        b["village"].as_object_mut().unwrap().remove("scenario");
+        assert_eq!(a, b);
+        let source = &mut d.start.residents.as_mut().unwrap()[0].source_credits;
+        source[0].revision = 0;
+        let mut r = Report::default();
+        check(&d, &mut r);
+        assert!(r.has_errors());
+        d.start.residents.as_mut().unwrap()[0].source_credits[0].revision = 3;
+        let credit = d.start.residents.as_ref().unwrap()[0].source_credits[0].clone();
+        d.start.residents.as_mut().unwrap()[0].source_credits = vec![credit; 17];
+        let mut r = Report::default();
+        check(&d, &mut r);
+        assert!(r.has_errors());
     }
 }

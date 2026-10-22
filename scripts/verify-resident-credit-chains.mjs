@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {mergeResidentCredits,residentFromPackage} from '../web/editor/resident-provenance.js';
+import {residentFile} from '../web/editor/resident-presets.js';
+import {addResident} from '../web/editor/roster.js';
+const credit=i=>({release:`person-${i}`,revision:i+1,author:`Author ${i}`});
+const first={format:'solar-friends-resident',schema:2,id:'person-0',content_revision:1,author:'Author 0',credits:[],resident:{name:'Friend'}};
+const before=JSON.stringify(first),resident=residentFromPackage(first);assert.deepEqual(resident.source_credits,[credit(0)]);assert.equal(JSON.stringify(first),before);
+resident.id='local-person';const reshared=residentFile(resident,{author:'Next author'});assert.deepEqual(reshared.credits,[credit(0)]);assert.equal(reshared.resident.source_credits,undefined);assert.equal(reshared.resident.id,undefined);assert.equal(resident.id,'local-person');
+assert.deepEqual(residentFromPackage(reshared).source_credits,[credit(0),{release:reshared.id,revision:1,author:'Next author'}]);
+assert.deepEqual(mergeResidentCredits([credit(0)],[credit(0)]),[credit(0)]);assert.equal(mergeResidentCredits([{...credit(0),author:'Other'}],[credit(0)]).length,2);
+const credits=Array.from({length:16},(_,i)=>credit(i)),full={...first,credits,resident:{...first.resident,source_credits:credits}};assert.equal(residentFromPackage(full).source_credits.length,16);assert.throws(()=>residentFromPackage({...full,id:'one-too-many'}),/maximum source credits/);assert.deepEqual(full.credits,credits);
+for(const bad of [null,{},[credit(0),{...credit(1),revision:0}],[{...credit(0),author:''}],[{...credit(0),extra:true}],[{...credit(0),release:'invalid key'}]])assert.throws(()=>mergeResidentCredits(bad),/unsupported source credits/);
+assert.throws(()=>residentFromPackage({...first,schema:999}),/unsupported/);assert.throws(()=>residentFromPackage(null),/unsupported/);
+const legacy={format:first.format,schema:1,resident:{name:'Legacy'}};assert.deepEqual(residentFromPackage(legacy),legacy.resident);
+const d={start:{residents:[resident]}};addResident(d,[],12,{source:resident.id,id:'copy'});assert.deepEqual(d.start.residents[1].source_credits,[credit(0)]);d.start.residents[1].source_credits[0].author='Edited';assert.equal(resident.source_credits[0].author,'Author 0');
+console.log('PASS: source chains, exact deduplication, preserved conflicting credits, immutable inputs, bounded refusal without truncation, legacy handling, package separation and independent cast copies.');
