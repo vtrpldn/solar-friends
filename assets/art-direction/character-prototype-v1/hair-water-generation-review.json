@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "status": "Watering hair/body draft only; full character creation unfinished",
+  "why": "Shifted and bent watering heads require distinct scalp registration, while the compatible first pose can reuse an unchanged cooking cap.",
+  "generations": [
+    {
+      "key": "hair_water5_v1",
+      "prompt": "Paint ONLY the green scalp-cap shape in image1 as short close-fitting brown curls, then make EVERYTHING ELSE fully transparent. Preserve the EXACT1254-square full-canvas registration. Follow the green outer shape and lower fringe precisely at x590..870,y105..300; opaque crown, short sides above ears, high fringe leaving eyes/eyebrows visible. Image2 supplies ONLY the restrained dark warm-brown painted material and curl scale, never its position or silhouette. Use fewer curl groups to stay within the green envelope; no big overhanging hairstyle, ear loops, dangling sideburns or glossy orange highlights. Remove ALL green, guide lines, body, skin, face, ears, eyes, eyebrows, hands, clothes and shoes. Outside this small cap every pixel must have alpha0, including all pixels below y350. Do not center, zoom, enlarge, shift, crop or normalize the cap. No props, watering can, text, shadow or background. Exact guide position and scale are essential for overlay on the unchanged watering body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-5-silhouette-guide.png",
+          "sha256": "02ae802876871b1780a4c207a48057c7f494b4a12cb60ef0e7aea0ed3231710d"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4a7ba6b9-7b61-4d00-9152-27249b8ec810.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-5-candidate-v1.png",
+      "verdict": "Registered hair/body draft: original bounds and lower-body pixels pass; temporal/volume and equipment polish incomplete.",
+      "sha256": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541"
+    },
+    {
+      "key": "hair_water6_v1",
+      "prompt": "Paint ONLY the green scalp-cap shape in image1 as short close-fitting brown curls, then make EVERYTHING ELSE fully transparent. Preserve the EXACT1254-square full-canvas registration. Follow the green outer shape and lower fringe precisely at x605..890,y125..320; opaque crown, short sides above ears, high fringe leaving eyes/eyebrows visible. Image2 supplies ONLY the restrained dark warm-brown painted material and curl scale, never its position or silhouette. Use fewer curl groups to stay within the green envelope; no big overhanging hairstyle, ear loops, dangling sideburns or glossy orange highlights. Remove ALL green, guide lines, body, skin, face, ears, eyes, eyebrows, hands, clothes and shoes. Outside this small cap every pixel must have alpha0, including all pixels below y350. Do not center, zoom, enlarge, shift, crop or normalize the cap. No props, watering can, text, shadow or background. Exact guide position and scale are essential for overlay on the unchanged watering body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-6-silhouette-guide.png",
+          "sha256": "63713840dec134c21d23fd7c58fc10970ff5ea36be5adeafd84f5474b63d3539"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7a5c3e37-b39e-4c87-83e5-79ef7c9dc441.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-6-candidate-v1.png",
+      "verdict": "Registered hair/body draft: original bounds and lower-body pixels pass; temporal/volume and equipment polish incomplete.",
+      "sha256": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0"
+    },
+    {
+      "key": "hair_water7_v1",
+      "prompt": "Paint ONLY the green scalp-cap shape in image1 as short close-fitting brown curls, then make EVERYTHING ELSE fully transparent. Preserve the EXACT1254-square full-canvas registration. Follow the green outer shape and lower fringe precisely at x675..960,y145..330; opaque crown, short sides above ears, high fringe leaving eyes/eyebrows visible. Image2 supplies ONLY the restrained dark warm-brown painted material and curl scale, never its position or silhouette. Use fewer curl groups to stay within the green envelope; no big overhanging hairstyle, ear loops, dangling sideburns or glossy orange highlights. Remove ALL green, guide lines, body, skin, face, ears, eyes, eyebrows, hands, clothes and shoes. Outside this small cap every pixel must have alpha0, including all pixels below y350. Do not center, zoom, enlarge, shift, crop or normalize the cap. No props, watering can, text, shadow or background. Exact guide position and scale are essential for overlay on the unchanged watering body.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-7-silhouette-guide.png",
+          "sha256": "bc9540e582e67d35cb39605148b3ea887de03937df442747c6fdc57a0e790fe1"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-988f05a3-f669-4be0-b135-738676d0bd3b.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v1.png",
+      "verdict": "Rejected visually despite region coverage1: shifted cap exposes a bald crescent behind the bending head.",
+      "sha256": "f115bd66fad1e347c2231b00be1992ee56d0784a67e2a899ba91913bf3f625ed"
+    },
+    {
+      "key": "hair_water7_v2",
+      "prompt": "Correct image1 hair silhouette using image2 exact green scalp envelope. Keep1254x1254 transparent canvas and the intended full-body registration. The current cap sits too far right, leaving a bald crescent on the back-left scalp. REPAINT/EXTEND the back-left brown curls to match the green silhouette starting around x680,y200..305, and cover its entire scalp interior. Crown should follow the guide around x755..880,y145..175. Shorten the front-right overhang so rightmost tip stays near x950,y275..305. Do not simply move the old cap; repaint the close-fitting contour and fringe to the exact green guide, with all hair inside roughly x675..960,y140..335. Preserve the existing subdued brown painted curl material and upper-left lighting. No extra volume, skin, ears, face, body, green, guides, watering can, props or text. Short sides, no ear loops. Only hair pixels on genuinely transparent canvas; alpha0 everywhere outside the cap, especially below y350. The entire green cap must be opaque brown curls, with transparent opening only below its fringe. Output hair only.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v1.png",
+          "sha256": "f115bd66fad1e347c2231b00be1992ee56d0784a67e2a899ba91913bf3f625ed"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-7-silhouette-guide.png",
+          "sha256": "bc9540e582e67d35cb39605148b3ea887de03937df442747c6fdc57a0e790fe1"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-010477f5-c349-4e4d-8099-80b57a703c85.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v2.png",
+      "verdict": "Registered hair/body draft: original bounds and lower-body pixels pass; temporal/volume and equipment polish incomplete.",
+      "sha256": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa"
+    }
+  ],
+  "geometry": "assets/art-direction/character-prototype-v1/hair-water-silhouette-guide.json",
+  "registration": "web/art/characters/prototype-v1/hair-water-v1-registration.json",
+  "integration": "assets/art-direction/character-prototype-v1/hair-water-v4-integration-report.json",
+  "reuse": {
+    "pose4": "Unchanged hair-curls-activities-0-candidate-v2.png; independent source/body registration and visual check.",
+    "initialReport": "assets/art-direction/character-prototype-v1/hair-water-v1-report.json",
+    "initialVerdict": "Walking cap rejected as a complete set: too bulky on5 and original bounds fail6/7. Bent cap is visibly misplaced."
+  },
+  "limits": [
+    "40/48 hair drafts: eight tending/feeding poses remain.",
+    "Watering can, grips, activity equipment and complete foreground/occlusion remain unfinished; no finished watering character or regular player integration.",
+    "Key-pose scalp/face placement reviewed; crossfade ghosting and curl-volume differences still need temporal polish.",
+    "All PNG generation/editing used the built-in generator. No code pixel repair, fitting, translation, clipping or threshold changes.",
+    "Other appearance options/artwork, portraits, native recipes, global cache/performance and all broader builder release gates remain."
+  ]
+}

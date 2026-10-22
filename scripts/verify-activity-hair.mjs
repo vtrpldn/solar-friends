@@ -3,7 +3,7 @@ import {writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 // Extend only after reviewing the actual head/equipment geometry of each group.
-const cases={cook:{bodyStartRow:96,rejected:{index:0,file:'hair-curls-activities-0-candidate-v1.png'}}},clip=process.argv[2];
+const cases={cook:{bodyStartRow:96,rejected:{index:0,file:'hair-curls-activities-0-candidate-v1.png'}},water:{bodyStartRow:96,rejected:{index:7,file:'hair-curls-base-1-candidate-v1.png'}}},clip=process.argv[2];
 if(!Object.hasOwn(cases,clip))throw Error('Choose a registered activity hair review.');
 const server=await serve();let browser;
 try{
