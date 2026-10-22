@@ -1,3 +1,5 @@
+import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
+import {MapSharingControls} from './map-sharing-controls.js';
 import {creationThumbnail} from './thumbnail.js';
 import {installLibraryDiscovery} from './library-discovery.js';
 import {RELEASE_FORMAT,freezeReleaseDefinition} from '../release-package.js';
@@ -41,7 +43,7 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let newBiome="mata-atlantica";
-let libraryDiscovery;
+let libraryDiscovery,mapSharing;
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
@@ -120,7 +122,7 @@ function refresh(){
   $('creator-river-enabled').checked=d.map.river!==null;
   $('creator-water').readOnly=Array.isArray(d.start.liquids);$('creator-water').title=d.start.liquids?'Edit the fresh-water allocations in Starting liquids.':'';
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
-  $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;$('creator-release').disabled=!report.ok||busy;
+  $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;$('creator-release').disabled=!report.ok||busy;$('creator-save-map').disabled=busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
   for(const [key,label]of Object.entries(ruleNames)){$('creator-rule-'+key).checked=d.rules[key];$('creator-rule-'+key).setAttribute('aria-label',label);}
   renderSelection();renderSupplies();renderReview();
@@ -298,23 +300,29 @@ async function launch(definition,record,sessionKind,releaseId=null,releasePackag
 }
 async function showLibrary({reset=false}={}){
   if(current)await save();
-  const [projects,runs,releases]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases()]);
+  const [projects,runs,releases,maps]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases(),library.listMaps()]);
   $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row">${previewMarkup('project',p.id)}<div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
   $('creator-releases-heading').hidden=!releases.length;
   $('creator-release-list').innerHTML=releases.map(r=>{
     const compatible=r.compatibility&&Object.entries(catalog.releases.compatibility).every(([key,value])=>r.compatibility[key]===value);
     return `<div class="creator-library-row creator-release-row" data-release="${escape(r.id)}">${previewMarkup('release',r.id)}<div><b>${escape(r.title)}</b><small>Version ${escape(r.contentRevision)} · ${escape(r.author)}</small><small>${compatible?'Frozen content · independent of the draft':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-play-release="${escape(r.id)}" ${compatible?'':'disabled'}>Play</button><button data-copy-release="${escape(r.id)}" ${compatible?'':'disabled'}>Edit a copy</button><button data-export-release="${escape(r.id)}">Export</button><button class="creator-remove" data-remove-release="${escape(r.id)}" aria-label="Remove release ${escape(r.title)} version ${escape(r.contentRevision)}">×</button></div></div>`;
   }).join('');
+  $('creator-map-list').innerHTML=maps.map(m=>{
+    const compatible=m.compatibility&&Object.entries(catalog.map_packages.compatibility).every(([key,value])=>m.compatibility[key]===value);
+    return `<div class="creator-library-row creator-release-row" data-map="${escape(m.id)}">${previewMarkup('map',m.id)}<div><b>${escape(m.title)}</b><small>Version ${escape(m.contentRevision)} · ${escape(m.author)}</small><small>${compatible?'Land and climate · start a new scenario':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-use-map="${escape(m.id)}" ${compatible?'':'disabled'}>Create scenario</button><button data-export-map="${escape(m.id)}">Export</button><button class="creator-remove" data-remove-map="${escape(m.id)}" aria-label="Remove map ${escape(m.title)}">×</button></div></div>`;
+  }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario');
   $('creator-runs-heading').hidden=!villages.length;
   $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button></div>`).join('');
-  $('creator-library-title').textContent=projects.length+releases.length+villages.length?'Creation library':'Create a village';
-  if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length===0;
-  libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages);if(reset)libraryDiscovery.reset();
+  $('creator-library-title').textContent=projects.length+releases.length+villages.length+maps.length?'Creation library':'Create a village';
+  if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length+maps.length===0;
+  libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages,maps);if(reset)libraryDiscovery.reset();
   for(const slot of document.querySelectorAll('[data-preview-id]'))library.getPreview(slot.dataset.previewKind,slot.dataset.previewId).then(image=>{if(!image||!slot.isConnected)return;const img=new Image();img.alt='';img.loading='lazy';img.width=120;img.height=75;img.src=image;slot.replaceChildren(img);slot.title='Opening landscape';}).catch(()=>{/* A missing preview cannot block library actions. */});
   $('creator-library-status').textContent='';if(!$('creator-library-dialog').open)$('creator-library-dialog').showModal();
 }
 function wire(){
+  mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,definition:current.doc.value,valid:report.ok,terrain:terrainBase,snapshot:map.snapshot,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;refresh();}});
+
   $('creator-route-tools').onclick=()=>{const details=$('creator-routes');details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};
   $('creator-habitat').onchange=()=>{map.view.habitatPreset=$('creator-habitat').value;setTool('habitat');};
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
@@ -406,6 +414,9 @@ function wire(){
       if(b.dataset.openProject){const record=await library.getProject(b.dataset.openProject);if(record)await openProject(record);}
       if(b.dataset.playProject){const record=await library.getProject(b.dataset.playProject);if(record)await launch(record.checkpoint.definition,record,'scenario');}
       if(b.dataset.copyProject){const record=await library.getProject(b.dataset.copyProject);if(record)await newProject('copy',{...record.checkpoint.definition,title:(record.title+' · copy').slice(0,100)},record.attribution??[]);}
+      if(b.dataset.useMap){const record=await library.getMap(b.dataset.useMap);if(record)await mapSharing.use(record);}
+      if(b.dataset.exportMap){const record=await library.getMap(b.dataset.exportMap);if(record){const url=URL.createObjectURL(new Blob([canonical(record.package)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`land-v${record.package.content_revision}.solar-map`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}
+      if(b.dataset.removeMap){const record=await library.getMap(b.dataset.removeMap);if(record){pendingDelete={kind:'map',record};$('creator-delete-title').textContent='Remove this reusable map?';$('creator-delete-dialog').querySelector('p').textContent='Only this saved map is removed. Existing drafts, releases and villages keep their own land.';$('creator-delete-dialog').showModal();}}
       if(b.dataset.playRelease){const record=await library.getRelease(b.dataset.playRelease);if(record)await launch(record.package.definition,{id:record.projectId,revision:record.sourceRevision},'scenario',record.id,record.package);}
       if(b.dataset.exportRelease){const record=await library.getRelease(b.dataset.exportRelease);if(record){const url=URL.createObjectURL(new Blob([canonical(record.package)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`village-v${record.package.content_revision}.solar-release`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}
       if(b.dataset.copyRelease){const record=await library.getRelease(b.dataset.copyRelease);if(record){const checked=JSON.parse(engine.validate_scenario(canonical(record.package)));if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');const p=record.package,credits=[...(p.credits??[]),{release:p.id,revision:p.content_revision,author:p.author}];if(credits.length>catalog.releases.maximum_credits)throw Error('This release already has the maximum source credits. Keep its original export.');await newProject('copy',{...p.definition,title:(p.title+' · copy').slice(0,100)},credits);}}
@@ -416,7 +427,7 @@ function wire(){
   };
   $('creator-delete-cancel').onclick=()=>$('creator-delete-dialog').close();
   $('creator-delete-confirm').onclick=async()=>{
-    try{if(pendingDelete?.kind==='release'){await library.deleteRelease(pendingDelete.record.id,pendingDelete.record.revision);}else if(pendingDelete){await library.deleteProject(pendingDelete.id,pendingDelete.revision);if(current?.id===pendingDelete.id){current=null;history.replaceState(null,'','./editor.html');}}
+    try{if(pendingDelete?.kind==='map'){await library.deleteMap(pendingDelete.record.id,pendingDelete.record.revision);}else if(pendingDelete?.kind==='release'){await library.deleteRelease(pendingDelete.record.id,pendingDelete.record.revision);}else if(pendingDelete){await library.deleteProject(pendingDelete.id,pendingDelete.revision);if(current?.id===pendingDelete.id){current=null;history.replaceState(null,'','./editor.html');}}
       $('creator-delete-dialog').close();pendingDelete=null;await showLibrary();}catch(error){toast(error.message);}
   };
   $('creator-import').onchange=async e=>{
@@ -424,6 +435,7 @@ function wire(){
     try{
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const raw=await file.text(),checked=JSON.parse(engine.validate_scenario(raw));let content;try{content=JSON.parse(raw);}catch{throw Error(checked.issues[0]?.message||'This file is not a readable creation.');}
+      if(content.format===MAP_FORMAT){const accepted=validateMapPackage(content,mapSharing.validate);if(current)await save();const thumbnail=mapSharing.preview(accepted);await library.importMap(accepted,mapSharing.validate,thumbnail);await showLibrary({reset:true});toast('Imported as a separate reusable map.');return;}
       if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();const previewGame=new Game();let thumbnail;try{const loaded=JSON.parse(previewGame.load_scenario(raw));if(loaded.ok)thumbnail=previewOf(content.definition,JSON.parse(previewGame.report_state()));}finally{previewGame.free();}await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)),thumbnail);await showLibrary({reset:true});toast('Imported as a separate frozen release.');return;}
       const blocked=new Set(['file_too_large','unsupported_format','invalid_json','invalid_definition','unsupported_map','unknown_building','invalid_appearance','invalid_material','too_many_objects','too_many_stores','duplicate_building','invalid_identity','unsupported_resident_preset','unsupported_resident_appearance','invalid_resident_credits']);
       if(checked.issues.some(i=>blocked.has(i.code)))throw Error(checked.issues.find(i=>blocked.has(i.code)).message);

@@ -117,8 +117,8 @@ export class ContentLibrary extends EventTarget {
   createRelease({projectId,expectedRevision,author,validate,thumbnail}){
     return this.#freeze({projectId,expectedRevision,thumbnail},{store:'releases',counters:'releaseCounters',kind:'release',format:'solar-friends-frozen-release',makePackage:(id,version,source)=>createReleasePackage({id,version,definition:source.checkpoint.definition,author,credits:source.attribution??[],validate})});
   }
-  createMap({projectId,expectedRevision,author,validate,thumbnail}){
-    return this.#freeze({projectId,expectedRevision,thumbnail},{store:'maps',counters:'mapCounters',kind:'map',format:'solar-friends-frozen-map',makePackage:(id,version,source)=>{const d=source.checkpoint.definition;return createMapPackage({id,version,map:d.map,weather:d.rules.weather,title:d.title,description:d.description,author,credits:source.attribution??[],validate});}});
+  createMap({projectId,expectedRevision,author,validate,thumbnail,title,description}){
+    return this.#freeze({projectId,expectedRevision,thumbnail},{store:'maps',counters:'mapCounters',kind:'map',format:'solar-friends-frozen-map',makePackage:(id,version,source)=>{const d=source.checkpoint.definition;return createMapPackage({id,version,map:d.map,weather:d.rules.weather,title:title??d.title,description:description??d.description,author,credits:source.attribution??[],validate});}});
   }
   async #freeze({projectId,expectedRevision,thumbnail},{store,counters,kind,format,makePackage}){
     const db=await this.#db(),id=crypto.randomUUID();
