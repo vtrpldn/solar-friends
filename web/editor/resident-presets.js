@@ -1,3 +1,4 @@
+import {downloadStoredPackage} from './stored-package-export.js';
 import {missingLibraryEntry,downloadMissingEntryDetails} from './missing-library-entry.js';
 import {exampleResidentPresets,loadExampleResident} from './example-scenarios.js';
 import {mergeResidentCredits,residentFromPackage} from './resident-provenance.js';
@@ -35,7 +36,7 @@ export class ResidentPresetLibrary{
     if(record.revision!==Number(button.dataset.revision))throw Error('This preset changed in another tab. Reopen the library before using it.');
     if(button.hasAttribute('data-delete-resident')){await library.deleteResidentPreset(record.id,record.revision);await this.render();this.status.textContent='Preset removed. Residents already in villages are unchanged.';return;}
     if(button.hasAttribute('data-copy-resident')){await library.saveResidentPreset({id:crypto.randomUUID(),file:record.file});this.search.value='';await this.render();this.status.textContent='Independent preset copy saved with its original authorship.';return;}
-    if(button.hasAttribute('data-export-resident')){this.download(record.file);return;}
+    if(button.hasAttribute('data-export-resident')){const result=downloadStoredPackage('resident',record);this.status.textContent=result.backup?'The resident package is damaged. A full original-record backup was downloaded; saved data is unchanged.':'Original resident package exported. Saved data is unchanged.';return;}
     this.validate(record.file,true);
     const latest=source();if(context.id!==latest.id||context.revision!==latest.revision)throw Error('The draft changed. Choose the preset again.');
     this.validate(record.file,latest.definition.start.resident_balance==='unrestricted');

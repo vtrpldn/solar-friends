@@ -3,7 +3,7 @@ import {EditorDocument} from './document.js';
 // Recovery exports deliberately bypass game/schema validation. A newer or
 // damaged record must remain available without opening or rewriting it.
 export function recoveryRecord(kind,record){
- if(!['project','run'].includes(kind))throw Error('Choose a draft or village backup.');
+ if(!['project','run','map','release','resident'].includes(kind))throw Error('Choose a supported library collection to back up.');
  if(record===null||record===undefined)throw Error('This saved entry is missing. No backup was created.');
  return JSON.stringify({format:'solar-friends-recovery',schema:1,kind,record},null,2);
 }
