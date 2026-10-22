@@ -1,0 +1,76 @@
+{
+  "result": "PASS",
+  "scope": "One static draft pose only; visual approval and remaining activity poses separate",
+  "unchanged": 63700,
+  "foreground": 310,
+  "visibleTool": 601,
+  "visibleEquipment": 1418,
+  "garmentForeground": 0,
+  "garmentLocations": [],
+  "bounds": [
+    126,
+    102,
+    222,
+    156
+  ],
+  "gripDistances": {
+    "nearHand": 0,
+    "farHand": 1.4142135623730951
+  },
+  "source": {
+    "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "width": 1254,
+    "height": 1254
+  },
+  "parts": [
+    {
+      "id": "basket",
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        590,
+        560,
+        320,
+        240
+      ],
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "grain",
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "rect": [
+        1010,
+        475,
+        110,
+        95
+      ],
+      "offset": [
+        0,
+        0
+      ]
+    }
+  ],
+  "registrationSha256": "6c6ee2e00b71b36ce1df5ac5bcd0b4fa07764cea88fbe96946d86202b24c5120",
+  "refused": [
+    "hash",
+    "pose",
+    "source-size",
+    "body-binding",
+    "changed-body-alpha",
+    "changed-body-pixels",
+    "overlapping-appearance",
+    "unsupported-animation-pose"
+  ]
+}

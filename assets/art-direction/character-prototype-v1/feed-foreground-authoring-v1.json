@@ -1,0 +1,43 @@
+{
+  "purpose": "Source-bound foreground ownership only; no body or equipment raster pixels edited",
+  "method": "Start with authored pose polygons. Keep original nontransparent body pixels, excluding the source-bound material model shirt/shorts labels. Store fixed prepared-frame runs; no runtime colour segmentation.",
+  "materialRegistrationSha256": "805525ce4468b630271873341ba1a18e2787d0072586acbaff813e87b37aac50",
+  "poses": [
+    {
+      "index": 12,
+      "input": "web/art/characters/prototype-v1/feed-equipment-pose-12-v3.json",
+      "inputSha256": "00ddb4855a1ce909653be629243f02f8b40bdad721aee578e3f3f25be0086789",
+      "excludedGarmentPixels": 63,
+      "selectedBodyPixels": 1118,
+      "runs": 45,
+      "maskSha256": "924a86de7a214e172acab55663f1afa2694384a86772a132b64ec7a56d566863"
+    },
+    {
+      "index": 13,
+      "input": "web/art/characters/prototype-v1/feed-equipment-pose-13-v3.json",
+      "inputSha256": "ab2c1ef3b688dcdd14212f2b77c63e76a676a5f5c76c8a4c9178ca663ed20b8a",
+      "excludedGarmentPixels": 20,
+      "selectedBodyPixels": 508,
+      "runs": 23,
+      "maskSha256": "2c992dd9e2f055bdef961732395aea9f353d1ebca02cae23008962325df51480"
+    },
+    {
+      "index": 14,
+      "input": "web/art/characters/prototype-v1/feed-equipment-pose-14-v3.json",
+      "inputSha256": "7437a85dc55e2419d9e41e1ca75dbdcef52568eb4b3fad91c3866f6d19ca1b3d",
+      "excludedGarmentPixels": 63,
+      "selectedBodyPixels": 462,
+      "runs": 22,
+      "maskSha256": "18f48a30f89c0544ebc0a7b9a9336fe5f43fc3898542503ab65ce11d12d69365"
+    },
+    {
+      "index": 15,
+      "input": "web/art/characters/prototype-v1/feed-equipment-pose-15-v3.json",
+      "inputSha256": "8b86a4402a00b47b19491d8da400a09bde9b26b18b3bef473ebe2b57493758b8",
+      "excludedGarmentPixels": 82,
+      "selectedBodyPixels": 444,
+      "runs": 21,
+      "maskSha256": "67abd12ce656e5679b1e285e505a55c637dee6feb21686a48347247b0260ddeb"
+    }
+  ]
+}

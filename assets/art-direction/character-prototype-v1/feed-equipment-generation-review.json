@@ -1,0 +1,247 @@
+{
+  "scope": "Four feeding equipment review poses; production appearance/player integration incomplete",
+  "calls": [
+    {
+      "pose": 12,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends FEEDING equipment sprite layer. Image 1 is a GEOMETRY GUIDE ONLY: blue shape is the exact small basket outline/location, yellow opening holds grain, tiny gold marks are loose grain positions, red crosses mark original hands. Image 2 is the unchanged resident body pose for scale/placement; do not output the person. Image 3 is the original Bento animation atlas, STYLE reference only: its bottom row has a small woven feed basket. Paint ONLY that small warm brown woven basket containing golden grain, exactly over the guide outline. SCOOP pose: only grain inside the basket, no separate floating kernels. Keep the identical 1254x1254 transparent whole-body coordinate square and all blank margins, no centering, cropping, shifting or arbitrary enlargement. Same basket physical size across all poses, roughly 260 source pixels wide, about 190 high including opening. Open basket with a simple low rim; no tall carry handle, straps, lid or added objects. Paint broad readable woven bands with restrained detail, modest upper-left warmth, dark painted edges like the original game, not a photoreal wicker product photograph, shiny plastic, tiny noisy texture or ornate craftwork. Loose kernels must be tiny seed-sized pieces, not fruit or a giant clump. No blue/red guide colours or lines, person, hands, arms, skin, clothes, ground, shadow, labels or extra particles. True transparency between basket and loose seeds. Body and fingers will be composited unchanged later. Follow the full-frame guide precisely.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e043a49a-1735-4426-b81d-63ad3cf18728.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-12-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-12.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-12-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Reference only: chunky weave and oversized glossy grain",
+      "sha256": "7dbe2622315ff0f9d9aef05553c950f7de41fead026d7f49e48e42bd9d9326b4"
+    },
+    {
+      "pose": 12,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends feeding equipment style correction. Image 1 is GEOMETRY ONLY: basket outline/position and tiny grain marks; red hands and blue outlines must not appear. Image 2 is the exact unchanged neutral body for placement, not output content. Image 3 is the ORIGINAL GAME ART STYLE reference, especially its small golden-brown wicker basket: match its fine woven strands, restrained warm contrast, plain low rim and subdued tiny grain. Output ONLY the basket and grain in image 1's fixed 1254x1254 whole-body coordinate frame, on true transparency. Preserve its exact guide silhouette, roughly 260 source pixels wide and 190 high; do not center, move, enlarge or crop. Use close fine wicker weave, approximately 10 narrow horizontal rows with about 16 strands across the width, not big rectangular wood blocks or masonry bricks. Soft simplified painted shading like image 3, not glossy mobile-game loot, a photo texture or noisy microdetail. Contents are a subdued tan/gold layer of tiny feed grains, not a pile of shiny beans. No loose grain outside the basket. Each loose seed is ONLY 7\u20139 SOURCE PIXELS long on the full 1254 square, plain muted ochre with one modest highlight. Do not turn seeds into coins, gold nuggets, eggs or fruit, and do not enlarge their positions. No tall handle/strap/lid/decoration. No people, hands, arms, clothing, skin, ground, shadows, labels or extra particles. The same original fingers will be restored separately. Keep transparent gaps and original full-frame margins.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-280ac11c-4358-465a-bf1e-fabcd3ca3adf.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-12-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-12-v2.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-12-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/original-feeding-style-reference.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Refinement reference only; final basket reuses pose-14 source",
+      "sha256": "39317848c06c8210fb87ccb43342a36dc5dbcc557ec27fcd67df30926311bdb4"
+    },
+    {
+      "pose": 13,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends FEEDING equipment sprite layer. Image 1 is a GEOMETRY GUIDE ONLY: blue shape is the exact small basket outline/location, yellow opening holds grain, tiny gold marks are loose grain positions, red crosses mark original hands. Image 2 is the unchanged resident body pose for scale/placement; do not output the person. Image 3 is the original Bento animation atlas, STYLE reference only: its bottom row has a small woven feed basket. Paint ONLY that small warm brown woven basket containing golden grain, exactly over the guide outline. HOLD pose: include the four tiny grain kernels at the marked positions over the extended palm. Keep the identical 1254x1254 transparent whole-body coordinate square and all blank margins, no centering, cropping, shifting or arbitrary enlargement. Same basket physical size across all poses, roughly 260 source pixels wide, about 190 high including opening. Open basket with a simple low rim; no tall carry handle, straps, lid or added objects. Paint broad readable woven bands with restrained detail, modest upper-left warmth, dark painted edges like the original game, not a photoreal wicker product photograph, shiny plastic, tiny noisy texture or ornate craftwork. Loose kernels must be tiny seed-sized pieces, not fruit or a giant clump. No blue/red guide colours or lines, person, hands, arms, skin, clothes, ground, shadow, labels or extra particles. True transparency between basket and loose seeds. Body and fingers will be composited unchanged later. Follow the full-frame guide precisely.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ca20faf5-2aa2-4edf-b7a7-048b6b54ed22.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-13-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-13.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-13-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Reference only: chunky weave and oversized glossy grain",
+      "sha256": "1936dbcc09e0965521f9e0890f6b0a8466b13bf5744547f76e988661e68ca681"
+    },
+    {
+      "pose": 13,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends feeding equipment style correction. Image 1 is GEOMETRY ONLY: basket outline/position and tiny grain marks; red hands and blue outlines must not appear. Image 2 is the exact unchanged neutral body for placement, not output content. Image 3 is the ORIGINAL GAME ART STYLE reference, especially its small golden-brown wicker basket: match its fine woven strands, restrained warm contrast, plain low rim and subdued tiny grain. Output ONLY the basket and grain in image 1's fixed 1254x1254 whole-body coordinate frame, on true transparency. Preserve its exact guide silhouette, roughly 260 source pixels wide and 190 high; do not center, move, enlarge or crop. Use close fine wicker weave, approximately 10 narrow horizontal rows with about 16 strands across the width, not big rectangular wood blocks or masonry bricks. Soft simplified painted shading like image 3, not glossy mobile-game loot, a photo texture or noisy microdetail. Contents are a subdued tan/gold layer of tiny feed grains, not a pile of shiny beans. Four tiny loose seeds sit at the guide's positions over the extended palm. Each loose seed is ONLY 7\u20139 SOURCE PIXELS long on the full 1254 square, plain muted ochre with one modest highlight. Do not turn seeds into coins, gold nuggets, eggs or fruit, and do not enlarge their positions. No tall handle/strap/lid/decoration. No people, hands, arms, clothing, skin, ground, shadows, labels or extra particles. The same original fingers will be restored separately. Keep transparent gaps and original full-frame margins.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-f0418f7a-9cf2-45b9-823b-b750533a4116.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-13-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-13-v2.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-13-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/original-feeding-style-reference.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Grain region retained; basket region excluded in favor of shared pose-14 source",
+      "sha256": "18ad112df73d1b82d2d799c3dc1ce72f89393fe9d67506d5c1b6de1c1fae8bc8"
+    },
+    {
+      "pose": 14,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends FEEDING equipment sprite layer. Image 1 is a GEOMETRY GUIDE ONLY: blue shape is the exact small basket outline/location, yellow opening holds grain, tiny gold marks are loose grain positions, red crosses mark original hands. Image 2 is the unchanged resident body pose for scale/placement; do not output the person. Image 3 is the original Bento animation atlas, STYLE reference only: its bottom row has a small woven feed basket. Paint ONLY that small warm brown woven basket containing golden grain, exactly over the guide outline. REACH pose: include the four tiny grain kernels at the marked positions over the extended palm. Keep the identical 1254x1254 transparent whole-body coordinate square and all blank margins, no centering, cropping, shifting or arbitrary enlargement. Same basket physical size across all poses, roughly 260 source pixels wide, about 190 high including opening. Open basket with a simple low rim; no tall carry handle, straps, lid or added objects. Paint broad readable woven bands with restrained detail, modest upper-left warmth, dark painted edges like the original game, not a photoreal wicker product photograph, shiny plastic, tiny noisy texture or ornate craftwork. Loose kernels must be tiny seed-sized pieces, not fruit or a giant clump. No blue/red guide colours or lines, person, hands, arms, skin, clothes, ground, shadow, labels or extra particles. True transparency between basket and loose seeds. Body and fingers will be composited unchanged later. Follow the full-frame guide precisely.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5eff4220-187e-41b8-b467-a438228539be.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-14-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-14.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-14-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Reference only: chunky weave and oversized glossy grain",
+      "sha256": "db8032b07fe40007e0cc8ffce512ed16f57d8a66a87bbf5a335951442b605978"
+    },
+    {
+      "pose": 14,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends feeding equipment style correction. Image 1 is GEOMETRY ONLY: basket outline/position and tiny grain marks; red hands and blue outlines must not appear. Image 2 is the exact unchanged neutral body for placement, not output content. Image 3 is the ORIGINAL GAME ART STYLE reference, especially its small golden-brown wicker basket: match its fine woven strands, restrained warm contrast, plain low rim and subdued tiny grain. Output ONLY the basket and grain in image 1's fixed 1254x1254 whole-body coordinate frame, on true transparency. Preserve its exact guide silhouette, roughly 260 source pixels wide and 190 high; do not center, move, enlarge or crop. Use close fine wicker weave, approximately 10 narrow horizontal rows with about 16 strands across the width, not big rectangular wood blocks or masonry bricks. Soft simplified painted shading like image 3, not glossy mobile-game loot, a photo texture or noisy microdetail. Contents are a subdued tan/gold layer of tiny feed grains, not a pile of shiny beans. Four tiny loose seeds sit at the guide's positions over the extended palm. Each loose seed is ONLY 7\u20139 SOURCE PIXELS long on the full 1254 square, plain muted ochre with one modest highlight. Do not turn seeds into coins, gold nuggets, eggs or fruit, and do not enlarge their positions. No tall handle/strap/lid/decoration. No people, hands, arms, clothing, skin, ground, shadows, labels or extra particles. The same original fingers will be restored separately. Keep transparent gaps and original full-frame margins.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2485f1b3-5a28-40af-b529-9d06ab6c4ea9.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-14-v2.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-14-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/original-feeding-style-reference.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Painted basket and grain regions retained for shared review recipe",
+      "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1"
+    },
+    {
+      "pose": 15,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends FEEDING equipment sprite layer. Image 1 is a GEOMETRY GUIDE ONLY: blue shape is the exact small basket outline/location, yellow opening holds grain, tiny gold marks are loose grain positions, red crosses mark original hands. Image 2 is the unchanged resident body pose for scale/placement; do not output the person. Image 3 is the original Bento animation atlas, STYLE reference only: its bottom row has a small woven feed basket. Paint ONLY that small warm brown woven basket containing golden grain, exactly over the guide outline. RELEASE pose: include only the four tiny kernels at the guide's positions following the short downward arc from the extended palm. Keep the identical 1254x1254 transparent whole-body coordinate square and all blank margins, no centering, cropping, shifting or arbitrary enlargement. Same basket physical size across all poses, roughly 260 source pixels wide, about 190 high including opening. Open basket with a simple low rim; no tall carry handle, straps, lid or added objects. Paint broad readable woven bands with restrained detail, modest upper-left warmth, dark painted edges like the original game, not a photoreal wicker product photograph, shiny plastic, tiny noisy texture or ornate craftwork. Loose kernels must be tiny seed-sized pieces, not fruit or a giant clump. No blue/red guide colours or lines, person, hands, arms, skin, clothes, ground, shadow, labels or extra particles. True transparency between basket and loose seeds. Body and fingers will be composited unchanged later. Follow the full-frame guide precisely.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5382efdb-253a-4fc8-ad40-3787a790555a.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-15-candidate-v1.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-15.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-15-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "web/art/animations/bento-activities.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Reference only: chunky weave and oversized glossy grain",
+      "sha256": "fd42e1e3f0912a39b6394c176829f31ae8d19fa931574544113eec2d3000f02d"
+    },
+    {
+      "pose": 15,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends feeding equipment style correction. Image 1 is GEOMETRY ONLY: basket outline/position and tiny grain marks; red hands and blue outlines must not appear. Image 2 is the exact unchanged neutral body for placement, not output content. Image 3 is the ORIGINAL GAME ART STYLE reference, especially its small golden-brown wicker basket: match its fine woven strands, restrained warm contrast, plain low rim and subdued tiny grain. Output ONLY the basket and grain in image 1's fixed 1254x1254 whole-body coordinate frame, on true transparency. Preserve its exact guide silhouette, roughly 260 source pixels wide and 190 high; do not center, move, enlarge or crop. Use close fine wicker weave, approximately 10 narrow horizontal rows with about 16 strands across the width, not big rectangular wood blocks or masonry bricks. Soft simplified painted shading like image 3, not glossy mobile-game loot, a photo texture or noisy microdetail. Contents are a subdued tan/gold layer of tiny feed grains, not a pile of shiny beans. Four tiny loose seeds follow exactly the short falling arc in guide 1. Each loose seed is ONLY 7\u20139 SOURCE PIXELS long on the full 1254 square, plain muted ochre with one modest highlight. Do not turn seeds into coins, gold nuggets, eggs or fruit, and do not enlarge their positions. No tall handle/strap/lid/decoration. No people, hands, arms, clothing, skin, ground, shadows, labels or extra particles. The same original fingers will be restored separately. Keep transparent gaps and original full-frame margins.",
+      "transparent_background": true,
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-cd99f09b-36a3-4659-9c7f-552e4a1511b2.png",
+      "output": "web/art/characters/prototype-v1/feeding-basket-pose-15-candidate-v2.png",
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/feed-equipment-guide-15-v2.png",
+          "role": "Code-authored geometry only; not finished art"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-15-body.png",
+          "role": "Exact unchanged body/hand placement"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/original-feeding-style-reference.png",
+          "role": "Original game feeding equipment style only"
+        }
+      ],
+      "verdict": "Grain region retained; basket region excluded in favor of shared pose-14 source",
+      "sha256": "247110fe39d3ac5fc6f5a327a6ce066302376a1eca74c6b09e1093923b9857c7"
+    }
+  ],
+  "composition": {
+    "registrationFormat": 2,
+    "activeRegistrations": [
+      "web/art/characters/prototype-v1/feed-equipment-pose-12-v4.json",
+      "web/art/characters/prototype-v1/feed-equipment-pose-13-v4.json",
+      "web/art/characters/prototype-v1/feed-equipment-pose-14-v4.json",
+      "web/art/characters/prototype-v1/feed-equipment-pose-15-v4.json"
+    ],
+    "basket": "One unchanged painted region from feeding-basket-pose-14-candidate-v2.png, shared by all four poses. Explicit integer offsets only. No per-part scaling, rotation, warping or silhouette fitting.",
+    "normalization": "Compose at integer source coordinates; normalize the whole frame once. Per-crop downscaling was rejected after independent pixels exposed resampling phase differences.",
+    "foreground": "Fixed body-bound pixel runs authored from pose polygons, excluding registered shirt/shorts material pixels. Original RGBA ownership is disjoint. No body/equipment raster edits or runtime colour segmentation.",
+    "ownershipEvidence": "feed-foreground-authoring-v1.json"
+  },
+  "review": {
+    "status": "Review drafts only; excluded from regular player choices",
+    "findings": [
+      "Fine woven strands and subdued basket contents improve the original chunky/bean-like candidates.",
+      "Shared basket source prevents per-pose changes in weave, physical size and lighting.",
+      "Precise foreground masks remove garment patches previously restored over the basket.",
+      "Loose seeds remain larger than the 7-9 source-pixel request in some generated sources; pose 13 also has three visible kernels rather than four requested. Final seed scale/palm semantics remain under review.",
+      "Whole-pose cadence remains discrete. This increment does not approve all character art or animation."
+    ],
+    "inspected": [
+      "feed-equipment-pose-12-v3-scenes.png (earlier polygon mask)",
+      "feed-equipment-pose-13-v3-scenes.png (earlier polygon mask)",
+      "feed-equipment-cycle-v1-transitions.png",
+      "feed-equipment-playback-keyframes-v1-frames.png",
+      "feed-equipment-playback-crossfade-v1-frames.png",
+      "feed-equipment-pose-12-v4-scenes.png",
+      "feed-equipment-pose-13-v4-scenes.png",
+      "feed-equipment-pose-15-v4-scenes.png",
+      "feed-equipment-pose-14-v4-scenes.png"
+    ]
+  },
+  "verification": {
+    "pose": "Four independent full-frame composition/source/hand/garment checks, margins, contact and incompatible-input refusals.",
+    "parts": "16 malformed part recipes and five source/format refusals; exactly one decoded basket/image request across all four authored placements. Invalid versions/parts fail before artwork requests.",
+    "foreground": "18 malformed pixel masks; exact disjoint RGBA ownership on all four dyed bodies; zero shirt/shorts in foreground.",
+    "cycle": "Real three-second loop, 19 boundary samples, four key poses, exact loop return, public play/pause/interruption and all four world views. Synchronous recorder/button start, forced final canvas capture, 75 successive decoded frames plus one decoded endpoint per presentation; both boards inspected.",
+    "regressions": "Legacy water/cook/tend static checks and all 48 composed appearance poses/portraits/controls/cache pass. Historical captures preserved through optional output directories. Duration-aware synchronized cooking/tending recordings pass."
+  },
+  "remaining": "Final art/temporal review, other modular appearance options, portraits/native recipes/player integration, and original builder recovery/feasibility/biome/usability/performance gates remain required."
+}

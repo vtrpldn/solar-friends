@@ -2,6 +2,7 @@ import {drawResidentAnimation,sampleResidentClip,residentClips} from '../residen
 import {loadCharacterImageSource} from '../character-image-source.js';
 import {registeredEquipmentFrame} from '../character-equipment.js';
 import {prototypeAppearanceRecipe} from '../character-appearance-recipe.js';
+import {loadEquipmentArt} from '../character-equipment-parts.js';
 // Shared review path for complete clips and explicitly partial equipment work.
 export async function installActivityEquipmentReview({frames,binding,materials,appearance,scene,before,clip,registrations,prefix,sectionId,title,note}){
  const spec=Object.hasOwn(residentClips,clip)?residentClips[clip]:null;
@@ -10,10 +11,11 @@ export async function installActivityEquipmentReview({frames,binding,materials,a
  if(!indices.length||new Set(indices).size!==indices.length||indices.some(i=>!Number.isInteger(i)||!expected.has(i))||indices.some(i=>!/^[a-z0-9-]+\.json$/.test(registrations[i])))throw Error('Choose registered equipment poses from one supported activity.');
  const hasCycle=[...expected].every(i=>indices.includes(i)),duration=spec.fps?spec.frames.length/spec.fps:0,section=document.createElement('section');section.id=sectionId;const heading=document.createElement('h2'),description=document.createElement('p');heading.textContent=title;description.textContent=note;section.append(heading,description);
  const select=document.createElement('select');select.id=prefix+'-pose-index';const label=document.createElement('label');label.textContent='Authored activity pose ';label.append(select);section.append(label);const grid=document.createElement('div');grid.className='body-review-scenes';section.append(grid);
- const recipe=prototypeAppearanceRecipe({skin:'copper',shirt:'teal',shorts:'sage',shoes:'graphite'}),hair=await appearance.provider(clip,recipe),poses=new Map();
+ const recipe=prototypeAppearanceRecipe({skin:'copper',shirt:'teal',shorts:'sage',shoes:'graphite'}),hair=await appearance.provider(clip,recipe),poses=new Map(),sources=new Map();
+ const load=file=>{if(!sources.has(file))sources.set(file,loadCharacterImageSource('/art/characters/prototype-v1/'+file));return sources.get(file);};
  for(const index of indices){
   const response=await fetch('/art/characters/prototype-v1/'+registrations[index]);if(!response.ok)throw Error('Cannot load the equipment pose registration.');const registration=await response.json();if(!/^[a-z0-9-]+\.png$/.test(registration.file??''))throw Error('Choose bundled equipment artwork.');
-  const equipment=await loadCharacterImageSource('/art/characters/prototype-v1/'+registration.file),painted=materials.provider(recipe.materials).frameForPose(spec.sheet,index),hairFrame=hair.frameForPose(spec.sheet,index),frame=await registeredEquipmentFrame({body:frames[spec.sheet][index],binding,appearanceBody:painted,appearanceFrame:hairFrame,equipment,registration,sheet:spec.sheet,index});
+  const equipment=await loadEquipmentArt(registration,load),painted=materials.provider(recipe.materials).frameForPose(spec.sheet,index),hairFrame=hair.frameForPose(spec.sheet,index),frame=await registeredEquipmentFrame({body:frames[spec.sheet][index],binding,appearanceBody:painted,appearanceFrame:hairFrame,equipment,registration,sheet:spec.sheet,index});
   poses.set(index,{registration,equipment,painted,hairFrame,frame,recipe});select.append(new Option(String(index-spec.row*4+1),String(index)));
  }
  const time=document.createElement('input');time.id=prefix+'-cycle-time';time.type='number';time.min='0';time.max=String(duration);time.step='.01';time.value='0';const timeLabel=document.createElement('label');timeLabel.textContent='Cycle time · seconds ';timeLabel.append(time);if(hasCycle)label.after(timeLabel);

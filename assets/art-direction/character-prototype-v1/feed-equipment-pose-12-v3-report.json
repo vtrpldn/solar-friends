@@ -1,0 +1,34 @@
+{
+  "result": "PASS",
+  "scope": "One static draft pose only; visual approval and remaining activity poses separate",
+  "unchanged": 63772,
+  "foreground": 844,
+  "visibleTool": 0,
+  "visibleEquipment": 846,
+  "garmentForeground": 0,
+  "bounds": [
+    121,
+    111,
+    174,
+    148
+  ],
+  "gripDistances": {
+    "nearHand": 0,
+    "farHand": 0
+  },
+  "source": {
+    "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "width": 1254,
+    "height": 1254
+  },
+  "refused": [
+    "hash",
+    "pose",
+    "source-size",
+    "body-binding",
+    "changed-body-alpha",
+    "changed-body-pixels",
+    "overlapping-appearance",
+    "unsupported-animation-pose"
+  ]
+}

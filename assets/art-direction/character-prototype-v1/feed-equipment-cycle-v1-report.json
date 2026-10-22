@@ -1,0 +1,211 @@
+{
+  "result": "PASS",
+  "scope": "Four draft equipment poses and real 3-second playback only; final grip/style/cadence approval separate",
+  "samples": [
+    0,
+    0.425,
+    0.47,
+    0.5,
+    0.925,
+    0.97,
+    1,
+    1.425,
+    1.47,
+    1.5,
+    1.925,
+    1.97,
+    2,
+    2.425,
+    2.47,
+    2.5,
+    2.925,
+    2.97,
+    3
+  ],
+  "uniqueKeyPoses": 4,
+  "recordedFramesPerMode": 76,
+  "recording": "Synchronous public-button start, forced final canvas frame, regular samples plus decoded endpoint",
+  "sources": [
+    {
+      "index": 12,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            -28,
+            -39
+          ]
+        }
+      ],
+      "registrationSha256": "75094ec82ac6e94ef17de6a33da66501a89ea3cd73464159006cefde459dfa91"
+    },
+    {
+      "index": 13,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            15,
+            -15
+          ]
+        },
+        {
+          "id": "grain",
+          "file": "feeding-basket-pose-13-candidate-v2.png",
+          "source": {
+            "sha256": "18ad112df73d1b82d2d799c3dc1ce72f89393fe9d67506d5c1b6de1c1fae8bc8",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            930,
+            480,
+            110,
+            85
+          ],
+          "offset": [
+            0,
+            0
+          ]
+        }
+      ],
+      "registrationSha256": "44958e557d0169b62c48e4eb1c017f1b6ebebcdfaf8f42f0bd6c8d242dea20c8"
+    },
+    {
+      "index": 14,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "grain",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            1010,
+            475,
+            110,
+            95
+          ],
+          "offset": [
+            0,
+            0
+          ]
+        }
+      ],
+      "registrationSha256": "6c6ee2e00b71b36ce1df5ac5bcd0b4fa07764cea88fbe96946d86202b24c5120"
+    },
+    {
+      "index": 15,
+      "file": "feeding-basket-pose-14-candidate-v2.png",
+      "source": {
+        "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+        "width": 1254,
+        "height": 1254
+      },
+      "parts": [
+        {
+          "id": "basket",
+          "file": "feeding-basket-pose-14-candidate-v2.png",
+          "source": {
+            "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            590,
+            560,
+            320,
+            240
+          ],
+          "offset": [
+            15,
+            0
+          ]
+        },
+        {
+          "id": "grain",
+          "file": "feeding-basket-pose-15-candidate-v2.png",
+          "source": {
+            "sha256": "247110fe39d3ac5fc6f5a327a6ce066302376a1eca74c6b09e1093923b9857c7",
+            "width": 1254,
+            "height": 1254
+          },
+          "rect": [
+            980,
+            600,
+            135,
+            150
+          ],
+          "offset": [
+            0,
+            0
+          ]
+        }
+      ],
+      "registrationSha256": "69aa7a53f4b5d42128a561454230e34a71e536e9231adc71207e20b206634c6a"
+    }
+  ]
+}

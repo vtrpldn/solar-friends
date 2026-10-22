@@ -8,3 +8,6 @@ export function installCookingEquipmentReview(options){
 export function installTendingEquipmentReview(options){
  return installActivityEquipmentReview({...options,clip:'tend',registrations:Object.fromEntries([8,9,10,11].map(i=>[i,`tend-equipment-pose-${i}-v${i===11?1:2}.json`])),prefix:'tend-equipment',sectionId:'tend-equipment-review',title:'Tending · equipment poses',note:'Four hand-trowel poses are drafts. Grip, boot/ground clearance, material consistency and cadence require visual review. Excluded from player choices.'});
 }
+export function installFeedingEquipmentReview(options){
+ return installActivityEquipmentReview({...options,clip:'feed',registrations:Object.fromEntries([12,13,14,15].map(i=>[i,`feed-equipment-pose-${i}-v4.json`])),prefix:'feed-equipment',sectionId:'feed-equipment-review',title:'Feeding · equipment poses',note:'Four basket-and-grain poses are drafts. Supporting grip, grain/palm layering, woven texture, proportions and cadence require visual review. Excluded from player choices.'});
+}

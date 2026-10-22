@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "purpose": "Style reference only, not a new sprite or neutral-body placement reference",
+  "source": "web/art/animations/bento-activities.png",
+  "sha256": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530",
+  "preparedFrame": 12,
+  "referenceRow": 0,
+  "outputSize": 1254
+}
