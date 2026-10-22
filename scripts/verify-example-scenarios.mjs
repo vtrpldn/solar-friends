@@ -13,5 +13,5 @@ try{
  assert(JSON.parse(game.validate_scenario(raw)).ok);assert(JSON.parse(game.load_scenario(raw)).ok);
  const journal=JSON.parse(game.scenario_journal());assert.equal(journal.finished_at,null);assert.equal(journal.chapters[0].goals[0].status,'active');assert.equal(journal.chapters[1].goals[0].status,'locked');
  const before=game.snapshot();game.tick(0);assert.equal(game.snapshot(),before);assert(copy.restore(before));assert.equal(copy.snapshot(),before);
- console.log('PASS: exported player-authored First clearing compiles with all core simulation rules, ordered/optional goals, real-run harvest credit, sustained pantry requirement, pause and exact opening restoration. Full completion/balance remains unverified.');
+ console.log('PASS: exported player-authored First clearing compiles with all core simulation rules, ordered/optional goals, real-run harvest credit, sustained pantry requirement, pause and exact opening restoration. This verifier covers opening state; completion is checked separately.');
 }finally{game.free();copy.free();}

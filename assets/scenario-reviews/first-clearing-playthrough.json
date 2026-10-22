@@ -1,0 +1,669 @@
+{
+  "schema": 1,
+  "sourceSha256": "978c6329d13be74f4a925bab852370ec4de2e5cf839dbde36c994ecbea1a6e78",
+  "speed": 16,
+  "actions": {
+    "orders": {
+      "tiles": 2,
+      "panels": 2,
+      "batteries": 2
+    },
+    "placements": [
+      [
+        "home",
+        27,
+        32
+      ],
+      [
+        "home",
+        28,
+        36
+      ],
+      [
+        "kitchen",
+        32,
+        34
+      ],
+      [
+        "garden",
+        35,
+        34
+      ]
+    ]
+  },
+  "finishedAt": 4158.86376953125,
+  "observedThrough": 8639.8701171875,
+  "daysAfterCompletion": 3.1118099636501735,
+  "remainingFunds": 151288,
+  "goals": [
+    {
+      "title": "A place to come home to",
+      "goals": [
+        {
+          "title": "Room for everyone",
+          "status": "complete",
+          "optional": false
+        },
+        {
+          "title": "A place to gather",
+          "status": "active",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "title": "A shared table",
+      "goals": [
+        {
+          "title": "Plant the first garden",
+          "status": "complete",
+          "optional": false
+        },
+        {
+          "title": "Cook together",
+          "status": "complete",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "title": "Learn from the land",
+      "goals": [
+        {
+          "title": "Two real harvests",
+          "status": "complete",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "title": "Find a comfortable rhythm",
+      "goals": [
+        {
+          "title": "Keep the pantry healthy",
+          "status": "complete",
+          "optional": false
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "frame": 0,
+      "minute": 480.79998779296875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 0
+        },
+        {
+          "kind": "home",
+          "progress": 0
+        },
+        {
+          "kind": "kitchen",
+          "progress": 0
+        },
+        {
+          "kind": "garden",
+          "progress": 0
+        }
+      ]
+    },
+    {
+      "frame": 600,
+      "minute": 960.7926635742188,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 75
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 33.333335876464844
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 1200,
+      "minute": 1440.817138671875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 75
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 33.333335876464844
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 1800,
+      "minute": 1920.846435546875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 75
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 33.333335876464844
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 2400,
+      "minute": 2400.875732421875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 75
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 3000,
+      "minute": 2880.905029296875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 75
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 3600,
+      "minute": 3360.934326171875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 75
+        },
+        {
+          "kind": "home",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 4200,
+      "minute": 3840.963623046875,
+      "finished": null,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 4800,
+      "minute": 4320.92431640625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 5400,
+      "minute": 4800.80712890625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 6000,
+      "minute": 5280.68994140625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 6600,
+      "minute": 5760.57275390625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 7200,
+      "minute": 6240.45556640625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 7800,
+      "minute": 6720.33837890625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 8400,
+      "minute": 7200.22119140625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 9000,
+      "minute": 7680.10400390625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 9600,
+      "minute": 8159.98681640625,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "frame": 10200,
+      "minute": 8639.8701171875,
+      "finished": 4158.86376953125,
+      "funds": 151288,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    }
+  ],
+  "scope": "Native normal-command playthrough, not a public-input usability study. No runtime snapshot patches, free stock, forced work or goal mutation."
+}

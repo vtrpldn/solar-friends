@@ -1,3 +1,4 @@
+import {exampleScenarios,loadExampleScenario} from './example-scenarios.js';
 import {hydrateLibraryPreviews} from './library-previews.js';
 import {chooseRecoveryCheckpoint} from './recovery-dialog.js';
 import {draftImportIssue} from './draft-import.js';
@@ -435,6 +436,7 @@ function wire(){
     try{
       if(b.dataset.backupProject)downloadRecoveryRecord('project',await library.getProject(b.dataset.backupProject));
       if(b.dataset.backupRun)downloadRecoveryRecord('run',await library.getRun(b.dataset.backupRun));
+      if(b.dataset.example){const definition=await loadExampleScenario(b.dataset.example,raw=>JSON.parse(engine.validate_scenario(raw)));await newProject('copy',definition);toast('A separate editable copy of the example is saved.');}
       if(b.dataset.preset)await newProject(b.dataset.preset);
       if(b.dataset.openProject){const record=await library.getProject(b.dataset.openProject);if(record)await openProject(record);}
       if(b.dataset.playProject){const record=await library.getProject(b.dataset.playProject);if(record)await launch(record.checkpoint.definition,record,'scenario');}
@@ -500,6 +502,7 @@ try{
   $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
+  $('creator-examples').innerHTML=exampleScenarios.map(e=>`<button data-example="${escape(e.id)}"><b>${escape(e.title)}</b><small>${escape(e.biome)} · ${escape(e.summary)}</small></button>`).join('');
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
   equipmentEditor=new EquipmentEditor($('creator-equipment-fields'),{engine,catalog:catalog.equipment,change,focus:(x,y)=>map.centerAt(x,y)});
   routesEditor=new RoutesEditor($('creator-routes-fields'),{engine,Game,catalog,change,buildingName:title,notify:toast,focus:(x,y)=>map.centerAt(x,y),select:id=>{setTool('select');if(id)map.selectRoute(id);else map.select(null);},preview:plan=>{map.utilityPreview=plan;map.render();},draw:()=>setTool('route-path')});

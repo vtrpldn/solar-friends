@@ -1,7 +1,7 @@
 {
   "description": "Five friends arrive at a small clearing in Mata Atlântica. A shed keeps the rain off and a shared store holds their first supplies. Plan homes, a kitchen and a modest garden while leaving the surrounding forest room to grow. There is no deadline.",
   "format": "solar-friends-scenario",
-  "id": "c41e176e-8475-4cf1-ae57-9454acf835e8",
+  "id": "e489903e-b8f8-42f1-be1e-916434bda903",
   "journal": {
     "chapters": [
       {
@@ -14,8 +14,8 @@
               "credit": "present",
               "kind": "buildings"
             },
-            "description": "Complete two homes. Each houses three people; a shed protects people from the weather but does not replace beds.",
-            "id": "goal-0cb8dbbe-b54e-4f81-8004-ff036209a6c8",
+            "description": "Complete two homes. Each houses three people; the shed does not provide beds. Standard homes need one solar panel and one battery each. Use Supplies to compare shortages with town purchases, or choose a supported local building recipe. Keep money for food and maintenance.",
+            "id": "goal-dea899f0-b3f1-43cf-90a5-99fed3da9e06",
             "optional": false,
             "title": "Room for everyone"
           },
@@ -27,12 +27,12 @@
               "kind": "buildings"
             },
             "description": "Optional: leave a square where paths meet, with room for a future community space.",
-            "id": "goal-fb55d81c-299a-45d0-874e-c47a78cf9915",
+            "id": "goal-fd53f2c0-0def-45f3-b439-f217f4604cd6",
             "optional": true,
             "title": "A place to gather"
           }
         ],
-        "id": "chapter-f947445d-5e0d-4d06-816c-727a04361c43",
+        "id": "chapter-fd2af8bf-3ef3-4839-a773-d1920d607b47",
         "title": "A place to come home to"
       },
       {
@@ -46,7 +46,7 @@
               "kind": "buildings"
             },
             "description": "Complete a garden near the kitchen and a reachable water supply. Avoid building over every fertile patch.",
-            "id": "goal-6d45f095-3368-438d-b8a6-eef17835ed97",
+            "id": "goal-d7ad8004-ccd8-4fb7-90cc-4f1e62874fb7",
             "optional": false,
             "title": "Plant the first garden"
           },
@@ -58,12 +58,12 @@
               "kind": "buildings"
             },
             "description": "Complete a kitchen. Check supplies and access before asking residents to build.",
-            "id": "goal-4801f2b7-9ab6-4edf-a9ca-ab7621c76d35",
+            "id": "goal-7574d0f2-82e1-45e5-ab1e-e6d59413824b",
             "optional": false,
             "title": "Cook together"
           }
         ],
-        "id": "chapter-b9073013-5de1-4223-8c86-2df618348e24",
+        "id": "chapter-669e7998-6171-4711-9c10-2215c99f7cd6",
         "title": "A shared table"
       },
       {
@@ -76,12 +76,12 @@
               "kind": "harvests"
             },
             "description": "Let residents complete two harvests during this village. Starting food does not count as growing it.",
-            "id": "goal-8e7dadb6-2036-477e-a9a9-f135c193ea66",
+            "id": "goal-2d27b238-2b01-4c80-97dc-d365dae62e40",
             "optional": false,
             "title": "Two real harvests"
           }
         ],
-        "id": "chapter-f1ef8dcd-5f06-4b86-b581-185efdb08c6b",
+        "id": "chapter-7d808fe6-6078-4e19-af51-910145098996",
         "title": "Learn from the land"
       },
       {
@@ -94,12 +94,12 @@
               "outcome": "pantry"
             },
             "description": "Maintain the pantry outcome for an observed hour. Food reserves and resident hunger must both stay healthy; pauses do not add time.",
-            "id": "goal-8f47788a-55d3-4114-b19b-50332790f533",
+            "id": "goal-a81f0bb1-964e-4cba-b06e-bea6855d1e9d",
             "optional": false,
             "title": "Keep the pantry healthy"
           }
         ],
-        "id": "chapter-7394b71e-9681-4b29-a0c6-c84a4778760d",
+        "id": "chapter-6fc09438-d495-4894-a83c-33db5d300b1b",
         "title": "Find a comfortable rhythm"
       }
     ],
@@ -213,7 +213,7 @@
     ],
     "generator": "property-v1",
     "height": 64,
-    "id": "map-c41e176e-8475-4cf1-ae57-9454acf835e8",
+    "id": "map-e489903e-b8f8-42f1-be1e-916434bda903",
     "nature": [
       {
         "id": "nature-0",
