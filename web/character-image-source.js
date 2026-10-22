@@ -7,7 +7,8 @@ export async function loadCharacterImageSource(url){
  const sourceHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
  const objectUrl=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));
  try{
-  const image=new Image();image.src=objectUrl;await image.decode();
+  const image=new Image();image.src=objectUrl;
+  try{await image.decode();}catch(cause){throw Error(`Cannot decode character artwork (${url}).`,{cause});}
   return {image,sourceHash};
  }finally{URL.revokeObjectURL(objectUrl);}
 }

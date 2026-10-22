@@ -1,0 +1,64 @@
+{
+  "result": "PASS",
+  "scope": "Four draft equipment poses and real two-second playback only; final grip/style/cadence approval separate",
+  "samples": [
+    0,
+    0.2833333333333333,
+    0.3133333333333333,
+    0.3333333333333333,
+    0.6166666666666667,
+    0.6466666666666666,
+    0.6666666666666666,
+    0.9500000000000001,
+    0.98,
+    1,
+    1.2833333333333334,
+    1.3133333333333332,
+    1.3333333333333333,
+    1.6166666666666665,
+    1.6466666666666667,
+    1.6666666666666667,
+    1.95,
+    1.9800000000000002,
+    2
+  ],
+  "uniqueKeyPoses": 4,
+  "sources": [
+    {
+      "index": 0,
+      "file": "cooking-pot-pose-0-candidate-v3.png",
+      "source": {
+        "sha256": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+        "width": 1254,
+        "height": 1254
+      }
+    },
+    {
+      "index": 1,
+      "file": "cooking-pot-pose-1-candidate-v2.png",
+      "source": {
+        "sha256": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+        "width": 1254,
+        "height": 1254
+      }
+    },
+    {
+      "index": 2,
+      "file": "cooking-pot-pose-2-candidate-v2.png",
+      "source": {
+        "sha256": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+        "width": 1254,
+        "height": 1254
+      }
+    },
+    {
+      "index": 3,
+      "file": "cooking-pot-pose-3-candidate-v2.png",
+      "source": {
+        "sha256": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+        "width": 1254,
+        "height": 1254
+      }
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "scope": "Three additional cooking equipment poses; not final activity approval",
+  "calls": [
+    {
+      "pose": 1,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends COOKING equipment animation layer. Image 1 is the EXACT full-frame resident pose/hand placement reference, not output content. Image 2 is the same grey cooking pot and wood spoon from pose 1; preserve its physical pot dimensions, material, food colours, spoon thickness, broad painted shading and upper-left lighting. SECOND stirring pose: near spoon grip (715,583), far supporting hand (921,681). Compared with design reference, pot shifts slightly left to sit under the far fist, rim around y665..725 and bottom near y850. Spoon shaft passes through (715,583) into contents near (780,700). Output ONLY this pot and spoon in the exact unchanged 1254x1254 transparent full-body coordinate space. Keep all blank space above/left; no centered inventory icon or crop. Same small household pot as image 2, roughly 300 source pixels wide and 220 tall, do not grow it into a stockpot. Rim must reach beneath the supporting fingers, not float below the hand. Spoon goes through the closed stirring fist and is occluded naturally by front rim/food below. True transparent background/gaps, no hands/arms/body/skin/clothing, no stove/table/ground/steam, no extra handles, labels or guides. Match the same illustrated game artist; avoid shiny chrome, photoreal textures or noisy patina. Equipment is composited with the unmodified body and fingers later.",
+      "transparent_background": true,
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-1-body.png",
+          "role": "exact unchanged body pose"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+          "role": "equipment style and scale"
+        }
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-1-candidate-v1.png",
+      "verdict": "Reference only: supporting-hand gap; superseded",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-193a7044-7948-400d-8468-6612b6cc499d.png",
+      "sha256": "f11bf00c9426c64bf97fe0769bc65c235a52e9f3523fd767c3d67eb3ba1d690a"
+    },
+    {
+      "pose": 1,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Repaint Solar Friends cooking EQUIPMENT for this exact pose. Image 1 is a GEOMETRY GUIDE ONLY: blue cylinder marks the exact small pot shape/location, gold line is the spoon shaft, red crosses are hand contact targets. Paint the real metal pot EXACTLY over that blue cylinder and the wooden spoon EXACTLY along the gold shaft. Keep their full-frame position, scale and angle; do NOT copy the guide colours or marks. Image 2 is the unchanged resident body pose for scale/contact, output no person. Image 3 is STYLE ONLY: same grey pot, warm food, wood and broad painted daylight. Output ONLY painted pot plus spoon on the identical 1254x1254 transparent square. The blue guide cylinder is already at the correct waist height under the supporting hand; do not move the pot downward or right. Spoon must pass through the red cross on its gold shaft, not beside the fist. No auto-centering, cropping, arbitrary enlargement, guide lines, red marks or blue tint. Body/hands/arms/clothing never appear in output. Soft painted grey metal, modest upper-left warm highlights, plain wood, no photo texture or ornate handles. Transparent outside the equipment and through gaps, no floor/stove/steam. This is an equipment-only sprite layer in fixed whole-body coordinates. Follow the shape/placement guide precisely while matching the painted style reference.",
+      "transparent_background": true,
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/cook-equipment-guide-1.png",
+          "role": "geometry only"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-1-body.png",
+          "role": "unchanged body pose and scale"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+          "role": "painted equipment style"
+        }
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-1-candidate-v2.png",
+      "verdict": "Draft for review only; not approved for players",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-06d625bd-d9bc-44c8-aaf7-09fc714224f5.png",
+      "sha256": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4"
+    },
+    {
+      "pose": 2,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends COOKING equipment animation layer. Image 1 is the EXACT full-frame resident pose/hand placement reference, not output content. Image 2 is the same grey cooking pot and wood spoon from pose 1; preserve its physical pot dimensions, material, food colours, spoon thickness, broad painted shading and upper-left lighting. THIRD stirring pose: near spoon grip (696,642), far supporting hand (906,671). Pot stays at the same physical size under that far hand, opening around y660..720 and bottom near y845. Spoon passes through (696,642) into the left side of contents around (790,700), tipped as a stirring motion rather than made thicker. Output ONLY this pot and spoon in the exact unchanged 1254x1254 transparent full-body coordinate space. Keep all blank space above/left; no centered inventory icon or crop. Same small household pot as image 2, roughly 300 source pixels wide and 220 tall, do not grow it into a stockpot. Rim must reach beneath the supporting fingers, not float below the hand. Spoon goes through the closed stirring fist and is occluded naturally by front rim/food below. True transparent background/gaps, no hands/arms/body/skin/clothing, no stove/table/ground/steam, no extra handles, labels or guides. Match the same illustrated game artist; avoid shiny chrome, photoreal textures or noisy patina. Equipment is composited with the unmodified body and fingers later.",
+      "transparent_background": true,
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-2-body.png",
+          "role": "exact unchanged body pose"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+          "role": "equipment style and scale"
+        }
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-2-candidate-v1.png",
+      "verdict": "Reference only: supporting-hand gap; superseded",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-3a7a5696-ce91-410c-a488-f34c9b79362c.png",
+      "sha256": "96719487684387cf97b99fe9054297855cd27b9b29b0b4a965a4ba61b371b8fa"
+    },
+    {
+      "pose": 2,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Repaint Solar Friends cooking EQUIPMENT for this exact pose. Image 1 is a GEOMETRY GUIDE ONLY: blue cylinder marks the exact small pot shape/location, gold line is the spoon shaft, red crosses are hand contact targets. Paint the real metal pot EXACTLY over that blue cylinder and the wooden spoon EXACTLY along the gold shaft. Keep their full-frame position, scale and angle; do NOT copy the guide colours or marks. Image 2 is the unchanged resident body pose for scale/contact, output no person. Image 3 is STYLE ONLY: same grey pot, warm food, wood and broad painted daylight. Output ONLY painted pot plus spoon on the identical 1254x1254 transparent square. The blue guide cylinder is already at the correct waist height under the supporting hand; do not move the pot downward or right. Spoon must pass through the red cross on its gold shaft, not beside the fist. No auto-centering, cropping, arbitrary enlargement, guide lines, red marks or blue tint. Body/hands/arms/clothing never appear in output. Soft painted grey metal, modest upper-left warm highlights, plain wood, no photo texture or ornate handles. Transparent outside the equipment and through gaps, no floor/stove/steam. This is an equipment-only sprite layer in fixed whole-body coordinates. Follow the shape/placement guide precisely while matching the painted style reference.",
+      "transparent_background": true,
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/cook-equipment-guide-2.png",
+          "role": "geometry only"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-2-body.png",
+          "role": "unchanged body pose and scale"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+          "role": "painted equipment style"
+        }
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-2-candidate-v2.png",
+      "verdict": "Draft for review only; not approved for players",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-65ea2de6-fcac-473c-ad78-7c835a9c571b.png",
+      "sha256": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4"
+    },
+    {
+      "pose": 3,
+      "revision": 1,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Solar Friends COOKING equipment animation layer. Image 1 is the EXACT full-frame resident pose/hand placement reference, not output content. Image 2 is the same grey cooking pot and wood spoon from pose 1; preserve its physical pot dimensions, material, food colours, spoon thickness, broad painted shading and upper-left lighting. FOURTH raised-spoon pose: near spoon grip (818,509), far supporting hand (916,686). Same-sized pot supported at waist, opening around y665..730 and bottom near y850. Wooden shaft passes through raised fist (818,509), visible tip near (795,425), lower end enters contents near (850,700). This is the lifted part of the stirring cycle. Output ONLY this pot and spoon in the exact unchanged 1254x1254 transparent full-body coordinate space. Keep all blank space above/left; no centered inventory icon or crop. Same small household pot as image 2, roughly 300 source pixels wide and 220 tall, do not grow it into a stockpot. Rim must reach beneath the supporting fingers, not float below the hand. Spoon goes through the closed stirring fist and is occluded naturally by front rim/food below. True transparent background/gaps, no hands/arms/body/skin/clothing, no stove/table/ground/steam, no extra handles, labels or guides. Match the same illustrated game artist; avoid shiny chrome, photoreal textures or noisy patina. Equipment is composited with the unmodified body and fingers later.",
+      "transparent_background": true,
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-3-body.png",
+          "role": "exact unchanged body pose"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+          "role": "equipment style and scale"
+        }
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-3-candidate-v1.png",
+      "verdict": "Reference only: supporting-hand gap; superseded",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c82f0bf4-f31a-4836-a655-cd0a2ee76d5e.png",
+      "sha256": "54b0b9ee236659ff55c5fc7f82a275a9a89d1b20e7879a5165384a84e73e5293"
+    },
+    {
+      "pose": 3,
+      "revision": 2,
+      "tool": "image_gen.imagegen",
+      "prompt": "Use case: precise-object-edit. Repaint Solar Friends cooking EQUIPMENT for this exact pose. Image 1 is a GEOMETRY GUIDE ONLY: blue cylinder marks the exact small pot shape/location, gold line is the spoon shaft, red crosses are hand contact targets. Paint the real metal pot EXACTLY over that blue cylinder and the wooden spoon EXACTLY along the gold shaft. Keep their full-frame position, scale and angle; do NOT copy the guide colours or marks. Image 2 is the unchanged resident body pose for scale/contact, output no person. Image 3 is STYLE ONLY: same grey pot, warm food, wood and broad painted daylight. Output ONLY painted pot plus spoon on the identical 1254x1254 transparent square. The blue guide cylinder is already at the correct waist height under the supporting hand; do not move the pot downward or right. Spoon must pass through the red cross on its gold shaft, not beside the fist. No auto-centering, cropping, arbitrary enlargement, guide lines, red marks or blue tint. Body/hands/arms/clothing never appear in output. Soft painted grey metal, modest upper-left warm highlights, plain wood, no photo texture or ornate handles. Transparent outside the equipment and through gaps, no floor/stove/steam. This is an equipment-only sprite layer in fixed whole-body coordinates. Follow the shape/placement guide precisely while matching the painted style reference.",
+      "transparent_background": true,
+      "references": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/cook-equipment-guide-3.png",
+          "role": "geometry only"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-activities-3-body.png",
+          "role": "unchanged body pose and scale"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+          "role": "painted equipment style"
+        }
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-3-candidate-v2.png",
+      "verdict": "Draft for review only; not approved for players",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e9cec98e-5367-4bdd-8dca-5ffb7b9441eb.png",
+      "sha256": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8"
+    }
+  ],
+  "identity": "Exact hashes and dimensions retained in corresponding registration and report files.",
+  "process": "Generated raster sources copied unchanged. Code-generated guides are diagnostic inputs. Source-bound foreground masks preserve original body pixels.",
+  "review": {
+    "inspected": [
+      "cook-equipment-cycle-v1-transitions.png",
+      "cook-equipment-playback-keyframes-v1-frames.png",
+      "cook-equipment-playback-crossfade-v1-frames.png"
+    ],
+    "findings": [
+      "Guided repaints improve pot/hand contact; near/far distances are 0/1, 0/0, 0/0 prepared pixels.",
+      "Whole poses retain intact silhouettes; crossfade comparison shows doubled heads, arms and pots.",
+      "Spoon thickness, pot highlights and width vary. Movement remains discrete. Supporting-hand/rim semantics, especially retained pose 0, need refinement."
+    ],
+    "status": "Needs correction; excluded from player choices"
+  },
+  "verification": "Three pose reports, 19 cycle observations, 50 decoded video frames per presentation, play/pause/interruption and partial/full boundary checks. Numeric selections explicitly use values and assert rendered pose identity.",
+  "remaining": "Other equipment, appearance choices, portraits, native/player integration and wider builder gates."
+}

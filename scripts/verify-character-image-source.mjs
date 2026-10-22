@@ -21,7 +21,7 @@ try{
    const pixelHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels))].map(n=>n.toString(16).padStart(2,'0')).join('');
    const expected=new Image();expected.src='/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png';await expected.decode();c.getContext('2d').clearRect(0,0,1254,1254);c.getContext('2d').drawImage(expected,0,0);
    const expectedHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',c.getContext('2d').getImageData(0,0,1254,1254).data))].map(n=>n.toString(16).padStart(2,'0')).join('');
-   const refused=[];for(const path of ['/invalid-character.png','/missing-character.png'])try{await loadCharacterImageSource(path);}catch{refused.push(path);}
+   const refused=[];for(const path of ['/invalid-character.png','/missing-character.png'])try{await loadCharacterImageSource(path);}catch(error){if(path==='/invalid-character.png'&&!error.message.includes(path))throw Error('Decode failure lost its source path');if(path==='/invalid-character.png'&&!error.cause)throw Error('Decode failure lost its original cause');refused.push(path);}
    return {sourceHash:loaded.sourceHash,pixelHash,expectedHash,created,revoked,refused};
   }finally{URL.createObjectURL=create;URL.revokeObjectURL=revoke;}
  });
