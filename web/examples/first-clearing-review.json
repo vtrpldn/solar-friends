@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "title": "First clearing",
+  "status": "authored candidate; completion and balance not yet approved",
+  "file": "first-clearing.solar-scenario",
+  "sha256": "8cf2d9ab724f5e1ba0ce526f0e7508a092dd6227bb27a90c661137d2a403dc15",
+  "biome": {
+    "id": "mata-atlantica",
+    "version": 1
+  },
+  "authoredThrough": "scripts/author-first-clearing.mjs uses regular player controls and the Export action; no runtime snapshot patches",
+  "verification": "scripts/verify-example-scenarios.mjs: native compilation, 64x64 resolved map, ordered/optional goals, explicit run harvest credit, sustained pantry condition, pause and exact opening restore",
+  "remaining": [
+    "Full player completion and several subsequent game days",
+    "Balance, access and resource bottleneck review",
+    "Regular example-picker integration",
+    "Other two biome examples",
+    "Custom/mixed casts and reusable resident presets",
+    "All example art/performance/save-integrity release gates"
+  ]
+}
