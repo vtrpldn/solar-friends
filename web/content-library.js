@@ -1,3 +1,4 @@
+import {enrichRunHeaders} from './library-migrations.js';
 import {canonical} from './editor/journal.js';
 import {createReleasePackage,validateRelease} from './release-package.js';
 // Projects, frozen playthrough content, and their saves never share mode slots.
@@ -21,10 +22,11 @@ export class ContentLibrary extends EventTarget {
   }
   async #db(){
     if(!this.#opening)this.#opening=new Promise((resolve,reject)=>{
-      const request=indexedDB.open(this.name,3);let blocked=false;
-      request.onupgradeneeded=()=>{
+      const request=indexedDB.open(this.name,4);let blocked=false;
+      request.onupgradeneeded=event=>{
         for(const name of ['projects','runs','residents','releases','releaseCounters','heads'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:name==='heads'?'key':'id'});
         const heads=request.transaction.objectStore('heads');if(!heads.indexNames.contains('kind'))heads.createIndex('kind','kind',{unique:false});if(!heads.indexNames.contains('projectId'))heads.createIndex('projectId','projectId',{unique:false});
+        if(event.oldVersion<4)enrichRunHeaders(request.transaction);
       };
       request.onblocked=()=>{blocked=true;reject(Error('Close other Solar Friends tabs to finish opening the creation library.'));};
       request.onerror=()=>{this.#opening=null;reject(request.error);};
