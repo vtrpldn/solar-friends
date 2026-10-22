@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "status": "Activity hair/body production draft only; full character creation incomplete",
+  "why": "The cooking heads need closer-fitting curls than the existing standing/walking caps, without changing body proportions or fitting sprites in code.",
+  "generations": [
+    {
+      "key": "hair_cook0_composite_v1",
+      "prompt": "Edit image1 on its EXACT existing1254x1254 transparent full-body canvas. Replace ONLY the green scalp guide and bald scalp inside it with SHORT close-fitting warm brown curls. Follow the green envelope precisely, approximately x580..850,y90..280, covering the crown and stopping above ears/eyebrows so both eyes and the face remain completely visible. Image2 is the original identical body: preserve all body/face/ear/hand/clothing/boot locations and proportions unchanged. Image3 is ONLY soft painted curl material/color reference; do not copy its larger cap size or position. These cooking heads are smaller; use fewer curl groups rather than a bulky long hairstyle. Restrained dark warm brown, broad shading, upper-left light, no orange gloss, ear loops or dangling sideburns. No green, guide marks, props, stool, kitchen objects, text or background. Output the complete original cooking person with just its scalp changed. Do not recenter, shift or scale the character. Genuine transparency.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-0-silhouette-guide.png",
+          "sha256": "f9f869ae568647f9687d6a44c8e5d974af892f8c210f3ce1c975f716440d5d4e"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-0-body.png",
+          "sha256": "83f65a0ff37319edbc420b5383da866f227188d32284bfd9e879274c3a484992"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-06e3cbb4-989f-4c56-a86c-f6da55d2c954.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-cook-0-composite-candidate-v1.png",
+      "verdict": "Geometry reference only; generated body is never installed.",
+      "sha256": "6f8c51042f0c83802a209bfaa493aacc66ad5c5a8d791b2ecda2e52b382b6e7f"
+    },
+    {
+      "key": "hair_cook1_composite_v1",
+      "prompt": "Edit image1 on its EXACT existing1254x1254 transparent full-body canvas. Replace ONLY the green scalp guide and bald scalp inside it with SHORT close-fitting warm brown curls. Follow the green envelope precisely, approximately x530..800,y90..280, covering the crown and stopping above ears/eyebrows so both eyes and the face remain completely visible. Image2 is the original identical body: preserve all body/face/ear/hand/clothing/boot locations and proportions unchanged. Image3 is ONLY soft painted curl material/color reference; do not copy its larger cap size or position. These cooking heads are smaller; use fewer curl groups rather than a bulky long hairstyle. Restrained dark warm brown, broad shading, upper-left light, no orange gloss, ear loops or dangling sideburns. No green, guide marks, props, stool, kitchen objects, text or background. Output the complete original cooking person with just its scalp changed. Do not recenter, shift or scale the character. Genuine transparency.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-1-silhouette-guide.png",
+          "sha256": "9f69d74b83547202cde6043508afe1b766bba5b15fc2ab0aef362e796f37a1c0"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-1-body.png",
+          "sha256": "598d747df4cac7e8f5be277f084cd33e5ddaa240697f654db2cfbc4d45e52f1d"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-46e10731-9478-42cc-9c94-7da530ea31e0.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-cook-1-composite-candidate-v1.png",
+      "verdict": "Geometry reference only; generated body is never installed.",
+      "sha256": "445ed5f23978885f3806b26441cdad8fb53b86bee974341cff4de91e44aa7d43"
+    },
+    {
+      "key": "hair_cook0_v1",
+      "prompt": "Extract ONLY the short close-fitting brown curly hair from this EXACT1254-square full-body sprite. Keep its exact existing full-canvas coordinates, scale, silhouette and soft brown painted colours: roughly x565..830,y105..285. Do not center, zoom, shift, crop, enlarge or redesign the cap. Remove the whole person except the hair: no ears, skin, face, eyebrows, eyes, neck, arms, clothes, boots or almost-invisible body fragments. Preserve short side curls ending above the ear, no dangling ear loops or sideburn tendrils. Cap interior stays opaque brown with transparent face opening below its existing fringe. Every pixel outside the small cap must be fully transparent, especially below y350. No props, stool, text, guides, green, shadow or background. Output the hair only at its original full-body canvas position, fully empty transparent canvas elsewhere.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-cook-0-composite-candidate-v1.png",
+          "sha256": "6f8c51042f0c83802a209bfaa493aacc66ad5c5a8d791b2ecda2e52b382b6e7f"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c2198dd5-6308-430d-86df-75b21814c228.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v1.png",
+      "verdict": "Rejected: extracted cap enlarged/shifted, hangs over face. Source0 also fails original bounds across0/2/3; source1 passes bounds but exposes bald crown and hides eyes.",
+      "sha256": "4eabe19abb109f0cdd680966a1d8931bddf6e4739a3cb5b04505ed300df18049"
+    },
+    {
+      "key": "hair_cook1_v1",
+      "prompt": "Extract ONLY the short close-fitting brown curly hair from this EXACT1254-square full-body sprite. Keep its exact existing full-canvas coordinates, scale, silhouette and soft brown painted colours: roughly x515..790,y100..285. Do not center, zoom, shift, crop, enlarge or redesign the cap. Remove the whole person except the hair: no ears, skin, face, eyebrows, eyes, neck, arms, clothes, boots or almost-invisible body fragments. Preserve short side curls ending above the ear, no dangling ear loops or sideburn tendrils. Cap interior stays opaque brown with transparent face opening below its existing fringe. Every pixel outside the small cap must be fully transparent, especially below y350. No props, stool, text, guides, green, shadow or background. Output the hair only at its original full-body canvas position, fully empty transparent canvas elsewhere.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-cook-1-composite-candidate-v1.png",
+          "sha256": "445ed5f23978885f3806b26441cdad8fb53b86bee974341cff4de91e44aa7d43"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d47b10ee-7757-4c59-ac5c-d61c385a23b6.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v1.png",
+      "verdict": "Rejected: extracted cap enlarged/shifted, hangs over face. Source0 also fails original bounds across0/2/3; source1 passes bounds but exposes bald crown and hides eyes.",
+      "sha256": "0181e2f7c070efc66da672e672581f7655d69fd99682afc20d066fe698d9aff6"
+    },
+    {
+      "key": "hair_cook0_v2",
+      "prompt": "Paint ONLY the green scalp-cap shape in image1 as short soft brown curls, then make EVERYTHING ELSE transparent. Exact1254x1254 full-canvas registration is mandatory. The cap must stay in the green shape's exact position and size, x580..850,y90..285. Use the green outer silhouette AND its lower fringe as a strict template: crown opaque, very short sides above ears, fringe high above eyes. No painted hair below y290. Image2 supplies ONLY subdued brown painted curl material, not its shape/size/position. Do not copy its larger cap. Use fewer smaller grouped curls to follow this close-fitting template. Output hair ONLY: remove all green, all body/skin/face/ears/eyes/eyebrows/clothes/hands/shoes, all guide marks. Outside the small painted cap every pixel must have alpha0, especially below y300. Do not center, enlarge, shift, crop or normalize. No dangling ear loops, sideburn tendrils, props, stool, text or background. Match the green template's fringe to avoid covering eyes or leaving a bald crown.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-0-silhouette-guide.png",
+          "sha256": "f9f869ae568647f9687d6a44c8e5d974af892f8c210f3ce1c975f716440d5d4e"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-69b7b805-adc0-4a0d-bac3-6f0bc61c7d1d.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+      "verdict": "Registered hair/body draft: all intended poses pass original bounds and preserve original lower-body pixels. Temporal and equipment review incomplete.",
+      "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+    },
+    {
+      "key": "hair_cook1_v2",
+      "prompt": "Paint ONLY the green scalp-cap shape in image1 as short soft brown curls, then make EVERYTHING ELSE transparent. Exact1254x1254 full-canvas registration is mandatory. The cap must stay in the green shape's exact position and size, x530..800,y90..285. Use the green outer silhouette AND its lower fringe as a strict template: crown opaque, very short sides above ears, fringe high above eyes. No painted hair below y290. Image2 supplies ONLY subdued brown painted curl material, not its shape/size/position. Do not copy its larger cap. Use fewer smaller grouped curls to follow this close-fitting template. Output hair ONLY: remove all green, all body/skin/face/ears/eyes/eyebrows/clothes/hands/shoes, all guide marks. Outside the small painted cap every pixel must have alpha0, especially below y300. Do not center, enlarge, shift, crop or normalize. No dangling ear loops, sideburn tendrils, props, stool, text or background. Match the green template's fringe to avoid covering eyes or leaving a bald crown.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-activities-1-silhouette-guide.png",
+          "sha256": "9f69d74b83547202cde6043508afe1b766bba5b15fc2ab0aef362e796f37a1c0"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-52d68af1-230c-4e58-8371-966207835b0d.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v2.png",
+      "verdict": "Registered hair/body draft: all intended poses pass original bounds and preserve original lower-body pixels. Temporal and equipment review incomplete.",
+      "sha256": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826"
+    }
+  ],
+  "registration": "web/art/characters/prototype-v1/hair-cook-v1-registration.json",
+  "geometry": "assets/art-direction/character-prototype-v1/hair-cook-silhouette-guide.json",
+  "integration": "assets/art-direction/character-prototype-v1/hair-cook-v4-integration-report.json",
+  "initialReuse": {
+    "report": "assets/art-direction/character-prototype-v1/hair-cook-v1-report.json",
+    "verdict": "Rejected visually despite all original bounds passing: standing/walking caps too bulky, hang low over cooking faces."
+  },
+  "reuse": "Unchanged final activity0 cap also serves2/3, independently checked in original whole-frame coordinates.",
+  "limits": [
+    "36/48 hair drafts; twelve remaining activity poses unfinished.",
+    "Utensils, activity equipment, grip layering and full occlusion remain unfinished.",
+    "Body crossfade ghosting and curl-volume differences remain; source hashes/bounds are not final visual approval.",
+    "All sprite PNG generation/editing used the built-in generator; no code pixel repair, fitting, translation, clipping or threshold relaxation.",
+    "Native recipes, other appearance artwork/options, portraits, ordinary player integration, global cache/performance and wider builder release gates remain."
+  ]
+}
