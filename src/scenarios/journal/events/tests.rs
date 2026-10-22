@@ -542,3 +542,255 @@ fn unlock_reachability_rejects_self_dependencies_but_accepts_real_alternatives()
     };
     assert!(crate::scenarios::compile(unused).is_err());
 }
+
+#[test]
+fn supply_events_wait_for_full_room_latch_intent_and_account_exactly_once() {
+    let mut gift = event(
+        "gift",
+        EventTrigger::Start,
+        EventEffect::DeliverSupplies {
+            material: "meals".into(),
+            count: 2,
+            building: None,
+        },
+    );
+    gift.condition = Some(GoalCondition::Stored {
+        material: "timber".into(),
+        count: 600,
+    });
+    let mut d = definition(vec![gift], 0, 0);
+    for inventory in &mut d.start.inventories {
+        inventory.items.clear();
+        if matches!(inventory.owner, InventoryOwner::Camp) {
+            inventory.items.insert("timber".into(), 600);
+        }
+    }
+    let mut g = game(d);
+    assert_eq!(report(&g)["events"][0]["status"], "waiting_for_delivery");
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    g.tick(0.);
+    assert_eq!(g.snapshot(), saved);
+    assert_eq!(g.sell_material(0, 1), "ok");
+    g.tick(0.25);
+    assert_eq!(
+        report(&g)["events"][0]["status"],
+        "waiting_for_delivery",
+        "One free slot cannot receive a two-unit delivery"
+    );
+    assert_eq!(
+        economy::quantity(g.app.world().resource::<Village>(), economy::MEALS),
+        0
+    );
+    let waiting = g.snapshot();
+    assert!(g.restore(&waiting));
+    assert_eq!(g.snapshot(), waiting);
+    assert_eq!(g.sell_material(0, 1), "ok");
+    g.tick(0.25);
+    assert_eq!(
+        report(&g)["events"][0]["status"],
+        "applied",
+        "The queued gift survives its now-false timber guard"
+    );
+    let v = g.app.world().resource::<Village>();
+    assert_eq!(
+        v.simulation.materials.as_ref().unwrap().received[economy::MEALS],
+        2
+    );
+    assert_eq!(economy::quantity(v, economy::MEALS), 2);
+    let store = v
+        .logistics
+        .as_ref()
+        .unwrap()
+        .stores
+        .iter()
+        .find(|p| p.owner == logistics::Owner::Camp)
+        .unwrap();
+    assert_eq!(
+        store
+            .food_lots
+            .iter()
+            .filter(|l| l.material == economy::MEALS)
+            .map(|l| l.amount)
+            .sum::<u32>(),
+        2
+    );
+    let applied = g.snapshot();
+    assert!(g.restore(&applied));
+    assert_eq!(g.snapshot(), applied);
+    for mutation in ["count", "destination", "accounting"] {
+        let mut bad: serde_json::Value = serde_json::from_str(&applied).unwrap();
+        if mutation == "accounting" {
+            bad["village"]["simulation"]["materials"]["received"][economy::MEALS] =
+                serde_json::json!(0);
+        } else {
+            let result =
+                &mut bad["village"]["progress"]["scenario_journal"]["events"]["gift"]["result"];
+            if mutation == "count" {
+                result["count"] = serde_json::json!(3);
+            } else {
+                result["building"] = serde_json::json!("starting-warehouse");
+            }
+        }
+        assert!(!g.restore(&bad.to_string()), "{mutation}");
+        assert_eq!(g.snapshot(), applied);
+    }
+    for _ in 0..20 {
+        g.tick(0.25);
+    }
+    assert_eq!(
+        g.app
+            .world()
+            .resource::<Village>()
+            .simulation
+            .materials
+            .as_ref()
+            .unwrap()
+            .received[economy::MEALS],
+        2
+    );
+}
+
+#[test]
+fn supply_events_bind_real_buildings_and_reject_impossible_source_deliveries() {
+    let gift = event(
+        "gift",
+        EventTrigger::Start,
+        EventEffect::DeliverSupplies {
+            material: "frames".into(),
+            count: 12,
+            building: Some("starting-warehouse".into()),
+        },
+    );
+    let mut d = definition(vec![gift], 0, 0);
+    for inventory in &mut d.start.inventories {
+        inventory.items.clear();
+    }
+    let mut g = game(d.clone());
+    assert_eq!(report(&g)["events"][0]["status"], "applied");
+    let v = g.app.world().resource::<Village>();
+    let id = v.scenario.as_ref().unwrap().buildings["starting-warehouse"];
+    assert_eq!(
+        v.logistics
+            .as_ref()
+            .unwrap()
+            .stores
+            .iter()
+            .find(|p| p.owner == logistics::Owner::Warehouse(id))
+            .unwrap()
+            .items[5],
+        12
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    for (material, count, building, logistics) in [
+        ("frames", 301, Some("starting-warehouse"), true),
+        ("frames", 1, Some("missing"), true),
+        ("unknown", 1, None, true),
+        ("frames", 0, None, true),
+        ("frames", 601, None, true),
+        ("frames", 1, None, false),
+    ] {
+        let mut bad = d.clone();
+        bad.rules.logistics = logistics;
+        bad.journal.as_mut().unwrap().events[0].effect = EventEffect::DeliverSupplies {
+            material: material.into(),
+            count,
+            building: building.map(str::to_string),
+        };
+        assert!(crate::scenarios::compile(bad).is_err());
+    }
+    // Real move work closes the store to external support until it is cancelled.
+    d.journal.as_mut().unwrap().events[0].trigger = EventTrigger::Date { minute: 481. };
+    let mut pending = game(d);
+    let id = pending
+        .app
+        .world()
+        .resource::<Village>()
+        .scenario
+        .as_ref()
+        .unwrap()
+        .buildings["starting-warehouse"];
+    assert_eq!(pending.queue_building_work(id, "move", 25, 25), "ok");
+    for _ in 0..4 {
+        pending.tick(0.25);
+    }
+    assert_eq!(
+        report(&pending)["events"][0]["status"],
+        "waiting_for_delivery"
+    );
+    assert!(
+        report(&pending)["events"][0]["delivery_blocker"]
+            .as_str()
+            .unwrap()
+            .contains("Finish or cancel")
+    );
+    assert_eq!(pending.cancel_building_work(id), "ok");
+    pending.tick(0.25);
+    assert_eq!(report(&pending)["events"][0]["status"], "applied");
+}
+
+#[test]
+fn disconnected_supply_destinations_wait_without_inventing_a_delivery() {
+    let mut d = definition(
+        vec![event(
+            "gift",
+            EventTrigger::Start,
+            EventEffect::DeliverSupplies {
+                material: "frames".into(),
+                count: 12,
+                building: Some("starting-warehouse".into()),
+            },
+        )],
+        0,
+        0,
+    );
+    for inventory in &mut d.start.inventories {
+        inventory.items.clear();
+    }
+    d.map.nature = Some(vec![]);
+    d.map.river = Some(world::River {
+        schema: 1,
+        centers: vec![40.; MAP_SIZE as usize],
+    });
+    d.map.clearings.push(crate::scenarios::Clearing {
+        x: 48,
+        y: 29,
+        size: 8,
+        disturbance: 0.05,
+    });
+    d.start
+        .buildings
+        .iter_mut()
+        .find(|b| b.id == "starting-warehouse")
+        .unwrap()
+        .x = 48;
+    let mut g = game(d);
+    assert_eq!(report(&g)["events"][0]["status"], "waiting_for_delivery");
+    assert!(
+        report(&g)["events"][0]["delivery_blocker"]
+            .as_str()
+            .unwrap()
+            .contains("walkable route")
+    );
+    let before = g.snapshot();
+    assert!(g.restore(&before));
+    assert_eq!(g.snapshot(), before);
+    for _ in 0..8 {
+        g.tick(0.25);
+    }
+    assert_eq!(report(&g)["events"][0]["status"], "waiting_for_delivery");
+    assert_eq!(
+        g.app
+            .world()
+            .resource::<Village>()
+            .simulation
+            .materials
+            .as_ref()
+            .unwrap()
+            .received[5],
+        0
+    );
+}

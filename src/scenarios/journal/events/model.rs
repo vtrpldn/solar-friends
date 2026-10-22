@@ -31,9 +31,21 @@ pub enum EventTrigger {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum EventEffect {
-    Message { text: String },
-    GrantFunds { cents: i64 },
-    UnlockBuilding { building: String },
+    Message {
+        text: String,
+    },
+    GrantFunds {
+        cents: i64,
+    },
+    UnlockBuilding {
+        building: String,
+    },
+    DeliverSupplies {
+        material: String,
+        count: u32,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        building: Option<String>,
+    },
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -47,6 +59,16 @@ pub struct EventRecord {
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum EffectResult {
     Message,
-    Funds { cents: i64 },
-    BuildingUnlocked { building: String },
+    Funds {
+        cents: i64,
+    },
+    BuildingUnlocked {
+        building: String,
+    },
+    SuppliesDelivered {
+        material: String,
+        count: u32,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        building: Option<String>,
+    },
 }

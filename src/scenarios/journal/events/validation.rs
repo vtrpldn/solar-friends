@@ -40,6 +40,11 @@ pub fn check(d: &crate::scenarios::Definition, report: &mut Report) {
             }
         };
         let effect_valid = match &event.effect {
+            EventEffect::DeliverSupplies {
+                material,
+                count,
+                building,
+            } => supplies::source_valid(d, material, *count, building.as_deref()),
             EventEffect::Message { text } => {
                 !text.trim().is_empty() && text.chars().count() <= 1000
             }
@@ -56,7 +61,7 @@ pub fn check(d: &crate::scenarios::Definition, report: &mut Report) {
             || !trigger_valid
             || !effect_valid
         {
-            report.push("journal.events","invalid_event","Give every one-shot event a unique identity, a title, an existing goal/chapter or supported trigger, and a message up to 1,000 characters, positive funding up to R$ 1,000,000, or a supported building that starts locked.");
+            report.push("journal.events","invalid_event","Give every one-shot event a unique identity, a title, an existing goal/chapter or supported trigger, and a message up to 1,000 characters, positive funding up to R$ 1,000,000, a supported building that starts locked, or a supported supply delivery within its receiving capacity with material logistics enabled.");
         }
         for condition in event.conditions() {
             let mut references = vec![];

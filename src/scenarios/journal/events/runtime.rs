@@ -68,6 +68,17 @@ pub fn advance(journal: &Journal, state: &mut State, v: &mut Village) {
         let record = state.events.get_mut(&event.id).unwrap();
         record.triggered_at.get_or_insert(v.minutes);
         let result = match &event.effect {
+            EventEffect::DeliverSupplies {
+                material,
+                count,
+                building,
+            } => supplies::deliver(v, material, *count, building.as_deref()).then(|| {
+                EffectResult::SuppliesDelivered {
+                    material: material.clone(),
+                    count: *count,
+                    building: building.clone(),
+                }
+            }),
             EventEffect::Message { text } => {
                 crate::event(v, text.clone());
                 Some(EffectResult::Message)
@@ -102,7 +113,7 @@ pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
         })
         .cloned()
         .collect();
-    if state.locked_buildings != expected {
+    if !supplies::valid_receipts(journal, state, v) || state.locked_buildings != expected {
         return false;
     }
     if state.events.len() != journal.events.len() {
@@ -164,7 +175,22 @@ pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
         match (&record.result, &event.effect, record.applied_at) {
             (None, EventEffect::UnlockBuilding { .. }, None) => record.triggered_at.is_none(),
             (None, EventEffect::Message { .. }, None) => record.triggered_at.is_none(),
-            (None, EventEffect::GrantFunds { .. }, None) => true,
+            (None, EventEffect::GrantFunds { .. } | EventEffect::DeliverSupplies { .. }, None) => {
+                true
+            }
+            (
+                Some(EffectResult::SuppliesDelivered {
+                    material,
+                    count,
+                    building,
+                }),
+                EventEffect::DeliverSupplies {
+                    material: expected,
+                    count: amount,
+                    building: destination,
+                },
+                Some(_),
+            ) => material == expected && count == amount && building == destination,
             (
                 Some(EffectResult::BuildingUnlocked { building }),
                 EventEffect::UnlockBuilding { building: expected },
@@ -181,5 +207,5 @@ pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
     })
 }
 pub fn view(journal: &Journal, state: &State, v: &Village) -> serde_json::Value {
-    serde_json::json!(journal.events.iter().map(|e|{let record=&state.events[&e.id];serde_json::json!({"id":e.id,"title":e.title,"when":e.trigger,"effect":e.effect,"triggered_at":record.triggered_at,"applied_at":record.applied_at,"result":record.result,"status":if record.applied_at.is_some(){"applied"}else if record.triggered_at.is_some(){"waiting_for_fund_space"}else{"watching"},"shared_fund_cents":v.economy.money})}).collect::<Vec<_>>())
+    serde_json::json!(journal.events.iter().map(|e|{let record=&state.events[&e.id];serde_json::json!({"id":e.id,"title":e.title,"when":e.trigger,"effect":e.effect,"triggered_at":record.triggered_at,"applied_at":record.applied_at,"result":record.result,"status":if record.applied_at.is_some(){"applied"}else if record.triggered_at.is_some(){if matches!(e.effect,EventEffect::DeliverSupplies{..}){"waiting_for_delivery"}else{"waiting_for_fund_space"}}else{"watching"},"shared_fund_cents":v.economy.money,"destination":if let EventEffect::DeliverSupplies{building,..}=&e.effect{supplies::destination(v,building.as_deref())}else{None},"delivery_blocker":if record.triggered_at.is_some()&&record.applied_at.is_none(){if let EventEffect::DeliverSupplies{count,building,..}=&e.effect{supplies::blocker(v,*count,building.as_deref())}else{None}}else{None}})}).collect::<Vec<_>>())
 }
