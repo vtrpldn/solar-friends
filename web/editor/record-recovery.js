@@ -1,3 +1,4 @@
+import {MAX_VILLAGE_SNAPSHOT_CHARACTERS} from '../recovery-limits.js';
 import {draftImportIssue} from './draft-import.js';
 import {EditorDocument} from './document.js';
 // Recovery exports deliberately bypass game/schema validation. A newer or
@@ -32,7 +33,7 @@ export function recoveredVillage(file,Game,{source:requested=null}={}){
  try{
   for(const [source,snapshot]of [['current',record.snapshot],['previous',record.previousSnapshot]]){
    if(requested&&source!==requested)continue;
-   if(typeof snapshot!=='string'||snapshot.length>16*1024*1024||!game.restore(snapshot))continue;
+   if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS||!game.restore(snapshot))continue;
    const restored=JSON.parse(game.snapshot()),definition=restored.village?.scenario?.definition;
    if(!definition)continue;
    // Restart uses the same frozen definition that native restoration accepted,

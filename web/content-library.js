@@ -1,3 +1,4 @@
+import {MAX_VILLAGE_SNAPSHOT_CHARACTERS} from './recovery-limits.js';
 import {createMapPackage,validateMapPackage} from './map-package.js';
 import {enrichRunHeaders} from './library-migrations.js';
 import {canonical} from './editor/journal.js';
@@ -190,7 +191,7 @@ export class ContentLibrary extends EventTarget {
     return this.#write('releases',crypto.randomUUID(),null,()=>({format:'solar-friends-frozen-release',schema:1,title:data.title,projectId:null,sourceRevision:null,package:data}),thumbnail);
   }
   async createRun({definition,snapshot,projectId=null,sessionKind='scenario',sourceRevision=null,releaseId=null,thumbnail}){
-    if(!['scenario','playtest'].includes(sessionKind)||typeof snapshot!=='string'||snapshot.length>16*1024*1024)throw Error('This playthrough cannot be stored.');
+    if(!['scenario','playtest'].includes(sessionKind)||typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS)throw Error('This playthrough cannot be stored.');
     let release=null;
     if(releaseId){
       const record=await this.getRelease(releaseId);
@@ -201,12 +202,12 @@ export class ContentLibrary extends EventTarget {
     return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,...data}),thumbnail);
   }
   async importRecoveredRun({definition,snapshot,release=null}){
-    if(typeof snapshot!=='string'||snapshot.length>16*1024*1024||!definition?.start)throw Error('This recovered village cannot be stored.');
+    if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS||!definition?.start)throw Error('This recovered village cannot be stored.');
     const data=clone({definition,snapshot,release});
     return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,projectId:null,sessionKind:'scenario',sourceRevision:null,...data}));
   }
   saveRun(id,snapshot,expectedRevision){
-    if(typeof snapshot!=='string'||snapshot.length>16*1024*1024)throw Error('This playthrough is too large to save.');
+    if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS)throw Error('This playthrough is too large to save.');
     return this.#write('runs',id,expectedRevision,previous=>{
       if(!previous)throw Error('This playthrough is missing.');
       // Definition and source revision are immutable throughout this run.

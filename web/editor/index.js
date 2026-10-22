@@ -1,3 +1,4 @@
+import {MAX_RECOVERY_FILE_BYTES} from '../recovery-limits.js';
 import {recoveredPackage} from './package-recovery.js';
 import {downloadStoredPackage} from './stored-package-export.js';
 import {missingLibraryEntry,downloadMissingEntryDetails} from './missing-library-entry.js';
@@ -476,7 +477,7 @@ function wire(){
     const file=e.target.files[0];if(!file)return;
     $('creator-library-status').textContent='Reading creation…';
     try{
-      if(file.size>32*1024*1024)throw Error('This creation file is too large.');
+      if(file.size>MAX_RECOVERY_FILE_BYTES)throw Error('This backup or creation file exceeds 96 MiB. Keep the original file.');
       const raw=await file.text();let content;try{content=JSON.parse(raw);}catch{throw Error('This file is not a readable creation.');}
       if(content.format==='solar-friends-recovery'){
         if(['map','release','resident'].includes(content.kind)){
