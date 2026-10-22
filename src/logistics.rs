@@ -2818,6 +2818,7 @@ mod targeted_storage_tests {
             crop: None,
             orchard: None,
             animals: None,
+            battery: None,
             id: "second-store".into(),
             kind: "warehouse".into(),
             x: 25,

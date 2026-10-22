@@ -335,6 +335,7 @@ mod tests {
         assert_eq!(crate::relationships::strength(&v.progress, 5, 0), 7);
         v.scenario = Some(std::sync::Arc::new(Origin {
             schema: SCHEMA,
+            batteries: BTreeMap::new(),
             definition: d.clone(),
             buildings: BTreeMap::new(),
             residents: bindings(&d),

@@ -167,6 +167,8 @@ pub struct Start {
     pub liquids: Option<Vec<StartingLiquids>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub resource_sites: Vec<super::sites::StartingSite>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub batteries: Vec<super::batteries::GroundBank>,
     pub buildings: Vec<Structure>,
     pub roads: Vec<[i32; 2]>,
     pub inventories: Vec<Inventory>,
@@ -195,6 +197,8 @@ pub struct Structure {
     pub orchard: Option<super::orchards::StartingOrchard>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub animals: Option<super::animals::StartingAnimals>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub battery: Option<super::batteries::BuildingBank>,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -237,6 +241,8 @@ pub struct Origin {
     pub schema: u32,
     pub definition: Definition,
     pub buildings: BTreeMap<String, usize>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub batteries: BTreeMap<String, simulation::Id>,
     #[serde(default)]
     pub residents: BTreeMap<String, usize>,
 }
@@ -349,6 +355,7 @@ impl Definition {
                 fresh_water: if sandbox { 40. } else { 32. },
                 liquids:None,
                 resource_sites:vec![],
+                batteries:vec![],
                 buildings: [("shed", -2, -3), ("warehouse", 4, -3)]
                     .into_iter()
                     .map(|(kind, dx, dy)| Structure {
@@ -362,6 +369,7 @@ impl Definition {
                         crop:None,
                         orchard:None,
                         animals:None,
+                        battery:None,
                     })
                     .collect(),
                 roads: vec![],

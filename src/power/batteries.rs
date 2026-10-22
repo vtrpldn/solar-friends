@@ -58,6 +58,9 @@ pub fn installed_equipment(v: &Village, id: usize) -> u8 {
         .iter()
         .find(|p| p.building == id)
         .map_or(0, |p| p.consumed[13].min(1) as u8)
+        .max(u8::from(scenarios::batteries::owns_building_equipment(
+            v, id,
+        )))
 }
 pub fn retained_equipment(v: &Village, id: usize) -> u32 {
     v.power

@@ -215,6 +215,7 @@ pub(super) fn check(d: &Definition) -> Report {
     super::farming::check(d, &mut r);
     super::orchards::check(d, &mut r);
     super::animals::check(d, &mut r);
+    super::batteries::check(d, &mut r);
     super::sites::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
@@ -380,6 +381,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     };
     v.scenario = Some(std::sync::Arc::new(Origin {
         schema: SCHEMA,
+        batteries: BTreeMap::new(),
         definition: d.clone(),
         buildings: BTreeMap::new(),
         residents: residents::bindings(&d),
@@ -490,6 +492,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     }
     v.scenario = Some(std::sync::Arc::new(Origin {
         schema: SCHEMA,
+        batteries: BTreeMap::new(),
         definition: d.clone(),
         buildings,
         residents: residents::bindings(&d),

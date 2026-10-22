@@ -1,3 +1,4 @@
+import {batteryImage,drawBattery} from '../battery-art.js';
 import {loadChickenArt,flock,drawChicken} from '../chickens.js';
 import {paintResourceSite} from '../resource-site-art.js';
 import {economyImage} from '../economy-art.js';
@@ -22,7 +23,7 @@ export async function loadEditorArt(){
   const terrain=image('terrain-atlas.png'),forest=image('mata-atlantica-atlas.png'),details=image('landscape-details.png');
   const residents=['iara','bento','luz','caua','nina'].map(name=>image(`animations/${name}.png`));
   await Promise.all([loadRegionalArt(),loadCropArt(),loadChickenArt()]);
-  await Promise.all([...Object.values(images),terrain,forest,details,...residents,economyImage].map(i=>i.decode()));
+  await Promise.all([...Object.values(images),terrain,forest,details,...residents,economyImage,batteryImage].map(i=>i.decode()));
   return {images,terrain,forest,details,residents};
 }
 const catalogMaterial=material=>['timber','bamboo','earth','stone','salvage'].indexOf(material);
@@ -154,6 +155,7 @@ export class EditorMap {
       objects.push({depth:site.x+site.y,draw:()=>{if(view.selectedSite===site.id)this.polygon(footprintCorners(sourceKinds[native.material],site.x,site.y),'#efc86d55','#ffe39a');paintResourceSite(c,native,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});}});
     }
     if(this.pointer&&(sourceKinds.includes(view.tool)||['move-site','copy-site'].includes(view.tool))){const source=this.siteCopy||this.document.start.resource_sites?.find(s=>s.id===view.selectedSite),kind=sourceKinds.includes(view.tool)?view.tool:sourceKinds[catalogMaterial(source?.material)];if(kind){this.polygon(footprintCorners(kind,this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');const preview=sitePreview(sourceKinds.includes(view.tool)?newStartingSite(kind.slice(7),this.pointer.x,this.pointer.y,'preview'):{...source,x:this.pointer.x,y:this.pointer.y});paintResourceSite(c,preview,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,alpha:.45});}}
+    for(const bank of this.snapshot.village.power.network.nodes.filter(n=>n.owner.kind==='ground'&&n.kind==='battery'))objects.push({depth:bank.x+bank.y+.1,draw:()=>drawBattery(c,this.project(bank.x,bank.y),this.scale)});
     for(const hen of flock(this.snapshot.village))objects.push({depth:hen.x+hen.y+.2,draw:()=>drawChicken(c,this.project(hen.x,hen.y),this.scale,hen)});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
       const p=this.project(resident.x,resident.y),frame=preparedFrames(art.residents[residentLookIndex(resident)],{referenceRow:2})?.[8],size=RESIDENT_WIDTH*this.scale;
