@@ -22,25 +22,36 @@ impl Kind {
             _ => None,
         }
     }
-    fn supplies(self, kind: &str) -> bool {
+    pub(crate) fn supplies(self, kind: &str) -> bool {
         match self {
             Self::Fresh => matches!(kind, "camp" | "well"),
             Self::Irrigation => kind == "wetland",
             Self::Greywater => matches!(kind, "camp" | "home" | "kitchen" | "eco_toilet"),
             Self::Sewage => kind == "eco_toilet",
-            Self::Electricity => matches!(kind, "solar_farm" | "hydro"),
+            Self::Electricity => power::shared_kind(kind),
         }
     }
-    fn receives(self, kind: &str) -> bool {
+    pub(crate) fn receives(self, kind: &str) -> bool {
         match self {
             Self::Fresh => matches!(
                 kind,
-                "home" | "kitchen" | "garden" | "greenhouse" | "eco_toilet" | "coop" | "workshop"
+                "home"
+                    | "kitchen"
+                    | "garden"
+                    | "greenhouse"
+                    | "eco_toilet"
+                    | "orchard"
+                    | "goat_pasture"
+                    | "source_timber"
+                    | "source_bamboo"
             ),
-            Self::Irrigation => matches!(kind, "garden" | "greenhouse"),
+            Self::Irrigation => matches!(
+                kind,
+                "garden" | "greenhouse" | "orchard" | "source_timber" | "source_bamboo"
+            ),
             Self::Greywater => kind == "wetland",
             Self::Sewage => matches!(kind, "banana_treatment" | "biodigester"),
-            Self::Electricity => power::load(kind) > 0.,
+            Self::Electricity => power::shared_kind(kind),
         }
     }
 }
@@ -87,7 +98,7 @@ fn unoccupied(v: &Village, x: i32, y: i32) -> bool {
             .sources
             .iter()
             .any(|s| s.active && inside(resource_sites::size(s.material), s.x, s.y, x, y))
-        && !inside(1, CAMP.0 as i32, CAMP.1 as i32, x, y)
+        && !inside(1, crate::camp(v).0 as i32, crate::camp(v).1 as i32, x, y)
         && !building_work::reserved(v, x, y, None)
         && !restoration::reserved(v, x, y)
 }
@@ -150,13 +161,13 @@ pub fn endpoints(v: &Village, kind: Kind) -> Vec<Endpoint> {
         result.push(Endpoint {
             id: -1,
             kind: "camp".into(),
-            x: CAMP.0 as i32,
-            y: CAMP.1 as i32,
+            x: crate::camp(v).0 as i32,
+            y: crate::camp(v).1 as i32,
             size: 1,
             supply: true,
             receive: false,
             ready: true,
-            ports: ports(v, 1, CAMP.0 as i32, CAMP.1 as i32),
+            ports: ports(v, 1, crate::camp(v).0 as i32, crate::camp(v).1 as i32),
         });
     }
     result.extend(v.buildings.iter().filter_map(|b| {

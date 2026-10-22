@@ -278,3 +278,60 @@ fn electrical(v: &Village, building: usize) -> i64 {
             .0,
     )
 }
+
+#[test]
+fn authored_camps_and_agricultural_tanks_share_the_real_endpoint_rules() {
+    for camp in [[32, 32], [20, 40]] {
+        let mut d = crate::scenarios::Definition::builtin(crate::modes::Mode::Sandbox);
+        d.rules.logistics = true;
+        d.rules.land = true;
+        d.rules.utilities = true;
+        d.map.camp = camp;
+        d.map.camera = camp.map(|n| n as f32);
+        for (i, kind) in ["orchard", "goat_pasture", "wetland", "coop", "workshop"]
+            .into_iter()
+            .enumerate()
+        {
+            let mut b = d.start.buildings[0].clone();
+            b.id = format!("utility-{kind}");
+            b.kind = kind.into();
+            b.x = camp[0] + 5;
+            b.y = camp[1] + i as i32 * 4;
+            d.start.buildings.push(b);
+        }
+        let (mut g, _) = crate::scenarios::compile(d)
+            .unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+        let before = g.snapshot();
+        let v = g.app.world().resource::<Village>();
+        let fresh = endpoints(v, Kind::Fresh);
+        let outlet = fresh.iter().find(|e| e.id == -1).unwrap();
+        assert_eq!([outlet.x, outlet.y], camp);
+        assert!(!clear(v, camp[0], camp[1]));
+        assert!(clear(v, crate::CAMP.0 as i32, crate::CAMP.1 as i32));
+        assert!(
+            !fresh
+                .iter()
+                .any(|e| matches!(e.kind.as_str(), "coop" | "workshop"))
+        );
+        let orchard = v.buildings.iter().find(|b| b.kind == "orchard").unwrap().id;
+        let goats = v
+            .buildings
+            .iter()
+            .find(|b| b.kind == "goat_pasture")
+            .unwrap()
+            .id;
+        let wetland = v.buildings.iter().find(|b| b.kind == "wetland").unwrap().id;
+        let route = plan(v, Kind::Fresh, -1, orchard as i64).unwrap();
+        assert!((route.start.cell[0] - camp[0]).abs() + (route.start.cell[1] - camp[1]).abs() == 1);
+        assert_eq!(g.snapshot(), before);
+        assert_eq!(g.queue_water_connection("fresh", -1, orchard as i32), "ok");
+        assert_eq!(g.queue_water_connection("fresh", -1, goats as i32), "ok");
+        assert_eq!(
+            g.queue_water_connection("irrigation", wetland as i32, orchard as i32),
+            "ok"
+        );
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+    }
+}

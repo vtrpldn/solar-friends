@@ -837,40 +837,8 @@ pub fn valid(v: &Village) -> bool {
         {
             return false;
         }
-        let source_ok = match p.plan.kind {
-            Kind::Fresh => matches!(p.anchors[0].kind.as_str(), "camp" | "well"),
-            Kind::Irrigation => p.anchors[0].kind == "wetland",
-            Kind::Greywater => matches!(
-                p.anchors[0].kind.as_str(),
-                "camp" | "home" | "kitchen" | "eco_toilet"
-            ),
-            Kind::Sewage => p.anchors[0].kind == "eco_toilet",
-            Kind::Electricity => power::shared_kind(&p.anchors[0].kind),
-        };
-        let receiver_ok = match p.plan.kind {
-            Kind::Fresh => matches!(
-                p.anchors[1].kind.as_str(),
-                "home"
-                    | "kitchen"
-                    | "orchard"
-                    | "goat_pasture"
-                    | "garden"
-                    | "greenhouse"
-                    | "eco_toilet"
-                    | "source_timber"
-                    | "source_bamboo"
-            ),
-            Kind::Irrigation => matches!(
-                p.anchors[1].kind.as_str(),
-                "garden" | "greenhouse" | "orchard" | "source_timber" | "source_bamboo"
-            ),
-            Kind::Greywater => p.anchors[1].kind == "wetland",
-            Kind::Sewage => matches!(
-                p.anchors[1].kind.as_str(),
-                "biodigester" | "banana_treatment"
-            ),
-            Kind::Electricity => power::shared_kind(&p.anchors[1].kind),
-        };
+        let source_ok = p.plan.kind.supplies(&p.anchors[0].kind);
+        let receiver_ok = p.plan.kind.receives(&p.anchors[1].kind);
         if !source_ok || !receiver_ok {
             return false;
         }
