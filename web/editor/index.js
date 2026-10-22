@@ -1,4 +1,4 @@
-import {downloadRecoveryRecord,recoveredDraft} from './record-recovery.js';
+import {downloadRecoveryRecord,recoveredDraft,recoveredVillage} from './record-recovery.js';
 import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
 import {MapSharingControls} from './map-sharing-controls.js';
 import {creationThumbnail} from './thumbnail.js';
@@ -438,6 +438,7 @@ function wire(){
     try{
       if(file.size>32*1024*1024)throw Error('This creation file is too large.');
       const raw=await file.text();let content;try{content=JSON.parse(raw);}catch{throw Error('This file is not a readable creation.');}
+      if(content.format==='solar-friends-recovery'&&content.kind==='run'){const recovered=recoveredVillage(content,Game);if(current)await save();await library.importRecoveredRun(recovered);await showLibrary({reset:true});toast(recovered.source==='previous'?'Recovered the previous village checkpoint as a separate save.':'Recovered as a separate saved village.');return;}
       if(content.format==='solar-friends-recovery'){const recovered=recoveredDraft(content,data=>JSON.parse(engine.validate_scenario(data)));await newProject('import',recovered.definition,recovered.attribution);toast(recovered.source==='previous'?'Recovered the previous checkpoint as a separate draft. The original backup is unchanged.':'Recovered as a separate draft. The original backup is unchanged.');return;}
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
       const checked=JSON.parse(engine.validate_scenario(raw));

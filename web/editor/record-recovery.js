@@ -21,3 +21,18 @@ export function recoveredDraft(file,validate){
  }
  throw Error('Neither draft checkpoint can open in this game version. Keep the original backup; nothing was imported.');
 }
+export function recoveredVillage(file,Game){
+ if(file?.format!=='solar-friends-recovery'||file.schema!==1||file.kind!=='run'||file.record?.format!=='solar-friends-run'||file.record.schema!==1||file.record.sessionKind!=='scenario')throw Error('This backup is not a supported saved village. Keep the original file.');
+ const record=file.record,game=new Game();
+ try{
+  for(const [source,snapshot]of [['current',record.snapshot],['previous',record.previousSnapshot]]){
+   if(typeof snapshot!=='string'||snapshot.length>16*1024*1024||!game.restore(snapshot))continue;
+   const restored=JSON.parse(game.snapshot()),definition=restored.village?.scenario?.definition;
+   if(!definition)continue;
+   // Restart uses the same frozen definition that native restoration accepted,
+   // never a conflicting or damaged outer record definition.
+   return {source,snapshot:game.snapshot(),definition,release:structuredClone(record.release??null)};
+  }
+ }finally{game.free();}
+ throw Error('Neither village checkpoint can open in this game version. Keep the original backup; nothing was imported.');
+}
