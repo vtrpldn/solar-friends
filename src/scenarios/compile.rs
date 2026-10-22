@@ -214,6 +214,7 @@ pub(super) fn check(d: &Definition) -> Report {
     super::liquids::check(d, &mut r);
     super::farming::check(d, &mut r);
     super::orchards::check(d, &mut r);
+    super::sites::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
     {

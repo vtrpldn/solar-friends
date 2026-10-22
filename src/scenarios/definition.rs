@@ -165,6 +165,8 @@ pub struct Start {
     pub fresh_water: f32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub liquids: Option<Vec<StartingLiquids>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub resource_sites: Vec<super::sites::StartingSite>,
     pub buildings: Vec<Structure>,
     pub roads: Vec<[i32; 2]>,
     pub inventories: Vec<Inventory>,
@@ -343,6 +345,7 @@ impl Definition {
                 funds: if sandbox { 10_000_000 } else { 300_000 },
                 fresh_water: if sandbox { 40. } else { 32. },
                 liquids:None,
+                resource_sites:vec![],
                 buildings: [("shed", -2, -3), ("warehouse", 4, -3)]
                     .into_iter()
                     .map(|(kind, dx, dy)| Structure {

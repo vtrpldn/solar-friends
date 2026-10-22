@@ -162,6 +162,7 @@ fn build(
             land::disturb_plot(&mut village, 1, x, y, 0.18);
         }
     }
+    scenarios::sites::initialize(&mut village)?;
     if !logistics::initialise(&mut village) {
         return Err(Report::error(
             "start.inventories",
