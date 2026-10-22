@@ -1,3 +1,4 @@
+import {recoveredPackage} from './package-recovery.js';
 import {downloadStoredPackage} from './stored-package-export.js';
 import {missingLibraryEntry,downloadMissingEntryDetails} from './missing-library-entry.js';
 import {exampleScenarios,loadExampleScenario} from './example-scenarios.js';
@@ -473,10 +474,20 @@ function wire(){
   };
   $('creator-import').onchange=async e=>{
     const file=e.target.files[0];if(!file)return;
+    $('creator-library-status').textContent='Reading creation…';
     try{
       if(file.size>32*1024*1024)throw Error('This creation file is too large.');
       const raw=await file.text();let content;try{content=JSON.parse(raw);}catch{throw Error('This file is not a readable creation.');}
       if(content.format==='solar-friends-recovery'){
+        if(['map','release','resident'].includes(content.kind)){
+          const recovered=recoveredPackage(content,{validateMap:mapSharing.validate,validateScenario:raw=>JSON.parse(engine.validate_scenario(raw)),validateResident:raw=>JSON.parse(engine.validate_resident_preset(raw,true))});
+          if(current)await save();
+          if(recovered.kind==='map')await library.importMap(recovered.file,mapSharing.validate,mapSharing.preview(recovered.file));
+          else if(recovered.kind==='release')await library.importRelease(recovered.file,raw=>JSON.parse(engine.validate_scenario(raw)));
+          else await library.saveResidentPreset({id:crypto.randomUUID(),file:recovered.file});
+          await showLibrary({reset:true});$('creator-library-status').textContent=`Recovered a separate ${recovered.kind==='resident'?'resident preset':recovered.kind==='release'?'scenario release':'reusable map'}. The original backup and saved entries are unchanged.${recovered.kind==='resident'?' Find the recovered person under Founding cast → Resident presets.':''}`;return;
+        }
+
         const recovered=await chooseRecoveryCheckpoint(content,{Game,validate:data=>JSON.parse(engine.validate_scenario(data))});if(!recovered)return;
         if(content.kind==='run'){if(current)await save();await library.importRecoveredRun(recovered);await showLibrary({reset:true});toast('Recovered as a separate saved village.');}
         else{if(current)await save();const id=crypto.randomUUID(),doc=EditorDocument.fork(recovered.checkpoint,id);attach(doc.value,{id,checkpoint:doc.checkpoint(),view:recovered.view,record:{attribution:clone(recovered.attribution)}});await save();toast(recovered.historyRecovered||doc.historyRecovered?'Recovered a separate draft. Damaged undo history was cleared.':recovered.playable?'Recovered as a separate draft with its history and view.':'Recovered as a separate draft. Review its issues before playing.');}
