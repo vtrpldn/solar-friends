@@ -6,6 +6,8 @@ description: Build player-facing map, scenario, and resident creators on shared 
 
 Status: implementation in progress. Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and player-created residents. The original five friends remain a ready-made cast.
 
+Required launch biomes: **Mata Atlântica, Cerrado, and Caatinga**. Both player-facing builders must support all three throughout creation, editing, saving, sharing, and play, with distinct vegetation, terrain presentation, climate, and resource tradeoffs. Resident customization must work in each biome. This is a minimum release requirement, not a limit on future biome additions; detailed acceptance criteria appear under Brazilian biome presets below.
+
 ## Why
 
 Players should be able to design a Brazilian countryside property, create the people who will live there, decide what they arrive with, and create a playable ecovila story or challenge. A map might offer fertile clearings but distant water; a scenario might ask the community to become self-sufficient before the dry season. These should be possible through ordinary game controls, without developer tools, JSON editing, or programming.
