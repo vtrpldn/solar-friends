@@ -1012,7 +1012,7 @@ function updateQuests() {
       ? "Choose our next quest →"
       : `Village journal · ${completions.filter(Boolean).length}/${quests.length}`;
   $("#village-needs").textContent =
-    `${Math.min(5, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/5 beds · ${v.meals} prepared meals`;
+    `${Math.min(state.residents.length, v.buildings.filter((b) => b.kind === "home" && b.progress >= 100).length * 3)}/${state.residents.length} beds · ${v.meals} prepared meals`;
   $("#quest-total").textContent =
     `${completions.filter(Boolean).length} of ${quests.length} chapters complete`;
   replaceMarkup($('#journal-chapters'),quests.map((q,i)=>`<button data-chapter="${i}" aria-pressed="${i===journalPage}"><span class="chapter-number">${completions[i]?'✓':i+1}</span><span><b>${q.title}</b><small>${questStatus(v,i)}</small></span></button>`).join(''));
@@ -1191,7 +1191,7 @@ function updateSupplies(v) {
   const coops = v.buildings.filter(b => b.kind === "coop" && b.progress >= 100);
   const fed = coops.filter(b => b.poultry.remaining > 0);
   const shared=v.progress.gathering_delivery;
-  const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(5,v.meals):0;
+  const sharedReserve=shared&&['preparing','ready','serving'].includes(shared.phase)&&shared.spent_after==null?Math.min(shared.portions,v.meals):0;
   replaceMarkup($("#pantry-stock"), [["food",Math.floor(v.food),"Ingredients"],["eggs",s.eggs,"Eggs"],["meals",v.meals,"Ready meals"],["milk",state.environment.economy.materials[25].stored,"Fresh milk"],["honey",state.environment.economy.materials[26].stored,"Honey"]].map(([icon,count,label])=>`<span>${itemIcon(icon)}<span><b>${count}</b><small>${label}</small></span></span>`).join(""));
   const foodReserve=state.environment.economy.food_reserve;
   $("#pantry-outlook").textContent = !usesLogistics(v) ? "Sandbox replenishes ingredients and meals. Neighbours keep their daily routines and have time for hobbies." : `${foodReserve.unclaimed_at_stores} unclaimed edible portions at stores · ${foodReserve.carried} carried · ${foodReserve.committed_to_cooking} ingredients held in cooking. Ingredients, prepared meals, milk and honey can be eaten directly; eggs need cooking. Clear paths still matter.`;
@@ -1250,8 +1250,10 @@ function updateUI() {
   const foodReserve=state.environment.economy.food_reserve;
   $('#food').textContent=foodReserve?.unclaimed_at_stores??Math.floor(v.food+v.meals);
   $('#food').closest('button').title='Unclaimed ingredients, meals, milk and honey at stores · open pantry for claims, cargo and cooking inputs';
+  $("#community-count").textContent=state.residents.length;
+  $("#community-count").setAttribute("aria-label",`${state.residents.length} ${state.residents.length===1?"resident":"residents"}`);
   $("#happiness").textContent =
-    Math.round(state.residents.reduce((s, r) => s + r.happiness, 0) / 5) + "%";
+    Math.round(state.residents.reduce((s, r) => s + r.happiness, 0) / Math.max(1,state.residents.length)) + "%";
   const mins = Math.floor(v.minutes) % 1440;
   $("#date").textContent =
     `Day ${Math.floor(v.minutes / 1440) + 1} · ${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
@@ -1483,7 +1485,7 @@ function frame(stamp) {
 }
 function setup() {
   for(const option of state.environment.economy.source_options)kinds[option.key]=[option.name,option.description];
-  gameUI=installGameUI({images:buildingImages,avatar,paintPortraits,selectPerson,
+  gameUI=installGameUI({images:buildingImages,residents:state.residents,avatar,paintPortraits,selectPerson,
     showPanel,closePanels,openDev:()=>{$('#help-dialog').close();devTools.open();},
     focusAt:(x,y)=>{const p=iso(x,y);cameraTarget={x:pan.x+width/2-p.x,y:pan.y+height*.45-p.y,dt:1/60};},
     worldView:()=>[[0,0],[width,0],[width,height],[0,height]].map(([x,y])=>unproject(x,y,origin,scale))});
@@ -1612,7 +1614,7 @@ function setup() {
     if(button){button.querySelector('.avatar').outerHTML=avatar(id);button.querySelector('b').textContent=person.name;button.setAttribute('aria-label',`Meet ${person.name}`);}
     selectPerson(id);updateUI();paintPortraits();render();save();
   }});
-  $("#residents").innerHTML = state.residents
+  $("#residents").innerHTML = [...state.residents].sort((a,b)=>a.id-b.id)
     .map(
       (r) =>
         `<button class="resident" data-resident="${r.id}" aria-label="Meet ${escapeHtml(r.name)}">${avatar(r.id)}<span class="info"><b>${escapeHtml(r.name)}</b><small></small><span class="energy-tiny"><i></i></span></span><span class="arrow">›</span></button>`,

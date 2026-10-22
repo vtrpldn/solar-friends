@@ -32,3 +32,5 @@
 #creator-residents-fields label.creator-field{font-size:11px;color:#715737;font-weight:bold}#creator-residents-fields details{margin-top:10px}#creator-residents-fields summary{overflow-wrap:anywhere}
 
 .creator-bond-pair{display:flex;align-items:center;gap:6px;justify-content:space-between}.creator-bond-person{display:flex;align-items:center;gap:4px;min-width:0;flex:1}.creator-bond-person span{overflow-wrap:anywhere}.creator-bond-person canvas{width:24px;height:27px;flex:none}#creator-relationships-fields label.creator-field{font-size:11px;font-weight:bold;color:#715737}
+
+.creator-roster-actions{display:flex;gap:8px;margin:14px 0 6px}.creator-roster-actions button{flex:1}

@@ -1,0 +1,446 @@
+{
+  "engine": "wasm",
+  "maximum": 12,
+  "framesPerSpeed": 120,
+  "note": "Engine and compact frame sampling only; shared/mixed bundled looks, not unique modular artwork or browser frame rate.",
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "count": 1,
+      "looks": "shared",
+      "map": 64,
+      "compile": 28.000125000000004,
+      "speeds": {
+        "1": {
+          "median": 0.11479199999999423,
+          "p95": 0.12995800000000202
+        },
+        "16": {
+          "median": 0.2301249999999868,
+          "p95": 0.9269160000000056
+        }
+      },
+      "snapshotBytes": 618421
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 1,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 13.787457999999987,
+      "speeds": {
+        "1": {
+          "median": 0.08499999999997954,
+          "p95": 0.09741700000000719
+        },
+        "16": {
+          "median": 0.1554580000000101,
+          "p95": 0.8122920000000136
+        }
+      },
+      "snapshotBytes": 618421
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 2,
+      "looks": "shared",
+      "map": 64,
+      "compile": 13.116542000000038,
+      "speeds": {
+        "1": {
+          "median": 0.09424999999998818,
+          "p95": 0.108333000000016
+        },
+        "16": {
+          "median": 1.3915829999999687,
+          "p95": 11.021250000000009
+        }
+      },
+      "snapshotBytes": 620814
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 2,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 13.823750000000018,
+      "speeds": {
+        "1": {
+          "median": 0.09570799999994506,
+          "p95": 0.10404099999993832
+        },
+        "16": {
+          "median": 1.3800830000000133,
+          "p95": 10.914083000000005
+        }
+      },
+      "snapshotBytes": 620816
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 5,
+      "looks": "shared",
+      "map": 64,
+      "compile": 13.906541999999945,
+      "speeds": {
+        "1": {
+          "median": 0.12220800000000054,
+          "p95": 0.17812499999990905
+        },
+        "16": {
+          "median": 2.3492089999999735,
+          "p95": 13.861958999999842
+        }
+      },
+      "snapshotBytes": 627955
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 5,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 15.51541700000007,
+      "speeds": {
+        "1": {
+          "median": 0.13029200000005403,
+          "p95": 0.13641600000005383
+        },
+        "16": {
+          "median": 2.277417000000014,
+          "p95": 13.019167000000152
+        }
+      },
+      "snapshotBytes": 627955
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 12,
+      "looks": "shared",
+      "map": 64,
+      "compile": 16.430624999999964,
+      "speeds": {
+        "1": {
+          "median": 0.18933400000014444,
+          "p95": 0.19974999999999454
+        },
+        "16": {
+          "median": 5.42429200000015,
+          "p95": 17.638416000000234
+        }
+      },
+      "snapshotBytes": 645053
+    },
+    {
+      "biome": "mata-atlantica",
+      "count": 12,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 16.419875000000047,
+      "speeds": {
+        "1": {
+          "median": 0.18912500000033106,
+          "p95": 0.2011659999998301
+        },
+        "16": {
+          "median": 5.171083000000181,
+          "p95": 16.89037499999995
+        }
+      },
+      "snapshotBytes": 645055
+    },
+    {
+      "biome": "cerrado",
+      "count": 1,
+      "looks": "shared",
+      "map": 64,
+      "compile": 12.810999999999694,
+      "speeds": {
+        "1": {
+          "median": 0.08008299999983137,
+          "p95": 0.08591700000033597
+        },
+        "16": {
+          "median": 0.14333399999986796,
+          "p95": 0.8038329999999405
+        }
+      },
+      "snapshotBytes": 607893
+    },
+    {
+      "biome": "cerrado",
+      "count": 1,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 13.303707999999915,
+      "speeds": {
+        "1": {
+          "median": 0.08191699999997581,
+          "p95": 0.09520900000006804
+        },
+        "16": {
+          "median": 0.14587500000016007,
+          "p95": 0.7985829999997804
+        }
+      },
+      "snapshotBytes": 607893
+    },
+    {
+      "biome": "cerrado",
+      "count": 2,
+      "looks": "shared",
+      "map": 64,
+      "compile": 12.99841699999979,
+      "speeds": {
+        "1": {
+          "median": 0.08887499999991633,
+          "p95": 0.10100000000011278
+        },
+        "16": {
+          "median": 1.3943749999998545,
+          "p95": 11.121291999999812
+        }
+      },
+      "snapshotBytes": 610286
+    },
+    {
+      "biome": "cerrado",
+      "count": 2,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 12.983165999999983,
+      "speeds": {
+        "1": {
+          "median": 0.08845800000017334,
+          "p95": 0.097791999999572
+        },
+        "16": {
+          "median": 1.3710000000000946,
+          "p95": 10.841999999999643
+        }
+      },
+      "snapshotBytes": 610288
+    },
+    {
+      "biome": "cerrado",
+      "count": 5,
+      "looks": "shared",
+      "map": 64,
+      "compile": 13.672125000000051,
+      "speeds": {
+        "1": {
+          "median": 0.11491699999987759,
+          "p95": 0.12537499999962165
+        },
+        "16": {
+          "median": 2.177875000000313,
+          "p95": 12.376166000000012
+        }
+      },
+      "snapshotBytes": 617427
+    },
+    {
+      "biome": "cerrado",
+      "count": 5,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 13.685500000000502,
+      "speeds": {
+        "1": {
+          "median": 0.11570799999935844,
+          "p95": 0.12220799999977316
+        },
+        "16": {
+          "median": 2.179041999999754,
+          "p95": 12.408707999999933
+        }
+      },
+      "snapshotBytes": 617427
+    },
+    {
+      "biome": "cerrado",
+      "count": 12,
+      "looks": "shared",
+      "map": 64,
+      "compile": 15.435958000000028,
+      "speeds": {
+        "1": {
+          "median": 0.17929200000071432,
+          "p95": 0.1950409999999465
+        },
+        "16": {
+          "median": 5.069250000000466,
+          "p95": 16.919750000000022
+        }
+      },
+      "snapshotBytes": 634525
+    },
+    {
+      "biome": "cerrado",
+      "count": 12,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 15.342375000000175,
+      "speeds": {
+        "1": {
+          "median": 0.17700000000058935,
+          "p95": 0.1907920000003287
+        },
+        "16": {
+          "median": 5.121082999999999,
+          "p95": 17.142917000000125
+        }
+      },
+      "snapshotBytes": 634527
+    },
+    {
+      "biome": "caatinga",
+      "count": 1,
+      "looks": "shared",
+      "map": 64,
+      "compile": 12.78979100000015,
+      "speeds": {
+        "1": {
+          "median": 0.07983299999978044,
+          "p95": 0.09425000000010186
+        },
+        "16": {
+          "median": 0.13941700000032142,
+          "p95": 0.8146249999999782
+        }
+      },
+      "snapshotBytes": 613469
+    },
+    {
+      "biome": "caatinga",
+      "count": 1,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 12.75983400000041,
+      "speeds": {
+        "1": {
+          "median": 0.07808300000033341,
+          "p95": 0.08254099999976461
+        },
+        "16": {
+          "median": 0.13820899999973335,
+          "p95": 0.8149169999996957
+        }
+      },
+      "snapshotBytes": 613469
+    },
+    {
+      "biome": "caatinga",
+      "count": 2,
+      "looks": "shared",
+      "map": 64,
+      "compile": 12.887625000000298,
+      "speeds": {
+        "1": {
+          "median": 0.0869169999996302,
+          "p95": 0.09570900000016991
+        },
+        "16": {
+          "median": 1.3647909999999683,
+          "p95": 10.8364160000001
+        }
+      },
+      "snapshotBytes": 615862
+    },
+    {
+      "biome": "caatinga",
+      "count": 2,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 12.92491599999994,
+      "speeds": {
+        "1": {
+          "median": 0.08720799999991868,
+          "p95": 0.09258300000055897
+        },
+        "16": {
+          "median": 1.3592500000004293,
+          "p95": 10.882374999999229
+        }
+      },
+      "snapshotBytes": 615864
+    },
+    {
+      "biome": "caatinga",
+      "count": 5,
+      "looks": "shared",
+      "map": 64,
+      "compile": 13.70679199999995,
+      "speeds": {
+        "1": {
+          "median": 0.11366699999962293,
+          "p95": 0.12308299999949668
+        },
+        "16": {
+          "median": 2.1618749999997817,
+          "p95": 12.302832999999737
+        }
+      },
+      "snapshotBytes": 623003
+    },
+    {
+      "biome": "caatinga",
+      "count": 5,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 13.78662500000064,
+      "speeds": {
+        "1": {
+          "median": 0.11370800000076997,
+          "p95": 0.1253340000002936
+        },
+        "16": {
+          "median": 2.149916000000303,
+          "p95": 12.250082999998995
+        }
+      },
+      "snapshotBytes": 623003
+    },
+    {
+      "biome": "caatinga",
+      "count": 12,
+      "looks": "shared",
+      "map": 64,
+      "compile": 15.34270800000013,
+      "speeds": {
+        "1": {
+          "median": 0.1758750000008149,
+          "p95": 0.1865830000006099
+        },
+        "16": {
+          "median": 5.146208000000115,
+          "p95": 17.036082999999053
+        }
+      },
+      "snapshotBytes": 640101
+    },
+    {
+      "biome": "caatinga",
+      "count": 12,
+      "looks": "mixed",
+      "map": 64,
+      "compile": 15.782250000000204,
+      "speeds": {
+        "1": {
+          "median": 0.18095800000082818,
+          "p95": 0.19633299999986775
+        },
+        "16": {
+          "median": 5.051292000000103,
+          "p95": 16.828708000000915
+        }
+      },
+      "snapshotBytes": 640103
+    }
+  ],
+  "browserArrivalSample": {
+    "median": 8.300000000000182,
+    "p95": 9.100000000000364,
+    "note": "Headless Chromium, 1600\u00d7900, 90 frames of the twelve-person arrival; not a player-device guarantee."
+  },
+  "scope": "Initial local bundled-look roster limit evidence. Final Stage 8 release validation remains open."
+}

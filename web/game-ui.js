@@ -10,7 +10,7 @@ export const materialIcons=['timber','bamboo','earth','stone','salvage','frames'
 export const itemIcon=key=>`<svg class="item-icon" aria-hidden="true" viewBox="0 0 48 48"><use href="${sheet}#${key}"/></svg>`;
 const buildingNames={shed:'Community shed',orchard:'Fruit orchard',goat_pasture:'Goat pasture',apiary:'Stingless bee apiary',hydro:'River generator',eco_toilet:'Ecological toilet',banana_treatment:'Banana treatment bed',wetland:'Reed bed',biodigester:'Biodigester',warehouse:'Storage house',home:'Home',garden:'Garden',greenhouse:'Greenhouse',kitchen:'Kitchen',well:'Cistern',grove:'Food forest',compost:'Compost station',square:'Village square',coop:'Chicken coop',workshop:'Workshop',solar_farm:'Solar farm',streetlight:'Street light'};
 
-export function installGameUI({images,avatar,paintPortraits,selectPerson,showPanel,openDev,focusAt,worldView}) {
+export function installGameUI({images,residents,avatar,paintPortraits,selectPerson,showPanel,openDev,focusAt,worldView}) {
   const $=s=>document.querySelector(s);
   for(const el of document.querySelectorAll('[data-item-icon]'))el.innerHTML=itemIcon(el.dataset.itemIcon);
   $('#help-open-dev').onclick=openDev;
@@ -41,7 +41,7 @@ export function installGameUI({images,avatar,paintPortraits,selectPerson,showPan
   for(const [selector,kind,label,key] of dockIcons){
     const button=$(selector);
     if(kind==='journal')button.innerHTML=itemIcon('journal');
-    else if(kind==='people')button.innerHTML=`<span class="people-emblem" aria-hidden="true">${avatar(0)}${avatar(1)}</span>`;
+    else if(kind==='people')button.innerHTML=`<span class="people-emblem" aria-hidden="true">${[...residents].sort((a,b)=>a.id-b.id).slice(0,2).map(r=>avatar(r.id)).join('')}</span>`;
     else{const canvas=document.createElement('canvas');canvas.setAttribute('aria-hidden','true');button.replaceChildren(canvas);paintIcon(canvas,kind,images[kind]);}
     const caption=document.createElement('span');caption.className='dock-label';caption.textContent=label;
     const shortcut=document.createElement('kbd');shortcut.textContent=key;shortcut.setAttribute('aria-hidden','true');caption.append(shortcut);button.append(caption);

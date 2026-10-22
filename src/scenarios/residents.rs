@@ -1,6 +1,7 @@
 //! Authored identities are stable even when the cast is reordered or renamed.
 use super::*;
 pub const PRESETS: [&str; 5] = ["iara", "bento", "luz", "caua", "nina"];
+pub const MAX_RESIDENTS: usize = 12;
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Person {
@@ -65,7 +66,6 @@ pub fn check(d: &Definition, r: &mut Report) {
         return;
     };
     let mut ids = HashSet::new();
-    let mut presets = HashSet::new();
     for (i, p) in people.iter().enumerate() {
         if !valid_key(&p.id)
             || !ids.insert(&p.id)
@@ -90,12 +90,18 @@ pub fn check(d: &Definition, r: &mut Report) {
         if p.slot().is_none() {
             r.push(&format!("start.residents.{i}.preset"),"unsupported_resident_preset","This resident preset or its artwork version is unavailable. Keep the original creation.");
         }
-        presets.insert(&p.preset);
     }
-    // This release slice keeps the existing cast playable while other per-person
-    // stores, appearances and population-dependent systems are generalized.
-    if people.len() != 5 || presets.len() != 5 {
-        r.push("start.residents","unsupported_cast","The current playable cast requires one of each founding preset. Other cast sizes can remain drafts while roster support is completed.");
+    if people.is_empty() || people.len() > MAX_RESIDENTS {
+        r.push(
+            "start.residents",
+            "unsupported_cast",
+            format!(
+                "Keep an empty cast as a draft, or choose 1–{MAX_RESIDENTS} residents to play."
+            ),
+        );
+    }
+    if d.rules.mode == modes::Mode::Story && !original_cast(people) {
+        r.push("start.residents", "missing_story_roles", "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom scenario role binding is not available yet.");
     }
 }
 fn original_cast(people: &[Person]) -> bool {
@@ -163,7 +169,8 @@ pub fn create(d: &Definition, v: &mut Village) -> Vec<Resident> {
             person.target_x = target.0;
             person.target_y = target.1;
             person.x = target.0;
-            person.y = target.1 + 5.5 + (person.id % 5) as f32 * 0.15;
+            person.y =
+                (target.1 + 5.5 + (person.id % 5) as f32 * 0.15).clamp(0.3, MAP_SIZE as f32 - 0.3);
             person.reason = if definitions.len() == 1 {
                 "Walking into my new clearing."
             } else {
@@ -222,6 +229,40 @@ mod tests {
                 .collect(),
         );
         d
+    }
+    #[test]
+    fn public_custom_casts_compile_across_biomes_and_keep_frozen_bindings_on_reload() {
+        for biome in biomes::presets() {
+            for count in [1, 2, MAX_RESIDENTS] {
+                let mut d = cast(count);
+                d.map = biomes::generate(biome.id, 42).unwrap();
+                d.rules.logistics = true;
+                d.rules.land = true;
+                d.rules.utilities = true;
+                let expected = bindings(&d);
+                let (mut g, _) =
+                    compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+                let saved = g.snapshot();
+                let state: Save = serde_json::from_str(&saved).unwrap();
+                assert_eq!(state.residents.len(), count);
+                assert_eq!(state.village.scenario.as_ref().unwrap().residents, expected);
+                assert!(g.restore(&saved));
+                assert_eq!(g.snapshot(), saved);
+            }
+        }
+        for count in [0, MAX_RESIDENTS + 1] {
+            assert!(compile(cast(count)).is_err());
+        }
+        let mut official = cast(2);
+        official.rules.mode = modes::Mode::Story;
+        assert!(
+            compile(official)
+                .err()
+                .unwrap()
+                .issues
+                .iter()
+                .any(|i| i.code == "missing_story_roles")
+        );
     }
     #[test]
     fn sparse_runtime_identities_restore_without_becoming_array_positions() {
