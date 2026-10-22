@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen.imagegen",
+  "scope": "First cooking equipment pose only, excluded from gameplay and character choices",
+  "calls": [
+    {
+      "prompt": "Use case: stylized-concept. Solar Friends resident COOKING EQUIPMENT layer, first stirring pose. Image 1 is exact 1254x1254 whole-frame neutral resident placement reference. Image 2 is the existing Bento activities atlas, STYLE and EQUIPMENT reference only: top row shows a small plain silver cooking pot and wooden spoon. Output ONLY a matching plain metal pot and wooden stirring spoon on a 1254x1254 transparent full-body canvas. NO person, hands, arms, clothing, ground, table, stove or steam. Keep original framing, not a centered inventory icon. The near hand grips the wooden shaft at (749,573); draw its vertical/slightly tilted shaft from about (742,490) THROUGH (749,573), ending inside the pot around (780,720). The far hand at (955,666) supports the pot rim/side, so the pot's upper-right edge must pass beneath that hand. Pot opening ellipse approximately x765..1000,y635..715, bottom around y815. Modest household pot about 230 pixels wide, a fifth of this resident's full height, same visual scale as the original reference. Broad soft painted grey metal shading, subdued warm upper-left highlights, rounded rim, simple wood grain, no glossy chrome or ornate handles. Visible simple warm food surface in the opening, spoon bowl naturally hidden inside. True transparency outside and through gaps. Preserve all canvas space above and left; keep entire equipment silhouette inside margins. Output only the equipment; original resident body will be composited unchanged.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-0-body.png",
+        "web/art/animations/bento-activities.png"
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v1.png",
+      "status": "rejected",
+      "finding": "Pot too large/low and metal too textured compared with original cooking sprites."
+    },
+    {
+      "prompt": "Use case: precise-object-edit. Correct the SCALE and POSITION of the cooking equipment. Image 1 is the exact 1254-square resident pose guide. Image 2 is the original Bento activities atlas: top-row pot/spoon is the TRUSTED size and simple painted style. Image 3 is the REJECTED equipment candidate: its pot is about twice too wide/tall, too low, the shaft too thick and metal too textured. Output ONLY a much smaller plain grey pot plus slim wood stirring spoon on the SAME full 1254x1254 TRANSPARENT canvas. Precise pot bounds: LEFT x765, RIGHT x1000, TOP rim y640, BOTTOM y815. Pot width only 235 pixels, height about 175, a small household pot held at the waist, NOT a stockpot at knee level. Smooth broad illustrated grey shading like atlas, no mottled photo metal. The far fist centered (955,666) supports the upper-right rim. Slim wood spoon shaft only 22..28 pixels thick, passes through near fist (749,573), top at (740,490), lower end enters pot around (790,685), bowl hidden by contents/front rim. Do not center or crop the equipment. Leave all space outside those object bounds transparent, including above, left and around the person. NO resident/body/hands/arms/clothes, no ground/table/stove, no extra handles, labels, guides or steam. Keep camera, warm upper-left light and painted edge treatment matching the original atlas. This is a full-frame activity layer, not a large centered inventory icon.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-0-body.png",
+        "web/art/animations/bento-activities.png",
+        "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v1.png"
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v2.png",
+      "status": "reference only",
+      "finding": "Smaller pot but still too low beneath the far fist. The first foreground polygon also covered shirt pixels above the stirring fist, interrupting the visible shaft."
+    },
+    {
+      "prompt": "Use case: precise-object-edit. Fix the HEIGHT of the pot in this cooking EQUIPMENT layer. Image 1 is the exact resident hand-placement reference; image 2 is equipment edit target. The pot is currently too low, leaving the far fist above it. Keep the same SMALL pot size, silver material, food, wood spoon, perspective and full transparent 1254x1254 framing. Move the POT upward approximately 90 source pixels (about 7% of the full canvas), leaving its horizontal position and size unchanged. Its upper rim must sit directly UNDER the far closed hand at (955,666): top/back rim approximately y630, front rim y690, pot bottom around y820, NOT around y950. The far fingers will overlap the top-right rim. Near-hand stirring grip stays at (749,573), the spoon top stays near (740,490), so the spoon enters the raised pot around (790,655); shorten only the hidden/submerged portion naturally rather than moving the gripping shaft away from the hand. DO NOT paint hands, arms, body, clothes or any resident. Preserve transparent space outside the two equipment objects, including large space above/left, no centered/cropped inventory icon. Same broad soft illustrated shading, no photo metal texture, no extra handles/table/stove/steam/labels. Output equipment only, small household pot at the resident's waist rather than below their empty fist.",
+      "references": [
+        "assets/art-direction/character-prototype-v1/hair-activities-0-body.png",
+        "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v2.png"
+      ],
+      "output": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+      "status": "working first-pose draft",
+      "finding": "Pot is raised and the tightened authored hand mask leaves the spoon continuous through the grip. Supporting rim alignment is improved; final hand alignment, shaft thickness, metal contrast and full cooking motion still need production review."
+    }
+  ],
+  "evidence": [
+    "assets/art-direction/character-prototype-v1/cook-equipment-pose-0-v3-scenes.png",
+    "assets/art-direction/character-prototype-v1/cook-equipment-pose-0-v3-report.json"
+  ],
+  "review": {
+    "body": "Exact source-bound activities pose 0 retained; colours/hair and foreground ownership verified. No body reshape, raster warping or automatic equipment fitting.",
+    "context": "Inspected original Bento cooking atlas and actual scene containing original resident, home, shed, storage, ground, both facings and day/night.",
+    "style": "Smaller plain grey pot and wood spoon retain the original equipment vocabulary. Final material/shaft thickness review remains open.",
+    "completeness": "One of four cooking poses is present; no cycle or unsupported pose fallback is offered. Shared review computes whether all expected poses exist before enabling time/playback.",
+    "remaining": [
+      "Three further cooking poses",
+      "Final supporting-hand alignment and material scale",
+      "Stirring continuity/cadence",
+      "Tending/feeding equipment",
+      "Additional modular art and native/player integration"
+    ]
+  }
+}
