@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "status": "production-guide foundation; one-pose coordinate draft; excluded from gameplay",
+  "file": "web/art/characters/prototype-v1/body-attachments-draft.json",
+  "sha256": "fde9a7d2f4065bbf07dde011427c8cc664a4c0cafc53dd9eaceee15162b1ba2e",
+  "sources": {
+    "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+    "activities": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123"
+  },
+  "preparedFrameDigests": 48,
+  "recordedPoses": [
+    {
+      "sheet": "activities",
+      "index": 8
+    }
+  ],
+  "authoredThrough": "scripts/author-body-attachment-guides.mjs uses the actual lab controls and Export, preserving unmarked pose slots.",
+  "visualReview": "Inspected kneeling body overlay. The initial neck point sat on the shoulder; corrected to the visible neck base. Visible grip points follow both painted hands. These remain draft anchors until tested with compatible painted parts.",
+  "mechanicalScope": "Import rejects changed source/frame bindings, malformed data and unsupported fields. Complete gate means all-48 coordinate coverage only; synthetic verifier coordinates are not authored art.",
+  "remaining": [
+    "Author/review the other 47 poses",
+    "Compatible face/hair/clothing/accessory/body art",
+    "Equipment, seating and front/back occlusion masks",
+    "All animation loops, facings, world scale and lighting with actual parts",
+    "Typed native recipes, portraits, player integration and global cache/performance gates"
+  ]
+}

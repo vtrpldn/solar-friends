@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "poseCoverageFixture": 48,
+  "frameDigests": 48,
+  "invalidCases": 5,
+  "invalidBindings": 3,
+  "historyLimit": 64,
+  "preparedFrameDriftRejected": true,
+  "scope": "Synthetic coordinates verify editor/data behaviour only. No semantic joint positions, compatible parts, style or gameplay art are approved."
+}

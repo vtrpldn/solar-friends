@@ -1,3 +1,4 @@
+import {installAttachmentEditor} from './character-attachment-editor.js';
 import {createBodyMaterialModel,bodyMaterialPalettes,defaultBodyMaterials} from '../character-materials.js';
 import init,{Game} from '../pkg/solar_friends.js';
 import {loadEditorArt} from '../editor/map-view.js';
@@ -28,6 +29,7 @@ try{
  const materialProvider=()=>materialModel.provider($('body-material-mode').value==='palette'?materialRecipe():defaultBodyMaterials,{diagnostic:$('body-material-mode').value==='regions'});
  const materialReport={schema:1,status:'prototype-only; semantic masks and colour variants require visual review',sheets:Object.fromEntries(Object.keys(frameBank).map(sheet=>[sheet,Array.from({length:16},(_,index)=>({index,counts:materialModel.mask(sheet,index).counts}))]))};
  $('body-material-report').textContent=JSON.stringify(materialReport,null,2);window.bodyMaterialsReview={model:materialModel,frames:frameBank,images:body,registration,sourceHashes};
+ await installAttachmentEditor({frames:frameBank,sourceHashes,button:$('body-attachment-open')});
  const heights=Object.values(report.sheets).map(s=>s.standingHeight);report.crossSheetStatureRatio=Math.max(...heights)/Math.min(...heights);
  const game=new Game();let d,snapshot;
  try{d=JSON.parse(game.scenario_template('sandbox'));d.start.buildings.push({id:'body-review-home',kind:'home',x:28,y:34,state:'completed',recipe:'standard',appearance:null});d.start.roads.push([30,34],[31,34],[32,34]);const checked=JSON.parse(game.load_scenario(JSON.stringify(d)));if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message);snapshot=JSON.parse(game.report_state());}finally{game.free();}
