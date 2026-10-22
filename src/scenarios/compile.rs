@@ -446,24 +446,14 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     }
     let mut opening = vec![];
     for (i, inventory) in d.start.inventories.iter().enumerate() {
-        let owner = match &inventory.owner {
-            InventoryOwner::Camp => logistics::Owner::Camp,
-            InventoryOwner::Building(key) => {
-                let id = buildings[key];
-                let b = v.buildings.iter().find(|b| b.id == id).unwrap();
-                if b.progress < 100. || ecology::farm(b) {
-                    logistics::Owner::Site(id)
-                } else if b.kind == "warehouse" {
-                    logistics::Owner::Warehouse(id)
-                } else {
-                    logistics::Owner::Pantry(id)
-                }
-            }
+        let building = match &inventory.owner {
+            InventoryOwner::Camp => None,
+            InventoryOwner::Building(key) => Some(buildings[key]),
         };
         let items =
             std::array::from_fn(|i| inventory.items.get(economy::NAMES[i]).copied().unwrap_or(0));
         opening.push(initialization::OpeningStore {
-            owner,
+            building,
             items,
             path: format!("start.inventories.{i}"),
         });

@@ -11,6 +11,7 @@ pub(crate) mod journal;
 mod relationships;
 mod resident_presets;
 mod residents;
+mod supplies;
 pub(crate) use definition::*;
 
 #[derive(Clone, Serialize)]
@@ -180,6 +181,10 @@ impl Game {
         serde_json::to_string(&resident_presets::validate(raw, unrestricted)).unwrap()
     }
 
+    pub fn scenario_supplies(&self, data: &str, distribute: bool) -> String {
+        serde_json::to_string(&supplies::preview(data, distribute)).unwrap()
+    }
+
     pub fn scenario_journal(&self) -> String {
         serde_json::to_string(&journal::view(self.app.world().resource::<Village>())).unwrap()
     }
@@ -188,11 +193,11 @@ impl Game {
         let buildings: Vec<_> = progression::BUILDINGS.iter().map(|kind| {
             let recipes: Vec<_> = ["standard", "local", "adobe"].into_iter()
                 .filter(|recipe| economy::recipe(kind, recipe).is_some()).collect();
-            serde_json::json!({"id":kind,"receives_deliveries":logistics::receives_at_building(kind,true),"size":interactions::footprint_size(kind),"recipes":recipes,
+            serde_json::json!({"id":kind,"receives_deliveries":logistics::receives_at_building(kind,true),"receiving_capacity":logistics::receiving_capacity(kind,true),"construction_receiving_capacity":150,"size":interactions::footprint_size(kind),"recipes":recipes,
                 "appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "max_regions":32,"max_buildings":MAX_BUILDINGS,"max_residents":residents::MAX_RESIDENTS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"journal":journal::catalog(),"resident_routines":resident_preferences::catalog(),"resident_personality":personality::catalog(),"resident_experience":experience::catalog(),"resident_appearances":resident_appearance::catalog(),"resident_presets":residents::founders(),"occupations":occupations::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"buildings":buildings})
+            "max_regions":32,"max_buildings":MAX_BUILDINGS,"max_residents":residents::MAX_RESIDENTS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"journal":journal::catalog(),"resident_routines":resident_preferences::catalog(),"resident_personality":personality::catalog(),"resident_experience":experience::catalog(),"resident_appearances":resident_appearance::catalog(),"resident_presets":residents::founders(),"occupations":occupations::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"supply_capacity":economy::CAPACITY,"perishable_materials":economy::NAMES.iter().enumerate().filter(|(i,_)|freshness::lifetime(*i).is_some()).map(|(_,name)|*name).collect::<Vec<_>>(),"buildings":buildings})
         .to_string()
     }
 

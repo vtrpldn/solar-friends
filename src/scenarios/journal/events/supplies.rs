@@ -1,16 +1,5 @@
 //! External support enters a real store, using the normal material/freshness API.
 use super::*;
-fn capacity(building: &crate::scenarios::Structure) -> u32 {
-    if building.state == BuildingState::Blueprint {
-        150
-    } else if building.kind == "warehouse" {
-        300
-    } else if matches!(building.kind.as_str(), "garden" | "greenhouse") {
-        150
-    } else {
-        60
-    }
-}
 pub fn source_valid(d: &Definition, material: &str, count: u32, building: Option<&str>) -> bool {
     d.rules.logistics
         && economy::NAMES.contains(&material)
@@ -28,26 +17,19 @@ pub fn source_valid(d: &Definition, material: &str, count: u32, building: Option
                                     b.state == BuildingState::Completed,
                                 )
                         })
-                        .map(capacity)
+                        .and_then(|b| {
+                            logistics::receiving_capacity(
+                                &b.kind,
+                                b.state == BuildingState::Completed,
+                            )
+                        })
                 })
                 .unwrap_or(0)
 }
 fn store<'a>(v: &'a Village, building: Option<&str>) -> Option<&'a logistics::Store> {
     let owner = if let Some(key) = building {
         let id = *v.scenario.as_ref()?.buildings.get(key)?;
-        let b = v.buildings.iter().find(|b| b.id == id)?;
-        if b.progress < 100. && building_work::original_progress(v, b.id) != Some(100.) {
-            logistics::Owner::Site(id)
-        } else if b.kind == "warehouse" {
-            logistics::Owner::Warehouse(id)
-        } else if logistics::pantry_kind(&b.kind) {
-            logistics::Owner::Pantry(id)
-        } else if ecology::farm(b) {
-            logistics::Owner::Site(id)
-        } else {
-            let site = v.production.sites.iter().find(|s| s.building == Some(id))?;
-            logistics::Owner::Production(site.id)
-        }
+        logistics::building_owner(v, id)?
     } else {
         logistics::Owner::Camp
     };

@@ -117,7 +117,7 @@ pub(crate) fn create(village: Village, residents: Vec<Resident>) -> Result<Game,
 }
 
 pub(crate) struct OpeningStore {
-    pub owner: logistics::Owner,
+    pub building: Option<usize>,
     pub items: economy::Bundle,
     pub path: String,
 }
@@ -171,13 +171,17 @@ fn build(
     production::sync(&mut village);
     if let Some(opening) = opening {
         for inventory in opening {
+            let owner = match inventory.building {
+                None => Some(logistics::Owner::Camp),
+                Some(id) => logistics::building_owner(&village, id),
+            };
             let Some(store) = village
                 .logistics
                 .as_mut()
                 .unwrap()
                 .stores
                 .iter_mut()
-                .find(|p| p.owner == inventory.owner)
+                .find(|p| Some(p.owner) == owner)
             else {
                 return Err(Report::error(
                     &inventory.path,

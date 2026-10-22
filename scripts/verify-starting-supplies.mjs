@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import init,{Game} from '../web/pkg/solar_friends.js';
+import {EditorDocument} from '../web/editor/document.js';
+await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
+const g=new Game(),totals=inventories=>inventories.reduce((sum,p)=>{for(const [m,n]of Object.entries(p.items))sum[m]=(sum[m]??0)+n;return sum;},{});
+try{
+ const before=g.snapshot();const d=JSON.parse(g.scenario_template('sandbox'));d.start.inventories=[{owner:{kind:'camp'},items:{earth:400,food:200}},{owner:{kind:'building',building:'starting-warehouse'},items:{earth:300}}];const doc=new EditorDocument(d),preview=JSON.parse(g.scenario_supplies(JSON.stringify(d),true));assert(preview.ok);assert.equal(preview.total,900);assert.deepEqual(totals(preview.inventories),totals(d.start.inventories));assert.equal(g.snapshot(),before);const camp=preview.inventories.find(p=>p.owner.kind==='camp'),store=preview.inventories.find(p=>p.owner.kind==='building');assert.deepEqual(camp.items,{earth:600});assert.deepEqual(store.items,{earth:100,food:200});doc.transact('Distribute our supplies',draft=>{draft.start.inventories=preview.inventories;});assert(doc.undo());assert.deepEqual(doc.value,d);assert(doc.redo());assert(JSON.parse(g.load_scenario(JSON.stringify(doc.value))).ok);const saved=g.snapshot();assert(g.restore(saved));assert.equal(g.snapshot(),saved);const v=JSON.parse(saved).village;assert.equal(v.simulation.materials.received.reduce((a,b)=>a+b,0),0);assert.equal(v.simulation.materials.opening[2],700);assert.equal(v.simulation.materials.opening[16],200);
+ const full=structuredClone(d);full.start.inventories[1].items.earth=301;const overflow=JSON.parse(g.scenario_supplies(JSON.stringify(full),true));assert.equal(overflow.ok,false);assert.deepEqual(overflow.unassigned,{earth:1});assert.equal(g.snapshot(),saved);full.start.inventories[1].items.unknown=1;assert(!JSON.parse(g.scenario_supplies(JSON.stringify(full),true)).ok);assert.equal(g.snapshot(),saved);
+ console.log('PASS: native supply layout, exact conservation and global/local capacity, food placement, no invisible stores, explicit overflow/unknown materials, read-only proposals, transactional undo/redo, actual starting ownership/accounting and exact restoration.');
+}finally{g.free();}

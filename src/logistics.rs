@@ -18,10 +18,39 @@ pub(crate) fn pantry_kind(kind: &str) -> bool {
             | "orchard"
     )
 }
+pub(crate) fn receiving_capacity(kind: &str, completed: bool) -> Option<u32> {
+    if !completed {
+        Some(150)
+    } else if kind == "warehouse" {
+        Some(300)
+    } else if pantry_kind(kind) || kind == "workshop" {
+        Some(60)
+    } else if matches!(kind, "garden" | "greenhouse") {
+        Some(150)
+    } else {
+        None
+    }
+}
 pub(crate) fn receives_at_building(kind: &str, completed: bool) -> bool {
-    !completed
-        || pantry_kind(kind)
-        || matches!(kind, "warehouse" | "workshop" | "garden" | "greenhouse")
+    receiving_capacity(kind, completed).is_some()
+}
+pub(crate) fn building_owner(v: &Village, id: usize) -> Option<Owner> {
+    let b = v.buildings.iter().find(|b| b.id == id)?;
+    if b.progress < 100. && building_work::original_progress(v, id) != Some(100.) {
+        Some(Owner::Site(id))
+    } else if b.kind == "warehouse" {
+        Some(Owner::Warehouse(id))
+    } else if pantry_kind(&b.kind) {
+        Some(Owner::Pantry(id))
+    } else if ecology::farm(b) {
+        Some(Owner::Site(id))
+    } else {
+        v.production
+            .sites
+            .iter()
+            .find(|s| s.building == Some(id))
+            .map(|s| Owner::Production(s.id))
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", content = "id", rename_all = "snake_case")]
