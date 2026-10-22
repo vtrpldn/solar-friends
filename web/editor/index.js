@@ -1,3 +1,4 @@
+import {downloadRecoveryRecord} from './record-recovery.js';
 import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
 import {MapSharingControls} from './map-sharing-controls.js';
 import {creationThumbnail} from './thumbnail.js';
@@ -301,7 +302,7 @@ async function launch(definition,record,sessionKind,releaseId=null,releasePackag
 async function showLibrary({reset=false}={}){
   if(current)await save();
   const [projects,runs,releases,maps]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases(),library.listMaps()]);
-  $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row">${previewMarkup('project',p.id)}<div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
+  $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row">${previewMarkup('project',p.id)}<div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button data-backup-project="${escape(p.id)}" title="Keep the original draft, history and previous checkpoint">Backup</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
   $('creator-releases-heading').hidden=!releases.length;
   $('creator-release-list').innerHTML=releases.map(r=>{
     const compatible=r.compatibility&&Object.entries(catalog.releases.compatibility).every(([key,value])=>r.compatibility[key]===value);
@@ -313,7 +314,7 @@ async function showLibrary({reset=false}={}){
   }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario');
   $('creator-runs-heading').hidden=!villages.length;
-  $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button></div>`).join('');
+  $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button><button data-backup-run="${escape(r.id)}" title="Keep the original village and previous snapshot">Backup</button></div>`).join('');
   $('creator-library-title').textContent=projects.length+releases.length+villages.length+maps.length?'Creation library':'Create a village';
   if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length+maps.length===0;
   libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages,maps);if(reset)libraryDiscovery.reset();
@@ -410,6 +411,8 @@ function wire(){
   $('creator-library-dialog').onclick=async e=>{
     const b=e.target.closest('button');if(!b||b.disabled)return;b.disabled=true;
     try{
+      if(b.dataset.backupProject)downloadRecoveryRecord('project',await library.getProject(b.dataset.backupProject));
+      if(b.dataset.backupRun)downloadRecoveryRecord('run',await library.getRun(b.dataset.backupRun));
       if(b.dataset.preset)await newProject(b.dataset.preset);
       if(b.dataset.openProject){const record=await library.getProject(b.dataset.openProject);if(record)await openProject(record);}
       if(b.dataset.playProject){const record=await library.getProject(b.dataset.playProject);if(record)await launch(record.checkpoint.definition,record,'scenario');}
