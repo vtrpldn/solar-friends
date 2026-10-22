@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "tool": "built-in image_gen__imagegen",
+  "scope": "Walking-pose production experiments only. No walking provider, lab selection or gameplay appearance enabled. All returned pixels preserved; no individual fitting/normalization, clipping repairs or relaxed bounds.",
+  "records": [
+    {
+      "id": "base-0-v1",
+      "prompt": "Use case: precise-object-edit. One precisely registered hair-only layer for a hand-painted game walk pose.\nInput1 is the EXACT bald resident geometry target (walking pose 0), on a1254-square transparent canvas. Input2 is the accepted short brown curly hair STYLE/SHAPE reference from a DIFFERENT pose; its old position is NOT this target's position.\nPaint the SAME hairstyle onto input1's actual scalp, following its crown, forehead hairline and visible ear. Preserve short rounded volume, broad curl cluster arrangement, painted edge treatment and upper-left light of input2. Do not invent another wig. The walking head is farther RIGHT than the style reference.\nReturn ONLY added hair, with all body, head, face, skin, ears, eyebrows and clothing fully transparent. Keep exact1254x1254 canvas and target coordinates. Entire hair must remain in outer x,y,width,height rectangle [602.5,68.6,333.1,293.9], following actual scalp rather than filling rectangle. Crown begins above the bald crown near y115; forehead/eyes and visible ear remain open. Stop behind/above the ear near y290; NO dangling curl or U-loop beneath the ear, NO skin backing.\nMost canvas must be empty transparent space. No body with hair, centered standalone wig, labels, guides, shadows, ground, background, crop, resizing or recentering. It will be composited over input1 as a whole frame with no independent fitting. Warm illustrated painted curls readable at48-pixel resident size.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-0-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d31a9744-a8b9-4cec-a5f2-1896da27268c.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png",
+      "verdict": "production draft only",
+      "findings": "Direct static fit is close. Matching dimensions and unchanged bounds gate pass. Full walking-set and temporal/style approval remain open.",
+      "candidateSha256": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-0-body.png": "2766fb25345e044a95df3357fe0275cdbcfb46e217cf5995bc36dcc511431ded",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-1-v1",
+      "prompt": "Use case: precise-object-edit. One precisely registered hair-only layer for a hand-painted game walk pose.\nInput1 is the EXACT bald resident geometry target (walking pose 1), on a1254-square transparent canvas. Input2 is the accepted short brown curly hair STYLE/SHAPE reference from a DIFFERENT pose; its old position is NOT this target's position.\nPaint the SAME hairstyle onto input1's actual scalp, following its crown, forehead hairline and visible ear. Preserve short rounded volume, broad curl cluster arrangement, painted edge treatment and upper-left light of input2. Do not invent another wig. The walking head is farther RIGHT than the style reference.\nReturn ONLY added hair, with all body, head, face, skin, ears, eyebrows and clothing fully transparent. Keep exact1254x1254 canvas and target coordinates. Entire hair must remain in outer x,y,width,height rectangle [563.3,68.6,333.1,293.9], following actual scalp rather than filling rectangle. Crown begins above the bald crown near y115; forehead/eyes and visible ear remain open. Stop behind/above the ear near y290; NO dangling curl or U-loop beneath the ear, NO skin backing.\nMost canvas must be empty transparent space. No body with hair, centered standalone wig, labels, guides, shadows, ground, background, crop, resizing or recentering. It will be composited over input1 as a whole frame with no independent fitting. Warm illustrated painted curls readable at48-pixel resident size.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-1-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7c6cf002-d108-4cb7-ba72-94632ade4dfb.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-1-candidate-v1.png",
+      "verdict": "production draft only",
+      "findings": "Direct static fit is close. Matching dimensions and unchanged bounds gate pass. Full walking-set and temporal/style approval remain open.",
+      "candidateSha256": "0afd3bda5cc8980f40c34099a48a02e9f6d4854eda9b4dd9fd0e08d42cc73f4f",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-1-body.png": "c5469da0b60a706488d0f183ddf4fe72343c3c3e4fa5339702928d7534f2ddcb",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-2-v1",
+      "prompt": "Use case: precise-object-edit. One precisely registered hair-only layer for a hand-painted game walk pose.\nInput1 is the EXACT bald resident geometry target (walking pose 2), on a1254-square transparent canvas. Input2 is the accepted short brown curly hair STYLE/SHAPE reference from a DIFFERENT pose; its old position is NOT this target's position.\nPaint the SAME hairstyle onto input1's actual scalp, following its crown, forehead hairline and visible ear. Preserve short rounded volume, broad curl cluster arrangement, painted edge treatment and upper-left light of input2. Do not invent another wig. The walking head is farther RIGHT than the style reference.\nReturn ONLY added hair, with all body, head, face, skin, ears, eyebrows and clothing fully transparent. Keep exact1254x1254 canvas and target coordinates. Entire hair must remain in outer x,y,width,height rectangle [592.7,68.6,333.1,293.9], following actual scalp rather than filling rectangle. Crown begins above the bald crown near y115; forehead/eyes and visible ear remain open. Stop behind/above the ear near y290; NO dangling curl or U-loop beneath the ear, NO skin backing.\nMost canvas must be empty transparent space. No body with hair, centered standalone wig, labels, guides, shadows, ground, background, crop, resizing or recentering. It will be composited over input1 as a whole frame with no independent fitting. Warm illustrated painted curls readable at48-pixel resident size.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-83d2b678-eb07-4fc3-9063-9e9e7ad63528.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-2-candidate-v1.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "9e7b01e855d45698b529198f005bb191140e494ffc5c72225a47490123e637c7",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-body.png": "826c5ebdb24d0c159a04ce1bc1feb1fea06f52b3abf8f1ebf550e7bd364da321",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-2-v2",
+      "prompt": "Use case: precise-object-edit. Registered game hair-only layer.\nInput1 is exact bald WALK pose2,1254-square canvas. Input2 is the WORKING short curly hair from walking pose0, same scale. Copy its restrained silhouette, curl clusters and warm painted light while repainting to hug input1's scalp. Head moves only slightly from the working walking reference. Preserve short cap, do NOT make hair larger or longer.\nThe last attempt sat too LOW and RIGHT, covering eyes and leaving bald crown exposed. Hair must cover the crown beginning near y110, not y155. Keep the front hairline above forehead/eyebrows, around y210\u2013235. Do not cover eyes near y270. Back edge tapers around the upper ear, no curl hanging beneath ear. Use actual input1 head as geometry authority. Hair approximate x600\u2013910, y110\u2013330.\nOutput ONLY hair on the exact1254-square transparent canvas. No scalp, skin, face, ear, body, clothes, background, shadows, labels or guide. Mostcanvas stays empty. Never crop, recenter, independently normalize or enlarge. Exact registered layer to composite over input1 without fitting. Keep broad painted shading, same hairstyle and upper-left light as input2.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c6c26d5a-a6fc-455c-9c7a-59d038a3b67f.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-2-candidate-v2.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "8d2159f115d826728eed4d67c1fa44c3bd5888ced4da62c6b650b64c3cd4e16a",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-body.png": "826c5ebdb24d0c159a04ce1bc1feb1fea06f52b3abf8f1ebf550e7bd364da321",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9"
+      }
+    },
+    {
+      "id": "base-2-v3",
+      "prompt": "Use case: precise-object-edit. Exact registered painted hair layer.\nInput1 is a geometry guide over the bald walking body: the GREEN FILLED SHAPE is the EXACT desired hair silhouette and position. Replace that green region with short brown painted curls. Follow its upper crown, back edge, ear notch and forehead opening. This is not an outer bounding rectangle: follow the actual curved filled region closely, with only tiny painted curl edge irregularities. Keep eyes, brows, ear, face, skin, body fully transparent in output.\nInput2 supplies ONLY the warm brown painted curl material, cluster scale and upper-left light. Its position and silhouette are NOT authoritative. The green shape in input1 IS authoritative.\nReturn ONLY hair in place of the green shape, on the SAME1254-square transparent canvas. Erase ALL body, skin, face, ears, clothing and green guide pixels. No opaque scalp or backing. Preserve the guide's exact crown coverage and high forehead hairline; do not lower/shift/enlarge the cap. No long dangling curl or loop below the ear. Mostcanvas is empty transparent. No text, background, shadows, crop, recentering or normalization. Output is directly overlaid on the original body without fitting. Broad warm painted short curls, not photoreal strands or a flat vector helmet.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dc518218-30ed-4a43-8962-ea1baa6dda1e.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-2-candidate-v3.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "4058a2229c974c8fbac5c98da1f43584ccdeae9fad38d2d80bb1bfe9567219b6",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-silhouette-guide.png": "faf4eca371297d0f3450cd899cbcb3412da70fada902f91b795aeb929e0a2c75",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9"
+      }
+    },
+    {
+      "id": "base-2-v4",
+      "prompt": "Use case: precise-object-edit. Correct a registered transparent hair layer without moving the crown.\nInput1: current hair-only layer on1254-square canvas. Input2: exact bald body target showing where the forehead, eyes and ears need transparent space. Preserve input1's upper crown, brown curl material, lighting and original canvas coordinates. Only shorten/repaint the lower/front fringe and outer front tip.\nShorten the rightmost tip so no hair extends beyond x920. Keep the forehead opening high, with no hair in face window x755\u2013925,y240\u2013355. Shorten the back near the ear to y330 maximum.\nDo not draw the face or fill this window with skin: it must be completely transparent for the original body to show through. No head backing, ears, skin fragments, body or clothing. Do not shift, stretch, normalize, crop or recenter the layer. Return ONLY the corrected hair at exact1254-square dimensions with true transparency. Most canvas stays empty. Preserve the same short brown painted curls, no new accessories, guide, labels, shadow or background.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-2-candidate-v3.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-body.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a4b22906-49de-4937-946b-4b8023f21c97.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-2-candidate-v4.png",
+      "verdict": "production draft only",
+      "findings": "Forehead/ear contact improved and bounds coverage 0.981240 passes. Part of incomplete walking set; no gameplay approval.",
+      "candidateSha256": "463360590bf3401200e56925c0533d8def9b1ea938872e4b2956ca8d1e17049d",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-2-candidate-v3.png": "4058a2229c974c8fbac5c98da1f43584ccdeae9fad38d2d80bb1bfe9567219b6",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-2-body.png": "826c5ebdb24d0c159a04ce1bc1feb1fea06f52b3abf8f1ebf550e7bd364da321"
+      }
+    },
+    {
+      "id": "base-3-v1",
+      "prompt": "Use case: precise-object-edit. One precisely registered hair-only layer for a hand-painted game walk pose.\nInput1 is the EXACT bald resident geometry target (walking pose 3), on a1254-square transparent canvas. Input2 is the accepted short brown curly hair STYLE/SHAPE reference from a DIFFERENT pose; its old position is NOT this target's position.\nPaint the SAME hairstyle onto input1's actual scalp, following its crown, forehead hairline and visible ear. Preserve short rounded volume, broad curl cluster arrangement, painted edge treatment and upper-left light of input2. Do not invent another wig. The walking head is farther RIGHT than the style reference.\nReturn ONLY added hair, with all body, head, face, skin, ears, eyebrows and clothing fully transparent. Keep exact1254x1254 canvas and target coordinates. Entire hair must remain in outer x,y,width,height rectangle [578,68.6,333.1,293.9], following actual scalp rather than filling rectangle. Crown begins above the bald crown near y115; forehead/eyes and visible ear remain open. Stop behind/above the ear near y290; NO dangling curl or U-loop beneath the ear, NO skin backing.\nMost canvas must be empty transparent space. No body with hair, centered standalone wig, labels, guides, shadows, ground, background, crop, resizing or recentering. It will be composited over input1 as a whole frame with no independent fitting. Warm illustrated painted curls readable at48-pixel resident size.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0274c18f-47ed-4c3a-a58e-417dcee79805.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v1.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "5ce848edbd095b00c09c0d1283f405e91d093e05890df330111f12a6309d8623",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-body.png": "f2f827d1df182c5832dc40ebee49e33c52e9efd43062670ea7d6907b71b5603a",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+      }
+    },
+    {
+      "id": "base-3-v2",
+      "prompt": "Use case: precise-object-edit. Registered game hair-only layer.\nInput1 is exact bald WALK pose3,1254-square canvas. Input2 is the WORKING short curly hair from walking pose0, same scale. Copy its restrained silhouette, curl clusters and warm painted light while repainting to hug input1's scalp. Head moves only slightly from the working walking reference. Preserve short cap, do NOT make hair larger or longer.\nThe last attempt sat too LOW and RIGHT, covering eyes and leaving bald crown exposed. Hair must cover the crown beginning near y110, not y155. Keep the front hairline above forehead/eyebrows, around y210\u2013235. Do not cover eyes near y270. Back edge tapers around the upper ear, no curl hanging beneath ear. Use actual input1 head as geometry authority. Hair approximate x575\u2013890, y110\u2013330.\nOutput ONLY hair on the exact1254-square transparent canvas. No scalp, skin, face, ear, body, clothes, background, shadows, labels or guide. Mostcanvas stays empty. Never crop, recenter, independently normalize or enlarge. Exact registered layer to composite over input1 without fitting. Keep broad painted shading, same hairstyle and upper-left light as input2.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-db770b49-b1fb-4719-a173-6dc5b3d5ee90.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v2.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "fc29b64f5db3ac9e1532da28d928ba7be2ffb2a1ee86c98724404e0ced7503b1",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-body.png": "f2f827d1df182c5832dc40ebee49e33c52e9efd43062670ea7d6907b71b5603a",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9"
+      }
+    },
+    {
+      "id": "base-3-v3",
+      "prompt": "Use case: precise-object-edit. Exact registered painted hair layer.\nInput1 is a geometry guide over the bald walking body: the GREEN FILLED SHAPE is the EXACT desired hair silhouette and position. Replace that green region with short brown painted curls. Follow its upper crown, back edge, ear notch and forehead opening. This is not an outer bounding rectangle: follow the actual curved filled region closely, with only tiny painted curl edge irregularities. Keep eyes, brows, ear, face, skin, body fully transparent in output.\nInput2 supplies ONLY the warm brown painted curl material, cluster scale and upper-left light. Its position and silhouette are NOT authoritative. The green shape in input1 IS authoritative.\nReturn ONLY hair in place of the green shape, on the SAME1254-square transparent canvas. Erase ALL body, skin, face, ears, clothing and green guide pixels. No opaque scalp or backing. Preserve the guide's exact crown coverage and high forehead hairline; do not lower/shift/enlarge the cap. No long dangling curl or loop below the ear. Mostcanvas is empty transparent. No text, background, shadows, crop, recentering or normalization. Output is directly overlaid on the original body without fitting. Broad warm painted short curls, not photoreal strands or a flat vector helmet.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c022f5a3-13ec-491d-8e0e-052e0ef44e3d.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v3.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "885fcd3c05d6d14791aaf07575375652a1d25909dc4d23c2cb5dc95c884f6ba5",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-silhouette-guide.png": "31f0601342ee480064494a7d34e50b9896dfe4135df33ec9b348717e9a9950a8",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9"
+      }
+    },
+    {
+      "id": "base-3-v4",
+      "prompt": "Use case: precise-object-edit. Correct a registered transparent hair layer without moving the crown.\nInput1: current hair-only layer on1254-square canvas. Input2: exact bald body target showing where the forehead, eyes and ears need transparent space. Preserve input1's upper crown, brown curl material, lighting and original canvas coordinates. Only shorten/repaint the lower/front fringe and outer front tip.\nThe fringe currently hides the eyebrows and eyes. Raise the forehead opening: remove all hair in the face window x725\u2013900,y235\u2013355. Keep the upper crown painted, but the lower/front hair edge should end above y230 across the forehead; do NOT lower the cap. Shorten the back near the ear to y310 maximum.\nDo not draw the face or fill this window with skin: it must be completely transparent for the original body to show through. No head backing, ears, skin fragments, body or clothing. Do not shift, stretch, normalize, crop or recenter the layer. Return ONLY the corrected hair at exact1254-square dimensions with true transparency. Most canvas stays empty. Preserve the same short brown painted curls, no new accessories, guide, labels, shadow or background.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-3-candidate-v3.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-body.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7e800d64-411d-4dd2-ab70-f5e13590b8f1.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v4.png",
+      "verdict": "rejected",
+      "findings": "Face/crown registration and/or unchanged bounds gate fails; see corresponding retained composition/report.",
+      "candidateSha256": "759bac6eb7113f638a35abd148ead8ef884e5566a80b1a7cd6e2d54e72619f1c",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-3-candidate-v3.png": "885fcd3c05d6d14791aaf07575375652a1d25909dc4d23c2cb5dc95c884f6ba5",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-body.png": "f2f827d1df182c5832dc40ebee49e33c52e9efd43062670ea7d6907b71b5603a"
+      }
+    },
+    {
+      "id": "base-3-v5",
+      "prompt": "Use case: precise-object-edit. One small hair-tip correction.\nThe supplied1254-square transparent hair layer has a RED VERTICAL GUIDE at x911. Preserve all existing painted hair to the LEFT of that guide, its exact crown and forehead opening, scale, position and warm curly shading. Repaint/shorten ONLY the far-right projecting tip so it ends naturally at x900, fully to the LEFT of the red guide. Remove all hair at or to the right of the red guide. Remove the red guide completely. Do not move or scale the rest of the hairstyle. Keep its exact original canvas coordinates.\nReturn ONLY the corrected short brown hair on SAME1254-square true transparent canvas. No red pixels, face, body, skin, backing, text, shadow, crop, recentering or enlargement. Mostcanvas stays transparent. This is a precise registered game layer: preserve the entire existing hairline and top except for the short outermost right tip.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-boundary-guide.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e9091751-b5c9-43a5-8253-29eec27627f0.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v5.png",
+      "verdict": "needs correction",
+      "findings": "Forehead/eyes now visible and crown contact improved. Coverage 0.979678 remains below unchanged 0.98 gate. Right edge still requires correction. No promotion or pixel fitting.",
+      "candidateSha256": "ae3beac8e8f1717e25a6cd21fdcc3ead818d25212e7a27c03965ad0fcbe28f10",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-3-boundary-guide.png": "c9947e1235693fa072a172bf36b2985a58b58ab42e4083c69d62f0c26c9f0325"
+      }
+    }
+  ],
+  "evidence": {
+    "latestReport": "hair-walk-v5-report.json",
+    "latestComposition": "hair-walk-v5-composition.png",
+    "latestDetails": "hair-walk-v5-details.png",
+    "review": "Inspected direct overlays of every revision. Inspected initial and latest key poses/loop-edge midpoints in both facings, 192px/48px and existing night tint. Crown/face failures improved after hand-traced silhouette guide and fringe corrections. Pose1 volume remains larger than pose0, and pose3 fails bounds; this is not a finished or accepted walking loop.",
+    "next": "Correct pose3 outer tip without moving its crown/hairline, then repeat full loop/style/world review. Continue other 40 poses and breathing temporal polish; full modular creator and original builder scope remain required."
+  }
+}

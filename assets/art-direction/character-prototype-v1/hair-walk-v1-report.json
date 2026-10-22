@@ -1,0 +1,55 @@
+{
+  "report": [
+    {
+      "index": 0,
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 36325,
+      "coverage": 1
+    },
+    {
+      "index": 1,
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 40930,
+      "coverage": 0.9916442707060835
+    },
+    {
+      "index": 2,
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 45345,
+      "coverage": 0.9573933178961297
+    },
+    {
+      "index": 3,
+      "actualSize": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "painted": 41539,
+      "coverage": 0.9254917065889887
+    }
+  ],
+  "times": [
+    0,
+    0.096875,
+    0.125,
+    0.221875,
+    0.25,
+    0.346875,
+    0.375,
+    0.471875
+  ],
+  "errors": []
+}

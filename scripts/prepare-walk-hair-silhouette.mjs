@@ -1,0 +1,9 @@
+// Hand-authored geometry guides, never final painted parts or pixel repairs.
+import {writeFile} from 'node:fs/promises';import {chromium} from 'playwright';import {serve} from './serve.mjs';
+const outline='M620 300 C599 289 587 260 591 225 C595 177 626 139 672 116 C707 98 751 99 790 112 C832 127 864 158 877 193 C885 215 886 237 876 251 C871 235 865 219 852 214 C840 225 824 229 807 222 C790 235 770 239 752 232 C730 246 710 248 692 244 C675 252 666 268 663 285 L660 301 C647 287 633 283 620 300 Z';
+const server=await serve();let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/artwork/character-body-lab.html`);await page.waitForFunction(()=>document.body.dataset.bodyReviewReady==='true');
+ const result=await page.evaluate(({outline})=>{const output=[];for(const index of [2,3]){const c=document.createElement('canvas');c.width=c.height=1254;const ctx=c.getContext('2d');ctx.drawImage(window.bodyAttachmentReview.frames.base[index],0,0,1254,1254);ctx.save();ctx.translate(index===2?24:0,0);ctx.fillStyle='#23a44d66';ctx.strokeStyle='#168738';ctx.lineWidth=4;const path=new Path2D(outline);ctx.fill(path);ctx.stroke(path);ctx.restore();output.push({index,data:c.toDataURL('image/png').split(',')[1]});}return output;},{outline});
+ const root='assets/art-direction/character-prototype-v1/';for(const pose of result)await writeFile(root+`hair-base-${pose.index}-silhouette-guide.png`,Buffer.from(pose.data,'base64'));await writeFile(root+'hair-walk-silhouette-guide.json',JSON.stringify({schema:1,size:1254,purpose:'Provisional hand-traced hair outline; guide only, not approved painted pixels',base3Path:outline,base2Translation:[24,0]},null,2)+'\n');
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
