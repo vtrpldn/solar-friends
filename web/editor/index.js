@@ -1,3 +1,5 @@
+import {RELEASE_FORMAT,freezeReleaseDefinition} from '../release-package.js';
+import {canonical} from './journal.js';
 import {ensureStart} from './arrival.js';
 import {startingRecoveryFields} from './recovery.js';
 import {renderOpeningSetup} from './setup.js';
@@ -60,7 +62,7 @@ function save(){
   if(ctx.conflicted)return Promise.reject(new LibraryConflict());
   if(current===ctx)status('Saving…');
   const operation=saving.catch(()=>{}).then(async()=>{
-    const record=await library.saveProject({id:ctx.id,checkpoint,view},ctx.storageRevision);
+    const record=await library.saveProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution},ctx.storageRevision);
     ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);
     try{
       const key=recoveryKey(ctx.id),cached=JSON.parse(sessionStorage.getItem(key)||'null');
@@ -111,7 +113,7 @@ function refresh(){
   $('creator-river-enabled').checked=d.map.river!==null;
   $('creator-water').readOnly=Array.isArray(d.start.liquids);$('creator-water').title=d.start.liquids?'Edit the fresh-water allocations in Starting liquids.':'';
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
-  $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;
+  $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;$('creator-release').disabled=!report.ok||busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
   for(const [key,label]of Object.entries(ruleNames)){$('creator-rule-'+key).checked=d.rules[key];$('creator-rule-'+key).setAttribute('aria-label',label);}
   renderSelection();renderSupplies();renderReview();
@@ -258,7 +260,7 @@ async function openProject(record){
   attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record});
   if(recovered){status('Recovered your last checkpoint');toast('Your creation was recovered. Save it to keep this checkpoint.');}
 }
-async function newProject(preset,source=null){
+async function newProject(preset,source=null,attribution=[]){
   if(current)await save();
   const id=crypto.randomUUID();let d=source?clone(source):JSON.parse(engine.scenario_template('story'));
   d.id=id;d.map.id='map-'+id;d.revision=1;d.map.revision=1;
@@ -270,27 +272,32 @@ async function newProject(preset,source=null){
   }
   const prepared=new Game();
   try{const checked=JSON.parse(prepared.load_scenario(JSON.stringify(d)));if(checked.ok)d=freezeCreation(d,{terrain:JSON.parse(prepared.terrain_template()),snapshot:JSON.parse(prepared.report_state()),catalog});}finally{prepared.free();}
-  attach(d,{id});await save();
+  attach(d,{id,record:{attribution:clone(attribution)}});await save();
 }
 async function copyCurrent(){
   if(!current)return;
   clearTimeout(saveTimer);await saving.catch(()=>{});
-  const id=crypto.randomUUID(),d=current.doc.value,view=map.state;d.id=id;d.map.id='map-'+id;d.title=(d.title+' · copy').slice(0,100);d.revision=1;d.map.revision=1;
-  attach(d,{id,view});await save();toast('A separate copy is saved.');
+  const id=crypto.randomUUID(),d=current.doc.value,view=map.state,attribution=clone(current.record?.attribution??[]);d.id=id;d.map.id='map-'+id;d.title=(d.title+' · copy').slice(0,100);d.revision=1;d.map.revision=1;
+  attach(d,{id,view,record:{attribution}});await save();toast('A separate copy is saved.');
 }
-async function launch(definition,record,sessionKind){
+async function launch(definition,record,sessionKind,releaseId=null,releasePackage=null){
   const candidate=new Game();
   try{
-    const checked=JSON.parse(candidate.load_scenario(JSON.stringify(definition)));
-    if(!checked.ok){toast(checked.issues.find(i=>i.severity==='error')?.message);return false;}
-    const run=await library.createRun({definition,snapshot:candidate.snapshot(),projectId:record.id,sessionKind,sourceRevision:record.revision});
+    const checked=JSON.parse(candidate.load_scenario(JSON.stringify(releasePackage??definition)));
+    if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This creation cannot start.');
+    const run=await library.createRun({definition,snapshot:candidate.snapshot(),projectId:record.id,sessionKind,sourceRevision:record.revision,releaseId});
     location.assign(`./?run=${encodeURIComponent(run.id)}`);return true;
   }finally{candidate.free();}
 }
 async function showLibrary(){
   if(current)await save();
-  const [projects,runs]=await Promise.all([library.listProjects(),library.listRuns()]);
+  const [projects,runs,releases]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases()]);
   $('creator-project-list').innerHTML=projects.length?projects.map(p=>`<div class="creator-library-row"><div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
+  $('creator-releases-heading').hidden=!releases.length;
+  $('creator-release-list').innerHTML=releases.map(r=>{
+    const compatible=r.compatibility&&Object.entries(catalog.releases.compatibility).every(([key,value])=>r.compatibility[key]===value);
+    return `<div class="creator-library-row creator-release-row" data-release="${escape(r.id)}"><div><b>${escape(r.title)}</b><small>Version ${escape(r.contentRevision)} · ${escape(r.author)}</small><small>${compatible?'Frozen content · independent of the draft':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-play-release="${escape(r.id)}" ${compatible?'':'disabled'}>Play</button><button data-copy-release="${escape(r.id)}" ${compatible?'':'disabled'}>Edit a copy</button><button data-export-release="${escape(r.id)}">Export</button><button class="creator-remove" data-remove-release="${escape(r.id)}" aria-label="Remove release ${escape(r.title)} version ${escape(r.contentRevision)}">×</button></div></div>`;
+  }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario');
   $('creator-runs-heading').hidden=!villages.length;
   $('creator-run-list').innerHTML=villages.map(r=>`<div class="creator-library-row"><div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button></div>`).join('');
@@ -356,6 +363,19 @@ function wire(){
     if(e.target.matches('[data-issue-supplies]')){$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
   };
   $('creator-undo').onclick=()=>current?.doc.undo();$('creator-redo').onclick=()=>current?.doc.redo();
+  $('creator-release').onclick=()=>{if(!current||busy||!report.ok)return;$('creator-release-status').textContent='';$('creator-release-credits').textContent=(current.record?.attribution??[]).map(c=>`Based on version ${c.revision} by ${c.author}`).join(' · ');$('creator-release-dialog').showModal();};
+  $('creator-release-cancel').onclick=()=>$('creator-release-dialog').close();
+  $('creator-release-dialog').addEventListener('cancel',e=>{if(busy)e.preventDefault();});
+  $('creator-release-confirm').onclick=async()=>{
+    const author=$('creator-release-author');if(!author.reportValidity()||!current||busy)return;
+    busy=true;$('creator-release-confirm').disabled=true;$('creator-release-cancel').disabled=true;$('creator-release-status').textContent='Checking and saving this release…';
+    try{
+      await save();const frozen=freezeReleaseDefinition(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog});
+      if(canonical(frozen)!==canonical(current.doc.value)){current.doc.transact('Resolve landscape for frozen release',d=>Object.assign(d,frozen));await save();}
+      const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,validate:raw=>JSON.parse(engine.validate_scenario(raw))});
+      $('creator-release-dialog').close();await showLibrary();toast(`Version ${record.package.content_revision} is saved independently.`);
+    }catch(error){$('creator-release-status').textContent=error.message;}finally{busy=false;$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current)refresh();}
+  };
   $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
   $('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
   $('creator-export').onclick=()=>{try{if(current)download(current.doc.value);}catch(error){toast(error.message);}};
@@ -369,26 +389,31 @@ function wire(){
   };
   $('creator-back').onclick=async e=>{e.preventDefault();try{if(current)await save();location.assign('./');}catch{/* Keep the unsaved work available to export. */}};
   $('creator-library-dialog').onclick=async e=>{
+    const b=e.target.closest('button');if(!b||b.disabled)return;b.disabled=true;
     try{
-      const b=e.target.closest('button');if(!b)return;
       if(b.dataset.preset)await newProject(b.dataset.preset);
       if(b.dataset.openProject){const record=await library.getProject(b.dataset.openProject);if(record)await openProject(record);}
       if(b.dataset.playProject){const record=await library.getProject(b.dataset.playProject);if(record)await launch(record.checkpoint.definition,record,'scenario');}
-      if(b.dataset.copyProject){const record=await library.getProject(b.dataset.copyProject);if(record)await newProject('copy',{...record.checkpoint.definition,title:(record.title+' · copy').slice(0,100)});}
-      if(b.dataset.removeProject){pendingDelete=await library.getProject(b.dataset.removeProject);$('creator-delete-dialog').showModal();}
+      if(b.dataset.copyProject){const record=await library.getProject(b.dataset.copyProject);if(record)await newProject('copy',{...record.checkpoint.definition,title:(record.title+' · copy').slice(0,100)},record.attribution??[]);}
+      if(b.dataset.playRelease){const record=await library.getRelease(b.dataset.playRelease);if(record)await launch(record.package.definition,{id:record.projectId,revision:record.sourceRevision},'scenario',record.id,record.package);}
+      if(b.dataset.exportRelease){const record=await library.getRelease(b.dataset.exportRelease);if(record){const url=URL.createObjectURL(new Blob([canonical(record.package)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=`village-v${record.package.content_revision}.solar-release`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}
+      if(b.dataset.copyRelease){const record=await library.getRelease(b.dataset.copyRelease);if(record){const checked=JSON.parse(engine.validate_scenario(canonical(record.package)));if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');const p=record.package,credits=[...(p.credits??[]),{release:p.id,revision:p.content_revision,author:p.author}];if(credits.length>catalog.releases.maximum_credits)throw Error('This release already has the maximum source credits. Keep its original export.');await newProject('copy',{...p.definition,title:(p.title+' · copy').slice(0,100)},credits);}}
+      if(b.dataset.removeRelease){const record=await library.getRelease(b.dataset.removeRelease);if(record){pendingDelete={kind:'release',record};$('creator-delete-title').textContent='Remove this frozen release?';$('creator-delete-dialog').querySelector('p').textContent='Only this release is removed. Drafts and saved villages keep their own content.';$('creator-delete-dialog').showModal();}}
+      if(b.dataset.removeProject){$('creator-delete-title').textContent='Remove this creation?';$('creator-delete-dialog').querySelector('p').textContent='The editable project will be removed. Frozen releases and independent villages keep their content and saves.';pendingDelete=await library.getProject(b.dataset.removeProject);$('creator-delete-dialog').showModal();}
       if(b.dataset.continueRun)location.assign(`./?run=${encodeURIComponent(b.dataset.continueRun)}`);
-    }catch(error){$('creator-library-status').textContent=error.message;}
+    }catch(error){$('creator-library-status').textContent=error.message;}finally{b.disabled=false;}
   };
   $('creator-delete-cancel').onclick=()=>$('creator-delete-dialog').close();
   $('creator-delete-confirm').onclick=async()=>{
-    try{if(pendingDelete){await library.deleteProject(pendingDelete.id,pendingDelete.revision);if(current?.id===pendingDelete.id){current=null;history.replaceState(null,'','./editor.html');}}
+    try{if(pendingDelete?.kind==='release'){await library.deleteRelease(pendingDelete.record.id,pendingDelete.record.revision);}else if(pendingDelete){await library.deleteProject(pendingDelete.id,pendingDelete.revision);if(current?.id===pendingDelete.id){current=null;history.replaceState(null,'','./editor.html');}}
       $('creator-delete-dialog').close();pendingDelete=null;await showLibrary();}catch(error){toast(error.message);}
   };
   $('creator-import').onchange=async e=>{
     const file=e.target.files[0];if(!file)return;
     try{
       if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
-      const raw=await file.text(),checked=JSON.parse(engine.validate_scenario(raw));
+      const raw=await file.text(),checked=JSON.parse(engine.validate_scenario(raw));let content;try{content=JSON.parse(raw);}catch{throw Error(checked.issues[0]?.message||'This file is not a readable creation.');}
+      if(content.format===RELEASE_FORMAT){if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');if(current)await save();await library.importRelease(content,data=>JSON.parse(engine.validate_scenario(data)));await showLibrary();toast('Imported as a separate frozen release.');return;}
       const blocked=new Set(['file_too_large','unsupported_format','invalid_json','invalid_definition','unsupported_map','unknown_building','invalid_appearance','invalid_material','too_many_objects','too_many_stores','duplicate_building','invalid_identity','unsupported_resident_preset','unsupported_resident_appearance']);
       if(checked.issues.some(i=>blocked.has(i.code)))throw Error(checked.issues.find(i=>blocked.has(i.code)).message);
       await newProject('import',JSON.parse(raw));toast(checked.ok?'The creation was imported as a separate project.':'Imported as a draft. Review its issues before testing.');
