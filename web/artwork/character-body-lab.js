@@ -60,5 +60,6 @@ try{
  window.walkHairReview=await installHairClipReview({clip:'walk',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.workHairReview=await installHairClipReview({clip:'work',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.sitHairReview=await installHairClipReview({clip:'sit',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
+ window.lookHairReview=await installHairClipReview({clip:'look',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

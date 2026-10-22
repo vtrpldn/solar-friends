@@ -1,5 +1,5 @@
 import {readFile,writeFile} from 'node:fs/promises';import {chromium} from 'playwright';import {serve} from './serve.mjs';
-const clip=process.argv[2];if(!['walk','work'].includes(clip))throw Error('Choose walk or work candidates.');
+const clip=process.argv[2];if(!['walk','work','look','stretch','wave','relax'].includes(clip))throw Error('Choose walk, work or look candidates.');
 const version=process.argv[3]??'v1';if(!['v1','v2','v3','v4','v5','v6'].includes(version))throw Error('Choose v1 through v6');
 const root='assets/art-direction/character-prototype-v1/',guide=JSON.parse(await readFile(root+`hair-${clip}-guide.json`,'utf8')),server=await serve();let browser;
 try{
@@ -9,7 +9,7 @@ try{
   const frames=new Map(),report=[],board=document.createElement('canvas');board.width=1024;board.height=560;const ctx=board.getContext('2d');ctx.fillStyle='#eadfbd';ctx.fillRect(0,0,1024,560);
   for(const [column,pose]of guide.poses.entries()){
    const sourceVersion=clip==='work'?(pose.index===4?'v1':version):pose.index<2?'v1':pose.index===2&&['v5','v6'].includes(version)?'v4':version;
-   const image=new Image();image.src=`/art/characters/prototype-v1/hair-curls-${guide.sheet}-${pose.index}-candidate-${sourceVersion}.png`;await image.decode();const c=document.createElement('canvas');c.width=c.height=1254;const cc=c.getContext('2d');cc.drawImage(image,0,0);const data=cc.getImageData(0,0,1254,1254).data;let painted=0,inside=0;const [bx,by,bw,bh]=pose.bounds;
+   const image=new Image();image.src=guide.sheet==='idle'?'/art/characters/prototype-v1/hair-curls-single-candidate-v3.png':`/art/characters/prototype-v1/hair-curls-${guide.sheet}-${pose.index}-candidate-${sourceVersion}.png`;await image.decode();const c=document.createElement('canvas');c.width=c.height=1254;const cc=c.getContext('2d');cc.drawImage(image,0,0);const data=cc.getImageData(0,0,1254,1254).data;let painted=0,inside=0;const [bx,by,bw,bh]=pose.bounds;
    for(let y=0;y<1254;y++)for(let x=0;x<1254;x++)if(data[(y*1254+x)*4+3]>=32){painted++;if(x>=bx&&x<bx+bw&&y>=by&&y<by+bh)inside++;}
    const body=window.bodyAttachmentReview.frames[guide.sheet][pose.index],frame=document.createElement('canvas');frame.width=frame.height=256;const fc=frame.getContext('2d');fc.drawImage(body,0,0);fc.drawImage(image,0,0,256,256);frames.set(pose.index,frame);
    const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await(await fetch(image.src)).arrayBuffer()))].map(n=>n.toString(16).padStart(2,'0')).join('');

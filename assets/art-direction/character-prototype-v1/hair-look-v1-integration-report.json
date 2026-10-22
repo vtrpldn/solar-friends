@@ -1,0 +1,53 @@
+{
+  "result": "PASS",
+  "scope": "Four idle-look poses reusing unmodified registered art; full hairstyle and player integration incomplete",
+  "checks": [
+    {
+      "index": 0,
+      "coverage": 0.9965611719973161,
+      "bodySha256": "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+      "partSha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+    },
+    {
+      "index": 1,
+      "coverage": 0.9965611719973161,
+      "bodySha256": "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+      "partSha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+    },
+    {
+      "index": 2,
+      "coverage": 0.9965611719973161,
+      "bodySha256": "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+      "partSha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+    },
+    {
+      "index": 3,
+      "coverage": 0.9965611719973161,
+      "bodySha256": "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+      "partSha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+    }
+  ],
+  "denied": [
+    "base:0",
+    "idle:4",
+    "activities:0",
+    "incomplete",
+    "swapped-body",
+    "wrong-sheet",
+    "unsupported-sheet",
+    "wrong-index",
+    "missing-bounds",
+    "changed-source",
+    "single-review-idle"
+  ],
+  "used": [
+    "base:10",
+    "base:11",
+    "base:8",
+    "base:9",
+    "idle:0",
+    "idle:1",
+    "idle:2",
+    "idle:3"
+  ]
+}

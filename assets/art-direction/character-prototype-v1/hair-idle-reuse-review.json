@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "status": "Partial idle hair production draft; no new raster generated in this increment",
+  "why": "Reuse unmodified artwork only where independent pose registration and visual review support it; preserve failed reuse evidence elsewhere.",
+  "source": {
+    "path": "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+    "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "originalGenerationRecord": "assets/art-direction/character-prototype-v1/hair-generation-review.json"
+  },
+  "method": "Draw the original image at its unchanged whole-frame coordinates and uniform whole-frame scale. No fit, translation, crop or threshold change. Each composed body is checked against its own sheet and pose digest.",
+  "clips": [
+    {
+      "clip": "look",
+      "report": {
+        "path": "assets/art-direction/character-prototype-v1/hair-look-v1-report.json",
+        "sha256": "84330dd8b6e80c070575e55f24aeb4d36505250554511a83d9630235b215832a"
+      },
+      "bodyGuide": {
+        "path": "assets/art-direction/character-prototype-v1/hair-look-guide.json",
+        "sha256": "b07e806993955c37259d472f513474742a98410970848c3822c091b214a97c8c"
+      },
+      "bodies": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-0-body.png",
+          "sha256": "e7ee51b2ce75c3239ab947d4c1ea0316419313a0de22b5f4a6f0f47910805abf"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-1-body.png",
+          "sha256": "5f67a2b4c8517c6ee0e260772b0e1d3d1868b70f933b0500ca90a13392e31904"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-2-body.png",
+          "sha256": "7614d3ca691b9285c578cf35930e6d62876a9687e7d0d342b8776ff0b81eb090"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-3-body.png",
+          "sha256": "40d39ce2c239979d4521acea810050b3ef93f72a1f9023e3ce3bb9499f294c7d"
+        }
+      ],
+      "verdict": "Registered lab draft: all four pass0.98, cover scalp and leave eyes visible; actual world and transition boards reviewed.",
+      "integrated": true
+    },
+    {
+      "clip": "stretch",
+      "report": {
+        "path": "assets/art-direction/character-prototype-v1/hair-stretch-v1-report.json",
+        "sha256": "728e416f06091a045195e6b553a7e21b512f9717b0bad8670bd20f8fffb8d6f9"
+      },
+      "bodyGuide": {
+        "path": "assets/art-direction/character-prototype-v1/hair-stretch-guide.json",
+        "sha256": "9925ab5507b5272ddbc0ce7082f00fc794e6c3164511a800ca61b87184cd9033"
+      },
+      "bodies": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-4-body.png",
+          "sha256": "4fe1fea635979cadf6084aaa0e7ee0e4f74e523e1a292ae1aa765906f1059f07"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-5-body.png",
+          "sha256": "aac25768e7ca964d02323e7fa885a0d17765754cb81c2322375416024225df3b"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-6-body.png",
+          "sha256": "dad6b2f43bedd35f712a9fe55eebd62912d870915595847f72d61c7067b7e276"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-7-body.png",
+          "sha256": "3072c0aebb4209c357c0f90001359ff5310401619469d54173848663b6c29c3a"
+        }
+      ],
+      "verdict": "Rejected as a complete clip: one or more original bounds fail; composition shows misplaced caps, raised/low scalp mismatch or exposed crown. Do not enable this reuse in gameplay or the registered lab.",
+      "integrated": false
+    },
+    {
+      "clip": "wave",
+      "report": {
+        "path": "assets/art-direction/character-prototype-v1/hair-wave-v1-report.json",
+        "sha256": "7121fd635f114fbe21026dd26294ad43cd581a3b36f79e9b8beb886517d42256"
+      },
+      "bodyGuide": {
+        "path": "assets/art-direction/character-prototype-v1/hair-wave-guide.json",
+        "sha256": "1dd727e984bf6991cd9c60db85accaff915ff1b7e60447ca012f9fba65d4d484"
+      },
+      "bodies": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-8-body.png",
+          "sha256": "6c9042d03537102b54072524ffc251dd069d7b40e8127308baf7a34209a15270"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-9-body.png",
+          "sha256": "2dbf1d41c6f87fa86a2b86dc3368b1fc6deac5c9669b7ca294daf15502ff1785"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-10-body.png",
+          "sha256": "36ad0380c3d3b10cf50aa1f971a46942430a968176ea20dd0af333ea524c3396"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-11-body.png",
+          "sha256": "4b39c1f9503441b883acb95185d6fd1e7bc90a15b0d1eb6688c62a56f68dd4c1"
+        }
+      ],
+      "verdict": "Rejected as a complete clip: one or more original bounds fail; composition shows misplaced caps, raised/low scalp mismatch or exposed crown. Do not enable this reuse in gameplay or the registered lab.",
+      "integrated": false
+    },
+    {
+      "clip": "relax",
+      "report": {
+        "path": "assets/art-direction/character-prototype-v1/hair-relax-v1-report.json",
+        "sha256": "94defb900a2ebb0e3f930ca543e54786bd4e9ad37a8b1441f820e09e7b08ad1b"
+      },
+      "bodyGuide": {
+        "path": "assets/art-direction/character-prototype-v1/hair-relax-guide.json",
+        "sha256": "523e852df6111ca3d5c5dda2d8f8a79c72d94612b04464e5652f8f4ed2d9a4c6"
+      },
+      "bodies": [
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-12-body.png",
+          "sha256": "94fcaf171792b60dc775e1d596c31bf3f229831f53041020b6fb46907d8ce630"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-13-body.png",
+          "sha256": "38ce5fccbb6d10ed25622b0fa4f24e75d41013605f94c353c33a42b975659c31"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-14-body.png",
+          "sha256": "ac1c01d2ac037473f5573a509c09ae8a559fa2c089b9a557ede38ee49fb963d7"
+        },
+        {
+          "path": "assets/art-direction/character-prototype-v1/hair-idle-15-body.png",
+          "sha256": "2f0494cb41df86dd38b59d47aca70018187b63dbefe73b1d851a4c35396c9add"
+        }
+      ],
+      "verdict": "Rejected as a complete clip: one or more original bounds fail; composition shows misplaced caps, raised/low scalp mismatch or exposed crown. Do not enable this reuse in gameplay or the registered lab.",
+      "integrated": false
+    }
+  ],
+  "limits": [
+    "Only look is added to the live lab. All other idle reuse checks remain rejected or incomplete.",
+    "Hair drafts cover base16 and idle0-3:20 of48 poses.",
+    "Breathing/look transitions still show curl/pose differences and ghosting; temporal polish not complete.",
+    "Full appearance options, portraits, native recipes, ordinary player integration and original builder release gates remain unfinished."
+  ]
+}

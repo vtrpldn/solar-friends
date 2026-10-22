@@ -1,21 +1,21 @@
 import {registeredHairFrame} from './character-single-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from '../character-atlas-part.js';
-const clips={breathe:{indices:[8,9,10,11],duration:5,label:'breathing'},walk:{indices:[0,1,2,3],duration:.5,label:'walking'},work:{indices:[4,5,6,7],duration:.8,label:'working'},sit:{indices:[12,13,14,15],duration:5,label:'seated / sleeping'}};
+const clips={breathe:{sheet:'base',indices:[8,9,10,11],duration:5,label:'breathing'},walk:{sheet:'base',indices:[0,1,2,3],duration:.5,label:'walking'},work:{sheet:'base',indices:[4,5,6,7],duration:.8,label:'working'},sit:{sheet:'base',indices:[12,13,14,15],duration:5,label:'seated / sleeping'},look:{sheet:'idle',indices:[0,1,2,3],duration:5,label:'looking around'}};
 export function hairClipProvider(frames,clip){
  const spec=Object.hasOwn(clips,clip)?clips[clip]:null;
  if(!spec||!(frames instanceof Map)||frames.size!==4||spec.indices.some(i=>frames.get(i)?.width!==256||frames.get(i)?.height!==256||typeof frames.get(i)?.getContext!=='function'))throw Error('Provide every registered frame for the supported hair clip.');
- const owned=new Map(frames);return Object.freeze({frameForPose:(sheet,index)=>{if(sheet!=='base'||!owned.has(index))throw Error('Hair artwork is unavailable for this pose.');return owned.get(index);}});
+ const owned=new Map(frames);return Object.freeze({frameForPose:(sheet,index)=>{if(sheet!==spec.sheet||!owned.has(index))throw Error('Hair artwork is unavailable for this pose.');return owned.get(index);}});
 }
 export async function installHairClipReview({clip,frames,binding,scene,before}){
  const spec=Object.hasOwn(clips,clip)?clips[clip]:null;if(!spec)throw Error('Unsupported hair review clip.');
  const root='../art/characters/prototype-v1/',registration=await(await fetch(root+`hair-${clip}-v1-registration.json`)).json();
- if(registration.schema!==1||registration.clip!==clip||registration.sheet!=='base'||Object.keys(registration.poses??{}).sort().join(',')!==spec.indices.map(String).sort().join(','))throw Error('Use the registered four-pose hair set.');
+ if(registration.schema!==1||registration.clip!==clip||registration.sheet!==spec.sheet||Object.keys(registration.poses??{}).sort().join(',')!==spec.indices.map(String).sort().join(','))throw Error('Use the registered four-pose hair set.');
  const sources=new Map(),load=async file=>{
-  if(!/^(?:hair-curls-(?:single-candidate-v3|base-(?:[0-9]|1[0-5])-candidate-v[1-6])|hair-seat-base-1[2-5]-candidate-v1)\.png$/.test(file))throw Error('Unsupported review asset.');
+  if(!/^(?:hair-curls-(?:single-candidate-v3|(?:base|idle|activities)-(?:[0-9]|1[0-5])-candidate-v[1-6])|hair-seat-base-1[2-5]-candidate-v1)\.png$/.test(file))throw Error('Unsupported review asset.');
   if(!sources.has(file)){const bytes=await(await fetch(root+file)).arrayBuffer(),sourceHash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join(''),image=new Image();image.src=root+file;await image.decode();sources.set(file,{image,sourceHash});}return sources.get(file);
  },composed=new Map(),appearanceFrames=new Map(),activityParts=new Map();for(const index of spec.indices){
   const pose=registration.poses[index],source=await load(pose.file),part=extractRegisteredAtlasPart({...source,registration:{sha256:pose.sha256,size:pose.size,bounds:pose.bounds,sourceRect:pose.sourceRect??[0,0,1254,1254]}});
-  const appearance=await registeredHairFrame({body:frames.base[index],binding,image:part.frame,sourceHash:source.sourceHash,registration:{schema:1,sheet:'base',index,size:pose.size,bounds:pose.bounds,partSha256:pose.sha256,body:registration.body,...(pose.foreground!==undefined?{foreground:pose.foreground}:{})}});appearanceFrames.set(index,appearance);
+  const appearance=await registeredHairFrame({body:frames[spec.sheet][index],binding,image:part.frame,sourceHash:source.sourceHash,registration:{schema:1,sheet:spec.sheet,index,size:pose.size,bounds:pose.bounds,partSha256:pose.sha256,body:registration.body,...(pose.foreground!==undefined?{foreground:pose.foreground}:{})}});appearanceFrames.set(index,appearance);
   if(pose.activity!==undefined){const activity=pose.activity;if(clip!=='sit'||activity.kind!=='stool'||activity.file!==`hair-seat-base-${index}-candidate-v1.png`||Object.keys(activity).sort().join(',')!=='bounds,file,kind,sha256,size,sourceRect')throw Error('Unsupported activity part for this pose.');const underlay=extractRegisteredAtlasPart({...await load(activity.file),registration:{sha256:activity.sha256,size:activity.size,bounds:activity.bounds,sourceRect:activity.sourceRect}});activityParts.set(index,underlay);composed.set(index,composeActivityUnderlay(appearance,underlay));}else composed.set(index,appearance);
  }
  const fullProvider=hairClipProvider(composed,clip),appearanceProvider=hairClipProvider(appearanceFrames,clip);let includeActivity=true;
