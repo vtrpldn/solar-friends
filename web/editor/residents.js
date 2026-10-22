@@ -1,11 +1,19 @@
+import {openingFields,ensureStart,clearStart} from './arrival.js';
 import {CharacterCreator} from './character-creator.js';
 import {addResident,removeResident} from './roster.js';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const hobbies=[['nature_walk','Nature walks'],['birdwatch','Birdwatching'],['stretch','Stretching'],['daydream','Daydreaming']];
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
 export class ResidentsEditor{
-  constructor(host,{presets,occupations,personality,experience,appearances,maximum,change,savePreset,openPresets,source,art,undo,redo,history,catalog}){
-    this.forms=new Map();this.maximum=maximum;this.host=host;this.presets=presets;this.occupations=occupations;this.personality=personality;this.experience=experience;this.appearances=appearances;
+  constructor(host,{presets,occupations,personality,experience,appearances,maximum,change,savePreset,openPresets,source,art,undo,redo,history,catalog,placeStart,locateStart}){
+    this.forms=new Map();this.maximum=maximum;this.host=host;this.presets=presets;this.occupations=occupations;this.personality=personality;this.experience=experience;this.appearances=appearances;this.catalog=catalog;
+    const startAction=event=>{const button=event.target.closest('[data-start-action],[data-remove-start]');if(!button)return;const id=button.dataset.removeStart??button.closest('[data-resident]')?.dataset.resident??button.closest('[data-editing-resident]')?.dataset.editingResident,action=button.dataset.startAction;
+      if(button.hasAttribute('data-remove-start')){change('Remove unavailable resident setup',d=>{d.start.resident_setup=(d.start.resident_setup??[]).filter(s=>s.resident!==id);});return;}
+      if(action==='place'){if(this.creator.dialog.open)this.creator.dialog.close();placeStart(id);return;}
+      if(action==='locate'){const position=source().start.resident_setup?.find(s=>s.resident===id)?.position;if(position){if(this.creator.dialog.open)this.creator.dialog.close();locateStart(id,position);}return;}
+      change('Reset starting resident circumstances',d=>{if(action==='all')d.start.resident_setup=(d.start.resident_setup??[]).filter(s=>s.resident!==id);else clearStart(d,id,action==='needs'?'needs':'position');});
+    };
+    host.addEventListener('click',startAction);
     host.addEventListener('click',event=>{
       const button=event.target.closest('[data-add-resident],[data-duplicate-resident],[data-remove-resident],[data-save-resident-preset],[data-open-resident-presets],[data-open-character]');if(!button)return;
       const identity=button.closest('[data-resident]')?.dataset.resident;
@@ -19,6 +27,7 @@ export class ResidentsEditor{
       });
     });
     const changeField=event=>{
+      const start=event.target.dataset.residentStart;if(start){const id=event.target.closest('[data-resident]')?.dataset.resident??event.target.closest('[data-editing-resident]')?.dataset.editingResident,value=Number(event.target.value);change('Set resident opening circumstances',d=>{const person=(d.start.residents??this.presets).find(p=>p.id===id);if(!person)return;const s=ensureStart(d,id);if(['x','y'].includes(start)){s.position??=[...d.map.camp];s.position[start==='x'?0:1]=value;}else{s.needs??=structuredClone(catalog.resident_start_defaults[person.preset]);s.needs[start]=value;}});return;}
       if(event.target.matches('[data-resident-policy]')){change('Change starting skill budget',d=>{d.start.resident_balance=event.target.value;});return;}
       const field=event.target.dataset.residentField,identity=event.target.closest('[data-resident],[data-editing-resident]')?.dataset.resident??event.target.closest('[data-editing-resident]')?.dataset.editingResident;
       if(!field||!identity)return;
@@ -37,18 +46,20 @@ export class ResidentsEditor{
       });
     };
     host.addEventListener('change',changeField);
-    this.creator=new CharacterCreator({art,source:()=>source().start.residents??this.presets,groups:()=>this.forms,changeField,undo,redo,history,catalog,editPerson:(label,edit)=>{const id=this.creator.id;return change(label,d=>{d.start.residents??=structuredClone(this.presets);const person=d.start.residents.find(p=>p.id===id);if(person){const next=edit(person);for(const key of Object.keys(person))if(!Object.hasOwn(next,key))delete person[key];Object.assign(person,next);}});}});
+    this.creator=new CharacterCreator({art,startAction,source:()=>source().start.residents??this.presets,groups:()=>this.forms,changeField,undo,redo,history,catalog,editPerson:(label,edit)=>{const id=this.creator.id;return change(label,d=>{d.start.residents??=structuredClone(this.presets);const person=d.start.residents.find(p=>p.id===id);if(person){const next=edit(person);for(const key of Object.keys(person))if(!Object.hasOwn(next,key))delete person[key];Object.assign(person,next);}});}});
   }
-  render(definition){
+  openArrival(id){this.creator.open(id);this.creator.select('Arrival');}
+  render(definition,report){
     const people=definition.start.residents??this.presets;
-    const signature=JSON.stringify([people,definition.start.resident_balance,definition.rules.learning]);if(signature===this.signature){this.creator.update();return;}this.signature=signature;
+    const signature=JSON.stringify([people,definition.start.resident_balance,definition.rules.learning,definition.start.resident_setup,report?.issues.filter(i=>i.path.startsWith('start.resident_setup'))]);if(signature===this.signature){this.creator.update();return;}this.signature=signature;
     const experienceOpen=new Set([...this.host.querySelectorAll('details[data-resident]')].filter(el=>el.querySelector('.creator-experience')?.open).map(el=>el.dataset.resident));
     const open=new Set([...this.host.querySelectorAll('details[open]')].map(el=>el.dataset.resident));
     const unrestricted=definition.start.resident_balance==='unrestricted';
     const policy=`<label class="creator-field">Starting skill setup<select data-resident-policy><option value="balanced" ${unrestricted?'':'selected'}>Balanced</option><option value="unrestricted" ${unrestricted?'selected':''}>Unrestricted</option></select></label><p>${unrestricted?'Up to five levels in every skill. This choice is shown in the scenario library and while playing.':'Six starting levels per resident, with no skill above level three.'}</p>`;
-    const controls=`<p>${people.length} / ${this.maximum} residents · ${definition.rules.mode==='story'?'Official Story needs all five founding roles.':'Choose at least one resident to play.'}</p><button type="button" data-add-resident ${people.length>=this.maximum?'disabled':''}>＋ New resident</button><button type="button" data-open-resident-presets>Resident presets</button><p>Removing someone also removes their starting friendships. Undo restores both. Empty casts can be saved as drafts.</p>`;
+    const controls=`<p>${people.length} / ${this.maximum} residents · ${definition.rules.mode==='story'?'Official Story needs all five founding roles.':'Choose at least one resident to play.'}</p><button type="button" data-add-resident ${people.length>=this.maximum?'disabled':''}>＋ New resident</button><button type="button" data-open-resident-presets>Resident presets</button><p>Removing someone also removes their starting friendships and scenario circumstances. Undo restores them. Empty casts can be saved as drafts.</p>`;
     this.forms.clear();
-    this.host.innerHTML=controls+policy+people.map(person=>{
+    const unknown=(definition.start.resident_setup??[]).filter(s=>!people.some(p=>p.id===s.resident));
+    this.host.innerHTML=controls+policy+unknown.map(s=>`<p>Unavailable resident has a starting setup. <button data-remove-start="${escape(s.resident)}">Clear unavailable setup</button></p>`).join('')+people.map(person=>{
       const p=person.routine_preferences;
       const levels=person.experience?.levels??{},background=person.experience?.background??'newcomer';
       const total=Object.values(levels).reduce((sum,value)=>sum+value,0);
@@ -71,8 +82,9 @@ export class ResidentsEditor{
       const identityControls=text('name','Name',80)+text('pronouns','Pronouns · optional',40)+text('biography','Their story · optional',600,true);
       const appearanceControls=`<label class="creator-field">Appearance<select data-resident-field="appearance">${this.appearances.map(look=>`<option value="${look.key}" ${(person.appearance?.preset??person.preset)===look.key?'selected':''}>${escape(look.name)}</option>`).join('')}</select></label><p>Choose a complete character look. Their skills, personality and routines stay the same.</p>`;
       const routineControls=`<label class="creator-field">Usual bedtime<input type="time" min="20:00" max="23:30" step="900" data-resident-field="preferred_bedtime" value="${time(p.preferred_bedtime)}"></label>${personalityControls}${hobby('favourite_hobby','Favourite pastime')}${hobby('alternate_hobby','Another pastime')}${occupationControls}`;
-      this.forms.set(person.id,{Identity:identityControls,Appearance:appearanceControls,Personality:routineControls,Experience:experienceControls});
-      return `<details data-resident="${escape(person.id)}" ${open.has(person.id)?'open':''}><summary>${escape(person.name||'Unnamed neighbour')}</summary><button type="button" data-open-character>Open character creator</button>${identityControls}${appearanceControls}${routineControls}${experienceControls}<button type="button" data-save-resident-preset>Save resident preset</button><div class="creator-roster-actions"><button type="button" data-duplicate-resident ${people.length>=this.maximum?'disabled':''}>Duplicate</button><button type="button" data-remove-resident>Remove resident</button></div></details>`;
+      const opening=openingFields(person,definition,this.catalog,report);
+      this.forms.set(person.id,{Arrival:opening,Identity:identityControls,Appearance:appearanceControls,Personality:routineControls,Experience:experienceControls});
+      return `<details data-resident="${escape(person.id)}" ${open.has(person.id)?'open':''}><summary>${escape(person.name||'Unnamed neighbour')}</summary><button type="button" data-open-character>Open character creator</button>${identityControls}${appearanceControls}${routineControls}${experienceControls}${opening}<button type="button" data-save-resident-preset>Save resident preset</button><div class="creator-roster-actions"><button type="button" data-duplicate-resident ${people.length>=this.maximum?'disabled':''}>Duplicate</button><button type="button" data-remove-resident>Remove resident</button></div></details>`;
     }).join('');
     this.creator.update();
   }

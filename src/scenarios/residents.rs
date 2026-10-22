@@ -113,6 +113,16 @@ fn original_cast(people: &[Person]) -> bool {
             .len()
             == 5
 }
+pub fn identities(d: &Definition) -> BTreeMap<String, usize> {
+    if d.start.residents.is_some() {
+        bindings(d)
+    } else {
+        founders()
+            .iter()
+            .map(|p| (p.id.clone(), p.slot().unwrap()))
+            .collect()
+    }
+}
 pub fn bindings(d: &Definition) -> BTreeMap<String, usize> {
     let Some(people) = &d.start.residents else {
         return BTreeMap::new();
@@ -336,7 +346,7 @@ mod tests {
         v.scenario = Some(std::sync::Arc::new(Origin {
             schema: SCHEMA,
             batteries: BTreeMap::new(),
-        routes: BTreeMap::new(),
+            routes: BTreeMap::new(),
             definition: d.clone(),
             buildings: BTreeMap::new(),
             residents: bindings(&d),

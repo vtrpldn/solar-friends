@@ -287,6 +287,12 @@ fn shelter(v: &Village, id: usize) -> Option<&Building> {
         .filter(|b| b.kind == "home" && b.progress >= 100.)
         .nth(roster::slot(v, id)? / HOME_BEDS)
 }
+fn resident_wellbeing(v: &Village, r: &Resident) -> f32 {
+    let comfort = if shelter(v, r.id).is_some() { 8. } else { 0. };
+    (r.energy * 0.30 + (100. - r.hunger) * 0.35 + r.social * 0.25 + comfort
+        - situations::concern(v, r.id))
+    .clamp(0., 100.)
+}
 fn sleeping_time(minutes: f32, r: &Resident) -> bool {
     sleep::due(r, minutes)
 }
@@ -1276,10 +1282,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         v.workforce_peers.insert(r.id, Some(r.clone()));
         v.activity_claims
             .insert(r.id, workforce::Claim::from_resident(&r));
-        let comfort = if shelter(&v, r.id).is_some() { 8. } else { 0. };
-        r.happiness = (r.energy * 0.30 + (100. - r.hunger) * 0.35 + r.social * 0.25 + comfort
-            - situations::concern(&v, r.id))
-        .clamp(0., 100.);
+        r.happiness = resident_wellbeing(&v, &r);
     }
     restoration::reconcile(&mut v);
     // A later worker may finish after earlier residents have already ticked.
@@ -1722,7 +1725,7 @@ impl Game {
             "economy": economy,
             "dry_day": !climate::day(&village,(village.minutes/1440.) as u32).rain_expected,
         });
-        let reference=village.scenario.as_ref().map(|o|serde_json::json!({"id":o.definition.id,"revision":o.definition.revision,"map":o.definition.map.id,"map_revision":o.definition.map.revision}));
+        let reference=village.scenario.as_ref().map(|o|serde_json::json!({"id":o.definition.id,"revision":o.definition.revision,"map":o.definition.map.id,"map_revision":o.definition.map.revision,"residents":scenarios::resident_bindings(&o.definition)}));
         if view_only {
             village.scenario = None;
         }

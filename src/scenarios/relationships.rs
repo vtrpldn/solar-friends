@@ -6,18 +6,8 @@ pub struct Bond {
     pub to: String,
     pub memories: u32,
 }
-fn identities(d: &Definition) -> BTreeMap<String, usize> {
-    if d.start.residents.is_some() {
-        residents::bindings(d)
-    } else {
-        residents::founders()
-            .iter()
-            .map(|p| (p.id.clone(), p.slot().unwrap()))
-            .collect()
-    }
-}
 pub fn check(d: &Definition, r: &mut Report) {
-    let people = identities(d);
+    let people = residents::identities(d);
     let mut pairs = HashSet::new();
     for (i, bond) in d.start.relationships.iter().enumerate() {
         let pair = if bond.from < bond.to {
@@ -36,7 +26,7 @@ pub fn check(d: &Definition, r: &mut Report) {
     }
 }
 pub fn apply(d: &Definition, v: &mut Village) {
-    let people = identities(d);
+    let people = residents::identities(d);
     for bond in &d.start.relationships {
         let from = people[&bond.from];
         let to = people[&bond.to];

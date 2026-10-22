@@ -55,10 +55,13 @@ export class EditorMap {
   get state(){return structuredClone({...this.view,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
   setTool(tool){this.view.tool=tool;this.stroke=null;this.routeStroke=null;this.drag=null;this.render();this.viewChanged(this.state);}
   selection(){return (this.view.selection?.length?this.view.selection:[this.view.selected]).filter(id=>this.document?.start.buildings.some(b=>b.id===id));}
-  selectRoute(id){this.view.selectedRoute=id;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
-  selectBank(id){this.view.selectedRoute=null;this.view.selectedBank=id;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
-  selectSite(id){this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=id;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectResident(id){this.select(null);this.view.selectedResident=id;this.render();this.viewChanged(this.state);}
+  residentAt(cell){const bindings=this.snapshot?.scenario_ref?.residents??{};const person=this.snapshot?.residents.find(p=>Math.hypot(p.x-cell.x,p.y-cell.y)<.8);return person?Object.keys(bindings).find(id=>bindings[id]===person.id):null;}
+  selectRoute(id){this.view.selectedResident=null;this.view.selectedRoute=id;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectBank(id){this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=id;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectSite(id){this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=id;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
   select(id,toggle=false){
+    this.view.selectedResident=null;
     this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;
     const ids=toggle?new Set(this.selection()):new Set();
     if(id){if(toggle&&ids.has(id))ids.delete(id);else ids.add(id);}
@@ -76,7 +79,7 @@ export class EditorMap {
     this.drag={cell,point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
     if(!pan&&this.view.tool==='route-path')this.routeStroke=[[cell.x,cell.y]];
     if(!pan&&['road','meadow','river','nature','thin-nature','habitat'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
-    if(!pan&&this.view.tool==='move'){const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.drag.bank=bank;this.selectBank(bank.id);return;}const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}else{const site=hitStartingSite(this.document,cell.x,cell.y);if(site){this.drag.site=site;this.selectSite(site.id);}}}
+    if(!pan&&this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.drag.resident=resident;this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.drag.bank=bank;this.selectBank(bank.id);return;}const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}else{const site=hitStartingSite(this.document,cell.x,cell.y);if(site){this.drag.site=site;this.selectSite(site.id);}}}
   }
   motion(e){
     if(!this.origin)return;
@@ -99,6 +102,7 @@ export class EditorMap {
     if(drag.pan){this.centerAt(...this.view.center);return;}
     if(this.routeStroke){const cells=this.routeStroke;this.routeStroke=null;this.action({type:'route-path',cells});return;}
     if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
+    if(drag.resident){this.action({type:'resident-start',resident:drag.resident,x:cell.x,y:cell.y});return;}
     if(drag.bank){this.action({type:'move-bank',x:cell.x,y:cell.y});return;}
     if(drag.site){this.action({type:'move-site',x:cell.x,y:cell.y});return;}
     if(drag.building){this.action({type:'move',id:drag.building.id,ids:this.selection(),dx:cell.x-drag.building.x,dy:cell.y-drag.building.y,x:cell.x,y:cell.y});return;}
@@ -107,11 +111,11 @@ export class EditorMap {
         const end=this.point(e),left=Math.min(drag.point.x,end.x),right=Math.max(drag.point.x,end.x),top=Math.min(drag.point.y,end.y),bottom=Math.max(drag.point.y,end.y);
         const ids=new Set(this.selection());
         for(const b of this.document.start.buildings){const p=this.project(b.x,b.y);if(p.x>=left&&p.x<=right&&p.y>=top&&p.y<=bottom)ids.add(b.id);}
-        this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
+        this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
       }
       return;
     }
-    if(this.view.tool==='select'||this.view.tool==='move'){const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=hitStartingRoute(this.document,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
+    if(this.view.tool==='select'||this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=hitStartingRoute(this.document,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
     else this.action({type:this.view.tool,x:cell.x,y:cell.y,id:this.hit(cell)?.id});
   }
   polygon(points,fill,stroke){
@@ -172,9 +176,11 @@ export class EditorMap {
     for(const hen of flock(this.snapshot.village))objects.push({depth:hen.x+hen.y+.2,draw:()=>drawChicken(c,this.project(hen.x,hen.y),this.scale,hen)});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
       const p=this.project(resident.x,resident.y),frame=preparedFrames(art.residents[residentLookIndex(resident)],{referenceRow:2})?.[8],size=RESIDENT_WIDTH*this.scale;
+      if(this.snapshot.scenario_ref?.residents?.[view.selectedResident]===resident.id){c.beginPath();c.ellipse(p.x,p.y,14*this.scale,7*this.scale,0,0,Math.PI*2);c.strokeStyle='#ffe39a';c.lineWidth=2;c.stroke();}
       paintContactShadow(c,p.x,p.y+2*this.scale,10*this.scale,4*this.scale,.25);
       if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);
     }});
+    if(this.pointer&&(view.tool==='resident-start'||this.drag?.resident)){const id=this.drag?.resident??this.placingResident,person=this.snapshot.residents.find(p=>p.id===this.snapshot.scenario_ref?.residents?.[id]);if(person){const p=this.project(this.pointer.x,this.pointer.y),size=RESIDENT_WIDTH*this.scale,frame=preparedFrames(art.residents[residentLookIndex(person)],{referenceRow:2})?.[8];objects.push({depth:this.pointer.x+this.pointer.y+.6,draw:()=>{c.save();c.globalAlpha=.5;if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}});}}
     objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
     const selectedRoute=this.document.start.routes?.find(r=>r.id===view.selectedRoute);
     if(selectedRoute)for(const [x,y]of selectedRoute.cells)this.polygon(footprintCorners('road',x,y),'#efc86d55','#ffe39a');

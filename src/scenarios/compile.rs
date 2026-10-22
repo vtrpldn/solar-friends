@@ -219,6 +219,7 @@ pub(super) fn check(d: &Definition) -> Report {
     super::routes::check(d, &mut r);
     super::equipment::check(d, &mut r);
     super::recovery::check(d, &mut r);
+    super::arrival::check(d, &mut r);
     super::sites::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
@@ -506,6 +507,8 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     residents::apply(&d, &mut residents, &mut v);
     relationships::apply(&d, &mut v);
     navigation::refresh(&mut v);
+    super::arrival::apply(&d, &mut residents, &v);
+    super::arrival::validate_positions(&d, &residents, &v)?;
     for resident in &residents {
         if !navigation::clear(&v, resident.x, resident.y)
             || !navigation::clear(&v, resident.target_x, resident.target_y)

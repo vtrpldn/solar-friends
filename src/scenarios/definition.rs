@@ -151,6 +151,8 @@ impl Rules {
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Start {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub resident_setup: Vec<super::arrival::Setup>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub residents: Option<Vec<super::residents::Person>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -357,6 +359,7 @@ impl Definition {
             },
             rules: Rules::for_mode(mode),
             start: Start {
+                resident_setup:vec![],
                 residents: Some(super::residents::founders()),
                 relationships:vec![],
                 resident_balance:super::experience::Policy::Balanced,

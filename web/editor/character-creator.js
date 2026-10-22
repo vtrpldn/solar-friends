@@ -4,10 +4,10 @@ import {residentClips,sampleResidentClip,drawResidentAnimation} from '../residen
 import {preparedFrames,RESIDENT_WIDTH} from '../sprite-frames.js';
 import {paintWorldBuilding,paintContactShadow} from '../world-renderer.js';
 import {unlitFilter} from '../power.js';
-const pages=['Identity','Appearance','Personality','Experience'];
+const pages=['Identity','Appearance','Personality','Experience','Arrival'];
 const poses={breathe:'Idle',walk:'Walking',work:'Working',cook:'Cooking',water:'Watering',tend:'Tending',feed:'Feeding',sit:'Sitting',sleep:'Sleeping',look:'Looking around',stretch:'Stretching',wave:'Waving',relax:'Relaxing'};
 export class CharacterCreator{
- constructor({art,source,groups,changeField,undo,redo,history,catalog,editPerson}){
+ constructor({art,source,groups,changeField,undo,redo,history,catalog,editPerson,startAction}){
   Object.assign(this,{art,source,groups,history,catalog});this.cache=new Map();this.id=null;this.page='Identity';this.token=0;this.frame=null;
   this.motion=matchMedia('(prefers-reduced-motion: reduce)');this.surface=document.createElement('canvas');this.surface.width=this.surface.height=256;
   this.dialog=document.createElement('dialog');this.dialog.id='character-creator';this.dialog.setAttribute('aria-labelledby','character-creator-title');
@@ -17,33 +17,35 @@ export class CharacterCreator{
   const tabs=this.dialog.querySelector('[role=tablist]');
   for(const name of pages){const tab=document.createElement('button');tab.type='button';tab.role='tab';tab.id='character-tab-'+name;tab.dataset.characterTab=name;tab.setAttribute('aria-controls','character-page-'+name);tab.textContent=name;tabs.append(tab);}
   tabs.onclick=event=>{const tab=event.target.closest('[data-character-tab]');if(tab)this.select(tab.dataset.characterTab);};
-  tabs.onkeydown=event=>{const current=pages.indexOf(this.page),next=event.key==='ArrowRight'?(current+1)%4:event.key==='ArrowLeft'?(current+3)%4:event.key==='Home'?0:event.key==='End'?3:null;if(next===null)return;event.preventDefault();this.select(pages[next]);tabs.querySelector(`[data-character-tab="${pages[next]}"]`).focus();};
+  tabs.onkeydown=event=>{const current=pages.indexOf(this.page),next=event.key==='ArrowRight'?(current+1)%pages.length:event.key==='ArrowLeft'?(current+pages.length-1)%pages.length:event.key==='Home'?0:event.key==='End'?pages.length-1:null;if(next===null)return;event.preventDefault();this.select(pages[next]);tabs.querySelector(`[data-character-tab="${pages[next]}"]`).focus();};
   this.dialog.querySelector('[data-character-undo]').onclick=undo;this.dialog.querySelector('[data-character-redo]').onclick=redo;
   this.dialog.querySelector('[data-character-random]').onclick=()=>editPerson('Randomize unlocked character categories',person=>randomizeCharacter(person,this.locked,catalog));
   this.dialog.querySelector('[data-character-reset]').onclick=()=>editPerson('Reset character '+this.page.toLowerCase(),person=>resetCharacterCategory(person,this.baseline,this.page));
-  this.dialog.onchange=event=>{if(event.target.matches('[data-character-lock]')){this.locked[this.page]=event.target.checked;this.select(this.page);}else if(event.target.dataset.residentField)changeField(event);else this.restart();};
+  this.dialog.onchange=event=>{if(event.target.matches('[data-character-lock]')){this.locked[this.page]=event.target.checked;this.select(this.page);}else if(event.target.dataset.residentField||event.target.dataset.residentStart)changeField(event);else this.restart();};
+  this.dialog.addEventListener('click',startAction);
   this.dialog.querySelector('.dialog-close').onclick=this.dialog.querySelector('[data-character-done]').onclick=()=>this.dialog.close();
-  this.dialog.addEventListener('close',()=>{const id=this.id;this.token++;cancelAnimationFrame(this.frame);this.frame=null;this.id=null;this.sheets=null;[...document.querySelectorAll('[data-resident]')].find(el=>el.dataset.resident===id)?.querySelector('[data-open-character]')?.focus({preventScroll:true});});
+  this.dialog.addEventListener('close',()=>{if(this.dialog.open)return;const id=this.id;this.token++;cancelAnimationFrame(this.frame);this.frame=null;this.id=null;this.sheets=null;[...document.querySelectorAll('[data-resident]')].find(el=>el.dataset.resident===id)?.querySelector('[data-open-character]')?.focus({preventScroll:true});});
   this.motion.addEventListener('change',()=>this.restart());document.addEventListener('visibilitychange',()=>this.restart());
  }
  person(){return this.source().find(p=>p.id===this.id);}
  open(id){this.id=id;this.baseline=structuredClone(this.person());this.locked={Identity:true,Appearance:false,Personality:false,Experience:false};this.page='Identity';this.signature=null;this.look=null;this.lookVersion=null;this.dialog.showModal();this.update();this.dialog.scrollTop=0;this.dialog.querySelector('[data-character-tab="Identity"]').focus();}
  update(){
   if(!this.dialog.open)return;const state=this.history();this.dialog.querySelector('[data-character-undo]').disabled=!state.undo;this.dialog.querySelector('[data-character-redo]').disabled=!state.redo;const person=this.person();if(!person){this.dialog.close();return;}
-  const signature=JSON.stringify(person);
+  const signature=JSON.stringify([person,this.groups().get(person.id)?.Arrival]);
   if(signature!==this.signature){
-   const focused=this.dialog.contains(document.activeElement)?document.activeElement.dataset.residentField:null;
+   const focused=this.dialog.contains(document.activeElement)?document.activeElement.dataset.residentField:null,startFocus=document.activeElement?.dataset.residentStart;
    this.signature=signature;this.fieldHost.dataset.editingResident=person.id;const fields=this.groups().get(person.id);
    this.fieldHost.innerHTML=pages.map(name=>`<div role="tabpanel" id="character-page-${name}" aria-labelledby="character-tab-${name}" data-character-page="${name}">${fields[name]}</div>`).join('');
    const experience=this.fieldHost.querySelector('.creator-experience');if(experience)experience.open=true;
    this.dialog.querySelector('[data-character-name]').textContent=person.name;this.select(this.page);
+   if(startFocus)this.fieldHost.querySelector(`[data-resident-start="${startFocus}"]`)?.focus({preventScroll:true});
    if(focused)this.fieldHost.querySelector(`[data-resident-field="${focused}"]`)?.focus({preventScroll:true});
   }
   const look=person.appearance?.preset??person.preset;
   const version=person.appearance?.version??person.preset_version;
   if(look!==this.look||version!==this.lookVersion){this.look=look;this.lookVersion=version;void this.load(look,version);}else this.restart();
  }
- select(name){this.page=name;this.dialog.querySelector('[data-character-lock]').checked=this.locked[name];this.dialog.querySelector('[data-character-lock-label]').textContent=`Keep ${name.toLowerCase()} when randomizing`;this.dialog.querySelector('[data-character-random]').disabled=Object.values(this.locked).every(Boolean);this.dialog.querySelector('[data-character-random-note]').textContent=Object.values(this.locked).every(Boolean)?'All categories are locked.':`Randomizing: ${pages.filter(page=>!this.locked[page]).join(', ')}. ${this.locked.Identity?'':'Unlocked identity gets a new name and clears pronouns and biography. '}Randomized routines leave outside shifts off.`;const person=this.person();this.dialog.querySelector('[data-character-reset]').disabled=characterCategories[name].every(field=>JSON.stringify(person?.[field])===JSON.stringify(this.baseline?.[field]));for(const tab of this.dialog.querySelectorAll('[role=tab]')){const selected=tab.dataset.characterTab===name;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}for(const panel of this.fieldHost.children)panel.hidden=panel.dataset.characterPage!==name;}
+ select(name){this.page=name;this.dialog.querySelector('.character-choice-actions').hidden=name==='Arrival';this.dialog.querySelector('[data-character-lock]').checked=this.locked[name];this.dialog.querySelector('[data-character-lock-label]').textContent=`Keep ${name.toLowerCase()} when randomizing`;this.dialog.querySelector('[data-character-random]').disabled=Object.values(this.locked).every(Boolean);this.dialog.querySelector('[data-character-random-note]').textContent=Object.values(this.locked).every(Boolean)?'All categories are locked.':`Randomizing: ${Object.keys(characterCategories).filter(page=>!this.locked[page]).join(', ')}. ${this.locked.Identity?'':'Unlocked identity gets a new name and clears pronouns and biography. '}Randomized routines leave outside shifts off.`;const person=this.person();this.dialog.querySelector('[data-character-reset]').disabled=(characterCategories[name]??[]).every(field=>JSON.stringify(person?.[field])===JSON.stringify(this.baseline?.[field]));for(const tab of this.dialog.querySelectorAll('[role=tab]')){const selected=tab.dataset.characterTab===name;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}for(const panel of this.fieldHost.children)panel.hidden=panel.dataset.characterPage!==name;}
  async load(look,version){
   const token=++this.token;this.sheets=null;cancelAnimationFrame(this.frame);this.canvas.getContext('2d').clearRect(0,0,320,240);this.portrait.getContext('2d').clearRect(0,0,64,72);this.status('Loading character poses…');
   try{
