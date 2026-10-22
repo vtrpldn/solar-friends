@@ -177,6 +177,25 @@ fn measure(
                 ),
             )
         }
+        GoalCondition::Maintain { outcome, minutes } => {
+            // Credit only the post-activation portion of the current consecutive
+            // observed period. Earlier best periods and unobserved time never count.
+            let age = v
+                .progress
+                .outcomes
+                .last_sample
+                .zip(record.activated_at)
+                .map_or(0., |(sample, activation)| (sample - activation).max(0.));
+            let elapsed = v.progress.outcomes.current[outcome.index()].min(age);
+            (
+                f64::from(elapsed),
+                f64::from(*minutes),
+                format!(
+                    "{} for {minutes} consecutive observed minutes after this goal starts",
+                    outcome.name()
+                ),
+            )
+        }
         GoalCondition::Goal { goal } => {
             let done = goals.contains(goal);
             let title = definition(v)
@@ -217,7 +236,20 @@ fn measure(
         GoalCondition::Funds { .. } => ("funds", "cents"),
         GoalCondition::Date { .. } => ("date", "minutes"),
         GoalCondition::Harvests { .. } => ("harvests", "count"),
+        GoalCondition::Maintain { .. } => ("maintain", "duration_minutes"),
         _ => unreachable!(),
+    };
+    let note = if let GoalCondition::Maintain { outcome, .. } = c {
+        let minimums = outcomes::food_minimums(v);
+        Some(match outcome {
+            ObservedOutcome::Pantry => format!("After arrival, every resident must have hunger at most 65 and energy at least 25, with access to at least {} stored food portions for this population.", minimums[0]),
+            ObservedOutcome::Diet => format!("After arrival, every resident must have hunger at most 65 and energy at least 25, with access to at least {} stored food portions for this population. This observation does not measure dietary variety.", minimums[1]),
+            ObservedOutcome::Services => "Residents must be healthy, with an occupied home and completed kitchen, washing available at every occupied home and kitchen, and every completed ecological toilet usable.".into(),
+            ObservedOutcome::Night => "At least one streetlight must be connected, enabled and fully illuminated while native darkness exceeds 0.5.".into(),
+            ObservedOutcome::Dry => format!("During the dry season, every resident must be healthy and housed, with social wellbeing at least 25, working household services and access to at least {} stored food portions.", minimums[2]),
+        })
+    } else {
+        None
     };
     let action = match c {
         GoalCondition::Buildings { building, .. } => json!({"kind":"build","building":building}),
@@ -228,7 +260,7 @@ fn measure(
     };
     (
         complete,
-        json!({"kind":kind,"unit":unit,"complete":complete,"value":value,"target":target,"description":label,"action":action}),
+        json!({"kind":kind,"unit":unit,"complete":complete,"value":value,"target":target,"description":label,"action":action,"note":note}),
     )
 }
 pub fn view(v: &Village) -> serde_json::Value {

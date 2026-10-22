@@ -6,7 +6,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const g=new Game(),copy=new Game(),goal=(id,condition,optional=false)=>({id,title:`Goal ${id}`,description:'Plain text <not markup>',optional,condition}),chapter=(id,goals)=>({id,title:`Chapter ${id}`,description:'A new beginning',goals});
 const report=()=>JSON.parse(g.scenario_journal()),load=d=>JSON.parse(g.load_scenario(JSON.stringify(d)));
 try{
- const original=g.snapshot(),catalog=JSON.parse(g.scenario_catalog());assert.equal(catalog.journal.schema,1);assert.equal(catalog.journal.conditions.length,8);assert.equal(catalog.journal.target_limits.buildings,256);
+ const original=g.snapshot(),catalog=JSON.parse(g.scenario_catalog());assert.equal(catalog.journal.schema,1);assert.equal(catalog.journal.conditions.length,9);assert.equal(catalog.journal.target_limits.buildings,256);
  const d=JSON.parse(g.scenario_template('sandbox'));d.journal={schema:1,introduction:'A home of our own.',completion:'Village life continues.',chapters:[chapter('arrival',[goal('fund',{kind:'funds',cents:0}),goal('later',{kind:'date',minute:600},true)]),chapter('home',[goal('build',{kind:'buildings',building:'home',count:1,credit:'after_activation'})]),chapter('morning',[goal('clock',{kind:'all',conditions:[{kind:'goal',goal:'build'},{kind:'date',minute:482}]})])]};
  assert(JSON.parse(g.validate_scenario(JSON.stringify(d))).ok);assert.equal(g.snapshot(),original,'Validation must not replace a live village');assert(load(d).ok);
  let r=report();assert.equal(r.chapters[0].goals[0].status,'complete');assert.equal(r.chapters[1].goals[0].status,'active');assert.equal(r.chapters[2].goals[0].status,'locked');assert.equal(r.chapters[2].goals[0].condition,null);
@@ -31,5 +31,11 @@ try{
   assert.equal(g.restore(JSON.stringify(broken)),false,mutation);assert.equal(g.snapshot(),settled);
  }
  const invalid=structuredClone(d);invalid.journal.chapters[0].goals[0].condition={kind:'goal',goal:'clock'};assert(!load(invalid).ok);assert.equal(g.snapshot(),settled);
- console.log('PASS: authored journal catalog and validation, explicit starting/activation credit, native reports/actions, ordered/optional goals, pause and 1x/16x observations, exact saves, limits and atomic corruption/deadlock rejection. Player journal authoring and rendering are not covered by this engine verifier.');
+ const timed=JSON.parse(g.scenario_template('sandbox'));timed.journal={schema:1,introduction:'A steady pantry',completion:'Comfortable',chapters:[chapter('steady',[goal('pantry',{kind:'maintain',outcome:'pantry',minutes:60})])]};assert(load(timed).ok);
+ let frames=0;while(report().chapters[0].goals[0].condition.value===0&&frames++<1800)advanceSimulation(g,1/60,16);
+ const observed=report().chapters[0].goals[0].condition;assert(observed.value>0&&observed.value<60,'Real simulation starts a partial observed duration');assert.match(observed.note,/hunger at most 65/);assert.equal(observed.unit,'duration_minutes');
+ const partial=g.snapshot();g.tick(0);assert.equal(g.snapshot(),partial);assert(copy.restore(partial));assert.equal(copy.snapshot(),partial);
+ frames=0;while(report().finished_at===null&&frames++<1800){advanceSimulation(g,1/60,16);advanceSimulation(copy,1/60,16);}
+ assert(report().finished_at!==null,'Real 16x residents sustain the authored outcome');assert.equal(g.snapshot(),copy.snapshot(),'Partial duration continues exactly at 16x');
+ console.log('PASS: authored journal catalog and validation, explicit starting/activation credit, native reports/actions, ordered/optional goals, pause and 1x/16x observations, real maintained outcomes with exact partial-window continuation, exact saves, limits and atomic corruption/deadlock rejection. Player journal authoring and rendering are not covered by this engine verifier.');
 }finally{g.free();copy.free();}

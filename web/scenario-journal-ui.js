@@ -2,7 +2,7 @@ import {allBuildingArt} from './building-art.js?v=night-1';
 const escape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=selector=>document.querySelector(selector);
 const date=minute=>`Day ${Math.floor(minute/1440)+1} · ${String(Math.floor(minute%1440/60)).padStart(2,'0')}:${String(Math.floor(minute%60)).padStart(2,'0')}`;
-const quantity=(n,unit)=>unit==='cents'?`R$ ${(n/100).toFixed(2)}`:unit==='minutes'?date(n):Number(n).toLocaleString(undefined,{maximumFractionDigits:1});
+const quantity=(n,unit)=>unit==='cents'?`R$ ${(n/100).toFixed(2)}`:unit==='minutes'?date(n):unit==='duration_minutes'?`${Number(n).toLocaleString(undefined,{maximumFractionDigits:1})} min`:Number(n).toLocaleString(undefined,{maximumFractionDigits:1});
 let original=null,actions=[],dispatch=null,installed=false;
 export function resetScenarioJournalUI(){
  if(!original)return;
@@ -30,7 +30,7 @@ export function renderScenarioJournal(report,{title,page,open,onAction,replace})
   if(!c)return '<li>This goal begins with its chapter.</li>';
   if(c.conditions)return `<li class="scenario-condition-group"><b>${c.kind==='all'?'All of these':'Any of these'}</b><ul>${c.conditions.map(child=>condition(child,credited)).join('')}</ul></li>`;
   let description=c.description;if(c.action?.building)description=description.replaceAll(c.action.building,allBuildingArt[c.action.building]?.name??c.action.building);
-  return `<li class="${credited||c.complete?'done':''}"><span>${escape(description)}</span>${typeof c.value==='number'?`<small>${escape(quantity(c.value,c.unit))} / ${escape(quantity(c.target,c.unit))}</small>`:''}${actionButton(c.action,credited)}</li>`;
+  return `<li class="${credited||c.complete?'done':''}"><span>${escape(description)}</span>${typeof c.value==='number'?`<small>${escape(quantity(c.value,c.unit))} / ${escape(quantity(c.target,c.unit))}</small>`:''}${c.note?`<small>${escape(c.note)}</small>`:''}${actionButton(c.action,credited)}</li>`;
  };
  replace($('#quest-list'),`<article class="quest-card ${selected.completed_at!==null?'complete':''}"><span class="eyebrow">CHAPTER ${index+1} OF ${report.chapters.length}</span><h3>${escape(selected.title)}</h3><p>${escape(selected.description)}</p>${selected.goals.map(goal=>`<section class="scenario-journal-goal ${goal.status}" data-scenario-goal="${escape(goal.id)}"><h4>${goal.status==='complete'?'✓ ':''}${escape(goal.title)}${goal.optional?' <small>Optional</small>':''}</h4><p>${escape(goal.description)}</p><small>${goal.status==='complete'?'Completed':goal.status==='active'?'In progress':'Upcoming'}</small><ul>${condition(goal.condition,goal.status==='complete')}</ul></section>`).join('')}${complete?`<p class="scenario-completion">${escape(report.completion)}</p>`:''}</article>`);
  return index;

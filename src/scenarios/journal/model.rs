@@ -46,6 +46,10 @@ pub enum GoalCondition {
         count: u32,
         credit: CounterCredit,
     },
+    Maintain {
+        outcome: ObservedOutcome,
+        minutes: u32,
+    },
     Goal {
         goal: String,
     },
@@ -55,6 +59,37 @@ pub enum GoalCondition {
     Any {
         conditions: Vec<GoalCondition>,
     },
+}
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ObservedOutcome {
+    Pantry,
+    Diet,
+    Services,
+    Night,
+    Dry,
+}
+impl ObservedOutcome {
+    pub fn index(self) -> usize {
+        match self {
+            Self::Pantry => outcomes::PANTRY,
+            Self::Diet => outcomes::DIET,
+            Self::Services => outcomes::SERVICES,
+            Self::Night => outcomes::NIGHT,
+            Self::Dry => outcomes::DRY,
+        }
+    }
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Pantry => "Healthy residents with accessible pantry reserves",
+            Self::Diet => "Healthy residents with accessible food reserves",
+            Self::Services => "Healthy residents with working household washing and sanitation",
+            Self::Night => "A fully powered streetlight during darkness",
+            Self::Dry => {
+                "A housed, healthy community with food, services and social wellbeing during the dry season"
+            }
+        }
+    }
 }
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

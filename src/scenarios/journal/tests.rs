@@ -303,3 +303,93 @@ fn stored_targets_do_not_count_paid_incoming_orders_and_reports_do_not_advance_t
     assert!(g.restore(&before));
     assert_eq!(g.snapshot(), before);
 }
+
+#[test]
+fn maintained_outcomes_credit_only_current_post_activation_observations() {
+    let mut g = game(scenario(vec![chapter(
+        "one",
+        vec![goal(
+            "pantry",
+            GoalCondition::Maintain {
+                outcome: ObservedOutcome::Pantry,
+                minutes: 60,
+            },
+        )],
+    )]));
+    let activated = g.app.world().resource::<Village>().minutes;
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.progress.outcomes.current[outcomes::PANTRY] = 300.;
+        v.progress.outcomes.best[outcomes::PANTRY] = 360.;
+        v.progress.outcomes.qualifies[outcomes::PANTRY] = true;
+        v.progress.outcomes.last_sample = Some(activated);
+        advance(&mut v);
+    }
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    for elapsed in [15., 30., 45.] {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = activated + elapsed;
+        v.progress.outcomes.last_sample = Some(v.minutes);
+        advance(&mut v);
+    }
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        45.
+    );
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.progress.outcomes.current[outcomes::PANTRY] = 0.;
+        v.progress.outcomes.qualifies[outcomes::PANTRY] = false;
+        advance(&mut v);
+    }
+    assert!(state(&mut g)["finished_at"].is_null());
+    assert_eq!(
+        state(&mut g)["chapters"][0]["goals"][0]["condition"]["value"],
+        0.
+    );
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = activated + 120.;
+        v.progress.outcomes.last_sample = Some(v.minutes);
+        v.progress.outcomes.current[outcomes::PANTRY] = 60.;
+        v.progress.outcomes.qualifies[outcomes::PANTRY] = true;
+        advance(&mut v);
+    }
+    assert!(state(&mut g)["finished_at"].is_number());
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    let mut disabled = scenario(vec![chapter(
+        "one",
+        vec![goal(
+            "dry",
+            GoalCondition::Maintain {
+                outcome: ObservedOutcome::Dry,
+                minutes: 60,
+            },
+        )],
+    )]);
+    disabled.rules.climate = false;
+    assert!(compile(disabled).is_err());
+    for minutes in [0, 14, 16, 361, u32::MAX] {
+        assert!(
+            compile(scenario(vec![chapter(
+                "one",
+                vec![goal(
+                    "bad",
+                    GoalCondition::Maintain {
+                        outcome: ObservedOutcome::Pantry,
+                        minutes
+                    }
+                )]
+            )]))
+            .is_err()
+        );
+    }
+}

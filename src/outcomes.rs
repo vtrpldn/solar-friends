@@ -1,4 +1,4 @@
-//! Earned Story outcomes use actual work and consecutive village observations.
+//! Native village outcomes use actual work and consecutive observations.
 use crate::*;
 pub const PANTRY: usize = 0;
 pub const DIET: usize = 1;
@@ -144,7 +144,7 @@ fn complete_leisure_day(day: &simulation::Day, people: &[Resident]) -> bool {
 }
 
 pub fn observe(v: &mut Village, people: &[Resident]) {
-    if v.mode != modes::Mode::Story {
+    if v.mode != modes::Mode::Story && !scenarios::journal::needs_outcomes(v) {
         return;
     }
     // Work completion and refunds are not deferred to the observation interval.
@@ -339,6 +339,39 @@ mod tests {
             *r = people[r.id].clone();
         }
     }
+    #[test]
+    fn authored_duration_subscribes_to_real_outcomes_under_sandbox_rules() {
+        let (_, mut v, people) = scene();
+        v.mode = modes::Mode::Sandbox;
+        observe(&mut v, &people);
+        assert!(v.progress.outcomes.last_sample.is_none());
+        let mut g = Game::new();
+        let mut d: serde_json::Value =
+            serde_json::from_str(&g.scenario_template("sandbox")).unwrap();
+        d["journal"] = serde_json::json!({"schema":1,"introduction":"","completion":"","chapters":[{"id":"one","title":"One","description":"","goals":[{"id":"pantry","title":"Pantry","description":"","optional":false,"condition":{"kind":"all","conditions":[{"kind":"maintain","outcome":"pantry","minutes":60}]}}]}]});
+        assert!(serde_json::from_str::<serde_json::Value>(&g.load_scenario(&d.to_string())).unwrap()["ok"].as_bool().unwrap());
+        v.scenario = g.app.world().resource::<Village>().scenario.clone();
+        observe(&mut v, &people);
+        assert!(v.progress.outcomes.qualifies[PANTRY]);
+        for _ in 0..4 {
+            v.minutes += 15.;
+            observe(&mut v, &people);
+        }
+        assert_eq!(v.progress.outcomes.current[PANTRY], 60.);
+        let mut hungry = people.clone();
+        hungry[0].hunger = 90.;
+        v.minutes += 1.;
+        observe(&mut v, &hungry);
+        assert_eq!(v.progress.outcomes.current[PANTRY], 0.);
+        assert_eq!(v.progress.outcomes.best[PANTRY], 60.);
+        v.minutes += 60.;
+        observe(&mut v, &people);
+        assert_eq!(
+            v.progress.outcomes.current[PANTRY], 0.,
+            "A gap in observations earns no unobserved time"
+        );
+    }
+
     #[test]
     fn population_observations_use_complete_rosters_and_scaled_food_targets() {
         for (count, expected) in [

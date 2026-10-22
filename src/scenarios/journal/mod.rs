@@ -24,8 +24,30 @@ pub fn catalog() -> serde_json::Value {
         example("Community fund balance",GoalCondition::Funds{cents:30_000}),
         example("Game date",GoalCondition::Date{minute:1440.}),
         example("Harvest count",GoalCondition::Harvests{count:1,credit:CounterCredit::AfterActivation}),
+        example("Maintain an observed village outcome",GoalCondition::Maintain{outcome:ObservedOutcome::Pantry,minutes:60}),
         example("Prior goal completion",GoalCondition::Goal{goal:"another-goal".into()}),
         example("All conditions",GoalCondition::All{conditions:vec![GoalCondition::Funds{cents:0}]}),
         example("Any condition",GoalCondition::Any{conditions:vec![GoalCondition::Funds{cents:0}]})
-    ],"building_credit":[BuildingCredit::Present,BuildingCredit::AfterActivation],"counter_credit":[CounterCredit::Run,CounterCredit::AfterActivation]})
+    ],"outcomes":([ObservedOutcome::Pantry,ObservedOutcome::Diet,ObservedOutcome::Services,ObservedOutcome::Night,ObservedOutcome::Dry].map(|outcome|serde_json::json!({"id":outcome,"name":outcome.name(),"maximum_minutes":outcomes::TARGETS[outcome.index()],"observation_minutes":15}))),"building_credit":[BuildingCredit::Present,BuildingCredit::AfterActivation],"counter_credit":[CounterCredit::Run,CounterCredit::AfterActivation]})
+}
+
+/// Outcome measurement is a scenario subscription, independent of rule presets.
+pub fn needs_outcomes(v: &Village) -> bool {
+    fn needed(condition: &GoalCondition) -> bool {
+        match condition {
+            GoalCondition::Maintain { .. } => true,
+            GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
+                conditions.iter().any(needed)
+            }
+            _ => false,
+        }
+    }
+    v.scenario
+        .as_ref()
+        .and_then(|s| s.definition.journal.as_ref())
+        .is_some_and(|j| {
+            j.chapters
+                .iter()
+                .any(|c| c.goals.iter().any(|g| needed(&g.condition)))
+        })
 }

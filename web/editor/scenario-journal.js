@@ -58,6 +58,10 @@ export class JournalEditor{
   if(c.kind==='funds')html+=field(path+'.cents','Shared fund · R$',c.cents/100,{type:'number',min:0,max:target.funds/100,step:.01});
   if(c.kind==='date')html+=field(path+'.day','Day',Math.floor(c.minute/1440)+1,{type:'number',min:1,max:Math.floor(target.date/1440)+1,step:1})+field(path+'.time','Time',`${String(Math.floor(c.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(c.minute%60)).padStart(2,'0')}`,{type:'time',step:60});
   if(c.kind==='harvests')html+=field(path+'.count','Completed harvests',c.count,{type:'number',min:1,max:target.harvests,step:1})+select(path+'.credit','Which harvests count?',c.credit,[['run','All harvests during this playthrough'],['after_activation','Only harvests after this goal starts']]);
+  if(c.kind==='maintain'){
+   const outcomes=this.catalog.journal.outcomes,selected=outcomes.find(o=>o.id===c.outcome);
+   html+=select(path+'.outcome','Observed village condition',c.outcome,outcomes.map(o=>[o.id,o.name]))+field(path+'.minutes','Consecutive observed minutes after activation',c.minutes,{type:'number',min:15,max:selected.maximum_minutes,step:15})+'<p>Measured every 15 game minutes. A lapse or observation gap resets the period. Earlier success does not count. Completed goals stay credited.</p>';
+  }
   if(c.kind==='goal')html+=select(path+'.goal','Earlier goal',c.goal,[['','Choose a goal'],...this.definition.journal.chapters.flatMap(chapter=>chapter.goals.filter(g=>g.id!==goal.id).map(g=>[g.id,`${chapter.title} · ${g.title}`]))]);
   if(['all','any'].includes(c.kind))html+=`<p>${c.kind==='all'?'Every condition must be met.':'At least one condition must be met.'}</p>`+c.conditions.map((child,i)=>`<fieldset><legend>Condition ${i+1}</legend>${this.condition(child,`${path}.conditions.${i}`,goal,depth+1)}<button data-journal-action="remove-condition" data-path="${path}" data-index="${i}">Remove condition</button></fieldset>`).join('')+`<button data-journal-action="add-condition" data-path="${path}" ${c.conditions.length>=limits.group_size||depth>=limits.condition_depth?'disabled':''}>Add condition</button>`;
   return html;

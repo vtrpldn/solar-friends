@@ -36,6 +36,13 @@ pub fn check(d: &Definition, report: &mut Report) {
             {
                 report.push("journal.chapters", "invalid_goal", "Give every goal a unique identity, a title up to 100 characters and description up to 1,000 characters.");
             }
+            if !d.rules.climate && needs_climate(&goal.condition) {
+                report.push(
+                    "journal.chapters",
+                    "disabled_climate_goal",
+                    "Enable seasonal weather before requiring a dry-season outcome.",
+                );
+            }
             if !condition(&goal.condition, 0, &mut nodes) {
                 report.push("journal.chapters", "invalid_condition", "Use supported goal conditions, positive bounded targets and nonempty groups nested at most four levels.");
             }
@@ -98,6 +105,10 @@ fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> bool {
         GoalCondition::Funds { cents } => (0..=1_000_000_000).contains(cents),
         GoalCondition::Date { minute } => minute.is_finite() && (0.0..=5_000_000.).contains(minute),
         GoalCondition::Harvests { count, .. } => (1..=1_000_000).contains(count),
+        GoalCondition::Maintain { outcome, minutes } => {
+            (15..=outcomes::TARGETS[outcome.index()] as u32).contains(minutes)
+                && minutes.is_multiple_of(15)
+        }
         GoalCondition::Goal { goal } => valid_key(goal),
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
             !conditions.is_empty()
@@ -139,4 +150,17 @@ fn cycle<'a>(
     visiting.remove(id);
     visited.insert(id);
     false
+}
+
+fn needs_climate(condition: &GoalCondition) -> bool {
+    match condition {
+        GoalCondition::Maintain {
+            outcome: ObservedOutcome::Dry,
+            ..
+        } => true,
+        GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
+            conditions.iter().any(needs_climate)
+        }
+        _ => false,
+    }
 }
