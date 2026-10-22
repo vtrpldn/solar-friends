@@ -13,8 +13,8 @@ const materialNames=['skin','shirt','shorts','shoes'];
 const ids={skin:1,shirt:2,shorts:3,shoes:4},debugColors=[[70,66,57],[225,89,88],[53,153,210],[113,186,86],[178,102,196]];
 const widths={base:16,idle:16,activities:16};
 export function validateBodyMaterials(recipe){
- if(!recipe||Object.keys(recipe).length!==4||Object.keys(recipe).some(key=>!Object.hasOwn(ids,key)))throw Error('Choose a supported body material recipe.');
- for(const key of Object.keys(ids))if(!Object.hasOwn(bodyMaterialPalettes[key],recipe[key])||recipe[key]==='reference')throw Error('This body material palette is unavailable.');
+ if(!recipe||typeof recipe!=='object'||Array.isArray(recipe)||Object.keys(recipe).length!==4||Object.keys(recipe).some(key=>!Object.hasOwn(ids,key)))throw Error('Choose a supported body material recipe.');
+ for(const key of Object.keys(ids))if(typeof recipe[key]!=='string'||!Object.hasOwn(bodyMaterialPalettes[key],recipe[key])||recipe[key]==='reference')throw Error('This body material palette is unavailable.');
  return Object.fromEntries(materialNames.map(key=>[key,recipe[key]]));
 }
 function creamComponents(pixels){

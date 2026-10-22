@@ -310,8 +310,16 @@
     "changed-alpha",
     "changed-size",
     "unknown-clip",
-    "unknown-palette"
+    "unknown-palette",
+    "future-schema",
+    "future-art",
+    "unknown-body",
+    "unknown-hair",
+    "unknown-field",
+    "missing-field",
+    "coerced-palette"
   ],
+  "portraitChecks": 4,
   "cache": {
     "clips": 2,
     "frames": 8,

@@ -8,6 +8,11 @@ export function paintResidentPortrait(canvas,appearance,images,{filter='none'}={
   const image=images[residentLookIndex({appearance})];
   const frame=preparedFrames(image,{referenceRow:2})?.[8];
   if(!frame)throw Error('This resident portrait could not load.');
+  paintPreparedResidentPortrait(canvas,frame,{filter});
+}
+
+export function paintPreparedResidentPortrait(canvas,frame,{filter='none'}={}){
+  if(frame?.width!==256||frame?.height!==256)throw Error('Use a shared prepared resident frame for the portrait.');
   const c=canvas.getContext('2d'),scale=Math.min(canvas.width/128,canvas.height/152),width=128*scale,height=152*scale;
   c.clearRect(0,0,canvas.width,canvas.height);c.save();c.filter=filter;
   c.drawImage(frame,64,12,128,152,(canvas.width-width)/2,(canvas.height-height)/2,width,height);c.restore();
