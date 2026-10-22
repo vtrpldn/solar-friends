@@ -227,7 +227,7 @@ impl Game {
     }
     pub fn set_seasons_enabled(&mut self, enabled: bool) -> bool {
         let mut v = self.app.world_mut().resource_mut::<Village>();
-        if v.mode != modes::Mode::Sandbox {
+        if v.mode != modes::Mode::Sandbox || scenarios::journal::challenge::rules_locked(&v) {
             return false;
         }
         v.climate.enabled = enabled;

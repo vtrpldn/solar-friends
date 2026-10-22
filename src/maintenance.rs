@@ -369,6 +369,9 @@ impl Game {
         report(self.app.world().resource::<Village>()).to_string()
     }
     pub fn set_equipment_condition(&mut self, enabled: bool) {
+        if scenarios::journal::challenge::rules_locked(self.app.world().resource::<Village>()) {
+            return;
+        }
         {
             let mut v = self.app.world_mut().resource_mut::<Village>();
             v.maintenance.enabled = enabled;

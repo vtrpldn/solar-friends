@@ -167,6 +167,9 @@ pub fn view(v: &Village) -> serde_json::Value {
 #[wasm_bindgen]
 impl Game {
     pub fn set_resident_learning(&mut self, enabled: bool) {
+        if scenarios::journal::challenge::rules_locked(self.app.world().resource::<Village>()) {
+            return;
+        }
         self.app
             .world_mut()
             .resource_mut::<Village>()

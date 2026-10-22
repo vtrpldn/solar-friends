@@ -31,7 +31,7 @@ pub fn valid(v: &Village) -> bool {
         && (0.0..=1e9).contains(&v.sandbox_rules.supplied_energy)
 }
 pub fn report(v: &Village) -> serde_json::Value {
-    serde_json::json!({"editable":v.mode==modes::Mode::Sandbox,"logistics":logistics(v),"land":land(v),"utilities":utilities(v),"supplied_energy":v.sandbox_rules.supplied_energy})
+    serde_json::json!({"editable":v.mode==modes::Mode::Sandbox && !scenarios::journal::challenge::rules_locked(v),"logistics":logistics(v),"land":land(v),"utilities":utilities(v),"supplied_energy":v.sandbox_rules.supplied_energy})
 }
 #[wasm_bindgen]
 impl Game {
@@ -47,7 +47,7 @@ impl Game {
     ) -> bool {
         {
             let mut v = self.app.world_mut().resource_mut::<Village>();
-            if v.mode != modes::Mode::Sandbox {
+            if v.mode != modes::Mode::Sandbox || scenarios::journal::challenge::rules_locked(&v) {
                 return false;
             }
             v.sandbox_rules.logistics = logistics;

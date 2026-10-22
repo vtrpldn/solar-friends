@@ -205,6 +205,10 @@ impl Game {
         serde_json::to_string(&supplies::preview(data, distribute)).unwrap()
     }
 
+    pub fn continue_scenario_freely(&mut self) -> bool {
+        journal::challenge::continue_freely(&mut self.app.world_mut().resource_mut::<Village>())
+    }
+
     pub fn scenario_journal(&self) -> String {
         serde_json::to_string(&journal::view(self.app.world().resource::<Village>())).unwrap()
     }

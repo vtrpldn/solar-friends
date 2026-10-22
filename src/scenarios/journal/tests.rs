@@ -995,3 +995,39 @@ fn challenge_rejects_deadlines_at_arrival_and_empty_failure_messages() {
     d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 900., failure_message: String::new() });
     assert!(compile(d).is_err());
 }
+
+#[test]
+fn failed_challenge_continuation_is_explicit_permanent_and_saved() {
+    let mut d = scenario(vec![chapter("opening", vec![goal("date", GoalCondition::Date { minute: 601. })])]);
+    d.start.minutes = 600.;
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 600.5, failure_message: "Missed the date.".into() });
+    let mut g = game(d);
+    let opening = g.snapshot();
+    assert!(!g.continue_scenario_freely());
+    assert!(!g.configure_sandbox_rules(true, true, true));
+    assert!(!g.set_seasons_enabled(true));
+    g.set_supplier_variation(true);
+    g.set_resident_learning(true);
+    g.set_equipment_condition(true);
+    assert_eq!(g.snapshot(), opening);
+    g.tick(0.25);
+    assert!(!g.configure_sandbox_rules(true, true, true));
+    assert!(g.continue_scenario_freely());
+    assert!(!g.continue_scenario_freely());
+    let continued = g.snapshot();
+    assert!(g.restore(&continued));
+    assert_eq!(g.snapshot(), continued);
+    assert!(g.configure_sandbox_rules(true, true, true));
+    for _ in 0..4 { g.tick(0.25); }
+    let report = state(&mut g);
+    assert_eq!(report["challenge"]["status"], "unrestricted");
+    assert_eq!(report["challenge"]["eligible"], false);
+    assert!(report["finished_at"].is_number());
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
+    let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
+    bad["village"]["progress"]["scenario_journal"]["continued_at"] = serde_json::json!(600.75);
+    assert!(!g.restore(&bad.to_string()));
+    assert_eq!(g.snapshot(), saved);
+}

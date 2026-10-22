@@ -95,6 +95,7 @@ pub fn initialize(v: &mut Village) {
     };
     let mut state = State {
         failed_at: None,
+        continued_at: None,
         schema: 1,
         events: BTreeMap::new(),
         locked_buildings: journal.locked_buildings.iter().cloned().collect(),
@@ -554,6 +555,20 @@ pub fn valid(v: &Village) -> bool {
     let Some(state) = &v.progress.scenario_journal else {
         return false;
     };
+    if challenge::rules_locked(v)
+        && v.scenario.as_ref().is_some_and(|origin| {
+            let rules = &origin.definition.rules;
+            rules.logistics != v.sandbox_rules.logistics
+                || rules.land != v.sandbox_rules.land
+                || rules.utilities != v.sandbox_rules.utilities
+                || rules.climate != v.climate.enabled
+                || rules.maintenance != v.maintenance.enabled
+                || rules.learning != v.skills.enabled
+                || rules.market != v.market.enabled
+        })
+    {
+        return false;
+    }
     if !challenge::valid(journal, state, v.minutes) {
         return false;
     }

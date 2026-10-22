@@ -314,3 +314,5 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 .scenario-story-events{border-top:1px solid #b49a64;margin-top:20px;padding-top:16px}.scenario-story-events>article{padding:12px 0;border-top:1px solid #c9b17b}.scenario-story-events h4{font-size:14px;margin:0 0 6px}.scenario-story-events small{font-size:11px;color:#776139}.scenario-story-events p{white-space:pre-wrap;font-size:12px;line-height:1.5}
 
 #quest-dialog[data-authored-journal=true] .quest-card{min-height:0}
+
+#quest-dialog .scenario-challenge{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #c9b17b}#quest-dialog .scenario-challenge .dialog-actions{margin-top:16px;gap:12px}

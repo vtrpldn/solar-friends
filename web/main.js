@@ -204,7 +204,7 @@ let storage = modeStores.story;
 let gameActive = false, menuWasPaused = false, pendingMode = null;
 const villagePanels = new Set(["building-panel","supplies-panel","projects-panel","town-panel","power-panel"]);
 let lastVillagePanel = "building-panel";
-let journalPage = 0, scenarioGoalRegion = null;
+let journalPage = 0, scenarioGoalRegion = null, challengeFailureShown = false;
 const legacyStorage = new VillageStorage();
 let pendingImport = null;
 let pendingRemoval = null, movingBuilding = null, movingBattery = null;
@@ -959,7 +959,9 @@ function openJournal() {
 }
 function updateQuests() {
   if(state.village.scenario?.definition?.journal){
-    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,onAction:({action,credited})=>{
+    const challengeReport=JSON.parse(game.scenario_journal());
+    if(challengeReport.challenge?.status==='failed'&&!challengeFailureShown&&!document.querySelector('dialog[open]')){challengeFailureShown=true;queueMicrotask(openJournal);}
+    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,onRestart:async()=>{if(!playerSession)return;try{if(!paused)togglePause();await playerSession.restartScenario();refreshDevScene();updateQuests();}catch(error){toast(error.message);}},onContinue:async()=>{try{if(game.continue_scenario_freely()){state=JSON.parse(game.snapshot());updateQuests();await playerSession?.save();toast('Free continuation · the original challenge remains failed.');}}catch(error){toast(error.message);}},onAction:({action,credited})=>{
       if(action.kind==='goal'){const report=JSON.parse(game.scenario_journal()),index=report.chapters.findIndex(c=>c.goals.some(g=>g.id===action.goal));if(index>=0){journalPage=index;updateQuests();[...document.querySelectorAll('[data-scenario-goal]')].find(el=>el.dataset.scenarioGoal===action.goal)?.scrollIntoView({block:'nearest'});}return;}
       if(['supplies','water','power','housing'].includes(action.kind)){questAction(action.kind==='water'?{type:'supplies',page:'water'}:action.kind==='power'?{type:'power'}:action.kind==='housing'?{type:'build'}:{type:'supplies',page:'pantry'}).run();return;}
       if(action.kind==='people'){questAction({type:'people'}).run();if(Number.isInteger(action.resident)&&state.residents.some(p=>p.id===action.resident))selectPerson(action.resident);return;}
@@ -1927,6 +1929,7 @@ function installCreationSession(){
 }
 function refreshDevScene() {
   economyUI?.resetForVillage();
+  challengeFailureShown=false;
   setZoom(zoom);
   residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; movingBattery = null; pendingRemoval = null;

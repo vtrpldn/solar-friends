@@ -99,7 +99,7 @@ pub fn advance(journal: &Journal, state: &mut State, v: &mut Village) {
     }
 }
 pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
-    let expected: std::collections::BTreeSet<_> = journal
+    let mut expected: std::collections::BTreeSet<_> = journal
         .locked_buildings
         .iter()
         .filter(|kind| {
@@ -113,6 +113,7 @@ pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
         })
         .cloned()
         .collect();
+    if state.continued_at.is_some() { expected.clear(); }
     if !supplies::valid_receipts(journal, state, v) || state.locked_buildings != expected {
         return false;
     }

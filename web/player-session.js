@@ -50,6 +50,9 @@ export class PlayerSession {
   }
   async restartTest(){
     if(!this.isTest)throw Error('Only a playtest can be restarted here.');
+    return this.restartScenario();
+  }
+  async restartScenario(){
     await this.#writes.catch(()=>{});
     const result=JSON.parse(this.game.load_scenario(JSON.stringify(this.record.definition)));
     if(!result.ok)throw Error(result.issues.map(i=>i.message).join(' '));

@@ -277,6 +277,9 @@ pub fn check_token(v: &Village, data: &str, pickup: bool, token: &str) -> Result
 #[wasm_bindgen]
 impl Game {
     pub fn set_supplier_variation(&mut self, enabled: bool) {
+        if scenarios::journal::challenge::rules_locked(self.app.world().resource::<Village>()) {
+            return;
+        }
         self.app
             .world_mut()
             .resource_mut::<Village>()
