@@ -675,7 +675,7 @@ fn choose(r: &mut Resident, v: &Village) {
             "sanitation",
             "Taking a private moment at the ecological toilet.",
         )
-    } else if autonomy::company(r) && v.skills.people.len() > 1 {
+    } else if autonomy::company(v, r) {
         (
             "socialize",
             "I need some company. Taking time to catch up before more chores.",
@@ -988,8 +988,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
         // the queue with new farming/production jobs and ignores blocked sites.
         let chores_start = !r.requested
             && !autonomy::recovering(&r)
-            && !autonomy::company(&r)
-            && r.social >= 65.
+            && !autonomy::company(&v, &r)
+            && (v.skills.people.len() == 1 || r.social >= 65.)
             && (leisure::hobby(&r.task) || matches!(r.task.as_str(), "idle" | "socialize"))
             && (occupations::available(&v, r.id)
                 || (v.minutes - r.work_check_at >= 5.
@@ -1018,7 +1018,8 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             || (requests::work(&r.task) || r.task == "haul")
                 && (r.energy < 28.
                     || autonomy::food_interrupt(&v, &r)
-                    || (r.social < 35. && !(r.task == "gather" && autonomy::foraging(&v, &r)))
+                    || (autonomy::company(&v, &r)
+                        && !(r.task == "gather" && autonomy::foraging(&v, &r)))
                     || (workforce::eating(&v, r.id)
                         && autonomy::meal_due(&r, v.minutes)
                         && !autonomy::finishing(&v, &r)))
@@ -1026,7 +1027,7 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 && r.trip.is_none()
                 && autonomy::free_time(&r)
                 && ((r.task != "rest" && r.energy < 28.)
-                    || (r.task != "socialize" && r.social < 35.)
+                    || (r.task != "socialize" && autonomy::company(&v, &r))
                     || (workforce::eating(&v, r.id) && autonomy::meal_due(&r, v.minutes))))
         {
             v.workforce_peers.insert(r.id, Some(r.clone()));

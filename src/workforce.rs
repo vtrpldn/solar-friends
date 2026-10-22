@@ -749,7 +749,7 @@ fn willing(v: &Village, r: &Resident, task: &str) -> bool {
     r.trip.is_none()
         && !r.requested
         && !autonomy::recovering(r)
-        && !autonomy::company(r)
+        && !autonomy::company(v, r)
         && r.hunger <= 60.
         && !sleeping_time(v.minutes, r)
         && !occupations::available(v, r.id)

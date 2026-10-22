@@ -4,8 +4,10 @@ use crate::*;
 pub fn recovering(r: &Resident) -> bool {
     r.energy < 28. || (r.task == "rest" && r.energy < 60. && r.hunger < 75.)
 }
-pub fn company(r: &Resident) -> bool {
-    r.social < 35. || (r.task == "socialize" && r.social < 75.)
+pub fn company(v: &Village, r: &Resident) -> bool {
+    // A lone resident can be lonely, but cannot resolve that need by choosing
+    // an unavailable conversation. It must not restart useful work each tick.
+    v.skills.people.len() > 1 && (r.social < 35. || (r.task == "socialize" && r.social < 75.))
 }
 pub fn meal_due(r: &Resident, now: f32) -> bool {
     r.hunger > 60. || r.hunger >= 20. && meal_slot(now).is_some_and(|slot| slot != r.last_meal_slot)
@@ -48,7 +50,7 @@ pub fn preparation(v: &Village, r: &Resident, travel: f32, work: f32) -> Option<
 pub fn finishing(v: &Village, r: &Resident) -> bool {
     if r.energy < 28.
         || r.hunger > 60.
-        || r.social < 35.
+        || company(v, r)
         || occupations::available(v, r.id)
         || sleeping_time(v.minutes, r)
     {
@@ -724,5 +726,34 @@ mod tests {
         assert!(offer.blocker.unwrap().contains("harvest needs room"));
         let mut worker = r;
         assert!(!workforce::choose_harvest(&mut worker, &v));
+    }
+    #[test]
+    fn a_lone_low_social_resident_finishes_a_real_harvest_without_restarting() {
+        let mut g = Game::new();
+        let mut d: serde_json::Value =
+            serde_json::from_str(&g.scenario_template("sandbox")).unwrap();
+        d["rules"]["logistics"] = true.into();
+        d["start"]["minutes"] = 570.into();
+        d["start"]["residents"].as_array_mut().unwrap().truncate(1);
+        d["start"]["inventories"] = serde_json::json!([]);
+        d["start"]["resident_setup"] = serde_json::json!([{"resident":"resident-iara","needs":{"energy":90,"hunger":10,"social":0}}]);
+        d["start"]["buildings"].as_array_mut().unwrap().push(serde_json::json!({"id":"ready-food","kind":"garden","x":28,"y":25,"state":"completed","recipe":"standard","appearance":null,"crop":{"crop":"lettuce","stage":"mature","next_crop":"lettuce","replant":false,"soil_wetness":0.8}}));
+        let loaded: serde_json::Value =
+            serde_json::from_str(&g.load_scenario(&d.to_string())).unwrap();
+        assert_eq!(loaded["ok"], true, "{loaded}");
+        for _ in 0..640 {
+            g.tick(0.25);
+        }
+        let saved: Save = serde_json::from_str(&g.snapshot()).unwrap();
+        assert!(
+            saved.village.harvests > 0,
+            "Loneliness must not reset the harvest timer every tick"
+        );
+        assert_eq!(saved.residents.len(), 1);
+        assert_eq!(
+            saved.residents[0].social, 0.,
+            "Working alone does not manufacture social contact"
+        );
+        assert_ne!(saved.residents[0].task, "socialize");
     }
 }
