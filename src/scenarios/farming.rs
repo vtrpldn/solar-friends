@@ -43,12 +43,32 @@ pub fn check(d: &Definition, r: &mut Report) {
             || !ecology::crop_kind(&c.next_crop)
             || !c.soil_wetness.is_finite()
             || !(0.0..=1.).contains(&c.soil_wetness)
-            || c.stage == Stage::Empty && c.soil_wetness != 0.
         {
-            r.push(&format!("start.buildings.{i}.crop"),"invalid_starting_crop","Starting crops need a completed garden or greenhouse, supported crop varieties and root-zone wetness from 0–100%. Empty beds must have zero root-zone wetness. Clear the crop setup to use a construction project.");
+            r.push(&format!("start.buildings.{i}.crop"),"invalid_starting_crop","Starting crops need a completed garden or greenhouse, supported crop varieties and root-zone wetness from 0–100%. Clear the crop setup to use a construction project.");
             let issue = r.issues.last_mut().unwrap();
             issue.entity = Some(b.id.clone());
             issue.at = Some([b.x, b.y]);
+        }
+    }
+}
+pub fn initialize_ground(v: &mut Village) {
+    let Some(origin) = v.scenario.clone() else {
+        return;
+    };
+    // Planted beds seed their root water through the native crop summary.
+    // Empty beds keep a zero crop summary, but may still contain wet soil.
+    for b in &origin.definition.start.buildings {
+        if let Some(c) = &b.crop
+            && c.stage == Stage::Empty
+            && c.soil_wetness > 0.
+        {
+            land::water_plot(
+                v,
+                interactions::footprint_size(&b.kind),
+                b.x,
+                b.y,
+                c.soil_wetness,
+            );
         }
     }
 }
@@ -121,12 +141,40 @@ mod tests {
         }
     }
     #[test]
+    fn empty_beds_can_start_with_real_wet_ground_without_claiming_planted_crops() {
+        let mut d = definition(Stage::Empty, "garden");
+        d.start
+            .buildings
+            .last_mut()
+            .unwrap()
+            .crop
+            .as_mut()
+            .unwrap()
+            .soil_wetness = 0.75;
+        let (mut g, _) =
+            compile(d).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
+        let v = g.app.world().resource::<Village>();
+        let id = v.scenario.as_ref().unwrap().buildings["our-crops"];
+        let b = v.buildings.iter().find(|b| b.id == id).unwrap();
+        assert!(!b.crop.planted);
+        assert_eq!(b.crop.moisture, 0.);
+        assert_eq!(v.land.water[(25 * MAP_SIZE + 25) as usize], 0.75);
+        assert_eq!(v.harvests, 0);
+        let saved = g.snapshot();
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+        g.tick(0.25);
+        let after = g.snapshot();
+        assert!(g.restore(&after));
+        assert_eq!(g.snapshot(), after);
+    }
+    #[test]
     fn impossible_starting_plants_reject_without_changing_the_village() {
         let d = definition(Stage::Mature, "garden");
         let (mut g, _) =
             compile(d.clone()).unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()));
         let before = g.snapshot();
-        for case in ["project", "building", "crop", "next", "wetness", "empty"] {
+        for case in ["project", "building", "crop", "next", "wetness", "negative"] {
             let mut bad = d.clone();
             let b = bad.start.buildings.last_mut().unwrap();
             match case {
@@ -135,7 +183,7 @@ mod tests {
                 "crop" => b.crop.as_mut().unwrap().crop = "unknown".into(),
                 "next" => b.crop.as_mut().unwrap().next_crop = "unknown".into(),
                 "wetness" => b.crop.as_mut().unwrap().soil_wetness = 1.01,
-                _ => b.crop.as_mut().unwrap().stage = Stage::Empty,
+                _ => b.crop.as_mut().unwrap().soil_wetness = -0.1,
             };
             let report: serde_json::Value =
                 serde_json::from_str(&g.load_scenario(&serde_json::to_string(&bad).unwrap()))

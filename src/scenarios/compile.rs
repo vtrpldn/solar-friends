@@ -499,6 +499,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         }
     }
     let mut game = initialization::create_authored(v, residents, &opening)?;
+    super::farming::initialize_ground(&mut game.app.world_mut().resource_mut::<Village>());
     journal::initialize(&mut game.app.world_mut().resource_mut::<Village>());
     {
         let v = game.app.world().resource::<Village>();
