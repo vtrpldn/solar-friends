@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "title": "An inherited village",
+  "status": "player-authored; native service completion and three later days passed; public picker/playtest entry reviewed; broader release gates open",
+  "file": "an-inherited-village.solar-scenario",
+  "sha256": "cbd0fdd9381fc893c564da261048cfca78df6b0f15dc169591d179d802ca7309",
+  "biome": "caatinga",
+  "authoredThrough": "scripts/author-inherited-village.mjs with shared normal player-control driver",
+  "setup": "Three original friends plus two new authored residents; twelve completed structures including the founding camp, six installed utility routes, 100 deliberately located fresh-water units and three failed equipment units. Inherited structures grant no service work or repair credit.",
+  "playthrough": "assets/scenario-reviews/inherited-village-playthrough.json",
+  "finishedAt": 1234.20458984375,
+  "observedThrough": 5760.57275390625,
+  "completedWorkedServiceJobs": 3,
+  "remaining": [
+    "Public-input completion and unfamiliar-player usability review",
+    "Full modular resident artwork",
+    "Complete biome art/balance/performance/save-integrity release gates"
+  ]
+}

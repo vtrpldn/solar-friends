@@ -1,6 +1,7 @@
 export const exampleScenarios=Object.freeze([
  Object.freeze({id:'first-clearing',title:'First clearing',biome:'Mata Atlântica',summary:'A gentle arrival: plan homes, buy missing parts, share a kitchen and grow a healthy pantry.',file:'first-clearing.solar-scenario'}),
  Object.freeze({id:'before-the-dry-season',title:'Before the dry season',biome:'Cerrado',summary:'A custom cast prepares reachable water reserves and a small garden before the wet season ends.',file:'before-the-dry-season.solar-scenario'}),
+ Object.freeze({id:'an-inherited-village',title:'An inherited village',biome:'Caatinga',summary:'Repair failed equipment and restore water, sanitation and evening light with a mixed community.',file:'an-inherited-village.solar-scenario'}),
 ]);
 export async function loadExampleScenario(id,validate){
  const example=exampleScenarios.find(e=>e.id===id);if(!example)throw Error('Choose an available example scenario.');

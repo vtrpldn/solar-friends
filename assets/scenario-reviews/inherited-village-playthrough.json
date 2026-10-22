@@ -1,0 +1,5669 @@
+{
+  "schema": 1,
+  "sourceSha256": "cbd0fdd9381fc893c564da261048cfca78df6b0f15dc169591d179d802ca7309",
+  "speed": 16,
+  "orders": {
+    "tools": 3
+  },
+  "finishedAt": 1234.20458984375,
+  "observedThrough": 5760.57275390625,
+  "completedServiceJobs": 3,
+  "remainingFunds": 291354,
+  "observations": [
+    {
+      "frame": 0,
+      "minute": 480.79998779296875,
+      "finished": null,
+      "services": [
+        {
+          "id": 63,
+          "finished": null,
+          "cancelled": false,
+          "work": 0,
+          "spent": null
+        },
+        {
+          "id": 65,
+          "finished": null,
+          "cancelled": false,
+          "work": 0,
+          "spent": null
+        },
+        {
+          "id": 67,
+          "finished": null,
+          "cancelled": false,
+          "work": 0,
+          "spent": null
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "active",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": false,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": false,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 480,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 100
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "locked",
+            "condition": null
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Food people can reach",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 600,
+      "minute": 960.7926635742188,
+      "finished": null,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "active",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": false,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": false,
+                "frozen": false,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 960.7926635742188,
+                "qualifies": false,
+                "unit": "count",
+                "value": 0
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 0
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "locked",
+            "condition": null
+          },
+          {
+            "title": "Food people can reach",
+            "status": "locked",
+            "condition": null
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 1200,
+      "minute": 1440.817138671875,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 1800,
+      "minute": 1920.846435546875,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 2400,
+      "minute": 2400.875732421875,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 3000,
+      "minute": 2880.905029296875,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 3600,
+      "minute": 3360.934326171875,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 4200,
+      "minute": 3840.963623046875,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 4800,
+      "minute": 4320.92431640625,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 5400,
+      "minute": 4800.80712890625,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 6000,
+      "minute": 5280.68994140625,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "frame": 6600,
+      "minute": 5760.57275390625,
+      "finished": 1234.20458984375,
+      "services": [
+        {
+          "id": 63,
+          "finished": 867.194091796875,
+          "cancelled": false,
+          "work": 36,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 65,
+          "finished": 903.1935424804688,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "id": 67,
+          "finished": 924.293212890625,
+          "cancelled": false,
+          "work": 32,
+          "spent": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "goals": [
+        [
+          {
+            "title": "Reachable fresh water",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 30 or more accessible fresh-water units for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unreserved fresh water in open owned containers reachable by friends on the property, with access for everyone present. When all are away, access is checked from the arrival clearing. Irrigation, sealed processing contents, carried water, incoming loads and the neighbour's service are excluded.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "fresh_water",
+                "minimum": 30,
+                "name": "Accessible fresh-water units",
+                "observation_minutes": 15,
+                "observed_at": 540.799072265625,
+                "qualifies": true,
+                "unit": "water_units",
+                "value": 99.08800000092015
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A dependable night light",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "power"
+              },
+              "complete": true,
+              "description": "Keep 1 or more fully illuminated streetlights after dark for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts enabled, connected streetlights at full native illumination while darkness exceeds 0.5. A lapse, disabled light, drained circuit or daylight breaks the period. Merely owning solar panels, batteries or disconnected lamps does not count.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "night_lights",
+                "minimum": 1,
+                "name": "Fully illuminated streetlights after dark",
+                "observation_minutes": 0,
+                "observed_at": 1173.40087890625,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ],
+        [
+          {
+            "title": "A usable ecological toilet",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "water"
+              },
+              "complete": true,
+              "description": "Keep 1 or more usable reachable ecological toilets for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts completed open ecological toilets with local fresh handwashing water, greywater space, sewage room and a reachable approach. Every friend on the property must reach at least one usable toilet; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "toilets",
+                "minimum": 1,
+                "name": "Usable reachable ecological toilets",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "count",
+                "value": 1
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          },
+          {
+            "title": "Food people can reach",
+            "status": "complete",
+            "condition": {
+              "action": {
+                "kind": "supplies"
+              },
+              "complete": true,
+              "description": "Keep 12 or more accessible edible portions for 60 consecutive observed minutes after activation",
+              "kind": "service",
+              "note": "Counts unclaimed edible portions in open stores that remain fresh until an actual meal approach. Carried cargo, incoming orders, cooking inputs and eggs requiring cooking do not count. Every friend currently on the property must have a meal route; when all are away, access is checked from the arrival clearing.",
+              "service": {
+                "accessible": true,
+                "frozen": true,
+                "id": "food",
+                "minimum": 12,
+                "name": "Accessible edible portions",
+                "observation_minutes": 15,
+                "observed_at": 1234.20458984375,
+                "qualifies": true,
+                "unit": "portions",
+                "value": 34
+              },
+              "target": 60,
+              "unit": "duration_minutes",
+              "value": 60
+            }
+          }
+        ]
+      ]
+    }
+  ],
+  "scope": "Normal paid purchase and autonomous resident servicing; inherited structures/routes are authored definitions, not runtime snapshot patches."
+}

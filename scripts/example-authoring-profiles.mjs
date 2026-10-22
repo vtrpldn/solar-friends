@@ -32,4 +32,30 @@ export const exampleAuthoringProfiles={
    ]},
   ],
  },
+ 'an-inherited-village':{
+  id:'an-inherited-village',title:'An inherited village',biome:'caatinga',
+  description:'An established Caatinga property has homes, food plots and useful equipment, but its pump and shared battery have failed. Iara, Bento and Nina welcome Sueli and Otávio. Inspect what is already here, service it with real parts and make everyday water, sanitation and lighting dependable.',
+  introduction:'We inherited buildings, not a working system. The cistern holds water but its pump needs service; the solar battery is also failed. Open Buildings to inspect equipment jobs, and Supplies to obtain tools and missing service parts. Keep the paths and utility lines clear before expanding.',
+  completion:'The inherited village works again: reachable water, usable sanitation, food and a lit path. Keep watching equipment condition and the water reserve as dry weather continues. Repair and care remain part of daily life.',
+  freshWater:100,removeFounders:['resident-luz','resident-caua'],
+  cast:[
+   {name:'Sueli',look:'luz',background:'grower',biography:'A grower joining Iara, Bento and Nina to understand the property’s soil and maintain a modest food plot.'},
+   {name:'Otávio',look:'caua',background:'maker',biography:'A repair-minded new neighbour who wants the shared equipment working before the village expands.'},
+  ],
+  inheritedBuildings:[['home',27,32],['home',28,36],['well',35,33],['kitchen',32,36],['garden',35,36],['solar_farm',25,29],['streetlight',31,34],['workshop',25,36],['eco_toilet',39,34],['banana_treatment',39,37]],
+  routes:[{kind:'fresh',from:'35, 33',to:'32, 36'},{kind:'fresh',from:'35, 33',to:'39, 34'},{kind:'sewage',from:'39, 34',to:'39, 37'},{kind:'electricity',from:'25, 29',to:'31, 34'},{kind:'electricity',from:'25, 29',to:'Fresh water pump',toOccurrence:0},{kind:'electricity',from:'25, 29',to:'Fresh water pump',toOccurrence:1}],
+  equipment:[{label:'Water pump',condition:0,occurrence:0},{label:'Water pump',condition:0,occurrence:1},{label:'Battery system · 25, 29',condition:0}],
+  chapters:[
+   {title:'Inspect before expanding',description:'The buildings already exist. Find the failed pump and shared battery, obtain their service kits and allow residents to do the work.',goals:[
+    {title:'Reachable fresh water',description:'Maintain 30 reachable fresh-water units for one observed hour. An inaccessible or empty tank does not help. Service the failed water pump; its kit uses fittings, plumbing and a tool.',kind:'service',service:'fresh_water',minimum:30,minutes:60},
+   ]},
+   {title:'Restore the evening path',description:'The inherited cable connects the solar farm and streetlight. Daytime generation alone cannot keep the path lit at night.',goals:[
+    {title:'A dependable night light',description:'Keep one connected streetlight fully lit for one observed hour after dark. The shared battery needs resident service, electrical parts and a tool. Order tools through Supplies if local preparation cannot provide them yet.',kind:'service',service:'night_lights',minimum:1,minutes:60},
+   ]},
+   {title:'Keep daily routines working',description:'Food and sanitation need physical supplies, local access and capacity. Starting structures do not grant service history.',goals:[
+    {title:'A usable ecological toilet',description:'Maintain a reachable ecological toilet for one observed hour, with fresh handwashing water and room for greywater and sewage. The inherited sewage route leads to a banana treatment bed; it produces no edible bananas.',kind:'service',service:'toilets',minimum:1,minutes:60},
+    {title:'Food people can reach',description:'Maintain at least 12 accessible edible portions for one observed hour. Incoming orders, carried cargo and eggs needing cooking do not count.',kind:'service',service:'food',minimum:12,minutes:60},
+   ]},
+  ],
+ },
 };
