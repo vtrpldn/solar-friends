@@ -107,7 +107,10 @@ fn services(v: &Village) -> bool {
         .filter(|b| {
             b.kind == "home"
                 && b.progress >= 100.
-                && (0..5).any(|id| shelter(v, id).is_some_and(|h| h.id == b.id))
+                && v.skills
+                    .people
+                    .keys()
+                    .any(|&id| shelter(v, id).is_some_and(|h| h.id == b.id))
         })
         .collect();
     let kitchens: Vec<_> = v
@@ -175,12 +178,19 @@ pub fn observe(v: &mut Village, people: &[Resident]) {
             .iter()
             .any(|day| complete_leisure_day(day, people));
     }
-    let healthy =
-        v.arrived && people.len() == 5 && people.iter().all(|r| r.hunger <= 65. && r.energy >= 25.);
+    let healthy = v.arrived
+        && !people.is_empty()
+        && skills::matches_residents(v, people)
+        && people.iter().all(|r| r.hunger <= 65. && r.energy >= 25.);
+    let minimums = food_minimums(v);
     // Urgent needs or an empty owned pantry invalidate a period immediately,
     // even between the more expensive route/access observations.
     let owned = food::owned_portions(v);
-    for (index, minimum) in [(PANTRY, 12), (DIET, 8), (DRY, 6)] {
+    for (index, minimum) in [
+        (PANTRY, minimums[0]),
+        (DIET, minimums[1]),
+        (DRY, minimums[2]),
+    ] {
         if !healthy || owned < minimum {
             v.progress.outcomes.current[index] = 0.;
             v.progress.outcomes.qualifies[index] = false;
@@ -204,20 +214,15 @@ pub fn observe(v: &mut Village, people: &[Resident]) {
                     .any(|c| c.id == b.id && c.enabled && c.connected && c.light_level >= 0.99)
         });
     let services_ready = services(v);
-    let housed = v
-        .buildings
-        .iter()
-        .filter(|b| b.kind == "home" && b.progress >= 100.)
-        .count()
-        >= 2;
+    let housed = !people.is_empty() && people.iter().all(|p| shelter(v, p.id).is_some());
     let qualifies = [
-        healthy && access && pantry >= 12,
-        healthy && access && pantry >= 8,
+        healthy && access && pantry >= minimums[0],
+        healthy && access && pantry >= minimums[1],
         healthy && services_ready,
         night,
         healthy
             && access
-            && pantry >= 6
+            && pantry >= minimums[2]
             && services_ready
             && housed
             && people.iter().all(|r| r.social >= 25.)
@@ -271,8 +276,13 @@ pub fn valid(v: &Village) -> bool {
         })
 }
 
+pub fn food_minimums(v: &Village) -> [u32; 3] {
+    [12u64, 8, 6].map(|base| {
+        u32::try_from((base * v.skills.people.len() as u64).div_ceil(5)).unwrap_or(u32::MAX)
+    })
+}
 pub fn report(v: &Village) -> serde_json::Value {
-    serde_json::json!({"building_paths":progression::BUILDINGS,"state":v.progress.outcomes,"observation_minutes":15,"target_minutes":TARGETS,"housing_budget":HOUSING_BUDGET,"note":"Consecutive quarter-hour observations credit the best earned period. Current periods restart after a lapse; earlier earned periods remain. Net housing spending excludes salaries and sales, includes refunds and retains existing starting materials."})
+    serde_json::json!({"food_minimums":food_minimums(v),"population":v.skills.people.len(),"building_paths":progression::BUILDINGS,"state":v.progress.outcomes,"observation_minutes":15,"target_minutes":TARGETS,"housing_budget":HOUSING_BUDGET,"note":"Consecutive quarter-hour observations credit the best earned period. Current periods restart after a lapse; earlier earned periods remain. Net housing spending excludes salaries and sales, includes refunds and retains existing starting materials."})
 }
 #[wasm_bindgen]
 impl Game {
@@ -329,6 +339,46 @@ mod tests {
             *r = people[r.id].clone();
         }
     }
+    #[test]
+    fn population_observations_use_complete_rosters_and_scaled_food_targets() {
+        for (count, expected) in [
+            (1, [3, 2, 2]),
+            (2, [5, 4, 3]),
+            (5, [12, 8, 6]),
+            (12, [29, 20, 15]),
+        ] {
+            let (_, mut v, templates) = scene();
+            let people: Vec<_> = (0..count)
+                .map(|i| {
+                    let mut p = templates[0].clone();
+                    p.id = 900 + i * 101;
+                    p
+                })
+                .collect();
+            v.skills.people = people
+                .iter()
+                .map(|p| (p.id, skills::Person::default()))
+                .collect();
+            assert_eq!(food_minimums(&v), expected);
+            observe(&mut v, &people);
+            assert!(
+                v.progress.outcomes.qualifies[PANTRY],
+                "population {count}: {}",
+                report(&v)
+            );
+            let mut missing = people.clone();
+            missing.pop();
+            observe(&mut v, &missing);
+            assert!(!v.progress.outcomes.qualifies[PANTRY]);
+            if count > 1 {
+                let mut duplicates = people.clone();
+                duplicates[count - 1] = duplicates[0].clone();
+                observe(&mut v, &duplicates);
+                assert!(!v.progress.outcomes.qualifies[PANTRY]);
+            }
+        }
+    }
+
     #[test]
     fn observations_need_consecutive_real_periods_and_retain_earlier_success() {
         let (_, mut v, people) = scene();

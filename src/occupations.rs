@@ -101,8 +101,14 @@ pub fn resident_name(v: &Village, id: usize) -> String {
         .or_else(|| {
             v.scenario
                 .as_ref()
-                .and_then(|o| o.definition.start.residents.as_ref())
-                .and_then(|people| people.iter().find(|p| p.slot() == Some(id)))
+                .and_then(|o| {
+                    o.definition
+                        .start
+                        .residents
+                        .as_ref()?
+                        .iter()
+                        .find(|p| o.residents.get(&p.id) == Some(&id))
+                })
                 .map(|p| p.name.clone())
         })
         .unwrap_or_else(|| NAMES.get(id).unwrap_or(&"Resident").to_string())

@@ -7,14 +7,14 @@ pub struct Bond {
     pub memories: u32,
 }
 fn identities(d: &Definition) -> BTreeMap<String, usize> {
-    d.start
-        .residents
-        .as_ref()
-        .cloned()
-        .unwrap_or_else(residents::founders)
-        .iter()
-        .filter_map(|p| p.slot().map(|id| (p.id.clone(), id)))
-        .collect()
+    if d.start.residents.is_some() {
+        residents::bindings(d)
+    } else {
+        residents::founders()
+            .iter()
+            .map(|p| (p.id.clone(), p.slot().unwrap()))
+            .collect()
+    }
 }
 pub fn check(d: &Definition, r: &mut Report) {
     let people = identities(d);

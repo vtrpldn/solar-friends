@@ -697,6 +697,7 @@ pub fn site_tools(v: &Village, id: usize) -> u32 {
         })
 }
 pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> {
+    let slot = roster::slot(v, id)?;
     // A put-down load can lie in a narrow walkable corridor. Pick it up where
     // it actually rests rather than requiring a ring of space around it.
     if matches!(
@@ -752,8 +753,8 @@ pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> 
                     {
                         spots.push(q);
                     }
-                    if spots.len() > id {
-                        let q = [spots[id].0, spots[id].1];
+                    if spots.len() > slot {
+                        let q = [spots[slot].0, spots[slot].1];
                         return doorway(v, p, q).then_some(q);
                     }
                 }

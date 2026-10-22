@@ -19,7 +19,7 @@ pub fn choose(r: &Resident, v: &Village) -> (&'static str, &'static str) {
             },
         );
     }
-    if r.social < 65. {
+    if r.social < 65. && v.skills.people.len() > 1 {
         return ("socialize", "There is time to catch up with my neighbours.");
     }
     if v.minutes.rem_euclid(1440.) >= 1200. {

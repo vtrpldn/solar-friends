@@ -333,7 +333,8 @@ fn available(v: &Village, task: &str) -> bool {
             .any(|&id| !utilities::crew_jobs(v, id).is_empty()),
         "craft" => production::can_order_tools(v),
         "eat" => food::owned_portions(v) > 0,
-        "gather" | "rest" | "socialize" | "idle" | "sleep" => true,
+        "socialize" => v.skills.people.len() > 1,
+        "gather" | "rest" | "idle" | "sleep" => true,
         _ => false,
     }
 }
@@ -667,14 +668,14 @@ fn choose(r: &mut Resident, v: &Village) {
             "sanitation",
             "Taking a private moment at the ecological toilet.",
         )
-    } else if autonomy::company(r) {
+    } else if autonomy::company(r) && v.skills.people.len() > 1 {
         (
             "socialize",
             "I need some company. Taking time to catch up before more chores.",
         )
     } else if requests::resume(r, v) || workforce::choose_work(r, v) {
         return;
-    } else if r.social < 55. {
+    } else if r.social < 55. && v.skills.people.len() > 1 {
         ("socialize", "A little company would be good.")
     } else {
         leisure::choose(r, v)
@@ -1099,7 +1100,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
             }
             "rest" => r.energy = (r.energy + dt * 0.65).min(100.),
             "socialize" | "gathering" => {
-                personality::company(&mut r, dt * 1.3);
+                if v.skills.people.len() > 1 {
+                    personality::company(&mut r, dt * 1.3);
+                }
                 r.energy = (r.energy + dt * 0.12).min(100.);
             }
             task if leisure::hobby(task) => {
@@ -1254,7 +1257,9 @@ fn simulate(step: Res<Step>, mut v: ResMut<Village>, mut people: Query<&mut Resi
                 }
                 "socialize" => {
                     completed_batch = true;
-                    v.progress.social_people.insert(r.id);
+                    if v.skills.people.len() > 1 {
+                        v.progress.social_people.insert(r.id);
+                    }
                 }
                 "eat" => {
                     let fed = food::eat(&mut v, &mut r);

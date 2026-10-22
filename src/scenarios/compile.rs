@@ -450,7 +450,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
         buildings,
         residents: residents::bindings(&d),
     }));
-    let mut residents = initialization::founding_residents(v.camp);
+    let mut residents = residents::create(&d, &mut v);
     residents::apply(&d, &mut residents, &mut v);
     relationships::apply(&d, &mut v);
     navigation::refresh(&mut v);

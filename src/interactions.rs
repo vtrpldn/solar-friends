@@ -101,9 +101,11 @@ pub fn finish(v: &mut Village, r: &mut Resident) {
     match kind.as_str() {
         "home" | "shed" => r.energy = (r.energy + 18.).min(100.),
         "square" => {
-            personality::company(r, 25.);
+            if v.skills.people.len() > 1 {
+                personality::company(r, 25.);
+                v.progress.social_people.insert(r.id);
+            }
             r.energy = (r.energy + 8.).min(100.);
-            v.progress.social_people.insert(r.id);
         }
         "garden" | "greenhouse" | "orchard" | "goat_pasture" | "apiary" => ecology::tend(v, r),
         "kitchen" if !situations::protected(v, r.id, "cook") => {

@@ -98,24 +98,89 @@ pub fn check(d: &Definition, r: &mut Report) {
         r.push("start.residents","unsupported_cast","The current playable cast requires one of each founding preset. Other cast sizes can remain drafts while roster support is completed.");
     }
 }
+fn original_cast(people: &[Person]) -> bool {
+    people.len() == 5
+        && people
+            .iter()
+            .filter_map(Person::slot)
+            .collect::<HashSet<_>>()
+            .len()
+            == 5
+}
 pub fn bindings(d: &Definition) -> BTreeMap<String, usize> {
-    d.start
-        .residents
-        .as_ref()
-        .map(|people| {
-            people
-                .iter()
-                .filter_map(|p| p.slot().map(|id| (p.id.clone(), id)))
-                .collect()
+    let Some(people) = &d.start.residents else {
+        return BTreeMap::new();
+    };
+    if original_cast(people) {
+        return people
+            .iter()
+            .map(|p| (p.id.clone(), p.slot().unwrap()))
+            .collect();
+    }
+    let mut people: Vec<_> = people.iter().collect();
+    people.sort_by(|a, b| a.id.cmp(&b.id));
+    people
+        .into_iter()
+        .enumerate()
+        .map(|(id, p)| (p.id.clone(), id))
+        .collect()
+}
+/// Fresh compilation only: templates supply defaults, authored identities own records.
+pub fn create(d: &Definition, v: &mut Village) -> Vec<Resident> {
+    let Some(definitions) = &d.start.residents else {
+        return initialization::founding_residents(v.camp);
+    };
+    let templates = initialization::founding_residents(v.camp);
+    let bindings = bindings(d);
+    let mut people: Vec<_> = definitions
+        .iter()
+        .map(|p| {
+            let mut person = templates[p.slot().expect("validated resident template")].clone();
+            person.id = bindings[&p.id];
+            person
         })
-        .unwrap_or_default()
+        .collect();
+    people.sort_by_key(|p| p.id);
+    v.skills.people = people
+        .iter()
+        .map(|p| (p.id, skills::Person::default()))
+        .collect();
+    v.workforce.preferences = people.iter().map(|p| (p.id, [1; 5])).collect();
+    v.workforce.days.clear();
+    v.simulation.days.clear();
+    v.activity_claims.clear();
+    v.workforce_peers.clear();
+    v.economy.outside_jobs = people.iter().map(|p| (p.id, false)).collect();
+    v.economy.outside_professions = people
+        .iter()
+        .map(|p| (p.id, occupations::Profession::None))
+        .collect();
+    v.economy.outside_committed_days = people.iter().map(|p| (p.id, -1)).collect();
+    v.economy.work_day = people.iter().map(|p| (p.id, -1)).collect();
+    if !original_cast(definitions) {
+        for person in &mut people {
+            let target = roster::camp_spot(v, person.id);
+            person.target_x = target.0;
+            person.target_y = target.1;
+            person.x = target.0;
+            person.y = target.1 + 5.5 + (person.id % 5) as f32 * 0.15;
+            person.reason = if definitions.len() == 1 {
+                "Walking into my new clearing."
+            } else {
+                "Walking into the clearing with our founding group."
+            }
+            .into();
+        }
+    }
+    people
 }
 pub fn apply(d: &Definition, people: &mut [Resident], v: &mut Village) {
     if let Some(definitions) = &d.start.residents {
+        let bindings = bindings(d);
         for definition in definitions {
-            if let Some(person) = definition
-                .slot()
-                .and_then(|slot| people.iter_mut().find(|r| r.id == slot))
+            if let Some(person) = bindings
+                .get(&definition.id)
+                .and_then(|id| people.iter_mut().find(|r| r.id == *id))
             {
                 v.economy
                     .outside_professions
@@ -134,6 +199,167 @@ pub fn apply(d: &Definition, people: &mut [Resident], v: &mut Village) {
                 if let Some(profile) = definition.personality {
                     profile.apply(person);
                 }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn cast(count: usize) -> Definition {
+        let mut d = Definition::builtin(modes::Mode::Sandbox);
+        let templates = founders();
+        d.start.residents = Some(
+            (0..count)
+                .map(|i| {
+                    let mut p = templates[i % templates.len()].clone();
+                    p.id = format!("friend-{i:02}");
+                    p.name = format!("Friend {i}");
+                    p.occupation = Some(occupations::Profession::None);
+                    p
+                })
+                .collect(),
+        );
+        d
+    }
+    #[test]
+    fn repeated_templates_keep_separate_experience_jobs_relationships_and_names() {
+        let mut d = cast(12);
+        let definitions = d.start.residents.as_mut().unwrap();
+        definitions[0].experience = Some(experience::Experience {
+            levels: [(experience::Domain::Growing, 1)].into_iter().collect(),
+            ..Default::default()
+        });
+        definitions[5].experience = Some(experience::Experience {
+            levels: [(experience::Domain::Growing, 3)].into_iter().collect(),
+            ..Default::default()
+        });
+        definitions[5].occupation = Some(occupations::Profession::WaterTechnician);
+        definitions[5].outside_shifts = true;
+        d.start
+            .relationships
+            .push(super::super::relationships::Bond {
+                from: "friend-00".into(),
+                to: "friend-05".into(),
+                memories: 7,
+            });
+        let mut v = Village::default();
+        let mut people = create(&d, &mut v);
+        apply(&d, &mut people, &mut v);
+        super::super::relationships::apply(&d, &mut v);
+        assert_eq!(people[0].appearance, people[5].appearance);
+        assert_eq!(v.skills.people[&0].experience[2], 12);
+        assert_eq!(v.skills.people[&5].experience[2], 60);
+        assert!(!v.economy.outside_jobs[&0]);
+        assert!(v.economy.outside_jobs[&5]);
+        assert_eq!(crate::relationships::strength(&v.progress, 0, 5), 7);
+        assert_eq!(crate::relationships::strength(&v.progress, 5, 0), 7);
+        v.scenario = Some(std::sync::Arc::new(Origin {
+            schema: SCHEMA,
+            definition: d.clone(),
+            buildings: BTreeMap::new(),
+            residents: bindings(&d),
+        }));
+        assert_eq!(occupations::resident_name(&v, 5), "Friend 5");
+    }
+
+    #[test]
+    fn fresh_rosters_seed_independent_records_and_do_not_bind_identity_to_template() {
+        for count in [1, 2, 5, 12] {
+            let d = cast(count);
+            let mut v = Village::default();
+            let mut people = create(&d, &mut v);
+            apply(&d, &mut people, &mut v);
+            assert_eq!(people.len(), count);
+            assert!(skills::matches_residents(&v, &people));
+            assert!(workforce::matches_residents(&v, &people));
+            assert!(occupations::matches_residents(&v.economy, &people));
+            let bindings = bindings(&d);
+            for p in d.start.residents.as_ref().unwrap() {
+                let id = bindings[&p.id];
+                let person = people.iter().find(|r| r.id == id).unwrap();
+                assert_eq!(person.name, p.name);
+                assert_eq!(
+                    person.appearance.preset,
+                    resident_appearance::FOUNDERS[p.slot().unwrap()]
+                );
+                assert_eq!(
+                    v.economy.outside_professions[&id],
+                    occupations::Profession::None
+                );
+            }
+            let mut reversed = d.clone();
+            reversed.start.residents.as_mut().unwrap().reverse();
+            let mut other = Village::default();
+            let mut reordered = create(&reversed, &mut other);
+            apply(&reversed, &mut reordered, &mut other);
+            assert_eq!(bindings, super::bindings(&reversed));
+            assert_eq!(
+                serde_json::to_value(&people).unwrap(),
+                serde_json::to_value(reordered).unwrap()
+            );
+        }
+    }
+    #[test]
+    fn fresh_one_two_and_twelve_person_ecs_worlds_advance_with_complete_owned_records() {
+        for count in [1, 2, 12] {
+            let d = cast(count);
+            let mut v = Village {
+                mode: modes::Mode::Sandbox,
+                sandbox_rules: sandbox::Rules {
+                    logistics: true,
+                    land: true,
+                    utilities: true,
+                    supplied_energy: 0.,
+                },
+                ..Default::default()
+            };
+            let mut people = create(&d, &mut v);
+            apply(&d, &mut people, &mut v);
+            let mut g = initialization::create(v, people).unwrap();
+            for _ in 0..1200 {
+                g.tick(0.25);
+            }
+            let saved: Save = serde_json::from_str(&g.snapshot()).unwrap();
+            assert_eq!(saved.residents.len(), count);
+            assert!(
+                saved.village.arrived,
+                "The complete {count}-person group must actually reach camp"
+            );
+            assert!(
+                simulation::view(&saved.village)["materials"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .all(|m| m["difference"] == 0.)
+            );
+            assert!(skills::matches_residents(&saved.village, &saved.residents));
+            assert!(workforce::matches_residents(
+                &saved.village,
+                &saved.residents
+            ));
+            assert!(occupations::matches_residents(
+                &saved.village.economy,
+                &saved.residents
+            ));
+            assert!(
+                saved
+                    .village
+                    .simulation
+                    .days
+                    .iter()
+                    .all(|day| day.residents.len() == count)
+            );
+            assert!(saved.residents.iter().all(|r| {
+                [r.x, r.y, r.target_x, r.target_y]
+                    .iter()
+                    .all(|p| p.is_finite() && (0.0..=MAP_SIZE as f32).contains(p))
+            }));
+            if count == 1 {
+                // Comfort food can affect connection; solo actors cannot invent social tasks or milestones.
+                assert!(saved.village.progress.social_people.is_empty());
+                assert_ne!(saved.residents[0].task, "socialize");
             }
         }
     }

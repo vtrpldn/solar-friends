@@ -104,8 +104,7 @@ pub fn observed_access(v: &Village, people: &[Resident]) -> (u32, bool) {
         let Some(mut visitor) = people.first().cloned() else {
             return (0, false);
         };
-        visitor.x = CAMP.0;
-        visitor.y = CAMP.1;
+        (visitor.x, visitor.y) = crate::camp(v);
         visitor.trip = None;
         participants.push(visitor);
     }
