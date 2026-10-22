@@ -138,6 +138,10 @@ Authors place geological patches and choose finite starting quantities within su
 
 At least three biomes are a release requirement for both map generation and scenario authoring. Give each a selection card with a landscape preview, supported local habitats, water/climate summary, and suggested planning challenges. Biomes are regional settings; a meadow, riverbank, or rocky patch is a local habitat inside that setting. Painting a habitat must not change the entire property's climate.
 
+**Minimum supported scope:** players must be able to create, edit, save, share, and play maps and scenarios in all three launch biomes: Mata Atlântica, Cerrado, and Caatinga. Three is a minimum, not a fixed engine limit; adding another biome should extend the versioned content catalogs rather than require a separate editor or scenario format.
+
+**Why:** choosing a region should change the land the friends settle and the planning tradeoffs they face, while keeping the same approachable player creation tools.
+
 The launch choices are distinct Brazilian biomes in the [IBGE classification](https://www.ibge.gov.br/geociencias/informacoes-ambientais/vegetacao/15842-biomas.html). The following are proposed game profiles, with parameters to be researched and balanced for a representative locality rather than presented as universal properties of an entire biome.
 
 | Biome | Landscape and art direction | Proposed planning emphasis |
