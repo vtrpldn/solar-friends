@@ -1,3 +1,4 @@
+import {SuppliesEditor} from './supplies.js';
 import {RegionsEditor} from './regions.js';
 import {JournalEditor} from './scenario-journal.js';
 import {ResidentPresetLibrary} from './resident-presets.js';
@@ -27,7 +28,7 @@ const ruleNames={logistics:'Materials, hauling and resident work',land:'Living s
 let newBiome="mata-atlantica";
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let minimap,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let landReport=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -123,13 +124,7 @@ function renderSelection(){
   const entry=catalog.buildings.find(e=>e.id===b.kind),appearances=(entry?.appearances||[]).filter(key=>key.startsWith('adobe-')===(b.recipe==='adobe'));
   panel.innerHTML=`<h2>${escape(title(b.kind))}</h2><div class="creator-coordinates"><div class="creator-field"><label for="creator-object-x">Column</label><input id="creator-object-x" type="number" min="1" max="62" step="1" value="${b.x}"></div><div class="creator-field"><label for="creator-object-y">Row</label><input id="creator-object-y" type="number" min="1" max="62" step="1" value="${b.y}"></div></div><div class="creator-field"><label for="creator-object-state">Starts as</label><select id="creator-object-state"><option value="completed" ${b.state==='completed'?'selected':''}>Completed building</option><option value="blueprint" ${b.state==='blueprint'?'selected':''}>Construction project</option></select></div><div class="creator-field"><label for="creator-object-recipe">Construction materials</label><select id="creator-object-recipe">${(entry?.recipes||[]).map(key=>`<option value="${key}" ${b.recipe===key?'selected':''}>${{standard:'Prepared materials',local:'Local materials',adobe:'Adobe and bamboo'}[key]}</option>`).join('')}</select></div>${appearances.length?`<div class="creator-field"><label for="creator-object-appearance">Appearance</label><select id="creator-object-appearance">${appearances.map(key=>`<option value="${key}" ${(b.appearance||'home')===key?'selected':''}>${escape(title(key))}</option>`).join('')}</select></div>`:''}<div class="creator-selection-actions"><button data-selection-action="move">Move on map</button><button data-selection-action="duplicate">Duplicate</button><button data-selection-action="remove">Remove</button></div>`;
 }
-function renderSupplies(){
-  const d=current.doc.value;
-  $('creator-supply-locations').innerHTML=d.start.inventories.map((p,i)=>{
-    const key=p.owner.kind==='camp'?'camp':`building:${p.owner.building}`,missing=p.owner.kind==='building'&&!d.start.buildings.some(b=>b.id===p.owner.building);
-    return `<div class="creator-supply"><label for="creator-inventory-${i}">Supply location ${i+1}</label><select id="creator-inventory-${i}" data-inventory="${i}">${missing?`<option value="${escape(key)}">Missing building · choose another store</option>`:''}<option value="camp" ${key==='camp'?'selected':''}>Arrival camp</option>${d.start.buildings.filter(b=>b.kind==='warehouse'&&b.state==='completed').map(b=>`<option value="building:${escape(b.id)}" ${key==='building:'+b.id?'selected':''}>${escape(title(b.kind))} · ${b.x}, ${b.y}</option>`).join('')}</select><p>${Object.entries(p.items).filter(([,n])=>n>0).map(([key,n])=>escape(`${n} ${key.replaceAll('_',' ')}`)).join(' · ')||'No starting supplies here'}</p></div>`;
-  }).join('');
-}
+function renderSupplies(){suppliesEditor.render(current.doc.value,report);}
 function renderReview(){
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
   $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':''}</div>`).join(''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
@@ -278,15 +273,6 @@ function wire(){
       try{map.copy=planBuildingCopy(current.doc.value,map.selection());if(map.copy.buildings.length)setTool('duplicate');}catch(error){toast(error.message);}
     }
   };
-  $('creator-supply-locations').onchange=e=>{
-    if(!e.target.matches('[data-inventory]'))return;
-    const index=Number(e.target.dataset.inventory),value=e.target.value;
-    change('Choose supply storage',d=>{
-      const p=d.start.inventories[index],owner=value==='camp'?{kind:'camp'}:{kind:'building',building:value.slice(9)};
-      const existing=d.start.inventories.find((q,i)=>i!==index&&JSON.stringify(q.owner)===JSON.stringify(owner));
-      if(existing){for(const [key,n]of Object.entries(p.items))existing.items[key]=(existing.items[key]||0)+n;d.start.inventories.splice(index,1);}else p.owner=owner;
-    });
-  };
   $('creator-issues').onclick=e=>{
     const button=e.target.closest('[data-issue]');
     if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity)map.select(issue.entity);}
@@ -354,6 +340,7 @@ try{
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
+  suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change,maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});
   journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
   relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change});
