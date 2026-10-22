@@ -1,3 +1,4 @@
+import {createMapPackage,validateMapPackage} from './map-package.js';
 import {enrichRunHeaders} from './library-migrations.js';
 import {canonical} from './editor/journal.js';
 import {createReleasePackage,validateRelease} from './release-package.js';
@@ -6,7 +7,7 @@ export class LibraryConflict extends Error {
   constructor(){super('Another tab changed this creation. Reload it or save your work as a copy.');this.name='LibraryConflict';}
 }
 const clone=value=>structuredClone(value);
-const recordKind=store=>({projects:'project',runs:'run',residents:'resident',releases:'release'})[store];
+const recordKind=store=>({projects:'project',runs:'run',residents:'resident',releases:'release',maps:'map'})[store];
 const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,residentName:record.file?.resident?.name,residentAppearance:record.file?.resident?(record.file.resident.appearance??{preset:record.file.resident.preset,version:record.file.resident.preset_version}):undefined,residentPackageSchema:record.file?.schema,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition??record.package?.definition)?.start?.resident_balance??'balanced',contentRevision:record.package?.content_revision??record.release?.content_revision??record.file?.content_revision,author:record.package?.author??record.release?.author??record.file?.author,compatibility:record.package?.compatibility??record.release?.compatibility??record.file?.compatibility});
 const safeThumbnail=value=>typeof value==='string'&&value.length<=96*1024&&/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(value)?value:null;
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
@@ -23,9 +24,9 @@ export class ContentLibrary extends EventTarget {
   }
   async #db(){
     if(!this.#opening)this.#opening=new Promise((resolve,reject)=>{
-      const request=indexedDB.open(this.name,5);let blocked=false;
+      const request=indexedDB.open(this.name,6);let blocked=false;
       request.onupgradeneeded=event=>{
-        for(const name of ['projects','runs','residents','releases','releaseCounters','heads','previews'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:['heads','previews'].includes(name)?'key':'id'});
+        for(const name of ['projects','runs','residents','releases','releaseCounters','heads','previews','maps','mapCounters'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:['heads','previews'].includes(name)?'key':'id'});
         const heads=request.transaction.objectStore('heads');if(!heads.indexNames.contains('kind'))heads.createIndex('kind','kind',{unique:false});if(!heads.indexNames.contains('projectId'))heads.createIndex('projectId','projectId',{unique:false});
         if(event.oldVersion<4)enrichRunHeaders(request.transaction);
       };
@@ -83,7 +84,11 @@ export class ContentLibrary extends EventTarget {
     return result;
   }
   #changed(kind,id,revision){const detail={kind,id,revision};this.#channel?.postMessage(detail);this.dispatchEvent(new CustomEvent('change',{detail}));}
-  async getPreview(kind,id){if(!['project','release','run'].includes(kind))return null;const row=await this.#read('previews',`${kind}:${id}`);return safeThumbnail(row?.image);}
+  async getPreview(kind,id){if(!['project','release','run','map'].includes(kind))return null;const row=await this.#read('previews',`${kind}:${id}`);return safeThumbnail(row?.image);}
+  listMaps(){return this.#list('map');}
+  getMap(id){return this.#read('maps',id);}
+  deleteMap(id,expectedRevision){return this.#write('maps',id,expectedRevision,()=>null);}
+  async importMap(file,validate,thumbnail){const data=validateMapPackage(file,validate);return this.#write('maps',crypto.randomUUID(),null,()=>({format:'solar-friends-frozen-map',schema:1,title:data.title,projectId:null,sourceRevision:null,package:data}),thumbnail);}
   listReleases(){return this.#list('release');}
   getRelease(id){return this.#read('releases',id);}
   deleteRelease(id,expectedRevision){return this.#write('releases',id,expectedRevision,()=>null);}
@@ -109,25 +114,30 @@ export class ContentLibrary extends EventTarget {
     }),thumbnail);
   }
   deleteProject(id,expectedRevision){return this.#write('projects',id,expectedRevision,()=>null);}
-  async createRelease({projectId,expectedRevision,author,validate,thumbnail}){
+  createRelease({projectId,expectedRevision,author,validate,thumbnail}){
+    return this.#freeze({projectId,expectedRevision,thumbnail},{store:'releases',counters:'releaseCounters',kind:'release',format:'solar-friends-frozen-release',makePackage:(id,version,source)=>createReleasePackage({id,version,definition:source.checkpoint.definition,author,credits:source.attribution??[],validate})});
+  }
+  createMap({projectId,expectedRevision,author,validate,thumbnail}){
+    return this.#freeze({projectId,expectedRevision,thumbnail},{store:'maps',counters:'mapCounters',kind:'map',format:'solar-friends-frozen-map',makePackage:(id,version,source)=>{const d=source.checkpoint.definition;return createMapPackage({id,version,map:d.map,weather:d.rules.weather,title:d.title,description:d.description,author,credits:source.attribution??[],validate});}});
+  }
+  async #freeze({projectId,expectedRevision,thumbnail},{store,counters,kind,format,makePackage}){
     const db=await this.#db(),id=crypto.randomUUID();
     const result=await new Promise((resolve,reject)=>{
-      const tx=db.transaction(['projects','releases','releaseCounters','heads','previews'],'readwrite'),projects=tx.objectStore('projects'),heads=tx.objectStore('heads');let result,error;
+      const tx=db.transaction(['projects',store,counters,'heads','previews'],'readwrite'),projects=tx.objectStore('projects'),heads=tx.objectStore('heads');let result,error;
       const source=projects.get(projectId);
       source.onsuccess=()=>{
         const previous=source.result;
         if(!previous||previous.revision!==expectedRevision){error=new LibraryConflict();tx.abort();return;}
-        const versions=tx.objectStore('releaseCounters').get(projectId);
+        const versions=tx.objectStore(counters).get(projectId);
         versions.onsuccess=()=>{try{
-          const version=(versions.result?.version??0)+1;
-          const file=createReleasePackage({id,version,definition:previous.checkpoint.definition,author,credits:previous.attribution??[],validate});
-          result={id,revision:1,updatedAt:Date.now(),format:'solar-friends-frozen-release',schema:1,title:file.title,projectId,sourceRevision:previous.revision,package:file};
-          tx.objectStore('releases').add(result);heads.add(header('release',result));if(safeThumbnail(thumbnail))tx.objectStore('previews').put({key:`release:${id}`,image:thumbnail});tx.objectStore('releaseCounters').put({id:projectId,version});
+          const version=(versions.result?.version??0)+1,file=makePackage(id,version,previous);
+          result={id,revision:1,updatedAt:Date.now(),format,schema:1,title:file.title,projectId,sourceRevision:previous.revision,package:file};
+          tx.objectStore(store).add(result);heads.add(header(kind,result));if(safeThumbnail(thumbnail))tx.objectStore('previews').put({key:`${kind}:${id}`,image:thumbnail});tx.objectStore(counters).put({id:projectId,version});
         }catch(cause){error=cause;tx.abort();}};
       };
-      tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(error||tx.error||Error('The release could not be saved. Your draft is unchanged.'));
+      tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(error||tx.error||Error('The content package could not be saved. Your draft is unchanged.'));
     });
-    this.#changed('releases',id,1);return result;
+    this.#changed(store,id,1);return result;
   }
   async importRelease(file,validate,thumbnail){
     const data=validateRelease(file,validate);
