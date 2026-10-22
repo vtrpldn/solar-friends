@@ -216,6 +216,7 @@ fn blueprints_supported_appearances_and_located_inputs_compile_without_free_salv
     let mut d = Definition::builtin(modes::Mode::Story);
     d.start.buildings.extend([
         Structure {
+            crop: None,
             id: "future-garden".into(),
             kind: "garden".into(),
             x: 38,
@@ -225,6 +226,7 @@ fn blueprints_supported_appearances_and_located_inputs_compile_without_free_salv
             appearance: None,
         },
         Structure {
+            crop: None,
             id: "adobe-house".into(),
             kind: "home".into(),
             x: 26,

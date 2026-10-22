@@ -187,6 +187,8 @@ pub struct Structure {
     pub state: BuildingState,
     pub recipe: String,
     pub appearance: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crop: Option<super::farming::StartingCrop>,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -349,6 +351,7 @@ impl Definition {
                         state: BuildingState::Completed,
                         recipe: "standard".into(),
                         appearance: None,
+                        crop:None,
                     })
                     .collect(),
                 roads: vec![],

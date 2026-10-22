@@ -27,11 +27,9 @@ impl Default for Crop {
         }
     }
 }
+pub const CROPS: [&str; 6] = ["lettuce", "beans", "tomatoes", "maize", "cassava", "fodder"];
 pub fn crop_kind(kind: &str) -> bool {
-    matches!(
-        kind,
-        "lettuce" | "beans" | "tomatoes" | "maize" | "cassava" | "fodder"
-    )
+    CROPS.contains(&kind)
 }
 pub fn farm(b: &Building) -> bool {
     matches!(b.kind.as_str(), "garden" | "greenhouse")
@@ -47,8 +45,11 @@ pub fn duration(c: &Crop) -> f32 {
         _ => 180.,
     }
 }
+pub(crate) fn root_capacity(kind: &str) -> f32 {
+    if kind == "greenhouse" { 480. } else { 240. }
+}
 pub fn moisture_capacity(b: &Building) -> f32 {
-    if b.kind == "greenhouse" { 480. } else { 240. }
+    root_capacity(&b.kind)
 }
 pub fn valid(b: &Building) -> bool {
     let c = &b.crop;

@@ -212,6 +212,7 @@ pub(super) fn check(d: &Definition) -> Report {
         );
     }
     super::liquids::check(d, &mut r);
+    super::farming::check(d, &mut r);
     if d.start.buildings.len() > MAX_BUILDINGS
         || d.start.roads.len() > (MAP_SIZE * MAP_SIZE) as usize
     {
@@ -400,7 +401,10 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
             contributors: crate::participation::Set::new(),
             next_visit: 0.,
             visits: 0,
-            crop: Default::default(),
+            crop: b
+                .crop
+                .as_ref()
+                .map_or_else(Default::default, |c| super::farming::resolve(c, &b.kind)),
             poultry: Default::default(),
             agriculture: Default::default(),
         });
