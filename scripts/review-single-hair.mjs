@@ -4,7 +4,7 @@ import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 const root='assets/art-direction/character-prototype-v1/';
 const version=process.argv[2]??'v1';
-if(!['v1','v2'].includes(version))throw new Error('Expected v1 or v2');
+if(!['v1','v2','v3'].includes(version))throw new Error('Expected v1, v2 or v3');
 const guide=JSON.parse(await readFile(root+'hair-single-guide.json','utf8'));
 const server=await serve();let browser;
 try {

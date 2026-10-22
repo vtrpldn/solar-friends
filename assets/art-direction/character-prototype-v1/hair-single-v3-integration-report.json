@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "scope": "One static pose only; no complete hair set or gameplay approval",
+  "refused": [
+    "hash",
+    "binding",
+    "pose",
+    "size",
+    "pixels"
+  ],
+  "bodyUnchanged": true,
+  "sourceHash": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+}

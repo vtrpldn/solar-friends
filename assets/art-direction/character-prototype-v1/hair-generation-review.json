@@ -63,6 +63,30 @@
         "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-single-body.png": "d783ae7f722e680766ba53bc6e5e05a3c32944aadd7c07c63fb23f2bc88b99b9",
         "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v1.png": "3f19563cb90e766870f2b87743ea32dfc0aee9d70fbe8f515c725a4306c0eeef"
       }
+    },
+    {
+      "id": "single-v3",
+      "prompt": "Use case: precise-object-edit. Registered game hair overlay correction.\nInput 1: EXACT bald body target, 1254x1254. Input 2: previous hair-only candidate, same canvas. Input 3: diagnostic comparison, showing the ugly dangling curl and background hole behind the ear on its right-hand character; do not copy the comparison board.\nChange ONLY the short back/ear area of input 2. Remove the dangling pointed curl at x545\u2013575 y320\u2013355 entirely. The hairstyle must end directly above and behind the actual visible ear of input 1, near x550 y260. There must be NO U-shaped loop extending behind or below that ear. Short curls taper against the scalp above the ear; leave the real ear unobscured. Preserve the existing crown, front curls, brown painted material and exact canvas coordinates. Hair can overlap the scalp, never grow down to the neck.\nReturn ONLY hair on true transparent alpha at exact original 1254-square coordinates, not bodies or a composition. No skin, ears, face, clothing, labels or background. Do not recenter, crop, enlarge or shift the crown. Keep the nice painted curl style. The output will be composited over input1 with no fitting.",
+      "references": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-single-body.png",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v2.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-single-v2-composition.png"
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c7d1f9db-0c93-405e-9887-1e1c6bd3b77e.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+      "verdict": "accepted for single-pose prototype review only",
+      "findings": "Direct unchanged-frame composition removes dangling curl/background ear gap. Exact 1254 canvas and region coverage 1.0. Actual renderer reviewed at 48px and 256px in both facings and day/night; matching warm painted curls and body ground contact. Only base8: no other pose, transitions, complete occlusion or playable hairstyle approval.",
+      "report": "hair-single-v3-report.json",
+      "composition": "hair-single-v3-composition.png",
+      "integrationReport": "hair-single-v3-integration-report.json",
+      "detailBoard": "hair-single-v3-details.png",
+      "sceneBoard": "hair-single-v3-scenes.png",
+      "candidateSha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+      "referenceSha256": {
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-single-body.png": "d783ae7f722e680766ba53bc6e5e05a3c32944aadd7c07c63fb23f2bc88b99b9",
+        "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v2.png": "1e7a3b990868d453cb62d30d095a80fdad0e105602870c98cfd5b6f519a485c5",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-single-v2-composition.png": "9e3ce203172b24e8278a5850f12f5e67f0a7125184620b08548f81f6734f4ab3"
+      }
     }
   ]
 }
