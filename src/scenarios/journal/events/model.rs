@@ -33,6 +33,7 @@ pub enum EventTrigger {
 pub enum EventEffect {
     Message { text: String },
     GrantFunds { cents: i64 },
+    UnlockBuilding { building: String },
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -47,4 +48,5 @@ pub struct EventRecord {
 pub enum EffectResult {
     Message,
     Funds { cents: i64 },
+    BuildingUnlocked { building: String },
 }

@@ -24,6 +24,7 @@ fn definition(
             }],
         }],
         events,
+        locked_buildings: vec![],
     });
     d
 }
@@ -420,4 +421,124 @@ fn event_limits_references_rules_and_effects_are_validated_before_installation()
     );
     disabled.rules.logistics = false;
     assert!(crate::scenarios::compile(disabled).is_err());
+}
+
+#[test]
+fn building_unlocks_gate_new_plans_and_restore_exactly() {
+    let mut d = definition(
+        vec![event(
+            "home",
+            EventTrigger::Date { minute: 482. },
+            EventEffect::UnlockBuilding {
+                building: "home".into(),
+            },
+        )],
+        0,
+        0,
+    );
+    d.rules.logistics = false;
+    d.journal.as_mut().unwrap().locked_buildings = vec!["home".into()];
+    let mut g = game(d);
+    assert!(!progression::unlocked(
+        g.app.world().resource::<Village>(),
+        "home"
+    ));
+    let before = g.snapshot();
+    assert_ne!(g.place("home", 25, 25), "ok");
+    assert_eq!(g.snapshot(), before);
+    assert!(g.restore(&before));
+    for _ in 0..10 {
+        g.tick(0.25);
+    }
+    assert!(progression::unlocked(
+        g.app.world().resource::<Village>(),
+        "home"
+    ));
+    assert_eq!(report(&g)["events"][0]["status"], "applied");
+    let unlocked = g.snapshot();
+    assert!(g.restore(&unlocked));
+    assert_eq!(g.snapshot(), unlocked);
+    for (source, locked) in [(&before, false), (&unlocked, true)] {
+        let mut bad: serde_json::Value = serde_json::from_str(source).unwrap();
+        bad["village"]["progress"]["scenario_journal"]["locked_buildings"] = if locked {
+            serde_json::json!(["home"])
+        } else {
+            serde_json::json!([])
+        };
+        assert!(!g.restore(&bad.to_string()));
+        assert_eq!(g.snapshot(), unlocked);
+    }
+    assert_eq!(g.place("home", 25, 25), "ok");
+}
+
+#[test]
+fn unlock_reachability_rejects_self_dependencies_but_accepts_real_alternatives() {
+    let unlock = event(
+        "home",
+        EventTrigger::Goal {
+            goal: "fund".into(),
+        },
+        EventEffect::UnlockBuilding {
+            building: "home".into(),
+        },
+    );
+    let mut d = definition(vec![unlock], 0, 0);
+    let j = d.journal.as_mut().unwrap();
+    j.locked_buildings = vec!["home".into()];
+    j.chapters[0].goals[0].condition = GoalCondition::Buildings {
+        building: "home".into(),
+        count: 1,
+        credit: BuildingCredit::AfterActivation,
+        region: None,
+    };
+    let rejected = crate::scenarios::compile(d.clone()).err().unwrap();
+    assert!(
+        serde_json::to_string(&rejected)
+            .unwrap()
+            .contains("unlock_deadlock")
+    );
+    let blocked = d.journal.as_ref().unwrap().chapters[0].goals[0]
+        .condition
+        .clone();
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Any {
+        conditions: vec![blocked.clone(), GoalCondition::Funds { cents: 0 }],
+    };
+    assert!(crate::scenarios::compile(d.clone()).is_ok());
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = blocked;
+    let mut home = d.start.buildings[0].clone();
+    home.id = "gifted-home".into();
+    home.kind = "home".into();
+    home.x = 25;
+    home.y = 25;
+    home.appearance = None;
+    home.recipe = "standard".into();
+    home.state = BuildingState::Blueprint;
+    d.start.buildings.push(home);
+    assert!(
+        crate::scenarios::compile(d.clone()).is_ok(),
+        "A gifted blueprint can be finished while new plans remain locked"
+    );
+    d.start.buildings.last_mut().unwrap().state = BuildingState::Completed;
+    assert!(
+        crate::scenarios::compile(d.clone()).is_err(),
+        "A completed gift cannot satisfy after-activation credit"
+    );
+    if let GoalCondition::Buildings { credit, .. } =
+        &mut d.journal.as_mut().unwrap().chapters[0].goals[0].condition
+    {
+        *credit = BuildingCredit::Present;
+    }
+    assert!(crate::scenarios::compile(d).is_ok());
+    let mut unused = definition(vec![], 0, 0);
+    unused.journal.as_mut().unwrap().locked_buildings = vec!["workshop".into()];
+    assert!(
+        crate::scenarios::compile(unused.clone()).is_ok(),
+        "Unused permanent exclusions are valid"
+    );
+    unused.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Produced {
+        material: "tools".into(),
+        count: 1,
+        credit: CounterCredit::Run,
+    };
+    assert!(crate::scenarios::compile(unused).is_err());
 }

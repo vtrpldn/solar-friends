@@ -8,6 +8,8 @@ pub struct Journal {
     pub completion: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub events: Vec<events::EventDefinition>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub locked_buildings: Vec<String>,
 }
 impl Journal {
     pub fn conditions(&self) -> impl Iterator<Item = &GoalCondition> {
@@ -165,6 +167,8 @@ pub struct State {
     pub goals: BTreeMap<String, GoalState>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub events: BTreeMap<String, events::EventRecord>,
+    #[serde(default, skip_serializing_if = "std::collections::BTreeSet::is_empty")]
+    pub locked_buildings: std::collections::BTreeSet<String>,
 }
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

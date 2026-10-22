@@ -23,6 +23,7 @@ fn scenario(chapters: Vec<Chapter>) -> Definition {
         introduction: "Our own beginning".into(),
         completion: "Keep enjoying village life.".into(),
         events: vec![],
+        locked_buildings: vec![],
         chapters,
     });
     d

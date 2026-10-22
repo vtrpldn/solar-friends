@@ -92,6 +92,7 @@ pub fn initialize(v: &mut Village) {
     let mut state = State {
         schema: 1,
         events: BTreeMap::new(),
+        locked_buildings: journal.locked_buildings.iter().cloned().collect(),
         last_sample: v.minutes,
         finished_at: None,
         trade: trade::requested(journal).then(trade::Ledger::default),

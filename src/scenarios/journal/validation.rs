@@ -100,6 +100,9 @@ pub fn check(d: &Definition, report: &mut Report) {
             break;
         }
     }
+    if !report.has_errors() {
+        events::check_unlocks(d, report);
+    }
 }
 fn text(value: &str, max: usize) -> bool {
     !value.trim().is_empty() && value.chars().count() <= max

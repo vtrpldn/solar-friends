@@ -3,6 +3,19 @@ pub fn check(d: &crate::scenarios::Definition, report: &mut Report) {
     let Some(journal) = d.journal.as_ref() else {
         return;
     };
+    let locks: HashSet<_> = journal.locked_buildings.iter().collect();
+    if locks.len() != journal.locked_buildings.len()
+        || locks.len() > progression::BUILDINGS.len()
+        || locks
+            .iter()
+            .any(|key| !progression::BUILDINGS.contains(&key.as_str()))
+    {
+        report.push(
+            "journal.events",
+            "invalid_building_locks",
+            "Choose distinct supported building kinds for the starting locks.",
+        );
+    }
     if journal.events.len() > MAX_EVENTS {
         report.push(
             "journal.events",
@@ -30,6 +43,10 @@ pub fn check(d: &crate::scenarios::Definition, report: &mut Report) {
             EventEffect::Message { text } => {
                 !text.trim().is_empty() && text.chars().count() <= 1000
             }
+            EventEffect::UnlockBuilding { building } => {
+                progression::BUILDINGS.contains(&building.as_str())
+                    && journal.locked_buildings.contains(building)
+            }
             EventEffect::GrantFunds { cents } => (1..=100_000_000).contains(cents),
         };
         if !valid_key(&event.id)
@@ -39,7 +56,7 @@ pub fn check(d: &crate::scenarios::Definition, report: &mut Report) {
             || !trigger_valid
             || !effect_valid
         {
-            report.push("journal.events","invalid_event","Give every one-shot event a unique identity, a title, an existing goal/chapter or supported trigger, and a message up to 1,000 characters or positive funding up to R$ 1,000,000.");
+            report.push("journal.events","invalid_event","Give every one-shot event a unique identity, a title, an existing goal/chapter or supported trigger, and a message up to 1,000 characters, positive funding up to R$ 1,000,000, or a supported building that starts locked.");
         }
         for condition in event.conditions() {
             let mut references = vec![];

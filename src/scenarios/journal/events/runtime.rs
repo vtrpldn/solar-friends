@@ -72,6 +72,12 @@ pub fn advance(journal: &Journal, state: &mut State, v: &mut Village) {
                 crate::event(v, text.clone());
                 Some(EffectResult::Message)
             }
+            EventEffect::UnlockBuilding { building } => {
+                state.locked_buildings.remove(building);
+                Some(EffectResult::BuildingUnlocked {
+                    building: building.clone(),
+                })
+            }
             EventEffect::GrantFunds { cents } => economy::scenario_grant(v, *cents, &event.title)
                 .then_some(EffectResult::Funds { cents: *cents }),
         };
@@ -82,6 +88,23 @@ pub fn advance(journal: &Journal, state: &mut State, v: &mut Village) {
     }
 }
 pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
+    let expected: std::collections::BTreeSet<_> = journal
+        .locked_buildings
+        .iter()
+        .filter(|kind| {
+            !journal.events.iter().any(|e| {
+                matches!(&e.effect,EventEffect::UnlockBuilding{building} if building==*kind)
+                    && state
+                        .events
+                        .get(&e.id)
+                        .is_some_and(|record| record.applied_at.is_some())
+            })
+        })
+        .cloned()
+        .collect();
+    if state.locked_buildings != expected {
+        return false;
+    }
     if state.events.len() != journal.events.len() {
         return false;
     }
@@ -139,8 +162,14 @@ pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
             }
         }
         match (&record.result, &event.effect, record.applied_at) {
+            (None, EventEffect::UnlockBuilding { .. }, None) => record.triggered_at.is_none(),
             (None, EventEffect::Message { .. }, None) => record.triggered_at.is_none(),
             (None, EventEffect::GrantFunds { .. }, None) => true,
+            (
+                Some(EffectResult::BuildingUnlocked { building }),
+                EventEffect::UnlockBuilding { building: expected },
+                Some(_),
+            ) => building == expected,
             (Some(EffectResult::Message), EventEffect::Message { .. }, Some(_)) => true,
             (
                 Some(EffectResult::Funds { cents }),

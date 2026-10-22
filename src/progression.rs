@@ -141,6 +141,13 @@ impl Default for Progress {
     }
 }
 pub fn unlocked(v: &Village, kind: &str) -> bool {
+    if v.progress
+        .scenario_journal
+        .as_ref()
+        .is_some_and(|s| s.locked_buildings.contains(kind))
+    {
+        return false;
+    }
     if v.mode == Mode::Sandbox {
         return true;
     }

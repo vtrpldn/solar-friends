@@ -1534,8 +1534,11 @@ impl Game {
         };
         let mut v = self.app.world_mut().resource_mut::<Village>();
         if !progression::unlocked(&v, kind) {
-            return "Complete the linked quest in the village journal to unlock this building."
-                .into();
+            return if v.progress.scenario_journal.is_some() {
+                "Follow this scenario’s journal to unlock this building.".into()
+            } else {
+                "Complete the linked quest in the village journal to unlock this building.".into()
+            };
         }
         if let Err(reason) = building_work::placement(&v, kind, x, y, None) {
             return reason.into();
