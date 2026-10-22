@@ -1,0 +1,47 @@
+{
+  "result": "PASS",
+  "scope": "Four stretching poses and one foreground mask draft only; not full occlusion or complete character approval.",
+  "poseDenied": [
+    "base:6",
+    "idle:0",
+    "idle:8",
+    "activities:6"
+  ],
+  "foregroundStats": {
+    "painted": 2531,
+    "maxAlpha": 255,
+    "nearOpaque": 2113
+  },
+  "definitionMatches": true,
+  "denied": [
+    "unknown-field",
+    "wrong-pose",
+    "wrong-size",
+    "sparse-points",
+    "outside-frame",
+    "zero-area",
+    "source-binding",
+    "changed-body"
+  ],
+  "aliasSafe": true,
+  "roundTripExact": true,
+  "disjoint": true,
+  "foregroundPixelsExact": true,
+  "protectedPixels": 2531,
+  "protectedExact": true,
+  "fixtureProtected": true,
+  "bodyUnchanged": true,
+  "bodyIntegrity": true,
+  "coverage": {
+    "4": 0.9965611719973161,
+    "5": 1,
+    "6": 1,
+    "7": 0.9965611719973161
+  },
+  "partHashes": {
+    "4": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "5": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775",
+    "6": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462",
+    "7": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+  }
+}

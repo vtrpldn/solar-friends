@@ -1,6 +1,6 @@
 import {registeredHairFrame} from './character-single-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from '../character-atlas-part.js';
-const clips={breathe:{sheet:'base',indices:[8,9,10,11],duration:5,label:'breathing'},walk:{sheet:'base',indices:[0,1,2,3],duration:.5,label:'walking'},work:{sheet:'base',indices:[4,5,6,7],duration:.8,label:'working'},sit:{sheet:'base',indices:[12,13,14,15],duration:5,label:'seated / sleeping'},look:{sheet:'idle',indices:[0,1,2,3],duration:5,label:'looking around'}};
+const clips={breathe:{sheet:'base',indices:[8,9,10,11],duration:5,label:'breathing'},walk:{sheet:'base',indices:[0,1,2,3],duration:.5,label:'walking'},work:{sheet:'base',indices:[4,5,6,7],duration:.8,label:'working'},sit:{sheet:'base',indices:[12,13,14,15],duration:5,label:'seated / sleeping'},look:{sheet:'idle',indices:[0,1,2,3],duration:5,label:'looking around'},stretch:{sheet:'idle',indices:[4,5,6,7],duration:3.75,label:'stretching'}};
 export function hairClipProvider(frames,clip){
  const spec=Object.hasOwn(clips,clip)?clips[clip]:null;
  if(!spec||!(frames instanceof Map)||frames.size!==4||spec.indices.some(i=>frames.get(i)?.width!==256||frames.get(i)?.height!==256||typeof frames.get(i)?.getContext!=='function'))throw Error('Provide every registered frame for the supported hair clip.');

@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "status": "Production draft only; not a complete player hairstyle",
+  "why": "Correct lowered stretching scalps and preserve near-arm foreground ownership without fitting original body artwork.",
+  "generations": [
+    {
+      "key": "hair_stretch5_composite_v1",
+      "prompt": "Edit image1, keeping its original transparent 1254-square full-body composition EXACTLY. Add short warm brown rounded curls to the bald scalp of this stretching resident. Image2 is hairstyle/material reference only; do not copy its position. Preserve every body part, face, closed eyes, ears, hands, clothes and boots exactly where they are. Hair must follow THIS scalp (approximately x480..780 y115..310) and cover its entire crown, leaving forehead/eyebrows visible. Short sides above ears, no ear loops or dangling tendrils. Warm hand-painted game illustration, broad soft curl shading, upper-left light.  No stool, props, background or text. Do not center, enlarge or move the person or cap. Output the entire same seated-free standing stretching person with only the scalp changed to the matching short curls. Genuine transparent background.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-5-body.png",
+          "sha256": "aac25768e7ca964d02323e7fa885a0d17765754cb81c2322375416024225df3b"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-09f846a2-97bc-48a3-9425-d37eeabe5c49.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-stretch-5-composite-candidate-v1.png",
+      "verdict": "Reference only; generated body is not installed. Used solely to extract pose-specific hair.",
+      "sha256": "05dad40cdde0068ac77c76fca6bf4749a289926096cd58139b10918601fbd6a6"
+    },
+    {
+      "key": "hair_stretch6_composite_v1",
+      "prompt": "Edit image1, keeping its original transparent 1254-square full-body composition EXACTLY. Add short warm brown rounded curls to the bald scalp of this stretching resident. Image2 is hairstyle/material reference only; do not copy its position. Preserve every body part, face, closed eyes, ears, hands, clothes and boots exactly where they are. Hair must follow THIS scalp (approximately x475..745 y165..350) and cover its entire crown, leaving forehead/eyebrows visible. Short sides above ears, no ear loops or dangling tendrils. Warm hand-painted game illustration, broad soft curl shading, upper-left light. Both raised fists and forearms stay IN FRONT of the hair where they overlap, and remain unchanged. No stool, props, background or text. Do not center, enlarge or move the person or cap. Output the entire same seated-free standing stretching person with only the scalp changed to the matching short curls. Genuine transparent background.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-idle-6-body.png",
+          "sha256": "dad6b2f43bedd35f712a9fe55eebd62912d870915595847f72d61c7067b7e276"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+          "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1eb07274-1887-44af-9bdd-219d68991ac7.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-stretch-6-composite-candidate-v1.png",
+      "verdict": "Reference only; generated body is not installed. Used solely to extract pose-specific hair.",
+      "sha256": "5199742970fa4bf2aa9d4bc8780963da41e3e590e6dbc17b71c9b89f0f051fc0"
+    },
+    {
+      "key": "hair_stretch5_v1",
+      "prompt": "Extract ONLY the short brown curly hair cap from this exact 1254-square full-body sprite. Keep the same entire transparent canvas and hair at its existing exact coordinates, approximately x470..775,y115..335. Remove ALL face, ears, skin, eyes, eyebrows, neck, hands, arms, clothing, boots and other objects. Do not center, translate, resize, enlarge or change the hair. Preserve painted curls and silhouette at their current full-body canvas location.  Output only opaque brown curls with a transparent opening below the existing fringe, fully transparent elsewhere. No stray dust or semi-transparent body remnants. No stool, props, text or marks.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-stretch-5-composite-candidate-v1.png",
+          "sha256": "05dad40cdde0068ac77c76fca6bf4749a289926096cd58139b10918601fbd6a6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4f59e77d-8f10-4c51-8a25-42a8b794452a.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png",
+      "verdict": "Lab production draft: fixed bounds pass; original body source retained; temporal polish still required.",
+      "sha256": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775"
+    },
+    {
+      "key": "hair_stretch6_v1",
+      "prompt": "Extract ONLY the short brown curly hair cap from this exact 1254-square full-body sprite. Keep the same entire transparent canvas and hair at its existing exact coordinates, approximately x475..735,y150..355. Remove ALL face, ears, skin, eyes, eyebrows, neck, hands, arms, clothing, boots and other objects. Do not center, translate, resize, enlarge or change the hair. Preserve painted curls and silhouette at their current full-body canvas location. Where the near raised forearm hid the far left side of the cap, extend the curls behind it only as far as x470, matching the scalp silhouette; the original forearm will be separately composed on top. Do not include any skin or fingers. Output only opaque brown curls with a transparent opening below the existing fringe, fully transparent elsewhere. No stray dust or semi-transparent body remnants. No stool, props, text or marks.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-stretch-6-composite-candidate-v1.png",
+          "sha256": "5199742970fa4bf2aa9d4bc8780963da41e3e590e6dbc17b71c9b89f0f051fc0"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-bb781586-87d1-49f2-a1fb-0ab65aeb1fbd.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v1.png",
+      "verdict": "Rejected:0.96726 region coverage and overpainting near forearm.",
+      "sha256": "cc4b31fa7f319c0e425a1ad7402824d8aa48059699a6792e38e0cd25757e0743"
+    },
+    {
+      "key": "hair_stretch6_v2",
+      "prompt": "Extract ONLY the VISIBLE brown curly hair from this exact 1254x1254 sprite, preserving its existing precise full-canvas placement, size and shape. Remove all skin, ears, eyebrows, face, fists, arms, body, clothing and shoes. Do NOT extend the hair behind the forearm: retain the visible left cutoff against the raised near arm at approximately x490. The complete painted cap remains inside x470..775 and y135..390; do not recenter or zoom. Keep brown painted curl material unchanged. No ear loops, dangling sideburns, dust or body remnants. Output just this small hair cap at its original upper-center-left canvas position, everything else truly transparent. Exact full-body canvas coordinates are essential. Preserve the existing crown and fringe; only erase non-hair.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-stretch-6-composite-candidate-v1.png",
+          "sha256": "5199742970fa4bf2aa9d4bc8780963da41e3e590e6dbc17b71c9b89f0f051fc0"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-fd0cec44-0483-4199-a073-9c7b0435105c.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v2.png",
+      "verdict": "Lab production draft: fixed bounds pass; original body source retained; temporal polish still required.",
+      "sha256": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462"
+    }
+  ],
+  "reused": "Unchanged hair-curls-single-candidate-v3.png in idle4/7",
+  "registration": "web/art/characters/prototype-v1/hair-stretch-v1-registration.json",
+  "foreground": "web/art/characters/prototype-v1/body-idle-6-foreground-v1.json",
+  "integration": "assets/art-direction/character-prototype-v1/hair-stretch-v3-integration-report.json",
+  "limits": [
+    "Hair coverage24/48 only; other24, temporal polish, all other customization and player integration remain.",
+    "Crossfades inherit large body pose differences; visible ghosting remains.",
+    "Foreground numeric polygon is a draft; correct compositing does not establish full semantic ownership approval.",
+    "No returned PNG was clipped, transformed, pixel-repaired or installed as a replacement body."
+  ]
+}
