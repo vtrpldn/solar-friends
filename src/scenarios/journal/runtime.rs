@@ -151,7 +151,12 @@ fn measure(
         GoalCondition::Date { minute } => (
             f64::from(v.minutes),
             f64::from(*minute),
-            format!("Reach game minute {minute}"),
+            format!(
+                "Reach day {} at {:02}:{:02}",
+                (*minute / 1440.).floor() as u32 + 1,
+                (*minute % 1440. / 60.).floor() as u32,
+                (*minute % 60.).floor() as u32
+            ),
         ),
         GoalCondition::Harvests { count, credit } => {
             let n = if *credit == CounterCredit::Run {
@@ -174,9 +179,18 @@ fn measure(
         }
         GoalCondition::Goal { goal } => {
             let done = goals.contains(goal);
+            let title = definition(v)
+                .and_then(|j| {
+                    j.chapters
+                        .iter()
+                        .flat_map(|c| &c.goals)
+                        .find(|g| g.id == *goal)
+                })
+                .map(|g| g.title.as_str())
+                .unwrap_or("earlier goal");
             return (
                 done,
-                json!({"kind":"goal","goal":goal,"complete":done,"description":format!("Complete goal {goal}")}),
+                json!({"kind":"goal","goal":goal,"complete":done,"description":format!("Complete {title}"),"action":{"kind":"goal","goal":goal}}),
             );
         }
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
@@ -197,6 +211,14 @@ fn measure(
         }
     };
     let complete = value >= target;
+    let (kind, unit) = match c {
+        GoalCondition::Buildings { .. } => ("buildings", "count"),
+        GoalCondition::Stored { .. } => ("stored", "count"),
+        GoalCondition::Funds { .. } => ("funds", "cents"),
+        GoalCondition::Date { .. } => ("date", "minutes"),
+        GoalCondition::Harvests { .. } => ("harvests", "count"),
+        _ => unreachable!(),
+    };
     let action = match c {
         GoalCondition::Buildings { building, .. } => json!({"kind":"build","building":building}),
         GoalCondition::Stored { material, .. } => json!({"kind":"trade","material":material}),
@@ -206,7 +228,7 @@ fn measure(
     };
     (
         complete,
-        json!({"complete":complete,"value":value,"target":target,"description":label,"action":action}),
+        json!({"kind":kind,"unit":unit,"complete":complete,"value":value,"target":target,"description":label,"action":action}),
     )
 }
 pub fn view(v: &Village) -> serde_json::Value {

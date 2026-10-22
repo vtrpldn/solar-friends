@@ -6,14 +6,14 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const g=new Game(),copy=new Game(),goal=(id,condition,optional=false)=>({id,title:`Goal ${id}`,description:'Plain text <not markup>',optional,condition}),chapter=(id,goals)=>({id,title:`Chapter ${id}`,description:'A new beginning',goals});
 const report=()=>JSON.parse(g.scenario_journal()),load=d=>JSON.parse(g.load_scenario(JSON.stringify(d)));
 try{
- const original=g.snapshot(),catalog=JSON.parse(g.scenario_catalog());assert.equal(catalog.journal.schema,1);assert.equal(catalog.journal.conditions.length,8);
+ const original=g.snapshot(),catalog=JSON.parse(g.scenario_catalog());assert.equal(catalog.journal.schema,1);assert.equal(catalog.journal.conditions.length,8);assert.equal(catalog.journal.target_limits.buildings,256);
  const d=JSON.parse(g.scenario_template('sandbox'));d.journal={schema:1,introduction:'A home of our own.',completion:'Village life continues.',chapters:[chapter('arrival',[goal('fund',{kind:'funds',cents:0}),goal('later',{kind:'date',minute:600},true)]),chapter('home',[goal('build',{kind:'buildings',building:'home',count:1,credit:'after_activation'})]),chapter('morning',[goal('clock',{kind:'all',conditions:[{kind:'goal',goal:'build'},{kind:'date',minute:482}]})])]};
  assert(JSON.parse(g.validate_scenario(JSON.stringify(d))).ok);assert.equal(g.snapshot(),original,'Validation must not replace a live village');assert(load(d).ok);
  let r=report();assert.equal(r.chapters[0].goals[0].status,'complete');assert.equal(r.chapters[1].goals[0].status,'active');assert.equal(r.chapters[2].goals[0].status,'locked');assert.equal(r.chapters[2].goals[0].condition,null);
- assert.deepEqual(r.chapters[1].goals[0].condition.action,{kind:'build',building:'home'});
+ assert.deepEqual(r.chapters[1].goals[0].condition.action,{kind:'build',building:'home'});assert.equal(r.chapters[1].goals[0].condition.unit,'count');assert.equal(r.chapters[0].goals[1].condition.unit,'minutes');assert.match(r.chapters[0].goals[1].condition.description,/day 1 at 10:00/);
  assert.equal(g.place('home',25,25),'ok');const paused=g.snapshot();g.tick(0);assert.equal(g.snapshot(),paused);assert.equal(report().chapters[1].goals[0].status,'active');
  for(let i=0;i<60;i++)advanceSimulation(g,1/60,1);
- r=report();assert.equal(r.chapters[1].goals[0].status,'complete');assert(r.finished_at!==null);
+ r=report();assert.equal(r.chapters[1].goals[0].status,'complete');assert(r.finished_at!==null);assert.equal(r.chapters[2].goals[0].condition.conditions[0].description,'Complete Goal build');assert.deepEqual(r.chapters[2].goals[0].condition.conditions[0].action,{kind:'goal',goal:'build'});
  assert.equal(r.chapters[0].goals[1].status,'active','Optional goals remain available after chapter completion');
  const checkpoint=g.snapshot();assert(copy.restore(checkpoint));assert.equal(copy.snapshot(),checkpoint);
  for(let i=0;i<180;i++){advanceSimulation(g,1/60,16);advanceSimulation(copy,1/60,16);}
