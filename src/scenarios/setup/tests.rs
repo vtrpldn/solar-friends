@@ -92,7 +92,11 @@ fn relaxed_rule_notes_replace_finite_resource_warnings_and_disabled_modes_are_di
     let mut d = definition(12);
     d.rules.logistics = false;
     d.rules.utilities = false;
-    let (_, r) = compiled(d.clone());
+    let (mut game, r) = compiled(d.clone());
+    let before = game.snapshot();
+    let api: serde_json::Value = serde_json::from_str(&game.scenario_setup_report()).unwrap();
+    assert!(api["access"].as_object().unwrap().is_empty());
+    assert_eq!(game.snapshot(), before);
     assert!(
         r.issues
             .iter()
@@ -336,4 +340,82 @@ fn long_opening_routes_use_the_closest_actual_starting_resident() {
         i.code.as_str(),
         "opening_building_travel" | "opening_building_access"
     ) && i.entity.as_deref() == Some("distant-cistern")));
+}
+
+#[test]
+fn opening_service_review_distinguishes_owned_unreachable_and_partial_reserves() {
+    let mut d = definition(5);
+    d.map.nature = Some(Vec::new());
+    d.map.deposits = Some(Vec::new());
+    d.map.river = Some(world::River {
+        schema: 1,
+        centers: vec![20.; MAP_SIZE as usize],
+    });
+    building(&mut d, "isolated-store", "warehouse", 10, 10);
+    building(&mut d, "isolated-water", "well", 10, 15);
+    d.start.inventories = vec![Inventory {
+        owner: InventoryOwner::Building("isolated-store".into()),
+        items: [("food".into(), 10)].into(),
+        food_lots: vec![],
+    }];
+    d.start.liquids = Some(vec![StartingLiquids {
+        owner: InventoryOwner::Building("isolated-water".into()),
+        contents: [("fresh".into(), 3.5)].into(),
+    }]);
+    d.start.fresh_water = 3.5;
+    let (mut game, report) = compiled(d.clone());
+    assert!(
+        report
+            .issues
+            .iter()
+            .any(|i| i.code == "opening_food_access")
+    );
+    assert!(
+        report
+            .issues
+            .iter()
+            .any(|i| i.code == "opening_water_access")
+    );
+    let before = game.snapshot();
+    let reading: serde_json::Value = serde_json::from_str(&game.scenario_setup_report()).unwrap();
+    assert_eq!(reading["summary"]["edible_portions"], 10);
+    assert_eq!(reading["summary"]["fresh_water"], 3.5);
+    for kind in ["food", "fresh_water"] {
+        assert_eq!(reading["access"][kind]["value"], 0.);
+        assert_eq!(reading["access"][kind]["accessible"], false);
+    }
+    assert_eq!(game.snapshot(), before);
+    d.start.inventories.push(Inventory {
+        owner: InventoryOwner::Camp,
+        items: [("food".into(), 2)].into(),
+        food_lots: vec![],
+    });
+    d.start.liquids.as_mut().unwrap().push(StartingLiquids {
+        owner: InventoryOwner::Camp,
+        contents: [("fresh".into(), 2.)].into(),
+    });
+    d.start.fresh_water = 5.5;
+    let (mut partial, report) = compiled(d.clone());
+    assert!(
+        report
+            .issues
+            .iter()
+            .any(|i| i.code == "opening_water_access" && i.message.contains("2.0 of 5.5"))
+    );
+    let reading: serde_json::Value =
+        serde_json::from_str(&partial.scenario_setup_report()).unwrap();
+    for kind in ["food", "fresh_water"] {
+        assert_eq!(reading["access"][kind]["value"], 2.);
+        assert_eq!(reading["access"][kind]["accessible"], true);
+    }
+    d.map.river = None;
+    let (mut connected, report) = compiled(d);
+    assert!(!report.issues.iter().any(|i| matches!(
+        i.code.as_str(),
+        "opening_food_access" | "opening_water_access"
+    )));
+    let reading: serde_json::Value =
+        serde_json::from_str(&connected.scenario_setup_report()).unwrap();
+    assert_eq!(reading["access"]["food"]["value"], 12.);
+    assert_eq!(reading["access"]["fresh_water"]["value"], 5.5);
 }

@@ -194,9 +194,72 @@ fn review_access(v: &Village, d: &Definition, people: &[Resident], r: &mut Repor
         }
     }
 }
+fn access(
+    v: &Village,
+    people: &[Resident],
+) -> BTreeMap<journal::services::Kind, journal::services::Reading> {
+    let mut kinds = Vec::new();
+    if sandbox::logistics(v) {
+        kinds.push(journal::services::Kind::Food);
+    }
+    if sandbox::utilities(v) {
+        kinds.push(journal::services::Kind::FreshWater);
+    }
+    journal::services::current_readings(v, people, &kinds)
+}
 pub fn review(v: &Village, d: &Definition, people: &[Resident], r: &mut Report) {
     review_access(v, d, people, r);
     let s = summarize(v);
+    let readings = access(v, people);
+    for (kind, owned, code, path, label) in [
+        (
+            journal::services::Kind::Food,
+            f64::from(s.edible_portions),
+            "opening_food_access",
+            "start.inventories",
+            "edible portions",
+        ),
+        (
+            journal::services::Kind::FreshWater,
+            s.fresh_water,
+            "opening_water_access",
+            "start.liquids",
+            "fresh-water units",
+        ),
+    ] {
+        if let Some(reading) = readings.get(&kind)
+            && owned > 0.
+            && (!reading.accessible || reading.value + 0.001 < owned)
+        {
+            let everyone = if reading.accessible {
+                "Everyone present has a supply route."
+            } else {
+                "At least one friend present has no usable supply."
+            };
+            let quantities = if kind == journal::services::Kind::Food {
+                format!("{:.0} of {owned:.0}", reading.value)
+            } else {
+                format!("{:.1} of {owned:.1}", reading.value)
+            };
+            issue(
+                r,
+                Severity::Warning,
+                code,
+                path,
+                format!(
+                    "{quantities} owned {label} are available through current routes and claims{}. {everyone} Review supply locations; future deliveries and resident work are not assumed.",
+                    if kind == journal::services::Kind::Food {
+                        " before spoilage"
+                    } else {
+                        ""
+                    }
+                ),
+                None,
+                d,
+            );
+        }
+    }
+
     if s.unhoused > 0 {
         issue(
             r,
@@ -328,9 +391,16 @@ pub fn review(v: &Village, d: &Definition, people: &[Resident], r: &mut Report) 
 }
 #[wasm_bindgen]
 impl Game {
-    pub fn scenario_setup_report(&self) -> String {
+    pub fn scenario_setup_report(&mut self) -> String {
+        let people: Vec<_> = self
+            .app
+            .world_mut()
+            .query::<&Resident>()
+            .iter(self.app.world())
+            .cloned()
+            .collect();
         let v = self.app.world().resource::<Village>();
-        serde_json::json!({"summary":summarize(v),"opening":v.scenario.as_ref().is_some_and(|o|v.minutes==o.definition.start.minutes),"preview_only":true,"note":"Opening quantities and current refill/care targets only. One shared meal means one edible portion per friend, not a daily diet. Stock is not a guarantee of access or delivery; no harvests, rainfall, trade or future resident work are assumed."}).to_string()
+        serde_json::json!({"summary":summarize(v),"access":access(v, &people),"opening":v.scenario.as_ref().is_some_and(|o|v.minutes==o.definition.start.minutes),"preview_only":true,"note":"Opening quantities, current route access and refill/care targets only. One shared meal means one edible portion per friend, not a daily diet. Owned stock differs from reachable unclaimed stock; food access also checks freshness on arrival; no harvests, rainfall, trade or future resident work are assumed. When everyone is away, access is checked from the arrival clearing."}).to_string()
     }
 }
 #[cfg(test)]

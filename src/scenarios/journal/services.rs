@@ -328,6 +328,18 @@ impl<'a> Frame<'a> {
         r
     }
 }
+/// Read the same current services as journal goals without changing watches.
+pub fn current_readings(
+    v: &Village,
+    people: &[Resident],
+    kinds: &[Kind],
+) -> BTreeMap<Kind, Reading> {
+    let mut frame = Frame::new(v, people);
+    kinds
+        .iter()
+        .map(|&kind| (kind, frame.reading(kind, v)))
+        .collect()
+}
 pub(super) fn sample(
     record: &mut GoalState,
     list: &[&GoalCondition],
