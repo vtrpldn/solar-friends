@@ -231,6 +231,12 @@ pub(super) fn measure(
             };
             (n as f64, f64::from(*count), label)
         }
+        GoalCondition::Crops { .. }
+        | GoalCondition::Orchards { .. }
+        | GoalCondition::Livestock { .. }
+        | GoalCondition::MaterialSites { .. } => {
+            return land_use::measure(c, v);
+        }
         GoalCondition::Stored { material, count } => {
             let i = economy::NAMES
                 .iter()

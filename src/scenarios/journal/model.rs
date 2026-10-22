@@ -46,6 +46,33 @@ pub enum GoalCondition {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         region: Option<String>,
     },
+    Crops {
+        crop: String,
+        count: u32,
+        stage: land_use::CropStage,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        region: Option<String>,
+    },
+    Orchards {
+        count: u32,
+        stage: land_use::OrchardStage,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        region: Option<String>,
+    },
+    Livestock {
+        building: String,
+        count: u32,
+        stage: land_use::AnimalStage,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        region: Option<String>,
+    },
+    MaterialSites {
+        material: String,
+        count: u32,
+        stage: land_use::SourceStage,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        region: Option<String>,
+    },
     Stored {
         material: String,
         count: u32,

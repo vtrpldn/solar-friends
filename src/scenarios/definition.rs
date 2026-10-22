@@ -61,8 +61,10 @@ pub struct Region {
 }
 impl Region {
     pub fn contains_building(&self, b: &Building) -> bool {
-        let size = interactions::footprint_size(&b.kind);
-        let (x, y) = (b.x - size / 2, b.y - size / 2);
+        self.contains_square(b.x, b.y, interactions::footprint_size(&b.kind))
+    }
+    pub fn contains_square(&self, center_x: i32, center_y: i32, size: i32) -> bool {
+        let (x, y) = (center_x - size / 2, center_y - size / 2);
         x >= self.x
             && y >= self.y
             && x + size <= self.x + self.width

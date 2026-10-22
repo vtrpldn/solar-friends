@@ -29,6 +29,36 @@ fn possible(
                     .count()
                     >= *count as usize
         }
+        GoalCondition::Crops { count, .. } => {
+            unlocked.contains("garden")
+                || unlocked.contains("greenhouse")
+                || d.start
+                    .buildings
+                    .iter()
+                    .filter(|b| ["garden", "greenhouse"].contains(&b.kind.as_str()))
+                    .count()
+                    >= *count as usize
+        }
+        GoalCondition::Orchards { count, .. } => {
+            unlocked.contains("orchard")
+                || d.start
+                    .buildings
+                    .iter()
+                    .filter(|b| b.kind == "orchard")
+                    .count()
+                    >= *count as usize
+        }
+        GoalCondition::Livestock {
+            building, count, ..
+        } => {
+            unlocked.contains(building)
+                || d.start
+                    .buildings
+                    .iter()
+                    .filter(|b| b.kind == *building)
+                    .count()
+                    >= *count as usize
+        }
         GoalCondition::Produced { material, .. } => match material.as_str() {
             "tools" | "tiles" => available("workshop", unlocked, d),
             "meals" => available("kitchen", unlocked, d),

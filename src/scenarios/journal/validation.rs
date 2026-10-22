@@ -41,7 +41,7 @@ pub fn check(d: &Definition, report: &mut Report) {
                 report.push("journal.chapters","missing_delivery_destination","Choose an existing starting building with a receiving inventory, a construction blueprint, or the arrival store.");
             }
             if !d.rules.logistics && needs_production(&goal.condition) {
-                report.push("journal.chapters","disabled_production_goal","Enable materials, hauling and resident work before requiring preparation or resident deliveries.");
+                report.push("journal.chapters","disabled_production_goal","Enable materials, hauling and resident work before requiring preparation, resident deliveries or material plots.");
             }
             if !d.rules.climate && needs_climate(&goal.condition) {
                 report.push(
@@ -54,7 +54,7 @@ pub fn check(d: &Definition, report: &mut Report) {
                 report.push(
                     "journal.chapters",
                     "missing_goal_region",
-                    "Choose an existing named region for each regional building goal.",
+                    "Choose an existing named region for each regional goal.",
                 );
             }
             if !condition(&goal.condition, 0, &mut nodes) {
@@ -116,6 +116,10 @@ pub(super) fn condition(c: &GoalCondition, depth: usize, nodes: &mut usize) -> b
         GoalCondition::Buildings {
             building, count, ..
         } => progression::BUILDINGS.contains(&building.as_str()) && (1..=256).contains(count),
+        GoalCondition::Crops { .. }
+        | GoalCondition::Orchards { .. }
+        | GoalCondition::Livestock { .. }
+        | GoalCondition::MaterialSites { .. } => land_use::valid(c),
         GoalCondition::Stored { material, count } => {
             economy::NAMES.contains(&material.as_str()) && (1..=economy::CAPACITY).contains(count)
         }
@@ -205,6 +209,18 @@ pub(super) fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
     match c {
         GoalCondition::Buildings {
             region: Some(id), ..
+        }
+        | GoalCondition::Crops {
+            region: Some(id), ..
+        }
+        | GoalCondition::Orchards {
+            region: Some(id), ..
+        }
+        | GoalCondition::Livestock {
+            region: Some(id), ..
+        }
+        | GoalCondition::MaterialSites {
+            region: Some(id), ..
         } => d.map.regions.iter().any(|r| r.id == *id),
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
             conditions.iter().all(|c| regions_exist(c, d))
@@ -215,7 +231,9 @@ pub(super) fn regions_exist(c: &GoalCondition, d: &Definition) -> bool {
 
 pub(super) fn needs_production(c: &GoalCondition) -> bool {
     match c {
-        GoalCondition::Produced { .. } | GoalCondition::Delivered { .. } => true,
+        GoalCondition::Produced { .. }
+        | GoalCondition::Delivered { .. }
+        | GoalCondition::MaterialSites { .. } => true,
         GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
             conditions.iter().any(needs_production)
         }

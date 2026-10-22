@@ -31,7 +31,7 @@ export class JournalEditor{
      if(value==='delivered'){const store=d.start.buildings.find(b=>b.kind==='warehouse'&&b.state==='completed');if(store)example.building=store.id;}
      if(value==='goal')example.goal=d.journal.chapters.flatMap(c=>c.goals).find(g=>g.id!==input.closest('[data-journal-goal]')?.dataset.journalGoal)?.id??'';
      for(const field of Object.keys(parent))delete parent[field];Object.assign(parent,example);
-    }else if(key==='building'&&['delivered','deliver_supplies'].includes(parent.kind)){if(value)parent.building=value;else delete parent.building;}else if(key==='region'){if(value)parent.region=value;else delete parent.region;}else if(key==='cents')parent[key]=Math.round(Number(value)*100);
+    }else if(key==='material'&&parent.kind==='material_sites'){parent.material=value;if(!['timber','bamboo'].includes(value))parent.stage='ready';}else if(key==='building'&&['delivered','deliver_supplies'].includes(parent.kind)){if(value)parent.building=value;else delete parent.building;}else if(key==='region'){if(value)parent.region=value;else delete parent.region;}else if(key==='cents')parent[key]=Math.round(Number(value)*100);
     else if(key==='day'||key==='time'){
      const day=key==='day'?Number(value):Math.floor(parent.minute/1440)+1,time=key==='time'?value:`${String(Math.floor(parent.minute%1440/60)).padStart(2,'0')}:${String(Math.floor(parent.minute%60)).padStart(2,'0')}`,[hours,minutes]=time.split(':').map(Number);
      parent.minute=(day-1)*1440+hours*60+minutes;
@@ -68,10 +68,20 @@ export class JournalEditor{
   const kinds=this.catalog.journal.conditions.map(option=>`<option value="${option.example.kind}" ${c.kind===option.example.kind?'selected':''} ${depth>=limits.condition_depth&&['all','any'].includes(option.example.kind)?'disabled':''}>${escape(option.name)}</option>`).join('');
   let html=`<label class="creator-field">Condition<select data-journal-path="${path}.kind">${kinds}</select></label>`;
   if(c.kind==='buildings')html+=select(path+'.building','Building',c.building,this.catalog.buildings.map(b=>[b.id,allBuildingArt[b.id]?.name??b.id.replaceAll('_',' ')]))+field(path+'.count','Completed buildings',c.count,{type:'number',min:1,max:target.buildings,step:1})+select(path+'.credit','Which buildings count?',c.credit,[['present','All completed buildings, including the starting settlement'],['after_activation',goal.event?'Completed after the scenario starts, and still standing':'Completed after this goal starts, and still standing']]);
-  if(c.kind==='buildings'){
+  if(['buildings','crops','orchards','livestock','material_sites'].includes(c.kind)){
    const regions=this.definition.map.regions??[],options=[['','Anywhere on the map'],...regions.map(r=>[r.id,r.title])];
    if(c.region&&!regions.some(r=>r.id===c.region))options.push([c.region,'Missing region · choose another area']);
    html+=select(path+'.region','Where must the full footprint fit?',c.region??'',options)+(c.region?'':'<p>Draw named regions on the map to target a particular area.</p>');
+  }
+  if(['crops','orchards','livestock','material_sites'].includes(c.kind)){
+   const land=this.catalog.journal.land_use,stages=c.kind==='crops'?land.crop_stages:c.kind==='orchards'?land.orchard_stages:c.kind==='livestock'?land.animal_stages:land.source_stages.filter(s=>['timber','bamboo'].includes(c.material)||s.id==='ready'),options=stages.map(s=>[s.id,s.name]);
+   if(!options.some(([id])=>id===c.stage))options.push([c.stage,'Unavailable stage · choose a supported state']);
+   if(c.kind==='crops')html+=select(path+'.crop','Current crop',c.crop,land.crops.map(crop=>[crop,crop]));
+   if(c.kind==='livestock')html+=select(path+'.building','Animal enclosure',c.building,land.animal_buildings.map(b=>[b,allBuildingArt[b]?.name??b]));
+   if(c.kind==='material_sites')html+=select(path+'.material','Local material',c.material,land.materials.map(m=>[m,m]));
+   html+=select(path+'.stage','Required current state',c.stage,options)+field(path+'.count',c.kind==='livestock'?'Qualifying enclosures · not individual animals':'Qualifying plots',c.count,{type:'number',min:1,max:land.limit,step:1})+'<p>Current assets count, including the starting settlement. No harvest, extraction or care-work history is credited. Completed goals stay credited. Projects and buildings being moved or removed do not count; regional goals require the full footprint inside the area.</p>';
+   if(c.kind==='livestock')html+='<p>Care means an unexpired goat-care period, inspected bees with nearby flowering forage, or hens with an active paid feeding batch. An occupied enclosure alone does not prove care or output.</p>';
+   if(c.kind==='material_sites')html+='<p>Harvestable means at least eight timber units or one unit of another material can be taken through normal extraction rules. Cleared plots do not count. Finite deposits can be exhausted. Requires materials, hauling and resident work.</p>';
   }
   if(c.kind==='stored')html+=select(path+'.material','Material',c.material,this.catalog.materials.map(m=>[m,m.replaceAll('_',' ')]))+field(path+'.count','Unreserved units at stores',c.count,{type:'number',min:1,max:target.stored,step:1})+'<p>Incoming orders and reserved materials do not count.</p>';
   if(c.kind==='funds')html+=field(path+'.cents','Shared fund · R$',c.cents/100,{type:'number',min:0,max:target.funds/100,step:.01});
