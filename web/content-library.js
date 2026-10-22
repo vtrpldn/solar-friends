@@ -3,6 +3,7 @@ export class LibraryConflict extends Error {
   constructor(){super('Another tab changed this creation. Reload it or save your work as a copy.');this.name='LibraryConflict';}
 }
 const clone=value=>structuredClone(value);
+const recordKind=store=>({projects:'project',runs:'run',residents:'resident'})[store];
 const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title:record.title,revision:record.revision,updatedAt:record.updatedAt,sessionKind:record.sessionKind,projectId:record.projectId,residentBalance:(record.definition??record.checkpoint?.definition)?.start?.resident_balance??'balanced'});
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
@@ -18,10 +19,10 @@ export class ContentLibrary extends EventTarget {
   }
   async #db(){
     if(!this.#opening)this.#opening=new Promise((resolve,reject)=>{
-      const request=indexedDB.open(this.name,1);let blocked=false;
+      const request=indexedDB.open(this.name,2);let blocked=false;
       request.onupgradeneeded=()=>{
-        for(const name of ['projects','runs','heads'])request.result.createObjectStore(name,{keyPath:name==='heads'?'key':'id'});
-        request.transaction.objectStore('heads').createIndex('kind','kind',{unique:false});
+        for(const name of ['projects','runs','residents','heads'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:name==='heads'?'key':'id'});
+        const heads=request.transaction.objectStore('heads');if(!heads.indexNames.contains('kind'))heads.createIndex('kind','kind',{unique:false});
       };
       request.onblocked=()=>{blocked=true;reject(Error('Close other Solar Friends tabs to finish opening the creation library.'));};
       request.onerror=()=>{this.#opening=null;reject(request.error);};
@@ -63,9 +64,9 @@ export class ContentLibrary extends EventTarget {
           if(result){
             result.id=id;result.revision=(previous?.revision??0)+1;
             result.updatedAt=Math.max(Date.now(),(previous?.updatedAt??0)+1);
-            records.put(result);tx.objectStore('heads').put(header(store==='projects'?'project':'run',result));
+            records.put(result);tx.objectStore('heads').put(header(recordKind(store),result));
           }else{
-            records.delete(id);tx.objectStore('heads').delete(`${store==='projects'?'project':'run'}:${id}`);
+            records.delete(id);tx.objectStore('heads').delete(`${recordKind(store)}:${id}`);
           }
         }catch(cause){error=cause;tx.abort();}
       };
@@ -78,6 +79,14 @@ export class ContentLibrary extends EventTarget {
   }
   listProjects(){return this.#list('project');}
   listRuns(){return this.#list('run');}
+  listResidentPresets(){return this.#list('resident');}
+  getResidentPreset(id){return this.#read('residents',id);}
+  saveResidentPreset({id,file},expectedRevision=null){
+    if(file?.format!=='solar-friends-resident'||file.schema!==1||typeof file.resident?.name!=='string'||'id' in file.resident||new TextEncoder().encode(JSON.stringify(file)).length>64*1024)throw Error('This resident preset cannot be stored.');
+    const data=clone(file);
+    return this.#write('residents',id,expectedRevision,()=>({format:'solar-friends-resident-preset',schema:1,title:data.resident.name,file:data}));
+  }
+  deleteResidentPreset(id,expectedRevision){return this.#write('residents',id,expectedRevision,()=>null);}
   getProject(id){return this.#read('projects',id);}
   getRun(id){return this.#read('runs',id);}
   async saveProject({id,checkpoint,view},expectedRevision=null){

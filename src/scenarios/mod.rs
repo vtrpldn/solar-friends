@@ -8,6 +8,7 @@ pub(crate) use biomes::Biome;
 mod definition;
 pub(crate) mod experience;
 mod relationships;
+mod resident_presets;
 mod residents;
 pub(crate) use definition::*;
 
@@ -172,6 +173,10 @@ impl Game {
         map.nature = Some(land::vegetation::default_nature(seed, map.camp));
         map.deposits = Some(land::default_deposits(seed));
         serde_json::to_string(&map).unwrap()
+    }
+
+    pub fn validate_resident_preset(&self, raw: &str, unrestricted: bool) -> String {
+        serde_json::to_string(&resident_presets::validate(raw, unrestricted)).unwrap()
     }
 
     pub fn scenario_catalog(&self) -> String {
