@@ -7,7 +7,7 @@ export async function singleHairFrame({body,binding,registration,image,sourceHas
  return registeredHairFrame({body,binding,registration,image,sourceHash});
 }
 export async function registeredHairFrame({body,binding,registration,image,sourceHash}){
- if(registration.schema!==1||registration.sheet!=='base'||!Number.isInteger(registration.index)||registration.index<0||registration.index>11||registration.size!==1254||!/^[a-f0-9]{64}$/.test(sourceHash??'')||registration.partSha256!==sourceHash||canonical(registration.body)!==canonical(binding)||body.width!==256||body.height!==256||image.width!==1254||image.height!==1254)throw Error('Review the changed hair/body registration before composing this pose.');
+ if(registration.schema!==1||registration.sheet!=='base'||!Number.isInteger(registration.index)||registration.index<0||registration.index>15||registration.size!==1254||!/^[a-f0-9]{64}$/.test(sourceHash??'')||registration.partSha256!==sourceHash||canonical(registration.body)!==canonical(binding)||body.width!==256||body.height!==256||image.width!==1254||image.height!==1254)throw Error('Review the changed hair/body registration before composing this pose.');
  const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',body.getContext('2d').getImageData(0,0,256,256).data))].map(n=>n.toString(16).padStart(2,'0')).join('');
  if(digest!==binding.frames.base[registration.index])throw Error('The prepared body pose changed.');
  const raw=document.createElement('canvas');raw.width=raw.height=1254;const rawContext=raw.getContext('2d');rawContext.drawImage(image,0,0);const audit=auditCharacterPartRegion(rawContext.getImageData(0,0,1254,1254),registration.bounds);

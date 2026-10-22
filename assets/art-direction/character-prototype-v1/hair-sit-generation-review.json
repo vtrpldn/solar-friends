@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "status": "Prototype only, not a complete or player-selectable hairstyle",
+  "why": "Keep appearance independent of activity seating while preserving original body source pixels and whole-frame coordinates.",
+  "generations": [
+    {
+      "key": "hair_sit12_composite_v1",
+      "prompt": "Use case: precise-object-edit. Registered seated resident reference for modular game layers.\nInput1 is the EXACT original bald seated body target on1254-square transparent canvas. Input2 shows the same body with a GREEN HAIR SHAPE defining the compact crown, high forehead opening and ear notch. Input3 is the short warm-brown painted curl material reference. Input4 is BENTO, a style/proportion reference ONLY for the small rustic wooden stool; do not copy his body, clothing or head coordinates.\nKeep the COMPLETE ORIGINAL BODY at its exact size, pose, face, ears, arms, hands, clothes, boots, ground anchor and original canvas coordinates. Change ONLY: add short brown painted curls following input2's green cap, and add a small simple timber stool directly UNDER the existing seated hips. The stool supports the original buttocks at their current height, with a modest square timber seat and four short sturdy legs, matching Bento's broad painted wood grain/scale. Body, thighs and legs naturally occlude the stool; do not alter the resident to fit it. No armchair, backrest, cushion, ground platform or extra props.\nPreserve the upright seated posture and original hands resting on the knees.\nEyes, eyebrows, face and ears stay visible. Match reference curls and upper-left illumination; no hanging curl/ear loop or green guide pixels. Return full body WITH hair and stool, SAME1254x1254 transparent canvas, mostly empty margin around the whole figure. Do not recenter, crop, stretch, enlarge, redraw the original body or create a ground shadow/background. This is a geometry reference for extracting hair and stool as SEPARATE layers; it will not replace the original body source.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-body.png",
+          "sha256": "1e09e8520bf56bc49cf9a243cc578553420a7d99795b01e7b136d9edf49061f9"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-silhouette-guide.png",
+          "sha256": "0db8a4d2b311d812867efd6694926191ca783cbc8aae4c0d4cbcbf119d35bffc"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+          "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/seated-bento-reference.png",
+          "sha256": "7252ee8b77efc0cb7acd9152509fc27af062fe6aa1101730d95dccd7c242a552"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-27873d98-977e-41b2-a2e9-462149b3a953.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-sit-12-composite-candidate-v1.png",
+      "verdict": "Reference only; generated body not installed; shifted head/hair made pose12 extraction fail.",
+      "sha256": "970473b0625ddf9e7fa9361205e94418eb2ce15b75eaa97403f8677acd019969"
+    },
+    {
+      "key": "hair_sit13_composite_v1",
+      "prompt": "Use case: precise-object-edit. Registered seated resident reference for modular game layers.\nInput1 is the EXACT original bald seated body target on1254-square transparent canvas. Input2 shows the same body with a GREEN HAIR SHAPE defining the compact crown, high forehead opening and ear notch. Input3 is the short warm-brown painted curl material reference. Input4 is BENTO, a style/proportion reference ONLY for the small rustic wooden stool; do not copy his body, clothing or head coordinates.\nKeep the COMPLETE ORIGINAL BODY at its exact size, pose, face, ears, arms, hands, clothes, boots, ground anchor and original canvas coordinates. Change ONLY: add short brown painted curls following input2's green cap, and add a small simple timber stool directly UNDER the existing seated hips. The stool supports the original buttocks at their current height, with a modest square timber seat and four short sturdy legs, matching Bento's broad painted wood grain/scale. Body, thighs and legs naturally occlude the stool; do not alter the resident to fit it. No armchair, backrest, cushion, ground platform or extra props.\nPreserve the forward-leaning seated posture, with the head farther right and lower than the upright poses.\nEyes, eyebrows, face and ears stay visible. Match reference curls and upper-left illumination; no hanging curl/ear loop or green guide pixels. Return full body WITH hair and stool, SAME1254x1254 transparent canvas, mostly empty margin around the whole figure. Do not recenter, crop, stretch, enlarge, redraw the original body or create a ground shadow/background. This is a geometry reference for extracting hair and stool as SEPARATE layers; it will not replace the original body source.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-13-body.png",
+          "sha256": "f25ed7cc97978b65aca01b2f2966e372122983076ce785ac50bf8701b8320550"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-13-silhouette-guide.png",
+          "sha256": "ec3a38a5b5b9435c85c0f083091d3f8cd7f2cebe4fcc0b25463ff6fbb1ab8166"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+          "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/seated-bento-reference.png",
+          "sha256": "7252ee8b77efc0cb7acd9152509fc27af062fe6aa1101730d95dccd7c242a552"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1b9453ab-8e7b-4176-a34b-e4076ae52f16.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-sit-13-composite-candidate-v1.png",
+      "verdict": "Reference only; body not installed; source for separated hair and stool.",
+      "sha256": "e483dc5f5f903eabfccaa13c24be176b60fdcf45bacc9043fb66b3ef0e1c4df3"
+    },
+    {
+      "key": "hair_sit14_composite_v1",
+      "prompt": "Use case: precise-object-edit. Registered seated resident reference for modular game layers.\nInput1 is the EXACT original bald seated body target on1254-square transparent canvas. Input2 shows the same body with a GREEN HAIR SHAPE defining the compact crown, high forehead opening and ear notch. Input3 is the short warm-brown painted curl material reference. Input4 is BENTO, a style/proportion reference ONLY for the small rustic wooden stool; do not copy his body, clothing or head coordinates.\nKeep the COMPLETE ORIGINAL BODY at its exact size, pose, face, ears, arms, hands, clothes, boots, ground anchor and original canvas coordinates. Change ONLY: add short brown painted curls following input2's green cap, and add a small simple timber stool directly UNDER the existing seated hips. The stool supports the original buttocks at their current height, with a modest square timber seat and four short sturdy legs, matching Bento's broad painted wood grain/scale. Body, thighs and legs naturally occlude the stool; do not alter the resident to fit it. No armchair, backrest, cushion, ground platform or extra props.\nPreserve the upright seated posture and original hands resting on the knees.\nEyes, eyebrows, face and ears stay visible. Match reference curls and upper-left illumination; no hanging curl/ear loop or green guide pixels. Return full body WITH hair and stool, SAME1254x1254 transparent canvas, mostly empty margin around the whole figure. Do not recenter, crop, stretch, enlarge, redraw the original body or create a ground shadow/background. This is a geometry reference for extracting hair and stool as SEPARATE layers; it will not replace the original body source.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-14-body.png",
+          "sha256": "6d7a9971b65aae09eaa0aedf476a42630309908344cd732709abb21b4ad7a81e"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-14-silhouette-guide.png",
+          "sha256": "5a27edf90983f48cf5b31e5f982ae9f5d53b65aa4d0d3a8fb7c0b56cda6af933"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+          "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/seated-bento-reference.png",
+          "sha256": "7252ee8b77efc0cb7acd9152509fc27af062fe6aa1101730d95dccd7c242a552"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-07fb9fea-1715-4c2e-8496-e16e64f94c1f.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-sit-14-composite-candidate-v1.png",
+      "verdict": "Reference only; body not installed; source for separated hair and stool.",
+      "sha256": "36c87c8247fa923d7c375a509980151b3d2b07e993de98398ad9daf6c7ed598a"
+    },
+    {
+      "key": "hair_sit15_composite_v1",
+      "prompt": "Use case: precise-object-edit. Registered seated resident reference for modular game layers.\nInput1 is the EXACT original bald seated body target on1254-square transparent canvas. Input2 shows the same body with a GREEN HAIR SHAPE defining the compact crown, high forehead opening and ear notch. Input3 is the short warm-brown painted curl material reference. Input4 is BENTO, a style/proportion reference ONLY for the small rustic wooden stool; do not copy his body, clothing or head coordinates.\nKeep the COMPLETE ORIGINAL BODY at its exact size, pose, face, ears, arms, hands, clothes, boots, ground anchor and original canvas coordinates. Change ONLY: add short brown painted curls following input2's green cap, and add a small simple timber stool directly UNDER the existing seated hips. The stool supports the original buttocks at their current height, with a modest square timber seat and four short sturdy legs, matching Bento's broad painted wood grain/scale. Body, thighs and legs naturally occlude the stool; do not alter the resident to fit it. No armchair, backrest, cushion, ground platform or extra props.\nThis is the closed-eye sleeping pose. Preserve the original closed eyes, relaxed seated posture and hands on knees.\nEyes, eyebrows, face and ears stay visible. Match reference curls and upper-left illumination; no hanging curl/ear loop or green guide pixels. Return full body WITH hair and stool, SAME1254x1254 transparent canvas, mostly empty margin around the whole figure. Do not recenter, crop, stretch, enlarge, redraw the original body or create a ground shadow/background. This is a geometry reference for extracting hair and stool as SEPARATE layers; it will not replace the original body source.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-15-body.png",
+          "sha256": "6fc55196b106679bace0ae2850b752fac0367eadf58d8484d3827d18089c82d1"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-15-silhouette-guide.png",
+          "sha256": "ae22cef5344e90a20e4ea2293a935a8af6b90dd921185554e932e0b195b5f292"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+          "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/seated-bento-reference.png",
+          "sha256": "7252ee8b77efc0cb7acd9152509fc27af062fe6aa1101730d95dccd7c242a552"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-03c47b71-ef98-4399-8ddf-8db479d861d8.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-sit-15-composite-candidate-v1.png",
+      "verdict": "Reference only; body not installed; source for separated hair and stool.",
+      "sha256": "7218c87c56dbe8af628669ecfd5e748d9f8cea6c944957a48054f259962950a6"
+    },
+    {
+      "key": "hair_sit12_v1",
+      "prompt": "Use case: background-extraction. Registered TWO-PART game atlas from this seated resident.\nRemove the ENTIRE resident, leaving ONLY two separate objects at their EXACT original positions on the same1254-square transparent canvas: (1) the existing short brown curly HAIR near the head, and (2) the small wooden STOOL under the hips. Hair stays in the upper half; stool stays in the lower part. Do not move, recenter, resize, enlarge, crop or rearrange either object.\nHair: retain the existing painted curls, crown and forehead/ear openings exactly. Remove all ears, scalp, face, skin, eyebrows and eyes; openings must be transparent, with no skin-coloured backing or fragments.\nStool: preserve its original seat height, original footprint and four short wooden legs. Complete the small areas of seat/legs hidden by the resident so this is a complete standalone stool behind a separately drawn body. Match the existing perspective, wood grain and upper-left lighting. Keep it directly in its original position; do not make it a larger chair or add a backrest, cushion, floor, shadow or platform.\nRemove every trace of body, arms, hands, shorts and boots, including skin/cloth between stool legs. All gaps around/between the objects and between stool legs are genuine transparent alpha. Return ONLY unchanged hair and the complete matching stool, mostly empty transparent1254x1254 canvas. No labels, borders, grid or background. This will be read as separate appearance/activity parts at their original coordinates, not as a centered product picture.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-12-composite-candidate-v1.png",
+          "sha256": "970473b0625ddf9e7fa9361205e94418eb2ce15b75eaa97403f8677acd019969"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-480c9478-8c42-40f5-9b17-2cf42b5864e3.png",
+      "candidate": "web/art/characters/prototype-v1/hair-seat-base-12-candidate-v1.png",
+      "verdict": "Hair rejected: 0.959 coverage and wrong scalp alignment; lower stool retained as lab activity draft.",
+      "sha256": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854"
+    },
+    {
+      "key": "hair_sit13_v1",
+      "prompt": "Use case: background-extraction. Registered TWO-PART game atlas from this seated resident.\nRemove the ENTIRE resident, leaving ONLY two separate objects at their EXACT original positions on the same1254-square transparent canvas: (1) the existing short brown curly HAIR near the head, and (2) the small wooden STOOL under the hips. Hair stays in the upper half; stool stays in the lower part. Do not move, recenter, resize, enlarge, crop or rearrange either object.\nHair: retain the existing painted curls, crown and forehead/ear openings exactly. Remove all ears, scalp, face, skin, eyebrows and eyes; openings must be transparent, with no skin-coloured backing or fragments.\nStool: preserve its original seat height, original footprint and four short wooden legs. Complete the small areas of seat/legs hidden by the resident so this is a complete standalone stool behind a separately drawn body. Match the existing perspective, wood grain and upper-left lighting. Keep it directly in its original position; do not make it a larger chair or add a backrest, cushion, floor, shadow or platform.\nRemove every trace of body, arms, hands, shorts and boots, including skin/cloth between stool legs. All gaps around/between the objects and between stool legs are genuine transparent alpha. Return ONLY unchanged hair and the complete matching stool, mostly empty transparent1254x1254 canvas. No labels, borders, grid or background. This will be read as separate appearance/activity parts at their original coordinates, not as a centered product picture.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-13-composite-candidate-v1.png",
+          "sha256": "e483dc5f5f903eabfccaa13c24be176b60fdcf45bacc9043fb66b3ef0e1c4df3"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a06623ec-49a2-459d-948d-4cb7ce365f45.png",
+      "candidate": "web/art/characters/prototype-v1/hair-seat-base-13-candidate-v1.png",
+      "verdict": "Hair and separate stool pass fixed bounds; production draft only, temporal/seating art review remains.",
+      "sha256": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec"
+    },
+    {
+      "key": "hair_sit14_v1",
+      "prompt": "Use case: background-extraction. Registered TWO-PART game atlas from this seated resident.\nRemove the ENTIRE resident, leaving ONLY two separate objects at their EXACT original positions on the same1254-square transparent canvas: (1) the existing short brown curly HAIR near the head, and (2) the small wooden STOOL under the hips. Hair stays in the upper half; stool stays in the lower part. Do not move, recenter, resize, enlarge, crop or rearrange either object.\nHair: retain the existing painted curls, crown and forehead/ear openings exactly. Remove all ears, scalp, face, skin, eyebrows and eyes; openings must be transparent, with no skin-coloured backing or fragments.\nStool: preserve its original seat height, original footprint and four short wooden legs. Complete the small areas of seat/legs hidden by the resident so this is a complete standalone stool behind a separately drawn body. Match the existing perspective, wood grain and upper-left lighting. Keep it directly in its original position; do not make it a larger chair or add a backrest, cushion, floor, shadow or platform.\nRemove every trace of body, arms, hands, shorts and boots, including skin/cloth between stool legs. All gaps around/between the objects and between stool legs are genuine transparent alpha. Return ONLY unchanged hair and the complete matching stool, mostly empty transparent1254x1254 canvas. No labels, borders, grid or background. This will be read as separate appearance/activity parts at their original coordinates, not as a centered product picture.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-14-composite-candidate-v1.png",
+          "sha256": "36c87c8247fa923d7c375a509980151b3d2b07e993de98398ad9daf6c7ed598a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7243e655-adff-49f8-9a5f-e51d98b954d6.png",
+      "candidate": "web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png",
+      "verdict": "Hair superseded: one faint stray pixel altered shirt channel at prepared pixel75,121; lower stool retained.",
+      "sha256": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4"
+    },
+    {
+      "key": "hair_sit15_v1",
+      "prompt": "Use case: background-extraction. Registered TWO-PART game atlas from this seated resident.\nRemove the ENTIRE resident, leaving ONLY two separate objects at their EXACT original positions on the same1254-square transparent canvas: (1) the existing short brown curly HAIR near the head, and (2) the small wooden STOOL under the hips. Hair stays in the upper half; stool stays in the lower part. Do not move, recenter, resize, enlarge, crop or rearrange either object.\nHair: retain the existing painted curls, crown and forehead/ear openings exactly. Remove all ears, scalp, face, skin, eyebrows and eyes; openings must be transparent, with no skin-coloured backing or fragments.\nStool: preserve its original seat height, original footprint and four short wooden legs. Complete the small areas of seat/legs hidden by the resident so this is a complete standalone stool behind a separately drawn body. Match the existing perspective, wood grain and upper-left lighting. Keep it directly in its original position; do not make it a larger chair or add a backrest, cushion, floor, shadow or platform.\nRemove every trace of body, arms, hands, shorts and boots, including skin/cloth between stool legs. All gaps around/between the objects and between stool legs are genuine transparent alpha. Return ONLY unchanged hair and the complete matching stool, mostly empty transparent1254x1254 canvas. No labels, borders, grid or background. This will be read as separate appearance/activity parts at their original coordinates, not as a centered product picture.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-15-composite-candidate-v1.png",
+          "sha256": "7218c87c56dbe8af628669ecfd5e748d9f8cea6c944957a48054f259962950a6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a21b39c0-9e17-4d01-b8a2-5fad86d993a4.png",
+      "candidate": "web/art/characters/prototype-v1/hair-seat-base-15-candidate-v1.png",
+      "verdict": "Hair and separate stool pass fixed bounds; production draft only, temporal/seating art review remains.",
+      "sha256": "39fbf81324795e5818bb5ca24f3b62fb46044ed126597d503130ef9618bbc148"
+    },
+    {
+      "key": "hair_sit12_composite_v2",
+      "prompt": "Use case: precise-object-edit. Add a compact short hairstyle to the EXACT seated body, preserving registration.\nInput1 is the original bald seated resident,1254-square transparent canvas. Input2 is that same body with GREEN desired hair silhouette: its position and outline are authoritative. Input3 supplies only warm short brown painted curls, NOT its old position.\nPaint ONLY that compact hair onto input1's scalp following the green shape. Return the COMPLETE ORIGINAL BODY WITH HAIR, exact body/face/ear/arm/hand/clothes/boot proportions, position and canvas. In this pose the head centre is near x510,y350. Hair should begin near x360,y190, cover the crown and end no farther right than x655. Keep the high forehead hairline and visible ear. Do not move the head rightward or copy the standing reference's coordinates.\nNo stool or new object in this reference. Keep original seated posture and original ground anchor; do not recenter, crop, enlarge, redraw or stretch the body. Match input3 broad painted curl clusters and upper-left lighting; no hanging side curl/ear loop, green pixels, face obstruction, labels, shadow, ground or background. True transparency. Only hair changes; original non-hair pixels should stay unchanged.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-body.png",
+          "sha256": "1e09e8520bf56bc49cf9a243cc578553420a7d99795b01e7b136d9edf49061f9"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-silhouette-guide.png",
+          "sha256": "0db8a4d2b311d812867efd6694926191ca783cbc8aae4c0d4cbcbf119d35bffc"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+          "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-6b813d74-c8bd-4229-ae9a-1e53cde1b9de.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-sit-12-composite-candidate-v2.png",
+      "verdict": "Reference only; body not installed; extraction v2 exposed scalp.",
+      "sha256": "5ab2d8a168bb6d0f6357eb3cf165aa89370c727e0bfa127c666b341488ae0903"
+    },
+    {
+      "key": "hair_sit12_v2",
+      "prompt": "Use case: background-extraction. Registered hair-only game layer.\nRemove absolutely everything from this image EXCEPT the existing short brown curly hair. Retain the hair's EXACT original1254-square canvas coordinates, original scale, crown, high forehead opening and painted curls. Do not move, recenter, enlarge, normalize, crop or redraw the cap.\nRemove body, skin/scalp, face, eyebrows, eyes, BOTH EARS, arms/hands, clothes and boots entirely. Face/ear openings must be genuine transparent alpha, no skin fragments or head backing. Shorten no existing part; simply extract the painted hair as it is, and do not invent a dangling ear loop.\nReturn SAME1254x1254 mostly empty transparent canvas with the small original cap near x370\u2013630,y200\u2013380, in its exact original location. No stool, new object, background, shadow, labels or guides. This overlays an unchanged body without independent fitting.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-12-composite-candidate-v2.png",
+          "sha256": "5ab2d8a168bb6d0f6357eb3cf165aa89370c727e0bfa127c666b341488ae0903"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b1b8810b-4365-41d2-bcae-103892a93b56.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v2.png",
+      "verdict": "Rejected visually despite 0.99753 region coverage: bald crescent above cap.",
+      "sha256": "9076356cf9774a029683dc43c6286523465c4d0615e516b7de5dafa4b33a8dcc"
+    },
+    {
+      "key": "hair_sit12_v3",
+      "prompt": "Create one transparent sprite PART on exactly 1254 by 1254 canvas. Image 1 is a precise full-canvas geometry guide: replace the green scalp cap including its translucent interior with painted short warm brown curls. Keep its exact full-canvas position and silhouette, approximately x350..645 y190..390. The interior of this cap MUST be opaque hair so it covers the bald crown; the only transparent hole is below the fringe where the face would be. Image 2 is hair material/style reference only: warm hand painted rounded brown curl groups, upper-left light, restrained highlights. Do NOT copy its stool or positions. Output ONLY the painted hair cap at the Image 1 scalp position. Remove ALL green, body, skin, face, ears, clothes, shoes, stool and guide marks. Do not center, enlarge or move the cap. Canvas outside the single hair piece is truly transparent. No skin-colored arcs or ear loops. This is an overlay on the original seated resident whose scalp must be fully covered with short curls while the eyes and face remain visible.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-silhouette-guide.png",
+          "sha256": "0db8a4d2b311d812867efd6694926191ca783cbc8aae4c0d4cbcbf119d35bffc"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png",
+          "sha256": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-02d18931-45d4-4dec-9f02-efedb02345a7.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v3.png",
+      "verdict": "Rejected: 0.89532 coverage, oversized sides and fringe obscures eyes.",
+      "sha256": "2ccd5ab5836b34014313ed7f9436f41ef4a25cc99e0bb1a75e41a0296c1fcfbc"
+    },
+    {
+      "key": "hair_sit12_v4",
+      "prompt": "Edit image1, preserving its transparent 1254-square canvas and exact scalp cap position. It is too bulky at the sides and fringe. Repaint it as a SHORTER cropped curly hairstyle. Keep the crown at its current y190 and brown painted curl material unchanged. Trim the left/back outline inward to x355 or greater (currently x310), removing the entire dangling left ear-loop and sideburn. Raise the lower-left outline to y385 or above (currently y500). Trim right edge inward to x640 or less and raise fringe to reveal eyes. The whole painted silhouette must stay within x343..676, y157..451, with scalp crown opaque. Image2 is exact geometry: match the green cap envelope and its lower fringe, NOT the skin. Output hair only, with no body, face, skin, ears, green, stool or guide marks. Do not shift or rescale the whole cap. Repaint the excess curls along sides and bottom as requested. Genuine transparent background.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-curls-base-12-candidate-v3.png",
+          "sha256": "2ccd5ab5836b34014313ed7f9436f41ef4a25cc99e0bb1a75e41a0296c1fcfbc"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-silhouette-guide.png",
+          "sha256": "0db8a4d2b311d812867efd6694926191ca783cbc8aae4c0d4cbcbf119d35bffc"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-424cd1d8-901f-4fff-9968-96f4c03e9ac1.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v4.png",
+      "verdict": "Rejected visually: enlarged and shifted cap, not the authored scalp location.",
+      "sha256": "51206ccd161acf7921105cc35ce9753245cb2741fb78646b632562f304ef45d2"
+    },
+    {
+      "key": "hair_sit12_composite_v5",
+      "prompt": "Edit image1 on its existing 1254x1254 transparent full-body canvas. Replace ONLY the green cap and the bald scalp inside it with warm brown short curls matching image3. Image2 is the original identical seated body for precise restoration: leave ALL body face eyes nose ears skin clothes hands legs boots and exact positions unchanged. The painted hair must follow image1 green cap at x350..645,y190..390, covering the complete scalp crown and ending above eyebrows with short sides above ears. Preserve the full-body composition and transparent margins EXACTLY: never center or enlarge the character or hair. No stool or props. Image3 is only curl material and identity reference, NOT its pose/location. The finished result is the entire original seated person with short brown curly hair, no green, no markings, true transparent background. Warm painted Brazilian countryside game style, consistent upper-left light. No extra sideburns or ear loops.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-silhouette-guide.png",
+          "sha256": "0db8a4d2b311d812867efd6694926191ca783cbc8aae4c0d4cbcbf119d35bffc"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-base-12-body.png",
+          "sha256": "1e09e8520bf56bc49cf9a243cc578553420a7d99795b01e7b136d9edf49061f9"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-14-composite-candidate-v1.png",
+          "sha256": "36c87c8247fa923d7c375a509980151b3d2b07e993de98398ad9daf6c7ed598a"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1d4f9d04-9d6a-4493-a835-02d08ca523e8.png",
+      "candidate": "assets/art-direction/character-prototype-v1/hair-sit-12-composite-candidate-v5.png",
+      "verdict": "Reference only; body not installed; improved scalp registration used for extraction.",
+      "sha256": "d1fdf292f5f116ef8255941b0a46fe5eaa8bf7ff302ed74e5a5458e0a336692c"
+    },
+    {
+      "key": "hair_sit12_v5",
+      "prompt": "Extract ONLY the brown curly hair from this exact 1254x1254 full-body sprite. Keep the exact existing canvas dimensions, hair location, hair silhouette and size: approximately x352..640, y188..400. Delete the entire person except the hair, including face, eyebrows, eyes, ears, skin, neck, body, clothing and shoes. The cap interior is opaque brown painted curls, with transparent opening only below the existing fringe. Do not center, shift, enlarge, shrink or reshape the hair. Preserve the short curls exactly where they are on this full-body canvas. Output is a small isolated hair cap in the upper left-central area of an otherwise genuinely transparent 1254-square image. No stool, text, guides, skin fragments or ear loops.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/hair-sit-12-composite-candidate-v5.png",
+          "sha256": "d1fdf292f5f116ef8255941b0a46fe5eaa8bf7ff302ed74e5a5458e0a336692c"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-adf82e7c-4cbf-4c3f-8172-775dd8e95f39.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v5.png",
+      "verdict": "Lab production draft: coverage1, scalp covered, eyes visible, body below head unchanged; temporal polish remains.",
+      "sha256": "31555d1e8bbab8161680e9f331e4362832ca24473064d30547b8e21395c422e0"
+    },
+    {
+      "key": "hair_sit14_v2",
+      "prompt": "Edit this exact 1254 by 1254 transparent atlas. Keep ONLY the existing small brown curly hair cap in the upper part in EXACTLY its current location, scale and shape, around x360..650 y210..455. Remove the entire wooden stool from the lower half and every other non-hair mark or faint stray pixel. Leave the complete hair cap untouched, do not recenter or zoom. All pixels outside the hair cap should be fully transparent, including the empty middle area between y480 and the bottom. No stool, body, skin, guides or other objects. This is a registered hair-only overlay; exact full-canvas placement is essential.",
+      "references": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png",
+          "sha256": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ec75d514-70fe-49f8-8f3d-cadf293e5b55.png",
+      "candidate": "web/art/characters/prototype-v1/hair-curls-base-14-candidate-v2.png",
+      "verdict": "Lab production draft: coverage0.99456, removes faint non-hair residue; body below head unchanged; temporal polish remains.",
+      "sha256": "8f49e66d8cca01f628a78741221dfc7e4b02de12534e246b5ebb4b46cbe1737c"
+    }
+  ],
+  "review": {
+    "registration": "web/art/characters/prototype-v1/hair-sit-v1-registration.json",
+    "integration": "assets/art-direction/character-prototype-v1/hair-sit-v1-integration-report.json",
+    "limits": [
+      "Only base16 of all48 hairstyle poses now drafted; idle and activities remain.",
+      "Curl volume and fringe vary across poses; temporal polish remains.",
+      "Stool perspective, dimensions and cross-pose consistency remain draft, not final seating approval.",
+      "No native appearance recipes, portraits, regular player integration or full customization shipped.",
+      "Only fixed atlas partitions separate disjoint objects. No per-pose repositioning, fitting, clipping of misregistered hair, PNG pixel repair or threshold relaxation."
+    ]
+  }
+}

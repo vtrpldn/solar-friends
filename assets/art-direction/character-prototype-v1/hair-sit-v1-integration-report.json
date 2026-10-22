@@ -1,0 +1,48 @@
+{
+  "result": "PASS",
+  "scope": "Prototype only; equipment, temporal and full character review remain open",
+  "checks": [
+    {
+      "index": 12,
+      "hairCoverage": 1,
+      "seatCoverage": 1,
+      "bodySha256": "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590"
+    },
+    {
+      "index": 13,
+      "hairCoverage": 1,
+      "seatCoverage": 1,
+      "bodySha256": "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262"
+    },
+    {
+      "index": 14,
+      "hairCoverage": 0.9945593035908596,
+      "seatCoverage": 1,
+      "bodySha256": "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2"
+    },
+    {
+      "index": 15,
+      "hairCoverage": 1,
+      "seatCoverage": 1,
+      "bodySha256": "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+    }
+  ],
+  "denied": [
+    "base:8",
+    "idle:12",
+    "activities:12",
+    "incomplete",
+    "wrong-hash",
+    "wrong-size",
+    "fit-rectangle",
+    "outside-part",
+    "loose-threshold",
+    "empty-region"
+  ],
+  "used": [
+    12,
+    13,
+    14,
+    15
+  ]
+}

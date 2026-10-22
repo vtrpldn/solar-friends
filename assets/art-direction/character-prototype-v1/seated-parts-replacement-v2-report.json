@@ -1,0 +1,164 @@
+{
+  "poses": [
+    {
+      "index": 12,
+      "size": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "hair": {
+        "pixels": 38518,
+        "inside": 38423,
+        "bounds": [
+          363,
+          239,
+          676,
+          458
+        ],
+        "coverage": 0.9975336206448933,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seat": {
+        "pixels": 76237,
+        "inside": 76237,
+        "bounds": [
+          335,
+          204,
+          726,
+          514
+        ],
+        "coverage": 1,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seatBounds": [
+        240,
+        760,
+        600,
+        400
+      ]
+    },
+    {
+      "index": 13,
+      "size": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "hair": {
+        "pixels": 26200,
+        "inside": 26200,
+        "bounds": [
+          504,
+          275,
+          766,
+          454
+        ],
+        "coverage": 1,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seat": {
+        "pixels": 66194,
+        "inside": 66194,
+        "bounds": [
+          288,
+          236,
+          682,
+          502
+        ],
+        "coverage": 1,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seatBounds": [
+        240,
+        760,
+        600,
+        400
+      ]
+    },
+    {
+      "index": 14,
+      "size": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "hair": {
+        "pixels": 34841,
+        "inside": 34710,
+        "bounds": [
+          362,
+          214,
+          661,
+          466
+        ],
+        "coverage": 0.9962400619959243,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seat": {
+        "pixels": 81638,
+        "inside": 81638,
+        "bounds": [
+          273,
+          204,
+          660,
+          520
+        ],
+        "coverage": 1,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seatBounds": [
+        240,
+        760,
+        600,
+        400
+      ]
+    },
+    {
+      "index": 15,
+      "size": [
+        1254,
+        1254
+      ],
+      "sizeMatches": true,
+      "hair": {
+        "pixels": 28355,
+        "inside": 28355,
+        "bounds": [
+          381,
+          226,
+          654,
+          447
+        ],
+        "coverage": 1,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seat": {
+        "pixels": 80721,
+        "inside": 80721,
+        "bounds": [
+          273,
+          206,
+          670,
+          516
+        ],
+        "coverage": 1,
+        "minimumCoverage": 0.98,
+        "ok": true
+      },
+      "seatBounds": [
+        240,
+        760,
+        600,
+        400
+      ]
+    }
+  ]
+}
