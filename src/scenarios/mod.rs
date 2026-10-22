@@ -13,6 +13,7 @@ mod biomes;
 mod compile;
 pub(crate) use biomes::Biome;
 mod definition;
+mod releases;
 pub(crate) mod story_adapter;
 pub(crate) mod experience;
 mod farming;
@@ -94,6 +95,9 @@ pub(crate) fn parse(data: &str) -> Result<Definition, Report> {
     }
     let value: serde_json::Value = serde_json::from_str(data)
         .map_err(|_| Report::error("", "invalid_json", "This file is not a readable scenario."))?;
+    if value["format"] == releases::FORMAT {
+        return releases::definition(value);
+    }
     if value["format"] != FORMAT || value["schema"].as_u64() != Some(u64::from(SCHEMA)) {
         return Err(Report::error(
             "schema",
@@ -226,7 +230,7 @@ impl Game {
                 "inherited_recovery":recovery::catalog(kind),"appearances":if *kind=="home" {HOME_APPEARANCES.to_vec()}else{vec![]}})
         }).collect();
         serde_json::json!({"schema":SCHEMA,"format":FORMAT,"map_size":MAP_SIZE,
-            "official_story":{"opening":story_adapter::opening_journal(),"remaining_legacy_chapters":progression::CHAPTER_COUNT-1},"max_regions":32,"max_buildings":MAX_BUILDINGS,"max_residents":residents::MAX_RESIDENTS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"journal":journal::catalog(),"resident_routines":resident_preferences::catalog(),"resident_personality":personality::catalog(),"resident_experience":experience::catalog(),"resident_appearances":resident_appearance::catalog(),"resident_start_defaults":arrival::defaults(),"resident_presets":residents::founders(),"occupations":occupations::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"equipment":equipment::catalog(),"batteries":batteries::catalog(),"routes":{"limit":64,"kinds":["fresh","irrigation","greywater","sewage","electricity"]},"animals":animals::catalog(),"resource_sites":sites::catalog(),"orchards":orchards::catalog(),"farming":farming::catalog(),"liquid_classes":liquids::classes(),"supply_capacity":economy::CAPACITY,"food_freshness":economy::NAMES.iter().enumerate().filter_map(|(i,name)|freshness::lifetime(i).map(|life|serde_json::json!({"material":name,"lifetime_minutes":life}))).collect::<Vec<_>>(),"max_food_batches":economy::CAPACITY,"perishable_materials":economy::NAMES.iter().enumerate().filter(|(i,_)|freshness::lifetime(*i).is_some()).map(|(_,name)|*name).collect::<Vec<_>>(),"buildings":buildings})
+            "releases":releases::catalog(),"official_story":{"opening":story_adapter::opening_journal(),"remaining_legacy_chapters":progression::CHAPTER_COUNT-1},"max_regions":32,"max_buildings":MAX_BUILDINGS,"max_residents":residents::MAX_RESIDENTS,"weather":climate::Profile::default(),"biomes":biomes::presets(),"journal":journal::catalog(),"resident_routines":resident_preferences::catalog(),"resident_personality":personality::catalog(),"resident_experience":experience::catalog(),"resident_appearances":resident_appearance::catalog(),"resident_start_defaults":arrival::defaults(),"resident_presets":residents::founders(),"occupations":occupations::catalog(),"nature":land::vegetation::SPECIES,"habitats":land::habitat::HABITATS,"materials":economy::NAMES,"equipment":equipment::catalog(),"batteries":batteries::catalog(),"routes":{"limit":64,"kinds":["fresh","irrigation","greywater","sewage","electricity"]},"animals":animals::catalog(),"resource_sites":sites::catalog(),"orchards":orchards::catalog(),"farming":farming::catalog(),"liquid_classes":liquids::classes(),"supply_capacity":economy::CAPACITY,"food_freshness":economy::NAMES.iter().enumerate().filter_map(|(i,name)|freshness::lifetime(i).map(|life|serde_json::json!({"material":name,"lifetime_minutes":life}))).collect::<Vec<_>>(),"max_food_batches":economy::CAPACITY,"perishable_materials":economy::NAMES.iter().enumerate().filter(|(i,_)|freshness::lifetime(*i).is_some()).map(|(_,name)|*name).collect::<Vec<_>>(),"buildings":buildings})
         .to_string()
     }
 
