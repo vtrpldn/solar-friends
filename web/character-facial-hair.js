@@ -1,6 +1,6 @@
 import {residentClips} from './resident-animation.js';
 import {auditCharacterPartRegion} from './character-parts.js';
-// Internal art-review compositor. Public recipes do not expose incomplete parts.
+// Pose-bound composition shared by bundled facial parts and internal art review.
 // The crop comes from the original body reference, never from painted bounds.
 export function composeFacialHairPose({appearanceFrame,image,sourceHash,binding,registration,sheet,index}){
  const r=registration,crop=r?.crop;
@@ -36,7 +36,7 @@ export function composeFacialHairClip({provider,binding,entries,clip}){
 
 export function composeWorkingFacialHair(args){return composeFacialHairClip({...args,clip:'work'});}
 
-// Complete internal appearance provider: transitions may request any body pose.
+// Complete internal review provider: transitions may request any body pose.
 // It owns its overlays, but never owns or disposes the underlying body provider.
 export function composeFacialHairProvider({provider,binding,entries}){
  const keys=['base','idle','activities'].flatMap(sheet=>Array.from({length:16},(_,index)=>sheet+':'+index));

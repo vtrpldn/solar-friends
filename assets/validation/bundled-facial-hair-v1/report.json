@@ -1,0 +1,363 @@
+{
+  "variants": 48,
+  "comparisons": 888,
+  "returns": 96,
+  "refused": 6,
+  "cleanup": 6,
+  "cases": [
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "poses": 50
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "chestnut",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "espresso",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "black",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "black",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "silver",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "poses": 50
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "chestnut",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "espresso",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "black",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "black",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "silver",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "poses": 50
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "chestnut",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "espresso",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "black",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "black",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "silver",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "poses": 50
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "chestnut",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "espresso",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "black",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "black",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "silver",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "poses": 50
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "chestnut",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "espresso",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "black",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "black",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "silver",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "poses": 50
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "chestnut",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "espresso",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "black",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "black",
+      "hat": "straw-v1",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "silver",
+      "hat": "none",
+      "poses": 14
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "poses": 14
+    }
+  ],
+  "cache": {
+    "entries": 16,
+    "active": 0,
+    "queued": 0,
+    "pending": 0,
+    "maxEntries": 16,
+    "maxConcurrent": 2,
+    "maxQueued": 24,
+    "preparedHairFrames": 96,
+    "preparedHairRgbaBytes": 25165824,
+    "facialOverlayFrames": 48,
+    "facialOverlayRgbaBytes": 12582912,
+    "maximumFrames": 800,
+    "rgbaByteUpperBound": 209715200,
+    "decodedSources": 86
+  },
+  "oldBareRecipeUnchanged": true,
+  "sourceRequests": 9
+}

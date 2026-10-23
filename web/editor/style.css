@@ -42,6 +42,7 @@
 #character-creator .dialog-actions{display:flex;gap:8px}#character-creator .dialog-actions button{min-width:90px}#character-creator [data-character-done]{margin-left:auto}
 
 .character-choice-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px solid #c5ad7b;margin-bottom:10px}.character-choice-actions label,.character-choice-actions small{grid-column:1/-1;font-size:11px;line-height:1.5}.character-choice-actions small{color:#705230}#character-creator .character-choice-actions button{font-size:11px}.character-settings [role=tabpanel]{max-height:350px}
+.character-settings .resident-part-palettes .creator-field{margin:0}.character-settings .resident-part-options{margin-bottom:12px}#character-creator [data-character-page=Appearance]{max-height:410px}
 
 .character-choice-actions label{display:flex;align-items:center;gap:7px}
 

@@ -1,0 +1,61 @@
+{
+  "result": "PASS",
+  "biome": "cerrado",
+  "portableScenarioCleanImport": true,
+  "sourceHashes": {
+    "src/resident_appearance/parts.rs": "6faa0560e9ee6f8228c72f4dea4867499731547d0fe1226a657c698ca4117d17",
+    "web/resident-part-recipe.js": "483b844fd2487547dba9e81c0c0d8f3672e7875660e246df5a8241a5a64b50c1",
+    "web/resident-parts.js": "e2072319feb58e56a38ba2c351fb5f17c31e6af8fdcb67b24290c6ad4225e0e1",
+    "web/character-facial-hair-parts.js": "b4d9f0da0ad943c440848d0dc52821912e517e50d28d51dae9c73e8921e0a73b",
+    "web/pkg/solar_friends_bg.wasm": "c9c723d66ad0c0d41a2a8cae9e7c86b01a78d34b5e794d3170f7983cd4871365"
+  },
+  "authored": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v1",
+    "body": "neutral-v1",
+    "hair": "side-part-v1",
+    "materials": {
+      "skin": "copper",
+      "shirt": "teal",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "facialHair": "short-chestnut-v1"
+  },
+  "live": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v1",
+    "body": "neutral-v1",
+    "hair": "short-curls-v1",
+    "materials": {
+      "skin": "copper",
+      "shirt": "indigo",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "facialHair": "short-chestnut-v1"
+  },
+  "presetAppearance": {
+    "assetVersion": "resident-parts-v1",
+    "body": "neutral-v1",
+    "facialHair": "short-chestnut-v1",
+    "hair": "side-part-v1",
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "materials": {
+      "shirt": "teal",
+      "shoes": "graphite",
+      "shorts": "sage",
+      "skin": "copper"
+    },
+    "schema": 2
+  },
+  "portablePresetRoundTrip": true,
+  "authoredResidents": 6,
+  "partResidents": 2,
+  "scope": "Initial bundled body/outfit, two hairstyles, palettes, optional straw hat and short chestnut beard; broader customization remains incomplete"
+}

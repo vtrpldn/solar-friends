@@ -15,7 +15,7 @@ export function randomizeCharacter(person,locked,catalog,random=Math.random){
  const result=structuredClone(person);
  const pick=values=>{if(!values.length)throw Error('No supported choices are available.');const value=random();if(!Number.isFinite(value)||value<0||value>=1)throw Error('Invalid character random source.');return values[Math.floor(value*values.length)];};
  if(!locked.Identity)Object.assign(result,{name:pick(names),pronouns:'',biography:''});
- if(!locked.Appearance){if(person.appearance?.schema===2){const parts=catalog.resident_parts;result.appearance=residentPartRecipe({hair:pick(parts.hairstyles),hairColour:pick(parts.hair_colours),hat:pick(parts.hats),materials:Object.fromEntries(Object.entries(parts.materials).map(([key,values])=>[key,pick(values)]))});}else{const look=pick(catalog.resident_appearances);result.appearance={preset:look.key,version:1};}}
+ if(!locked.Appearance){if(person.appearance?.schema===2){const parts=catalog.resident_parts;result.appearance=residentPartRecipe({hair:pick(parts.hairstyles),hairColour:pick(parts.hair_colours),hat:pick(parts.hats),facialHair:pick(parts.facial_hair),materials:Object.fromEntries(Object.entries(parts.materials).map(([key,values])=>[key,pick(values)]))});}else{const look=pick(catalog.resident_appearances);result.appearance={preset:look.key,version:1};}}
  if(!locked.Personality){
   const routines=catalog.resident_routines,bed=routines.bedtime;
   const favourite=pick(routines.hobbies).id,other=pick(routines.hobbies.filter(h=>h.id!==favourite)).id;

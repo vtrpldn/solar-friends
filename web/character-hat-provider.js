@@ -10,9 +10,10 @@ export function composeHatProvider({provider,binding,registrations,image,sourceH
   for(const index of spec.indices){
    const key=spec.sheet+':'+index;
    if(frames.has(key))throw Error('Hat activity registrations overlap.');
-   const compose=pose=>composeFrame({appearanceFrame:provider.frameForPose(spec.sheet,index,pose),registration,sheet:spec.sheet,index});
-   frames.set(key,compose());
-   if(spec.sheet==='activities'&&[13,14].includes(index))returns.set(index,compose({sequenceIndex:5}));
+   // Do not close over the underlying provider in an inner composer: the
+   // returned provider owns only its finished frames, not another full set.
+   frames.set(key,composeFrame({appearanceFrame:provider.frameForPose(spec.sheet,index),registration,sheet:spec.sheet,index}));
+   if(spec.sheet==='activities'&&[13,14].includes(index))returns.set(index,composeFrame({appearanceFrame:provider.frameForPose(spec.sheet,index,{sequenceIndex:5}),registration,sheet:spec.sheet,index}));
   }
  }
  if(frames.size!==48||returns.size!==2)throw Error('Hat poses and feeding returns are incomplete.');

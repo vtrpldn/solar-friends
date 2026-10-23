@@ -1,0 +1,1696 @@
+{
+  "schema": 1,
+  "part": "short-chestnut-v1",
+  "assetVersion": "resident-parts-v1",
+  "body": {
+    "normalization": 1,
+    "size": 256,
+    "anchor": 0.95,
+    "sources": {
+      "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+      "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+      "activities": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123"
+    },
+    "frames": {
+      "base": [
+        "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+        "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+        "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+        "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+        "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+        "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+        "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+        "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+        "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+        "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+        "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+        "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+        "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+        "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+        "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+        "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+      ],
+      "idle": [
+        "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+        "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+        "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+        "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+        "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+        "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+        "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+        "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+        "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+        "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+        "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+        "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+        "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+        "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+        "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+        "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936"
+      ],
+      "activities": [
+        "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+        "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+        "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+        "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+        "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+        "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+        "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+        "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+        "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+        "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+        "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+        "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+        "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+        "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+        "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+        "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "file": "facial-short-chestnut-source-01-v1.png",
+      "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4"
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74"
+    },
+    {
+      "file": "facial-short-chestnut-source-03-v1.png",
+      "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d"
+    },
+    {
+      "file": "facial-short-chestnut-source-04-v1.png",
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352"
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb"
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934"
+    },
+    {
+      "file": "facial-short-chestnut-source-07-v1.png",
+      "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12"
+    },
+    {
+      "file": "facial-short-chestnut-source-08-v1.png",
+      "sha256": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585"
+    },
+    {
+      "file": "facial-short-chestnut-source-09-v1.png",
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd"
+    }
+  ],
+  "poses": [
+    {
+      "file": "facial-short-chestnut-source-01-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "sheet": "base",
+        "index": 4,
+        "bodyFrameSha256": "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+        "source": {
+          "size": 1254,
+          "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+          "rect": [
+            0,
+            0,
+            627,
+            627
+          ]
+        },
+        "crop": [
+          120,
+          38,
+          48,
+          48
+        ],
+        "bounds": [
+          50,
+          350,
+          460,
+          240
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-01-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "sheet": "base",
+        "index": 5,
+        "bodyFrameSha256": "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+        "source": {
+          "size": 1254,
+          "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+          "rect": [
+            627,
+            0,
+            627,
+            627
+          ]
+        },
+        "crop": [
+          116,
+          38,
+          48,
+          48
+        ],
+        "bounds": [
+          50,
+          350,
+          465,
+          250
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-01-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "sheet": "base",
+        "index": 6,
+        "bodyFrameSha256": "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+        "source": {
+          "size": 1254,
+          "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+          "rect": [
+            0,
+            627,
+            627,
+            627
+          ]
+        },
+        "crop": [
+          120,
+          44,
+          48,
+          48
+        ],
+        "bounds": [
+          100,
+          360,
+          400,
+          230
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "walk",
+        "sheet": "base",
+        "index": 0,
+        "bodyFrameSha256": "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          140,
+          38,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "walk",
+        "sheet": "base",
+        "index": 1,
+        "bodyFrameSha256": "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          132,
+          36,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "walk",
+        "sheet": "base",
+        "index": 2,
+        "bodyFrameSha256": "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            836,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          136,
+          36,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "walk",
+        "sheet": "base",
+        "index": 3,
+        "bodyFrameSha256": "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          132,
+          36,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "breathe",
+        "sheet": "base",
+        "index": 8,
+        "bodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            418,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          112,
+          30,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "breathe",
+        "sheet": "base",
+        "index": 9,
+        "bodyFrameSha256": "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            836,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          112,
+          28,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "breathe",
+        "sheet": "base",
+        "index": 10,
+        "bodyFrameSha256": "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            0,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          112,
+          30,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-02-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "breathe",
+        "sheet": "base",
+        "index": 11,
+        "bodyFrameSha256": "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+        "source": {
+          "size": 1254,
+          "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+          "rect": [
+            418,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          112,
+          30,
+          48,
+          48
+        ],
+        "bounds": [
+          30,
+          210,
+          350,
+          180
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-03-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "sit",
+        "sheet": "base",
+        "index": 12,
+        "bodyFrameSha256": "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+        "source": {
+          "size": 1254,
+          "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          92,
+          54,
+          48,
+          48
+        ],
+        "bounds": [
+          40,
+          230,
+          277,
+          148
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-03-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "sit",
+        "sheet": "base",
+        "index": 13,
+        "bodyFrameSha256": "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+        "source": {
+          "size": 1254,
+          "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          108,
+          68,
+          48,
+          48
+        ],
+        "bounds": [
+          57,
+          241,
+          304,
+          155
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-03-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "sit",
+        "sheet": "base",
+        "index": 14,
+        "bodyFrameSha256": "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+        "source": {
+          "size": 1254,
+          "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+          "rect": [
+            836,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          96,
+          58,
+          48,
+          48
+        ],
+        "bounds": [
+          49,
+          221,
+          251,
+          157
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-03-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "sleep",
+        "sheet": "base",
+        "index": 15,
+        "bodyFrameSha256": "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a",
+        "source": {
+          "size": 1254,
+          "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          96,
+          60,
+          48,
+          48
+        ],
+        "bounds": [
+          57,
+          213,
+          251,
+          156
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-04-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "look",
+        "sheet": "idle",
+        "index": 0,
+        "bodyFrameSha256": "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+        "source": {
+          "size": 1254,
+          "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          120,
+          34,
+          48,
+          48
+        ],
+        "bounds": [
+          57,
+          252,
+          277,
+          135
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-04-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "look",
+        "sheet": "idle",
+        "index": 1,
+        "bodyFrameSha256": "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+        "source": {
+          "size": 1254,
+          "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          120,
+          34,
+          48,
+          48
+        ],
+        "bounds": [
+          57,
+          243,
+          277,
+          135
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-04-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "look",
+        "sheet": "idle",
+        "index": 2,
+        "bodyFrameSha256": "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+        "source": {
+          "size": 1254,
+          "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+          "rect": [
+            836,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          120,
+          34,
+          48,
+          48
+        ],
+        "bounds": [
+          57,
+          252,
+          286,
+          135
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-04-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "look",
+        "sheet": "idle",
+        "index": 3,
+        "bodyFrameSha256": "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+        "source": {
+          "size": 1254,
+          "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          120,
+          34,
+          48,
+          48
+        ],
+        "bounds": [
+          66,
+          252,
+          277,
+          135
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-04-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "work",
+        "sheet": "base",
+        "index": 7,
+        "bodyFrameSha256": "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+        "source": {
+          "size": 1254,
+          "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+          "rect": [
+            418,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          132,
+          70,
+          68,
+          68
+        ],
+        "bounds": [
+          80,
+          197,
+          196,
+          135
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "wave",
+        "sheet": "idle",
+        "index": 8,
+        "bodyFrameSha256": "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          116,
+          40,
+          56,
+          56
+        ],
+        "bounds": [
+          77,
+          188,
+          279,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "wave",
+        "sheet": "idle",
+        "index": 9,
+        "bodyFrameSha256": "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          116,
+          40,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          180,
+          279,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "wave",
+        "sheet": "idle",
+        "index": 10,
+        "bodyFrameSha256": "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            836,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          116,
+          40,
+          56,
+          56
+        ],
+        "bounds": [
+          55,
+          180,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "wave",
+        "sheet": "idle",
+        "index": 11,
+        "bodyFrameSha256": "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          116,
+          40,
+          56,
+          56
+        ],
+        "bounds": [
+          85,
+          188,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "relax",
+        "sheet": "idle",
+        "index": 12,
+        "bodyFrameSha256": "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            418,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          52,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          188,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "relax",
+        "sheet": "idle",
+        "index": 13,
+        "bodyFrameSha256": "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            836,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          52,
+          56,
+          56
+        ],
+        "bounds": [
+          55,
+          195,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "relax",
+        "sheet": "idle",
+        "index": 14,
+        "bodyFrameSha256": "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            0,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          52,
+          56,
+          56
+        ],
+        "bounds": [
+          70,
+          195,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-05-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "relax",
+        "sheet": "idle",
+        "index": 15,
+        "bodyFrameSha256": "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936",
+        "source": {
+          "size": 1254,
+          "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+          "rect": [
+            418,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          52,
+          56,
+          56
+        ],
+        "bounds": [
+          100,
+          188,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "stretch",
+        "sheet": "idle",
+        "index": 4,
+        "bodyFrameSha256": "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          218,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "stretch",
+        "sheet": "idle",
+        "index": 5,
+        "bodyFrameSha256": "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          70,
+          204,
+          263,
+          137
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "stretch",
+        "sheet": "idle",
+        "index": 6,
+        "bodyFrameSha256": "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            836,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          46,
+          56,
+          56
+        ],
+        "bounds": [
+          85,
+          182,
+          226,
+          136
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "stretch",
+        "sheet": "idle",
+        "index": 7,
+        "bodyFrameSha256": "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          100,
+          218,
+          278,
+          123
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "cook",
+        "sheet": "activities",
+        "index": 0,
+        "bodyFrameSha256": "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            418,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          152,
+          174,
+          248,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "cook",
+        "sheet": "activities",
+        "index": 1,
+        "bodyFrameSha256": "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            836,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          100,
+          174,
+          248,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "cook",
+        "sheet": "activities",
+        "index": 2,
+        "bodyFrameSha256": "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            0,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          144,
+          174,
+          249,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-06-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "cook",
+        "sheet": "activities",
+        "index": 3,
+        "bodyFrameSha256": "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+        "source": {
+          "size": 1254,
+          "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+          "rect": [
+            418,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          152,
+          174,
+          248,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-07-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "water",
+        "sheet": "activities",
+        "index": 6,
+        "bodyFrameSha256": "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+        "source": {
+          "size": 1254,
+          "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          126,
+          46,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          174,
+          234,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-07-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "water",
+        "sheet": "activities",
+        "index": 7,
+        "bodyFrameSha256": "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+        "source": {
+          "size": 1254,
+          "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          140,
+          54,
+          56,
+          56
+        ],
+        "bounds": [
+          100,
+          167,
+          233,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-07-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "tend",
+        "sheet": "activities",
+        "index": 9,
+        "bodyFrameSha256": "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+        "source": {
+          "size": 1254,
+          "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          126,
+          104,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          174,
+          234,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-07-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "tend",
+        "sheet": "activities",
+        "index": 10,
+        "bodyFrameSha256": "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+        "source": {
+          "size": 1254,
+          "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+          "rect": [
+            418,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          132,
+          106,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          174,
+          234,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-08-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "water",
+        "sheet": "activities",
+        "index": 4,
+        "bodyFrameSha256": "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+        "source": {
+          "size": 1254,
+          "sha256": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          122,
+          40,
+          56,
+          56
+        ],
+        "bounds": [
+          85,
+          174,
+          233,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-08-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "water",
+        "sheet": "activities",
+        "index": 5,
+        "bodyFrameSha256": "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+        "source": {
+          "size": 1254,
+          "sha256": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          126,
+          40,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          174,
+          234,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-08-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "tend",
+        "sheet": "activities",
+        "index": 8,
+        "bodyFrameSha256": "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+        "source": {
+          "size": 1254,
+          "sha256": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+          "rect": [
+            418,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          126,
+          95,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          174,
+          234,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-08-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "tend",
+        "sheet": "activities",
+        "index": 11,
+        "bodyFrameSha256": "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+        "source": {
+          "size": 1254,
+          "sha256": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+          "rect": [
+            418,
+            836,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          132,
+          107,
+          56,
+          56
+        ],
+        "bounds": [
+          92,
+          174,
+          234,
+          122
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-09-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "feed",
+        "sheet": "activities",
+        "index": 12,
+        "bodyFrameSha256": "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+        "source": {
+          "size": 1254,
+          "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+          "rect": [
+            0,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          114,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          77,
+          174,
+          234,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-09-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "feed",
+        "sheet": "activities",
+        "index": 13,
+        "bodyFrameSha256": "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+        "source": {
+          "size": 1254,
+          "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+          "rect": [
+            418,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          122,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          77,
+          182,
+          234,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-09-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "feed",
+        "sheet": "activities",
+        "index": 14,
+        "bodyFrameSha256": "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+        "source": {
+          "size": 1254,
+          "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+          "rect": [
+            836,
+            0,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          119,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          77,
+          174,
+          234,
+          129
+        ]
+      }
+    },
+    {
+      "file": "facial-short-chestnut-source-09-v1.png",
+      "registration": {
+        "reviewSchema": 1,
+        "part": "short-beard",
+        "clip": "feed",
+        "sheet": "activities",
+        "index": 15,
+        "bodyFrameSha256": "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77",
+        "source": {
+          "size": 1254,
+          "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+          "rect": [
+            0,
+            418,
+            418,
+            418
+          ]
+        },
+        "crop": [
+          117,
+          36,
+          56,
+          56
+        ],
+        "bounds": [
+          77,
+          174,
+          234,
+          129
+        ]
+      }
+    }
+  ],
+  "reviewSource": {
+    "manifest": "assets/art-direction/character-prototype-v1/short-beard-complete-jaw-corrected-v1/report.json",
+    "sha256": "adfb0b9ba4d5550386ebbca25f8ef5de798c7245c794bf12e11bc2a516aa295c"
+  }
+}

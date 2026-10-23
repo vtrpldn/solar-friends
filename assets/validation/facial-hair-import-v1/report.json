@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "outage": "**/facial-short-chestnut-source-*.png",
+  "inputSha256": "f33def6c9591d30f99677ffb2c278c955cfce8ac332b104fb8648a4228757752",
+  "importedResidents": 6,
+  "restoredResidents": 5,
+  "failedImportPreservedCurrentVillage": true,
+  "retryInstalledExactVillage": true,
+  "namesPortraitsJobsRefreshed": true,
+  "normalVillageRestoredExactly": true,
+  "uncaughtErrors": []
+}
