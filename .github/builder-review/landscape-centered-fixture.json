@@ -1,0 +1,15 @@
+{
+  "why": "Restore the landscape release regression after the camp moved to the center, without bypassing physical construction inputs.",
+  "baselineFailure": "Current release WASM reproduced Resident-attended construction at 450: original fixed coordinates and 110-step budget measured cross-map hauling, not work-hour restrictions.",
+  "changes": [
+    "General resident staging follows the current camp coordinates",
+    "Work fixture stages near the actual warehouse and places its garden through the native placement API",
+    "Existing 110-step budget and former-window exclusion remain unchanged",
+    "New assertions require empty initial project storage, real carrying, positive labour and consumption, exact warehouse input debit and conserved materials"
+  ],
+  "evidence": "assets/validation/landscape-centered-v1.json",
+  "result": "PASS: 64x64 Story/Sandbox starters, six habitats, twelve species, distant placement/hydro, real work at 501.75/851.75/1151.75 minutes, shelter spacing in sun/rain, one-day needs/material accounting and exact saves.",
+  "scriptSha256": "9b7a452c4a600f5712a167d17422d341269518e10069db23dfe5eb4569703158",
+  "wasmSha256": "c2243fbf1d941cc7836d75cbc2b6006109d5855071bce407fbf9963aa00a6cd2",
+  "remaining": "This is a default-landscape regression, not all-biome cycle, art, performance or full builder completion evidence."
+}

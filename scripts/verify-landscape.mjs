@@ -7,7 +7,7 @@ await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.w
 const output='artifacts/landscape';await mkdir(output,{recursive:true});
 const snap=g=>JSON.parse(g.snapshot());
 function checkpoint(g){const saved=g.snapshot(),copy=new Game();assert(copy.restore(saved));assert.equal(copy.snapshot(),saved);copy.free();}
-function readyState(g,minute){const s=snap(g);s.village.minutes=minute;s.village.arrived=true;Object.keys(s.village.economy.outside_jobs).forEach(id=>s.village.economy.outside_jobs[id]=false);for(const r of s.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,energy:90,hunger:5,social:90,last_meal_slot:-1,x:7.5+r.id*1.25,y:15,target_x:7.5+r.id*1.25,target_y:15});return s;}
+function readyState(g,minute){const s=snap(g);s.village.minutes=minute;s.village.arrived=true;Object.keys(s.village.economy.outside_jobs).forEach(id=>s.village.economy.outside_jobs[id]=false);for(const r of s.residents)Object.assign(r,{task:'idle',remaining:0,requested:false,energy:90,hunger:5,social:90,last_meal_slot:-1,x:s.village.camp[0]-2.5+r.id*1.25,y:s.village.camp[1]+3,target_x:s.village.camp[0]-2.5+r.id*1.25,target_y:s.village.camp[1]+3});return s;}
 const report={map:MAP_SIZE,modes:[],habitats:[],species:[],work:[],shelter:[],checks:[]};
 assert.equal(MAP_SIZE,64);
 for(const mode of ['story','sandbox']){
@@ -30,10 +30,32 @@ for(const mode of ['story','sandbox']){
  checkpoint(g);report.modes.push({mode,startingFood:v.food,indoorFood:store.items[16],plants:v.land.vegetation.length});g.free();
 }
 for(const minute of [450,800,1100]){
- const g=new Game();g.start_mode('story');const s=readyState(g,1440+minute);assert(g.restore(JSON.stringify(s)));assert.equal(g.place('garden',13,14),'ok');assert.match(g.request(1,'build',false),/Happy/);
- let progress=0;for(let frame=0;frame<110;frame++){g.tick(.25);progress=snap(g).village.buildings.find(b=>b.kind==='garden').progress;if(progress>0)break;}
- const after=snap(g);assert(progress>0,`Resident-attended construction at ${minute}`);const m=after.village.minutes%1440;assert(m<540||m>=720&&m<900||m>=960,'Progress occurs outside the removed work windows');
- checkpoint(g);report.work.push({started:minute,workedAt:m,progress});g.free();
+ const g=new Game();g.start_mode('story');
+ const s=readyState(g,1440+minute),warehouse=s.village.buildings.find(b=>b.kind==='warehouse');
+ // Keep this work-hours fixture beside the actual starter warehouse. The old
+ // coordinates tested a cross-map supply trip rather than the removed schedule.
+ for(const r of s.residents)Object.assign(r,{x:warehouse.x+2.5+r.id*1.25,y:warehouse.y+2,target_x:warehouse.x+2.5+r.id*1.25,target_y:warehouse.y+2});
+ assert(g.restore(JSON.stringify(s)));
+ assert.equal(g.place('garden',warehouse.x+2,warehouse.y+3),'ok');
+ const opening=snap(g),garden=opening.village.buildings.find(b=>b.kind==='garden'),site=opening.village.logistics.stores.find(p=>p.owner.kind==='site'&&p.owner.id===garden.id),source=opening.village.logistics.stores.find(p=>p.owner.kind==='warehouse');
+ assert(site.items.every(n=>n===0),'No materials are injected into the project');
+ assert.match(g.request(1,'build',false),/Happy/);
+ let progress=0,carried=false;
+ for(let frame=0;frame<110;frame++){
+  g.tick(.25);const state=snap(g);
+  carried ||= state.village.logistics.shipments.some(h=>h.to===site.id&&h.carrying);
+  progress=state.village.buildings.find(b=>b.id===garden.id).progress;
+  if(progress>0)break;
+ }
+ const after=snap(g),project=after.village.economy.projects.find(p=>p.building===garden.id),remainingSource=after.village.logistics.stores.find(p=>p.id===source.id);
+ assert(progress>0,`Resident-attended construction at ${minute}`);
+ assert(carried,'Residents physically carry starter materials to the project');
+ assert(project.labour>0&&project.consumed.some(n=>n>0),'Real labour consumes supplied materials');
+ for(const [i,n]of project.consumed.entries())if(n>0)assert.equal(source.items[i]-remainingSource.items[i],n,'Consumed inputs came from the owned starter warehouse');
+ assert(JSON.parse(g.simulation_report()).materials.every(m=>m.difference===0),'Construction preserves material accounting');
+ const m=after.village.minutes%1440;
+ assert(m<540||m>=720&&m<900||m>=960,'Progress occurs outside the removed work windows');
+ checkpoint(g);report.work.push({started:minute,workedAt:m,progress,carried,labour:project.labour,consumed:project.consumed});g.free();
 }
 for(const minute of [720,900]){
  const g=new Game();g.start_mode('story');const s=readyState(g,minute);for(const r of s.residents)r.energy=10;assert(g.restore(JSON.stringify(s)));
