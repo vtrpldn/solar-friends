@@ -1,0 +1,64 @@
+{
+  "why": "The neutral custom body held closed eyes for about 1.25 seconds. Share body-specific presentation timing across gameplay and previews, with a brief blink and unchanged original-cast gameplay timing.",
+  "profile": {
+    "body": "neutral-v1",
+    "clip": "breathe",
+    "poseDurationsSeconds": [
+      2,
+      0.15,
+      1.35,
+      1.5
+    ],
+    "loopSeconds": 5,
+    "closedEyeSeconds": 0.15
+  },
+  "checks": {
+    "profileTransitionCases": 169,
+    "existingTransitionCases": 156,
+    "originalPoseComparisons": 240,
+    "originalFacingLightingComparisons": 520,
+    "sharedOriginalPortraits": 10,
+    "frozenPlayableFrameFingerprints": 400,
+    "publicCreatorAndLiveTiming": "passed with controlled browser clock",
+    "reducedMotionFreezeAndResume": true,
+    "gameplayReceivesProfile": true,
+    "creatorExportImportPlaytestCheckpoint": "passed",
+    "normalSandboxSaveContinue": "passed",
+    "hatReviewFrames": 8,
+    "hatMalformedRegistrationRefusals": 10,
+    "hatUnsupportedProviderPosesRefused": 4,
+    "hatTimelineSamples": 36,
+    "inspectedRecordedPlayback": true
+  },
+  "commands": [
+    "node scripts/verify-resident-animation-profiles.mjs",
+    "node scripts/verify-resident-animation.mjs",
+    "node scripts/verify-public-blink-timing.mjs",
+    "node scripts/verify-resident-appearance-library.mjs",
+    "node scripts/verify-resident-part-fingerprints.mjs",
+    "node scripts/verify-part-creator.mjs",
+    "node scripts/verify-part-mode-save.mjs",
+    "node scripts/verify-hat-breathe.mjs"
+  ],
+  "remaining": "Hat support beyond breathing, broad appearance range, other grip/cadence review and original biome/usability/recovery/performance release gates remain open. No native simulation or source sprite changed.",
+  "sha256": {
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/resident-animation.js": "e94e9cbf0ee93b0b63afa5a9c3aa1e42b48c18aea3e87e4e7d6115b11b88b1b5",
+    "web/resident-parts.js": "ff8ec3e71f4849b4f41d8a40b5d95173a7de50484798af1c6e9ace8e88e19ccf",
+    "web/main.js": "6eadbd5e37914378b9df6c613db739d9c99ddf92b1f0ddff5ee9bedd2fc79210",
+    "web/editor/character-creator.js": "1699e67b4189787760326b370ee0f87f914c85224786ec58b832267b4103be30",
+    "web/resident-identity.js": "3e3b5048a5d58464c01f25449f52e1bcb25854efe1df3c8d0644c468cd006d78",
+    "web/artwork/character-body-lab.js": "08eb70e8046a7017bf1ae5d76b3df6e72b119653977351f56b3e3462cadfb6cb",
+    "web/artwork/character-composed-review.js": "aff14dd04911ed6a29a0b693fc8fae66a4563d922480f3aa15a018e51ea1f8dd",
+    "web/artwork/character-equipped-model.js": "f54eb3a2ef235c3748cb0fe02dc0a05edbeebfbd681d1f3684c6a4c2ef7e7a0c",
+    "web/artwork/character-sidepart-review.js": "535cf0fa34e846a5ef5c094322ae0bff216ec282c8d07d4391cb1bbbc8fb1408",
+    "web/artwork/character-hat-prototype.js": "f2afec94dbceb6045f98e7fa8195e9420502b88ccb56b38436ee0c728f71e209",
+    "web/artwork/character-hat-breathe-review.js": "b9adb68907f6fc42618348e1aaab908630ff7b1ce2073479c3506201b2641b22",
+    "web/art/characters/prototype-v1/straw-hat-breathe-v1-registration.json": "896da35949c473bfd357adbb04535a8410fe81ddc1b530f70159cdcf90ccf4dc",
+    "scripts/verify-resident-animation-profiles.mjs": "6a679e15d194121af9f515ef7b8f42b59946e28485724b1b74a1812534019cf2",
+    "scripts/verify-public-blink-timing.mjs": "edc6545dd282cc361916789d7192b941a8d9a84539335a2b1583807fc72d9813",
+    "assets/art-direction/character-prototype-v1/blink-timing-v1/timeline.png": "5728fdfc76a81c864af0d8bfc661d96920c45229562f2d76bfc05f622c7fe6ba",
+    "assets/art-direction/character-prototype-v1/blink-timing-v1/world-playback.webm": "2d6a1d49905cb9b01aebfaf4e0b309e98f34607bcc510dbaed4659a7df216f5e",
+    "assets/art-direction/character-prototype-v1/blink-timing-v1/live.png": "13a9b818e12430ae703f41c45057f58776bbbeb52689d2cefc3c6a2cef08db16"
+  }
+}

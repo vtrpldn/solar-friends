@@ -1,6 +1,7 @@
 // Visual state only: saved simulation time chooses idle activities; animation
 // seconds advance only while the simulation runs. No village/save mutations.
 import { preparedFrames, FRAME_ANCHOR } from './sprite-frames.js';
+import {residentClipTiming} from './resident-animation-profiles.js';
 export const residentClips = {
   cook: { sheet: 'activities', row: 0, fps: 3, frames: [0,1,2,3,2,1], loop: true },
   water: { sheet: 'activities', row: 1, fps: 2, frames: [0,1,2,3,2,1], loop: true },
@@ -50,8 +51,15 @@ export function residentActivity(r, minutes) {
   return 'look';
 }
 const ease = t => t * t * (3 - 2 * t);
-export function sampleResidentClip(mode, seconds) {
+export function sampleResidentClip(mode, seconds, profile) {
   const clip = residentClips[mode];
+  const timing=residentClipTiming(profile,mode);
+  if(timing){
+    const duration=timing.durations.reduce((sum,n)=>sum+n,0);
+    const position=Math.max(0,seconds)%duration;let index=0,end=timing.durations[0];
+    while(index<timing.durations.length-1&&position>=end){index++;end+=timing.durations[index];}
+    return [{sheet:clip.sheet,row:clip.row,frame:clip.frames[index],sequenceIndex:index,weight:1}];
+  }
   const position = Math.max(0, seconds * clip.fps);
   const index = clip.loop ? Math.floor(position) % clip.frames.length : Math.min(Math.floor(position), clip.frames.length - 1);
   const next = clip.loop ? (index + 1) % clip.frames.length : Math.min(index + 1, clip.frames.length - 1);
@@ -63,7 +71,7 @@ export function sampleResidentClip(mode, seconds) {
     { sheet: clip.sheet, row: clip.row, frame: clip.frames[next], sequenceIndex: next, weight: blend },
   ].filter(frame => frame.weight > 0);
 }
-export function advanceResidentAnimation(previous, r, minutes, delta) {
+export function advanceResidentAnimation(previous, r, minutes, delta, profile) {
   const mode = residentActivity(r, minutes);
   const changed = previous && mode !== previous.mode;
   const phase = changed ? 0 : (previous?.phase ?? r.id * .19) + delta;
@@ -73,11 +81,11 @@ export function advanceResidentAnimation(previous, r, minutes, delta) {
     if (Math.abs(dx) > .00001) facing = dx < 0 ? -1 : 1;
   }
   const transition = changed ? 0 : Math.min(.18, (previous?.transition ?? .18) + delta);
-  const from = changed ? sampleResidentClip(previous.mode, previous.phase) : previous?.from;
+  const from = changed ? sampleResidentClip(previous.mode, previous.phase, previous.animationProfile??profile) : previous?.from;
   const mix = ease(transition / .18);
-  const layers = sampleResidentClip(mode, phase).map(frame => ({ ...frame, weight: frame.weight * mix }));
+  const layers = sampleResidentClip(mode, phase, profile).map(frame => ({ ...frame, weight: frame.weight * mix }));
   if (from && mix < 1) layers.push(...from.map(frame => ({ ...frame, weight: frame.weight * (1 - mix) })));
-  return { mode, phase, facing, transition, from: mix < 1 ? from : undefined, layers,
+  return { mode, phase, facing, transition, from: mix < 1 ? from : undefined, layers, animationProfile:profile,
     x: r.x, y: r.y, breath: mode === 'walk' || mode === 'work' || mode === 'sleep' ? 1 : 1 + Math.sin(phase * 1.8 + r.id) * .006 };
 }
 

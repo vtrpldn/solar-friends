@@ -61,10 +61,10 @@ export class CharacterCreator{
   if(scale)paintWorldBuilding(ctx,{key:'home',x:0,y:0},{project:()=>({x:100,y:178}),scale:1,images:this.art.images,night,light:0});
   const x=scale?220:160,y=scale?195:222,width=scale?RESIDENT_WIDTH:160;
   paintContactShadow(ctx,x,y,width*.24,width*.065,.18);ctx.save();ctx.filter=unlitFilter(night);
-  drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds),facing,breath:1},x,y,width);ctx.restore();
+  drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds,this.sheets.animationProfile),facing,breath:1},x,y,width);ctx.restore();
   if(scale){const frame=this.art.appearances.portraitFrame({preset:'bento',version:1});ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
   paintResidentPortrait(this.portrait,this.appearance,this.art.appearances,{filter:unlitFilter(night)});
-  Object.assign(this.canvas.dataset,{look:this.look,appearance:JSON.stringify(this.appearance),pose:mode,frame:String(sampleResidentClip(mode,seconds)[0].frame),scale:String(scale),night:String(night)});
+  Object.assign(this.canvas.dataset,{look:this.look,appearance:JSON.stringify(this.appearance),pose:mode,animationProfile:this.sheets.animationProfile??'legacy',frame:String(sampleResidentClip(mode,seconds,this.sheets.animationProfile)[0].frame),scale:String(scale),night:String(night)});
   if(!this.motion.matches&&residentClips[mode].fps>0)this.frame=requestAnimationFrame(t=>this.draw(t));
  }
 }

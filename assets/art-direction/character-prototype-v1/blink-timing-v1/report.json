@@ -1,0 +1,9 @@
+{
+  "mechanical": "PASS",
+  "visual": "Inspected the 36-sample blink-boundary timeline, recorded world playback and decoded samples. Closed-eye pose is brief; hat remains attached. Public live preview inspected at desktop size.",
+  "scope": "Neutral-body breathing timing is shared by gameplay, creator, live editing and hat review. Hat support remains four review-only poses.",
+  "frames": 8,
+  "denied": 10,
+  "providerRefusals": 4,
+  "timelineSamples": 36
+}

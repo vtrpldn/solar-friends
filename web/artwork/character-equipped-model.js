@@ -25,7 +25,7 @@ export function createEquippedAppearanceReview({appearance,materials,frames,bind
     recovery.set(index,await registeredEquipmentFrame({...args,registration:{...registration,parts:keep.map(i=>registration.parts[i])},equipment:{...equipment,parts:keep.map(i=>equipment.parts[i])}}));
    }
   }
-  return {interpolation:'keyframes',frameForPose(sheet,index,pose){
+  return {interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){
    if(sheet!=='activities'||!composed.has(index))throw Error('This appearance activity pose is unavailable.');
    return clip==='feed'&&pose?.sequenceIndex>=4?recovery.get(index)??composed.get(index):composed.get(index);
   }};

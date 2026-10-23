@@ -610,14 +610,15 @@ function resident(r) {
     ctx.stroke();
   }
   const py = p.y;
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, worksiteKind: state.village.buildings.find(b=>b.id===r.activity_building)?.kind, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta);
+  const appearanceProvider=residentAppearances.provider(r.appearance);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, worksiteKind: state.village.buildings.find(b=>b.id===r.activity_building)?.kind, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta,appearanceProvider.animationProfile);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
     residentSurfaces.set(r.id, surface);
   }
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
-    residentAppearances.provider(r.appearance), animation, p.x, py, RESIDENT_WIDTH * s);
+    appearanceProvider, animation, p.x, py, RESIDENT_WIDTH * s);
   if(state.village.logistics?.shipments.some(h=>h.resident===r.id&&h.carrying))drawCarriedMaterials(ctx,p,s,animation.facing,nightAmount(state.village.minutes));
   const waterLoad=state.village.water_supply.trips.find(h=>h.resident===r.id&&h.carrying);if(waterLoad)drawCarriedWater(ctx,p,s,animation.facing,waterLoad.class,nightAmount(state.village.minutes));
   if(state.village.power.network?.nodes.some(n=>n.owner.kind==='carrier'&&n.owner.id===r.id))drawBattery(ctx,{x:p.x+animation.facing*8*s,y:p.y-12*s},s*.65,nightAmount(state.village.minutes),1,true);
@@ -1983,6 +1984,7 @@ const devAPI = {
   inspect: () => JSON.parse(game.dev_inspect()),
   simulationClock:()=>simulationClock.status(),
   residentArtworkCache:()=>residentAppearances.partCacheInfo(),
+  residentAnimation:id=>structuredClone(residentAnimations.get(id)??null),
   observe: () => game.dev_observe(true),
   isSandbox: () => !!sandbox,
   scenario: () => sandboxName || (artworkPreview ? 'Artwork preview' : 'Saved village'),

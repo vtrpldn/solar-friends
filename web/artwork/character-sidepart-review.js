@@ -29,7 +29,7 @@ export async function installSidePartReview({frames,binding,materials,seated,sce
     composed.set(index,activityParts.has(key)?composeActivityUnderlay(appearance,activityParts.get(key)):appearance);
    }catch(error){throw Error('Side-part '+clip+' pose '+index+': '+error.message,{cause:error});}
   }
-  return {interpolation:'keyframes',frameForPose(requestedSheet,index){if(requestedSheet!==sheet||!composed.has(index))throw Error('The partial side-part hairstyle has no artwork for this pose.');return composed.get(index);}};
+  return {interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(requestedSheet,index){if(requestedSheet!==sheet||!composed.has(index))throw Error('The partial side-part hairstyle has no artwork for this pose.');return composed.get(index);}};
  }});
  const model={provider(clip,recipe=sidePartReviewRecipe()){
   if(!clipKeys.includes(clip))return Promise.reject(Error('This hairstyle has no painted artwork for that activity yet.'));

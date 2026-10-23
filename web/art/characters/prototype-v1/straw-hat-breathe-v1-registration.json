@@ -1,7 +1,8 @@
 {
   "reviewSchema": 1,
-  "status": "Four-pose head fit reviewed; existing closed-eye cadence still needs correction. Excluded from player choices.",
+  "status": "Four-pose head fit and neutral-body blink timing reviewed. Remaining activities and player integration are unfinished.",
   "clip": "breathe",
+  "animationProfile": "neutral-v1",
   "sheet": "base",
   "coordinateSize": 256,
   "anchorHead": [

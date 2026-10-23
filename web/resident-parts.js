@@ -54,7 +54,7 @@ export function createResidentPartLibrary(){
    }
    frames.set(key,frame);
   }
-  return Object.freeze({interpolation:'keyframes',frameForPose(sheet,index,pose){const key=sheet+':'+index;if(!frames.has(key))throw Error('These resident parts have no artwork for this pose.');return sheet==='activities'&&pose?.sequenceIndex>=4?returns.get(index)??frames.get(key):frames.get(key);}});
+  return Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){const key=sheet+':'+index;if(!frames.has(key))throw Error('These resident parts have no artwork for this pose.');return sheet==='activities'&&pose?.sequenceIndex>=4?returns.get(index)??frames.get(key):frames.get(key);}});
  }});
  return Object.freeze({
   prepare(recipe){let checked;try{checked=validateResidentPartRecipe(recipe);}catch(error){return Promise.reject(error);}return cache.get(keyFor(checked),checked);},

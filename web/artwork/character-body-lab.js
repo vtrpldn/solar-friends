@@ -50,7 +50,7 @@ try{
   const objects=land.vegetation.filter(t=>!t.cleared).map(tree=>({depth:tree.x+tree.y,draw:()=>paintWorldTree(ctx,tree,{project:position,scale,width:900,height:420,forest:art.forest,details:art.details,night})}));
   for(const b of d.start.buildings)objects.push({depth:b.x+b.y,draw:()=>paintWorldBuilding(ctx,{key:b.kind,x:b.x,y:b.y},{project:position,scale,images:art.images,night,light:0})});
   const candidate=hairProvider??(hairFrame?{frameForPose:(sheet,index)=>{if(sheet!=='base'||index!==8)throw Error('Only base pose 8 has hair artwork.');return hairFrame;}}:materialProvider());
-  for(const [sheets,x]of [[reference,30.5],[candidate,32]])objects.push({depth:x+33+.6,draw:()=>{const p=position(x,33);paintContactShadow(ctx,p.x,p.y,10*scale,4*scale,.22);ctx.save();ctx.filter=unlitFilter(night);drawResidentAnimation(ctx,surface,sheets,{layers:hairFrame?[{sheet:'base',row:2,frame:0,weight:1}]:sampleResidentClip(mode,seconds),facing,breath:1},p.x,p.y,RESIDENT_WIDTH*scale);ctx.restore();}});
+  for(const [sheets,x]of [[reference,30.5],[candidate,32]])objects.push({depth:x+33+.6,draw:()=>{const p=position(x,33);paintContactShadow(ctx,p.x,p.y,10*scale,4*scale,.22);ctx.save();ctx.filter=unlitFilter(night);drawResidentAnimation(ctx,surface,sheets,{layers:hairFrame?[{sheet:'base',row:2,frame:0,weight:1}]:sampleResidentClip(mode,seconds,sheets.animationProfile),facing,breath:1},p.x,p.y,RESIDENT_WIDTH*scale);ctx.restore();}});
   objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());canvas.dataset.mode=mode;canvas.dataset.facing=String(facing);canvas.dataset.night=String(night);canvas.dataset.seconds=String(seconds);
  }
  function draw(){
