@@ -1,0 +1,122 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "water",
+    "sheet": "activities",
+    "index": 6,
+    "bodyFrameSha256": "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+    "source": {
+      "size": 1254,
+      "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+      "rect": [
+        0,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      126,
+      46,
+      56,
+      56
+    ],
+    "bounds": [
+      92,
+      174,
+      234,
+      122
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "water",
+    "sheet": "activities",
+    "index": 7,
+    "bodyFrameSha256": "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+    "source": {
+      "size": 1254,
+      "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+      "rect": [
+        418,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      140,
+      54,
+      56,
+      56
+    ],
+    "bounds": [
+      100,
+      167,
+      233,
+      122
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "tend",
+    "sheet": "activities",
+    "index": 9,
+    "bodyFrameSha256": "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+    "source": {
+      "size": 1254,
+      "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+      "rect": [
+        0,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      126,
+      104,
+      56,
+      56
+    ],
+    "bounds": [
+      92,
+      174,
+      234,
+      122
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "tend",
+    "sheet": "activities",
+    "index": 10,
+    "bodyFrameSha256": "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+    "source": {
+      "size": 1254,
+      "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+      "rect": [
+        418,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      132,
+      106,
+      56,
+      56
+    ],
+    "bounds": [
+      92,
+      174,
+      234,
+      122
+    ]
+  }
+]

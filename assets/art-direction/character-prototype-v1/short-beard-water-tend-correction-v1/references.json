@@ -1,0 +1,58 @@
+{
+  "frames": [
+    {
+      "key": "activities-6"
+    },
+    {
+      "key": "activities-7"
+    },
+    {
+      "key": "activities-9"
+    },
+    {
+      "key": "activities-10"
+    }
+  ],
+  "guides": [
+    {
+      "key": "activities-6",
+      "painted": 5824,
+      "bounds": [
+        104,
+        186,
+        314,
+        284
+      ]
+    },
+    {
+      "key": "activities-7",
+      "painted": 5615,
+      "bounds": [
+        112,
+        179,
+        321,
+        277
+      ]
+    },
+    {
+      "key": "activities-9",
+      "painted": 5824,
+      "bounds": [
+        104,
+        186,
+        314,
+        284
+      ]
+    },
+    {
+      "key": "activities-10",
+      "painted": 5824,
+      "bounds": [
+        104,
+        186,
+        314,
+        284
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "prompt": "Repaint ONLY the GREEN pixels in image1 as matte dark chestnut illustrated short facial hair for Solar Friends. Preserve the EXACT1254x1254 canvas and mask coordinates. There are FOUR beard+moustache pairs only, in the TOP-LEFT TWO BY TWO cells of a3x3 grid of418px cells. The entire rightmost418px column and bottom418px row MUST stay transparent and empty. Do NOT enlarge these four pairs to fill the canvas. Their beard/moustache envelopes in full-canvas pixels are approximately [104,186]-[314,284], [530,179]-[739,277], [104,604]-[314,702], [522,604]-[732,702]. Trace the individual green shape edges EXACTLY; don't fill these rectangles. Image2 shows the corresponding actual resident faces only for anatomical context; output no face/body pixels. Keep each shallow narrow asymmetric beard band and its tiny moustache in its own position with the same width, thickness and mouth opening. Replace flat green with restrained warm dark chestnut paint, subtle broad short-hair clumps, soft upper-left light, dark underside, matte slightly broken edges. No glossy tube, polished wood/leather look, bright rim, hair strand microdetail or black outline. Alpha ZERO outside each original green shape; no halo, shadow, glow, haze, debris, text, background, grid, face, skin, eyes, nose, ears, scalp hair, clothing or tools. Keep mouth openings and all the space between each moustache and beard transparent. Entire beard-band interior painted. No recentering, scaling, shifting, widening, deepening or invented shapes. Only four pairs matching the stencil exactly, true transparency.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-correction-v1/jaw.png",
+      "role": "Exact four-pose positional stencil, unchanged native jaw paths"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-correction-v1/faces.png",
+      "role": "Actual native faces for anatomical context only"
+    }
+  ],
+  "file": "candidate-v1.png",
+  "outputSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d2f39288-ccf8-497b-8f0a-ac0478ff5a93.png",
+  "verdict": "All four original-bound region audits pass at100% coverage, undeclared painted pixels0. Reviewed through the six-profile complete provider; selected for internal comparison only, not a completed public appearance."
+}

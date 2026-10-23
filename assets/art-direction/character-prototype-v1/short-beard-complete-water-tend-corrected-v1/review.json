@@ -1,0 +1,49 @@
+{
+  "status": "Complete eight-pose activity correction reviewed internally; full facial-hair release acceptance remains open",
+  "selected": [
+    {
+      "collection": "short-beard-water-tend-v1",
+      "candidate": "candidate-v4.png",
+      "poses": [
+        4,
+        5,
+        8,
+        11
+      ]
+    },
+    {
+      "collection": "short-beard-water-tend-correction-v1",
+      "candidate": "candidate-v1.png",
+      "poses": [
+        6,
+        7,
+        9,
+        10
+      ]
+    }
+  ],
+  "unchangedRegistration": "Original native face crops, body-frame bindings and per-pose region bounds retained. Only source atlas cell locations change for the focused four-pose atlas; no generated paint is edited.",
+  "findings": [
+    "Inspected the unmodified focused atlas, six-profile palette matrix, full warm-skin/two-hairstyle board, ordered transitions, and 128 static day/night/facing/size render samples.",
+    "All eight watering/tending bands have restrained short-hair clumps rather than the previous smooth tube-like material, with open mouth gaps and attached jaw placement.",
+    "The focused four-pose source is slightly warmer at enlarged scale than the other activity atlas. Cross-source material and complete cross-clip volume review remain open.",
+    "Looking bands remain thinner than several other idle poses; bent-work angularity remains unresolved.",
+    "Static ordered samples and render calls do not prove continuous playback, in-village neighbour/ground review or public creator integration."
+  ],
+  "mechanical": {
+    "profiles": 6,
+    "poseOutsideCropChecks": 288,
+    "feedingReturns": 12,
+    "transitionUpdates": 4860,
+    "clipSamples": 18720,
+    "clipCount": 13,
+    "invalidRequests": 39,
+    "lateReturnFailureCleanup": true,
+    "lightingSamples": 128,
+    "maximumOwnedFramesPerProvider": 50,
+    "rgbaByteUpperBoundPerProvider": 13107200,
+    "focusedSourceCoverage": 1,
+    "focusedSourceUndeclaredPaint": 0
+  },
+  "integration": "Internal registered comparison only. Facial hair remains absent from the player appearance catalog and live gameplay recipes."
+}

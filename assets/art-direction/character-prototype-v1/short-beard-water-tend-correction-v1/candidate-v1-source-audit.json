@@ -1,0 +1,67 @@
+{
+  "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+  "ok": true,
+  "undeclaredPaint": 0,
+  "poses": [
+    {
+      "sheet": "activities",
+      "index": 6,
+      "pixels": 7809,
+      "inside": 7809,
+      "bounds": [
+        101,
+        183,
+        315,
+        290
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "pixels": 8012,
+      "inside": 8012,
+      "bounds": [
+        107,
+        178,
+        323,
+        282
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "activities",
+      "index": 9,
+      "pixels": 7835,
+      "inside": 7835,
+      "bounds": [
+        100,
+        184,
+        315,
+        290
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "activities",
+      "index": 10,
+      "pixels": 8024,
+      "inside": 8024,
+      "bounds": [
+        99,
+        184,
+        316,
+        291
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ]
+}
