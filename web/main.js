@@ -1,7 +1,9 @@
 import {creationPresentation} from './creation-presentation.js';
 import {paintResourceSite} from './resource-site-art.js';
 import {renderScenarioJournal,resetScenarioJournalUI} from './scenario-journal-ui.js';
-import {residentLookIndex} from './resident-look.js';
+import {residentAppearanceInfo,residentLookKeys} from './resident-look.js';
+import {createResidentAppearanceLibrary} from './resident-appearance-library.js';
+import {paintPreparedResidentPortrait} from './resident-portrait.js';
 import {installResidentIdentity} from './resident-identity.js';
 import {relationshipStrength} from './relationships.js';
 import {residentStory} from './resident-story.js';
@@ -141,7 +143,6 @@ const tasks = {
   daydream: "Sitting and daydreaming",
   stargaze: "Watching the stars",
 };
-const colors = ["#d8a044", "#588b83", "#d27a59", "#6a8e58", "#8580a0"];
 const buildingImages = Object.fromEntries(Object.entries(allBuildingArt).map(([kind, art]) => {
   const image = new Image();
   image.src = `art/${art.file}`;
@@ -155,17 +156,18 @@ const nightBuildingImages = Object.fromEntries(Object.entries(allBuildingArt).ma
 for(const [kind,art]of Object.entries(allBuildingArt))if(art.emptyFile){const image=new Image();image.src=`art/${art.emptyFile}`;buildingImages[kind+':empty']=image;nightBuildingImages[kind+':empty']=image;}
 const terrain = new Image();
 terrain.src = "art/terrain-atlas.png";
-const animations = ["iara", "bento", "luz", "caua", "nina"].map((name) => {
+const animations = residentLookKeys.map((name) => {
   const image = new Image();
   image.src = `art/animations/${name}.png`;
   return image;
 });
-const idleAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
+const idleAnimations = residentLookKeys.map(name => {
   const image = new Image(); image.src = `art/animations/${name}-idle.png`; return image;
 });
-const activityAnimations = ['iara', 'bento', 'luz', 'caua', 'nina'].map(name => {
+const activityAnimations = residentLookKeys.map(name => {
   const image = new Image(); image.src = `art/animations/${name}-activities.png`; return image;
 });
+const residentAppearances=createResidentAppearanceLibrary({base:animations,idle:idleAnimations,activities:activityAnimations});
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
 let animationDelta = 0;
@@ -218,13 +220,15 @@ const escapeHtml = (s) =>
       ],
   );
 function avatar(id) {
-  const look=residentLookIndex(state.residents.find(r=>r.id===id));
-  return `<span class="avatar" style="background:${colors[look]}20"><canvas data-portrait="${look}" width="96" height="108" aria-hidden="true"></canvas></span>`;
+  const look=residentAppearanceInfo(state.residents.find(r=>r.id===id).appearance);
+  return `<span class="avatar" style="background:${look.accent}20"><canvas data-portrait="${residentLookKeys.indexOf(look.key)}" data-portrait-resident="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
 }
 function paintPortraits(root=document) {
   for (const portrait of root.querySelectorAll('[data-portrait]')) {
-    const frame=preparedFrames(animations[Number(portrait.dataset.portrait)],{referenceRow:2})?.[8];
-    if(frame&&portrait._paintedFrame!==frame){portrait.getContext('2d').drawImage(frame,64,12,128,152,0,0,96,108);portrait._paintedFrame=frame;}
+    const person=state.residents.find(r=>r.id===Number(portrait.dataset.portraitResident));
+    if(!person)continue;
+    const frame=residentAppearances.portraitFrame(person.appearance);
+    if(frame&&portrait._paintedFrame!==frame){paintPreparedResidentPortrait(portrait,frame);portrait._paintedFrame=frame;}
   }
 }
 function contactShadow(x, y, rx, ry, opacity = 0.2) {
@@ -596,7 +600,7 @@ function resident(r) {
     residentSurfaces.set(r.id, surface);
   }
   drawResidentAnimation(ctx, residentSurfaces.get(r.id),
-    { base: animations[residentLookIndex(r)], idle: idleAnimations[residentLookIndex(r)], activities: activityAnimations[residentLookIndex(r)] }, animation, p.x, py, RESIDENT_WIDTH * s);
+    residentAppearances.provider(r.appearance), animation, p.x, py, RESIDENT_WIDTH * s);
   if(state.village.logistics?.shipments.some(h=>h.resident===r.id&&h.carrying))drawCarriedMaterials(ctx,p,s,animation.facing,nightAmount(state.village.minutes));
   const waterLoad=state.village.water_supply.trips.find(h=>h.resident===r.id&&h.carrying);if(waterLoad)drawCarriedWater(ctx,p,s,animation.facing,waterLoad.class,nightAmount(state.village.minutes));
   if(state.village.power.network?.nodes.some(n=>n.owner.kind==='carrier'&&n.owner.id===r.id))drawBattery(ctx,{x:p.x+animation.facing*8*s,y:p.y-12*s},s*.65,nightAmount(state.village.minutes),1,true);
@@ -1623,7 +1627,7 @@ function setup() {
       $(villagePanels.has(id)?'#open-village':`[data-panel="${id}"]`).focus();
     };
   }
-  residentIdentity=installResidentIdentity({images:animations,catalog:JSON.parse(game.scenario_catalog()).resident_appearances,game:()=>game,snapshot:()=>state,changed:id=>{
+  residentIdentity=installResidentIdentity({appearances:residentAppearances,catalog:JSON.parse(game.scenario_catalog()).resident_appearances,game:()=>game,snapshot:()=>state,changed:id=>{
     state=JSON.parse(game.snapshot());residentAnimations.delete(id);residentSurfaces.delete(id);
     const person=state.residents.find(p=>p.id===id),button=$(`#residents [data-resident="${id}"]`);
     if(button){button.querySelector('.avatar').outerHTML=avatar(id);button.querySelector('b').textContent=person.name;button.setAttribute('aria-label',`Meet ${person.name}`);}

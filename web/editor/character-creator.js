@@ -1,15 +1,14 @@
 import {paintResidentPortrait} from '../resident-portrait.js';
 import {characterCategories,randomizeCharacter,resetCharacterCategory} from './character-choices.js';
-import {residentLookIndex,residentLookKeys} from '../resident-look.js';
 import {residentClips,sampleResidentClip,drawResidentAnimation} from '../resident-animation.js';
-import {preparedFrames,RESIDENT_WIDTH} from '../sprite-frames.js';
+import {RESIDENT_WIDTH} from '../sprite-frames.js';
 import {paintWorldBuilding,paintContactShadow} from '../world-renderer.js';
 import {unlitFilter} from '../power.js';
 const pages=['Identity','Appearance','Personality','Experience','Arrival'];
 const poses={breathe:'Idle',walk:'Walking',work:'Working',cook:'Cooking',water:'Watering',tend:'Tending',feed:'Feeding',sit:'Sitting',sleep:'Sleeping',look:'Looking around',stretch:'Stretching',wave:'Waving',relax:'Relaxing'};
 export class CharacterCreator{
  constructor({art,source,groups,changeField,undo,redo,history,catalog,editPerson,startAction}){
-  Object.assign(this,{art,source,groups,history,catalog});this.cache=new Map();this.id=null;this.page='Identity';this.token=0;this.frame=null;
+  Object.assign(this,{art,source,groups,history,catalog});this.id=null;this.page='Identity';this.token=0;this.frame=null;
   this.motion=matchMedia('(prefers-reduced-motion: reduce)');this.surface=document.createElement('canvas');this.surface.width=this.surface.height=256;
   this.dialog=document.createElement('dialog');this.dialog.id='character-creator';this.dialog.setAttribute('aria-labelledby','character-creator-title');
   this.dialog.innerHTML='<button class="dialog-close" aria-label="Close character creator">×</button><h2 id="character-creator-title">Meet our neighbour</h2><p>Changes belong to this creation. Use Undo to restore earlier choices.</p><div class="character-layout"><section class="character-preview"><canvas width="320" height="240" data-character-preview aria-label="Animated resident preview"></canvas><div class="character-portrait"><canvas width="64" height="72" aria-label="Matching resident portrait"></canvas><p data-character-name></p></div><label class="creator-field">Preview activity<select data-character-pose></select></label><label class="creator-field">Facing<select data-character-facing><option value="1">Right</option><option value="-1">Left</option></select></label><label class="creator-field">Lighting<select data-character-light><option value="0">Day</option><option value="1">Night</option></select></label><label><input type="checkbox" data-character-scale> Scale beside a home and neighbour</label><p data-character-preview-status role="status"></p></section><section class="character-settings"><div role="tablist" aria-label="Character settings"></div><div class="character-choice-actions"><label><input type="checkbox" data-character-lock> <span data-character-lock-label></span></label><button type="button" data-character-reset>Reset category</button><button type="button" data-character-random>Randomize unlocked categories</button><small>Reset restores this category to when you opened the creator.</small><small data-character-random-note></small></div><div data-character-fields></div></section></div><div class="dialog-actions"><button type="button" data-character-undo>Undo</button><button type="button" data-character-redo>Redo</button><button type="button" data-character-done>Done</button></div>';
@@ -50,11 +49,9 @@ export class CharacterCreator{
  async load(look,version){
   const token=++this.token;this.sheets=null;cancelAnimationFrame(this.frame);this.canvas.getContext('2d').clearRect(0,0,320,240);this.portrait.getContext('2d').clearRect(0,0,64,72);this.status('Loading character poses…');
   try{
-   const index=residentLookIndex({appearance:{preset:look,version}});
-   if(!this.cache.has(look))this.cache.set(look,(async()=>{const load=async suffix=>{const image=new Image();image.src=new URL(`../art/animations/${residentLookKeys[index]}${suffix}.png`,import.meta.url);await image.decode();return image;};const [idle,activities]=await Promise.all([load('-idle'),load('-activities')]);return {base:this.art.residents[index],idle,activities};})());
-   const sheets=await this.cache.get(look);if(token!==this.token||!this.dialog.open)return;
+   const sheets=await this.art.appearances.prepare({preset:look,version});if(token!==this.token||!this.dialog.open)return;
    this.sheets=sheets;this.status('Preview only · village time and resident needs stay unchanged.');this.restart();
-  }catch{if(token===this.token){this.cache.delete(look);this.status('These character poses could not load. Keep your draft and try again.');}}
+  }catch{if(token===this.token)this.status('These character poses could not load. Keep your draft and try again.');}
  }
  status(text){this.dialog.querySelector('[data-character-preview-status]').textContent=text;}
  restart(){cancelAnimationFrame(this.frame);this.frame=null;this.start=performance.now();if(this.dialog.open&&this.sheets&&!document.hidden)this.draw(this.start);}
@@ -66,8 +63,8 @@ export class CharacterCreator{
   const x=scale?220:160,y=scale?195:222,width=scale?RESIDENT_WIDTH:160;
   paintContactShadow(ctx,x,y,width*.24,width*.065,.18);ctx.save();ctx.filter=unlitFilter(night);
   drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds),facing,breath:1},x,y,width);ctx.restore();
-  if(scale){const frame=preparedFrames(this.art.residents[1],{referenceRow:2})[8];ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
-  paintResidentPortrait(this.portrait,{preset:this.look,version:this.lookVersion},this.art.residents,{filter:unlitFilter(night)});
+  if(scale){const frame=this.art.appearances.portraitFrame({preset:'bento',version:1});ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
+  paintResidentPortrait(this.portrait,{preset:this.look,version:this.lookVersion},this.art.appearances,{filter:unlitFilter(night)});
   Object.assign(this.canvas.dataset,{look:this.look,pose:mode,frame:String(sampleResidentClip(mode,seconds)[0].frame),scale:String(scale),night:String(night)});
   if(!this.motion.matches&&residentClips[mode].fps>0)this.frame=requestAnimationFrame(t=>this.draw(t));
  }

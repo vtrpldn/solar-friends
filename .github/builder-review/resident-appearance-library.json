@@ -1,0 +1,44 @@
+{
+  "result": "PASS",
+  "scope": "Shared runtime/editor appearance selection for the existing five public looks; no modular artwork approval or new player part choices",
+  "baseRevision": "9494cffe269028ca9b6d6e2e37292a180c8729fe",
+  "sourceHashes": {
+    "web/resident-look.js": "037550fb338c060f64462e9aef8593469050a4fe627a86d83753cdc7678b156c",
+    "web/resident-appearance-library.js": "a21ce18628ee2465cc6ffaac91afaf19883c228ad61a45d36d78ba946e553189",
+    "web/resident-portrait.js": "4e441e6cc67ae6e512345e2077bd3a58f7d192184bac69f5d75531cb9ec550f0",
+    "web/resident-identity.js": "ce5a50a3bc036e98527924150040de1c3a028a1161acae5726b7902564eae9a6",
+    "web/main.js": "67671e232afaa3766fb91867de24ab9c8a1b124fb7d2db467d2c5088f35ed5de",
+    "web/editor/map-view.js": "458ffc60f7841e02f7e6d47cfa6ec6eef942ecdba96ebc03e5a450fe69185393",
+    "web/editor/character-creator.js": "178f1c7fccca84db15130afeda8a44bcd84e51001fbe416a07e35c1d2e962e6f",
+    "web/editor/resident-presets.js": "69f546a92dbac2fadbb3ce2daed59c67c4ba906d147aa6822655070ec48b3238",
+    "web/editor/relationships.js": "071201f77f72572b7a7e614fc5c2ab92159878226638935bae3c2b8cffdb9673",
+    "scripts/verify-resident-appearance-library.mjs": "df24ac46fc028e1f221d4b3cd62776a3eecd9070e0ae1089a2722212a9a2ccc4",
+    "web/pkg/solar_friends_bg.wasm": "afd6e6f5c5b7478bec1c24bffa8471a0b8eb4043c6830128abe42053cba97c14",
+    "scripts/verify-resident-appearance.mjs": "fcb62dc3d432f90c0417d3116149591e8c84e60da5109b232b140f8f15fabdbd"
+  },
+  "checks": {
+    "exactPoseSelections": 240,
+    "renderedAnimationComparisons": 520,
+    "portraitComparisons": 10,
+    "nativeCatalogEntries": 5,
+    "sheetLoads": 15,
+    "sheetDecodes": 15,
+    "invalidAppearanceRefusals": 24,
+    "retryAttempts": 2,
+    "identityBoundRelationshipPortraits": 2,
+    "unsupportedRelationshipPortraits": 1
+  },
+  "commands": [
+    "node scripts/verify-resident-appearance-library.mjs",
+    "node scripts/verify-character-creator.mjs",
+    "node scripts/verify-resident-appearance.mjs",
+    "node scripts/verify-resident-portraits.mjs",
+    "node scripts/verify-story-roles-editor.mjs",
+    "node scripts/verify-character-choice-controls.mjs"
+  ],
+  "visualReview": {
+    "captures": "assets/art-direction/character-prototype-v1/shared-appearance-path-v1",
+    "findings": "Inspected desktop creator, animated live identity dialog and preset portrait sheet. Existing cast paint and world proportions remain unchanged. Relationship thumbnails and live avatars now use the shared aspect-preserving portrait crop; live avatar pixels are checked before and after cosmetic editing."
+  },
+  "remaining": "Complete modular body/face/hair/clothing/facial-hair/hat/accessory artwork, final style/grip/cadence, production recipes and creator controls; all original builder release gates remain required."
+}

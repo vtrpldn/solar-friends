@@ -1,13 +1,12 @@
-import {residentLookIndex} from './resident-look.js';
-import {preparedFrames} from './sprite-frames.js';
+import {createResidentAppearanceLibrary} from './resident-appearance-library.js';
+const legacyLibraries=new WeakMap();
 
 // Crop the same approved standing frame as the character creator. Fit the
 // portrait without changing the painted face/body proportions.
-export function paintResidentPortrait(canvas,appearance,images,{filter='none'}={}){
-  if(!appearance||Object.keys(appearance).some(key=>!['preset','version'].includes(key)))throw Error('This resident artwork is unavailable.');
-  const image=images[residentLookIndex({appearance})];
-  const frame=preparedFrames(image,{referenceRow:2})?.[8];
-  if(!frame)throw Error('This resident portrait could not load.');
+export function paintResidentPortrait(canvas,appearance,source,{filter='none'}={}){
+  let library=source;
+  if(Array.isArray(source)){if(!legacyLibraries.has(source))legacyLibraries.set(source,createResidentAppearanceLibrary({base:source}));library=legacyLibraries.get(source);}
+  const frame=library.portraitFrame(appearance);
   paintPreparedResidentPortrait(canvas,frame,{filter});
 }
 

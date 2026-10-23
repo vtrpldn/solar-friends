@@ -7,7 +7,8 @@ import {paintResourceSite} from '../resource-site-art.js';
 import {economyImage} from '../economy-art.js';
 import {hitStartingSite,sourceKinds,sitePreview,newStartingSite} from './sites.js';
 import {loadCropArt} from '../crop-art.js';
-import {residentLookIndex} from '../resident-look.js';
+import {residentLookKeys} from '../resident-look.js';
+import {createResidentAppearanceLibrary} from '../resident-appearance-library.js';
 import {loadRegionalArt} from '../regional-art.js';
 import {terrainRevision} from '../terrain-revision.js';
 import {strokeCells} from './brush.js';
@@ -17,17 +18,18 @@ import {allBuildingArt} from '../building-art.js?v=night-1';
 import {footprintCorners,occupies} from '../building-footprints.js';
 import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops,paintContactShadow} from '../world-renderer.js';
 import {drawBuildingState} from '../building-state-art.js';
-import {preparedFrames,FRAME_ANCHOR,RESIDENT_WIDTH} from '../sprite-frames.js';
+import {FRAME_ANCHOR,RESIDENT_WIDTH} from '../sprite-frames.js';
 
 const image=file=>{const value=new Image();value.src=new URL('../art/'+file,import.meta.url);return value;};
 export async function loadEditorArt(){
   const images=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,image(art.file)]));
   for(const [kind,art]of Object.entries(allBuildingArt))if(art.emptyFile)images[kind+':empty']=image(art.emptyFile);
   const terrain=image('terrain-atlas.png'),forest=image('mata-atlantica-atlas.png'),details=image('landscape-details.png');
-  const residents=['iara','bento','luz','caua','nina'].map(name=>image(`animations/${name}.png`));
+  const residents=residentLookKeys.map(name=>image(`animations/${name}.png`));
   await Promise.all([loadRegionalArt(),loadCropArt(),loadChickenArt()]);
   await Promise.all([...Object.values(images),terrain,forest,details,...residents,economyImage,batteryImage].map(i=>i.decode()));
-  return {images,terrain,forest,details,residents};
+  const appearances=createResidentAppearanceLibrary({base:residents});
+  return {images,terrain,forest,details,residents,appearances};
 }
 const catalogMaterial=material=>['timber','bamboo','earth','stone','salvage'].indexOf(material);
 const keyFor=b=>b.kind!=='home'?b.kind:b.recipe==='local'?'home-veranda':b.appearance||(b.recipe==='adobe'?'adobe-gable':'home');
@@ -177,12 +179,12 @@ export class EditorMap {
     for(const bank of this.snapshot.village.power.network.nodes.filter(n=>n.owner.kind==='ground'&&n.kind==='battery'))objects.push({depth:bank.x+bank.y+.1,draw:()=>{if(hitStartingBank(this.document,bank.x,bank.y)?.id===view.selectedBank)this.polygon(footprintCorners('battery',bank.x,bank.y),'#efc86d55','#ffe39a');drawBattery(c,this.project(bank.x,bank.y),this.scale);}});
     for(const hen of flock(this.snapshot.village))objects.push({depth:hen.x+hen.y+.2,draw:()=>drawChicken(c,this.project(hen.x,hen.y),this.scale,hen)});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
-      const p=this.project(resident.x,resident.y),frame=preparedFrames(art.residents[residentLookIndex(resident)],{referenceRow:2})?.[8],size=RESIDENT_WIDTH*this.scale;
+      const p=this.project(resident.x,resident.y),frame=art.appearances.portraitFrame(resident.appearance),size=RESIDENT_WIDTH*this.scale;
       if(this.snapshot.scenario_ref?.residents?.[view.selectedResident]===resident.id){c.beginPath();c.ellipse(p.x,p.y,14*this.scale,7*this.scale,0,0,Math.PI*2);c.strokeStyle='#ffe39a';c.lineWidth=2;c.stroke();}
       paintContactShadow(c,p.x,p.y+2*this.scale,10*this.scale,4*this.scale,.25);
       if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);
     }});
-    if(this.pointer&&(view.tool==='resident-start'||this.drag?.resident)){const id=this.drag?.resident??this.placingResident,person=this.snapshot.residents.find(p=>p.id===this.snapshot.scenario_ref?.residents?.[id]);if(person){const p=this.project(this.pointer.x,this.pointer.y),size=RESIDENT_WIDTH*this.scale,frame=preparedFrames(art.residents[residentLookIndex(person)],{referenceRow:2})?.[8];objects.push({depth:this.pointer.x+this.pointer.y+.6,draw:()=>{c.save();c.globalAlpha=.5;if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}});}}
+    if(this.pointer&&(view.tool==='resident-start'||this.drag?.resident)){const id=this.drag?.resident??this.placingResident,person=this.snapshot.residents.find(p=>p.id===this.snapshot.scenario_ref?.residents?.[id]);if(person){const p=this.project(this.pointer.x,this.pointer.y),size=RESIDENT_WIDTH*this.scale,frame=art.appearances.portraitFrame(person.appearance);objects.push({depth:this.pointer.x+this.pointer.y+.6,draw:()=>{c.save();c.globalAlpha=.5;c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}});}}
     objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
     const selectedRoute=this.document.start.routes?.find(r=>r.id===view.selectedRoute);
     if(selectedRoute)for(const [x,y]of selectedRoute.cells)this.polygon(footprintCorners('road',x,y),'#efc86d55','#ffe39a');
