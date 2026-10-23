@@ -1,0 +1,46 @@
+{
+  "why": "Avoid spending dense-village frame time rebuilding closed management panels.",
+  "changes": "The fund HUD stays live; closed economy/supplies/power/building details defer DOM/native detail work until opening. Open pickup dialog still refreshes.",
+  "fixture": "64x64 seed 42, 256 completed buildings across 21 inland types, 12 unique custom looks with mixed hats. Every phase restores the same opening snapshot, warms up, then samples ten seconds. Real pointer drags in pan phases.",
+  "fixtureClarification": "Earlier labels said no stocked livestock; this fixture actually inherits native completed-building defaults and supplies no explicit crop/animal overrides.",
+  "baseline": "Fixed 8bb62ea main.js/economy-ui.js served over the same remaining source.",
+  "evidence": "assets/validation/mixed-play-performance-v1",
+  "observations": [
+    {
+      "speed": 1,
+      "panning": false,
+      "beforeP95GapMs": 50.10000000000218,
+      "afterP95GapMs": 26.099999999998545,
+      "afterEffectiveSpeed": 1.0038140320346285
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "beforeP95GapMs": 50,
+      "afterP95GapMs": 25.899999999997817,
+      "afterEffectiveSpeed": 1.0039810409995595
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "beforeP95GapMs": 67,
+      "afterP95GapMs": 50,
+      "afterEffectiveSpeed": 4.495546125711824
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "beforeP95GapMs": 66.69999999999709,
+      "afterP95GapMs": 50,
+      "afterEffectiveSpeed": 4.50886962503045
+    }
+  ],
+  "checks": [
+    "Exact checkpoint restore with all 12 residents and 256 buildings after every phase",
+    "Closed-panel probe: no water detail calls or child/text DOM rebuilds in observed closed panels; immediate current contents on opening supplies, power, buildings, projects and trade",
+    "Public trade-goal/purchase/sale/resident-pickup/checkpoint regression passes",
+    "Public hatted-character preview/preset import-export/draft/play/live cosmetic/checkpoint regression passes"
+  ],
+  "visual": "Inspected final 1x and 16x panning captures; world, portraits and dock remain visible.",
+  "remaining": "Selected 16x achieves only about 4.5x in this maximum fixture. Roughly 60fps, sustained long runs, total GPU/source memory, real brush/save/compile cancellation, all-biome balances and other original builder release gates remain unfinished."
+}

@@ -130,8 +130,10 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   };
   $('#storage-locations').onchange=event=>{if(event.target.matches('select')){const row=event.target.closest('.storage-location'),building=Number(row.querySelector('button').dataset.storeTarget),store=snapshot().village.logistics.stores.find(p=>p.owner.kind==='warehouse'&&p.owner.id===building);row.querySelector('input').value=store.target[Number(event.target.value)];}};
   $('#storage-locations').addEventListener('focusout',()=>queueMicrotask(update));
-  function update(){
+  function update({panels=true}={}){
     const s=snapshot(),e=s.environment.economy,v=s.village;
+    $('#fund').textContent=money(e.money);
+    if(!panels)return;
     syncJobs(s);
     suppliers.update(s);
     for(const m of e.materials){const node=$(`[data-material="${m.id}"]`)?.closest('.town-item').querySelector('.trade-price');if(node&&node.textContent!==money(m.price))node.textContent=money(m.price);}

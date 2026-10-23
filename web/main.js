@@ -1085,14 +1085,14 @@ function updateQuests() {
   $("#compost-stock").textContent =
     `${p.scraps} scraps → ${p.compost} compost · ${p.enriched_harvests} enriched ${p.enriched_harvests === 1 ? "harvest" : "harvests"}`;
   $("#tools-control").hidden = !has("workshop") && p.tool_uses===0;
-  $("#tools-stock").textContent =
+  if(!$("#supplies-panel").hidden)$("#tools-stock").textContent =
     `${p.tool_uses} tool ${p.tool_uses===1?'use':'uses'} owned across the village · ${p.tools_crafted} ${p.tools_crafted===1?'batch':'batches'} crafted`;
   $("#use-tools").checked = p.use_tools;
   const gathering=gatheringInfo(v);
   $("#gathering-control").hidden = !has("square") && !gathering.active;
   $("#gathering-status").textContent = gathering.summary;
   $("#shared-table").hidden = !has("square") && !p.gathering_delivery;
-  $("#shared-table-status").textContent = gathering.summary;
+  if(!$("#supplies-panel").hidden)$("#shared-table-status").textContent = gathering.summary;
   for(const button of document.querySelectorAll('[data-cancel-gathering]'))button.hidden=!gathering.active;
   $("#host-gathering").disabled = gathering.active || p.gathering_day === Math.floor(v.minutes / 1440);
   $("#host-gathering").textContent = gathering.active
@@ -1274,12 +1274,12 @@ function updateUI() {
   $('#help-intro').textContent=free?(instant?'Sandbox unlocks every building. New buildings are instant and free; pantry, tools and funds replenish. Settings lets you add construction, living-land and utility constraints.':'Sandbox unlocks every building. Supplies and resident labour are needed for new construction; plan projects in Construction and purchases in Trade. Living-land and utility rules are separate choices in Settings.'):'Follow the journal’s thirteen Story chapters to unlock village life. Plan blueprints in Construction and buy missing supplies in Trade.';
   replaceMarkup($('#help-start'),instant?'<b>Build freely.</b> Open Build, choose any building, then click a clearing. Select it in Buildings to change crops, invite a visitor, or queue resident demolition, salvage or relocation.':free?'<b>Plan your own village.</b> Every building is unlocked. Choose a blueprint in Build, manage its supplies and priority in Construction, and let residents carry and build when they have the energy. Adjust the other simulation rules in Settings.':'<b>Start with the essentials.</b> Open Journal and follow A Shared Beginning: a cistern, homes, a garden and a kitchen. Plan their materials in Village → Construction; residents build when they have the energy.');
   if(creation){$('#help-intro').textContent=creation.intro;replaceMarkup($('#help-start'),creation.start);}
-  economyUI?.update();
+  economyUI?.update({panels:['#projects-panel','#town-panel','#supplies-panel','#power-panel'].some(selector=>!$(selector).hidden)||$('#pickup-dialog').open});
   updateSituations();
   const v = state.village;
-  updateSupplies(v);
-  updatePowerUI(state,kinds);
-  updateBuildingPanel();
+  if(!$('#supplies-panel').hidden)updateSupplies(v);
+  if(!$('#power-panel').hidden)updatePowerUI(state,kinds);
+  if(!$('#building-panel').hidden)updateBuildingPanel();
   for (const k of ["wood", "water"])
     $("#" + k).textContent = Math.floor(v[k]);
   const foodReserve=state.environment.economy.food_reserve;
