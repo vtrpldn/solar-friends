@@ -1,0 +1,35 @@
+{
+  "status": "Internal development only; no gameplay or resident-recipe integration.",
+  "standingFinding": "The v6 shorter source removes the conspicuous right-side tip and excess chin bulk in the inspected standing comparison. This is an initial fit improvement, not complete accessory acceptance.",
+  "registration": {
+    "sourceSize": 1254,
+    "bodyGuideSize": 1254,
+    "fixedFaceCrop": [
+      540,
+      200,
+      300,
+      300
+    ],
+    "assembly": "Register the entire source into the fixed guide crop in a 1254-square assembly, then normalize the whole frame to 256. No alpha-bounds fitting, local warp, clipping or generated-pixel repaint."
+  },
+  "evidence": {
+    "v5": "v5-registration-review.json",
+    "v6": "v6-registration-review.json",
+    "facePairs": "v6-faces.png"
+  },
+  "findings": [
+    "Both hairstyles, small/enlarged standing display and mirrored/night-tinted comparisons were captured.",
+    "48 complete body poses and 48 enlarged original/overlay face pairs were inspected.",
+    "Hat head translations do not establish jaw or mouth alignment.",
+    "Bent/tipped faces still show cheek/mouth detachment, especially base work 7, stretch 5/6, water 7 and tending poses.",
+    "The current review does not cover the two equipment-return frames, hair-colour/material matrix, portraits, planted world scenes or continuous animation."
+  ],
+  "nextAction": "Author facial landmarks and separate painted angle sources for the flagged poses. Bind those sources to body-frame hashes, validate all main and return poses, then do palette/portrait/world and public-native integration.",
+  "fingerprints": {
+    "jaw-only-guide-v5.png": "40e325b0cdd9b1e708ff93eb52fce95991a0c0f593dd87e783814a9b28d498de",
+    "jaw-only-guide.png": "90ddc31a62013674c6be63355a7e9dc4f29fe1445dd7074e6c9eacde527ffe9a",
+    "face-scale-reference.png": "eb34e45a656a7c977cf1c58de03730ca766109f98664c183a71a41dbbd4c9c1b",
+    "candidate-v5.png": "0e6998334b5ea30a3253a6957adcfc932b8343902af5dfa490247d45267a22f9",
+    "candidate-v6.png": "6fb8a248f895330e4a831be1b5de3e752ae4a79f906fab2bd080eed7b62fa382"
+  }
+}
