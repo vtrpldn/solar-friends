@@ -1,0 +1,18 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "prompt": "Precise painted GAME SPRITE PART ATLAS. Image1 is a 1254x1254 transparent atlas containing exactly THREE small green beard-and-moustache pairs. It has a 2x2 layout with 627x627 cells: top-left is pose4, top-right pose5, bottom-left pose6, and bottom-right must stay entirely empty. Replace ONLY the green paint with dark-chestnut short beard paint, following each pair's exact distinct silhouette, position and dimensions. Preserve all transparent holes and margins. Do not center, move, enlarge, merge or duplicate the shapes. The three slightly different jaw curves are deliberate body-pose registrations. Keep their side tips short; no new horns, no extra bulk below the green chin curve. Image2 is MATERIAL/COLOUR only: match this existing short beard's warm subdued chestnut broad painted clumps and soft upper-left highlights, simplified enough for a small Solar Friends countryside resident. It is NOT a shape/layout reference. Output only three beard-and-moustache overlays on true transparent alpha, retaining the full1254-square canvas and empty bottom-right cell. No faces, skin, eyes, scalp hair, clothes, green guide marks, text, border, grid, shadow outside the shapes or detached flecks. No photoreal hair strands. Each pair is one pose of the same close-trimmed beard.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-clip-v1/jaw-atlas.png",
+      "role": "Exact measured silhouette positions for working body poses 4, 5 and 6; empty fourth cell"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-clip-v1/../short-beard-v1/candidate-v6.png",
+      "role": "Standing beard paint/material reference only"
+    }
+  ],
+  "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-76728ead-f7c5-4fe7-99d8-912ae0d3d341.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+  "file": "candidate-v1.png",
+  "scope": "Internal facial-hair working-clip development, not a public appearance recipe."
+}

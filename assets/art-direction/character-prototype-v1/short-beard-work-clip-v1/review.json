@@ -1,0 +1,32 @@
+{
+  "status": "Four working facial poses pass isolated frame-fit review. Internal development only; not a complete selectable appearance.",
+  "scope": "Neutral body base poses 4 through 7. Three freshly painted atlas regions plus the previously reviewed dedicated bent-pose source.",
+  "registration": "Each face has an authored crop and exact body-frame hash. Atlas cells are fixed 627-square source regions. Source tiles assemble through the guide-derived face crop into the full shared source canvas before normalization; no alpha fitting, warping or hat offsets.",
+  "inspected": [
+    "Original and composed face pairs for both hairstyles and warm/sunlit/copper skin palettes (24 combinations).",
+    "All four working frames at enlarged and small resident-renderer scales, both facings, day and night tint.",
+    "24 ordered render samples around the native work-clip frame boundaries; beard stays with the corresponding body keyframe. This is not a completed continuous-playback or general motion-polish verdict."
+  ],
+  "mechanical": [
+    "All four painted regions have complete coverage inside their authored review bounds.",
+    "Empty fourth atlas tile contains no visible paint.",
+    "No pixels outside the authored face crop change in all 24 combinations.",
+    "Six malformed source tiles, three incomplete/swapped pose sets and one unsupported-pose request are refused.",
+    "Four frames per prepared working provider: 1048576 composed RGBA bytes, unchanged after repeated requests. All six tested providers release their frames explicitly and reject reads after disposal. This does not measure total decoded-source/body/GPU memory.",
+    "The earlier ten-refusal bent-pose browser regression and existing sprite-frame checks pass."
+  ],
+  "remaining": [
+    "Every other facial activity and required return frame",
+    "Hair-colour and hat compatibility, portraits and independent custom resident palettes",
+    "Planted world scenes beside original cast and buildings",
+    "Continuous playback and cross-activity transitions",
+    "Full provider cache/source/GPU memory gates",
+    "Native/public creator/library/export/save integration"
+  ],
+  "fingerprints": {
+    "candidate-v1.png": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+    "jaw-atlas.png": "f5011643df9ddb51a829b382aa4ce7085a9733eb9159cfe1c4898b6e8531ad68",
+    "faces-atlas.png": "3ed3f802bfb1b96434a98550524708b70b440b561b39e717713466895bc8393f",
+    "registrations.json": "1bcfe8a9b439af61e5e39b08282142287393dd65dc2f7a5be1c59806bb931bd7"
+  }
+}

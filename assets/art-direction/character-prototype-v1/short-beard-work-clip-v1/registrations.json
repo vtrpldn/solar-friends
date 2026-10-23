@@ -1,0 +1,89 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "sheet": "base",
+    "index": 4,
+    "bodyFrameSha256": "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+    "source": {
+      "size": 1254,
+      "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+      "rect": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    "crop": [
+      120,
+      38,
+      48,
+      48
+    ],
+    "bounds": [
+      50,
+      350,
+      460,
+      240
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "sheet": "base",
+    "index": 5,
+    "bodyFrameSha256": "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+    "source": {
+      "size": 1254,
+      "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+      "rect": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    "crop": [
+      116,
+      38,
+      48,
+      48
+    ],
+    "bounds": [
+      50,
+      350,
+      465,
+      250
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "sheet": "base",
+    "index": 6,
+    "bodyFrameSha256": "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+    "source": {
+      "size": 1254,
+      "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+      "rect": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    "crop": [
+      120,
+      44,
+      48,
+      48
+    ],
+    "bounds": [
+      100,
+      360,
+      400,
+      230
+    ]
+  }
+]
