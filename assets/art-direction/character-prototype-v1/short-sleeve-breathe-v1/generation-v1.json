@@ -1,0 +1,30 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "generate referenced garment-only paint",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/mask.png",
+      "role": "sole source geometry and atlas layout authority; not a colour/style reference",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/mask.png"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/context.png",
+      "role": "anatomical context only; bodies must not be output",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/context.png"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/atlas.png",
+      "role": "existing cream fabric material and painted style reference only; not tank-top geometry",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/atlas.png"
+    }
+  ],
+  "acceptance": "registration-intent.json; unchanged generated paint, geometry audit then full-body visual review",
+  "status": "rejected: all four source regions fail unchanged fit gates",
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-05a3fc79-6553-455f-8d18-f552cf51d3f2.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "1b9d2f8e219c1b710cfb1b5ec6028e6095736245a329aca0c67969400953a8a9",
+  "audit": "candidate-v1-audit.json",
+  "visualFinding": "Cream fabric shading is plausible; every garment is enlarged and shifted down relative to the registered outline. No source fitting or trimming was performed.",
+  "transparentBackground": true
+}

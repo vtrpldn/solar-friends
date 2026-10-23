@@ -1,0 +1,31 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-sleeve-v1",
+    "sheet": "base",
+    "index": 11,
+    "crop": [
+      70,
+      65,
+      130,
+      130
+    ],
+    "bodyFrameSha256": "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+    "bounds": [
+      128,
+      2,
+      950,
+      754
+    ],
+    "source": {
+      "size": 1254,
+      "sha256": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+      "rect": [
+        0,
+        0,
+        1254,
+        1254
+      ]
+    }
+  }
+]

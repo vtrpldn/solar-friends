@@ -1,0 +1,70 @@
+{
+  "status": "accepted as an internal four-pose production prototype; public clothing option not delivered",
+  "why": "A different shirt cut must be authored to the real body poses and composed before hair/foreground, rather than simulated by body scaling or colour alone.",
+  "selectedSources": [
+    {
+      "collection": "short-sleeve-breathe-single-8-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+      "poses": [
+        "base:8"
+      ]
+    },
+    {
+      "collection": "short-sleeve-breathe-single-9-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+      "poses": [
+        "base:9"
+      ]
+    },
+    {
+      "collection": "short-sleeve-breathe-single-10-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+      "poses": [
+        "base:10"
+      ]
+    },
+    {
+      "collection": "short-sleeve-breathe-single-11-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+      "poses": [
+        "base:11"
+      ]
+    }
+  ],
+  "reviewedImages": [
+    "review-v1-board.png",
+    "review-v1-details.png",
+    "review-v1-lighting.png",
+    "motion-breathe.png"
+  ],
+  "findings": [
+    "Four original breathing poses retain stature and hand/lower-body pixels; warm cream cotton reads consistently at 48 and 120 pixels.",
+    "Corrected asymmetric crew collars show no old tank-top pixels in the collar diagnostics.",
+    "Full-body comparison covers both hairstyles and all three skin palettes; the enlarged painted folds vary slightly across poses.",
+    "Inspected sixteen encoded samples spanning the breathing poses and loop return in daylight and mirrored night. Requested timestamps do not prove exact native/decoder pose correspondence."
+  ],
+  "evidence": {
+    "outsideCropChecks": 24,
+    "handAndLowerBodyChecks": 24,
+    "strictRefusals": 20,
+    "exactForegroundRecombinations": 4,
+    "failedCompositionCleanups": 4,
+    "lightingSamples": 64,
+    "videoSha256": "3ad71901a21c6dc8986f48ed152ae1ceb1744bf85f99560d85ad48a1a34fed4d",
+    "duration": "11.003821",
+    "decodedFrames": "331"
+  },
+  "remaining": [
+    "Forty-four other raw body poses and equipment-return compatibility",
+    "Shirt colour variants and exact old-garment coverage around seams",
+    "Hat and beard combinations",
+    "Shared-world neighbours/ground/biome review",
+    "Complete cross-clip transitions and continuous animation acceptance",
+    "Native/public recipe catalog, creator, portraits, saves and portable-content integration",
+    "Maximum-roster preparation/cache and total-memory acceptance"
+  ]
+}

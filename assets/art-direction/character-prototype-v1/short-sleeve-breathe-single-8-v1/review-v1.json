@@ -1,0 +1,42 @@
+{
+  "status": "Internal four-pose prototype; source audit passes, visual findings recorded separately; no public recipe option.",
+  "sourceHash": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+  "profiles": [
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm"
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit"
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper"
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm"
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit"
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper"
+    }
+  ],
+  "outsideChecks": 6,
+  "refused": 4,
+  "coverage": [
+    {
+      "sheet": "base",
+      "index": 8,
+      "oldTop": 2050,
+      "covered": 2034,
+      "coverage": 0.9921951219512195,
+      "collarLeaks": []
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "edit single-pose mask in place",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-single-8-v1/mask.png",
+      "role": "sole edit target, alpha and geometry authority",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-single-8-v1/mask.png"
+    }
+  ],
+  "intent": "registration-intent.json frozen before generation; native shape unchanged from preceding collar correction",
+  "status": "source geometry and shared static composition accepted for internal breathing prototype; public set incomplete",
+  "candidate": "candidate-v1.png",
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-56e2bd8c-3805-4899-960e-4fc787483ef1.png",
+  "sha256": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+  "audit": "candidate-v1-audit.json",
+  "transparentBackground": true,
+  "combinedReview": "../short-sleeve-breathe-complete-v1/review-v1.json",
+  "visualFinding": "Full-body and enlarged source-bound review: crew collar covers previous tank-top straps, sleeves follow upper arms, hands/lower body remain exact; four pose cloth folds vary slightly enlarged. Remaining clips, tint/hat/beard/equipment compatibility and shared-world placement still need review."
+}

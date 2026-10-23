@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "edit corrected mask in place; no paint fitting",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-shoulder-v1/mask.png",
+      "role": "edit target and exact alpha/layout authority",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-shoulder-v1/mask.png"
+    }
+  ],
+  "intent": "registration-intent.json frozen before generation",
+  "reason": "Anatomical shoulder/collar correction after full-body review exposed old tank straps",
+  "status": "source-fit pass; static review requires asymmetric collar correction",
+  "candidate": "candidate-v1.png",
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5e300bed-1986-4e76-896f-3862c9c46aef.png",
+  "sha256": "263b1b0a5f3aa4dd44f608e21fc6838cc22b124158e7eac8151904f3c732e5e5",
+  "audit": "candidate-v1-audit.json",
+  "visualFinding": "Raised shoulder removes shoulder straps, but 5 to 7 old white pixels remain inside the collar opening. Native diagnostics locate them at x144..149 y75..78, so the right edge of the asymmetric collar must rise earlier.",
+  "transparentBackground": true
+}

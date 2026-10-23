@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "edit corrected silhouette in place; no paint fitting",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-collar-v1/mask.png",
+      "role": "edit target and exact alpha/layout authority",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-collar-v1/mask.png"
+    }
+  ],
+  "intent": "registration-intent.json frozen before generation",
+  "reason": "Asymmetric collar correction at measured old strap pixels; sleeves and hem unchanged",
+  "status": "rejected: all four fixed source-envelope/guide-coverage checks fail",
+  "candidate": "candidate-v1.png",
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4899e054-b160-4f1a-888e-1822a2163e38.png",
+  "audit": "candidate-v1-audit.json",
+  "visualFinding": "Atlas cells drift/expand from the unchanged guide; bounds coverage 86.55 to 97.74 percent, and three guide overlaps below 90 percent. Reject without fitting. Next layout isolates one native pose per source.",
+  "sha256": "43ee26d5193299c026f7f03d8b7933c2396e6f81b30467b8142b4ad298d25013",
+  "transparentBackground": true
+}

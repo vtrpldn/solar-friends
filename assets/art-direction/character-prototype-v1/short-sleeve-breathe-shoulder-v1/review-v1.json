@@ -1,0 +1,162 @@
+{
+  "status": "Internal four-pose prototype; source audit passes, visual findings recorded separately; no public recipe option.",
+  "sourceHash": "263b1b0a5f3aa4dd44f608e21fc6838cc22b124158e7eac8151904f3c732e5e5",
+  "profiles": [
+    {
+      "hair": "short-curls-v1",
+      "skin": "warm"
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "sunlit"
+    },
+    {
+      "hair": "short-curls-v1",
+      "skin": "copper"
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "warm"
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "sunlit"
+    },
+    {
+      "hair": "side-part-v1",
+      "skin": "copper"
+    }
+  ],
+  "outsideChecks": 24,
+  "refused": 16,
+  "coverage": [
+    {
+      "sheet": "base",
+      "index": 8,
+      "oldTop": 2050,
+      "covered": 2031,
+      "coverage": 0.9907317073170732,
+      "collarLeaks": [
+        [
+          147,
+          75
+        ],
+        [
+          147,
+          76
+        ],
+        [
+          148,
+          76
+        ],
+        [
+          149,
+          76
+        ],
+        [
+          148,
+          77
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 9,
+      "oldTop": 2130,
+      "covered": 2105,
+      "coverage": 0.9882629107981221,
+      "collarLeaks": [
+        [
+          146,
+          75
+        ],
+        [
+          147,
+          75
+        ],
+        [
+          148,
+          75
+        ],
+        [
+          147,
+          76
+        ],
+        [
+          148,
+          76
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 10,
+      "oldTop": 2096,
+      "covered": 2068,
+      "coverage": 0.9866412213740458,
+      "collarLeaks": [
+        [
+          144,
+          75
+        ],
+        [
+          145,
+          76
+        ],
+        [
+          146,
+          76
+        ],
+        [
+          146,
+          77
+        ],
+        [
+          147,
+          77
+        ],
+        [
+          146,
+          78
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 11,
+      "oldTop": 2094,
+      "covered": 2054,
+      "coverage": 0.9808978032473734,
+      "collarLeaks": [
+        [
+          145,
+          75
+        ],
+        [
+          145,
+          76
+        ],
+        [
+          146,
+          76
+        ],
+        [
+          147,
+          76
+        ],
+        [
+          146,
+          77
+        ],
+        [
+          147,
+          77
+        ],
+        [
+          148,
+          77
+        ]
+      ]
+    }
+  ]
+}

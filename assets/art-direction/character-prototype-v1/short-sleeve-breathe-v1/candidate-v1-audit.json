@@ -1,0 +1,43 @@
+{
+  "sha256": "1b9d2f8e219c1b710cfb1b5ec6028e6095736245a329aca0c67969400953a8a9",
+  "undeclaredPaint": 0,
+  "poses": [
+    {
+      "key": "base-8",
+      "painted": 60916,
+      "expected": 43300,
+      "boundedCoverage": 0.6768993367916475,
+      "guideCoverage": 0.6410854503464203,
+      "areaRatio": 1.4068360277136258,
+      "ok": false
+    },
+    {
+      "key": "base-9",
+      "painted": 61337,
+      "expected": 43931,
+      "boundedCoverage": 0.700849405742048,
+      "guideCoverage": 0.6495413261705857,
+      "areaRatio": 1.3962122419248366,
+      "ok": false
+    },
+    {
+      "key": "base-10",
+      "painted": 60538,
+      "expected": 43951,
+      "boundedCoverage": 0.7735306749479666,
+      "guideCoverage": 0.788810265978021,
+      "areaRatio": 1.3773975563695935,
+      "ok": false
+    },
+    {
+      "key": "base-11",
+      "painted": 59438,
+      "expected": 43603,
+      "boundedCoverage": 0.798798748275514,
+      "guideCoverage": 0.817329082861271,
+      "areaRatio": 1.3631630851088228,
+      "ok": false
+    }
+  ],
+  "ok": false
+}

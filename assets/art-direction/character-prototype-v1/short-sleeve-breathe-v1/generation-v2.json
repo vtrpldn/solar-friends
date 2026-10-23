@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "edit mask in place; no source paint fitting",
+  "promptFile": "prompt-v2.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/mask.png",
+      "role": "edit target, exact alpha/layout authority; replace green with painted cream cloth",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-breathe-v1/mask.png"
+    }
+  ],
+  "invariants": "unchanged registration-intent.json, source size, native crops and acceptance thresholds",
+  "status": "source-fit pass; visual correction required, not selected for public use",
+  "candidate": "candidate-v2.png",
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-707b8af4-67d1-4500-ae42-17696cd3263d.png",
+  "sha256": "793533fe21bbf57cb222d7273c3147cef285a7285ad60d97504e38d0a68e334e",
+  "audit": "candidate-v2-audit.json",
+  "visualFinding": "Full-body boards show coherent sleeves/material, but the pre-authored guide leaves narrow original tank-top straps exposed at the shoulder and collar. Revise the guide, never fit existing paint.",
+  "transparentBackground": true
+}
