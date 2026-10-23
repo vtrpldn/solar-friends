@@ -1,0 +1,262 @@
+{
+  "scope": "Three warm manual saves after a funds edit. Times include instrumented callbacks; not sustained save throughput or full memory evidence.",
+  "cases": [
+    {
+      "fixture": {
+        "population": 5,
+        "buildings": 2
+      },
+      "samples": [
+        {
+          "synchronousMs": 594.6999999284744,
+          "elapsedMs": 616.0999999046326,
+          "calls": [
+            {
+              "key": "checkpoint",
+              "ms": 0.6000000238418579
+            },
+            {
+              "key": "thumbnailRender",
+              "ms": 583.3000000715256
+            },
+            {
+              "key": "thumbnailEncode",
+              "ms": 10.099999904632568
+            },
+            {
+              "key": "recoveryEncode",
+              "ms": 0.30000007152557373
+            },
+            {
+              "key": "recoveryStore",
+              "ms": 0.19999992847442627
+            },
+            {
+              "key": "saveProjectSync",
+              "ms": 1.2000000476837158
+            },
+            {
+              "key": "markSaved",
+              "ms": 2.899999976158142
+            }
+          ]
+        },
+        {
+          "synchronousMs": 588.3999999761581,
+          "elapsedMs": 603.3999999761581,
+          "calls": [
+            {
+              "key": "checkpoint",
+              "ms": 0.5
+            },
+            {
+              "key": "thumbnailRender",
+              "ms": 577.3999999761581
+            },
+            {
+              "key": "thumbnailEncode",
+              "ms": 9.800000071525574
+            },
+            {
+              "key": "recoveryEncode",
+              "ms": 0.40000009536743164
+            },
+            {
+              "key": "recoveryStore",
+              "ms": 0.19999992847442627
+            },
+            {
+              "key": "saveProjectSync",
+              "ms": 1.100000023841858
+            },
+            {
+              "key": "markSaved",
+              "ms": 2.4000000953674316
+            }
+          ]
+        },
+        {
+          "synchronousMs": 598.6999999284744,
+          "elapsedMs": 613,
+          "calls": [
+            {
+              "key": "checkpoint",
+              "ms": 0.7999999523162842
+            },
+            {
+              "key": "thumbnailRender",
+              "ms": 587.2000000476837
+            },
+            {
+              "key": "thumbnailEncode",
+              "ms": 10
+            },
+            {
+              "key": "recoveryEncode",
+              "ms": 0.3999999761581421
+            },
+            {
+              "key": "recoveryStore",
+              "ms": 0.19999992847442627
+            },
+            {
+              "key": "saveProjectSync",
+              "ms": 1.100000023841858
+            },
+            {
+              "key": "markSaved",
+              "ms": 2.399999976158142
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "population": 12,
+        "buildings": 256,
+        "types": {
+          "shed": 13,
+          "home": 12,
+          "garden": 13,
+          "well": 13,
+          "kitchen": 12,
+          "grove": 12,
+          "warehouse": 13,
+          "compost": 12,
+          "square": 12,
+          "workshop": 12,
+          "greenhouse": 12,
+          "coop": 12,
+          "solar_farm": 12,
+          "streetlight": 12,
+          "eco_toilet": 12,
+          "wetland": 12,
+          "banana_treatment": 12,
+          "biodigester": 12,
+          "orchard": 12,
+          "goat_pasture": 12,
+          "apiary": 12
+        },
+        "custom": true,
+        "attempted": 312,
+        "seed": 42
+      },
+      "samples": [
+        {
+          "synchronousMs": 662.1999999284744,
+          "elapsedMs": 694.6999999284744,
+          "calls": [
+            {
+              "key": "checkpoint",
+              "ms": 0.7000000476837158
+            },
+            {
+              "key": "thumbnailRender",
+              "ms": 649.1999999284744
+            },
+            {
+              "key": "thumbnailEncode",
+              "ms": 11.100000023841858
+            },
+            {
+              "key": "recoveryEncode",
+              "ms": 0.2999999523162842
+            },
+            {
+              "key": "recoveryStore",
+              "ms": 0.40000009536743164
+            },
+            {
+              "key": "saveProjectSync",
+              "ms": 1.399999976158142
+            },
+            {
+              "key": "markSaved",
+              "ms": 3.200000047683716
+            }
+          ]
+        },
+        {
+          "synchronousMs": 643.7999999523163,
+          "elapsedMs": 660.1000000238419,
+          "calls": [
+            {
+              "key": "checkpoint",
+              "ms": 0.6000000238418579
+            },
+            {
+              "key": "thumbnailRender",
+              "ms": 631.2999999523163
+            },
+            {
+              "key": "thumbnailEncode",
+              "ms": 11
+            },
+            {
+              "key": "recoveryEncode",
+              "ms": 0.3999999761581421
+            },
+            {
+              "key": "recoveryStore",
+              "ms": 0.30000007152557373
+            },
+            {
+              "key": "saveProjectSync",
+              "ms": 1.3000000715255737
+            },
+            {
+              "key": "markSaved",
+              "ms": 2.799999952316284
+            }
+          ]
+        },
+        {
+          "synchronousMs": 642.5999999046326,
+          "elapsedMs": 660,
+          "calls": [
+            {
+              "key": "checkpoint",
+              "ms": 0.5999999046325684
+            },
+            {
+              "key": "thumbnailRender",
+              "ms": 630.4000000953674
+            },
+            {
+              "key": "thumbnailEncode",
+              "ms": 10.900000095367432
+            },
+            {
+              "key": "recoveryEncode",
+              "ms": 0.3999999761581421
+            },
+            {
+              "key": "recoveryStore",
+              "ms": 0.19999992847442627
+            },
+            {
+              "key": "saveProjectSync",
+              "ms": 1.2000000476837158
+            },
+            {
+              "key": "markSaved",
+              "ms": 4.200000047683716
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sourceHashes": {
+    "web/editor/index.js": "fa07c9fffd79b1f2f8333c462c36a43c8a456f4272c6dfc2ca64afa7ffde81a3",
+    "web/editor/thumbnail.js": "14bf7d5fac74986595835fe768c1d9368647123a23b33d8ee5160bee323269fd",
+    "web/pkg/solar_friends_bg.wasm": "9004507f61fedacf1ff196ddf3d6b47f982e067f3df8e28babb507767c12ff27"
+  },
+  "baselineCommit": "406e7e9a99c87e70d5686bf9adccd43522c1e27d",
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  }
+}
