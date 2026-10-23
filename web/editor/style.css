@@ -100,3 +100,7 @@
 .creator-outlook-project{padding:10px 0;border-top:1px solid #b69b64}
 .creator-outlook-project h5{margin:0;font:inherit;font-weight:bold}
 .creator-outlook-project p{margin:6px 0 10px}
+
+.creator-prepare-dialog{max-width:32rem;padding:1.5rem;color:var(--ink,#344b38);background:var(--paper,#fff8df);border:3px solid #8c7047;border-radius:12px;box-shadow:0 12px 40px #152b2670}
+.creator-prepare-dialog::backdrop{background:#142b2566}
+.creator-prepare-dialog p{line-height:1.5}

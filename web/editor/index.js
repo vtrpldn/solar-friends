@@ -1,3 +1,4 @@
+import {prepareScenario} from './prepare-scenario.js';
 import {landPreviewKey} from './land-preview-key.js';
 import {projectPlaces} from './outlook-projects.js';
 import {ScenarioOutlook} from './outlook.js';
@@ -308,13 +309,9 @@ async function copyCurrent(){
   attach(d,{id,view,record:{attribution}});await save();toast('A separate copy is saved.');
 }
 async function launch(definition,record,sessionKind,releaseId=null,releasePackage=null){
-  const candidate=new Game();
-  try{
-    const checked=JSON.parse(candidate.load_scenario(JSON.stringify(releasePackage??definition)));
-    if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This creation cannot start.');
-    const run=await library.createRun({definition,snapshot:candidate.snapshot(),projectId:record.id,sessionKind,sourceRevision:record.revision,releaseId,thumbnail:previewOf(definition,JSON.parse(candidate.report_state()))});
-    location.assign(`./?run=${encodeURIComponent(run.id)}`);return true;
-  }finally{candidate.free();}
+  const prepared=await prepareScenario(releasePackage??definition);
+  const run=await library.createRun({definition,snapshot:prepared.snapshot,projectId:record.id,sessionKind,sourceRevision:record.revision,releaseId,thumbnail:previewOf(definition,prepared.report)});
+  location.assign(`./?run=${encodeURIComponent(run.id)}`);return true;
 }
 async function showLibrary({reset=false}={}){
   if(current)await save();
@@ -452,7 +449,7 @@ function wire(){
   $('creator-zoom-in').onclick=()=>map.setZoom(map.view.zoom+.15);$('creator-zoom-out').onclick=()=>map.setZoom(map.view.zoom-.15);$('creator-center').onclick=()=>map.centerAt(...current.doc.value.map.camp);
   $('creator-test').onclick=async()=>{
     if(!current||busy||!report.ok)return;busy=true;$('creator-test').disabled=true;status('Preparing the playtest…');
-    try{const record=await save();await launch(current.doc.value,record,'playtest');}catch(e){toast(e.message);}finally{busy=false;refresh();}
+    try{const record=await save();await launch(current.doc.value,record,'playtest');}catch(e){toast(e.message);}finally{busy=false;refresh();$('creator-test').focus();}
   };
   $('creator-back').onclick=async e=>{e.preventDefault();try{if(current)await save();location.assign('./');}catch{/* Keep the unsaved work available to export. */}};
   $('creator-library-dialog').onclick=async e=>{
