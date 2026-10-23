@@ -106,7 +106,10 @@ export class EditorDocument extends EventTarget{
       schema:1,
       revision:this.#revision,
       definition:this.value,
-      history:structuredClone({format:2,past:this.#past,future:this.#future}),
+      // Journal entries contain validated JSON data only. The JSON clone keeps
+      // checkpoints independently mutable without structured-cloning hundreds
+      // of thousands of tiny change objects near the history byte limit.
+      history:JSON.parse(JSON.stringify({format:2,past:this.#past,future:this.#future})),
     };
   }
   static restore(checkpoint){

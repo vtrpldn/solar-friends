@@ -28,6 +28,8 @@ try{
   reopened.transact('Rename the property',draft=>{draft.title='A place for our friends';});
   assert(!reopened.canRedo,'A new branch discards only obsolete redo actions');
   const journal=reopened.checkpoint(),broken=structuredClone(journal);
+  const detached=reopened.checkpoint();detached.history.past.at(-1).changes[0].after.value='A changed external checkpoint';
+  assert.deepEqual(reopened.checkpoint(),journal,'Changing a returned journal cannot change live history');
   reopened.markSaved(journal);assert(!reopened.dirty);
   assert.equal(reopened.markSaved(saved),false);assert(!reopened.dirty,'An older acknowledgement cannot undo a newer successful save');
   broken.history.past.at(-1).after='{}';

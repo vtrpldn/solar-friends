@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import init,{Game} from '../web/pkg/solar_friends.js';
+import {serve} from './serve.mjs';
+
+const output=process.argv[2]??'/tmp/solar-large-history-save';await mkdir(output,{recursive:true});
+await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
+const game=new Game(),definition=JSON.parse(game.scenario_template('sandbox'));
+definition.map.terrain=JSON.parse(game.terrain_template());game.free();
+const baselinePath=process.argv.find(arg=>arg.startsWith('--baseline-document='))?.slice(20);
+const baselineSource=baselinePath?await readFile(baselinePath):null;
+const server=await serve(0,{handle:baselineSource?(_req,res,path)=>{if(path!=='/editor/document.js')return false;res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'}).end(baselineSource);return true;}:undefined});let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/`);
+ const fixture=await page.evaluate(async definition=>{
+  const {EditorDocument}=await import('/editor/document.js'),{ContentLibrary}=await import('/content-library.js');
+  const doc=new EditorDocument(definition);
+  for(let n=0;n<96;n++)doc.transact('Whole-property fertility '+n,d=>{for(const cell of d.map.terrain)cell.fertility=.2+n*.005;});
+  const checkpoint=doc.checkpoint(),bytes=new TextEncoder().encode(JSON.stringify(checkpoint.history)).length;
+  const library=new ContentLibrary();await library.saveProject({id:'large-history',checkpoint});
+  return {bytes,steps:checkpoint.history.past.length,revision:checkpoint.revision,definition:checkpoint.definition};
+ },definition);
+ assert(fixture.bytes>7*1024*1024&&fixture.bytes<8*1024*1024,`Expected near-limit journal, got ${fixture.bytes}`);
+ const validator=new Game();try{assert.equal(JSON.parse(validator.validate_scenario(JSON.stringify(fixture.definition))).ok,true);}finally{validator.free();}
+ await page.addInitScript(()=>{
+  window.historySaveProbe=[];
+  window.historyProbeReady=Promise.all([import('/editor/document.js').then(({EditorDocument})=>{
+   for(const name of ['checkpoint','markSaved']){const original=EditorDocument.prototype[name];EditorDocument.prototype[name]=function(...args){const start=performance.now();try{return original.apply(this,args);}finally{window.historySaveProbe.push({name,ms:performance.now()-start});}};}
+  })]);
+ });
+ const openStart=Date.now();await page.goto(`http://127.0.0.1:${server.address().port}/editor.html?project=large-history`);
+ await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');
+ const openElapsedMs=Date.now()-openStart;
+ await page.locator('#creator-funds').fill('9001');await page.locator('#creator-funds').dispatchEvent('change');
+ const sample=await page.evaluate(async()=>{
+  await window.historyProbeReady;window.historySaveProbe=[];let maxTimerGapMs=0,last=performance.now();
+  const timer=setInterval(()=>{const now=performance.now();maxTimerGapMs=Math.max(maxTimerGapMs,now-last);last=now;},5);
+  await new Promise(resolve=>setTimeout(resolve,10));const start=performance.now();document.querySelector('#creator-save').click();const synchronousMs=performance.now()-start;
+  await new Promise((resolve,reject)=>{const deadline=performance.now()+30000;const check=()=>{if(document.querySelector('#creator-save-status').textContent==='Saved on this device')return resolve();if(performance.now()>deadline)return reject(Error('Save did not finish'));setTimeout(check,5);};check();});
+  const saveElapsedMs=performance.now()-start;
+  await new Promise(resolve=>setTimeout(resolve,10));clearInterval(timer);
+  const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(),record=await library.getProject('large-history');
+  return {synchronousMs,saveElapsedMs,elapsedWithDurableReadMs:performance.now()-start,maxTimerGapMs,calls:window.historySaveProbe,checkpoint:record.checkpoint};
+ });
+ assert.equal(sample.checkpoint.definition.start.funds,900100);
+ const expected=structuredClone(fixture.definition);expected.start.funds=900100;assert.deepEqual(sample.checkpoint.definition,expected);
+ const persisted=JSON.stringify(sample.checkpoint);delete sample.checkpoint;
+ await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
+ await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');
+ assert.equal(await page.locator('#creator-funds').inputValue(),'9001');
+ const restored=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),{EditorDocument}=await import('/editor/document.js');const record=await new ContentLibrary().getProject('large-history');const doc=EditorDocument.restore(record.checkpoint);return {recovered:doc.historyRecovered,checkpoint:JSON.stringify(doc.checkpoint())};});
+ assert(!restored.recovered);assert.equal(restored.checkpoint,persisted);assert.deepEqual(errors,[]);
+ await page.locator('#creator-undo').click();await page.waitForFunction(value=>document.querySelector('#creator-funds').value===String(value),fixture.definition.start.funds/100);
+ await page.locator('#creator-redo').click();assert.equal(await page.locator('#creator-funds').inputValue(),'9001');
+ assert.deepEqual(errors,[]);
+ await page.screenshot({path:output+'/editor.png'});
+ const sources=['web/editor/document.js','web/editor/index.js','web/content-library.js','web/pkg/solar_friends_bg.wasm'];
+ const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:await readFile(file)).digest('hex')])))};
+ await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

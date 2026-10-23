@@ -1,0 +1,30 @@
+{
+  "scope": "Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.",
+  "historyBytes": 8078050,
+  "historySteps": 16,
+  "openElapsedMs": 2323,
+  "sample": {
+    "synchronousMs": 88.89999997615814,
+    "saveElapsedMs": 276.59999990463257,
+    "elapsedWithDurableReadMs": 332.09999990463257,
+    "maxTimerGapMs": 155.5,
+    "calls": [
+      {
+        "name": "checkpoint",
+        "ms": 67
+      },
+      {
+        "name": "markSaved",
+        "ms": 2.299999952316284
+      }
+    ]
+  },
+  "exactCheckpointReload": true,
+  "errors": [],
+  "sourceHashes": {
+    "web/editor/document.js": "f81c4da0bcfc2af2ba26212ce119502c71a20082e95228962889e323e43ade1e",
+    "web/editor/index.js": "0541b820f2443c60389657ebbc9adfb6377ddacccf10448fc85be1c96c58b6b9",
+    "web/content-library.js": "8bed099d63283f03f483cd8473f8ea4bdcc90b5413241ab8775c94e24990fd0a",
+    "web/pkg/solar_friends_bg.wasm": "c9c723d66ad0c0d41a2a8cae9e7c86b01a78d34b5e794d3170f7983cd4871365"
+  }
+}
