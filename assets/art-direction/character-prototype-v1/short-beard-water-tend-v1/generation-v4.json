@@ -1,0 +1,18 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "prompt": "Precise texture replacement of image1's GREEN SHAPES. Keep image1's1254x1254 transparent canvas exactly. Repaint each existing green beard and tiny moustache in place with matte dark chestnut illustrated short facial hair. The eight DIFFERENT silhouettes and positions are intentional and must remain exactly unchanged. The jaw bands are shallow, narrow and asymmetric; never replace them with generic deep U shapes. Image2 shows the underlying actual faces for placement context only, DO NOT include any face/body pixels in output. Eight beard+moustache pairs,3x3 atlas,418x418 cells, last cell completely empty. Match the green silhouette boundary precisely on every cell. Add only restrained broad painterly clumps, slight warm upper-left light and a dark underside, a short close-trimmed beard rather than a rounded smooth tube. No bright rim, hair strand microdetail, outlines, shadows, glows, haze or specks. Alpha must be zero outside the original green shapes, including the gap above every jaw and below every moustache. Keep the entire beard-band interior painted. No skin, facial features, scalp hair, clothing, tools, text, borders or background. Do NOT recenter, rescale, translate, widen, deepen or copy a single pose across all cells. Output only facial-hair layers, true transparency. The ONLY allowed change is green flat fill -> dark chestnut illustrated short hair.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/jaw.png",
+      "role": "Exact positional silhouette stencil"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/faces.png",
+      "role": "Actual resident faces for placement context only"
+    }
+  ],
+  "file": "candidate-v4.png",
+  "outputSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-137cb341-c0a1-43f1-b62c-4b83acc681e9.png",
+  "verdict": "Only activities4,5,8,11 selected for internal comparison. Remaining four fail original bounds; full appearance acceptance remains open."
+}

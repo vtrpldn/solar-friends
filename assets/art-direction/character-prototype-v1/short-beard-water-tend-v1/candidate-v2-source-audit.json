@@ -1,0 +1,126 @@
+{
+  "sha256": "62590e34829877652c4e6700e67b24ebea42bab69343ffec7bb157aae8d30ba3",
+  "ok": false,
+  "poses": [
+    {
+      "sheet": "activities",
+      "index": 4,
+      "pixels": 13398,
+      "inside": 12070,
+      "bounds": [
+        73,
+        186,
+        316,
+        314
+      ],
+      "coverage": 0.9008807284669353,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 5,
+      "pixels": 13528,
+      "inside": 11895,
+      "bounds": [
+        91,
+        185,
+        336,
+        311
+      ],
+      "coverage": 0.879287403903016,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 6,
+      "pixels": 14029,
+      "inside": 11581,
+      "bounds": [
+        93,
+        186,
+        347,
+        311
+      ],
+      "coverage": 0.8255043124955449,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "pixels": 14709,
+      "inside": 12622,
+      "bounds": [
+        75,
+        169,
+        334,
+        300
+      ],
+      "coverage": 0.8581140798150793,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 8,
+      "pixels": 14489,
+      "inside": 13105,
+      "bounds": [
+        82,
+        172,
+        339,
+        301
+      ],
+      "coverage": 0.9044792601283732,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 9,
+      "pixels": 14866,
+      "inside": 12941,
+      "bounds": [
+        90,
+        170,
+        351,
+        303
+      ],
+      "coverage": 0.8705098883357998,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 10,
+      "pixels": 14120,
+      "inside": 12366,
+      "bounds": [
+        70,
+        174,
+        333,
+        304
+      ],
+      "coverage": 0.8757790368271955,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "activities",
+      "index": 11,
+      "pixels": 14021,
+      "inside": 12598,
+      "bounds": [
+        81,
+        173,
+        336,
+        303
+      ],
+      "coverage": 0.8985093787889594,
+      "minimumCoverage": 0.98,
+      "ok": false
+    }
+  ]
+}

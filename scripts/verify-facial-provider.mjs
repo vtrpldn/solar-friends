@@ -4,8 +4,8 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const variant=process.argv[2]??'original';assert(['original','rest-consistency'].includes(variant),'Choose an explicit registered comparison variant');
-const root='assets/art-direction/character-prototype-v1',output=root+(variant==='original'?'/short-beard-complete-v1':'/short-beard-complete-rest-consistency-v1');
+const variant=process.argv[2]??'original';assert(['original','rest-consistency','water-tend-consistency'].includes(variant),'Choose an explicit registered comparison variant');
+const root='assets/art-direction/character-prototype-v1',output=root+(variant==='original'?'/short-beard-complete-v1':variant==='rest-consistency'?'/short-beard-complete-rest-consistency-v1':'/short-beard-complete-water-tend-consistency-v1');
 const collections=[
  ['short-beard-work-clip-v1','registrations.json','candidate-v1.png'],
  ['short-beard-work-v1','registration-v2.json','candidate-v2.png'],
@@ -14,10 +14,13 @@ const collections=[
  ...(variant==='original'?[]:[['short-beard-rest-consistency-v1','registrations-v2.json','candidate-v2.png','idle']]),
  ['short-beard-gesture-clips-v1','registrations-v1.json','candidate-v1.png'],
  ['short-beard-stretch-cook-v1','registrations-v1.json','candidate-v1.png'],
- ['short-beard-water-tend-v1','registrations-v1.json','candidate-v1.png'],
+ ...(variant==='water-tend-consistency'?[
+  ['short-beard-water-tend-v1','registrations-v1.json','candidate-v1.png',null,[6,7,9,10]],
+  ['short-beard-water-tend-v1','registrations-v4.json','candidate-v4.png',null,[4,5,8,11]],
+ ]:[['short-beard-water-tend-v1','registrations-v1.json','candidate-v1.png']]),
  ['short-beard-feed-v1','registrations-v1.json','candidate-v1.png'],
 ];
-const sources=[];for(const [collection,file,paint,sheet]of collections){const data=await readFile(`${root}/${collection}/${paint}`),sha256=createHash('sha256').update(data).digest('hex'),raw=JSON.parse(await readFile(`${root}/${collection}/${file}`,'utf8')),registrations=(Array.isArray(raw)?raw:[raw]).filter(r=>!sheet||r.sheet===sheet);for(const r of registrations)assert.equal(r.source.sha256,sha256);sources.push({collection,file,paint,sha256,selectedPoses:registrations.map(r=>r.sheet+':'+r.index),registrations,data:data.toString('base64')});}
+const sources=[];for(const [collection,file,paint,sheet,indices]of collections){const data=await readFile(`${root}/${collection}/${paint}`),sha256=createHash('sha256').update(data).digest('hex'),raw=JSON.parse(await readFile(`${root}/${collection}/${file}`,'utf8')),registrations=(Array.isArray(raw)?raw:[raw]).filter(r=>(!sheet||r.sheet===sheet)&&(!indices||indices.includes(r.index)));for(const r of registrations)assert.equal(r.source.sha256,sha256);sources.push({collection,file,paint,sha256,selectedPoses:registrations.map(r=>r.sheet+':'+r.index),registrations,data:data.toString('base64')});}
 assert.equal(sources.reduce((n,s)=>n+s.registrations.length,0),48);await mkdir(output,{recursive:true});
 const server=await serve(0);let browser;
 try{

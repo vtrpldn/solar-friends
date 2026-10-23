@@ -1,0 +1,22 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "prompt": "Create a production sprite layer by replacing ONLY the green pixels of image1 with painted warm dark chestnut short beard hair. Image1 is the EXACT positional stencil to follow, not a suggestion. Image2 shows corresponding resident faces for context ONLY; do not output any face or body. Image3 is a material/color reference ONLY, never copy its geometry or positions. Retain image1's precise1254x1254 canvas and eight different beard+moustache shapes, each exactly in its existing418px cell in a3x3 atlas, ninth cell empty. Follow EACH green boundary without shifting, rotating, recentering, widening or deepening. Flat illustrated paint with subtle broad hair clumps, matte dark chestnut, restrained upper-left illumination and dark underside. Make the hair slightly irregular within its existing silhouette so it reads as short facial hair rather than a smooth leather tube. Full painted interior of each band. Alpha must be exactly ZERO everywhere outside the stencil, including mouth gaps, the large space between each moustache and beard, margins, and last cell. Absolutely NO cast shadows, glows, halos, colored haze, outline, background, skin, faces, scalp hair, eyes, ears, clothes, text or detached specks. Do not add any brushwork outside the green mask. Eight pairs only, preserve the exact individual mask locations and dimensions. Output ONLY opaque/matte facial-hair paint with true transparent background.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/jaw.png",
+      "role": "Primary edit target or exact geometry stencil"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/faces.png",
+      "role": "Geometry/face context"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/../short-beard-base-clips-v1/candidate-v1.png",
+      "role": "Material reference only"
+    }
+  ],
+  "file": "candidate-v3.png",
+  "verdict": "Rejected: copied the material-reference layout rather than exact stencil; all eight checks fail (coverage0.1906–0.3368).",
+  "outputSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-25f80457-e2bb-4296-a75b-641028b6c82d.png"
+}

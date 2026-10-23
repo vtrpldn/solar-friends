@@ -1,0 +1,36 @@
+{
+  "status": "Four revised activity poses reviewed for internal comparison; complete appearance acceptance remains open",
+  "selected": {
+    "collection": "short-beard-water-tend-v1",
+    "candidate": "candidate-v4.png",
+    "poses": [
+      "activities:4",
+      "activities:5",
+      "activities:8",
+      "activities:11"
+    ]
+  },
+  "excluded": [
+    "All candidate-v2 poses: halos and failed bounds",
+    "All candidate-v3 poses: material reference layout copied instead of stencil",
+    "Candidate-v4 activities 6,7,9,10: fixed-region checks fail"
+  ],
+  "findings": [
+    "Inspected each unmodified generated atlas and the fixed-region source audits.",
+    "Inspected the complete 96-pose/two-hairstyle board and ordered transition contact sheet through the shared animation renderer.",
+    "The four selected activity poses have less smooth band-like material, with restrained short-hair clumps. The other four retain their prior smoother source, so this is not a coherent completed watering/tending set.",
+    "Looking poses remain thinner than some other idle bands; bent-work geometry and overall cross-clip volume/material review remain open.",
+    "Static transition samples do not prove continuous playback acceptance."
+  ],
+  "mechanical": {
+    "fullPoseChecks": 96,
+    "feedingReturns": 4,
+    "transitionUpdates": 1620,
+    "clipSamples": 6240,
+    "invalidRequests": 15,
+    "lateReturnFailureCleanup": true,
+    "maximumOwnedFrames": 50,
+    "rgbaByteUpperBoundPerProvider": 13107200
+  },
+  "integration": "Internal registered comparison only. No public appearance catalog, recipe, or gameplay routing changes."
+}

@@ -1,0 +1,22 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "prompt": "Edit image 1, a transparent facial-hair sprite atlas for Solar Friends. Image 2 is its exact positional silhouette guide; image 3 is a material reference only, NOT a layout reference. Preserve image 1's 1254x1254 canvas, 3x3 cells of418 pixels, eight distinct beard+moustache pairs in reading order and fully empty ninth cell. Keep every existing pair at its exact location, scale, shallow jaw thickness and orientation. Change ONLY the material treatment of the eight smooth beard bands: restrained warm dark chestnut painted short facial hair, subtle broad irregular clumps and softly broken edges matching image3, upper-left diffuse light, darker underside. No glossy rounded tube, no polished leather/wood appearance, no bright highlight strip, no individual hair microdetail, no black outline. Paint all the way across the interior of each beard band, not an outline enclosing empty space. Do not widen, deepen, move, recenter or rescale the silhouettes; follow image2's masks separately for each pose. Keep mouth/skin openings and spaces between moustache and jaw fully transparent. Output facial hair ONLY, true transparent background including margins and empty ninth cell. No faces, skin, ears, scalp hair, clothes, tools, text, guides, stray dots or new shapes. Do not copy the other atlas's larger silhouettes.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/candidate-v1.png",
+      "role": "Primary edit target or exact geometry stencil"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/jaw.png",
+      "role": "Geometry/face context"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/../short-beard-base-clips-v1/candidate-v1.png",
+      "role": "Material reference only"
+    }
+  ],
+  "file": "candidate-v2.png",
+  "verdict": "Rejected: halos and all eight original fixed-region checks fail (coverage0.8255–0.9045).",
+  "outputSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2e3e2e50-7223-4210-a38e-916e9ea1e765.png"
+}
