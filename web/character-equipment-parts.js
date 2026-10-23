@@ -24,14 +24,15 @@ export async function loadEquipmentArt(registration,load){
  return {...root,parts:loaded};
 }
 export function paintEquipmentArt(equipment,registration){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');let assembly=null;
+ try{
  if(registration.schema===1){
   if(Object.hasOwn(registration,'parts'))throw Error('Equipment parts require a versioned recipe.');
   ctx.drawImage(equipment.image,0,0,256,256);return canvas;
  }
  const parts=validateEquipmentParts(registration);
  if(!Array.isArray(equipment.parts)||equipment.parts.length!==parts.length)throw Error('Equipment recipe sources are incomplete.');
- const assembly=document.createElement('canvas');assembly.width=registration.source.width;assembly.height=registration.source.height;const source=assembly.getContext('2d');
+ assembly=document.createElement('canvas');assembly.width=registration.source.width;assembly.height=registration.source.height;const source=assembly.getContext('2d');
  for(const [index,part]of parts.entries()){
   const loaded=equipment.parts[index];
   if(loaded?.file!==part.file||loaded.sourceHash!==part.source.sha256||loaded.image?.naturalWidth!==part.source.width||loaded.image?.naturalHeight!==part.source.height)throw Error('Equipment part pixels differ from their registered source.');
@@ -40,6 +41,8 @@ export function paintEquipmentArt(equipment,registration){
  }
  // Assemble at integer source coordinates, then normalize the whole frame once.
  // Scaling individual cropped regions can change their resampling phase.
- ctx.drawImage(assembly,0,0,256,256);assembly.width=assembly.height=1;
+ ctx.drawImage(assembly,0,0,256,256);
  return canvas;
+ }catch(error){canvas.width=canvas.height=0;throw error;}
+ finally{if(assembly)assembly.width=assembly.height=0;}
 }
