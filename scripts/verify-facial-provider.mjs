@@ -4,18 +4,20 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const root='assets/art-direction/character-prototype-v1',output=root+'/short-beard-complete-v1';
+const variant=process.argv[2]??'original';assert(['original','rest-consistency'].includes(variant),'Choose an explicit registered comparison variant');
+const root='assets/art-direction/character-prototype-v1',output=root+(variant==='original'?'/short-beard-complete-v1':'/short-beard-complete-rest-consistency-v1');
 const collections=[
  ['short-beard-work-clip-v1','registrations.json','candidate-v1.png'],
  ['short-beard-work-v1','registration-v2.json','candidate-v2.png'],
  ['short-beard-base-clips-v1','registrations.json','candidate-v1.png'],
- ['short-beard-rest-clips-v1','registrations-v2.json','candidate-v2.png'],
+ ['short-beard-rest-clips-v1','registrations-v2.json','candidate-v2.png',variant==='original'?null:'base'],
+ ...(variant==='original'?[]:[['short-beard-rest-consistency-v1','registrations-v2.json','candidate-v2.png','idle']]),
  ['short-beard-gesture-clips-v1','registrations-v1.json','candidate-v1.png'],
  ['short-beard-stretch-cook-v1','registrations-v1.json','candidate-v1.png'],
  ['short-beard-water-tend-v1','registrations-v1.json','candidate-v1.png'],
  ['short-beard-feed-v1','registrations-v1.json','candidate-v1.png'],
 ];
-const sources=[];for(const [collection,file,paint]of collections){const data=await readFile(`${root}/${collection}/${paint}`),sha256=createHash('sha256').update(data).digest('hex'),raw=JSON.parse(await readFile(`${root}/${collection}/${file}`,'utf8')),registrations=Array.isArray(raw)?raw:[raw];for(const r of registrations)assert.equal(r.source.sha256,sha256);sources.push({collection,file,paint,sha256,registrations,data:data.toString('base64')});}
+const sources=[];for(const [collection,file,paint,sheet]of collections){const data=await readFile(`${root}/${collection}/${paint}`),sha256=createHash('sha256').update(data).digest('hex'),raw=JSON.parse(await readFile(`${root}/${collection}/${file}`,'utf8')),registrations=(Array.isArray(raw)?raw:[raw]).filter(r=>!sheet||r.sheet===sheet);for(const r of registrations)assert.equal(r.source.sha256,sha256);sources.push({collection,file,paint,sha256,selectedPoses:registrations.map(r=>r.sheet+':'+r.index),registrations,data:data.toString('base64')});}
 assert.equal(sources.reduce((n,s)=>n+s.registrations.length,0),48);await mkdir(output,{recursive:true});
 const server=await serve(0);let browser;
 try{
@@ -58,5 +60,5 @@ try{
  },sources);
  assert.equal(result.checked,96);assert.equal(result.returns,4);assert.equal(result.refused,15);assert.equal(result.cleanup,1);assert.equal(result.transitionFrames,1620);assert.equal(result.clipFrames,6240);
  for(const key of ['board','transitions']){await writeFile(`${output}/${key}.png`,Buffer.from(result[key],'base64'));delete result[key];}
- await writeFile(output+'/report.json',JSON.stringify({status:'Mechanical full-set checks pass; visual and continuous playback review pending. Internal only.',sources:sources.map(({data,registrations,...s})=>s),...result},null,2)+'\n');console.log(JSON.stringify(result));
+ await writeFile(output+'/report.json',JSON.stringify({status:'Mechanical full-set checks pass; visual and continuous playback review pending. Internal only.',variant,sources:sources.map(({data,registrations,...s})=>s),...result},null,2)+'\n');console.log(JSON.stringify(result));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

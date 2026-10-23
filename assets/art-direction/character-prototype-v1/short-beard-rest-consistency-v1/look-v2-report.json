@@ -1,0 +1,112 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "0c7fc5b178ec9bea0cd318f44e7ee871684111e82bcc86995f97c2e272e47adf",
+  "clip": "look",
+  "sheet": "idle",
+  "poseCount": 4,
+  "clipPoseCount": 4,
+  "sourceOnlyPoses": [],
+  "unusedRefused": 0,
+  "surplusRefused": 0,
+  "sourceOnlyReleased": 0,
+  "checked": 24,
+  "refused": 16,
+  "disposed": 6,
+  "partialCleanup": 1,
+  "returnChecked": 0,
+  "returnCleanup": 0,
+  "undeclaredPaint": 0,
+  "audits": [
+    {
+      "index": 0,
+      "pixels": 9304,
+      "inside": 9304,
+      "bounds": [
+        63,
+        260,
+        333,
+        375
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 1,
+      "pixels": 10002,
+      "inside": 9973,
+      "bounds": [
+        62,
+        253,
+        337,
+        371
+      ],
+      "coverage": 0.9971005798840232,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 2,
+      "pixels": 11121,
+      "inside": 11121,
+      "bounds": [
+        59,
+        260,
+        343,
+        380
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 3,
+      "pixels": 10759,
+      "inside": 10759,
+      "bounds": [
+        70,
+        261,
+        343,
+        380
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 24
+}

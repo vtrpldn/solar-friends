@@ -1,0 +1,126 @@
+{
+  "sha256": "ce7ac872d4124831f2179f8519635c736ab27552a10292564198510554773a70",
+  "ok": false,
+  "poses": [
+    {
+      "sheet": "base",
+      "index": 12,
+      "pixels": 13109,
+      "inside": 13039,
+      "bounds": [
+        57,
+        232,
+        324,
+        360
+      ],
+      "coverage": 0.994660157143947,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "base",
+      "index": 13,
+      "pixels": 13880,
+      "inside": 13880,
+      "bounds": [
+        60,
+        241,
+        345,
+        380
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "base",
+      "index": 14,
+      "pixels": 14241,
+      "inside": 12623,
+      "bounds": [
+        60,
+        232,
+        348,
+        366
+      ],
+      "coverage": 0.886384383119163,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "base",
+      "index": 15,
+      "pixels": 14193,
+      "inside": 12925,
+      "bounds": [
+        58,
+        225,
+        332,
+        376
+      ],
+      "coverage": 0.9106601845980413,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "idle",
+      "index": 0,
+      "pixels": 10561,
+      "inside": 10187,
+      "bounds": [
+        77,
+        254,
+        351,
+        372
+      ],
+      "coverage": 0.964586686866774,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "idle",
+      "index": 1,
+      "pixels": 11077,
+      "inside": 10258,
+      "bounds": [
+        72,
+        258,
+        364,
+        377
+      ],
+      "coverage": 0.9260630134512955,
+      "minimumCoverage": 0.98,
+      "ok": false
+    },
+    {
+      "sheet": "idle",
+      "index": 2,
+      "pixels": 12431,
+      "inside": 12314,
+      "bounds": [
+        67,
+        251,
+        350,
+        377
+      ],
+      "coverage": 0.9905880460139973,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "idle",
+      "index": 3,
+      "pixels": 12811,
+      "inside": 11916,
+      "bounds": [
+        77,
+        247,
+        366,
+        378
+      ],
+      "coverage": 0.9301381625165873,
+      "minimumCoverage": 0.98,
+      "ok": false
+    }
+  ]
+}
