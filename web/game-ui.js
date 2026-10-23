@@ -80,6 +80,8 @@ export function installGameUI({images,residents,avatar,paintPortraits,selectPers
     document.body.classList.toggle('unlimited-supplies',!usesLogistics(state.village));
     $('#material-total').textContent=state.environment.economy.materials.reduce((sum,m)=>sum+m.stored,0);
     const people=[...state.residents].sort((a,b)=>a.id-b.id),key=JSON.stringify(people.map(r=>[r.id,r.appearance]));if(key!==rosterKey){rosterKey=key;document.querySelector('.people-emblem').innerHTML=people.slice(0,2).map(r=>avatar(r.id)).join('');paintPortraits();}
+    $('#resident-strip').style.setProperty('--resident-columns',Math.max(1,Math.min(6,people.length)));
+    document.body.style.setProperty('--resident-stack-offset',people.length>6?'55px':'0px');
     const present=new Set(people.map(r=>r.id));for(const [id,button]of portraits)if(!present.has(id)){button.remove();portraits.delete(id);}
     for(const r of state.residents){
       let button=portraits.get(r.id);

@@ -1,0 +1,12 @@
+{
+  "why": "Keep a twelve-person player-authored cast selectable without covering the main dock or map tools.",
+  "changes": [
+    "Portraits use at most six full-size columns; seven to twelve residents form two rows",
+    "Minimap, situations and camera controls follow the additional row height, including land-map stylesheet and short/narrow desktop rules",
+    "Land-view popup clears the situations button and portrait tray"
+  ],
+  "evidence": "assets/builder-review/resident-strip-v1",
+  "checks": "48 actual-game layouts: counts 1,5,6,7,12,1; widths 960,1024,1440,1920; heights 768,900. All bottom control pairs and open land popup separated. Portrait hit areas stay 43x48; last person selected by click and keyboard after every roster change. Twelve-to-one shrink resets offsets. No page errors.",
+  "visual": "Inspected final 1024x768 and 1440x900 twelve-person layouts and open land view at 1024x768. Camera controls, minimap, situations, dock and portraits are clear.",
+  "remaining": "Broader builder/character/performance/biome/recovery/usability release gates remain unfinished."
+}
