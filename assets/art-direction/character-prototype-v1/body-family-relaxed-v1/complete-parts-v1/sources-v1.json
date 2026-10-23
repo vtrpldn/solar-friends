@@ -1,0 +1,302 @@
+{
+  "hair-curls-single-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+    "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954"
+  },
+  "hair-curls-base-4-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+    "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507"
+  },
+  "hair-curls-base-5-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v3.png",
+    "sha256": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2"
+  },
+  "hair-curls-base-6-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v3.png",
+    "sha256": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c"
+  },
+  "hair-curls-base-7-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v3.png",
+    "sha256": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2"
+  },
+  "hair-curls-base-9-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-9-candidate-v1.png",
+    "sha256": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786"
+  },
+  "hair-curls-base-10-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-10-candidate-v1.png",
+    "sha256": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99"
+  },
+  "hair-curls-base-11-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-11-candidate-v1.png",
+    "sha256": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea"
+  },
+  "hair-curls-base-12-candidate-v5.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v5.png",
+    "sha256": "31555d1e8bbab8161680e9f331e4362832ca24473064d30547b8e21395c422e0"
+  },
+  "hair-seat-base-12-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-seat-base-12-candidate-v1.png",
+    "sha256": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854"
+  },
+  "hair-seat-base-13-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-seat-base-13-candidate-v1.png",
+    "sha256": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec"
+  },
+  "hair-curls-base-14-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-base-14-candidate-v2.png",
+    "sha256": "8f49e66d8cca01f628a78741221dfc7e4b02de12534e246b5ebb4b46cbe1737c"
+  },
+  "hair-seat-base-14-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png",
+    "sha256": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4"
+  },
+  "hair-seat-base-15-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-seat-base-15-candidate-v1.png",
+    "sha256": "39fbf81324795e5818bb5ca24f3b62fb46044ed126597d503130ef9618bbc148"
+  },
+  "hair-curls-idle-5-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png",
+    "sha256": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775"
+  },
+  "hair-curls-idle-6-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v2.png",
+    "sha256": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462"
+  },
+  "hair-curls-idle-9-candidate-v4.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v4.png",
+    "sha256": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da"
+  },
+  "hair-curls-idle-12-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-idle-12-candidate-v1.png",
+    "sha256": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1"
+  },
+  "hair-curls-idle-13-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-idle-13-candidate-v1.png",
+    "sha256": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327"
+  },
+  "hair-curls-activities-0-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+    "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+  },
+  "hair-curls-activities-1-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v2.png",
+    "sha256": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826"
+  },
+  "hair-curls-activities-5-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-5-candidate-v1.png",
+    "sha256": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541"
+  },
+  "hair-curls-activities-6-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-6-candidate-v1.png",
+    "sha256": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0"
+  },
+  "hair-curls-activities-7-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v2.png",
+    "sha256": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa"
+  },
+  "hair-curls-activities-8-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png",
+    "sha256": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea"
+  },
+  "hair-curls-activities-9-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png",
+    "sha256": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180"
+  },
+  "hair-curls-activities-10-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-10-candidate-v1.png",
+    "sha256": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0"
+  },
+  "hair-curls-activities-12-candidate-v4.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v4.png",
+    "sha256": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2"
+  },
+  "hair-curls-activities-13-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-13-candidate-v1.png",
+    "sha256": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74"
+  },
+  "hair-curls-activities-14-candidate-v4.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v4.png",
+    "sha256": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9"
+  },
+  "hair-curls-activities-15-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png",
+    "sha256": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38"
+  },
+  "hair-sidepart-crown-candidate-v3.png": {
+    "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/hair-sidepart-crown-v2/candidate-v2.png",
+    "sha256": "0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5"
+  },
+  "hair-sidepart-base-4-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-4-candidate-v1.png",
+    "sha256": "695348cf1af7bc316f59ce7966b2a807b8e5e3b215012231714a1983b3edf102"
+  },
+  "hair-sidepart-base-5-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-5-candidate-v1.png",
+    "sha256": "1cb0a2baff79df1dc3b16577e7163c06f6a1d99b0cc322314b327f3fac56b15f"
+  },
+  "hair-sidepart-base-6-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-6-candidate-v1.png",
+    "sha256": "ce670a638795fbec27de86c5fe7634139ad94321688a1f4b27f5eff05f93afcd"
+  },
+  "hair-sidepart-base-7-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-7-candidate-v3.png",
+    "sha256": "bc8a038f244c38c4ae28da13d9437fc17d2a225e54228dcb1146392d98017f0a"
+  },
+  "hair-sidepart-base-9-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-9-candidate-v1.png",
+    "sha256": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c"
+  },
+  "hair-sidepart-base-10-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-10-candidate-v1.png",
+    "sha256": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8"
+  },
+  "hair-sidepart-base-11-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-11-candidate-v1.png",
+    "sha256": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00"
+  },
+  "hair-sidepart-base-12-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-12-candidate-v2.png",
+    "sha256": "e13d5a9d3679a9bb9a6cac71a6deb12f32a7b1fb2635d3ef3d02ccaa65106766"
+  },
+  "hair-sidepart-base-13-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-13-candidate-v2.png",
+    "sha256": "d083b4edee167a11a1eb7dd70ee288a70b7439fbf0281c2267a3d0d5ebddf465"
+  },
+  "hair-sidepart-base-14-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-14-candidate-v2.png",
+    "sha256": "f0a8e1ef723684d84bb992a8624960da2dfdb7c457917079543cbafbf10f815f"
+  },
+  "hair-sidepart-base-15-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-15-candidate-v2.png",
+    "sha256": "13df9efb3803a90f053ab248d31256cfe0f90fd88b43078c3c1d4bd432af3d2f"
+  },
+  "hair-sidepart-base-8-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+    "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+  },
+  "hair-sidepart-idle-5-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-idle-5-candidate-v2.png",
+    "sha256": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e"
+  },
+  "hair-sidepart-idle-6-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-idle-6-candidate-v1.png",
+    "sha256": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e"
+  },
+  "hair-sidepart-idle-9-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-idle-9-candidate-v1.png",
+    "sha256": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4"
+  },
+  "hair-sidepart-idle-12-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-idle-12-candidate-v1.png",
+    "sha256": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8"
+  },
+  "hair-sidepart-idle-13-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-idle-13-candidate-v1.png",
+    "sha256": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07"
+  },
+  "hair-sidepart-activities-0-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-0-candidate-v1.png",
+    "sha256": "2505ee1234bbf6be23fac98304b244a881955ca8a5621f227b0df462a98692e0"
+  },
+  "hair-sidepart-activities-1-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-1-candidate-v1.png",
+    "sha256": "b90ff250c7011bd0bbc65a3a3647ea0cfff2d82a13138719c59d631148bdcad7"
+  },
+  "hair-sidepart-activities-5-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-5-candidate-v1.png",
+    "sha256": "3d432fa16752dbbee4ef568b326a24a3489fe7c77a2dcf402ec8629c223aa8fb"
+  },
+  "hair-sidepart-activities-6-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-6-candidate-v1.png",
+    "sha256": "014791cea3b7b6cdc14b3de99be15a3714c5f1097da72c3b0ceba51fb317385c"
+  },
+  "hair-sidepart-activities-7-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-7-candidate-v1.png",
+    "sha256": "e92b159dc2259080cc7a849bf977031f0aa1497cca706d01109f52bdffe7a538"
+  },
+  "hair-sidepart-activities-8-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-8-candidate-v1.png",
+    "sha256": "a1345fe33b37c3037f7c9f5acbb349eb1c34812bdbd6ac20d645377dedd04714"
+  },
+  "hair-sidepart-activities-9-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-9-candidate-v1.png",
+    "sha256": "1c1a35056faad9f52ba3becfcdfff349d2844e24135e6e507dc9651b6dcbccd7"
+  },
+  "hair-sidepart-activities-10-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-10-candidate-v1.png",
+    "sha256": "652c4645bd1ecc85c09dc8a6a0f548ab34843b185b2395a88fdc0b8c1aa797ba"
+  },
+  "hair-sidepart-activities-12-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-12-candidate-v1.png",
+    "sha256": "92eb897f846e17aeeebdc75dc90ab6c55f7f9b7ae36d4a9b15ee500e3a2eee5e"
+  },
+  "hair-sidepart-activities-13-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-13-candidate-v1.png",
+    "sha256": "ac8f8fcb214fc140cc715c03cf0db791f8f46ef6237acf66599dd657be3d143f"
+  },
+  "hair-sidepart-activities-14-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-14-candidate-v1.png",
+    "sha256": "7b00bcad19c20e5d49f886636ec80aad6e61cd04775732535464cbf6912016d0"
+  },
+  "hair-sidepart-activities-15-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/hair-sidepart-activities-15-candidate-v1.png",
+    "sha256": "a22c78dfdd8552882ec1806c8c42c0136d1e59cef6c16d5802e2a4366fba76f5"
+  },
+  "cooking-pot-pose-0-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+    "sha256": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91"
+  },
+  "cooking-pot-pose-1-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/cooking-pot-pose-1-candidate-v2.png",
+    "sha256": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4"
+  },
+  "cooking-pot-pose-2-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/cooking-pot-pose-2-candidate-v2.png",
+    "sha256": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4"
+  },
+  "cooking-pot-pose-3-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/cooking-pot-pose-3-candidate-v2.png",
+    "sha256": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8"
+  },
+  "watering-can-pose-4-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/watering-can-pose-4-candidate-v2.png",
+    "sha256": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41"
+  },
+  "watering-can-pose-5-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png",
+    "sha256": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6"
+  },
+  "watering-can-pose-6-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/watering-can-pose-6-candidate-v1.png",
+    "sha256": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a"
+  },
+  "watering-can-pose-7-candidate-v3.png": {
+    "path": "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v3.png",
+    "sha256": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f"
+  },
+  "tending-trowel-pose-8-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png",
+    "sha256": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2"
+  },
+  "tending-trowel-pose-9-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png",
+    "sha256": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c"
+  },
+  "tending-trowel-pose-10-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png",
+    "sha256": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5"
+  },
+  "tending-trowel-pose-11-candidate-v1.png": {
+    "path": "web/art/characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png",
+    "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943"
+  },
+  "feeding-basket-pose-14-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png",
+    "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1"
+  },
+  "feed-grains-hold-candidate-v2.png": {
+    "path": "web/art/characters/prototype-v1/feed-grains-hold-candidate-v2.png",
+    "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8"
+  }
+}
