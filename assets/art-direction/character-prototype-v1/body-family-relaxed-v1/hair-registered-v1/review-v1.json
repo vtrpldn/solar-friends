@@ -1,0 +1,120 @@
+{
+  "scope": "Eight internal rigid, source/body/pose-bound hair placements. No scale/warp/new paint or public recipe. Palette/pose isolation and source proof are separate from visual/motion/world acceptance.",
+  "compositions": 96,
+  "protectedBodies": 96,
+  "protectedFaces": 96,
+  "refused": 18,
+  "coverage": [
+    {
+      "name": "curls",
+      "index": 0,
+      "scalpPixels": 649,
+      "coveredPixels": 642,
+      "ratio": 0.9892141756548536,
+      "offset": [
+        -2,
+        4
+      ]
+    },
+    {
+      "name": "curls",
+      "index": 1,
+      "scalpPixels": 643,
+      "coveredPixels": 640,
+      "ratio": 0.995334370139969,
+      "offset": [
+        -9,
+        0
+      ]
+    },
+    {
+      "name": "curls",
+      "index": 2,
+      "scalpPixels": 643,
+      "coveredPixels": 640,
+      "ratio": 0.995334370139969,
+      "offset": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "curls",
+      "index": 3,
+      "scalpPixels": 647,
+      "coveredPixels": 643,
+      "ratio": 0.9938176197836167,
+      "offset": [
+        -5,
+        3
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 0,
+      "scalpPixels": 649,
+      "coveredPixels": 600,
+      "ratio": 0.9244992295839753,
+      "offset": [
+        -2,
+        4
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 1,
+      "scalpPixels": 643,
+      "coveredPixels": 600,
+      "ratio": 0.9331259720062208,
+      "offset": [
+        -9,
+        0
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 2,
+      "scalpPixels": 643,
+      "coveredPixels": 600,
+      "ratio": 0.9331259720062208,
+      "offset": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 3,
+      "scalpPixels": 647,
+      "coveredPixels": 601,
+      "ratio": 0.9289026275115919,
+      "offset": [
+        -5,
+        3
+      ]
+    }
+  ],
+  "recordings": [
+    {
+      "clip": "walk",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 3007.899999976158,
+      "cycleSeconds": 0.5,
+      "renderCalls": 363
+    },
+    {
+      "clip": "walk",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 3008,
+      "elapsedMs": 3008.0999999046326,
+      "cycleSeconds": 0.5,
+      "renderCalls": 361
+    }
+  ],
+  "renderCalls": 724,
+  "videoSha256": "cd50badcba23d7445605c3e8502e3b496945fe1f3bc7825a90fd395e41394e3a",
+  "registrationSha256": "e9f56bad354bd93c3f9e23e7b8330c6ee04ec5a57a6a168736c38093af5af4ea"
+}

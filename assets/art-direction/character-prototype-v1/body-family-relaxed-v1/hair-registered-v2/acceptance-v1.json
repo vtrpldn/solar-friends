@@ -1,0 +1,7 @@
+{
+  "status": "needs-correction",
+  "reason": "First repaint passes aggregate crown coverage but fails exact diagnosed-strip coverage: 20 of 24. Preserved as correction evidence, not accepted.",
+  "activeRecipesChanged": false,
+  "evidence": "review-v1.json",
+  "supersededBy": "../hair-registered-v3/acceptance-v1.json"
+}

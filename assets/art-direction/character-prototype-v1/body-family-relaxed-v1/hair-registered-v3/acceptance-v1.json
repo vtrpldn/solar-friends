@@ -1,0 +1,168 @@
+{
+  "status": "accepted internal eight-pose hair/body registration and scoped art review; complete-family/player integration pending",
+  "registrationSha256": "e68c4d85aceb395fd147f019210b7ad3cbaef08b95714567b310ecf4eb1ed443",
+  "rendererSha256": {
+    "character-hair.js": "80c402daf8563112b0ed4ada7702543d18043600fe8f66f7b9ea4a7b1479ca19",
+    "character-hair-placement.js": "6829af8d50016e6a0307033c31b0bc3e7532d680c99fd5c2009804d3996a4c6e",
+    "character-materials.js": "4b87f9105cf939f39cd0c3e3aa3198b2db7698e2453e0607a637231c3bbc1171"
+  },
+  "activeRecipesChanged": false,
+  "targetPoses": [
+    "base:0",
+    "base:1",
+    "base:2",
+    "base:3"
+  ],
+  "styles": [
+    "curls",
+    "sidepart"
+  ],
+  "method": "Whole existing cap source in the fixed 256-pixel body space, translated by independently declared integer crown sockets. No scale, rotation, source crop, silhouette fitting or local warp. Source and target original body frames are independently hash-verified.",
+  "inspected": [
+    "review-v1-body.png",
+    "review-v1-palettes.png",
+    "review-v1-lighting.png",
+    "motion-walk.png",
+    "world/mata-atlantica-day.png",
+    "world/mata-atlantica-night.png",
+    "world/cerrado-day.png",
+    "world/cerrado-night.png",
+    "world/caatinga-day.png",
+    "world/caatinga-night.png"
+  ],
+  "checks": {
+    "compositions": 96,
+    "protectedBodies": 96,
+    "protectedFaces": 96,
+    "refused": 19,
+    "requiredCrown": {
+      "pixels": 24,
+      "covered": 24
+    },
+    "actualClipCleanup": true,
+    "coverage": [
+      {
+        "name": "curls",
+        "index": 0,
+        "scalpPixels": 649,
+        "coveredPixels": 642,
+        "ratio": 0.9892141756548536,
+        "offset": [
+          -2,
+          4
+        ]
+      },
+      {
+        "name": "curls",
+        "index": 1,
+        "scalpPixels": 643,
+        "coveredPixels": 640,
+        "ratio": 0.995334370139969,
+        "offset": [
+          -9,
+          0
+        ]
+      },
+      {
+        "name": "curls",
+        "index": 2,
+        "scalpPixels": 643,
+        "coveredPixels": 640,
+        "ratio": 0.995334370139969,
+        "offset": [
+          3,
+          5
+        ]
+      },
+      {
+        "name": "curls",
+        "index": 3,
+        "scalpPixels": 647,
+        "coveredPixels": 643,
+        "ratio": 0.9938176197836167,
+        "offset": [
+          -5,
+          3
+        ]
+      },
+      {
+        "name": "sidepart",
+        "index": 0,
+        "scalpPixels": 649,
+        "coveredPixels": 640,
+        "ratio": 0.9861325115562404,
+        "offset": [
+          -2,
+          4
+        ]
+      },
+      {
+        "name": "sidepart",
+        "index": 1,
+        "scalpPixels": 643,
+        "coveredPixels": 634,
+        "ratio": 0.9860031104199067,
+        "offset": [
+          -9,
+          0
+        ]
+      },
+      {
+        "name": "sidepart",
+        "index": 2,
+        "scalpPixels": 643,
+        "coveredPixels": 634,
+        "ratio": 0.9860031104199067,
+        "offset": [
+          3,
+          5
+        ]
+      },
+      {
+        "name": "sidepart",
+        "index": 3,
+        "scalpPixels": 647,
+        "coveredPixels": 638,
+        "ratio": 0.9860896445131375,
+        "offset": [
+          -5,
+          3
+        ]
+      }
+    ]
+  },
+  "motion": {
+    "videoSha256": "0a4391a99c23fe7759d5107da50476acbe204711ea736aa2a944467768821c7d",
+    "durationSeconds": 6.001393,
+    "decodedFrames": 181,
+    "inspectedDecoderSamples": 16,
+    "renderCalls": 723,
+    "note": "Native 0.5-second walk sampler, at least three seconds per lighting/facing. Render calls are not encoded frames or frame-pacing evidence; visible clocks identify actual decoded observations."
+  },
+  "world": {
+    "sceneCount": 24,
+    "residentComparisons": 72,
+    "lightingSamples": 64,
+    "findings": "Head/body proportions, attached caps, facial clearance and ground contact fit Bento, home, shed, warehouse and roads in the inspected four-pose day/mirrored-night views across all three biomes."
+  },
+  "sourceCorrection": {
+    "original": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+    "candidate": "../hair-sidepart-crown-v2/candidate-v2.png",
+    "tool": "built-in image_gen",
+    "prompt": "../hair-sidepart-crown-v2/prompt-v2.txt",
+    "why": "The installed standing side-part cap itself leaves an upper-rear scalp strip. The original rectangle failure was real; the threshold/region was not relaxed. The first repaint covers 20 of the 24 diagnosed pixels; the second covers all 24, and all four targets exceed 98.6 percent crown coverage.",
+    "sourcePaintProcessing": "Generated PNGs were copied unmodified. Existing curly paint is reused without edits."
+  },
+  "publicRegression": {
+    "frozenAppearanceRgba": 400,
+    "partPoseComparisons": 288,
+    "feedingReturns": 12,
+    "nativeCatalogAndCacheParity": true
+  },
+  "remaining": [
+    "Compile full 48-pose family hair ownership, reusing unchanged poses only after exact frame-hash checks.",
+    "Apply/review the corrected standing side-part source as appropriate; the original active file still contains the diagnosed gap. Audit remaining hair poses rather than assuming installed artwork is perfect.",
+    "Complete changed walking hat/beard/garment ownership, tools/underlays and complete appearance transitions/portraits/world/creator integration.",
+    "Complete body/face/clothing/shoe variation and all original biome, sustained performance/memory, recovery and usability release gates."
+  ]
+}

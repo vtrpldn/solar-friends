@@ -1,0 +1,27 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v2.txt",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-family-relaxed-v1/hair-sidepart-crown-v2/candidate-v1.png",
+      "role": "edit target; preserve whole cap placement and existing paint",
+      "sha256": "277e0fbde9dd9e717afd2bbaa7d18fdb88968688072650dfabe3b1a737f75ed6"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-family-relaxed-v1/hair-sidepart-crown-v2/reference.png",
+      "role": "actual unchanged standing body anatomy/position reference",
+      "sha256": "d783ae7f722e680766ba53bc6e5e05a3c32944aadd7c07c63fb23f2bc88b99b9"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-family-relaxed-v1/hair-sidepart-crown-v2/guide-v1.png",
+      "role": "four remaining uncovered upper-rear scalp pixels; geometry only",
+      "sha256": "0675634b16096f6cb4e38380343d6cd3cb560503ab0013218f5d30a54124a2d5"
+    }
+  ],
+  "transparentBackground": true,
+  "originalOutputPath": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-62110f27-ba1f-4adb-a203-42b14fdf1e18.png",
+  "savedSource": "candidate-v2.png",
+  "sourceSha256": "0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5",
+  "status": "accepted for internal hair registration/art review only; public/full-family integration pending"
+}

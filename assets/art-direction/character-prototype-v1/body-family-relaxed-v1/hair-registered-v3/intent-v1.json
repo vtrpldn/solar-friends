@@ -1,0 +1,61 @@
+{
+  "status": "Internal measured attachment candidate; full source/body/pose/facing/palette/motion/world review required before public use.",
+  "method": "Rigid integer translation only, preserving whole existing cap paint, source normalization and size. Crown-band sockets are four native pixels below the delivered scalp alpha-top in the inspected native-coordinate head guide. No head or hair scale fitting.",
+  "guide": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/hair-fit-v1/head.png",
+  "guideSha256": "2344cd9f594f45d3a89230cabe3a9adcd4c62d8fa64952ec8128251dddffd2cf",
+  "reference": {
+    "sheet": "base",
+    "index": 8,
+    "bodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+    "socket": [
+      135,
+      27
+    ]
+  },
+  "targets": [
+    {
+      "sheet": "base",
+      "index": 0,
+      "bodyFrameSha256": "1749b5eb9703486aa1551e5ad12a3f768d0a066d55734c389c11f81b230ba19a",
+      "socket": [
+        133,
+        31
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 1,
+      "bodyFrameSha256": "53f7bca26dad74f846444f8486452c0648f991bdd5b6506b7bf033c0f2ccb7f8",
+      "socket": [
+        126,
+        27
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 2,
+      "bodyFrameSha256": "f9c1e3cd46ae4a3772f4f5451de15f020184471afe5ba28303fa3420d5ccba3b",
+      "socket": [
+        138,
+        32
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 3,
+      "bodyFrameSha256": "3292ef7affd635f16189b95a8c71b995b3ea6dc5ed44675a117eb03aaba831de",
+      "socket": [
+        130,
+        30
+      ]
+    }
+  ],
+  "disallowed": [
+    "scale",
+    "rotation",
+    "source crop",
+    "local warp",
+    "clipped paint",
+    "source-pose or target-pose fallback"
+  ]
+}

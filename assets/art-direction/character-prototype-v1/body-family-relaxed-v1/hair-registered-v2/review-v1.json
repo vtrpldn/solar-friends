@@ -1,0 +1,130 @@
+{
+  "scope": "Eight internal rigid, source/body/pose-bound hair placements. No scale/warp or public recipe; the corrected side-part candidate is a separate repainted source. Palette/pose isolation and source proof are separate from visual/motion/world acceptance.",
+  "compositions": 96,
+  "protectedBodies": 96,
+  "protectedFaces": 96,
+  "refused": 19,
+  "requiredCrown": {
+    "pixels": 24,
+    "covered": 20
+  },
+  "actualClipCleanup": true,
+  "coverage": [
+    {
+      "name": "curls",
+      "index": 0,
+      "scalpPixels": 649,
+      "coveredPixels": 642,
+      "ratio": 0.9892141756548536,
+      "offset": [
+        -2,
+        4
+      ]
+    },
+    {
+      "name": "curls",
+      "index": 1,
+      "scalpPixels": 643,
+      "coveredPixels": 640,
+      "ratio": 0.995334370139969,
+      "offset": [
+        -9,
+        0
+      ]
+    },
+    {
+      "name": "curls",
+      "index": 2,
+      "scalpPixels": 643,
+      "coveredPixels": 640,
+      "ratio": 0.995334370139969,
+      "offset": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "curls",
+      "index": 3,
+      "scalpPixels": 647,
+      "coveredPixels": 643,
+      "ratio": 0.9938176197836167,
+      "offset": [
+        -5,
+        3
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 0,
+      "scalpPixels": 649,
+      "coveredPixels": 627,
+      "ratio": 0.9661016949152542,
+      "offset": [
+        -2,
+        4
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 1,
+      "scalpPixels": 643,
+      "coveredPixels": 627,
+      "ratio": 0.9751166407465007,
+      "offset": [
+        -9,
+        0
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 2,
+      "scalpPixels": 643,
+      "coveredPixels": 627,
+      "ratio": 0.9751166407465007,
+      "offset": [
+        3,
+        5
+      ]
+    },
+    {
+      "name": "sidepart",
+      "index": 3,
+      "scalpPixels": 647,
+      "coveredPixels": 628,
+      "ratio": 0.9706336939721792,
+      "offset": [
+        -5,
+        3
+      ]
+    }
+  ],
+  "recordings": [
+    {
+      "clip": "walk",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 3002.2000000476837,
+      "cycleSeconds": 0.5,
+      "renderCalls": 361
+    },
+    {
+      "clip": "walk",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 3002.2000000476837,
+      "elapsedMs": 3000.600000023842,
+      "cycleSeconds": 0.5,
+      "renderCalls": 360
+    }
+  ],
+  "renderCalls": 721,
+  "videoSha256": "dde6f05623d42c059039457b44cf8803c18bead471a1c8e693d6c0ed3325f6fd",
+  "rendererSha256": {
+    "character-hair.js": "80c402daf8563112b0ed4ada7702543d18043600fe8f66f7b9ea4a7b1479ca19",
+    "character-hair-placement.js": "1d6abbec2c2ba55357c876dbfb9c24e70921763c488b6059ece74f4baa8b110f",
+    "character-materials.js": "4b87f9105cf939f39cd0c3e3aa3198b2db7698e2453e0607a637231c3bbc1171"
+  },
+  "registrationSha256": "bed43b869b3414540b75729c324ab5bcc6bf7d371402891e489ca8d365791590"
+}

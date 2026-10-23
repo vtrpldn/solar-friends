@@ -1,0 +1,7 @@
+{
+  "status": "needs-correction",
+  "reason": "Original side-part cap fails the unchanged 95 percent crown gate; the curl placements pass. Diagnostic confirms uncovered upper-rear scalp in the original standing source too.",
+  "activeRecipesChanged": false,
+  "evidence": "review-v1.json",
+  "supersededBy": "../hair-registered-v3/acceptance-v1.json"
+}

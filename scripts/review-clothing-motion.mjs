@@ -7,8 +7,9 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
-const name=process.argv[2]??'short-sleeve-breathe-complete-v1',clip=process.argv[3]??'breathe';assert(/^[a-z0-9-]+$/.test(name)&&['breathe','walk'].includes(clip));
+const name=process.argv[2]??'short-sleeve-breathe-complete-v1',clip=process.argv[3]??'breathe';assert(/^[a-z0-9-]+(?:\/[a-z0-9-]+)?$/.test(name)&&['breathe','walk'].includes(clip));
 const body=process.argv.includes('--body'),version=process.argv.find(arg=>arg.startsWith('--version='))?.slice(10)??'v1';assert(/^v[1-9][0-9]?$/.test(version));
+const subjects=process.argv.find(arg=>arg.startsWith('--subjects='))?.slice(11)??(body?'original and candidate body':'both hairstyles');
 const label=version+(process.argv.includes('--registered')?'-registered':'');
 const run=promisify(execFile),folder='assets/art-direction/character-prototype-v1/'+name,movie=folder+'/review-'+label+'-'+clip+'.webm',report=JSON.parse(await readFile(folder+'/review-'+label+'.json','utf8')),temp=await mkdtemp(join(tmpdir(),'solar-clothing-motion-'));let browser;
 try{
@@ -28,5 +29,5 @@ try{
   return c.toDataURL('image/png').split(',')[1];
  },samples);
  await writeFile(folder+'/motion-'+clip+(label==='v1'?'':'-'+label)+'.png',Buffer.from(image,'base64'));
- await writeFile(folder+'/motion-samples'+(label==='v1'?'':'-'+label)+'.json',JSON.stringify({scope:`Encoded ${clip} loop review samples for ${body?'original and candidate body':'both hairstyles'}, day and mirrored night; requested recording times are not exact native/decoder pose identities or frame-pacing evidence.`,videoSha256:createHash('sha256').update(await readFile(movie)).digest('hex'),metadata,samples:samples.map(({data,...s})=>s)},null,2)+'\n');console.log(`Prepared 16 encoded ${clip} loop samples and independent video metadata.`);
+ await writeFile(folder+'/motion-samples'+(label==='v1'?'':'-'+label)+'.json',JSON.stringify({scope:`Encoded ${clip} loop review samples for ${subjects}, day and mirrored night; requested recording times are not exact native/decoder pose identities or frame-pacing evidence.`,videoSha256:createHash('sha256').update(await readFile(movie)).digest('hex'),metadata,samples:samples.map(({data,...s})=>s)},null,2)+'\n');console.log(`Prepared 16 encoded ${clip} loop samples and independent video metadata.`);
 }finally{await browser?.close();await rm(temp,{recursive:true,force:true});}
