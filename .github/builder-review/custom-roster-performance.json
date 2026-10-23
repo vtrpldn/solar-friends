@@ -1,0 +1,241 @@
+{
+  "why": "The twelve-person 64x64 benchmark exposed a main-thread catch-up spiral. Budget interactive simulation work so slow ticks cannot indefinitely amplify the next frame.",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "baseline": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "shared",
+        "loading": {
+          "compileMs": 13.100000023841858,
+          "loadMs": 3246.899999976158,
+          "snapshotBytes": 157156,
+          "uniqueAppearances": 1
+        },
+        "runtime": {
+          "frames": 22,
+          "medianGapMs": 125,
+          "p95GapMs": 1350,
+          "maxGapMs": 1466.699999999999,
+          "meter": {
+            "samples": 119,
+            "simulation": {
+              "median": 0.7999999523162842,
+              "p95": 208.29999995231628
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.200000047683716
+            },
+            "paint": {
+              "median": 6.399999976158142,
+              "p95": 6.799999952316284
+            },
+            "total": {
+              "median": 7.5,
+              "p95": 216.89999997615814
+            },
+            "frameInterval": {
+              "median": 16.599999999999454,
+              "p95": 225
+            }
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          }
+        }
+      },
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 10,
+          "loadMs": 12143.799999952316,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "frames": 15,
+          "medianGapMs": 149.90000000000146,
+          "p95GapMs": 1625.5999999999985,
+          "maxGapMs": 1625.5999999999985,
+          "meter": {
+            "samples": 223,
+            "simulation": {
+              "median": 0.8000000715255737,
+              "p95": 619
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.200000047683716
+            },
+            "paint": {
+              "median": 6.5,
+              "p95": 7
+            },
+            "total": {
+              "median": 7.5,
+              "p95": 628
+            },
+            "frameInterval": {
+              "median": 16.599999999999454,
+              "p95": 691.5999999999985
+            }
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          }
+        }
+      }
+    ]
+  },
+  "bounded": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "shared",
+        "loading": {
+          "compileMs": 12.5,
+          "loadMs": 3239.399999976158,
+          "snapshotBytes": 157156,
+          "uniqueAppearances": 1
+        },
+        "runtime": {
+          "advancedMinutes": 93.45941162109375,
+          "wallSeconds": 5.011699999976157,
+          "frames": 229,
+          "medianGapMs": 24.899999999999636,
+          "p95GapMs": 25.299999999999272,
+          "maxGapMs": 33.29999999999927,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 10.5,
+              "p95": 12.699999928474426
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.1999999284744263
+            },
+            "paint": {
+              "median": 6.600000023841858,
+              "p95": 7
+            },
+            "total": {
+              "median": 17.799999952316284,
+              "p95": 21
+            },
+            "frameInterval": {
+              "median": 24.899999999999636,
+              "p95": 25.299999999999272
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0.24375,
+            "droppedSeconds": 3.4006999999999934,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 13107200,
+            "decodedSources": 52
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 211
+        }
+      },
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 9.399999976158142,
+          "loadMs": 10958.200000047684,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "advancedMinutes": 97.9927978515625,
+          "wallSeconds": 5.0210999999284756,
+          "frames": 234,
+          "medianGapMs": 24.899999999997817,
+          "p95GapMs": 25.200000000000728,
+          "maxGapMs": 25.700000000000728,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 10.600000023841858,
+              "p95": 12.599999904632568
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.200000047683716
+            },
+            "paint": {
+              "median": 6.399999976158142,
+              "p95": 6.700000047683716
+            },
+            "total": {
+              "median": 17.5,
+              "p95": 21.100000023841858
+            },
+            "frameInterval": {
+              "median": 24.899999999997817,
+              "p95": 25.200000000000728
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0.24375,
+            "droppedSeconds": 6.29844999999999,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 157286400,
+            "decodedSources": 85
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 208
+        }
+      }
+    ]
+  },
+  "checks": [
+    "node scripts/verify-simulation-clock.mjs",
+    "node scripts/verify-performance-history.mjs",
+    "node scripts/verify-frame-state.mjs",
+    "node scripts/verify-part-mode-save.mjs",
+    "node scripts/benchmark-custom-roster.mjs"
+  ],
+  "remaining": "Requested 16x throughput is not achieved at maximum population. Dense buildings, sustained pan/edit/save, GPU/source-art memory and longer runs remain unverified. Pause click measurements include Playwright protocol/actionability overhead. JS heap reports are coarse browser estimates and exclude canvas/GPU memory.",
+  "sha256": {
+    "web/main.js": "dddc6d9eaeaf7d594f85bd5f271bd88d24492459d4ca4c512dba066731ad12bf",
+    "web/simulation-speed.js": "affd4a3da3593f05dbd3ef31e63cd3d296fcde19350b026d978762eac8108c32",
+    "scripts/benchmark-custom-roster.mjs": "f3e30d85b22bf453748fe0fe458fffa7fa5a5232360a57fe548e6bc8e45c2d81",
+    "scripts/verify-simulation-clock.mjs": "2325ba320a325ccacf0175dce704bf5c7043ed948304b99d1449f140eabe6b70",
+    "web/pkg/solar_friends_bg.wasm": "2e46ece94581ef0bef8f54a2ecb2c5769687ff28fb6187df3714e03ee46373b5"
+  }
+}

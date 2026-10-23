@@ -30,7 +30,7 @@ import {makeArtPreview} from './dev/art-preview.js';
 import {installMaintenanceUI} from './maintenance-ui.js';
 import {installGameUI,itemIcon} from './game-ui.js';
 import {economyImage} from './economy-art.js';
-import {advanceSimulation,simulationSpeed} from './simulation-speed.js';
+import {createSimulationClock,simulationSpeed} from './simulation-speed.js';
 import {sleepLabel,residentVisible,residentIsAway,tripLabel} from './resident-presence.js';
 import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies } from './building-footprints.js';
@@ -1472,6 +1472,7 @@ function setTool(kind) {
 }
 function togglePause() {
   paused = !paused;
+  simulationClock.reset();
   $("#pause").textContent = paused ? "▶" : "Ⅱ";
   $("#pause").setAttribute(
     "aria-label",
@@ -1481,8 +1482,9 @@ function togglePause() {
   if(paused&&game&&state&&gameUI){state=sampleFrame(game,state,true);reportElapsed=0;updateUI();}
 }
 let paintedState = null, paintedView = "", reportElapsed = Infinity;
+const simulationClock=createSimulationClock();
 function frame(stamp) {
-  if(residentArtworkLoading){last=stamp;requestAnimationFrame(frame);return;}
+  if(residentArtworkLoading){simulationClock.reset();last=stamp;requestAnimationFrame(frame);return;}
   meter.start(stamp);
   if (!last) last = stamp;
   const elapsed = Math.max(0, (stamp - last) / 1000);
@@ -1495,12 +1497,12 @@ function frame(stamp) {
   sound.update(running, state.environment.raining, state.village.minutes, state.residents.some(r => r.task === "build" && Math.hypot(r.x-r.target_x, r.y-r.target_y) < 0.2));
   if (running) {
     if(!reducedMotion.matches)weatherTime += dt;
-    time += advanceSimulation(game, Math.min(elapsed, 1), speed);
+    time += simulationClock.advance(game, Math.min(elapsed, 1), speed);
     meter.mark('simulation');
     reportElapsed += elapsed;
     state = sampleFrame(game, state, reportElapsed >= .25);
     if (reportElapsed >= .25) reportElapsed = 0;
-  }
+  }else simulationClock.reset();
   meter.mark('sample');
   $("#auto-speed").hidden = !running || !game.fast_forward_ready();
   const viewKey = [width,height,zoom,pan.x,pan.y,tool,selected,pointer?.x,pointer?.y,!!drag?.moved,reducedMotion.matches,paused,$("#pipe-overlay")?.checked,waterOverlayRevision(),$("#cable-overlay")?.checked,electricalOverlayRevision()].join("|");
@@ -1960,6 +1962,7 @@ function installCreationSession(){
   if(session.recovered)toast('Recovered your last scenario checkpoint.');
 }
 function refreshDevScene() {
+  simulationClock.reset();
   if(ensureResidentArtwork(JSON.parse(game.snapshot()),refreshDevScene))return;
   economyUI?.resetForVillage();
   challengeFailureShown=false;
@@ -1978,6 +1981,8 @@ const devAPI = {
   utilityPreview: (kind,from,to)=>JSON.parse(game.utility_preview(kind,from,to)),
   snapshot: () => JSON.parse(game.snapshot()),
   inspect: () => JSON.parse(game.dev_inspect()),
+  simulationClock:()=>simulationClock.status(),
+  residentArtworkCache:()=>residentAppearances.partCacheInfo(),
   observe: () => game.dev_observe(true),
   isSandbox: () => !!sandbox,
   scenario: () => sandboxName || (artworkPreview ? 'Artwork preview' : 'Saved village'),
@@ -2032,6 +2037,12 @@ const devAPI = {
     return devAPI.snapshot();
   },
   run() { if (!sandbox) throw new Error('Load a sandbox first.'); if (paused) togglePause(); },
+  setSpeed(value) {
+    if(!sandbox)throw new Error('Load a sandbox before changing its test speed.');
+    if(![1,2,4,8,16].includes(value))throw new Error('Choose a supported simulation speed.');
+    speed=value;
+    for(const button of document.querySelectorAll('[data-speed]')){const active=Number(button.dataset.speed)===value;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
+  },
   fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; weatherTime = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
   locate(id) {
     const r = state.residents.find(r => r.id === id);
