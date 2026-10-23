@@ -1,0 +1,26 @@
+{
+  "status": "measured source landmarks for internal normalization review; not attachment/public acceptance",
+  "sourceSha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+  "evidence": "review-v1-anatomy.png",
+  "method": "Visually inspected lower edge of tank/waistband at 25-source-pixel grid. Landmarks are waist centres, not forced head centroids or leg medians. One common sheet scale retained from unregistered review.",
+  "waistLandmarks": [
+    [
+      361,
+      319
+    ],
+    [
+      945,
+      320
+    ],
+    [
+      354,
+      940
+    ],
+    [
+      944,
+      939
+    ]
+  ],
+  "scaleOrigin": "review-v1.json sourceScale multiplied by 256, common to all four frames",
+  "groundAnchor": "existing FRAME_ANCHOR .95; each complete component sole bottom; no source paint edits"
+}

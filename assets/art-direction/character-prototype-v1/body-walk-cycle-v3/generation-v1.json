@@ -1,0 +1,23 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-walk-cycle-v2/candidate-v1.png",
+      "role": "edit target; preserve identity, style, contact poses and upper body",
+      "sha256": "3cbbcee07977f572bff015cf3dc4ae77522d63a6dc22773b02aac7c51e9d7006"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-walk-cycle-v3/geometry.png",
+      "role": "lower passing knee/boot geometry only; flat colours are not painted materials",
+      "sha256": "730ee6a27ebb564ba8a332571280003da9401dcf7220f487a75647933272dc18"
+    }
+  ],
+  "guideIntent": "guide-intent.json",
+  "transparentBackground": true,
+  "originalOutputPath": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7414ecca-4972-40bc-b617-598a3a603e17.png",
+  "savedSource": "candidate-v1.png",
+  "sourceSha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+  "status": "accepted for internal body-source/landmark prototyping only; public integration, part bindings and complete motion acceptance pending"
+}

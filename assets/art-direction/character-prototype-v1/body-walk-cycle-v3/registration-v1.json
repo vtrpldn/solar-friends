@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "family": "relaxed-walk-prototype-v1",
+  "sheet": "base",
+  "source": {
+    "sha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+    "width": 1254,
+    "height": 1254,
+    "columns": 2,
+    "rows": 2
+  },
+  "uniformScale": 0.3725211505922166,
+  "frames": [
+    {
+      "index": 0,
+      "waist": [
+        361,
+        319
+      ]
+    },
+    {
+      "index": 1,
+      "waist": [
+        945,
+        320
+      ]
+    },
+    {
+      "index": 2,
+      "waist": [
+        354,
+        940
+      ]
+    },
+    {
+      "index": 3,
+      "waist": [
+        944,
+        939
+      ]
+    }
+  ]
+}

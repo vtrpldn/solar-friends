@@ -1,0 +1,11 @@
+{
+  "poses": [
+    "1749b5eb9703486aa1551e5ad12a3f768d0a066d55734c389c11f81b230ba19a",
+    "53f7bca26dad74f846444f8486452c0648f991bdd5b6506b7bf033c0f2ccb7f8",
+    "f9c1e3cd46ae4a3772f4f5451de15f020184471afe5ba28303fa3420d5ccba3b",
+    "3292ef7affd635f16189b95a8c71b995b3ea6dc5ed44675a117eb03aaba831de"
+  ],
+  "refused": 19,
+  "failureReleased": true,
+  "syntheticTorsoComparisons": 3
+}

@@ -1,0 +1,52 @@
+{
+  "status": "accepted for internal body-source and registration prototyping; production integration pending",
+  "activeArtworkChanged": false,
+  "sourceSha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+  "registeredPoseSha256": [
+    "1749b5eb9703486aa1551e5ad12a3f768d0a066d55734c389c11f81b230ba19a",
+    "53f7bca26dad74f846444f8486452c0648f991bdd5b6506b7bf033c0f2ccb7f8",
+    "f9c1e3cd46ae4a3772f4f5451de15f020184471afe5ba28303fa3420d5ccba3b",
+    "3292ef7affd635f16189b95a8c71b995b3ea6dc5ed44675a117eb03aaba831de"
+  ],
+  "inspected": [
+    "candidate-v1.png",
+    "review-v1-anatomy.png",
+    "review-v1-board.png",
+    "review-v1-registered-board.png",
+    "review-v1-registered-lighting.png",
+    "motion-walk-v1-registered.png",
+    "world/mata-atlantica-day.png",
+    "world/mata-atlantica-night.png",
+    "world/cerrado-day.png",
+    "world/cerrado-night.png",
+    "world/caatinga-day.png",
+    "world/caatinga-night.png"
+  ],
+  "findings": [
+    "Passing knees/boots are lower than the prior candidate, with compact leg and boot proportions preserved.",
+    "Contact drawings visibly alternate near/far foreground legs and opposing arm swings while keeping right-facing identity.",
+    "Waist landmarks use delivered source anatomy rather than changing scale or forcing head positions. Residual torso lean and head displacement remain in the original paint; registration does not erase them.",
+    "Normalized standing-relative heights are 215\u2013220 pixels versus the reference 220. Ground contact and overall resident/building scale are coherent in the inspected shared-renderer scenes.",
+    "No unowned source paint at alpha >=32 was detected beyond component/fringe ownership.",
+    "The isolated native 0.5-second walk samples show distinct contact/passing phases; cadence during actual village travel and transitions into the other body poses still needs review."
+  ],
+  "checks": {
+    "registrationRefusals": 19,
+    "syntheticTorsoComparisons": 3,
+    "failureCanvasCleanup": true,
+    "worldScenes": 24,
+    "worldResidentComparisons": 72,
+    "lightingSamples": 32,
+    "publicFrozenPixelComparisons": 400,
+    "movieSha256": "6105ca5301feeaf87ad0afa87b85c999578d98c7ed32dcbe4deb8909329eb325",
+    "decodedFrames": 179,
+    "durationSeconds": 5.910312
+  },
+  "remaining": [
+    "Implement explicit multi-source body-pose ownership before any active replacement; old body source hashes cannot describe these frames.",
+    "Reauthor/review the four walking hair, hat, facial-hair and garment bindings and colour/material ownership against this actual body source.",
+    "Review walking/idle/work transitions and moving world cadence before production acceptance.",
+    "Complete the broader body/face/clothing/shoe variations and original builder release gates."
+  ],
+  "scopeLimit": "Static body-source scale/ground/style acceptance and internal gait evidence only. No complete appearance, public creator or final motion acceptance."
+}

@@ -4,18 +4,25 @@ import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 const version=process.argv[2]??'v1';assert(/^v[1-9][0-9]?$/.test(version));
-const root='assets/art-direction/character-prototype-v1/body-walk-cycle-v2',source=await readFile(root+'/candidate-'+version+'.png'),sourceHash=createHash('sha256').update(source).digest('hex'),intent=JSON.parse(await readFile(root+'/guide-intent.json','utf8'));
+const collection=process.argv.find(arg=>arg.startsWith('--collection='))?.slice(13)??'v2';assert(['v2','v3'].includes(collection));
+const root='assets/art-direction/character-prototype-v1/body-walk-cycle-'+collection,source=await readFile(root+'/candidate-'+version+'.png'),sourceHash=createHash('sha256').update(source).digest('hex'),intent=JSON.parse(await readFile(root+'/guide-intent.json','utf8'));
 for(const [file,hash]of Object.entries(intent.hashes))assert.equal(createHash('sha256').update(await readFile(root+'/'+file)).digest('hex'),hash);
+const registration=process.argv.includes('--registered')?JSON.parse(await readFile(root+'/registration-'+version+'.json','utf8')):null;
+const label=version+(registration?'-registered':'')+(process.argv.includes('--video')?'':'-static');
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/body-walk-review`);
- const result=await page.evaluate(async({data,video})=>{
+ const result=await page.evaluate(async({data,video,registration,sourceHash})=>{
   const {loadCharacterImageSource}=await import('/character-image-source.js'),{preparedFrames,locateSpriteFrames}=await import('/sprite-frames.js'),{drawResidentAnimation,sampleResidentClip}=await import('/resident-animation.js'),{unlitFilter}=await import('/power.js');
   const original=await loadCharacterImageSource('/art/characters/prototype-v1/body-neutral-base.png'),old=preparedFrames(original.image,{referenceRow:2}),candidate=new Image();candidate.src='data:image/png;base64,'+data;await candidate.decode();
   if(candidate.naturalWidth!==1254||candidate.naturalHeight!==1254)throw Error('Use the authored 1254-square source');
-  const raw=document.createElement('canvas');raw.width=raw.height=1254;raw.getContext('2d').drawImage(candidate,0,0);const sourcePixels=raw.getContext('2d').getImageData(0,0,1254,1254),layout=locateSpriteFrames(sourcePixels.data,1254,1254,2,2,0),frames=preparedFrames(candidate,{columns:2,rows:2,referenceRow:0});
+  const raw=document.createElement('canvas');raw.width=raw.height=1254;raw.getContext('2d').drawImage(candidate,0,0);const sourcePixels=raw.getContext('2d').getImageData(0,0,1254,1254),layout=locateSpriteFrames(sourcePixels.data,1254,1254,2,2,0),frames=registration?(await import('/character-body-frames.js')).prepareRegisteredBodyFrames({image:candidate,sourceHash},registration):preparedFrames(candidate,{columns:2,rows:2,referenceRow:0});
   const bbox=frame=>{const data=frame.getContext('2d').getImageData(0,0,256,256).data,b=[256,256,0,0];let headX=0,headAlpha=0;for(let y=0;y<256;y++)for(let x=0;x<256;x++)if(data[(y*256+x)*4+3]>=32){b[0]=Math.min(b[0],x);b[1]=Math.min(b[1],y);b[2]=Math.max(b[2],x+1);b[3]=Math.max(b[3],y+1);}for(let y=b[1];y<b[1]+(b[3]-b[1])*.24;y++)for(let x=0;x<256;x++){const a=data[(y*256+x)*4+3];headX+=x*a;headAlpha+=a;}return {bounds:b,height:b[3]-b[1],upperBodyCentroidX:headX/headAlpha};};
-  const measurements=frames.map((frame,index)=>({index,sourceBounds:[layout.frames[index].left,layout.frames[index].top,layout.frames[index].right,layout.frames[index].bottom],sourcePivot:layout.frames[index].pivot,...bbox(frame)}));
+  const anatomy=document.createElement('canvas');anatomy.width=anatomy.height=1254;const ac=anatomy.getContext('2d');ac.fillStyle='#e8dfbf';ac.fillRect(0,0,1254,1254);ac.drawImage(candidate,0,0);ac.font='12px monospace';
+  for(let x=0;x<1254;x+=25){ac.strokeStyle='rgba(40,80,80,.25)';ac.beginPath();ac.moveTo(x,0);ac.lineTo(x,1254);ac.stroke();ac.fillStyle='#243e3e';ac.fillText(x,x+2,17);ac.fillText(x,x+2,637);}
+  for(let y=0;y<1254;y+=25){ac.strokeStyle='rgba(40,80,80,.25)';ac.beginPath();ac.moveTo(0,y);ac.lineTo(1254,y);ac.stroke();ac.fillStyle='#243e3e';ac.fillText(y,3,y+13);ac.fillText(y,630,y+13);}
+  let unownedOpaquePixels=0;for(let p=0;p<layout.owners.length;p++)if(sourcePixels.data[p*4+3]>=32&&!layout.owners[p])unownedOpaquePixels++;
+  const measurements=frames.map((frame,index)=>({index,sourceBounds:[layout.frames[index].left,layout.frames[index].top,layout.frames[index].right,layout.frames[index].bottom],sourcePivot:layout.frames[index].pivot,registeredWaist:registration?.frames[index].waist??null,...bbox(frame)}));
   const board=document.createElement('canvas');board.width=1600;board.height=1000;const b=board.getContext('2d');b.fillStyle='#e8dfbf';b.fillRect(0,0,1600,1000);
   for(let index=0;index<4;index++)for(const [row,frame,label]of [[0,old[index],'old walk'],[1,frames[index],'new walk'],[2,old[8],'standing reference']]){const x=index*400,y=row*330;b.strokeStyle='#b7a987';b.beginPath();b.moveTo(x+35,y+290);b.lineTo(x+365,y+290);b.stroke();b.drawImage(frame,x+30,y,300,300);b.fillStyle='#483a27';b.font='14px monospace';b.fillText(`${label} ${index}`,x+8,y+322);}
   const surface=document.createElement('canvas');surface.width=surface.height=256;
@@ -28,9 +35,9 @@ try{
    const bytes=new Uint8Array(await new Blob(chunks,{type}).arrayBuffer());let binary='';for(let n=0;n<bytes.length;n+=32768)binary+=String.fromCharCode(...bytes.subarray(n,n+32768));movie=btoa(binary);
   }
   let refused=0;for(const [sheet,index]of [['base',4],['idle',0],['base','0']]){try{providers[1].frameForPose(sheet,index);throw Error('accepted');}catch(error){if(error.message==='accepted')throw error;refused++;}}
-  return {scope:'Internal unbound body prototype using one existing sheet-derived scale for the four new poses. Not an approved replacement or attached hair/clothing/body family.',sourceScale:layout.scale,measurements,standing:bbox(old[8]),refused,lightingSamples:32,recordings,renderCalls,movie,board:board.toDataURL('image/png').split(',')[1],lighting:lighting.toDataURL('image/png').split(',')[1]};
- },{data:source.toString('base64'),video:process.argv.includes('--video')});
+  return {scope:registration?'Internal registered-waist body prototype with one uniform source scale; no production attachment binding or public acceptance.':'Internal unbound body prototype using one existing sheet-derived scale for the four new poses. Not an approved replacement or attached hair/clothing/body family.',sourceScale:layout.scale,unownedOpaquePixels,measurements,standing:bbox(old[8]),refused,lightingSamples:32,recordings,renderCalls,movie,anatomy:anatomy.toDataURL('image/png').split(',')[1],board:board.toDataURL('image/png').split(',')[1],lighting:lighting.toDataURL('image/png').split(',')[1]};
+ },{registration,sourceHash,data:source.toString('base64'),video:process.argv.includes('--video')});
  assert.equal(result.measurements.length,4);assert.equal(result.refused,3);for(const pose of result.measurements){assert(pose.sourceBounds[0]>1&&pose.sourceBounds[1]>1&&pose.sourceBounds[2]<1253&&pose.sourceBounds[3]<1253);assert(Math.abs(pose.height-result.standing.height)<=8);}
- for(const key of ['board','lighting']){await writeFile(root+'/review-'+version+'-'+key+'.png',Buffer.from(result[key],'base64'));delete result[key];}if(result.movie){await writeFile(root+'/review-'+version+'-walk.webm',Buffer.from(result.movie,'base64'));delete result.movie;}
- await writeFile(root+'/review-'+version+'.json',JSON.stringify({sourceHash,...result},null,2)+'\n');console.log(JSON.stringify(result));
+ for(const key of ['board','lighting','anatomy']){await writeFile(root+'/review-'+label+'-'+key+'.png',Buffer.from(result[key],'base64'));delete result[key];}if(result.movie){const movie=Buffer.from(result.movie,'base64');await writeFile(root+'/review-'+label+'-walk.webm',movie);result.videoSha256=createHash('sha256').update(movie).digest('hex');delete result.movie;}
+ await writeFile(root+'/review-'+label+'.json',JSON.stringify({sourceHash,registrationSha256:registration?createHash('sha256').update(await readFile(root+'/registration-'+version+'.json')).digest('hex'):null,...result},null,2)+'\n');console.log(JSON.stringify(result));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

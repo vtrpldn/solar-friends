@@ -1,0 +1,110 @@
+{
+  "sourceHash": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+  "scope": "Internal unbound body prototype using one existing sheet-derived scale for the four new poses. Not an approved replacement or attached hair/clothing/body family.",
+  "sourceScale": 0.001455160744500846,
+  "measurements": [
+    {
+      "index": 0,
+      "sourceBounds": [
+        169,
+        25,
+        563,
+        606
+      ],
+      "sourcePivot": 351,
+      "bounds": [
+        60,
+        27,
+        207,
+        243
+      ],
+      "height": 216,
+      "upperBodyCentroidX": 137.14748355509434
+    },
+    {
+      "index": 1,
+      "sourceBounds": [
+        823,
+        25,
+        1109,
+        616
+      ],
+      "sourcePivot": 960,
+      "bounds": [
+        77,
+        23,
+        184,
+        243
+      ],
+      "height": 220,
+      "upperBodyCentroidX": 120.65155993659188
+    },
+    {
+      "index": 2,
+      "sourceBounds": [
+        178,
+        645,
+        593,
+        1221
+      ],
+      "sourcePivot": 359.5,
+      "bounds": [
+        60,
+        28,
+        215,
+        243
+      ],
+      "height": 215,
+      "upperBodyCentroidX": 136.36129350656623
+    },
+    {
+      "index": 3,
+      "sourceBounds": [
+        784,
+        644,
+        1130,
+        1227
+      ],
+      "sourcePivot": 970.5,
+      "bounds": [
+        58,
+        26,
+        187,
+        243
+      ],
+      "height": 217,
+      "upperBodyCentroidX": 120.74948954289721
+    }
+  ],
+  "standing": {
+    "bounds": [
+      82,
+      23,
+      188,
+      243
+    ],
+    "height": 220,
+    "upperBodyCentroidX": 135.21042474257325
+  },
+  "refused": 3,
+  "lightingSamples": 32,
+  "recordings": [
+    {
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 0.5,
+      "offsetMs": 0,
+      "elapsedMs": 3007.5999999046326,
+      "renderCalls": 356
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 0.5,
+      "offsetMs": 3007.5999999046326,
+      "elapsedMs": 3007.9000000953674,
+      "renderCalls": 361
+    }
+  ],
+  "renderCalls": 717
+}

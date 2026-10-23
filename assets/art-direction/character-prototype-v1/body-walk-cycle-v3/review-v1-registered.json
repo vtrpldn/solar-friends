@@ -1,0 +1,129 @@
+{
+  "sourceHash": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+  "scope": "Internal registered-waist body prototype with one uniform source scale; no production attachment binding or public acceptance.",
+  "sourceScale": 0.001455160744500846,
+  "unownedOpaquePixels": 0,
+  "measurements": [
+    {
+      "index": 0,
+      "sourceBounds": [
+        169,
+        25,
+        563,
+        606
+      ],
+      "sourcePivot": 351,
+      "registeredWaist": [
+        361,
+        319
+      ],
+      "bounds": [
+        57,
+        27,
+        203,
+        243
+      ],
+      "height": 216,
+      "upperBodyCentroidX": 133.4243733628713
+    },
+    {
+      "index": 1,
+      "sourceBounds": [
+        823,
+        25,
+        1109,
+        616
+      ],
+      "sourcePivot": 960,
+      "registeredWaist": [
+        945,
+        320
+      ],
+      "bounds": [
+        83,
+        23,
+        189,
+        243
+      ],
+      "height": 220,
+      "upperBodyCentroidX": 126.26157469542554
+    },
+    {
+      "index": 2,
+      "sourceBounds": [
+        178,
+        645,
+        593,
+        1221
+      ],
+      "sourcePivot": 359.5,
+      "registeredWaist": [
+        354,
+        940
+      ],
+      "bounds": [
+        62,
+        28,
+        217,
+        243
+      ],
+      "height": 215,
+      "upperBodyCentroidX": 138.4128294107662
+    },
+    {
+      "index": 3,
+      "sourceBounds": [
+        784,
+        644,
+        1130,
+        1227
+      ],
+      "sourcePivot": 970.5,
+      "registeredWaist": [
+        944,
+        939
+      ],
+      "bounds": [
+        68,
+        26,
+        197,
+        243
+      ],
+      "height": 217,
+      "upperBodyCentroidX": 130.61689063571635
+    }
+  ],
+  "standing": {
+    "bounds": [
+      82,
+      23,
+      188,
+      243
+    ],
+    "height": 220,
+    "upperBodyCentroidX": 135.21042474257325
+  },
+  "refused": 3,
+  "lightingSamples": 32,
+  "recordings": [
+    {
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 0.5,
+      "offsetMs": 0,
+      "elapsedMs": 3001,
+      "renderCalls": 355
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 0.5,
+      "offsetMs": 3001,
+      "elapsedMs": 3000.100000023842,
+      "renderCalls": 360
+    }
+  ],
+  "renderCalls": 715,
+  "videoSha256": "6105ca5301feeaf87ad0afa87b85c999578d98c7ed32dcbe4deb8909329eb325",
+  "registrationSha256": "870ebb4c41f25d213da08ee61e5bf993260ab24a03eabbbfc14d863e2b3c8128"
+}

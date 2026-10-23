@@ -3,7 +3,9 @@ import {mkdir,writeFile,readFile,access} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const root='assets/art-direction/character-prototype-v1/body-walk-cycle-v2';
+const revision=process.argv[2]??'v2';
+if(!['v2','v3'].includes(revision))throw Error('Unknown authored gait geometry revision');
+const root='assets/art-direction/character-prototype-v1/body-walk-cycle-'+revision;
 // Freeze geometry before painting: changing guides would invalidate provenance.
 try { await access(root+'/guide-intent.json'); throw new Error('Guide already frozen; create a new versioned collection instead.'); } catch(error) { if(error.code!=='ENOENT')throw error; }
 await mkdir(root,{recursive:true});
@@ -13,6 +15,16 @@ const poses=[
  {key:'contact-far',head:[149,55],nearArm:[[119,90],[132,119],[156,149]],farArm:[[165,91],[148,122],[124,154]],nearLeg:[[132,155],[111,196],[96,224]],farLeg:[[151,153],[168,194],[184,225]],nearBoot:[[91,223],[102,226],[113,241],[104,243],[87,232]],farBoot:[[179,225],[190,226],[203,237],[182,242],[176,236]],support:'far heel and near toe'},
  {key:'passing-far-support',head:[149,51],nearArm:[[119,86],[129,121],[143,153]],farArm:[[165,87],[162,120],[151,153]],nearLeg:[[132,151],[157,188],[144,212]],farLeg:[[151,149],[145,194],[141,226]],nearBoot:[[140,210],[150,212],[162,222],[157,229],[136,222]],farBoot:[[135,225],[146,225],[158,238],[155,243],[132,243]],support:'far foot; near knee passes forward with raised boot'},
 ];
+// Revision 3 lowers only the swing legs and reduces vertical rise.
+// Anatomy is authored here, before generating any new paint.
+if(revision==='v3'){
+ const near=poses[1],far=poses[3];
+ for(const p of [near,far]){p.head[1]=53;for(const arm of [p.nearArm,p.farArm])for(const point of arm)point[1]+=2;for(const leg of [p.nearLeg,p.farLeg])leg[0][1]+=2;}
+ near.farLeg=[[151,151],[157,202],[146,221]];
+ near.farBoot=[[142,219],[152,221],[163,230],[158,236],[138,229]];
+ far.nearLeg=[[132,153],[145,202],[137,221]];
+ far.nearBoot=[[133,219],[143,221],[155,230],[150,236],[129,229]];
+}
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/walk-cycle-guide`);
