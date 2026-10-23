@@ -354,7 +354,18 @@
       ]
     }
   },
-  "guides": [],
+  "guides": [
+    {
+      "key": "base-1",
+      "bounds": [
+        152,
+        107,
+        860,
+        708
+      ],
+      "painted": 279935
+    }
+  ],
   "rowSpans": [
     {
       "key": "base-1",
@@ -547,10 +558,10 @@
     }
   ],
   "sourceHashes": {
-    "specs.json": "3c65e340262c8e4d134a92647466c6f8a79e65069d72c774fedde8ffdc6cca1a",
+    "specs.json": "1f76a66125b039546120840f3077ff8eeb3e025facf87e3b65cdec2bf01ddef1",
     "atlas.png": "56bd95f1a3af59e75ccc40f78bad585324bd8ba3832c08a7ff8b034ede2858a4",
-    "mask.png": "9604c687be233ccc5348ad50e914921e67a9a957fd6d822347001f824fb3bbb5",
-    "context.png": "56bd95f1a3af59e75ccc40f78bad585324bd8ba3832c08a7ff8b034ede2858a4",
+    "mask.png": "629b77eabd59d8af3af411ee2371a413ae64706b6e1318fec1aa7240817f97ac",
+    "context.png": "f1f243ddb7ed0952a369c396fa8510a2f6994867ccb02f158584aae8be97f047",
     "board.png": "bac057333d1dc101ed23df0ee53e0cb8e842bb676d477650ea1f1c0eb23d2e9d"
   }
 }

@@ -1,0 +1,8 @@
+{
+  "status": "Unfrozen anatomy draft; not ready for paint or player use",
+  "next": "Inspect the revised collar; author crossed-forearm foreground ownership from the original body, excluding original garments, then inspect the resolved mask/context before freezing and generating source paint.",
+  "invariants": [
+    "Original body and generated artwork must remain unmodified",
+    "No fallback to another walking pose or silhouette fitting"
+  ]
+}

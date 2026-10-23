@@ -1,0 +1,4 @@
+{
+  "status": "Needs correction; source silhouette audit passes but not accepted for full pose use",
+  "finding": "The complete body review reports one exposed original tank-top collar pixel at native 137,77. v2 moves the right collar inward before painting; do not modify this generated PNG."
+}

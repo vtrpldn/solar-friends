@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v1.txt",
+  "promptSha256": "582a6b4aa15b0e8f099ae5b4322bbc24f3270db28479364684863a70251e0ddf",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-1-v1/mask.png",
+      "role": "Sole edit target; exact pose silhouette, fixed position and alpha authority",
+      "sha256": "629b77eabd59d8af3af411ee2371a413ae64706b6e1318fec1aa7240817f97ac"
+    }
+  ],
+  "geometryIntent": "registration-intent.json",
+  "geometryIntentSha256": "8025e3559d6c59ae993d81236a097b6005246cfbba4851f847ac4e3e032ce481",
+  "transparentBackground": true,
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-63b52032-5ff1-4052-96bf-a6dc43c65bc8.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "2433fdd30a3c94fad38d47aae4a92bec808392f982c92aeb75ec5a1da8c3a6cd",
+  "paintModified": false,
+  "status": "Needs correction: one old collar pixel remains; source retained unchanged."
+}

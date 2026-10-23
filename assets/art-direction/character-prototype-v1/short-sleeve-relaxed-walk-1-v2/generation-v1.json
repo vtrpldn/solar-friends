@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v1.txt",
+  "promptSha256": "582a6b4aa15b0e8f099ae5b4322bbc24f3270db28479364684863a70251e0ddf",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-1-v2/mask.png",
+      "role": "Sole edit target; exact pose silhouette, fixed position and alpha authority",
+      "sha256": "ff4c75759fbbf730aa9b7d0fec641a1abc4d630815b0a8926800ed1a3ab40984"
+    }
+  ],
+  "geometryIntent": "registration-intent.json",
+  "geometryIntentSha256": "98a444716e2b2d51fc28a9e890b3e5a22f54f49c643bd0696ba81785a45f385e",
+  "transparentBackground": true,
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0704e9a2-7a42-4a41-b86e-a97f62c6361e.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+  "paintModified": false,
+  "status": "Internal static pose/forearm candidate; complete clothing-family acceptance remains open."
+}

@@ -1,0 +1,132 @@
+{
+  "status": "Internal static pose/forearm fit candidate; full clothing-family approval remains open.",
+  "pose": {
+    "sheet": "base",
+    "index": 3
+  },
+  "sourceSha256": {
+    "candidate-v1.png": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+    "registration-intent.json": "c7b58576ed75c25b5fc050dcb12c3054ba004ed2e23810dfad5c6387b3c51cfa",
+    "registrations-v1.json": "fc2b288faec7e278f0d0a0e4eb999b61ba17906566c61cb289d69109fab2db8f",
+    "body-foreground-v1.json": "4ee4a8a302316c3dab7fafcf3f3baaaee689789bfd0b847ffa28c5071c4c4ea5",
+    "foreground-regions-v1.json": "1d9814b85748c54790914277faf20cefcacc66a256a96127cb4236e67c023600",
+    "review-v1-board.png": "a8f54b3ccc7e78cae3bdfcfb2fabc3f61bd35c14b7e4a495c0e3f1212aa52a7a",
+    "review-v1-details.png": "85646b2f3b1c051956990155cca23662f0d6cf1f9ba75557f51410320cc9baef",
+    "review-v1-lighting.png": "4824f2e2b7cbd21412d2347f856161c64cba4580b62afed43ba9057f9283fa96"
+  },
+  "findings": [
+    "Inspected the untouched generated shirt, assembled both hairstyles in all three existing skin palettes with optional hat/beard, native torso details and both facings in day/night lighting. Cloth retains broad cream shading and readable sleeve/waist edges.",
+    "Near-forearm foreground ownership comes from authored native body rectangles; source garment paint is not read or altered to choose the ownership.",
+    "Opaque foreground pixels remain exact, original garments are excluded from the protected forearm regions, and every tested edge alpha is applied once. No tested original collar leak remains."
+  ],
+  "foregroundAlphaChecks": 3978,
+  "originalTopCoverage": {
+    "sheet": "base",
+    "index": 3,
+    "oldTop": 1810,
+    "covered": 1791,
+    "ratio": 0.9895027624309393,
+    "collarLeaks": [],
+    "uncovered": [
+      [
+        115,
+        79,
+        235
+      ],
+      [
+        116,
+        80,
+        224
+      ],
+      [
+        117,
+        81,
+        224
+      ],
+      [
+        118,
+        82,
+        237
+      ],
+      [
+        119,
+        82,
+        178
+      ],
+      [
+        120,
+        83,
+        220
+      ],
+      [
+        152,
+        104,
+        239
+      ],
+      [
+        152,
+        105,
+        220
+      ],
+      [
+        152,
+        106,
+        191
+      ],
+      [
+        152,
+        107,
+        156
+      ],
+      [
+        152,
+        108,
+        131
+      ],
+      [
+        151,
+        112,
+        228
+      ],
+      [
+        150,
+        127,
+        133
+      ],
+      [
+        149,
+        128,
+        232
+      ],
+      [
+        150,
+        128,
+        108
+      ],
+      [
+        149,
+        129,
+        219
+      ],
+      [
+        150,
+        129,
+        75
+      ],
+      [
+        149,
+        130,
+        208
+      ],
+      [
+        149,
+        133,
+        189
+      ]
+    ]
+  },
+  "limits": [
+    "Remaining low-opacity original-shirt edge positions are retained in the report; inspect them again with garment colour choices and the full animated family.",
+    "These are static pose candidates. The crossed-forearm walking pose, full gait movie/world review, colours, remaining idle/work/activity garments and player integration remain unfinished."
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "scope": "One internal pose source, six complete character combinations and static lighting/facing guides. No complete shirt animation or player recipe.",
+  "composed": 6,
+  "outside": 6,
+  "protectedLower": 6,
+  "foregroundChecks": 6,
+  "foregroundAlphaChecks": 3978,
+  "refused": 6,
+  "coverage": [
+    {
+      "sheet": "base",
+      "index": 3,
+      "oldTop": 1810,
+      "covered": 1791,
+      "ratio": 0.9895027624309393,
+      "collarLeaks": [],
+      "uncovered": [
+        [
+          115,
+          79,
+          235
+        ],
+        [
+          116,
+          80,
+          224
+        ],
+        [
+          117,
+          81,
+          224
+        ],
+        [
+          118,
+          82,
+          237
+        ],
+        [
+          119,
+          82,
+          178
+        ],
+        [
+          120,
+          83,
+          220
+        ],
+        [
+          152,
+          104,
+          239
+        ],
+        [
+          152,
+          105,
+          220
+        ],
+        [
+          152,
+          106,
+          191
+        ],
+        [
+          152,
+          107,
+          156
+        ],
+        [
+          152,
+          108,
+          131
+        ],
+        [
+          151,
+          112,
+          228
+        ],
+        [
+          150,
+          127,
+          133
+        ],
+        [
+          149,
+          128,
+          232
+        ],
+        [
+          150,
+          128,
+          108
+        ],
+        [
+          149,
+          129,
+          219
+        ],
+        [
+          150,
+          129,
+          75
+        ],
+        [
+          149,
+          130,
+          208
+        ],
+        [
+          149,
+          133,
+          189
+        ]
+      ]
+    }
+  ],
+  "sourceHash": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+  "reviewToolSha256": "0bd8bbd313527812e061458b6c2693d6c87616a75fd6634d703533a502073b60",
+  "rendererSha256": {
+    "character-clothing.js": "03f1f569e774282ed07051ba6bfe6c7fb298408c463c092be85888e5ddc9d25a",
+    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b"
+  }
+}
