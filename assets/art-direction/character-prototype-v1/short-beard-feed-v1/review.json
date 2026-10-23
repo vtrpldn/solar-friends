@@ -1,0 +1,17 @@
+{
+  "status": "Initial isolated frame-fit review passed; internal only",
+  "candidate": "candidate-v1.png",
+  "findings": [
+    "Inspected all four original face grids and guide masks before generation.",
+    "Inspected unchanged generated source, 24 main-pose and 12 equipment-return hairstyle/skin comparisons, mirrored day/night resident-renderer scenes at two sizes, and 32 ordered timing samples.",
+    "Jaw curves remain attached and mouths remain visible in these captures. All four source envelopes have full measured coverage; all five unused source cells contain no thresholded paint.",
+    "Return body faces exactly match their normal registered face crops; equipment pixels outside those crops remain byte-identical to the original return frames. Return frames remain distinct from the grain-bearing forward motion.",
+    "Six cached full frames per recipe are bounded and cleared on disposal; forced failure during the second return clears previous normal and return surfaces."
+  ],
+  "remaining": [
+    "Continuous and cross-activity material/playback review",
+    "Hair colours, hats, portraits and biome world integration",
+    "Aggregate complete-set loader and native/public creator integration",
+    "Additional body/face/clothing choices and every original builder release gate"
+  ]
+}

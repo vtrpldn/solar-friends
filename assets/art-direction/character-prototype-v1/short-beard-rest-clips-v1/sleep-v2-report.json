@@ -13,6 +13,9 @@
   "refused": 16,
   "disposed": 6,
   "partialCleanup": 1,
+  "returnChecked": 0,
+  "returnCleanup": 0,
+  "undeclaredPaint": 0,
   "audits": [
     {
       "index": 15,

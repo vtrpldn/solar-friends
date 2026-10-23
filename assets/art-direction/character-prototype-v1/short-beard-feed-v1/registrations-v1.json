@@ -1,0 +1,122 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "feed",
+    "sheet": "activities",
+    "index": 12,
+    "bodyFrameSha256": "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+    "source": {
+      "size": 1254,
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+      "rect": [
+        0,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      114,
+      36,
+      56,
+      56
+    ],
+    "bounds": [
+      77,
+      174,
+      234,
+      129
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "feed",
+    "sheet": "activities",
+    "index": 13,
+    "bodyFrameSha256": "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+    "source": {
+      "size": 1254,
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+      "rect": [
+        418,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      122,
+      36,
+      56,
+      56
+    ],
+    "bounds": [
+      77,
+      182,
+      234,
+      129
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "feed",
+    "sheet": "activities",
+    "index": 14,
+    "bodyFrameSha256": "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+    "source": {
+      "size": 1254,
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+      "rect": [
+        836,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      119,
+      36,
+      56,
+      56
+    ],
+    "bounds": [
+      77,
+      174,
+      234,
+      129
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "feed",
+    "sheet": "activities",
+    "index": 15,
+    "bodyFrameSha256": "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77",
+    "source": {
+      "size": 1254,
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+      "rect": [
+        0,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      117,
+      36,
+      56,
+      56
+    ],
+    "bounds": [
+      77,
+      174,
+      234,
+      129
+    ]
+  }
+]

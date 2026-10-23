@@ -20,15 +20,18 @@ export function composeFacialHairPose({appearanceFrame,image,sourceHash,binding,
 
 // A partial facial set must never fall back to a bare face mid-animation.
 export function composeFacialHairClip({provider,binding,entries,clip}){
- if(!['work','walk','breathe','sit','sleep','look','wave','relax','stretch','cook','water','tend'].includes(clip))throw Error('This facial animation set is not available.');
+ if(!['work','walk','breathe','sit','sleep','look','wave','relax','stretch','cook','water','tend','feed'].includes(clip))throw Error('This facial animation set is not available.');
  const spec=residentClips[clip],indices=[...new Set(spec.frames.map(frame=>spec.row*4+frame))];
  if(provider?.animationProfile!=='neutral-v1'||typeof provider.frameForPose!=='function'||!(entries instanceof Map)||entries.size!==indices.length||indices.some(index=>!entries.has(index)))throw Error('Provide every registered pose for this facial animation.');
- const frames=new Map();
+ const frames=new Map(),returns=new Map(),returnIndices=clip==='feed'?[13,14]:[];
  try{for(const index of indices){
   const entry=entries.get(index),result=composeFacialHairPose({...entry,binding,appearanceFrame:provider.frameForPose(spec.sheet,index),sheet:spec.sheet,index});frames.set(index,result.frame);
- }}catch(error){for(const frame of frames.values())frame.width=frame.height=0;throw error;}
+ }
+ for(const index of returnIndices){
+  const entry=entries.get(index),result=composeFacialHairPose({...entry,binding,appearanceFrame:provider.frameForPose(spec.sheet,index,{sequenceIndex:4}),sheet:spec.sheet,index});returns.set(index,result.frame);
+ }}catch(error){for(const frame of [...frames.values(),...returns.values()])frame.width=frame.height=0;throw error;}
  let disposed=false;
- return Object.freeze({animationProfile:'neutral-v1',interpolation:'keyframes',frameForPose(sheet,index){if(disposed||sheet!==spec.sheet||!frames.has(index))throw Error('This facial set has no registered artwork for the requested pose.');return frames.get(index);},cacheInfo:()=>({entries:frames.size,maximum:indices.length,rgbaByteUpperBound:frames.size*256*256*4}),dispose(){if(disposed)return;disposed=true;for(const frame of frames.values())frame.width=frame.height=0;frames.clear();}});
+ return Object.freeze({animationProfile:'neutral-v1',interpolation:'keyframes',frameForPose(sheet,index,pose){if(disposed||sheet!==spec.sheet||!frames.has(index))throw Error('This facial set has no registered artwork for the requested pose.');return pose?.sequenceIndex>=4?returns.get(index)??frames.get(index):frames.get(index);},cacheInfo:()=>({entries:frames.size+returns.size,maximum:indices.length+returnIndices.length,rgbaByteUpperBound:(frames.size+returns.size)*256*256*4}),dispose(){if(disposed)return;disposed=true;for(const frame of [...frames.values(),...returns.values()])frame.width=frame.height=0;frames.clear();returns.clear();}});
 }
 
 export function composeWorkingFacialHair(args){return composeFacialHairClip({...args,clip:'work'});}
