@@ -8,6 +8,8 @@ Status: implementation in progress. Delivery target: the desktop game, with 64×
 
 Required launch biomes: **Mata Atlântica, Cerrado, and Caatinga**. Both player-facing builders must support all three throughout creation, editing, saving, sharing, and play, with distinct vegetation, terrain presentation, climate, and resource tradeoffs. Resident customization must work in each biome. This is a minimum release requirement, not a limit on future biome additions; detailed acceptance criteria appear under Brazilian biome presets below.
 
+**Builder acceptance criterion:** a regular player can create a map and a playable scenario in each of these three Brazilian biomes from the normal Create menu, without developer tools. Each biome provides its own starting template and generation preset, and retains its identity when the creation is exported, imported, and played.
+
 Current resident creation includes the original five looks and an initial playable custom look: one body/outfit, two hairstyles, three skin tones and separate top/bottom/shoe palettes. Custom looks persist in presets, creation files and playable saves. The complete body/face/clothing/accessory range, hair colours, final art/cadence review and full release gates below remain unfinished.
 
 ## Why
