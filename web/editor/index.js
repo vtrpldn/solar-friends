@@ -1,3 +1,4 @@
+import {prepareCreationExport} from './prepare-export.js';
 import {prepareScenario} from './prepare-scenario.js';
 import {landPreviewKey} from './land-preview-key.js';
 import {projectPlaces} from './outlook-projects.js';
@@ -36,7 +37,7 @@ import {RelationshipsEditor} from './relationships.js';
 import {ResidentsEditor} from './residents.js';
 import {BiomeEditor} from './biome-editor.js';
 import {WeatherEditor} from './weather.js';
-import {creationFile,freezeCreation,MAX_CREATION_BYTES} from './files.js';
+import {freezeCreation,MAX_CREATION_BYTES} from './files.js';
 import {resolvedNature,plantStroke,thinStroke} from './nature.js';
 import {riverBank} from '../terrain.js';
 import {GeologyEditor} from './geology.js';
@@ -66,9 +67,9 @@ let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
 function status(text){$('creator-save-status').textContent=text;}
-function download(definition){
-  const exported=report.ok?freezeCreation(definition,{terrain:terrainBase,snapshot:map.snapshot,catalog}):definition;
-  const url=URL.createObjectURL(new Blob([creationFile(exported)],{type:'application/json'})),a=document.createElement('a');
+async function download(definition){
+  const file=await prepareCreationExport(definition,report.ok?{terrain:terrainBase,snapshot:map.snapshot,catalog}:null);
+  const url=URL.createObjectURL(new Blob([file],{type:'application/json'})),a=document.createElement('a');
   a.href=url;a.download=(definition.title||'our-village').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.solar-scenario';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function cacheRecovery(ctx,checkpoint,view){try{sessionStorage.setItem(recoveryKey(ctx.id),JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view}));}catch{/* The durable library remains the primary save. */}}
@@ -442,7 +443,7 @@ function wire(){
   };
   $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
   $('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
-  $('creator-export').onclick=()=>{try{if(current)download(current.doc.value);}catch(error){toast(error.message);}};
+  $('creator-export').onclick=async()=>{if(!current||busy)return;busy=true;try{await download(current.doc.value);}catch(error){toast(error.message);}finally{busy=false;$('creator-export').focus();}};
   $('creator-library').onclick=()=>showLibrary().catch(e=>toast(e.message));
   $('creator-library-close').onclick=()=>{if(current)$('creator-library-dialog').close();else location.assign('./');};
   $('creator-library-dialog').addEventListener('cancel',e=>{if(!current){e.preventDefault();location.assign('./');}});

@@ -1,0 +1,15 @@
+{
+  "cancelButton": true,
+  "escape": true,
+  "noRunAfterCancellation": true,
+  "focusRestored": true,
+  "workerNativeParity": {
+    "snapshot": true,
+    "report": true
+  },
+  "unchangedDraftAndRunsAfterCancellation": true,
+  "unchangedLibraryDuringWorker": true,
+  "invalidCompilationPreservesLibrary": true,
+  "successfulPlaytest": true,
+  "browserErrors": []
+}
