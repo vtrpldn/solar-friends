@@ -1,0 +1,244 @@
+{
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "roads": 0,
+      "beforePixelHash": "4b70e49e283347925bd4caeacfef6bf47903efc3203cbe7224200572d68adc13",
+      "afterPixelHash": "4b70e49e283347925bd4caeacfef6bf47903efc3203cbe7224200572d68adc13",
+      "changedPixels": 0,
+      "samples": [
+        {
+          "before": {
+            "ms": 602.2000000476837,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 424.7000000476837,
+            "allocations": 2
+          }
+        },
+        {
+          "after": {
+            "ms": 423.7999999523163,
+            "allocations": 2
+          },
+          "before": {
+            "ms": 610.7000000476837,
+            "allocations": 3
+          }
+        },
+        {
+          "before": {
+            "ms": 607.3999999761581,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 414.8000000715256,
+            "allocations": 2
+          }
+        }
+      ]
+    },
+    {
+      "biome": "mata-atlantica",
+      "roads": 3,
+      "beforePixelHash": "4b70e49e283347925bd4caeacfef6bf47903efc3203cbe7224200572d68adc13",
+      "afterPixelHash": "78412ead69a72ac99b7e3178b30e20cc21a4b46b87d926f7cc1c7b7251b198df",
+      "changedPixels": 10740,
+      "samples": [
+        {
+          "before": {
+            "ms": 594.5,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 420.2000000476837,
+            "allocations": 3
+          }
+        },
+        {
+          "after": {
+            "ms": 432,
+            "allocations": 3
+          },
+          "before": {
+            "ms": 612.6000000238419,
+            "allocations": 3
+          }
+        },
+        {
+          "before": {
+            "ms": 597.6000000238419,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 419.7000000476837,
+            "allocations": 3
+          }
+        }
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "roads": 0,
+      "beforePixelHash": "090c16cec69bcc0a9c615525db7c9830d07586c1175c5b2ab693102bbabdd8e4",
+      "afterPixelHash": "090c16cec69bcc0a9c615525db7c9830d07586c1175c5b2ab693102bbabdd8e4",
+      "changedPixels": 0,
+      "samples": [
+        {
+          "before": {
+            "ms": 1798.7999999523163,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 458.3000000715256,
+            "allocations": 2
+          }
+        },
+        {
+          "after": {
+            "ms": 456,
+            "allocations": 2
+          },
+          "before": {
+            "ms": 1743.4000000953674,
+            "allocations": 3
+          }
+        },
+        {
+          "before": {
+            "ms": 1764.7000000476837,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 465.59999990463257,
+            "allocations": 2
+          }
+        }
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "roads": 3,
+      "beforePixelHash": "090c16cec69bcc0a9c615525db7c9830d07586c1175c5b2ab693102bbabdd8e4",
+      "afterPixelHash": "47a0725d5e5bdf88d818412c09e042aae8eb24ca9e90ece84621bb608d6a6394",
+      "changedPixels": 10740,
+      "samples": [
+        {
+          "before": {
+            "ms": 1800.1999999284744,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 471.5,
+            "allocations": 3
+          }
+        },
+        {
+          "after": {
+            "ms": 472.2999999523163,
+            "allocations": 3
+          },
+          "before": {
+            "ms": 1761.3000000715256,
+            "allocations": 3
+          }
+        },
+        {
+          "before": {
+            "ms": 1771.0999999046326,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 479.7999999523163,
+            "allocations": 3
+          }
+        }
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "roads": 0,
+      "beforePixelHash": "ecdc47cc370e4449562f987d84f174acfd42ac01602e10c04b67b6d4799a2dab",
+      "afterPixelHash": "ecdc47cc370e4449562f987d84f174acfd42ac01602e10c04b67b6d4799a2dab",
+      "changedPixels": 0,
+      "samples": [
+        {
+          "before": {
+            "ms": 1793,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 465.10000002384186,
+            "allocations": 2
+          }
+        },
+        {
+          "after": {
+            "ms": 475.39999997615814,
+            "allocations": 2
+          },
+          "before": {
+            "ms": 1829.2999999523163,
+            "allocations": 3
+          }
+        },
+        {
+          "before": {
+            "ms": 1832.1999999284744,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 470.1999999284744,
+            "allocations": 2
+          }
+        }
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "roads": 3,
+      "beforePixelHash": "ecdc47cc370e4449562f987d84f174acfd42ac01602e10c04b67b6d4799a2dab",
+      "afterPixelHash": "b562cf271b87e6af26c1129d3bd9ee9d55854539d13923da2eb4059e4c4f0a2e",
+      "changedPixels": 10740,
+      "samples": [
+        {
+          "before": {
+            "ms": 1819.6000000238419,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 487,
+            "allocations": 3
+          }
+        },
+        {
+          "after": {
+            "ms": 478.5,
+            "allocations": 3
+          },
+          "before": {
+            "ms": 1795.1000000238419,
+            "allocations": 3
+          }
+        },
+        {
+          "before": {
+            "ms": 1803.4000000953674,
+            "allocations": 3
+          },
+          "after": {
+            "ms": 477.7999999523163,
+            "allocations": 3
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Three alternating samples per biome/road case, full 4096-square pixel readback. Includes resource-edge mask and soil. Not sustained gameplay or total memory acceptance.",
+  "baselineRevision": "3216078",
+  "sourceHashes": {
+    "before": "2a0faa8d35c4f68033a1eb5975ca00fe9ccdf33523765aa99badf9cb70bfeffc",
+    "after": "cd50845ff3759e8ab8320fb802e9722a63a7adc7533cd65d249c88bbde3f44fb"
+  }
+}

@@ -142,22 +142,23 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
   paintHabitats(g,seed,map);
   paintSoil(g,soil);
-  const paths = surface();
-  const p = paths.getContext("2d");
-  p.lineCap = "round";
-  p.lineJoin = "round";
-  p.strokeStyle = p.fillStyle = "white";
-  p.shadowColor = "white";
-  p.shadowBlur = 0;
-  const unit = RESOLUTION / GROUND_SIZE;
-  for (const [x, y] of roads) {
-    const [px, py] = groundPoint(x, y);
-    p.fillRect(px - unit / 2, py - unit / 2, unit, unit);
+  // An empty road mask contributes no pixels. Avoid allocating and painting a
+  // second 4096-square surface for land-only previews and unbuilt properties.
+  if(roads.length){
+    const paths = surface();
+    const p = paths.getContext("2d");
+    // Clip once to the union of road cells. Repeated source-in tile draws
+    // erase previous tiles and can leave the entire road layer transparent.
+    p.beginPath();
+    const unit = RESOLUTION / GROUND_SIZE;
+    for (const [x, y] of roads) {
+      const [px, py] = groundPoint(x, y);
+      p.rect(px - unit / 2, py - unit / 2, unit, unit);
+    }
+    p.clip();
+    paintedTexture(p,texture,1,row,rows,regional?.image?8:32);
+    g.drawImage(paths, 0, 0);
   }
-  p.shadowBlur = 0;
-  p.globalCompositeOperation = "source-in";
-  paintedTexture(p,texture,1,row,rows,regional?.image?8:32);
-  g.drawImage(paths, 0, 0);
   paintRiver(g,map);
 
   // Irregular meadow edges dissolve into the map surround instead of forming
