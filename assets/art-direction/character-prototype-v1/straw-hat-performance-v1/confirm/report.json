@@ -1,0 +1,72 @@
+{
+  "environment": "Headless Chromium, 1440×900 desktop, 64×64 Sandbox arrival, 12 residents, selected 16×; five-second sampled running windows after one-second warmup.",
+  "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+  "results": [
+    {
+      "cast": "unique",
+      "hat": true,
+      "loading": {
+        "compileMs": 9.200000047683716,
+        "loadMs": 5772.800000071526,
+        "snapshotBytes": 157936,
+        "uniqueAppearances": 12
+      },
+      "runtime": {
+        "advancedMinutes": 241.26885986328125,
+        "wallSeconds": 5.005600000095368,
+        "frames": 404,
+        "medianGapMs": 10.399999999999636,
+        "p95GapMs": 17.5,
+        "maxGapMs": 18.399999999999636,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1.600000023841858,
+            "p95": 3.5
+          },
+          "sample": {
+            "median": 0.20000004768371582,
+            "p95": 2
+          },
+          "paint": {
+            "median": 6.199999928474426,
+            "p95": 6.600000023841858
+          },
+          "total": {
+            "median": 8.100000023841858,
+            "p95": 10.600000023841858
+          },
+          "frameInterval": {
+            "median": 9.600000000000364,
+            "p95": 17.5
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.525,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "artworkCache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86
+        },
+        "heap": {
+          "used": 10000000,
+          "total": 13400000
+        },
+        "pauseClickWallMs": 124
+      }
+    }
+  ]
+}

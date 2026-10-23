@@ -1,16 +1,16 @@
 import {hatReviewClips} from './character-hat-poses.js';
-import {composeHatClipFrame} from './character-hat.js';
+import {prepareHatClipComposer} from './character-hat.js';
 // Includes the equipment return frames as well as every main body pose.
 export function composeHatProvider({provider,binding,registrations,image,sourceHash}){
  if(provider?.animationProfile!=='neutral-v1'||provider.interpolation!=='keyframes'||typeof provider.frameForPose!=='function'||!(registrations instanceof Map)||registrations.size!==Object.keys(hatReviewClips).length)throw Error('Provide the complete registered neutral-body hat set.');
- const frames=new Map(),returns=new Map();
+ const composeFrame=prepareHatClipComposer({binding,source:registrations.get('breathe')?.source,image,sourceHash}),frames=new Map(),returns=new Map();
  for(const [clip,spec]of Object.entries(hatReviewClips)){
   const registration=registrations.get(clip);
   if(registration?.clip!==clip)throw Error('Hat activity registration is missing.');
   for(const index of spec.indices){
    const key=spec.sheet+':'+index;
    if(frames.has(key))throw Error('Hat activity registrations overlap.');
-   const compose=pose=>composeHatClipFrame({appearanceFrame:provider.frameForPose(spec.sheet,index,pose),binding,registration,image,sourceHash,sheet:spec.sheet,index});
+   const compose=pose=>composeFrame({appearanceFrame:provider.frameForPose(spec.sheet,index,pose),registration,sheet:spec.sheet,index});
    frames.set(key,compose());
    if(spec.sheet==='activities'&&[13,14].includes(index))returns.set(index,compose({sequenceIndex:5}));
   }

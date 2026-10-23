@@ -1,0 +1,23 @@
+{
+  "why": "Avoid rescanning and normalizing the same large hat source fifty times for each resident appearance.",
+  "scope": "Source preparation optimization and limited cold-arrival benchmark; no sprite or simulation changes.",
+  "evidence": "assets/art-direction/character-prototype-v1/straw-hat-performance-v1",
+  "measurement": {
+    "beforeLoadMs": 14897.4,
+    "afterLoadMs": 5836.2,
+    "isolatedConfirmationLoadMs": 5772.8,
+    "world": "64x64, 12 unique custom looks with hats, headless Chromium 1440x900, five-second 16x arrival window",
+    "confirmationP95FrameGapMs": 17.5
+  },
+  "checks": [
+    "1200 exact sampled main/return frames match independent composition",
+    "100 body/return frames preserve original pixels outside overlay, 20 invalid inputs refused, 3120 ordered transition samples",
+    "Prepared and previous palette/feeding capture PNGs byte-identical",
+    "Breathing regression: eight fits, ten invalid registrations, four unsupported poses, 36 timeline samples and playback controls"
+  ],
+  "remaining": [
+    "Dense and sustained camera/editor/save/compile/GPU performance gates",
+    "12-person portrait strip overlaps the central dock at 1440px; observed in this benchmark and requires correction",
+    "Other original builder and character requirements"
+  ]
+}
