@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const output=process.argv[2]??'/tmp/solar-map-preparation';await mkdir(output,{recursive:true});
+const server=await serve(0);let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');
+ const stored=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');const l=new ContentLibrary();try{const projects=await l.listProjects();return {projects,runs:await l.listRuns(),maps:await l.listMaps(),records:await Promise.all(projects.map(p=>l.getProject(p.id)))};}finally{l.close();}});
+ const before=await stored(),url=page.url();
+ await page.route('**/map-prepare-worker.js',async route=>{await new Promise(resolve=>setTimeout(resolve,1200));try{await route.continue();}catch{}});
+ await page.locator('#creator-save-map').click();await page.locator('#creator-map-author').fill('Our community');
+ for(const escape of [false,true]){
+  await page.locator('#creator-map-save-confirm').click();await page.getByRole('heading',{name:'Preparing your map',exact:true}).waitFor();if(!escape)await page.screenshot({path:output+'/preparing.png'});
+  if(escape)await page.keyboard.press('Escape');else await page.getByRole('button',{name:'Cancel preparation',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('.creator-prepare-dialog'));await page.waitForTimeout(1400);assert.equal(page.url(),url);assert.deepEqual(await stored(),before);assert.equal(await page.evaluate(()=>document.activeElement.id),'creator-map-save-confirm');assert.equal(await page.locator('#creator-map-save-dialog').evaluate(d=>d.open),true);
+ }
+ await page.unroute('**/map-prepare-worker.js');
+ const parity=await page.evaluate(async source=>{
+  const {Game}=await import('/pkg/solar_friends.js'),{freezeCreation}=await import('/editor/files.js'),{prepareSharedMap,checkSharedMap,mapPreviewDefinition}=await import('/editor/map-sharing.js'),{prepareMap}=await import('/editor/prepare-map.js'),g=new Game(),results=[];
+  try{const catalog=JSON.parse(g.scenario_catalog()),template=JSON.parse(g.scenario_template('sandbox')),validate=raw=>JSON.parse(g.validate_map_package(raw)),metadata={title:'Independent land',description:'A shared property',author:'Our community',credits:[]};
+   for(const biome of ['mata-atlantica','cerrado','caatinga'])for(const valid of [true,false]){
+    const definition=structuredClone(source);definition.map=JSON.parse(g.generate_biome_property(biome,42));if(!valid)definition.start.funds=-1;let resolved=null;if(valid){const checked=JSON.parse(g.load_scenario(JSON.stringify(definition)));if(!checked.ok)throw Error(JSON.stringify(checked));resolved=freezeCreation(definition,{terrain:JSON.parse(g.terrain_template()),snapshot:JSON.parse(g.report_state()),catalog});}
+    const prepared=prepareSharedMap(definition,{catalog,resolved,defaultMap:template.map}),checked=checkSharedMap({...prepared,...metadata,validate}),previewDefinition=mapPreviewDefinition(checked,template,validate),previewValid=JSON.parse(g.load_scenario(JSON.stringify(previewDefinition))).ok,preview=previewValid?{definition:previewDefinition,report:JSON.parse(g.report_state())}:null,original=JSON.stringify(definition),actual=await prepareMap({definition,valid,metadata});results.push({biome,valid,prepared:JSON.stringify(actual.prepared)===JSON.stringify(prepared),checked:JSON.stringify(actual.checked)===JSON.stringify(checked),preview:JSON.stringify(actual.preview)===JSON.stringify(preview),unchanged:JSON.stringify(definition)===original});
+   }return results;
+  }finally{g.free();}
+ },before.records[0].checkpoint.definition);assert.equal(parity.length,6);for(const row of parity)for(const key of ['prepared','checked','preview','unchanged'])assert.equal(row[key],true,JSON.stringify(row));assert.deepEqual(await stored(),before);
+ const invalid=await page.evaluate(async definition=>{const {prepareMap}=await import('/editor/prepare-map.js');definition.map.biome={id:'caatinga',version:999};delete definition.rules.weather;try{await prepareMap({definition,valid:false,metadata:{title:'Bad climate',description:'',author:'Author'}});return false;}catch(error){return Boolean(error.message)&&!document.querySelector('.creator-prepare-dialog');}},before.records[0].checkpoint.definition);assert.equal(invalid,true);assert.deepEqual(await stored(),before);
+ // Force a revision change while the actual worker starts; stale output must not install.
+ await page.locator('#creator-map-save-cancel').click();await page.locator('#creator-title').fill('Temporary map edit');await page.locator('#creator-title').press('Tab');await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');
+ await page.route('**/map-prepare-worker.js',async route=>{await new Promise(resolve=>setTimeout(resolve,1200));try{await route.continue();}catch{}});
+ await page.locator('#creator-save-map').click();await page.locator('#creator-map-save-confirm').click();await page.getByRole('heading',{name:'Preparing your map',exact:true}).waitFor();await page.evaluate(()=>document.querySelector('#creator-undo').click());
+ await page.waitForFunction(()=>document.querySelector('#creator-map-save-status').textContent.includes('changed during preparation'));assert.equal((await stored()).maps.length,0);assert.equal(await page.locator('#creator-title').inputValue(),before.records[0].checkpoint.definition.title);await page.unroute('**/map-prepare-worker.js');
+ await page.locator('#creator-map-save-confirm').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});const after=await stored();assert.equal(after.maps.length,1);assert.equal(after.maps[0].contentRevision,1);const first=page.locator('[data-map]');await first.locator('.creator-preview img').waitFor();
+ const map=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary();try{const record=await l.getMap((await l.listMaps())[0].id);return {biome:record.package.map.biome.id,terrain:record.package.map.terrain.length,author:record.package.author,settlement:'start' in record.package};}finally{l.close();}});assert.deepEqual(map,{biome:'mata-atlantica',terrain:4096,author:'Our community',settlement:false});assert.deepEqual(errors,[]);
+ const result={cancelButton:true,escape:true,noLateMapAfterCancel:true,unchangedDraftHistoryViewAndLibrary:true,focusRestored:true,allBiomeValidAndInvalidSettlementParity:parity,invalidClimatePreservesLibrary:true,staleRevisionRefused:true,successfulFirstMapVersion:1,optionalPreviewSaved:true,browserErrors:errors};await writeFile(output+'/report.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

@@ -368,7 +368,7 @@ function wire(){
     catch(error){$('creator-library-status').textContent=error.message;}finally{button.disabled=false;}
   };
 
-  mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,definition:current.doc.value,valid:report.ok,terrain:terrainBase,snapshot:map.snapshot,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;refresh();}});
+  mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,revision:current.doc.revision,definition:current.doc.value,valid:report.ok,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;$('creator-test').disabled=busy||!report.ok;$('creator-release').disabled=busy||!report.ok;$('creator-save-map').disabled=busy;}});
 
   $('creator-route-tools').onclick=()=>{const details=$('creator-routes');details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};
   $('creator-habitat').onchange=()=>{map.view.habitatPreset=$('creator-habitat').value;setTool('habitat');};

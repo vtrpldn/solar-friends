@@ -1,0 +1,62 @@
+{
+  "cancelButton": true,
+  "escape": true,
+  "noLateMapAfterCancel": true,
+  "unchangedDraftHistoryViewAndLibrary": true,
+  "focusRestored": true,
+  "allBiomeValidAndInvalidSettlementParity": [
+    {
+      "biome": "mata-atlantica",
+      "valid": true,
+      "prepared": true,
+      "checked": true,
+      "preview": true,
+      "unchanged": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "valid": false,
+      "prepared": true,
+      "checked": true,
+      "preview": true,
+      "unchanged": true
+    },
+    {
+      "biome": "cerrado",
+      "valid": true,
+      "prepared": true,
+      "checked": true,
+      "preview": true,
+      "unchanged": true
+    },
+    {
+      "biome": "cerrado",
+      "valid": false,
+      "prepared": true,
+      "checked": true,
+      "preview": true,
+      "unchanged": true
+    },
+    {
+      "biome": "caatinga",
+      "valid": true,
+      "prepared": true,
+      "checked": true,
+      "preview": true,
+      "unchanged": true
+    },
+    {
+      "biome": "caatinga",
+      "valid": false,
+      "prepared": true,
+      "checked": true,
+      "preview": true,
+      "unchanged": true
+    }
+  ],
+  "invalidClimatePreservesLibrary": true,
+  "staleRevisionRefused": true,
+  "successfulFirstMapVersion": 1,
+  "optionalPreviewSaved": true,
+  "browserErrors": []
+}
