@@ -1345,3 +1345,12 @@ The breathing regression still passes its pose, profile/registration refusal, lo
 The shared review exposes sleep explicitly, since the sitting loop does not sample that pose. Relax follows gameplay’s one-shot timing, stops at its final pose and can replay from the beginning. The check now verifies exact original pixels everywhere the hat has zero alpha, preserving hands, feet and the stool rather than checking only a fixed lower-body rectangle.
 
 Sixteen pose/hairstyle fits, twenty refused inputs, 144 timeline samples and 480 transition samples pass. Enlarged poses, world timelines, both facings, day/night transitions, sleep controls and decoded seated/relaxed playback were inspected. Walking/looking and breathing regressions pass, as do all 400 frozen playable-frame fingerprints. Evidence is retained under `assets/art-direction/character-prototype-v1/straw-hat-seated-relaxed-v1/` and `.github/builder-review/straw-hat-seated-relaxed.json`. The remaining 28 body poses, raised-hand/tool occlusion, equipment return states, palette/part coverage, portraits and native recipe/save/player integration remain open, together with the other original creator and release requirements.
+
+
+### Raised-arm gesture accessory review — 2026-10-23
+
+**Why:** social and idle gestures raise hands close to the head, so their accessory fit needs its own review before hats can become player choices. Waving and stretching now have rigid body-bound hat placements for all eight authored poses, bringing reviewed coverage to 28 of 48. The existing painted source and body pixels remain unchanged.
+
+The review checks sixteen pose/hairstyle fits, twenty invalid or unsupported inputs, 144 mirrored day/night timeline samples and 240 transition samples. Transition exits explicitly start from raised-arm poses rather than neutral first frames. Actual one-shot playback reaches and stops at the correct final time for both gestures. Enlarged poses, both hairstyles, all mirrored day/night timelines, transitions and decoded world playback were inspected: the hat remains attached and the hands stay clear of its brim. No additional foreground hand mask is needed for these specific poses.
+
+Evidence is retained under `assets/art-direction/character-prototype-v1/straw-hat-gestures-v1/` and `.github/builder-review/straw-hat-gestures.json`. Twenty work/activity body poses, tool overlap, equipment return states, complete palette/part coverage, portraits and native recipe/save/player integration remain open, along with the other original builder and release requirements.

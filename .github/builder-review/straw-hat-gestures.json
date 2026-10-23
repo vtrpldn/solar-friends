@@ -1,0 +1,21 @@
+{
+  "why": "Cover social and stretching gestures, including raised arms, before enabling hats for players.",
+  "scope": "28 of 48 body poses reviewed; no player hat integration yet.",
+  "evidence": "assets/art-direction/character-prototype-v1/straw-hat-gestures-v1",
+  "checks": {
+    "mechanical": "PASS",
+    "visual": "Reviewed all raw poses and mirrored day/night timelines, both hairstyles, raised-arm exit transitions and decoded one-shot world playback. Hat remains attached and hands stay clear of brim.",
+    "scope": "stretch,wave candidate fits only; remaining activities and player integration unfinished.",
+    "checked": 16,
+    "denied": 20,
+    "timelineSamples": 144,
+    "transitionSamples": 240,
+    "playbackProvenance": "Retained inspected first-run recordings; final run changes only verifier transition start phases. All static non-transition PNGs byte-identical."
+  },
+  "remaining": [
+    "20 work/activity body poses",
+    "tool overlap and feeding return states",
+    "all part/palette combinations, portraits, native recipe/save/player integration",
+    "other original builder release requirements"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "mechanical": "PASS",
+  "visual": "Reviewed all raw poses and mirrored day/night timelines, both hairstyles, raised-arm exit transitions and decoded one-shot world playback. Hat remains attached and hands stay clear of brim.",
+  "scope": "stretch,wave candidate fits only; remaining activities and player integration unfinished.",
+  "checked": 16,
+  "denied": 20,
+  "timelineSamples": 144,
+  "transitionSamples": 240,
+  "playbackProvenance": "Retained inspected first-run recordings; final run changes only verifier transition start phases. All static non-transition PNGs byte-identical."
+}
