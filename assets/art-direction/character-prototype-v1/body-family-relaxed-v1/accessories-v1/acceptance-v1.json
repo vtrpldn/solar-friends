@@ -1,0 +1,37 @@
+{
+  "status": "Accepted for internal complete-family accessory attachment development; player release gates remain open.",
+  "method": "Reuse unchanged painted PNGs, retain original hat normalization and original square beard tiles, translate only by registered native integer offsets. No bitmap edits, scale changes or shape fitting.",
+  "sourceSha256": {
+    "registration-v1.json": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+    "sources-v1.json": "35fae855ce378ff1792c39aaf7962c17474b655e10dd3c2b8f812e43b48578aa",
+    "review-v1-heads.png": "3d1603b248f015313f3f5131174dda4c69d9db60f32f1e8d675669cb240cca21",
+    "review-v1-curls.png": "059a3f506d36f75fb7e6efcef942e0e571b2e230918be508bb71ea2ac562985b",
+    "review-v1-sidepart.png": "cc74deddc6a6c528d1a0ac8b84eabce640f142e15079a71321796496cd293511",
+    "review-v2-walk.webm": "ccb2b4ef6052fbae72351e44aa26ac26543a21f3956bef83762aecae8235e98a",
+    "motion-walk-v2.png": "6067397cf82173f52dfa3871201d2e838bc922854e2caebb9115f59514d3e7bf",
+    "world/mata-atlantica-day.png": "dbe977df446972df7e836c30f7fd7f765ba952290e7491c231c5b878e9063967",
+    "world/mata-atlantica-night.png": "49155bc026080afd6b6b880c2b3089d98c23da3e36046035342d0bed51258dda",
+    "world/cerrado-day.png": "9686faf297be09d61ce5b1b8a4bdb68e2fa20bbf259088cd8792583eea3c2261",
+    "world/cerrado-night.png": "7d062904370b15ac91994795c6ad13f6f59e0b4287028a498d3cad3ca72ec76f",
+    "world/caatinga-day.png": "879978fe903fbd81ab46ae702a14331a0a27295e518a7d4c2ef61da1bdb7d7fd",
+    "world/caatinga-night.png": "66c591dabe5417c6bf18496e452a35daad5c85f3d3d41738888a87d71c5fc952"
+  },
+  "findings": [
+    "Inspected both complete 48-pose boards in two palettes, daylight and mirrored night. Hats and beards remain attached while seating and equipment retain their existing layering.",
+    "Inspected the forty walking/standing face crops. These diagnostic crops intentionally exclude portions of the hat brim; full silhouettes are checked in the complete-pose boards and actual-paint clipping tests.",
+    "Inspected all six world boards: four walk poses per lighting/facing case across Mata Atlantica, Cerrado and Caatinga, beside Bento, a home, shed, warehouse and roads. Headwear follows body scale and ground anchors remain unchanged.",
+    "Inspected sixteen independently decoded samples of the native-sampled walk loop, including alternate contacts and passing poses. No separate hat/beard jump or loss was visible in these samples."
+  ],
+  "movie": {
+    "sha256": "ccb2b4ef6052fbae72351e44aa26ac26543a21f3956bef83762aecae8235e98a",
+    "width": 600,
+    "height": 320,
+    "encodedFrames": 180,
+    "durationSeconds": 5.970944
+  },
+  "limits": [
+    "The media uses the actual walk sampler, not a real resident travelling through a saved village.",
+    "Walking-to-other-activity transitions, all other accessory animation loops and player/portrait flows remain required.",
+    "This does not approve additional body/face/clothing/bottom/shoe variants or establish sustained total-memory/frame-pacing acceptance."
+  ]
+}

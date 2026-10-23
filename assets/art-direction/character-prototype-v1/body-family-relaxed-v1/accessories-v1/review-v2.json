@@ -1,0 +1,33 @@
+{
+  "scope": "Encoded native-sampled 0.5-second walk loop with both complete hat/beard appearances, daylight and mirrored night. Render calls are neither encoded-frame count nor frame-pacing acceptance.",
+  "recordings": [
+    {
+      "clip": "walk",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 3006,
+      "cycleSeconds": 0.5,
+      "renderCalls": 362
+    },
+    {
+      "clip": "walk",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 3006,
+      "elapsedMs": 3000.100000023842,
+      "cycleSeconds": 0.5,
+      "renderCalls": 360
+    }
+  ],
+  "renderCalls": 722,
+  "videoSha256": "ccb2b4ef6052fbae72351e44aa26ac26543a21f3956bef83762aecae8235e98a",
+  "registrationSha256": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+  "rendererSha256": {
+    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",
+    "character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b",
+    "resident-animation.js": "e94e9cbf0ee93b0b63afa5a9c3aa1e42b48c18aea3e87e4e7d6115b11b88b1b5"
+  }
+}

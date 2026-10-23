@@ -1,0 +1,223 @@
+{
+  "images": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    }
+  ],
+  "sceneCount": 24,
+  "residentComparisons": 72,
+  "scope": "Four complete hat/beard walking poses through the shared native world/animation painters across three biomes, day and mirrored night beside Bento and buildings. Static scale, layering, ground and lighting only; movement and public recipes remain unverified.",
+  "registrationSha256": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+  "rendererSha256": {
+    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b"
+  }
+}

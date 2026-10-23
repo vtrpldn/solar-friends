@@ -9,13 +9,14 @@ export function composeFacialHairPose({appearanceFrame,image,sourceHash,binding,
  if(r.source?.size!==1254||!/^[a-f0-9]{64}$/.test(r.source?.sha256)||r.source.sha256!==sourceHash||image?.naturalWidth!==1254||image?.naturalHeight!==1254||appearanceFrame?.width!==256||appearanceFrame?.height!==256)throw Error('Facial hair requires its exact source pixels and complete body frame.');
  const rect=r.source.rect===undefined?[0,0,1254,1254]:r.source.rect;
  if(!Array.isArray(rect)||rect.length!==4||Array.from(rect).some(n=>!Number.isSafeInteger(n))||rect[0]<0||rect[1]<0||rect[2]<=0||rect[2]!==rect[3]||rect[0]+rect[2]>1254||rect[1]+rect[3]>1254)throw Error('Use the square source tile authored for this facial pose.');
- const assembly=document.createElement('canvas');assembly.width=assembly.height=1254;const context=assembly.getContext('2d');
+ const assembly=document.createElement('canvas');assembly.width=assembly.height=1254;const context=assembly.getContext('2d');let frame=null;
  try{
   context.drawImage(image,0,0);const audit=auditCharacterPartRegion(context.getImageData(...rect),r.bounds);
   if(!audit.ok)throw Error('Facial-hair paint leaves its authored region.');
   context.clearRect(0,0,1254,1254);const scale=1254/256;context.drawImage(image,...rect,...crop.map(n=>n*scale));
-  const frame=document.createElement('canvas');frame.width=frame.height=256;const ctx=frame.getContext('2d');ctx.drawImage(appearanceFrame,0,0);ctx.drawImage(assembly,0,0,256,256);return {frame,audit};
- }finally{assembly.width=assembly.height=0;}
+  frame=document.createElement('canvas');frame.width=frame.height=256;const ctx=frame.getContext('2d');ctx.drawImage(appearanceFrame,0,0);ctx.drawImage(assembly,0,0,256,256);return {frame,audit};
+ }catch(error){if(frame)frame.width=frame.height=0;throw error;}
+ finally{assembly.width=assembly.height=0;}
 }
 
 // A partial facial set must never fall back to a bare face mid-animation.

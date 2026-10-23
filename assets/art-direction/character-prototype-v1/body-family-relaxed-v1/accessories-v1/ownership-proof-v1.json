@@ -1,0 +1,822 @@
+{
+  "schema": 1,
+  "scope": "44 identical target bodies plus 4 explicit walking crown offsets per accessory; all source PNGs unchanged.",
+  "poses": [
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 8,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-breathe-v1-registration.json",
+      "referenceSha256": "896da35949c473bfd357adbb04535a8410fe81ddc1b530f70159cdcf90ccf4dc"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 9,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-breathe-v1-registration.json",
+      "referenceSha256": "896da35949c473bfd357adbb04535a8410fe81ddc1b530f70159cdcf90ccf4dc"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 10,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-breathe-v1-registration.json",
+      "referenceSha256": "896da35949c473bfd357adbb04535a8410fe81ddc1b530f70159cdcf90ccf4dc"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 11,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-breathe-v1-registration.json",
+      "referenceSha256": "896da35949c473bfd357adbb04535a8410fe81ddc1b530f70159cdcf90ccf4dc"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 0,
+      "method": "crown-socket",
+      "referenceFile": "straw-hat-walk-v1-registration.json",
+      "referenceSha256": "46c5be5c0de60c4eec1737cf25d9f3ab3f7b4d13c8577818e35a8df8802d8fcd"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 1,
+      "method": "crown-socket",
+      "referenceFile": "straw-hat-walk-v1-registration.json",
+      "referenceSha256": "46c5be5c0de60c4eec1737cf25d9f3ab3f7b4d13c8577818e35a8df8802d8fcd"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 2,
+      "method": "crown-socket",
+      "referenceFile": "straw-hat-walk-v1-registration.json",
+      "referenceSha256": "46c5be5c0de60c4eec1737cf25d9f3ab3f7b4d13c8577818e35a8df8802d8fcd"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 3,
+      "method": "crown-socket",
+      "referenceFile": "straw-hat-walk-v1-registration.json",
+      "referenceSha256": "46c5be5c0de60c4eec1737cf25d9f3ab3f7b4d13c8577818e35a8df8802d8fcd"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 0,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-look-v1-registration.json",
+      "referenceSha256": "78ce0deaa7513bc7c13940f9f2672d549cbeaacc3c3f5a1816578c533e2bf4e7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 1,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-look-v1-registration.json",
+      "referenceSha256": "78ce0deaa7513bc7c13940f9f2672d549cbeaacc3c3f5a1816578c533e2bf4e7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 2,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-look-v1-registration.json",
+      "referenceSha256": "78ce0deaa7513bc7c13940f9f2672d549cbeaacc3c3f5a1816578c533e2bf4e7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 3,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-look-v1-registration.json",
+      "referenceSha256": "78ce0deaa7513bc7c13940f9f2672d549cbeaacc3c3f5a1816578c533e2bf4e7"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 12,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-sit-v1-registration.json",
+      "referenceSha256": "e4efa84c31fe123991bc71163fd4ad64cfc4f935af6df7ae3496db412b7ce575"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 13,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-sit-v1-registration.json",
+      "referenceSha256": "e4efa84c31fe123991bc71163fd4ad64cfc4f935af6df7ae3496db412b7ce575"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 14,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-sit-v1-registration.json",
+      "referenceSha256": "e4efa84c31fe123991bc71163fd4ad64cfc4f935af6df7ae3496db412b7ce575"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 15,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-sit-v1-registration.json",
+      "referenceSha256": "e4efa84c31fe123991bc71163fd4ad64cfc4f935af6df7ae3496db412b7ce575"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 12,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-relax-v1-registration.json",
+      "referenceSha256": "be217b9acc959e1d44d912931b695f5eacc1868c1e4235dc0aba0dd28176ced2"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 13,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-relax-v1-registration.json",
+      "referenceSha256": "be217b9acc959e1d44d912931b695f5eacc1868c1e4235dc0aba0dd28176ced2"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 14,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-relax-v1-registration.json",
+      "referenceSha256": "be217b9acc959e1d44d912931b695f5eacc1868c1e4235dc0aba0dd28176ced2"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 15,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-relax-v1-registration.json",
+      "referenceSha256": "be217b9acc959e1d44d912931b695f5eacc1868c1e4235dc0aba0dd28176ced2"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 4,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-stretch-v1-registration.json",
+      "referenceSha256": "c3754558934a086022624a3024b0e53d75c3f97b890f87b146276513ea32f1d7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 5,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-stretch-v1-registration.json",
+      "referenceSha256": "c3754558934a086022624a3024b0e53d75c3f97b890f87b146276513ea32f1d7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 6,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-stretch-v1-registration.json",
+      "referenceSha256": "c3754558934a086022624a3024b0e53d75c3f97b890f87b146276513ea32f1d7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 7,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-stretch-v1-registration.json",
+      "referenceSha256": "c3754558934a086022624a3024b0e53d75c3f97b890f87b146276513ea32f1d7"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 8,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-wave-v1-registration.json",
+      "referenceSha256": "384eaac36239b8adb924ede7eadbed8cb5ddeb211a250f2917ffa16df51d9572"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 9,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-wave-v1-registration.json",
+      "referenceSha256": "384eaac36239b8adb924ede7eadbed8cb5ddeb211a250f2917ffa16df51d9572"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 10,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-wave-v1-registration.json",
+      "referenceSha256": "384eaac36239b8adb924ede7eadbed8cb5ddeb211a250f2917ffa16df51d9572"
+    },
+    {
+      "part": "hat",
+      "sheet": "idle",
+      "index": 11,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-wave-v1-registration.json",
+      "referenceSha256": "384eaac36239b8adb924ede7eadbed8cb5ddeb211a250f2917ffa16df51d9572"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 4,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-work-v1-registration.json",
+      "referenceSha256": "8981cc25a6bdd63ab311c6539a6bac46486e5d81d92661c152bfa5d328a4e306"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 5,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-work-v1-registration.json",
+      "referenceSha256": "8981cc25a6bdd63ab311c6539a6bac46486e5d81d92661c152bfa5d328a4e306"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 6,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-work-v1-registration.json",
+      "referenceSha256": "8981cc25a6bdd63ab311c6539a6bac46486e5d81d92661c152bfa5d328a4e306"
+    },
+    {
+      "part": "hat",
+      "sheet": "base",
+      "index": 7,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-work-v1-registration.json",
+      "referenceSha256": "8981cc25a6bdd63ab311c6539a6bac46486e5d81d92661c152bfa5d328a4e306"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 0,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-cook-v1-registration.json",
+      "referenceSha256": "1be5e59bfc736fd2b23aa63d5c94fe40dc9f835d47379b7cb3b37a00adaabf87"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 1,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-cook-v1-registration.json",
+      "referenceSha256": "1be5e59bfc736fd2b23aa63d5c94fe40dc9f835d47379b7cb3b37a00adaabf87"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 2,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-cook-v1-registration.json",
+      "referenceSha256": "1be5e59bfc736fd2b23aa63d5c94fe40dc9f835d47379b7cb3b37a00adaabf87"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 3,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-cook-v1-registration.json",
+      "referenceSha256": "1be5e59bfc736fd2b23aa63d5c94fe40dc9f835d47379b7cb3b37a00adaabf87"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 4,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-water-v1-registration.json",
+      "referenceSha256": "c1a85268c1bc2644d71e752b0af18ff441425aeaa137d3dc5731aac808ebefb0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 5,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-water-v1-registration.json",
+      "referenceSha256": "c1a85268c1bc2644d71e752b0af18ff441425aeaa137d3dc5731aac808ebefb0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 6,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-water-v1-registration.json",
+      "referenceSha256": "c1a85268c1bc2644d71e752b0af18ff441425aeaa137d3dc5731aac808ebefb0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 7,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-water-v1-registration.json",
+      "referenceSha256": "c1a85268c1bc2644d71e752b0af18ff441425aeaa137d3dc5731aac808ebefb0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 8,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-tend-v1-registration.json",
+      "referenceSha256": "05e57b3c4b5919ba0c08b67df39af4f15ceb57aafd5f5434d290be1b584c4769"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 9,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-tend-v1-registration.json",
+      "referenceSha256": "05e57b3c4b5919ba0c08b67df39af4f15ceb57aafd5f5434d290be1b584c4769"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 10,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-tend-v1-registration.json",
+      "referenceSha256": "05e57b3c4b5919ba0c08b67df39af4f15ceb57aafd5f5434d290be1b584c4769"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 11,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-tend-v1-registration.json",
+      "referenceSha256": "05e57b3c4b5919ba0c08b67df39af4f15ceb57aafd5f5434d290be1b584c4769"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 12,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-feed-v1-registration.json",
+      "referenceSha256": "c7d96babf330a61042f56a9faac74596227ea0dd0c2dc580fc3ad781154ebfd0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 13,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-feed-v1-registration.json",
+      "referenceSha256": "c7d96babf330a61042f56a9faac74596227ea0dd0c2dc580fc3ad781154ebfd0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 14,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-feed-v1-registration.json",
+      "referenceSha256": "c7d96babf330a61042f56a9faac74596227ea0dd0c2dc580fc3ad781154ebfd0"
+    },
+    {
+      "part": "hat",
+      "sheet": "activities",
+      "index": 15,
+      "method": "unchanged",
+      "referenceFile": "straw-hat-feed-v1-registration.json",
+      "referenceSha256": "c7d96babf330a61042f56a9faac74596227ea0dd0c2dc580fc3ad781154ebfd0"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 0,
+      "method": "crown-socket",
+      "referenceSheet": "base",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 1,
+      "method": "crown-socket",
+      "referenceSheet": "base",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 2,
+      "method": "crown-socket",
+      "referenceSheet": "base",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 3,
+      "method": "crown-socket",
+      "referenceSheet": "base",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 4,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 4,
+      "referenceBodyFrameSha256": "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 5,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 5,
+      "referenceBodyFrameSha256": "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 6,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 6,
+      "referenceBodyFrameSha256": "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 7,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 7,
+      "referenceBodyFrameSha256": "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 8,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 9,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 9,
+      "referenceBodyFrameSha256": "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 10,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 10,
+      "referenceBodyFrameSha256": "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 11,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 11,
+      "referenceBodyFrameSha256": "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 12,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 12,
+      "referenceBodyFrameSha256": "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 13,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 13,
+      "referenceBodyFrameSha256": "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 14,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 14,
+      "referenceBodyFrameSha256": "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "base",
+      "index": 15,
+      "method": "unchanged",
+      "referenceSheet": "base",
+      "referenceIndex": 15,
+      "referenceBodyFrameSha256": "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 0,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 0,
+      "referenceBodyFrameSha256": "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 1,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 1,
+      "referenceBodyFrameSha256": "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 2,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 2,
+      "referenceBodyFrameSha256": "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 3,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 3,
+      "referenceBodyFrameSha256": "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 4,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 4,
+      "referenceBodyFrameSha256": "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 5,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 5,
+      "referenceBodyFrameSha256": "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 6,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 6,
+      "referenceBodyFrameSha256": "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 7,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 7,
+      "referenceBodyFrameSha256": "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 8,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 9,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 9,
+      "referenceBodyFrameSha256": "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 10,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 10,
+      "referenceBodyFrameSha256": "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 11,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 11,
+      "referenceBodyFrameSha256": "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 12,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 12,
+      "referenceBodyFrameSha256": "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 13,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 13,
+      "referenceBodyFrameSha256": "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 14,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 14,
+      "referenceBodyFrameSha256": "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "idle",
+      "index": 15,
+      "method": "unchanged",
+      "referenceSheet": "idle",
+      "referenceIndex": 15,
+      "referenceBodyFrameSha256": "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 0,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 0,
+      "referenceBodyFrameSha256": "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 1,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 1,
+      "referenceBodyFrameSha256": "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 2,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 2,
+      "referenceBodyFrameSha256": "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 3,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 3,
+      "referenceBodyFrameSha256": "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 4,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 4,
+      "referenceBodyFrameSha256": "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 5,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 5,
+      "referenceBodyFrameSha256": "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 6,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 6,
+      "referenceBodyFrameSha256": "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 7,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 7,
+      "referenceBodyFrameSha256": "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 8,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 8,
+      "referenceBodyFrameSha256": "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 9,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 9,
+      "referenceBodyFrameSha256": "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 10,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 10,
+      "referenceBodyFrameSha256": "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 11,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 11,
+      "referenceBodyFrameSha256": "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 12,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 12,
+      "referenceBodyFrameSha256": "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 13,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 13,
+      "referenceBodyFrameSha256": "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 14,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 14,
+      "referenceBodyFrameSha256": "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9"
+    },
+    {
+      "part": "facialHair",
+      "sheet": "activities",
+      "index": 15,
+      "method": "unchanged",
+      "referenceSheet": "activities",
+      "referenceIndex": 15,
+      "referenceBodyFrameSha256": "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77"
+    }
+  ]
+}

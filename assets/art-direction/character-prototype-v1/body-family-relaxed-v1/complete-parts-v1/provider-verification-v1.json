@@ -12,7 +12,7 @@
   "allOwnedCanvasesReleased": true,
   "borrowedBodiesPreserved": true,
   "rendererSha256": {
-    "character-family-appearance.js": "03e0c5424840f1c0c3ace17b6e418728a1f560ddf4d9505166750be94480bd3e",
+    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
     "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0"
   },
   "referenceSha256": "2265c0e385468de9b37aa9cd573bdf92ee937116333fdcf09d70a4131603f1bd"
