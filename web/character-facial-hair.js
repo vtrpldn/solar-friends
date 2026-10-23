@@ -35,3 +35,26 @@ export function composeFacialHairClip({provider,binding,entries,clip}){
 }
 
 export function composeWorkingFacialHair(args){return composeFacialHairClip({...args,clip:'work'});}
+
+// Complete internal appearance provider: transitions may request any body pose.
+// It owns its overlays, but never owns or disposes the underlying body provider.
+export function composeFacialHairProvider({provider,binding,entries}){
+ const keys=['base','idle','activities'].flatMap(sheet=>Array.from({length:16},(_,index)=>sheet+':'+index));
+ if(provider?.animationProfile!=='neutral-v1'||provider.interpolation!=='keyframes'||typeof provider.frameForPose!=='function'||!(entries instanceof Map)||entries.size!==48||keys.some(key=>!entries.has(key)))throw Error('Provide the complete registered facial-hair body set.');
+ const frames=new Map(),returns=new Map();
+ const compose=(sheet,index,pose)=>composeFacialHairPose({...entries.get(sheet+':'+index),binding,appearanceFrame:provider.frameForPose(sheet,index,pose),sheet,index}).frame;
+ try{
+  for(const key of keys){const [sheet,index]=key.split(':');frames.set(key,compose(sheet,Number(index)));}
+  for(const index of [13,14])returns.set(index,compose('activities',index,{sequenceIndex:4}));
+ }catch(error){for(const frame of [...frames.values(),...returns.values()])frame.width=frame.height=0;throw error;}
+ let disposed=false;
+ return Object.freeze({animationProfile:'neutral-v1',interpolation:'keyframes',frameForPose(sheet,index,pose){
+  const key=sheet+':'+index;
+  if(disposed||typeof sheet!=='string'||!Number.isInteger(index)||index<0||index>15||!frames.has(key))throw Error('This facial appearance has no registered artwork for the requested pose.');
+  return sheet==='activities'&&pose?.sequenceIndex>=4?returns.get(index)??frames.get(key):frames.get(key);
+ },cacheInfo:()=>({entries:frames.size+returns.size,maximum:50,rgbaByteUpperBound:(frames.size+returns.size)*256*256*4}),dispose(){
+  if(disposed)return;disposed=true;
+  for(const frame of [...frames.values(),...returns.values()])frame.width=frame.height=0;
+  frames.clear();returns.clear();
+ }});
+}

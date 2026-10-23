@@ -1,0 +1,72 @@
+{
+  "status": "Mechanical full-set checks pass; visual and continuous playback review pending. Internal only.",
+  "sources": [
+    {
+      "collection": "short-beard-work-clip-v1",
+      "file": "registrations.json",
+      "paint": "candidate-v1.png",
+      "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4"
+    },
+    {
+      "collection": "short-beard-work-v1",
+      "file": "registration-v2.json",
+      "paint": "candidate-v2.png",
+      "sha256": "2539c3ad4e92b5099fadc1dad9f48f3dc801929638b9691a45a28b7bdfc0c9c7"
+    },
+    {
+      "collection": "short-beard-base-clips-v1",
+      "file": "registrations.json",
+      "paint": "candidate-v1.png",
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74"
+    },
+    {
+      "collection": "short-beard-rest-clips-v1",
+      "file": "registrations-v2.json",
+      "paint": "candidate-v2.png",
+      "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d"
+    },
+    {
+      "collection": "short-beard-gesture-clips-v1",
+      "file": "registrations-v1.json",
+      "paint": "candidate-v1.png",
+      "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb"
+    },
+    {
+      "collection": "short-beard-stretch-cook-v1",
+      "file": "registrations-v1.json",
+      "paint": "candidate-v1.png",
+      "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934"
+    },
+    {
+      "collection": "short-beard-water-tend-v1",
+      "file": "registrations-v1.json",
+      "paint": "candidate-v1.png",
+      "sha256": "418cfbac00699656277d3cad7aa9a033284277ef29e80da2d12fd02d0e9f6f48"
+    },
+    {
+      "collection": "short-beard-feed-v1",
+      "file": "registrations-v1.json",
+      "paint": "candidate-v1.png",
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd"
+    }
+  ],
+  "checked": 96,
+  "returns": 4,
+  "transitionFrames": 1620,
+  "clipFrames": 6240,
+  "refused": 15,
+  "cleanup": 1,
+  "caches": [
+    {
+      "entries": 50,
+      "maximum": 50,
+      "rgbaByteUpperBound": 13107200
+    },
+    {
+      "entries": 50,
+      "maximum": 50,
+      "rgbaByteUpperBound": 13107200
+    }
+  ],
+  "clipCount": 13
+}

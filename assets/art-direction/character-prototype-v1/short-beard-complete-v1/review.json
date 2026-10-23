@@ -1,0 +1,37 @@
+{
+  "status": "Mechanical complete-provider checks pass; cross-activity art needs correction; internal only",
+  "inspected": [
+    "96-pose combined face sheet spanning every main pose and both hairstyles",
+    "56 captured transition samples, including mirrored facing"
+  ],
+  "findings": [
+    "Full-set comparison exposes fuller/darker wraparound beards in some idle poses relative to walking and work.",
+    "Watering/tending source shading is smoother than the other painted batches.",
+    "The dedicated bent working frame has a more angular beard treatment than the soft standing curves.",
+    "Isolated frame attachment is insufficient to approve cross-activity continuity. No public recipe option is enabled."
+  ],
+  "mechanical": [
+    "96 unchanged-outside-face frame comparisons",
+    "Four return-frame identity checks across two hairstyles",
+    "1620 native transition updates rendered without unavailable frames",
+    "6240 clip samples across 13 modes rendered without unavailable frames",
+    "15 malformed-set, invalid-pose and disposed-read refusals",
+    "Late return failure clears all partial canvases",
+    "Successful disposal clears every owned frame while preserving the borrowed body provider"
+  ],
+  "memory": {
+    "composedFrames": 50,
+    "rgbaBytesPerAppearance": 13107200,
+    "excludes": [
+      "Source images",
+      "Underlying body and equipment artwork",
+      "GPU and browser overhead"
+    ]
+  },
+  "remaining": [
+    "Repaint inconsistent jaw volume and material across batches",
+    "Continuous playback and cross-activity visual acceptance",
+    "Hair-colour, hat, portrait and biome world review",
+    "Public/native recipe integration and full original builder scope"
+  ]
+}
