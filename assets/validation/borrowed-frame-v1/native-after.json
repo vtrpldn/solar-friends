@@ -1,0 +1,48 @@
+{
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "samples": 120,
+  "measurements": {
+    "frame": {
+      "medianMs": 0.9577079999999114,
+      "p95Ms": 1.1757499999985157
+    },
+    "parse": {
+      "medianMs": 0.6264589999991586,
+      "p95Ms": 0.7865409999994881
+    },
+    "tick": {
+      "medianMs": 2.321834000000308,
+      "p95Ms": 38.861291999999594
+    }
+  },
+  "bytes": 236174
+}

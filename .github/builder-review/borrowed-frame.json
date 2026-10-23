@@ -1,0 +1,50 @@
+{
+  "why": "Avoid allocating a full intermediate serde_json::Value tree for every native render sample.",
+  "changes": "Borrowed typed serialization keeps all original fields and promotes f32 formatting to f64 exactly as the old value-based implementation did. Climate sample computed once. No snapshot or simulation changes.",
+  "evidence": "assets/validation/borrowed-frame-v1",
+  "nativeBenchmark": {
+    "samples": 120,
+    "before": {
+      "frame": {
+        "medianMs": 2.734083000001192,
+        "p95Ms": 2.9879579999997077
+      },
+      "parse": {
+        "medianMs": 0.6141660000012052,
+        "p95Ms": 0.7536249999993743
+      },
+      "tick": {
+        "medianMs": 2.2323340000002645,
+        "p95Ms": 36.660665999999765
+      }
+    },
+    "after": {
+      "frame": {
+        "medianMs": 0.9577079999999114,
+        "p95Ms": 1.1757499999985157
+      },
+      "parse": {
+        "medianMs": 0.6264589999991586,
+        "p95Ms": 0.7865409999994881
+      },
+      "tick": {
+        "medianMs": 2.321834000000308,
+        "p95Ms": 38.861291999999594
+      }
+    },
+    "beforeBytes": 236174,
+    "afterBytes": 236174
+  },
+  "checks": [
+    "Original JSON value contract and no mutation across 100 native ticks",
+    "Promoted f32 values include signed zero, fractional, minimum positive and maximum finite cases",
+    "779 native tests pass",
+    "Strict clippy --lib -- -D warnings and release WASM build pass",
+    "WASM render sample agrees with full snapshots and exact continuation across five scenes including max mixed/custom cast, 180 frames each at 1x/16x",
+    "Controlled before/after browser phases restore identical opening snapshots and verify exact checkpoints; preserved previous WASM served with identical current UI"
+  ],
+  "baselineWasmSha256": "c2243fbf1d941cc7836d75cbc2b6006109d5855071bce407fbf9963aa00a6cd2",
+  "afterWasmSha256": "94f21d878d635019b5ecf306f2da86b0b48a408b1bd6dc05cce3fb1e4c5bfa99",
+  "visual": "Inspected final 16x panning capture; no artwork changed.",
+  "limits": "Native serialization median falls from 2.73 to 0.96 ms; compact browser sample median about 2.9-3.0 to 1.2-1.3 ms. Overall p95 intervals and selected 16x throughput remain below the release target: about 4.6x effective speed in this maximum fixture. Full reports, simulation, long runs and GPU memory remain open."
+}

@@ -14,6 +14,7 @@ pub mod electricity;
 mod food;
 mod forecast;
 mod founding;
+mod frame_view;
 mod freshness;
 mod gatherings;
 mod initialization;
@@ -1376,25 +1377,7 @@ impl Game {
         let world = self.app.world();
         let v = world.resource::<Village>();
         let residents: Vec<_> = query.iter(world).collect();
-        serde_json::json!({
-            "village": {
-                "minutes": v.minutes,
-                "buildings": v.buildings,
-                "building_jobs": v.building_jobs,
-                "power": v.power,
-                "water_supply": v.water_supply,
-                "logistics": v.logistics,
-                "roads": v.roads,
-                "economy": { "sources": v.economy.sources },
-            },
-            "residents": residents,
-            "environment": {
-                "raining": climate::at(v, v.minutes).raining,
-                "weather": { "current": climate::at(v, v.minutes) },
-                "power": power::supply(v),
-            },
-        })
-        .to_string()
+        frame_view::serialize(v, &residents)
     }
     pub fn snapshot(&mut self) -> String {
         self.state_snapshot(false)
