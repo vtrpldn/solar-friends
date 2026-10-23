@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const output=process.argv[2]??'/tmp/solar-hat-provider';await mkdir(output,{recursive:true});const server=await serve();let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/hat-provider-host`);
+ const result=await page.evaluate(async()=>{
+  const {createResidentPartLibrary}=await import('/resident-parts.js'),{residentPartRecipe}=await import('/resident-part-recipe.js'),{hatReviewClips}=await import('/artwork/character-hat-clips.js'),{composeHatReviewProvider}=await import('/artwork/character-hat-provider.js'),{loadCharacterImageSource}=await import('/character-image-source.js'),{residentClips,sampleResidentClip,advanceResidentAnimation,drawResidentAnimation}=await import('/resident-animation.js');
+  const root='/art/characters/prototype-v1/',registrations=new Map(await Promise.all(Object.keys(hatReviewClips).map(async key=>[key,await(await fetch(root+`straw-hat-${key}-v1-registration.json`)).json()]))),source=registrations.get('breathe').source,{image,sourceHash}=await loadCharacterImageSource(root+source.file),library=createResidentPartLibrary(),images={};let checked=0,denied=0,transitions=0;
+  const inputs={cook:{task:'cook'},water:{task:'water'},tend:{task:'garden'},feed:{task:'garden',worksiteKind:'goat_pasture'},walk:{task:'idle',target_x:11},work:{task:'build'},sit:{task:'rest'},breathe:{task:'stretch',minutes:16},sleep:{task:'sleep'},look:{task:'birdwatch'},stretch:{task:'stretch',minutes:8},wave:{task:'socialize',minutes:0},relax:{task:'idle',minutes:24}};
+  for(const hair of ['short-curls-v1','side-part-v1']){
+   const original=await library.prepare(residentPartRecipe({hair})),args={provider:original,binding:source.body,registrations,image,sourceHash},hat=composeHatReviewProvider(args),read=canvas=>canvas.getContext('2d').getImageData(0,0,256,256).data;
+   for(const [clip,spec]of Object.entries(hatReviewClips))for(const index of spec.indices)for(const returning of [false,...(spec.sheet==='activities'&&[13,14].includes(index)?[true]:[])]){
+    const pose=returning?{sequenceIndex:5}:undefined,a=read(hat.frameForPose(spec.sheet,index,pose)),b=read(original.frameForPose(spec.sheet,index,pose)),mask=document.createElement('canvas');mask.width=mask.height=256;mask.getContext('2d').drawImage(image,...registrations.get(clip).poses[index].translation,256,256);const coverage=read(mask);for(let p=0;p<a.length;p+=4)if(!coverage[p+3])for(let c=0;c<4;c++)if(a[p+c]!==b[p+c])throw Error('Changed original body, furniture, equipment or return pixels outside hat');checked++;
+   }
+   for(const index of [13,14]){const forward=hat.frameForPose('activities',index),back=hat.frameForPose('activities',index,{sequenceIndex:4});if(forward===back)throw Error('Feeding return substituted forward frame');if(back!==hat.frameForPose('activities',index,{sequenceIndex:5}))throw Error('Feeding return ownership differs between return steps');const returningPixels=read(back);if(!read(forward).some((n,i)=>n!==returningPixels[i]))throw Error('Feeding return lost its equipment distinction');}
+   for(const patch of [{sourceHash:'0'.repeat(64)},{registrations:new Map([...registrations].filter(([k])=>k!=='feed'))},{provider:{...original,animationProfile:'future'}}]){let refused=false;try{composeHatReviewProvider({...args,...patch});}catch{refused=true;}if(!refused)throw Error('Incomplete/changed hat inputs accepted');denied++;}
+   for(const [sheet,index]of [['other',0],['base',16],['idle',-1]]){let refused=false;try{hat.frameForPose(sheet,index);}catch{refused=true;}if(!refused)throw Error('Unsupported pose accepted');denied++;}
+   const surface=document.createElement('canvas');surface.width=surface.height=256;const board=document.createElement('canvas');board.width=1024;board.height=560;const ctx=board.getContext('2d');ctx.fillStyle='#dfe6c9';ctx.fillRect(0,0,1024,560);
+   for(const [row,facing]of [1,-1].entries())for(const [column,seconds]of [.5,1,2,2.5].entries()){
+    drawResidentAnimation(ctx,surface,hat,{layers:sampleResidentClip('feed',seconds,'neutral-v1'),facing,breath:1},column*256+128,row*280+250,220);ctx.fillStyle='#51432c';ctx.font='13px monospace';ctx.fillText(`feed ${seconds}s / ${facing}`,column*256+12,row*280+275);
+   }images[hair]=board.toDataURL('image/png');
+   for(const from of Object.keys(inputs))for(const to of Object.keys(inputs))if(from!==to)for(const facing of [1,-1]){
+    const target={id:0,x:10,y:10,target_x:10,target_y:10,...inputs[to]};let state={mode:from,phase:from==='sleep'?0:residentClips[from].frames.length/residentClips[from].fps*.7,transition:.18,x:10,y:10,facing,animationProfile:'neutral-v1'};
+    for(let step=0;step<5;step++){state=advanceResidentAnimation(state,target,inputs[to].minutes??0,step? .045:0,'neutral-v1');drawResidentAnimation(ctx,surface,hat,state,128,250,100);transitions++;}
+   }
+  }return {checked,denied,transitions,images};
+ });assert.equal(result.checked,100);assert.equal(result.denied,12);assert.equal(result.transitions,3120);assert.deepEqual(errors,[]);for(const [name,data]of Object.entries(result.images))await writeFile(output+'/'+name+'.png',Buffer.from(data.split(',')[1],'base64'));delete result.images;await writeFile(output+'/report.json',JSON.stringify(result,null,2)+'\n');console.log('PASS: complete hat provider preserves all 100 body/return frames outside overlay, refuses 12 invalid inputs and draws 3120 ordered activity-transition samples.',result);
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

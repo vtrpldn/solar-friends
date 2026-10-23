@@ -1,0 +1,21 @@
+{
+  "why": "Use one complete accessory provider, retaining feeding return equipment states across activity transitions.",
+  "scope": "Internal review composition; no playable recipe or native save changes.",
+  "evidence": "assets/art-direction/character-prototype-v1/straw-hat-complete-provider-v1",
+  "checks": {
+    "checked": 100,
+    "denied": 12,
+    "transitions": 3120,
+    "visual": "Inspected both-hairstyle mirrored feeding forward/return boards. Hat fit and basket contact retained. Full transition coverage here is mechanical, not a visual verdict for every pair."
+  },
+  "additionalChecks": [
+    "Forward and return feeding canvases remain distinct with different pixels; sequence steps four and five share the correct return canvas",
+    "12 invalid source/profile/incomplete registration/unsupported pose cases refused"
+  ],
+  "remaining": [
+    "full palette/part coverage",
+    "portraits and creator/native recipe/save integration",
+    "visual transition polish beyond inspected pairs",
+    "other original builder plan requirements"
+  ]
+}
