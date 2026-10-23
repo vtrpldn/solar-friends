@@ -1,0 +1,43 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "entries": [
+    {
+      "file": "candidate-v1.png",
+      "prompt": "Solar Friends game sprite facial-hair layer, exact registration. Image1 is the ONLY geometry reference: replace its two green patches with short close-trimmed dark-chestnut beard and moustache, tracing their position, shape and size exactly. They belong in the LOWER HALF of the 1254x1254 canvas. Keep all empty margins; never recenter, enlarge or crop the patches. Image2 is the exact bent-working FACE reference, STYLE and view only: the person's face points down and toward the right, so the beard follows this foreshortened jaw rather than a standing head. Image3 is the existing standing beard, MATERIAL AND COLOUR reference only, not geometry. Match its subdued brown broad painted shading, simplified soft edges and upper-left light. Final output contains ONLY the two facial hair shapes from image1 on true transparent alpha: no skin, ears, nose, mouth, eyes, scalp hair, neck, body, clothing, green guide, lines or backdrop. Keep the open mouth area transparent. No extra fragments, shadow outside the beard, text, grid, border, photoreal hair strands or black outline. This is a separate painted pose of the same short beard, not a full character and not a standalone centered beard icon.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-v1/jaw.png",
+          "archivedAs": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-v1/jaw-v1.png",
+          "role": "Initial exact bent-pose silhouette guide; cheek boundary was later found too wide"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-v1/face.png",
+          "role": "Actual bent-pose face style/view"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-v1/../short-beard-v1/candidate-v6.png",
+          "role": "Standing source material only"
+        }
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-234419cb-b9a6-4d41-8260-1c93545a7232.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Rejected: improved jaw angle but right guide boundary extends beyond the cheek."
+    },
+    {
+      "file": "candidate-v2.png",
+      "prompt": "Precise registered facial-hair layer for Solar Friends. Image1 is an authored silhouette: replace its TWO GREEN PATCHES with very short dark-chestnut beard and moustache paint. Copy the patches' outline, size, position and asymmetric downward-tilted curve exactly. In particular keep the RIGHT END LOW AND SHORT, ending where the green right end ends; do not extend it into a high sharp horn. Paint only inside the green shapes. Image2 is the actual bent-working face, STYLE/VIEW reference only: match warm softly shaded illustrated hair, broad simplified marks and upper-left light. Do not draw the face, skin or body. The final is just the two painted patches on true transparency, in the same LOWER HALF of the unchanged1254x1254 canvas with all its empty margins. No recentering, zoom, crop or whole-person repaint. No green pixels, skin-colored fragments, eyes, nose, neck, clothes, scalp hair, lines, text, border, detached flecks or photoreal strands. Keep the mouth opening transparent. This is a close-trimmed beard for a downward-facing jaw, not a long bushy beard.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-v1/jaw.png",
+          "role": "Corrected cheek/jaw/moustache silhouette"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-work-v1/face.png",
+          "role": "Actual bent-pose face style/view"
+        }
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2263f8e8-138c-4428-8fb8-977bbbee02bc.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Initial single-pose visual fit passes in reviewed captures. Complete facial-hair feature remains internal and unfinished."
+    }
+  ]
+}

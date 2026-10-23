@@ -1,0 +1,27 @@
+{
+  "scope": "One independently painted bent working pose: neutral body base index 7. Not a complete facial-hair option.",
+  "status": "Revision 2 passes initial isolated pose fit review. Excluded from gameplay and public recipes until the complete accessory passes its original gates.",
+  "inspected": [
+    "board.png: original versus misapplied standing overlay versus first dedicated source; first guide right cheek too wide.",
+    "v2-board.png: right edge now follows the actual cheek, downward jaw and open mouth; no floating side tip.",
+    "v2-scenes.png: both hairstyles, both facings, small and enlarged actual resident-renderer samples, daylight and night tint."
+  ],
+  "mechanical": "Both hairstyle frames pass exact unchanged pixels outside the authored face crop, full source-region coverage, ten invalid source, pose and crop refusals, including a sparse array. Existing sprite-frame checks pass.",
+  "registration": "Face crop is fixed [132,70,68,68] in the original 256-square body frame. Source is assembled into the shared 1254-square coordinate space before whole-frame normalization. Registration names exact source and body-frame hashes. No independent alpha fit, local warp or raster repair.",
+  "remaining": [
+    "All other main and equipment-return poses with authored face bindings",
+    "Palette and hair-colour combinations",
+    "Continuous working and other activity transitions",
+    "Portrait and planted world review beside original cast/buildings",
+    "Native/public creator/library/export/save integration",
+    "Full cache and performance gates"
+  ],
+  "fingerprints": {
+    "face.png": "a24e840d12012761531ff7052882b029de4bcf9e8e27836c211852057a9d3faf",
+    "grid.png": "12d0885f70438d3719afdcb23b45afce42b60f58196e5018f8c74166204f3b89",
+    "jaw-v1.png": "c3b81b07bf3aa5f1cdb252e3da754d66975f6dd4582de74ca458ba6554ceff93",
+    "jaw.png": "2d0a4f8fbca005d1de19f3f106f7b79374cb5cadc999e3ee6b89731e67fd963a",
+    "candidate-v1.png": "f64e11f3a56e07edf46dbc82b055cf89efebc2f9d7b227dd0d1d56a0ec230d53",
+    "candidate-v2.png": "2539c3ad4e92b5099fadc1dad9f48f3dc801929638b9691a45a28b7bdfc0c9c7"
+  }
+}

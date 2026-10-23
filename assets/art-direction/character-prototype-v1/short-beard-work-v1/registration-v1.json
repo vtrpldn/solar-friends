@@ -1,0 +1,24 @@
+{
+  "reviewSchema": 1,
+  "part": "short-beard",
+  "sheet": "base",
+  "index": 7,
+  "bodyFrameSha256": "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+  "source": {
+    "size": 1254,
+    "sha256": "f64e11f3a56e07edf46dbc82b055cf89efebc2f9d7b227dd0d1d56a0ec230d53"
+  },
+  "crop": [
+    132,
+    70,
+    68,
+    68
+  ],
+  "bounds": [
+    240,
+    600,
+    660,
+    420
+  ],
+  "status": "Prototype awaiting pose review; excluded from gameplay"
+}

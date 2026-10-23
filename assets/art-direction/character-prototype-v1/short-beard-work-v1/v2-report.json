@@ -1,0 +1,20 @@
+{
+  "status": "Mechanical checks pass; awaiting actual visual inspection. Internal one-pose development only.",
+  "sourceHash": "2539c3ad4e92b5099fadc1dad9f48f3dc801929638b9691a45a28b7bdfc0c9c7",
+  "audit": {
+    "pixels": 56154,
+    "inside": 56154,
+    "bounds": [
+      272,
+      615,
+      792,
+      969
+    ],
+    "coverage": 1,
+    "minimumCoverage": 0.98,
+    "ok": true
+  },
+  "checked": 2,
+  "refused": 10,
+  "unchangedOutsideFaceCrop": true
+}
