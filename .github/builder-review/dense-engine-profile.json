@@ -1,0 +1,17 @@
+{
+  "why": "Attribute the remaining maximum-village tick cost before changing resident decisions or geometry.",
+  "tool": "scripts/profile-dense-engine.mjs profiles 600 real quarter-second ticks through Chromium CPU sampling, aggregates functions across call paths, and verifies exact state against the production module.",
+  "evidence": "assets/validation/dense-engine-profile-v1",
+  "sourceCommit": "ec3a462",
+  "profileBuild": "CARGO_PROFILE_RELEASE_STRIP=none cargo build --offline --locked --release --target wasm32-unknown-unknown --target-dir /tmp/solar-friends-symbol-profile; wasm-bindgen --target web --keep-debug into that temporary tree. --wasm serves the named module AND its matching generated bindings.",
+  "exactReplay": true,
+  "outcomeSha256": "6ef030f5beb708b92e3f7706e17bc2eac12cb8a6cf3502745411b28546c7f0e5",
+  "findings": [
+    "Largest sampled leaves include spacing::clear_plot, interactions::footprint_size and production::store",
+    "Meal/hauling candidate selection repeatedly calls logistics::approaches and doorway",
+    "Source inspection shows doorway resolving owner exclusions and footprint sizes inside every 0.1-cell sample along its segment"
+  ],
+  "nextAction": "Hoist invariant owner/footprint work out of doorway sampling and conservatively exclude distant plots; retain identical sampled coordinates, open boundaries and owner exceptions. Differential tests and exact replay are required before adoption.",
+  "limits": "Sampling attribution, not latency measurements or a completed performance fix. Running game package and production code unchanged. Full original builder goal remains incomplete.",
+  "scriptSha256": "3f3f4fedd31e8856bd8cb172273c083a629922ad67dd95b99347f15bf669b124"
+}

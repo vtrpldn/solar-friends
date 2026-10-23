@@ -1,0 +1,391 @@
+{
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "profileWasm": "/tmp/solar-friends-symbol-profile/pkg/solar_friends_bg.wasm",
+  "profileWasmSha256": "93e26b3b726cca7593fb685d373a347a1b91cedb508b84b6204d0035d32edd3a",
+  "outcomeSha256": "6ef030f5beb708b92e3f7706e17bc2eac12cb8a6cf3502745411b28546c7f0e5",
+  "exactReplay": true,
+  "scope": "600 real quarter-second native ticks, headless Chromium CPU sampling at requested 100 microseconds; profiler overhead means these are attribution samples, not latency measurements.",
+  "leaf": [
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::spacing::clear_plot",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 899946
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::interactions::footprint_size",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 889415
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::production::store",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 482811
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::food::held",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 262512
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::needs",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 257198
+    },
+    {
+      "name": "core[608f92abc48d28da]::iter::traits::iterator::Iterator::all::check::<u32, solar_friends[f070ff9bd16fd73a]::logistics::doorway::{closure#1}>::{closure#0}",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 220402
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::food::reserved_space",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 201768
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::collections::btree::navigate::LazyLeafRange<alloc[cb2b8d99256f33df]::collections::btree::node::marker::Dying, usize, core[608f92abc48d28da]::option::Option<solar_friends[f070ff9bd16fd73a]::Resident>>>::init_front",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 130987
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::navigation::search",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 117256
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::room",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 80155
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::collections::binary_heap::BinaryHeap<core[608f92abc48d28da]::cmp::Reverse<(u32, usize)>>>::sift_down_to_bottom",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 73849
+    },
+    {
+      "name": "<solar_friends[f070ff9bd16fd73a]::navigation::geometry::Bounds>::intersects",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 56844
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::navigation::clear",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 56050
+    },
+    {
+      "name": "<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::Building>, solar_friends[f070ff9bd16fd73a]::navigation::geometry::obstacles::{closure#0}>, solar_friends[f070ff9bd16fd73a]::navigation::geometry::obstacles::{closure#1}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::economy::Source>, solar_friends[f070ff9bd16fd73a]::navigation::geometry::obstacles::{closure#2}>, solar_friends[f070ff9bd16fd73a]::navigation::geometry::obstacles::{closure#3}>>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::electricity::Node>, solar_friends[f070ff9bd16fd73a]::navigation::geometry::obstacles::{closure#4}>, solar_friends[f070ff9bd16fd73a]::navigation::geometry::obstacles::{closure#5}>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 52897
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::production::pantry_site",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 45880
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::water::sync",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 37497
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::vec::Vec<solar_friends[f070ff9bd16fd73a]::simulation::Id> as alloc[cb2b8d99256f33df]::vec::spec_from_iter_nested::SpecFromIterNested<solar_friends[f070ff9bd16fd73a]::simulation::Id, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::water::Tank>, solar_friends[f070ff9bd16fd73a]::water::sync::{closure#0}>, solar_friends[f070ff9bd16fd73a]::water::sync::{closure#1}>>>::from_iter",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 35984
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::navigation::departure_path",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 34919
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::total",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 34646
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::tool_target",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 33076
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::simulate",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 32338
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::navigation::geometry::land_points",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 28779
+    },
+    {
+      "name": "<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::logistics::Shipment>, solar_friends[f070ff9bd16fd73a]::logistics::held::{closure#0}>, solar_friends[f070ff9bd16fd73a]::logistics::held::{closure#1}> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::fold::<u32, <u32 as core[608f92abc48d28da]::iter::traits::accum::Sum>::sum<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::logistics::Shipment>, solar_friends[f070ff9bd16fd73a]::logistics::held::{closure#0}>, solar_friends[f070ff9bd16fd73a]::logistics::held::{closure#1}>>::{closure#0}>",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 26669
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::usable",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 23007
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::collections::btree::map::Values<usize, core[608f92abc48d28da]::option::Option<solar_friends[f070ff9bd16fd73a]::Resident>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 21910
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::water::open",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 21507
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::economy::gross_needs",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 21153
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::water::quote",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 21064
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::navigation::crowd_clear",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 18579
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::agriculture::flowers",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 17688
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::sync",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 16778
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::production::closing",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 15691
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::doorway",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 15520
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::gatherings::held",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 14457
+    },
+    {
+      "name": "<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::navigation::geometry::Bounds>, solar_friends[f070ff9bd16fd73a]::navigation::departure_path::{closure#2}> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::fold::<(), core[608f92abc48d28da]::iter::traits::iterator::Iterator::for_each::call<bool, <alloc[cb2b8d99256f33df]::vec::Vec<bool>>::extend_trusted<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[f070ff9bd16fd73a]::navigation::geometry::Bounds>, solar_friends[f070ff9bd16fd73a]::navigation::departure_path::{closure#2}>>::{closure#0}>::{closure#0}>",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 14184
+    }
+  ],
+  "inclusive": [
+    {
+      "name": "(root)",
+      "url": "",
+      "microseconds": 4728175
+    },
+    {
+      "name": "evaluate",
+      "url": "",
+      "microseconds": 4317723
+    },
+    {
+      "name": "",
+      "url": "",
+      "microseconds": 4317723
+    },
+    {
+      "name": "game_tick",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317670
+    },
+    {
+      "name": "js-to-wasm::",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317670
+    },
+    {
+      "name": "tick",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends.js",
+      "microseconds": 4317670
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::schedule::schedule::Schedule>::run",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::world::World>::try_schedule_scope::<(), bevy_ecs[4d9df4259d1565]::intern::Interned<dyn bevy_ecs[4d9df4259d1565]::schedule::set::ScheduleLabel>, <bevy_ecs[4d9df4259d1565]::world::World>::run_schedule<bevy_ecs[4d9df4259d1565]::intern::Interned<dyn bevy_ecs[4d9df4259d1565]::schedule::set::ScheduleLabel>>::{closure#0}>",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::world::World>::schedule_scope::<(), bevy_ecs[4d9df4259d1565]::intern::Interned<dyn bevy_ecs[4d9df4259d1565]::schedule::set::ScheduleLabel>, <bevy_ecs[4d9df4259d1565]::world::World>::run_schedule<bevy_ecs[4d9df4259d1565]::intern::Interned<dyn bevy_ecs[4d9df4259d1565]::schedule::set::ScheduleLabel>>::{closure#0}>",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<bevy_app[d3681ffd9ce9248e]::sub_app::SubApp>::run_default_schedule",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<bevy_app[d3681ffd9ce9248e]::sub_app::SubApps>::update",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<bevy_app[d3681ffd9ce9248e]::app::App>::update",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<solar_friends[f070ff9bd16fd73a]::Game>::tick",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4317569
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::schedule::executor::single_threaded::SingleThreadedExecutor as bevy_ecs[4d9df4259d1565]::schedule::executor::SystemExecutor>::run",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4316210
+    },
+    {
+      "name": "<bevy_app[d3681ffd9ce9248e]::main_schedule::Main>::run_main",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4315607
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::world::World>::last_change_tick_scope::<(), <bevy_ecs[4d9df4259d1565]::system::exclusive_function_system::ExclusiveFunctionSystem<fn(bevy_ecs[4d9df4259d1565]::system::system_param::Local<bool>), <bevy_app[d3681ffd9ce9248e]::main_schedule::Main>::run_main> as bevy_ecs[4d9df4259d1565]::system::system::System>::run_unsafe::{closure#0}>",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4315607
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::system::schedule_system::InfallibleSystemWrapper<bevy_ecs[4d9df4259d1565]::system::exclusive_function_system::ExclusiveFunctionSystem<fn(bevy_ecs[4d9df4259d1565]::system::system_param::Local<bool>), <bevy_app[d3681ffd9ce9248e]::main_schedule::Main>::run_main>> as bevy_ecs[4d9df4259d1565]::system::system::System>::run",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4315607
+    },
+    {
+      "name": "bevy_ecs[4d9df4259d1565]::schedule::executor::__rust_begin_short_backtrace::run",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4315607
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::world::World>::try_resource_scope::<bevy_app[d3681ffd9ce9248e]::main_schedule::MainScheduleOrder, (), <bevy_app[d3681ffd9ce9248e]::main_schedule::Main>::run_main::{closure#1}>",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4315456
+    },
+    {
+      "name": "bevy_ecs[4d9df4259d1565]::schedule::executor::__rust_begin_short_backtrace::run_unsafe",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4313191
+    },
+    {
+      "name": "<bevy_ecs[4d9df4259d1565]::system::schedule_system::InfallibleSystemWrapper<bevy_ecs[4d9df4259d1565]::system::function_system::FunctionSystem<fn(bevy_ecs[4d9df4259d1565]::change_detection::Res<solar_friends[f070ff9bd16fd73a]::Step>, bevy_ecs[4d9df4259d1565]::change_detection::ResMut<solar_friends[f070ff9bd16fd73a]::Village>, bevy_ecs[4d9df4259d1565]::system::query::Query<&mut solar_friends[f070ff9bd16fd73a]::Resident>), solar_friends[f070ff9bd16fd73a]::simulate>> as bevy_ecs[4d9df4259d1565]::system::system::System>::run_unsafe",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4312886
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::simulate",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 4311514
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::food::meal",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 2211081
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::workforce::eating",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 2208352
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::approaches",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 1762910
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::spacing::clear_plot",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 1508595
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::doorway",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 1307085
+    },
+    {
+      "name": "core[608f92abc48d28da]::iter::traits::iterator::Iterator::all::check::<u32, solar_friends[f070ff9bd16fd73a]::logistics::doorway::{closure#1}>::{closure#0}",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 1291718
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::candidates",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 924857
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::workforce::offers",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 897457
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::interactions::footprint_size",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 889415
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::choose",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 827625
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::workforce::choose_work",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 818073
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::logistics::usable",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 798546
+    },
+    {
+      "name": "solar_friends[f070ff9bd16fd73a]::economy::rebalance",
+      "url": "http://127.0.0.1:61625/pkg/solar_friends_bg.wasm",
+      "microseconds": 610541
+    }
+  ]
+}
