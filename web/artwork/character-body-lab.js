@@ -1,5 +1,5 @@
 import {installEquipmentReview,installCookingEquipmentReview,installTendingEquipmentReview,installFeedingEquipmentReview} from './character-equipment-review.js';
-import {installSidePartReview} from './character-sidepart-review.js';
+import {installSidePartReview,sidePartReviewRecipe,validateSidePartReviewRecipe} from './character-sidepart-review.js';
 import {createEquippedAppearanceReview} from './character-equipped-model.js';
 import {installComposedAppearanceReview,installAppearanceControls} from './character-composed-review.js';
 import {loadCharacterImageSource} from '../character-image-source.js';
@@ -80,5 +80,7 @@ try{
  const equippedModel=createEquippedAppearanceReview({appearance:window.composedAppearanceReview.model,materials:materialModel,frames:frameBank,binding:window.bodyAttachmentReview.binding,reviews:{cook:window.cookingEquipmentReview,water:window.equipmentPoseReview,tend:window.tendingEquipmentReview,feed:window.feedingEquipmentReview}});
  window.equippedAppearanceReview=await installAppearanceControls({model:equippedModel,scene,before:$('body-attachment-open'),prefix:'equipped-appearance',titleText:'Combined appearance · activity equipment',noteText:'One draft appearance supplies the portrait and all poses, including activity tools and empty-handed feeding recovery. Colour changes preserve equipment paint. Parts, grip, cadence and production integration remain under review; excluded from player choices.'});
  window.sidePartAppearanceReview=await installSidePartReview({seated:window.sitHairReview,frames:frameBank,binding:window.bodyAttachmentReview.binding,materials:materialModel,scene,before:$('body-attachment-open')});
+ const sidePartEquipped=createEquippedAppearanceReview({appearance:window.sidePartAppearanceReview.model,materials:materialModel,frames:frameBank,binding:window.bodyAttachmentReview.binding,reviews:{cook:window.cookingEquipmentReview,water:window.equipmentPoseReview,tend:window.tendingEquipmentReview,feed:window.feedingEquipmentReview},makeRecipe:sidePartReviewRecipe,validateRecipe:validateSidePartReviewRecipe});
+ window.sidePartEquippedReview=await installAppearanceControls({model:sidePartEquipped,scene,before:$('body-attachment-open'),prefix:'sidepart-equipped',makeRecipe:sidePartReviewRecipe,titleText:'Side part · activity equipment',noteText:'The second draft hairstyle with shared activity tools, foreground hands and empty-handed feeding recovery. Check contact and proportions in both facings and lighting states. Excluded from player choices pending final artwork review and production integration.'});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

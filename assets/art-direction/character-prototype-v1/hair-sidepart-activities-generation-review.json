@@ -1,0 +1,516 @@
+{
+  "scope": "Twelve daily activity hairstyle sources explicitly bound to sixteen poses; private review only",
+  "records": [
+    {
+      "index": 0,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 0, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x581–845, y103–282; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e099ade5-b112-4121-8cac-927a892f2416.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-0-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "2505ee1234bbf6be23fac98304b244a881955ca8a5621f227b0df462a98692e0",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 0,
+          "coverage": 1,
+          "bounds": [
+            577,
+            119,
+            845,
+            292
+          ],
+          "ok": true,
+          "orangePixels": 0
+        },
+        {
+          "index": 2,
+          "coverage": 1,
+          "bounds": [
+            577,
+            119,
+            845,
+            292
+          ],
+          "ok": true,
+          "orangePixels": 0
+        },
+        {
+          "index": 3,
+          "coverage": 1,
+          "bounds": [
+            577,
+            119,
+            845,
+            292
+          ],
+          "ok": true,
+          "orangePixels": 0
+        },
+        {
+          "index": 4,
+          "coverage": 1,
+          "bounds": [
+            577,
+            119,
+            845,
+            292
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 1, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x514–825, y111–306; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v2.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-3ee70c60-5c05-4736-8e92-fa4c84aa9e7c.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-1-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "b90ff250c7011bd0bbc65a3a3647ea0cfff2d82a13138719c59d631148bdcad7",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 1,
+          "coverage": 1,
+          "bounds": [
+            523,
+            115,
+            822,
+            310
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 5, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x591–879, y127–321; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-5-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c75ef2de-52b3-41c3-a04a-089980f6a6c9.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-5-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "3d432fa16752dbbee4ef568b326a24a3489fe7c77a2dcf402ec8629c223aa8fb",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 5,
+          "coverage": 1,
+          "bounds": [
+            595,
+            136,
+            874,
+            322
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 6, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x612–883, y143–324; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-6-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1f69c187-bcf6-48b4-812f-fc908eaf559f.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-6-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "014791cea3b7b6cdc14b3de99be15a3714c5f1097da72c3b0ceba51fb317385c",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 6,
+          "coverage": 1,
+          "bounds": [
+            614,
+            143,
+            885,
+            326
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 7, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x679–1000, y153–358; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v2.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-99cb87c9-59a6-41f4-9cd8-fc4e21dba416.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-7-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "e92b159dc2259080cc7a849bf977031f0aa1497cca706d01109f52bdffe7a538",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 7,
+          "coverage": 0.9872880187508617,
+          "bounds": [
+            677,
+            155,
+            1001,
+            361
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 8, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x609–877, y380–562; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-461a3121-8435-406f-9b7c-d38d6899e117.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-8-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "a1345fe33b37c3037f7c9f5acbb349eb1c34812bdbd6ac20d645377dedd04714",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 8,
+          "coverage": 1,
+          "bounds": [
+            612,
+            380,
+            876,
+            558
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 9, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x609–877, y421–595; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a3b55ff1-0a7a-4ceb-b298-d11f71c90fe7.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-9-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "1c1a35056faad9f52ba3becfcdfff349d2844e24135e6e507dc9651b6dcbccd7",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 9,
+          "coverage": 1,
+          "bounds": [
+            609,
+            423,
+            871,
+            599
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 10, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x649–926, y432–615; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-10-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1d9151a8-1bd0-4f4d-ac89-2808fe48fb63.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-10-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "652c4645bd1ecc85c09dc8a6a0f548ab34843b185b2395a88fdc0b8c1aa797ba",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 10,
+          "coverage": 1,
+          "bounds": [
+            656,
+            437,
+            930,
+            616
+          ],
+          "ok": true,
+          "orangePixels": 0
+        },
+        {
+          "index": 11,
+          "coverage": 1,
+          "bounds": [
+            656,
+            437,
+            930,
+            616
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 12, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x496–783, y87–332; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v4.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-43f59438-c823-49ad-8b71-762543411e1e.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-12-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "92eb897f846e17aeeebdc75dc90ab6c55f7f9b7ae36d4a9b15ee500e3a2eee5e",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 12,
+          "coverage": 1,
+          "bounds": [
+            518,
+            113,
+            803,
+            327
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 13, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x558–847, y104–305; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-13-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-675addc3-1034-4a75-ae8b-b0609d60f01e.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-13-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "ac8f8fcb214fc140cc715c03cf0db791f8f46ef6237acf66599dd657be3d143f",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 13,
+          "coverage": 1,
+          "bounds": [
+            551,
+            116,
+            843,
+            307
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 14, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x509–790, y103–336; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v4.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-aa587e07-aa91-45d5-90bc-3d2809999996.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-14-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "7b00bcad19c20e5d49f886636ec80aad6e61cd04775732535464cbf6912016d0",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 14,
+          "coverage": 1,
+          "bounds": [
+            521,
+            115,
+            815,
+            329
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "tool": "image_gen.imagegen",
+      "mode": "built-in precise-object-edit",
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 IN PLACE. It is the correctly registered hair-only cap for Solar Friends daily-activity pose 15, on a mostly empty 1254×1254 transparent canvas. Preserve its exact small location, head angle, scale and ear opening. Its current painted bounds are x516–782, y104–286; keep approximately that same compact footprint, without moving, enlarging or recentering it.\nChange ONLY the curly hair structure into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle and paint identity ONLY: never copy its canvas coordinates or its silhouette size. Replace the round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown, close sides, warm chestnut colour and restrained upper-left brush highlights. Keep image 1's head orientation and footprint even though image 2 has a different pose.\nReturn a 1254×1254 true-transparent HAIR-ONLY PNG. Keep all transparent margin empty; the small hair cap is the only painted subject. No face, skin, ear, eyebrow, head-shaped opaque backing, body, hands, utensils, plants, stools, ground, shadow, guide, text or background. No stretching, resizing, warping or independent fitting of a cap; repaint at the original image-1 registration. No curls, tall quiff, glossy plastic or individual strand noise.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png",
+          "role": "Pose registration edit target; preserve position, orientation, canvas and compact footprint",
+          "sha256": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part chestnut paint and shape identity only, not coordinates",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-47bc99b6-0919-4dc9-be13-cfb7750ea07a.png",
+      "projectPath": "web/art/characters/prototype-v1/hair-sidepart-activities-15-candidate-v1.png",
+      "verdict": "Accepted into private pose/equipment review, not approved for production",
+      "rawReview": "Broad warm chestnut swept groups replace curls. Transparent hair-only output, compact pose-aligned location. Body contact and temporal volume still require composed review.",
+      "sha256": "a22c78dfdd8552882ec1806c8c42c0136d1e59cef6c16d5802e2a4366fba76f5",
+      "composedReview": "Inspected all four activity palette boards, both facings/day-night timelines and decoded public-button recordings. Eyes and ear apertures remain readable; no obvious scalp gap or hair/tool overlap in these views. Crown compression and rear sweep vary somewhat between head tilts; final temporal consistency remains open.",
+      "containment": [
+        {
+          "index": 15,
+          "coverage": 1,
+          "bounds": [
+            522,
+            116,
+            789,
+            289
+          ],
+          "ok": true,
+          "orangePixels": 0
+        }
+      ]
+    }
+  ],
+  "registration": "web/art/characters/prototype-v1/hair-sidepart-all-v1-registration.json",
+  "remaining": "Production body/face/hair/clothing/facial-hair/hat/accessory variety, final style/grip/cadence review, native recipes and regular-player integration remain incomplete.",
+  "evidence": [
+    "assets/art-direction/character-prototype-v1/sidepart-all-review-v1/report.json",
+    "assets/art-direction/character-prototype-v1/sidepart-equipment-review-v1/report.json",
+    "assets/art-direction/character-prototype-v1/sidepart-all-source-audit.json"
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "scope": "Read-only alpha>=32 measurements of existing correctly registered curl caps; geometry references only",
+  "targets": [
+    {
+      "index": 0,
+      "file": "hair-curls-activities-0-candidate-v2.png",
+      "bounds": [
+        581,
+        103,
+        845,
+        282
+      ]
+    },
+    {
+      "index": 1,
+      "file": "hair-curls-activities-1-candidate-v2.png",
+      "bounds": [
+        514,
+        111,
+        825,
+        306
+      ]
+    },
+    {
+      "index": 5,
+      "file": "hair-curls-activities-5-candidate-v1.png",
+      "bounds": [
+        591,
+        127,
+        879,
+        321
+      ]
+    },
+    {
+      "index": 6,
+      "file": "hair-curls-activities-6-candidate-v1.png",
+      "bounds": [
+        612,
+        143,
+        883,
+        324
+      ]
+    },
+    {
+      "index": 7,
+      "file": "hair-curls-activities-7-candidate-v2.png",
+      "bounds": [
+        679,
+        153,
+        1000,
+        358
+      ]
+    },
+    {
+      "index": 8,
+      "file": "hair-curls-activities-8-candidate-v1.png",
+      "bounds": [
+        609,
+        380,
+        877,
+        562
+      ]
+    },
+    {
+      "index": 9,
+      "file": "hair-curls-activities-9-candidate-v1.png",
+      "bounds": [
+        609,
+        421,
+        877,
+        595
+      ]
+    },
+    {
+      "index": 10,
+      "file": "hair-curls-activities-10-candidate-v1.png",
+      "bounds": [
+        649,
+        432,
+        926,
+        615
+      ]
+    },
+    {
+      "index": 12,
+      "file": "hair-curls-activities-12-candidate-v4.png",
+      "bounds": [
+        496,
+        87,
+        783,
+        332
+      ]
+    },
+    {
+      "index": 13,
+      "file": "hair-curls-activities-13-candidate-v1.png",
+      "bounds": [
+        558,
+        104,
+        847,
+        305
+      ]
+    },
+    {
+      "index": 14,
+      "file": "hair-curls-activities-14-candidate-v4.png",
+      "bounds": [
+        509,
+        103,
+        790,
+        336
+      ]
+    },
+    {
+      "index": 15,
+      "file": "hair-curls-activities-15-candidate-v1.png",
+      "bounds": [
+        516,
+        104,
+        782,
+        286
+      ]
+    }
+  ]
+}

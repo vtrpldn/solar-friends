@@ -4,7 +4,7 @@ import {registeredEquipmentFrame} from '../character-equipment.js';
 import {residentClips} from '../resident-animation.js';
 // Review-only. One immutable source set per model; recipes never choose files.
 // Equipment is activity-owned and is composed after appearance, before hands.
-export function createEquippedAppearanceReview({appearance,materials,frames,binding,reviews,maxClips=12,maxConcurrent=2,maxQueued=48}){
+export function createEquippedAppearanceReview({appearance,materials,frames,binding,reviews,makeRecipe=prototypeAppearanceRecipe,validateRecipe=validatePrototypeAppearanceRecipe,maxClips=12,maxConcurrent=2,maxQueued=48}){
  const activities=new Map();
  for(const clip of ['cook','water','tend','feed']){
   const review=reviews?.[clip],spec=residentClips[clip],indices=[...new Set(spec.frames)].map(frame=>spec.row*4+frame);
@@ -31,8 +31,8 @@ export function createEquippedAppearanceReview({appearance,materials,frames,bind
   }};
  }});
  return {
-  provider(clip,recipe=prototypeAppearanceRecipe()){
-   let checked;try{checked=validatePrototypeAppearanceRecipe(recipe);}catch(error){return Promise.reject(error);}
+  provider(clip,recipe=makeRecipe()){
+   let checked;try{checked=validateRecipe(recipe);}catch(error){return Promise.reject(error);}
    if(!Object.hasOwn(residentClips,clip))return Promise.reject(Error('This appearance animation is unavailable.'));
    if(!activities.has(clip))return appearance.provider(clip,checked);
    return cache.get(clip+':'+JSON.stringify(checked),{clip,recipe:checked});

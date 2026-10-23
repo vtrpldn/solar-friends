@@ -1,0 +1,350 @@
+{
+  "result": "PASS",
+  "scope": "Draft side-part equipment composition; no production artwork approval",
+  "sourceHashes": {
+    "scripts/verify-sidepart-equipment.mjs": "72cd2ec80040afb3436c84a609455e0468c3bdafdcfb7f2a53a9d24c80e45be8",
+    "scripts/record-preview-playback.mjs": "649f65a06435f80c2c3c73fc61466e2a886b21094eabbbd3fe2175ac9c7bc55b",
+    "web/artwork/character-equipped-model.js": "a24bb8731b5dd8b2007a43a4c7e0f763bc705c2d825cc8a50edfb7ca69e07c0f",
+    "web/artwork/character-sidepart-review.js": "abfe2e2faf364009c7969da21cb85b8dca78a73f5ec1753996fd26e860ccc893",
+    "web/artwork/character-body-lab.js": "1d29af01862acf48fc2c17454ec9caed80315bc816c71d1318550dd12ca2312a",
+    "web/character-equipment.js": "d22787c4c840b531732a288e9b8da843a35b45162c7eb94f6814d2af4e071c9b",
+    "web/art/characters/prototype-v1/hair-sidepart-all-v1-registration.json": "ecdf3af60b23233a0c1a49bc6578983a883c34f04b6fde861b062041d67ccc5b",
+    "web/pkg/solar_friends_bg.wasm": "afd6e6f5c5b7478bec1c24bffa8471a0b8eb4043c6830128abe42053cba97c14"
+  },
+  "recordings": {
+    "cook": {
+      "duration": 2,
+      "samples": [
+        0.01,
+        0.26,
+        0.51,
+        0.76,
+        1.01,
+        1.26,
+        1.51,
+        1.76,
+        2.25
+      ],
+      "firstWorldSha256": "8a7fb57d159e7414a6c4fabdb42970f659c587d49f5e06dd115bcf7cbf8bf881",
+      "lastWorldSha256": "8a7fb57d159e7414a6c4fabdb42970f659c587d49f5e06dd115bcf7cbf8bf881",
+      "exactLoopReturn": true
+    },
+    "water": {
+      "duration": 3,
+      "samples": [
+        0.01,
+        0.26,
+        0.51,
+        0.76,
+        1.01,
+        1.26,
+        1.51,
+        1.76,
+        2.01,
+        2.26,
+        2.51,
+        2.76,
+        3.25
+      ],
+      "firstWorldSha256": "84f79ffeb3b3c5c9b875a024f00d10fb79da50817f9e068ddad0db120f8be60a",
+      "lastWorldSha256": "84f79ffeb3b3c5c9b875a024f00d10fb79da50817f9e068ddad0db120f8be60a",
+      "exactLoopReturn": true
+    },
+    "tend": {
+      "duration": 2,
+      "samples": [
+        0.01,
+        0.26,
+        0.51,
+        0.76,
+        1.01,
+        1.26,
+        1.51,
+        1.76,
+        2.25
+      ],
+      "firstWorldSha256": "5bee36bfa188e6609695e33758ff1ed5fdd0ae1a4d67688ffa75679065898f29",
+      "lastWorldSha256": "5bee36bfa188e6609695e33758ff1ed5fdd0ae1a4d67688ffa75679065898f29",
+      "exactLoopReturn": true
+    },
+    "feed": {
+      "duration": 3,
+      "samples": [
+        0.01,
+        0.26,
+        0.51,
+        0.76,
+        1.01,
+        1.26,
+        1.51,
+        1.76,
+        2.01,
+        2.26,
+        2.51,
+        2.76,
+        3.25
+      ],
+      "firstWorldSha256": "81bf0f9f09b7ee7a3ed7718e5257bcc7b52768b85595fabacd00b87052d87f07",
+      "lastWorldSha256": "81bf0f9f09b7ee7a3ed7718e5257bcc7b52768b85595fabacd00b87052d87f07",
+      "exactLoopReturn": true
+    }
+  },
+  "checked": [
+    {
+      "clip": "cook",
+      "index": 0,
+      "palette": 0
+    },
+    {
+      "clip": "cook",
+      "index": 1,
+      "palette": 0
+    },
+    {
+      "clip": "cook",
+      "index": 2,
+      "palette": 0
+    },
+    {
+      "clip": "cook",
+      "index": 3,
+      "palette": 0
+    },
+    {
+      "clip": "cook",
+      "index": 0,
+      "palette": 1
+    },
+    {
+      "clip": "cook",
+      "index": 1,
+      "palette": 1
+    },
+    {
+      "clip": "cook",
+      "index": 2,
+      "palette": 1
+    },
+    {
+      "clip": "cook",
+      "index": 3,
+      "palette": 1
+    },
+    {
+      "clip": "cook",
+      "index": 0,
+      "palette": 2
+    },
+    {
+      "clip": "cook",
+      "index": 1,
+      "palette": 2
+    },
+    {
+      "clip": "cook",
+      "index": 2,
+      "palette": 2
+    },
+    {
+      "clip": "cook",
+      "index": 3,
+      "palette": 2
+    },
+    {
+      "clip": "water",
+      "index": 4,
+      "palette": 0
+    },
+    {
+      "clip": "water",
+      "index": 5,
+      "palette": 0
+    },
+    {
+      "clip": "water",
+      "index": 6,
+      "palette": 0
+    },
+    {
+      "clip": "water",
+      "index": 7,
+      "palette": 0
+    },
+    {
+      "clip": "water",
+      "index": 4,
+      "palette": 1
+    },
+    {
+      "clip": "water",
+      "index": 5,
+      "palette": 1
+    },
+    {
+      "clip": "water",
+      "index": 6,
+      "palette": 1
+    },
+    {
+      "clip": "water",
+      "index": 7,
+      "palette": 1
+    },
+    {
+      "clip": "water",
+      "index": 4,
+      "palette": 2
+    },
+    {
+      "clip": "water",
+      "index": 5,
+      "palette": 2
+    },
+    {
+      "clip": "water",
+      "index": 6,
+      "palette": 2
+    },
+    {
+      "clip": "water",
+      "index": 7,
+      "palette": 2
+    },
+    {
+      "clip": "tend",
+      "index": 8,
+      "palette": 0
+    },
+    {
+      "clip": "tend",
+      "index": 9,
+      "palette": 0
+    },
+    {
+      "clip": "tend",
+      "index": 10,
+      "palette": 0
+    },
+    {
+      "clip": "tend",
+      "index": 11,
+      "palette": 0
+    },
+    {
+      "clip": "tend",
+      "index": 8,
+      "palette": 1
+    },
+    {
+      "clip": "tend",
+      "index": 9,
+      "palette": 1
+    },
+    {
+      "clip": "tend",
+      "index": 10,
+      "palette": 1
+    },
+    {
+      "clip": "tend",
+      "index": 11,
+      "palette": 1
+    },
+    {
+      "clip": "tend",
+      "index": 8,
+      "palette": 2
+    },
+    {
+      "clip": "tend",
+      "index": 9,
+      "palette": 2
+    },
+    {
+      "clip": "tend",
+      "index": 10,
+      "palette": 2
+    },
+    {
+      "clip": "tend",
+      "index": 11,
+      "palette": 2
+    },
+    {
+      "clip": "feed",
+      "index": 12,
+      "palette": 0
+    },
+    {
+      "clip": "feed",
+      "index": 13,
+      "palette": 0
+    },
+    {
+      "clip": "feed",
+      "index": 14,
+      "palette": 0
+    },
+    {
+      "clip": "feed",
+      "index": 15,
+      "palette": 0
+    },
+    {
+      "clip": "feed",
+      "index": 12,
+      "palette": 1
+    },
+    {
+      "clip": "feed",
+      "index": 13,
+      "palette": 1
+    },
+    {
+      "clip": "feed",
+      "index": 14,
+      "palette": 1
+    },
+    {
+      "clip": "feed",
+      "index": 15,
+      "palette": 1
+    },
+    {
+      "clip": "feed",
+      "index": 12,
+      "palette": 2
+    },
+    {
+      "clip": "feed",
+      "index": 13,
+      "palette": 2
+    },
+    {
+      "clip": "feed",
+      "index": 14,
+      "palette": 2
+    },
+    {
+      "clip": "feed",
+      "index": 15,
+      "palette": 2
+    }
+  ],
+  "cache": {
+    "entries": 1,
+    "active": 0,
+    "queued": 0,
+    "pending": 0,
+    "maxEntries": 1,
+    "maxConcurrent": 2,
+    "maxQueued": 48,
+    "clips": 1,
+    "frames": 6,
+    "frameCountIsUpperBound": true,
+    "cacheLabel": "equipment poses",
+    "maximumFrames": 6,
+    "rgbaBytes": 1572864
+  },
+  "deniedRecipes": 3
+}
