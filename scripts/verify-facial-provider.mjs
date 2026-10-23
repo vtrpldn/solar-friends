@@ -4,17 +4,17 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const variant=process.argv[2]??'original';assert(['original','rest-consistency','water-tend-consistency','water-tend-corrected'].includes(variant),'Choose an explicit registered comparison variant');
-const matrix=variant==='water-tend-corrected',root='assets/art-direction/character-prototype-v1',output=root+(variant==='original'?'/short-beard-complete-v1':variant==='rest-consistency'?'/short-beard-complete-rest-consistency-v1':matrix?'/short-beard-complete-water-tend-corrected-v1':'/short-beard-complete-water-tend-consistency-v1');
+const variant=process.argv[2]??'original',folders={original:'short-beard-complete-v1','rest-consistency':'short-beard-complete-rest-consistency-v1','water-tend-consistency':'short-beard-complete-water-tend-consistency-v1','water-tend-corrected':'short-beard-complete-water-tend-corrected-v1','jaw-corrected':'short-beard-complete-jaw-corrected-v1'};assert(Object.hasOwn(folders,variant),'Choose an explicit registered comparison variant');
+const jawCorrected=variant==='jaw-corrected',matrix=variant==='water-tend-corrected'||jawCorrected,root='assets/art-direction/character-prototype-v1',output=root+'/'+folders[variant];
 const collections=[
  ['short-beard-work-clip-v1','registrations.json','candidate-v1.png'],
- ['short-beard-work-v1','registration-v2.json','candidate-v2.png'],
+ ...(jawCorrected?[]:[['short-beard-work-v1','registration-v2.json','candidate-v2.png']]),
  ['short-beard-base-clips-v1','registrations.json','candidate-v1.png'],
  ['short-beard-rest-clips-v1','registrations-v2.json','candidate-v2.png',variant==='original'?null:'base'],
- ...(variant==='original'?[]:[['short-beard-rest-consistency-v1','registrations-v2.json','candidate-v2.png','idle']]),
+ ...(variant==='original'?[]:jawCorrected?[['short-beard-jaw-consistency-v1','registrations-v1.json','candidate-v1.png']]:[['short-beard-rest-consistency-v1','registrations-v2.json','candidate-v2.png','idle']]),
  ['short-beard-gesture-clips-v1','registrations-v1.json','candidate-v1.png'],
  ['short-beard-stretch-cook-v1','registrations-v1.json','candidate-v1.png'],
- ...(variant.startsWith('water-tend-')?[
+ ...(variant.startsWith('water-tend-')||jawCorrected?[
   matrix?['short-beard-water-tend-correction-v1','registrations-v1.json','candidate-v1.png']:['short-beard-water-tend-v1','registrations-v1.json','candidate-v1.png',null,[6,7,9,10]],
   ['short-beard-water-tend-v1','registrations-v4.json','candidate-v4.png',null,[4,5,8,11]],
  ]:[['short-beard-water-tend-v1','registrations-v1.json','candidate-v1.png']]),
@@ -25,7 +25,7 @@ assert.equal(sources.reduce((n,s)=>n+s.registrations.length,0),48);await mkdir(o
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/facial-provider-review`);
- const result=await page.evaluate(async({sources,matrix})=>{
+ const result=await page.evaluate(async({sources,matrix,jawCorrected})=>{
   const {createResidentPartLibrary}=await import('/resident-parts.js'),{residentPartRecipe}=await import('/resident-part-recipe.js'),{composeFacialHairProvider}=await import('/character-facial-hair.js'),{residentClips,drawResidentAnimation,advanceResidentAnimation,sampleResidentClip}=await import('/resident-animation.js');
   const binding=(await(await fetch('/art/characters/prototype-v1/straw-hat-work-v1-registration.json')).json()).source.body,entries=new Map();
   const {defaultBodyMaterials}=await import('/character-materials.js');
@@ -34,6 +34,7 @@ try{
   const library=createResidentPartLibrary(),board=document.createElement('canvas');board.width=1600;board.height=2400;const b=board.getContext('2d');b.fillStyle='#e8dfbf';b.fillRect(0,0,1600,2400);
   const transitions=document.createElement('canvas');transitions.width=1600;transitions.height=1400;const tc=transitions.getContext('2d');tc.fillStyle='#e8dfbf';tc.fillRect(0,0,1600,1400);
   const profiles=['short-curls-v1','side-part-v1'].flatMap(hair=>(matrix?['warm','sunlit','copper']:['warm']).map(skin=>({hair,skin})));
+  const reviewPoses=jawCorrected?[['base',0],['base',7],['base',8],['idle',0],['idle',1],['idle',2],['idle',3],['idle',4]]:Array.from({length:8},(_,i)=>['activities',i+4]);
   const palette=document.createElement('canvas');palette.width=1600;palette.height=profiles.length*220;const paletteContext=palette.getContext('2d');paletteContext.fillStyle='#e8dfbf';paletteContext.fillRect(0,0,palette.width,palette.height);
   const scenes=document.createElement('canvas');scenes.width=2800;scenes.height=1040;const sceneContext=scenes.getContext('2d');
   const surface=document.createElement('canvas'),probe=document.createElement('canvas');surface.width=surface.height=probe.width=probe.height=256;const pc=probe.getContext('2d');let checked=0,returns=0,transitionFrames=0,clipFrames=0,refused=0,cleanup=0,lightingSamples=0;const caches=[];
@@ -44,12 +45,12 @@ try{
     const frame=composed.frameForPose(sheet,index),original=provider.frameForPose(sheet,index),crop=entries.get(sheet+':'+index).registration.crop,a=original.getContext('2d').getImageData(0,0,256,256).data,c=frame.getContext('2d').getImageData(0,0,256,256).data;
     for(let y=0;y<256;y++)for(let x=0;x<256;x++)if(x<crop[0]||x>=crop[0]+crop[2]||y<crop[1]||y>=crop[1]+crop[3])for(let k=0;k<4;k++)if(a[(y*256+x)*4+k]!==c[(y*256+x)*4+k])throw Error('Complete provider changed pixels outside face crop');
     if(skin==='warm'){const x=i%8*200,y=hairSlot*1200+Math.floor(i/8)*200;b.drawImage(frame,...crop,x,y,160,160);b.fillStyle='#483a27';b.font='13px monospace';b.fillText(`${sheet} ${index}`,x+4,y+180);}
-    if(sheet==='activities'&&index>=4&&index<=11){const x=(index-4)*200,y=h*220;paletteContext.drawImage(frame,...crop,x,y,160,160);paletteContext.fillStyle='#483a27';paletteContext.font='11px monospace';paletteContext.fillText(`${hair} ${skin}`,x+4,y+180);paletteContext.fillText(`${sheet} ${index}`,x+4,y+200);}checked++;
+    const reviewColumn=reviewPoses.findIndex(([s,i])=>sheet===s&&index===i);if(reviewColumn>=0){const x=reviewColumn*200,y=h*220;paletteContext.drawImage(frame,...crop,x,y,160,160);paletteContext.fillStyle='#483a27';paletteContext.font='11px monospace';paletteContext.fillText(`${hair} ${skin}`,x+4,y+180);paletteContext.fillText(`${sheet} ${index}`,x+4,y+200);}checked++;
    }
    if(matrix&&skin==='warm')for(const night of [0,1]){
     const y=(hairSlot*2+night)*260;sceneContext.fillStyle=night?'#263c4b':'#e8dfbf';sceneContext.fillRect(0,y,scenes.width,260);sceneContext.save();sceneContext.filter=unlitFilter(night);
-    for(let index=4;index<=11;index++)for(const facing of [1,-1])for(const [size,x,py]of [[120,facing===1?75:245,210],[48,facing===1?155:325,220]]){drawResidentAnimation(sceneContext,surface,composed,{layers:[{sheet:'activities',row:Math.floor(index/4),frame:index%4,weight:1}],facing,breath:1},(index-4)*350+x,y+py,size);lightingSamples++;}
-    sceneContext.restore();sceneContext.fillStyle=night?'#f4e9c8':'#483a27';sceneContext.font='12px monospace';for(let index=4;index<=11;index++)sceneContext.fillText(`${hair} ${index} ${night?'night':'day'}`, (index-4)*350+8,y+250);
+    for(const [column,[sheet,index]]of reviewPoses.entries())for(const facing of [1,-1])for(const [size,x,py]of [[120,facing===1?75:245,210],[48,facing===1?155:325,220]]){drawResidentAnimation(sceneContext,surface,composed,{layers:[{sheet,row:Math.floor(index/4),frame:index%4,weight:1}],facing,breath:1},column*350+x,y+py,size);lightingSamples++;}
+    sceneContext.restore();sceneContext.fillStyle=night?'#f4e9c8':'#483a27';sceneContext.font='12px monospace';for(const [column,[sheet,index]]of reviewPoses.entries())sceneContext.fillText(`${hair} ${sheet} ${index} ${night?'night':'day'}`,column*350+8,y+250);
    }
    for(const index of [13,14]){const frame=composed.frameForPose('activities',index,{sequenceIndex:4});if(frame===composed.frameForPose('activities',index))throw Error('Missing feeding return');returns++;}
    let previous=null;const tasks=['idle','build','cook','water','garden','sleep','rest','socialize','idle'];
@@ -70,8 +71,8 @@ try{
    try{composed.frameForPose('base',0);throw Error('accepted');}catch(error){if(error.message==='accepted')throw error;refused++;}
    if(provider.frameForPose('base',0).width!==256)throw Error('Full set disposed its borrowed body');
   }
-  return {profiles,checked,returns,transitionFrames,clipFrames,refused,cleanup,caches,lightingSamples,clipCount:Object.keys(residentClips).length,board:board.toDataURL('image/png').split(',')[1],transitions:transitions.toDataURL('image/png').split(',')[1],palette:palette.toDataURL('image/png').split(',')[1],...(matrix?{scenes:scenes.toDataURL('image/png').split(',')[1]}:{})};
- },{sources,matrix});
+  return {profiles,reviewPoses,checked,returns,transitionFrames,clipFrames,refused,cleanup,caches,lightingSamples,clipCount:Object.keys(residentClips).length,board:board.toDataURL('image/png').split(',')[1],transitions:transitions.toDataURL('image/png').split(',')[1],palette:palette.toDataURL('image/png').split(',')[1],...(matrix?{scenes:scenes.toDataURL('image/png').split(',')[1]}:{})};
+ },{sources,matrix,jawCorrected});
  const count=matrix?6:2;assert.equal(result.checked,count*48);assert.equal(result.returns,count*2);assert.equal(result.refused,3+count*6);assert.equal(result.cleanup,1);assert.equal(result.transitionFrames,count*810);assert.equal(result.clipFrames,count*3120);
  assert.equal(result.lightingSamples,matrix?128:0);
  for(const key of ['board','transitions','palette',...(matrix?['scenes']:[])]){await writeFile(`${output}/${key}.png`,Buffer.from(result[key],'base64'));delete result[key];}

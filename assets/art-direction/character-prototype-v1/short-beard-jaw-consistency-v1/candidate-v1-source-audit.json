@@ -1,0 +1,82 @@
+{
+  "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+  "ok": true,
+  "undeclaredPaint": 0,
+  "poses": [
+    {
+      "sheet": "idle",
+      "index": 0,
+      "pixels": 14411,
+      "inside": 14371,
+      "bounds": [
+        63,
+        257,
+        339,
+        383
+      ],
+      "coverage": 0.9972243425161335,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "idle",
+      "index": 1,
+      "pixels": 14608,
+      "inside": 14410,
+      "bounds": [
+        64,
+        253,
+        336,
+        382
+      ],
+      "coverage": 0.9864457831325302,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "idle",
+      "index": 2,
+      "pixels": 14301,
+      "inside": 14301,
+      "bounds": [
+        64,
+        260,
+        339,
+        385
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "idle",
+      "index": 3,
+      "pixels": 14676,
+      "inside": 14674,
+      "bounds": [
+        69,
+        258,
+        344,
+        385
+      ],
+      "coverage": 0.9998637230853094,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "sheet": "base",
+      "index": 7,
+      "pixels": 6560,
+      "inside": 6560,
+      "bounds": [
+        88,
+        205,
+        272,
+        327
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ]
+}

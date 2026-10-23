@@ -1,0 +1,65 @@
+{
+  "status": "Five-pose jaw correction passes internal geometry, palette and sampled world/motion review; complete public appearance acceptance remains open",
+  "source": {
+    "collection": "short-beard-jaw-consistency-v1",
+    "file": "candidate-v1.png",
+    "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+    "poses": [
+      "idle:0",
+      "idle:1",
+      "idle:2",
+      "idle:3",
+      "base:7"
+    ]
+  },
+  "guideChanges": [
+    "Looking upper jaw fill is raised two native pixels to better match walking beard thickness. Outer jaw, cheek width, mouth gap, moustache and native crop remain unchanged.",
+    "Bent-work anatomical path and native crop are unchanged. Source atlas cell changes uniformly; no generated paint is locally stretched or trimmed.",
+    "Per-pose bounds use the guide's alpha>=32 box plus twelve source pixels, recorded with input hashes before paint generation. The source-region threshold stays98%."
+  ],
+  "inspected": [
+    "Unmodified generated source and guide overlay",
+    "Six hairstyle/skin palette rows with walking, breathing and stretching comparisons",
+    "Complete warm-skin/two-hairstyle pose board and ordered transition sheet",
+    "Both facings at48/120px widths with day/night lighting",
+    "Shared-world looking/bent-work scenes beside Bento, home, shed, warehouse, roads and regional vegetation in all three biomes",
+    "Twenty looking/work samples extracted from the encoded world recording, including looking loop return and bent/upright work poses, day and mirrored night"
+  ],
+  "findings": [
+    "Looking central jaw coverage is fuller and closer to adjacent walking/idle poses while preserving mouth openings.",
+    "Bent-work edges are softer than the preceding angular source, retaining the actual downward-facing jaw.",
+    "Observed native-scale body stature, foot contact and facial attachment match the reference/world; sampled looking/work changes show no detached tip or independent beard movement.",
+    "Some cross-source paint warmth differences remain visible in enlarged full-set comparisons. This review is not a claim that every remaining clip's continuous playback or every supported hair/hat colour combination is accepted."
+  ],
+  "mechanical": {
+    "poses": 288,
+    "feedingReturnChecks": 12,
+    "transitionUpdates": 4860,
+    "clipSamples": 18720,
+    "invalidRequests": 39,
+    "lightingSamples": 128,
+    "maximumOwnedFramesPerProvider": 50,
+    "rgbaByteUpperBoundPerProvider": 13107200,
+    "lateReturnFailureCleanup": true,
+    "undeclaredSourcePaint": 0
+  },
+  "world": {
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "staticScenes": 12,
+    "residentComparisons": 36,
+    "video": "world/clips.webm",
+    "videoScope": "Thirteen native-timed clips, full cycle plus boundary or held ending, day/right-facing and night/left-facing. This is an art recording, not a gameplay or frame-pacing benchmark.",
+    "motionSamples": "world/motion-look-work.png",
+    "motionScope": "Twenty encoded-video samples of looking/work only. Requested timestamps do not assert exact decoder/native pose correspondence."
+  },
+  "remaining": [
+    "Review remaining clips in continuous world playback and remaining cross-source warmth/volume differences",
+    "Hat and hair-colour compatibility, bundled production registration, public recipe/native validation and creator integration",
+    "Final appearance-cache/performance and complete builder release gates"
+  ],
+  "integration": "No gameplay appearance routing or public recipe/catalog changes."
+}

@@ -1,0 +1,147 @@
+{
+  "status": "Encoded recording samples prepared for visual review; not an automated animation verdict.",
+  "videoSha256": "bc5dd463b379115c5343aca6be58848b5bab658a1b1dba62c3ef24d1902a5e43",
+  "scope": "Looking and work changes only, both facings/day-night. Requested sample times, not exact decoder/native pose equivalence.",
+  "samples": [
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.7,
+      "videoSeconds": 26.3384
+    },
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.95,
+      "videoSeconds": 27.5884
+    },
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "seconds": 3.2,
+      "videoSeconds": 28.8384
+    },
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "seconds": 4.45,
+      "videoSeconds": 30.0884
+    },
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "seconds": 5.3,
+      "videoSeconds": 30.9384
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.7,
+      "videoSeconds": 70.985
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.95,
+      "videoSeconds": 72.235
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "seconds": 3.2,
+      "videoSeconds": 73.485
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "seconds": 4.45,
+      "videoSeconds": 74.735
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "seconds": 5.3,
+      "videoSeconds": 75.585
+    },
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.25,
+      "videoSeconds": 12.4801
+    },
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.45,
+      "videoSeconds": 12.6801
+    },
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.65,
+      "videoSeconds": 12.8801
+    },
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.85,
+      "videoSeconds": 13.0801
+    },
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.05,
+      "videoSeconds": 13.2801
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.25,
+      "videoSeconds": 57.1091
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.45,
+      "videoSeconds": 57.3091
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.65,
+      "videoSeconds": 57.5091
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.85,
+      "videoSeconds": 57.7091
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.05,
+      "videoSeconds": 57.9091
+    }
+  ]
+}

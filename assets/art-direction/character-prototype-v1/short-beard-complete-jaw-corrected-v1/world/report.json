@@ -1,0 +1,374 @@
+{
+  "images": [
+    {
+      "biome": "mata-atlantica",
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    }
+  ],
+  "recordings": [
+    {
+      "clip": "cook",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 2,
+      "targetMs": 2200,
+      "offsetMs": 0,
+      "elapsedMs": 2205.0999999046326,
+      "renderedFrames": 252
+    },
+    {
+      "clip": "water",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 3,
+      "targetMs": 3300.0000000000005,
+      "offsetMs": 2205.0999999046326,
+      "elapsedMs": 3308.3000000715256,
+      "renderedFrames": 397
+    },
+    {
+      "clip": "tend",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 2,
+      "targetMs": 2200,
+      "offsetMs": 5513.399999976158,
+      "elapsedMs": 2200.100000023842,
+      "renderedFrames": 264
+    },
+    {
+      "clip": "feed",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 3,
+      "targetMs": 3300.0000000000005,
+      "offsetMs": 7713.5,
+      "elapsedMs": 3308.5,
+      "renderedFrames": 397
+    },
+    {
+      "clip": "walk",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 0.5,
+      "targetMs": 1200,
+      "offsetMs": 11022,
+      "elapsedMs": 1208.0999999046326,
+      "renderedFrames": 145
+    },
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 0.8,
+      "targetMs": 1200,
+      "offsetMs": 12230.099999904633,
+      "elapsedMs": 1200,
+      "renderedFrames": 144
+    },
+    {
+      "clip": "sit",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 5,
+      "targetMs": 5500,
+      "offsetMs": 13430.099999904633,
+      "elapsedMs": 5500,
+      "renderedFrames": 660
+    },
+    {
+      "clip": "breathe",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 5,
+      "targetMs": 5500,
+      "offsetMs": 18930.099999904633,
+      "elapsedMs": 5500,
+      "renderedFrames": 660
+    },
+    {
+      "clip": "sleep",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 1,
+      "targetMs": 1200,
+      "offsetMs": 24430.099999904633,
+      "elapsedMs": 1208.3000000715256,
+      "renderedFrames": 145
+    },
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 5,
+      "targetMs": 5500,
+      "offsetMs": 25638.399999976158,
+      "elapsedMs": 5508.600000023842,
+      "renderedFrames": 661
+    },
+    {
+      "clip": "stretch",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 3.75,
+      "targetMs": 4125,
+      "offsetMs": 31147,
+      "elapsedMs": 4133,
+      "renderedFrames": 496
+    },
+    {
+      "clip": "wave",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 2.5,
+      "targetMs": 2750,
+      "offsetMs": 35280,
+      "elapsedMs": 2754.0999999046326,
+      "renderedFrames": 331
+    },
+    {
+      "clip": "relax",
+      "night": 0,
+      "facing": 1,
+      "cycleSeconds": 6,
+      "targetMs": 6600.000000000001,
+      "offsetMs": 38034.09999990463,
+      "elapsedMs": 6604.300000071526,
+      "renderedFrames": 793
+    },
+    {
+      "clip": "cook",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 2,
+      "targetMs": 2200,
+      "offsetMs": 44638.39999997616,
+      "elapsedMs": 2207.6999999284744,
+      "renderedFrames": 222
+    },
+    {
+      "clip": "water",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 3,
+      "targetMs": 3300.0000000000005,
+      "offsetMs": 46846.09999990463,
+      "elapsedMs": 3301.100000023842,
+      "renderedFrames": 332
+    },
+    {
+      "clip": "tend",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 2,
+      "targetMs": 2200,
+      "offsetMs": 50147.199999928474,
+      "elapsedMs": 2200.899999976158,
+      "renderedFrames": 221
+    },
+    {
+      "clip": "feed",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 3,
+      "targetMs": 3300.0000000000005,
+      "offsetMs": 52348.199999928474,
+      "elapsedMs": 3307.2000000476837,
+      "renderedFrames": 331
+    },
+    {
+      "clip": "walk",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 0.5,
+      "targetMs": 1200,
+      "offsetMs": 55655.39999997616,
+      "elapsedMs": 1203.6999999284744,
+      "renderedFrames": 120
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 0.8,
+      "targetMs": 1200,
+      "offsetMs": 56859.09999990463,
+      "elapsedMs": 1204,
+      "renderedFrames": 120
+    },
+    {
+      "clip": "sit",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 5,
+      "targetMs": 5500,
+      "offsetMs": 58063.09999990463,
+      "elapsedMs": 5507,
+      "renderedFrames": 550
+    },
+    {
+      "clip": "breathe",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 5,
+      "targetMs": 5500,
+      "offsetMs": 63570.09999990463,
+      "elapsedMs": 5509.300000071526,
+      "renderedFrames": 551
+    },
+    {
+      "clip": "sleep",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 1,
+      "targetMs": 1200,
+      "offsetMs": 69079.5,
+      "elapsedMs": 1205.5,
+      "renderedFrames": 121
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 5,
+      "targetMs": 5500,
+      "offsetMs": 70285,
+      "elapsedMs": 5503.399999976158,
+      "renderedFrames": 547
+    },
+    {
+      "clip": "stretch",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 3.75,
+      "targetMs": 4125,
+      "offsetMs": 75788.39999997616,
+      "elapsedMs": 4127.199999928474,
+      "renderedFrames": 406
+    },
+    {
+      "clip": "wave",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 2.5,
+      "targetMs": 2750,
+      "offsetMs": 79915.59999990463,
+      "elapsedMs": 2759,
+      "renderedFrames": 274
+    },
+    {
+      "clip": "relax",
+      "night": 1,
+      "facing": -1,
+      "cycleSeconds": 6,
+      "targetMs": 6600.000000000001,
+      "offsetMs": 82674.69999992847,
+      "elapsedMs": 6605.200000047684,
+      "renderedFrames": 650
+    }
+  ],
+  "recordedFrames": 9790,
+  "clipCount": 13,
+  "sceneCount": 12,
+  "residentComparisons": 36,
+  "scope": "Static shared-world scenes across three biomes; optional recording covers at least one complete cycle plus the next boundary (or held/nonlooping end) per clip. Recording alone is not an automated visual or frame-pacing verdict.",
+  "sourceManifestSha256": "adfb0b9ba4d5550386ebbca25f8ef5de798c7245c794bf12e11bc2a516aa295c"
+}

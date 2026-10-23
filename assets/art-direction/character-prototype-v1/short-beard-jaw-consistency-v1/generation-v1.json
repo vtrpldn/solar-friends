@@ -1,0 +1,18 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "prompt": "Precise green-mask texture replacement for a Solar Friends game facial-hair sprite layer. Image1 is the ONLY silhouette/layout target. Image2 shows the corresponding actual resident faces as anatomical context ONLY. Output NO face/body pixels. Replace ONLY the five green beard+moustache pairs with restrained matte warm dark chestnut illustrated short facial hair. Preserve1254x1254 canvas,418x418 cells in3x3 layout: three large looking-pose pairs in the first row, one large looking pair at middle-left, ONE intentionally smaller, asymmetrically bent working-pose pair at middle-center. Middle-right and the whole bottom row MUST be empty transparent. Do NOT enlarge the smaller middle-center pair or copy the four standing shapes into it. Every green outline, location, angle and width is exact. Trace each individual mask faithfully, with all empty margins preserved. Keep the entire band interior painted, mouth gaps and moustache-to-jaw spaces transparent. The first four beards intentionally have fuller central upper-jaw coverage; do not hollow them into thin outlines or deepen them below the mask. The smaller middle-center beard follows a downward-facing jaw; preserve that angle while making the painted treatment softly grouped rather than a sharp polygon. Matte dark chestnut, subtle broad short-hair clumps, simplified soft painted edges, diffuse upper-left light, darker underside, no bright rim or high contrast hair strands. No rounded leather tube, wood grain, outline, geometric facets, glow, halo, cast shadow, haze, detached specks, green paint, skin, eyes, ears, nose, scalp hair, clothes, tools, text or background. Alpha ZERO outside the original green shapes. Never recenter, resize, translate, widen or warp. Output just five painted facial-hair pairs on true transparency.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-jaw-consistency-v1/jaw.png",
+      "role": "Exact revised looking volume and unchanged bent-work positional stencil"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-jaw-consistency-v1/faces.png",
+      "role": "Actual native resident faces; anatomical context only"
+    }
+  ],
+  "file": "candidate-v1.png",
+  "outputSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-6306c74b-99db-476a-a76c-2d5f75722397.png",
+  "verdict": "All five guide-fixed source-region checks pass at the unchanged98% requirement (minimum98.64%), undeclared painted pixels0. Reviewed through six appearance profiles and shared-world scenes; internal only pending complete appearance/integration gates."
+}

@@ -1,0 +1,71 @@
+{
+  "frames": [
+    {
+      "key": "idle-0"
+    },
+    {
+      "key": "idle-1"
+    },
+    {
+      "key": "idle-2"
+    },
+    {
+      "key": "idle-3"
+    },
+    {
+      "key": "base-7"
+    }
+  ],
+  "guides": [
+    {
+      "key": "idle-0",
+      "painted": 10087,
+      "bounds": [
+        69,
+        264,
+        322,
+        375
+      ]
+    },
+    {
+      "key": "idle-1",
+      "painted": 10071,
+      "bounds": [
+        69,
+        255,
+        322,
+        366
+      ]
+    },
+    {
+      "key": "idle-2",
+      "painted": 10551,
+      "bounds": [
+        69,
+        264,
+        331,
+        375
+      ]
+    },
+    {
+      "key": "idle-3",
+      "painted": 10083,
+      "bounds": [
+        78,
+        264,
+        331,
+        375
+      ]
+    },
+    {
+      "key": "base-7",
+      "painted": 3180,
+      "bounds": [
+        92,
+        209,
+        264,
+        320
+      ]
+    }
+  ]
+}

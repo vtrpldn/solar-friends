@@ -1,0 +1,21 @@
+{
+    "programs": [
+
+    ],
+    "stream_groups": [
+
+    ],
+    "streams": [
+        {
+            "codec_name": "vp9",
+            "width": 900,
+            "height": 420,
+            "avg_frame_rate": "0/0",
+            "nb_read_frames": "2676"
+        }
+    ],
+    "format": {
+        "duration": "89.138187",
+        "size": "8710707"
+    }
+}

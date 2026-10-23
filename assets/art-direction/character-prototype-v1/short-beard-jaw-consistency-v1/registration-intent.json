@@ -1,0 +1,141 @@
+{
+  "purpose": "Looking upper-jaw fill volume correction; unchanged bent-work jaw anatomy with material/edge repaint.",
+  "inputs": {
+    "specs.json": "71c5e7805945b0fd0fae50625b785087203fc7840405ae647d88b56148469a3e",
+    "faces.png": "895fec55866fdece7eba25d34e83e4fb4e96b0ef5fb3501fef948364ecb06c79",
+    "jaw.png": "5366dbb3dfbfc04384bddf6860aa20c62906c396f0d60e938abec49f2af8d617",
+    "references.json": "72858ee52b90f9b148b45477b21afeba3b282a51d46f59b71508e17adb07c037"
+  },
+  "poses": [
+    {
+      "key": "idle-0",
+      "sheet": "idle",
+      "index": 0,
+      "clip": "look",
+      "crop": [
+        120,
+        34,
+        48,
+        48
+      ],
+      "bodyFrameSha256": "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+      "sourceRect": [
+        0,
+        0,
+        418,
+        418
+      ],
+      "bounds": [
+        57,
+        252,
+        277,
+        135
+      ],
+      "boundsRule": "Guide alpha>=32 bounding box with twelve source-pixel margin, fixed before paint generation."
+    },
+    {
+      "key": "idle-1",
+      "sheet": "idle",
+      "index": 1,
+      "clip": "look",
+      "crop": [
+        120,
+        34,
+        48,
+        48
+      ],
+      "bodyFrameSha256": "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+      "sourceRect": [
+        418,
+        0,
+        418,
+        418
+      ],
+      "bounds": [
+        57,
+        243,
+        277,
+        135
+      ],
+      "boundsRule": "Guide alpha>=32 bounding box with twelve source-pixel margin, fixed before paint generation."
+    },
+    {
+      "key": "idle-2",
+      "sheet": "idle",
+      "index": 2,
+      "clip": "look",
+      "crop": [
+        120,
+        34,
+        48,
+        48
+      ],
+      "bodyFrameSha256": "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+      "sourceRect": [
+        836,
+        0,
+        418,
+        418
+      ],
+      "bounds": [
+        57,
+        252,
+        286,
+        135
+      ],
+      "boundsRule": "Guide alpha>=32 bounding box with twelve source-pixel margin, fixed before paint generation."
+    },
+    {
+      "key": "idle-3",
+      "sheet": "idle",
+      "index": 3,
+      "clip": "look",
+      "crop": [
+        120,
+        34,
+        48,
+        48
+      ],
+      "bodyFrameSha256": "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+      "sourceRect": [
+        0,
+        418,
+        418,
+        418
+      ],
+      "bounds": [
+        66,
+        252,
+        277,
+        135
+      ],
+      "boundsRule": "Guide alpha>=32 bounding box with twelve source-pixel margin, fixed before paint generation."
+    },
+    {
+      "key": "base-7",
+      "sheet": "base",
+      "index": 7,
+      "clip": "work",
+      "crop": [
+        132,
+        70,
+        68,
+        68
+      ],
+      "bodyFrameSha256": "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+      "sourceRect": [
+        418,
+        418,
+        418,
+        418
+      ],
+      "bounds": [
+        80,
+        197,
+        196,
+        135
+      ],
+      "boundsRule": "Guide alpha>=32 bounding box with twelve source-pixel margin, fixed before paint generation."
+    }
+  ]
+}

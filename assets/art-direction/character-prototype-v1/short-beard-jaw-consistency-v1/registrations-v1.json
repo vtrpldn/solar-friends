@@ -1,0 +1,152 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "look",
+    "sheet": "idle",
+    "index": 0,
+    "bodyFrameSha256": "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+    "source": {
+      "size": 1254,
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+      "rect": [
+        0,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      120,
+      34,
+      48,
+      48
+    ],
+    "bounds": [
+      57,
+      252,
+      277,
+      135
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "look",
+    "sheet": "idle",
+    "index": 1,
+    "bodyFrameSha256": "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+    "source": {
+      "size": 1254,
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+      "rect": [
+        418,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      120,
+      34,
+      48,
+      48
+    ],
+    "bounds": [
+      57,
+      243,
+      277,
+      135
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "look",
+    "sheet": "idle",
+    "index": 2,
+    "bodyFrameSha256": "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+    "source": {
+      "size": 1254,
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+      "rect": [
+        836,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      120,
+      34,
+      48,
+      48
+    ],
+    "bounds": [
+      57,
+      252,
+      286,
+      135
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "look",
+    "sheet": "idle",
+    "index": 3,
+    "bodyFrameSha256": "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+    "source": {
+      "size": 1254,
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+      "rect": [
+        0,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      120,
+      34,
+      48,
+      48
+    ],
+    "bounds": [
+      66,
+      252,
+      277,
+      135
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "work",
+    "sheet": "base",
+    "index": 7,
+    "bodyFrameSha256": "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+    "source": {
+      "size": 1254,
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+      "rect": [
+        418,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      132,
+      70,
+      68,
+      68
+    ],
+    "bounds": [
+      80,
+      197,
+      196,
+      135
+    ]
+  }
+]
