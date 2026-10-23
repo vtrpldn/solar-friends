@@ -1,0 +1,25 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "generate new painted gait poses from anatomy guide and original standing style reference",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-walk-cycle-v2/geometry.png",
+      "role": "pose and depth guide only; replace flat guide colours with finished human paint"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-walk-cycle-v2/standing.png",
+      "role": "actual existing body style, anatomy, face, skin, clothing, boot and proportion reference only"
+    }
+  ],
+  "excludedReference": {
+    "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/body-walk-cycle-v2/old.png",
+    "reason": "failure evidence: all four frames retain the same leading leg; not provided to generator"
+  },
+  "guideIntent": "guide-intent.json",
+  "transparentBackground": true,
+  "status": "needs correction; internal candidate only; active artwork unchanged",
+  "originalOutputPath": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-daa12381-c353-4c93-b4ca-aa7074f15279.png",
+  "savedSource": "candidate-v1.png",
+  "sourceSha256": "3cbbcee07977f572bff015cf3dc4ae77522d63a6dc22773b02aac7c51e9d7006"
+}

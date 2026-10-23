@@ -1,0 +1,25 @@
+{
+  "status": "needs-correction",
+  "activeArtworkChanged": false,
+  "inspected": [
+    "candidate-v1.png",
+    "review-v1-board.png",
+    "motion-walk.png"
+  ],
+  "evidence": [
+    "review-v1.json",
+    "motion-samples.json"
+  ],
+  "findings": [
+    "Four distinct contact/passing drawings replace the inherited same-leading-leg silhouette, but near/far leg ownership still needs explicit review.",
+    "Passing knees and boots lift too high for the intended relaxed walking gait.",
+    "Current shared-scale lower-leg pivot normalization shifts the upper-body alpha centroid about 14.8 native pixels between contact and passing poses.",
+    "Torso and head consistency require anatomical landmark review before any registration change; do not force head centroids or warp paint."
+  ],
+  "next": [
+    "Author lower passing-knee geometry and review source anatomy against standing reference.",
+    "Measure actual waist/hip landmarks and review body-owned registration with one common scale.",
+    "Review world scale/ground contact, both facings, complete motion, and all affected part bindings before promotion."
+  ],
+  "scopeLimit": "Native sampler recording and isolated render checks do not prove animation quality, world acceptance, accessory compatibility or performance."
+}
