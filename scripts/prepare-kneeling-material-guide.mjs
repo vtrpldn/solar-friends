@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const root='assets/art-direction/character-prototype-v1/body-family-relaxed-v1',ownership=JSON.parse(await readFile(root+'/ownership-v1.json','utf8')),files=JSON.parse(await readFile(root+'/source-files-v1.json','utf8')),sources={};
+for(const [id,file]of Object.entries(files)){const bytes=await readFile(file),sourceHash=createHash('sha256').update(bytes).digest('hex');assert.equal(sourceHash,ownership.sources[id].sha256);sources[id]={sourceHash,data:bytes.toString('base64')};}
+const server=await serve(0);let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/family-material-review`);
+ const result=await page.evaluate(async({ownership,sources})=>{const {prepareBodyFamily}=await import('/character-body-family.js'),loaded={};for(const [id,s]of Object.entries(sources)){const image=new Image();image.src='data:image/png;base64,'+s.data;await image.decode();loaded[id]={image,sourceHash:s.sourceHash};}const family=await prepareBodyFamily({ownership,sources:loaded}),images={};try{for(let index=8;index<=11;index++){const canvas=document.createElement('canvas');canvas.width=canvas.height=768;const ctx=canvas.getContext('2d');ctx.fillStyle='#e8dfbf';ctx.fillRect(0,0,768,768);ctx.drawImage(family.frameForPose('activities',index),0,0,768,768);ctx.font='12px monospace';for(let n=0;n<256;n+=10){ctx.strokeStyle='rgba(30,75,75,.3)';ctx.beginPath();ctx.moveTo(n*3,0);ctx.lineTo(n*3,768);ctx.moveTo(0,n*3);ctx.lineTo(768,n*3);ctx.stroke();ctx.fillStyle='#243e3e';ctx.fillText(n,n*3+1,14);ctx.fillText(n,2,n*3+13);}images[index]=canvas.toDataURL('image/png').split(',')[1];}return images;}finally{family.dispose();}},{ownership,sources});for(const [index,data]of Object.entries(result)){const path=root+'/material-guide-kneel-'+index+'.png',bytes=Buffer.from(data,'base64');let previous;try{previous=await readFile(path);}catch(error){if(error.code!=='ENOENT')throw error;}if(previous)assert(previous.equals(bytes),'Frozen body guide changed; create a new version');else await writeFile(path,bytes);}
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

@@ -1,0 +1,55 @@
+{
+  "status": "accepted internal family-colour model and calibration; final per-pixel/complete-part/world acceptance pending",
+  "registration": "materials-v7.json",
+  "registrationSha256": "9a762e92d93e30d880dabac0620b3cc60b67ce7310ad30c18ad04ec3666a114f",
+  "rendererSha256": "4b87f9105cf939f39cd0c3e3aa3198b2db7698e2453e0607a637231c3bbc1171",
+  "activeRecipesChanged": false,
+  "sourcePaintOrAlphaEdited": false,
+  "inspected": [
+    "materials-v7-walking.png",
+    "materials-v7-kneeling-8.png",
+    "materials-v7-kneeling-9.png",
+    "materials-v7-kneeling-10.png",
+    "materials-v7-kneeling-11.png"
+  ],
+  "findings": [
+    "The family colour model binds all 48 prepared RGBA hashes and full multi-source ownership; it cannot describe the repainted gait using only the original three PNG hashes.",
+    "Walking masks follow measured waist seams and own the calves separately from complete boot regions.",
+    "Kneeling masks now include the raised rear boot, follow the actual waist seam, and keep visible wrist/lower-shin skin ahead of shoe ownership.",
+    "Reusing old mask output would preserve inherited wrong shirt/pant boundaries and uncoloured rear boots; exact old output is therefore required only for the 40 unaffected masks.",
+    "Fine highlight/edge ownership and complete clothing/accessory/equipment/portrait/world/motion combinations remain a separate release gate. This calibration is not a production art-perfect verdict."
+  ],
+  "checks": {
+    "isolated": 192,
+    "preserved": 160,
+    "defaultReuse": 48,
+    "walkingPaletteCombinations": 288,
+    "kneelingProbes": 20,
+    "refused": 21,
+    "semanticGeometryProbes": 5,
+    "maskCopiesIsolated": 48,
+    "cacheAtCapacity": {
+      "entries": 8,
+      "maximum": 8,
+      "rgbaByteUpperBound": 2097152
+    }
+  },
+  "publicRegression": {
+    "legacyIsolatedMaterialChanges": 192,
+    "legacyClipsBothFacings": 13,
+    "frozenAppearanceRgbaComparisons": 400
+  },
+  "historicalDiagnostics": {
+    "v2": "Inherited row cutoff leaves raised kneeling boot brown; scalar waist cuts through pants.",
+    "v3": "Footwear region improves boot coverage but overlaps wrist skin.",
+    "v4": "Pooled palm protection does not cover the full dorsal/lower wrist.",
+    "v5": "Close-up reveals remaining lower wrist/calf intrusion.",
+    "v6": "Brightness guard avoids calf intrusion but misclassifies isolated bright boot paint.",
+    "note": "Earlier captures/reports describe the evolving internal renderer and are retained as failure evidence, not current passing gates. Only v7 report pins the final renderer hash used for this claim."
+  },
+  "remaining": [
+    "Finish pixel-boundary material review together with the complete new-family parts.",
+    "Update the four walking hair/hat/facial-hair/garment bindings and review unchanged-pose reuse by exact hashes.",
+    "Complete character appearance range, public creator integration, all-clip/world/portrait review and the original biome/performance/recovery/usability gates."
+  ]
+}
