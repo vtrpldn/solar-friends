@@ -1527,3 +1527,14 @@ The shared verifier now distinguishes authored source poses from playback poses.
 Face comparisons, mirrored day/night renderer scenes at two sizes and 60 ordered temporal samples were inspected. Evidence and exact generation provenance: `assets/art-direction/character-prototype-v1/short-beard-gesture-clips-v1/`. Repeat `node scripts/verify-facial-clips.mjs short-beard-gesture-clips-v1 wave v1` and the same command with `relax`.
 
 **Why:** artwork coverage and playable animation coverage differ when source sheets contain unused poses. Keeping both explicit prevents review-only frames from silently entering runtime caches. Continuous playback, remaining activities/returns, public/native integration, additional body/face/clothing choices and all original biome, recovery, sustainability, usability and performance gates remain open. The complete builder objective stays active.
+
+
+### Stretching and cooking facial-hair sets
+
+Eight new independently traced overlays cover idle 4–7 and activities 0–3, bringing initial internal frame-fit coverage to 36 of 48 main poses. The raised-arm guide was narrowed after reference review before generation so its tip stays on the face. Fixed source cells, native-coordinate crops and body-frame hashes remain explicit. Public appearance recipes are unchanged.
+
+Both sets pass 48 combined hairstyle/skin/pose comparisons, unchanged pixels outside face crops, 32 invalid-input refusals, twelve disposal checks and two partial-construction cleanup checks. Stretch uses three runtime frames and refuses its raw unused idle 7 pose plus surplus sets; cook uses four frames. Their composed caches remain bounded to 786432 and 1048576 RGBA bytes respectively, excluding source/body/GPU allocations. Seven source regions have full coverage; activities 3 retains 10081/10094 thresholded pixels inside its fixed guide-derived envelope (0.998712, above the unchanged 0.98 gate). The ninth atlas cell is empty. No generated paint was warped or trimmed. The existing waving regression passes with unchanged captures.
+
+Original/composite faces, mirrored day/night resident-renderer scenes at two sizes and 64 ordered temporal samples were inspected. Exact prompts, registrations and evidence: `assets/art-direction/character-prototype-v1/short-beard-stretch-cook-v1/`. Repeat `node scripts/verify-facial-clips.mjs short-beard-stretch-cook-v1 stretch v1` and the same with `cook`.
+
+**Why:** tipped stretching faces and tool-bearing activities require their own jaw registrations. These isolated captures do not establish continuous playback or complete customization. Remaining activity/return frames, colour/hat/portrait/world checks, native/public integration, additional body/face/clothing choices and every original biome, sustainability, recovery, usability and performance gate remain open. The complete builder objective stays active.

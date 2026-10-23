@@ -1,0 +1,110 @@
+{
+  "frames": [
+    {
+      "key": "idle-4"
+    },
+    {
+      "key": "idle-5"
+    },
+    {
+      "key": "idle-6"
+    },
+    {
+      "key": "idle-7"
+    },
+    {
+      "key": "activities-0"
+    },
+    {
+      "key": "activities-1"
+    },
+    {
+      "key": "activities-2"
+    },
+    {
+      "key": "activities-3"
+    }
+  ],
+  "guides": [
+    {
+      "key": "idle-4",
+      "painted": 6948,
+      "bounds": [
+        104,
+        230,
+        358,
+        329
+      ]
+    },
+    {
+      "key": "idle-5",
+      "painted": 6286,
+      "bounds": [
+        82,
+        216,
+        321,
+        329
+      ]
+    },
+    {
+      "key": "idle-6",
+      "painted": 4497,
+      "bounds": [
+        97,
+        194,
+        299,
+        306
+      ]
+    },
+    {
+      "key": "idle-7",
+      "painted": 6919,
+      "bounds": [
+        112,
+        230,
+        366,
+        329
+      ]
+    },
+    {
+      "key": "activities-0",
+      "painted": 6218,
+      "bounds": [
+        164,
+        186,
+        388,
+        291
+      ]
+    },
+    {
+      "key": "activities-1",
+      "painted": 6217,
+      "bounds": [
+        112,
+        186,
+        336,
+        291
+      ]
+    },
+    {
+      "key": "activities-2",
+      "painted": 6251,
+      "bounds": [
+        156,
+        186,
+        381,
+        291
+      ]
+    },
+    {
+      "key": "activities-3",
+      "painted": 6218,
+      "bounds": [
+        164,
+        186,
+        388,
+        291
+      ]
+    }
+  ]
+}

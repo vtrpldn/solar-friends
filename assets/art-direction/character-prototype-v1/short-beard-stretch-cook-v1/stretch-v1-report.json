@@ -1,0 +1,111 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+  "clip": "stretch",
+  "sheet": "idle",
+  "poseCount": 4,
+  "clipPoseCount": 3,
+  "sourceOnlyPoses": [
+    7
+  ],
+  "unusedRefused": 1,
+  "surplusRefused": 1,
+  "sourceOnlyReleased": 6,
+  "checked": 24,
+  "refused": 16,
+  "disposed": 6,
+  "partialCleanup": 1,
+  "audits": [
+    {
+      "index": 4,
+      "pixels": 11293,
+      "inside": 11293,
+      "bounds": [
+        100,
+        228,
+        368,
+        338
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 5,
+      "pixels": 10532,
+      "inside": 10532,
+      "bounds": [
+        74,
+        214,
+        329,
+        338
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 6,
+      "pixels": 7944,
+      "inside": 7944,
+      "bounds": [
+        93,
+        184,
+        310,
+        315
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 7,
+      "pixels": 11446,
+      "inside": 11446,
+      "bounds": [
+        100,
+        226,
+        375,
+        340
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 32
+}

@@ -3,7 +3,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const collection=process.argv[2],clip=process.argv[3];assert(/^[a-z0-9-]+$/.test(collection??''));assert(['work','walk','breathe','look','sit','sleep','wave','relax'].includes(clip));const root='assets/art-direction/character-prototype-v1/'+collection,version=process.argv[4];assert(/^v[1-9][0-9]?$/.test(version??''),'Choose a candidate revision explicitly, such as v2.');
+const collection=process.argv[2],clip=process.argv[3];assert(/^[a-z0-9-]+$/.test(collection??''));assert(['work','walk','breathe','look','sit','sleep','wave','relax','stretch','cook'].includes(clip));const root='assets/art-direction/character-prototype-v1/'+collection,version=process.argv[4];assert(/^v[1-9][0-9]?$/.test(version??''),'Choose a candidate revision explicitly, such as v2.');
 const atlas=await readFile(root+'/candidate-'+version+'.png');
 const registrations=JSON.parse(await readFile(root+'/registrations-'+version+'.json','utf8')).filter(r=>r.clip===clip);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');

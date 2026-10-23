@@ -1,0 +1,17 @@
+{
+  "status": "Initial isolated frame-fit review passed; internal only",
+  "candidate": "candidate-v1.png",
+  "findings": [
+    "Inspected original pose grids and fixed face-mask guides; narrowed the raised-arm jaw guide before generation to avoid crossing onto the arm.",
+    "Inspected generated atlas, 48 hairstyle/skin/pose comparisons, mirrored day/night resident-renderer scenes at 48 and 150 pixel widths, and 64 ordered timing samples.",
+    "Jaw curves remain attached and mouth openings remain visible in these isolated captures. Continuous playback remains unverified.",
+    "Stretch uses idle 4/5/6; idle 7 is reviewed raw artwork and refused by its runtime clip provider. Cooking uses all four authored activity poses.",
+    "Seven source envelopes have full measured coverage; activities 3 has 10081 of 10094 thresholded pixels inside its fixed guide-derived envelope (0.998712), exceeding the unchanged 0.98 minimum. No paint was trimmed or warped."
+  ],
+  "remaining": [
+    "Activity poses 4 through 15 and two equipment returns",
+    "Continuous and cross-activity playback",
+    "Hair colours, hats, portraits and biome world integration",
+    "Public/native recipe integration and full original builder release requirements"
+  ]
+}

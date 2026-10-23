@@ -1,0 +1,109 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+  "clip": "cook",
+  "sheet": "activities",
+  "poseCount": 4,
+  "clipPoseCount": 4,
+  "sourceOnlyPoses": [],
+  "unusedRefused": 0,
+  "surplusRefused": 0,
+  "sourceOnlyReleased": 0,
+  "checked": 24,
+  "refused": 16,
+  "disposed": 6,
+  "partialCleanup": 1,
+  "audits": [
+    {
+      "index": 0,
+      "pixels": 10320,
+      "inside": 10320,
+      "bounds": [
+        157,
+        181,
+        397,
+        301
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 1,
+      "pixels": 10135,
+      "inside": 10135,
+      "bounds": [
+        103,
+        181,
+        348,
+        301
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 2,
+      "pixels": 10161,
+      "inside": 10161,
+      "bounds": [
+        145,
+        182,
+        391,
+        301
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 3,
+      "pixels": 10094,
+      "inside": 10081,
+      "bounds": [
+        155,
+        183,
+        402,
+        301
+      ],
+      "coverage": 0.998712106201704,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 32
+}
