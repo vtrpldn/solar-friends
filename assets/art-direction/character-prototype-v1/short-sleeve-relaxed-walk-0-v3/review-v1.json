@@ -1,0 +1,23 @@
+{
+  "scope": "One internal pose source, six complete character combinations and static lighting/facing guides. No complete shirt animation or player recipe.",
+  "composed": 6,
+  "outside": 6,
+  "protectedLower": 6,
+  "refused": 4,
+  "coverage": [
+    {
+      "sheet": "base",
+      "index": 0,
+      "oldTop": 1760,
+      "covered": 1760,
+      "ratio": 1,
+      "collarLeaks": []
+    }
+  ],
+  "sourceHash": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+  "rendererSha256": {
+    "character-clothing.js": "03f1f569e774282ed07051ba6bfe6c7fb298408c463c092be85888e5ddc9d25a",
+    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b"
+  }
+}

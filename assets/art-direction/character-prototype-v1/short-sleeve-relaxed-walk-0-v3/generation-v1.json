@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v1.txt",
+  "promptSha256": "bc2920d18501ca6795d41f4a35b4827f3f2d09455215486bf22e469b345665be",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-0-v3/mask.png",
+      "role": "Sole edit target; exact pose silhouette and alpha/position authority",
+      "sha256": "8b860ff9e8296d136c44a96bb8dea677000edb8fbc9730370de203e54c70ec05"
+    }
+  ],
+  "geometryIntent": "registration-intent.json",
+  "geometryIntentSha256": "7b88fa0db34d00d60411292670766aebd468ff94436b33c416a3e2cd5ab385ab",
+  "transparentBackground": true,
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ff3ac895-5345-4b9e-9d84-d83f7f291b28.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+  "paintModified": false,
+  "status": "Internal single-pose candidate; frozen source coverage passes; static visual review retained separately. Full clothing family and player integration unfinished."
+}

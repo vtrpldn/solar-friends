@@ -1,0 +1,26 @@
+{
+  "status": "Internal single-pose source/fit candidate; complete clothing-family acceptance remains open.",
+  "pose": {
+    "sheet": "base",
+    "index": 0
+  },
+  "sourceSha256": {
+    "candidate-v1.png": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+    "registration-intent.json": "7b88fa0db34d00d60411292670766aebd468ff94436b33c416a3e2cd5ab385ab",
+    "registrations-v1.json": "1ff5ba8c2bb902551c880c49508ad3e810f0394b63b086508354aff1f740694c",
+    "review-v1-board.png": "82a48bf8721adfc6258473e57079e32f1c43af98f17c7f6a90f331089c1f7e4d",
+    "review-v1-details.png": "6b3109e8c601103f50ff8bc88ddddae88cfa332c2789b72877b7d36d6cfcbf7c",
+    "review-v1-lighting.png": "8e3a99dfac8c0c997e8846132b25f1ddb37b01fcbf4ad8b6faca461b2702d1d2"
+  },
+  "findings": [
+    "Unmodified generator output follows the frozen collar, shoulder, sleeve and waist guide. The two earlier collar guides were rejected before paint generation and remain separate records.",
+    "Inspected source paint, both hairstyle/three-skin comparison boards, native torso closeups and full sprites in both facings and day/night lighting. Cream cloth has broad restrained shading and readable sleeve edges beside the existing body painting.",
+    "The generated fringe does not show a conspicuous detached halo at the reviewed 120-pixel sprite scale; no alpha trimming or other bitmap cleanup was performed.",
+    "Six compositions preserve every tested pixel outside the fixed torso crop and all lower-body pixels below native y=150. All 1760 tested original shirt pixels are covered and no tested collar leaks remain."
+  ],
+  "limits": [
+    "One gait pose only; the other three walking shirt poses are not supplied by this candidate.",
+    "Foreground ownership for crossing arms, garment colour choices, full idle/work/activity clothing, clip transitions, world scenes and player integration remain required.",
+    "No body/face/bottom/shoe range, complete clothing animation, sustained performance or total-memory acceptance is claimed."
+  ]
+}

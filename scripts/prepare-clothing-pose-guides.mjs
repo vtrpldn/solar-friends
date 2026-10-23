@@ -4,23 +4,25 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
+const familyName=process.argv.find(arg=>arg.startsWith('--family='))?.slice(9);assert(familyName===undefined||/^[a-z0-9-]+$/.test(familyName));
+let familyInput=null;if(familyName){const root='assets/art-direction/character-prototype-v1/'+familyName,ownership=JSON.parse(await readFile(root+'/ownership-v1.json','utf8')),files=JSON.parse(await readFile(root+'/source-files-v1.json','utf8')),sources={};for(const [id,file]of Object.entries(files)){const bytes=await readFile(file),sourceHash=createHash('sha256').update(bytes).digest('hex');assert.equal(sourceHash,ownership.sources[id].sha256);sources[id]={sourceHash,data:bytes.toString('base64')};}familyInput={ownership,sources};}
 const name=process.argv[2];assert(/^[a-z0-9-]+$/.test(name??''));
 const root='assets/art-direction/character-prototype-v1/'+name;await mkdir(root,{recursive:true});
-if(process.argv.includes('--freeze')){
- const existing=await readFile(root+'/registration-intent.json').catch(error=>{if(error.code==='ENOENT')return null;throw error;});
- assert(existing===null,'A frozen collection must use a new name for revised geometry');
-}
+const priorIntent=await readFile(root+'/registration-intent.json','utf8').catch(error=>{if(error.code==='ENOENT')return null;throw error;});
+if(process.argv.includes('--freeze'))assert(priorIntent===null,'A frozen collection must use a new name for revised geometry');
 const specs=JSON.parse(await readFile(root+'/specs.json','utf8')),keys=new Set();assert(Array.isArray(specs)&&specs.length>0&&specs.length<=9);
 for(const s of specs){assert(['base','idle','activities'].includes(s.sheet)&&Number.isInteger(s.index)&&s.index>=0&&s.index<16);assert(s.key===s.sheet+'-'+s.index&&!keys.has(s.key));keys.add(s.key);for(const [rect,size]of [[s.crop,256],[s.tile,1254]])assert(Array.isArray(rect)&&rect.length===4&&rect.every(Number.isSafeInteger)&&rect[0]>=0&&rect[1]>=0&&rect[2]>0&&rect[2]===rect[3]&&rect[0]+rect[2]<=size&&rect[1]+rect[3]<=size);if(s.path)assert(typeof s.path==='string'&&s.path.length<8192);}
 for(let i=0;i<specs.length;i++)for(let j=0;j<i;j++){const a=specs[i].tile,b=specs[j].tile;assert(a[0]+a[2]<=b[0]||b[0]+b[2]<=a[0]||a[1]+a[3]<=b[1]||b[1]+b[3]<=a[1],'Guide cells overlap');}
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/clothing-guides`);
- const result=await page.evaluate(async specs=>{
+ const result=await page.evaluate(async({specs,familyInput})=>{
   const {loadCharacterImageSource}=await import('/character-image-source.js'),{preparedFrames}=await import('/sprite-frames.js'),{attachmentBinding}=await import('/character-attachments.js');
-  const files={base:'body-neutral-base.png',idle:'body-neutral-idle-candidate-v2.png',activities:'body-neutral-activities-candidate-v1.png'},frames={},hashes={};
+  const files={base:'body-neutral-base.png',idle:'body-neutral-idle-candidate-v2.png',activities:'body-neutral-activities-candidate-v1.png'};let frames={},hashes={},family=null,binding;
+  if(familyInput){const {prepareBodyFamily}=await import('/character-body-family.js'),sources={};for(const [id,source]of Object.entries(familyInput.sources)){const image=new Image();image.src='data:image/png;base64,'+source.data;await image.decode();sources[id]={image,sourceHash:source.sourceHash};}family=await prepareBodyFamily({ownership:familyInput.ownership,sources});frames=family.frames;binding=family.binding;}else{
   for(const [sheet,file]of Object.entries(files)){const source=await loadCharacterImageSource('/art/characters/prototype-v1/'+file);frames[sheet]=preparedFrames(source.image,{referenceRow:sheet==='base'?2:0});hashes[sheet]=source.sourceHash;}
-  const binding=await attachmentBinding(frames,hashes),make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},atlas=make(1254,1254),mask=make(1254,1254),context=make(1254,1254),board=make(1600,Math.ceil(specs.length/4)*640),b=board.getContext('2d'),guides=[],grids={},rowSpans=[];
+  binding=await attachmentBinding(frames,hashes);}
+  const make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},atlas=make(1254,1254),mask=make(1254,1254),context=make(1254,1254),board=make(1600,Math.ceil(specs.length/4)*640),b=board.getContext('2d'),guides=[],grids={},rowSpans=[];
   b.fillStyle='#e8dfbf';b.fillRect(0,0,board.width,board.height);
   for(const [i,s]of specs.entries()){
    const body=frames[s.sheet][s.index],grid=make(650,650),g=grid.getContext('2d'),[cx,cy,cw,ch]=s.crop,[x,y,w,h]=s.tile;
@@ -37,11 +39,13 @@ try{
     if(!painted||bounds[0]<=0||bounds[1]<=0||bounds[2]>=w||bounds[3]>=h)throw Error('A garment guide is empty or leaves its cell');guides.push({key:s.key,bounds,painted});
    }
   }
-  return {binding,guides,rowSpans,images:{...grids,...Object.fromEntries(Object.entries({atlas,mask,context,board}).map(([key,c])=>[key,c.toDataURL('image/png').split(',')[1]]))}};
- },specs);
- for(const [key,data]of Object.entries(result.images))await writeFile(root+'/'+key+'.png',Buffer.from(data,'base64'));delete result.images;
- const sourceHashes={};for(const file of ['specs.json','atlas.png','mask.png','context.png','board.png'])sourceHashes[file]=createHash('sha256').update(await readFile(root+'/'+file)).digest('hex');
- await writeFile(root+'/references.json',JSON.stringify({...result,sourceHashes},null,2)+'\n');
+  const result={binding,guides,rowSpans,images:{...grids,...Object.fromEntries(Object.entries({atlas,mask,context,board}).map(([key,c])=>[key,c.toDataURL('image/png').split(',')[1]]))}};family?.dispose();return result;
+ },{specs,familyInput});
+ const outputs=Object.fromEntries(Object.entries(result.images).map(([key,data])=>[key+'.png',Buffer.from(data,'base64')]));delete result.images;
+ const sourceHashes={};for(const file of ['specs.json','atlas.png','mask.png','context.png','board.png'])sourceHashes[file]=createHash('sha256').update(outputs[file]??await readFile(root+'/'+file)).digest('hex');
+ outputs['references.json']=Buffer.from(JSON.stringify({...result,sourceHashes},null,2)+'\n');
+ if(priorIntent!==null){const frozen=JSON.parse(priorIntent);assert.deepEqual(result.binding,frozen.body,'A frozen garment guide cannot change body family');assert.deepEqual(sourceHashes,frozen.guideHashes,'A frozen garment guide cannot change geometry or reference pixels');for(const [file,data]of Object.entries(outputs))assert((await readFile(root+'/'+file)).equals(data),'A frozen garment guide cannot rewrite '+file);}
+ else for(const [file,data]of Object.entries(outputs))await writeFile(root+'/'+file,data);
  if(process.argv.includes('--freeze')){
   assert.equal(result.guides.length,specs.length,'Every frozen pose needs an authored silhouette');
   assert(specs.every(s=>s.tile[2]===specs[0].tile[2]),'A frozen collection uses one source scale');
