@@ -1516,3 +1516,14 @@ The shared guide tool validates pose identity, crop/tile limits and non-overlap,
 The face pairs, mirrored day/night resident-renderer scenes at small/enlarged sizes and 72 ordered timing samples were inspected. Full continuous/cross-activity playback, remaining gestures/activities/returns, hair-colour/hat/portrait/world checks, total memory and public/native integration remain open. Exact prompts, source fingerprints, rejected comparisons and results: `assets/art-direction/character-prototype-v1/short-beard-rest-clips-v1/`. Repeat `node scripts/verify-facial-clips.mjs short-beard-rest-clips-v1 sit v2` (also `sleep` and `look`).
 
 **Why:** resting faces need their own jaw shapes, and clip completeness must follow actual animation frames rather than assuming every activity has four. The complete original builder scope remains active.
+
+
+### Waving and relaxing facial-hair sets
+
+Eight independently traced and painted overlays cover idle 8–15, bringing initial internal frame-fit review to 28 of 48 main poses. The unchanged source atlas uses fixed guide-derived crops, measured silhouette envelopes and exact body-frame hashes. Public appearance recipes remain unchanged.
+
+The shared verifier now distinguishes authored source poses from playback poses. Waving uses idle 8/10/11 and relaxing uses 12/13/14; idle 9 and 15 receive artwork review but cannot be served or cached by either runtime clip provider. Both clips pass 48 combined hairstyle/skin/pose comparisons, unchanged pixels outside the face crops, full measured source-envelope coverage, empty ninth atlas cell, 32 malformed-input refusals, two surplus-set refusals, two unused-pose refusals, twelve disposal checks and two partial-failure cleanup checks. Each provider retains at most three composed frames (786432 RGBA bytes, excluding source/body/GPU memory). Temporary source-only review surfaces are released. Seated, sleeping and looking regressions also pass, with their captured images unchanged.
+
+Face comparisons, mirrored day/night renderer scenes at two sizes and 60 ordered temporal samples were inspected. Evidence and exact generation provenance: `assets/art-direction/character-prototype-v1/short-beard-gesture-clips-v1/`. Repeat `node scripts/verify-facial-clips.mjs short-beard-gesture-clips-v1 wave v1` and the same command with `relax`.
+
+**Why:** artwork coverage and playable animation coverage differ when source sheets contain unused poses. Keeping both explicit prevents review-only frames from silently entering runtime caches. Continuous playback, remaining activities/returns, public/native integration, additional body/face/clothing choices and all original biome, recovery, sustainability, usability and performance gates remain open. The complete builder objective stays active.

@@ -1,0 +1,18 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "file": "candidate-v1.png",
+  "prompt": "Precise sprite-layer EDIT. Image1 shows eight actual Solar Friends faces with GREEN PATCHES defining exact short beard and moustache silhouettes. Image2 is the matching silhouette-only mask. Paint only those green shapes as subdued dark chestnut short facial hair, then export ONLY the newly painted beard and moustache overlays on true transparent alpha; remove every human face and background pixel. Preserve the EXACT 1254x1254 canvas, 3x3 grid of418-square cells, eight pairs in reading order and completely EMPTY bottom-right cell. Each pose's silhouette, position, scale, mouth opening and transparent margins must match image2 exactly. No recentering, zoom, extra bulk, detached tips, added sideburns or shape copying between poses. Warm soft painted Solar Friends illustration, broad simple shaded hair clumps, upper-left light, no photoreal strands. No skin, eyes, lips, nose, ears, scalp hair, neck, clothes, green paint, grid, labels, borders or external shadows. This is a registered animation layer: exact silhouette and coordinates matter more than generic beard attractiveness.",
+  "inputs": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-gesture-clips-v1/faces.png",
+      "role": "Actual faces and exact green paint guide"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-gesture-clips-v1/jaw.png",
+      "role": "Exact silhouette-only mask"
+    }
+  ],
+  "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-11608b1d-bcf7-423a-9c0c-d9ee711861aa.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+  "verdict": "Initial isolated frame-fit review passed; internal only"
+}

@@ -1,0 +1,17 @@
+{
+  "status": "Initial isolated frame-fit review passed; internal only",
+  "candidate": "candidate-v1.png",
+  "findings": [
+    "Inspected all eight original face grids before tracing independent native-coordinate jaw guides.",
+    "Inspected generated source and all 48 original/composite hairstyle-skin-pose comparisons. Jaw curves remain attached; mouth openings remain visible.",
+    "Inspected mirrored day/night actual resident-renderer scenes at 48 and 150 pixel widths and 60 ordered temporal samples. These still captures do not establish continuous playback quality.",
+    "Source-only idle 9 and 15 remain reviewed artwork but are refused by runtime clip providers.",
+    "All eight source regions have measured coverage 1 at the unchanged 0.98 minimum; ninth cell is empty."
+  ],
+  "remaining": [
+    "Other raw main poses and equipment returns",
+    "Continuous and cross-activity playback",
+    "Hair colours, hats, portraits and biome world integration",
+    "Public/native recipe integration and complete builder release gates"
+  ]
+}
