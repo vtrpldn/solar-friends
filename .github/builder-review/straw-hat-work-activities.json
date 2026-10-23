@@ -1,0 +1,13 @@
+{
+  "why": "Cover the remaining work and equipped activity head placements before player-facing accessory integration.",
+  "scope": "All 48 main body pose placements reviewed; not a complete playable hat.",
+  "checks": "Three paired browser runs each pass 16 pose/style checks, 20 refused cases, 144 timeline samples and 240 transition samples. Work repeats in two pairs. Pixels outside hat alpha unchanged.",
+  "evidence": "assets/art-direction/character-prototype-v1/straw-hat-work-activities-v1",
+  "remaining": [
+    "feeding return states",
+    "all activity-pair transition coverage",
+    "full palette/part combinations and portraits",
+    "native recipe, saves and player-facing controls",
+    "other original builder release requirements"
+  ]
+}
