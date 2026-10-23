@@ -1,3 +1,4 @@
+import {installHatClipReview} from './character-hat-clip-review.js';
 import {installHatBreatheReview} from './character-hat-breathe-review.js';
 import {prototypeAppearanceRecipe} from '../character-appearance-recipe.js';
 import {installHatPrototypeReview} from './character-hat-prototype.js';
@@ -88,5 +89,7 @@ try{
  const hatProviders=new Map([['short-curls-v1',await equippedModel.provider('breathe',prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider('breathe',sidePartReviewRecipe())]]);
  window.strawHatPrototypeReview=await installHatPrototypeReview({binding:window.bodyAttachmentReview.binding,providers:hatProviders,scene,before:$('body-attachment-open')});
  window.strawHatBreatheReview=await installHatBreatheReview({binding:window.bodyAttachmentReview.binding,providers:hatProviders,source:window.strawHatPrototypeReview,scene,before:$('body-attachment-open')});
+ window.strawHatClipReviews=new Map([['breathe',window.strawHatBreatheReview]]);
+ for(const clip of ['walk','look']){const providers=new Map([['short-curls-v1',await equippedModel.provider(clip,prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider(clip,sidePartReviewRecipe())]]);window.strawHatClipReviews.set(clip,await installHatClipReview({clip,binding:window.bodyAttachmentReview.binding,providers,source:window.strawHatPrototypeReview,scene,before:$('body-attachment-open')}));}
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

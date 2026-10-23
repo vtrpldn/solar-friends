@@ -1,0 +1,9 @@
+{
+  "mechanical": "PASS",
+  "visual": "Inspected all four pose timelines and four selected transition boards, plus decoded walking and looking world recordings. Brim fit and eye visibility remain consistent; no visible hat detachment through these clips or transitions.",
+  "scope": "Twelve body poses now reviewed across breathe/walk/look with both current hairstyles. Remaining 36 body poses, work/gesture occlusion, equipment return states and player integration unfinished.",
+  "checked": 16,
+  "denied": 20,
+  "timelineSamples": 144,
+  "transitionSamples": 240
+}
