@@ -1,0 +1,16 @@
+{
+  "status": "Initial isolated frame-fit review passed; internal only",
+  "candidate": "candidate-v1.png",
+  "findings": [
+    "Inspected all original face grids and native-coordinate masks before generation.",
+    "Inspected unchanged source, 48 original/composite hairstyle-skin-pose comparisons, mirrored day/night actual resident-renderer scenes at 48 and 150 pixel widths, and 64 ordered timing samples.",
+    "The narrower bent jaws remain attached in these captures; mouth openings remain visible. Source shading is smoother than prior beard atlases; complete cross-activity material and continuous playback review remains required.",
+    "Seven regions have full authored-envelope coverage; activity 7 has 9247/9290 thresholded pixels inside the fixed envelope (0.995371), above the unchanged 0.98 gate. No paint was trimmed or warped."
+  ],
+  "remaining": [
+    "Activity poses 12 through 15 and two equipment returns",
+    "Continuous and cross-activity material/playback review",
+    "Hair colours, hats, portraits and biome world integration",
+    "Public/native recipe integration and every original builder release gate"
+  ]
+}

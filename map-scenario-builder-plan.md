@@ -1538,3 +1538,14 @@ Both sets pass 48 combined hairstyle/skin/pose comparisons, unchanged pixels out
 Original/composite faces, mirrored day/night resident-renderer scenes at two sizes and 64 ordered temporal samples were inspected. Exact prompts, registrations and evidence: `assets/art-direction/character-prototype-v1/short-beard-stretch-cook-v1/`. Repeat `node scripts/verify-facial-clips.mjs short-beard-stretch-cook-v1 stretch v1` and the same with `cook`.
 
 **Why:** tipped stretching faces and tool-bearing activities require their own jaw registrations. These isolated captures do not establish continuous playback or complete customization. Remaining activity/return frames, colour/hat/portrait/world checks, native/public integration, additional body/face/clothing choices and every original biome, sustainability, recovery, usability and performance gate remain open. The complete builder objective stays active.
+
+
+### Watering and tending facial-hair sets
+
+Eight new independently traced overlays cover activities 4–11, bringing initial internal frame-fit review to 44 of 48 main poses. The bent heads use their own fixed native-coordinate face crops and body-frame hashes. No head-offset approximation, raster warp or alpha fitting was used. Public appearance recipes remain unchanged.
+
+The two clips pass 48 combined hairstyle/skin/pose comparisons, unchanged pixels outside face crops, 32 malformed-input refusals, twelve disposal checks and two instrumented partial-construction cleanup checks. Both caches are bounded to four composed frames (1048576 RGBA bytes each, excluding source/body/GPU allocations). Seven source regions have full coverage; activity 7 retains 9247/9290 thresholded pixels inside its fixed guide-derived envelope (0.995371, above the unchanged 0.98 threshold). The ninth atlas cell is empty. The existing stretching regression passes with unchanged captures.
+
+Inspected original/composite faces, mirrored day/night resident-renderer scenes at two sizes and 64 ordered timing samples. Source shading is smoother than previous atlases; cross-activity material consistency remains an explicit open review, alongside continuous playback. Evidence and exact generation provenance: `assets/art-direction/character-prototype-v1/short-beard-water-tend-v1/`. Repeat `node scripts/verify-facial-clips.mjs short-beard-water-tend-v1 water v1` and the same with `tend`.
+
+**Why:** watering and kneeling garden work move and tip the jaw far beyond standing offsets. Isolated frame-fit progress does not complete the accessory: feeding/return frames, cross-activity polish, colour/hat/portrait/world checks, public/native integration and additional body/face/clothing choices remain required. All original biome, sustainability, recovery, usability and performance gates stay open; the full builder objective remains active.

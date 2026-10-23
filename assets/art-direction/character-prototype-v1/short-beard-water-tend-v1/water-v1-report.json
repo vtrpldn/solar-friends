@@ -1,0 +1,109 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "418cfbac00699656277d3cad7aa9a033284277ef29e80da2d12fd02d0e9f6f48",
+  "clip": "water",
+  "sheet": "activities",
+  "poseCount": 4,
+  "clipPoseCount": 4,
+  "sourceOnlyPoses": [],
+  "unusedRefused": 0,
+  "surplusRefused": 0,
+  "sourceOnlyReleased": 0,
+  "checked": 24,
+  "refused": 16,
+  "disposed": 6,
+  "partialCleanup": 1,
+  "audits": [
+    {
+      "index": 4,
+      "pixels": 8031,
+      "inside": 8031,
+      "bounds": [
+        94,
+        186,
+        311,
+        299
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 5,
+      "pixels": 8102,
+      "inside": 8102,
+      "bounds": [
+        100,
+        185,
+        318,
+        291
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 6,
+      "pixels": 8750,
+      "inside": 8750,
+      "bounds": [
+        96,
+        185,
+        322,
+        296
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 7,
+      "pixels": 9290,
+      "inside": 9247,
+      "bounds": [
+        99,
+        177,
+        327,
+        287
+      ],
+      "coverage": 0.9953713670613563,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 32
+}
