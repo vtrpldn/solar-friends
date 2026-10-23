@@ -266,6 +266,15 @@ pub(crate) fn route_avoiding(
     to: [f32; 2],
     people: &[[f32; 2]],
 ) -> Result<Route, &'static str> {
+    route_to(v, from, to, people, true)
+}
+fn route_to(
+    v: &Village,
+    from: [f32; 2],
+    to: [f32; 2],
+    people: &[[f32; 2]],
+    bounded: bool,
+) -> Result<Route, &'static str> {
     if !clear(v, from[0], from[1]) {
         return Err("The pickup approach is blocked.");
     }
@@ -307,7 +316,12 @@ pub(crate) fn route_avoiding(
     if starts.is_empty() || goals.is_empty() {
         return Err("There is no clear approach to this route.");
     }
-    let paths = search(v, from, people, &grid, free, starts);
+    let terminals: Vec<_> = goals
+        .iter()
+        .filter(|_| bounded)
+        .map(|&i| (i, (cost(v, point(i), to) * 1000.).round() as u32))
+        .collect();
+    let paths = search(v, from, people, &grid, free, starts, &terminals);
     finish_route(v, from, to, people, goals, &paths)
 }
 
@@ -322,6 +336,7 @@ fn search(
     grid: &Grid,
     free: &[bool],
     starts: Vec<usize>,
+    terminals: &[(usize, u32)],
 ) -> Paths {
     let mut distances = vec![u32::MAX; grid.free.len()];
     let mut previous = vec![None; grid.free.len()];
@@ -331,9 +346,19 @@ fn search(
         distances[start] = n;
         queue.push(Reverse((n, start)));
     }
+    let mut ceiling = u32::MAX;
     while let Some(Reverse((score, current))) = queue.pop() {
+        // Include equal-cost entries to preserve deterministic endpoint and
+        // predecessor ties. Terminal approach cost is part of the full route;
+        // reaching the first goal cell alone is not enough to stop.
+        if score > ceiling {
+            break;
+        }
         if score != distances[current] {
             continue;
+        }
+        if let Some((_, approach)) = terminals.iter().find(|(i, _)| *i == current) {
+            ceiling = ceiling.min(score.saturating_add(*approach));
         }
         for &(next, edge) in &grid.edges[current] {
             if !free[next] || !crowd_clear(point(current), point(next), people) {
@@ -424,7 +449,7 @@ impl<'a> RoutesFrom<'a> {
         if starts.is_empty() {
             return None;
         }
-        let paths = search(v, from, &[], &grid, &grid.free, starts);
+        let paths = search(v, from, &[], &grid, &grid.free, starts, &[]);
         Some(Self {
             village: v,
             from,
@@ -467,6 +492,109 @@ impl Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn bounded_destination_search_matches_exhaustive_routes_with_roads_crowds_and_obstacles() {
+        let mut g = Game::new();
+        g.start_fixture_mode("sandbox");
+        for (x, y) in [
+            (8, 4),
+            (10, 4),
+            (12, 4),
+            (8, 6),
+            (12, 6),
+            (8, 8),
+            (10, 8),
+            (12, 8),
+        ] {
+            assert_eq!(g.place("home", x, y), "ok");
+        }
+        for x in 3..=20 {
+            assert_eq!(g.toggle_road(x, 2), "ok");
+        }
+        // Match the simulation's shared derived grid; rebuilding the same
+        // 4096-cell geometry twice per sample would dominate this oracle test.
+        refresh(&mut g.app.world_mut().resource_mut::<Village>());
+        let v = g.app.world().resource::<Village>();
+        let crowds = [
+            vec![],
+            vec![[5., 5.], [6., 5.], [7., 5.]],
+            vec![[10., 10.], [22.2, 15.4], [31.5, 32.5]],
+        ];
+        let mut seed = 42_u32;
+        let mut point = || {
+            seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+            (seed % 620) as f32 / 10. + 0.5
+        };
+        let mut success = 0;
+        let mut refused = 0;
+        for people in &crowds {
+            for _ in 0..300 {
+                let from = [point(), point()];
+                let to = [point(), point()];
+                let bounded = route_to(v, from, to, people, true);
+                if bounded.is_ok() {
+                    success += 1;
+                } else {
+                    refused += 1;
+                }
+                assert_eq!(
+                    serde_json::to_value(&bounded).unwrap(),
+                    serde_json::to_value(route_to(v, from, to, people, false)).unwrap(),
+                    "from {from:?} to {to:?}, crowd {people:?}"
+                );
+            }
+        }
+        assert!(
+            success > 100 && refused > 0,
+            "success {success}, refused {refused}"
+        );
+        // Exercise local/fractional endpoint ties explicitly, including the
+        // enclosed clearing and invalid endpoints on either side of a river.
+        for from in [
+            [3., 3.],
+            [3.2, 3.7],
+            [10., 10.],
+            [10., 6.],
+            [62., 3.],
+            [f32::NAN, 3.],
+        ] {
+            for to in [[3., 3.], [4.2, 4.7], [10., 10.], [10., 6.], [62., 3.]] {
+                assert_eq!(
+                    serde_json::to_value(route_to(v, from, to, &[], true)).unwrap(),
+                    serde_json::to_value(route_to(v, from, to, &[], false)).unwrap()
+                );
+            }
+        }
+    }
+    #[test]
+    fn nearby_destination_does_not_search_the_entire_reachable_map() {
+        let g = Game::new();
+        let v = g.app.world().resource::<Village>();
+        let grid = grid(v);
+        let from = [3., 3.];
+        let to = [4., 4.];
+        let starts = links(v, from, &grid, &grid.free);
+        let goals = links(v, to, &grid, &grid.free);
+        let terminals: Vec<_> = goals
+            .iter()
+            .map(|&i| (i, (cost(v, point(i), to) * 1000.).round() as u32))
+            .collect();
+        let bounded = search(v, from, &[], &grid, &grid.free, starts.clone(), &terminals);
+        let exhaustive = search(v, from, &[], &grid, &grid.free, starts, &[]);
+        assert!(bounded.distances.iter().filter(|&&n| n != u32::MAX).count() < 100);
+        assert!(
+            exhaustive
+                .distances
+                .iter()
+                .filter(|&&n| n != u32::MAX)
+                .count()
+                > 1000
+        );
+        assert_eq!(
+            serde_json::to_value(finish_route(v, from, to, &[], goals.clone(), &bounded)).unwrap(),
+            serde_json::to_value(finish_route(v, from, to, &[], goals, &exhaustive)).unwrap()
+        );
+    }
     #[test]
     fn fractional_grid_links_match_the_original_segment_checks() {
         let mut g = Game::new();

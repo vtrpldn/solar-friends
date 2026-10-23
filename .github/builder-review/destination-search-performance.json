@@ -1,0 +1,801 @@
+{
+  "why": "Profiled single-destination routing unnecessarily searched the entire map. Stop only after every equal-or-cheaper complete route is settled.",
+  "profileBefore": {
+    "baselineCommit": "a18fbd6",
+    "configuration": "1000 release-WASM ticks of 0.1 seconds, twelve founding residents, Sandbox arrival; release strip disabled solely to retain function names.",
+    "totalSamples": 4633,
+    "topLeafSamples": [
+      {
+        "function": "solar_friends[f070ff9bd16fd73a]::navigation::search",
+        "samples": 1958
+      },
+      {
+        "function": "<alloc[cb2b8d99256f33df]::collections::binary_heap::BinaryHeap<core[608f92abc48d28da]::cmp::Reverse<(u32, usize)>>>::sift_down_to_bottom",
+        "samples": 1391
+      },
+      {
+        "function": "solar_friends[f070ff9bd16fd73a]::navigation::crowd_clear",
+        "samples": 704
+      },
+      {
+        "function": "<alloc[cb2b8d99256f33df]::collections::binary_heap::BinaryHeap<core[608f92abc48d28da]::cmp::Reverse<(u32, usize)>>>::pop",
+        "samples": 147
+      },
+      {
+        "function": "<alloc[cb2b8d99256f33df]::collections::binary_heap::BinaryHeap<core[608f92abc48d28da]::cmp::Reverse<(u32, usize)>>>::sift_up",
+        "samples": 139
+      },
+      {
+        "function": "solar_friends[f070ff9bd16fd73a]::navigation::geometry::land_points",
+        "samples": 53
+      },
+      {
+        "function": "<alloc[cb2b8d99256f33df]::vec::Vec<u32>>::extend_with",
+        "samples": 17
+      },
+      {
+        "function": "__rustc[9d087a5ab36ea756]::__rdl_realloc",
+        "samples": 14
+      },
+      {
+        "function": "__rustc[9d087a5ab36ea756]::__rdl_alloc_zeroed",
+        "samples": 13
+      },
+      {
+        "function": "core[608f92abc48d28da]::iter::traits::iterator::Iterator::all::check::<u32, solar_friends[f070ff9bd16fd73a]::logistics::doorway::{closure#1}>::{closure#0}",
+        "samples": 13
+      },
+      {
+        "function": "solar_friends[f070ff9bd16fd73a]::food::held",
+        "samples": 12
+      },
+      {
+        "function": "hypotf",
+        "samples": 12
+      },
+      {
+        "function": "<alloc[cb2b8d99256f33df]::raw_vec::RawVecInner>::finish_grow",
+        "samples": 11
+      },
+      {
+        "function": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::malloc",
+        "samples": 11
+      },
+      {
+        "function": "solar_friends[f070ff9bd16fd73a]::navigation::links",
+        "samples": 8
+      }
+    ]
+  },
+  "browserFinal": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "shared",
+        "loading": {
+          "compileMs": 10.100000023841858,
+          "loadMs": 3949.100000023842,
+          "snapshotBytes": 157156,
+          "uniqueAppearances": 1
+        },
+        "runtime": {
+          "advancedMinutes": 241.1912841796875,
+          "wallSeconds": 5.004199999976158,
+          "frames": 370,
+          "medianGapMs": 16.600000000000364,
+          "p95GapMs": 17.200000000000728,
+          "maxGapMs": 24.700000000000728,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 2.100000023841858,
+              "p95": 3.700000047683716
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.1999999284744263
+            },
+            "paint": {
+              "median": 6.899999976158142,
+              "p95": 7.099999904632568
+            },
+            "total": {
+              "median": 9.5,
+              "p95": 12.200000047683716
+            },
+            "frameInterval": {
+              "median": 16.600000000000364,
+              "p95": 17.200000000000728
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5915999999999999,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 13107200,
+            "decodedSources": 52
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 131
+        }
+      },
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 7.600000023841858,
+          "loadMs": 14485.200000047684,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "advancedMinutes": 241.18695068359375,
+          "wallSeconds": 5.009099999999998,
+          "frames": 372,
+          "medianGapMs": 16.599999999998545,
+          "p95GapMs": 17.099999999998545,
+          "maxGapMs": 18.5,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 2,
+              "p95": 3.700000047683716
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.200000047683716
+            },
+            "paint": {
+              "median": 6.899999976158142,
+              "p95": 7.100000023841858
+            },
+            "total": {
+              "median": 9.200000047683716,
+              "p95": 11.900000095367432
+            },
+            "frameInterval": {
+              "median": 16.599999999998545,
+              "p95": 17.099999999998545
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5915999999999999,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 157286400,
+            "decodedSources": 85
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 127
+        }
+      }
+    ]
+  },
+  "browserEarlierRepeat": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "shared",
+        "loading": {
+          "compileMs": 9.200000047683716,
+          "loadMs": 4913.399999976158,
+          "snapshotBytes": 157156,
+          "uniqueAppearances": 1
+        },
+        "runtime": {
+          "advancedMinutes": 241.25360107421875,
+          "wallSeconds": 5.007400000023841,
+          "frames": 412,
+          "medianGapMs": 9.399999999999636,
+          "p95GapMs": 16.899999999999636,
+          "maxGapMs": 18.399999999999636,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 1.7000000476837158,
+              "p95": 3.399999976158142
+            },
+            "sample": {
+              "median": 0.20000004768371582,
+              "p95": 0.40000009536743164
+            },
+            "paint": {
+              "median": 6.199999928474426,
+              "p95": 6.700000047683716
+            },
+            "total": {
+              "median": 8.200000047683716,
+              "p95": 10.699999928474426
+            },
+            "frameInterval": {
+              "median": 9.5,
+              "p95": 17
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5166,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 13107200,
+            "decodedSources": 52
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 117
+        }
+      },
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 6.800000071525574,
+          "loadMs": 27211.399999976158,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "advancedMinutes": 240.79345703125,
+          "wallSeconds": 5.000699999952317,
+          "frames": 405,
+          "medianGapMs": 10,
+          "p95GapMs": 17,
+          "maxGapMs": 18.30000000000291,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 1.6999999284744263,
+              "p95": 3.5
+            },
+            "sample": {
+              "median": 0.20000004768371582,
+              "p95": 2
+            },
+            "paint": {
+              "median": 6.299999952316284,
+              "p95": 6.600000023841858
+            },
+            "total": {
+              "median": 8.300000071525574,
+              "p95": 10.599999904632568
+            },
+            "frameInterval": {
+              "median": 10.099999999998545,
+              "p95": 17
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5166,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 157286400,
+            "decodedSources": 85
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 120
+        }
+      }
+    ]
+  },
+  "engineCastChecks": {
+    "engine": "wasm",
+    "maximum": 12,
+    "framesPerSpeed": 120,
+    "note": "Engine and compact frame sampling only; shared/mixed bundled looks, not unique modular artwork or browser frame rate.",
+    "results": [
+      {
+        "biome": "mata-atlantica",
+        "count": 1,
+        "looks": "shared",
+        "map": 64,
+        "compile": 28.555707999999996,
+        "speeds": {
+          "1": {
+            "median": 0.12112499999999216,
+            "p95": 0.16637500000000216
+          },
+          "16": {
+            "median": 0.24199999999999022,
+            "p95": 0.3096249999999827
+          }
+        },
+        "snapshotBytes": 619030
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 1,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 13.396916000000004,
+        "speeds": {
+          "1": {
+            "median": 0.09112500000000523,
+            "p95": 0.10499999999998977
+          },
+          "16": {
+            "median": 0.1631670000000156,
+            "p95": 0.23837499999999068
+          }
+        },
+        "snapshotBytes": 619030
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 2,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.851958000000025,
+        "speeds": {
+          "1": {
+            "median": 0.0973329999999919,
+            "p95": 0.11404199999998355
+          },
+          "16": {
+            "median": 0.22733299999998735,
+            "p95": 0.6427079999999705
+          }
+        },
+        "snapshotBytes": 621423
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 2,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 12.740625000000023,
+        "speeds": {
+          "1": {
+            "median": 0.09695799999997234,
+            "p95": 0.10500000000001819
+          },
+          "16": {
+            "median": 0.22654100000005428,
+            "p95": 0.6399159999999711
+          }
+        },
+        "snapshotBytes": 621425
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 5,
+        "looks": "shared",
+        "map": 64,
+        "compile": 13.117666999999983,
+        "speeds": {
+          "1": {
+            "median": 0.1252499999999941,
+            "p95": 0.14150000000000773
+          },
+          "16": {
+            "median": 0.33704199999999673,
+            "p95": 0.7325840000000312
+          }
+        },
+        "snapshotBytes": 628564
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 5,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 12.927790999999957,
+        "speeds": {
+          "1": {
+            "median": 0.12412500000004911,
+            "p95": 0.13304099999993468
+          },
+          "16": {
+            "median": 0.33091699999999946,
+            "p95": 0.7429579999999305
+          }
+        },
+        "snapshotBytes": 628564
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 12,
+        "looks": "shared",
+        "map": 64,
+        "compile": 13.937958999999978,
+        "speeds": {
+          "1": {
+            "median": 0.1920830000000251,
+            "p95": 0.2185420000000704
+          },
+          "16": {
+            "median": 0.77962500000001,
+            "p95": 1.368750000000091
+          }
+        },
+        "snapshotBytes": 645662
+      },
+      {
+        "biome": "mata-atlantica",
+        "count": 12,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 13.694999999999936,
+        "speeds": {
+          "1": {
+            "median": 0.18962499999997817,
+            "p95": 0.20812499999999545
+          },
+          "16": {
+            "median": 0.7657090000000153,
+            "p95": 1.3610419999999976
+          }
+        },
+        "snapshotBytes": 645664
+      },
+      {
+        "biome": "cerrado",
+        "count": 1,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.594375000000014,
+        "speeds": {
+          "1": {
+            "median": 0.08329200000002857,
+            "p95": 0.08629200000007131
+          },
+          "16": {
+            "median": 0.1488329999999678,
+            "p95": 0.21791700000017045
+          }
+        },
+        "snapshotBytes": 608502
+      },
+      {
+        "biome": "cerrado",
+        "count": 1,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 12.777874999999995,
+        "speeds": {
+          "1": {
+            "median": 0.08395900000004985,
+            "p95": 0.09320900000011534
+          },
+          "16": {
+            "median": 0.15045900000018264,
+            "p95": 0.20924999999988358
+          }
+        },
+        "snapshotBytes": 608502
+      },
+      {
+        "biome": "cerrado",
+        "count": 2,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.809541000000081,
+        "speeds": {
+          "1": {
+            "median": 0.09437499999989996,
+            "p95": 0.10275000000001455
+          },
+          "16": {
+            "median": 0.21812499999987267,
+            "p95": 0.6227080000001024
+          }
+        },
+        "snapshotBytes": 610895
+      },
+      {
+        "biome": "cerrado",
+        "count": 2,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 13.126459000000068,
+        "speeds": {
+          "1": {
+            "median": 0.09395900000004076,
+            "p95": 0.11804200000005949
+          },
+          "16": {
+            "median": 0.2139159999999265,
+            "p95": 0.6059579999998732
+          }
+        },
+        "snapshotBytes": 610897
+      },
+      {
+        "biome": "cerrado",
+        "count": 5,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.739833999999973,
+        "speeds": {
+          "1": {
+            "median": 0.12037499999996726,
+            "p95": 0.12379100000021026
+          },
+          "16": {
+            "median": 0.3112499999999727,
+            "p95": 0.7365830000001097
+          }
+        },
+        "snapshotBytes": 618036
+      },
+      {
+        "biome": "cerrado",
+        "count": 5,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 12.867958999999928,
+        "speeds": {
+          "1": {
+            "median": 0.12108299999999872,
+            "p95": 0.1308329999999387
+          },
+          "16": {
+            "median": 0.31133299999987685,
+            "p95": 0.6977499999998145
+          }
+        },
+        "snapshotBytes": 618036
+      },
+      {
+        "biome": "cerrado",
+        "count": 12,
+        "looks": "shared",
+        "map": 64,
+        "compile": 13.929625000000215,
+        "speeds": {
+          "1": {
+            "median": 0.1891249999998763,
+            "p95": 0.22254100000009203
+          },
+          "16": {
+            "median": 0.7592920000001868,
+            "p95": 1.3748330000000806
+          }
+        },
+        "snapshotBytes": 635134
+      },
+      {
+        "biome": "cerrado",
+        "count": 12,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 13.578874999999925,
+        "speeds": {
+          "1": {
+            "median": 0.1851249999999709,
+            "p95": 0.1961670000000595
+          },
+          "16": {
+            "median": 0.7620840000001863,
+            "p95": 1.3725420000000668
+          }
+        },
+        "snapshotBytes": 635136
+      },
+      {
+        "biome": "caatinga",
+        "count": 1,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.411125000000084,
+        "speeds": {
+          "1": {
+            "median": 0.0830829999999878,
+            "p95": 0.0861250000000382
+          },
+          "16": {
+            "median": 0.14616700000010496,
+            "p95": 0.20716700000002675
+          }
+        },
+        "snapshotBytes": 614078
+      },
+      {
+        "biome": "caatinga",
+        "count": 1,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 12.411957999999913,
+        "speeds": {
+          "1": {
+            "median": 0.08283299999993687,
+            "p95": 0.08562499999993634
+          },
+          "16": {
+            "median": 0.1454999999998563,
+            "p95": 0.20745899999997164
+          }
+        },
+        "snapshotBytes": 614078
+      },
+      {
+        "biome": "caatinga",
+        "count": 2,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.531666000000087,
+        "speeds": {
+          "1": {
+            "median": 0.0909999999998945,
+            "p95": 0.09695799999985866
+          },
+          "16": {
+            "median": 0.21229200000016135,
+            "p95": 0.6013330000000678
+          }
+        },
+        "snapshotBytes": 616471
+      },
+      {
+        "biome": "caatinga",
+        "count": 2,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 12.447832999999946,
+        "speeds": {
+          "1": {
+            "median": 0.0915829999999005,
+            "p95": 0.10150000000021464
+          },
+          "16": {
+            "median": 0.21220799999991868,
+            "p95": 0.6055830000000242
+          }
+        },
+        "snapshotBytes": 616473
+      },
+      {
+        "biome": "caatinga",
+        "count": 5,
+        "looks": "shared",
+        "map": 64,
+        "compile": 12.77233299999989,
+        "speeds": {
+          "1": {
+            "median": 0.11891700000023775,
+            "p95": 0.1279170000002523
+          },
+          "16": {
+            "median": 0.3047919999999067,
+            "p95": 0.7116660000001502
+          }
+        },
+        "snapshotBytes": 623612
+      },
+      {
+        "biome": "caatinga",
+        "count": 5,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 13.061874999999873,
+        "speeds": {
+          "1": {
+            "median": 0.12070900000026086,
+            "p95": 0.14037499999994907
+          },
+          "16": {
+            "median": 0.31470900000022084,
+            "p95": 0.7578749999997854
+          }
+        },
+        "snapshotBytes": 623612
+      },
+      {
+        "biome": "caatinga",
+        "count": 12,
+        "looks": "shared",
+        "map": 64,
+        "compile": 13.554625000000215,
+        "speeds": {
+          "1": {
+            "median": 0.1845419999999649,
+            "p95": 0.20499999999992724
+          },
+          "16": {
+            "median": 0.752875000000131,
+            "p95": 1.3458329999998568
+          }
+        },
+        "snapshotBytes": 640710
+      },
+      {
+        "biome": "caatinga",
+        "count": 12,
+        "looks": "mixed",
+        "map": 64,
+        "compile": 13.458208000000013,
+        "speeds": {
+          "1": {
+            "median": 0.1841669999998885,
+            "p95": 0.1958329999997659
+          },
+          "16": {
+            "median": 0.7463339999999334,
+            "p95": 1.3359159999999974
+          }
+        },
+        "snapshotBytes": 640712
+      }
+    ]
+  },
+  "native": {
+    "passed": 777,
+    "failed": 0,
+    "differentialRouteSamples": 900,
+    "explicitRouteCases": 30,
+    "focusedNavigationTests": 16,
+    "clippyAllTargets": "passed",
+    "scopedFormatting": "passed",
+    "releaseBuild": "passed"
+  },
+  "checks": [
+    "cargo test --lib",
+    "cargo test navigation --lib",
+    "cargo clippy --all-targets -- -D warnings",
+    "bash scripts/build.sh",
+    "node scripts/verify-custom-casts.mjs",
+    "node scripts/verify-frame-state.mjs",
+    "node scripts/benchmark-custom-roster.mjs"
+  ],
+  "remaining": "Short arrival windows only. Dense mixed-building worlds, sustained pan/edit/save, full memory accounting, full appearance range and the other plan release gates remain open. Cold custom-art loading remains multi-second.",
+  "sha256": {
+    "src/navigation.rs": "e7e3e4e1532884131d856a2fb7e9ed1aa7d7e7aff69f38232be8843c62cfe08f",
+    "web/simulation-speed.js": "affd4a3da3593f05dbd3ef31e63cd3d296fcde19350b026d978762eac8108c32",
+    "scripts/profile-custom-roster.mjs": "6a50471ae01f8458e9f96c0eb7dce1eaca287b6e5dc320bc445b5ba9e97d5bd8",
+    "scripts/benchmark-custom-roster.mjs": "f3e30d85b22bf453748fe0fe458fffa7fa5a5232360a57fe548e6bc8e45c2d81",
+    "web/pkg/solar_friends_bg.wasm": "978dc7cbeca64e151c8455ed70293f56f2767b128b9964c5639838a3bed805f8"
+  }
+}
