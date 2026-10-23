@@ -1,0 +1,28 @@
+{
+  "status": "Native body foreground ownership; generated garment paint was not read or modified.",
+  "bodyFrameSha256": "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+  "registrationIntentSha256": "4d17b751038c5fbc0aa4d092c0c14cd78f3f5dd10464ca43ba118e2b2c59facc",
+  "regionSpecSha256": "6a4f788495839398a20dc48f01e44c31ec0e9a1796cb755be473f0505880d566",
+  "maskSha256": "90b7b2c08f8f311e4a87b7ecdfff71ccb4a373ffe104e1148e9e5efc79f138b6",
+  "regions": [
+    [
+      0,
+      125,
+      119,
+      10
+    ],
+    [
+      0,
+      135,
+      111,
+      45
+    ],
+    [
+      174,
+      125,
+      82,
+      55
+    ]
+  ],
+  "ownedPixels": 10695
+}

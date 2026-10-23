@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "edit single-pose mask in place",
+  "promptFile": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-walk-single-0-v1/mask.png",
+      "absolutePath": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-walk-single-0-v1/mask.png",
+      "role": "sole edit target, alpha and exact walking-pose geometry authority"
+    }
+  ],
+  "intent": "registration-intent.json frozen before generation",
+  "transparentBackground": true,
+  "status": "internal garment source fit accepted; forearm ownership reviewed; inherited body walk gait still needs correction",
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-597f0e4c-6b93-4fcd-95e4-fd5bd7af4d89.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "241e6de7fb664bcccec0efcec1d8f37b153788685ebf2e9b5c71fa0a02e31ac0",
+  "audit": "candidate-v1-audit.json",
+  "foreground": "body-foreground-v1.json",
+  "combinedReview": "../short-sleeve-walk-complete-v1/acceptance.json"
+}

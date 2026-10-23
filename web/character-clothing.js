@@ -1,6 +1,7 @@
 import {auditCharacterPartRegion} from './character-parts.js';
 import {registeredBodyAppearance} from './character-body-appearance.js';
 import {validateAttachmentBinding} from './character-attachments.js';
+import {validateBodyForegroundMask} from './character-foreground-mask.js';
 // Clothing changes the silhouette; colour-only body validation must stay strict.
 // Every garment instead inherits a fixed source tile and native body-pose crop.
 // This first source family remains internal until all animation poses exist.
@@ -11,12 +12,25 @@ export function composeClothingPose({body,appearanceBody,binding,image,sourceHas
  const square=(value,size)=>Array.isArray(value)&&value.length===4&&Array.from(value).every(Number.isSafeInteger)&&value[0]>=0&&value[1]>=0&&value[2]>0&&value[2]===value[3]&&value[0]+value[2]<=size&&value[1]+value[3]<=size;
  if(!square(crop,256)||!square(rect,1254))throw Error('Use the original fixed garment crop and source cell.');
  if(r.source.size!==1254||!/^[a-f0-9]{64}$/.test(sourceHash??'')||sourceHash!==r.source.sha256||image?.naturalWidth!==1254||image?.naturalHeight!==1254||body?.width!==256||body?.height!==256)throw Error('Use the exact registered garment source and complete body frame.');
+ const foreground=r.foreground===undefined?null:validateBodyForegroundMask(r.foreground,binding,sheet,index);
+ if(foreground&&foreground.schema!==2)throw Error('Garment foreground requires registered native pixel ownership.');
  const painted=registeredBodyAppearance(body,appearanceBody),probe=document.createElement('canvas');probe.width=probe.height=1254;
  try{
   const context=probe.getContext('2d');context.drawImage(image,0,0);
   const audit=auditCharacterPartRegion(context.getImageData(...rect),r.bounds);if(!audit.ok)throw Error('Garment paint leaves its authored region.');
   const frame=document.createElement('canvas');frame.width=frame.height=256;const ctx=frame.getContext('2d');
-  try{ctx.drawImage(painted,0,0);ctx.drawImage(image,...rect,...crop);return {frame,audit};}
+  let front=null;
+  try{
+   if(foreground){
+    const original=painted.getContext('2d').getImageData(0,0,256,256),backPixels=new ImageData(original.data.slice(),256,256),frontPixels=new ImageData(256,256);
+    for(const [start,length]of foreground.runs)for(let p=start;p<start+length;p++)for(let k=0;k<4;k++){frontPixels.data[p*4+k]=original.data[p*4+k];backPixels.data[p*4+k]=0;}
+    ctx.putImageData(backPixels,0,0);front=document.createElement('canvas');front.width=front.height=256;front.getContext('2d').putImageData(frontPixels,0,0);
+   }else ctx.drawImage(painted,0,0);
+   ctx.drawImage(image,...rect,...crop);
+   if(front)ctx.drawImage(front,0,0);
+   return {frame,audit};
+  }
   catch(error){frame.width=frame.height=0;throw error;}
+  finally{if(front)front.width=front.height=0;}
  }finally{probe.width=probe.height=0;}
 }

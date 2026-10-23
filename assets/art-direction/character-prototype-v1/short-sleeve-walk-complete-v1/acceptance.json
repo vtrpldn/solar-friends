@@ -1,0 +1,99 @@
+{
+  "status": "Internal garment fit and arm occlusion accepted; inherited body gait needs correction before walking motion acceptance. Not public clothing.",
+  "why": "Walking sleeves must follow the original upper-arm poses while the forearms remain in front of the shirt.",
+  "selectedSources": [
+    {
+      "collection": "short-sleeve-walk-single-0-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "241e6de7fb664bcccec0efcec1d8f37b153788685ebf2e9b5c71fa0a02e31ac0",
+      "foregroundSha256": "af0f638cc452268f130be4104e4b3a24db0c5bfa3e05b8d8a35a9feaf22b8263",
+      "poses": [
+        "base:0"
+      ]
+    },
+    {
+      "collection": "short-sleeve-walk-single-1-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "4f546c85fe1ca2e3ce506b82bbac13140437c410e3605776b1c661751a06373c",
+      "foregroundSha256": "7225e423e9bc18c9627c9d1d4334d50ba99a5839dc967d8e78cbd46817e6e17b",
+      "poses": [
+        "base:1"
+      ]
+    },
+    {
+      "collection": "short-sleeve-walk-single-2-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "a37c8dc825ec8301e53e19295f2375c18438573b8c30e37dc11e79a75722ae96",
+      "foregroundSha256": "90b7b2c08f8f311e4a87b7ecdfff71ccb4a373ffe104e1148e9e5efc79f138b6",
+      "poses": [
+        "base:2"
+      ]
+    },
+    {
+      "collection": "short-sleeve-walk-single-3-v1",
+      "paint": "candidate-v1.png",
+      "sha256": "a40af41980b74272d14852619cedb846d60bd0979d90fe85a7c69db0b6687601",
+      "foregroundSha256": "151f05bb56502ba3318e2b182c6d7121045d7c63f411c1a6e74591282efdad7b",
+      "poses": [
+        "base:3"
+      ]
+    }
+  ],
+  "reviewedImages": [
+    "review-v1-board.png",
+    "review-v1-details.png",
+    "review-v1-lighting.png",
+    "motion-walk.png",
+    "../short-sleeve-walk-breathe-comparison-v1/review-v1-details.png",
+    "../short-sleeve-walk-breathe-comparison-v1/review-v1-transitions.png"
+  ],
+  "findings": [
+    "Four independently authored walking shirts pass unchanged geometry gates, preserve stature and cover the original tank top at the measured core/collar regions.",
+    "Native forearm regions are authored from body coordinates, not garment paint. Forearms draw once in front of the shirt; opaque pixels stay exact and partial-alpha edges blend against cloth behind them.",
+    "The first protected-body assertion included an empty torso gap where legitimate shirt alpha was added. Protection now distinguishes actual opaque forearms, empty gaps, lower-body pixels and mathematically checked source-over edges. No source paint or fit threshold was changed.",
+    "Six hairstyle/skin profiles, 48/120-pixel facings/day-night and encoded loop samples were inspected. Walking and breathing cloth treatment is coherent at game scale; small enlarged fold differences remain.",
+    "Native walk-to-breathe and breathe-to-walk transitions render only registered poses; their static samples were inspected."
+  ],
+  "evidence": {
+    "outsideCropChecks": 24,
+    "protectedBodyChecks": 24,
+    "strictRefusals": 28,
+    "exactForegroundRecombinations": 4,
+    "failedCompositionCleanups": 4,
+    "armOcclusionChecks": 4,
+    "checkedAlphaIntersections": 106,
+    "lightingSamples": 64,
+    "videoSha256": "3a8ef4c1d48868eef341220bc87270482c1f90eac54523e0280bff8a61040c46",
+    "duration": "5.970639",
+    "decodedFrames": "180",
+    "combinedPoseChecks": 48,
+    "transitionUpdates": 52,
+    "transitionSamples": 16
+  },
+  "openBodyMotionFinding": {
+    "status": "needs correction",
+    "source": "web/art/characters/prototype-v1/body-neutral-base.png",
+    "sourceSha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "poses": [
+      "base:0",
+      "base:1",
+      "base:2",
+      "base:3"
+    ],
+    "evidence": [
+      "../short-sleeve-walk-trace-v1/board.png",
+      "motion-walk.png",
+      "web/resident-animation.js walk sampler uses frames 0,1,2,3 repeatedly; no alternate leg synthesis"
+    ],
+    "finding": "All four existing body walk drawings retain the same leading leg. The recorded loop does not show a full alternating contact/passing stride. This is inherited from the original body artwork and is not corrected by a shirt overlay.",
+    "nextAction": "Review and correct the body walking cycle before extending or publishing this clothing family, then revalidate every affected body/part binding and motion/ground-contact sample."
+  },
+  "remaining": [
+    "Inherited body walk gait correction and affected part registrations",
+    "Forty other raw poses and equipment-return compatibility",
+    "Shirt palettes and hat/beard combinations",
+    "Shared-world/biome neighbours and ground review",
+    "Full animation, native/public creator/save/portable-content integration",
+    "Maximum-roster preparation/cache and total-memory acceptance"
+  ]
+}

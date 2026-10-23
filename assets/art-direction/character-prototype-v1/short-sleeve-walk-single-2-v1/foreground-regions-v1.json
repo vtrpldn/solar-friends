@@ -1,0 +1,23 @@
+{
+  "role": "Near and far forearms and hands occlude the short-sleeved shirt; authored in original native body coordinates, not from garment paint.",
+  "regions": [
+    [
+      0,
+      125,
+      119,
+      10
+    ],
+    [
+      0,
+      135,
+      111,
+      45
+    ],
+    [
+      174,
+      125,
+      82,
+      55
+    ]
+  ]
+}
