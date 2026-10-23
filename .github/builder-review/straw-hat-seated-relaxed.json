@@ -1,0 +1,25 @@
+{
+  "why": "Extend accessory coverage to seated, sleeping and relaxed residents while preserving authored body and furniture pixels.",
+  "scope": "Review prototype only; 20 of 48 body poses covered. No playable hat or save schema change.",
+  "evidence": "assets/art-direction/character-prototype-v1/straw-hat-seated-relaxed-v1",
+  "checks": {
+    "mechanical": "PASS",
+    "visual": "Reviewed: hat remains attached in seated, leaning, sleeping and relaxed poses; both hairstyles, facings and day/night timelines, transitions and decoded recordings. Existing stool and body remain unchanged outside hat alpha.",
+    "scope": "sit,relax candidate fits only; remaining activities and player integration unfinished.",
+    "checked": 16,
+    "denied": 20,
+    "timelineSamples": 144,
+    "transitionSamples": 480
+  },
+  "regressions": [
+    "walking/looking: 16 fits, 20 refusals, 144 timeline and 240 transition samples",
+    "breathing: eight fits, 10 invalid registrations, four provider refusals, 36 timeline samples and playback controls",
+    "400 frozen playable RGBA fingerprints unchanged"
+  ],
+  "remaining": [
+    "28 other body poses",
+    "raised-hand/tool occlusion and equipment return states",
+    "all palette/part combinations, portraits and native player/save integration",
+    "remaining builder plan requirements"
+  ]
+}

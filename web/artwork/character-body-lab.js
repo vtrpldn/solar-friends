@@ -90,6 +90,6 @@ try{
  window.strawHatPrototypeReview=await installHatPrototypeReview({binding:window.bodyAttachmentReview.binding,providers:hatProviders,scene,before:$('body-attachment-open')});
  window.strawHatBreatheReview=await installHatBreatheReview({binding:window.bodyAttachmentReview.binding,providers:hatProviders,source:window.strawHatPrototypeReview,scene,before:$('body-attachment-open')});
  window.strawHatClipReviews=new Map([['breathe',window.strawHatBreatheReview]]);
- for(const clip of ['walk','look']){const providers=new Map([['short-curls-v1',await equippedModel.provider(clip,prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider(clip,sidePartReviewRecipe())]]);window.strawHatClipReviews.set(clip,await installHatClipReview({clip,binding:window.bodyAttachmentReview.binding,providers,source:window.strawHatPrototypeReview,scene,before:$('body-attachment-open')}));}
+ for(const clip of ['walk','look','sit','relax']){const providers=new Map([['short-curls-v1',await equippedModel.provider(clip,prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider(clip,sidePartReviewRecipe())]]);window.strawHatClipReviews.set(clip,await installHatClipReview({clip,binding:window.bodyAttachmentReview.binding,providers,source:window.strawHatPrototypeReview,scene,before:$('body-attachment-open')}));}
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

@@ -1,0 +1,9 @@
+{
+  "mechanical": "PASS",
+  "visual": "Reviewed: hat remains attached in seated, leaning, sleeping and relaxed poses; both hairstyles, facings and day/night timelines, transitions and decoded recordings. Existing stool and body remain unchanged outside hat alpha.",
+  "scope": "sit,relax candidate fits only; remaining activities and player integration unfinished.",
+  "checked": 16,
+  "denied": 20,
+  "timelineSamples": 144,
+  "transitionSamples": 480
+}
