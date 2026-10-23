@@ -1,0 +1,10 @@
+{
+  "mechanical": "PASS",
+  "visual": "Inspected the 36-sample enlarged/game-size timeline, actual terrain/building views and decoded world-canvas playback. Hat follows head in the four poses without visible detachment; existing blink timing remains unpolished.",
+  "scope": "Four breathing poses only. Other activities and player integration remain unfinished.",
+  "frames": 8,
+  "denied": 9,
+  "providerRefusals": 4,
+  "timelineSamples": 36,
+  "remaining": "Closed-eye source pose currently holds about 1.25 seconds; cadence correction, remaining 44 pose fits, hand/tool occlusion, part/palette coverage and playable recipe/UI/save integration remain unfinished."
+}

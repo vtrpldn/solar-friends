@@ -1,3 +1,4 @@
+import {installHatBreatheReview} from './character-hat-breathe-review.js';
 import {prototypeAppearanceRecipe} from '../character-appearance-recipe.js';
 import {installHatPrototypeReview} from './character-hat-prototype.js';
 import {installEquipmentReview,installCookingEquipmentReview,installTendingEquipmentReview,installFeedingEquipmentReview} from './character-equipment-review.js';
@@ -84,6 +85,8 @@ try{
  window.sidePartAppearanceReview=await installSidePartReview({seated:window.sitHairReview,frames:frameBank,binding:window.bodyAttachmentReview.binding,materials:materialModel,scene,before:$('body-attachment-open')});
  const sidePartEquipped=createEquippedAppearanceReview({appearance:window.sidePartAppearanceReview.model,materials:materialModel,frames:frameBank,binding:window.bodyAttachmentReview.binding,reviews:{cook:window.cookingEquipmentReview,water:window.equipmentPoseReview,tend:window.tendingEquipmentReview,feed:window.feedingEquipmentReview},makeRecipe:sidePartReviewRecipe,validateRecipe:validateSidePartReviewRecipe});
  window.sidePartEquippedReview=await installAppearanceControls({model:sidePartEquipped,scene,before:$('body-attachment-open'),prefix:'sidepart-equipped',makeRecipe:sidePartReviewRecipe,titleText:'Side part · activity equipment',noteText:'The second draft hairstyle with shared activity tools, foreground hands and empty-handed feeding recovery. Check contact and proportions in both facings and lighting states. These sources also feed the initial custom-look set; this inspection recipe is separate from player saves. Further artwork choices and final review remain unfinished.'});
- window.strawHatPrototypeReview=await installHatPrototypeReview({binding:window.bodyAttachmentReview.binding,providers:new Map([['short-curls-v1',await equippedModel.provider('breathe',prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider('breathe',sidePartReviewRecipe())]]),scene,before:$('body-attachment-open')});
+ const hatProviders=new Map([['short-curls-v1',await equippedModel.provider('breathe',prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider('breathe',sidePartReviewRecipe())]]);
+ window.strawHatPrototypeReview=await installHatPrototypeReview({binding:window.bodyAttachmentReview.binding,providers:hatProviders,scene,before:$('body-attachment-open')});
+ window.strawHatBreatheReview=await installHatBreatheReview({binding:window.bodyAttachmentReview.binding,providers:hatProviders,source:window.strawHatPrototypeReview,scene,before:$('body-attachment-open')});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

@@ -1,0 +1,37 @@
+{
+  "why": "Extend the required accessory range from a static hat to source-bound poses with actual motion review before player integration.",
+  "scope": "Four breathing poses, both current hairstyles. Review-only and excluded from native appearance recipes.",
+  "geometry": "Reuses unchanged hat pixels with rigid integer translations derived from prior authored head points, pinned to exact body/frame hashes. No body warp, silhouette fitting or colour-based head detection.",
+  "checks": {
+    "poseHairstyleFrames": 8,
+    "invalidRegistrationRefusals": 9,
+    "unsupportedProviderRefusals": 4,
+    "timelineSamples": 36,
+    "lowerBodyExact": true,
+    "loopWrapAndPauseOnEdit": true,
+    "standingPrototypeRegression": "passed",
+    "unchangedPlayableRgbaFingerprints": 400,
+    "inspectedRecordedWorldPlayback": true
+  },
+  "observedIssue": "The existing body breathing timing holds its closed-eye pose about 1.25 seconds. Head fit accepted for development; temporal polish remains open.",
+  "commands": [
+    "node scripts/register-hat-breathe.mjs",
+    "node scripts/verify-hat-breathe.mjs",
+    "node scripts/verify-hat-prototype.mjs",
+    "node scripts/verify-resident-part-fingerprints.mjs",
+    "ffmpeg -i world-playback.webm -vf fps=3,crop=200:200:390:210,scale=400:400,tile=4x4 -frames:v 1 world-playback-frames.png"
+  ],
+  "remaining": "Closed-eye source pose currently holds about 1.25 seconds; cadence correction, remaining 44 pose fits, hand/tool occlusion, part/palette coverage and playable recipe/UI/save integration remain unfinished.",
+  "sha256": {
+    "web/artwork/character-hat-prototype.js": "3d925eddc61a3ac6804922ce8f19dbb00ccc4f52b4c6bb8981cee42c1f7e591a",
+    "web/artwork/character-hat-breathe-review.js": "963aa7d19822d68898010e73b5f919d3bc6db5a8a2b3decd7ca40cf99186cbd5",
+    "web/artwork/character-body-lab.js": "2b42c589ff8e15e70bd9241bade1f15450e704e08008c27c27d5e68930597957",
+    "scripts/register-hat-breathe.mjs": "7ea8d50db79f4d5263705c443d8644c82ca3aab1bd340f4ca6f0365bd12c40df",
+    "scripts/verify-hat-breathe.mjs": "9211aae1a4a971d062db57914b879f587bc744b43b4cdbbc92ce8884b42d97f1",
+    "web/art/characters/prototype-v1/straw-hat-breathe-v1-registration.json": "6d7e0000d191aa8b01685afd3a9e1cebedfb12b663f3302e61402768aa7b65de",
+    "web/art/characters/prototype-v1/straw-hat-base8-candidate-v3.png": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+    "assets/art-direction/character-prototype-v1/straw-hat-breathe-v1/timeline.png": "2c7d8c84eac2175dc6f67881f93bf0a8f7229563bd083d77f010d86905154a49",
+    "assets/art-direction/character-prototype-v1/straw-hat-breathe-v1/world-playback.webm": "a14dd848330cd922779b41e77a3c2c789d6041b892fae1ef13e06123eeee4a68",
+    "assets/art-direction/character-prototype-v1/straw-hat-breathe-v1/world-playback-frames.png": "564371e22597834883bd944c8d29a43cc8c425ac7aa278b9e1481031034da987"
+  }
+}
