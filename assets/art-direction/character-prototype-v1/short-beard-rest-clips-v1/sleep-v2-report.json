@@ -1,0 +1,62 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+  "clip": "sleep",
+  "sheet": "base",
+  "poseCount": 1,
+  "checked": 6,
+  "refused": 16,
+  "disposed": 6,
+  "partialCleanup": 1,
+  "audits": [
+    {
+      "index": 15,
+      "pixels": 10471,
+      "inside": 10471,
+      "bounds": [
+        66,
+        223,
+        300,
+        360
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 1,
+      "maximum": 1,
+      "rgbaByteUpperBound": 262144
+    },
+    {
+      "entries": 1,
+      "maximum": 1,
+      "rgbaByteUpperBound": 262144
+    },
+    {
+      "entries": 1,
+      "maximum": 1,
+      "rgbaByteUpperBound": 262144
+    },
+    {
+      "entries": 1,
+      "maximum": 1,
+      "rgbaByteUpperBound": 262144
+    },
+    {
+      "entries": 1,
+      "maximum": 1,
+      "rgbaByteUpperBound": 262144
+    },
+    {
+      "entries": 1,
+      "maximum": 1,
+      "rgbaByteUpperBound": 262144
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 24
+}

@@ -20,7 +20,7 @@ export function composeFacialHairPose({appearanceFrame,image,sourceHash,binding,
 
 // A partial facial set must never fall back to a bare face mid-animation.
 export function composeFacialHairClip({provider,binding,entries,clip}){
- if(!['work','walk','breathe'].includes(clip))throw Error('This facial animation set is not available.');
+ if(!['work','walk','breathe','sit','sleep','look'].includes(clip))throw Error('This facial animation set is not available.');
  const spec=residentClips[clip],indices=[...new Set(spec.frames.map(frame=>spec.row*4+frame))];
  if(provider?.animationProfile!=='neutral-v1'||typeof provider.frameForPose!=='function'||!(entries instanceof Map)||entries.size!==indices.length||indices.some(index=>!entries.has(index)))throw Error('Provide every registered pose for this facial animation.');
  const frames=new Map();

@@ -1,0 +1,89 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "42cd2148ecc6bcd415a57054a42976a0656b02c70838c991860ead8451d8e7e8",
+  "clip": "sit",
+  "sheet": "base",
+  "poseCount": 3,
+  "checked": 18,
+  "refused": 16,
+  "disposed": 6,
+  "audits": [
+    {
+      "index": 12,
+      "pixels": 12314,
+      "inside": 12314,
+      "bounds": [
+        64,
+        234,
+        330,
+        363
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 13,
+      "pixels": 12676,
+      "inside": 12676,
+      "bounds": [
+        65,
+        241,
+        343,
+        374
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 14,
+      "pixels": 13187,
+      "inside": 13187,
+      "bounds": [
+        61,
+        233,
+        347,
+        366
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    },
+    {
+      "entries": 3,
+      "maximum": 3,
+      "rgbaByteUpperBound": 786432
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 24
+}

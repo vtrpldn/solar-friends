@@ -1,0 +1,110 @@
+{
+  "frames": [
+    {
+      "key": "base-12"
+    },
+    {
+      "key": "base-13"
+    },
+    {
+      "key": "base-14"
+    },
+    {
+      "key": "base-15"
+    },
+    {
+      "key": "idle-0"
+    },
+    {
+      "key": "idle-1"
+    },
+    {
+      "key": "idle-2"
+    },
+    {
+      "key": "idle-3"
+    }
+  ],
+  "guides": [
+    {
+      "key": "base-12",
+      "painted": 8254,
+      "bounds": [
+        52,
+        242,
+        305,
+        366
+      ]
+    },
+    {
+      "key": "base-13",
+      "painted": 9555,
+      "bounds": [
+        69,
+        253,
+        349,
+        384
+      ]
+    },
+    {
+      "key": "base-14",
+      "painted": 7834,
+      "bounds": [
+        61,
+        233,
+        288,
+        366
+      ]
+    },
+    {
+      "key": "base-15",
+      "painted": 7546,
+      "bounds": [
+        69,
+        225,
+        296,
+        357
+      ]
+    },
+    {
+      "key": "idle-0",
+      "painted": 8464,
+      "bounds": [
+        61,
+        264,
+        331,
+        384
+      ]
+    },
+    {
+      "key": "idle-1",
+      "painted": 8450,
+      "bounds": [
+        61,
+        255,
+        331,
+        375
+      ]
+    },
+    {
+      "key": "idle-2",
+      "painted": 8895,
+      "bounds": [
+        61,
+        264,
+        340,
+        384
+      ]
+    },
+    {
+      "key": "idle-3",
+      "painted": 8512,
+      "bounds": [
+        69,
+        264,
+        340,
+        384
+      ]
+    }
+  ]
+}

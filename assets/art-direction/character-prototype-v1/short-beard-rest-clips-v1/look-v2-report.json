@@ -1,0 +1,104 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; declared facial clip only, excluded from gameplay.",
+  "atlasSha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+  "clip": "look",
+  "sheet": "idle",
+  "poseCount": 4,
+  "checked": 24,
+  "refused": 16,
+  "disposed": 6,
+  "partialCleanup": 1,
+  "audits": [
+    {
+      "index": 0,
+      "pixels": 14035,
+      "inside": 14035,
+      "bounds": [
+        57,
+        258,
+        340,
+        390
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 1,
+      "pixels": 14625,
+      "inside": 14625,
+      "bounds": [
+        54,
+        249,
+        341,
+        381
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 2,
+      "pixels": 15247,
+      "inside": 15247,
+      "bounds": [
+        56,
+        256,
+        347,
+        389
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 3,
+      "pixels": 13858,
+      "inside": 13858,
+      "bounds": [
+        61,
+        255,
+        347,
+        389
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 24
+}

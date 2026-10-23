@@ -1,0 +1,36 @@
+{
+  "status": "Revision 2 passes isolated seated, sleeping and looking frame-fit review. Internal development only; not a public appearance option.",
+  "scope": "Base poses 12\u201315 and idle poses 0\u20133. Together with prior work, twenty of 48 main facial poses have reviewed bindings; return poses remain open.",
+  "rejectedSource": "Revision 1 passed broad bounds checks but failed actual seated/sleeping face review: generic widened curves and floating cheek tips. None of its poses is promoted. Its source, registrations and failed visual comparisons are retained.",
+  "acceptedSource": "Revision 2 was generated from actual face/mask guides. Its cheek and jaw curves follow the narrower seated/sleeping faces and looking poses in the inspected comparisons. No raster trimming, warping, alpha fitting or source-crop resizing was used to conceal the failed source.",
+  "inspected": [
+    "48 original/composed hairstyle, skin-palette and pose comparisons: 18 sitting, 6 sleeping and 24 looking.",
+    "All eight frames in both facings, day/night tint, small/enlarged actual resident-renderer samples.",
+    "72 ordered temporal comparisons including the seated lean/return, held sleeping frame over elapsed times and looking loop. This is not full continuous-playback or cross-activity motion acceptance."
+  ],
+  "mechanical": [
+    "Revision 2 passes the existing 98 percent authored-region gate using guide-measured bounds plus a twelve-source-pixel margin. One pose has five thresholded source pixels outside that envelope; its measured coverage is recorded in sit-v2-report.json. The other seven have complete envelope coverage.",
+    "No pixels outside the authored face crop change in all 48 combinations.",
+    "Each of the three clips refuses 16 invalid source-tile, pose-set, clip and pose requests; the unused ninth tile is empty.",
+    "18 provider disposal checks and three instrumented failed-construction cleanup checks pass. Partially allocated canvas surfaces are cleared before errors escape.",
+    "Cache limits follow actual unique poses: sit 3 frames / 786432 composed RGBA bytes; sleep 1 / 262144; look 4 / 1048576. Decoded source/body/GPU memory is outside this measurement.",
+    "Earlier walking, breathing, working and sprite-frame regressions pass. Candidate revision is mandatory in the shared verifier, preventing an accidental default to a rejected revision."
+  ],
+  "tools": "prepare-facial-pose-guides.mjs validates fixed face/tile bounds, unique pose keys, non-overlapping integer source tiles and measured guide paint bounds. verify-facial-clips.mjs handles base/idle sheets and varying clip lengths using the actual animation catalog/timing.",
+  "remaining": [
+    "Other idle gestures and all activity/return facial poses",
+    "Hair-colour and hat compatibility, portraits and planted scenes",
+    "Continuous playback and cross-activity transitions",
+    "Full source/body/GPU memory and roster measurements",
+    "Native/public creator/library/export/save integration",
+    "All other original builder release requirements"
+  ],
+  "fingerprints": {
+    "candidate-v1.png": "42cd2148ecc6bcd415a57054a42976a0656b02c70838c991860ead8451d8e7e8",
+    "candidate-v2.png": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+    "jaw.png": "cab14456c35160d71400843256f0434a4f09fd1c34e97bbb93f056c437eda419",
+    "faces.png": "5fa9739e764b29828cf2d9cbf16402f8d021de075547ca19e8afdf37da104bae",
+    "specs.json": "9b6e861242fa1ab712d40bdac1a0226ee5b1b57f608c45328e93a63f0ac8411f",
+    "registrations-v2.json": "a71898d64c175c1763f0ad25ef28768cb5385e31d7e4af63711ed2ea96ee56af"
+  }
+}

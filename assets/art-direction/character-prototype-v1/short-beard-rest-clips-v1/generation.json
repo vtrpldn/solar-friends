@@ -1,0 +1,38 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "entries": [
+    {
+      "file": "candidate-v1.png",
+      "prompt": "Precise Solar Friends game facial-hair atlas. Image1 is the exact1254x1254 geometry guide, a3x3 grid of418x418 cells. It contains exactly EIGHT green short-beard-and-moustache pairs in reading order; the ninth/bottom-right cell must stay completely empty. Replace ONLY the green shapes with dark-chestnut close-trimmed beard paint. Trace each distinct silhouette, position and scale exactly. The different curves represent seated, leaning, sleeping and looking-around face poses. Preserve mouth holes and transparent gaps. Keep the sides short and the chin thickness inside the green shapes; no added horns, bulk, detached specks or extra ninth pair. Image2 is MATERIAL/COLOUR only: match this existing beard's warm subdued chestnut broad illustrated shading, soft upper-left light and simplified hair clumps. Do not copy its positions or shapes. Retain the full1254square canvas, empty margins and empty ninth cell; do not recenter, zoom, crop, shift or merge parts. Final is only eight painted beard-and-moustache overlays on genuine transparent alpha. No people, skin, eyes, face, scalp hair, clothing, green marks, text, grid, cell borders, backdrop or shadows outside the silhouettes. No photoreal individual hairs.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-rest-clips-v1/jaw.png",
+          "role": "Exact eight-pose silhouettes"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-rest-clips-v1/../short-beard-base-clips-v1/candidate-v1.png",
+          "role": "Material/colour only"
+        }
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5e10fb41-9a54-448c-b58d-26a4781b2f9a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Rejected after seated/sleeping close-up review: several silhouettes widened and their side tips float beyond the cheek. Bounds-only success did not establish fit."
+    },
+    {
+      "file": "candidate-v2.png",
+      "prompt": "Precise sprite-layer EDIT, not free-form generation. Image1 shows eight actual Solar Friends face poses with GREEN PATCHES marking the exact beard and moustache paint areas; image2 is the matching silhouette-only MASK. Replace only the green regions with short dark-chestnut illustrated facial hair and then export ONLY those newly painted regions on transparency, deleting the entire human face/background. The output should follow image2's silhouettes exactly, including each DIFFERENT jaw width, diagonal curve and moustache position. Do not make the beard pairs the same shape. Particularly the top-right and middle-left beards are NARROWER and must not extend beyond the face; the leaning top-middle beard has a diagonal downward jaw. Keep all side tips attached to their own cheek, no horns past the face and no extra chin bulk. Keep the3x3 layout on the original1254square canvas, eight pairs in reading order, ninth/bottom-right cell completely empty. No recentering, resizing, zoom, cropping or moving of the shapes. Paint like the existing warm soft Solar Friends illustration: subdued chestnut, broad simple shaded clumps, upper-left light, no fine photoreal strands. Output only beard/moustache pixels inside the silhouette mask, no skin, eyes, mouth, nose, ears, scalp hair, neck, clothes, green guide paint, grid, labels, borders, shadows outside the mask or detached fragments. All mouth holes and margins are true transparent alpha. This is a registered animation overlay atlas; matching the masks matters more than making a generic attractive beard.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-rest-clips-v1/faces.png",
+          "role": "Actual face/green-mask guide"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-rest-clips-v1/jaw.png",
+          "role": "Matching silhouette-only mask"
+        }
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d2794e70-9340-401f-9a02-a7e71ab89951.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Isolated seated, sleeping and looking frame fit reviewed; complete accessory and player integration remain unfinished."
+    }
+  ]
+}
