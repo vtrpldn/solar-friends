@@ -318,6 +318,7 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 .resident-identity-dialog [data-identity-appearance]>label,.resident-identity-dialog [data-identity-appearance]>p{grid-column:1/-1}
 .resident-identity-dialog .resident-part-palettes{grid-column:1/-1}
 .resident-part-palettes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.resident-part-options{grid-template-columns:repeat(3,minmax(0,1fr))}
 
 .scenario-journal-goal{padding:14px 0;border-top:1px solid #c9b17b}.scenario-journal-goal h4{margin:0 0 7px;font-size:15px}.scenario-journal-goal h4 small{font-size:11px;color:#806738;margin-left:8px}.scenario-journal-goal p{white-space:pre-wrap}.scenario-journal-goal.locked{opacity:.65}.scenario-journal-goal>ul{padding-left:18px}.scenario-journal-goal li{margin:10px 0;font-size:12px;line-height:1.5}.scenario-journal-goal li>small{display:block;color:#776139}.scenario-journal-goal li>button{display:block;margin-top:6px}.scenario-journal-goal .done>span{color:#526537}.scenario-condition-group>ul{padding-left:20px}.scenario-completion{border-top:1px solid #b49a64;padding-top:15px;font-weight:bold;color:#526537}
 

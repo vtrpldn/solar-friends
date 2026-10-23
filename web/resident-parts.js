@@ -8,6 +8,8 @@ import {registeredEquipmentFrame} from './character-equipment.js';
 import {loadEquipmentArt} from './character-equipment-parts.js';
 import {createAppearanceCache} from './appearance-cache.js';
 import {validateResidentPartRecipe} from './resident-part-recipe.js';
+import {composeHatProvider} from './character-hat-provider.js';
+import {hatReviewClips} from './character-hat-poses.js';
 import {canonical} from './editor/journal.js';
 const root='/art/characters/prototype-v1/',sheets=['base','idle','activities'];
 const bodyFiles={base:'body-neutral-base.png',idle:'body-neutral-idle-candidate-v2.png',activities:'body-neutral-activities-candidate-v1.png'};
@@ -15,7 +17,7 @@ const toolFiles=Array.from({length:16},(_,i)=>i<4?`cook-equipment-pose-${i}-v${i
 const keyFor=recipe=>JSON.stringify(validateResidentPartRecipe(recipe));
 // Sources are bundled, pose-bound and hash-checked. A recipe cannot name a file.
 export function createResidentPartLibrary(){
- const sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,pinned=new Set();
+ const sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,hatWork=null,pinned=new Set();
  const read=async file=>{if(!/^[a-z0-9-]+\.json$/.test(file))throw Error('Choose bundled resident registrations.');const response=await fetch(root+file);if(!response.ok)throw Error('Cannot load resident part registration.');return response.json();};
  const load=file=>{
   if(!/^[a-z0-9-]+\.png$/.test(file))return Promise.reject(Error('Choose bundled resident artwork.'));
@@ -43,6 +45,7 @@ export function createResidentPartLibrary(){
   if(!toolWork){const work=Promise.all(toolFiles.map(async file=>{const registration=await read(file),equipment=await loadEquipmentArt(registration,load);return {registration,equipment};}));toolWork=work;work.catch(()=>{if(toolWork===work)toolWork=null;});}
   return toolWork;
  };
+ const hat=()=>{if(!hatWork){const work=(async()=>{const registrations=new Map(await Promise.all(Object.keys(hatReviewClips).map(async clip=>[clip,await read(`straw-hat-${clip}-v1-registration.json`)])));const source=registrations.get('breathe').source;return {registrations,...await load(source.file)};})();hatWork=work;work.catch(()=>{if(hatWork===work)hatWork=null;});}return hatWork;};
  const cache=createAppearanceCache({maxEntries:16,maxConcurrent:2,maxQueued:24,isPinned:key=>pinned.has(key),compose:async recipe=>{
   const [base,caps,equipment]=await Promise.all([body(),hair(recipe.hair),tools()]),painted=base.materials.provider(recipe.materials),frames=new Map(),returns=new Map();
   for(const sheet of sheets)for(let index=0;index<16;index++){
@@ -54,7 +57,8 @@ export function createResidentPartLibrary(){
    }
    frames.set(key,frame);
   }
-  return Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){const key=sheet+':'+index;if(!frames.has(key))throw Error('These resident parts have no artwork for this pose.');return sheet==='activities'&&pose?.sequenceIndex>=4?returns.get(index)??frames.get(key):frames.get(key);}});
+  const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){const key=sheet+':'+index;if(!frames.has(key))throw Error('These resident parts have no artwork for this pose.');return sheet==='activities'&&pose?.sequenceIndex>=4?returns.get(index)??frames.get(key):frames.get(key);}});
+  return recipe.hat==='straw-v1'?composeHatProvider({provider,binding:base.binding,...await hat()}):provider;
  }});
  return Object.freeze({
   prepare(recipe){let checked;try{checked=validateResidentPartRecipe(recipe);}catch(error){return Promise.reject(error);}return cache.get(keyFor(checked),checked);},

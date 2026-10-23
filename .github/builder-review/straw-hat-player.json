@@ -1,0 +1,19 @@
+{
+  "why": "Make the reviewed straw hat an actual resident choice shared by authoring, play, portraits and saved appearances.",
+  "scope": "Optional straw-v1 hat on the existing neutral body and outfit; broader character customization remains unfinished.",
+  "evidence": "assets/art-direction/character-prototype-v1/straw-hat-player-v1",
+  "checks": [
+    "777 native tests pass; all 1152 bundled recipe combinations round-trip, including hat/no-hat",
+    "Strict cargo clippy --lib -- -D warnings and release WASM build pass",
+    "Public hat and no-hat creator flows: all pose previews, facing/night/scale, undo/redo, resident preset export/import, draft reload, native play, cancelled/applied live edits and exact checkpoint reload",
+    "1200 exact rendered main/feeding-return frames across 24 hairstyle, hair-colour and representative body palette recipes",
+    "288 existing no-hat pose comparisons, 12 feeding returns, shared catalog/cache checks and 400 frozen no-hat RGBA fingerprints unchanged",
+    "No-hat canonicalization; unknown/null hat, inherited required fields and extra fields refused"
+  ],
+  "visual": "Inspected final 1440x900 creator, live editor, resident library portrait, village capture and 24-look palette board. Hat fits portraits and existing scale; three appearance selectors share one row.",
+  "remaining": [
+    "Broader body/face/clothing/facial hair/accessory range",
+    "General motion/grip/cadence polish and full release performance gates",
+    "Other original map/scenario/biome/recovery/usability requirements"
+  ]
+}
