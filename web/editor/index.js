@@ -1,3 +1,4 @@
+import {validatePublication} from './validate-publication.js';
 import {prepareRelease} from './prepare-release.js';
 import {prepareCreationExport} from './prepare-export.js';
 import {prepareScenario} from './prepare-scenario.js';
@@ -64,6 +65,7 @@ const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary 
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
+let releasePublication=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
@@ -430,11 +432,11 @@ function wire(){
   };
   $('creator-undo').onclick=()=>current?.doc.undo();$('creator-redo').onclick=()=>current?.doc.redo();
   $('creator-release').onclick=()=>{if(!current||busy||!report.ok)return;$('creator-release-status').textContent='';$('creator-release-credits').textContent=(current.record?.attribution??[]).map(c=>`Based on version ${c.revision} by ${c.author}`).join(' · ');$('creator-release-dialog').showModal();};
-  $('creator-release-cancel').onclick=()=>$('creator-release-dialog').close();
-  $('creator-release-dialog').addEventListener('cancel',e=>{if(busy)e.preventDefault();});
+  $('creator-release-cancel').onclick=()=>{if(releasePublication)releasePublication.abort(new DOMException('Release publication cancelled. Your checked draft is still saved.','AbortError'));else $('creator-release-dialog').close();};
+  $('creator-release-dialog').addEventListener('cancel',e=>{if(busy){e.preventDefault();releasePublication?.abort(new DOMException('Release publication cancelled. Your checked draft is still saved.','AbortError'));}});
   $('creator-release-confirm').onclick=async()=>{
     const author=$('creator-release-author');if(!author.reportValidity()||!current||busy)return;
-    busy=true;$('creator-release-confirm').disabled=true;$('creator-release-cancel').disabled=true;$('creator-release-status').textContent='Checking and saving this release…';
+    busy=true;author.disabled=true;$('creator-release-confirm').disabled=true;$('creator-release-cancel').disabled=true;$('creator-release-status').textContent='Checking and saving this release…';
     const ctx=current,revision=ctx.doc.revision;
     try{
       const frozen=await prepareRelease(ctx.doc.value);
@@ -442,9 +444,10 @@ function wire(){
       $('creator-release-status').textContent='Saving the checked release…';
       await save();
       if(canonical(frozen)!==canonical(current.doc.value)){current.doc.transact('Resolve landscape for frozen release',d=>Object.assign(d,frozen));await save();}
-      const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,validate:raw=>JSON.parse(engine.validate_scenario(raw)),thumbnail:previewOf(current.doc.value,map.snapshot)});
+      const thumbnail=previewOf(current.doc.value,map.snapshot);releasePublication=new AbortController();$('creator-release-cancel').disabled=false;$('creator-release-cancel').textContent='Cancel save';$('creator-release-status').textContent='Checking your release…';
+      const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,signal:releasePublication.signal,validate:raw=>validatePublication('release',raw,{signal:releasePublication.signal,onStage:stage=>$('creator-release-status').textContent=stage}),thumbnail});
       $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
-    }catch(error){$('creator-release-status').textContent=error.message;}finally{busy=false;$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
+    }catch(error){$('creator-release-status').textContent=error.message;}finally{releasePublication=null;busy=false;author.disabled=false;$('creator-release-cancel').textContent='Keep editing';$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
   };
   $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
   $('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));

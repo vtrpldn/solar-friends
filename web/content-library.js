@@ -1,11 +1,22 @@
 import {MAX_VILLAGE_SNAPSHOT_CHARACTERS} from './recovery-limits.js';
-import {createMapPackage,validateMapPackage} from './map-package.js';
+import {createMapPackageAsync,validateMapPackage} from './map-package.js';
 import {enrichRunHeaders} from './library-migrations.js';
 import {canonical} from './editor/journal.js';
-import {createReleasePackage,validateRelease} from './release-package.js';
+import {createReleasePackageAsync,validateRelease} from './release-package.js';
 // Projects, frozen playthrough content, and their saves never share mode slots.
 export class LibraryConflict extends Error {
   constructor(){super('Another tab changed this creation. Reload it or save your work as a copy.');this.name='LibraryConflict';}
+}
+// Reject promptly on cancellation even when a validator does not cooperate.
+// Late validator completion is observed, but cannot enter the commit phase.
+function whileActive(value,signal){
+ if(!signal)return Promise.resolve(value);
+ return new Promise((resolve,reject)=>{
+  const abort=()=>{signal.removeEventListener('abort',abort);reject(signal.reason??new DOMException('Publication cancelled.','AbortError'));};
+  signal.addEventListener('abort',abort,{once:true});
+  Promise.resolve(value).then(result=>{signal.removeEventListener('abort',abort);resolve(result);},error=>{signal.removeEventListener('abort',abort);reject(error);});
+  if(signal.aborted)abort();
+ });
 }
 const clone=value=>structuredClone(value);
 const recordKind=store=>({projects:'project',runs:'run',residents:'resident',releases:'release',maps:'map'})[store];
@@ -161,30 +172,49 @@ export class ContentLibrary extends EventTarget {
     }),thumbnail);
   }
   deleteProject(id,expectedRevision){return this.#write('projects',id,expectedRevision,()=>null);}
-  createRelease({projectId,expectedRevision,author,validate,thumbnail}){
-    return this.#freeze({projectId,expectedRevision,thumbnail},{store:'releases',counters:'releaseCounters',kind:'release',format:'solar-friends-frozen-release',makePackage:(id,version,source)=>createReleasePackage({id,version,definition:source.checkpoint.definition,author,credits:source.attribution??[],validate})});
+  createRelease({projectId,expectedRevision,author,validate,thumbnail,signal}){
+    return this.#freeze({projectId,expectedRevision,thumbnail,signal},{store:'releases',counters:'releaseCounters',kind:'release',format:'solar-friends-frozen-release',makePackage:(id,version,source)=>createReleasePackageAsync({id,version,definition:source.checkpoint.definition,author,credits:source.attribution??[],validate})});
   }
-  createMap({projectId,expectedRevision,author,validate,thumbnail,title,description}){
-    return this.#freeze({projectId,expectedRevision,thumbnail},{store:'maps',counters:'mapCounters',kind:'map',format:'solar-friends-frozen-map',makePackage:(id,version,source)=>{const d=source.checkpoint.definition;return createMapPackage({id,version,map:d.map,weather:d.rules.weather,title:title??d.title,description:description??d.description,author,credits:source.attribution??[],validate});}});
+  createMap({projectId,expectedRevision,author,validate,thumbnail,title,description,signal}){
+    return this.#freeze({projectId,expectedRevision,thumbnail,signal},{store:'maps',counters:'mapCounters',kind:'map',format:'solar-friends-frozen-map',makePackage:(id,version,source)=>{const d=source.checkpoint.definition;return createMapPackageAsync({id,version,map:d.map,weather:d.rules.weather,title:title??d.title,description:description??d.description,author,credits:source.attribution??[],validate});}});
   }
-  async #freeze({projectId,expectedRevision,thumbnail},{store,counters,kind,format,makePackage}){
-    const db=await this.#db(),id=crypto.randomUUID();
-    const result=await new Promise((resolve,reject)=>{
-      const tx=db.transaction(['projects',store,counters,'heads','previews'],'readwrite'),projects=tx.objectStore('projects'),heads=tx.objectStore('heads');let result,error;
-      const source=projects.get(projectId);
-      source.onsuccess=()=>{
-        const previous=source.result;
-        if(!previous||previous.revision!==expectedRevision){error=new LibraryConflict();tx.abort();return;}
-        const versions=tx.objectStore(counters).get(projectId);
-        versions.onsuccess=()=>{try{
-          const version=(versions.result?.version??0)+1,file=makePackage(id,version,previous);
-          result={id,revision:1,updatedAt:Date.now(),format,schema:1,title:file.title,projectId,sourceRevision:previous.revision,package:file};
-          tx.objectStore(store).add(result);heads.add(header(kind,result));if(safeThumbnail(thumbnail))tx.objectStore('previews').put({key:`${kind}:${id}`,image:thumbnail});tx.objectStore(counters).put({id:projectId,version});
+  async #freeze({projectId,expectedRevision,thumbnail,signal},{store,counters,kind,format,makePackage}){
+    signal?.throwIfAborted();const db=await this.#db(),id=crypto.randomUUID();
+    // Validation may await a worker. Never keep an IndexedDB transaction open
+    // across that await; recheck both the source and version counter at commit.
+    for(let attempt=0;attempt<8;attempt++){
+      signal?.throwIfAborted();
+      const previous=await this.#read('projects',projectId);
+      if(!previous||previous.revision!==expectedRevision)throw new LibraryConflict();
+      const count=(await this.#read(counters,projectId))?.version??0,version=count+1;
+      signal?.throwIfAborted();
+      const sourceIdentity=canonical({definition:previous.checkpoint.definition,attribution:previous.attribution??[]});
+      const file=await whileActive(makePackage(id,version,previous),signal);
+      signal?.throwIfAborted();
+      const result=await new Promise((resolve,reject)=>{
+        const tx=db.transaction(['projects',store,counters,'heads','previews'],'readwrite');let result,error,retry=false;
+        const abort=()=>{error=signal.reason??new DOMException('Publication cancelled.','AbortError');try{tx.abort();}catch{/* Completion owns an already committed record. */}};
+        signal?.addEventListener('abort',abort,{once:true});
+        const finish=()=>signal?.removeEventListener('abort',abort);
+        const source=tx.objectStore('projects').get(projectId);
+        source.onsuccess=()=>{try{
+          if(!source.result||source.result.revision!==expectedRevision||canonical({definition:source.result.checkpoint?.definition,attribution:source.result.attribution??[]})!==sourceIdentity){error=new LibraryConflict();tx.abort();return;}
+          const versions=tx.objectStore(counters).get(projectId);
+          versions.onsuccess=()=>{try{
+            if((versions.result?.version??0)!==count){retry=true;tx.abort();return;}
+            result={id,revision:1,updatedAt:Date.now(),format,schema:1,title:file.title,projectId,sourceRevision:previous.revision,package:file};
+            tx.objectStore(store).add(result);tx.objectStore('heads').add(header(kind,result));
+            if(safeThumbnail(thumbnail))tx.objectStore('previews').put({key:`${kind}:${id}`,image:thumbnail});
+            tx.objectStore(counters).put({id:projectId,version});
+          }catch(cause){error=cause;tx.abort();}};
         }catch(cause){error=cause;tx.abort();}};
-      };
-      tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(error||tx.error||Error('The content package could not be saved. Your draft is unchanged.'));
-    });
-    this.#changed(store,id,1);return result;
+        tx.oncomplete=()=>{finish();resolve(result);};
+        tx.onabort=()=>{finish();if(error)reject(error);else if(retry)resolve(null);else reject(tx.error||Error('The content package could not be saved. Your draft is unchanged.'));};
+        if(signal?.aborted)abort();
+      });
+      if(result){this.#changed(store,id,1);return result;}
+    }
+    throw new LibraryConflict();
   }
   async importRelease(file,validate,thumbnail){
     const data=validateRelease(file,validate);

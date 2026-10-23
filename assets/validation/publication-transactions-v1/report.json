@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "map",
+    "preAbort": true,
+    "asyncRejection": true,
+    "promptAbortDuringValidation": true,
+    "lateResultIgnored": true,
+    "commitBoundaryAbortAtomic": true,
+    "concurrentVersions": [
+      1,
+      2
+    ],
+    "revalidatedRetry": true,
+    "sourceEditRefused": true,
+    "sameRevisionContentReplacementRefused": true,
+    "malformedSourceReplacementRefused": true,
+    "postCommitAbortPreservesSuccess": true,
+    "nextVersion": 4
+  },
+  {
+    "kind": "release",
+    "preAbort": true,
+    "asyncRejection": true,
+    "promptAbortDuringValidation": true,
+    "lateResultIgnored": true,
+    "commitBoundaryAbortAtomic": true,
+    "concurrentVersions": [
+      1,
+      2
+    ],
+    "revalidatedRetry": true,
+    "sourceEditRefused": true,
+    "sameRevisionContentReplacementRefused": true,
+    "malformedSourceReplacementRefused": true,
+    "postCommitAbortPreservesSuccess": true,
+    "nextVersion": 4
+  }
+]

@@ -1,0 +1,30 @@
+[
+  {
+    "kind": "map",
+    "cancelButton": true,
+    "escape": true,
+    "noLatePackage": true,
+    "focusRestored": true,
+    "nextVersion": 1,
+    "workerNativeParity": {
+      "version": 1,
+      "valid": true,
+      "invalid": true
+    },
+    "browserErrors": []
+  },
+  {
+    "kind": "release",
+    "cancelButton": true,
+    "escape": true,
+    "noLatePackage": true,
+    "focusRestored": true,
+    "nextVersion": 1,
+    "workerNativeParity": {
+      "version": 1,
+      "valid": true,
+      "invalid": true
+    },
+    "browserErrors": []
+  }
+]
