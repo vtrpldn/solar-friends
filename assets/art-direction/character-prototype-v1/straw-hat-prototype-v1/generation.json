@@ -1,0 +1,59 @@
+{
+  "tool": "Built-in imagegen",
+  "transparentBackground": true,
+  "workflow": "Generate/version/review; no raster repair or local warping. Guide and review canvases use unchanged source compositions.",
+  "entries": [
+    {
+      "candidate": "v1",
+      "prompt": "Use case: precise-object-edit. Asset: Solar Friends modular resident accessory prototype, one single straw sun hat overlay. Input 1 is the exact-position body guide, NOT an image to repaint: retain its 1254 by 1254 coordinate space and imagine the hat worn naturally on this standing person's head. Input 2 is Iara's original animation atlas, STYLE REFERENCE ONLY: match her modest golden straw hat, dark brown band, warm broad painted shading, simple grouped woven marks, soft illustrated edge contrast and upper-left daylight. Produce ONLY THE HAT, with true transparent background everywhere else, including where the person's face, hair, body and feet were. No person, face, hair, clothing or shadow outside the hat. Keep all empty canvas margins: do not center or enlarge the isolated hat to fill the canvas. In the 1254-square canvas, the intended head is around x=650,y=210. A naturally sized hat should occupy approximately x=420..930,y=20..270; the low left brim end is around x=430,y=250, the raised right brim end around x=900,y=140, and the small rounded crown rises near x=630,y=30. These are alignment guides, not drawn lines. The brim sits just above the eyebrows, keeps the eyes visible, and follows the same three-quarter view facing right as the guide. Broad shallow oval brim, modest low rounded crown, no tall cowboy pinch, no dramatic floppy wave, no chin strap, no flower, no logo. Preserve painted Brazilian countryside game style rather than photoreal straw microtexture. The hat is human sized, not oversized; match Iara. Entire silhouette uncropped with transparent margin, no text, no border, no grid, no ground plate. Save a new candidate, not a replacement.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/body-guide.png",
+          "role": "Exact-position body guide, not paint to change"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/web/art/animations/iara.png",
+          "role": "Original straw-hat style and proportions"
+        }
+      ],
+      "output": "rejected-candidate-v1.png",
+      "verdict": "Rejected: oversized, low placement and a disconnected paint/face fragment."
+    },
+    {
+      "candidate": "v2",
+      "prompt": "Use case: precise-object-edit. Create a registered Solar Friends straw-hat overlay on a TRUE TRANSPARENT 1254x1254 canvas. Image 1 is the EXACT POSITION/SIZE GUIDE: its green silhouette is where the hat must be painted, at the very top of the otherwise mostly empty canvas. Image 2 is the previous hat candidate, STYLE/MATERIAL reference only; it was far too large and too low on the canvas. Paint one golden straw sun hat with a brown band ONLY INSIDE THE GREEN SILHOUETTE AREA OF IMAGE 1. Match that silhouette's approximate size and placement: x420..930, y20..280. Use the first image's resident to match the camera; the painted hat would sit naturally on that resident's head without hiding their eyes. Final output must contain ONLY the small hat near the top, and NOTHING of the green guides, human, hair, face, clothing, body or feet. Everything below y290 is fully transparent; all the empty surrounding space stays empty. Do not recenter the hat. Do not zoom or crop around it. The previous candidate contained a small stray face/paint fragment: omit ALL disconnected fragments. Warm painted illustration like Iara's hat in Solar Friends, broad grouped golden straw marks, upper-left sunlight, modest low rounded crown and shallow diagonal oval brim, dark brown band. No photoreal microtexture, cartoon outline, cowboy shape, giant brim, text, borders or watermark. Preserve the whole 1254-square coordinate frame and genuine alpha.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/silhouette-guide.png",
+          "role": "Authored geometry guide only"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/rejected-candidate-v1.png",
+          "role": "Previous material treatment, not valid scale"
+        }
+      ],
+      "output": "straw-hat-base8-candidate-v2.png",
+      "verdict": "Rejected after actual renderer review: brim too wide and low; obscures eyes."
+    },
+    {
+      "candidate": "v3",
+      "prompt": "Use case: precise-object-edit. Edit ONLY the hat in image 1, keeping a true transparent 1254x1254 canvas. This is a registered accessory layer, so empty space must remain empty. The current hat is 20 percent too wide and about 50 pixels too low. Make the ENTIRE hat uniformly about 20 percent smaller, and place it higher, with its opaque silhouette approximately x420..940 and y10..240. Keep the full canvas 1254 square, no crop, no recentering. In image 2 the body/green silhouette is a POSITION GUIDE ONLY. Image 3 is the in-game review: the original character on the left has both eyes visible; the oversized new hat on the right obscures the eyebrows/eyes. The corrected hat must expose both eyes and the forehead of that right-hand body, like the original. Preserve the gold painted straw, dark brown band, same modest rounded crown, shallow diagonal brim, warm upper-left light, broad illustrated shading and soft painted edge treatment. Paint only this corrected smaller, higher hat near the very TOP of the canvas. No face, hair, person, guide marks, green paint, disconnected specks, text, borders, shadow plate or background pixels. Everything below y245 must be fully transparent. Do not enlarge the hat to fill empty canvas. Do not add strings, flowers or cowboy details.",
+      "inputs": [
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/straw-hat-base8-candidate-v2.png",
+          "role": "Edit target"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/silhouette-guide.png",
+          "role": "Position and body guide"
+        },
+        {
+          "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/rejected-v2-board.png",
+          "role": "Actual in-game fit comparison, supplied through its /tmp capture path"
+        }
+      ],
+      "output": "/Users/paladini/Documents/veeware/solar-friends/web/art/characters/prototype-v1/straw-hat-base8-candidate-v3.png",
+      "verdict": "Accepted for one-pose accessory development after visual review; not approved for all poses or playable integration."
+    }
+  ]
+}

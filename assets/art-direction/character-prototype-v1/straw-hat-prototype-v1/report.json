@@ -1,0 +1,9 @@
+{
+  "mechanical": "PASS",
+  "visual": "Reviewed: v3 fits the standing head, leaves both eyes visible, and matches the original straw-hat scale/material treatment at two sizes, both facings and day/night. Accepted for single-pose development only.",
+  "scope": "One standing pose only. Excluded from gameplay and resident recipes.",
+  "sourceHash": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+  "denied": 5,
+  "lowerBodyUnchanged": true,
+  "remaining": "All other 47 pose fits, raised-hand/tool occlusion, animation continuity, colour/part combinations, portrait clipping and player recipe/save/UI integration remain unfinished."
+}

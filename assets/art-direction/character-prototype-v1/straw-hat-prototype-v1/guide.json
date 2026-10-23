@@ -1,0 +1,17 @@
+{
+  "recipe": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v1",
+    "body": "neutral-v1",
+    "hair": "side-part-v1",
+    "materials": {
+      "skin": "warm",
+      "shirt": "cream",
+      "shorts": "cream",
+      "shoes": "brown"
+    }
+  },
+  "sheet": "base",
+  "index": 8,
+  "size": 1254
+}

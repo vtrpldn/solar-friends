@@ -1,3 +1,5 @@
+import {prototypeAppearanceRecipe} from '../character-appearance-recipe.js';
+import {installHatPrototypeReview} from './character-hat-prototype.js';
 import {installEquipmentReview,installCookingEquipmentReview,installTendingEquipmentReview,installFeedingEquipmentReview} from './character-equipment-review.js';
 import {installSidePartReview,sidePartReviewRecipe,validateSidePartReviewRecipe} from './character-sidepart-review.js';
 import {createEquippedAppearanceReview} from './character-equipped-model.js';
@@ -58,7 +60,7 @@ try{
  }
  function choose(){const sheet=$('body-review-sheet').value,select=$('body-review-clip');select.replaceChildren(...Object.entries(residentClips).filter(([,clip])=>clip.sheet===sheet).map(([name])=>new Option(name,name)));draw();}
  $('body-review-sheet').onchange=choose;for(const id of ['mode','skin','shirt','shorts','shoes'])$('body-material-'+id).oninput=draw;for(const id of ['body-review-clip','body-review-time','body-review-facing'])$(id).oninput=draw;
- $('body-review-report').textContent=JSON.stringify(report,null,2);$('body-review-status').textContent=`48 extracted poses · cross-sheet stature ratio ${report.crossSheetStatureRatio.toFixed(3)}. Body-only production review; compatible parts and equipment remain unfinished.`;choose();
+ $('body-review-report').textContent=JSON.stringify(report,null,2);$('body-review-status').textContent=`48 extracted poses · cross-sheet stature ratio ${report.crossSheetStatureRatio.toFixed(3)}. Shared body/material review; labels below distinguish playable sources from incomplete prototypes.`;choose();
  window.singleHairReview=await installSingleHairReview({body:frameBank.base[8],binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.breatheHairReview=await installBreatheHairReview({frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
  window.walkHairReview=await installHairClipReview({clip:'walk',frames:frameBank,binding:window.bodyAttachmentReview.binding,scene,before:$('body-attachment-open')});
@@ -82,5 +84,6 @@ try{
  window.sidePartAppearanceReview=await installSidePartReview({seated:window.sitHairReview,frames:frameBank,binding:window.bodyAttachmentReview.binding,materials:materialModel,scene,before:$('body-attachment-open')});
  const sidePartEquipped=createEquippedAppearanceReview({appearance:window.sidePartAppearanceReview.model,materials:materialModel,frames:frameBank,binding:window.bodyAttachmentReview.binding,reviews:{cook:window.cookingEquipmentReview,water:window.equipmentPoseReview,tend:window.tendingEquipmentReview,feed:window.feedingEquipmentReview},makeRecipe:sidePartReviewRecipe,validateRecipe:validateSidePartReviewRecipe});
  window.sidePartEquippedReview=await installAppearanceControls({model:sidePartEquipped,scene,before:$('body-attachment-open'),prefix:'sidepart-equipped',makeRecipe:sidePartReviewRecipe,titleText:'Side part · activity equipment',noteText:'The second draft hairstyle with shared activity tools, foreground hands and empty-handed feeding recovery. Check contact and proportions in both facings and lighting states. These sources also feed the initial custom-look set; this inspection recipe is separate from player saves. Further artwork choices and final review remain unfinished.'});
+ window.strawHatPrototypeReview=await installHatPrototypeReview({binding:window.bodyAttachmentReview.binding,providers:new Map([['short-curls-v1',await equippedModel.provider('breathe',prototypeAppearanceRecipe())],['side-part-v1',await sidePartEquipped.provider('breathe',sidePartReviewRecipe())]]),scene,before:$('body-attachment-open')});
  document.body.dataset.bodyReviewReady='true';
 }catch(error){$('body-review-status').textContent=error.message;throw error;}

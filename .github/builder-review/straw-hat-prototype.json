@@ -1,0 +1,39 @@
+{
+  "why": "Begin the required accessory range with a source-bound, visually checked straw-hat prototype before expanding poses or accepting playable recipes.",
+  "scope": "Base standing pose 8 only; two current hairstyles, both facings, day/night and two scales. Not available in player custom looks.",
+  "tool": "Built-in imagegen, true alpha, three non-destructive candidates; exact prompts/reference roles in generation.json.",
+  "visualFindings": {
+    "v1": "Rejected: size/placement wrong and disconnected paint fragment.",
+    "v2": "Rejected after game renderer capture: oversized brim obscures eyes.",
+    "v3": "Accepted for single-pose development: eyes visible, natural forehead/ear contact and modest brim, painted straw/brown band consistent beside Iara and original world artwork."
+  },
+  "mechanical": {
+    "nativePoseBindingAndSourceHash": true,
+    "unsupportedInputRefusals": 5,
+    "unchangedBodyBelowHead": true,
+    "actualWorldScenes": 8,
+    "finalCapturesEqualInspectedCaptures": true,
+    "unchangedPlayableFingerprintComparisons": 400,
+    "existingPlayablePoseComparisons": 288,
+    "existingFeedingReturns": 12
+  },
+  "checks": [
+    "node scripts/prepare-hat-prototype-guide.mjs",
+    "node scripts/verify-hat-prototype.mjs",
+    "node scripts/verify-resident-part-fingerprints.mjs",
+    "node scripts/verify-resident-parts.mjs"
+  ],
+  "remaining": "47 other poses, hand/tool occlusion, transitions, all material/colour combinations, portrait crop and native recipe/save/player-control integration. Other body/face/clothing/facial-hair/accessory and release requirements remain open.",
+  "sha256": {
+    "web/art/characters/prototype-v1/straw-hat-base8-candidate-v3.png": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+    "web/art/characters/prototype-v1/straw-hat-base8-v3-registration.json": "e5627eccf6cfd518794cf4da2174d095c47905be76a6573bace56aa22c8c75d7",
+    "web/artwork/character-hat-prototype.js": "9b3645aa9a1f8d7e9fbc176952ed257e5338ec6462475bcad762dc0b2668c2d8",
+    "web/artwork/character-body-lab.js": "4267434a3cf6ad272ff34e9e6579fac0831f46d551fd451d35305ddabea9959c",
+    "web/artwork/character-body-lab.html": "e412a36881b4c6636db3e04fc784ded9402ff2248a16c3b49304ba965140669f",
+    "scripts/prepare-hat-prototype-guide.mjs": "9676168d448765e4567a42b1cf1bcb65a75b522191c9aaf9b7ea34cb22c95983",
+    "scripts/verify-hat-prototype.mjs": "30796b98bae63a2fcb004d5141d12f323b7245b5ca645c6867f6ccb88dba94d1",
+    "assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/generation.json": "be95ec7dedb9b0e62a32d871c92427970f1c60675060cef3f4a8ac003552c737",
+    "assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/board.png": "1b3d7ef1b5d643e53cd329306f43f5f6936800bf6ebdef54c6ba6e54addb23e6",
+    "assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/scenes.png": "b6c0cac8bc8192e12bec2e08ac3c8019e642c4025fa013df8f67e3996c35e13c"
+  }
+}
