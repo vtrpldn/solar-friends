@@ -1,3 +1,4 @@
+import {landPreviewKey} from './land-preview-key.js';
 import {projectPlaces} from './outlook-projects.js';
 import {ScenarioOutlook} from './outlook.js';
 import {MAX_RECOVERY_FILE_BYTES} from '../recovery-limits.js';
@@ -59,7 +60,7 @@ let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false
 const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
-let landReport=null,landSampleKey='',hoverCell=null;
+let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
@@ -111,10 +112,16 @@ function refresh(){
   report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
   if(report.ok)report.roles=JSON.parse(engine.scenario_journal())?.roles??[];
   const snapshot=JSON.parse(engine.report_state());
-  terrainBase=JSON.parse(engine.terrain_template());
-  landReport=JSON.parse(engine.land_report());geometry=JSON.parse(engine.world_geometry());landSampleKey='';
+  const nextMapKey=landPreviewKey(d),nextLandKey=report.ok?nextMapKey:null;
+  const landChanged=!landReport||(report.ok&&nextLandKey!==landReportKey);
+  if(landChanged){
+    terrainBase=JSON.parse(engine.terrain_template());
+    landReport=JSON.parse(engine.land_report());geometry=JSON.parse(engine.world_geometry());
+    landReportKey=nextLandKey;
+  }
+  landSampleKey='';
   map.landOverlay=overlayTiles();
-  map.set(d,snapshot);
+  map.set(d,snapshot,undefined,{paint:!report.ok||nextMapKey!==mapPreviewKey});mapPreviewKey=nextMapKey;
   minimap.set(landReport,geometry);
   geologyEditor.render(d,landReport);
   weatherEditor.render(d);

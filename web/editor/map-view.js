@@ -51,14 +51,14 @@ export class EditorMap {
     canvas.addEventListener('pointerleave',()=>{if(!this.drag){this.pointer=null;this.render();}});
     canvas.addEventListener('wheel',e=>{e.preventDefault();this.setZoom(this.view.zoom-e.deltaY*.001);},{passive:false});
   }
-  set(document,snapshot,view){
+  set(document,snapshot,view,{paint=true}={}){
     this.document=document;this.snapshot=snapshot;
     const appearances=snapshot.residents.map(p=>p.appearance);if(!this.preview)this.art.appearances.setActive(appearances);
     const revision=this.artRevision=(this.artRevision??0)+1;this.artLoading=appearances.some(a=>!this.art.appearances.isReady(a));this.artError=null;
     this.canvas.setAttribute('aria-busy',String(this.artLoading));this.canvas.style.pointerEvents=this.artLoading?'none':'';
     if(this.artLoading)Promise.all(appearances.filter(a=>!this.art.appearances.isReady(a)).map(a=>this.art.appearances.prepare(a))).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.canvas.setAttribute('aria-busy','false');this.canvas.style.pointerEvents='';this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.render();}});
     if(view)this.view={...this.view,...view,center:[...view.center]};
-    this.render();
+    if(paint||view||this.artLoading)this.render();
   }
   get state(){return structuredClone({...this.view,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
   setTool(tool){this.view.tool=tool;this.stroke=null;this.routeStroke=null;this.drag=null;this.render();this.viewChanged(this.state);}

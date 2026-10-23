@@ -1,0 +1,42 @@
+{
+  "why": "Measure a real mixed-building maximum-sized creation and avoid rebuilding unchanged land reports and pixels for funds/title/description edits.",
+  "fixture": "256 completed buildings across 21 inland types; 12 unique custom residents, mixed hats; generated Mata Atlantica seed 42; no authored routes or stocked livestock. Validated through normal scenario compilation.",
+  "baseline": "Fixed 2374fde editor/index.js served over current shared modules; fresh browser with artwork ready.",
+  "evidence": "assets/validation/mixed-editor-performance-v1",
+  "observations": {
+    "beforeMedianMs": {
+      "funds": 118,
+      "undo": 113,
+      "redo": 113
+    },
+    "afterMedianMs": {
+      "funds": 94,
+      "undo": 91,
+      "redo": 91
+    },
+    "afterObservedP95Ms": {
+      "funds": 97,
+      "undo": 92,
+      "redo": 92
+    },
+    "samplesPerAction": 5
+  },
+  "checks": [
+    "Native reports remain byte-identical when only title, description or funds change",
+    "Actual UI avoids land queries/repaint for funds edits; seed edits refresh reports and repaint",
+    "Invalid-title repair and undo from invalid geography restore valid previews",
+    "Core creator save/reload/test/restart/return flow preserves normal saves",
+    "Biome preview/cancel/remap/weather/soil/undo/redo/reload/native playtest regression passes"
+  ],
+  "visual": "Inspected fully rendered mixed-fixture editor capture. Initial captures made while artwork loaded were rejected as performance evidence; benchmark now waits for aria-busy=false.",
+  "limits": "Synchronous handler timings and two-frame presentation samples, not full sustained camera/brush/save/compile cancellation/GPU/simulation release gates. Performance is observed on this host, not a device guarantee.",
+  "sourceSha256": {
+    "web/editor/index.js": "c219d197a8530546da9d1942a5210cd62eb8ffa0f7b4c31e4fb071ff504c2606",
+    "web/editor/map-view.js": "f6d811e2d52e30170093243248aa89a15313850ddd3493b9113b3f829acbaaf1",
+    "web/editor/minimap.js": "b38166af28847a51db57eb1a9bfd631ec1b22d0dabddaba223680bcd6268fb5c",
+    "web/editor/land-preview-key.js": "31248e85559d9ffc701551c00e44cb0dc00a2e9657583f9b88041f90e320c5e6",
+    "scripts/mixed-builder-fixture.mjs": "8368084aa02bbdcc9407431e1a334c9e27a3287688b08d22a302b8bb66e7d9d2",
+    "scripts/benchmark-builder.mjs": "a17d677d18d925dd3f846ceb9203f7573dd7204fe235f716b4727241dcd05199",
+    "scripts/verify-editor-land-cache.mjs": "366611020774dbf54d88d6c6222b28300d6689ba20351d3830044e2e6342b3d8"
+  }
+}

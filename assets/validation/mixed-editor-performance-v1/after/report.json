@@ -1,0 +1,392 @@
+{
+  "landCacheBaseline": null,
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "dense_fixture": "256 completed buildings across 21 inland types, clear arrival area, 12 unique custom residents with mixed hats; no authored utility routes or stocked livestock.",
+  "wasm_sha256": "c2243fbf1d941cc7836d75cbc2b6006109d5855071bce407fbf9963aa00a6cd2",
+  "scope": "Desktop editor synchronous handlers and two-frame presentation latency. The mixed-only case includes unique custom appearances; this is not sustained camera movement, brush drag, save/compile cancellation, GPU memory or simulation performance release evidence.",
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "cases": [
+    {
+      "population": 12,
+      "buildings": 256,
+      "fixture": {
+        "population": 12,
+        "buildings": 256,
+        "types": {
+          "shed": 13,
+          "home": 12,
+          "garden": 13,
+          "well": 13,
+          "kitchen": 12,
+          "grove": 12,
+          "warehouse": 13,
+          "compost": 12,
+          "square": 12,
+          "workshop": 12,
+          "greenhouse": 12,
+          "coop": 12,
+          "solar_farm": 12,
+          "streetlight": 12,
+          "eco_toilet": 12,
+          "wetland": 12,
+          "banana_treatment": 12,
+          "biodigester": 12,
+          "orchard": 12,
+          "goat_pasture": 12,
+          "apiary": 12
+        },
+        "custom": true,
+        "attempted": 312,
+        "seed": 42
+      },
+      "samples": [
+        {
+          "action": "funds",
+          "synchronousMs": 94.10000002384186,
+          "presentationMs": 97.10000002384186,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58.39999997615814
+            },
+            {
+              "key": "report_state",
+              "ms": 7.299999952316284
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 96.29999995231628,
+          "presentationMs": 99.20000004768372,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 59.799999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 7.100000023841858
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 92.89999997615814,
+          "presentationMs": 95.5,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58.5
+            },
+            {
+              "key": "report_state",
+              "ms": 7.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 91.69999992847443,
+          "presentationMs": 94.29999995231628,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58.299999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 7.100000023841858
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 97.39999997615814,
+          "presentationMs": 100.19999992847443,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 60.699999928474426
+            },
+            {
+              "key": "report_state",
+              "ms": 7.5
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 91,
+          "presentationMs": 93.60000002384186,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58.700000047683716
+            },
+            {
+              "key": "report_state",
+              "ms": 7.100000023841858
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 91,
+          "presentationMs": 93.60000002384186,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58.699999928474426
+            },
+            {
+              "key": "report_state",
+              "ms": 7
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 90.5,
+          "presentationMs": 93,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58.799999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 7.100000023841858
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 91.70000004768372,
+          "presentationMs": 94.5,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 59.300000071525574
+            },
+            {
+              "key": "report_state",
+              "ms": 7.199999928474426
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 90,
+          "presentationMs": 92.60000002384186,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58
+            },
+            {
+              "key": "report_state",
+              "ms": 7.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 91.29999995231628,
+          "presentationMs": 94.69999992847443,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 59.39999997615814
+            },
+            {
+              "key": "report_state",
+              "ms": 7.399999976158142
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 92.19999992847443,
+          "presentationMs": 95,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 60
+            },
+            {
+              "key": "report_state",
+              "ms": 7.399999976158142
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 91.79999995231628,
+          "presentationMs": 94.60000002384186,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 59.40000009536743
+            },
+            {
+              "key": "report_state",
+              "ms": 7.299999952316284
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 89.40000009536743,
+          "presentationMs": 92,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 58
+            },
+            {
+              "key": "report_state",
+              "ms": 7
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 91.29999995231628,
+          "presentationMs": 94.10000002384186,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 59.5
+            },
+            {
+              "key": "report_state",
+              "ms": 7.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 17.399999976158142,
+          "presentationMs": 22,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 17.299999952316284
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 10.700000047683716,
+          "presentationMs": 15.100000023841858,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 10.700000047683716
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 16.300000071525574,
+          "presentationMs": 20.200000047683716,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 16.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 9.300000071525574,
+          "presentationMs": 15,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 9.300000071525574
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 11.799999952316284,
+          "presentationMs": 16.600000023841858,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 11.799999952316284
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.400000095367432,
+          "presentationMs": 15.300000071525574,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6.100000023841858
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.200000047683716,
+          "presentationMs": 15.800000071525574,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6.100000023841858
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.100000023841858,
+          "presentationMs": 15.899999976158142,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.199999928474426,
+          "presentationMs": 16,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6.199999928474426
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6,
+          "presentationMs": 15.900000095367432,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+    "dpr": 1
+  }
+}

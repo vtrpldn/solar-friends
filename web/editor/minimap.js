@@ -15,6 +15,8 @@ export class EditorMinimap {
     });
   }
   set(report,geometry){
+    if(report===this.report&&geometry===this.geometry){this.draw();return;}
+    this.report=report;this.geometry=geometry;
     this.ground=document.createElement('canvas');this.ground.width=this.ground.height=256;
     const c=this.ground.getContext('2d');c.scale(4,4);c.fillStyle='#74a7a0';c.fillRect(0,0,64,64);
     for(const {x,y,ground}of report.cells){c.fillStyle=habitatColors[ground.biome]||'#87965b';c.fillRect(x,y,1,1);}
