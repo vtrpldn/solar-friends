@@ -1,0 +1,32 @@
+{
+  "status": "Walking and breathing facial pose sets pass isolated frame-fit review. Internal development only; public facial-hair option remains unfinished.",
+  "scope": "Eight newly painted poses: neutral-body base 0\u20133 and 8\u201311. Together with the separate working set, twelve of 48 main facial poses now have reviewed bindings; required return poses are still open.",
+  "registration": "Each face has its own authored silhouette, fixed 418-square atlas cell, guide-derived body crop and exact body-frame hash. No hat offsets, independent alpha fitting or local warping.",
+  "inspected": [
+    "48 original/composed hairstyle, skin-palette and pose combinations. Jaw and moustache fit follows the face through walking and the breathing blink.",
+    "Small/enlarged actual resident-renderer captures for each frame, both facings, both hairstyles and day/night tint.",
+    "48 ordered original/composed temporal samples at walking boundaries and neutral-body blink timing, including loop boundaries. These samples do not establish continuous-playback or full cross-activity motion acceptance."
+  ],
+  "mechanical": [
+    "All eight source regions have complete coverage within authored bounds; ninth tile contains no visible paint.",
+    "No pixels outside the face crop change in all 48 combinations.",
+    "Each clip refuses 16 malformed tile, incomplete/swapped set, unavailable clip or unsupported pose requests.",
+    "Twelve provider disposal checks pass; each provider stays at four composed frames (1 MiB RGBA) after repeated requests, then releases those frames. This excludes body/source/GPU allocations.",
+    "Working clip, dedicated bent-pose and existing sprite-frame regressions pass. Prior working/bent captures remain byte-identical."
+  ],
+  "remaining": [
+    "Seated/sleeping and every remaining activity/return facial pose",
+    "Hair-colour and hat compatibility, portraits and planted world scenes",
+    "Continuous playback and cross-activity transitions",
+    "Full source/body/GPU memory and roster benchmarks",
+    "Native/public creator/library/export/save integration",
+    "All other original builder release requirements"
+  ],
+  "fingerprints": {
+    "candidate-v1.png": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+    "jaw-atlas.png": "f4ace53bd3f6d4414c919b67c8ed4fb010e9ec75df8eb41998fb665c12a8d872",
+    "faces-atlas.png": "13dc083f3d26296fd236b90499a0d983066ea1881b3bee3b0887cbf88e8ad8d4",
+    "specs.json": "d1b308e2c08d06ccb11af7a9d73debfe1059ddc81698d32f47985a8cd7aefaa2",
+    "registrations.json": "5e3d6b5e39e249788fc22c2e610818d6facd0bd735a702728f8cfc607995400d"
+  }
+}

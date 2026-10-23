@@ -1,0 +1,242 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "walk",
+    "sheet": "base",
+    "index": 0,
+    "bodyFrameSha256": "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        0,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      140,
+      38,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "walk",
+    "sheet": "base",
+    "index": 1,
+    "bodyFrameSha256": "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        418,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      132,
+      36,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "walk",
+    "sheet": "base",
+    "index": 2,
+    "bodyFrameSha256": "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        836,
+        0,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      136,
+      36,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "walk",
+    "sheet": "base",
+    "index": 3,
+    "bodyFrameSha256": "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        0,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      132,
+      36,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "breathe",
+    "sheet": "base",
+    "index": 8,
+    "bodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        418,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      112,
+      30,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "breathe",
+    "sheet": "base",
+    "index": 9,
+    "bodyFrameSha256": "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        836,
+        418,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      112,
+      28,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "breathe",
+    "sheet": "base",
+    "index": 10,
+    "bodyFrameSha256": "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        0,
+        836,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      112,
+      30,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  },
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "breathe",
+    "sheet": "base",
+    "index": 11,
+    "bodyFrameSha256": "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+    "source": {
+      "size": 1254,
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "rect": [
+        418,
+        836,
+        418,
+        418
+      ]
+    },
+    "crop": [
+      112,
+      30,
+      48,
+      48
+    ],
+    "bounds": [
+      30,
+      210,
+      350,
+      180
+    ]
+  }
+]

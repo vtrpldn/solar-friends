@@ -1,0 +1,100 @@
+{
+  "status": "Mechanical checks pass. Visual review pending; walking/breathing clip only, excluded from gameplay.",
+  "atlasSha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+  "checked": 24,
+  "refused": 16,
+  "disposed": 6,
+  "audits": [
+    {
+      "index": 8,
+      "pixels": 14141,
+      "inside": 14141,
+      "bounds": [
+        68,
+        251,
+        375,
+        383
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 9,
+      "pixels": 13620,
+      "inside": 13620,
+      "bounds": [
+        61,
+        255,
+        374,
+        388
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 10,
+      "pixels": 13220,
+      "inside": 13220,
+      "bounds": [
+        68,
+        252,
+        361,
+        382
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    {
+      "index": 11,
+      "pixels": 13658,
+      "inside": 13658,
+      "bounds": [
+        75,
+        250,
+        372,
+        381
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ],
+  "emptyPaint": 0,
+  "cache": [
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    },
+    {
+      "entries": 4,
+      "maximum": 4,
+      "rgbaByteUpperBound": 1048576
+    }
+  ],
+  "unchangedOutsideFaceCrop": true,
+  "timelineSamples": 24
+}
