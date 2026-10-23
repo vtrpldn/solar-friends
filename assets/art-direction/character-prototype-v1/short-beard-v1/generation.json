@@ -1,0 +1,45 @@
+{
+  "tool": "built-in imagegen",
+  "transparentBackground": true,
+  "scope": "Short beard development. No candidate is active in gameplay or accepted as a complete accessory.",
+  "entries": [
+    {
+      "file": "rejected-candidate-v1.png",
+      "prompt": "Use case: precise registered game accessory. Input 1 is an EXACT POSITION guide for one Solar Friends resident; preserve its entire 1254x1254 coordinate space and empty margins. Create ONLY a short neatly trimmed warm dark-brown beard and small connected moustache that would fit naturally onto the guide's lower face, same three-quarter view facing right. This is an overlay, NOT a new character portrait: remove ALL body, skin, eyes, nose, ears, scalp hair, clothes, shoes and background. Only facial-hair paint remains on TRUE TRANSPARENCY, positioned where the guide's jaw and upper lip already are. The person's head is near x650,y220; the beard belongs approximately inside x590..785,y280..365, the small moustache around x710,y292. Do not recenter, resize or zoom the accessory. Beard follows the jaw, thin on cheeks, slightly fuller under chin, no long pointed chin and no bushy oversized mass; keep the smile opening and nose area transparent. Match the guide's warm painted Brazilian countryside game illustration: broad soft dark-chestnut clumps, restrained warm highlights from upper left, simplified readable edges, no photoreal individual hair strands, no heavy black line. Only beard/moustache pixels, no skin-colored fragments, no ghost face, no detached flecks, no text/grid/border/shadow. Entire silhouette remains uncropped. Output a new candidate for review, not a replacement of existing artwork.",
+      "inputs": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/straw-hat-prototype-v1/body-guide.png"
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5259c3a9-85e0-4178-acee-029a542809f0.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Rejected: oversized and low, below the jaw."
+    },
+    {
+      "file": "candidate-v2.png",
+      "prompt": "Precise Solar Friends accessory edit. Image 1 is the EXACT POSITION AND SILHOUETTE GUIDE on a 1254x1254 canvas. Replace ONLY its two small bright-green shapes on the lower face with short dark-chestnut painted facial hair: thin trimmed beard along the jaw and small moustache. The guide is correctly sized; the beard occupies roughly x590..777,y286..359, and the moustache x687..751,y290..304. Paint inside those green shapes, preserve their placement and small extent. Image 2 is a REJECTED previous beard candidate: its warm painted texture is useful, but its placement and size are entirely wrong, much too large and low; do not copy its geometry. Deliver ONLY the small correctly registered beard and moustache from image1 on genuine transparent alpha. Remove the whole person, all skin, face, scalp hair, clothes, feet, green shapes, guide strokes and background. Every pixel outside those small facial hair regions must be transparent, including below y365. Do not center or enlarge the accessory, do not crop the 1254-square canvas. Broad warm illustrated clumps with restrained upper-left highlights, readable soft edge, no individual hair microtexture, no photorealism, no heavy outline. Keep the mouth/smile and nose area open and transparent. Nothing is painted on the eyes or ears. This is a separate overlay for the unchanged reference resident, not a new portrait or character. No extra fragments, skin-colored paint, text, border, grid or watermark.",
+      "inputs": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-v1/silhouette-guide.png",
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-v1/rejected-candidate-v1.png"
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-23dd4b15-642d-4590-b929-9ec0651cda61.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Rejected: placed around the torso, not the face."
+    },
+    {
+      "file": "candidate-v3.png",
+      "prompt": "EDIT INPUT IMAGE, exact registration task: keep a 1254x1254 transparent canvas. The image contains a full person and TWO GREEN PATCHES on their face. Output only those two green patches replaced with dark-brown illustrated short facial hair. COPY THE GREEN PATCHES' POSITION AND SIZE EXACTLY: these patches are near the TOP of the canvas, around y=300, NOT in the middle. Delete everything except the replacement facial-hair patches. The beard should be a small crescent at x594..777,y288..358 and the moustache a tiny dash at x687..751,y290..304. Everything below y365 is EMPTY TRANSPARENT. Entire lower two-thirds of image is empty. Do not center the cutout or make it larger; leave huge transparent margins. No human, skin, clothes, scalp hair, green guide, background or stray marks. Paint the tiny beard as broad chestnut warm shaded clumps matching this person's illustration, lit upper-left. This is an exact-position accessory overlay for an existing character, not a standalone centered beard icon.",
+      "inputs": [
+        "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-beard-v1/silhouette-guide.png"
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-fb4c999e-ff49-454d-b4ca-4da773fcb339.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Needs correction: right tip extends outside face and excessive chin bulk."
+    },
+    {
+      "file": "candidate-v4.png",
+      "prompt": "Edit the facial-hair overlay in IMAGE 1, preserving its 1254x1254 canvas and exact existing placement near the TOP. IMAGE 2 is the body registration guide, not paint to include. The beard in image1 is close but has an upward-pointing right tip outside the face and too much volume below the chin. Make it a SHORT close-trimmed beard: keep the left cheek start at x595,y296, follow the guide's jaw to x714,y348, then end at x770,y314. No right horn: delete all beard paint right of x775. Reduce the beard's bottom edge from y385 to y357, following the green guide rather than a deep crescent. Trim the moustache's right end to x752 and keep it a small flattened shape, x688..752,y292..304. Final painted bounds must stay x590..775,y286..359. Preserve warm dark chestnut painted texture and upper-left highlights, but simplify clumps to match the person's broad illustrated shading. Do not draw any body, face, skin, clothes, hair, guide marks, green paint or background. Only this small beard and moustache on true transparency. Do not move the shapes to the canvas center, zoom, crop, add outline, or fill transparent mouth/face holes. Everything below y365 stays transparent. The entire surrounding canvas must stay empty. This remains a registered accessory, not a standalone icon.",
+      "inputs": [
+        "candidate-v3.png",
+        "silhouette-guide.png"
+      ],
+      "output": "Generated images are saved to /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239 as /Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7bdb4a3a-e9d8-4773-a0a6-24bc24815cfa.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "verdict": "Needs correction, excluded from gameplay: reduced bulk but right tip and moustache still extend beyond the reference face."
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "status": "Not accepted. All candidates excluded from gameplay and resident recipe catalogs.",
+  "scope": "One standing pose, base index 8, shared 1254-square source canvas. No animation/portrait/provider integration is claimed.",
+  "reference": "../straw-hat-prototype-v1/body-guide.png",
+  "mechanical": "All four sources measured at native resolution; raw alpha threshold 8 and a conservative x580..790/y280..370 review envelope. No source pixels repaired, cropped, warped or scaled independently of the body.",
+  "visual": [
+    "Compared all four overlays on unchanged resident at common full-body, enlarged-face and small display scales.",
+    "v1 hangs below the jaw and v2 sits on the torso.",
+    "v3 improves placement but beard and moustache extend beyond the right face contour and beard is too deep.",
+    "v4 reduces depth slightly, but right-contour and moustache overshoot remain visible."
+  ],
+  "sourceAudit": [
+    {
+      "name": "rejected-candidate-v1.png",
+      "sha256": "d74b95e8de7ba4fd392ffc29e258a7f4c82f2941b2e0187852b73399624bbdfa",
+      "width": 1254,
+      "height": 1254,
+      "alphaThreshold": 8,
+      "bounds": [
+        620,
+        303,
+        880,
+        497
+      ],
+      "visiblePixels": 24396,
+      "outsideReviewEnvelope": 22655
+    },
+    {
+      "name": "candidate-v2.png",
+      "sha256": "64c54e62df278825a3eb26f1c884a6f2b3074078f9e070fc747fce850a6b1350",
+      "width": 1254,
+      "height": 1254,
+      "alphaThreshold": 8,
+      "bounds": [
+        628,
+        575,
+        875,
+        708
+      ],
+      "visiblePixels": 16641,
+      "outsideReviewEnvelope": 16641
+    },
+    {
+      "name": "candidate-v3.png",
+      "sha256": "437ce1d1b85ffc022949ce28b6030b2be7f1001f4047e6fec520d373424df9ba",
+      "width": 1254,
+      "height": 1254,
+      "alphaThreshold": 8,
+      "bounds": [
+        584,
+        291,
+        800,
+        385
+      ],
+      "visiblePixels": 10454,
+      "outsideReviewEnvelope": 1603
+    },
+    {
+      "name": "candidate-v4.png",
+      "sha256": "b3175b569cc2487aae8602b0f58872e8aa9ee48d7f51bff0dd0bfed4355abb06",
+      "width": 1254,
+      "height": 1254,
+      "alphaThreshold": 8,
+      "bounds": [
+        582,
+        289,
+        800,
+        380
+      ],
+      "visiblePixels": 9647,
+      "outsideReviewEnvelope": 952
+    }
+  ],
+  "nextAction": "Replace the full-body reference with a tight silhouette-only registration guide and a separate texture reference. Require correct jaw/mouth fit before expanding across poses.",
+  "remainingGates": [
+    "Standing-pose acceptance",
+    "Every activity and equipment-return pose",
+    "Both hairstyles and supported hair colours/materials",
+    "Portrait, mirrored facing, day/night and ground-contact review",
+    "Native/public creator/library/save integration"
+  ]
+}
