@@ -1,0 +1,28 @@
+{
+  "status": "Internal static crossed-forearm pose candidate; full gait/colour/world/player acceptance remains open.",
+  "pose": {
+    "sheet": "base",
+    "index": 2
+  },
+  "sourceSha256": {
+    "candidate-v1.png": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+    "registration-intent.json": "c71723f81bbd77feca3382e11b88457aee7daf081191caa647557f9694b231ca",
+    "registrations-v1.json": "79231a2e14e7f0ebb0122e92668294bcd79b1b9efff1c121482346392a89bf2d",
+    "body-foreground-v4.json": "a7b37a511ce212a94b1936b99a2d648a0683e59bfd8264f55e8853c06e102f78",
+    "foreground-polygons-v4.json": "83db0fd042bf156b8dc1cce4ea6c28b930becee03385ddc70c4a9fc8b9c8303c",
+    "paint-guide-v1.png": "13da0860f024c76939127e2d5d66acbe02962ab0d2ac763d5af0bb6d65496310",
+    "review-v1-board.png": "0d7361693853639395264504d15c9b4fc7dd523617b42f471205fa072986d40d",
+    "review-v1-details.png": "442fbbfe5ec5419dbcb90610457b0568c5095961ff7913cf6eca779173ae58a9",
+    "review-v1-lighting.png": "3d028adb89c18ebbefe0591eefe510fe7793c5ae602e37fde5b9e60a15ee04c4"
+  },
+  "findings": [
+    "Inspected untouched source paint and analytical foreground/cuff guides. The rejected enlarged output was never fitted or warped.",
+    "The tightened native foreground keeps the crossing arm contour and excludes classified original garments; a painted folded cuff defines the near sleeve opening.",
+    "Inspected the six complete hairstyle/skin comparisons, torso details and day/night/facing samples, with and without hat/beard. The sleeve reads as attached to the forearm rather than an isolated skin patch.",
+    "All 1053 tested original-shirt pixels are covered; no tested collar/shoulder leaks remain. Six compositions preserve outside-crop and lower-body RGBA, with 6642 single-application foreground-alpha checks and six malformed registration refusals."
+  ],
+  "limits": [
+    "Four-frame motion, garment colour choices, terrain/world review and travel/clip transitions remain required.",
+    "Other idle/work/activity clothing and the broader body/face/bottom/shoe range plus player integration are unfinished."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "status": "Curated complete four-pose internal walk source set. Static gates pass; motion/world acceptance is pending; no public clothing recipe.",
+  "familyBindingSha256": "b9dfc6e02e34891ac930bcf9b551726df8e7744ac2af57de923f8205c6973e75",
+  "poses": [
+    {
+      "sheet": "base",
+      "index": 0,
+      "collection": "short-sleeve-relaxed-walk-0-v3",
+      "sourceVersion": "v1",
+      "foregroundVersion": null,
+      "sourceSha256": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+      "registrationSha256": "1ff5ba8c2bb902551c880c49508ad3e810f0394b63b086508354aff1f740694c",
+      "reviewSha256": "b1c0a0e8ac13c49619343b8ef017a5d8de4e7c93eb9046e0594b88e893e4694b"
+    },
+    {
+      "sheet": "base",
+      "index": 1,
+      "collection": "short-sleeve-relaxed-walk-1-v2",
+      "sourceVersion": "v1",
+      "foregroundVersion": "v1",
+      "sourceSha256": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+      "registrationSha256": "deb2750366b2df4f6b1f2d4e9073f73875db463b8dd9309b9279b7eda650898e",
+      "reviewSha256": "e5be7c8b22984c4bd95c89c7ab175436118401e755ba60a0e267cf4d2ba74ec9"
+    },
+    {
+      "sheet": "base",
+      "index": 2,
+      "collection": "short-sleeve-relaxed-walk-2-v2",
+      "sourceVersion": "v1",
+      "foregroundVersion": "v4",
+      "sourceSha256": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+      "registrationSha256": "79231a2e14e7f0ebb0122e92668294bcd79b1b9efff1c121482346392a89bf2d",
+      "reviewSha256": "6c689a6b2b631c894de1e710dc5f4fda6f4e8eec920413198f3ca40b0deeca5c"
+    },
+    {
+      "sheet": "base",
+      "index": 3,
+      "collection": "short-sleeve-relaxed-walk-3-v1",
+      "sourceVersion": "v1",
+      "foregroundVersion": "v1",
+      "sourceSha256": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+      "registrationSha256": "fc2b288faec7e278f0d0a0e4eb999b61ba17906566c61cb289d69109fab2db8f",
+      "reviewSha256": "838e407404fb21dfc862a93d71d9ab4ced3dc25e82d27c5d43928deb667815fb"
+    }
+  ]
+}

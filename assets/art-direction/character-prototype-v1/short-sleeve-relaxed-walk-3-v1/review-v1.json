@@ -113,8 +113,9 @@
       ]
     }
   ],
+  "foregroundVersion": "v1",
   "sourceHash": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
-  "reviewToolSha256": "0bd8bbd313527812e061458b6c2693d6c87616a75fd6634d703533a502073b60",
+  "reviewToolSha256": "e5c3fd17685072e1c480036ecfe16fd7999820f2269fa543c318f387e9604ae1",
   "rendererSha256": {
     "character-clothing.js": "03f1f569e774282ed07051ba6bfe6c7fb298408c463c092be85888e5ddc9d25a",
     "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",

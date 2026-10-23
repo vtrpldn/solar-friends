@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "intent": "Near forearm starts at the short sleeve around native 111,119 to127,115. Beyond the opening, the envelope extends above and below the actual forearm so its painted contour remains intact; exclude original shirt/shorts/shoes through exact registered material ownership. Earlier v2 cut across the forearm and is a rejected diagnostic.",
+  "excludeMaterials": [2, 3, 4],
+  "polygons": [[[111,119],[127,115],[132,115],[142,119],[160,125],[172,132],[174,150],[163,158],[147,156],[138,146],[126,140],[116,134],[110,126]]]
+}

@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "intent": "Near forearm and hand below a short sleeve ending around the elbow. The sloped upper boundary follows the cuff at native 113,122 through 134,126, rather than exposing an isolated patch of upper arm in the middle of the torso. Use only original anatomy and registered material exclusion.",
+  "excludeMaterials": [2, 3, 4],
+  "polygons": [[[113,122],[123,124],[134,126],[145,128],[160,132],[168,136],[170,149],[161,155],[149,154],[140,145],[130,139],[119,133],[113,126],[111,123]]]
+}

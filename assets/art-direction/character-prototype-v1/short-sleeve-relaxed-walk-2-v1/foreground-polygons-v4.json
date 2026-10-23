@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "intent": "Sloped near-sleeve opening at native 111,119 to127,115 followed by the original forearm contour. Keep the tighter lower/upper contour of v1; v2 sliced skin and v3's enlarged envelope included old shirt-outline pixels. No generated garment pixels are used.",
+  "excludeMaterials": [2, 3, 4],
+  "polygons": [[[111,119],[127,115],[133,120],[145,126],[160,131],[168,136],[170,149],[161,155],[149,154],[140,145],[130,139],[119,133],[113,125],[110,123]]]
+}

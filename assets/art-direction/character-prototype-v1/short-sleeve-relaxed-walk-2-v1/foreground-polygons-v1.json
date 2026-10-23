@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "intent": "Native near forearm and hand crossing the torso, below the near sleeve cuff. Exclude original shirt, shorts and shoes using the exact body's registered material ownership; never use generated garment paint.",
+  "excludeMaterials": [2, 3, 4],
+  "polygons": [[[112,115],[130,114],[133,120],[145,126],[160,131],[168,136],[170,149],[161,155],[149,154],[140,145],[130,139],[119,133],[113,125],[110,119]]]
+}

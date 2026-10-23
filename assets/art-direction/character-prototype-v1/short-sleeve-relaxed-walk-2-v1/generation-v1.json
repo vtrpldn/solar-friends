@@ -1,0 +1,26 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v1.txt",
+  "promptSha256": "916c04e6d1177ac4198a435b97f5072680b56a22000be448eef0deae0c5b6420",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-2-v1/mask.png",
+      "role": "sole edit target and alpha/position authority",
+      "sha256": "aac744460b918815e9cd4bd75d04b07876abe27df13c4c269abe01d86d9bd9e6"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-2-v1/foreground-context-v1.png",
+      "role": "anatomical reference only",
+      "sha256": "93f858d91ed74470221cf0cfbd8cb1e2e7dc89cd29b0bd7b7524b497ed830618"
+    }
+  ],
+  "geometryIntent": "registration-intent.json",
+  "geometryIntentSha256": "a77e2283ddd36768da6ee85bd4e7c8f195d567fb552f296bcc94c653bcd38f77",
+  "transparentBackground": true,
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-bbeda4be-457f-4bb3-8903-75aa430976da.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "81b54fc5ffc40dbdb97507d5693f3395c14c439e5f1f1fce014813dac35d15c1",
+  "paintModified": false,
+  "status": "Rejected: generated geometry enlarged and moved; frozen source audit fails."
+}

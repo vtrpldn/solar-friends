@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "precise-object-edit",
+  "promptFile": "prompt-v1.txt",
+  "promptSha256": "efff56b6980b4874be0f1b7434b42c50ac5bb21f2bd9c75ad9176c2d971de7a5",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-2-v2/paint-guide-v1.png",
+      "role": "sole exact-alpha edit target; red is a geometry marker to replace with a painted cuff",
+      "sha256": "13da0860f024c76939127e2d5d66acbe02962ab0d2ac763d5af0bb6d65496310"
+    }
+  ],
+  "geometryIntent": "registration-intent.json",
+  "geometryIntentSha256": "c71723f81bbd77feca3382e11b88457aee7daf081191caa647557f9694b231ca",
+  "transparentBackground": true,
+  "generatedSource": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-36b84a23-9078-4d0d-9acb-75beac869d53.png",
+  "candidate": "candidate-v1.png",
+  "sha256": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+  "paintModified": false,
+  "status": "Internal static four-pose source set member; full motion/world and clothing family acceptance unfinished."
+}

@@ -3,6 +3,8 @@
   "composed": 6,
   "outside": 6,
   "protectedLower": 6,
+  "foregroundChecks": 0,
+  "foregroundAlphaChecks": 0,
   "refused": 4,
   "coverage": [
     {
@@ -11,10 +13,13 @@
       "oldTop": 1760,
       "covered": 1760,
       "ratio": 1,
-      "collarLeaks": []
+      "collarLeaks": [],
+      "uncovered": []
     }
   ],
+  "foregroundVersion": null,
   "sourceHash": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+  "reviewToolSha256": "e5c3fd17685072e1c480036ecfe16fd7999820f2269fa543c318f387e9604ae1",
   "rendererSha256": {
     "character-clothing.js": "03f1f569e774282ed07051ba6bfe6c7fb298408c463c092be85888e5ddc9d25a",
     "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",

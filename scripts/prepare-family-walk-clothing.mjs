@@ -1,0 +1,13 @@
+// Curate the complete internal clip only after source/body/foreground reviews.
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const base='assets/art-direction/character-prototype-v1/',read=async p=>JSON.parse(await readFile(p,'utf8')),sha=async p=>createHash('sha256').update(await readFile(p)).digest('hex'),bindingFile=base+'body-family-relaxed-v1/binding-v2.json',binding=await read(bindingFile),poses=[];
+for(const [index,collection,foreground]of [[0,'short-sleeve-relaxed-walk-0-v3',null],[1,'short-sleeve-relaxed-walk-1-v2','v1'],[2,'short-sleeve-relaxed-walk-2-v2','v4'],[3,'short-sleeve-relaxed-walk-3-v1','v1']]){
+ const root=base+collection,intent=await read(root+'/registration-intent.json'),registrations=await read(root+'/registrations-v1.json'),review=await read(root+'/review-v1.json'),audit=await read(root+'/candidate-v1-audit.json'),sourceHash=await sha(root+'/candidate-v1.png');
+ assert.deepEqual(intent.body,binding);assert.equal(registrations.length,1);const r=registrations[0];assert.equal(r.sheet,'base');assert.equal(r.index,index);assert.equal(r.bodyFrameSha256,binding.frames.base[index]);assert.equal(r.source.sha256,sourceHash);assert.equal(review.foregroundVersion,foreground);assert.equal(review.sourceHash,sourceHash);assert.equal(audit.sha256,sourceHash);assert(audit.ok);assert(review.coverage.every(c=>!c.collarLeaks.length));assert.equal(review.reviewToolSha256,await sha('scripts/review-family-clothing.mjs'));assert.equal(review.composed,6);assert.equal(review.outside,6);assert.equal(review.protectedLower,6);
+ for(const [file,hash]of Object.entries(intent.guideHashes))assert.equal(await sha(root+'/'+file),hash,'Frozen garment guide changed');
+ if(foreground){assert.deepEqual(r.foreground,await read(root+'/body-foreground-'+foreground+'.json'));assert.equal(review.foregroundAlphaChecks,r.foreground.runs.reduce((n,r)=>n+r[1],0)*6);}else assert.equal(r.foreground,undefined);
+ poses.push({sheet:'base',index,collection,sourceVersion:'v1',foregroundVersion:foreground,sourceSha256:sourceHash,registrationSha256:await sha(root+'/registrations-v1.json'),reviewSha256:await sha(root+'/review-v1.json')});
+}
+const out=base+'short-sleeve-relaxed-walk-complete-v1';await mkdir(out,{recursive:true});await writeFile(out+'/sources-v1.json',JSON.stringify({schema:1,status:'Curated complete four-pose internal walk source set. Static gates pass; motion/world acceptance is pending; no public clothing recipe.',familyBindingSha256:await sha(bindingFile),poses},null,2)+'\n');console.log('Curated all four source/body/foreground-bound shirt poses after 24 static character checks.');

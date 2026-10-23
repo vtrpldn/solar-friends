@@ -1,8 +1,11 @@
 {
-  "status": "Unfrozen anatomy draft; not ready for paint or player use",
-  "next": "Inspect the revised collar; author crossed-forearm foreground ownership from the original body, excluding original garments, then inspect the resolved mask/context before freezing and generating source paint.",
-  "invariants": [
-    "Original body and generated artwork must remain unmodified",
-    "No fallback to another walking pose or silhouette fitting"
-  ]
+  "status": "Frozen diagnostic collection, superseded by short-sleeve-relaxed-walk-2-v2.",
+  "rejected": {
+    "candidateV1": "Failed unchanged frozen geometry rules.",
+    "candidateV2": "One exposed old shoulder pixel and inadequate cuff definition.",
+    "foregroundV1": "Opening lacked a coherent sleeve cuff.",
+    "foregroundV2": "Cut across the original forearm contour.",
+    "foregroundV3": "Oversized envelope restored old shirt outlines."
+  },
+  "foregroundV4": "Retained tight native contour; re-used under the corrected guide with a painted cuff. No source paint edited."
 }
