@@ -1,0 +1,56 @@
+{
+  "status": "accepted-for-internal-walking-review",
+  "scope": "Four cream-shirt walking poses, warm skin, chestnut curls/sidepart, with and without straw hat and short beard. Internal review only; not a released clothing option.",
+  "visualFindings": [
+    "Inspected both 16-sample decoded movie filmstrips: shoulder coverage and sleeve contours remain coherent across contact and passing poses; crossing arm stays in front of cloth.",
+    "Head accessories follow the body pose without visible detached caps in sampled frames; mirrored night preserves the silhouette.",
+    "Inspected all twelve terrain boards: three biomes, day/night, bare/equipped. Shoes meet the terrain, body scale agrees with Bento, and the cream torso remains readable against all three ground palettes.",
+    "No clipping or opaque ground island visible in these boards. Contact shadows and building context come from the shared renderer."
+  ],
+  "limits": [
+    "Filmstrips are discrete decoded samples; this does not establish continuous motion quality or frame pacing.",
+    "World boards use static sampled poses, not actual village travel, pathing or activity transitions.",
+    "Only walking, one skin/top/bottom/shoe/hair palette and two hairstyles are represented here. Remaining poses, colours, body/face/bottom/shoe variants and player integration remain required.",
+    "Previously recorded low-opacity garment edge pixels still require colour review. No native simulation regression claim."
+  ],
+  "movies": [
+    {
+      "report": "motion-samples.json",
+      "sha256": "721e3e80a083ee067c3e0b38bab133846ace299ba44e72147c9de5bab25ef1f6",
+      "encodedFrames": 180,
+      "durationSeconds": 5.967753,
+      "inspectedSamples": 16
+    },
+    {
+      "report": "motion-samples-v2.json",
+      "sha256": "f0c95b768c4530ebb3c7d51af5ecdfde4990a105f64fcdadaa81e533d19bd36a",
+      "encodedFrames": 180,
+      "durationSeconds": 5.971152,
+      "inspectedSamples": 16
+    }
+  ],
+  "artifacts": {
+    "world-plain/mata-atlantica-day.png": "523deb41ff503506f4cdb2da8c26561b0f1bb75a72f99d49706ed92ae6b27763",
+    "world-plain/mata-atlantica-night.png": "f6afde24908d5d3dac4c2d4b8b91eea5460f7c16e541b48c5c3b344ffd5447d0",
+    "world-plain/cerrado-day.png": "8f586577d2543b5fd52de01ba3cd1896945c7d374778f071d26fe4e5417e54dd",
+    "world-plain/cerrado-night.png": "f7ae8ec4a92f823d67b80dd0039368f9759bbcd5e90f76302a9aa5a3179bc730",
+    "world-plain/caatinga-day.png": "a4653337bee176b33122d05bf82f4734241d6c4f63be61b2aa9cc227e1096f84",
+    "world-plain/caatinga-night.png": "40a89d19f75072ec99d7ff5ec685f86461721ca6a2124ea0970d78ead4658cb4",
+    "world-equipped/mata-atlantica-day.png": "3acd241600a179f24f213ad479520c316a3f4d7f1b8359b2d60d3abcd4b2cbc0",
+    "world-equipped/mata-atlantica-night.png": "39faecd7c6f464f0c110bff78803bae85cfb9296546b2723abe39e395d66dc28",
+    "world-equipped/cerrado-day.png": "e5a788cbf74b00113b8abd59e272a3d9f4c4cc6fa33f89538cda33fd7d0e2098",
+    "world-equipped/cerrado-night.png": "e6ec7d5338544291067ad00238fe81f23724b0e7bed86dc5061db8ffa4c896b0",
+    "world-equipped/caatinga-day.png": "280dcaef16da71e45c94cf6f4d21aa9ba4fd38e59f330263801e96e34dc0ae42",
+    "world-equipped/caatinga-night.png": "e9aa0b5d2c5d0b3e7bbc3698067b8c2fb66e9bc037c730e064e4367a3717a903",
+    "sources-v1.json": "9b24942be6be0be32069d753d845260908957415da82b679393bbda284550f5f",
+    "motion-walk.png": "cec6bbc625a8f61ecb5bf98163b4f5ca6e108f7e82ddf14304a63178b0218623",
+    "motion-walk-v2.png": "e44380dd809244128772a9098137f5f15123a3b897b1cc46ec95a284f70222f7",
+    "motion-samples.json": "174b760e543e3d6e6c643f5946eb5a6f35cc7d552fb71b3a1f80175eb98ae45d",
+    "motion-samples-v2.json": "17403359ddac3348826b95c7f75dc2f632ba8b2b70df1051edaf9c08744727b0",
+    "review-v1.json": "cde9c328cd34971ef7b6314ad8dcbbcce53a204409187b5d3755103f0a9565db",
+    "review-v2.json": "33d52d85ba9d298cf98b976dc9fed3042027c290b059c9917cc271f33fc81e2c",
+    "verification-v1.json": "a4d432f2642aedf9dfaa38be44611b1e2e863b6e4afd95d1bcaca0724eb2ca69",
+    "world-plain/report.json": "a3033602efae3d50adc67fc2b9935498e24cf80a18c4a28034625ca3616450fb",
+    "world-equipped/report.json": "0eab62a86ef2cc3cf9b4a72aba1de4c5dceb7becc7e33a2efdad8308d3f5a425"
+  }
+}

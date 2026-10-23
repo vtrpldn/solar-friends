@@ -1,0 +1,29 @@
+// Review helpers must preserve original body caches and own every output buffer.
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+import {familyWalkClothingFixture,walkClothingOutput,fileSha256} from './family-walk-clothing-fixture.mjs';
+const fixture=await familyWalkClothingFixture(),server=await serve(0,{handle(req,res,path){if(!fixture.served.has(path))return false;res.writeHead(200,{'Content-Type':'image/png'}).end(fixture.served.get(path));return true;}});let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/shirt-walk-verification`);
+ const result=await page.evaluate(async data=>{
+  const {prepareFamilyWalkReview}=await import('/artwork/character-family-walk-review.js'),{loadCharacterImageSource}=await import('/character-image-source.js'),{prepareBodyFamily}=await import('/character-body-family.js'),{preparedFrames}=await import('/sprite-frames.js'),cache=new Map(),load=file=>{if(!cache.has(file))cache.set(file,loadCharacterImageSource('/family-source/'+file));return cache.get(file);},check=(v,msg)=>{if(!v)throw Error(msg);},loaded={};for(const id of Object.keys(data.ownership.sources))loaded[id]=await load('body-'+id);const warm=await prepareBodyFamily({ownership:data.ownership,sources:loaded});warm.dispose();
+  const borrowed=['base','idle','activities'].flatMap(sheet=>preparedFrames(loaded[sheet].image,{referenceRow:sheet==='base'?2:0})),pixels=c=>c.getContext('2d').getImageData(0,0,256,256).data,sha=async c=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels(c)))].map(n=>n.toString(16).padStart(2,'0')).join(''),before=await Promise.all(borrowed.map(sha)),create=document.createElement.bind(document),draw=CanvasRenderingContext2D.prototype.drawImage,created=[];let model=null,refused=0;const expected=[];
+  document.createElement=function(name,...args){const value=create(name,...args);if(name==='canvas')created.push(value);return value;};
+  const reject=async fn=>{let denied=false;try{const model=await fn();model?.dispose?.();}catch{denied=true;}check(denied,'Invalid/incomplete walk review accepted');refused++;},empty=()=>check(created.every(c=>c.width===0&&c.height===0),'Owned review buffers survived failure/disposal');
+  try{
+   model=await prepareFamilyWalkReview({...data,load,withAccessories:true});
+   for(const provider of model.providers)for(let index=0;index<4;index++){const frame=provider.frameForPose('base',index);check(frame.width===256&&frame.height===256,'Incomplete reviewed pose');let painted=0,foot=0;const rgba=pixels(frame);for(let p=0;p<65536;p++)if(rgba[p*4+3]>=32){painted++;foot=Math.max(foot,Math.floor(p/256));}check(painted>1000&&foot>220,'Lost full body or ground anchor');expected.push(await sha(frame));}
+   for(const [sheet,index]of [['idle',0],['activities',0],['base',4],['base',-1],['base',.5],['base',NaN]])await reject(()=>model.providers[0].frameForPose(sheet,index));
+   const provider=model.providers[0];model.dispose();model.dispose();await reject(()=>provider.frameForPose('base',0));empty();
+   created.length=0;const input=structuredClone(data),work=prepareFamilyWalkReview({...input,load,withAccessories:true});input.garments[0].registration.crop=[0,0,1,1];input.owners.curls.poses.base[0].index=15;model=await work;const actual=[];for(const p of model.providers)for(let i=0;i<4;i++)actual.push(await sha(p.frameForPose('base',i)));check(JSON.stringify(actual)===JSON.stringify(expected),'Preparation borrowed mutable registration input');model.dispose();empty();
+   for(const mutate of [d=>d.garments.pop(),d=>d.garments[1].registration.index=0]){created.length=0;const invalid=structuredClone(data);mutate(invalid);await reject(()=>prepareFamilyWalkReview({...invalid,load}));empty();}
+   created.length=0;await reject(()=>prepareFamilyWalkReview({...data,load:async file=>file==='shirt-review-0.png'?{...await load(file),sourceHash:'0'.repeat(64)}:load(file)}));empty();
+   created.length=0;let sideCalls=0;const sideFile=data.owners.sidepart.poses.base[0].file;await reject(()=>prepareFamilyWalkReview({...data,withAccessories:true,load:file=>{if(file===sideFile&&++sideCalls===4)throw Error('Injected last-hair-source outage');return load(file);}}));check(sideCalls===4,'Late source failure not reached');empty();
+   created.length=0;let draws=0,failed=false;try{CanvasRenderingContext2D.prototype.drawImage=function(source,...args){if(source instanceof HTMLCanvasElement&&source.width===256&&++draws===11){failed=true;throw Error('Injected late pose draw failure');}return draw.call(this,source,...args);};await reject(()=>prepareFamilyWalkReview({...data,load}));}finally{CanvasRenderingContext2D.prototype.drawImage=draw;}check(failed,'Late drawing failure not reached');empty();
+   const after=await Promise.all(borrowed.map(sha));check(JSON.stringify(before)===JSON.stringify(after)&&borrowed.every(c=>c.width===256),'Borrowed original body cache changed');return {completeFrames:8,refused,inputCopyIsolated:true,lateSourceRollback:true,lateDrawRollback:true,allOwnedCanvasesReleased:true,originalBodyFramesPreserved:borrowed.length};
+  }finally{CanvasRenderingContext2D.prototype.drawImage=draw;model?.dispose();document.createElement=create;}
+ },fixture.data);
+ assert.deepEqual(errors,[]);assert.equal(result.completeFrames,8);assert.equal(result.refused,12);assert.equal(result.originalBodyFramesPreserved,48);result.inputSha256=fixture.hashes;result.rendererSha256=await fileSha256('web/artwork/character-family-walk-review.js');await writeFile(walkClothingOutput+'/verification-v1.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

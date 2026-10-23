@@ -1,0 +1,42 @@
+{
+  "scope": "Encoded shared-sampler walking loop with both four-pose shirt appearances, daylight and mirrored night. Optional hats/beards are recorded explicitly. No non-walk pose fallback, actual village travel, frame-pacing or full clothing-family acceptance is claimed.",
+  "withAccessories": true,
+  "recordings": [
+    {
+      "clip": "walk",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 3006,
+      "cycleSeconds": 0.5,
+      "renderCalls": 361
+    },
+    {
+      "clip": "walk",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 3006,
+      "elapsedMs": 3008.399999976158,
+      "cycleSeconds": 0.5,
+      "renderCalls": 361
+    }
+  ],
+  "renderCalls": 722,
+  "videoSha256": "f0c95b768c4530ebb3c7d51af5ecdfde4990a105f64fcdadaa81e533d19bd36a",
+  "inputSha256": {
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/ownership-v1.json": "26a50b7dad4122319874ca791b1a38c9b3cbe0e121f138ea8f52eeecc791a734",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/materials-v7.json": "9a762e92d93e30d880dabac0620b3cc60b67ce7310ad30c18ad04ec3666a114f",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-curls-v1.json": "e0a35a02b2eb49d44608df2ad19c3c70bc0ad3a1ee9d73d7d729309a86dd5018",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-sidepart-v1.json": "8b65a60278dcabacf508382f1ac5ce77002bd0491b0674ddde1695ffaf692419",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/accessories-v1/registration-v1.json": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-complete-v1/sources-v1.json": "9b24942be6be0be32069d753d845260908957415da82b679393bbda284550f5f"
+  },
+  "rendererSha256": {
+    "artwork/character-family-walk-review.js": "9639331462bcefdc70281c5aa6c9fed0da8e71c057420a6d2959649e7a90e046",
+    "character-clothing.js": "03f1f569e774282ed07051ba6bfe6c7fb298408c463c092be85888e5ddc9d25a",
+    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "resident-animation.js": "e94e9cbf0ee93b0b63afa5a9c3aa1e42b48c18aea3e87e4e7d6115b11b88b1b5",
+    "resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90"
+  }
+}
