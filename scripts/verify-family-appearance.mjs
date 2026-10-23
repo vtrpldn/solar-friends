@@ -1,0 +1,51 @@
+// Full prepared family composition; frozen old output comparisons are equivalence,
+// while retained boards support a separate visual review of changed attachments.
+import assert from 'node:assert/strict';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const root='assets/art-direction/character-prototype-v1/body-family-relaxed-v1',out=root+'/complete-parts-v1',read=async file=>JSON.parse(await readFile(file,'utf8')),sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const ownership=await read(root+'/ownership-v1.json'),materials=await read(root+'/materials-v7.json'),files=await read(root+'/source-files-v1.json'),sourceManifest=await read(out+'/sources-v1.json'),owners={curls:await read(out+'/hair-curls-v1.json'),sidepart:await read(out+'/hair-sidepart-v1.json')},equipment=await read(out+'/equipment-v1.json'),served=new Map();
+for(const [id,path]of Object.entries(files)){const bytes=await readFile(path);assert.equal(sha(bytes),ownership.sources[id].sha256);served.set('/family-source/body-'+id,bytes);}
+for(const [file,source]of Object.entries(sourceManifest)){const bytes=await readFile(source.path);assert.equal(sha(bytes),source.sha256);served.set('/family-source/'+file,bytes);}
+const server=await serve(0,{handle(req,res,path){if(!served.has(path))return false;res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'no-store'}).end(served.get(path));return true;}});let browser;const expected=await read(out+'/review-v1.json');
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/family-provider-verification`);
+ const result=await page.evaluate(async({ownership,materials,owners,equipment,expected})=>{
+  const {loadCharacterImageSource}=await import('/character-image-source.js'),{prepareBodyFamily}=await import('/character-body-family.js'),{prepareFamilyAppearanceLibrary}=await import('/character-family-appearance.js'),{prepareRegisteredHair}=await import('/character-hair.js'),{extractRegisteredAtlasPart}=await import('/character-atlas-part.js');
+  const loaded={},sourceCache=new Map(),load=file=>{if(!sourceCache.has(file))sourceCache.set(file,loadCharacterImageSource('/family-source/'+file));return sourceCache.get(file);},check=(v,message)=>{if(!v)throw Error(message);},pixels=c=>c.getContext('2d').getImageData(0,0,256,256).data,digest=crypto.subtle.digest.bind(crypto.subtle),sha=async c=>[...new Uint8Array(await digest('SHA-256',pixels(c)))].map(n=>n.toString(16).padStart(2,'0')).join(''),defaultMaterials={skin:'warm',shirt:'cream',shorts:'cream',shoes:'brown'},dyed={skin:'copper',shirt:'teal',shorts:'sage',shoes:'graphite'},recipe=(hair='curls',hairColour='chestnut',materials=defaultMaterials)=>({hair,hairColour,materials}),reject=async fn=>{let denied=false;try{await fn();}catch{denied=true;}check(denied,'Unsupported operation was accepted');};
+  for(const id of Object.keys(ownership.sources))loaded[id]=await loadCharacterImageSource('/family-source/body-'+id);const family=await prepareBodyFamily({ownership,sources:loaded}),create=document.createElement.bind(document),created=[];
+  document.createElement=function(name,...args){const value=create(name,...args);if(name==='canvas')created.push(value);return value;};let library,compared=0,returns=0,refused=0;const args={family,materials,owners,equipment,load,maxEntries:2,maxConcurrent:1,maxQueued:2};
+  try{
+   const input=structuredClone({materials,owners,equipment}),pending=prepareFamilyAppearanceLibrary({...args,...input});input.owners.curls.poses.base[0].index=15;input.materials.sheets.base.regions[0].waist=0;library=await pending;
+   for(const hair of ['curls','sidepart'])for(const [palette,material]of [defaultMaterials,dyed].entries()){
+    const value=recipe(hair,palette?'silver':'chestnut',material),[a,b]=await Promise.all([library.acquire(value),library.acquire(structuredClone(value))]);
+    check(a.provider.frameForPose('base',0)===b.provider.frameForPose('base',0),'Duplicate callers did not share prepared frames');a.release();a.release();await reject(()=>a.provider.frameForPose('base',0));refused++;
+    for(const record of expected.hashes.filter(h=>h.style===hair&&h.palette===palette)){check(await sha(b.provider.frameForPose(record.sheet,record.index))===record.sha256,'Complete provider pixels differ '+hair+' '+record.sheet+':'+record.index);compared++;}
+    for(const index of [13,14]){const normal=b.provider.frameForPose('activities',index),recovery=b.provider.frameForPose('activities',index,{sequenceIndex:5});check(normal!==recovery,'Missing distinct feeding recovery frame');returns++;}
+    const bads=[['bad',0],['base',-1],['base',16],['base',.5],['idle',NaN]];for(const [sheet,index]of bads){await reject(()=>b.provider.frameForPose(sheet,index));refused++;}b.release();
+   }
+   check(library.info().entries===2&&library.info().appearanceFrames===100&&library.info().leases===0,'Unbounded appearance cache or leaked lease');
+   const a=await library.acquire(recipe()),b=await library.acquire(recipe('sidepart'));await reject(()=>library.acquire(recipe('curls','espresso')));refused++;check(a.provider.frameForPose('base',0).width===256,'Capacity pressure destroyed leased frames');a.release();const c=await library.acquire(recipe('curls','espresso'));check(b.provider.frameForPose('base',0).width===256,'Eviction destroyed another active lease');b.release();c.release();
+   for(const bad of [{...recipe(),hair:'unknown'},{...recipe(),hat:'straw-v1'},{...recipe(),hairColour:'future'},{...recipe(),materials:{...defaultMaterials,skin:'reference'}}]){await reject(()=>library.acquire(bad));refused++;}
+   const closing=library.dispose();check(closing===library.dispose(),'Dispose did not share completion');await closing;await reject(()=>library.acquire(recipe()));refused++;await reject(()=>c.provider.frameForPose('base',0));refused++;
+   check(created.every(c=>c.width===0&&c.height===0),'Disposed library retained owned canvases');check(Object.values(family.frames).flat().every(c=>c.width===256&&c.height===256),'Disposed library changed borrowed body frames');
+   // Fail after several prepared caps; initialization must roll all of them back.
+   created.length=0;let calls=0;await reject(()=>prepareFamilyAppearanceLibrary({...args,load:file=>{if(++calls===6)throw Error('Injected sixth source outage');return load(file);}}));check(calls===6&&created.every(c=>c.width===0&&c.height===0),'Source outage retained prepared parts');
+   let hairDisposalRaces=0;
+   for(const stopAt of [1,2]){
+    created.length=0;const pose=owners.curls.poses.base[6],source=await load(pose.file),part=extractRegisteredAtlasPart({...source,registration:{sha256:pose.partSha256,size:pose.size,bounds:pose.bounds,sourceRect:pose.sourceRect??[0,0,1254,1254]}}),prepared=prepareRegisteredHair({...source,image:part.frame,registration:{...pose,body:owners.curls.body}});if(part.frame instanceof HTMLCanvasElement)part.frame.width=part.frame.height=0;
+    let resume,entered,calls=0;const barrier=new Promise(resolve=>{resume=resolve;}),blocked=new Promise(resolve=>{entered=resolve;});crypto.subtle.digest=async(...args)=>{const hashed=digest(...args);if(++calls===stopAt){entered();await barrier;}return hashed;};
+    const work=prepared.compose({body:family.frames.base[6],binding:family.binding}),denied=reject(()=>work);await blocked;prepared.dispose();prepared.dispose();resume();await denied;crypto.subtle.digest=digest;await reject(()=>prepared.compose({body:family.frames.base[6],binding:family.binding}));check(created.every(c=>c.width===0&&c.height===0),'Hair disposal race retained owned paint/layers');hairDisposalRaces++;
+   }
+   // Keep the first real body hash suspended while another job queues, then close.
+   created.length=0;library=await prepareFamilyAppearanceLibrary({...args,maxEntries:3,maxQueued:1});let resume,entered;const blocked=new Promise(resolve=>{entered=resolve;}),barrier=new Promise(resolve=>{resume=resolve;});let intercepted=false;
+   crypto.subtle.digest=async(...args)=>{const hashed=digest(...args);if(!intercepted){intercepted=true;entered();await barrier;}return hashed;};
+   const first=library.acquire(recipe()),firstDenied=reject(()=>first);await blocked;const queued=library.acquire(recipe('sidepart')),queuedDenied=reject(()=>queued);check(library.info().queued===1,'Missing queued cancellation state');await reject(()=>library.acquire(recipe('curls','silver')));check(library.info().entries===2,'Queue overflow retained an appearance slot');const disposing=library.dispose();resume();await Promise.all([firstDenied,queuedDenied,disposing]);crypto.subtle.digest=digest;
+   check(created.every(c=>c.width===0&&c.height===0),'Mid-composition disposal retained buffers');check(library.info().closed&&library.info().entries===0&&library.info().queued===0,'Disposed queue published results');
+   return {compared,returns,refused,sharedFrames:true,activeLeasesSurviveEviction:true,inputCopyIsolated:true,sourceOutageCleanup:true,queuedAndInFlightDisposal:true,queueBackpressure:true,hairDisposalRaces,allOwnedCanvasesReleased:true,borrowedBodiesPreserved:true};
+  }finally{crypto.subtle.digest=digest;await library?.dispose();document.createElement=create;family.dispose();}
+ },{ownership,materials,owners,equipment,expected});
+ assert.deepEqual(errors,[]);assert.equal(result.compared,192);assert.equal(result.returns,8);assert.equal(result.refused,31);result.rendererSha256={};for(const file of ['character-family-appearance.js','character-hair.js'])result.rendererSha256[file]=sha(await readFile('web/'+file));result.referenceSha256=sha(await readFile(out+'/review-v1.json'));await writeFile(out+'/provider-verification-v1.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
