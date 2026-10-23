@@ -1,0 +1,21 @@
+{
+  "file": "web/art/characters/prototype-v1/hair-sidepart-base-7-candidate-v2.png",
+  "sha256": "9bfe3a29bba212d4505dd16f8516392d1a607a5fcf4a5af948a638afc52b8f97",
+  "alphaThreshold": 64,
+  "width": 1254,
+  "height": 1254,
+  "nontransparent": 52358,
+  "components": [
+    {
+      "pixels": 49505,
+      "bounds": [
+        572,
+        326,
+        960,
+        546
+      ],
+      "width": 388,
+      "height": 220
+    }
+  ]
+}

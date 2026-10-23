@@ -1,0 +1,31 @@
+{
+  "scope": "Unchanged registered atlas-part extractions used only as geometry references for new hair painting; no new final art",
+  "sources": [
+    {
+      "index": 13,
+      "source": {
+        "file": "hair-seat-base-13-candidate-v1.png",
+        "sha256": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec",
+        "sourceRect": [
+          0,
+          0,
+          1254,
+          600
+        ]
+      }
+    },
+    {
+      "index": 15,
+      "source": {
+        "file": "hair-seat-base-15-candidate-v1.png",
+        "sha256": "39fbf81324795e5818bb5ca24f3b62fb46044ed126597d503130ef9618bbc148",
+        "sourceRect": [
+          0,
+          0,
+          1254,
+          600
+        ]
+      }
+    }
+  ]
+}
