@@ -37,6 +37,9 @@ export class EditorDocument extends EventTarget{
   #past=[];
   #future=[];
   #revision=0;
+  // Only internally owned entries are cached. Restored caller data is measured
+  // afresh before cloning, so mutating a checkpoint cannot bypass byte limits.
+  #historySizes=new WeakMap();
   historyRecovered=false;
 
   constructor(initial){
@@ -170,9 +173,14 @@ export class EditorDocument extends EventTarget{
   }
   #changed(){this.#revision++;this.dispatchEvent(new Event('change'));}
   #trim(){
-    let size=this.#past.reduce((sum,step)=>sum+historySize(step),0);
+    const sizeOf=step=>{
+      let size=this.#historySizes.get(step);
+      if(size===undefined){size=historySize(step);this.#historySizes.set(step,size);}
+      return size;
+    };
+    let size=this.#past.reduce((sum,step)=>sum+sizeOf(step),0);
     while(this.#past.length>MAX_HISTORY_STEPS||size>MAX_HISTORY_BYTES){
-      size-=historySize(this.#past.shift());
+      size-=sizeOf(this.#past.shift());
     }
   }
 }

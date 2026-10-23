@@ -1,0 +1,62 @@
+{
+  "scope": "Node journal-edit CPU measurement with a near-8-MiB retained history. Synthetic draft; not native scenario validation, browser save latency, or total memory acceptance.",
+  "cpu": "Apple M3 Pro",
+  "sourceSha256": "f81c4da0bcfc2af2ba26212ce119502c71a20082e95228962889e323e43ade1e",
+  "baseline": {
+    "historyBytes": 7950361,
+    "retainedSteps": 64,
+    "byteLimitedHistoryBytes": 8272403,
+    "byteLimitedSteps": 59,
+    "finalCheckpointSha256": "5249f49b585d79e3c445317a1ff79db6fb9d4d18ba02ab0823d9daa356539f4e",
+    "measuredEdits": 16,
+    "medianMs": 11.617833000000019,
+    "p95Ms": 11.774000000000001,
+    "samplesMs": [
+      11.683541999999989,
+      11.633832999999981,
+      11.774000000000001,
+      11.75429200000002,
+      12.030666999999994,
+      11.624415999999997,
+      11.610833000000014,
+      11.534167000000025,
+      11.718874999999969,
+      11.576416999999992,
+      11.531333000000018,
+      11.617833000000019,
+      11.537707999999952,
+      11.517417000000023,
+      11.686624999999935,
+      11.49070800000004
+    ]
+  },
+  "baselineSourceSha256": "a341b2a7a914cccd3bc20366784373243778832ca33435686b691e8212a4bbae",
+  "current": {
+    "historyBytes": 7950361,
+    "retainedSteps": 64,
+    "byteLimitedHistoryBytes": 8272403,
+    "byteLimitedSteps": 59,
+    "finalCheckpointSha256": "5249f49b585d79e3c445317a1ff79db6fb9d4d18ba02ab0823d9daa356539f4e",
+    "measuredEdits": 16,
+    "medianMs": 0.6884580000000824,
+    "p95Ms": 0.704915999999912,
+    "samplesMs": [
+      0.6936670000000049,
+      0.6927080000000387,
+      0.7027080000000296,
+      0.6864590000000135,
+      0.686040999999932,
+      0.6917499999999563,
+      0.6872089999999389,
+      0.7735829999999169,
+      0.6884580000000824,
+      0.6941249999999854,
+      0.6883749999999509,
+      0.6861670000000686,
+      0.687125000000151,
+      0.6870409999999083,
+      0.704915999999912,
+      0.701917000000094
+    ]
+  }
+}
