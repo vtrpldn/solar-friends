@@ -1,0 +1,24 @@
+{
+  "cancelButton": true,
+  "escape": true,
+  "noLateReleaseAfterCancel": true,
+  "unchangedDraftHistoryViewAndLibrary": true,
+  "focusRestored": true,
+  "invalidCompilationPreservesLibrary": true,
+  "denseWorkerNativeParity": {
+    "exact": true,
+    "elapsedMs": 183,
+    "maximumGapMs": 11.899999976158142,
+    "ticks": 18,
+    "buildings": 256,
+    "residents": 12
+  },
+  "successfulFirstReleaseVersion": 1,
+  "checkedRelease": {
+    "ok": true,
+    "terrain": 4096,
+    "residents": 5,
+    "author": "Our community"
+  },
+  "browserErrors": []
+}

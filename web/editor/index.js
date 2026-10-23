@@ -1,3 +1,4 @@
+import {prepareRelease} from './prepare-release.js';
 import {prepareCreationExport} from './prepare-export.js';
 import {prepareScenario} from './prepare-scenario.js';
 import {landPreviewKey} from './land-preview-key.js';
@@ -16,7 +17,7 @@ import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
 import {MapSharingControls} from './map-sharing-controls.js';
 import {creationThumbnail} from './thumbnail.js';
 import {installLibraryDiscovery} from './library-discovery.js';
-import {RELEASE_FORMAT,freezeReleaseDefinition} from '../release-package.js';
+import {RELEASE_FORMAT} from '../release-package.js';
 import {canonical} from './journal.js';
 import {ensureStart} from './arrival.js';
 import {startingRecoveryFields} from './recovery.js';
@@ -434,12 +435,16 @@ function wire(){
   $('creator-release-confirm').onclick=async()=>{
     const author=$('creator-release-author');if(!author.reportValidity()||!current||busy)return;
     busy=true;$('creator-release-confirm').disabled=true;$('creator-release-cancel').disabled=true;$('creator-release-status').textContent='Checking and saving this release…';
+    const ctx=current,revision=ctx.doc.revision;
     try{
-      await save();const frozen=freezeReleaseDefinition(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog});
+      const frozen=await prepareRelease(ctx.doc.value);
+      if(current!==ctx||ctx.doc.revision!==revision)throw Error('This draft changed during preparation. Prepare the release again.');
+      $('creator-release-status').textContent='Saving the checked release…';
+      await save();
       if(canonical(frozen)!==canonical(current.doc.value)){current.doc.transact('Resolve landscape for frozen release',d=>Object.assign(d,frozen));await save();}
       const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,validate:raw=>JSON.parse(engine.validate_scenario(raw)),thumbnail:previewOf(current.doc.value,map.snapshot)});
       $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
-    }catch(error){$('creator-release-status').textContent=error.message;}finally{busy=false;$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current)refresh();}
+    }catch(error){$('creator-release-status').textContent=error.message;}finally{busy=false;$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
   };
   $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
   $('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
