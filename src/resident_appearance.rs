@@ -1,5 +1,7 @@
 //! Versioned looks are cosmetic data, independent of a resident's identity.
 use crate::*;
+mod parts;
+pub use parts::*;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Preset {
@@ -39,13 +41,25 @@ impl Preset {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Look {
+pub struct PresetLook {
     pub preset: Preset,
     pub version: u32,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Look {
+    Preset(PresetLook),
+    Parts(PartsLook),
+}
 impl Look {
     pub fn valid(self) -> bool {
-        self.version == 1
+        match self {
+            Self::Preset(look) => look.version == 1,
+            Self::Parts(look) => look.valid(),
+        }
+    }
+    pub fn from_preset(preset: Preset, version: u32) -> Self {
+        Self::Preset(PresetLook { preset, version })
     }
 }
 pub fn migrate(raw: &mut serde_json::Value) -> bool {
@@ -64,7 +78,7 @@ pub fn migrate(raw: &mut serde_json::Value) -> bool {
         else {
             return false;
         };
-        p["appearance"] = serde_json::to_value(Look { preset, version: 1 }).unwrap();
+        p["appearance"] = serde_json::to_value(Look::from_preset(preset, 1)).unwrap();
     }
     true
 }
@@ -83,7 +97,20 @@ impl Game {
         let Some(preset) = Preset::from_key(preset) else {
             return false;
         };
-        let appearance = Look { preset, version };
+        self.apply_resident_identity(id, name, Look::from_preset(preset, version))
+    }
+    pub fn change_resident_appearance(&mut self, id: usize, name: &str, raw: &str) -> bool {
+        if raw.len() > 4096 {
+            return false;
+        }
+        let Ok(appearance) = serde_json::from_str::<Look>(raw) else {
+            return false;
+        };
+        self.apply_resident_identity(id, name, appearance)
+    }
+}
+impl Game {
+    fn apply_resident_identity(&mut self, id: usize, name: &str, appearance: Look) -> bool {
         if !appearance.valid() || name.trim().is_empty() || name.chars().count() > 80 {
             return false;
         }

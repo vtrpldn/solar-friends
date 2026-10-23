@@ -384,8 +384,11 @@ mod tests {
                 let person = people.iter().find(|r| r.id == id).unwrap();
                 assert_eq!(person.name, p.name);
                 assert_eq!(
-                    person.appearance.preset,
-                    resident_appearance::FOUNDERS[p.slot().unwrap()]
+                    person.appearance,
+                    resident_appearance::Look::from_preset(
+                        resident_appearance::FOUNDERS[p.slot().unwrap()],
+                        1
+                    )
                 );
                 assert_eq!(
                     v.economy.outside_professions[&id],

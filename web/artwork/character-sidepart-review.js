@@ -36,6 +36,6 @@ export async function installSidePartReview({frames,binding,materials,seated,sce
   let checked;try{checked=validateSidePartReviewRecipe(recipe);}catch(error){return Promise.reject(error);}
   const keyClip=clip==='sleep'?'sit':clip;return cache.get(keyClip+':'+JSON.stringify(checked),{clip:keyClip,recipe:checked});
  },clear:()=>cache.clear(),cacheInfo:()=>{const info=cache.info();return {...info,frames:info.entries*4,maximumFrames:24,rgbaBytes:info.entries*4*256*256*4};}};
- const controls=await installAppearanceControls({model,scene,before,prefix:'sidepart-appearance',makeRecipe:sidePartReviewRecipe,clipKeys,titleText:'Side part · all poses prototype',noteText:'Forty-eight explicitly registered poses share painted caps where compatible, original foreground hands and activity stools. This draft hairstyle is excluded from player recipes, saves and character choices; style, contact and temporal consistency remain under review.'});
+ const controls=await installAppearanceControls({model,scene,before,prefix:'sidepart-appearance',makeRecipe:sidePartReviewRecipe,clipKeys,titleText:'Side part · all poses prototype',noteText:'Forty-eight explicitly registered poses share painted caps where compatible, original foreground hands and activity stools. The initial custom-look set uses these same sources through a separate native part recipe. This inspection recipe stays outside player saves; style, contact and temporal consistency remain under review.'});
  return {...controls,registration,sources,activityParts,decodedSourceCount:files.size};
 }

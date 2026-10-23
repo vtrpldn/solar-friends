@@ -16,6 +16,9 @@ export class RelationshipsEditor{
  render(d){
   const people=d.start.residents??this.presets,bonds=d.start.relationships??[],signature=JSON.stringify([people.map(p=>[p.id,p.name,p.preset,p.preset_version,p.appearance]),bonds]);
   if(signature===this.signature)return;this.signature=signature;
+  this.definition=d;
+  const pending=people.map(person=>person.appearance).filter(a=>a?.schema===2&&!this.art.appearances.isReady(a));
+  if(pending.length)Promise.all(pending.map(a=>this.art.appearances.prepare(a))).then(()=>{if(this.definition===d){this.signature=null;this.render(d);}},()=>{});
   this.host.innerHTML='<p>Shared memories from before arrival. Gatherings and visits to the square can build new memories during play.</p>'+people.flatMap((from,i)=>people.slice(i+1).map(to=>{
    const bond=bonds.find(b=>b.from===from.id&&b.to===to.id||b.from===to.id&&b.to===from.id);
    const person=p=>`<span class="creator-bond-person"><canvas width="48" height="54" data-bond-portrait="${escape(p.appearance?.preset??p.preset)}" data-bond-resident="${escape(p.id)}" aria-hidden="true"></canvas><span>${escape(p.name)}</span></span>`;

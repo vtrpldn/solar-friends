@@ -6,6 +6,7 @@ export function creationThumbnail(definition,snapshot,art){
   const canvas=document.createElement('canvas');
   const map=new EditorMap(canvas,art,{preview:true});
   map.set(definition,snapshot,{center:definition.map.camera,zoom:1.3,grid:false});
+  if(map.artLoading)throw Error('Resident artwork is still loading; keep the previous preview.');
   return canvas.toDataURL('image/webp',.72);
 }
 

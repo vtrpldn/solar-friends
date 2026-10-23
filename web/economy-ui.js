@@ -86,8 +86,11 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   $('#town-shortages').onclick=()=>{focusedCatalog=true;const e=snapshot().environment.economy;for(let i=0;i<e.materials.length;i++){const input=$(`[data-material="${i}"]`);if(input)input.value=Math.min(e.shortage[i],100);}quote();};
   $('#town-clear').onclick=()=>{for(const input of $('#town-catalog').querySelectorAll('input'))input.value=0;quote();};
   $('#town-order').onclick=()=>{const pickup=pickupMode(),orderId=snapshot().village.economy.next_order,driver=snapshot().environment.economy.pickup_drivers.find(r=>String(r.id)===$('#pickup-driver').value),result=pickup?game().order_supplies_pickup_quoted(JSON.stringify(basket()),Number($('#pickup-driver').value),currentQuote?.token||''):game().order_supplies_quoted(JSON.stringify(basket()),currentQuote?.token||'');if(result==='ok'){if(pickup)pickupNoticeOrder=orderId;$('#town-clear').click();}transact(result);if(result!=='ok')quote();if(result==='ok'&&pickup)notify(pickupMessage(driver.name));};
-  const jobs=snapshot().environment.economy.jobs;
-  $('#outside-jobs').innerHTML=jobs.map(job=>`<article class="occupation-card"><div class="occupation-heading">${avatar(job.id)}<div><strong>${escape(job.name)}</strong><b>${escape(job.title)}</b></div><label><input type="checkbox" data-outside-job="${job.id}" aria-label="Schedule ${escape(job.name)}'s outside job"> Work outside</label></div><p>${escape(job.description)}</p><small>09:00–17:00 · ${money(job.income)} contribution per shift</small><span data-job-status="${job.id}"></span></article>`).join('');paintPortraits();
+  let jobsSignature='';
+  function syncJobs(state){const jobs=state.environment.economy.jobs,signature=JSON.stringify(jobs.map(job=>[job.id,job.name,job.title,job.description,job.income,job.available,state.residents.find(r=>r.id===job.id)?.appearance]));if(signature===jobsSignature)return;jobsSignature=signature;
+    $('#outside-jobs').innerHTML=jobs.map(job=>`<article class="occupation-card"><div class="occupation-heading">${avatar(job.id)}<div><strong>${escape(job.name)}</strong><b>${escape(job.title)}</b></div><label><input type="checkbox" data-outside-job="${job.id}" aria-label="Schedule ${escape(job.name)}'s outside job"> Work outside</label></div><p>${escape(job.description)}</p><small>09:00–17:00 · ${money(job.income)} contribution per shift</small><span data-job-status="${job.id}"></span></article>`).join('');paintPortraits($('#outside-jobs'));
+  }
+  syncJobs(snapshot());
   $('#jobs-outlook').onclick=()=>{const section=$('#outside-jobs').closest('details');section.open=true;section.querySelector('summary').scrollIntoView({block:'start'});section.querySelector('summary').focus({preventScroll:true});};
   $('#outside-jobs').onchange=event=>{const input=event.target.closest('[data-outside-job]');if(!input)return;game().set_resident_job(Number(input.dataset.outsideJob),input.checked);changed();update();};
   $('#sell-surplus').onclick=()=>transact(game().sell_surplus(Math.min(20,snapshot().environment.economy.saleable_food)));
@@ -129,6 +132,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
   $('#storage-locations').addEventListener('focusout',()=>queueMicrotask(update));
   function update(){
     const s=snapshot(),e=s.environment.economy,v=s.village;
+    syncJobs(s);
     suppliers.update(s);
     for(const m of e.materials){const node=$(`[data-material="${m.id}"]`)?.closest('.town-item').querySelector('.trade-price');if(node&&node.textContent!==money(m.price))node.textContent=money(m.price);}
     if(forecasts.observe(s))lastProjects='';
@@ -137,6 +141,7 @@ export function installEconomyUI({snapshot,game,changed,notify,locate,openTown,p
     $('#jobs-outlook').textContent=enabled.length?`${enabled.length} optional ${enabled.length===1?'shift':'shifts'} · up to ${money(enabled.reduce((sum,j)=>sum+j.income,0))} per day${away.length?' · '+away.length+' working off-site':''}`:'Choose outside shifts';
     for(const job of e.jobs){
       $(`[data-outside-job="${job.id}"]`).checked=job.enabled;
+      $(`[data-outside-job="${job.id}"]`).disabled=!job.available;
       const r=s.residents.find(r=>r.id===job.id),working=r.trip?.purpose==='work';
       $(`[data-job-status="${job.id}"]`).textContent=working?r.trip.phase==='leaving'?`Leaving for ${job.place}`:r.trip.phase==='away'?'Working off-site · returns at 17:00':`Back from work · ${money(job.income)} contributed`:job.paid_today?`Today’s contribution received · ${job.enabled?'scheduled again tomorrow':'future shifts off'}`:!job.enabled?'Staying available for village life':v.minutes%1440>=600?'No shift taken today · next departure tomorrow at 09:00':'Scheduled · leaves between 09:00 and 10:00 when rested';
     }

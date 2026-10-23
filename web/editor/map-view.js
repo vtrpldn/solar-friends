@@ -35,9 +35,9 @@ const catalogMaterial=material=>['timber','bamboo','earth','stone','salvage'].in
 const keyFor=b=>b.kind!=='home'?b.kind:b.recipe==='local'?'home-veranda':b.appearance||(b.recipe==='adobe'?'adobe-gable':'home');
 
 export class EditorMap {
-  constructor(canvas,art,{action,viewChanged,hover,preview=false}){
+  constructor(canvas,art,{action,viewChanged,hover,preview=false,onArtworkReady=()=>{}}){
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.art=art;
-    this.action=action;this.viewChanged=viewChanged;this.hover=hover;
+    this.action=action;this.viewChanged=viewChanged;this.hover=hover;this.onArtworkReady=onArtworkReady;
     this.brushSize=3;
     this.view={center:[32,32],zoom:1.3,selected:null,selection:[],tool:'select',grid:true};
     this.preview=preview;
@@ -53,6 +53,10 @@ export class EditorMap {
   }
   set(document,snapshot,view){
     this.document=document;this.snapshot=snapshot;
+    const appearances=snapshot.residents.map(p=>p.appearance);if(!this.preview)this.art.appearances.setActive(appearances);
+    const revision=this.artRevision=(this.artRevision??0)+1;this.artLoading=appearances.some(a=>!this.art.appearances.isReady(a));this.artError=null;
+    this.canvas.setAttribute('aria-busy',String(this.artLoading));this.canvas.style.pointerEvents=this.artLoading?'none':'';
+    if(this.artLoading)Promise.all(appearances.filter(a=>!this.art.appearances.isReady(a)).map(a=>this.art.appearances.prepare(a))).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.canvas.setAttribute('aria-busy','false');this.canvas.style.pointerEvents='';this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.render();}});
     if(view)this.view={...this.view,...view,center:[...view.center]};
     this.render();
   }
@@ -133,6 +137,7 @@ export class EditorMap {
     const dpr=this.preview?1:Math.min(devicePixelRatio,2),w=Math.round(width*dpr),h=Math.round(height*dpr);
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
     c.setTransform(dpr,0,0,dpr,0,0);
+    if(this.artLoading){c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);c.fillStyle='#304435';c.font='16px sans-serif';c.fillText(this.artError??'Preparing resident artwork…',20,32);return;}
     this.scale=Math.max(.18,Math.min(width/1000,height/800)*view.zoom);
     const anchor=project(...view.center,{x:0,y:0},this.scale);
     this.origin={x:width/2-anchor.x,y:height/2-anchor.y};

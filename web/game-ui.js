@@ -73,11 +73,14 @@ export function installGameUI({images,residents,avatar,paintPortraits,selectPers
     const imageKey=key&&allBuildingArt[key]?.emptyFile&&(b.progress<100||b.agriculture.stocked===false)?key+':empty':key;
     if(key&&imageKey!==buildingKey){paintIcon($('#building-portrait'),b.kind,images[imageKey],allBuildingArt[key]);buildingKey=imageKey;}
   }
+  let rosterKey=null;
   function update(state,developer,selected){
     document.body.classList.toggle('developer-session',developer);
     document.body.classList.toggle('sandbox-mode',state.village.mode==='sandbox');
     document.body.classList.toggle('unlimited-supplies',!usesLogistics(state.village));
     $('#material-total').textContent=state.environment.economy.materials.reduce((sum,m)=>sum+m.stored,0);
+    const people=[...state.residents].sort((a,b)=>a.id-b.id),key=JSON.stringify(people.map(r=>[r.id,r.appearance]));if(key!==rosterKey){rosterKey=key;document.querySelector('.people-emblem').innerHTML=people.slice(0,2).map(r=>avatar(r.id)).join('');paintPortraits();}
+    const present=new Set(people.map(r=>r.id));for(const [id,button]of portraits)if(!present.has(id)){button.remove();portraits.delete(id);}
     for(const r of state.residents){
       let button=portraits.get(r.id);
       if(!button){button=document.createElement('button');button.dataset.citizen=r.id;button.innerHTML=`${avatar(r.id)}<span class="citizen-status" aria-hidden="true"></span>`;button.onclick=()=>selectPerson(r.id);$('#resident-strip').append(button);portraits.set(r.id,button);paintPortraits();}

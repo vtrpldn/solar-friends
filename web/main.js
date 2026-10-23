@@ -168,6 +168,15 @@ const activityAnimations = residentLookKeys.map(name => {
   const image = new Image(); image.src = `art/animations/${name}-activities.png`; return image;
 });
 const residentAppearances=createResidentAppearanceLibrary({base:animations,idle:idleAnimations,activities:activityAnimations});
+let residentArtworkLoading=false,residentArtworkRevision=0;
+function prepareResidentCast(snapshot){const appearances=snapshot.residents.map(p=>p.appearance);residentAppearances.setActive(appearances);return Promise.all(appearances.filter(a=>!residentAppearances.isReady(a,{sheets:['base','idle','activities']})).map(a=>residentAppearances.prepare(a)));}
+function ensureResidentArtwork(snapshot,ready,failed=()=>{}){
+  const revision=++residentArtworkRevision,appearances=snapshot.residents.map(p=>p.appearance);residentAppearances.setActive(appearances);
+  if(appearances.every(a=>residentAppearances.isReady(a,{sheets:['base','idle','activities']}))){if(residentArtworkLoading)$('#loading').hidden=true;residentArtworkLoading=false;return false;}
+  residentArtworkLoading=true;$('#loading').hidden=false;$('#load-status').textContent='Preparing resident artwork…';
+  prepareResidentCast(snapshot).then(()=>{if(revision===residentArtworkRevision){residentArtworkLoading=false;$('#loading').hidden=true;ready();}},error=>{if(revision===residentArtworkRevision){$('#load-status').textContent='Resident artwork could not load. Reload to retry; your saved village is preserved.';console.error(error);failed(error);}});
+  return true;
+}
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
 let animationDelta = 0;
@@ -221,7 +230,14 @@ const escapeHtml = (s) =>
   );
 function avatar(id) {
   const look=residentAppearanceInfo(state.residents.find(r=>r.id===id).appearance);
-  return `<span class="avatar" style="background:${look.accent}20"><canvas data-portrait="${residentLookKeys.indexOf(look.key)}" data-portrait-resident="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
+  return `<span class="avatar" style="background:${look.accent}20"><canvas data-portrait="${look.version===2?'parts':residentLookKeys.indexOf(look.key)}" data-portrait-resident="${id}" width="96" height="108" aria-hidden="true"></canvas></span>`;
+}
+let residentRosterSignature='';
+function syncResidentRoster(){
+  const people=[...state.residents].sort((a,b)=>a.id-b.id),signature=JSON.stringify(people.map(r=>[r.id,r.name,r.appearance]));if(signature===residentRosterSignature)return;residentRosterSignature=signature;
+  $('#residents').innerHTML=people.map(r=>`<button class="resident" data-resident="${r.id}" aria-label="Meet ${escapeHtml(r.name)}">${avatar(r.id)}<span class="info"><b>${escapeHtml(r.name)}</b><small></small><span class="energy-tiny"><i></i></span></span><span class="arrow">›</span></button>`).join('');
+  if(selected!==null&&!people.some(r=>r.id===selected)){selected=null;$('#person').hidden=true;}
+  paintPortraits($('#residents'));
 }
 function paintPortraits(root=document) {
   for (const portrait of root.querySelectorAll('[data-portrait]')) {
@@ -316,6 +332,7 @@ function openMainMenu() {
   $('#main-menu').showModal();
 }
 function enterVillage(candidate,mode) {
+  if(ensureResidentArtwork(JSON.parse(candidate.snapshot()),()=>{enterVillage(candidate,mode);save();},()=>candidate.free()))return false;
   playerSession?.dispose({freeGame:false});playerSession=null;
   document.querySelector(".creation-session")?.remove();document.body.classList.remove("in-creation-run");
   game.free();game=candidate;storage=modeStores[mode];gameActive=true;
@@ -342,7 +359,7 @@ function continueMode(mode) {
     if(raw===null || !candidate.restore(raw) || (JSON.parse(candidate.snapshot()).village.mode||'story')!==mode) {
       candidate.free();$('#menu-status').textContent='This village could not be loaded. Its saved data is preserved.';return;
     }
-    enterVillage(candidate,mode);save();
+    if(enterVillage(candidate,mode)!==false)save();
   } catch {candidate.free();$('#menu-status').textContent='Device storage could not be read. Your village is preserved.';}
 }
 function requestNewMode(mode) {
@@ -628,6 +645,7 @@ function resident(r) {
 }
 let terrainSample;
 function render() {
+  if(residentArtworkLoading)return;
   $('#relocation-guidance').hidden=!tool||(movingBattery===null&&movingBuilding===null);
   if(!$('#relocation-guidance').hidden)$('#relocation-guidance').textContent=$('#placement').textContent;
   const weather = weatherConditions(state.environment,state.village.minutes);
@@ -1237,6 +1255,7 @@ function openSituations() {
   $("#situation-dialog").showModal();
 }
 function updateUI() {
+  syncResidentRoster();
   const free = state.village.mode==='sandbox', instant = !usesLogistics(state.village);
   sandboxRulesUI?.update();
   const creation=creationPresentation(playerSession?state.village.scenario?.definition:null,{playtest:playerSession?.isTest});
@@ -1463,6 +1482,7 @@ function togglePause() {
 }
 let paintedState = null, paintedView = "", reportElapsed = Infinity;
 function frame(stamp) {
+  if(residentArtworkLoading){last=stamp;requestAnimationFrame(frame);return;}
   meter.start(stamp);
   if (!last) last = stamp;
   const elapsed = Math.max(0, (stamp - last) / 1000);
@@ -1629,16 +1649,12 @@ function setup() {
   }
   residentIdentity=installResidentIdentity({appearances:residentAppearances,catalog:JSON.parse(game.scenario_catalog()).resident_appearances,game:()=>game,snapshot:()=>state,changed:id=>{
     state=JSON.parse(game.snapshot());residentAnimations.delete(id);residentSurfaces.delete(id);
+    residentAppearances.setActive(state.residents.map(person=>person.appearance));
     const person=state.residents.find(p=>p.id===id),button=$(`#residents [data-resident="${id}"]`);
     if(button){button.querySelector('.avatar').outerHTML=avatar(id);button.querySelector('b').textContent=person.name;button.setAttribute('aria-label',`Meet ${person.name}`);}
     selectPerson(id);updateUI();paintPortraits();render();save();
   }});
-  $("#residents").innerHTML = [...state.residents].sort((a,b)=>a.id-b.id)
-    .map(
-      (r) =>
-        `<button class="resident" data-resident="${r.id}" aria-label="Meet ${escapeHtml(r.name)}">${avatar(r.id)}<span class="info"><b>${escapeHtml(r.name)}</b><small></small><span class="energy-tiny"><i></i></span></span><span class="arrow">›</span></button>`,
-    )
-    .join("");
+  syncResidentRoster();
   paintPortraits();
   $("#residents").onclick = (e) => {
     const b = e.target.closest("[data-resident]");
@@ -1750,6 +1766,12 @@ function setup() {
   $("#confirm-import").onclick = () => {
     if (sandbox || artworkPreview || directScenario) return;
     if (!pendingImport || sandbox || artworkPreview || directScenario) return;
+    const imported=JSON.parse(pendingImport);
+    residentAppearances.setActive(imported.residents.map(person=>person.appearance));
+    if(imported.residents.some(person=>!residentAppearances.isReady(person.appearance,{sheets:['base','idle','activities']}))){
+      const confirm=$('#confirm-import'),cancel=$('#cancel-import'),label=confirm.textContent;confirm.disabled=cancel.disabled=true;confirm.textContent='Preparing resident artwork…';
+      ensureResidentArtwork(imported,()=>{confirm.disabled=cancel.disabled=false;confirm.textContent=label;confirm.click();},()=>{const recover=()=>{confirm.disabled=cancel.disabled=false;confirm.textContent=label;$('#import-summary').textContent='Resident artwork could not load. Retry or cancel; your current village and saved data are unchanged.';};if(!ensureResidentArtwork(JSON.parse(game.snapshot()),recover))recover();});return;
+    }
     try {
       const mode=JSON.parse(pendingImport).village.mode || 'story';
       const target=modeStores[mode];
@@ -1938,6 +1960,7 @@ function installCreationSession(){
   if(session.recovered)toast('Recovered your last scenario checkpoint.');
 }
 function refreshDevScene() {
+  if(ensureResidentArtwork(JSON.parse(game.snapshot()),refreshDevScene))return;
   economyUI?.resetForVillage();
   challengeFailureShown=false;
   setZoom(zoom);
@@ -1959,7 +1982,7 @@ const devAPI = {
   isSandbox: () => !!sandbox,
   scenario: () => sandboxName || (artworkPreview ? 'Artwork preview' : 'Saved village'),
   async loadScenario(id) {
-    if (loadingScenario) throw new Error('A scenario is already loading.');
+    if (loadingScenario||residentArtworkLoading) throw new Error('Wait for the current scene and resident artwork to finish loading.');
     loadingScenario = true;
     const candidate = new Game();
     try {
@@ -1982,16 +2005,17 @@ const devAPI = {
     zoom=1.3;pan={x:0,y:0};refreshDevScene(); devTools?.refresh();
   },
   importSandbox(raw) {
-    if(loadingScenario)throw new Error('Wait for the scenario to finish loading.');
+    if(loadingScenario||residentArtworkLoading)throw new Error('Wait for the current scene and resident artwork to finish loading.');
     if(raw.length>5_000_000)throw new Error('Choose a checkpoint smaller than 5 MB.');
     const candidate=new Game();
     if(!candidate.restore(raw)){candidate.free();throw new Error('This checkpoint is not a valid village. The current scene is unchanged.');}
+    const cast=JSON.parse(candidate.snapshot());if(cast.residents.some(p=>!residentAppearances.isReady(p.appearance,{sheets:['base','idle','activities']}))){candidate.free();return new Promise((resolve,reject)=>{ensureResidentArtwork(cast,()=>{try{resolve(devAPI.importSandbox(raw));}catch(error){reject(error);}},error=>{const fail=()=>reject(error);if(!ensureResidentArtwork(JSON.parse(game.snapshot()),fail,fail))fail();});});}
     if(!sandbox)sandbox={game,paused,zoom,pan:{...pan},time};else game.free();
     game=candidate;sandboxName='imported';game.dev_observe(true);if(!paused)togglePause();
     refreshDevScene();devTools?.refresh();
   },
   returnToVillage() {
-    if (loadingScenario) throw new Error('Wait for the scenario to finish loading.');
+    if (loadingScenario||residentArtworkLoading) throw new Error('Wait for the current scene and resident artwork to finish loading.');
     if (!sandbox) return;
     game.free();
     ({ game, zoom, pan, time } = sandbox);
@@ -2082,6 +2106,7 @@ try {
     catch(error){library.close();toast(error.message);}
   }
   state = JSON.parse(game.snapshot());
+  await prepareResidentCast(state);
   gameActive=artworkPreview || !!directScenario || !!playerSession;
   setup();
   installMenu();

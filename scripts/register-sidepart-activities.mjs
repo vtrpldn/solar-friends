@@ -18,5 +18,5 @@ for(const clip of ['cook','water','tend','feed']){
  }
 }
 if(Object.keys(activities).length!==16)throw Error('Provide all sixteen activity bindings.');
-await writeFile(root+'hair-sidepart-all-v1-registration.json',JSON.stringify({...prior,status:'All 48 pose bindings for private art review; production appearance approval remains incomplete',sheets:[...prior.sheets,'activities'],clips:[...prior.clips,'cook','water','tend','feed'],poses:{...prior.poses,activities}},null,2)+'\n');
+await writeFile(root+'hair-sidepart-all-v1-registration.json',JSON.stringify({...prior,status:'Initial playable part set; final cadence and complete character-creator release gates remain under review',sheets:[...prior.sheets,'activities'],clips:[...prior.clips,'cook','water','tend','feed'],poses:{...prior.poses,activities}},null,2)+'\n');
 console.log('Registered all 48 explicit side-part poses; visual and equipment review still required.');

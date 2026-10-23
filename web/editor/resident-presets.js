@@ -57,6 +57,7 @@ export class ResidentPresetLibrary{
    try{let appearance=head.residentAppearance,schema=head.residentPackageSchema,compatibility=head.compatibility;
     if(schema===undefined){const record=await this.library.getResidentPreset(head.id);if(!record||record.revision!==head.revision||!slot.isConnected)continue;appearance=record.file?.resident?.appearance??{preset:record.file?.resident?.preset,version:record.file?.resident?.preset_version};schema=record.file?.schema;compatibility=record.file?.compatibility;}
     if(schema!==1&&(schema!==2||!['game','ruleset','assets'].every(key=>compatibility?.[key]===1)))continue;
+    if(appearance?.schema===2)await this.art.appearances.prepare(appearance);
     const canvas=document.createElement('canvas');canvas.width=64;canvas.height=76;canvas.setAttribute('aria-hidden','true');paintResidentPortrait(canvas,appearance,this.art.appearances);if(slot.isConnected)slot.replaceChildren(canvas);
    }catch{/* Unavailable artwork stays exportable and is never substituted. */}
   }

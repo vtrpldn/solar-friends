@@ -1,5 +1,6 @@
 import {openingFields,ensureStart,clearStart} from './arrival.js';
 import {CharacterCreator} from './character-creator.js';
+import {appearanceFields,changeAppearanceField} from '../resident-appearance-fields.js';
 import {addResident,removeResident} from './roster.js';
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const hobbies=[['nature_walk','Nature walks'],['birdwatch','Birdwatching'],['stretch','Stretching'],['daydream','Daydreaming']];
@@ -36,7 +37,7 @@ export class ResidentsEditor{
       change('Change a founding resident',definition=>{
         definition.start.residents??=structuredClone(this.presets);
         const person=definition.start.residents.find(p=>p.id===identity);if(!person)return;
-        if(field==='appearance'){person.appearance={preset:value,version:1};}
+        if(field==='appearance'||field.startsWith('appearance:')){person.appearance=changeAppearanceField(person.appearance,field,value);}
         else if(field==='background'){const background=this.experience.backgrounds.find(b=>b.key===value);person.experience={background:value,levels:structuredClone(background.levels)};}
         else if(field.startsWith('skill:')){person.experience??={background:'newcomer',levels:{}};person.experience.levels[field.slice(6)]=Number(value);}
         else if(field.startsWith('work:')){person.work_preferences??={};person.work_preferences[field.slice(5)]=value;}
@@ -80,7 +81,7 @@ export class ResidentsEditor{
       const text=(field,label,max,multiline=false)=>`<label class="creator-field">${label}${multiline?`<textarea rows="3" maxlength="${max}" data-resident-field="${field}">${escape(person[field])}</textarea>`:`<input type="text" maxlength="${max}" data-resident-field="${field}" value="${escape(person[field])}">`}</label>`;
       const hobby=(field,label)=>`<label class="creator-field">${label}<select data-resident-field="${field}">${hobbies.map(([key,name])=>`<option value="${key}" ${p[field]===key?'selected':''}>${name}</option>`).join('')}</select></label>`;
       const identityControls=text('name','Name',80)+text('pronouns','Pronouns · optional',40)+text('biography','Their story · optional',600,true);
-      const appearanceControls=`<label class="creator-field">Appearance<select data-resident-field="appearance">${this.appearances.map(look=>`<option value="${look.key}" ${(person.appearance?.preset??person.preset)===look.key?'selected':''}>${escape(look.name)}</option>`).join('')}</select></label><p>Choose a complete character look. Their skills, personality and routines stay the same.</p>`;
+      const appearanceControls=appearanceFields(person.appearance??{preset:person.preset,version:person.preset_version},this.appearances);
       const routineControls=`<label class="creator-field">Usual bedtime<input type="time" min="20:00" max="23:30" step="900" data-resident-field="preferred_bedtime" value="${time(p.preferred_bedtime)}"></label>${personalityControls}${hobby('favourite_hobby','Favourite pastime')}${hobby('alternate_hobby','Another pastime')}${occupationControls}`;
       const opening=openingFields(person,definition,this.catalog,report);
       this.forms.set(person.id,{Arrival:opening,Identity:identityControls,Appearance:appearanceControls,Personality:routineControls,Experience:experienceControls});

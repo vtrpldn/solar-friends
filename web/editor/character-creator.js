@@ -28,7 +28,7 @@ export class CharacterCreator{
   this.motion.addEventListener('change',()=>this.restart());document.addEventListener('visibilitychange',()=>this.restart());
  }
  person(){return this.source().find(p=>p.id===this.id);}
- open(id){this.id=id;this.baseline=structuredClone(this.person());this.locked={Identity:true,Appearance:false,Personality:false,Experience:false};this.page='Identity';this.signature=null;this.look=null;this.lookVersion=null;this.dialog.showModal();this.update();this.dialog.scrollTop=0;this.dialog.querySelector('[data-character-tab="Identity"]').focus();}
+ open(id){this.id=id;this.baseline=structuredClone(this.person());this.locked={Identity:true,Appearance:false,Personality:false,Experience:false};this.page='Identity';this.signature=null;this.look=null;this.appearanceKey=null;this.dialog.showModal();this.update();this.dialog.scrollTop=0;this.dialog.querySelector('[data-character-tab="Identity"]').focus();}
  update(){
   if(!this.dialog.open)return;const state=this.history();this.dialog.querySelector('[data-character-undo]').disabled=!state.undo;this.dialog.querySelector('[data-character-redo]').disabled=!state.redo;const person=this.person();if(!person){this.dialog.close();return;}
   const signature=JSON.stringify([person,this.groups().get(person.id)?.Arrival]);
@@ -41,15 +41,14 @@ export class CharacterCreator{
    if(startFocus)this.fieldHost.querySelector(`[data-resident-start="${startFocus}"]`)?.focus({preventScroll:true});
    if(focused)this.fieldHost.querySelector(`[data-resident-field="${focused}"]`)?.focus({preventScroll:true});
   }
-  const look=person.appearance?.preset??person.preset;
-  const version=person.appearance?.version??person.preset_version;
-  if(look!==this.look||version!==this.lookVersion){this.look=look;this.lookVersion=version;void this.load(look,version);}else this.restart();
+  const appearance=person.appearance??{preset:person.preset,version:person.preset_version},key=JSON.stringify(appearance);
+  if(key!==this.appearanceKey){this.appearanceKey=key;this.appearance=appearance;this.look=appearance.preset??'custom';void this.load(appearance);}else this.restart();
  }
  select(name){this.page=name;this.dialog.querySelector('.character-choice-actions').hidden=name==='Arrival';this.dialog.querySelector('[data-character-lock]').checked=this.locked[name];this.dialog.querySelector('[data-character-lock-label]').textContent=`Keep ${name.toLowerCase()} when randomizing`;this.dialog.querySelector('[data-character-random]').disabled=Object.values(this.locked).every(Boolean);this.dialog.querySelector('[data-character-random-note]').textContent=Object.values(this.locked).every(Boolean)?'All categories are locked.':`Randomizing: ${Object.keys(characterCategories).filter(page=>!this.locked[page]).join(', ')}. ${this.locked.Identity?'':'Unlocked identity gets a new name and clears pronouns and biography. '}Randomized routines leave outside shifts off.`;const person=this.person();this.dialog.querySelector('[data-character-reset]').disabled=(characterCategories[name]??[]).every(field=>JSON.stringify(person?.[field])===JSON.stringify(this.baseline?.[field]));for(const tab of this.dialog.querySelectorAll('[role=tab]')){const selected=tab.dataset.characterTab===name;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}for(const panel of this.fieldHost.children)panel.hidden=panel.dataset.characterPage!==name;}
- async load(look,version){
+ async load(appearance){
   const token=++this.token;this.sheets=null;cancelAnimationFrame(this.frame);this.canvas.getContext('2d').clearRect(0,0,320,240);this.portrait.getContext('2d').clearRect(0,0,64,72);this.status('Loading character poses…');
   try{
-   const sheets=await this.art.appearances.prepare({preset:look,version});if(token!==this.token||!this.dialog.open)return;
+   const sheets=await this.art.appearances.prepare(appearance);if(token!==this.token||!this.dialog.open)return;
    this.sheets=sheets;this.status('Preview only · village time and resident needs stay unchanged.');this.restart();
   }catch{if(token===this.token)this.status('These character poses could not load. Keep your draft and try again.');}
  }
@@ -64,8 +63,8 @@ export class CharacterCreator{
   paintContactShadow(ctx,x,y,width*.24,width*.065,.18);ctx.save();ctx.filter=unlitFilter(night);
   drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds),facing,breath:1},x,y,width);ctx.restore();
   if(scale){const frame=this.art.appearances.portraitFrame({preset:'bento',version:1});ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
-  paintResidentPortrait(this.portrait,{preset:this.look,version:this.lookVersion},this.art.appearances,{filter:unlitFilter(night)});
-  Object.assign(this.canvas.dataset,{look:this.look,pose:mode,frame:String(sampleResidentClip(mode,seconds)[0].frame),scale:String(scale),night:String(night)});
+  paintResidentPortrait(this.portrait,this.appearance,this.art.appearances,{filter:unlitFilter(night)});
+  Object.assign(this.canvas.dataset,{look:this.look,appearance:JSON.stringify(this.appearance),pose:mode,frame:String(sampleResidentClip(mode,seconds)[0].frame),scale:String(scale),night:String(night)});
   if(!this.motion.matches&&residentClips[mode].fps>0)this.frame=requestAnimationFrame(t=>this.draw(t));
  }
 }
