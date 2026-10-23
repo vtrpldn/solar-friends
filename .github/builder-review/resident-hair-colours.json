@@ -11,7 +11,11 @@
     "creatorPresetImportExportUndoReloadPlaytest": true,
     "normalSandboxSaveColdContinue": true,
     "clippyAllTargets": "passed",
-    "releaseWasm": "passed"
+    "releaseWasm": "passed",
+    "nativeFullSuite": {
+      "passed": 775,
+      "failed": 0
+    }
   },
   "commands": [
     "node scripts/verify-hair-colours.mjs",
@@ -21,7 +25,8 @@
     "node scripts/verify-part-creator.mjs",
     "cargo test resident_appearance --lib",
     "cargo clippy --all-targets -- -D warnings",
-    "bash scripts/build.sh"
+    "bash scripts/build.sh",
+    "cargo test --lib"
   ],
   "sha256": {
     "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
