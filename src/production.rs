@@ -258,11 +258,9 @@ pub fn power_blocker(v: &Village, id: Id) -> Option<&'static str> {
     }
 }
 fn store(v: &Village, id: Id) -> Option<&logistics::Store> {
-    v.logistics
-        .as_ref()?
-        .stores
-        .iter()
-        .find(|p| p.owner == owner(v, id))
+    let stores = &v.logistics.as_ref()?.stores;
+    let owner = owner(v, id);
+    stores.iter().find(|p| p.owner == owner)
 }
 fn pending(v: &Village, id: Id) -> Option<&Batch> {
     v.production
