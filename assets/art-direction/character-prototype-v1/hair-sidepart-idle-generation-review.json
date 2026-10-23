@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "status": "Partial idle hairstyle review; not a playable appearance",
+  "method": "Five selected cap shapes from six built-in hair-only edits, including one rejected stretch trial. Existing side-part base pose 8 is explicitly reused across nine independently registered idle poses; source reuse is authored data, never runtime fallback or fitting.",
+  "generations": [
+    {
+      "pose": {
+        "sheet": "idle",
+        "index": 5
+      },
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 in place. It is the correctly registered hair-only cap for Solar Friends idle pose 5, on a mostly empty 1254×1254 transparent canvas. KEEP its exact small location, scale, overall footprint and ear opening. Do not move, enlarge or recenter the cap; preserve its head angle and all surrounding empty alpha.\nChange ONLY the curly texture into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle/paint identity ONLY: do NOT copy its size or canvas coordinates. Replace round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown and close sides. Preserve image 1's compact silhouette, while matching image 2's warm chestnut colour and restrained upper-left brush shading. \nReturn the edited HAIR-ONLY 1254×1254 true-transparent PNG. No face, skin, ear, eyebrow, opaque head backing, hand, body, stool, tool, ground, shadow, text, label, guide or background. Do not resize, warp or stretch an existing image. Repaint at the unchanged image-1 position. Only the small registered cap is painted; all other canvas pixels stay transparent.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png",
+          "role": "Correctly registered hair-only cap geometry; edit location and footprint stay fixed",
+          "sha256": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part hairstyle and painted identity only",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d8df6ff3-18db-4975-a357-370f2d964bf9.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-idle-5-candidate-v1.png",
+      "verdict": "Rejected: cap shifted right and only 96.35 percent of alpha>=32 pixels meet unchanged pose bounds; excluded from integration",
+      "candidateSha256": "47564c61a75576f0fa4185db289177ce60d7dc968343da5d7a885d36228962af"
+    },
+    {
+      "pose": {
+        "sheet": "idle",
+        "index": 6
+      },
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 in place. It is the correctly registered hair-only cap for Solar Friends idle pose 6, on a mostly empty 1254×1254 transparent canvas. KEEP its exact small location, scale, overall footprint and ear opening. Do not move, enlarge or recenter the cap; preserve its head angle and all surrounding empty alpha.\nChange ONLY the curly texture into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle/paint identity ONLY: do NOT copy its size or canvas coordinates. Replace round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown and close sides. Preserve image 1's compact silhouette, while matching image 2's warm chestnut colour and restrained upper-left brush shading. The original body compositor will restore a foreground hand over this cap; do not add any hand or skin pixels.\nReturn the edited HAIR-ONLY 1254×1254 true-transparent PNG. No face, skin, ear, eyebrow, opaque head backing, hand, body, stool, tool, ground, shadow, text, label, guide or background. Do not resize, warp or stretch an existing image. Repaint at the unchanged image-1 position. Only the small registered cap is painted; all other canvas pixels stay transparent.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v2.png",
+          "role": "Correctly registered hair-only cap geometry; edit location and footprint stay fixed",
+          "sha256": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part hairstyle and painted identity only",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-f13bb174-953a-4e39-b782-8c55b0d0c31a.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-idle-6-candidate-v1.png",
+      "verdict": "Retained idle-gesture review draft; source bounds and composition pass, final production style/temporal approval separate",
+      "candidateSha256": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e"
+    },
+    {
+      "pose": {
+        "sheet": "idle",
+        "index": 9
+      },
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 in place. It is the correctly registered hair-only cap for Solar Friends idle pose 9, on a mostly empty 1254×1254 transparent canvas. KEEP its exact small location, scale, overall footprint and ear opening. Do not move, enlarge or recenter the cap; preserve its head angle and all surrounding empty alpha.\nChange ONLY the curly texture into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle/paint identity ONLY: do NOT copy its size or canvas coordinates. Replace round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown and close sides. Preserve image 1's compact silhouette, while matching image 2's warm chestnut colour and restrained upper-left brush shading. \nReturn the edited HAIR-ONLY 1254×1254 true-transparent PNG. No face, skin, ear, eyebrow, opaque head backing, hand, body, stool, tool, ground, shadow, text, label, guide or background. Do not resize, warp or stretch an existing image. Repaint at the unchanged image-1 position. Only the small registered cap is painted; all other canvas pixels stay transparent.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v4.png",
+          "role": "Correctly registered hair-only cap geometry; edit location and footprint stay fixed",
+          "sha256": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part hairstyle and painted identity only",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2490747f-08a7-4e0c-9115-8deeac76d544.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-idle-9-candidate-v1.png",
+      "verdict": "Retained idle-gesture review draft; source bounds and composition pass, final production style/temporal approval separate",
+      "candidateSha256": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4"
+    },
+    {
+      "pose": {
+        "sheet": "idle",
+        "index": 12
+      },
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 in place. It is the correctly registered hair-only cap for Solar Friends idle pose 12, on a mostly empty 1254×1254 transparent canvas. KEEP its exact small location, scale, overall footprint and ear opening. Do not move, enlarge or recenter the cap; preserve its head angle and all surrounding empty alpha.\nChange ONLY the curly texture into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle/paint identity ONLY: do NOT copy its size or canvas coordinates. Replace round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown and close sides. Preserve image 1's compact silhouette, while matching image 2's warm chestnut colour and restrained upper-left brush shading. \nReturn the edited HAIR-ONLY 1254×1254 true-transparent PNG. No face, skin, ear, eyebrow, opaque head backing, hand, body, stool, tool, ground, shadow, text, label, guide or background. Do not resize, warp or stretch an existing image. Repaint at the unchanged image-1 position. Only the small registered cap is painted; all other canvas pixels stay transparent.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-idle-12-candidate-v1.png",
+          "role": "Correctly registered hair-only cap geometry; edit location and footprint stay fixed",
+          "sha256": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part hairstyle and painted identity only",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ca9b2570-6c8b-4e56-a1f7-ba79dbe76f72.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-idle-12-candidate-v1.png",
+      "verdict": "Retained idle-gesture review draft; source bounds and composition pass, final production style/temporal approval separate",
+      "candidateSha256": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8"
+    },
+    {
+      "pose": {
+        "sheet": "idle",
+        "index": 13
+      },
+      "prompt": "Use case: precise-object-edit.\nEDIT IMAGE 1 in place. It is the correctly registered hair-only cap for Solar Friends idle pose 13, on a mostly empty 1254×1254 transparent canvas. KEEP its exact small location, scale, overall footprint and ear opening. Do not move, enlarge or recenter the cap; preserve its head angle and all surrounding empty alpha.\nChange ONLY the curly texture into the chestnut SIDE-PART hairstyle shown in image 2. Image 2 is hairstyle/paint identity ONLY: do NOT copy its size or canvas coordinates. Replace round curl clusters with two or three broad gently swept painted groups, a subtle side part, low crown and close sides. Preserve image 1's compact silhouette, while matching image 2's warm chestnut colour and restrained upper-left brush shading. \nReturn the edited HAIR-ONLY 1254×1254 true-transparent PNG. No face, skin, ear, eyebrow, opaque head backing, hand, body, stool, tool, ground, shadow, text, label, guide or background. Do not resize, warp or stretch an existing image. Repaint at the unchanged image-1 position. Only the small registered cap is painted; all other canvas pixels stay transparent.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-idle-13-candidate-v1.png",
+          "role": "Correctly registered hair-only cap geometry; edit location and footprint stay fixed",
+          "sha256": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Side-part hairstyle and painted identity only",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2738d56d-42ae-451a-b534-6d536e79ee4e.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-idle-13-candidate-v1.png",
+      "verdict": "Retained idle-gesture review draft; source bounds and composition pass, final production style/temporal approval separate",
+      "candidateSha256": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07"
+    },
+    {
+      "pose": {
+        "sheet": "idle",
+        "index": 5
+      },
+      "prompt": "Use case: precise-object-edit.\nEdit ONLY image 1's small curly cap IN PLACE. Image 1 is already correctly registered to Solar Friends stretch pose 5; its painted cap is approximately x485–787 and y125–350 on the 1254×1254 transparent canvas. KEEP those coordinates and its exact small size. Its crown, ear notch and empty margins must not shift right, grow or recenter.\nRepaint the cap's curls as a low chestnut side-part hairstyle: two or three broad smooth swept groups, subtle side part, close sides, restrained warm upper-left painted highlights, no separate round curl clusters. Image 2 is hairstyle/paint identity ONLY; never use image 2's canvas location or silhouette size. The entire new painted cap must stay inside x480–790 and y120–355, and follow image 1's head tilt/ear opening.\nReturn the 1254×1254 true-transparent hair-only PNG. Keep every other region empty alpha. No skin, ears, face, eyebrows, opaque backing, body, hands, props, shadows, text, guides or background. Do not resize, stretch, warp or move an old cap; paint the straight swept texture at image 1's original location.",
+      "references": [
+        {
+          "path": "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png",
+          "role": "Exact registered cap footprint and location",
+          "sha256": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775"
+        },
+        {
+          "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+          "role": "Hairstyle and painted identity only",
+          "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+        }
+      ],
+      "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1b51e2c0-fe48-41e6-b2a4-36d622bdbbd7.png",
+      "candidate": "web/art/characters/prototype-v1/hair-sidepart-idle-5-candidate-v2.png",
+      "verdict": "Retained idle-gesture review draft; source bounds and composition pass, final production style/temporal approval separate",
+      "candidateSha256": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e"
+    }
+  ],
+  "remaining": "Sixteen daily-activity poses, final art consistency, complete appearance variety, native/player integration and original builder release gates remain.",
+  "explicitReuse": {
+    "file": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+    "idlePoses": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      8,
+      10,
+      11
+    ],
+    "rule": "Each pose has its own body/frame hash, authored bounds and any foreground mask. No missing-pose fallback, fitting, source editing or geometry correction is performed.",
+    "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+  },
+  "registration": "web/art/characters/prototype-v1/hair-sidepart-base-idle-v1-registration.json",
+  "evidence": "assets/art-direction/character-prototype-v1/sidepart-idle-review-v1",
+  "visualFindings": "All sixteen idle poses were inspected in three palettes. Shared caps preserve a clear forehead/eyes and register without independent fitting. Raised stretch and wave hands retain their original foreground pixels; the corrected stretch cap no longer exceeds its authored bounds. The higher stretch and relaxing poses have slightly different crown compression, and final temporal/style approval remains open."
+}

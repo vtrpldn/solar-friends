@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Sixteen partial base-animation hair drafts; 32 poses remain; excluded from complete/player recipes",
+  "status": "Base-pose source review record; side-part now covers 32 base/idle bindings, with 16 daily-activity poses remaining; excluded from complete/player recipes",
   "generations": [
     {
       "pose": {
@@ -632,6 +632,8 @@
     }
   ],
   "visualFindings": "The selected low swept caps cover all sixteen base poses, with forehead/eyes clear in inspected palette boards. Working pose 6 retains the original foreground hands; seated poses share unchanged stools. Five initially displaced caps and two oversized bent-forward attempts were rejected without fitting or relaxing head bounds. Repainting the exact registered hair-only cap location corrected registration; using a full-body target with a different pose as hairstyle reference repeatedly displaced or enlarged some caps. Walk pose 0 is more compact than the other steps; some crown/rear-sweep volume differences remain for final temporal review. Warm broad painted shading and distinct straight/swept groups remain visible in all three palettes.",
-  "remaining": "Paint and review the other 32 idle/daily-activity poses, including their foreground occlusion and equipment. Finish final crown/temporal style review, other body/face/hair/clothing/accessory choices, native/player integration and every original builder release gate.",
-  "selectedRegistration": "web/art/characters/prototype-v1/hair-sidepart-base-v1-registration.json"
+  "remaining": "The hairstyle now has 32 explicit base/idle pose bindings; see the linked idle review. Sixteen daily-activity poses, final style/temporal review, complete appearance variety, native/player integration and all original builder release gates remain.",
+  "selectedRegistration": "web/art/characters/prototype-v1/hair-sidepart-base-v1-registration.json",
+  "currentCombinedRegistration": "web/art/characters/prototype-v1/hair-sidepart-base-idle-v1-registration.json",
+  "idleReview": "assets/art-direction/character-prototype-v1/hair-sidepart-idle-generation-review.json"
 }

@@ -1,0 +1,1075 @@
+{
+  "schema": 2,
+  "status": "Partial base/idle-animation review only; not a playable hairstyle",
+  "sheets": [
+    "base",
+    "idle"
+  ],
+  "clips": [
+    "breathe",
+    "walk",
+    "work",
+    "sit",
+    "sleep",
+    "look",
+    "stretch",
+    "wave",
+    "relax"
+  ],
+  "body": {
+    "normalization": 1,
+    "size": 256,
+    "anchor": 0.95,
+    "sources": {
+      "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+      "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+      "activities": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123"
+    },
+    "frames": {
+      "base": [
+        "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+        "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+        "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+        "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+        "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+        "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+        "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+        "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+        "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+        "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+        "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+        "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+        "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+        "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+        "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+        "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+      ],
+      "idle": [
+        "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+        "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+        "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+        "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+        "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+        "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+        "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+        "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+        "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+        "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+        "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+        "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+        "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+        "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+        "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+        "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936"
+      ],
+      "activities": [
+        "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+        "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+        "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+        "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+        "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+        "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+        "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+        "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+        "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+        "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+        "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+        "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+        "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+        "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+        "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+        "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77"
+      ]
+    }
+  },
+  "poses": {
+    "base": {
+      "0": {
+        "file": "hair-sidepart-base-0-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 0,
+        "size": 1254,
+        "bounds": [
+          602.5078125,
+          68.578125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "d4f879bb5ae00e3ff2de21953f7cc46fe91aed9b83a8c14722cde4eb1fa3a1ba"
+      },
+      "1": {
+        "file": "hair-sidepart-base-1-candidate-v2.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 1,
+        "size": 1254,
+        "bounds": [
+          563.3203125,
+          68.578125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "b58cd58a6ef99fcd8dd46e534dc7916cd57e0f3c2eaea8e4316b59cc1337f9d5"
+      },
+      "2": {
+        "file": "hair-sidepart-base-2-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 2,
+        "size": 1254,
+        "bounds": [
+          592.7109375,
+          68.578125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "58c7017d7598dec094f3387a2a3aa3efbadee6a746a0580f2324603beb0682c5"
+      },
+      "3": {
+        "file": "hair-sidepart-base-3-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 3,
+        "size": 1254,
+        "bounds": [
+          578.015625,
+          68.578125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "453b2f2d92d5a086fce8584044ad3f4522199710107af2995507792f0bf432bc"
+      },
+      "4": {
+        "file": "hair-sidepart-base-4-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 4,
+        "size": 1254,
+        "bounds": [
+          494.7421875,
+          83.2734375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "695348cf1af7bc316f59ce7966b2a807b8e5e3b215012231714a1983b3edf102"
+      },
+      "5": {
+        "file": "hair-sidepart-base-5-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 5,
+        "size": 1254,
+        "bounds": [
+          475.1484375,
+          88.171875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "1cb0a2baff79df1dc3b16577e7163c06f6a1d99b0cc322314b327f3fac56b15f"
+      },
+      "6": {
+        "file": "hair-sidepart-base-6-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 6,
+        "size": 1254,
+        "bounds": [
+          489.84375,
+          97.96875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "ce670a638795fbec27de86c5fe7634139ad94321688a1f4b27f5eff05f93afcd",
+        "foreground": {
+          "schema": 1,
+          "body": {
+            "normalization": 1,
+            "size": 256,
+            "anchor": 0.95,
+            "sources": {
+              "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+              "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+              "activities": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123"
+            },
+            "frames": {
+              "base": [
+                "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+                "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+                "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+                "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+                "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+                "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+                "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+                "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+                "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+                "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+                "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+                "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+                "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+                "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+                "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+                "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+              ],
+              "idle": [
+                "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+                "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+                "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+                "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+                "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+                "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+                "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+                "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+                "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+                "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+                "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+                "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+                "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+                "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+                "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+                "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936"
+              ],
+              "activities": [
+                "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+                "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+                "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+                "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+                "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+                "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+                "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+                "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+                "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+                "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+                "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+                "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+                "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+                "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+                "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+                "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77"
+              ]
+            }
+          },
+          "sheet": "base",
+          "index": 6,
+          "size": 1254,
+          "polygons": [
+            [
+              [
+                430,
+                265
+              ],
+              [
+                466,
+                244
+              ],
+              [
+                505,
+                246
+              ],
+              [
+                538,
+                268
+              ],
+              [
+                563,
+                310
+              ],
+              [
+                600,
+                344
+              ],
+              [
+                672,
+                375
+              ],
+              [
+                748,
+                409
+              ],
+              [
+                778,
+                451
+              ],
+              [
+                773,
+                488
+              ],
+              [
+                745,
+                520
+              ],
+              [
+                710,
+                538
+              ],
+              [
+                667,
+                536
+              ],
+              [
+                626,
+                519
+              ],
+              [
+                585,
+                485
+              ],
+              [
+                544,
+                451
+              ],
+              [
+                505,
+                418
+              ],
+              [
+                475,
+                394
+              ],
+              [
+                452,
+                367
+              ],
+              [
+                434,
+                330
+              ],
+              [
+                422,
+                293
+              ]
+            ]
+          ]
+        }
+      },
+      "7": {
+        "file": "hair-sidepart-base-7-candidate-v3.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 7,
+        "size": 1254,
+        "bounds": [
+          607.40625,
+          269.4140625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "bc8a038f244c38c4ae28da13d9437fc17d2a225e54228dcb1146392d98017f0a"
+      },
+      "8": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 8,
+        "size": 1254,
+        "bounds": [
+          489.84375,
+          39.1875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "9": {
+        "file": "hair-sidepart-base-9-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 9,
+        "size": 1254,
+        "bounds": [
+          484.9453125,
+          53.8828125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c"
+      },
+      "10": {
+        "file": "hair-sidepart-base-10-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 10,
+        "size": 1254,
+        "bounds": [
+          480.046875,
+          44.0859375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8"
+      },
+      "11": {
+        "file": "hair-sidepart-base-11-candidate-v1.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 11,
+        "size": 1254,
+        "bounds": [
+          484.9453125,
+          39.1875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00"
+      },
+      "12": {
+        "file": "hair-sidepart-base-12-candidate-v2.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 12,
+        "size": 1254,
+        "bounds": [
+          342.890625,
+          156.75,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "e13d5a9d3679a9bb9a6cac71a6deb12f32a7b1fb2635d3ef3d02ccaa65106766",
+        "activity": {
+          "kind": "stool",
+          "file": "hair-seat-base-12-candidate-v1.png",
+          "size": 1254,
+          "sha256": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854",
+          "sourceRect": [
+            0,
+            600,
+            1254,
+            654
+          ],
+          "bounds": [
+            240,
+            760,
+            600,
+            400
+          ]
+        }
+      },
+      "13": {
+        "file": "hair-sidepart-base-13-candidate-v2.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 13,
+        "size": 1254,
+        "bounds": [
+          475.1484375,
+          230.2265625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "d083b4edee167a11a1eb7dd70ee288a70b7439fbf0281c2267a3d0d5ebddf465",
+        "activity": {
+          "kind": "stool",
+          "file": "hair-seat-base-13-candidate-v1.png",
+          "size": 1254,
+          "sha256": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec",
+          "sourceRect": [
+            0,
+            600,
+            1254,
+            654
+          ],
+          "bounds": [
+            240,
+            760,
+            600,
+            400
+          ]
+        }
+      },
+      "14": {
+        "file": "hair-sidepart-base-14-candidate-v2.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 14,
+        "size": 1254,
+        "bounds": [
+          367.3828125,
+          176.34375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "f0a8e1ef723684d84bb992a8624960da2dfdb7c457917079543cbafbf10f815f",
+        "activity": {
+          "kind": "stool",
+          "file": "hair-seat-base-14-candidate-v1.png",
+          "size": 1254,
+          "sha256": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4",
+          "sourceRect": [
+            0,
+            600,
+            1254,
+            654
+          ],
+          "bounds": [
+            240,
+            760,
+            600,
+            400
+          ]
+        }
+      },
+      "15": {
+        "file": "hair-sidepart-base-15-candidate-v2.png",
+        "schema": 1,
+        "sheet": "base",
+        "index": 15,
+        "size": 1254,
+        "bounds": [
+          372.28125,
+          181.2421875,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "13df9efb3803a90f053ab248d31256cfe0f90fd88b43078c3c1d4bd432af3d2f",
+        "activity": {
+          "kind": "stool",
+          "file": "hair-seat-base-15-candidate-v1.png",
+          "size": 1254,
+          "sha256": "39fbf81324795e5818bb5ca24f3b62fb46044ed126597d503130ef9618bbc148",
+          "sourceRect": [
+            0,
+            600,
+            1254,
+            654
+          ],
+          "bounds": [
+            240,
+            760,
+            600,
+            400
+          ]
+        }
+      }
+    },
+    "idle": {
+      "0": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 0,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          53.8828125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "1": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 1,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          48.984375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "2": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 2,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          53.8828125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "3": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 3,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          53.8828125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "4": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 4,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          73.4765625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "5": {
+        "file": "hair-sidepart-idle-5-candidate-v2.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 5,
+        "size": 1254,
+        "bounds": [
+          465.3515625,
+          93.0703125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e"
+      },
+      "6": {
+        "file": "hair-sidepart-idle-6-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 6,
+        "size": 1254,
+        "bounds": [
+          465.3515625,
+          127.359375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e",
+        "foreground": {
+          "schema": 1,
+          "body": {
+            "normalization": 1,
+            "size": 256,
+            "anchor": 0.95,
+            "sources": {
+              "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+              "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+              "activities": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123"
+            },
+            "frames": {
+              "base": [
+                "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+                "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+                "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+                "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+                "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+                "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+                "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+                "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+                "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+                "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+                "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+                "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+                "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+                "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+                "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+                "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+              ],
+              "idle": [
+                "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+                "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+                "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+                "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+                "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+                "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+                "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+                "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+                "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+                "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+                "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+                "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+                "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+                "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+                "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+                "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936"
+              ],
+              "activities": [
+                "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+                "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+                "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+                "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+                "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+                "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+                "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+                "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+                "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+                "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+                "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+                "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+                "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+                "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+                "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+                "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77"
+              ]
+            }
+          },
+          "sheet": "idle",
+          "index": 6,
+          "size": 1254,
+          "polygons": [
+            [
+              [
+                350,
+                75
+              ],
+              [
+                510,
+                75
+              ],
+              [
+                525,
+                145
+              ],
+              [
+                507,
+                205
+              ],
+              [
+                500,
+                230
+              ],
+              [
+                510,
+                310
+              ],
+              [
+                515,
+                365
+              ],
+              [
+                539,
+                430
+              ],
+              [
+                558,
+                490
+              ],
+              [
+                555,
+                559
+              ],
+              [
+                529,
+                585
+              ],
+              [
+                493,
+                577
+              ],
+              [
+                461,
+                535
+              ],
+              [
+                423,
+                465
+              ],
+              [
+                390,
+                380
+              ],
+              [
+                369,
+                305
+              ],
+              [
+                365,
+                245
+              ],
+              [
+                350,
+                195
+              ]
+            ]
+          ]
+        }
+      },
+      "7": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 7,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          73.4765625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "8": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 8,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          83.2734375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "9": {
+        "file": "hair-sidepart-idle-9-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 9,
+        "size": 1254,
+        "bounds": [
+          519.234375,
+          73.4765625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4"
+      },
+      "10": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 10,
+        "size": 1254,
+        "bounds": [
+          480.046875,
+          73.4765625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+        "foreground": {
+          "schema": 1,
+          "body": {
+            "normalization": 1,
+            "size": 256,
+            "anchor": 0.95,
+            "sources": {
+              "base": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+              "idle": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+              "activities": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123"
+            },
+            "frames": {
+              "base": [
+                "6b75ce4dfe69d50efe28021142c9095b5fada4446af9c43ec5438ff62f3c0b74",
+                "545fac63f1cdaee8ed8ac7036909dc2fef0be6cdfac45061e848c80a640fb4d3",
+                "0188ad5ef5121d7b65a910f941aaf281bf5a6c8937e6b033f527e3fdf706c6ce",
+                "f7c62479f56951d7b1f07856d4891fc5bb22572e27eb7db8ec767ac45363d71d",
+                "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+                "681fbb59fe979d6f0cffb58400ad4d0b62becb46b37888512ba656171accb5be",
+                "6a179440f8f1cfea0569c0b9392a47e84788ecc08fab38cf1ffeb37ea71b6a6b",
+                "912a9cd4831bb213cdd476cade8589ace88f0a82ff3a56e563af4fcee148faa5",
+                "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+                "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+                "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+                "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+                "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+                "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+                "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+                "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a"
+              ],
+              "idle": [
+                "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+                "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+                "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+                "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+                "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+                "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+                "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+                "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+                "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+                "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+                "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+                "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+                "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+                "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+                "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+                "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936"
+              ],
+              "activities": [
+                "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+                "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+                "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+                "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+                "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+                "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+                "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+                "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+                "7b19c47aee1996e680866963a80dcd3f1d539177d77db2c619e1ae25db9046a2",
+                "05c56feabe55504a9f0704d0fabe2df8f32ab9e8e9c2eface20259ebcae22024",
+                "77880b3d367d87b85899d9ade322fe35b1b90c0172a4a8cef1c33becf230dffd",
+                "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+                "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+                "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+                "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+                "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77"
+              ]
+            }
+          },
+          "sheet": "idle",
+          "index": 10,
+          "size": 1254,
+          "polygons": [
+            [
+              [
+                300,
+                135
+              ],
+              [
+                470,
+                130
+              ],
+              [
+                480,
+                215
+              ],
+              [
+                505,
+                215
+              ],
+              [
+                532,
+                244
+              ],
+              [
+                524,
+                268
+              ],
+              [
+                493,
+                295
+              ],
+              [
+                480,
+                324
+              ],
+              [
+                478,
+                380
+              ],
+              [
+                490,
+                442
+              ],
+              [
+                485,
+                500
+              ],
+              [
+                456,
+                526
+              ],
+              [
+                390,
+                524
+              ],
+              [
+                350,
+                500
+              ],
+              [
+                330,
+                465
+              ],
+              [
+                325,
+                412
+              ],
+              [
+                330,
+                360
+              ],
+              [
+                349,
+                319
+              ],
+              [
+                320,
+                270
+              ],
+              [
+                305,
+                226
+              ]
+            ]
+          ]
+        }
+      },
+      "11": {
+        "file": "hair-sidepart-base-8-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 11,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          78.375,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+      },
+      "12": {
+        "file": "hair-sidepart-idle-12-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 12,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          132.2578125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8"
+      },
+      "13": {
+        "file": "hair-sidepart-idle-13-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 13,
+        "size": 1254,
+        "bounds": [
+          475.1484375,
+          137.15625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07"
+      },
+      "14": {
+        "file": "hair-sidepart-idle-13-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 14,
+        "size": 1254,
+        "bounds": [
+          484.9453125,
+          137.15625,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07"
+      },
+      "15": {
+        "file": "hair-sidepart-idle-12-candidate-v1.png",
+        "schema": 1,
+        "sheet": "idle",
+        "index": 15,
+        "size": 1254,
+        "bounds": [
+          509.4375,
+          132.2578125,
+          333.09375,
+          293.90625
+        ],
+        "partSha256": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8"
+      }
+    }
+  }
+}
