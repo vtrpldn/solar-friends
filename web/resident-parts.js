@@ -46,7 +46,7 @@ export function createResidentPartLibrary(){
  const cache=createAppearanceCache({maxEntries:16,maxConcurrent:2,maxQueued:24,isPinned:key=>pinned.has(key),compose:async recipe=>{
   const [base,caps,equipment]=await Promise.all([body(),hair(recipe.hair),tools()]),painted=base.materials.provider(recipe.materials),frames=new Map(),returns=new Map();
   for(const sheet of sheets)for(let index=0;index<16;index++){
-   const key=sheet+':'+index,cap=caps.get(key),args={body:base.frames[sheet][index],binding:base.binding,appearanceBody:painted.frameForPose(sheet,index)},appearance=await registeredHairFrame({...args,...cap});
+   const key=sheet+':'+index,cap=caps.get(key),args={body:base.frames[sheet][index],binding:base.binding,appearanceBody:painted.frameForPose(sheet,index)},appearance=await registeredHairFrame({...args,...cap,hairColour:recipe.hairColour??'chestnut'});
    let frame=cap.activity?composeActivityUnderlay(appearance,cap.activity):appearance;
    if(sheet==='activities'){
     const {registration,equipment:tool}=equipment[index],options={...args,appearanceFrame:appearance,equipment:tool,registration,sheet,index};frame=await registeredEquipmentFrame(options);

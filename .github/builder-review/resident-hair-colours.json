@@ -1,0 +1,36 @@
+{
+  "why": "Expose independent hair colour in playable and portable custom residents while preserving registered artwork and identity.",
+  "scope": "Four colours, two existing hairstyles, one existing body/outfit; broader appearance and release gates remain open.",
+  "checks": {
+    "allColourStylePoses": 384,
+    "feedingReturns": 16,
+    "unchangedReviewedDefaultPoses": 288,
+    "unchangedDefaultReturns": 12,
+    "nativeRecipeCombinations": 576,
+    "catalogAndRandomization": true,
+    "creatorPresetImportExportUndoReloadPlaytest": true,
+    "normalSandboxSaveColdContinue": true,
+    "clippyAllTargets": "passed",
+    "releaseWasm": "passed"
+  },
+  "commands": [
+    "node scripts/verify-hair-colours.mjs",
+    "node scripts/verify-hair-colour-frames.mjs",
+    "node scripts/verify-resident-parts.mjs",
+    "node scripts/verify-part-mode-save.mjs",
+    "node scripts/verify-part-creator.mjs",
+    "cargo test resident_appearance --lib",
+    "cargo clippy --all-targets -- -D warnings",
+    "bash scripts/build.sh"
+  ],
+  "sha256": {
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-hair.js": "58145cbe4204e2edadcfeee82381e1e142ff75dbe08651797e1460aaa5000b8d",
+    "web/resident-part-recipe.js": "1041d473b6080f643c7c97c19f41fc90e2e5c22870065fe3250d3ada1f9bbfd0",
+    "web/resident-parts.js": "0b3f379753aaa8c2dbbcc2e0c46e920950ed3b7efdd13d809d5ac9b257c8cec1",
+    "web/resident-appearance-fields.js": "4331056b2f9ce6dc776b44df7dceb51dae6565645868153f27a7be2f5b439129",
+    "web/editor/character-choices.js": "d5a89e9b25286cf7ecc0b82c56c6674d891f2190e933241ca42500f68f838bdb",
+    "src/resident_appearance/parts.rs": "5444c53b0be30a0adc5c858271050ef7e988b1215c9bcb56c646f68a70ce8236",
+    "web/pkg/solar_friends_bg.wasm": "2e46ece94581ef0bef8f54a2ecb2c5769687ff28fb6187df3714e03ee46373b5"
+  }
+}

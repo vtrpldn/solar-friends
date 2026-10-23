@@ -10,6 +10,21 @@ macro_rules! part_keys {
 part_keys!(PartAssets { V1 => "resident-parts-v1" });
 part_keys!(BodyPart { Neutral => "neutral-v1" });
 part_keys!(HairPart { Curls => "short-curls-v1", SidePart => "side-part-v1" });
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum HairColour {
+    #[default]
+    Chestnut,
+    Espresso,
+    Black,
+    Silver,
+}
+impl HairColour {
+    pub const KEYS: &'static [&'static str] = &["chestnut", "espresso", "black", "silver"];
+    pub fn is_chestnut(&self) -> bool {
+        *self == Self::Chestnut
+    }
+}
 part_keys!(SkinPalette { Warm => "warm", Sunlit => "sunlit", Copper => "copper" });
 part_keys!(TopPalette { Cream => "cream", Teal => "teal", Terracotta => "terracotta", Indigo => "indigo" });
 part_keys!(BottomPalette { Cream => "cream", Sage => "sage", Umber => "umber" });
@@ -30,6 +45,12 @@ pub struct PartsLook {
     pub asset_version: PartAssets,
     pub body: BodyPart,
     pub hair: HairPart,
+    #[serde(
+        default,
+        rename = "hairColour",
+        skip_serializing_if = "HairColour::is_chestnut"
+    )]
+    pub hair_colour: HairColour,
     pub materials: PartMaterials,
 }
 impl PartsLook {
@@ -38,7 +59,7 @@ impl PartsLook {
     }
 }
 pub fn parts_catalog() -> serde_json::Value {
-    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"hairstyles":HairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
+    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
 }
 
 #[cfg(test)]
@@ -50,24 +71,29 @@ mod tests {
     #[test]
     fn all_bundled_combinations_round_trip_and_unknown_parts_fail() {
         let mut count = 0;
-        for hair in HairPart::KEYS {
-            for skin in SkinPalette::KEYS {
-                for shirt in TopPalette::KEYS {
-                    for shorts in BottomPalette::KEYS {
-                        for shoes in ShoePalette::KEYS {
-                            let mut value = recipe(hair);
-                            value["materials"] = serde_json::json!({"skin":skin,"shirt":shirt,"shorts":shorts,"shoes":shoes});
-                            let look: super::super::Look =
-                                serde_json::from_value(value.clone()).unwrap();
-                            assert!(look.valid());
-                            assert_eq!(serde_json::to_value(look).unwrap(), value);
-                            count += 1;
+        for colour in HairColour::KEYS {
+            for hair in HairPart::KEYS {
+                for skin in SkinPalette::KEYS {
+                    for shirt in TopPalette::KEYS {
+                        for shorts in BottomPalette::KEYS {
+                            for shoes in ShoePalette::KEYS {
+                                let mut value = recipe(hair);
+                                if *colour != "chestnut" {
+                                    value["hairColour"] = (*colour).into();
+                                }
+                                value["materials"] = serde_json::json!({"skin":skin,"shirt":shirt,"shorts":shorts,"shoes":shoes});
+                                let look: super::super::Look =
+                                    serde_json::from_value(value.clone()).unwrap();
+                                assert!(look.valid());
+                                assert_eq!(serde_json::to_value(look).unwrap(), value);
+                                count += 1;
+                            }
                         }
                     }
                 }
             }
         }
-        assert_eq!(count, 144);
+        assert_eq!(count, 576);
         let mut bad = recipe("side-part-v1");
         bad["preset"] = "nina".into();
         assert!(serde_json::from_value::<super::super::Look>(bad).is_err());
@@ -75,6 +101,7 @@ mod tests {
             ("assetVersion", serde_json::json!("future")),
             ("body", serde_json::json!("stretched")),
             ("hair", serde_json::json!("unknown")),
+            ("hairColour", serde_json::json!("neon")),
             ("hat", serde_json::json!("straw")),
         ] {
             let mut bad = recipe("side-part-v1");
@@ -121,6 +148,8 @@ mod tests {
         people.truncate(2);
         people[0]["appearance"] = recipe("side-part-v1");
         people[1]["appearance"] = recipe("short-curls-v1");
+        people[0]["appearance"]["hairColour"] = "black".into();
+        people[1]["appearance"]["hairColour"] = "silver".into();
         people.reverse();
         let report: serde_json::Value =
             serde_json::from_str(&g.load_scenario(&d.to_string())).unwrap();
