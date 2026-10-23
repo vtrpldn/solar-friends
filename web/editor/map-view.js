@@ -10,10 +10,11 @@ import {loadCropArt} from '../crop-art.js';
 import {residentLookKeys} from '../resident-look.js';
 import {createResidentAppearanceLibrary} from '../resident-appearance-library.js';
 import {loadRegionalArt} from '../regional-art.js';
-import {terrainRevision} from '../terrain-revision.js';
+import {prepareTerrain} from './prepare-terrain.js';
+import {terrainInputs,completedTerrain,rememberTerrain} from './terrain-cache.js';
 import {strokeCells} from './brush.js';
 import {project,unproject,TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from '../projection.js';
-import {paintTerrain,soilAppearance,MAP_SIZE} from '../terrain.js';
+import {paintTerrain,MAP_SIZE} from '../terrain.js';
 import {allBuildingArt} from '../building-art.js?v=night-1';
 import {footprintCorners,occupies} from '../building-footprints.js';
 import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops,paintContactShadow} from '../world-renderer.js';
@@ -35,9 +36,10 @@ const catalogMaterial=material=>['timber','bamboo','earth','stone','salvage'].in
 const keyFor=b=>b.kind!=='home'?b.kind:b.recipe==='local'?'home-veranda':b.appearance||(b.recipe==='adobe'?'adobe-gable':'home');
 
 export class EditorMap {
-  constructor(canvas,art,{action,viewChanged,hover,preview=false,onArtworkReady=()=>{}}){
+  constructor(canvas,art,{action,viewChanged,hover,preview=false,onArtworkReady=()=>{},onTerrainReady=()=>{}}){
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.art=art;
     this.action=action;this.viewChanged=viewChanged;this.hover=hover;this.onArtworkReady=onArtworkReady;
+    this.onTerrainReady=onTerrainReady;
     this.brushSize=3;
     this.view={center:[32,32],zoom:1.3,selected:null,selection:[],tool:'select',grid:true};
     this.preview=preview;
@@ -53,12 +55,42 @@ export class EditorMap {
   }
   set(document,snapshot,view,{paint=true}={}){
     this.document=document;this.snapshot=snapshot;
+    this.landPaint=terrainInputs(document,snapshot);
+    if(this.terrainTask&&this.terrainTask.key!==this.landPaint.key){this.terrainTask.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.terrainError=null;}
     const appearances=snapshot.residents.map(p=>p.appearance);if(!this.preview)this.art.appearances.setActive(appearances);
     const revision=this.artRevision=(this.artRevision??0)+1;this.artLoading=appearances.some(a=>!this.art.appearances.isReady(a));this.artError=null;
-    this.canvas.setAttribute('aria-busy',String(this.artLoading));this.canvas.style.pointerEvents=this.artLoading?'none':'';
-    if(this.artLoading)Promise.all(appearances.filter(a=>!this.art.appearances.isReady(a)).map(a=>this.art.appearances.prepare(a))).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.canvas.setAttribute('aria-busy','false');this.canvas.style.pointerEvents='';this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.render();}});
+    this.updateBusy();
+    if(this.artLoading)Promise.all(appearances.filter(a=>!this.art.appearances.isReady(a)).map(a=>this.art.appearances.prepare(a))).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.updateBusy();this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.render();}});
     if(view)this.view={...this.view,...view,center:[...view.center]};
     if(paint||view||this.artLoading)this.render();
+  }
+  updateBusy(){this.canvas.setAttribute('aria-busy',String(!!(this.artLoading||this.terrainLoading)));this.canvas.setAttribute('aria-description',this.terrainError??(this.terrainLoading?'Updating landscape. You can keep editing.':''));this.canvas.style.pointerEvents=this.artLoading?'none':'';}
+  groundFor(key,request){
+    if(this.groundKey===key){
+      // Undo may return to the displayed land while a newer paint is pending.
+      if(this.terrainTask){this.terrainTask.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.terrainError=null;this.updateBusy();}
+      return this.ground;
+    }
+    const cached=completedTerrain(this.art,key);
+    if(cached){this.terrainTask?.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.terrainError=null;this.ground=cached;this.groundKey=key;this.updateBusy();return cached;}
+    if(this.preview||typeof Worker==='undefined'||typeof OffscreenCanvas==='undefined'){
+      this.ground=paintTerrain(this.art.terrain,request.roads,[],request.soil,request.seed,request.map);this.groundKey=key;return this.ground;
+    }
+    if(this.terrainTask?.key===key||this.terrainFailedKey===key)return this.ground;
+    this.terrainTask?.controller.abort();
+    const task={key,controller:new AbortController()};this.terrainTask=task;this.terrainLoading=true;this.terrainError=null;this.terrainFailedKey=null;this.updateBusy();
+    prepareTerrain(request,{signal:task.controller.signal}).then(bitmap=>{
+      try{
+        if(this.terrainTask!==task)return;
+        const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;canvas.getContext('2d').drawImage(bitmap,0,0);
+        this.ground=canvas;this.groundKey=key;rememberTerrain(this.art,key,canvas);
+        this.terrainTask=null;this.terrainLoading=false;this.updateBusy();this.render();this.onTerrainReady();
+      }finally{bitmap.close();}
+    }).catch(error=>{
+      if(this.terrainTask!==task)return;
+      this.terrainTask=null;this.terrainLoading=false;this.terrainFailedKey=key;this.terrainError=error.message;this.updateBusy();this.render();
+    });
+    return this.ground;
   }
   get state(){return structuredClone({...this.view,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
   setTool(tool){this.view.tool=tool;this.stroke=null;this.routeStroke=null;this.drag=null;this.render();this.viewChanged(this.state);}
@@ -145,10 +177,9 @@ export class EditorMap {
     canvas.dataset.origin=JSON.stringify(this.origin);canvas.dataset.scale=this.scale;
     canvas.dataset.center=JSON.stringify(view.center);canvas.dataset.overlayCells=String(this.landOverlay?.length||0);
     c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);
-    const land=this.snapshot.village.land,roads=this.document.start.roads;
-    const soil=soilAppearance(land.soil),key=JSON.stringify([land.seed,roads,soil,this.document.map.river,this.document.map.biome,terrainRevision(this.document.map)]);
-    if(this.groundKey!==key){this.ground=paintTerrain(art.terrain,roads,[],soil,land.seed,this.document.map);this.groundKey=key;}
-    paintWorldGround(c,this.ground,this.origin,this.scale);
+    const land=this.snapshot.village.land;
+    const {key,request}=this.landPaint,ground=this.groundFor(key,request);
+    if(ground)paintWorldGround(c,ground,this.origin,this.scale);
     for(const tile of this.landOverlay||[])this.polygon(footprintCorners('road',tile.x,tile.y),tile.fill,tile.stroke);
     if(view.grid){
       c.strokeStyle='#fff9d34d';c.lineWidth=.7;c.beginPath();
@@ -211,6 +242,7 @@ export class EditorMap {
       const end=this.project(this.pointer.x,this.pointer.y),start=this.drag.point;c.fillStyle='#f4df9a33';c.strokeStyle='#fff3c4';c.lineWidth=2;c.fillRect(start.x,start.y,end.x-start.x,end.y-start.y);c.strokeRect(start.x,start.y,end.x-start.x,end.y-start.y);
     }
     if(this.pointer&&view.tool==='nature'&&this.natureSpecies){c.save();c.globalAlpha=.5;paintWorldTree(c,{x:this.pointer.x,y:this.pointer.y,size:this.natureSize||1,species:this.natureSpecies.art_index},{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});c.restore();}
+    if(this.terrainLoading||this.terrainError){c.save();c.font='bold 13px Trebuchet MS';c.textAlign='left';const message=this.terrainError??'Updating landscape… You can keep editing.',noticeWidth=Math.min(width-24,c.measureText(message).width+20);c.fillStyle='#f5e5ba';c.fillRect(12,52,noticeWidth,32);c.fillStyle='#4f3920';c.fillText(message,22,73,noticeWidth-20);c.restore();}
     this.onRender?.();
     canvas.style.cursor=view.tool==='select'?'grab':view.tool==='pan'?'grab':'crosshair';
   }

@@ -6,6 +6,7 @@ try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  for(const id of ['mata-atlantica','cerrado','caatinga']){
   await page.goto(base+'/editor.html');await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
+  if(!await page.locator('#creator-new-options').evaluate(el=>el.open))await page.locator('#creator-new-options > summary').click();
   await page.locator(`[data-biome="${id}"]`).click();assert.equal(await page.locator(`[data-biome="${id}"]`).getAttribute('aria-pressed'),'true');
   await page.locator('[data-preset=camp]').click();await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled&&document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
   const project=new URL(page.url()).searchParams.get('project');
@@ -21,7 +22,7 @@ try{
    const p=await page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
    await page.mouse.click(p.x,p.y);
   }
-  await page.locator('[data-tool=select]').click();await page.locator('#creator-save').click();await page.screenshot({path:`/private/tmp/solar-biome-${id}-editor.png`});
+  await page.locator('[data-tool=select]').click();await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');await page.screenshot({path:`/private/tmp/solar-biome-${id}-editor.png`});
   await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
   const snapshot=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(snapshot.village.scenario.definition.map.biome.id,id);assert.equal(snapshot.environment.weather.profile.intro_days,0);assert.equal(snapshot.environment.weather.season_days,id==='caatinga'?28:21);
   for(const key of species)assert(snapshot.village.scenario.definition.map.nature.some(p=>p.species===key));

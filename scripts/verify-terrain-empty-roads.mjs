@@ -35,11 +35,12 @@ try{
      for(let run=0;run<3;run++){
       const pair={};
       for(const [name,module] of run%2?[['after',after],['before',before]]:[['before',before],['after',after]]){
-       const original=document.createElement.bind(document);let allocations=0;
+       const original=document.createElement.bind(document),OriginalOffscreen=globalThis.OffscreenCanvas;let allocations=0;
        document.createElement=function(tag,...args){if(tag==='canvas')allocations++;return original(tag,...args);};
+       globalThis.OffscreenCanvas=class extends OriginalOffscreen{constructor(...args){super(...args);allocations++;}};
        let canvas,bytes;const start=performance.now();
        try{canvas=module.paintTerrain(art.terrain,roads,[{x:0,y:10}],[[30,30,.4,.2,.5]],42,map);bytes=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;}
-       finally{document.createElement=original;}
+       finally{document.createElement=original;globalThis.OffscreenCanvas=OriginalOffscreen;}
        const ms=performance.now()-start,hash=await digest(bytes);
        if(name==='after'&&run===0&&roads.length){const unit=4096/69;boardContext.drawImage(canvas,29*unit,29*unit,8*unit,8*unit,cases.length/2*300-150,0,300,300);}
        canvas.width=canvas.height=0;
@@ -62,7 +63,7 @@ try{
       }
       if(changedPixels<unit*unit*2)throw Error('Road coverage unexpectedly sparse');
      }
-     for(const pair of samples){if(pair.before.allocations!==3||pair.after.allocations!==(roads.length?3:2))throw Error('Unexpected scratch allocation count');}
+     for(const pair of samples){if(pair.before.allocations!==3||pair.after.allocations!==2)throw Error('Unexpected scratch allocation count');}
      cases.push({biome,roads:roads.length,beforePixelHash:hashes.before[0],afterPixelHash:hashes.after[0],changedPixels,samples});
     }
    }

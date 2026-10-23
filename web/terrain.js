@@ -77,9 +77,10 @@ function paintRiver(g,map) {
   }
   g.restore();
 }
-function surface() {
+function surface(size=RESOLUTION) {
+  if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(size,size);
   const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = RESOLUTION;
+  canvas.width = canvas.height = size;
   return canvas;
 }
 function groundPoint(x, y) {
@@ -131,10 +132,9 @@ function paintHabitats(g,seed,map){
   }
 
 }
-export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0,map) {
-  const ground = surface();
+export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],seed=0,map,{surface:makeSurface=surface,regional=regionalGround(map)}={}) {
+  const ground = makeSurface(RESOLUTION);
   const g = ground.getContext("2d");
-  const regional=regionalGround(map);
   if(regional?.image)texture=regional.image;
   const row=regional?.image?regional.row:0,rows=regional?.image?2:1;
   paintedTexture(g,texture,0,row,rows,regional?.image?8:32);
@@ -142,28 +142,27 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
   paintHabitats(g,seed,map);
   paintSoil(g,soil);
-  // An empty road mask contributes no pixels. Avoid allocating and painting a
-  // second 4096-square surface for land-only previews and unbuilt properties.
+  // An empty road clip contributes no pixels. Paint directly into the ground
+  // so road cells need no additional 4096-square transparent surface.
   if(roads.length){
-    const paths = surface();
-    const p = paths.getContext("2d");
+    g.save();
     // Clip once to the union of road cells. Repeated source-in tile draws
     // erase previous tiles and can leave the entire road layer transparent.
-    p.beginPath();
+    g.beginPath();
     const unit = RESOLUTION / GROUND_SIZE;
     for (const [x, y] of roads) {
       const [px, py] = groundPoint(x, y);
-      p.rect(px - unit / 2, py - unit / 2, unit, unit);
+      g.rect(px - unit / 2, py - unit / 2, unit, unit);
     }
-    p.clip();
-    paintedTexture(p,texture,1,row,rows,regional?.image?8:32);
-    g.drawImage(paths, 0, 0);
+    g.clip();
+    paintedTexture(g,texture,1,row,rows,regional?.image?8:32);
+    g.restore();
   }
   paintRiver(g,map);
 
   // Irregular meadow edges dissolve into the map surround instead of forming
   // a hard, board-game diamond. The complete buildable area stays opaque.
-  const edge = surface();
+  const edge = makeSurface(RESOLUTION);
   const e = edge.getContext("2d");
   e.scale(RESOLUTION, RESOLUTION);
   e.fillStyle = "white";

@@ -15,7 +15,7 @@ try{
  await page.locator('#creator-biome-target').selectOption('caatinga');await page.locator('#creator-biome-preview').click();
  await page.locator('#creator-biome-suggest').click();assert(await page.locator('#creator-biome-apply').isEnabled());
  await page.locator('#creator-biome-weather').selectOption('keep');await page.locator('#creator-biome-ground').selectOption('defaults');
- await page.locator('#creator-biome-map').scrollIntoViewIfNeeded();await page.screenshot({path:'/private/tmp/solar-biome-change-preview.png'});
+ await page.locator('#creator-biome-map').scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('#creator-biome-map').getAttribute('aria-busy')==='false');await page.screenshot({path:'/private/tmp/solar-biome-change-preview.png'});
  await page.locator('#creator-biome-apply').click();await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
  const changed=await read();assert.equal(changed.map.biome.id,'caatinga');assert.equal(changed.rules.weather.season_days,21);assert.deepEqual(changed.start,original.start);assert.deepEqual(changed.map.river,original.map.river);assert.deepEqual(changed.map.deposits,original.map.deposits);assert.deepEqual(changed.map.nature.map(p=>[p.id,p.x,p.y,p.size]),original.map.nature.map(p=>[p.id,p.x,p.y,p.size]));
  await page.locator('#creator-undo').click();assert.equal(await page.locator('#creator-biome-target').inputValue(),'mata-atlantica');await page.locator('#creator-save').click();assert.deepEqual(await read(),original);

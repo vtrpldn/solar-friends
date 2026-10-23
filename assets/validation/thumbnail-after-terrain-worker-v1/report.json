@@ -1,0 +1,68 @@
+{
+  "samples": [
+    {
+      "label": "first",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "funds-and-title",
+      "exact": true,
+      "terrainRebuilt": false
+    },
+    {
+      "label": "camera",
+      "exact": true,
+      "terrainRebuilt": false
+    },
+    {
+      "label": "road",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "terrain",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "river",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "biome-cerrado",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "biome-caatinga",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "biome-mata-atlantica",
+      "exact": true,
+      "terrainRebuilt": true
+    },
+    {
+      "label": "custom-resident",
+      "exact": true,
+      "terrainRebuilt": false
+    },
+    {
+      "label": "land-only",
+      "exact": true,
+      "terrainRebuilt": false
+    },
+    {
+      "label": "return-to-scenario",
+      "exact": true,
+      "terrainRebuilt": false
+    }
+  ],
+  "oneRendererPerArtLibrary": true,
+  "separateArtLibrary": true,
+  "unchangedNonvisualPixels": true,
+  "visualCameraChange": true
+}
