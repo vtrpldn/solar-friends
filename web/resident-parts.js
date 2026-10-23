@@ -3,7 +3,7 @@ import {preparedFrames} from './sprite-frames.js';
 import {attachmentBinding} from './character-attachments.js';
 import {createBodyMaterialModel} from './character-materials.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from './character-atlas-part.js';
-import {registeredHairFrame} from './character-hair.js';
+import {prepareRegisteredHair} from './character-hair.js';
 import {registeredEquipmentFrame} from './character-equipment.js';
 import {loadEquipmentArt} from './character-equipment-parts.js';
 import {createAppearanceCache} from './appearance-cache.js';
@@ -15,7 +15,7 @@ const toolFiles=Array.from({length:16},(_,i)=>i<4?`cook-equipment-pose-${i}-v${i
 const keyFor=recipe=>JSON.stringify(validateResidentPartRecipe(recipe));
 // Sources are bundled, pose-bound and hash-checked. A recipe cannot name a file.
 export function createResidentPartLibrary(){
- const sources=new Map(),hairSets=new Map();let bodyWork=null,toolWork=null,pinned=new Set();
+ const sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,pinned=new Set();
  const read=async file=>{if(!/^[a-z0-9-]+\.json$/.test(file))throw Error('Choose bundled resident registrations.');const response=await fetch(root+file);if(!response.ok)throw Error('Cannot load resident part registration.');return response.json();};
  const load=file=>{
   if(!/^[a-z0-9-]+\.png$/.test(file))return Promise.reject(Error('Choose bundled resident artwork.'));
@@ -33,9 +33,9 @@ export function createResidentPartLibrary(){
    const poses=new Map();for(const sheet of sheets)for(let index=0;index<16;index++){
     const pose=owner.poses[sheet][index],source=await load(pose.file),part=extractRegisteredAtlasPart({...source,registration:{sha256:pose.partSha256,size:pose.size,bounds:pose.bounds,sourceRect:pose.sourceRect??[0,0,1254,1254]}});
     let activity=null;if(pose.activity){const a=pose.activity;if(sheet!=='base'||index<12||a.kind!=='stool')throw Error('Unsupported resident activity underlay.');activity=extractRegisteredAtlasPart({...await load(a.file),registration:{sha256:a.sha256,size:a.size,bounds:a.bounds,sourceRect:a.sourceRect}});}
-    poses.set(sheet+':'+index,{image:part.frame,sourceHash:source.sourceHash,registration:{...pose,body:owner.body},activity});
+    poses.set(sheet+':'+index,{composer:prepareRegisteredHair({image:part.frame,sourceHash:source.sourceHash,registration:{...pose,body:owner.body}}),activity});
    }
-   return poses;
+   preparedHairCounts.set(style,poses.size);return poses;
   })();hairSets.set(style,work);work.catch(()=>{if(hairSets.get(style)===work)hairSets.delete(style);});}
   return hairSets.get(style);
  };
@@ -46,7 +46,7 @@ export function createResidentPartLibrary(){
  const cache=createAppearanceCache({maxEntries:16,maxConcurrent:2,maxQueued:24,isPinned:key=>pinned.has(key),compose:async recipe=>{
   const [base,caps,equipment]=await Promise.all([body(),hair(recipe.hair),tools()]),painted=base.materials.provider(recipe.materials),frames=new Map(),returns=new Map();
   for(const sheet of sheets)for(let index=0;index<16;index++){
-   const key=sheet+':'+index,cap=caps.get(key),args={body:base.frames[sheet][index],binding:base.binding,appearanceBody:painted.frameForPose(sheet,index)},appearance=await registeredHairFrame({...args,...cap,hairColour:recipe.hairColour??'chestnut'});
+   const key=sheet+':'+index,cap=caps.get(key),args={body:base.frames[sheet][index],binding:base.binding,appearanceBody:painted.frameForPose(sheet,index)},appearance=await cap.composer.compose({...args,hairColour:recipe.hairColour??'chestnut'});
    let frame=cap.activity?composeActivityUnderlay(appearance,cap.activity):appearance;
    if(sheet==='activities'){
     const {registration,equipment:tool}=equipment[index],options={...args,appearanceFrame:appearance,equipment:tool,registration,sheet,index};frame=await registeredEquipmentFrame(options);
@@ -60,6 +60,6 @@ export function createResidentPartLibrary(){
   prepare(recipe){let checked;try{checked=validateResidentPartRecipe(recipe);}catch(error){return Promise.reject(error);}return cache.get(keyFor(checked),checked);},
   provider(recipe){const provider=cache.peek(keyFor(recipe));if(!provider)throw Error('These resident parts are still loading.');return provider;},
   setActive(recipes){if(recipes.length>12)throw Error('Keep at most twelve active resident appearances.');pinned=new Set(recipes.map(keyFor));},
-  cacheInfo:()=>({...cache.info(),maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size}),
+  cacheInfo:()=>({...cache.info(),preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size}),
  });
 }

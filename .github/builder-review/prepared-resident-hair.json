@@ -1,0 +1,370 @@
+{
+  "why": "Avoid re-auditing and resampling the same fixed hair source for every custom appearance while preserving exact artwork, body validation and loading recovery.",
+  "before": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "shared",
+        "loading": {
+          "compileMs": 10.100000023841858,
+          "loadMs": 3949.100000023842,
+          "snapshotBytes": 157156,
+          "uniqueAppearances": 1
+        },
+        "runtime": {
+          "advancedMinutes": 241.1912841796875,
+          "wallSeconds": 5.004199999976158,
+          "frames": 370,
+          "medianGapMs": 16.600000000000364,
+          "p95GapMs": 17.200000000000728,
+          "maxGapMs": 24.700000000000728,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 2.100000023841858,
+              "p95": 3.700000047683716
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.1999999284744263
+            },
+            "paint": {
+              "median": 6.899999976158142,
+              "p95": 7.099999904632568
+            },
+            "total": {
+              "median": 9.5,
+              "p95": 12.200000047683716
+            },
+            "frameInterval": {
+              "median": 16.600000000000364,
+              "p95": 17.200000000000728
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5915999999999999,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 13107200,
+            "decodedSources": 52
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 131
+        }
+      },
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 7.600000023841858,
+          "loadMs": 14485.200000047684,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "advancedMinutes": 241.18695068359375,
+          "wallSeconds": 5.009099999999998,
+          "frames": 372,
+          "medianGapMs": 16.599999999998545,
+          "p95GapMs": 17.099999999998545,
+          "maxGapMs": 18.5,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 2,
+              "p95": 3.700000047683716
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.200000047683716
+            },
+            "paint": {
+              "median": 6.899999976158142,
+              "p95": 7.100000023841858
+            },
+            "total": {
+              "median": 9.200000047683716,
+              "p95": 11.900000095367432
+            },
+            "frameInterval": {
+              "median": 16.599999999998545,
+              "p95": 17.099999999998545
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5915999999999999,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 157286400,
+            "decodedSources": 85
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 13400000
+          },
+          "pauseClickWallMs": 127
+        }
+      }
+    ]
+  },
+  "preparedSequential": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "shared",
+        "loading": {
+          "compileMs": 9.200000047683716,
+          "loadMs": 3056.100000023842,
+          "snapshotBytes": 157156,
+          "uniqueAppearances": 1
+        },
+        "runtime": {
+          "advancedMinutes": 241.19158935546875,
+          "wallSeconds": 5.004200000047684,
+          "frames": 416,
+          "medianGapMs": 9.300000000001091,
+          "p95GapMs": 17.100000000000364,
+          "maxGapMs": 18.5,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 1.600000023841858,
+              "p95": 3.399999976158142
+            },
+            "sample": {
+              "median": 0.20000004768371582,
+              "p95": 0.30000007152557373
+            },
+            "paint": {
+              "median": 6.100000023841858,
+              "p95": 6.600000023841858
+            },
+            "total": {
+              "median": 8,
+              "p95": 10.199999928474426
+            },
+            "frameInterval": {
+              "median": 9,
+              "p95": 17.100000000000364
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5165,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 13107200,
+            "decodedSources": 52
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 16100000
+          },
+          "pauseClickWallMs": 116
+        }
+      },
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 6.900000095367432,
+          "loadMs": 3229.1999999284744,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "advancedMinutes": 241.19183349609375,
+          "wallSeconds": 5.004100000023842,
+          "frames": 415,
+          "medianGapMs": 9.099999999998545,
+          "p95GapMs": 16.900000000001455,
+          "maxGapMs": 18.30000000000291,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 1.7000000476837158,
+              "p95": 3.399999976158142
+            },
+            "sample": {
+              "median": 0.20000004768371582,
+              "p95": 2.100000023841858
+            },
+            "paint": {
+              "median": 6.100000023841858,
+              "p95": 6.599999904632568
+            },
+            "total": {
+              "median": 8.200000047683716,
+              "p95": 10.299999952316284
+            },
+            "frameInterval": {
+              "median": 9.099999999998545,
+              "p95": 17.100000000002183
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5165,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 157286400,
+            "decodedSources": 85
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 16100000
+          },
+          "pauseClickWallMs": 120
+        }
+      }
+    ]
+  },
+  "preparedColdUnique": {
+    "environment": "Headless Chromium, 1440\u00d7900 desktop, 64\u00d764 Sandbox arrival, 12 residents, selected 16\u00d7; five-second sampled running windows after one-second warmup.",
+    "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+    "results": [
+      {
+        "cast": "unique",
+        "loading": {
+          "compileMs": 9.299999952316284,
+          "loadMs": 5737.5,
+          "snapshotBytes": 157528,
+          "uniqueAppearances": 12
+        },
+        "runtime": {
+          "advancedMinutes": 241.59521484375,
+          "wallSeconds": 5.012399999976158,
+          "frames": 385,
+          "medianGapMs": 15.899999999999636,
+          "p95GapMs": 17.700000000000728,
+          "maxGapMs": 26.799999999999272,
+          "meter": {
+            "samples": 240,
+            "simulation": {
+              "median": 1.899999976158142,
+              "p95": 3.600000023841858
+            },
+            "sample": {
+              "median": 0.2999999523162842,
+              "p95": 2.0999999046325684
+            },
+            "paint": {
+              "median": 6.600000023841858,
+              "p95": 7
+            },
+            "total": {
+              "median": 8.799999952316284,
+              "p95": 11.200000047683716
+            },
+            "frameInterval": {
+              "median": 16,
+              "p95": 17.5
+            }
+          },
+          "clock": {
+            "pendingSeconds": 0,
+            "droppedSeconds": 0.5260999999999999,
+            "budgetMs": 8,
+            "maxPendingSeconds": 0.25
+          },
+          "artworkCache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "preparedHairFrames": 96,
+            "preparedHairRgbaBytes": 25165824,
+            "maximumFrames": 800,
+            "rgbaByteUpperBound": 157286400,
+            "decodedSources": 85
+          },
+          "heap": {
+            "used": 10000000,
+            "total": 12700000
+          },
+          "pauseClickWallMs": 123
+        }
+      }
+    ]
+  },
+  "checks": {
+    "reviewedPoses": 288,
+    "reviewedFeedingReturns": 12,
+    "colourPoses": 384,
+    "colourFeedingReturns": 16,
+    "frozenPreOptimizationRgbaFingerprints": 400,
+    "preparedHairRefusalCases": 7,
+    "sourceRegistrationOutputAndTintIsolation": true,
+    "creatorPresetPlaytestCheckpoint": "passed",
+    "normalSandboxSaveContinue": "passed",
+    "ordinaryImportArtworkFailureRetryAndRosterRefresh": "passed"
+  },
+  "commands": [
+    "node scripts/verify-prepared-hair.mjs",
+    "node scripts/verify-resident-parts.mjs",
+    "node scripts/verify-hair-colour-frames.mjs",
+    "node scripts/verify-resident-part-fingerprints.mjs",
+    "node scripts/verify-part-creator.mjs",
+    "node scripts/verify-part-mode-save.mjs",
+    "node scripts/verify-part-import.mjs",
+    "node scripts/benchmark-custom-roster.mjs",
+    "node scripts/benchmark-custom-roster.mjs /tmp/solar-custom-roster-prepared-cold --unique-only"
+  ],
+  "remaining": "Multi-second cold load, full source/canvas/GPU memory accounting, dense worlds and sustained editor/run performance remain open. Frozen fingerprints cover one material combination; the existing reviewed-pose comparison covers three body palettes with default hair.",
+  "sha256": {
+    "web/character-hair.js": "a62976c8a00a0da615e297c56632feefbe0ef90a05ab03a061d19713b425e545",
+    "web/resident-parts.js": "c65bafb9fd3f049311ac3867f701778fe245e396371aec0a1904c870a3ae3bff",
+    "scripts/verify-prepared-hair.mjs": "717b31597d5438945765423bb2a6c54f2f29eb1696e91f83ae9ff663b1d111b9",
+    "scripts/verify-resident-part-fingerprints.mjs": "5f07fd8c1ebad8f46782989c7c23e5b2cffd93c6f6c1ea903fc0a3c5fed428e8",
+    "scripts/benchmark-custom-roster.mjs": "ad4f676ca88262d3d886e6ea0f9dc75d566b3d7bbc4ab3d8e9db9f5d15a05f5d",
+    "scripts/verify-resident-parts.mjs": "6348c30b07907d0763cc4dbfceed5e11dcc607ffd897c180253db45ca14e06e8"
+  }
+}
