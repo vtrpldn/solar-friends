@@ -11,7 +11,9 @@ const game=new Game(),definition=JSON.parse(game.scenario_template('sandbox'));
 definition.map.terrain=JSON.parse(game.terrain_template());game.free();
 const baselinePath=process.argv.find(arg=>arg.startsWith('--baseline-document='))?.slice(20);
 const baselineSource=baselinePath?await readFile(baselinePath):null;
-const server=await serve(0,{handle:baselineSource?(_req,res,path)=>{if(path!=='/editor/document.js')return false;res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'}).end(baselineSource);return true;}:undefined});let browser;
+const baselineEditorPath=process.argv.find(arg=>arg.startsWith('--baseline-editor='))?.slice(18);
+const baselineEditor=baselineEditorPath?await readFile(baselineEditorPath):null;
+const server=await serve(0,{handle:(_req,res,path)=>{const source=path==='/editor/document.js'?baselineSource:path==='/editor/index.js'?baselineEditor:null;if(!source)return false;res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'}).end(source);return true;}});let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/`);
@@ -27,9 +29,16 @@ try{
  const validator=new Game();try{assert.equal(JSON.parse(validator.validate_scenario(JSON.stringify(fixture.definition))).ok,true);}finally{validator.free();}
  await page.addInitScript(()=>{
   window.historySaveProbe=[];
+  window.historySaveWrites=[];
   window.historyProbeReady=Promise.all([import('/editor/document.js').then(({EditorDocument})=>{
    for(const name of ['checkpoint','markSaved']){const original=EditorDocument.prototype[name];EditorDocument.prototype[name]=function(...args){const start=performance.now();try{return original.apply(this,args);}finally{window.historySaveProbe.push({name,ms:performance.now()-start});}};}
-  })]);
+   if(EditorDocument.prototype.checkpointAsync){const original=EditorDocument.prototype.checkpointAsync;EditorDocument.prototype.checkpointAsync=async function(...args){
+    const start=performance.now();
+    if(window.failNextCheckpoint){window.failNextCheckpoint=false;throw Error('Injected checkpoint preparation failure');}
+    if(window.holdNextCheckpoint){window.holdNextCheckpoint=false;let first=true;args=[{yieldControl:async()=>{if(first){first=false;window.checkpointHeld=true;await new Promise(resolve=>window.releaseCheckpoint=resolve);}await new Promise(resolve=>setTimeout(resolve,0));}}];}
+    try{return await original.apply(this,args);}finally{window.historySaveProbe.push({name:'checkpointAsyncElapsed',ms:performance.now()-start});}
+   };}
+  }),import('/content-library.js').then(({ContentLibrary})=>{const original=ContentLibrary.prototype.saveProject;ContentLibrary.prototype.saveProject=async function(...args){const record=await original.apply(this,args);window.historySaveWrites.push({revision:record.checkpoint.revision,funds:record.checkpoint.definition.start.funds});return record;};})]);
  });
  const openStart=Date.now();await page.goto(`http://127.0.0.1:${server.address().port}/editor.html?project=large-history`);
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');
@@ -55,9 +64,31 @@ try{
  assert(!restored.recovered);assert.equal(restored.checkpoint,persisted);assert.deepEqual(errors,[]);
  await page.locator('#creator-undo').click();await page.waitForFunction(value=>document.querySelector('#creator-funds').value===String(value),fixture.definition.start.funds/100);
  await page.locator('#creator-redo').click();assert.equal(await page.locator('#creator-funds').inputValue(),'9001');
+ let concurrentSave=null,preparationFailure=null;
+ if(await page.evaluate(async()=>{const {EditorDocument}=await import('/editor/document.js');return typeof EditorDocument.prototype.checkpointAsync==='function';})){
+  await page.locator('#creator-funds').fill('9002');await page.locator('#creator-funds').dispatchEvent('change');
+  await page.evaluate(()=>{window.historySaveWrites=[];window.holdNextCheckpoint=true;});
+  await page.locator('#creator-save').click();await page.waitForFunction(()=>window.checkpointHeld);
+  await page.locator('#creator-funds').fill('9003');await page.locator('#creator-funds').dispatchEvent('change');
+  await page.evaluate(()=>window.releaseCheckpoint());
+  await page.waitForFunction(()=>window.historySaveWrites.some(w=>w.funds===900200));
+  assert.equal(await page.locator('#creator-funds').inputValue(),'9003');
+  await page.waitForFunction(()=>window.historySaveWrites.some(w=>w.funds===900300)&&document.querySelector('#creator-save-status').textContent==='Saved on this device');
+  concurrentSave=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');const record=await new ContentLibrary().getProject('large-history');return {writes:window.historySaveWrites,current:record.checkpoint.definition.start.funds,previous:record.previous.checkpoint.definition.start.funds};});
+  assert.equal(concurrentSave.current,900300);assert.equal(concurrentSave.previous,900200);
+  assert(concurrentSave.writes.find(w=>w.funds===900300).revision>concurrentSave.writes.find(w=>w.funds===900200).revision);
+  await page.locator('#creator-funds').fill('9004');await page.locator('#creator-funds').dispatchEvent('change');
+  await page.evaluate(()=>{window.failNextCheckpoint=true;});await page.locator('#creator-save').click();
+  await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Could not save · export a copy');
+  assert.equal(await page.locator('#creator-funds').inputValue(),'9004');
+  const preserved=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');return (await new ContentLibrary().getProject('large-history')).checkpoint.definition.start.funds;});assert.equal(preserved,900300);
+  await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');
+  const retried=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');return (await new ContentLibrary().getProject('large-history')).checkpoint.definition.start.funds;});assert.equal(retried,900400);
+  preparationFailure={preservedFunds:preserved,retriedFunds:retried,liveEditPreserved:true};
+ }
  assert.deepEqual(errors,[]);
  await page.screenshot({path:output+'/editor.png'});
  const sources=['web/editor/document.js','web/editor/index.js','web/content-library.js','web/pkg/solar_friends_bg.wasm'];
- const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:await readFile(file)).digest('hex')])))};
+ const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,concurrentSave,preparationFailure,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:file==='web/editor/index.js'&&baselineEditor?baselineEditor:await readFile(file)).digest('hex')])))};
  await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

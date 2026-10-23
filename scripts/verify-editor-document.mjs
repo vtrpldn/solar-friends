@@ -62,5 +62,17 @@ try{
   assert.deepEqual(branch.checkpoint(),beforeFork);assert(JSON.parse(game.validate_scenario(JSON.stringify(fork.value))).ok);
   const damagedFork=structuredClone(beforeFork);damagedFork.history.past[0].after={};
   const safeFork=EditorDocument.fork(damagedFork,'damaged-journal-copy');assert(safeFork.historyRecovered);assert.equal(safeFork.value.title,'Recovered title');assert(!safeFork.canUndo);
+  const asynchronous=new EditorDocument(initial);
+  for(let n=0;n<12;n++)asynchronous.transact('Name '+n,d=>{d.title='Name '+n;});
+  asynchronous.undo();const captured=asynchronous.checkpoint();let yields=0;
+  const prepared=await asynchronous.checkpointAsync({yieldControl:async()=>{
+    if(++yields===1){asynchronous.redo();asynchronous.transact('During save',d=>{d.title='Newer unsaved edit';});}
+  }});
+  assert(yields>=4);assert.deepEqual(prepared,captured,'A yielding checkpoint owns one exact revision, including the captured redo branch');
+  asynchronous.markSaved(prepared);assert(asynchronous.dirty,'Saving an older prepared revision must not acknowledge newer edits');
+  prepared.history.past[0].label='External mutation';assert.equal(asynchronous.checkpoint().history.past[0].label,'Name 0');
+  const beforeFailure=asynchronous.checkpoint();
+  await assert.rejects(asynchronous.checkpointAsync({yieldControl:()=>Promise.reject(Error('Interrupted preparation'))}),/Interrupted preparation/);
+  assert.deepEqual(asynchronous.checkpoint(),beforeFailure,'Failed preparation must preserve the complete live document');
   console.log('PASS: atomic editor transactions, complete-stroke undo/redo, history reopening/recovery, branching, save acknowledgements, stable references, and bounded history.');
 }finally{game.free();}

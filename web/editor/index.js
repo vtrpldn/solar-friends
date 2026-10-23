@@ -82,17 +82,21 @@ function previewMarkup(kind,id){return `<span class="creator-preview" data-previ
 function save(){
   clearTimeout(saveTimer);
   if(!current)return Promise.resolve();
-  const ctx=current,checkpoint=ctx.doc.checkpoint(),view=map.state;
-  if(ctx.thumbnailRevision!==checkpoint.revision){
-    // Save authored data immediately; a finished landscape will schedule its
-    // own preview update. Undefined preserves the previous stored thumbnail.
-    if(map.terrainLoading){ctx.thumbnail=undefined;ctx.thumbnailRevision=null;}
-    else{ctx.thumbnail=report.ok?previewOf(checkpoint.definition,map.snapshot):null;ctx.thumbnailRevision=checkpoint.revision;}
-  }
-  const thumbnail=ctx.thumbnail;cacheRecovery(ctx,checkpoint,view);
-  if(ctx.conflicted)return Promise.reject(new LibraryConflict());
+  const ctx=current,view=map.state,snapshot=map.snapshot,terrainLoading=map.terrainLoading,valid=report.ok;
+  const preparation=ctx.doc.checkpointAsync();
+  // Observe preparation failures even while an earlier durable save is queued.
+  preparation.catch(()=>{});
   if(current===ctx)status('Saving…');
   const operation=saving.catch(()=>{}).then(async()=>{
+    const checkpoint=await preparation;
+    if(ctx.thumbnailRevision!==checkpoint.revision){
+      // Snapshot and terrain readiness belong to the captured revision. Edits
+      // made while preparation yields must not paint a newer world into it.
+      if(terrainLoading){ctx.thumbnail=undefined;ctx.thumbnailRevision=null;}
+      else{ctx.thumbnail=valid?previewOf(checkpoint.definition,snapshot):null;ctx.thumbnailRevision=checkpoint.revision;}
+    }
+    const thumbnail=ctx.thumbnail;cacheRecovery(ctx,checkpoint,view);
+    if(ctx.conflicted)throw new LibraryConflict();
     const record=await library.saveProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution,thumbnail},ctx.storageRevision);
     ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);
     try{

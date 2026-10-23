@@ -112,6 +112,19 @@ export class EditorDocument extends EventTarget{
       history:JSON.parse(JSON.stringify({format:2,past:this.#past,future:this.#future})),
     };
   }
+  async checkpointAsync({yieldControl=()=>new Promise(resolve=>setTimeout(resolve,0))}={}){
+    // Capture before yielding. Transactions replace entries rather than mutate
+    // them, so edits/undo/redo during copying cannot mix checkpoint revisions.
+    const raw=this.#raw,revision=this.#revision,past=[...this.#past],future=[...this.#future];
+    const history={format:2,past:[],future:[]};
+    await yieldControl();
+    let count=0;
+    for(const [name,steps]of [['past',past],['future',future]])for(const step of steps){
+      history[name].push(JSON.parse(JSON.stringify(step)));
+      if(++count%4===0)await yieldControl();
+    }
+    return {schema:1,revision,definition:definition(raw),history};
+  }
   static restore(checkpoint){
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<0)throw Error('This draft checkpoint is not supported.');
     const doc=new EditorDocument(checkpoint.definition);
