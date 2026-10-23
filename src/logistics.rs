@@ -803,47 +803,92 @@ pub(crate) fn approaches(v: &Village, p: &Store, id: usize) -> Option<[f32; 2]> 
     (navigation::clear(v, x, y) && doorway(v, p, [x, y])).then_some([x, y])
 }
 fn doorway(v: &Village, p: &Store, to: [f32; 2]) -> bool {
-    // A blueprint can enclose a walker carrying goods. Its interrupted load
-    // remains inside that plot, reachable through the same bounded departure
-    // geometry as an occupied worksite. It cannot cross another foundation.
     if p.owner == Owner::Ground {
         return navigation::exit_segment(v, [p.x, p.y], to);
     }
-    // River generators are supplied from a land approach. Their connection to
-    // that approach crosses water; the resident's walking route never does.
-    let river_structure = v
+    if ![p.x, p.y, to[0], to[1]].iter().all(|n| n.is_finite()) {
+        return false;
+    }
+    let river_structure = v.buildings.iter().any(|b| b.kind == "hydro" && (p.owner == Owner::Site(b.id) || matches!(p.owner, Owner::Maintenance(id) if maintenance::jobs::job(v,id).and_then(|j|maintenance::jobs::building(v,j.equipment))==Some(b.id))));
+    let steps = ((to[0] - p.x).hypot(to[1] - p.y) / 0.1).ceil().max(1.) as u32;
+    // Keep the original arithmetic and every sampled point. The envelope is
+    // derived from those actual rounded points, not an approximate line box.
+    let points: Vec<_> = (0..=steps)
+        .map(|i| {
+            let t = i as f32 / steps as f32;
+            [p.x + (to[0] - p.x) * t, p.y + (to[1] - p.y) * t]
+        })
+        .collect();
+    if points
+        .iter()
+        .any(|[x, y]| !world::walkable(v, *x, *y) && !river_structure)
+    {
+        return false;
+    }
+    let low = points
+        .iter()
+        .fold([f32::INFINITY; 2], |a, p| [a[0].min(p[0]), a[1].min(p[1])]);
+    let high = points.iter().fold([f32::NEG_INFINITY; 2], |a, p| {
+        [a[0].max(p[0]), a[1].max(p[1])]
+    });
+    let excluded_building = match p.owner {
+        Owner::Site(id) | Owner::Warehouse(id) | Owner::Pantry(id) => Some(id),
+        Owner::Production(id) => production::building(v, id),
+        Owner::Restoration(id) => restoration::job(v, id).and_then(|j| j.building),
+        Owner::Maintenance(id) => maintenance::jobs::job(v, id).and_then(|j| match j.equipment {
+            maintenance::Equipment::Workshop(id) => Some(id),
+            maintenance::Equipment::Battery(id) => v
+                .power
+                .network
+                .nodes
+                .iter()
+                .find(|n| n.id == id)
+                .and_then(|n| match n.owner {
+                    electricity::Owner::Building(id) => Some(id),
+                    _ => None,
+                }),
+            _ => None,
+        }),
+        _ => None,
+    };
+    let excluded_source = match p.owner {
+        Owner::Source(id) => Some(id),
+        Owner::Restoration(id) => restoration::job(v, id).and_then(|j| j.source),
+        _ => None,
+    };
+    let bounds = |size: i32, x: i32, y: i32| {
+        let left = (x - size / 2) as f32 - 0.5;
+        let top = (y - size / 2) as f32 - 0.5;
+        [
+            left - 0.2,
+            left + size as f32 + 0.2,
+            top - 0.2,
+            top + size as f32 + 0.2,
+        ]
+    };
+    let obstacles: Vec<_> = v
         .buildings
         .iter()
-        .any(|b| b.kind == "hydro" && (p.owner == Owner::Site(b.id) || matches!(p.owner, Owner::Maintenance(id) if maintenance::jobs::job(v,id).and_then(|j|maintenance::jobs::building(v,j.equipment))==Some(b.id))));
-    let steps = ((to[0] - p.x).hypot(to[1] - p.y) / 0.1).ceil().max(1.) as u32;
-    (0..=steps).all(|i| {
-        let t = i as f32 / steps as f32;
-        let x = p.x + (to[0] - p.x) * t;
-        let y = p.y + (to[1] - p.y) * t;
-        (world::walkable(v, x, y) || river_structure)
-            && v.buildings
-                .iter()
-                .filter(|b| !matches!(p.owner,Owner::Site(id)|Owner::Warehouse(id)|Owner::Pantry(id) if id==b.id)
-                    && !matches!(p.owner,Owner::Production(id) if production::building(v,id)==Some(b.id))
-                    && !matches!(p.owner,Owner::Maintenance(id) if maintenance::jobs::job(v,id).is_some_and(|j|matches!(j.equipment,maintenance::Equipment::Workshop(k) if k==b.id)||matches!(j.equipment,maintenance::Equipment::Battery(k) if v.power.network.nodes.iter().any(|n|n.id==k&&n.owner==electricity::Owner::Building(b.id)))))
-                    && !matches!(p.owner,Owner::Restoration(id) if restoration::job(v,id).and_then(|j|j.building)==Some(b.id)))
-                .all(|b| spacing::clear_plot(b, x, y))
-            && v.economy
+        .filter(|b| Some(b.id) != excluded_building && !(b.kind == "shed" && b.progress >= 100.))
+        .map(|b| bounds(interactions::footprint_size(&b.kind), b.x, b.y))
+        .chain(
+            v.economy
                 .sources
                 .iter()
                 .enumerate()
-                .filter(|(index, s)| s.active && p.owner != Owner::Source(*index) && !matches!(p.owner,Owner::Restoration(id) if restoration::job(v,id).and_then(|j|j.source)==Some(*index)))
-                .all(|(_, s)| {
-                    let n = resource_sites::size(s.material);
-                    let left = (s.x - n / 2) as f32 - 0.5;
-                    let top = (s.y - n / 2) as f32 - 0.5;
-                    x <= left - 0.2
-                        || x >= left + n as f32 + 0.2
-                        || y <= top - 0.2
-                        || y >= top + n as f32 + 0.2
-                })
+                .filter(|(id, s)| s.active && Some(*id) != excluded_source)
+                .map(|(_, s)| bounds(resource_sites::size(s.material), s.x, s.y)),
+        )
+        .filter(|b| b[0] < high[0] && b[1] > low[0] && b[2] < high[1] && b[3] > low[1])
+        .collect();
+    points.iter().all(|[x, y]| {
+        obstacles
+            .iter()
+            .all(|b| *x <= b[0] || *x >= b[1] || *y <= b[2] || *y >= b[3])
     })
 }
+#[cfg(test)]
+mod doorway_tests;
 #[derive(Clone)]
 struct Candidate {
     from: Id,

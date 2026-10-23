@@ -1,0 +1,19 @@
+{
+  "scope": "Prepared doorway geometry for dense authored villages",
+  "nativeTests": 780,
+  "differentialComparisons": ">2000 original sampled-geometry comparisons",
+  "strictClippy": true,
+  "releaseBuild": true,
+  "replay": {
+    "ticks": 600,
+    "secondsPerTick": 0.25,
+    "buildings": 256,
+    "residents": 12,
+    "sha256": "6ef030f5beb708b92e3f7706e17bc2eac12cb8a6cf3502745411b28546c7f0e5",
+    "matchesPreChange": true
+  },
+  "limitations": [
+    "Short Node timing sample; not a browser performance or 16x release verdict.",
+    "Differential geometry checks cover dense valid stores and adjacent representable boundary values; not invalid nonfinite coordinates."
+  ]
+}
