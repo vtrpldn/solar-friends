@@ -1,0 +1,50 @@
+{
+  "status": "accepted internal multi-source ownership foundation; public appearance integration pending",
+  "ownershipSha256": "26a50b7dad4122319874ca791b1a38c9b3cbe0e121f138ea8f52eeecc791a734",
+  "bindingSha256": "b9dfc6e02e34891ac930bcf9b551726df8e7744ac2af57de923f8205c6973e75",
+  "inspected": [
+    "review-v1-board.png",
+    "review-v1-transitions.png",
+    "motion-v1-transitions.png"
+  ],
+  "findings": [
+    "All 48 raw pose slots are explicit. Four new walking frames are distinct; the other 44 exactly retain their current public body pixels and borrowed frame ownership.",
+    "Shared keyframe presentation shows a single complete body through walk/breathe/work mode changes, with stable overall head/body scale and ground anchor in the inspected samples.",
+    "On-screen mode/animation clocks identify actual decoded observations; requested decode timestamps alone are not native frame identities.",
+    "The body remains bare of modular hair, clothing, hats, facial hair and equipment in these reviews. These are not completed character or gameplay cadence approvals."
+  ],
+  "checks": {
+    "scope": "Internal multi-source body/attachment ownership. No new public appearance or semantic rig approval.",
+    "preserved": 44,
+    "replaced": 4,
+    "ownershipRefusals": 30,
+    "sourceRefusals": 2,
+    "bindingRefusals": 4,
+    "oldRigRefused": true,
+    "oldHairIdentityAndPixelsRefused": 2,
+    "cleanupCases": 2,
+    "borrowedFramesPreserved": true,
+    "inputOwnershipIsolated": true
+  },
+  "motion": {
+    "videoSha256": "3a16c7148ce626fb2be3613759c3e9930a731464313dd8cd4e1d2ea9fd6a45b9",
+    "durationSeconds": 6.374512,
+    "decodedFrames": 192,
+    "inspectedDecodedSamples": 32,
+    "nativeTransitionUpdates": 104,
+    "nativeStaticTransitionSamples": 32
+  },
+  "publicRegression": {
+    "frozenRgbaFingerprints": 400,
+    "partPoseComparisons": 288,
+    "feedingReturns": 12,
+    "invalidForegroundMasks": 18,
+    "existingAttachmentEditorJourney": true
+  },
+  "remaining": [
+    "Register source-family-bound material/colour masks.",
+    "Reauthor and review changed walking hair, hat, facial-hair and garment poses. Reuse unchanged poses only with exact prepared-body hash evidence.",
+    "Integrate a complete appearance through the public catalog/creator and review actual village travel, all clips, lighting, equipment and portraits.",
+    "Complete all remaining body/face/clothing variants and original builder release gates."
+  ]
+}

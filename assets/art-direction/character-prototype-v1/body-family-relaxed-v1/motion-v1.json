@@ -1,0 +1,303 @@
+{
+  "scope": "32 independently decoded samples around walk/breathe/work changes, day and mirrored night. Requested recording times are not exact native pose or decoder frame identities; no frame-pacing verdict.",
+  "videoSha256": "3a16c7148ce626fb2be3613759c3e9930a731464313dd8cd4e1d2ea9fd6a45b9",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.21.08",
+        "width": 600,
+        "height": 320,
+        "coded_width": 600,
+        "coded_height": 320,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "15:8",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "120/1",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "192",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/review-v1-transitions.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "6.374512",
+      "size": "477419",
+      "bit_rate": "599159",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "samples": [
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.025,
+      "requestedVideoSeconds": 0.025
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.48,
+      "requestedVideoSeconds": 0.48
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.56,
+      "requestedVideoSeconds": 0.56
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.64,
+      "requestedVideoSeconds": 0.64
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.74,
+      "requestedVideoSeconds": 0.74
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.06,
+      "requestedVideoSeconds": 1.06
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.15,
+      "requestedVideoSeconds": 1.15
+    },
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.2,
+      "requestedVideoSeconds": 1.2
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.025,
+      "requestedVideoSeconds": 1.6254000000953674
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.48,
+      "requestedVideoSeconds": 2.0804000000953673
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.56,
+      "requestedVideoSeconds": 2.1604000000953674
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.64,
+      "requestedVideoSeconds": 2.2404000000953674
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.74,
+      "requestedVideoSeconds": 2.3404000000953675
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.06,
+      "requestedVideoSeconds": 2.6604000000953674
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.15,
+      "requestedVideoSeconds": 2.7504000000953672
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.2,
+      "requestedVideoSeconds": 2.8004000000953675
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.025,
+      "requestedVideoSeconds": 3.2334000000953673
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.48,
+      "requestedVideoSeconds": 3.6884000000953674
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.56,
+      "requestedVideoSeconds": 3.7684000000953675
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.64,
+      "requestedVideoSeconds": 3.8484000000953675
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.74,
+      "requestedVideoSeconds": 3.9484000000953676
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.06,
+      "requestedVideoSeconds": 4.268400000095367
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.15,
+      "requestedVideoSeconds": 4.358400000095367
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.2,
+      "requestedVideoSeconds": 4.408400000095368
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.025,
+      "requestedVideoSeconds": 4.833400000095367
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.48,
+      "requestedVideoSeconds": 5.288400000095367
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.56,
+      "requestedVideoSeconds": 5.368400000095367
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.64,
+      "requestedVideoSeconds": 5.448400000095367
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.74,
+      "requestedVideoSeconds": 5.548400000095367
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.06,
+      "requestedVideoSeconds": 5.868400000095367
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.15,
+      "requestedVideoSeconds": 5.9584000000953665
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.2,
+      "requestedVideoSeconds": 6.008400000095367
+    }
+  ]
+}

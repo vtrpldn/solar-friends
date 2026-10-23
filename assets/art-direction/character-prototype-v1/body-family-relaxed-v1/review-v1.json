@@ -1,0 +1,41 @@
+{
+  "scope": "Internal complete multi-source body and native walk/breathe/work transitions only. No public recipes, clothing/equipment, travel cadence or frame-pacing acceptance.",
+  "updates": 104,
+  "samples": 32,
+  "recordings": [
+    {
+      "other": "breathe",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 1600.4000000953674,
+      "renderCalls": 193
+    },
+    {
+      "other": "work",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 1600.4000000953674,
+      "elapsedMs": 1608,
+      "renderCalls": 193
+    },
+    {
+      "other": "breathe",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 3208.4000000953674,
+      "elapsedMs": 1600,
+      "renderCalls": 192
+    },
+    {
+      "other": "work",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 4808.400000095367,
+      "elapsedMs": 1600,
+      "renderCalls": 192
+    }
+  ],
+  "renderCalls": 770,
+  "videoSha256": "3a16c7148ce626fb2be3613759c3e9930a731464313dd8cd4e1d2ea9fd6a45b9"
+}

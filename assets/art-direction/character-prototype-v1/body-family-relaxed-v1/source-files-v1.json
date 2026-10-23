@@ -1,0 +1,6 @@
+{
+  "base": "web/art/characters/prototype-v1/body-neutral-base.png",
+  "idle": "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png",
+  "activities": "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+  "walk": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/candidate-v1.png"
+}

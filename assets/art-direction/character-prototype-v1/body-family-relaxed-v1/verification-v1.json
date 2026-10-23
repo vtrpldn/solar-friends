@@ -1,0 +1,13 @@
+{
+  "scope": "Internal multi-source body/attachment ownership. No new public appearance or semantic rig approval.",
+  "preserved": 44,
+  "replaced": 4,
+  "ownershipRefusals": 30,
+  "sourceRefusals": 2,
+  "bindingRefusals": 4,
+  "oldRigRefused": true,
+  "oldHairIdentityAndPixelsRefused": 2,
+  "cleanupCases": 2,
+  "borrowedFramesPreserved": true,
+  "inputOwnershipIsolated": true
+}

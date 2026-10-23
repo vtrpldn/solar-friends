@@ -1,5 +1,6 @@
 import {FRAME_ANCHOR} from './sprite-frames.js';
 import {canonical} from './editor/journal.js';
+import {validateBodyOwnership} from './character-body-ownership.js';
 export const attachmentSockets=Object.freeze(['head','neck','nearHand','farHand']);
 const sheets=['base','idle','activities'],clone=value=>structuredClone(value),exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join(',')===[...keys].sort().join(',');
 export async function attachmentBinding(frames,sources){
@@ -11,8 +12,25 @@ export async function attachmentBinding(frames,sources){
  }
  return result;
 }
+export async function attachmentFamilyBinding(frames,ownership){
+ const owner=clone(ownership);validateBodyOwnership(owner);
+ const result={normalization:2,size:256,anchor:FRAME_ANCHOR,ownership:owner,frames:{}};
+ for(const sheet of sheets){
+  if(frames[sheet]?.length!==16)throw Error('Provide all 48 measured body frames.');
+  result.frames[sheet]=[];
+  for(const frame of frames[sheet]){
+   if(frame?.width!==256||frame?.height!==256)throw Error('Use complete prepared body frames.');
+   const pixels=frame.getContext('2d').getImageData(0,0,256,256);
+   result.frames[sheet].push([...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels.data))].map(n=>n.toString(16).padStart(2,'0')).join(''));
+  }
+ }
+ return result;
+}
 export function validateAttachmentBinding(binding){
- if(!exact(binding,['normalization','size','anchor','sources','frames'])||binding.normalization!==1||binding.size!==256||binding.anchor!==FRAME_ANCHOR||!exact(binding.sources,sheets)||!exact(binding.frames,sheets)||sheets.some(sheet=>!/^[a-f0-9]{64}$/.test(binding.sources[sheet]??'')||!Array.isArray(binding.frames[sheet])||binding.frames[sheet].length!==16||Array.from(binding.frames[sheet]).some(hash=>typeof hash!=='string'||!/^[a-f0-9]{64}$/.test(hash))))throw Error('Use a measured binding for all 48 prepared body frames.');
+ const family=binding?.normalization===2;
+ if(!exact(binding,['normalization','size','anchor',family?'ownership':'sources','frames'])||![1,2].includes(binding.normalization)||binding.size!==256||binding.anchor!==FRAME_ANCHOR||!exact(binding.frames,sheets)||sheets.some(sheet=>!Array.isArray(binding.frames[sheet])||binding.frames[sheet].length!==16||Array.from(binding.frames[sheet]).some(hash=>typeof hash!=='string'||!/^[a-f0-9]{64}$/.test(hash))))throw Error('Use a measured binding for all 48 prepared body frames.');
+ if(family)validateBodyOwnership(binding.ownership);
+ else if(!exact(binding.sources,sheets)||sheets.some(sheet=>!/^[a-f0-9]{64}$/.test(binding.sources[sheet]??'')))throw Error('Use exact original body source identities.');
 }
 export function validateAttachmentRig(value,binding){
  validateAttachmentBinding(binding);

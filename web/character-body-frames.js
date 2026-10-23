@@ -2,15 +2,20 @@ import {FRAME_ANCHOR,locateSpriteFrames} from './sprite-frames.js';
 // Body-owned landmarks replace lower-leg centering only for an explicitly
 // registered source. Garments and attachments must bind to the resulting RGBA.
 // No per-pose scale, local warp, inferred attachment anchor or fallback.
-export function prepareRegisteredBodyFrames({image,sourceHash},registration){
+export function validateBodyFrameRegistration(registration){
  const exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&keys.every(key=>Object.hasOwn(value,key));
  const r=registration,s=r?.source;
  if(!exact(r,['schema','family','sheet','source','uniformScale','frames'])||r.schema!==1||typeof r.family!=='string'||!r.family.length||!['base','idle','activities'].includes(r.sheet)||!exact(s,['sha256','width','height','columns','rows']))throw Error('Use a complete body-source registration.');
- if(!/^[a-f0-9]{64}$/.test(sourceHash??'')||sourceHash!==s.sha256||!image?.complete||image.naturalWidth!==s.width||image.naturalHeight!==s.height)throw Error('Use the exact decoded body source.');
+ if(!/^[a-f0-9]{64}$/.test(s.sha256??''))throw Error('Use the exact body source identity.');
  if(![s.width,s.height,s.columns,s.rows].every(Number.isSafeInteger)||s.width<1||s.height<1||s.width>4096||s.height>4096||s.columns<1||s.rows<1||s.columns*s.rows>16||!Number.isFinite(r.uniformScale)||r.uniformScale<=0||r.uniformScale>1||!Array.isArray(r.frames)||r.frames.length!==s.columns*s.rows)throw Error('Use bounded body-source geometry and one uniform scale.');
  for(const [index,f]of r.frames.entries()){
-  if(!exact(f,['index','waist'])||!Number.isSafeInteger(f.index)||f.index!==index||!Array.isArray(f.waist)||f.waist.length!==2||!f.waist.every(Number.isSafeInteger))throw Error('Use ordered body poses with measured waist landmarks.');
+  if(!exact(f,['index','waist'])||!Number.isSafeInteger(f.index)||f.index!==index||!Array.isArray(f.waist)||f.waist.length!==2||!Array.from(f.waist).every(Number.isSafeInteger))throw Error('Use ordered body poses with measured waist landmarks.');
  }
+}
+export function prepareRegisteredBodyFrames({image,sourceHash},registration){
+ validateBodyFrameRegistration(registration);
+ const r=registration,s=r.source;
+ if(!/^[a-f0-9]{64}$/.test(sourceHash??'')||sourceHash!==s.sha256||!image?.complete||image.naturalWidth!==s.width||image.naturalHeight!==s.height)throw Error('Use the exact decoded body source.');
  const source=document.createElement('canvas');source.width=s.width;source.height=s.height;
  const output=[];
  try{
