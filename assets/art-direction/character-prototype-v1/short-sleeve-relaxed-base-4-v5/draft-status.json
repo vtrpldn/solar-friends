@@ -1,0 +1,29 @@
+{
+  "status": "pending-colour-and-lower-seam-review",
+  "selectedCandidate": "candidate-v2.png",
+  "rejectedCandidates": [
+    {
+      "file": "candidate-v1.png",
+      "reason": "Moved down relative to fixed geometry; bounded coverage 0.826606, guide coverage 0.672017. Do not fit or trim."
+    }
+  ],
+  "findings": [
+    "The original pale waistband consists of body shirt pixels, not shorts or wrong material labels. Body shirt waist is y149; old guide was too short.",
+    "Corrected source is unmodified built-in imagegen edit. All six compositions preserve lower body at y150 and below and outside-crop pixels. No tested collar leaks remain.",
+    "Inspected exact source and all three composed boards. Broad pale band is absent at this board scale; sleeve cut and cream folds match the intended painted family.",
+    "Upper shirt coverage is 1754/1759 strong pixels, with five antialiased side-edge pixels.",
+    "The new lower-shirt diagnostic tests 718 pixels, only 593 strongly covered. Rows147 and148 retain underlying shirt at varying opacity. This is not full hem coverage and must not be treated as a finished clothing option."
+  ],
+  "next": "Review full matching-colour appearances and correct any visible double hem or contrasting underlayer before accepting the pose. Keep the original material registration unchanged.",
+  "artifacts": {
+    "candidate-v2.png": "d5c171717372eb723aa173f20fdc741c36559d9384c26b5a232252b4661121f6",
+    "registration-intent.json": "abb68715ddbe84f296327dc6fd84bb6252895429b116068217c5e64792158a00",
+    "registrations-v2.json": "885f5f6f6c32e5beb4478b002765f867d70fac958b817f4da22ab4aa4676d870",
+    "candidate-v2-audit.json": "601a96676bafbc6ec47d2fb1a5007952d6d08d25c7f574b3eedefbe286175de9",
+    "review-v2.json": "ea4fd812bd471d81aeaeceb255e2703c56178651126d265f38425393847557c1",
+    "review-v2-details.png": "a1d73511eb2aeaa507794363ede254569ef143bc4d17a7acbf0d295390a4daa4",
+    "review-v2-board.png": "9b44eb75e41d577977063cc15e351801d6a424ed066c9d62e636ccf9562ba422",
+    "review-v2-lighting.png": "523f5d5dcaa702ae84ccb2954258964336e8460cbacd37983a9272e0fff4120b",
+    "waist-v2.json": "f747941964c4b6b7678b336ec454f3352fa84231b4bae68d7de7029bffa84c89"
+  }
+}

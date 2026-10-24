@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-99fe3713-f5a8-4d1d-9a27-1ac619a74649.png",
+  "promptFile": "prompt-v2.txt",
+  "promptSha256": "ee6cfc88c3eeecfb7fa1fe8440e04cda20b315ff4112fc464a26170ed137ec7d",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-4-v4/candidate-v1.png",
+      "role": "painted edit target; retain upper paint location",
+      "sha256": "f6e63b47bbc0e09abf42e8106dd53dc730891d5e795f83295ae73da3af6c692a"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-4-v5/mask.png",
+      "role": "exact corrected lower hem geometry",
+      "sha256": "345bb16bf196578d20bcd4fb1269ff13318d67409a71a7171f41365d89cce418"
+    }
+  ],
+  "candidateSha256": "d5c171717372eb723aa173f20fdc741c36559d9384c26b5a232252b4661121f6",
+  "paintEdits": "none; copied original PNG unmodified"
+}

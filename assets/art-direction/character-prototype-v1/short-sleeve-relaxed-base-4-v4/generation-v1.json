@@ -1,0 +1,15 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2fc28476-b6c3-41b3-9cf8-6b9fd8c69b59.png",
+  "promptFile": "prompt-v1.txt",
+  "promptSha256": "af3a5472a548e1986cfacdc1312e087db1b92db4d1662b38279d92e4cd1c017d",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-4-v4/mask.png",
+      "role": "exact measured-waist geometry edit target",
+      "sha256": "1becd56d543b4f2573575e864976257bf8f42e13e2593bce5f737ebd45db4fce"
+    }
+  ],
+  "candidateSha256": "f6e63b47bbc0e09abf42e8106dd53dc730891d5e795f83295ae73da3af6c692a",
+  "paintEdits": "none; copied original PNG unmodified"
+}

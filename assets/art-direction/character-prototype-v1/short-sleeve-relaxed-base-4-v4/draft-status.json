@@ -1,0 +1,4 @@
+{
+  "status": "rejected-source",
+  "reason": "Generated paint extends into protected native lower-body rows (y>=150); do not trim source or weaken lower-body invariant. New guide allows an antialiasing margin above that protected boundary."
+}

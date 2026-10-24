@@ -1,0 +1,47 @@
+{
+  "bodyPose": "base:4",
+  "bodyFrameSha256": "4dfd8520c7ce9244200f6c790bf452bcf3eef1b0d919d047fde0cb1706b40cdc",
+  "materials": "body-family-relaxed-v1/materials-v7.json",
+  "measuredRegion": {
+    "shirtTop": 85,
+    "waist": 149,
+    "shoes": 208,
+    "head": [
+      146,
+      56,
+      30,
+      33
+    ]
+  },
+  "sampleArea": {
+    "x": [
+      105,
+      153
+    ],
+    "y": [
+      137,
+      152
+    ]
+  },
+  "shirtPixelsByRow": {
+    "137": 45,
+    "138": 44,
+    "139": 43,
+    "140": 42,
+    "141": 40,
+    "142": 43,
+    "143": 32,
+    "144": 47,
+    "145": 48,
+    "146": 48,
+    "147": 48,
+    "148": 49
+  },
+  "shortsPixelsByRow": {
+    "149": 49,
+    "150": 49,
+    "151": 49,
+    "152": 49
+  },
+  "finding": "Existing pale strip is original shirt above the waist, not shorts or unassigned material. Previous garment ends too high. Extend authored hem to the measured seam; retain material mask unchanged."
+}
