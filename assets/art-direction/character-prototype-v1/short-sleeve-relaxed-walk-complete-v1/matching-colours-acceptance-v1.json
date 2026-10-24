@@ -1,0 +1,25 @@
+{
+  "status": "accepted-static-matching-colour-review",
+  "findings": [
+    "Inspected all six full-size boards, covering 96 poses: cream, teal, terracotta and indigo retain broad painted folds across both hairstyles and three skin tones.",
+    "Matching the underlying shirt palette removes the conspicuous cream underlayer at the hem seen in the raw-body diagnostic. No obvious pale strip remains at this board scale.",
+    "Crossed forearm stays in front of sleeve; neck and arm skin remain visually coherent across the palettes.",
+    "Hair silhouettes and feet remain unchanged across shirt colours."
+  ],
+  "limits": [
+    "Static walking poses only. No new garment sources or generated-paint edits.",
+    "The previously measured low-opacity edges have visual board-scale coverage here, not a claim of pixel-perfect source coverage.",
+    "Accessories, day/night, motion, portrait and actual player selection still need combined colour review.",
+    "Remaining garment poses and broader creator/body/face/bottom/shoe catalogue remain unfinished."
+  ],
+  "artifacts": {
+    "matching-colours-v1-warm-curls.png": "b95dfc4aee3cb5cbb0d8e227ba266e362dc840e86dba30960a7db6b7703d4aa3",
+    "matching-colours-v1-warm-sidepart.png": "476f44ebbb2c9ed4f42cda6181a0745c3bd40e22d08560168d42014f306e4ffd",
+    "matching-colours-v1-sunlit-curls.png": "e23ffbfadea09edb0137782186ae7e29c7373f313e1ec591192368c02284ada5",
+    "matching-colours-v1-sunlit-sidepart.png": "6189187fd249bcef6c1c1ab553a4ef908ea8a196ee8c2a7c9e0704ce4eb2a5dc",
+    "matching-colours-v1-copper-curls.png": "5918fd40ba2b6db8edee472a1601e240f1bb6a4d2e4d0f18c0beeadd81db3724",
+    "matching-colours-v1-copper-sidepart.png": "59b5d3e257555f9b0e3ba719213eff3173ddd16ae2b2d98af3d3b7a467bec569",
+    "matching-colours-v1.json": "4a87e66759678adfabd7644460ddaf7a948c1908d40d7f5ccb6975cb3ace4782",
+    "verification-v2.json": "2bb0603b7621e7cd38b45498478447081434a27252e957299d12cddb752cf1ad"
+  }
+}
