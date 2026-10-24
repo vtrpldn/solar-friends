@@ -1,0 +1,29 @@
+{
+  "unchanged": 44,
+  "changed": 4,
+  "counts": [
+    {
+      "sheet": "base",
+      "index": 4,
+      "reassignedShirtToShorts": 324
+    },
+    {
+      "sheet": "base",
+      "index": 5,
+      "reassignedShirtToShorts": 492
+    },
+    {
+      "sheet": "base",
+      "index": 6,
+      "reassignedShirtToShorts": 540
+    },
+    {
+      "sheet": "base",
+      "index": 7,
+      "reassignedShirtToShorts": 1110
+    }
+  ],
+  "alphaChecks": 1048576,
+  "materialSha256": "87b0d01b1f079e9a9e9fa897f78ec373bf22e1ea3dcb8acca58a21129e66c374",
+  "scope": "Four work-pose material boundaries only. Painted seam review distinct from inherited-mask equivalence. No complete garment/appearance acceptance."
+}

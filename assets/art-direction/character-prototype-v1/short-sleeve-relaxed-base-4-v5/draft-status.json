@@ -1,5 +1,5 @@
 {
-  "status": "static-review-completed-see-acceptance-v2",
+  "status": "superseded-by-v3-with-materials-v8",
   "selectedCandidate": "candidate-v2.png",
   "rejectedCandidates": [
     {
@@ -25,5 +25,6 @@
     "review-v2-board.png": "9b44eb75e41d577977063cc15e351801d6a424ed066c9d62e636ccf9562ba422",
     "review-v2-lighting.png": "523f5d5dcaa702ae84ccb2954258964336e8460cbacd37983a9272e0fff4120b",
     "waist-v2.json": "f747941964c4b6b7678b336ec454f3352fa84231b4bae68d7de7029bffa84c89"
-  }
+  },
+  "latestDecision": "Physical painted seam review found inherited material labels incorrect. See short-sleeve-relaxed-base-4-v3/acceptance-materials-v8.json. Earlier long-hem diagnosis/acceptance is historical and superseded."
 }

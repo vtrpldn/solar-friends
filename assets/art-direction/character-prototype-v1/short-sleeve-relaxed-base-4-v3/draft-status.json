@@ -1,5 +1,5 @@
 {
-  "status": "needs-correction-not-accepted",
+  "status": "accepted-static-with-materials-v8",
   "findings": [
     "Original generated PNG copied unmodified. Source audit passes, including unchanged bounded/guide/area gates.",
     "Six hairstyle/skin compositions, outside-crop and protected-lower checks pass. All 1759 tested upper old-shirt pixels covered; no tested collar leak. Four invalid registrations reject.",
@@ -19,5 +19,6 @@
     "review-v1-board.png": "bd7cf2ef8735b0b0246e4bccbc2122c3f52c5af52864be1838556a3628b0669e",
     "review-v1-details.png": "55df2df19f9fbbb779c47cfbbb5ec3adfebf6e4dc1c6b519ddfca64b76f78572",
     "review-v1-lighting.png": "d06babbfe0a00abc9e29f0f5b57f121bbdae99f0001dbd68000c1fb5b123477e"
-  }
+  },
+  "latestDecision": "Physical painted seam review found inherited material labels incorrect. See short-sleeve-relaxed-base-4-v3/acceptance-materials-v8.json. Earlier long-hem diagnosis/acceptance is historical and superseded."
 }

@@ -1,0 +1,25 @@
+{
+  "status": "accepted-static-source-with-materials-v8",
+  "source": "candidate-v1.png",
+  "pose": "base:4",
+  "materialSha256": "87b0d01b1f079e9a9e9fa897f78ec373bf22e1ea3dcb8acca58a21129e66c374",
+  "correction": "The previous interpretation of the pale band as uncovered shirt was incorrect: inherited material cutoffs mislabeled painted shorts. Painted seam inspection supersedes mask labels as geometry evidence.",
+  "findings": [
+    "Inspected all four uncoloured work-waist measurement images and their v7/v8 palette comparison board. New cutoffs follow the actual painted seam rather than the inherited scalar row.",
+    "Inspected 48 plain/equipped appearances and twelve enlarged waist samples with source v3 and corrected v8 materials. The earlier short shirt meets the physical waist naturally with no contrasting cream shorts band.",
+    "2359296 exact alpha comparisons and 3907584 protected lower-body channel checks pass."
+  ],
+  "limits": [
+    "Static source acceptance only; not a full work clip or public outfit.",
+    "44 unchanged material regions remain identical, which does not prove their physical correctness; continue painted-seam review.",
+    "Other 39 garment sources, combined clips/equipment/world/player integration and broader release gates remain unfinished."
+  ],
+  "artifacts": {
+    "candidate-v1.png": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+    "registrations-v1.json": "9e774194889797bf4739ebd5d7952f507ba5440efde40c4454a0ceaf543e7893",
+    "colours-v1-materials-v8.json": "0128c608b2d3c8860657ff6db759a43b9e883523fc92946f39628e7d9d65be36",
+    "colours-v1-materials-v8-plain.png": "79b145b514b20bf20ec66d07b57d8c17a792b6aeac59dff712818352731987a7",
+    "colours-v1-materials-v8-equipped.png": "0545208ad12bf78a6fb46f169744687b8063f1642ca7796997a6e6a37d8bf5d7",
+    "colours-v1-materials-v8-waist.png": "1bb2139e2071a97fe68f98bdc4d56e1dd60ab9e9e20942c19e6ef0f3d40c4f6d"
+  }
+}
