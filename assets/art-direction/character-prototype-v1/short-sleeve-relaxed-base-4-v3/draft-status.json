@@ -1,0 +1,23 @@
+{
+  "status": "needs-correction-not-accepted",
+  "findings": [
+    "Original generated PNG copied unmodified. Source audit passes, including unchanged bounded/guide/area gates.",
+    "Six hairstyle/skin compositions, outside-crop and protected-lower checks pass. All 1759 tested upper old-shirt pixels covered; no tested collar leak. Four invalid registrations reject.",
+    "Inspected exact raw source, torso details, complete board, and small day/night mirrored views with hats/beards. Painted material and sleeve contours fit the existing family.",
+    "Enlarged torso view exposes a pale waistband below the shirt hem above sage shorts. Diagnose garment length versus existing material-mask ownership before accepting this pose."
+  ],
+  "remaining": [
+    "Resolve the visible waistband consistently with walking and breathing shirts.",
+    "Colour, motion, equipment, world and cross-clip review.",
+    "Other uncovered clothing poses and complete creator/player integration."
+  ],
+  "artifacts": {
+    "candidate-v1.png": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+    "registration-intent.json": "f3d0221e29da7c9a7d59ec006b89a5950e19c15d6a24acf3f000334b287dde18",
+    "registrations-v1.json": "9e774194889797bf4739ebd5d7952f507ba5440efde40c4454a0ceaf543e7893",
+    "review-v1.json": "b95b5a532f938839e714490eabbfe0469fd0d93bc77ad0330a302ced5643f9e5",
+    "review-v1-board.png": "bd7cf2ef8735b0b0246e4bccbc2122c3f52c5af52864be1838556a3628b0669e",
+    "review-v1-details.png": "55df2df19f9fbbb779c47cfbbb5ec3adfebf6e4dc1c6b519ddfca64b76f78572",
+    "review-v1-lighting.png": "d06babbfe0a00abc9e29f0f5b57f121bbdae99f0001dbd68000c1fb5b123477e"
+  }
+}

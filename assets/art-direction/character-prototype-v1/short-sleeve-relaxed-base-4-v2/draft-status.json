@@ -1,0 +1,4 @@
+{
+  "status": "rejected-source",
+  "reason": "Two old tank collar pixels exposed at native [145,81] and [146,81]. Geometry audit alone insufficient. Repaint from new collar guide; no bitmap fitting."
+}

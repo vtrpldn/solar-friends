@@ -1974,3 +1974,13 @@ Rendered and inspected all six breathing colour boards, covering ninety-six full
 Walking lifecycle and colour cleanup checks still pass after generalizing the composer; the refreshed report is `verification-v3.json`, preserving earlier evidence revisions. Syntax/whitespace checks pass. Forty other raw body poses still need garments, followed by full equipment returns, accessories, lighting/motion/world and player/portrait integration. Remaining body/face/bottom/shoe options and broader release gates are unchanged.
 
 **Why:** byte-identical body poses can reuse their correctly registered clothing without discarding finished artwork, while the revised walking poses must keep their newly authored garments. Explicit clip ownership prevents incomplete sets from silently impersonating a complete wardrobe.
+
+### First uncovered base-pose garment source
+
+Authored frozen native geometry and generated a new cream shirt for base pose 4 using built-in image generation. The first guide exposed the old right torso edge and was rejected before paint. The second source passed geometry but exposed old collar pixels [145,81] and [146,81], so it remains rejected. A third frozen guide corrects that neckline. Every original PNG remains untouched; exact prompts, reference roles/hashes and original generator output paths are retained beside the candidates.
+
+The third source passes with zero undeclared paint, full bounded coverage, 99.800% guide coverage and a 1.03234 area ratio. Its six complete hairstyle/skin compositions preserve outside-crop and protected lower-body pixels; all 1,759 tested upper old-shirt pixels are covered, no tested collar leak remains, and four malformed registrations reject. Inspected its raw image, enlarged torso, full six-profile board, hats/beards and small day/night mirrored views.
+
+Visual review nevertheless found a pale waistband between the shirt hem and sage shorts. This pose is explicitly **not accepted**; `short-sleeve-relaxed-base-4-v3/draft-status.json` records the defect and exact source/report/board hashes. Determine whether the gap comes from garment length or material ownership before accepting it. Do not conceal it by fitting paint, weakening coverage thresholds or claiming the upper-shirt test covers the waist. Production assets and player choices remain unchanged; the forty uncovered poses are not reduced by this candidate yet.
+
+**Why:** per-pose native guides and unchanged source audits prevent arbitrary clothing fit, while actual composition review catches lower seams that collar checks miss. This increment supplies the next original garment and a concrete correction target for the complete wardrobe. All remaining creator and broader builder release gates stay active.
