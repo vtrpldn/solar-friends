@@ -1,0 +1,57 @@
+{
+  "status": "static-breathing-colour-review-only",
+  "sources": [
+    {
+      "collection": "short-sleeve-breathe-single-8-v1",
+      "sheet": "base",
+      "index": 8,
+      "sourceSha256": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+      "bodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+      "registrationSha256": "b2740928efca51b6ae37a6e96fa58bc9c5ecd67458773ad2d59be99515948dd9"
+    },
+    {
+      "collection": "short-sleeve-breathe-single-9-v1",
+      "sheet": "base",
+      "index": 9,
+      "sourceSha256": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+      "bodyFrameSha256": "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+      "registrationSha256": "1dcae8d1350cd1220ec747ce831ad9e86f2022e0f1bfa4c81a2aafb490145f9e"
+    },
+    {
+      "collection": "short-sleeve-breathe-single-10-v1",
+      "sheet": "base",
+      "index": 10,
+      "sourceSha256": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+      "bodyFrameSha256": "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+      "registrationSha256": "66b0edc3fc1764ecd70e7eb5cf766566e05751e54dad88da1cc14851174d8b82"
+    },
+    {
+      "collection": "short-sleeve-breathe-single-11-v1",
+      "sheet": "base",
+      "index": 11,
+      "sourceSha256": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+      "bodyFrameSha256": "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+      "registrationSha256": "0d25bf075f641596dc2ecfdda86598c966e3469d2a924152d7a395bba2a8cc3c"
+    }
+  ],
+  "findings": [
+    "All four legacy garment registrations match the current family body frames exactly; source PNGs and original registrations remain unchanged.",
+    "Inspected all six boards covering 96 complete compositions. Collars, arm skin, hair and feet remain coherent across the four shirt colours and three skin tones.",
+    "Breathing shirt hem folds are more pronounced than the walking shirt. Cross-clip transition review remains required; this does not accept the entire outfit animation."
+  ],
+  "remaining": [
+    "Other 40 raw body garment poses",
+    "Breathing accessories, motion, lighting, terrain and cross-clip transition checks",
+    "Equipment-return compatibility and full player/portrait integration",
+    "Full body/face/bottom/shoe catalogue and broader builder release gates"
+  ],
+  "artifacts": {
+    "matching-colours-v1-warm-curls.png": "691dc89fc34a688076eeebc1e032b36fae82ec6417e1090c7fdd29c34c3bb78b",
+    "matching-colours-v1-warm-sidepart.png": "c4c356e64c1898409e6bcaea3c4c44446f0a777d86af8d43a88a9d8370b53fea",
+    "matching-colours-v1-sunlit-curls.png": "d7aae879788f028fff80ac88ac47d568e96ca8bda3ff7922048845beb5c28af8",
+    "matching-colours-v1-sunlit-sidepart.png": "799874ee3ecf22322d80e9752328af391621c0e76cbcf23650a8daa98fb4e5f9",
+    "matching-colours-v1-copper-curls.png": "2adb166f43064e3f0aa4cf28a371881fba33f55e6fda9252dfabbd1305a7a8da",
+    "matching-colours-v1-copper-sidepart.png": "2b494564bcbe83d04a3ae2425a1c2f0062503e555725606804dc82b7d3bca9c4",
+    "matching-colours-v1.json": "696a2c10d60532b47cbb38701d32e345aea6c50ebbf9445b90345261347f498d"
+  }
+}
