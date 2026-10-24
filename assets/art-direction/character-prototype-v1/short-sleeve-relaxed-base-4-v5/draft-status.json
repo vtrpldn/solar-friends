@@ -1,5 +1,5 @@
 {
-  "status": "pending-colour-and-lower-seam-review",
+  "status": "static-review-completed-see-acceptance-v2",
   "selectedCandidate": "candidate-v2.png",
   "rejectedCandidates": [
     {
@@ -14,7 +14,7 @@
     "Upper shirt coverage is 1754/1759 strong pixels, with five antialiased side-edge pixels.",
     "The new lower-shirt diagnostic tests 718 pixels, only 593 strongly covered. Rows147 and148 retain underlying shirt at varying opacity. This is not full hem coverage and must not be treated as a finished clothing option."
   ],
-  "next": "Review full matching-colour appearances and correct any visible double hem or contrasting underlayer before accepting the pose. Keep the original material registration unchanged.",
+  "next": "Continue the remaining pose sources and full clip/equipment/world review; do not expose an incomplete outfit in the player catalogue.",
   "artifacts": {
     "candidate-v2.png": "d5c171717372eb723aa173f20fdc741c36559d9384c26b5a232252b4661121f6",
     "registration-intent.json": "abb68715ddbe84f296327dc6fd84bb6252895429b116068217c5e64792158a00",

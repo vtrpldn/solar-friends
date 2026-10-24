@@ -1,0 +1,26 @@
+{
+  "status": "accepted-static-pose-source-only",
+  "source": "candidate-v2.png",
+  "pose": "base:4",
+  "findings": [
+    "Inspected both full 24-profile boards and the twelve enlarged waist views. Matching body/garment colours remove a contrasting cream strip at the bottom seam; hem reads as the same garment across the four colours.",
+    "Crew collar, short sleeves and broad painted folds retain the intended family style. Both hairstyles and straw hat/beard layering remain aligned.",
+    "48 plain/equipped compositions pass 2359296 exact alpha comparisons and 3907584 protected lower-body channel checks."
+  ],
+  "limits": [
+    "Upper source coverage remains 1754/1759 strong tested pixels; lower y134..149 coverage remains 593/718. Matching colour is visual evidence of a coherent seam, not full source-pixel coverage.",
+    "Only one static body pose. No entire carry clip, continuous transition, world/terrain, lighting-colour, tool/equipment-return or public player acceptance.",
+    "Other 39 raw body garment poses, broader body/face/bottom/shoe catalogue and builder release gates remain unfinished."
+  ],
+  "artifacts": {
+    "candidate-v2.png": "d5c171717372eb723aa173f20fdc741c36559d9384c26b5a232252b4661121f6",
+    "registrations-v2.json": "885f5f6f6c32e5beb4478b002765f867d70fac958b817f4da22ab4aa4676d870",
+    "registration-intent.json": "abb68715ddbe84f296327dc6fd84bb6252895429b116068217c5e64792158a00",
+    "review-v2.json": "ea4fd812bd471d81aeaeceb255e2703c56178651126d265f38425393847557c1",
+    "waist-v2.json": "f747941964c4b6b7678b336ec454f3352fa84231b4bae68d7de7029bffa84c89",
+    "colours-v2.json": "df332783a2f7166360d9c38950245e7a91066925e35c0e1733948a09f7a0d5d1",
+    "colours-v2-plain.png": "6d2b2d4f79917e432529e8dabfb95796c4d2501f3df627f4d9fc8ae3042ad4c0",
+    "colours-v2-equipped.png": "156a451bc9548dd99f69dac970e019f5f8a6edb8ae83676d3a127c31c50f1ab2",
+    "colours-v2-waist.png": "35cb02e6a6543c20e4b63059d7365bd9ea537d261b8b213aa922610eb0b0424b"
+  }
+}
