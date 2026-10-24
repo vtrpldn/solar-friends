@@ -1,0 +1,69 @@
+{
+  "unchanged": 36,
+  "changed": 12,
+  "counts": [
+    {
+      "sheet": "activities",
+      "index": 0,
+      "reassignedShirtToShorts": 453
+    },
+    {
+      "sheet": "activities",
+      "index": 1,
+      "reassignedShirtToShorts": 424
+    },
+    {
+      "sheet": "activities",
+      "index": 2,
+      "reassignedShirtToShorts": 198
+    },
+    {
+      "sheet": "activities",
+      "index": 3,
+      "reassignedShirtToShorts": 523
+    },
+    {
+      "sheet": "activities",
+      "index": 4,
+      "reassignedShirtToShorts": 529
+    },
+    {
+      "sheet": "activities",
+      "index": 5,
+      "reassignedShirtToShorts": 747
+    },
+    {
+      "sheet": "activities",
+      "index": 6,
+      "reassignedShirtToShorts": 805
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "reassignedShirtToShorts": 1178
+    },
+    {
+      "sheet": "activities",
+      "index": 12,
+      "reassignedShirtToShorts": 519
+    },
+    {
+      "sheet": "activities",
+      "index": 13,
+      "reassignedShirtToShorts": 301
+    },
+    {
+      "sheet": "activities",
+      "index": 14,
+      "reassignedShirtToShorts": 262
+    },
+    {
+      "sheet": "activities",
+      "index": 15,
+      "reassignedShirtToShorts": 283
+    }
+  ],
+  "alphaChecks": 4194304,
+  "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "scope": "Twelve activity boundaries corrected and four kneeling poses retained. Painted seam review distinct from inherited-mask equivalence. No complete garment/appearance acceptance."
+}

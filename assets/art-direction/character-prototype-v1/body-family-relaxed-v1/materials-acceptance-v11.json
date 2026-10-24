@@ -1,0 +1,25 @@
+{
+  "status": "accepted-internal-painted-waist-material-family",
+  "findings": [
+    "Inspected all sixteen enlarged native activity waist guides. Twelve inherited activity cutoffs wrongly included shorts; four previously measured kneeling seams remain unchanged.",
+    "For partly occluded seams, visible painted endpoints are traced and hidden segments bridged. No claim of measuring invisible artwork.",
+    "Inspected both complete activity comparison boards and the base/idle/activities ownership-plus-colour boards for the complete v11 family. Waist ownership follows painted shirt/shorts separation at this review scale.",
+    "Only twelve masks change from v10, all label2-to-label3. Thirty-six regions remain identical. The full family verifier passes 192 material isolation cases, 48 default borrowed frames, 288 walking palette-alpha cases, 32 exact walking/kneeling baseline comparisons, 20 kneeling probes, 21 refusals and five semantic geometry probes."
+  ],
+  "limits": [
+    "Bare body material family only. Hair, accessories, garment/tool layering, continuous clips, portraits and public creator need combined review using this revision.",
+    "Cache upper-bound reporting is not whole-app memory/performance acceptance.",
+    "Thirty-nine missing garment sources and all broader builder release gates remain unfinished."
+  ],
+  "artifacts": {
+    "materials-v11.json": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+    "material-regions-v11.json": "ea30bd732375f5e8b983ea55cc18643ca7c557b2a99edf027ca357318225cad9",
+    "materials-v11-report.json": "d7efbcaaf3f1f1048cde4d9192a4b16c42c69c9b65ab2b271b5b8072883178d3",
+    "materials-v11-base.png": "4c9089bff5ea8273bf22865e21b19d1480b9cdcc4bd87a4d1dcd6d693a4af54d",
+    "materials-v11-idle.png": "f84970f3c39df46004fbbb071165a228c758a4d4e74c255a252cf46b98f43fcd",
+    "materials-v11-activities.png": "df57c2ff24d4aac4bd5364f18f10223e1949db21bfe09b5e7b03cfd664cc95cb",
+    "waist-measurement-activities-0-v1/review-v11.json": "eed8ac9225b13577eb8ea9cf2ea970f8bc10ade60ef9076219650a6e36aa8afb",
+    "waist-measurement-activities-0-v1/palettes-v11-0.png": "7a16150ab0a48b7ea74fcb264ccd4a6312b935109de96c0c3b05595860bc2752",
+    "waist-measurement-activities-0-v1/palettes-v11-1.png": "4bb32ac612847ac78db07c8510daaf40c92dbaceac96d5e735b70cac394de3cb"
+  }
+}

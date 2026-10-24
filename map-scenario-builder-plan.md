@@ -2034,3 +2034,15 @@ Fresh comparison against v9 confirms that only sixteen idle masks change, exclus
 This remains a bare-body internal mask review. Activity masks still need painted-seam inspection, and full garment/hair/accessory/continuous-clip/player integration is not established by these comparisons. Thirty-nine missing garment sources and all wider creator/builder release gates remain open. Frozen preparation is byte-identical; syntax and whitespace checks pass. Original body and garment PNGs remain untouched.
 
 **Why:** independent shirt and shorts colours should retain the same physical garment boundary while residents move through everyday idle actions. Correcting the interpretation before authoring more shirts prevents another seam defect from being concealed by garment shape changes.
+
+### Activity seams and full material-family regression
+
+Inspected all sixteen native activity seam guides. Added frozen materials-v11 with corrected boundaries for the twelve cooking, watering and feeding poses. Four existing measured gardening boundaries remain unchanged. Where arms hide a seam, visible edges establish its endpoints and hidden portions are bridged; this is not a claim to measure invisible paint. All original PNGs remain untouched.
+
+Fresh activity comparison changes only twelve masks, solely shirt-to-shorts labels; thirty-six other regions stay identical. All 4,194,304 body-alpha comparisons pass. Inspected both complete activity comparison boards and the final base/idle/activities ownership-and-colour boards. Painted shirt/shorts separation is now represented across the complete bare-body pose family rather than inferred from inherited scalar rows.
+
+Extended the full material verifier for v11 while preserving older revision checks. Deliberately corrected poses no longer claim equality with the faulty legacy colours. Instead, the eight previously measured walking/gardening poses compare exactly against v7 across four isolated materials (thirty-two comparisons). Fresh results also pass 192 material isolation cases, forty-eight default-frame reuse and defensive mask-copy cases, 288 walking palette-alpha combinations, twenty kneeling probes, twenty-one malformed requests, five synthetic geometry probes and the eight-entry cache bound. The cache's nominal canvas byte bound is not total-app memory acceptance.
+
+`materials-acceptance-v11.json` records the exact registration, report and inspected-board hashes and accepts only the internal bare-body material family. Combined full hair/accessory/garment/tool, continuous animation, portrait and player integration must use and review this revision next. Thirty-nine remaining garment sources and every wider builder release gate remain unfinished. Frozen preparation is byte-identical; syntax and whitespace checks pass. No native simulation or full player result is claimed.
+
+**Why:** the complete character palette must respect physical garments throughout useful everyday actions, and a regression suite must distinguish intentional corrections from preserved behaviour. This completes the bare-family waist interpretation pass without treating old mask equality as visual proof.

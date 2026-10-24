@@ -1,0 +1,405 @@
+{
+  "status": "Measured cooking/watering/feeding waist correction; internal palette review required.",
+  "why": "Inherited scalar rows coloured shorts as shirt. Trace visible painted edges and bridge occluded portions between visible endpoints; mask labels are not physical evidence.",
+  "priorSha256": "47b64d421c6ce53cbcd727ae5db58a5c655ad537a153a0ffe8f016216904e7df",
+  "bodyBindingSha256": "b9dfc6e02e34891ac930bcf9b551726df8e7744ac2af57de923f8205c6973e75",
+  "changedPoses": [
+    {
+      "sheet": "activities",
+      "index": 0,
+      "bodyFrameSha256": "c756fdadc0a6c2b280bdd7d3a491f3fb3221bf92e8fff85c1b7c0125c9319540",
+      "waistLine": [
+        [
+          101,
+          134
+        ],
+        [
+          115,
+          136
+        ],
+        [
+          129,
+          138
+        ],
+        [
+          141,
+          137
+        ],
+        [
+          151,
+          134
+        ],
+        [
+          155,
+          130
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 1,
+      "bodyFrameSha256": "188084b007488b23a2fce45f13187264c6982c6514e108155e1350f9c77e45c8",
+      "waistLine": [
+        [
+          98,
+          136
+        ],
+        [
+          114,
+          138
+        ],
+        [
+          128,
+          138
+        ],
+        [
+          140,
+          137
+        ],
+        [
+          149,
+          134
+        ],
+        [
+          152,
+          130
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 2,
+      "bodyFrameSha256": "c651baf0198d481b9574ad1ff18da641f213ef5a23c1024b0d82ef1742f5a966",
+      "waistLine": [
+        [
+          100,
+          136
+        ],
+        [
+          113,
+          138
+        ],
+        [
+          129,
+          138
+        ],
+        [
+          141,
+          137
+        ],
+        [
+          151,
+          134
+        ],
+        [
+          155,
+          130
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 3,
+      "bodyFrameSha256": "0a88b07b5c05bbcd203db77d33cc3b40a64cdb593c54142b9d47f99d01434118",
+      "waistLine": [
+        [
+          105,
+          132
+        ],
+        [
+          116,
+          135
+        ],
+        [
+          129,
+          137
+        ],
+        [
+          140,
+          137
+        ],
+        [
+          151,
+          135
+        ],
+        [
+          155,
+          130
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 4,
+      "bodyFrameSha256": "23a012e1c9216fe4eed9fd82fe540fa25da1964a2d1084a47f8ef1dd21a051d0",
+      "waistLine": [
+        [
+          105,
+          135
+        ],
+        [
+          119,
+          139
+        ],
+        [
+          133,
+          140
+        ],
+        [
+          147,
+          139
+        ],
+        [
+          156,
+          137
+        ],
+        [
+          160,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 5,
+      "bodyFrameSha256": "942cefc161d75a33714f97c7a2032d711a8a2b8869a7e021bd18e46b35b0c40f",
+      "waistLine": [
+        [
+          106,
+          128
+        ],
+        [
+          115,
+          133
+        ],
+        [
+          128,
+          137
+        ],
+        [
+          140,
+          138
+        ],
+        [
+          148,
+          138
+        ],
+        [
+          156,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 6,
+      "bodyFrameSha256": "b0c17b0c88e1f8a353b78cc29eb695f95d402c78ce637e27f860b71e4417a519",
+      "waistLine": [
+        [
+          105,
+          131
+        ],
+        [
+          115,
+          135
+        ],
+        [
+          129,
+          139
+        ],
+        [
+          141,
+          139
+        ],
+        [
+          150,
+          137
+        ],
+        [
+          155,
+          132
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "bodyFrameSha256": "6628e4a801644c0ee53c93b66a9fdcaf13d0e6f2217efad600b3a22237e2b6a8",
+      "waistLine": [
+        [
+          110,
+          128
+        ],
+        [
+          119,
+          133
+        ],
+        [
+          130,
+          137
+        ],
+        [
+          142,
+          139
+        ],
+        [
+          153,
+          138
+        ],
+        [
+          160,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 12,
+      "bodyFrameSha256": "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+      "waistLine": [
+        [
+          100,
+          133
+        ],
+        [
+          113,
+          135
+        ],
+        [
+          127,
+          137
+        ],
+        [
+          139,
+          137
+        ],
+        [
+          149,
+          134
+        ],
+        [
+          154,
+          130
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 13,
+      "bodyFrameSha256": "a0189be0742c4ce5ce5cac47b025ceca47c9906708a8522191fe61de94d57271",
+      "waistLine": [
+        [
+          100,
+          135
+        ],
+        [
+          113,
+          138
+        ],
+        [
+          128,
+          139
+        ],
+        [
+          140,
+          138
+        ],
+        [
+          150,
+          135
+        ],
+        [
+          154,
+          131
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 14,
+      "bodyFrameSha256": "6032a6a05da3476d29ff69ca3c2d3c78dd445c0e5f455e192841b17d48c427e9",
+      "waistLine": [
+        [
+          100,
+          135
+        ],
+        [
+          113,
+          138
+        ],
+        [
+          128,
+          139
+        ],
+        [
+          140,
+          138
+        ],
+        [
+          150,
+          135
+        ],
+        [
+          154,
+          131
+        ]
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 15,
+      "bodyFrameSha256": "68dd9e4c87a385d9a8b87bfe5f0b5a6c948ac51aa70bca18bc32a8a82278bf77",
+      "waistLine": [
+        [
+          100,
+          135
+        ],
+        [
+          113,
+          138
+        ],
+        [
+          128,
+          139
+        ],
+        [
+          140,
+          138
+        ],
+        [
+          150,
+          135
+        ],
+        [
+          154,
+          131
+        ]
+      ]
+    }
+  ],
+  "unchangedRegions": 36,
+  "preservedKneeling": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "evidence": {
+    "waist-measurement-activities-0-v1/activities-0.png": "3a3703fb038de727a1f486357d33e40770bfdf89167395648e9a3fa974b95404",
+    "waist-measurement-activities-0-v1/activities-1.png": "46b9fb9241c4d18d3ce22e371364576011e996a18d7b9e388234975a2ef42542",
+    "waist-measurement-activities-0-v1/activities-2.png": "1ed1ac9d0c0ad8d973f60ad2b5e5e67798f75f23f6fa7226d43a6dd26e5b0ad2",
+    "waist-measurement-activities-0-v1/activities-3.png": "45bdedf8ae25a26c3b5d19372c43ca35e6f2054be5fe9ea470fcbb3c16d86d31",
+    "waist-measurement-activities-4-v1/activities-4.png": "4b950029db6d832e63686e541c7f34580e15855fa61bdac4b5b9ca917c46989b",
+    "waist-measurement-activities-4-v1/activities-5.png": "6a63f849994c8807057a0ba1d84d0d58a2311f55b0c75791934cfe701317a48f",
+    "waist-measurement-activities-4-v1/activities-6.png": "935577c838900993147be02d224e95f9c015a181cab73b05749032a6325cbb55",
+    "waist-measurement-activities-4-v1/activities-7.png": "dbc223b1b217c64cb8e2aae69cb9e8d6273ad2fa6e296fb28ac0ae337de8f68d",
+    "waist-measurement-activities-8-v1/activities-8.png": "b48dd139cad50f75a3cea14e1df2c5522e74dd1126290a34d0754343ff43e6b0",
+    "waist-measurement-activities-8-v1/activities-9.png": "376548845e3f0d199bcd38d2d757dc7f29305362d8bfc78c5e90afb4a294dfc6",
+    "waist-measurement-activities-8-v1/activities-10.png": "b0aa83e36accfb46e5cb03893d99a9f4e277642d8b2211e289605aa804bca2fd",
+    "waist-measurement-activities-8-v1/activities-11.png": "b805a394017dd018d4dba631e3a0b3e29fcd0f4cda9ef93cb4921ac267da801b",
+    "waist-measurement-activities-12-v1/activities-12.png": "95497a0ca1d9fc61f082d7e02834ac440ef09d6d2238847f6c1513525ec8eef7",
+    "waist-measurement-activities-12-v1/activities-13.png": "aaf17c872101b72c0c56b958c0fee76e16e3577da79dfc02595bc077f7db01fb",
+    "waist-measurement-activities-12-v1/activities-14.png": "5bc905e5481efea99e5a767b597b80a125f61068c810c5e0c7271c98869210e7",
+    "waist-measurement-activities-12-v1/activities-15.png": "73027df37f97d2d35c903e7eacc0829be2b69a1769a04ae5885dc5c5f129c28b"
+  }
+}
