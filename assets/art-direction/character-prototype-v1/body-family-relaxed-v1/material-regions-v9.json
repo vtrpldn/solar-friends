@@ -1,0 +1,283 @@
+{
+  "status": "Measured breathing and seated waist correction; internal palette review required.",
+  "why": "Inherited scalar waist cutoffs labelled visible shorts as shirt. Trace the painted hem from actual uncoloured native pixels rather than accepting those labels as physical ground truth.",
+  "priorSha256": "87b0d01b1f079e9a9e9fa897f78ec373bf22e1ea3dcb8acca58a21129e66c374",
+  "bodyBindingSha256": "b9dfc6e02e34891ac930bcf9b551726df8e7744ac2af57de923f8205c6973e75",
+  "changedPoses": [
+    {
+      "sheet": "base",
+      "index": 8,
+      "bodyFrameSha256": "54bb2ef172030ff217a335eb8deda8721dc35a11fc5c2d2e25fc2f9f1d398cd1",
+      "waistLine": [
+        [
+          108,
+          132
+        ],
+        [
+          116,
+          135
+        ],
+        [
+          129,
+          137
+        ],
+        [
+          142,
+          138
+        ],
+        [
+          152,
+          136
+        ],
+        [
+          159,
+          132
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 9,
+      "bodyFrameSha256": "0c020264d3a2de05bd6d38c3aaf3ddb55d7f2e49c6ce4ea7dfe71a3255f86bc5",
+      "waistLine": [
+        [
+          108,
+          132
+        ],
+        [
+          116,
+          135
+        ],
+        [
+          129,
+          137
+        ],
+        [
+          142,
+          138
+        ],
+        [
+          153,
+          135
+        ],
+        [
+          160,
+          131
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 10,
+      "bodyFrameSha256": "121af55c5092c26782af08e9db7becc7e5f6bcc5e23378fae760dcecbc7965ac",
+      "waistLine": [
+        [
+          108,
+          133
+        ],
+        [
+          117,
+          136
+        ],
+        [
+          129,
+          138
+        ],
+        [
+          143,
+          138
+        ],
+        [
+          154,
+          135
+        ],
+        [
+          160,
+          132
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 11,
+      "bodyFrameSha256": "6d98ee94df25924d990b97e614c8c43ead89cc7ec0dc397bd19f5560746ac352",
+      "waistLine": [
+        [
+          108,
+          133
+        ],
+        [
+          117,
+          136
+        ],
+        [
+          130,
+          138
+        ],
+        [
+          143,
+          138
+        ],
+        [
+          154,
+          135
+        ],
+        [
+          160,
+          132
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 12,
+      "bodyFrameSha256": "933f1676dfc106df743cfc31d9bc7684176ff353f3170978b431b1ea34c9a590",
+      "waistLine": [
+        [
+          85,
+          137
+        ],
+        [
+          95,
+          144
+        ],
+        [
+          105,
+          147
+        ],
+        [
+          116,
+          149
+        ],
+        [
+          122,
+          144
+        ],
+        [
+          126,
+          137
+        ],
+        [
+          145,
+          150
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 13,
+      "bodyFrameSha256": "c2679bdb1b0f714f2ed44867e5dea4ae0bcda631403452ab538e94a94305c262",
+      "waistLine": [
+        [
+          85,
+          134
+        ],
+        [
+          98,
+          139
+        ],
+        [
+          108,
+          145
+        ],
+        [
+          120,
+          149
+        ],
+        [
+          126,
+          139
+        ],
+        [
+          133,
+          133
+        ],
+        [
+          145,
+          148
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 14,
+      "bodyFrameSha256": "8a969849dbf8a295e2a733c6d2febf0624b9f9f16058ea17cd27eb1dd74e78b2",
+      "waistLine": [
+        [
+          85,
+          139
+        ],
+        [
+          98,
+          146
+        ],
+        [
+          109,
+          150
+        ],
+        [
+          116,
+          152
+        ],
+        [
+          122,
+          147
+        ],
+        [
+          126,
+          137
+        ],
+        [
+          145,
+          150
+        ]
+      ]
+    },
+    {
+      "sheet": "base",
+      "index": 15,
+      "bodyFrameSha256": "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a",
+      "waistLine": [
+        [
+          85,
+          137
+        ],
+        [
+          99,
+          145
+        ],
+        [
+          110,
+          149
+        ],
+        [
+          116,
+          151
+        ],
+        [
+          123,
+          146
+        ],
+        [
+          126,
+          137
+        ],
+        [
+          145,
+          149
+        ]
+      ]
+    }
+  ],
+  "unchangedRegions": 40,
+  "evidence": {
+    "waist-measurement-base-8-v1/base-8.png": "fcfd0e7d3167b194314e015617b2b491788686be12ad9d13c90a897916346934",
+    "waist-measurement-base-8-v1/base-9.png": "418e28f6b6ae82b95c032066df4587e0c1032ed8ef8ce10156b1e87aba9b2925",
+    "waist-measurement-base-8-v1/base-10.png": "da6f158c7a57fbf2e8612f0e421590201a676b0e1da5d831d2a45c468e2ea84d",
+    "waist-measurement-base-8-v1/base-11.png": "33ba3b0891df518f33c92342bf91e171862af3e3b8ef9b949f253407dca984ad",
+    "waist-measurement-base-12-v1/base-12.png": "387061b137e972f05927dd5393442ed58b51e0074d62c85b2c58a90fb7e2ee2f",
+    "waist-measurement-base-12-v1/base-13.png": "a113b940591eb25568562b0d3e99496b51e1341ac6a299172025e03aff8c2433",
+    "waist-measurement-base-12-v1/base-14.png": "9366ad61f1fea2cc4d3227e7067fbb29327e0249ee4c32584af065e13a9ad631",
+    "waist-measurement-base-12-v1/base-15.png": "b5455567b6ad8339b8072c2fb0f9c82dc3a341f32e521a411dce983b4c052883"
+  }
+}

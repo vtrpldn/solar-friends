@@ -1,0 +1,49 @@
+{
+  "unchanged": 40,
+  "changed": 8,
+  "counts": [
+    {
+      "sheet": "base",
+      "index": 8,
+      "reassignedShirtToShorts": 468
+    },
+    {
+      "sheet": "base",
+      "index": 9,
+      "reassignedShirtToShorts": 485
+    },
+    {
+      "sheet": "base",
+      "index": 10,
+      "reassignedShirtToShorts": 465
+    },
+    {
+      "sheet": "base",
+      "index": 11,
+      "reassignedShirtToShorts": 461
+    },
+    {
+      "sheet": "base",
+      "index": 12,
+      "reassignedShirtToShorts": 274
+    },
+    {
+      "sheet": "base",
+      "index": 13,
+      "reassignedShirtToShorts": 732
+    },
+    {
+      "sheet": "base",
+      "index": 14,
+      "reassignedShirtToShorts": 283
+    },
+    {
+      "sheet": "base",
+      "index": 15,
+      "reassignedShirtToShorts": 553
+    }
+  ],
+  "alphaChecks": 2097152,
+  "materialSha256": "101bb53c95a16c6a8d0a06ab9ec0fb79aae81a3bc42d2c6a287b73db458aee56",
+  "scope": "Eight breathing/seated material boundaries only. Painted seam review distinct from inherited-mask equivalence. No complete garment/appearance acceptance."
+}

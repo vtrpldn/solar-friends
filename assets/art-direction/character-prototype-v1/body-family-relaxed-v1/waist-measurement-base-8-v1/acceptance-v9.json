@@ -1,0 +1,21 @@
+{
+  "status": "accepted-internal-breathing-seated-waist-regions",
+  "findings": [
+    "Inspected all eight enlarged uncoloured native seam guides before tracing the new boundaries.",
+    "Inspected all thirty-two old/new normal and inverse palette views. Visible shorts start at the painted seam rather than the inherited scalar cutoff.",
+    "Bent seated pose 13 no longer carries the large shirt-colour patch on its shorts. Occluding arm skin remains unchanged.",
+    "Only eight masks change; all changed labels are shirt-to-shorts and forty other regions remain identical. All 2097152 compared alpha values remain exact."
+  ],
+  "limits": [
+    "Bare body mask review only, not full clothing/hair/accessory/portrait or player integration.",
+    "Existing short-sleeve breathing sources still require review with this revised material registration.",
+    "Idle/activity inherited masks still need painted-seam review; unchanged does not mean verified correct.",
+    "No complete biome/campaign/performance/recovery/usability release claim."
+  ],
+  "artifacts": {
+    "materials-v9.json": "101bb53c95a16c6a8d0a06ab9ec0fb79aae81a3bc42d2c6a287b73db458aee56",
+    "material-regions-v9.json": "39d317eff84aa6fa5a8c9b09bbcc0a7e60df49ec59c5b1f9ff86966b5721d2cd",
+    "waist-measurement-base-8-v1/review-v9.json": "a39b56ee73f51c10b64125837085945847c05453346bf64587aac4d494576c76",
+    "waist-measurement-base-8-v1/palettes-v9.png": "7704eef619f555b314b3e2d3abeb294b942f7da767b004bc3b710deadcfa16e3"
+  }
+}
