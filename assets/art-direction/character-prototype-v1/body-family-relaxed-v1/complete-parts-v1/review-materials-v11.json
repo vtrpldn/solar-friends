@@ -1,0 +1,1429 @@
+{
+  "scope": "Internal complete 48-pose hair/tool/stool assembly, two styles and two palettes. No public body recipe, hat/beard/clothing/body-range, animation/world or player acceptance claim.",
+  "composed": 192,
+  "unchanged": 87,
+  "returns": 8,
+  "foregrounds": 64,
+  "hashes": [
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 0,
+      "palette": 0,
+      "sha256": "ada9e4bec4552d5fb1d1aa773ac398b5b70fc30c9bfc84ebc56d2c0e00b6047b"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 0,
+      "palette": 1,
+      "sha256": "1cdee40db1d8ea3b08882d761f87b518546da18e3427ae55c25af3eadf437e00"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 1,
+      "palette": 0,
+      "sha256": "0ab063a5228e987ed1b1251341a7acbfe5c22d1898f61394ecc77c9083ba6cbd"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 1,
+      "palette": 1,
+      "sha256": "575f39515c68b4c9e6d0a6b1dd1d123c2ba6752cba4b0b566e0fb654db913c94"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 2,
+      "palette": 0,
+      "sha256": "b1694b000e93e79014b1f8d10edd9725377907cf7a7a9d786d28662299c8868d"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 2,
+      "palette": 1,
+      "sha256": "94b6c31dfb42b9b68c8c045e0fcabeecb295616a127a8f6ba7a7642eb63edaf4"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 3,
+      "palette": 0,
+      "sha256": "47c2d2c362ab821e47b4e8181e8eb32d34c97d6e9376f62050a8bc23465ec779"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 3,
+      "palette": 1,
+      "sha256": "1439287e5dca3fd18e6adef73485609752d499254d14c7da0e02def858bad99c"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 4,
+      "palette": 0,
+      "sha256": "696334807596ff27bdc903bd8fd66c6562c336d11554a8f971cd3d0cc2246c44"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 4,
+      "palette": 1,
+      "sha256": "5652119456499cb59d4e339df9bf5dc28c47fea7002996ddbfb0f3e8b4c3bb4a"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 5,
+      "palette": 0,
+      "sha256": "7c044d61b206248956adcb4aa8d0a7aefefb6245360166fc1b10bf8ca226d880"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 5,
+      "palette": 1,
+      "sha256": "6a0e400ffa40bda381f560a2f05dbf4b5b9ce7c95db152d5117de9f6707b9840"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 6,
+      "palette": 0,
+      "sha256": "0f3f63aa648ab9433920cea7b64362f01c423b05833b2da058beff2b4e1460f5"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 6,
+      "palette": 1,
+      "sha256": "8acd986e0860f2247a5a946abbd3fa785317c30dc0d7989c6daa0fdee301ea99"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 7,
+      "palette": 0,
+      "sha256": "9715df5ca669446033836026c2022f009eed0addd98ec338ed955f7d90f46649"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 7,
+      "palette": 1,
+      "sha256": "9f11c0d9cb92a2a679c0a2cff809902502374d006dec9cdcadc062ba97bba873"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 8,
+      "palette": 0,
+      "sha256": "120e846f5ea289eeada25d6bb065e092f9de4190ba59d41a58d2629099dd39a3"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 8,
+      "palette": 1,
+      "sha256": "c17eb8f248d6dc3773afe9772acc52df75765e7337653196666dce80e6abc93c"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 9,
+      "palette": 0,
+      "sha256": "ac5a20ba3fe368167bc2379c795741bc5bd1f81db0cb6c25be63ea1e015f73c7"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 9,
+      "palette": 1,
+      "sha256": "4766cdbcef28f946de10a718c5cf04578ae464b6ec53a2e993b5d5a222a2a073"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 10,
+      "palette": 0,
+      "sha256": "f2d5733f865c3e4290a2baddc3d325554b5938964f7d49eba66081abd97a9de0"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 10,
+      "palette": 1,
+      "sha256": "b2953bd0f36cfe41b2fc49f42271cf6f4a1c4849148b8f43aea04a7a17ce9386"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 11,
+      "palette": 0,
+      "sha256": "0b385b3e8baafcf824d7c4ec50c49aff00e53809ad5a75e03d3999b56fb5f571"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 11,
+      "palette": 1,
+      "sha256": "96de2aa914ce06bcea6de0052559dc54cbf060166a239e053f05f8d3d0753d38"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 12,
+      "palette": 0,
+      "sha256": "557dd70819ffd65edce1185c38120077727dfb67f7d618fec86dba12a4df7170"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 12,
+      "palette": 1,
+      "sha256": "4b31d16db3147c11d414eb8b20c57d3873450ce58a10e3f602de5a7920aa7a63"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 13,
+      "palette": 0,
+      "sha256": "92040725169d971e229e7806a7d8fd191c35203605cf1a0a70c17bd4c434ee82"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 13,
+      "palette": 1,
+      "sha256": "d01931c7adbd332f439f146ebf6df375c2d45c5075088c4db1feb7df148503c0"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 14,
+      "palette": 0,
+      "sha256": "3601b1edd7c9109e390665602da4da9951129a0a23dca481d9c9aa76e6dd0284"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 14,
+      "palette": 1,
+      "sha256": "27c705f74e046dc7548275b6e8af467e70b68ac2abce2c56cc19eb057edc6221"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 15,
+      "palette": 0,
+      "sha256": "3342d22e5bcf58be778cbb14eeaab43b149f082d3a3efe600f774ace9efb3954"
+    },
+    {
+      "style": "curls",
+      "sheet": "base",
+      "index": 15,
+      "palette": 1,
+      "sha256": "658229a718b95f29b441f9762377b4e84c4426fcab3e9fe0d6c4225af6606d50"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 0,
+      "palette": 0,
+      "sha256": "af099d8480a0ac48adaa0ff90dbd8ea3ea8b218f9983b12ecd1ce46078fa5384"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 0,
+      "palette": 1,
+      "sha256": "b51c72b710ce4520f5d1f122a3595e8a3b9ac18a932b4c5c507eb0b37c09e153"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 1,
+      "palette": 0,
+      "sha256": "756f20f808ee770dac928856eccc1a02a3239e66f31d80ae8db3769a9fa85543"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 1,
+      "palette": 1,
+      "sha256": "faef886043957d0cd1d823705d7c29a961e9795e04a89a0a9682c0d180e3012c"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 2,
+      "palette": 0,
+      "sha256": "f7f44d5573289a0998080dd38c3bf9912194a8e1fe96b1227118476240c7f0d5"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 2,
+      "palette": 1,
+      "sha256": "af7f27a992cdd623788f12b827e9497384b36bd7ddb4afe8daf0bba57b85d473"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 3,
+      "palette": 0,
+      "sha256": "de4183a7b101017b5d978f78c183ec459ce511735a02cdb3a69a396c5c74753a"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 3,
+      "palette": 1,
+      "sha256": "8247fd56dafe6b49457b1dcb2b51d0587a7c30c4b47688780b90ebb083c2b38a"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 4,
+      "palette": 0,
+      "sha256": "0ed243de7f67c071b8cd1ce3bd0f177744e667fa3541d523afdaa16fd59e11d3"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 4,
+      "palette": 1,
+      "sha256": "10a1b1c8d2d88b60c41c0e1841df0ad7dbccd759ca7668a95913726f40d8dcfd"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 5,
+      "palette": 0,
+      "sha256": "3aca28e45f6f9fde6aa0b729ffbf3102357401ffe2186ab128ad25aabf356ed0"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 5,
+      "palette": 1,
+      "sha256": "6be7a80c38c6baf73945ebf3136d90ba6bab17e0a081025ba26cd16b7a7f076a"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 6,
+      "palette": 0,
+      "sha256": "b36816fd251d8e0325e6773135fce91a1cc15b7488378d0c4b4d7956d8a4414f"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 6,
+      "palette": 1,
+      "sha256": "7a8d40d9cea49875a098a1d24cc6e4624506e7389aa941e291789c182ca4edd8"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 7,
+      "palette": 0,
+      "sha256": "ad69a2d16e1fc9e9998a3ab153324894485510d7ba4bb20ae231d63801706c90"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 7,
+      "palette": 1,
+      "sha256": "d60eb4fba4148a2c975eb604b1d01ed999b8a42ad7fe6b0cfc787f205be2415c"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 8,
+      "palette": 0,
+      "sha256": "de7523b73fc6875a681cc8f65e2a515e2fd4f9bcbaeaf3060c6f0bff42d0646b"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 8,
+      "palette": 1,
+      "sha256": "717633c214f9204c04fa2fbdae1c0f5eef01702ddff8c4ca60c1add9dbff4a1f"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 9,
+      "palette": 0,
+      "sha256": "7da13f936526bde1c20a847bb56728110e95858c907cf0a965586646a8c6e032"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 9,
+      "palette": 1,
+      "sha256": "bb2d799f9ba8bd7661a867cad3f45bea943b0b31c2e7f27643eb3c2f4ca5277e"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 10,
+      "palette": 0,
+      "sha256": "3119eea2830fb12af69bed5e628300b4aa5151cc63bfbe9b41ba350b7605e8bb"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 10,
+      "palette": 1,
+      "sha256": "47b71e67b2b305e936209b6028d5ffeaee6ddeb957621fe63c6d533e9d7f220e"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 11,
+      "palette": 0,
+      "sha256": "f3b35acf91de5d51fab9fef8622d67aeed1f86f323b2bf0508ceaa9c0ab03bb4"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 11,
+      "palette": 1,
+      "sha256": "12c6418b94fe1a970552918d4f729ab8a48be9617faab1a49a8adf58a68eaf03"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 12,
+      "palette": 0,
+      "sha256": "89ffd87de896472adaa43183199d9557b51928b547a591dcff0625614b49480c"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 12,
+      "palette": 1,
+      "sha256": "e1091f0019e76daa708b5d52e89650f5371674358997d0a49b503dc7b845c6fc"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 13,
+      "palette": 0,
+      "sha256": "c5b7ac97adc56e8b8ae4b03ca32bf03ed83a9164415d7bc6cf435de08c788b66"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 13,
+      "palette": 1,
+      "sha256": "827b360c8563c7771fa3b6982ff82149f6f5c850132b3ddd5331db3b944aec7c"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 14,
+      "palette": 0,
+      "sha256": "9ec04226de757cf17cca6ad1b48ab504713efcc959c1069e2e286a9fe0982a82"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 14,
+      "palette": 1,
+      "sha256": "4ad110ee546675ce4f29dac24a3613d4a4c067c1ff2217e6e1ce48ab3d8b447c"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 15,
+      "palette": 0,
+      "sha256": "60c265ab52f02b3b47d789a713f74638e8c71105f2fbeebcafa374a68f2933c6"
+    },
+    {
+      "style": "curls",
+      "sheet": "idle",
+      "index": 15,
+      "palette": 1,
+      "sha256": "6161da1c12f09e90960290f257eea05ac650b0b313a3f1c7a077455ab2ce3d3c"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 0,
+      "palette": 0,
+      "sha256": "95aa495abcbce0305db80920300cb57363f7f4ffbcbfd95c908996ca672616fc"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 0,
+      "palette": 1,
+      "sha256": "4201d38e1417c6366267badf26df1b0b0cf24617b18ca93024ba9fece5f10ff0"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 1,
+      "palette": 0,
+      "sha256": "b40638d9a9d3ce8816f6e876bd5cd0ebac492b6077464efea628b6457899a073"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 1,
+      "palette": 1,
+      "sha256": "50e48f98fe7c5a18912774486ac53266e025af8e2229f61b0ce3337fb8ac3bee"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 2,
+      "palette": 0,
+      "sha256": "89f9cbdbb021af0b856b231e3ca6ccbd0854dc369bd0dd4c5202ccbdd177f62c"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 2,
+      "palette": 1,
+      "sha256": "0390b2aa562278dc55bfcc5edfbe4b57bcb35d8a10c5be2c47422dc62baadd3b"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 3,
+      "palette": 0,
+      "sha256": "2fd7d53fcbb529fa8357f4e8e97c55c8b98842841fdd91246a7a9f1cfae5e4aa"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 3,
+      "palette": 1,
+      "sha256": "cb122bf5448fc9cba0ff193bdd074432dc306041be7ac040cfe0ad51de5a675e"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 4,
+      "palette": 0,
+      "sha256": "47961b679bab7598c3cd526c20fd0126983fe34122a4e0646c0ded6ab91291e2"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 4,
+      "palette": 1,
+      "sha256": "5f300c4128b46f50a80966bd8300ae1a5fc3eb6b13c97feb4cdc2ee237873680"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 5,
+      "palette": 0,
+      "sha256": "3a82f7c0e69cba8a05822dbac50dfb8afc7d344e3e17feda3a7c0a713f98e45a"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 5,
+      "palette": 1,
+      "sha256": "b99244aced61370ac8f47bc709a4778eea6be7b0cdab74f94de3fa6e3a9beaec"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 6,
+      "palette": 0,
+      "sha256": "112348a056c7ea61807fc0543bb85d9abc7f302e1c7bb5dd12edb69e850fb32c"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 6,
+      "palette": 1,
+      "sha256": "97211db16f7e2434258e74eb48abd23de134a9c748bf510e0959d67510acf52f"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 7,
+      "palette": 0,
+      "sha256": "831452945bb6461491088a82d81699994ef489101c6bc9bd1a0be7aa880e73e3"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 7,
+      "palette": 1,
+      "sha256": "c6b9d7057bc6a4a6f0aae661c8f96c104ce87bfee3f6b6ba51a9bd7c72ae1972"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 8,
+      "palette": 0,
+      "sha256": "ad7bf13ff496e161451a723130134861a340996a1c9dcf7816375e7d8de91c1e"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 8,
+      "palette": 1,
+      "sha256": "f9aa3d8a25add2d24bbfeea8b5f9e5da6c24f9ac14e7b89e55169ce5ff7120ef"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 9,
+      "palette": 0,
+      "sha256": "d1447e035ed8aedc4ff92e174b8558c3ce1f6a0ba698155861b756cf3fa3da5a"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 9,
+      "palette": 1,
+      "sha256": "282306e38b3dbb9ba1ae86d7abbbe857070f2f8a4db5a932d2b6a51476381c33"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 10,
+      "palette": 0,
+      "sha256": "040d2697b6de6f3e8960fc644f3c085990ff0bc4da29d68737914ef58f2f722f"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 10,
+      "palette": 1,
+      "sha256": "aa4d52bc56b8df5f6e1cbfd1562b14490edee7b4e9d8bd2918a09b8122361cad"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 11,
+      "palette": 0,
+      "sha256": "a494c94980038f817132094a2e30a3270474db02bdd08d820ca181775b715a0e"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 11,
+      "palette": 1,
+      "sha256": "d1a485eb363cf2a83af67e7327a6cd94c553cbfb662827d466adac5819ab8855"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 12,
+      "palette": 0,
+      "sha256": "da3920212b2bbe79bf212e17aa7bff0310a68941adb3d46ef137a243ddf7c5d3"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 12,
+      "palette": 1,
+      "sha256": "d9e3df180995a65d33adbe1859b9d0c4e2964ff878c5e80694a91efcd26993c8"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 0,
+      "sha256": "6c919285f59327cbc9918d04adeab8792410645acca4c4e8db8c2334525e72eb"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 1,
+      "sha256": "630c51220baecd3091b4743960a864f748b5b91ce55efd527cad9e8b146ec079"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 0,
+      "sha256": "b9fb49397c25955462251d86e0b909f626f996a25c55954dca15e3fe70c835a3"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 1,
+      "sha256": "1adf3378ff9625fd3b77bb2453c262f28b9bb060e38a97ea1a05cc4e7d631007"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 15,
+      "palette": 0,
+      "sha256": "1439a0131ebea13cd38b5e39557b1c933be9766f3ac5a91439f2a97ccf18bc82"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 15,
+      "palette": 1,
+      "sha256": "e3a1ccdd68c9cc6af624f8804de0d15d0ba5269fc60fdff4b6f6ec85efd355f4"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 0,
+      "palette": 0,
+      "sha256": "b889bf0a2fc4d1889a59dcba663c213d73131418f89aabab82d009d5d4ec503d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 0,
+      "palette": 1,
+      "sha256": "21e724f529e918589ec85f4b51cb2260a3dd025be8727fade5892b2d384ca611"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 1,
+      "palette": 0,
+      "sha256": "ac314552ac5f19b546ca06adfe81a5368c60e15b213a2f9e4e2156d6154a9bf7"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 1,
+      "palette": 1,
+      "sha256": "4260339b193bf1b1ca5d7ce88926d41eba9ded9716ee60b096979be1d188e06e"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 2,
+      "palette": 0,
+      "sha256": "405ae9919ea7294702c4c272ae3b641346d9b93f86d4bc915a2653e2ebf7a8ca"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 2,
+      "palette": 1,
+      "sha256": "92f8608b499e069104acc95f2880a51effa6cb736fb19d230afd1b29437249c0"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 3,
+      "palette": 0,
+      "sha256": "1e6c485ba2762315d516ff0d2fef7d4e606c278536618b073da8bf0501f95746"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 3,
+      "palette": 1,
+      "sha256": "211c6a11c71e15740ecf3c0e3ec6e46ec4d05933324be212839ab2eaf6a591d7"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 4,
+      "palette": 0,
+      "sha256": "3456f8461b20e4b9ccb449aa234cfc0f34842fe58e78ec4668d041ff0b887bad"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 4,
+      "palette": 1,
+      "sha256": "1788bb1c0a44b77e08f3f496656fe405ef01547e784ce7ff93b64df2dc203412"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 5,
+      "palette": 0,
+      "sha256": "11d1f87b84c780e957c5a09ec86b17b35df3d38a475dd38b626085769c9ba666"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 5,
+      "palette": 1,
+      "sha256": "d696d9bc4a9efc6fb5dd12a0bbcf1cb6428ea34b311c636f1f1230a2a6a3f8cb"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 6,
+      "palette": 0,
+      "sha256": "924829fdc1cb60bfbf05dde38e3f5df6c28ddfca55fef76b008e5f328445f0b6"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 6,
+      "palette": 1,
+      "sha256": "9b42a7477a4170748a6fdb89e0204c74a2eae0ca983c71464c144ccc82195f2b"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 7,
+      "palette": 0,
+      "sha256": "3fc9b7c1af187f17782d5ba54a226f16deaff8b09b2137e96f59733e59b497a4"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 7,
+      "palette": 1,
+      "sha256": "d7ff69387d57fcab48b114bd7c9a2e368aedaf441f3858e39aab8fe9aa8fd8a9"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 8,
+      "palette": 0,
+      "sha256": "7b278ad31b5f03d08e43a65e0deda02016a2b27c1d4a9e93fbfbfb06bfb6499e"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 8,
+      "palette": 1,
+      "sha256": "3ece772cf53af679e2683ef6a41cd97e63ad2f621446477b7a33450cf82a9d5c"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 9,
+      "palette": 0,
+      "sha256": "32570012d423683605d331b2078556a73f8791ae2ffa53d81552392936656c01"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 9,
+      "palette": 1,
+      "sha256": "44750dfd6594c8f771245cfa8934d15d226b0ad19b47f36618912e57dd4b1c5a"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 10,
+      "palette": 0,
+      "sha256": "ed64fe109d41d38c0ed889d9c25fb17eff9fd3904a49c0fb67275d7f11909aca"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 10,
+      "palette": 1,
+      "sha256": "f14ea1aee774aa0f2cbbf4ce9ce18594c0ceb7129b342a06084208893d162045"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 11,
+      "palette": 0,
+      "sha256": "41bdb4654aacedb4e72b62b72eba1aa1497a9edb6b1ec68b028cdb6f084bf5ce"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 11,
+      "palette": 1,
+      "sha256": "aa76cfa05548f53d95f8f3c0d8a820be678453dcc70c7283f26e96a18938cb3d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 12,
+      "palette": 0,
+      "sha256": "dde2579d25740480573d4ddad2e2a237de683bc065a0c3c840d50e329fb8eadc"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 12,
+      "palette": 1,
+      "sha256": "9ce695fab29029eeea0c8ade154e7d2ed892258f8838ea5ab8d3eab47b22e7f1"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 13,
+      "palette": 0,
+      "sha256": "93733a5592dc628dd7ba202226ca5a7c4fe9e54702036aea562ee2015eea2cf1"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 13,
+      "palette": 1,
+      "sha256": "3fdef357e11450de11e1bf7262b191819ee5bde741b20c5a0fef9ce1dde0c2f8"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 14,
+      "palette": 0,
+      "sha256": "6de7ade7c16422d075d10807e73dbb0bfa57d0eee48a6cc0d8a7ec488c015f19"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 14,
+      "palette": 1,
+      "sha256": "cf6aee40c96011bf51c5e722d4d6d267d601e9b4143d8e9657e70b07e3d7bb3b"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 15,
+      "palette": 0,
+      "sha256": "9d71b82ec2744c2a540e7daba7e6291ed4ebb8b71f7e72e80615ea53df3a50f0"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "base",
+      "index": 15,
+      "palette": 1,
+      "sha256": "4a60c748ee102f09b5c950943f1620d68de30e16e2dd9f51ca0e3e66fa213c79"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 0,
+      "palette": 0,
+      "sha256": "7d7398297cf6df26114d4c26903c0fdcf45827a3e33e19799b1aaa2cb3671348"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 0,
+      "palette": 1,
+      "sha256": "2a9b693f76ce0307973a86a73750be391a2b78984511d10db81d6ab821388f87"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 1,
+      "palette": 0,
+      "sha256": "b16c62cd97784d3b0f51f24494ba87f2a50d57cc662b23fd53f2e8b2fa713adc"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 1,
+      "palette": 1,
+      "sha256": "1f72ed0c5257c4e960f46d549e1d7c1ce9439e2b0c16059c6f6244858146177d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 2,
+      "palette": 0,
+      "sha256": "50d3f35866e2bd0e30a40f778942af0c6607315b7be2206a156cd62055213ceb"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 2,
+      "palette": 1,
+      "sha256": "906c595d3d462e0d126f28c20051b987b4af00385852fc19d5b523a53f70a2a5"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 3,
+      "palette": 0,
+      "sha256": "8eecddb902fd7b2a6596a6fb34ff57f96037b8e75d42defa734d6269370469fc"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 3,
+      "palette": 1,
+      "sha256": "be7ccd9c962bd73d2c9c7bb95fad0d8953231c0856ba97c02bcb64441fafca60"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 4,
+      "palette": 0,
+      "sha256": "b0c95ec6636d12570c8e2b67fd040c855b5f20056510e9f7bd3b500389036d47"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 4,
+      "palette": 1,
+      "sha256": "6a5c0900827fa864201164ea88dc99975b656a50a0420765422ce298a3140a32"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 5,
+      "palette": 0,
+      "sha256": "e94ec20839232c47a1e325c2c74ab9a506a3a1878af3cc17b9fc6ec78ec2ee97"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 5,
+      "palette": 1,
+      "sha256": "b6a9cff3814b59973845d8bd3ff18998d2ce1343b7980f42393f7fdfe365cd08"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 6,
+      "palette": 0,
+      "sha256": "727b0d9968d4f8b9bacc7ba904ddb325d510b329d6506f7ac21f5015fe991851"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 6,
+      "palette": 1,
+      "sha256": "efb0e05ac94b978d62bfe58183c2371627188810bf6f92b0790596bbde80ffe8"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 7,
+      "palette": 0,
+      "sha256": "5ee948fd7355888298ade278f0e2b28329ababac1125972c347c4e19c4123fe3"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 7,
+      "palette": 1,
+      "sha256": "f191c24cd0c4a801a2226ab31f1c09e2333d8929e86604c982e832d38c5addad"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 8,
+      "palette": 0,
+      "sha256": "872f209dfe44a7442b638af516f0cb698a775a8df7231c37b726539ed6db5023"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 8,
+      "palette": 1,
+      "sha256": "368984e45fbb86441f806ae9d97a8da847a06280ed4badd4d05461288da22b7f"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 9,
+      "palette": 0,
+      "sha256": "11ec373c80aa247f026ee268dc3815e0872ad3981607d6f6ec561529b0234ca6"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 9,
+      "palette": 1,
+      "sha256": "73e480d27fd03c1deb88c80134c09b83b7d94f17045d738096f964167e0a6b06"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 10,
+      "palette": 0,
+      "sha256": "06c38ac8b161c709c50930655ca5cdcb4031355b6cf2698e2ce63c5b660bebfd"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 10,
+      "palette": 1,
+      "sha256": "40ecbea99dc0fb55a3d6636766b0995c1c3f310ea2b10d341f8686c6fc0f2e4d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 11,
+      "palette": 0,
+      "sha256": "a000ee93de1d2b6a482587f9923adce2f1d9fcdf58b33d5a43ded0374e99b3f8"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 11,
+      "palette": 1,
+      "sha256": "7c30caaace94833c119fb5a3f510a537948dad838cee1ab0df3033ebe6d74587"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 12,
+      "palette": 0,
+      "sha256": "48236ea3b3b979bebdc83777a6da5cfeacbc94a338f1fbf15abc02b7aad16271"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 12,
+      "palette": 1,
+      "sha256": "2879cb17ad460851975d78575e73abd99b375624be2c0f5290d36dd1333ef976"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 13,
+      "palette": 0,
+      "sha256": "88285237a1d9bfc640c5c02907f4a45b3d03a28a558d617135eb2437da2bd415"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 13,
+      "palette": 1,
+      "sha256": "1b37ffbd51ff48df44fcb61a92514422e5f6e920e3ed6f55ad7da648ce8f5514"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 14,
+      "palette": 0,
+      "sha256": "aaf1de7eb293a0d5f3e1aa937a5d30e6dd9907ae65e31cc857d51c2a7bb3d0ff"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 14,
+      "palette": 1,
+      "sha256": "48e29fdeb7f36b81b6aaa167a22c6505fab6abf477db6fb58e0c28c5270ec316"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 15,
+      "palette": 0,
+      "sha256": "8df3591707c0607905417fb06768312b87fc74e7bce1121f594b09f2f6069ecf"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "idle",
+      "index": 15,
+      "palette": 1,
+      "sha256": "aa0689d70a70e7b7b4ad72ae8ae6b04e3ee9736b0f13d3f81843ad8209bf683d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 0,
+      "palette": 0,
+      "sha256": "5fb832bc2a95dc3424a4f2cc434b0d510b94fb1aee88424f0e28991ee9c62fe1"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 0,
+      "palette": 1,
+      "sha256": "0a517e5a0c8a4fe60981cb53b9e9cc0ed061b9d9d30dfd238660deaad6b73fbc"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 1,
+      "palette": 0,
+      "sha256": "2aeb6be8b7ff8e30acd2a2f38e031b6706f1efbf85fe228a55f0986d4da6ac37"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 1,
+      "palette": 1,
+      "sha256": "317ec04298f7628d14187ab283bdbdc6c706ee3d3b769fc83ea1e28a84b63dde"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 2,
+      "palette": 0,
+      "sha256": "d2ed3046d89249bb832b83f9c17aa02648e4cea5ac1694303811ec11bb9b4892"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 2,
+      "palette": 1,
+      "sha256": "9cf38eec9efa736f00ed10700c48d0dab224ae6d6510b058c75f083dc2eb6e5a"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 3,
+      "palette": 0,
+      "sha256": "741422172951d3bbdb0ded4abcda2625eab7f19cbca9415129239f50410d600e"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 3,
+      "palette": 1,
+      "sha256": "dc75f7df12be6c55e682af9e3bb650036a5815e1e54579e51a3fa995778b9fb1"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 4,
+      "palette": 0,
+      "sha256": "13003e30f7385f917de5a9044adb237b500017007e119b529fd7f3a3217e3c0b"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 4,
+      "palette": 1,
+      "sha256": "afbeb3488402a644c453e56905d9854f170863f1096f6c20c91c682b08bebc56"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 5,
+      "palette": 0,
+      "sha256": "dbba5ad5fbbf756b3dab282c287f2ce1df6331f6e98f70689876b7de56e2f98a"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 5,
+      "palette": 1,
+      "sha256": "a474d83be407e3f6f9b0d54783c2f6b8ee835f7ded5d6d1a0d28907a99e84d70"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 6,
+      "palette": 0,
+      "sha256": "1079267bd9522eb264d664023dde27eda5ad386b22686183885f628ed5ff2499"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 6,
+      "palette": 1,
+      "sha256": "a2b6d1728b1cb93d57b71192a30d2f9e97025fc22b24545f362fca7805ad96be"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 7,
+      "palette": 0,
+      "sha256": "1d5ecb4d91c91ffe85111449746c6e5c68baf631f010e327e7375c0ebbee4f67"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 7,
+      "palette": 1,
+      "sha256": "adbc73de40cb72f1d998f6ccfe0112e73bfedc7cbee8d6d3b137bc54bc434616"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 8,
+      "palette": 0,
+      "sha256": "8b9dedfbbadc537de3d51194b3b095738c71a018cb75b576367cbe2c78008f8d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 8,
+      "palette": 1,
+      "sha256": "789a4d99e625a3cb27a79bbe2845a64c16cd1457423b8fdd2770e3d40f2ed593"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 9,
+      "palette": 0,
+      "sha256": "7144aca5ef7c9040d5667ae4e9f4faa0e263a0f6a403a93e5f84d552cf38abea"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 9,
+      "palette": 1,
+      "sha256": "ac40ed46a06552e4b461ac7c69ab5e55a75e6ecddfba9b741423ff59086bac5d"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 10,
+      "palette": 0,
+      "sha256": "46792d09ab3b972bc7da967843d1b619ce6e5f504b694e365d6eec5d8c3f4f81"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 10,
+      "palette": 1,
+      "sha256": "db8a38537ab4261dba544fe51d990b19959b454a5c8bca52990de55a39cb0f9a"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 11,
+      "palette": 0,
+      "sha256": "aa0516979fa8112626df768d36bae55d6e4a357640172c5449ecba5fa3063bec"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 11,
+      "palette": 1,
+      "sha256": "7fdde2cd25fa81971d9c452d2a271809f72e7c743da7b89cb5f4261be00e1439"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 12,
+      "palette": 0,
+      "sha256": "c17518ffe9464beddaaf0090514d22b4af810018e9bef25bc40a22765e94a7cf"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 12,
+      "palette": 1,
+      "sha256": "e54f07f963275589c9761259e01e5846be5f5c215458438843195c1cc7733ec9"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 0,
+      "sha256": "23817d64e37ea3f9d280296587e2bcaaf3a473f3dbbadc4935d0e1be90a3698e"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 1,
+      "sha256": "2eb7484f1186907e7add3ad37cda7513352150b383a4194585068b88e7115e5a"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 0,
+      "sha256": "786359dab300998c50dd4cf2ea8c10ab9b627d73c2da46ac75d79f83792aa72e"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 1,
+      "sha256": "8232508b5af9ff0099ad4917fc02c0889d8dc5e3cfaa148183b2328b8e7443b4"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 15,
+      "palette": 0,
+      "sha256": "6bf639068496e8016d7abfdea1a694e5a7db85f34a3083727298c5da3e8c29a2"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 15,
+      "palette": 1,
+      "sha256": "630fd464ab806e92346d9324adfe41996ff0e9316ccf886b40ca6bb4da6db993"
+    }
+  ],
+  "returnHashes": [
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 0,
+      "sha256": "986b342ef9fc882b5949c975ac5a17f7445ec2dea1882d751b7dc5569bd4eb73"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 1,
+      "sha256": "7d94dad29d5b8d25728e6a40f60ff533aaa6d7398c775ae202a834aeab6b5644"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 0,
+      "sha256": "aa01277aefacba9ccc8c051bae432801ab73ad14e6a398c0c7481f09eb5863d5"
+    },
+    {
+      "style": "curls",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 1,
+      "sha256": "33befe71f7cc467a73404a0a66c2b88aeb582b99034dc5fc0f754d58831a934b"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 0,
+      "sha256": "ae1fe4ee3aa6576704f3f21c5f6b3d5a0f415870275ece856d8121ca5016dbde"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 13,
+      "palette": 1,
+      "sha256": "e2049ee2547280aaf13e27f2d36ad864b83e80857a0af7625516969a49755746"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 0,
+      "sha256": "6159fc24d30d785ecb5bea3ef24ae4974b58721a023e895c3a890275140b89cf"
+    },
+    {
+      "style": "sidepart",
+      "sheet": "activities",
+      "index": 14,
+      "palette": 1,
+      "sha256": "968a8473babda51023916913daf92ff0c1f8e419f9e77b7956adaa67a5c7d098"
+    }
+  ],
+  "inputSha256": {
+    "hair-curls-v1.json": "e0a35a02b2eb49d44608df2ad19c3c70bc0ad3a1ee9d73d7d729309a86dd5018",
+    "hair-sidepart-v1.json": "8b65a60278dcabacf508382f1ac5ce77002bd0491b0674ddde1695ffaf692419",
+    "equipment-v1.json": "63bc53306126dc298523cea81b385bcb65f07deb2b338fd27cdee7abd77db7db",
+    "sources-v1.json": "45d421435d102c2b2005f2fbe339929fcd7676a0e791406b4360392c19e415a1",
+    "ownership-proof-v1.json": "f00a988e5ac9d476ae23852bef827810fe158af7874380179c1bb4b1b1f1e142"
+  },
+  "materialRegistrationSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "reviewToolSha256": "168bc34c6d34ce69753902aacdd8a79dbe11cf6d5cd5e89d6c04f38dd16e1207",
+  "rendererSha256": {
+    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",
+    "character-hair-placement.js": "6829af8d50016e6a0307033c31b0bc3e7532d680c99fd5c2009804d3996a4c6e",
+    "character-materials.js": "4b87f9105cf939f39cd0c3e3aa3198b2db7698e2453e0607a637231c3bbc1171",
+    "character-atlas-part.js": "ca287ad3a1647f468b1a28c144d6cb15526c0303f126ded998bf15f16bf1a757",
+    "character-equipment.js": "737e115c483bdbb8cead56db18e07beb4a5e463168ca70e0b18bf02831a025ab",
+    "character-equipment-parts.js": "892bda1be66baca5c2c3f168cc3bceaf36e2a12d023b2c30904ccbdea3f2be18",
+    "character-foreground.js": "c6ed3c8a88e2d5b37a4150ffa56e641319c40d1303d9cbc7580f442d32f7a3c6"
+  }
+}

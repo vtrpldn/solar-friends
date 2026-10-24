@@ -1,0 +1,28 @@
+{
+  "status": "accepted-internal-static-composition-with-revised-materials",
+  "findings": [
+    "Inspected both complete manual hair/tool/stool boards: two hairstyles, two palettes, all48 poses and mirrored facings. Tool hands and painted waist separation remain coherent.",
+    "Inspected both complete hat+beard boards in daylight and mirrored night tint, plus enlarged bare/hat/beard/both head examples. No new visible clipping or detached head accessory in these static views.",
+    "Independent manual assembly produces 192 poses and eight feeding recovery reference hashes. Prepared provider matches all192 poses and all8 recovery hashes with v11 materials.",
+    "Accessory review renders768 combinations and preserves348 default reference poses and16 default feeding recoveries. Accessory lifecycle verifies144 compositions,22 refusals and rollback/release on failures.",
+    "Provider lifecycle passes31 refusals, shared cache ownership, active-lease eviction protection, defensive inputs, source-outage rollback, queued/in-flight cancellation and two hair-disposal races."
+  ],
+  "limits": [
+    "Static internal composition only; no continuous transitions, three-biome world review or creator/portrait/player deployment using materials-v11.",
+    "Not every768 combination has an individual enlarged screenshot; complete both-accessories boards and selected head combinations were visually inspected.",
+    "No complete clothing/body/face/bottom/shoe range:39 garment poses and broader release gates remain unfinished.",
+    "Cache dimensions and released buffers do not establish total-app memory or sustained performance acceptance."
+  ],
+  "artifacts": {
+    "materials-v11.json": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+    "complete-parts-v1/review-materials-v11.json": "879f58093851f69fe4d51fd043cd9c34b2a2a2105cef811bb58d284ad878d9f4",
+    "complete-parts-v1/provider-verification-materials-v11.json": "fadd5fc6730c0bb7f648ae299f47b64aa8b98a07d639bd12f6fc733869afe71c",
+    "complete-parts-v1/review-materials-v11-curls.png": "22afedf51567766631d9695a598bb19d1c1b7db48dbada84c2134783a4436f76",
+    "complete-parts-v1/review-materials-v11-sidepart.png": "be02fa67e884bf79f669d89ae67e8759375c65608cb9d793c72b1f7d196b810d",
+    "accessories-v1/review-materials-v11.json": "b4a8b6e479023c2b29e4d8d1d34518bc6caa1c74a6643179753f9034e876f291",
+    "accessories-v1/verification-materials-v11.json": "f5a9dda0444b5fd9e4fd6a1310f2dbe1754250a28991337c61775b81d67c353c",
+    "accessories-v1/review-materials-v11-curls.png": "2ca5f317a96822c240cd8ef323957f17c725d8459036e29eac696a96d836b793",
+    "accessories-v1/review-materials-v11-sidepart.png": "e857af50a4129aa6a929c34f00444890e05cc566d2736efa7c82cde04cad3d18",
+    "accessories-v1/review-materials-v11-heads.png": "3d1603b248f015313f3f5131174dda4c69d9db60f32f1e8d675669cb240cca21"
+  }
+}

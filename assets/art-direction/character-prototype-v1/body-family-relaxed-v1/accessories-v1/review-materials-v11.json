@@ -1,0 +1,6180 @@
+{
+  "scope": "Complete internal hat/beard composition with unchanged source paint and four measured walking offsets. Static art/source review only; movement/world/player integration remains required.",
+  "composed": 768,
+  "unchanged": 348,
+  "returns": 16,
+  "info": {
+    "entries": 2,
+    "active": 0,
+    "queued": 0,
+    "leases": 0,
+    "preparedHairFrames": 96,
+    "underlays": 4,
+    "appearanceFrames": 100,
+    "maxEntries": 2,
+    "maxConcurrent": 2,
+    "maxQueued": 24,
+    "closed": false,
+    "accessories": {
+      "hatFrames": 1,
+      "facialSourceFrames": 44,
+      "posePlacements": 96,
+      "rgbaBytes": 11796480
+    }
+  },
+  "hashes": [
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "ada9e4bec4552d5fb1d1aa773ac398b5b70fc30c9bfc84ebc56d2c0e00b6047b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "0ab063a5228e987ed1b1251341a7acbfe5c22d1898f61394ecc77c9083ba6cbd"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "b1694b000e93e79014b1f8d10edd9725377907cf7a7a9d786d28662299c8868d"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "47c2d2c362ab821e47b4e8181e8eb32d34c97d6e9376f62050a8bc23465ec779"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "696334807596ff27bdc903bd8fd66c6562c336d11554a8f971cd3d0cc2246c44"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "7c044d61b206248956adcb4aa8d0a7aefefb6245360166fc1b10bf8ca226d880"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "0f3f63aa648ab9433920cea7b64362f01c423b05833b2da058beff2b4e1460f5"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "9715df5ca669446033836026c2022f009eed0addd98ec338ed955f7d90f46649"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "120e846f5ea289eeada25d6bb065e092f9de4190ba59d41a58d2629099dd39a3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "ac5a20ba3fe368167bc2379c795741bc5bd1f81db0cb6c25be63ea1e015f73c7"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "f2d5733f865c3e4290a2baddc3d325554b5938964f7d49eba66081abd97a9de0"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "0b385b3e8baafcf824d7c4ec50c49aff00e53809ad5a75e03d3999b56fb5f571"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "557dd70819ffd65edce1185c38120077727dfb67f7d618fec86dba12a4df7170"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "92040725169d971e229e7806a7d8fd191c35203605cf1a0a70c17bd4c434ee82"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "3601b1edd7c9109e390665602da4da9951129a0a23dca481d9c9aa76e6dd0284"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "3342d22e5bcf58be778cbb14eeaab43b149f082d3a3efe600f774ace9efb3954"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "af099d8480a0ac48adaa0ff90dbd8ea3ea8b218f9983b12ecd1ce46078fa5384"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "756f20f808ee770dac928856eccc1a02a3239e66f31d80ae8db3769a9fa85543"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "f7f44d5573289a0998080dd38c3bf9912194a8e1fe96b1227118476240c7f0d5"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "de4183a7b101017b5d978f78c183ec459ce511735a02cdb3a69a396c5c74753a"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "0ed243de7f67c071b8cd1ce3bd0f177744e667fa3541d523afdaa16fd59e11d3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "3aca28e45f6f9fde6aa0b729ffbf3102357401ffe2186ab128ad25aabf356ed0"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "b36816fd251d8e0325e6773135fce91a1cc15b7488378d0c4b4d7956d8a4414f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "ad69a2d16e1fc9e9998a3ab153324894485510d7ba4bb20ae231d63801706c90"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "de7523b73fc6875a681cc8f65e2a515e2fd4f9bcbaeaf3060c6f0bff42d0646b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "7da13f936526bde1c20a847bb56728110e95858c907cf0a965586646a8c6e032"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "3119eea2830fb12af69bed5e628300b4aa5151cc63bfbe9b41ba350b7605e8bb"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "f3b35acf91de5d51fab9fef8622d67aeed1f86f323b2bf0508ceaa9c0ab03bb4"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "89ffd87de896472adaa43183199d9557b51928b547a591dcff0625614b49480c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "c5b7ac97adc56e8b8ae4b03ca32bf03ed83a9164415d7bc6cf435de08c788b66"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "9ec04226de757cf17cca6ad1b48ab504713efcc959c1069e2e286a9fe0982a82"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "60c265ab52f02b3b47d789a713f74638e8c71105f2fbeebcafa374a68f2933c6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "95aa495abcbce0305db80920300cb57363f7f4ffbcbfd95c908996ca672616fc"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "b40638d9a9d3ce8816f6e876bd5cd0ebac492b6077464efea628b6457899a073"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "89f9cbdbb021af0b856b231e3ca6ccbd0854dc369bd0dd4c5202ccbdd177f62c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "2fd7d53fcbb529fa8357f4e8e97c55c8b98842841fdd91246a7a9f1cfae5e4aa"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "47961b679bab7598c3cd526c20fd0126983fe34122a4e0646c0ded6ab91291e2"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "3a82f7c0e69cba8a05822dbac50dfb8afc7d344e3e17feda3a7c0a713f98e45a"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "112348a056c7ea61807fc0543bb85d9abc7f302e1c7bb5dd12edb69e850fb32c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "831452945bb6461491088a82d81699994ef489101c6bc9bd1a0be7aa880e73e3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "ad7bf13ff496e161451a723130134861a340996a1c9dcf7816375e7d8de91c1e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "d1447e035ed8aedc4ff92e174b8558c3ce1f6a0ba698155861b756cf3fa3da5a"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "040d2697b6de6f3e8960fc644f3c085990ff0bc4da29d68737914ef58f2f722f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "a494c94980038f817132094a2e30a3270474db02bdd08d820ca181775b715a0e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "da3920212b2bbe79bf212e17aa7bff0310a68941adb3d46ef137a243ddf7c5d3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "6c919285f59327cbc9918d04adeab8792410645acca4c4e8db8c2334525e72eb"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "b9fb49397c25955462251d86e0b909f626f996a25c55954dca15e3fe70c835a3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "1439a0131ebea13cd38b5e39557b1c933be9766f3ac5a91439f2a97ccf18bc82"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "448701422b8c29b8ef66e66be213ccc872983473810fa50182cf1a2bcab08530"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "9e15a2672403dbd312369108f1eadff09ae5f6ac0394a3f0ab6cd09ce5f862d1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "07066a6de52b144af32aaeb84cbfe67744f6f18bfd1dbf998f82748573c293b9"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "7ec56298b56c198426e394f2b3d41eaa6142ee39fe69054d6fab06fc8efcd36b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "bcb9169bdc4f59694c35374f9883e5267aeefbb742ce5a57cfe3010208e149be"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "bddd3049d46fc40a14a63a5ba2ac538aa3dddbdefac5c13ee0f0e456ae6ac4de"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "f51620c63aa4911f8c290ce6344c53c26af81181eb634c24dcf8690f1e3b73d8"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "bf8b7205f5da7afefd969bdda7b41fdca9695ca0731b8f989e207a9241941ecf"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "d554ceae4c5ffa060a220d6096bdbb293d6049206c26184943e58cc449afbf37"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "fcfebce9dd5dac1f7ec76b17521ecc538ff8896ec2755359022374533a79fc0b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "64d21fd56967af7e593191abf61fd652acd569169ad48d99789264d4d019d436"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "51a94d164d46b3de826b951448b5a73af0c3d195dc4606e9958cae5a7f38371e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "dfaaa4daa4f8936634e69edd9241d61cb263df977b8302e3819fe53c48ddb073"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "35f64484bbe7a997ff0cfe20e910a8bc36e1d8627620b2989899c4af61b053d1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "8b118719fd7cb05209ed1af7e3b5a0c3a0e880a1c3ba7fd5b1f261d14dabcef1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "86e5980dc7199d435614e3ff4a0f97317ef954c257dc8248abfce8d153f71d6e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "613ecf9c3a77a26bbdaf326497d8d43b11282e86ee834aa101d761056cbdeae1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "233ea91e632e085629398d1c9773ad56469743b9b507f02b7bb4540b0d5adb7c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "46fe039ec45273e37d54fe271bb05d3fbf3ef3a6ef566f0fa69bd95ea8239b24"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "1a9a463ee9775fd3836c91201c75c2369cac4ade5637ce019de288ee557dac8c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "9bb07ff3314d60d5593439257c55331c2e49bb095d4f16b403a34adfa4a8760a"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "4f73e06498f342ed1c5c9472944710d1bb88e110246f068897fa50b365299864"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "41b01ee123ef39bcd219f0dd9255e5d96a4db07a7cc7edf5a42fce45a2105b8b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "b3491ca0505d0f775bed958255d6c2812717c34b0338c7da55efd42b01b36dea"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "fd28f1727c27ca0bdc91f25ef25309027cde54f63273a30d6d458389dcb52f22"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "59594262ac635ace536aa2e285deb35df0ccc81054d4d421e375b637f64a1f0f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "4a07055ec76160bc62a344076afd974da834ce73d9ede97d4accc594ec11beba"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "bd139609bc16910be802635cf69d5c1afc0d904ecb33c8d8acbd8ec050175eba"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "dda4e382afafdd850e551f3799ca9f0fdb8f9591e647214aff4fcf5b69499d3f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "796aa04dfe9c7b34599abbff5b15c99bd862149dfec6916ab7ca37ddf15d6c76"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "e412df6157276bef55423c3cc67d67efa03df4a9354701cd7c1d2e9efd3e0ca1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "21f2191257c5ecd7308acd632d0551b4dac1cc23e5037a52a8cd4c454221ca37"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "3ed61feaa58ff51c401d91f78870f33a1913d2e481f024dafb96b03055153b59"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "38c561356b1b21ebc129b3c259540c7bdbe572ce3f85f12ab71694502415c6b3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "291f2ec8a09be2668ddc29c2552535d5936a090cbee03e5631d3b2e2b843a51e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "e3e9b10b29fe8371fe8ce417539ee18acf1ba9511d52358acb5543f06851b545"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "2320b5c8fc4b8b2eeec7ca869148265949167d0be5a33e3f50675c3493b94d8c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "2a046e367bed85e642cd9072f6141f87a4b871e335c230674b0a8a350767fff6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "00e5ec35e5a329407284d5660628cdd2593e5cda626adf731b5c297f0c779f44"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "a6c013e55a232acdc905977bf40164146e5957b493badc475f4685955fcdf89b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "25d242b5a205b9b3c52c44fa333415ca3ce41ec9d8e809e5cfd3db65782c9ed1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "b73dcebc1d6fc107a705048b7b96200bb3800dde3a690751ece2b31d7f4daa85"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "6a9e6ea3ca0ff7a3f42c1e8183646321b98ad05be755835b937158ebc38abec6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "85396990629282f6623db965954c625e8c7c7c537d1c98e03689a3bf905f4dd1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "218d53ca967ec15ede852acbde7e36b0ca4d8185a111c5867becdb7a0d478c31"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "72744143462c116642542dc5d4585998bbdfceaaae17f954615a888e6f2d77c0"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "10ffdb11d99aa2c5d82bc6c29f00325ae4432417f00524eb0b7b806924bbfdf2"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "f532fd0b778917b61ec44e73ac22bc6d416bdb7e00ac3a34b7d010ff03018cb6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "2edb2b7d27034b489c3fac1358f47c251a06e7e5a58d2596f36e1756c4c84ac1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "36f2e7f103b449747bd73a931c522edfb77fe2309f2441f22b7fa851fa8bc254"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "35b6bb6b984654961e1c67a567d5c617a09318ff3bccd74b5cf5764b03af8213"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "13843b109806948b6bcaa0b31c395d0a05654890fa778fe9125966fe62db7ae8"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "5d6c4352c2069550c389e4cdd27d4258650e3f12ef027e2b3e41798bc675000d"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "df7966c4e661813468750206c62cddf468fc7faf82b6e363e40bb47f7a5d0179"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "2a214ae6a9b8430d7b4343bd3265296ef86f1bc0d027bb006a95e27280033eb6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "16a39b81c2be9e2b9b3ded2600b63407190757e2db8eca9a977226744dd757a1"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "4e1f00e08f71fa9297ed3b4f8d8da33df8ec1ddba18338dae9fa248520a215b5"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "5ea273ba7887747ac31232f5f1f1c453ad77bd459d56abf9b473b7d32f8bf484"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "8e1e5201e3f9e19e45431709750f3691135d0017d2068c39f6a5be3d812ef8dd"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "739079abca8ae77b471d5b638862d86325a071304deeeb1f3474f433b45ad664"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "0d8d2ba7519b66ad7aa0e639a8f3d54809cc41f5acc364890184c4e6fd84cbe7"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "85e10d779e361527f3acff4766ebd58abe2aa0fd346320e717aa069ddb3a5bf5"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "79d3f9049350e8e229309ddb0cafa07fb03db95a93a53c9c333cc91e088c7da6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "19cec3adc0c16d5a07630bfb21aeb7e735abfb2745ed537196695dd552cdcf47"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "a64694b21c799c49c1ec12f8ee25e07ff37be1f98b05d00e77cdee85054625fd"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "7cf6b6527315578c35917212214b1c66e74646507ef31bb631cae683b7e9742c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "7181cec5cffc36146accf2a736712492543e3439bc3d211d16d33b109f6e78ce"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "5f91f66a4e175b830cd161c2e8b49c9bb2d3acc66039bef18fa4e5df1a9b523f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "6af2bd24709107fb0c89fbbc37fc87bad3a6590f099d5eb3ac27a45cbb3aa2be"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "15d05dc40dda849d985805c470855c6e45c1d33e8e259f9633ef86820e3ba50f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "634a87724091e897fadd97f206b688c1faea221ab257886d2374b05b5fc3c64b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "5b7e345979c70df091460e6d43a09207ed528707393009fa1755391a9dc92858"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "53931db0fc5c36858a6c7046d60ff9ba970b1b912b1683e496a2e468f53be740"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "241fa4a49f7007f3313d6306bc8e87e81b0abdfd0da8bb04ba309b62684b171e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "4be84b81f310abe34c4150f20cdbcba14c4720a2d3361d0b17b26f4544fcd6be"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "622fd588cd84e49f3b3e2c6ea1d240eacc2b63bbf219ad717005604a52b8890b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "795bc4e9d54cf3935d138b02972639a6198bc8caeae4d97e9730212e42143337"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "1cdb9c2e62b26e8ebc1c5f905d9c92ba03deae9d462caa2e483e1dd5620d72c0"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "cd3423b0a975d234bc06546958e64c36a31229f659adb6d89d73d92edc176ab5"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "b478c937d2a403fc6e126e8dde62693110af670f806533edf723230e39b27eff"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "982edd61aa4b52b0ad1ff438acb73e31c6767ce6641e89a883c2ea3c0eac1507"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "7e67e44cf30bc64131511ee2d66bd87797da5a11bf456787ac3e28d49dc0cf8c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "5bd1e85061999d0c7711a0098d5d15f9f80a8254572e68720c99510122d8f7cf"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "706e50e8f7a1422f8b47eb26b781ceedf811313ef50af30484ffedb166bb66de"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "c74609a81348ab5a179b5f339e610309cced58abe416e10e9ca3c38bdffa8c50"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "18d5f02d2c287f2162ae7cd6cd23ca89d7dc0cc04def11be47d807d85bf6a0bf"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "ffc3367d6467d02b820c8c416764bad873373c3a4f777a106eabdd1ce58e7afe"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "aee76e19daf83b6b2260609a0a07997c78bcb7194795ac188d4d5e3b8d9848bb"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "be33ddec3f5d9bc678b7daa5da7aff274e6246ab77c18721382faf8ba9699e0a"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "72785e42c4aeec103fdde958a6b2ad6b45b4a243d676d1766852e61af39dab21"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "ce0d6fc1dfc16772d28704b9753a286a836ac1f25ced43526ebe00c3652b7c47"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "12809d0fd1f38820d68badfe5399576b29d08499a473d3eafcef6d29c54f387e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "b233d2d18c583855372489f076b02cc4f420a00be1498d7fd93515b2c9c529ff"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "69e5bca78e5d7d3e011763903512da115dc78c460ad0b1c3cf549eff4c4a8028"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "464114329d569589bf7991c49a939513654f30c91e50705abcf1fb6a5db7d431"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "fd7388d4001a1f71a63b4fb98410df1cf611ad762d655aaac6170e361a26adbf"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "f41caab3d82463c4cc0833239927cb49befe81af11af938c313d62a1bb6c9d54"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "fd38e862d5faedd662f5ad343e41cb35fd328cc4dd1cfef1f81cb73d133b6c0c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "b24c06a0afee51f548de3aa9eda70e0f57de28029e83b3f31a5597168933e9d9"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "007b3e511544f26426d1ba3133f04b88f25b3a2b526a629dba248225b4f427ab"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "112c1e7edee99e1c50f526cfa9f9c0713b7ef8fc1a6aff1b206b3cef6aac9fcc"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "d387df4037cc99c6d9303ca328629358e5a7ce32485a457f7eb176c2d693803c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "3d421380ff0a9b5b73c226d26a962d4acc9aecfea12179938360b54f97977a60"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "49a55057cef0bd1b765c6358e88e414457fb954439a544bff163bbf7fbfb2972"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "f8fa12d547fa11057183c7bc0850b34626904d16d3f43441874fdd50f50a1457"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "aec691acc60b663c1627a390981021a32ab06b259ad5c9d1df84045a678d2191"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "9e0aea8b69dab52e5c137820fb236cb21bfc21b96eeae3b812acbe4794ec1350"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "3ae51926ce8f70e155dd63aac47f81645d2506052cdd81f248c9b29a3863a436"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "8e8f0380c79a3678aadc16e53a40545b983866b294eb9ddeab399af41ae60e54"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "fecc8f5ba7ad9806b8d87fe8fe456a97479b0f722acc18adbb0cdaf856c196b0"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "e64c39d16cc62835ab5d39e676f018e035559bf3518c94c84d68d3fbd0225a6b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "6e6cc16e41d6e0a820bcb69b30fd8085e64518efe1e64f1911e20bcf2784cbee"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "280d4194541ddf7904ed1c2f81e4ae4b1f2840aef9007c6fa913b75a78cd4bb6"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "6c6a7ad82217419aec5aae9652999df04c040c9324b553d1c7ebc20b2c8f9c74"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "1c2a469d29ff9a8daa16e30f66c98f190d361a655e31a297c55d7b9774464c2b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "7c81330d2f16d2a8b603a2412c8076fa1dc0389f79ecc5908650810d1e29bf4c"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "8d5090751604e519617a51e61a8f80d1ef610b5e6a2506f272a99759cb0f6f9d"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "be09fab96f58b258f2a6f5c0f2c124302d8299548a3abf887d7a91b29fd8f617"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "0ab7c433264f98d0d6a6bd33412ea48fb941756f90dcc0c717dcf39c01335878"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "34ed7292579e9f022b84d35ba7e996f71104f8ebfcc933d6f289bbcbe8bff97e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "35ccaa24ba7bb9b8282ec3571a75ff0870f9ed43c5eaa10234052fb7fa0588da"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "eee122dc11ba4e1efa323826fec6f3d033f7b60d64bee3f837cdf8fd653bc2da"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "d48c81024a63c431125a7053cb667332866d5a0dc78c42ad82e0ade003b57ef8"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "e6d710679c5643b28f6e1481338943436a0ae8b9565e17193ef317a42fdc28bd"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "d644d878f01628c6a0469909ccdc55d6974fd5732cd66a64fc98cd7208feceda"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "1ff5e3347efab66381842cc61fc262e3322a0ce40394fd3ed15c27d1edf2fa31"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "3c5e3c8b72e3f6b045b53f59e8c7f7e50c7c8c3b545ae536525b5596095c9d15"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "8cbf6775200a9882729240e1859bbfee404aface55e1694629e3c49113540ba8"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "1cbfd39d53918d855fe08d1cac94d0b55d3331c631a6cd00afbcd49988a2c2de"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "aa20edd93afa7b20b327b6c81f9df65f947d07234cdd600feb58c85154511e59"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "fc123ddbb0972d014340d8ab07d61fb271b3361413be636577373d0d61efb839"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "ee3bc06d6caa6fcf6400bb4ee0089869f2062bd8070ff4b4872d98e845abea36"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "b6a3afdd79d02dbfcfdaa69f58e8b468811925cae25c506615ba876c48caee99"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "9e0d165561aae5dcc3246519ed739995c03595ee3fff565399c69f7782e09d58"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "54657857cd7fa41c0a9a96b15dc8ad981aba1502b04fa24e523125d18ee1cfb2"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "9e2fe7f83572296bae4506a46d0488c176620fe6d6d0dda3d8e8bd0a92a92c0f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "8fda762585387508178d530858eb669409a0b086993a7c09ca2f05f5c5ed84ed"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "b77e69dc03c03385785dd24a5d28eaa4448890a291cfc801c775f7ce2b736a34"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "20005cfb9d3438efd1f45f41375357d650a447ba1681f4c3041bb76c9e8445b3"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "b434f797c9912ee5afff23bebc392ba5fd2eb7491d32db873a4607e62b68319e"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "9512e2e12e243dccf0c42a0a1d8ac2adf50999b30db2133f17bc8ab921736e6f"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "413beaf48749c8fb9386ef01d23ab9637d79120f8d3354da65ad3083a263452b"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "ab0c656a1b71b5069b3a346a393af3d4c5d421890c953619a5b6d8ba89b76c03"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "c83e91d24a414b3bdd0a2902ec6b702a37aa9d366bd4ca6b74824eda959da46f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "1cdee40db1d8ea3b08882d761f87b518546da18e3427ae55c25af3eadf437e00"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "575f39515c68b4c9e6d0a6b1dd1d123c2ba6752cba4b0b566e0fb654db913c94"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "94b6c31dfb42b9b68c8c045e0fcabeecb295616a127a8f6ba7a7642eb63edaf4"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "1439287e5dca3fd18e6adef73485609752d499254d14c7da0e02def858bad99c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "5652119456499cb59d4e339df9bf5dc28c47fea7002996ddbfb0f3e8b4c3bb4a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "6a0e400ffa40bda381f560a2f05dbf4b5b9ce7c95db152d5117de9f6707b9840"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "8acd986e0860f2247a5a946abbd3fa785317c30dc0d7989c6daa0fdee301ea99"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "9f11c0d9cb92a2a679c0a2cff809902502374d006dec9cdcadc062ba97bba873"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "c17eb8f248d6dc3773afe9772acc52df75765e7337653196666dce80e6abc93c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "4766cdbcef28f946de10a718c5cf04578ae464b6ec53a2e993b5d5a222a2a073"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "b2953bd0f36cfe41b2fc49f42271cf6f4a1c4849148b8f43aea04a7a17ce9386"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "96de2aa914ce06bcea6de0052559dc54cbf060166a239e053f05f8d3d0753d38"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "4b31d16db3147c11d414eb8b20c57d3873450ce58a10e3f602de5a7920aa7a63"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "d01931c7adbd332f439f146ebf6df375c2d45c5075088c4db1feb7df148503c0"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "27c705f74e046dc7548275b6e8af467e70b68ac2abce2c56cc19eb057edc6221"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "658229a718b95f29b441f9762377b4e84c4426fcab3e9fe0d6c4225af6606d50"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "b51c72b710ce4520f5d1f122a3595e8a3b9ac18a932b4c5c507eb0b37c09e153"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "faef886043957d0cd1d823705d7c29a961e9795e04a89a0a9682c0d180e3012c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "af7f27a992cdd623788f12b827e9497384b36bd7ddb4afe8daf0bba57b85d473"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "8247fd56dafe6b49457b1dcb2b51d0587a7c30c4b47688780b90ebb083c2b38a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "10a1b1c8d2d88b60c41c0e1841df0ad7dbccd759ca7668a95913726f40d8dcfd"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "6be7a80c38c6baf73945ebf3136d90ba6bab17e0a081025ba26cd16b7a7f076a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "7a8d40d9cea49875a098a1d24cc6e4624506e7389aa941e291789c182ca4edd8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "d60eb4fba4148a2c975eb604b1d01ed999b8a42ad7fe6b0cfc787f205be2415c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "717633c214f9204c04fa2fbdae1c0f5eef01702ddff8c4ca60c1add9dbff4a1f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "bb2d799f9ba8bd7661a867cad3f45bea943b0b31c2e7f27643eb3c2f4ca5277e"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "47b71e67b2b305e936209b6028d5ffeaee6ddeb957621fe63c6d533e9d7f220e"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "12c6418b94fe1a970552918d4f729ab8a48be9617faab1a49a8adf58a68eaf03"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "e1091f0019e76daa708b5d52e89650f5371674358997d0a49b503dc7b845c6fc"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "827b360c8563c7771fa3b6982ff82149f6f5c850132b3ddd5331db3b944aec7c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "4ad110ee546675ce4f29dac24a3613d4a4c067c1ff2217e6e1ce48ab3d8b447c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "6161da1c12f09e90960290f257eea05ac650b0b313a3f1c7a077455ab2ce3d3c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "4201d38e1417c6366267badf26df1b0b0cf24617b18ca93024ba9fece5f10ff0"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "50e48f98fe7c5a18912774486ac53266e025af8e2229f61b0ce3337fb8ac3bee"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "0390b2aa562278dc55bfcc5edfbe4b57bcb35d8a10c5be2c47422dc62baadd3b"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "cb122bf5448fc9cba0ff193bdd074432dc306041be7ac040cfe0ad51de5a675e"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "5f300c4128b46f50a80966bd8300ae1a5fc3eb6b13c97feb4cdc2ee237873680"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "b99244aced61370ac8f47bc709a4778eea6be7b0cdab74f94de3fa6e3a9beaec"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "97211db16f7e2434258e74eb48abd23de134a9c748bf510e0959d67510acf52f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "c6b9d7057bc6a4a6f0aae661c8f96c104ce87bfee3f6b6ba51a9bd7c72ae1972"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "f9aa3d8a25add2d24bbfeea8b5f9e5da6c24f9ac14e7b89e55169ce5ff7120ef"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "282306e38b3dbb9ba1ae86d7abbbe857070f2f8a4db5a932d2b6a51476381c33"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "aa4d52bc56b8df5f6e1cbfd1562b14490edee7b4e9d8bd2918a09b8122361cad"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "d1a485eb363cf2a83af67e7327a6cd94c553cbfb662827d466adac5819ab8855"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "d9e3df180995a65d33adbe1859b9d0c4e2964ff878c5e80694a91efcd26993c8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "630c51220baecd3091b4743960a864f748b5b91ce55efd527cad9e8b146ec079"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "1adf3378ff9625fd3b77bb2453c262f28b9bb060e38a97ea1a05cc4e7d631007"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "e3a1ccdd68c9cc6af624f8804de0d15d0ba5269fc60fdff4b6f6ec85efd355f4"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "decc320cca106ac2174b616d328afd2779aa13c9c36c2538808403e80d8f3324"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "9ee057ecc1855d69f42a2eb6fd35e0fe2a30ca7079fe76bd57561809eb528981"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "1d10b8e8eb98fcf046bc80ac75d226bf319581bf6669f605912a11a20ce406c1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "2e78e879e908f095b465170fb1fee18095eddee70625fdc9c812e097e57874d4"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "7081b8bbf77b39155106bc8f78ec87f9dfd67e800a5a66a5dc014590d8bd8ed3"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "f22ea7459502963e6f736fea9b64b40cbc88ba969fd2ef2203f91180372a8911"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "5b0f96da113d79e549beca3513277fa3f9bb5a3bd52acfb5bf342badf8587089"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "72457d3ff2d938122dc9c595589cec83228efd0dc1fe4777a186b9580f8f9111"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "858a3c2a428ae75393743409206e5fc98ae16ab8a13174205f963b93aaaf3b13"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "af5a51204702cb4258c98c5eb2eeddfe9feb992ae6bd0c91933afa15627314f0"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "31d105dc80474d084df2d2fc93cbac66600b57905557fe9889834e8428eb67e7"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "d3bd48c3c83a827c1c27a8dfbffc2475e5eab1b67a3e4a2471b16164721dc399"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "d071fa3413389222fae4bafa7688414841b3f952b3af59470a9834b6c75ab81a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "0c7a772ac8650ed9f399e6cdfe5f56ca33bdf3058969bc6fa8e7204866b5a3c1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "cf801ed5b3e5452d5094477fcc936215ddde0304e904b6559e739c62b4810b48"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "fcfdb0dc7ac762f0ec598cf60d20b5943e6e3210ff690966a5afff512834a588"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "efc57af83be284435cb85f99c464d97ed9e868a3e9a201ebd954adb9d340b434"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "44146f1cecfcd6ec314c60f11d03e5fac23063de4e0c366fe9133ffde20f787e"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "7d8b66da3c9809ba8fc2e2b911fc818bf7173ae8c79586924efb2719b2acaf97"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "cd9ec68ddad30bf80c5415170ea5ea9806061e9c90761073ed977644c8cb4e8c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "72213309fb145a8af3312ef1d70542bf80eb930addf77a5b679369d8acb48a4a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "c926cd6ac369e6ee3423a73f3c361756d92328fe6ab9e2a364999b6298445a8f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "2a31a51923747bfad496ec33bd09945cc5b80167dc13ff9f1b3d2f2eb07d4629"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "492296b231210420035ebcbf30440c5ef2196d18c7e5c10f6b5d297dd037907f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "a1eb907f75c282da51900623e50ff13d2cd5db656274976f6931c20a354c290a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "e0e0ffb263f8295e6c7ef451f3eb169fe58e1157d2cf0c2814d8685d46dec288"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "a3962f65e6edeae577c5d6ae23c108fb5f26f769d03992e4b5dab75c28c2f7ce"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "5a1249a109add564e8a77cff1aa8bfa3a235b17f5c548dc0deab16ce987449d5"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "4bd61a4f93d88131e6e3bfaccda0e652e387eb2990236adcf5d49c9f2eaa3d5a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "c2c95a312e27ed50e2ea6dfb7c13c3632ff4c82e795cb66bc6c6cf4ff150c504"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "8d8be734eee539ed5be075d9c79b0a48f7a216459cc7bf4b4637cb8dfe85b34d"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "89430022beb4f549c5e000b6c6b89dcbca96748585dd6d0b17861fd42bcc46c4"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "195403c1517d12f045288e0d3818b87cee29a1d286bdc688765bc9a1a445f4c1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "56f0b1ca1d8050f7217e8294d1f5b48eead0cd33a50884520c32f7cca9e77629"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "3cce85d57375c22bc34fa6c74fd99b48adb64a06f9e80ef7eafba17cfad28538"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "5db5d7222cda105a977eea7e51d9c57de7c0428a436554bb13bfcaaf73b470a9"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "9e4f4ce1f04ad5b1af4d4b380be69157366aa921ee71471bc0c206391068ef59"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "18dc6210276186d912def0517396890c7318505a022cea18c3aaa2c1ed63d4ae"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "854efc6d03b945c426e81f56b7e2fe74e499755c66211c921c9fca27bb1d5fea"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "6e14a74be6164f0e1e8e66f5e98d48bd7b8835843d83fa17b6781508d57caea1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "65d69746ba0947e598c6e9906cc9d332eef6a3acba28932d910531203c616077"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "14e88e7b4dcce9f543c86cc73afaf030a8cb71901100cc86ff8f95efddc2b316"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "e22f59accbc5e50466146ebc9cb4225e64f5738d2e825d74de470e68c48ff1f7"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "2d3f97cf89b2deeb75b99a5fd29c6d7ca8d36746808dd85ce4613858f87496e1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "5c846633254235841e7a32799cb61363113bf70cd545126e47b5c5e8c9b3903b"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "0be6683891380075db691d556bbbce1f95831303e40ed09602ae728054feebd7"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "47b6d6ca247f15a6485fdb3a3a343825b8eb383a0f363feca055d4dcf32c75df"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "59dcbc87856e9d239d5f7089b849c5d49bc8b183b8191f9d32796c0a1ce37375"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "9a4ee547e81ccfa9344d7031917b3b65831aa9cf99c3f00a37efdf906483e75a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "3d36fdd3716ad4ec0f213b683ddc9327f344e47e789bd97246d8e14753395057"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "c4f06997ab0a703fad5688455c9b77598848290196efb3f901bacf4372a03dd8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "45644665ca33ed90e648a18e30f0c1807a57d9d9bc7b119c4f6db1f6ceb6d2be"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "ac309334be27b905a8e1253f0a94a605e6939ac481bdc0472382a0d50c7a3602"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "deffbd4a145b9ab1987ad9972ba4dfa959815a4f51afe0300dc5c85102db9536"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "ed231578d65e96435e68b0437694a20eb1fd5abccf8a428668e856c59599a165"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "394fdc655c5e7c4a451bf1c9c4f80e036c3d2a1cfe6ded2850f80cf7031e5070"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "cd26433aecc60753eba9006722f20172ffecf077d9364513cf4570dcd118940c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "494aaa21adaf39e35d4580d09ecc9a42cd934fdae8b50a29b43b775853f1aea3"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "eef55cc3163506cea3f486a7affddb780c073bebef5391b64f1d148171ff3b1c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "cedce426f7de29aa56d77e68852b63f10151ff3bfc22cb8253a596ec3dbbdd10"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "561c4bdd58f2c1719c744ade87de14ef25ac3723684f996f80bb374254a3a651"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "ba6d4b68d439100dd0e56330717566ade6f70d63fc747190ce43f30f82ac7737"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "93f23a5742dd491b37a66c7558d9fe39fa1bc5d84b676df36f2276d55bc61123"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "667ed665c3e54b88c9ebb528b235696fa78ad02ac7b9faf4cc57124b39579e19"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "cab3f42ac9195a531bcaa832c2834559ba3c9e8235c4ca778f6a89348a827e75"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "75506c1db3e9807f2bcf7b06890e1807aa728676a0906d431c4b813adeafd1c0"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "dbbc14fd9ada1c054beab7cfb3ef51465e3b13d518b105b9db0317263daba306"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "daf60663c3414991e6b8261c749029c758a3bfea0d4080991ad338d80f583471"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "627e51303194e4313241bca953f819ff0443a947fb86fb5f5110844fefe6467a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "084553a123aa4d22df8e329ab34e7668ba5ef2b079385ef7cfb42abe6426c75d"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "918cf06ee2c6cfdd865e7746499990c5863a7b1837b756456cf7241b39e45cd6"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "fd94bf26f83417a2dee4e38b969b37823bd3bbac0d249446814554d413f7b379"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "fc74ab0706e9b7fb0043ef38630c959294901e4c1a53574c8758379ff857e029"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "f512ccb108d1b111e6fca0ffb666251f2e7583f493e459a7932bd68b1c8c2b85"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "943051d84970f8dd7dd7cd9745cedb2911ee0b4e6e3ceb2a647251910ce1b8c2"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "501c8e9d8105433233583255eb7d9929df900744aa56e332fefade3d96da7679"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "60b536939c87a2062e5a3b15b9d8eb422a22cd3a8aab23a7b5a99787fa0b12f0"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "906bcf4433bd6a3a8dd57c32683820b5616113f4074db5db20d6ccd5a10addd8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "93bd203a3a838a6917a07ab1ed90f81ae4c0309fe2dba540b1ad74629468400b"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "5604e7294a7bf32021216c3a39fa19dd72a5ead9c09a56ab0b2664d00fcedf75"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "bfb4c7c6d5c8aec21f6ff5d0b3fa9d594ff69c9285f3487e5042402ee0252d5b"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "8ef5490a6ffc7addf892c80ec6533062da15d2b5102666c6c890ac90c2f8e79e"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "66e7d105541e166f9a24a2ec834bf811eaf874541fdf613383d37f468119ee57"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "a03febed9c8c4f7103ad595dca4e65add03fe6df2366ac2201a34adfb00cff3a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "05d9cfce1737c31108a77fa51bba4516fe455e2caaf437b5a9ba9e750f65aca1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "abafc409cdc1b18c9cb59256c1a847fd6910b070d9ef86d0f32c252cc1643ddc"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "788c8d608be8b5aa5e3f7d656292f2c270b01e68c791afd1b844748e4163b806"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "6b3330059312849400b1781a34d61647acdc35fb30cc76fd0b83ae185d4e74d3"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "9b2d574467c21b3102dd52a91fb4de789a12b197978a2090059845e48e53086f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "869aae00b0bb3d35d6a693d6403269d4797ddde61f6e9a1dfcee547ec5b999e1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "89a68ea54c27b292e43abf16b941971938fd2fc11d26a69bbf1c1a1c392ca987"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "8a7a343ca32fd9b8b782c03837aad921e9df1d59eb52aeceeb52581e8d5c299b"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "7222d342840b1cbbca86b9e534650d4681fbf593d3fb6291fd3a463e3b13a5ce"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "490fbf1d7cc960f81c7746a3f4e6bf01ed36e086dfca38f3a23fbc408d207a6f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "0f8b6d6ab35436a4ca5149a44120ed1dd81ec04f41b594c5a1889925d9974433"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "34958a6a985f17c5e8a6ee3a131bbd31b5d184672b073463ef5ddd1faadfd18e"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "1f1a8eac566cd9d233f537366efac45787a917ad747d835e7cbd126254ed8dba"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "a3527b59106b2ceee37f45a3500af3334f9b3a3a0e978cb1927335fcb2afa491"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "c7f9d6d73cc830050ba204d32bc2e228303d848a0779817737952f843033ae06"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "7d559a169b1cac31921f9d115ddf840dabe50a6c4561b38961e3d275614b31db"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "7981cc729c691dc3350a86fa6e3d1572ddca82b2c58c7761426294fb97cf7746"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "011d99b0746dd80626fcb2645d10ee7080e46eb5820d511b38de4ed2f90d06ae"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "b6005a2253a4c395cb8f4adcf5cff27f9e4fd83f6bda4cd984c3f156d30744f5"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "c849c170c98cb02677add0ec66284ec5d95615fa3d78c2b5b0441bbe3e47c12a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "046dc8e82cb17d546f22d9eb36194039f27c7fc5fbb0e200271321734509237c"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "6a682cf4573cf0805cf4bfd57d007598510d0c0ab0ded60da81ab6e8be3e7c8f"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "2118f2d29cb34b3ecb1d72d079e22cad486d9890e56506efe829892346678343"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "d6d4ff391c2a1ae53e2882cbb5c4b7df18be51722e7dce82ef5b714de7a79e69"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "da4e2ac1dfab23470e21820f46b167f3bfd75e14c4e610242c4d3bd9df819455"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "07087223c098209a4196afcee74d9d84013099fb332e8f1a3a815c796640aafe"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "0c18950278e4562e59c85bae6ef1a3fdeaa63a96d7a1b81231d3fc0dfb6bd743"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "5ad0edc28829d5b4fb93919c9e59d10edade59499adf4bda524b48584cb3eed8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "c1a599e3df821e9e8d0d6b295fcefb8db2af293f51e71e5d5a971feee8f76193"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "02a6267bb1976f95b0c6b8ec6e44a23f366a654a7eb766dfcc238c30b8f5eb93"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "0e58ad74fb772198e410fca0a29d7b4110e237c3054d55174cec7dc05d070b14"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "1aa4c766770ee53c5cc21cce8c16b31c35736612288c037f2b1838223e245864"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "4d550eea83fb54aa4b8980754ab38c9c30d863d7b78a6792aa8958085d1810d1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "95fbcc25a9b0043036bf8631bb1462ca6f05be1e9dc914eeab67e632c8b25ecd"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "a994b22e6cd835f84901cc27ba52b1b789456d4a789969603c0a0ee67bea65d4"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "0d651471e96feea49d14de8e076264aebdf44d4a873e99e7652c952efe7e87f2"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "1143a2b18392e7b8ab90db2c82f320c4488e931f8273dd152b7372369f6afaa8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "faa529d6bffe275c1c77a785c607a3f2752902ea60f8ae2f9d274ec7c3072247"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "8004f97e0654770712f326adad6e537e5de15f68ecf1122d4f4c008a57185343"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "9d3c5139071329f723ae60a07cf99de3348ed82012c206537acc954b11421988"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "9befd85419b0cd8206331c342565b739c442bc12e211c62db8f6c6ce68d69ed9"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "e44d2256be980c4291c90cff2621cb46d8854e4032a32de17aa2c87e76460275"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "64a3ee12f040c986dfc996b99d12b7de298f405b15195628d5abc652eff8b954"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "f83677ac363da90ed4a0a2c9bf75ba64167de71d8036924e707a4dd651ed37f4"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "ed5bb162e9d03148af310997461d41a8d2dee90b4a0e9333f08ae99425e91818"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "4dbb88fc1c952aeb30c2efaedf2c3c60a72eef6b05a64f8c38e533d6950d466b"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "682b3e1b9ea7ebc5cf87f82b57215e6581b95fdb8c0d51ff8125ff9d0338d1f8"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "0b6dc8b75de3f24ec0a7b0875b8301431dba74cc95342760730f15d7516009ae"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "cfbb65c4442f0d2fa4cf0ecc94ff3d3fa306210349f18646de38dce3c09db7c1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "70bccbb7639ca5502c224a6eb96e66ffafcd5ff093eeab5e11d86c92420b054a"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "c0f4ab4c2df1518a1793160f4f2c557293fe7ea21dfd6a793e18317ee81494ac"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "4e3c62f6a281964bfe8aaee2e2e189729680c4d7e4619959822ba9151e9a2436"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "ddae3c9ac9790879355ebe7b289c29c0619a33b0a877e2f7fa25108a6c53047d"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "741e9c5f6abefc2ada3a5dae0c1326909dde46ecf60351100071a2c91f38dcc1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "722fbe80feec9b5d6ba3ab24dbe41d340a6eb695fae3881873fe3196370610b9"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "abb94c8af146f596568e1260937429d33255ffbd5c360caef436fa98168005c1"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "0646e10eefc881a2ee0cdac8498fc1dbf32635465c3d7ebfa60c90cc1a9dbba3"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "17257e4289503dfa862f39069628762c7be24650fea3f86f877477a3de8faabf"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "6013f3740cb91240e911faa8313be56e0b189b271597adcf9dcf5f5be1d98bb6"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "45aff6b3f8ea6bab9fb1df727e30f7dfc4a6c8b568d21ccd953286f29c99c370"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "b889bf0a2fc4d1889a59dcba663c213d73131418f89aabab82d009d5d4ec503d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "ac314552ac5f19b546ca06adfe81a5368c60e15b213a2f9e4e2156d6154a9bf7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "405ae9919ea7294702c4c272ae3b641346d9b93f86d4bc915a2653e2ebf7a8ca"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "1e6c485ba2762315d516ff0d2fef7d4e606c278536618b073da8bf0501f95746"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "3456f8461b20e4b9ccb449aa234cfc0f34842fe58e78ec4668d041ff0b887bad"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "11d1f87b84c780e957c5a09ec86b17b35df3d38a475dd38b626085769c9ba666"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "924829fdc1cb60bfbf05dde38e3f5df6c28ddfca55fef76b008e5f328445f0b6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "3fc9b7c1af187f17782d5ba54a226f16deaff8b09b2137e96f59733e59b497a4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "7b278ad31b5f03d08e43a65e0deda02016a2b27c1d4a9e93fbfbfb06bfb6499e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "32570012d423683605d331b2078556a73f8791ae2ffa53d81552392936656c01"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "ed64fe109d41d38c0ed889d9c25fb17eff9fd3904a49c0fb67275d7f11909aca"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "41bdb4654aacedb4e72b62b72eba1aa1497a9edb6b1ec68b028cdb6f084bf5ce"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "dde2579d25740480573d4ddad2e2a237de683bc065a0c3c840d50e329fb8eadc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "93733a5592dc628dd7ba202226ca5a7c4fe9e54702036aea562ee2015eea2cf1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "6de7ade7c16422d075d10807e73dbb0bfa57d0eee48a6cc0d8a7ec488c015f19"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "9d71b82ec2744c2a540e7daba7e6291ed4ebb8b71f7e72e80615ea53df3a50f0"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "7d7398297cf6df26114d4c26903c0fdcf45827a3e33e19799b1aaa2cb3671348"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "b16c62cd97784d3b0f51f24494ba87f2a50d57cc662b23fd53f2e8b2fa713adc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "50d3f35866e2bd0e30a40f778942af0c6607315b7be2206a156cd62055213ceb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "8eecddb902fd7b2a6596a6fb34ff57f96037b8e75d42defa734d6269370469fc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "b0c95ec6636d12570c8e2b67fd040c855b5f20056510e9f7bd3b500389036d47"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "e94ec20839232c47a1e325c2c74ab9a506a3a1878af3cc17b9fc6ec78ec2ee97"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "727b0d9968d4f8b9bacc7ba904ddb325d510b329d6506f7ac21f5015fe991851"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "5ee948fd7355888298ade278f0e2b28329ababac1125972c347c4e19c4123fe3"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "872f209dfe44a7442b638af516f0cb698a775a8df7231c37b726539ed6db5023"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "11ec373c80aa247f026ee268dc3815e0872ad3981607d6f6ec561529b0234ca6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "06c38ac8b161c709c50930655ca5cdcb4031355b6cf2698e2ce63c5b660bebfd"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "a000ee93de1d2b6a482587f9923adce2f1d9fcdf58b33d5a43ded0374e99b3f8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "48236ea3b3b979bebdc83777a6da5cfeacbc94a338f1fbf15abc02b7aad16271"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "88285237a1d9bfc640c5c02907f4a45b3d03a28a558d617135eb2437da2bd415"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "aaf1de7eb293a0d5f3e1aa937a5d30e6dd9907ae65e31cc857d51c2a7bb3d0ff"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "8df3591707c0607905417fb06768312b87fc74e7bce1121f594b09f2f6069ecf"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "5fb832bc2a95dc3424a4f2cc434b0d510b94fb1aee88424f0e28991ee9c62fe1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "2aeb6be8b7ff8e30acd2a2f38e031b6706f1efbf85fe228a55f0986d4da6ac37"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "d2ed3046d89249bb832b83f9c17aa02648e4cea5ac1694303811ec11bb9b4892"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "741422172951d3bbdb0ded4abcda2625eab7f19cbca9415129239f50410d600e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "13003e30f7385f917de5a9044adb237b500017007e119b529fd7f3a3217e3c0b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "dbba5ad5fbbf756b3dab282c287f2ce1df6331f6e98f70689876b7de56e2f98a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "1079267bd9522eb264d664023dde27eda5ad386b22686183885f628ed5ff2499"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "1d5ecb4d91c91ffe85111449746c6e5c68baf631f010e327e7375c0ebbee4f67"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "8b9dedfbbadc537de3d51194b3b095738c71a018cb75b576367cbe2c78008f8d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "7144aca5ef7c9040d5667ae4e9f4faa0e263a0f6a403a93e5f84d552cf38abea"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "46792d09ab3b972bc7da967843d1b619ce6e5f504b694e365d6eec5d8c3f4f81"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "aa0516979fa8112626df768d36bae55d6e4a357640172c5449ecba5fa3063bec"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "c17518ffe9464beddaaf0090514d22b4af810018e9bef25bc40a22765e94a7cf"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "23817d64e37ea3f9d280296587e2bcaaf3a473f3dbbadc4935d0e1be90a3698e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "786359dab300998c50dd4cf2ea8c10ab9b627d73c2da46ac75d79f83792aa72e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 0,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "6bf639068496e8016d7abfdea1a694e5a7db85f34a3083727298c5da3e8c29a2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "b36995511fcc947b61c812349a9026ebf9691ee681aa4e088d5622d495ec1971"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "867e8aa7904beac7c4bd9936222ac1e2b716addf885f1785ca4e5449d359520e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "217b4dfb4d4d9b95f3a19044cd02a31082ba16eb70162f4e86c03671c44ed85a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "cf1e5141573d42adf825494a1a2f5b683b96d9b4b20aa7464d60003aec8a4b88"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "9251fd03dd58f9f352114726e5be9937216e81a7f096fb2a1bc7dc3159e0e2da"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "5a864ccfe548583c8c3959b2a0adee55f0fbac70334c151e08586595a3c7f23b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "f2b7e7acaf42dd93716fb112a0636e39fc447bc71fc83b230d6b9410ae673b68"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "9a0159c63c282f5fd787c13ee2648748f9bd25b76dbc3dbc5772506b4a12b2df"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "4d9ba9d2933c6acbc40f5be8de79cd9486d76b38524836fc11bf507689545a1c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "35069bbb3404757a53195ecc17eb72c8c0c5b8520d2fe4faf79780d3443cab52"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "732e1531ca8eca7e0ebda75673953c8b4da8f59d1676a178ab3525972a42753d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "2d9e573ffafedc14b94c3ea3da35f71235a4042f8471a8858a95ae17137d3426"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "a1e5682da11b440ccc6ee34edbffaa461f2595b623d316fe0a9cfed006ed8890"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "f414291df5640127b08a2c3759a5de4205cc931f6185fdb8d97ba80102ffc795"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "ed1273587fe9acfa73d541c9cf20375559e62ecc20f933f6a9dfa1528aab8d65"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "aca82800189453a28321eb5257cb294f2848aba2ab6d3175ab3e0df3adae8844"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "65d08d351b07e48ad0df40a70f389913b44e08f1bc124d4a56636b1a172b0e7e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "009f237f9899960547cce2ff8cde98d3f5c53dee5280d817af08c5110cf0e274"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "b5e2f917dbe14e1bd16c629403b601592ebf960096de6caa3e07fff44dd93f2a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "72c32661ed547f444caf677fececd45913d6ca1904215fd4dec8ce369b9e3621"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "322eb34846600909e1c4f4b32a7288bc4a3955d43384780b8a6b365b5a1d4ea5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "3a79c5e363a483b7d16e8277cd9d3e53263e677939e5967400e47333e854761e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "df93ebf401f5cf857d48b071e51b71fb4c0653155807f7844334c2fe58731cb2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "6488e8ac55245dbe8897f8fb140d99b7d4a010bc8bcd8205429930512026977e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "e1889736b763818979d5054ee917886f65fcaaa0a513106a6e085ed81d87fd24"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "ad122968c8f35c62402195222fa18c5f2c989bfc964bf5424f263910c386db0a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "858e023b10b076a6f1cc48966dbf5ec00403dad7639b5fa8697166db942118b1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "7b35b12eaceecab657aa3e59f019e1a665fdb6a641e84b05d9b3b59b7623ee34"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "337538e609c9249f341351c99ba5c5422db93b4f2f4fa53b9ff0398db7db6aa7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "05c804f98310fd745867c2172c6c152e6410032cb2511653692f57ad1ddb4b30"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "0f39b489a666482f8bacedee22ce9fa077c2f52aeddce476775ba725f9d6c3d6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "c62f7819f02869738617e4bd0f792bf27bb340f26d73bdd13a018badf539ebf1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "1069976b3cc387e8977088e066d08405324008dd9f6fafa643bdff06f1dfd92a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "6e9e0c0f931aa81a58e96eb175551de273e7c81b5d9624262b073429002cea2a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "51b828a8f7cb452ae02766f665415352b7bde0bc854feb222fc3892c8e5e8b6e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "d16a6387008f9a99492ae951ca89541995cc270770529ee673e974de34223694"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "d07b23df0c0d109a46f2634fb9d59069c00697bb4279ed24c9445faf7e4c9c85"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "13e483249e3177428209edf85e46a264eeb66fec173ee0a8de616b4431c1e2a6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "37e9ab06bfa015c47f421905b44710e17941f797b35d20d0e4175075a89820f2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "e513531ab9837caa1bcce1d52f5fd02f24f19577b280ba8f966e05c37cc41d46"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "87fe8b916890584562801d4ff695d73df16725034ade03a0abddeec45811c7b2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "5d45b046614cb625fd711426ec7e2da120ffa3ad3aad362631fffd0c5b9d7edc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "d48df4c1ff4d2e69df655315302dd44f8281e55eee6099f1d39a67b87a01af7f"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "eaaa4a1eac906b99a5d5ab7efadbf76c7e43e7dd3264a4f58765471aafe461e4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "a701588075324dd673ce3e1b9dd31aae58555580f6480cbebd189db7aada8caf"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "7139f5bfd69c387ce81641e327966b5a8fc54b1f737e8a92e95c50c0c09195c6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "c44df9b12a5dd3cc5bcc9807f70b760e43bf8d0bd8ab2c79db0b5dfdec5ec344"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 1,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "51b09e67947f5a20021b180d27e243d082751429ee6c1fede5d246117faff5ca"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "87156df043b752706162c3b931a9f7bfda0fab71d8a64b0778f2a4ab3e8598fb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "00493b1e4788f60a506c0375b3ed5258b6633960c7b2337bf7984a82f2bea562"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "e24114d5d3ea430573ee9e30aceebede10727ae069d065878eeeb1b2fed01e22"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "6a23e3319006e6dc55aec69fe1b803b1aeeae5cad8dfb60043d4f9f6dbde44fb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "bdd7729803943fd595d741097a3672f4078f57a162a31e2b451473d28738f1d0"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "191c11c19993225873584589ab2c22559d241a02b98f722d2edb839f1ba06fc8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "0de5d032ace47896d3d9b520d80e76a892d4e9a1bf2fa62259b4035fdd04d9e1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "abe78d5d1ccc8ddf2fb1f1129f544ab820e5ba6c7e3c5bac6157203280ce9cda"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "86cf7c2979d6a740f1838fddbcf2ec3b96a6fea90aa47eddf395e2d14fbad8ba"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "061f3cbbabe2d5866c7fe95b46ec5ae7bd0a273f1caabe259afc0dabbf313e11"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "b5714adac032a3936fe0604ce94eb21ac0c1c1f73109242410b1a77002883ee7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "b447bf201806c1c4edd99a7cdf9e11314047525d2698d40b442d8478bed43205"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "119c470020ed42f1e84d0fdf1c25acdb89e6a595ce378af50888b95769a79217"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "fb286672a3477b545fa6b96df87e8d141b811b576545542dc482a7a3b4d7c5af"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "da182d4564f81c0387c959434f4580396d7adec536bc3472720245fd617a195d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "9b281484fb991c4ecb3dcf5715ba0c383efe5a4bc86d9e256e74ebc6612e2b79"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "3397e427e4363d4c31eb82ddd4d0a9edb7ca35a312b21cb28bb97958ae926b40"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "fa7294e0a0c03bc1c71e7641af7bcfe3f404064b72a7413d3624d351480cae31"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "1c7f2d8dadcffbb6d9ccd93f05986f3c0f949d8994f3c8aedb299c818c7988c3"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "2c6fffc9090f509ff06630fdbf1463c9bdfe0d4af7f12869525c7439a452001e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "bbe3e645a2130154ed724ac81d19b17c62c68a3581d73885b61a2f837e1d1422"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "6fa322de270c1404383b1b227d225c5b5e3ab97d464bcd427d695560da6640f7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "6f4f09c5e30e12e513b058ef1f918db336efa090727177c4fc90799f044e9050"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "a5e9b7b002c473ad2569c4563caecd9f4c0bfae9f2672b0a1384c9ed6100c7e1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "8e79407b12231c2d47bfe71ef52713742ca55fecc7defe9508c8aa9dbf34941b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "4eed93be1b66b770063d91baa8d2f8783be8a955a1539dc5bcce4f06601c748e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "2da7f27ccf3bde4f0b23c8352388cabf007960cb2cef10487dcc85aedfdce595"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "208e01de6c57d8db38dd3cba9d16cbb7726ce1a8a88c06468f383d550c9bc21f"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "2cde28ecbffff257aa8ab1af06fec877e1236f1ab12aeb74c97c33aa72504fdc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "0384096c78057cdf6a3255f5f426be78c3b9c13833923fe39c258e95b82aedd4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "8f75c79b1f9db6ca4b5b2517b40edee56ae5ff196f3c61603b192ab4445ec145"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "3d0150306d70ee2386ba1aa7c9d618d2289a5c99bab29164d7694d9e62151fdc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "2e8c841d87167f1bd001c9c4150d32967d4a55f5111142e68604a7c3b959de7d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "0bfe2277524967593cd263265f977b05d907650df05776dcea897d81b1d092de"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "e6c4d6351811b2d0143f62a16a99fa0cf5c65a726a5bb4357d47078c0ec246b1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "d96c8e2951db2bb18a4eadaa669029e53056054e61c03fa26cf6ad8fec639326"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "54d64e16bb6d6ef53ac3c619efc133e357b1d0f3e2ffcac78d5d691b525c8b94"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "51f75c865709086dca748777bdba25a022cfe71df20c935ebb8839f9c89e008e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "24332e670ffd98134f761444455d03de9db0392a80c95613ab5dddf93230c794"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "372eb3f0927fa91481c2b9931fab6607fa4fdfbf0b6759d0b3d8a774082c64cf"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "b94f33a538030940a40e45444a8cedd54d6177f5d25efb9b199ef693fbbbe2a5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "bad0fca9a5021bdedcad74aa98863c444cb855d9e89e0a7b1d39a2a8b5067785"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "8427d46b230e47cc51c22bfc5e670cecf0210dcfd9de89ed3c56c666b6510e84"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "7d924ea9d335e0cf6140448fdb8d00ced95dd56001617d65dd69fe82e39c3199"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "3fb7d60735bb9068dc95b243fbf1c7f4104bdb522695a519e7dfc882cef9ee2a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "22ffd368ba22855a6f3bc95911e14e482c7470fb4f75cc4569c7277d53a4ff70"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "fd4e53b763456248d8a6326c4d711a5bb6ee0d7780333e8e3638a23728afeeb2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 2,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "506567c3198c9b6a71dfb5c1a2842c85cbf542e59a581daa39706e60f32e7b21"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "856b4d05ffba46088b3f60f693f4342dbffb41e12f754ac369e11b787c576b32"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "d35f6fef19fd302d7905c320c431f1c79bec7f96c15d710c444baa766bedfe29"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "a80b0eae8b15dcaa31d14c401f4043c66ed8225a67e6d2ddcbc3c9955d990864"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "6704a1548dc548b91350ce29c81584e6f10203b4e8cbcdbff4538fa4652d30d8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "037bfd3adf39bbe98cdc9ebb9aedd65835e4e5a77e59a1a519dc12a9bf88e408"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "aea484f6beb22dc1c25aaf7ef4c06aa7252958d215f4ea3beb0cc4a42589a157"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "b41ee2aa046f13a8b69e691dda5b561c2fd3a9294f7bd89b41ae56919e2c7764"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "b83940fce941bb6e656c72436c1235676b9f60e4fb48f031a77e8bf018646c22"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "fd46cd5aad3563c4eeef992813898b72a07c7b3083210d75df98bd54531fc5c5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "3854fa80749826058bee82b006cb8d7874a293b44af6ddcec8aaad3c342d9e94"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "627d7d85790d30373699fc6f2863e989296499c43531064b0fce6a05f3b2a613"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "c713a2e4475f581e118e8df18f9fa60a46b7b6da5871c3f2e60c4e0bd6a83f1c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "c6fc200ddda74e6ef78b6d9539366adacf0c17cc1496b47fdde15352e19d438e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "b09c2ae4df48223156c66c2a75c54eb86d8164ccc373f09285c4fd7744cd803a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "b0944c245912654d6eb1eaa853792b4b7369f0fb756854bb10974f6cdd76e48e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "124b3d154b701e85f3ececdd84a1b99be03ca5e57077c52127f6c420d17a4d25"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "df8ca983c43a11e2a4459915962a745ad49c585a7ad358c565c57cedfd6aa477"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "f590cf3a46f84cb49bd44c056758d973eae64c8bc2e564d4ffec405e9cf42df7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "42dc7fc507459dce8abce198b742df5e43cf2f9721de000239f20e98d1b37000"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "8dbf2a768a1f9e1ca0b4cb74db0f0b56ff2dd432e28dcaababa4a75c1ecb136d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "202c61752644be7a438ac67608edb7a9e350c3315adb23c3c36839d37a4fbe18"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "f8b0e30cb72adbaabaf2589c5a94ae9992b05decfa8259ecb6cede0ed1f94862"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "fdd0f4525f864f5862a3d426896f72b9673c7e2479d34dc222833c01c6945dd5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "d06c9159aeb78a051b9e3f94eba9609d974dc19e70f32133ab175087a17140c1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "3792280f44776eac7a2ad3ca850781e210c9503b0bf0dbe8f0f21e4c21033fa4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "c1f66a5f6e644e055b4f2b8224b425bb38191e384b6852852ea95a438ff74981"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "30ae3214800c28010bbb931f1f3effe14c8404c944029ac8350bce2586d44eb5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "8c66a3b9b5dafd6df9e58b83eb14124d7c37c77da304b0da00fda5c73c9d7df2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "234653d7dde96c9fb3a720df7aa55ff6f3a1ba9b4a5b8363b2bb6d51a11e5345"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "c6a7259fde6c88582f8d98168848ba9703b7e3fbc50e77af0ee7466bed8f5b1d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "43ce7e973ac5227038445e5c43d21b671ee729e02df8b85c36a1e2e2a353e36e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "ad6a945d43777cc5d7491e3126b0d82400007052e532e39633ab5942e0289932"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "9f40f9f8398df1e268d4aa60586d50a60253d5996ef52311b9e99c9f01159611"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "9ee54b3397a109d45d453f9e3298f62c94f6c607d19baee442645936ca4bc6dd"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "0e1b5aa564b48c66cce700d60e1ed1b31bfebe963c68dcc244fff3c93408e3a3"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "b2d228f90da1f80f806d50baf05b95c292eca1da463830366f2cb9e2ffc97a31"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "a0e5ed8ec5a1daaac6b9fc477b978768343633cf0d2d722223b1d199322f7409"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "9437c90ce7ccba404fecc6db9a3c404ce17f38ac42d5fa6280596f9cb5d0c87b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "3fd9848faa6ee3ea9f49b2743858c9f07f85144943b86f35bd512c20a44f6d25"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "56071c9d7d57c8c500df134bbf171ebd7e836a6d1032eef168913b1384548517"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "c51c9a18ba4fb472d53c9d90dfc54f057f837d69a0f050d2521403488867d32a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "c945c7973c77f4dd26acf8d781a633741adc68fba425051b9a569b01982b3628"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "ad7e2fad78e024ddfd17da4516a6516c2ad78df9d0e8d9a2d5d3702ee6798cf9"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "12f6e73ac1002e0b36021961a225e4fe4532c16d5b6b7b0d384279580538d5d6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "8f20c34574a7916a728b3db284f023584c378ca642e5050fc1b967f818974195"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "b6534bc65dd1161db0d956ad2a3026b561e6febfb277a0ac796d6f192ae604ed"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "f5229213eeed63ff5d9e7d4374634039c32e15e76bdb170ae8c6b89f3ca6c592"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "option": 3,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "0c61bd13b6ee2e2217f52e86e1a8fbe4ecd3011384b653c814b7e388c4c71066"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "21e724f529e918589ec85f4b51cb2260a3dd025be8727fade5892b2d384ca611"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "4260339b193bf1b1ca5d7ce88926d41eba9ded9716ee60b096979be1d188e06e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "92f8608b499e069104acc95f2880a51effa6cb736fb19d230afd1b29437249c0"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "211c6a11c71e15740ecf3c0e3ec6e46ec4d05933324be212839ab2eaf6a591d7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "1788bb1c0a44b77e08f3f496656fe405ef01547e784ce7ff93b64df2dc203412"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "d696d9bc4a9efc6fb5dd12a0bbcf1cb6428ea34b311c636f1f1230a2a6a3f8cb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "9b42a7477a4170748a6fdb89e0204c74a2eae0ca983c71464c144ccc82195f2b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "d7ff69387d57fcab48b114bd7c9a2e368aedaf441f3858e39aab8fe9aa8fd8a9"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "3ece772cf53af679e2683ef6a41cd97e63ad2f621446477b7a33450cf82a9d5c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "44750dfd6594c8f771245cfa8934d15d226b0ad19b47f36618912e57dd4b1c5a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "f14ea1aee774aa0f2cbbf4ce9ce18594c0ceb7129b342a06084208893d162045"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "aa76cfa05548f53d95f8f3c0d8a820be678453dcc70c7283f26e96a18938cb3d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "9ce695fab29029eeea0c8ade154e7d2ed892258f8838ea5ab8d3eab47b22e7f1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "3fdef357e11450de11e1bf7262b191819ee5bde741b20c5a0fef9ce1dde0c2f8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "cf6aee40c96011bf51c5e722d4d6d267d601e9b4143d8e9657e70b07e3d7bb3b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "4a60c748ee102f09b5c950943f1620d68de30e16e2dd9f51ca0e3e66fa213c79"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "2a9b693f76ce0307973a86a73750be391a2b78984511d10db81d6ab821388f87"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "1f72ed0c5257c4e960f46d549e1d7c1ce9439e2b0c16059c6f6244858146177d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "906c595d3d462e0d126f28c20051b987b4af00385852fc19d5b523a53f70a2a5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "be7ccd9c962bd73d2c9c7bb95fad0d8953231c0856ba97c02bcb64441fafca60"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "6a5c0900827fa864201164ea88dc99975b656a50a0420765422ce298a3140a32"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "b6a9cff3814b59973845d8bd3ff18998d2ce1343b7980f42393f7fdfe365cd08"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "efb0e05ac94b978d62bfe58183c2371627188810bf6f92b0790596bbde80ffe8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "f191c24cd0c4a801a2226ab31f1c09e2333d8929e86604c982e832d38c5addad"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "368984e45fbb86441f806ae9d97a8da847a06280ed4badd4d05461288da22b7f"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "73e480d27fd03c1deb88c80134c09b83b7d94f17045d738096f964167e0a6b06"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "40ecbea99dc0fb55a3d6636766b0995c1c3f310ea2b10d341f8686c6fc0f2e4d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "7c30caaace94833c119fb5a3f510a537948dad838cee1ab0df3033ebe6d74587"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "2879cb17ad460851975d78575e73abd99b375624be2c0f5290d36dd1333ef976"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "1b37ffbd51ff48df44fcb61a92514422e5f6e920e3ed6f55ad7da648ce8f5514"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "48e29fdeb7f36b81b6aaa167a22c6505fab6abf477db6fb58e0c28c5270ec316"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "aa0689d70a70e7b7b4ad72ae8ae6b04e3ee9736b0f13d3f81843ad8209bf683d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "0a517e5a0c8a4fe60981cb53b9e9cc0ed061b9d9d30dfd238660deaad6b73fbc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "317ec04298f7628d14187ab283bdbdc6c706ee3d3b769fc83ea1e28a84b63dde"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "9cf38eec9efa736f00ed10700c48d0dab224ae6d6510b058c75f083dc2eb6e5a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "dc75f7df12be6c55e682af9e3bb650036a5815e1e54579e51a3fa995778b9fb1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "afbeb3488402a644c453e56905d9854f170863f1096f6c20c91c682b08bebc56"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "a474d83be407e3f6f9b0d54783c2f6b8ee835f7ded5d6d1a0d28907a99e84d70"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "a2b6d1728b1cb93d57b71192a30d2f9e97025fc22b24545f362fca7805ad96be"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "adbc73de40cb72f1d998f6ccfe0112e73bfedc7cbee8d6d3b137bc54bc434616"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "789a4d99e625a3cb27a79bbe2845a64c16cd1457423b8fdd2770e3d40f2ed593"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "ac40ed46a06552e4b461ac7c69ab5e55a75e6ecddfba9b741423ff59086bac5d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "db8a38537ab4261dba544fe51d990b19959b454a5c8bca52990de55a39cb0f9a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "7fdde2cd25fa81971d9c452d2a271809f72e7c743da7b89cb5f4261be00e1439"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "e54f07f963275589c9761259e01e5846be5f5c215458438843195c1cc7733ec9"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "2eb7484f1186907e7add3ad37cda7513352150b383a4194585068b88e7115e5a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "8232508b5af9ff0099ad4917fc02c0889d8dc5e3cfaa148183b2328b8e7443b4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 0,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "630fd464ab806e92346d9324adfe41996ff0e9316ccf886b40ca6bb4da6db993"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "d862ae77e191674dc22fc80e541d3f3c05ffff59aea6de7af84fd5f6e1cc3c25"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "83e212f22cd56e22725bd803bec9fd529f60066fe1b8eb9cfaf01f99001f992b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "0fa7abef2c7703e73d200467929963fdcd65282e3276fc26456df64b9ed1f410"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "e753536deecc3975fff60885ccc93ff066bc18dc688cfee930a973e4c81e3769"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "ee89b955f8b29e4e4ab82fc3fe15fdee52a36dcdde98a438cde5f713eb905025"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "046fa0c8436c1427119a1c3289ab8114ccadf3c0b24c01b16f887613f64dbbbb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "e3529ffce8ce31f8e7546e0e76a267e0bae5586c1e017c1ed2f2e40599b9e641"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "aa4e56d8265200760c0a25f7c75e9b1c6c838826265151c4d39f38bbb6612d11"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "454e840afb2c87e0469227f1b40ef7370e8044895c170d69ece77aa699878e1a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "c8274155ccbe38100abc1fb611a4e23770278371a1377f1c8286a7c8d1828ff1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "e720d0a86bc9a50da56f630e10533fce96e2e1cc775f87047df53244793de49d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "fe23940e7e68aa600d8838595507292f43e15a124a7318dace0ecbb111ca098e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "88b0c1891458beb1320437e4e87f9a9f28f4d883de7cef24ab6090da47033d66"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "fbabbcb4d807be48084c881a643d7b203848f340b70fe400677a43d9ba9d6272"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "0bc2891cdb31941f15d0532210c7ce5b0a60c03fffaa6c845b36a42b8f2144db"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "d1d4563343a57f5b8bf8b129e5af8ae8d66f7e0475a91b011abb62be5080532a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "d250a3c076271190916a9aa0b9c60673917cc267f9b5df2aae99fc8ec5e349a9"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "96a32d5bc5bdb560ceb81b777b1e911efa0b3f6713924e30ad02222dad2e248b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "2d0330e3a4298099c6592c655e35fb16649f5adfb3da614650439cec448a4a8e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "d2db0b650223eb2ae5521ca539dd8a38fb90c40a08c771d20654db29577aefcb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "ef61a9fc7cb5063dc9a262d8f7475b2f802ee3176df11f22d1ea6b4496fcf6ea"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "bbbae6f37191dfb64ed14d2af84fc4a6f107602af99d5c9f5a13679c2b6f3f8d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "aaac40883ab23b8d91e2218c00be7aa7b070fa1a79990334090ef5d0b5d6fa50"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "84dcc2381a8b9626488720c2b991ee32c15ee7213c94db11a7f36e3e3fe5e964"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "3fda965d7b32304dc240bc58323bd934f14450c07459318fb98843c708686d3d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "043598eb3ca6e6136e8399faa02337e5edf6d0b475b9926da711349033236071"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "6069ad295269cd96b570d23b7abd74002cf6d9cd4990074be0b130a57d567ec2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "b32a48f6964a3e5d85497e3326ab8e962d8b68faa4dbae7454f45c7d6b57b304"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "fb37f59d12829ad562778de713049732f83579c0b923f6c4b24c02293452ecbf"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "cb5ed34fa8263402a379622cd6f3ee1d58d09dc462732fe08d73c15cf31691f2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "829b49373eeae77917551e42d71de3946f4832afb0d2045c3d5693b7f31048a2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "8f1f6410e3632472d72ba649d0791333539ba379906158549d3e148eab01f18b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "4b37d003815cd196b051c18213bc46ea1f7ceadc00032f4ee5d2cbb988b0dc16"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "41adf1182f5443ca5ae1a5504dc1bafed47839673a58aa61db59a2feb5898342"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "318c92b60185606115a1bb52c157e7638c6fced026ddeb3a5e7be3d23744078b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "56dc3445a563cf368310a9a7b4310d95461cdd50f29bb1327d9067f9882103ad"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "bfe2062b0f332934f9460dc47edaf4a835da9ccff220da50ccfb84ba4a32c289"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "16317e9213c38e41881b21777a64409b94b6d64d159de2ad617dbc2fa4194a25"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "168ffff1408ac750daaecec073537cb1f5ab0f206dc1966cc7a3167e7b0843ba"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "bf086b5ea8a16f7478ba97e638cf19b0eb772f1711a74cbb1be3bc0dc1ec21a4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "60fffd51102ec67a21249001a085a44bb13c5c765d5af83ef89767500bba5ed5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "a381b22b89f359d992d7455050fdacd7274979d511b11cc7eed0a6553568a320"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "d922729d57331d5ba913d91266c5364730c69cc44b51755cc3bb273c6eaa3b62"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "be844491d1059ec834c6b6dbedf4355ad0c7c9fad6d385cdd0d313a06176a67c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "f6ba3f443a9fca132eedafb381ac89d9b5b9325f4eeb238243e036a8db4dc369"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "11fffa49c557e2825e009c7d3c515e99d767d0cddb595a7add4264e67a357ba6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "13fad3f112fde62c9d6c84b8142295fa94e6d83ed465ed31f1a530874fb05673"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 1,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "894d93939771573848add316b97f10cb2760d62a347cb649e288b2936a6121eb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "57aa1bf2239cd387740e74868e2260e9ff297232018b9c6545f17d4201a68593"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "aee5351a350b77a78c0f5e68f3ae16fa1d01367ab444775f50398f5e7e636a93"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "48f08f06623038507f43aadb0885264a97eff206828f4a67696f701bd1cecf95"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "f7fb27145ce455eb38562c467be7274713be6527ea3883e21d3963c91e140806"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "ba2c8b58cdc96085a2fdbff199e2d3332232813faac52c12cd867e2bb7e7de19"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "d657fff3764820b60b94f0e312cc4509e095120876f8921f7dbb83f8a932b355"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "ae4add95f9c31281cc7546f0b662482f2c53199fa2d1d72f1e6b44b0cb3e5af7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "dc62d98b18fca7d8964fec2cc50f90a59fd92461530a29546fc365d5f9a7b1ac"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "6886d7b83f3ca2d722f4d61b10457653b27299cb2167f67ef07ced1feb0b4486"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "62281567557a9cf064ed3ceb820258410b25018dca12615b5eb617c625c457da"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "c2c05424b145dad897e5084fdc5e640825a0b4f0f87054ba67fe7cebd341ad32"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "fe581252b2a253de40b445185a1e4eb707227ae638b7f17e65d823cdcb824f6e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "59275e67e1f10949732c692b9daaa64149ac29f71e5c32b7f9d3ff836246cfd3"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "672c7a0e0275206104d70db84223f538214b8b041b8d70a519e52fde47af0b24"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "b5d2ac5a0ddd2a6e7df1729f4e0038de79501af173f25077a08982125ef0ef42"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "c7ad050a9cd5def61b8d69e3a8a7e2932e4d9c4d5c060d7bdede0a4ea079f046"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "4c0a758b8628de79aefc5f115a36e874c6690d8396df192b845114402a898abb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "3a1ee4a07076f05659d7e3618180a00f5ca8cfd888621c2ccf36aadbebcac722"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "9eafc0789f4ebfc39d74e87789a02f7aacd4ae6e01225ce0a7330a79f94850d5"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "55e61ddb1718be6aa342a373020db4ac04a093e37bad5db172dabeb4f16f9dcd"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "9947cfec43a675a061436f0e48af2fd5c4a3a0898d2afe375f867114d7237435"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "5b4de72bf32b6f6afd80ab4af4ab84bd059a58bb8695b90ed689343d246a1f41"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "fcb0f318943a2f9a5352ba46c25eb14a2cee5108990bc0d6a2ba58addd4717b1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "b3ce9a021a77ee6da2760ef8c42a915811a09f6df02daa368ffac01752a70548"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "0707abe3e054e54aa2dd9d0dfdb2bd203d44f4255e4f4bf81736fa726114371f"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "dea04138be9ecbc4dca14f0da3211c4f50e34d842c36cb93f1817a39b79b018f"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "31b1c90900f35fd22837b35f99cf429be4cbf61310e82e5dc91619f19d657110"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "d6335af3a8a2e883aa3629a0f00fcf5818369199f769c2cbc9261661c50537e2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "512ba91d0a50cbab943956d4fe599f45cf4c9661c9ff31775bae712d6bc4475b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "000de21f5780f1ff6e164028f753a42d014966329ca99acc5e1171f8736bbd77"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "e75198f434ef11c4b1ffaaea86e8e6f16473ae9a52a566a512825cb19ebbc36c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "e1d365085f6fe949f16046a93e1b6c63376de8ab9b51f5bf28d0560b5f30d6db"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "e2ca2556994be82fe3b2908f80a4dfacc7bc53c2cdfa14679d4ed61f6a6a84ee"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "a3a87750887de73d136a9e923c675a4bd2c1fa172a02035683469acd101f0bba"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "ee4257921bb20f430fe0c5fea8852b3642ccd8b5581a5053a3aacc095336534a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "a5ca91511253ace0524ea82105b6d6e2567bb60b2c2827b97c346324e685657f"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "78ab394d593cbedbdcc34e43d4fed7b1e5e01d01f84cf9ab2e8ddeb7fb401b0b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "bb6d02954c48578948acb7b7325f39e35e511d41666343dd5ab57544fb9d436e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "117404b917dae391ec65dd14fa975f9bb1f6cac0131d02ffdba4e9d8f1dd3cd8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "fbe0a0ffefa6078601dcf95496df371f0312212c11e95641e76fa4dacf49058e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "df7a130058595a233b08459d5fa4614a0feea0bce7de4e44cd0a24e550f0e190"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "1c04ef6ec37e06e1b7537063f88933505f5264dea3a96fed41a9dbab2c9b0271"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "b88fcba37b0c70d039736bba0bc4abde08ebb5af2ba5e4312827c265acedd0b4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "c47e9447c6c9b38500bd6d4f5905b6a2b59cc255acd70ba53ca3a7fa604d23f4"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "d7cd71860fdc6fd7910aec83219528fc4db4af0cd18315840a3c9b0d9233b0a6"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "9960f471f40f91772880b4935d514774ddeef6620ec519e3a16f87dab0bb397b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "5d0d1435c6c85e8db82285ac683efb4278b845be3b2973ea37908b8d63a6e722"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 2,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "29d211c3b6063d6b2d204c66b29fa80e0035c43f296465e6d38794bdf1fd565e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 0,
+      "sha256": "7a4f9c4eec688c1952839852071aa7d504d80e158a520752889b8af2e2c1f361"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 1,
+      "sha256": "190f312559be4d5d62b643619cb4139178f4ef9d02f092cfd673a2607407e9fd"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 2,
+      "sha256": "cfe1c9ae2fc89cf88cc7e4093a4c6605c60c424ba8823e1b3e1031265e185082"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 3,
+      "sha256": "8eb9c06a3109c0a30f349427cd49f5580f34cbd49ab101c8154e5ef848f42314"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 4,
+      "sha256": "d35cf0fc3ca0393e5f7228069cbcaf4a3b86b6c6118eb9aff0ca3d6f1c286dbb"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 5,
+      "sha256": "731e22a4e8dd25ed1c00b9e4b0cbe13e4de6776d6086b7f9533afc84540f01cc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 6,
+      "sha256": "3bafd69141986df786346173602004306d5d36647f8846e707fa6e4b8dd98f79"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 7,
+      "sha256": "a5946cad9004281118d17a76e61800bd6304374cdc62c4592b0fc73ba00cc4d2"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 8,
+      "sha256": "867a90f347e06536cbb636d8a1eb5b7f6ab33d53552feb7275f88c4f7e429247"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 9,
+      "sha256": "f75404bbe850a0d0ce5309d06488ff3f7025b787516286ce74772ccc1ee73624"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 10,
+      "sha256": "0372092a4bfaaf2ee4a059ebf0fc3e70c24837c176613cfc4ef49f6b9c6fb64d"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 11,
+      "sha256": "9537664c35ab27ae983b6682fc2b30e448943a51ab7533f6e9e3c4a07f4f77ba"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 12,
+      "sha256": "745d0aa514aaf0b0a94284bb9ccca90306d58013197c3c0f498ea3ec5c912746"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 13,
+      "sha256": "82a399663162a538bbaf0177be30e1029a826f546e75ed55032283eee0961a97"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 14,
+      "sha256": "8a9e46d33713dd4ccbe5dc21372dad0bdf471907a1adb46eebb22d5a45b87456"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "base",
+      "index": 15,
+      "sha256": "bcbd917098c86fb24d4006c9679ffccbbb58939a702543d792bd668f5f796972"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 0,
+      "sha256": "bb0115fcf5f167b34b8244eb05ebc78424fe6fdd866c3e2cd469e0c506e08f9e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 1,
+      "sha256": "ad24f12c2852922b4f8eb8509ac78f816d0b4b04189f22758f3f0641db9a90a1"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 2,
+      "sha256": "b9df34d01dba59fecff651cd863813019becf6053ad147c9e9bb7d893627b0ef"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 3,
+      "sha256": "ba0210c28d999bd9c50c65847e0f244e4b0fac06faa9b29be2de7fc799789b67"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 4,
+      "sha256": "4fd4466cbadcb9ad4195575e9137d633c646311088b95d344f4cd3a37ac0a8ed"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 5,
+      "sha256": "db410bc7086dbff92a4b60574e3d9fffe6e255b29c987bd5e2543c7ef1405035"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 6,
+      "sha256": "aaeaba97888c32ad2e4ffe8cc647fa9d3f6b406e3f22a08b8647f64bf2904fe3"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 7,
+      "sha256": "2a60349e40d9c0d2e328f5cba1211d135d1936ac91bc22157d3d64f692a80616"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 8,
+      "sha256": "b327a7c747c96e95b503becd8aa2ae27d40d48c95158f737cfe3ce3c75ce4fad"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 9,
+      "sha256": "07df1717e2aa20461d7571901368068e059a96dd8db7677ed19d00a7d32d2e53"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 10,
+      "sha256": "3a0ff0d24dd6d781d841eaaf0d9e37650bb020770f9a534f7699467243ca41f7"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 11,
+      "sha256": "3ad050b154e9e4d4f300b425d697393df0f6a0b315989b7990ab37fc1455e55b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 12,
+      "sha256": "1d37b9edd1b40266ed6d9fbc4f9fef8a5a120c42dec9dd3f5bed9c0210022506"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 13,
+      "sha256": "e1797770731b7200ff409409ef900ff1515eedae9ee7d0dfe56c0d7c17cfe269"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 14,
+      "sha256": "70f63d71e44deffda48e05e3e36d7577eee43022cbdd2228db84ec2a089d0c9e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "idle",
+      "index": 15,
+      "sha256": "e574f74054fbf4e0df2c822ba8a89f2bd1ed18150445fb27e227d66ed0159032"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 0,
+      "sha256": "90640eca9ef67ce6f20675df335849f11de5e41931bacb77e3237ec7c7bdf184"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 1,
+      "sha256": "6e03a6eeb738bb989bea72d89cb48d353ece3b53c2ec729af1dd4ab149245c0a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 2,
+      "sha256": "5b4c88eed51add1e7ec374fd2a513bed97d72e31189d806550486d7901d33c23"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 3,
+      "sha256": "91e40f4e057dcede013b2712ccf324e0988f0fd6db3bd5a264cf149c4d63ffad"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 4,
+      "sha256": "2455758317e256f337c3d8c06c257fb24f555762e02426856860df9a52ee923a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 5,
+      "sha256": "40fc08acf26351b608b255a01ce039218ce3bcf947d1ffa09e4fb1afe5996060"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 6,
+      "sha256": "75c59af7857f067ccca60e1a2ad02730900ea3a34b5d26810d0801e8aa04252a"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 7,
+      "sha256": "3e5a513481a47404c5a743c0793439e87606bf76ad5535b307d1ee59b12278dd"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 8,
+      "sha256": "3bf3d66533a5fbb0d0380a171a76c78322e29e98291c70dbd49d4b227f7467ea"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 9,
+      "sha256": "bfc32734011ccbff230d396650d4166203e69c51a1685b38a2ce2f34f0074448"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 10,
+      "sha256": "490c415a6898e451ace3ba40d501aec041f61d14e80588dec4a6f11ca0eec9fc"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 11,
+      "sha256": "9e2d05eb8abc92b86c72bb86914c7b001de7690e9fac7e07c323af50b54578e8"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 12,
+      "sha256": "56abdb58cd23b2749d74e9b4dd346695b782dcb4b0e5d962e81aa55ab855ff9e"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 13,
+      "sha256": "64de8cce33e6f29be0ebbda1a7c79b605c55be7f38b665cfb62ccb4abb157a84"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 14,
+      "sha256": "144c3f1b06840cf1ac67e6e2b53d8769a53f264a914214a2ba7ea27f8637e02c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "option": 3,
+      "sheet": "activities",
+      "index": 15,
+      "sha256": "10503fb4ba9f889afb223b414b4a9a4ac0b7a553d94f7183af018f6f1755fb82"
+    }
+  ],
+  "registrationSha256": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+  "materialRegistrationSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "reviewToolSha256": "2add221807042c00238d13ee7ffd6f31bf1a41c688e13c264bc8c3df2c9cfec1",
+  "rendererSha256": {
+    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0",
+    "character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b"
+  }
+}

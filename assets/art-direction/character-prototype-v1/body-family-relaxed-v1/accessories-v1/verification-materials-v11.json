@@ -1,0 +1,19 @@
+{
+  "composed": 144,
+  "registrationRefusals": 22,
+  "inputCopyIsolated": true,
+  "sharedFacialSourceFrames": 44,
+  "finalDrawCleanup": true,
+  "facialPublicationCleanup": true,
+  "queuedAndInFlightProviderDisposal": true,
+  "allOwnedCanvasesReleased": true,
+  "borrowedBodiesPreserved": true,
+  "materialRegistrationSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "reviewToolSha256": "adbf7a476d96915558bad507bf9f9f951b81abb1abb5218c9b45402b36447b27",
+  "rendererSha256": {
+    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b"
+  },
+  "registrationSha256": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40"
+}
