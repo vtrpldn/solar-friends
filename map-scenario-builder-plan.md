@@ -1934,3 +1934,13 @@ Independent decoding reports 180 encoded frames in each movie, with durations 5.
 Fresh lifecycle verification passes eight complete outputs, twelve invalid/incomplete/use-after-disposal refusals, defensive input copies, late source and drawing failure rollback, explicit release of owned canvases and exact preservation of all forty-eight original cached body frames. All five new JavaScript files pass syntax checks; whitespace checks pass. No native simulation suite result is claimed.
 
 **Why:** independently valid garment drawings can still jump, detach accessories or look wrong on terrain. This review supplies evidence for the complete walking source set while keeping incomplete clothing out of player selection. Next implement garment palette support and the remaining idle/work/activity garments, then finish the complete body/face/bottom/shoe options and portrait/player integration. The campaign, sustained performance/memory/storage, recovery and unfamiliar-player release gates remain open.
+
+### Garment colour transform foundation
+
+Added an internal immutable garment material transform using the same cream/teal/terracotta/indigo reference ratios as body clothing. It preserves original shading through channel ratios, copies borrowed buffers, retains every alpha byte and transparent RGB, and rejects unsupported palettes and malformed/unbounded pixel inputs. Cream is byte-identical. This is runtime material code, not edited or regenerated source artwork.
+
+Fresh verification covers all four actual generated walking-shirt sources in all four palettes: sixteen transforms and 25,160,256 exact alpha checks, with original source buffers unchanged. Synthetic shaded/partly transparent samples and ten invalid palette/buffer inputs also pass. Syntax checks pass.
+
+A trial compositor integration exposed a real resampling difference: pose 0 in teal changed native pixel 16983 from alpha 0 to 1 when a canvas replaced the decoded image as the scaled drawing source. That integration was removed; `character-clothing.js` remains unchanged. Do not relax the exact alpha invariant or treat these raw-source checks as final composition acceptance. Next establish a prepared tinted-source path with identical native coverage, then inspect colour boards, foreground arm edges and the previously recorded low-opacity garment boundaries before exposing colours to the player.
+
+**Why:** colour choices must retain the approved garment shape and ground-independent transparency. A correct raw material transform is necessary, but browser source resampling must also preserve that geometry before the creator can use it. Full clothing poses, remaining body/face/bottom/shoe choices, integration and the broader release gates remain unfinished.
