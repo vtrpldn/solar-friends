@@ -1,0 +1,17 @@
+{
+  "bodyFrames": [
+    "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+    "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+    "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+    "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec"
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/ownership-v1.json": "26a50b7dad4122319874ca791b1a38c9b3cbe0e121f138ea8f52eeecc791a734",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/materials-v7.json": "9a762e92d93e30d880dabac0620b3cc60b67ce7310ad30c18ad04ec3666a114f",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-curls-v1.json": "e0a35a02b2eb49d44608df2ad19c3c70bc0ad3a1ee9d73d7d729309a86dd5018",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-sidepart-v1.json": "8b65a60278dcabacf508382f1ac5ce77002bd0491b0674ddde1695ffaf692419",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/accessories-v1/registration-v1.json": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-complete-v1/sources-v1.json": "9b24942be6be0be32069d753d845260908957415da82b679393bbda284550f5f"
+  },
+  "scriptSha256": "e2a081d3f8eca8283b15259e8d6186d7c99d63f6aae6c4f90e506a79dba5d4db"
+}

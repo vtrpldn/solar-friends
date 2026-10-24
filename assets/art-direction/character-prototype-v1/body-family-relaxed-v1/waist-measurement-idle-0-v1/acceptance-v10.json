@@ -1,0 +1,21 @@
+{
+  "status": "accepted-internal-idle-waist-regions",
+  "findings": [
+    "Inspected all sixteen uncoloured native seam guides before tracing separate pose boundaries.",
+    "Inspected both palette boards covering all sixty-four old/new normal and inverse views. Shirt/shorts separation follows the painted garment as residents look, stretch, wave and rest their hands on their hips.",
+    "Only sixteen idle masks change, exclusively shirt-to-shorts labels; thirty-two other masks remain identical. All 4194304 compared alpha values remain exact.",
+    "Skin and shoe labels stay unchanged."
+  ],
+  "limits": [
+    "Bare material review only; not full garment, hair/accessory, continuous clip or player integration.",
+    "Activity poses still require painted-seam review; unchanged masks are not assumed correct.",
+    "Thirty-nine garment sources and wider creator/builder release gates remain unfinished."
+  ],
+  "artifacts": {
+    "materials-v10.json": "47b64d421c6ce53cbcd727ae5db58a5c655ad537a153a0ffe8f016216904e7df",
+    "material-regions-v10.json": "128c2db88a07d7d4e63c307fc1ae344df8df595380f13059043dd71981dd30c2",
+    "waist-measurement-idle-0-v1/review-v10.json": "bd4e2c56c365f59645d36ec7d867fcca8ad98a3123835ee6156f55e155722b06",
+    "waist-measurement-idle-0-v1/palettes-v10-0.png": "804a57b5495a84ee609b715c1607cf885a4b9007b4cd346f878ebf2c272057cc",
+    "waist-measurement-idle-0-v1/palettes-v10-1.png": "f28b810d011fdae9f8d5857a5614d0dede464ba764258a2ec45a0f6169628e6a"
+  }
+}

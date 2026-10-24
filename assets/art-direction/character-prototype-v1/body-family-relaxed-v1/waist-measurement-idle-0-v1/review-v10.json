@@ -1,0 +1,89 @@
+{
+  "unchanged": 32,
+  "changed": 16,
+  "counts": [
+    {
+      "sheet": "idle",
+      "index": 0,
+      "reassignedShirtToShorts": 270
+    },
+    {
+      "sheet": "idle",
+      "index": 1,
+      "reassignedShirtToShorts": 300
+    },
+    {
+      "sheet": "idle",
+      "index": 2,
+      "reassignedShirtToShorts": 257
+    },
+    {
+      "sheet": "idle",
+      "index": 3,
+      "reassignedShirtToShorts": 256
+    },
+    {
+      "sheet": "idle",
+      "index": 4,
+      "reassignedShirtToShorts": 249
+    },
+    {
+      "sheet": "idle",
+      "index": 5,
+      "reassignedShirtToShorts": 703
+    },
+    {
+      "sheet": "idle",
+      "index": 6,
+      "reassignedShirtToShorts": 338
+    },
+    {
+      "sheet": "idle",
+      "index": 7,
+      "reassignedShirtToShorts": 286
+    },
+    {
+      "sheet": "idle",
+      "index": 8,
+      "reassignedShirtToShorts": 249
+    },
+    {
+      "sheet": "idle",
+      "index": 9,
+      "reassignedShirtToShorts": 546
+    },
+    {
+      "sheet": "idle",
+      "index": 10,
+      "reassignedShirtToShorts": 465
+    },
+    {
+      "sheet": "idle",
+      "index": 11,
+      "reassignedShirtToShorts": 283
+    },
+    {
+      "sheet": "idle",
+      "index": 12,
+      "reassignedShirtToShorts": 241
+    },
+    {
+      "sheet": "idle",
+      "index": 13,
+      "reassignedShirtToShorts": 255
+    },
+    {
+      "sheet": "idle",
+      "index": 14,
+      "reassignedShirtToShorts": 527
+    },
+    {
+      "sheet": "idle",
+      "index": 15,
+      "reassignedShirtToShorts": 231
+    }
+  ],
+  "alphaChecks": 4194304,
+  "materialSha256": "47b64d421c6ce53cbcd727ae5db58a5c655ad537a153a0ffe8f016216904e7df",
+  "scope": "Sixteen idle material boundaries only. Painted seam review distinct from inherited-mask equivalence. No complete garment/appearance acceptance."
+}

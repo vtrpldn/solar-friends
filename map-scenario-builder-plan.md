@@ -2024,3 +2024,13 @@ Added frozen materials-v9 and source-bound measurement metadata with eight separ
 These remain internal registrations. Existing breathing garment sources need a combined review with v9; idle/activity masks still need physical seam review, and unchanged regions are not automatically visually verified. No production asset or public catalogue was switched. Syntax, frozen regeneration and whitespace checks pass. Thirty-nine garment sources plus complete family integration and all wider builder release gates remain unfinished.
 
 **Why:** shirt/shorts colour choices should follow the painted garments while residents breathe, sit and sleep. Tracing each physical seam fixes the interpretation rather than hiding it with longer clothing or altering original body paint.
+
+### Complete idle waist interpretation review
+
+Inspected all sixteen uncoloured native idle-pose waist guides, then added frozen materials-v10 with separate painted seam polylines for looking, stretching, waving and hands-on-hips poses. Existing scalar cutoffs again extended shirt colour onto shorts. Metadata retains each exact body-frame identity and all sixteen measurement-image hashes.
+
+Fresh comparison against v9 confirms that only sixteen idle masks change, exclusively shirt-to-shorts label assignments. Thirty-two other masks remain identical; all 4,194,304 body-alpha comparisons pass. Inspected both complete palette boards, covering sixty-four old/new normal and inverse views. The colour boundary follows the painted waist through arm raises and torso movement; skin and shoe ownership stays unchanged. Scoped acceptance and exact material/report/board hashes are retained in `waist-measurement-idle-0-v1/acceptance-v10.json`.
+
+This remains a bare-body internal mask review. Activity masks still need painted-seam inspection, and full garment/hair/accessory/continuous-clip/player integration is not established by these comparisons. Thirty-nine missing garment sources and all wider creator/builder release gates remain open. Frozen preparation is byte-identical; syntax and whitespace checks pass. Original body and garment PNGs remain untouched.
+
+**Why:** independent shirt and shorts colours should retain the same physical garment boundary while residents move through everyday idle actions. Correcting the interpretation before authoring more shirts prevents another seam defect from being concealed by garment shape changes.

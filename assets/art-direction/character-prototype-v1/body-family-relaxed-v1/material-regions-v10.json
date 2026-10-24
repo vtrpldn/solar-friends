@@ -1,0 +1,531 @@
+{
+  "status": "Measured idle-pose waist correction; internal palette review required.",
+  "why": "Inherited scalar waist cutoffs labelled visible shorts as shirt. Trace the painted hem from actual uncoloured native pixels rather than accepting those labels as physical ground truth.",
+  "priorSha256": "101bb53c95a16c6a8d0a06ab9ec0fb79aae81a3bc42d2c6a287b73db458aee56",
+  "bodyBindingSha256": "b9dfc6e02e34891ac930bcf9b551726df8e7744ac2af57de923f8205c6973e75",
+  "changedPoses": [
+    {
+      "sheet": "idle",
+      "index": 0,
+      "bodyFrameSha256": "d6371fa4814f89737bf0b72a1b12426a8c91f3514aec8a591bd514daf8d3c06f",
+      "waistLine": [
+        [
+          105,
+          136
+        ],
+        [
+          111,
+          139
+        ],
+        [
+          122,
+          142
+        ],
+        [
+          136,
+          143
+        ],
+        [
+          147,
+          141
+        ],
+        [
+          156,
+          137
+        ],
+        [
+          161,
+          133
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 1,
+      "bodyFrameSha256": "31fb99600ee065cf67315dcea6ef961e94ad9e24f0d30a051a529732ae2b1c6b",
+      "waistLine": [
+        [
+          105,
+          136
+        ],
+        [
+          113,
+          139
+        ],
+        [
+          126,
+          142
+        ],
+        [
+          140,
+          142
+        ],
+        [
+          151,
+          140
+        ],
+        [
+          160,
+          134
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 2,
+      "bodyFrameSha256": "a8efed1b64031e2f33aea9577aa9bedb86293902abf7d00340e939e8ba7c33f7",
+      "waistLine": [
+        [
+          105,
+          136
+        ],
+        [
+          113,
+          140
+        ],
+        [
+          127,
+          143
+        ],
+        [
+          140,
+          143
+        ],
+        [
+          152,
+          140
+        ],
+        [
+          160,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 3,
+      "bodyFrameSha256": "b475b4b781a8a0326c0c01bd6bc12cec31cc0fab0865e81d9487ecb58f6da803",
+      "waistLine": [
+        [
+          105,
+          136
+        ],
+        [
+          113,
+          140
+        ],
+        [
+          127,
+          143
+        ],
+        [
+          140,
+          143
+        ],
+        [
+          152,
+          140
+        ],
+        [
+          160,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 4,
+      "bodyFrameSha256": "668f5495830f53e78ff281505ea4dab2e0451c224736cb4ab0a49adf82acaf33",
+      "waistLine": [
+        [
+          105,
+          137
+        ],
+        [
+          115,
+          141
+        ],
+        [
+          128,
+          144
+        ],
+        [
+          142,
+          144
+        ],
+        [
+          153,
+          142
+        ],
+        [
+          161,
+          137
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 5,
+      "bodyFrameSha256": "6b00e6a27680a6c5575f3bada6854e16adc0a74a2335e684ce694e3657f091e9",
+      "waistLine": [
+        [
+          98,
+          136
+        ],
+        [
+          108,
+          140
+        ],
+        [
+          123,
+          143
+        ],
+        [
+          138,
+          144
+        ],
+        [
+          150,
+          142
+        ],
+        [
+          160,
+          136
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 6,
+      "bodyFrameSha256": "2b8d16f8707b61fec3e11e5c65bc9328180ffb13131a0431509dd8a771b6c616",
+      "waistLine": [
+        [
+          101,
+          139
+        ],
+        [
+          112,
+          143
+        ],
+        [
+          128,
+          146
+        ],
+        [
+          142,
+          146
+        ],
+        [
+          153,
+          143
+        ],
+        [
+          160,
+          139
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 7,
+      "bodyFrameSha256": "110a1c9f6801a19fe245ef673cc2d346e76b2c969ebf49d25edbefa54653b01e",
+      "waistLine": [
+        [
+          105,
+          137
+        ],
+        [
+          115,
+          141
+        ],
+        [
+          128,
+          143
+        ],
+        [
+          142,
+          143
+        ],
+        [
+          153,
+          141
+        ],
+        [
+          161,
+          137
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 8,
+      "bodyFrameSha256": "4afe4adf32d28fe01ebe70b10947214583c1b9515381b33b1bcd011f4be35fa0",
+      "waistLine": [
+        [
+          105,
+          137
+        ],
+        [
+          115,
+          141
+        ],
+        [
+          128,
+          144
+        ],
+        [
+          142,
+          144
+        ],
+        [
+          153,
+          142
+        ],
+        [
+          161,
+          137
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 9,
+      "bodyFrameSha256": "209e0a1061bb15966aa96bd0b1a8b9778a838c8d6d76aa95437346381a016de7",
+      "waistLine": [
+        [
+          111,
+          137
+        ],
+        [
+          120,
+          140
+        ],
+        [
+          131,
+          143
+        ],
+        [
+          146,
+          143
+        ],
+        [
+          157,
+          140
+        ],
+        [
+          167,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 10,
+      "bodyFrameSha256": "94b94b115888da124f46145d293bed9dfe2adc96c1a1bb88455be16ac18caf4d",
+      "waistLine": [
+        [
+          100,
+          136
+        ],
+        [
+          111,
+          140
+        ],
+        [
+          125,
+          143
+        ],
+        [
+          139,
+          143
+        ],
+        [
+          151,
+          140
+        ],
+        [
+          159,
+          135
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 11,
+      "bodyFrameSha256": "f79769ae8c157d59ce4fd204c6c7375e59ffc54957f735bbfd40c26f7898aeec",
+      "waistLine": [
+        [
+          105,
+          137
+        ],
+        [
+          115,
+          141
+        ],
+        [
+          128,
+          143
+        ],
+        [
+          142,
+          143
+        ],
+        [
+          153,
+          141
+        ],
+        [
+          161,
+          137
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 12,
+      "bodyFrameSha256": "7e20db10f49c246b76fc42530d8bf5d2e0ed38b5809f410d12d9492f6b56adcc",
+      "waistLine": [
+        [
+          105,
+          145
+        ],
+        [
+          115,
+          149
+        ],
+        [
+          129,
+          151
+        ],
+        [
+          142,
+          151
+        ],
+        [
+          153,
+          149
+        ],
+        [
+          161,
+          144
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 13,
+      "bodyFrameSha256": "47a72597f849eab3d856ae4bc2c2e26adec52b966e29ee6a88c2837c878bd886",
+      "waistLine": [
+        [
+          98,
+          143
+        ],
+        [
+          110,
+          149
+        ],
+        [
+          124,
+          152
+        ],
+        [
+          136,
+          152
+        ],
+        [
+          145,
+          150
+        ],
+        [
+          154,
+          146
+        ],
+        [
+          158,
+          140
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 14,
+      "bodyFrameSha256": "1d08c056b4945ae20d68eba49ce826dfe03d43dc24bcb081e59d8c17839dbaed",
+      "waistLine": [
+        [
+          106,
+          143
+        ],
+        [
+          120,
+          149
+        ],
+        [
+          132,
+          149
+        ],
+        [
+          144,
+          147
+        ],
+        [
+          153,
+          144
+        ],
+        [
+          158,
+          139
+        ]
+      ]
+    },
+    {
+      "sheet": "idle",
+      "index": 15,
+      "bodyFrameSha256": "64a19b257af460566a705adba36da45f195491c57b611d5f75a0c1d2a1849936",
+      "waistLine": [
+        [
+          105,
+          145
+        ],
+        [
+          115,
+          149
+        ],
+        [
+          129,
+          151
+        ],
+        [
+          142,
+          151
+        ],
+        [
+          153,
+          149
+        ],
+        [
+          161,
+          144
+        ]
+      ]
+    }
+  ],
+  "unchangedRegions": 32,
+  "evidence": {
+    "waist-measurement-idle-0-v1/idle-0.png": "e350d5d4cc61fdda084e5f4822d5c36f96af6084ab4dcf7b5b9b3ce6d4225ee7",
+    "waist-measurement-idle-0-v1/idle-1.png": "f301728668a65f016c653f3e94b948f53bfcd9aaf0edf41e8cf298fc9c5c9d23",
+    "waist-measurement-idle-0-v1/idle-2.png": "999faf42770833f4d03aa0f68888e3d8072acb601b507f8f0a43b2407f84d48d",
+    "waist-measurement-idle-0-v1/idle-3.png": "9f2f7a2b2d7c99a47e7e9e7a6ac2f484b1901bb5008e7bcdfdb2023954b55d51",
+    "waist-measurement-idle-4-v1/idle-4.png": "327d078a333273a21ac2dc2b898055dd79d65202e9e51830bfcf71ec55a7fff5",
+    "waist-measurement-idle-4-v1/idle-5.png": "89318931cb9530d385f531bdbc44bdca137da90cf126c02b5fe5dd6d6b9bc590",
+    "waist-measurement-idle-4-v1/idle-6.png": "e7b79a0d5481fd3d9ceaa3d34b81044b5dfb9d737282c2be5f6b21013be2adf5",
+    "waist-measurement-idle-4-v1/idle-7.png": "76767bcf3aba5d18575600be34a3d24bb203bd857fbdd3b05c5a5c550c15961b",
+    "waist-measurement-idle-8-v1/idle-8.png": "747c7255fd6bdc3c2ab53c28df8ad9d248aafc83f4ac1c14708bd7a9c679f46c",
+    "waist-measurement-idle-8-v1/idle-9.png": "05b368c0ca1466c54406f608bbc4f5426cdfb4c7333043d187c5bd9184edc928",
+    "waist-measurement-idle-8-v1/idle-10.png": "aaea1f8a0b680886016ecde8e61e9cb4f86556b3ed30a50a3173fe6d5932fe6c",
+    "waist-measurement-idle-8-v1/idle-11.png": "4535af880f24125961861a816c1da28a26d93a76b65e8ab522e08bc8942b246c",
+    "waist-measurement-idle-12-v1/idle-12.png": "474c6502a3f0b752d0ea56b003e7463b294175cb34f3e1088194fa790a449c88",
+    "waist-measurement-idle-12-v1/idle-13.png": "2b67cb718d985e3ccaf609a6bc760cf0213871b377ef16b91f21be55c24d2e00",
+    "waist-measurement-idle-12-v1/idle-14.png": "e7f28c807c787e67b9bd3fccdc9d0256855f64c98a9974aca39d1216a3877620",
+    "waist-measurement-idle-12-v1/idle-15.png": "9ba5839822cabf85b6cbbea546718d70ff6a4c4b261d2619e1073a5c20ada5e7"
+  }
+}
