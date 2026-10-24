@@ -1,0 +1,18 @@
+{
+  "compositions": 16,
+  "alphaChecks": 1048576,
+  "refused": 32,
+  "scope": "Decoded-image colour path; four raw-body walking poses, no hair, one skin palette. Full matching-body colour, edges, lighting and player review remain open.",
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/ownership-v1.json": "26a50b7dad4122319874ca791b1a38c9b3cbe0e121f138ea8f52eeecc791a734",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/materials-v7.json": "9a762e92d93e30d880dabac0620b3cc60b67ce7310ad30c18ad04ec3666a114f",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-curls-v1.json": "e0a35a02b2eb49d44608df2ad19c3c70bc0ad3a1ee9d73d7d729309a86dd5018",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-sidepart-v1.json": "8b65a60278dcabacf508382f1ac5ce77002bd0491b0674ddde1695ffaf692419",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/accessories-v1/registration-v1.json": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-complete-v1/sources-v1.json": "9b24942be6be0be32069d753d845260908957415da82b679393bbda284550f5f"
+  },
+  "rendererSha256": {
+    "web/character-clothing.js": "1be06afb85547f198b51865000af22d55562c43c7d29fff91b99c05f6832b501",
+    "web/character-clothing-colour.js": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4"
+  }
+}
