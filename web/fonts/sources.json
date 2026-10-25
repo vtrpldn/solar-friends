@@ -1,0 +1,18 @@
+{
+  "source": "https://github.com/google/fonts",
+  "downloaded": "2026-10-25",
+  "fonts": {
+    "dm-sans.ttf": "ofl/dmsans/DMSans[opsz,wght].ttf",
+    "fraunces.ttf": "ofl/fraunces/Fraunces[SOFT,WONK,opsz,wght].ttf"
+  },
+  "licenses": {
+    "dm-sans-OFL.txt": "ofl/dmsans/OFL.txt",
+    "fraunces-OFL.txt": "ofl/fraunces/OFL.txt"
+  },
+  "sha256": {
+    "dm-sans.ttf": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+    "fraunces.ttf": "177ff6c0f14e5550a3c624247cd1189611d4eb65d000b14944c63d967958abbb",
+    "dm-sans-OFL.txt": "9af36190332437f5ecd09974de43c1f7c77a310a996cdd8ceb25628b458840e1",
+    "fraunces-OFL.txt": "bdf4c22802eaf804f998195871c6b8938aac2ac14b2d78a8bd66a6f1eced833b"
+  }
+}

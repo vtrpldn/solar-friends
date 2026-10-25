@@ -307,7 +307,7 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 
 .person .friendship-note{overflow-wrap:anywhere}
 
-.resident-identity-dialog{width:460px;max-width:calc(100vw - 100px)}.resident-identity-dialog form{display:grid;gap:14px}.resident-identity-dialog canvas{justify-self:center}.resident-identity-dialog label{display:grid;gap:6px;font-size:13px}.resident-identity-dialog input,.resident-identity-dialog select{font:inherit;padding:8px;background:#faf0d3;color:#4e4028;border:1px solid #b39866;border-radius:4px}.resident-identity-actions{display:flex;justify-content:flex-end;gap:10px}.person .edit-resident-identity{margin:12px 0}
+.resident-identity-dialog{width:460px;max-width:calc(100vw - 100px)}.resident-identity-dialog form{display:grid;gap:14px}.resident-identity-dialog canvas{justify-self:center}.resident-identity-dialog label{display:grid;gap:6px;font-size:13px;margin:0}.resident-identity-dialog input,.resident-identity-dialog select{font:inherit;padding:8px;background:#faf0d3;color:#4e4028;border:1px solid #b39866;border-radius:4px}.resident-identity-actions{display:flex;justify-content:flex-end;gap:10px}.person .edit-resident-identity{margin:12px 0}
 .resident-identity-dialog:has([data-resident-field="appearance:hair"]){width:740px}
 .resident-identity-dialog:has([data-resident-field="appearance:hair"]) form{grid-template-columns:220px minmax(0,1fr);align-items:start}
 .resident-identity-dialog:has([data-resident-field="appearance:hair"]) h2,.resident-identity-dialog:has([data-resident-field="appearance:hair"]) .resident-identity-actions{grid-column:1/-1}
@@ -317,6 +317,7 @@ dialog .dialog-actions button.danger{background:linear-gradient(#e5bd96,#ce986f)
 .resident-identity-dialog [data-identity-appearance]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .resident-identity-dialog [data-identity-appearance]>label,.resident-identity-dialog [data-identity-appearance]>p{grid-column:1/-1}
 .resident-identity-dialog .resident-part-palettes{grid-column:1/-1}
+.resident-identity-dialog [role="status"]:empty{display:none}
 .resident-part-palettes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .resident-part-options{grid-template-columns:repeat(2,minmax(0,1fr))}
 
