@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "scope": "Public corrected-family creation, matching portraits, portability, live cosmetic edits and exact checkpoint reload in all three biomes; static screenshots inspected. Not continuous animation/performance, full character range or complete-builder acceptance.",
+  "biomes": {
+    "mata-atlantica": {
+      "mata-atlantica-report.json": "38e5c494d442ecd12485222557596bb1f0fba0d765e727d1f1a126e3626164df",
+      "mata-atlantica-creator-custom.png": "c8041728207d30af98f7ce62e9ac86848e0b15ae8aa59a4d221f3d5686f7c5ab",
+      "mata-atlantica-live-custom.png": "83b57829771e98f1c8f8acb2c9c12a63053dbc0cc25c75a81d7970b087846781",
+      "mata-atlantica-custom-village.png": "1d531952fc152e98778bd48ed45b2c376c5d4cf7b6d20fa2bcee889a51313fdb"
+    },
+    "cerrado": {
+      "cerrado-report.json": "84e692f11e46922d7d24dad4e39ae8b0ba66e27d3da9bf387883715b118eac08",
+      "cerrado-creator-custom.png": "49591c161281b0c4e7087010be212aaa42f56ad5e0efc4e845d64fc7e85d74f6",
+      "cerrado-live-custom.png": "41aab424c364ef6e400e7ab5e0353320199469c04dd4cc6638d51c7ab0a8a049",
+      "cerrado-custom-village.png": "c8ac5ebee7ef324d0de5fd79cf50e4eda3c800f9940d69e09b82e174475931bd"
+    },
+    "caatinga": {
+      "caatinga-report.json": "39723319d7340e10cc89500ea71e166fd1e84c26408b2920ae1ef2ce6f1ff907",
+      "caatinga-creator-custom.png": "8430ffda2c72be3308ef64bd2b5dee9ec13635b28e405ccbecdcde6ca6c500a0",
+      "caatinga-live-custom.png": "ab8697492a88689f13bb5605d3995d219ea534a854e98372eef89321179b828c",
+      "caatinga-custom-village.png": "2909f7ce37e70295e99b850bfb969ea4fdb9297096e3a4372484fe569ae73f0c"
+    }
+  },
+  "classicRegression": {
+    "poses": 288,
+    "feedingRecoveries": 12,
+    "nativeBrowserCatalogParity": true,
+    "command": "node scripts/verify-resident-parts.mjs"
+  },
+  "offlineFonts": {
+    "command": "node scripts/verify-local-fonts.mjs",
+    "externalNetworkBlocked": true,
+    "bundledFontHashesVerified": true
+  },
+  "remaining": [
+    "Wider body, face, garment, bottoms and shoe choices",
+    "Continuous animation and activity transitions",
+    "Complete biome/campaign and art sweeps",
+    "Sustained performance, memory and storage gates",
+    "Recovery and unfamiliar-player usability gates"
+  ]
+}

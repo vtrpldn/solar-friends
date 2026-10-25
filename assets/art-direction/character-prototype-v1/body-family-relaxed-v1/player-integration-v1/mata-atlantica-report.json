@@ -1,0 +1,66 @@
+{
+  "result": "PASS",
+  "biome": "mata-atlantica",
+  "portableScenarioCleanImport": true,
+  "sourceHashes": {
+    "src/resident_appearance/parts.rs": "28b2d3fc4c0c8494082c8f8fa5bbf02abd6ac051e4bf3ffadcb0b4ba3f0ad9ae",
+    "web/resident-part-recipe.js": "c94d22773b396542cf205a86f715c0a003f028d650a170aa81682bf969abba86",
+    "web/resident-parts.js": "adb6669a9bcb5edefc2c8926837516cd01430fa05a4e74a7b8ab1f616e4976b1",
+    "web/resident-family-parts.js": "84fb00fb0a826a5a391d45cf868037ddcdea8cf5e0ba3e9498bf4382b17889eb",
+    "web/character-family-bundle.js": "d4b1584bd5bb0b694fd2a6c01044a4d52bc21370e3bfd766429da6455442813d",
+    "web/character-family-bundle-index.js": "e7060b9a4d83be379fecb8405824b31c56fb437bffee0937a749a5be11be7b64",
+    "web/resident-appearance-fields.js": "d3365c0ce143891b1b5a7f3be055da62c45d445dd8912c06777872cd120507e1",
+    "web/art/characters/relaxed-v1/bundle-v1.json": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69",
+    "web/character-facial-hair-parts.js": "b4d9f0da0ad943c440848d0dc52821912e517e50d28d51dae9c73e8921e0a73b",
+    "web/pkg/solar_friends_bg.wasm": "7bbf6381b7ca604dde6e30c7fe75991ba942965c89bcbefede1c817310669de1"
+  },
+  "authored": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v2",
+    "body": "relaxed-v1",
+    "hair": "side-part-v1",
+    "materials": {
+      "skin": "copper",
+      "shirt": "teal",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "facialHair": "short-chestnut-v1"
+  },
+  "live": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v2",
+    "body": "relaxed-v1",
+    "hair": "short-curls-v1",
+    "materials": {
+      "skin": "copper",
+      "shirt": "indigo",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "facialHair": "short-chestnut-v1"
+  },
+  "presetAppearance": {
+    "assetVersion": "resident-parts-v2",
+    "body": "relaxed-v1",
+    "facialHair": "short-chestnut-v1",
+    "hair": "side-part-v1",
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "materials": {
+      "shirt": "teal",
+      "shoes": "graphite",
+      "shorts": "sage",
+      "skin": "copper"
+    },
+    "schema": 2
+  },
+  "portablePresetRoundTrip": true,
+  "authoredResidents": 6,
+  "partResidents": 2,
+  "scope": "Versioned classic/relaxed stance, fixed body/outfit, two hairstyles, palettes, optional straw hat and short chestnut beard; broader customization remains incomplete"
+}
