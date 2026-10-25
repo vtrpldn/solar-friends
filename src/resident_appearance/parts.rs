@@ -7,8 +7,8 @@ macro_rules! part_keys {
         impl $name { pub const KEYS: &'static [&'static str] = &[$($key),+]; }
     };
 }
-part_keys!(PartAssets { V1 => "resident-parts-v1" });
-part_keys!(BodyPart { Neutral => "neutral-v1" });
+part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2" });
+part_keys!(BodyPart { Neutral => "neutral-v1", Relaxed => "relaxed-v1" });
 part_keys!(HairPart { Curls => "short-curls-v1", SidePart => "side-part-v1" });
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -92,10 +92,14 @@ pub struct PartsLook {
 impl PartsLook {
     pub fn valid(self) -> bool {
         self.schema == 2
+            && matches!(
+                (self.asset_version, self.body),
+                (PartAssets::V1, BodyPart::Neutral) | (PartAssets::V2, BodyPart::Relaxed)
+            )
     }
 }
 pub fn parts_catalog() -> serde_json::Value {
-    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
+    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v2"},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
 }
 
 #[cfg(test)]
@@ -103,6 +107,36 @@ mod tests {
     use super::*;
     fn recipe(hair: &str) -> serde_json::Value {
         serde_json::json!({"schema":2,"assetVersion":"resident-parts-v1","body":"neutral-v1","hair":hair,"materials":{"skin":"copper","shirt":"teal","shorts":"sage","shoes":"graphite"}})
+    }
+    #[test]
+    fn family_revisions_are_paired_and_preserved_atomically() {
+        let mut g = Game::new();
+        let before: serde_json::Value = serde_json::from_str(&g.snapshot()).unwrap();
+        let mut value = recipe("side-part-v1");
+        value["body"] = "relaxed-v1".into();
+        value["assetVersion"] = "resident-parts-v2".into();
+        assert!(g.change_resident_appearance(0, "Iara", &value.to_string()));
+        let saved = g.snapshot();
+        let mut after: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        assert_eq!(after["residents"][0]["appearance"], value);
+        after["residents"][0]["appearance"] = before["residents"][0]["appearance"].clone();
+        assert_eq!(after["residents"], before["residents"]);
+        assert_eq!(after["village"], before["village"]);
+        assert!(g.restore(&saved));
+        assert_eq!(g.snapshot(), saved);
+        for (body, version) in [
+            ("neutral-v1", "resident-parts-v2"),
+            ("relaxed-v1", "resident-parts-v1"),
+        ] {
+            value["body"] = body.into();
+            value["assetVersion"] = version.into();
+            assert!(!g.change_resident_appearance(0, "Iara", &value.to_string()));
+            assert_eq!(g.snapshot(), saved);
+            let mut bad: serde_json::Value = serde_json::from_str(&saved).unwrap();
+            bad["residents"][0]["appearance"] = value.clone();
+            assert!(!g.restore(&bad.to_string()));
+            assert_eq!(g.snapshot(), saved);
+        }
     }
     #[test]
     fn all_bundled_combinations_round_trip_and_unknown_parts_fail() {

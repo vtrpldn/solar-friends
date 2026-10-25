@@ -13,7 +13,7 @@ async function definition(){
  for(const [file,source]of Object.entries(data.sources))if(!/^[a-z0-9-]+\.png$/.test(file)||!exact(source,['url','sha256'])||!/^\/art\/characters\/(?:prototype-v1|relaxed-v1)\/[a-z0-9-]+\.png$/.test(source.url)||!/^[a-f0-9]{64}$/.test(source.sha256))throw Error('Use only the closed bundled family source catalogue.');
  for(const file of Object.values(data.bodySources))if(!Object.hasOwn(data.sources,file))throw Error('The bundled family body source is missing.');return data;
 }
-// Not yet activated by player recipes. This adapter owns its family and library;
+// This adapter owns its family and library;
 // callers retain appearance leases and must release/dispose them explicitly.
 export async function prepareBundledResidentFamily(options={}){
  if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(key=>!['maxEntries','maxConcurrent','maxQueued'].includes(key)))throw Error('Choose only bounded family cache options.');
