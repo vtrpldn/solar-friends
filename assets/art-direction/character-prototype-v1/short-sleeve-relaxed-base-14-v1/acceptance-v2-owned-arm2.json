@@ -1,0 +1,52 @@
+{
+  "status": "Accepted internal static pose 14; no public outfit or complete seated cycle.",
+  "source": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-14-v1/candidate-v2.png",
+    "sha256": "1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de",
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-67bd4fb2-3853-4d50-9fe6-f64e71f02311.png",
+    "byteIdenticalToOriginal": true,
+    "generatedPaintEdited": false
+  },
+  "scope": {
+    "nativeCrop": [
+      35,
+      60,
+      170,
+      170
+    ],
+    "requiredUpperShirtPixels": 822,
+    "coveredUpperShirtPixels": 822,
+    "staticCompositions": 6,
+    "exactOwnedLowerBodyChannels": 66696,
+    "malformedInputsRefused": 9,
+    "paletteAccessoryCompositions": 48,
+    "colourAlphaChecks": 2359296,
+    "colourProtectedLowerChannels": 397440
+  },
+  "findings": [
+    "Collar, shoulders and sleeve proportions match the original upright seated body.",
+    "Far forearm ownership follows the sleeve hem; no upper-arm skin block cuts through the cuff.",
+    "Cream, teal, terracotta and indigo retain coherent folds and shading.",
+    "Native trousers/shoes, stool underlay, hands, hair and accessories remain coherent in inspected static boards."
+  ],
+  "artifacts": {
+    "registration-intent.json": "340a6f7d790ff728b3c6815f30b818e80026496c354536e8e3dfaa6abbb17b5f",
+    "anatomy-review-intent-v1.json": "0a3421d12c1b19ca9c9dfb5dfb931b73d619bf9991307a37a805df4744d810b0",
+    "guide-coverage-v1.json": "8608c2dce10518719e2706c89e8a2f793dd4ec73c3b75c4964366dd7eecfa01e",
+    "foreground-intent-v2.json": "671cbbd2a93b881abebda288f094ba3b86475d97a4b30fc04f74c35613214739",
+    "preserved-body-intent-v1.json": "8132a3da16cf77061ec7c7dbe839f3803210058c7501b50feffc085f706bb72a",
+    "registrations-v2-owned-arm2.json": "86da03a8663b186a5fcd469eeacc3f296697f7b6142ff03a503c71656e10b1fb",
+    "review-v2-owned-arm2.json": "cf9ea648666e9147e60d7bc75c49400524125c8752f50cc972a2d770c384cea5",
+    "review-v2-owned-arm2-details.png": "335aeb090d7c97245896438827277d5ec7be4ec5130b80cf5e6c87d60a935119",
+    "review-v2-owned-arm2-lighting.png": "b30dfb79434603b30fe17741974b820336afbd4962ee9d30fa757c42f507866a",
+    "colours-v2-owned-arm2-materials-v11.json": "13595f1045aeef252159e3f2c82aedb707ad0753986fda9b0c6919951110ffd2",
+    "colours-v2-owned-arm2-materials-v11-plain.png": "347415808bee225a187b8c48996203e789392312fe3c8b25d13ceebfc7a88925",
+    "colours-v2-owned-arm2-materials-v11-equipped.png": "f891914d5dcfb4f242ec8aa47d321c3459bff55f115a0da6d817e5761dfdb503"
+  },
+  "rendererSha256": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+  "limits": [
+    "Fifteen of forty-eight internal shirt poses now covered; thirty-three remain.",
+    "No complete seated loop, transitions, continuous motion, shared-world or public-outfit acceptance.",
+    "Original wider builder release scope remains open."
+  ]
+}

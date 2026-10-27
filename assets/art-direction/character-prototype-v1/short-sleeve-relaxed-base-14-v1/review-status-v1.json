@@ -1,0 +1,21 @@
+{
+  "status": "Rejected; inactive",
+  "sourceSha256": "4840d7b3e4f129866833e1aff7e05a38a8748f45c852c7bff69a46aebecf541f",
+  "reason": "Generated source enlarged and shifted; do not warp or change fixed registration.",
+  "audit": {
+    "sha256": "4840d7b3e4f129866833e1aff7e05a38a8748f45c852c7bff69a46aebecf541f",
+    "undeclaredPaint": 0,
+    "poses": [
+      {
+        "key": "base-14",
+        "painted": 261892,
+        "expected": 156466,
+        "boundedCoverage": 0.7751439524689566,
+        "guideCoverage": 0.7149540475247018,
+        "areaRatio": 1.6737949458668337,
+        "ok": false
+      }
+    ],
+    "ok": false
+  }
+}
