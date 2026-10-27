@@ -1,0 +1,20 @@
+{
+  "decision": "Reject experimental production stock cache; restore original logic and release bindings.",
+  "roles": {
+    "baseline": "Experimental cache",
+    "candidate": "Pinned production before cache"
+  },
+  "experimentalMeanMs": 563.0566457500008,
+  "productionMeanMs": 563.0792812500003,
+  "stateParity": {
+    "denseTicks": 1200,
+    "denseSnapshots": 50,
+    "matrixAccepted": 12,
+    "matrixRejected": 6
+  },
+  "limits": [
+    "Local paired engine timings exclude browser rendering.",
+    "State equivalence is limited to sampled fixtures.",
+    "Neither version closes the sustained browser performance gate."
+  ]
+}

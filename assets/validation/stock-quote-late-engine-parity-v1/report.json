@@ -1,0 +1,284 @@
+{
+  "scope": "One maximum mixed opening, 1200 fixed ticks with exact snapshots every 24 ticks, frame/full-report parity. Not every possible simulation state.",
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "steps": 1200,
+  "snapshotsCompared": 50,
+  "frameParity": true,
+  "reportParity": true,
+  "baselineSha256": "8c82a5ec760023a23365e06da2217dd427d59bd84bd3537e19ac09eef2e1e4eb",
+  "candidateSha256": "0538dff635e77e3caf8055c6135b3b3aa41159a8130bceae78de029cb81e6f61",
+  "baselineBytes": 4394793,
+  "candidateBytes": 4392895,
+  "engineOnlyTiming": {
+    "scope": "Four alternating-order local batches per build, 1000 warmup and 240 timed fixed ticks from identical restored state. Browser/rendering excluded.",
+    "warmupTicks": 1000,
+    "timedTicks": 240,
+    "timings": {
+      "baseline": [
+        572.3110000000015,
+        567.3073330000007,
+        567.4687909999993,
+        576.025416000004
+      ],
+      "candidate": [
+        563.3744590000024,
+        563.8614999999991,
+        561.6544579999972,
+        561.3876670000027
+      ]
+    }
+  },
+  "matrix": [
+    {
+      "biome": "mata-atlantica",
+      "mode": "story",
+      "population": 1,
+      "accepted": false,
+      "atomicState": true,
+      "issues": [
+        {
+          "severity": "error",
+          "code": "missing_story_roles",
+          "path": "start.residents",
+          "message": "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages."
+        }
+      ]
+    },
+    {
+      "biome": "mata-atlantica",
+      "mode": "story",
+      "population": 5,
+      "accepted": true,
+      "startMinutes": 960,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "mode": "story",
+      "population": 12,
+      "accepted": false,
+      "atomicState": true,
+      "issues": [
+        {
+          "severity": "error",
+          "code": "missing_story_roles",
+          "path": "start.residents",
+          "message": "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages."
+        }
+      ]
+    },
+    {
+      "biome": "mata-atlantica",
+      "mode": "sandbox",
+      "population": 1,
+      "accepted": true,
+      "startMinutes": 480,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "mode": "sandbox",
+      "population": 5,
+      "accepted": true,
+      "startMinutes": 960,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "mode": "sandbox",
+      "population": 12,
+      "accepted": true,
+      "startMinutes": 1320,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "cerrado",
+      "mode": "story",
+      "population": 1,
+      "accepted": false,
+      "atomicState": true,
+      "issues": [
+        {
+          "severity": "error",
+          "code": "missing_story_roles",
+          "path": "start.residents",
+          "message": "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages."
+        }
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "mode": "story",
+      "population": 5,
+      "accepted": true,
+      "startMinutes": 960,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "cerrado",
+      "mode": "story",
+      "population": 12,
+      "accepted": false,
+      "atomicState": true,
+      "issues": [
+        {
+          "severity": "error",
+          "code": "missing_story_roles",
+          "path": "start.residents",
+          "message": "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages."
+        }
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "mode": "sandbox",
+      "population": 1,
+      "accepted": true,
+      "startMinutes": 480,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "cerrado",
+      "mode": "sandbox",
+      "population": 5,
+      "accepted": true,
+      "startMinutes": 960,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "cerrado",
+      "mode": "sandbox",
+      "population": 12,
+      "accepted": true,
+      "startMinutes": 1320,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "caatinga",
+      "mode": "story",
+      "population": 1,
+      "accepted": false,
+      "atomicState": true,
+      "issues": [
+        {
+          "severity": "error",
+          "code": "missing_story_roles",
+          "path": "start.residents",
+          "message": "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages."
+        }
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "mode": "story",
+      "population": 5,
+      "accepted": true,
+      "startMinutes": 960,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "caatinga",
+      "mode": "story",
+      "population": 12,
+      "accepted": false,
+      "atomicState": true,
+      "issues": [
+        {
+          "severity": "error",
+          "code": "missing_story_roles",
+          "path": "start.residents",
+          "message": "The official Story requires the five founding roles. Keep one of each founding template, or use Sandbox for a custom cast. Custom Sandbox journals support named story roles and resident-bound messages."
+        }
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "mode": "sandbox",
+      "population": 1,
+      "accepted": true,
+      "startMinutes": 480,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "caatinga",
+      "mode": "sandbox",
+      "population": 5,
+      "accepted": true,
+      "startMinutes": 960,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    },
+    {
+      "biome": "caatinga",
+      "mode": "sandbox",
+      "population": 12,
+      "accepted": true,
+      "startMinutes": 1320,
+      "ticks": 240,
+      "snapshots": 11,
+      "frameParity": true,
+      "reportParity": true
+    }
+  ]
+}
