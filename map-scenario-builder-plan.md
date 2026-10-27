@@ -2186,3 +2186,9 @@ New frozen base-5 guide v2 expands the measured collar and left torso edges. Its
 Prepared base-6 fixed geometry and source-bound raised-arm masks. The first source missed two checked right-arm edge pixels; revised frozen guide v2 and regenerated without editing paint. All 1,535 upper-shirt pixels now pass, as do six static anatomy compositions and 48 colour/accessory combinations. Enlarged review caught overbroad foreground ownership hiding the sleeves. Foreground v2 narrows ownership to crossing forearms, exposing sleeve cloth over the upper arms; repeated static and colour checks pass.
 
 **Why:** opaque-hand checks alone cannot establish believable sleeve anatomy. Retained both sources, masks and findings. The revised cuffs still have angular ownership edges requiring four-pose tool/cycle/motion review. Sources now exist for all four work poses, but this is not full cycle acceptance or public outfit integration; remaining garment poses and all broader release gates remain open.
+
+### Combined shirt and mallet cycle review
+
+Added an internal four-pose composer using the production body/hair/clothing/equipment path. Rendered and inspected 32 combinations: two hairstyles, tool/no tool and hat/beard/plain. This revealed the production mallet mask restoring upper-arm skin over the corrected sleeve. The review now intersects normalized tool ownership with the shirt's reviewed foreground region where supplied, retaining the resting pose's original hand mask. The revised static board preserves sleeve cloth and mallet grip. Retained exact derived masks and source/bundle/registration identities.
+
+**Why:** separate shirt and tool checks missed a layering interaction. The correction is currently internal review only; production integration must use equivalent validated ownership. Full motion/transitions, other palettes and world views, remaining garment poses and broader builder gates stay open.

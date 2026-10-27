@@ -1,0 +1,17 @@
+{
+  "status": "internal static cycle review; motion and wider integration pending",
+  "boardSha256": "11c766627e175a69a88094728f5ef4df376a9ee8236a632c079a8a04b7a92921",
+  "reportSha256": "88ac6c135299d9b6c9f0189f0e2029b50aa46b2e9b21bc160118271acd2f3e6a",
+  "findings": [
+    "Inspected all 32 four-pose compositions: two hairstyles, with/without mallet, with/without hat/beard",
+    "Combined production tool mask originally restored upper-arm skin over shirt sleeves",
+    "Internal review intersects normalized tool ownership with reviewed shirt foreground where supplied; resting pose retains original tool ownership",
+    "Revised board retains visible sleeve cloth and mallet grip through all four static poses",
+    "Angular cuff edges still require continuous motion review"
+  ],
+  "limitations": [
+    "Single teal/copper/sage/graphite palette in shared board",
+    "No day/night motion, world or production recipe activation acceptance",
+    "Derived masks currently live only in internal review; future runtime integration must retain equivalent validated ownership"
+  ]
+}
