@@ -1,0 +1,48 @@
+{
+  "scope": "Four completed thirty-second isolated headless browser phases, release engine; no profiler.",
+  "engineSha256": "0538dff635e77e3caf8055c6135b3b3aa41159a8130bceae78de029cb81e6f61",
+  "terminalExitCode": 0,
+  "browserErrors": [],
+  "checkpointReloads": 4,
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "wallSeconds": 30.005899999976158,
+      "gameMinutesPerSecond": 3.0047140452375536,
+      "p95GapMs": 25.69999999999709,
+      "maxGapMs": 41.70000000000073
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "wallSeconds": 30.003100000023842,
+      "gameMinutesPerSecond": 3.003568415441038,
+      "p95GapMs": 25.799999999995634,
+      "maxGapMs": 59.5
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "wallSeconds": 30.025500000023836,
+      "gameMinutesPerSecond": 26.571575131169478,
+      "p95GapMs": 83.40000000000873,
+      "maxGapMs": 351.1999999999971
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "wallSeconds": 30.0295,
+      "gameMinutesPerSecond": 25.012765767307982,
+      "p95GapMs": 83.30000000000291,
+      "maxGapMs": 100
+    }
+  ],
+  "decision": "Sustained dense-map performance gate remains open. Profile later simulation states before further optimizations.",
+  "limitations": [
+    "The same maximum mixed opening resets before each phase.",
+    "Clock droppedSeconds is cumulative across phase resets; do not interpret it as per-phase.",
+    "No total app/GPU memory or storage measurement.",
+    "Headless browser timing does not establish physical-display smoothness."
+  ]
+}
