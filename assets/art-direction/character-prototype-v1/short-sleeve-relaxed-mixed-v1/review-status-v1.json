@@ -1,0 +1,15 @@
+{
+  "status": "internal mixed-pose integration passes; full outfit incomplete",
+  "reportSha256": "c07ed9fb1fd497cf96b63de622e58218217d327aabace38e94ad7397442d9068",
+  "inspectedBoards": [
+    "curls-1-false.png",
+    "sidepart-0-true.png"
+  ],
+  "findings": [
+    "Walk/work/breathe retain common body proportions and fixed native anchors",
+    "Indigo and cream cloth remain attached through all twelve sampled poses",
+    "Tools stay in hands and accessories retain head placement",
+    "No claim about uninspected palette boards or continuous cross-clip transitions"
+  ],
+  "remaining": "36 garment poses absent: base 12\u201315, all idle and all activities. Public appearance recipe/catalogue remains unchanged."
+}
