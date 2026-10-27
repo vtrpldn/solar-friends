@@ -75,7 +75,7 @@ async function download(definition){
   const url=URL.createObjectURL(new Blob([file],{type:'application/json'})),a=document.createElement('a');
   a.href=url;a.download=(definition.title||'our-village').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.solar-scenario';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-function cacheRecovery(ctx,checkpoint,view){try{sessionStorage.setItem(recoveryKey(ctx.id),JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view}));}catch{/* The durable library remains the primary save. */}}
+function cacheRecovery(ctx,checkpoint,view){try{const raw=JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view});sessionStorage.setItem(recoveryKey(ctx.id),raw);return raw;}catch{/* The durable library remains the primary save. */return null;}}
 function scheduleSave(){clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save().catch(()=>{});},450);}
 function previewOf(definition,snapshot){try{return creationThumbnail(definition,snapshot,art);}catch{return null;}}
 function previewMarkup(kind,id){return `<span class="creator-preview" data-preview-kind="${kind}" data-preview-id="${escape(id)}"><span>No preview yet</span></span>`;}
@@ -95,14 +95,20 @@ function save(){
       if(terrainLoading){ctx.thumbnail=undefined;ctx.thumbnailRevision=null;}
       else{ctx.thumbnail=valid?previewOf(checkpoint.definition,snapshot):null;ctx.thumbnailRevision=checkpoint.revision;}
     }
-    const thumbnail=ctx.thumbnail;cacheRecovery(ctx,checkpoint,view);
+    const thumbnail=ctx.thumbnail,recoveryBytes=cacheRecovery(ctx,checkpoint,view);
     if(ctx.conflicted)throw new LibraryConflict();
     const record=await library.saveProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution,thumbnail},ctx.storageRevision);
     ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);
     try{
-      const key=recoveryKey(ctx.id),cached=JSON.parse(sessionStorage.getItem(key)||'null');
-      if(cached?.checkpoint.revision===checkpoint.revision&&JSON.stringify(cached.view)===JSON.stringify(view))sessionStorage.removeItem(key);
-      else if(cached)sessionStorage.setItem(key,JSON.stringify({...cached,storageRevision:record.revision}));
+      const key=recoveryKey(ctx.id),raw=sessionStorage.getItem(key);
+      // The common case is the exact recovery copy written by this save.
+      // Comparing bytes avoids parsing a multi-megabyte history a second time.
+      if(recoveryBytes!==null&&raw===recoveryBytes)sessionStorage.removeItem(key);
+      else{
+        const cached=JSON.parse(raw||'null');
+        if(cached?.checkpoint.revision===checkpoint.revision&&JSON.stringify(cached.view)===JSON.stringify(view))sessionStorage.removeItem(key);
+        else if(cached)sessionStorage.setItem(key,JSON.stringify({...cached,storageRevision:record.revision}));
+      }
     }catch{/* The completed IndexedDB transaction owns the saved record. */}
     if(current===ctx){ctx.viewDirty=JSON.stringify(map.state)!==JSON.stringify(view);status(ctx.doc.dirty||ctx.viewDirty?'New changes to save':'Saved on this device');}
     return record;

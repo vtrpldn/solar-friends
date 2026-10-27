@@ -2246,3 +2246,11 @@ Extended the analytical guide measurement to report any coverage of source-bound
 Retried pose-13 guide v2 with explicit horizontal-hem instructions. The unchanged source passes fixed bounds, exact protected shorts/shoes and foreground-arm checks in six compositions. Forty-eight colour/accessory invariant checks also pass, but six upper-shirt edge pixels remain partially uncovered (alpha 183–185). Enlarged composition review reveals squared-off near-cuff ownership and a far-shoulder fit issue. Retained the precise failed coverage and visual findings.
 
 **Why:** repeated generation against the same guide cannot repair an anatomical ownership defect. Revise the cuff/shoulder geometry from the original body before generating again; do not relax coverage or enable this source. Full outfit and broader builder requirements remain active.
+
+### Avoid redundant recovery-history parsing after save
+
+Ordinary editor saves now retain the exact recovery-envelope bytes they wrote and remove that recovery copy after durable commit when the stored bytes still match. This avoids parsing the unchanged multi-megabyte checkpoint again. A different recovery copy still follows the existing revision/view reconciliation, preserving edits made during an earlier save. Before-unload recovery continues to use the same synchronous writer.
+
+The near-limit browser journey passes on an 8,078,050-byte history: zero large recovery-envelope parses, exact checkpoint reload, public Undo/Redo, isolated old/new concurrent save revisions, preserved durable/live state after preparation failure and successful retry. No browser errors. The latest local sample records 0.3 ms synchronous Save handling, 28.8 ms yielding checkpoint preparation, 228 ms to saved status and a 119.7 ms maximum timer gap. The remaining stall is not resolved by this change; storage/serialization responsiveness remains open. Evidence is retained under `assets/validation/large-history-recovery-byte-save-v1`.
+
+**Why:** completing a durable save should not parse an unchanged large recovery copy solely to delete it. This removes redundant work without weakening recovery or claiming full responsiveness acceptance. The inactive seated artwork and all other unfinished plan requirements remain active.

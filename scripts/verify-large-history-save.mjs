@@ -29,7 +29,7 @@ try{
  const validator=new Game();try{assert.equal(JSON.parse(validator.validate_scenario(JSON.stringify(fixture.definition))).ok,true);}finally{validator.free();}
  await page.addInitScript(()=>{
   window.historySaveProbe=[];
-  window.historySaveWrites=[];
+  window.historySaveWrites=[];window.largeRecoveryParses=0;const parse=JSON.parse;JSON.parse=function(raw,...args){if(typeof raw==='string'&&raw.length>7*1024*1024&&raw.startsWith('{"storageRevision":'))window.largeRecoveryParses++;return parse.call(this,raw,...args);};
   window.historyProbeReady=Promise.all([import('/editor/document.js').then(({EditorDocument})=>{
    for(const name of ['checkpoint','markSaved']){const original=EditorDocument.prototype[name];EditorDocument.prototype[name]=function(...args){const start=performance.now();try{return original.apply(this,args);}finally{window.historySaveProbe.push({name,ms:performance.now()-start});}};}
    if(EditorDocument.prototype.checkpointAsync){const original=EditorDocument.prototype.checkpointAsync;EditorDocument.prototype.checkpointAsync=async function(...args){
@@ -86,9 +86,9 @@ try{
   const retried=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');return (await new ContentLibrary().getProject('large-history')).checkpoint.definition.start.funds;});assert.equal(retried,900400);
   preparationFailure={preservedFunds:preserved,retriedFunds:retried,liveEditPreserved:true};
  }
- assert.deepEqual(errors,[]);
+ assert.deepEqual(errors,[]);const largeRecoveryParses=await page.evaluate(()=>window.largeRecoveryParses);if(!baselineEditor)assert.equal(largeRecoveryParses,0,'Saving parsed the unchanged near-limit recovery envelope');
  await page.screenshot({path:output+'/editor.png'});
  const sources=['web/editor/document.js','web/editor/index.js','web/content-library.js','web/pkg/solar_friends_bg.wasm'];
- const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,concurrentSave,preparationFailure,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:file==='web/editor/index.js'&&baselineEditor?baselineEditor:await readFile(file)).digest('hex')])))};
+ const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',largeRecoveryParses,historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,concurrentSave,preparationFailure,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:file==='web/editor/index.js'&&baselineEditor?baselineEditor:await readFile(file)).digest('hex')])))};
  await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
