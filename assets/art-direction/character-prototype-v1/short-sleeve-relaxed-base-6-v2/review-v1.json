@@ -1,0 +1,65 @@
+{
+  "scope": "One internal pose source, six complete character combinations and static lighting/facing guides. No complete shirt animation or player recipe.",
+  "composed": 6,
+  "outside": 6,
+  "protectedLower": 6,
+  "foregroundChecks": 6,
+  "foregroundAlphaChecks": 15804,
+  "refused": 6,
+  "coverage": [
+    {
+      "sheet": "base",
+      "index": 6,
+      "oldTop": 1535,
+      "covered": 1535,
+      "ratio": 1,
+      "collarLeaks": [],
+      "uncovered": []
+    }
+  ],
+  "foregroundVersion": "v2",
+  "sourceHash": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+  "anatomyReview": {
+    "sha256": "aee70071dabc8b211cdd1ad5bd98949d390a949c4c33891175607b4f97640e63",
+    "criteria": {
+      "status": "pre-paint review criteria",
+      "materialRevision": "v11",
+      "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+      "measuredWaistLine": [
+        [
+          98,
+          136
+        ],
+        [
+          109,
+          140
+        ],
+        [
+          123,
+          142.5
+        ],
+        [
+          137,
+          143
+        ],
+        [
+          151,
+          141
+        ],
+        [
+          161,
+          137
+        ]
+      ],
+      "lowerProtection": "Original shorts pixels at least two native pixels below the measured per-column waistline and every shoe pixel must remain unchanged. Foreground arm pixels are checked separately; a global horizontal cutoff is invalid for this bent body.",
+      "collarProtection": "Every opaque original shirt pixel above native row 134 must be covered; use the inspected original cloth and source-bound material regions to distinguish cloth from bent-face eyes/skin.",
+      "scope": "Declared before source paint generation; not appearance acceptance."
+    }
+  },
+  "reviewToolSha256": "051b1d21b863591e3e0b5f511cc9cbe29eb4466b1d856ea300943b67232d80e5",
+  "rendererSha256": {
+    "character-clothing.js": "1be06afb85547f198b51865000af22d55562c43c7d29fff91b99c05f6832b501",
+    "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b"
+  }
+}

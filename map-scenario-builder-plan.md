@@ -2180,3 +2180,9 @@ Prepared and froze base-5 shirt geometry and material-v11 anatomy criteria. Refi
 New frozen base-5 guide v2 expands the measured collar and left torso edges. Its unchanged generated source covers all 1,044 checked upper-shirt pixels and passes six anatomy-bound compositions plus 48 colour/accessory combinations: 2,359,296 alpha comparisons and 578,592 protected lower-body channel comparisons. Inspected enlarged details, colour and day/night/facing boards. Torso and neckline follow the pose, hands remain above cloth and the four colours share a consistent silhouette.
 
 **Why:** correcting the guide before generation closes the previous three-pixel coverage failure without modifying generated paint or weakening checks. This is one internal static pose, not full outfit acceptance. Work pose 6, full cycle/tool/motion review, remaining outfit poses and the broader builder release gates remain open.
+
+### Final work-shirt pose source and sleeve ownership
+
+Prepared base-6 fixed geometry and source-bound raised-arm masks. The first source missed two checked right-arm edge pixels; revised frozen guide v2 and regenerated without editing paint. All 1,535 upper-shirt pixels now pass, as do six static anatomy compositions and 48 colour/accessory combinations. Enlarged review caught overbroad foreground ownership hiding the sleeves. Foreground v2 narrows ownership to crossing forearms, exposing sleeve cloth over the upper arms; repeated static and colour checks pass.
+
+**Why:** opaque-hand checks alone cannot establish believable sleeve anatomy. Retained both sources, masks and findings. The revised cuffs still have angular ownership edges requiring four-pose tool/cycle/motion review. Sources now exist for all four work poses, but this is not full cycle acceptance or public outfit integration; remaining garment poses and all broader release gates remain open.

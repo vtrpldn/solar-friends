@@ -1,0 +1,12 @@
+{
+  "status": "superseded: two right-arm edge coverage failures",
+  "sourceSha256": "40f30276d5077f2db931c447dbb5c09f24dc07656bf07e25a3da46290ba03ec3",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-05a47456-20cf-4c5b-ac0b-0c8ab657b7d6.png",
+  "promptSha256": "4f38408adabdb58165b39e05522c977984e351e502b1a41af0a7af270fb6cbbb",
+  "reference": {
+    "role": "frozen geometry guide",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-6-v1/mask.png",
+    "sha256": "9560cc604edcac3a767cfbe2c17be1444fbad2dcf5596a1ed4198e3d46099583"
+  },
+  "scope": "One internal work pose. No player-facing outfit or full cycle acceptance."
+}

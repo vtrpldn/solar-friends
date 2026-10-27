@@ -1,0 +1,34 @@
+{
+  "status": "pre-paint review criteria",
+  "materialRevision": "v11",
+  "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "measuredWaistLine": [
+    [
+      98,
+      136
+    ],
+    [
+      109,
+      140
+    ],
+    [
+      123,
+      142.5
+    ],
+    [
+      137,
+      143
+    ],
+    [
+      151,
+      141
+    ],
+    [
+      161,
+      137
+    ]
+  ],
+  "lowerProtection": "Original shorts pixels at least two native pixels below the measured per-column waistline and every shoe pixel must remain unchanged. Foreground arm pixels are checked separately; a global horizontal cutoff is invalid for this bent body.",
+  "collarProtection": "Every opaque original shirt pixel above native row 134 must be covered; use the inspected original cloth and source-bound material regions to distinguish cloth from bent-face eyes/skin.",
+  "scope": "Declared before source paint generation; not appearance acceptance."
+}

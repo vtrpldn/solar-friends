@@ -1,0 +1,20 @@
+{
+  "status": "internal static checks passed; cuff geometry and motion review pending",
+  "sourceSha256": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-f5107004-57bd-4a0d-9828-5929e3e5253f.png",
+  "promptSha256": "4f38408adabdb58165b39e05522c977984e351e502b1a41af0a7af270fb6cbbb",
+  "reference": {
+    "role": "frozen geometry guide",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-6-v2/mask.png",
+    "sha256": "2fb14e7cefd748f4afb01c087a1afbf11bb86f81d28bbb1cdca9fd31265aae2d"
+  },
+  "scope": "One internal work pose. No player-facing outfit or full cycle acceptance.",
+  "foregroundVersion": "v2",
+  "findings": [
+    "All 1535 upper-shirt pixels covered",
+    "Six static compositions and 48 colour/accessory combinations pass",
+    "Foreground v1 restored too much upper arm and hid sleeves; v2 retains crossing forearms while allowing visible cloth over upper arms",
+    "Inspected enlarged revised composition: sleeve cloth appears but cuff ownership edges remain angular and need adjacent-pose review"
+  ],
+  "next": "Assemble four-pose cycle with tools and review cuff anatomy and transitions before activation."
+}
