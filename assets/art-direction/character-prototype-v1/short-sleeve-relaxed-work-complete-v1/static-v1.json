@@ -2039,6 +2039,24 @@
       }
     }
   ],
+  "recordings": [
+    {
+      "clip": "work",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 3003.600000023842
+    },
+    {
+      "clip": "work",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 3003.6999999284744,
+      "elapsedMs": 3007.600000023842
+    }
+  ],
+  "calls": 629,
+  "videoSha256": "dd5fc84ba0d61ca0216e0c98649041e27f33967c6d4b9be37e1204bd2574e7bd",
   "inputs": {
     "short-sleeve-relaxed-base-4-v3": {
       "sourceSha256": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
@@ -2058,5 +2076,5 @@
     },
     "productionBundleSha256": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4"
   },
-  "reviewToolSha256": "3953973a76fc1af61eb228a06422fcf5fcd5137cb0363cbf45279048d1dd5e08"
+  "reviewToolSha256": "05c1694b48b69c93871925b945f7f1dfcf01d6dad0c28f4e290829d03d9166dd"
 }

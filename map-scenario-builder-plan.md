@@ -2192,3 +2192,9 @@ Prepared base-6 fixed geometry and source-bound raised-arm masks. The first sour
 Added an internal four-pose composer using the production body/hair/clothing/equipment path. Rendered and inspected 32 combinations: two hairstyles, tool/no tool and hat/beard/plain. This revealed the production mallet mask restoring upper-arm skin over the corrected sleeve. The review now intersects normalized tool ownership with the shirt's reviewed foreground region where supplied, retaining the resting pose's original hand mask. The revised static board preserves sleeve cloth and mallet grip. Retained exact derived masks and source/bundle/registration identities.
 
 **Why:** separate shirt and tool checks missed a layering interaction. The correction is currently internal review only; production integration must use equivalent validated ownership. Full motion/transitions, other palettes and world views, remaining garment poses and broader builder gates stay open.
+
+### Encoded shirt and mallet work-loop review
+
+Recorded the four prepared work poses through the shared production sampler for both hairstyles, plain and hat/beard, in daylight and mirrored night. Independently decoded 180 frames over 5.9755 seconds and inspected sixteen retained samples. Shirt and mallet remain attached in sampled rest/raise/impact poses, with sleeve cloth visible after the tool-mask correction. The sampler visibly crossfades some pose changes; this evidence does not establish village travel, smooth pacing or walk/work transitions.
+
+**Why:** static combinations do not reveal phase-change layering. Retained the encoded movie, independent decoder metadata, requested sample times and review board with hashes. Production outfit integration, remaining garment poses, transition/world checks and all wider builder release gates remain open.

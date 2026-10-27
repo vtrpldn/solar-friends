@@ -1,7 +1,7 @@
 {
-  "status": "internal static cycle review; motion and wider integration pending",
+  "status": "internal static and sampled work-loop review; broader integration pending",
   "boardSha256": "11c766627e175a69a88094728f5ef4df376a9ee8236a632c079a8a04b7a92921",
-  "reportSha256": "88ac6c135299d9b6c9f0189f0e2029b50aa46b2e9b21bc160118271acd2f3e6a",
+  "reportSha256": "a5dfbc7c03681cd7c565c181d90d20e5468fafad7af64cf0c0700a8951466e09",
   "findings": [
     "Inspected all 32 four-pose compositions: two hairstyles, with/without mallet, with/without hat/beard",
     "Combined production tool mask originally restored upper-arm skin over shirt sleeves",
@@ -10,8 +10,22 @@
     "Angular cuff edges still require continuous motion review"
   ],
   "limitations": [
-    "Single teal/copper/sage/graphite palette in shared board",
-    "No day/night motion, world or production recipe activation acceptance",
-    "Derived masks currently live only in internal review; future runtime integration must retain equivalent validated ownership"
-  ]
+    "No walk/work transitions, actual village/world or production recipe activation acceptance",
+    "Single teal/copper/sage/graphite palette in this cycle review; per-pose colour boards are separate evidence",
+    "Derived tool masks currently live only in internal review; production integration must retain equivalent validated ownership"
+  ],
+  "motion": {
+    "videoSha256": "dd5fc84ba0d61ca0216e0c98649041e27f33967c6d4b9be37e1204bd2574e7bd",
+    "decodedReportSha256": "281605fafb46f9cd2e3bd367eaf3e116fb889aec43b11034670032c36320e947",
+    "decodedFrames": 180,
+    "durationSeconds": 5.9755,
+    "inspectedSamples": 16,
+    "findings": [
+      "Day and mirrored night samples show rest, raised and bent impact poses with shirt and mallet together",
+      "Shirt remains attached to torso; sleeves stay visible with tool ownership constrained to reviewed foreground",
+      "Mallet grip follows the hands in inspected whole poses",
+      "Shared sampler creates visible crossfade ghosting between some poses; this review does not assess village travel or frame pacing"
+    ],
+    "scope": "Sampled encoded work loop at one material palette; requested timestamps are not exact native pose or decoder frame identities."
+  }
 }

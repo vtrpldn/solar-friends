@@ -1,0 +1,175 @@
+{
+  "scope": "Encoded work loop review samples for both hairstyles, day and mirrored night; requested recording times are not exact native/decoder pose identities or frame-pacing evidence.",
+  "videoSha256": "dd5fc84ba0d61ca0216e0c98649041e27f33967c6d4b9be37e1204bd2574e7bd",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.30.08",
+        "width": 1000,
+        "height": 540,
+        "coded_width": 1000,
+        "coded_height": 540,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "50:27",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "30000/1001",
+        "avg_frame_rate": "30000/1001",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "180",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-work-complete-v1/work-motion-v1.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "5.975500",
+      "size": "1039536",
+      "bit_rate": "1391730",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "samples": [
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.025,
+      "requestedVideoSeconds": 0.025
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.14,
+      "requestedVideoSeconds": 0.14
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.25,
+      "requestedVideoSeconds": 0.25
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.4,
+      "requestedVideoSeconds": 0.4
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.55,
+      "requestedVideoSeconds": 0.55
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 0.7,
+      "requestedVideoSeconds": 0.7
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 1.2,
+      "requestedVideoSeconds": 1.2
+    },
+    {
+      "night": 0,
+      "facing": 1,
+      "seconds": 2.2,
+      "requestedVideoSeconds": 2.2
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.025,
+      "requestedVideoSeconds": 3.0286999999284743
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.14,
+      "requestedVideoSeconds": 3.1436999999284745
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.25,
+      "requestedVideoSeconds": 3.2536999999284744
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.4,
+      "requestedVideoSeconds": 3.4036999999284743
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.55,
+      "requestedVideoSeconds": 3.553699999928474
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 0.7,
+      "requestedVideoSeconds": 3.7036999999284745
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 1.2,
+      "requestedVideoSeconds": 4.2036999999284745
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "seconds": 2.2,
+      "requestedVideoSeconds": 5.2036999999284745
+    }
+  ]
+}
