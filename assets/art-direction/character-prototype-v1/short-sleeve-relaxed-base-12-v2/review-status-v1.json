@@ -1,0 +1,14 @@
+{
+  "status": "rejected source; frozen revised guide retained",
+  "sourceSha256": "9eaa1a301f783592c24f4beeb5050929c18c2658f1cc97e52261a9cae4337574",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-1ec470f2-9f27-4a3e-a31c-f7e4283699a4.png",
+  "promptSha256": "0a8d9a7fd8cfc4f1928c981407dee0217f6972861bafcd3341beb87761038e5b",
+  "reference": {
+    "role": "frozen exact geometry target",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v2/mask.png",
+    "sha256": "7665f51d2dc150d7413285569e4166ca42c8e29b5d48c6325cfecd594961bb7b"
+  },
+  "finding": "Generator enlarged/shifted shirt: bounded coverage 61.53%, guide coverage 70.02%, area ratio 1.984. Do not fit or resize source to conceal failure.",
+  "activation": false,
+  "next": "Regenerate revised guide without altering frozen geometry or generated source."
+}

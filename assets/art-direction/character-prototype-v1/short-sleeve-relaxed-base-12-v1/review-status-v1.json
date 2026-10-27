@@ -1,0 +1,14 @@
+{
+  "status": "needs collar edge correction",
+  "sourceSha256": "46b20801610131f13033bcd0401caa2868d3691b06fb4d5f0be5f1c6fe433833",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-564eae98-7ae9-436e-82aa-7bc262ca5d19.png",
+  "promptSha256": "0a8d9a7fd8cfc4f1928c981407dee0217f6972861bafcd3341beb87761038e5b",
+  "reference": {
+    "role": "frozen exact geometry target",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v1/mask.png",
+    "sha256": "bef03e48406abf9f637f456f2d055956096acc0da1b253857acf057c03386b08"
+  },
+  "finding": "Source audit passed and protected shorts/hands preserved; four original upper-shirt pixels have candidate alpha 224\u2013231 rather than required 240.",
+  "activation": false,
+  "next": "Regenerate revised guide without altering frozen geometry or generated source."
+}

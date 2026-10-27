@@ -2216,3 +2216,9 @@ The internal complete-family appearance library now accepts bounded, unique sour
 Assembled the reviewed walk, work and breathing sources through the shared appearance library using current production materials. Eight appearances cover two hairstyles, two material palettes and plain/hat+beard variants: 96 dressed poses, 288 unchanged other poses, sixteen unchanged feeding returns and 96 cached-frame reuse checks pass. All eight released preview leases refuse further reads; disposal is idempotent and clears garment registrations. Inspected indigo plain/curls and cream equipped/sidepart boards across all twelve poses; scale, anchors, cloth fit, tools and head accessories remain coherent.
 
 **Why:** separate clip reviews cannot establish that mixed clothing sources coexist in the bounded library with current material registration. This remains twelve internal poses; base 12–15, sixteen idle and sixteen activity garment poses are absent. Cross-clip/world review, full public outfit integration and broader builder gates remain open.
+
+### Seated garment anatomy preparation
+
+Prepared analytical grids for base 12–15 and a source-bound shirt guide for seated pose 12. The seated arm span uses a fixed 170-pixel native crop rather than cutting off the shoulder with the upright crop. Frozen original-arm ownership and the measured seated waistline before generation. First source passes fixed bounds and protected shorts/hands but misses four collar-edge pixels. Revised the collar guide; its first generated candidate was enlarged and shifted and fails the source audit. Both remain inactive, with original PNGs, exact prompts and review findings retained.
+
+**Why:** seated clothes must follow seated proportions and preserve the lap/hand overlap. Regenerate the revised guide rather than warping paint or weakening coverage. This does not add an accepted seated pose; thirty-six garment poses and broader builder release gates remain open.
