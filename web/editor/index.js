@@ -83,6 +83,9 @@ function save(){
   clearTimeout(saveTimer);
   if(!current)return Promise.resolve();
   const ctx=current,view=map.state,snapshot=map.snapshot,terrainLoading=map.terrainLoading,valid=report.ok;
+  const requestKey=JSON.stringify([ctx.doc.revision,view,ctx.artRevision??0,terrainLoading]);
+  const pending=ctx.pendingSaves??=new Map();
+  if(pending.has(requestKey))return pending.get(requestKey);
   const preparation=ctx.doc.checkpointAsync();
   // Observe preparation failures even while an earlier durable save is queued.
   preparation.catch(()=>{});
@@ -114,11 +117,12 @@ function save(){
     return record;
   });
   saving=operation;
-  return operation.catch(error=>{
+  const handled=operation.catch(error=>{
     if(error instanceof LibraryConflict)ctx.conflicted=true;
     if(current===ctx){status(ctx.conflicted?'Changed in another tab · save a copy':'Could not save · export a copy');toast(error.message);}
     throw error;
-  });
+  }).finally(()=>{if(pending.get(requestKey)===handled)pending.delete(requestKey);});
+  pending.set(requestKey,handled);return handled;
 }
 function change(label,edit,{valid=false}={}){
   if(!current||busy)return false;
@@ -551,7 +555,7 @@ try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
   outlook=new ScenarioOutlook($('creator-outlook'),{source:()=>({key:current?current.id+':'+current.doc.revision:null,valid:!!current&&report.ok,snapshot:()=>engine.snapshot(),projects:checkpoint=>projectPlaces(checkpoint,current.doc.value.start.buildings,title)}),reviewProject:p=>{if(!current?.doc.value.start.buildings.some(b=>b.id===p.id))return;setTool('select');map.select(p.id);map.centerAt(p.x,p.y);$('creator-selection').scrollIntoView({block:'nearest'});}});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
-  map=new EditorMap($('creator-map'),art,{onTerrainReady:()=>{if(current){current.thumbnailRevision=null;scheduleSave();}},onArtworkReady:()=>{if(current){current.thumbnailRevision=null;scheduleSave();}},action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank,map.view.selectedRoute,map.view.selectedResident]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
+  map=new EditorMap($('creator-map'),art,{onTerrainReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},onArtworkReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank,map.view.selectedRoute,map.view.selectedResident]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
   minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
   $('creator-sites').innerHTML='<button data-tool="battery-bank" aria-pressed="false">Battery bank</button>'+sourceKinds.map((kind,i)=>`<button data-tool="${kind}" aria-pressed="false">${escape(siteNames[i])}</button>`).join('');
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');

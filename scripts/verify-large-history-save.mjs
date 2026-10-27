@@ -28,14 +28,14 @@ try{
  assert(fixture.bytes>7*1024*1024&&fixture.bytes<8*1024*1024,`Expected near-limit journal, got ${fixture.bytes}`);
  const validator=new Game();try{assert.equal(JSON.parse(validator.validate_scenario(JSON.stringify(fixture.definition))).ok,true);}finally{validator.free();}
  await page.addInitScript(()=>{
-  window.historySaveProbe=[];window.savePhaseProbe=[];window.trackSavePhases=false;
+  window.checkpointStarts=0;window.historySaveProbe=[];window.savePhaseProbe=[];window.trackSavePhases=false;
   const measure=(name,fn)=>function(...args){const start=performance.now();try{return fn.apply(this,args);}finally{const ms=performance.now()-start;if(window.trackSavePhases&&ms>=1)window.savePhaseProbe.push({name,ms});}};
   JSON.stringify=measure('JSON.stringify',JSON.stringify);window.structuredClone=measure('structuredClone',window.structuredClone);Storage.prototype.setItem=measure('storage.setItem',Storage.prototype.setItem);Storage.prototype.getItem=measure('storage.getItem',Storage.prototype.getItem);IDBObjectStore.prototype.put=measure('indexedDB.put',IDBObjectStore.prototype.put);
   window.historySaveWrites=[];window.largeRecoveryParses=0;const parse=JSON.parse;JSON.parse=function(raw,...args){if(typeof raw==='string'&&raw.length>7*1024*1024&&raw.startsWith('{"storageRevision":'))window.largeRecoveryParses++;return parse.call(this,raw,...args);};
   window.historyProbeReady=Promise.all([import('/editor/document.js').then(({EditorDocument})=>{
    for(const name of ['checkpoint','markSaved']){const original=EditorDocument.prototype[name];EditorDocument.prototype[name]=function(...args){const start=performance.now();try{return original.apply(this,args);}finally{window.historySaveProbe.push({name,ms:performance.now()-start});}};}
    if(EditorDocument.prototype.checkpointAsync){const original=EditorDocument.prototype.checkpointAsync;EditorDocument.prototype.checkpointAsync=async function(...args){
-    const start=performance.now();
+    window.checkpointStarts++;const start=performance.now();
     if(window.failNextCheckpoint){window.failNextCheckpoint=false;throw Error('Injected checkpoint preparation failure');}
     if(window.holdNextCheckpoint){window.holdNextCheckpoint=false;let first=true;args=[{yieldControl:async()=>{if(first){first=false;window.checkpointHeld=true;await new Promise(resolve=>window.releaseCheckpoint=resolve);}await new Promise(resolve=>setTimeout(resolve,0));}}];}
     try{return await original.apply(this,args);}finally{window.historySaveProbe.push({name:'checkpointAsyncElapsed',ms:performance.now()-start});}
@@ -66,11 +66,12 @@ try{
  assert(!restored.recovered);assert.equal(restored.checkpoint,persisted);assert.deepEqual(errors,[]);
  await page.locator('#creator-undo').click();await page.waitForFunction(value=>document.querySelector('#creator-funds').value===String(value),fixture.definition.start.funds/100);
  await page.locator('#creator-redo').click();assert.equal(await page.locator('#creator-funds').inputValue(),'9001');
- let concurrentSave=null,preparationFailure=null;
+ let concurrentSave=null,preparationFailure=null,coalescedRequests=null;
  if(await page.evaluate(async()=>{const {EditorDocument}=await import('/editor/document.js');return typeof EditorDocument.prototype.checkpointAsync==='function';})){
   await page.locator('#creator-funds').fill('9002');await page.locator('#creator-funds').dispatchEvent('change');
   await page.evaluate(()=>{window.historySaveWrites=[];window.holdNextCheckpoint=true;});
   await page.locator('#creator-save').click();await page.waitForFunction(()=>window.checkpointHeld);
+  coalescedRequests=await page.evaluate(()=>{const before=window.checkpointStarts;document.querySelector('#creator-save').click();document.querySelector('#creator-save').click();return {extraClicks:2,extraPreparations:window.checkpointStarts-before};});if(!baselineEditor)assert.equal(coalescedRequests.extraPreparations,0,'Identical pending saves repeated checkpoint preparation');
   await page.locator('#creator-funds').fill('9003');await page.locator('#creator-funds').dispatchEvent('change');
   await page.evaluate(()=>window.releaseCheckpoint());
   await page.waitForFunction(()=>window.historySaveWrites.some(w=>w.funds===900200));
@@ -91,6 +92,6 @@ try{
  assert.deepEqual(errors,[]);const largeRecoveryParses=await page.evaluate(()=>window.largeRecoveryParses);if(!baselineEditor)assert.equal(largeRecoveryParses,0,'Saving parsed the unchanged near-limit recovery envelope');
  await page.screenshot({path:output+'/editor.png'});
  const sources=['web/editor/document.js','web/editor/index.js','web/content-library.js','web/save-project-prepared.js','web/project-save-worker.js','web/pkg/solar_friends_bg.wasm'];
- const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',largeRecoveryParses,historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,concurrentSave,preparationFailure,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:file==='web/editor/index.js'&&baselineEditor?baselineEditor:await readFile(file)).digest('hex')])))};
+ const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',largeRecoveryParses,historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,coalescedRequests,concurrentSave,preparationFailure,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:file==='web/editor/index.js'&&baselineEditor?baselineEditor:await readFile(file)).digest('hex')])))};
  await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
