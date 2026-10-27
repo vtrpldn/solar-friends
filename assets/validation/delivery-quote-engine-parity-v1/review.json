@@ -1,0 +1,25 @@
+{
+  "status": "retained scoped quote reuse; full throughput gate open",
+  "buildRoles": {
+    "baseline": "rebuilt release with per-scan quote reuse",
+    "candidate": "pinned pre-change release including footprint broad bound"
+  },
+  "engineOnlyMeansMs": {
+    "new": 843.5966355,
+    "old": 1081.1702707499994,
+    "reductionPercent": 21.973748416629736
+  },
+  "checks": {
+    "nativeTests": 783,
+    "allTargetClippy": "passed after test-only type alias cleanup",
+    "releaseBuild": "passed",
+    "changingVillageQuoteComparisons": 240,
+    "exactEngineSnapshots": 10,
+    "fixedTicks": 240,
+    "frameParity": true,
+    "reportParity": true
+  },
+  "invariant": "Cache values live only within one immutable candidates scan. No persisted cache, no changed candidate ordering, no reuse across assignments or inventory changes.",
+  "limitations": "Short browser run; throughput still below requested 16\u00d7. No sustained frame-pacing or total memory acceptance.",
+  "sourceSha256": "3d0c18e005912ac174acc5c189eefd4ec429514dcb8586527f42c29c4c081380"
+}

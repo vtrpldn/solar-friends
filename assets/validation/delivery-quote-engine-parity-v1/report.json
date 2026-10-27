@@ -1,0 +1,58 @@
+{
+  "scope": "One maximum mixed opening, 240 fixed ticks with exact snapshots every 24 ticks, frame/full-report parity. Not every possible simulation state.",
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "steps": 240,
+  "snapshotsCompared": 10,
+  "frameParity": true,
+  "reportParity": true,
+  "baselineSha256": "db68ca82670b5c429b8ddbca3b97c28d2ab045b4e35627d77fa8bb6f6cfc69dc",
+  "candidateSha256": "9f56512b109f247a098c55059d2baa92ac162cf9835f11445701b6ce5b39b432",
+  "baselineBytes": 3608694,
+  "candidateBytes": 3606500,
+  "engineOnlyTiming": {
+    "scope": "Four alternating-order local batches per build, 32 warmup and 240 timed fixed ticks from identical restored state. Browser/rendering excluded.",
+    "timings": {
+      "baseline": [
+        846.8365830000002,
+        843.7895420000004,
+        837.8377920000003,
+        845.9226249999992
+      ],
+      "candidate": [
+        1084.4881249999999,
+        1082.0353749999995,
+        1080.4917920000007,
+        1077.6657909999976
+      ]
+    }
+  }
+}

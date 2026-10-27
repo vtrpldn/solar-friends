@@ -960,6 +960,35 @@ fn delivery_priority(v: &Village, to: Owner, material: usize) -> u32 {
     if supplies::urgent(v) { 1 } else { 2 }
 }
 fn candidates(v: &Village) -> Vec<Candidate> {
+    // This whole scan borrows an immutable village. Reuse quotes only within
+    // it; a later resident assignment or delivery gets a fresh scan/cache.
+    let mut requirements = Vec::<(Owner, Bundle)>::new();
+    let mut spaces = Vec::<(Owner, u32)>::new();
+    candidates_using(
+        v,
+        |owner| {
+            if let Some((_, items)) = requirements.iter().find(|(key, _)| *key == owner) {
+                return *items;
+            }
+            let items = needs(v, owner);
+            requirements.push((owner, items));
+            items
+        },
+        |owner| {
+            if let Some((_, amount)) = spaces.iter().find(|(key, _)| *key == owner) {
+                return *amount;
+            }
+            let amount = room(v, owner);
+            spaces.push((owner, amount));
+            amount
+        },
+    )
+}
+fn candidates_using(
+    v: &Village,
+    mut required_for: impl FnMut(Owner) -> Bundle,
+    mut space_for: impl FnMut(Owner) -> u32,
+) -> Vec<Candidate> {
     let Some(s) = &v.logistics else {
         return vec![];
     };
@@ -981,7 +1010,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 | Owner::Pantry(_)
                 | Owner::Restoration(_)
                 | Owner::Source(_)
-                | Owner::Maintenance(_) => available.saturating_sub(needs(v, from.owner)[i]),
+                | Owner::Maintenance(_) => available.saturating_sub(required_for(from.owner)[i]),
                 Owner::Warehouse(_) if from.managed && !closing(v, from.owner) => {
                     available.saturating_sub(from.target[i])
                 }
@@ -1020,7 +1049,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                     } else {
                         u32::MAX
                     };
-                    let room = room(v, to.owner).min(wanted);
+                    let room = space_for(to.owner).min(wanted);
                     let n = excess.min(room).min(LOAD);
                     if n > 0 {
                         out.push(Candidate {
@@ -1056,7 +1085,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
         let Some(to) = s.stores.iter().find(|s| s.owner == Owner::Site(p.building)) else {
             continue;
         };
-        let required = needs(v, to.owner);
+        let required = required_for(to.owner);
         let on_site = to.items;
         for i in 0..COUNT {
             let missing = p.reserved[i]
@@ -1104,7 +1133,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
         {
             let amount = missing
                 .min(gatherings::held(v, from.id, economy::MEALS) + usable(v, from, economy::MEALS))
-                .min(room(v, to.owner));
+                .min(space_for(to.owner));
             if amount > 0 {
                 out.push(Candidate {
                     from: from.id,
@@ -1123,7 +1152,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
             Owner::Pantry(_) | Owner::Site(_) | Owner::Source(_) | Owner::Restoration(_)
         ) && !closing(v, p.owner)
     }) {
-        let required = needs(v, to.owner);
+        let required = required_for(to.owner);
         for (i, &required) in required.iter().enumerate().skip(economy::FOOD) {
             let pending = s
                 .shipments
@@ -1144,10 +1173,10 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                     if matches!(to.owner, Owner::Restoration(_)) {
                         0
                     } else {
-                        needs(v, from.owner)[i]
+                        required_for(from.owner)[i]
                     },
                 );
-                let amount = missing.min(excess).min(room(v, to.owner)).min(LOAD);
+                let amount = missing.min(excess).min(space_for(to.owner)).min(LOAD);
                 if amount > 0 {
                     out.push(Candidate {
                         from: from.id,
@@ -1181,7 +1210,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
         {
             let amount = missing
                 .min(usable(v, from, economy::TOOLS))
-                .min(room(v, to.owner));
+                .min(space_for(to.owner));
             if amount > 0 {
                 out.push(Candidate {
                     from: from.id,
@@ -1217,7 +1246,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 let amount = missing
                     .min(usable(v, from, i))
                     .min(LOAD)
-                    .min(room(v, to.owner));
+                    .min(space_for(to.owner));
                 if amount > 0 {
                     out.push(Candidate {
                         from: from.id,
@@ -1266,7 +1295,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 let amount = missing
                     .min(usable(v, from, i))
                     .min(LOAD)
-                    .min(room(v, to.owner));
+                    .min(space_for(to.owner));
                 if amount > 0 {
                     out.push(Candidate {
                         from: from.id,
@@ -1307,7 +1336,7 @@ fn candidates(v: &Village) -> Vec<Candidate> {
                 let amount = missing
                     .min(usable(v, from, i))
                     .min(LOAD)
-                    .min(room(v, to.owner));
+                    .min(space_for(to.owner));
                 if amount > 0 {
                     out.push(Candidate {
                         from: from.id,
@@ -2058,6 +2087,35 @@ pub fn fixture_stage(v: &mut Village, id: usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn scoped_delivery_quotes_match_fresh_quotes_as_village_changes() {
+        type Signature = (Id, Id, usize, u32, (u32, u32, u32));
+        fn signature(items: Vec<Candidate>) -> Vec<Signature> {
+            items
+                .into_iter()
+                .map(|c| (c.from, c.to, c.material, c.amount, c.rank))
+                .collect()
+        }
+        let mut g = scene(13, 15);
+        let mut offered = 0;
+        for step in 0..240 {
+            let v = g.app.world().resource::<Village>();
+            let cached = candidates(v);
+            offered += cached.len();
+            let fresh = candidates_using(v, |owner| needs(v, owner), |owner| room(v, owner));
+            assert_eq!(signature(cached), signature(fresh), "delivery scan {step}");
+            if step == 120 {
+                let mut v = g.app.world_mut().resource_mut::<Village>();
+                fixture_stock(&mut v, economy::FOOD, 11);
+            }
+            g.tick(0.25);
+        }
+        assert!(
+            offered > 0,
+            "The comparison must exercise actual delivery offers"
+        );
+    }
+
     fn scene(x: i32, y: i32) -> Game {
         let mut g = Game::new();
         {
