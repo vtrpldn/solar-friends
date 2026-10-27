@@ -1,7 +1,7 @@
 {
   "status": "internal static and sampled work-loop review; broader integration pending",
   "boardSha256": "11c766627e175a69a88094728f5ef4df376a9ee8236a632c079a8a04b7a92921",
-  "reportSha256": "d56270ba058601ea1028af20808b534ca9190ac3f0aadb31c0911433cee7df26",
+  "reportSha256": "210f4f6f44e1c0591962ba9cdcd5f3ea14bbf4bf188e1c78ba914f2333cbed97",
   "findings": [
     "Inspected all 32 four-pose compositions: two hairstyles, with/without mallet, with/without hat/beard",
     "Combined production tool mask originally restored upper-arm skin over shirt sleeves",
@@ -10,15 +10,15 @@
     "Angular cuff edges still require continuous motion review"
   ],
   "limitations": [
-    "No walk/work transitions, actual village/world or production recipe activation acceptance",
-    "Single teal/copper/sage/graphite palette in this cycle review; per-pose colour boards are separate evidence",
-    "Derived tool masks currently live only in internal review; production integration must retain equivalent validated ownership"
+    "Only four work poses integrated into internal library; remaining garment poses are absent",
+    "Public recipe and catalogue are unchanged",
+    "Shared-library comparisons use one material palette; broader palette/lifecycle coverage remains"
   ],
   "motion": {
-    "videoSha256": "60589cb729e03847c932b9a527763d43d4d16c959c414f0e4aa68845c1bd0805",
-    "decodedReportSha256": "b52cc5ed570e1fd465828be2ba9214cfbd0456a77daea91f585902305d7cb81f",
-    "decodedFrames": 179,
-    "durationSeconds": 5.981444,
+    "videoSha256": "2467bd71fb4b54d58ce1f5d013f4349e577de7fd8a08c1751bcebd2f4046d5a1",
+    "decodedReportSha256": "a5fb2ca2624809076c93182a74926850fdae2279359e4f6043392e858ebeb457",
+    "decodedFrames": 180,
+    "durationSeconds": 5.984251,
     "inspectedSamples": 16,
     "findings": [
       "Day and mirrored night samples show rest, raised and bent impact poses with shirt and mallet together",
@@ -40,5 +40,14 @@
       "invalidInitializationRefusals": 5,
       "borrowedFramesPreserved": 48
     }
+  },
+  "sharedLibraryClothing": {
+    "sha256": "ba959c01df0a6bcbdc8b62afb7bbf366ca6ab53d4daf84b77a357b38ba8ec0fe",
+    "exactWorkFramesCompared": 16,
+    "otherPosesUnchanged": 176,
+    "feedingReturnsUnchanged": 8,
+    "invalidInitializationRefusals": 5,
+    "failureOwnedCanvasesReleased": true,
+    "playerActivation": false
   }
 }

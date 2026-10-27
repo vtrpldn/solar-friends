@@ -1,6 +1,10 @@
 {
   "scope": "32 static four-pose shirt/hair/tool/accessory compositions. Boards require visual inspection. No motion or public activation acceptance.",
   "compositions": 32,
+  "sharedCompared": 16,
+  "unchanged": 176,
+  "recoveries": 8,
+  "clothingRefusals": 5,
   "derivedToolMasks": [
     {
       "index": 4,
@@ -1987,18 +1991,18 @@
       "night": 0,
       "facing": 1,
       "offsetMs": 0,
-      "elapsedMs": 3003.600000023842
+      "elapsedMs": 3004.399999976158
     },
     {
       "clip": "work",
       "night": 1,
       "facing": -1,
-      "offsetMs": 3003.600000023842,
-      "elapsedMs": 3001.8000000715256
+      "offsetMs": 3004.399999976158,
+      "elapsedMs": 3004.600000023842
     }
   ],
-  "calls": 614,
-  "videoSha256": "60589cb729e03847c932b9a527763d43d4d16c959c414f0e4aa68845c1bd0805",
+  "calls": 619,
+  "videoSha256": "2467bd71fb4b54d58ce1f5d013f4349e577de7fd8a08c1751bcebd2f4046d5a1",
   "inputs": {
     "short-sleeve-relaxed-base-4-v3": {
       "sourceSha256": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
@@ -2018,5 +2022,5 @@
     },
     "productionBundleSha256": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4"
   },
-  "reviewToolSha256": "1020c8bff8e774315e61b64d6d35ea102dab6b7c7d72b8f7276caed9c17b2bcc"
+  "reviewToolSha256": "66f7e9c025169d7e60a46518357461288a8019041698e9ed528d42526f7267ee"
 }

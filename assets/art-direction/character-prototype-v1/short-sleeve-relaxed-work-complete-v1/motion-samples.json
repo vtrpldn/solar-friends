@@ -1,6 +1,6 @@
 {
   "scope": "Encoded work loop review samples for both hairstyles, day and mirrored night; requested recording times are not exact native/decoder pose identities or frame-pacing evidence.",
-  "videoSha256": "60589cb729e03847c932b9a527763d43d4d16c959c414f0e4aa68845c1bd0805",
+  "videoSha256": "2467bd71fb4b54d58ce1f5d013f4349e577de7fd8a08c1751bcebd2f4046d5a1",
   "metadata": {
     "streams": [
       {
@@ -29,7 +29,7 @@
         "time_base": "1/1000",
         "start_pts": 0,
         "start_time": "0.000000",
-        "nb_read_frames": "179",
+        "nb_read_frames": "180",
         "disposition": {
           "default": 1,
           "dub": 0,
@@ -65,9 +65,9 @@
       "format_name": "matroska,webm",
       "format_long_name": "Matroska / WebM",
       "start_time": "0.000000",
-      "duration": "5.981444",
-      "size": "1003865",
-      "bit_rate": "1342639",
+      "duration": "5.984251",
+      "size": "1046507",
+      "bit_rate": "1399014",
       "probe_score": 100,
       "tags": {
         "encoder": "Chrome"
@@ -127,49 +127,49 @@
       "night": 1,
       "facing": -1,
       "seconds": 0.025,
-      "requestedVideoSeconds": 3.0286000000238418
+      "requestedVideoSeconds": 3.029399999976158
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 0.14,
-      "requestedVideoSeconds": 3.143600000023842
+      "requestedVideoSeconds": 3.1443999999761583
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 0.25,
-      "requestedVideoSeconds": 3.253600000023842
+      "requestedVideoSeconds": 3.254399999976158
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 0.4,
-      "requestedVideoSeconds": 3.4036000000238418
+      "requestedVideoSeconds": 3.404399999976158
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 0.55,
-      "requestedVideoSeconds": 3.5536000000238417
+      "requestedVideoSeconds": 3.554399999976158
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 0.7,
-      "requestedVideoSeconds": 3.703600000023842
+      "requestedVideoSeconds": 3.7043999999761583
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 1.2,
-      "requestedVideoSeconds": 4.203600000023842
+      "requestedVideoSeconds": 4.204399999976158
     },
     {
       "night": 1,
       "facing": -1,
       "seconds": 2.2,
-      "requestedVideoSeconds": 5.203600000023842
+      "requestedVideoSeconds": 5.204399999976158
     }
   ]
 }

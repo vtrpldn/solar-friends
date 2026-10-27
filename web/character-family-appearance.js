@@ -1,3 +1,6 @@
+import {composeClothingPose} from './character-clothing.js';
+import {prepareClothingColourSource} from './character-clothing-colour.js';
+import {intersectBodyForegroundMasks} from './character-foreground.js';
 import {prepareFamilyAccessories} from './character-family-accessories.js';
 import {validateBodyForegroundMask} from './character-foreground-mask.js';
 import {canonical} from './editor/journal.js';
@@ -11,15 +14,15 @@ const sheets=['base','idle','activities'],exact=(v,keys)=>v&&typeof v==='object'
 // Internal complete-family provider. The caller retains ownership of the body
 // family and decoded sources. Every acquired preview has an explicit lease;
 // eviction never invalidates a preview that is still in use.
-export async function prepareFamilyAppearanceLibrary({family,materials,owners,equipment,load,accessories=null,workEquipment=null,maxEntries=12,maxConcurrent=2,maxQueued=24}){
+export async function prepareFamilyAppearanceLibrary({family,materials,owners,equipment,load,accessories=null,workEquipment=null,clothing=null,maxEntries=12,maxConcurrent=2,maxQueued=24}){
  if(typeof load!=='function'||typeof family?.frameForPose!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded complete-family composition limits.');
- const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),records=new Map(),queue=[];
+ const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment,clothing}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),garments=new Map(),records=new Map(),queue=[];
  let model=null,accessoryParts=null,active=0,closed=false,disposing=null;
  const alive=()=>{if(closed)throw Error('This character family library has been released.');},source=file=>{
   if(typeof file!=='string'||!/^[a-z0-9-]+\.png$/.test(file))throw Error('Choose registered bundled family artwork.');
   if(!sourceWork.has(file))sourceWork.set(file,Promise.resolve().then(()=>load(file)));return sourceWork.get(file);
  };
- const destroyParts=()=>{for(const cap of caps.values())cap.composer.dispose();caps.clear();for(const a of underlays.values())if(a.frame instanceof HTMLCanvasElement)clear(a.frame);underlays.clear();sourceWork.clear();tools.length=0;workTools.clear();accessoryParts?.dispose();accessoryParts=null;model?.clear();model=null;};
+ const destroyParts=()=>{for(const cap of caps.values())cap.composer.dispose();caps.clear();for(const a of underlays.values())if(a.frame instanceof HTMLCanvasElement)clear(a.frame);underlays.clear();sourceWork.clear();tools.length=0;workTools.clear();garments.clear();accessoryParts?.dispose();accessoryParts=null;model?.clear();model=null;};
  try{
   if(!exact(registrations.owners,['curls','sidepart'])||!Array.isArray(registrations.equipment)||registrations.equipment.length!==16)throw Error('Provide two complete hairstyle owners and sixteen tools.');
   for(const owner of Object.values(registrations.owners)){
@@ -43,6 +46,17 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     const art=await loadEquipmentArt(registration,source);validateRegisteredEquipment({binding:family.binding,equipment:art,registration,sheet:'base',index});validateBodyForegroundMask(registration.foreground,family.binding,'base',index);workTools.set(index,{registration,equipment:art});
    }
   }
+  if(registrations.clothing!==null){
+   if(!Array.isArray(registrations.clothing)||!registrations.clothing.length||registrations.clothing.length>48)throw Error('Provide a bounded set of registered garment poses.');
+   for(const garment of registrations.clothing){
+    if(!exact(garment,['file','registration']))throw Error('Choose registered garment sources.');
+    const r=garment.registration,key=r?.sheet+':'+r?.index;if(garments.has(key))throw Error('Duplicate garment pose.');
+    const art=await source(garment.file),probe=composeClothingPose({...art,registration:r,body:family.frameForPose(r?.sheet,r?.index),binding:family.binding,sheet:r?.sheet,index:r?.index});clear(probe.frame);
+    garments.set(key,{...art,registration:r});
+    const work=r.sheet==='base'?workTools.get(r.index):null;
+    if(work&&r.foreground)workTools.set(r.index,{...work,registration:{...work.registration,foreground:intersectBodyForegroundMasks({binding:family.binding,sheet:r.sheet,index:r.index,masks:[work.registration.foreground,r.foreground]})}});
+   }
+  }
   if(registrations.accessories!==null)accessoryParts=await prepareFamilyAccessories({family,registration:registrations.accessories,load:source});
  }catch(error){destroyParts();throw error;}
  const validate=input=>{
@@ -52,15 +66,16 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
   return {hair:input.hair,hairColour:validateHairColour(input.hairColour),materials:validateBodyMaterials(input.materials),...(hat==='none'?{}:{hat}),...(facialHair==='none'?{}:{facialHair})};
  };
  const compose=async recipe=>{
-  const scratch=new Set(),frames=new Map(),returns=new Map();let completed=false;
+  const scratch=new Set(),frames=new Map(),returns=new Map(),colours=new Map();let completed=false;
   const own=c=>{scratch.add(c);return c;};
   try{
+   for(const [key,garment]of garments)colours.set(key,await prepareClothingColourSource({...garment,colour:recipe.materials.shirt}));
    for(const sheet of sheets)for(let index=0;index<16;index++){
     alive();const body=family.frameForPose(sheet,index),cap=caps.get(recipe.hair+':'+sheet+':'+index);let painted=body;
     if(Object.keys(defaultBodyMaterials).some(k=>recipe.materials[k]!==defaultBodyMaterials[k])){
      const tinted=tintBodyMaterials(body.getContext('2d').getImageData(0,0,256,256),model.mask(sheet,index),recipe.materials);painted=own(document.createElement('canvas'));painted.width=painted.height=256;painted.getContext('2d').putImageData(new ImageData(tinted.data,256,256),0,0);
     }
-    const work=sheet==='base'?workTools.get(index):null,args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,...(work?{equipment:{art:work.equipment,registration:work.registration}}:{}),referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
+    const garment=garments.get(sheet+':'+index),work=sheet==='base'?workTools.get(index):null,args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,...(garment?{clothing:{...garment,colourSource:colours.get(sheet+':'+index)}}:{}),...(work?{equipment:{art:work.equipment,registration:work.registration}}:{}),referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
     if(cap.activity)frame=own(composeActivityUnderlay(appearance,cap.activity));
     if(sheet==='activities'){
      const options={...args,...tools[index],appearanceFrame:appearance,sheet,index};frame=own(await registeredEquipmentFrame(options));alive();
@@ -72,7 +87,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     for(const c of [painted,appearance])if(c!==body&&c!==frame&&scratch.delete(c))clear(c);
    }
    completed=true;return {frames,returns};
-  }finally{if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
+  }finally{for(const colour of colours.values())colour.dispose();if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
  };
  const destroyRecord=record=>{if(record.value){for(const c of [...record.value.frames.values(),...record.value.returns.values()])clear(c);record.value.frames.clear();record.value.returns.clear();record.value=null;}};
  function drain(){while(!closed&&active<maxConcurrent&&queue.length){const job=queue.shift();active++;Promise.resolve().then(()=>compose(job.recipe)).then(job.resolve,job.reject).finally(()=>{active--;drain();});}}
@@ -90,7 +105,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
    const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');if(!sheets.includes(sheet)||!Number.isSafeInteger(index)||index<0||index>15)throw Error('Choose a registered family pose.');const normal=value.frames.get(sheet+':'+index);return sheet==='activities'&&pose?.sequenceIndex>=4?value.returns.get(index)??normal:normal;}});
    return Object.freeze({provider,release(){if(released)return;released=true;record.users--;}});
   },
-  info:()=>({entries:records.size,active,queued:queue.length,leases:[...records.values()].reduce((n,r)=>n+r.users,0),preparedHairFrames:caps.size,underlays:underlays.size,workTools:workTools.size,appearanceFrames:[...records.values()].reduce((n,r)=>n+(r.value?50:0),0),maxEntries,maxConcurrent,maxQueued,closed,accessories:accessoryParts?.info()??null}),
+  info:()=>({entries:records.size,active,queued:queue.length,leases:[...records.values()].reduce((n,r)=>n+r.users,0),preparedHairFrames:caps.size,underlays:underlays.size,workTools:workTools.size,clothingPoses:garments.size,appearanceFrames:[...records.values()].reduce((n,r)=>n+(r.value?50:0),0),maxEntries,maxConcurrent,maxQueued,closed,accessories:accessoryParts?.info()??null}),
   dispose(){
    if(disposing)return disposing;closed=true;for(const job of queue.splice(0))job.reject(Error('This character family library has been released.'));
    disposing=(async()=>{await Promise.allSettled([...records.values()].map(r=>r.promise));for(const r of records.values())destroyRecord(r);records.clear();destroyParts();})();return disposing;
