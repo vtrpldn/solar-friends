@@ -2,11 +2,7 @@ import {registeredBodyAppearance} from './character-body-appearance.js';
 import {validateBodyForegroundMask} from './character-foreground-mask.js';
 export {validateBodyForegroundMask} from './character-foreground-mask.js';
 import {composeClothingPose} from './character-clothing.js';
-export async function createBodyForegroundLayers({body,binding,mask,sheet,index,appearanceBody,clothing}){
- const checked=validateBodyForegroundMask(mask,binding,sheet,index);
- if(body.width!==256||body.height!==256)throw Error('Foreground layers require the shared prepared body frame.');
- const original=body.getContext('2d').getImageData(0,0,256,256),digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',original.data))].map(n=>n.toString(16).padStart(2,'0')).join('');
- if(digest!==binding.frames[sheet][index])throw Error('The prepared body pixels differ from the foreground mask.');
+function foregroundOwnership(checked){
  const ownership=new Uint8Array(256*256);
  if(checked.schema===2){for(const [start,length]of checked.runs)ownership.fill(1,start,start+length);}
  else{
@@ -17,6 +13,23 @@ export async function createBodyForegroundLayers({body,binding,mask,sheet,index,
   for(let pixel=0;pixel<ownership.length;pixel++)ownership[pixel]=Number(coverage[pixel*4+3]>=128);
   }finally{region.width=region.height=0;}
  }
+ return ownership;
+}
+// Union semantic ownership before painting. A body pixel belongs to one layer
+// even when several registered parts pass behind the same hand.
+export function combineBodyForegroundMasks({binding,sheet,index,masks}){
+ if(!Array.isArray(masks)||!masks.length||masks.length>8)throw Error('Combine a bounded set of registered foreground masks.');
+ const union=new Uint8Array(256*256);
+ for(const mask of masks){const owned=foregroundOwnership(validateBodyForegroundMask(mask,binding,sheet,index));for(let i=0;i<union.length;i++)union[i]|=owned[i];}
+ const runs=[];for(let i=0;i<union.length;){if(!union[i]){i++;continue;}const start=i;while(i<union.length&&union[i])i++;runs.push([start,i-start]);}
+ return validateBodyForegroundMask({schema:2,body:binding,sheet,index,size:256,runs},binding,sheet,index);
+}
+export async function createBodyForegroundLayers({body,binding,mask,sheet,index,appearanceBody,clothing}){
+ const checked=validateBodyForegroundMask(mask,binding,sheet,index);
+ if(body.width!==256||body.height!==256)throw Error('Foreground layers require the shared prepared body frame.');
+ const original=body.getContext('2d').getImageData(0,0,256,256),digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',original.data))].map(n=>n.toString(16).padStart(2,'0')).join('');
+ if(digest!==binding.frames[sheet][index])throw Error('The prepared body pixels differ from the foreground mask.');
+ const ownership=foregroundOwnership(checked);
  const painted=registeredBodyAppearance(body,appearanceBody),dressed=clothing?composeClothingPose({...clothing,body,appearanceBody:painted,binding,sheet,index}).frame:null;
  let appearance;try{appearance=(dressed??painted).getContext('2d').getImageData(0,0,256,256);}finally{if(dressed)dressed.width=dressed.height=0;}
  const back=document.createElement('canvas'),front=document.createElement('canvas');back.width=back.height=front.width=front.height=256;

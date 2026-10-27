@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "raised-pose layered composition verified; incomplete inactive cycle",
+  "sourceSha256": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+  "reportSha256": "719f242e9687debaf3e85fcd9008480ed40e5643c5e1ed820c5e8d07091a2ce4",
+  "boardSha256": "a31393a0ed1265af20c09cb867903a8f755b258f84f78f037780ce274d49177c",
+  "visualReview": "Inspected all eight static cells and grip details: both hands cover the continuous wooden shaft; warm mallet shading matches the existing equipment style; plain and hat/beard variants preserve distinct heads. The hat brim partly occludes the raised hand as in the existing accessory composition. No all-motion or gameplay verdict.",
+  "mechanical": {
+    "independentAssemblies": 4,
+    "appearances": 8,
+    "invalidEquipmentRefusals": 10,
+    "invalidMaskUnions": 5,
+    "cleanupCases": 4,
+    "overlapDisjointDuplicateMasks": true
+  },
+  "next": [
+    "Author the other three work-tool sources and their hand masks",
+    "Review complete mallet motion and activity transitions",
+    "Review day/night, gameplay scale and material/accessory coverage",
+    "Activate only a complete reviewed versioned work-tool set"
+  ],
+  "remainingBuilderGoal": "Full plan remains in progress; wider character range, sleep artwork and campaign/performance/recovery/usability release gates stay open."
+}

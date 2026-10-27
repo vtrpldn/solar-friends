@@ -1,0 +1,63 @@
+{
+  "comparisons": 4,
+  "refused": 10,
+  "hashes": [
+    {
+      "hair": "curls",
+      "palette": 0,
+      "equipped": false,
+      "sha256": "05fced033e1a201a04b085a133ddb8fe0275cdafb4c2ad6e0d9bae2b3386639a"
+    },
+    {
+      "hair": "curls",
+      "palette": 0,
+      "equipped": true,
+      "sha256": "80e9f9a4254460c182c989088e046436de7c09b9b17e1470f9611148bc280390"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "equipped": false,
+      "sha256": "ec4934baac1028b14e7337bda4ab107708ebccad697f4fd75ab8b59d4cf2a471"
+    },
+    {
+      "hair": "curls",
+      "palette": 1,
+      "equipped": true,
+      "sha256": "164901b9287979ed67df9ff9a2a859fb7843a7b46041e0782bd94985d5e63033"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "equipped": false,
+      "sha256": "46e32d1c66400f4658bdb48eada1bd0b951bddd743d455c6f9dcf0d96124925b"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 0,
+      "equipped": true,
+      "sha256": "a205f0306fc6abe3a0372b300d36b3dea39c7bbb658f543893ad1628a9e6129c"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "equipped": false,
+      "sha256": "1a8367cf602a629cb69603fec5f1bb6a498b027e25306a03d2eb6967d096d674"
+    },
+    {
+      "hair": "sidepart",
+      "palette": 1,
+      "equipped": true,
+      "sha256": "249a48c091c196d2db8e98391e592c0a0bd0362f6a0fabfad7145663361a73a9"
+    }
+  ],
+  "unionRefusals": 5,
+  "cleanupChecks": 4,
+  "exactOverlappingAndDisjointUnion": true,
+  "scope": "Raised work pose only: exact layered assembly and duplicate mask ownership, two hairstyles/two palettes and static accessories; no full-cycle or public activation verdict.",
+  "sourceHashes": {
+    "web/character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "web/character-equipment.js": "397585186f925195ed9a37e8f1ea21387962f4ac1a3df7b7ccbe8024dbfe298f",
+    "web/character-foreground.js": "157bbed1fffe44ce5c9d68581bccf9fdb7423b34313309a849f8780402ab045e"
+  }
+}

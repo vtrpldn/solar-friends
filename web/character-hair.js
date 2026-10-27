@@ -1,8 +1,10 @@
 import {registeredBodyAppearance} from './character-body-appearance.js';
 import {canonical} from './editor/journal.js';
 import {auditCharacterPartRegion} from './character-parts.js';
-import {createBodyForegroundLayers} from './character-foreground.js';
+import {createBodyForegroundLayers,combineBodyForegroundMasks} from './character-foreground.js';
 import {validateHairColour,tintHairPixels} from './character-hair-colours.js';
+import {validateRegisteredEquipment} from './character-equipment.js';
+import {paintEquipmentArt} from './character-equipment-parts.js';
 import {composeClothingPose} from './character-clothing.js';
 import {registeredHairPlacement,verifyHairPlacementBodies} from './character-hair-placement.js';
 // Capture one validated source at the shared sprite resolution. The private
@@ -21,24 +23,32 @@ export function prepareRegisteredHair({registration,image,sourceHash}){
  }
  }catch(error){normalized.width=normalized.height=0;throw error;}
  const alive=()=>{if(disposed)throw Error('This prepared hair part has been released.');};
- return Object.freeze({dispose(){if(disposed)return;disposed=true;normalized.width=normalized.height=0;},async compose({body,binding,appearanceBody,hairColour='chestnut',clothing,referenceBody}){
+ return Object.freeze({dispose(){if(disposed)return;disposed=true;normalized.width=normalized.height=0;},async compose({body,binding,appearanceBody,hairColour='chestnut',clothing,referenceBody,equipment}){
   alive();validateHairColour(hairColour);
   if(canonical(checked.body)!==canonical(binding)||body.width!==256||body.height!==256)throw Error('Review the changed hair/body registration before composing this pose.');
   const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',body.getContext('2d').getImageData(0,0,256,256).data))].map(n=>n.toString(16).padStart(2,'0')).join('');
   if(digest!==binding.frames[checked.sheet][checked.index])throw Error('The prepared body pose changed.');
   await verifyHairPlacementBodies(placement,body,referenceBody);alive();
   const frame=document.createElement('canvas');frame.width=frame.height=256;
-  let layers=null,dressed=null,hair=normalized;
+  let layers=null,dressed=null,tool=null,hair=normalized;
   try{
    const paintedBody=registeredBodyAppearance(body,appearanceBody),ctx=frame.getContext('2d');
-   layers=checked.foreground!==undefined?await createBodyForegroundLayers({body,binding,mask:checked.foreground,sheet:checked.sheet,index:checked.index,appearanceBody:paintedBody,clothing}):null;
+   let mask=checked.foreground;
+   if(equipment!==undefined){
+    if(!equipment||typeof equipment!=='object'||Array.isArray(equipment)||Object.keys(equipment).sort().join(',')!=='art,registration')throw Error('Choose registered equipment layers.');
+    validateRegisteredEquipment({binding,equipment:equipment.art,registration:equipment.registration,sheet:checked.sheet,index:checked.index});
+    mask=combineBodyForegroundMasks({binding,sheet:checked.sheet,index:checked.index,masks:[...(mask?[mask]:[]),equipment.registration.foreground]});
+    tool=paintEquipmentArt(equipment.art,equipment.registration);
+   }
+   layers=mask!==undefined?await createBodyForegroundLayers({body,binding,mask,sheet:checked.sheet,index:checked.index,appearanceBody:paintedBody,clothing}):null;
    alive();dressed=!layers&&clothing?composeClothingPose({...clothing,body,appearanceBody:paintedBody,binding,sheet:checked.sheet,index:checked.index}).frame:null;
    if(hairColour!=='chestnut'){hair=document.createElement('canvas');hair.width=hair.height=256;const painted=tintHairPixels(normalized.getContext('2d').getImageData(0,0,256,256),hairColour);hair.getContext('2d').putImageData(new ImageData(painted.data,256,256),0,0);}
-   ctx.drawImage(layers?layers.back:dressed??paintedBody,0,0);ctx.drawImage(hair,...(placement?.offset??[0,0]));if(layers)ctx.drawImage(layers.front,0,0);
+   ctx.drawImage(layers?layers.back:dressed??paintedBody,0,0);ctx.drawImage(hair,...(placement?.offset??[0,0]));if(tool)ctx.drawImage(tool,0,0);if(layers)ctx.drawImage(layers.front,0,0);
    frame.dataset.partCoverage=String(audit.coverage);return frame;
   }catch(error){frame.width=frame.height=0;throw error;}
   finally{
    if(dressed)dressed.width=dressed.height=0;
+   if(tool)tool.width=tool.height=0;
    if(layers)for(const layer of [layers.back,layers.front])layer.width=layer.height=0;
    if(hair!==normalized)hair.width=hair.height=0;
   }

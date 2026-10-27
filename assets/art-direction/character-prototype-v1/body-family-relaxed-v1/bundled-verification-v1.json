@@ -6,8 +6,8 @@
   "rejectedCorruptInputs": 4,
   "rejectedOptionOverrides": 4,
   "retryAfterOutage": true,
-  "scope": "Verified normal HTTP bundle, exact reviewed output and rejection/retry/disposal; not activated in native/player recipe catalogues. No whole-app memory/performance claim.",
+  "scope": "Verified normal HTTP bundle, exact reviewed output and rejection/retry/disposal; player integration is verified separately. No whole-app memory/performance claim.",
   "bundleSha256": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69",
   "referenceSha256": "b4a8b6e479023c2b29e4d8d1d34518bc6caa1c74a6643179753f9034e876f291",
-  "loaderSha256": "a9596d6a0a8f605beee23909ecf3ac575d3b0612259436279fb2495077273f71"
+  "loaderSha256": "d4b1584bd5bb0b694fd2a6c01044a4d52bc21370e3bfd766429da6455442813d"
 }
