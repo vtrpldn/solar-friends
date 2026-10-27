@@ -1,0 +1,30 @@
+{
+  "status": "inactive; needs edge correction",
+  "candidates": [
+    {
+      "version": "v1",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d0314a06-7411-4b51-9052-f0fa280dbf79.png",
+      "sha256": "863d7550aff627a40ba50da14804af12cc2ba1a50c27c0bec2eb9f29b8ce0874",
+      "status": "rejected: enlarged/shifted; frozen silhouette audit failed"
+    },
+    {
+      "version": "v2",
+      "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c80f76ae-cc41-4a20-b873-bef373d60def.png",
+      "sha256": "92760f1262670dd35e035be71d0721f097cdba165e2f27d05db2340fa5f9c2b5",
+      "status": "needs correction: source audit passed, anatomy review failed three upper-shirt coverage pixels"
+    }
+  ],
+  "reference": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-5-v1/mask.png",
+    "role": "frozen exact geometry",
+    "sha256": "521d8b24f1d304cc1e0725309547865e29b347af1ccbb77f50b5d130ffa518a2"
+  },
+  "foreground": "v2; v1 retained only as earlier draft that restored strap pixels beside fist",
+  "findings": [
+    "Source v2 preserves declared shorts, shoes and opaque hands in six compositions",
+    "48 colour/accessory combinations preserve alpha and lower protection; no garment acceptance implied",
+    "Coverage fails at (144,83), (100,132), (100,133); candidate alpha 201/206/198 below required 240",
+    "Inspected enlarged detail: silhouette fits torso and hands remain in front; near collar/fist strip and angular cuff require further review"
+  ],
+  "next": "New frozen guide with a slightly wider left torso and collar boundary; preserve source PNGs without editing."
+}

@@ -2168,3 +2168,9 @@ Frozen base-7 guide v3 raises the hem and retains full upper-shirt coverage. Its
 The apparent cream triangle recorded above is the review background showing through the anatomical arm gap, not exposed shirt paint. Native body samples (147,149), (148,150), (149,151) have alpha 8/11/14, material label 0 and guide alpha 0; matching cream/teal board samples retain the same background colours. Preserve the gap. The previous defect diagnosis is superseded; source v3 passes the scoped static composition/colour checks. The enlarged cuff edge remains an item for adjacent-pose and motion review, and the outfit remains internal.
 
 **Why:** artwork changes must follow measured pixels and anatomy rather than an ambiguous enlarged screenshot. Retained the source/body diagnostic and corrected the source status without changing generated paint. Complete clothing cycles and all broader plan requirements remain open.
+
+### Raised-arm work-shirt source
+
+Prepared and froze base-5 shirt geometry and material-v11 anatomy criteria. Refined foreground ownership before generation to stop restoring tank-top strap pixels beside the raised fist. Rejected the first generated source for enlargement and displacement. The unchanged retry passes source bounds, six lower-body/hand compositions and 48 colour/accessory invariants, but fails opaque shirt coverage at (144,83), (100,132), (100,133). Retained both original sources, review boards and exact findings; source stays inactive pending a slightly expanded edge guide.
+
+**Why:** player clothing must remain continuous around raised hands as well as the bent torso. Passing source bounds or colour invariants cannot substitute for actual shirt coverage. Full work-cycle integration, remaining outfit poses and broader builder requirements remain open.
