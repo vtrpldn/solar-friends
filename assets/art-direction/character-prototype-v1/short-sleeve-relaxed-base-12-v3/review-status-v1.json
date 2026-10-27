@@ -1,0 +1,28 @@
+{
+  "status": "internal static composition/colour checks pass; seated cycle and integration pending",
+  "sourceSha256": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-2e32f804-0e23-4b92-81c5-60fce1020557.png",
+  "promptSha256": "45978a4e364e5fb685f807e00e50d3da86fbad34468a79b253d4c188e919f7b8",
+  "reference": {
+    "role": "frozen exact geometry",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v3/mask.png",
+    "sha256": "ecbc056b0863a1358e3b5adc386deceac8ad4835833560731428aeddd5fefe52"
+  },
+  "playerActivation": false,
+  "checks": {
+    "upperShirtCovered": 919,
+    "upperShirtTotal": 919,
+    "staticCompositions": 6,
+    "colourAccessoryCompositions": 48
+  },
+  "inspected": [
+    "review-v1-details.png",
+    "colours-v1-materials-v11-plain.png"
+  ],
+  "findings": [
+    "Collar follows seated neck; sleeves and curved torso hem remain at fixed source registration",
+    "Original lap hands remain above cloth; protected shorts and shoes unchanged",
+    "Four colours retain same cloth fit at displayed game scale"
+  ],
+  "remaining": "Other three seated poses, stool/shared-library integration, motion/world review, remaining idle/activity garment poses and broader builder gates."
+}

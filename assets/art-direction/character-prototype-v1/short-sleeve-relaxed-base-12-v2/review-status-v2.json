@@ -1,0 +1,12 @@
+{
+  "status": "superseded: source bounds pass; one opposite collar pixel fails opacity",
+  "sourceSha256": "1fd1bc3174861104f4980cebf8f45eb19c1a080cd678c417477ee2bf847dd2ae",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7040b528-8273-4aa0-a2cb-4cc9431b8b8d.png",
+  "promptSha256": "45978a4e364e5fb685f807e00e50d3da86fbad34468a79b253d4c188e919f7b8",
+  "reference": {
+    "role": "frozen exact geometry",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v2/mask.png",
+    "sha256": "7665f51d2dc150d7413285569e4166ca42c8e29b5d48c6325cfecd594961bb7b"
+  },
+  "playerActivation": false
+}
