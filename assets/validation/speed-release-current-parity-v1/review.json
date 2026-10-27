@@ -1,0 +1,56 @@
+{
+  "decision": "Adopt opt-level 3 for release simulation throughput.",
+  "why": "The dense-map simulation remains below requested 16x; favor measured throughput over the smaller WASM download.",
+  "baselineSha256": "5b618609b82162a32c4cd2586c5c2927a95260d95432237f51bb8665b9e29e9e",
+  "candidateSha256": "0538dff635e77e3caf8055c6135b3b3aa41159a8130bceae78de029cb81e6f61",
+  "extraBytes": 784181,
+  "engineOnly": {
+    "baselineMeanMs": 662.2057085000001,
+    "candidateMeanMs": 633.0835937500001,
+    "reductionPercent": 4.397744443485122
+  },
+  "matrix": {
+    "accepted": 12,
+    "rejectedAtomically": 6
+  },
+  "browserPhases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "wallSeconds": 5.009000000047683,
+      "gameMinutesPerSecond": 3.0249018563172814,
+      "p95GapMs": 25.100000000000364,
+      "maxGapMs": 33.30000000000109
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "wallSeconds": 5.0127999999999995,
+      "gameMinutesPerSecond": 3.022681856322814,
+      "p95GapMs": 25.099999999998545,
+      "maxGapMs": 33.39999999999782
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "wallSeconds": 5.00820000002384,
+      "gameMinutesPerSecond": 44.565145582906545,
+      "p95GapMs": 41.60000000000218,
+      "maxGapMs": 50.099999999998545
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "wallSeconds": 5.006600000023842,
+      "gameMinutesPerSecond": 42.68837790346387,
+      "p95GapMs": 41.69999999999709,
+      "maxGapMs": 58.29999999999927
+    }
+  ],
+  "limits": [
+    "Five-second phases are not sustained performance acceptance.",
+    "Sampled state parity is equivalence, not universal correctness.",
+    "Requested 16x target remains 48 game minutes per wall second.",
+    "No total memory or storage acceptance is claimed."
+  ]
+}
