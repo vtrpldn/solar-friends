@@ -1,0 +1,16 @@
+{
+  "status": "needs correction; inactive",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-600cd08b-b9b2-48fa-b87a-60dfc1cfddbb.png",
+  "sourceSha256": "432f94d4b36ec90d96c71ccae7b30de219d29f6c307abd57b3fa87d76101ee44",
+  "promptSha256": "c78738ed453ec32ba1a45370962f39d82d2b9bd7c7fb83e400ea1b1b56490db6",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-7-v2/mask.png",
+      "role": "frozen silhouette guide",
+      "sha256": "ecfbb2d682b31b8a21b08991942f402aba6c63578b094ffeea0eba0191007c5c"
+    }
+  ],
+  "sourceAudit": "passed frozen bounds and coverage; this is not composition acceptance",
+  "compositionFinding": "Anatomy-bound review fails: protected shorts pixel (85,137), red channel changes 65 to 72. Candidate overlaps the declared sloped waist protection. Keep original source unchanged; revise guide and regenerate.",
+  "visualFinding": "Warm cream painted folds and short cuffs; final dressed composition not accepted."
+}
