@@ -1,0 +1,47 @@
+{
+  "polygons": [
+    [
+      [
+        70,
+        126
+      ],
+      [
+        103,
+        126
+      ],
+      [
+        104,
+        190
+      ],
+      [
+        70,
+        190
+      ]
+    ],
+    [
+      [
+        162,
+        128
+      ],
+      [
+        195,
+        128
+      ],
+      [
+        195,
+        190
+      ],
+      [
+        162,
+        190
+      ]
+    ]
+  ],
+  "excludeMaterials": [
+    2,
+    3,
+    4
+  ],
+  "intent": "Original idle-0 forearms and hands below the short-sleeve cuffs; upper biceps stay under the garment.",
+  "schema": 1
+}

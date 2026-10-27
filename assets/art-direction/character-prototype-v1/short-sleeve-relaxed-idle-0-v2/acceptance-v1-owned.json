@@ -1,0 +1,62 @@
+{
+  "status": "Accepted corrected internal static idle pose 0; no public outfit or complete idle clip.",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-0ca84c14-cbfe-49e1-ada4-a7cf34624406.png",
+    "sourceSha256": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+    "copyByteIdentical": true,
+    "generatedPaintEdited": false,
+    "status": "Accepted internal static source only"
+  },
+  "scope": {
+    "staticCompositions": 6,
+    "requiredUpperShirtPixels": 2044,
+    "coveredUpperShirtPixels": 2044,
+    "exactOwnedLowerBodyChannels": 119856,
+    "malformedInputsRefused": 9,
+    "paletteAccessoryCompositions": 48,
+    "alphaChecks": 2359296,
+    "protectedLowerChannels": 707040
+  },
+  "findings": [
+    "Repainted wider shoulders cover the original upper-arm contours; detached sleeve defect from prior collection is absent.",
+    "Original forearms/hands, trousers and shoes remain coherent.",
+    "Inspected full plain/equipped colour boards, enlarged details, day/night facings and mixed base/idle library board."
+  ],
+  "artifacts": {
+    "colours-v1-owned-materials-v11.json": "b042dbcfdd19449cefe7af982d5a36d41c4a0cb2ffb5908d84cb2c790afbe7dc",
+    "foreground-polygons-v1.json": "39b35aa24f0c761d6b2d6235a10352f83a10d738d348c95d2cb9d68e6b39ad96",
+    "references.json": "0d08aa47c11d05547952ad4e6c889f3f6e7ba57e210f40ff9c1660cc723681a4",
+    "preserved-body-intent-v1.json": "4115d0d6a8d3dee62dad1ca690329bfac2fb51d8e9543dfa49640d2f006abebe",
+    "review-v1-owned-board.png": "1ceda875cff7586186c29c2553e1870731611d615277c2b9f07178d7d8c0610f",
+    "idle-0-grid.png": "cc19d147509826b03ebc45927caea4f38d30dbd54ab96e15c1bafb9f4ae126e2",
+    "candidate-v1.png": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+    "registration-intent.json": "19953d1fcb01f20728bd7088864f56a5a2172972e24acd0dd935dfb27334396d",
+    "candidate-v1-audit.json": "7ea1ca3e5356c0d2585dad415efec2cf8670acbf38d4eee3015c78f9dc39a83f",
+    "colours-v1-owned-materials-v11-waist.png": "6491b0e0a7c0a6bf8cc58b11b31cfb6b6f2ac72fc78be0fcd57bf1ea27bf6bf5",
+    "colours-v1-owned-materials-v11-equipped.png": "c7cc4a305212cb214fb9bdd091540bba8abdb2edfab3370a15eab9e9a9da7a8c",
+    "specs.json": "eaeb9db1119223f4588951c2db1f45c3e32b3cfe22b2b6f60f641b3fa66391e2",
+    "prompt-v1.txt": "926be8fbc557f0f1f778701edaabee2a74d33db25bc76afd7ba004d7fc9a2459",
+    "context.png": "42e5933a7a5e80200a5608e89f27eb74c5baaedcdf323f5f6fb52aeb7832d6e9",
+    "foreground-intent-v1.json": "e52a16eb5caa8a6df29c5bc19a0f3c45219b7d13164f9d262cb1114c16a0b08d",
+    "guide-coverage-v1.json": "8756af16fa36b56ed08d426c4fee3461bc6755da7b1fdd9916c36eeea4cc27f0",
+    "review-v1-owned-details.png": "59183aaf6a02726f3104661c89d8a34316ca479eb15fe96ee910f63e31e784df",
+    "colours-v1-owned-materials-v11-plain.png": "6080616829a200368fb02f36f3c1302f5114bc30f3efc20761cf37e501700c28",
+    "anatomy-review-intent-v1.json": "b4b6b858111d3bd2f946e2f4402fcd7f69d21a77e5d5258b0d223000bead2648",
+    "review-v1-owned.json": "0de68a4f8dd143677bce8ea2d244182945af8206fe9c97a0a7fa48fdb713bdbb",
+    "atlas.png": "840bcc67894e10cf5ab08a76a18d33a95345a04e49ad16d35c54afbab5c5ff6a",
+    "board.png": "1233ecc9c7f421880472021a6b7585c64b723c76b4e20b3aa350f647404c49f5",
+    "generation-inputs-v1.json": "ab3a187978ae42c2948fd121b9d26ddebe77fec6f00716ccfa04b6f52d83e894",
+    "body-foreground-v1.json": "f7244bf19dfeac50a250f1568e7243836709e6afdbcc5bcf4a346ab2ae584509",
+    "preserved-body-v1.json": "59b05aaceeacb0de3940b65ef3594c5d5dd4219d60683ec98b2653c1a1861212",
+    "review-v1-owned-lighting.png": "f3b3e2e3c394023e7303f43ee45e0712e6a1bed5e03c387d3a72fecda35bff38",
+    "foreground-context-v1.png": "1553288e1119f1cce406f48feee5a82f9f4b90eb46ee668df5c6843ce934dc78",
+    "registrations-v1-owned.json": "c9df32becfd2242101f71ff29bd374a09627cc6f8a216f438e0a68c0c0e07683",
+    "mask.png": "3da97885c89437118f06ff9f450a171b08350f202ec59248b54f2b97f6d2f5de",
+    "candidate-v1-provenance.json": "d3233b8535d4ae097ef9519114d4e897157ece349fb3c9f5dc717eeb650f5474"
+  },
+  "limits": [
+    "Seventeen of forty-eight internal shirt poses; thirty-one remain.",
+    "No complete idle cycle, continuous motion, world or public outfit acceptance.",
+    "All original broader builder release requirements stay open."
+  ]
+}

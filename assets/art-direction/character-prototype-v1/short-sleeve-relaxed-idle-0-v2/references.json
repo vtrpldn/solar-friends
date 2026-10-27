@@ -358,12 +358,12 @@
     {
       "key": "idle-0",
       "bounds": [
-        347,
+        317,
         103,
         1085,
         617
       ],
-      "painted": 249546
+      "painted": 258584
     }
   ],
   "rowSpans": [
@@ -552,10 +552,10 @@
     }
   ],
   "sourceHashes": {
-    "specs.json": "410ffc44100088ff44c1f5a821277aa96d0bd76520fc7a50d04e3b6da0144e8f",
+    "specs.json": "eaeb9db1119223f4588951c2db1f45c3e32b3cfe22b2b6f60f641b3fa66391e2",
     "atlas.png": "840bcc67894e10cf5ab08a76a18d33a95345a04e49ad16d35c54afbab5c5ff6a",
-    "mask.png": "02565e3e66e3ff3de35d4c5bec3799fa6d065def42d0b55516c7bf5e076055d1",
-    "context.png": "c15b53c48691ca1c83d978093ece30e2912f1006457dcbba2d58d7397db07af5",
+    "mask.png": "3da97885c89437118f06ff9f450a171b08350f202ec59248b54f2b97f6d2f5de",
+    "context.png": "42e5933a7a5e80200a5608e89f27eb74c5baaedcdf323f5f6fb52aeb7832d6e9",
     "board.png": "1233ecc9c7f421880472021a6b7585c64b723c76b4e20b3aa350f647404c49f5"
   }
 }
