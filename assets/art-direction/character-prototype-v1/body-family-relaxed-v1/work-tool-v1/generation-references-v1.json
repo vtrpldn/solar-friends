@@ -1,0 +1,22 @@
+{
+  "pose": 6,
+  "roles": [
+    "geometry only",
+    "body context only; omit resident",
+    "painted wood/style only"
+  ],
+  "files": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-6-guide.png",
+      "sha256": "fea198da2d897c9e54a91100be5aae3769b76cae7276cc85eed1de030454230f"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-6-context.png",
+      "sha256": "cbe56acd808bec3da5e237d58f4672a674ec2697b835fa2c576ec4607eb8a9db"
+    },
+    {
+      "path": "web/art/animations/bento.png",
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889"
+    }
+  ]
+}

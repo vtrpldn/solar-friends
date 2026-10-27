@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "status": "in-progress; candidate not activated",
+  "sourcePaint": "Unmodified built-in imagegen PNG, 1254x1254. Prompt, original path, reference roles and hashes retained.",
+  "visualReview": "Inspected all four analytical body/context guides and the generated raised mallet. Wood treatment follows the existing Bento work mallet; complete grip/style/in-world acceptance remains unproven.",
+  "diagnosis": "The flattened hair/body provider contains hair behind partially transparent raised-hand pixels. Existing equipment validation correctly refuses replacing those pixels with bare-body foreground. Both broad reviewed and narrower draft masks expose the disagreement.",
+  "attempts": 4,
+  "refused": 4,
+  "next": "Compose tool paint between back/hair and foreground hands using registered layers, preserving the existing appearance protection. Then complete the other three tool poses and review grip, motion, accessories and all materials.",
+  "files": {
+    "base-6-candidate-v1.png": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+    "base-6-draft-review.json": "cbf5e4967202ae4541e22f2576a790717e2d3bcc6a0eabb26800d4fd99336473",
+    "base-6-draft-review.png": "09cd31d6a8b855fe2c2d31f99725f2863abb09011fa09a18d87c86c015ae2b47",
+    "guides.json": "13e31a680f3bc94374a070e280ce73098f4da12a54f3f22a068249581e8a20f2",
+    "prompt-v1.txt": "9cbae399376d00fa35980962606b85980c83f28838dc673cddd7ad1b78674c7b",
+    "generation-v1.json": "6d6be6848546c06357f48f1df26aab3b0e6dbbd2da2ebd98112be18e4f512b7d",
+    "generation-references-v1.json": "33fba17406d2a612e031b04c3e0bf6e5867a2533e4e6d7510d5288a0ad1619d0"
+  }
+}
