@@ -1,0 +1,58 @@
+{
+  "scope": "One internal pose source, six complete character combinations and static lighting/facing guides. No complete shirt animation or player recipe.",
+  "composed": 6,
+  "outside": 6,
+  "protectedLower": 6,
+  "foregroundChecks": 6,
+  "foregroundAlphaChecks": 38850,
+  "preservedBodyChecks": 120864,
+  "refused": 9,
+  "coverage": [
+    {
+      "sheet": "idle",
+      "index": 10,
+      "oldTop": 2102,
+      "covered": 2102,
+      "ratio": 1,
+      "collarLeaks": [],
+      "uncovered": []
+    }
+  ],
+  "foregroundVersion": "v2",
+  "sourceHash": "9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97",
+  "anatomyReview": {
+    "sha256": "f58e0f1f07641fc7a8d8637efced1be9a8739749c3640bf008c2efd0bb3efcf1",
+    "criteria": {
+      "status": "pre-paint review criteria",
+      "materialRevision": "v11",
+      "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+      "measuredWaistLine": [
+        [
+          99,
+          138
+        ],
+        [
+          115,
+          142
+        ],
+        [
+          137,
+          143
+        ],
+        [
+          160,
+          139
+        ]
+      ],
+      "lowerProtection": "Original shorts pixels at least two native pixels below the measured per-column waistline and every shoe pixel must remain unchanged. Original trousers/shoes also receive independent native RGBA ownership.",
+      "collarProtection": "Every opaque original shirt pixel above native row 134 must be covered. Distinguish cloth from arm/face skin and transparent gaps.",
+      "scope": "Original idle-10 pre-paint wave criteria: independent collar, sleeve, arm and waist geometry."
+    }
+  },
+  "reviewToolSha256": "6222962c04ce6240e7fa90e4165f9779a9e6404423c0f87fec93b8cd041269dd",
+  "rendererSha256": {
+    "character-clothing.js": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+    "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b"
+  }
+}

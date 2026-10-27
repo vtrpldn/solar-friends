@@ -1,0 +1,10 @@
+{
+  "prompt": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-10-v1/mask.png",
+      "role": "Exact fixed wave-shirt geometry and transparent canvas",
+      "sha256": "af7947101ceebd5850c08c3f548c3fe6b2974768b10a8f1458fdb4e22d7e1415"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "polygons": [
+    [
+      [
+        70,
+        126
+      ],
+      [
+        108,
+        126
+      ],
+      [
+        110,
+        137
+      ],
+      [
+        109,
+        148
+      ],
+      [
+        112,
+        160
+      ],
+      [
+        112,
+        185
+      ],
+      [
+        70,
+        195
+      ]
+    ],
+    [
+      [
+        180,
+        0
+      ],
+      [
+        235,
+        0
+      ],
+      [
+        235,
+        108
+      ],
+      [
+        188,
+        108
+      ],
+      [
+        182,
+        97
+      ],
+      [
+        180,
+        88
+      ]
+    ]
+  ],
+  "excludeMaterials": [
+    2,
+    3,
+    4
+  ],
+  "intent": "Original raised far forearm/hand beyond the diagonal cuff and resting near forearm. Native contour correction before paint: do not restore an upper-bicep rectangle through the sleeve."
+}

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "polygons": [
+    [
+      [
+        70,
+        126
+      ],
+      [
+        114,
+        126
+      ],
+      [
+        114,
+        195
+      ],
+      [
+        70,
+        195
+      ]
+    ],
+    [
+      [
+        180,
+        0
+      ],
+      [
+        235,
+        0
+      ],
+      [
+        235,
+        108
+      ],
+      [
+        188,
+        108
+      ],
+      [
+        182,
+        97
+      ],
+      [
+        180,
+        88
+      ]
+    ]
+  ],
+  "excludeMaterials": [
+    2,
+    3,
+    4
+  ],
+  "intent": "Original raised far forearm/hand beyond the diagonal cuff and resting near forearm."
+}

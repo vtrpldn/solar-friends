@@ -1,0 +1,65 @@
+{
+  "status": "Accepted internal static wave-row pose 8; no public outfit or world acceptance.",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-602f47d4-4da9-49a4-9b88-2f62dd89d512.png",
+    "sourceSha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "copyByteIdentical": true,
+    "generatedPaintEdited": false,
+    "status": "Accepted internal static pose only",
+    "generationInputs": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-1-v2/generation-inputs-v1.json",
+    "generationInputsSha256": "16eb50854de909f31d7e37bdf9955d090cf423e0412a0e226fd209bc727c62b9",
+    "reusedFrom": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-1-v2/candidate-v1.png"
+  },
+  "scope": {
+    "nativeShirtPixels": 1965,
+    "staticCompositions": 6,
+    "ownedLowerChannels": 118344,
+    "malformedRefusals": 9,
+    "paletteCompositions": 48,
+    "alphaChecks": 2359296,
+    "protectedLowerChannels": 707040
+  },
+  "findings": [
+    "Inspected enlarged cuff/collar/waist against the original native body.",
+    "Inspected complete colour/accessory comparisons and day/night/facing views.",
+    "Unchanged existing paint fits the independently bound neutral endpoint."
+  ],
+  "artifacts": {
+    "colours-v1-owned-materials-v11.json": "f14f95cfab2c59f3a39c92c4f15b2efedff121a96c34b98c764ae55e49d0397e",
+    "foreground-polygons-v1.json": "39b35aa24f0c761d6b2d6235a10352f83a10d738d348c95d2cb9d68e6b39ad96",
+    "references.json": "21637415efbeea07a66d5615ad6ad1e6e1f096bb7620e5d568b948d6057aace4",
+    "preserved-body-intent-v1.json": "be4eada446c9a20dc8606b400980e7f007ed808eb1ac2d790d68e31a3c44e0f1",
+    "review-v1-owned-board.png": "cd43e89b10d0729f75a6ae3b190611b8085666f445fee638a1996af894482312",
+    "candidate-v1.png": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "registration-intent.json": "c839b36646f5bc2b89604aa311cce003bed15350c86c311ac89197bdae1f1db9",
+    "candidate-v1-audit.json": "0a91a5599efddbd03dfe1f9716f8bbccd3e24a436b1a8c8ab745e5ca9cf00f06",
+    "colours-v1-owned-materials-v11-waist.png": "08a7f0bf12adc50d254603af9fae628004829baf19973db80bafd129ffeb88ed",
+    "colours-v1-owned-materials-v11-equipped.png": "26071e90e8898530a061ae0a0833c11552ff6e5c607d09c45be28bedd6044896",
+    "specs.json": "965be644830b9cf55f02caee72018742e0da9c7b46711a7ab11351969a834e64",
+    "prompt-v1.txt": "926be8fbc557f0f1f778701edaabee2a74d33db25bc76afd7ba004d7fc9a2459",
+    "idle-8-grid.png": "084bd4d6d37bea82009b44f9e45d3c7e06efd6e48495c2dca6e38a186f760a03",
+    "context.png": "a014dacc54a22b9c19c5e7cb4f761added6e51ea1087f80c08daf26804f1d4f3",
+    "foreground-intent-v1.json": "c5a827d3fb18da4d08a69c38c44f505a8571b4b617b55e4a3c79d089a53b6e5c",
+    "guide-coverage-v1.json": "81fc64703ceb9ccfca8795252189c51f8fc2c7b9ce40731785893c6ee17252b0",
+    "review-v1-owned-details.png": "20082fd395a1e5c9bfce19acd1f333e56469b1dc82ff69d30a561d48f9179503",
+    "colours-v1-owned-materials-v11-plain.png": "81ef67abb838a7ce7640fe389b7a4c054e3441ac8aca8423c581fac4465c2f8d",
+    "anatomy-review-intent-v1.json": "65d0108e7b869bb52dd10fff23b000cef58e8993d91d1351515f12574fce32d6",
+    "review-v1-owned.json": "93ea194bb720c3bc7e2ec3959dd25ff4b3153669347a46621c77d266cf3df7e5",
+    "atlas.png": "103c9a4cde9059c071fb8a7446aead983f2741a0c1d89b4b1686e1db102383b2",
+    "board.png": "33f0bbf0ee3a31cd7e61fce2252603e81d90dec72a516c1eea0ccc95304282ee",
+    "body-foreground-v1.json": "151032c365b7292386783db0dc9bc78dbb3aca2244bda6214cf54f3c2208952d",
+    "preserved-body-v1.json": "9ba5461d3dae7ac2937a21c85b04024c8ca4cb5a4809c8ba31710f6c7395c472",
+    "source-reuse-v1.json": "9b9243dd4d5720645efeef488e0b218359c5866f017309ea29666becb7adf916",
+    "review-v1-owned-lighting.png": "c494332c110f588cf3fd8a11debe36f5247f4ec58c02f6541f2622b6eb2ce72b",
+    "foreground-context-v1.png": "cf249efef916a1ac9340e23ad491ff7b3171280812671b61cbff6c00ed829970",
+    "registrations-v1-owned.json": "750f73f3fdd9e7e32ab01062299f01501e386c61e83e9ab4932ce925a6639528",
+    "mask.png": "cbb15f97c493b4f84c31c11f750e87a3638369abd1a61a4dbd23656e0db3e25c",
+    "candidate-v1-provenance.json": "cebd06d5f1d9978a40e3f8782fd5c24fb5b86a92c8f6c64a3aa5ade245ee1011"
+  },
+  "limits": [
+    "Twenty-eight of forty-eight internal shirt poses covered; twenty remain.",
+    "Actual wave profile uses idle 8/10/10/11/8; idle 9 is a spare static far-arm pose.",
+    "Encoded samples do not prove exhaustive playback, all palettes in motion, world, physical display pacing or public outfit acceptance.",
+    "All original wider builder release requirements remain open."
+  ]
+}

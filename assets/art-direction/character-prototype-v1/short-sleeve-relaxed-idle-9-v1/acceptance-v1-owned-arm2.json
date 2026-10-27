@@ -1,0 +1,69 @@
+{
+  "status": "Accepted internal static wave-row pose 9; no public outfit or world acceptance.",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-3212a4b3-ec06-4c10-9ac4-24ab0bbbeaee.png",
+    "sourceSha256": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+    "copyByteIdentical": true,
+    "generatedPaintEdited": false,
+    "prompt": "prompt-v1.txt",
+    "generationInputs": "generation-inputs-v1.json",
+    "status": "Accepted internal static pose only"
+  },
+  "scope": {
+    "nativeShirtPixels": 2017,
+    "staticCompositions": 6,
+    "ownedLowerChannels": 123408,
+    "malformedRefusals": 9,
+    "paletteCompositions": 48,
+    "alphaChecks": 2359296,
+    "protectedLowerChannels": 725472
+  },
+  "findings": [
+    "Inspected enlarged cuff/collar/waist against the original native body.",
+    "Inspected complete colour/accessory comparisons and day/night/facing views.",
+    "Forearm contour masks keep the raised hand/arm in front without upper-bicep rectangles cutting through the sleeve."
+  ],
+  "artifacts": {
+    "foreground-polygons-v1.json": "cdfd551089b75f34f4917d0b6ae046e57ebc293fa91e15e855e630d4cc52f03d",
+    "references.json": "c718d77cbdd09f3557951bbb0d89135cd9211bb84c625a9ebbae79d47b6f83d6",
+    "review-v1-owned-arm2-lighting.png": "2c9f1ca8c6e60841f6f4d5f0b26005339a64a3882a3a7258511c1b297856b7ef",
+    "preserved-body-intent-v1.json": "c772e9f4edac20d0085d40105b28afea3ab32c43cc6f640a9bbdd024ee98cf72",
+    "body-foreground-v2.json": "94b86972028c8bf7741a66174b8d12280c0753326208b1849f387adf773d3b41",
+    "candidate-v1.png": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+    "colours-v1-owned-arm2-materials-v11-plain.png": "179d89028c3452c7a9dca793ae3afb69871eb49aa0c1aebf086bba06e027d663",
+    "registrations-v1-owned-arm2.json": "4ce8306f4b54f9c99daf9edc6f39097ad48822012e663bf6354e2890b8b9cc61",
+    "review-v1-owned-arm2-board.png": "b63818cf67438e66b8524adf7fa46980f9af7a8d1de643b1827a79ed971d3579",
+    "registration-intent.json": "d024a24824b140a618331f552aa6e5c28edf960e29c0c719ca21973341c31b59",
+    "colours-v1-owned-arm2-materials-v11-equipped.png": "7e967edd3477ddca5c9b4fbd8b1445edc5b2d723d00edb8911654c9dbc785fed",
+    "foreground-intent-v2.json": "1c53f444664f89eda47e93ad745d5002d3bb1df67095142c12bfe023275ef82d",
+    "candidate-v1-audit.json": "d37e8ea67a6d22cff66761c4c5785a7a3d64e38a61b6bedcf9dfbf61f4400e68",
+    "specs.json": "ffea1cf4f0c8b9c5dfc77e9bf77cb4c6356941e2113ea85b590b44b9ec88fea1",
+    "colours-v1-owned-arm2-materials-v11-waist.png": "03be32353267bb53dcae1a84be3cb3847b64e8e339360ff0d9f1a70eb263a1c2",
+    "prompt-v1.txt": "3aea05ad277cda4dfa1cd6760f6a784ba1c1c6507d42fe9aff6c4e42cfdcceb2",
+    "idle-9-grid.png": "a4a3997913927746d31f09fba748c9023f01b6affb394bc03018360e154986a8",
+    "context.png": "db4e0c3d2d55bb17cc2d0570a9757ddcc748dbc9e4bf92859053f9bd5ebf618e",
+    "foreground-intent-v1.json": "8c56aa61bddef5f6ba0b88f1800600074699a5ab400e3181d145c5274bce398b",
+    "guide-coverage-v1.json": "b7dd9845772f5613c48adabf00c950aac12e83268f7bd49ca6c6b18780d82cf9",
+    "review-v1-owned-arm2.json": "26c7941900f087fd0138d3b6ec41a993e42ddba80782b9173e7961aa1d5bf0f0",
+    "review-v1-owned-arm2-details.png": "c755810dc87485b163fa459cea80d127e18de69cb61ca7cebf7872485cd4e0b6",
+    "anatomy-review-intent-v1.json": "8783b631e180d868ded6282a8bf45ace39929608477d82017583716e95617a21",
+    "atlas.png": "69844eaef1e4aab1f209432dbeb369b87cd75b31cb9be9976c3443d79b03992c",
+    "board.png": "97c3d32d158d918ce09891a6a1fcc476283d70083e8c48e20193fa09371d78d1",
+    "generation-inputs-v1.json": "0f9566e59f9633abfee5d6650237eda22216d8f6d102eca547e604c6fad95b50",
+    "body-foreground-v1.json": "de9539ceb6737557e1ba28ecf9ab831686bbc9961793e2ed76e25f680faf5561",
+    "preserved-body-v1.json": "b5d3b72ed215fcdb7e75657963dd9a33d96ed5c9b17bc33c8b9be4c03046e36c",
+    "foreground-review-v1.json": "59b792c9f629463da91765d3f01053ec43395ade1a1d0bc5636fe93a7b2f84a4",
+    "foreground-context-v1.png": "6d40f71a99939ed11652305876da271657f30fd08414590656d81c0780b4a343",
+    "foreground-context-v2.png": "832ff98c41266079741cadc872a2f42884cb4c24edde0ab12758d5a79444529c",
+    "foreground-polygons-v2.json": "d3c20d72fa25851ecb9e4ca338c31c5563e141de2025b00f07a56a78094d1d61",
+    "mask.png": "6fb8b8c58f365179467e7e4fca830e122aa73318842c6ed32768303ed332a53e",
+    "colours-v1-owned-arm2-materials-v11.json": "7c981670dc238c0a25b03acdeeee11f15e8cb98b48e28b183b876f4b64c2886d",
+    "candidate-v1-provenance.json": "6a4d05e7651ab5f4c843d178400975b463846508dd122535a378ef174b32dce4"
+  },
+  "limits": [
+    "Twenty-eight of forty-eight internal shirt poses covered; twenty remain.",
+    "Actual wave profile uses idle 8/10/10/11/8; idle 9 is a spare static far-arm pose.",
+    "Encoded samples do not prove exhaustive playback, all palettes in motion, world, physical display pacing or public outfit acceptance.",
+    "All original wider builder release requirements remain open."
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "polygons": [
+    [
+      [
+        50,
+        0
+      ],
+      [
+        103,
+        0
+      ],
+      [
+        103,
+        76
+      ],
+      [
+        98,
+        83
+      ],
+      [
+        101,
+        97
+      ],
+      [
+        95,
+        105
+      ],
+      [
+        73,
+        105
+      ],
+      [
+        60,
+        97
+      ]
+    ],
+    [
+      [
+        159,
+        128
+      ],
+      [
+        195,
+        128
+      ],
+      [
+        195,
+        190
+      ],
+      [
+        159,
+        190
+      ]
+    ]
+  ],
+  "excludeMaterials": [
+    2,
+    3,
+    4
+  ],
+  "intent": "Original raised near forearm/hand crosses in front of its sleeve; resting far forearm remains original."
+}

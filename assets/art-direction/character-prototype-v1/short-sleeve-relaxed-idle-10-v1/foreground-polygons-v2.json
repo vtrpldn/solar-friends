@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "polygons": [
+    [
+      [
+        50,
+        0
+      ],
+      [
+        98,
+        0
+      ],
+      [
+        98,
+        72
+      ],
+      [
+        96,
+        80
+      ],
+      [
+        97,
+        91
+      ],
+      [
+        101,
+        99
+      ],
+      [
+        94,
+        105
+      ],
+      [
+        73,
+        105
+      ],
+      [
+        60,
+        97
+      ]
+    ],
+    [
+      [
+        159,
+        128
+      ],
+      [
+        195,
+        128
+      ],
+      [
+        195,
+        190
+      ],
+      [
+        159,
+        190
+      ]
+    ]
+  ],
+  "excludeMaterials": [
+    2,
+    3,
+    4
+  ],
+  "intent": "Original raised near forearm/hand crosses in front of its sleeve; resting far forearm remains original. Native contour correction before paint: do not restore an upper-bicep rectangle through the sleeve."
+}

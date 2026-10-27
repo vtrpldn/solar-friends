@@ -1,0 +1,6 @@
+{
+  "status": "Original pre-paint arm mask needs contour correction; v2 selected.",
+  "finding": "Rectangular ownership restored a small upper-bicep patch through the sleeve. Authored v2 from original body contours before generating paint.",
+  "selected": "body-foreground-v2.json",
+  "paintReadOrEdited": false
+}

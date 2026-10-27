@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "Four independently bound internal wave-row sources; actual sampler uses three of them. No public outfit.",
+  "poses": [
+    {
+      "sheet": "idle",
+      "index": 8,
+      "collection": "short-sleeve-relaxed-idle-8-v1",
+      "sourceVersion": "v1",
+      "sourceSha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+      "registrationTag": "v1-owned",
+      "registrationSha256": "750f73f3fdd9e7e32ab01062299f01501e386c61e83e9ab4932ce925a6639528",
+      "reviewSha256": "93ea194bb720c3bc7e2ec3959dd25ff4b3153669347a46621c77d266cf3df7e5"
+    },
+    {
+      "sheet": "idle",
+      "index": 9,
+      "collection": "short-sleeve-relaxed-idle-9-v1",
+      "sourceVersion": "v1",
+      "sourceSha256": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+      "registrationTag": "v1-owned-arm2",
+      "registrationSha256": "4ce8306f4b54f9c99daf9edc6f39097ad48822012e663bf6354e2890b8b9cc61",
+      "reviewSha256": "26c7941900f087fd0138d3b6ec41a993e42ddba80782b9173e7961aa1d5bf0f0"
+    },
+    {
+      "sheet": "idle",
+      "index": 10,
+      "collection": "short-sleeve-relaxed-idle-10-v1",
+      "sourceVersion": "v1",
+      "sourceSha256": "9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97",
+      "registrationTag": "v1-owned-arm2",
+      "registrationSha256": "1d3173cea349201cd4673cc6de5fc773a8d17e40d70f1822e4e50c499d1f81e6",
+      "reviewSha256": "4e56c7491ce7fdc0603434e349233fc5569c05d219f4cc65104c129640ba3da4"
+    },
+    {
+      "sheet": "idle",
+      "index": 11,
+      "collection": "short-sleeve-relaxed-idle-11-v1",
+      "sourceVersion": "v1",
+      "sourceSha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+      "registrationTag": "v1-owned",
+      "registrationSha256": "f352fccc2c4abbdac0994ec4991666a985ce00b20f62caaca76a783f711e1ff2",
+      "reviewSha256": "fd8380bb9ae64751734694836c95d9a49e9af02ebf5ff2a8e5af1e731eeed998"
+    }
+  ],
+  "totals": {
+    "nativeShirtPixels": 8062,
+    "staticCompositions": 24,
+    "ownedLowerChannels": 482232,
+    "malformedRefusals": 36,
+    "paletteCompositions": 192,
+    "alphaChecks": 9437184,
+    "protectedLowerChannels": 2856096
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "scope": "Analytical comparison boards, no source paint changes.",
+  "poseOrder": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-8-v1/colours-v1-owned-materials-v11-plain.png": "81ef67abb838a7ce7640fe389b7a4c054e3441ac8aca8423c581fac4465c2f8d",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-9-v1/colours-v1-owned-arm2-materials-v11-plain.png": "179d89028c3452c7a9dca793ae3afb69871eb49aa0c1aebf086bba06e027d663",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-10-v1/colours-v1-owned-arm2-materials-v11-plain.png": "fe06badc642970ca85a9680cd3b3b07a7ac3decab2b4364a2e4eb111c54dc001",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-11-v1/colours-v1-owned-materials-v11-plain.png": "b3ed7b64a01ab73b37c52b7ebddd3e971d14babfa3587b3682a414c16d74a5c6",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-8-v1/colours-v1-owned-materials-v11-equipped.png": "26071e90e8898530a061ae0a0833c11552ff6e5c607d09c45be28bedd6044896",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-9-v1/colours-v1-owned-arm2-materials-v11-equipped.png": "7e967edd3477ddca5c9b4fbd8b1445edc5b2d723d00edb8911654c9dbc785fed",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-10-v1/colours-v1-owned-arm2-materials-v11-equipped.png": "3d90d6543a7d7b6f0bbfbce0a2d50ff9e790abbe2c0a446e210c5b5c4d84b146",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-11-v1/colours-v1-owned-materials-v11-equipped.png": "b280f25db9780d2cc6c48e2a1a09d07f3ce79a4ef382073aaf9ba0a517bc1ee1"
+  }
+}

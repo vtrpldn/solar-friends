@@ -1,0 +1,23 @@
+{
+  "compositions": 48,
+  "alphaChecks": 2359296,
+  "lowerChecks": 711792,
+  "scope": "Single-pose matching-body shirt colour and hat/beard review. No complete clip, world, lighting, transition or player acceptance.",
+  "anatomyReviewSha256": "6b539149584da8c152d0155b35c1243fa074085cbdf22669f03acf40844e9ee3",
+  "materialRevision": "v11",
+  "sourceSha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+  "registrationSha256": "f352fccc2c4abbdac0994ec4991666a985ce00b20f62caaca76a783f711e1ff2",
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/ownership-v1.json": "26a50b7dad4122319874ca791b1a38c9b3cbe0e121f138ea8f52eeecc791a734",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-curls-v1.json": "e0a35a02b2eb49d44608df2ad19c3c70bc0ad3a1ee9d73d7d729309a86dd5018",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/complete-parts-v1/hair-sidepart-v1.json": "8b65a60278dcabacf508382f1ac5ce77002bd0491b0674ddde1695ffaf692419",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/accessories-v1/registration-v1.json": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40",
+    "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-walk-complete-v1/sources-v1.json": "9b24942be6be0be32069d753d845260908957415da82b679393bbda284550f5f",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/materials-v11.json": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db"
+  },
+  "rendererSha256": {
+    "web/character-clothing.js": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+    "web/character-clothing-colour.js": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4",
+    "web/character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a"
+  }
+}
