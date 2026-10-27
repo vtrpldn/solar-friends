@@ -53,8 +53,13 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     const r=garment.registration,key=r?.sheet+':'+r?.index;if(garments.has(key))throw Error('Duplicate garment pose.');
     const art=await source(garment.file),probe=composeClothingPose({...art,registration:r,body:family.frameForPose(r?.sheet,r?.index),binding:family.binding,sheet:r?.sheet,index:r?.index});clear(probe.frame);
     garments.set(key,{...art,registration:r});
-    const work=r.sheet==='base'?workTools.get(r.index):null;
-    if(work&&r.foreground)workTools.set(r.index,{...work,registration:{...work.registration,foreground:intersectBodyForegroundMasks({binding:family.binding,sheet:r.sheet,index:r.index,masks:[work.registration.foreground,r.foreground]})}});
+    const equipped=r.sheet==='base'?workTools.get(r.index):r.sheet==='activities'?tools[r.index]:null;
+    if(equipped&&r.foreground){
+     // Only native skin shared by the tool and garment may be restored above
+     // both. A tool's older broad arm mask must not erase the new sleeves.
+     const adjusted={...equipped,registration:{...equipped.registration,foreground:intersectBodyForegroundMasks({binding:family.binding,sheet:r.sheet,index:r.index,masks:[equipped.registration.foreground,r.foreground]})}};
+     if(r.sheet==='base')workTools.set(r.index,adjusted);else tools[r.index]=adjusted;
+    }
    }
   }
   if(registrations.accessories!==null)accessoryParts=await prepareFamilyAccessories({family,registration:registrations.accessories,load:source});
@@ -88,7 +93,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     const work=sheet==='base'?workTools.get(index):null,args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,...(garment?{clothing:{...garment,colourSource:colour.prepared}}:{}),...(work?{equipment:{art:work.equipment,registration:work.registration}}:{}),referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
     if(cap.activity)frame=own(composeActivityUnderlay(appearance,cap.activity));
     if(sheet==='activities'){
-     const options={...args,...tools[index],appearanceFrame:appearance,sheet,index};frame=own(await registeredEquipmentFrame(options));alive();
+     const options={...args,...tools[index],appearanceFrame:appearance,sheet,index,...(garment?{clothing:{...garment,colourSource:colour.prepared}}:{})};frame=own(await registeredEquipmentFrame(options));alive();
      if([13,14].includes(index)){const {registration,equipment:art}=tools[index],keep=registration.parts.map((p,i)=>p.id.startsWith('grain-')?-1:i).filter(i=>i>=0);returns.set(index,own(await registeredEquipmentFrame({...options,registration:{...registration,parts:keep.map(i=>registration.parts[i])},equipment:{...art,parts:keep.map(i=>art.parts[i])}})));alive();}
     }
     if(recipe.hat||recipe.facialHair){const originalFrame=frame,flags={hat:!!recipe.hat,facialHair:!!recipe.facialHair};frame=own(accessoryParts.compose(frame,flags,sheet,index));if(originalFrame!==appearance&&scratch.delete(originalFrame))clear(originalFrame);if(returns.has(index)){const original=returns.get(index);returns.set(index,own(accessoryParts.compose(original,flags,sheet,index)));if(scratch.delete(original))clear(original);}}

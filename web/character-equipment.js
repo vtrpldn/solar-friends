@@ -6,10 +6,10 @@ import {paintEquipmentArt} from './character-equipment-parts.js';
 export function validateRegisteredEquipment({binding,equipment,registration,sheet,index}){
  if(![1,2].includes(registration?.schema)||registration.sheet!==sheet||registration.index!==index||canonical(registration.body)!==canonical(binding)||registration.source?.sha256!==equipment?.sourceHash||!/^[a-f0-9]{64}$/.test(equipment?.sourceHash??'')||equipment?.image?.naturalWidth!==registration.source.width||equipment?.image?.naturalHeight!==registration.source.height||registration.source.width!==registration.source.height||registration.source.width<256||registration.source.width>2048)throw Error('This equipment artwork is not registered to the exact body pose.');
 }
-export async function registeredEquipmentFrame({body,binding,appearanceBody=body,appearanceFrame=appearanceBody,equipment,registration,sheet,index}){
+export async function registeredEquipmentFrame({body,binding,appearanceBody=body,appearanceFrame=appearanceBody,clothing,equipment,registration,sheet,index}){
  validateRegisteredEquipment({binding,equipment,registration,sheet,index});
  if(appearanceFrame?.width!==256||appearanceFrame?.height!==256)throw Error('Equipment requires the shared prepared appearance frame.');
- const layers=await createBodyForegroundLayers({body,binding,appearanceBody,mask:registration.foreground,sheet,index});
+ const layers=await createBodyForegroundLayers({body,binding,appearanceBody,clothing,mask:registration.foreground,sheet,index});
  let tool=null,result=null;
  try{
   tool=paintEquipmentArt(equipment,registration);

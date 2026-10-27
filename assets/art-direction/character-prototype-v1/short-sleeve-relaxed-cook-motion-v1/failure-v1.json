@@ -1,0 +1,6 @@
+{
+  "status": "failed; not accepted motion evidence",
+  "reason": "Activity tool masks include upper arm pixels now owned by shirt sleeves.",
+  "terminalExitCode": 1,
+  "output": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\npage.evaluate: Error: The equipment foreground overlaps another appearance part.\n    at registeredEquipmentFrame (http://127.0.0.1:60114/character-equipment.js:18:73)\n    at async compose (http://127.0.0.1:60114/character-family-appearance.js:91:95)\n    at async Object.acquire (http://127.0.0.1:60114/character-family-appearance.js:114:41)\n    at async eval (eval at evaluate (:311:30), <anonymous>:5:887)\n    at async <anonymous>:337:30\n    at /Users/paladini/Documents/veeware/solar-friends/scripts/verify-mixed-family-clothing.mjs:34:227 {\n  log: []\n}\n\nNode.js v24.10.0\n"
+}

@@ -1,0 +1,6 @@
+{
+  "status": "failed; not accepted motion evidence",
+  "reason": "Mask intersection alone does not account for clothing behind partially transparent arm edges.",
+  "terminalExitCode": 1,
+  "output": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\npage.evaluate: Error: The equipment foreground overlaps another appearance part.\n    at registeredEquipmentFrame (http://127.0.0.1:60176/character-equipment.js:18:73)\n    at async compose (http://127.0.0.1:60176/character-family-appearance.js:96:95)\n    at async Object.acquire (http://127.0.0.1:60176/character-family-appearance.js:119:41)\n    at async eval (eval at evaluate (:311:30), <anonymous>:5:887)\n    at async <anonymous>:337:30\n    at /Users/paladini/Documents/veeware/solar-friends/scripts/verify-mixed-family-clothing.mjs:34:227 {\n  log: []\n}\n\nNode.js v24.10.0\n"
+}
