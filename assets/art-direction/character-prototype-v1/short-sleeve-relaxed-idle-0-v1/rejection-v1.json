@@ -1,0 +1,6 @@
+{
+  "status": "Rejected visual geometry; inactive",
+  "sourceSha256": "9fa0390204d91e16e96a728616fac50d58ee57726bbec3d6f4be2371dc5d72fc",
+  "finding": "Upper near and far sleeve contours sit inside the original upper-arm silhouette, leaving exposed shoulder strips. Automated cloth-coverage success does not establish sleeve anatomy.",
+  "next": "Widen shoulder and sleeve contours in a new frozen collection; retain source PNG unchanged."
+}
