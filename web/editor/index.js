@@ -97,7 +97,7 @@ function save(){
     }
     const thumbnail=ctx.thumbnail,recoveryBytes=cacheRecovery(ctx,checkpoint,view);
     if(ctx.conflicted)throw new LibraryConflict();
-    const record=await library.saveProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution,thumbnail},ctx.storageRevision);
+    const record=await library.savePreparedProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution,thumbnail},ctx.storageRevision);
     ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);
     try{
       const key=recoveryKey(ctx.id),raw=sessionStorage.getItem(key);

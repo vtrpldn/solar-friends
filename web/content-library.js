@@ -1,3 +1,4 @@
+import {savePreparedProjectBytes} from './save-project-prepared.js';
 import {MAX_VILLAGE_SNAPSHOT_CHARACTERS} from './recovery-limits.js';
 import {createMapPackageAsync,validateMapPackage} from './map-package.js';
 import {enrichRunHeaders} from './library-migrations.js';
@@ -27,9 +28,9 @@ const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'se
 export class ContentLibrary extends EventTarget {
   #opening;
   #channel;
-  constructor(name='solar-friends-creations'){
+  constructor(name='solar-friends-creations',{broadcast=true}={}){
     super();this.name=name;
-    if(typeof BroadcastChannel!=='undefined'){
+    if(broadcast&&typeof BroadcastChannel!=='undefined'){
       this.#channel=new BroadcastChannel(name);
       this.#channel.onmessage=event=>this.dispatchEvent(new CustomEvent('change',{detail:{...event.data,remote:true}}));
     }
@@ -162,6 +163,13 @@ export class ContentLibrary extends EventTarget {
   deleteResidentPreset(id,expectedRevision){return this.#write('residents',id,expectedRevision,()=>null);}
   getProject(id){return this.#read('projects',id);}
   getRun(id){return this.#read('runs',id);}
+  // For detached editor checkpoints only. Returns compact durable metadata;
+  // callers retain the captured checkpoint used to acknowledge the saved edit.
+  async savePreparedProject(input,expectedRevision=null,options){
+    const id=input?.id,raw=JSON.stringify(input);
+    try{const saved=await savePreparedProjectBytes(this.name,raw,expectedRevision,options);if(saved.id!==id)throw Error('The saved creation acknowledgement names a different draft.');this.#changed('projects',saved.id,saved.revision);return saved;}
+    catch(error){if(error.name==='LibraryConflict')throw new LibraryConflict();throw error;}
+  }
   async saveProject({id,checkpoint,view,attribution,thumbnail},expectedRevision=null){
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||!checkpoint.definition?.start)throw Error('This draft checkpoint is not supported.');
     const data=clone({checkpoint,view:safeView(view)});

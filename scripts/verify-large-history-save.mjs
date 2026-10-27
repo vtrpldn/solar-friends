@@ -40,7 +40,7 @@ try{
     if(window.holdNextCheckpoint){window.holdNextCheckpoint=false;let first=true;args=[{yieldControl:async()=>{if(first){first=false;window.checkpointHeld=true;await new Promise(resolve=>window.releaseCheckpoint=resolve);}await new Promise(resolve=>setTimeout(resolve,0));}}];}
     try{return await original.apply(this,args);}finally{window.historySaveProbe.push({name:'checkpointAsyncElapsed',ms:performance.now()-start});}
    };}
-  }),import('/content-library.js').then(({ContentLibrary})=>{const original=ContentLibrary.prototype.saveProject;ContentLibrary.prototype.saveProject=async function(...args){const record=await original.apply(this,args);window.historySaveWrites.push({revision:record.checkpoint.revision,funds:record.checkpoint.definition.start.funds});return record;};})]);
+  }),import('/content-library.js').then(({ContentLibrary})=>{for(const name of ['saveProject','savePreparedProject']){const original=ContentLibrary.prototype[name];if(!original)continue;ContentLibrary.prototype[name]=async function(...args){const record=await original.apply(this,args),checkpoint=record.checkpoint??args[0].checkpoint;window.historySaveWrites.push({revision:checkpoint.revision,funds:checkpoint.definition.start.funds});return record;};}})]);
  });
  const openStart=Date.now();await page.goto(`http://127.0.0.1:${server.address().port}/editor.html?project=large-history`);
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');
@@ -90,7 +90,7 @@ try{
  }
  assert.deepEqual(errors,[]);const largeRecoveryParses=await page.evaluate(()=>window.largeRecoveryParses);if(!baselineEditor)assert.equal(largeRecoveryParses,0,'Saving parsed the unchanged near-limit recovery envelope');
  await page.screenshot({path:output+'/editor.png'});
- const sources=['web/editor/document.js','web/editor/index.js','web/content-library.js','web/pkg/solar_friends_bg.wasm'];
+ const sources=['web/editor/document.js','web/editor/index.js','web/content-library.js','web/save-project-prepared.js','web/project-save-worker.js','web/pkg/solar_friends_bg.wasm'];
  const report={scope:'Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.',largeRecoveryParses,historyBytes:fixture.bytes,historySteps:fixture.steps,openElapsedMs,sample,exactCheckpointReload:true,concurrentSave,preparationFailure,errors,sourceHashes:Object.fromEntries(await Promise.all(sources.map(async file=>[file,createHash('sha256').update(file==='web/editor/document.js'&&baselineSource?baselineSource:file==='web/editor/index.js'&&baselineEditor?baselineEditor:await readFile(file)).digest('hex')])))};
  await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
