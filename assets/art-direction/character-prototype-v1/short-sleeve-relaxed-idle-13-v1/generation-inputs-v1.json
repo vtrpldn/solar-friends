@@ -1,0 +1,12 @@
+{
+  "prompt": "prompt-v1.txt",
+  "anatomyReviewSha256": "fe58d329b01012376015f6266c67b2b5b044c55251da1ecdd8c74d145a0aee67",
+  "foregroundIntentSha256": "0a6b69ec91dc2d53ffd37f35327a0cd78c387baae378dc4b95b7e42cf889c40d",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-13-v1/mask.png",
+      "role": "Exact full-shirt geometry and fixed canvas; frozen before paint",
+      "sha256": "5b81b3b3163dbbce261403dcbc9293d0324821fdd3ea17437695cab9626e62ea"
+    }
+  ]
+}

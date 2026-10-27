@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-35044c31-e7c9-4215-80a1-6ed5e6d6aec6.png",
+  "sourceSha256": "2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "dfdd8ccd462e914a62ac0ab899a13e9ebddb20161e6311f1b730d409cc7a3765",
+  "status": "Unreviewed relaxed leaning source; inactive"
+}

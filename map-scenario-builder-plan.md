@@ -2472,3 +2472,9 @@ The remaining idle row has compact torsos and hands-on-hips geometry, so existin
 The stricter check catches 131/173/83/134 uncovered pixels in the initial four guides. Fitted new full hems using the unchanged source-bound material waist landmarks, with constant outer extensions matching the native material sampler. The corrected four guides now cover all 8,822 required shirt pixels with zero protected-pants/shoe overlap. Frozen their geometry and derived separate original-arm and pants/shoe ownership before painting. The two neutral endpoints share one exact silhouette; the two hands-on-hips poses need distinct sleeves and forearm layers. Inspected enlarged original bodies and arm-layer guide views.
 
 **Why:** a passing collar check must not hide an exposed old hem. This is pre-paint geometry and stronger validation only: no additional shirt source is accepted yet. Twenty-eight internal poses remain reviewed; full paint, palette and motion checks for this row and every original release gate remain required.
+
+### Relaxed stance shirt sources — static review
+
+Generated and reviewed idle poses 12–15 against the complete original shirt silhouette, with native arm and lower-body ownership. The first pose-12 paint exposed one original neckline pixel and is retained as rejected; replacement v2 covers all 2,205 required pixels. Poses 13–15 cover all 2,304, 2,103 and 2,210 required pixels. All four pass palette checks; composed torso and equipped palette boards were visually inspected. Exact source/report fingerprints are stored beside each source.
+
+**Why:** relaxed residents need fitted clothes through their arm and torso shifts. These are internal static source reviews only; mixed-library integration, relaxed motion and lighting review remain pending, alongside the sixteen activity poses and the original full builder requirements.

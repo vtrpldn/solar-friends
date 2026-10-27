@@ -1,0 +1,11 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dcc1493d-ca19-43f2-9d49-7f2e05e52b67.png",
+  "sourceSha256": "1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-12-v1/prompt-v1.txt",
+  "generationInputs": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-12-v1/generation-inputs-v1.json",
+  "generationInputsSha256": "ce72c0ee865cf8e381e9c78ccc76858b418cbb73794c95d020e15eed4c4d567a",
+  "status": "Unreviewed compact neutral shirt; inactive",
+  "reusedFrom": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-12-v1/candidate-v1.png"
+}

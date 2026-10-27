@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "Full-shirt check exposes original shirt at native coordinate 118,94; delivered alpha 218.",
+  "sourceSha256": "1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6",
+  "report": "review-v1-owned.json",
+  "replacement": "candidate-v2.png"
+}
