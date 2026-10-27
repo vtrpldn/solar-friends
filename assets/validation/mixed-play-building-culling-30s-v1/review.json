@@ -1,0 +1,47 @@
+{
+  "scope": "Four thirty-second phases; same release engine, conservative offscreen building rejection.",
+  "terminalExitCode": 0,
+  "sourceHashes": {
+    "web/main.js": "69897226b3e9be7b63ec806f25c19346dc9fa4a0e46cd55fd5dcd71d15350c90",
+    "web/world-visibility.js": "35dadeba53c888dc1a0c6c63a81fb8e6947235613aec16b32cbd45a664929940",
+    "scripts/benchmark-mixed-play.mjs": "b11b7ba4769fbdbc8eec4720e9720deb71d0aaa79c97810464a2cca8b126e3aa",
+    "scripts/verify-world-culling.mjs": "a392f8781c01e4c8222b6e16b500c73170c844ee72c6949f81a7060bdf991099"
+  },
+  "checkpointReloads": 4,
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "gameMinutesPerSecond": 3.004335666336253,
+      "p95FrameGapMs": 25.599999999998545,
+      "paintMedianMs": 7.200000047683716
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "gameMinutesPerSecond": 3.0040921824767493,
+      "p95FrameGapMs": 25.5,
+      "paintMedianMs": 7.100000023841858
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "gameMinutesPerSecond": 27.823830920751497,
+      "p95FrameGapMs": 83.5,
+      "paintMedianMs": 26.799999952316284
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "gameMinutesPerSecond": 22.952127382220993,
+      "p95FrameGapMs": 83.39999999999418,
+      "paintMedianMs": 44.199999928474426
+    }
+  ],
+  "decision": "Keep conservative omission of offscreen work; sustained throughput remains unaccepted. These separate runs do not show a consistent overall speed win.",
+  "limits": [
+    "Panning camera paths vary with pointer-call timing, so separately sampled pans are not identical workloads.",
+    "Fixed-view same-page PNG parity is proven separately for six cases; moving-camera pixel parity remains unverified.",
+    "No total memory/storage or physical-display pacing acceptance."
+  ]
+}

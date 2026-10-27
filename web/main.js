@@ -15,6 +15,7 @@ let playerSession=null;
 import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops} from './world-renderer.js';
 import {constructionOpacity,drawBuildingState} from './building-state-art.js';
 import {paintImage} from './paint-cache.js';
+import {buildingInViewport} from './world-visibility.js';
 import { performanceMeter } from './dev/performance.js';
 import { sampleFrame } from './frame-state.js';
 import {usesLogistics,usesUtilities,installSandboxRulesUI} from './sandbox-rules.js';
@@ -712,7 +713,7 @@ function render() {
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
     })),
-    ...state.village.buildings.map((b) => ({
+    ...state.village.buildings.filter(b=>buildingInViewport(iso(b.x,b.y),scale,width,height)).map((b) => ({
       depth: b.x + b.y,
       draw: () => building(b),
       light: () => {
