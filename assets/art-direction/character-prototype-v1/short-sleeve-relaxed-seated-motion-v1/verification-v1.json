@@ -1,0 +1,121 @@
+{
+  "changed": 128,
+  "unchanged": 256,
+  "returns": 16,
+  "cacheReuses": 128,
+  "releasedRefusals": 8,
+  "disposedRefusal": true,
+  "movies": {
+    "curls-0-true": {
+      "recordings": [
+        {
+          "clip": "sit",
+          "night": 0,
+          "facing": 1,
+          "offsetMs": 0,
+          "elapsedMs": 6000.100000023842,
+          "frames": 721
+        },
+        {
+          "clip": "sit",
+          "night": 1,
+          "facing": -1,
+          "offsetMs": 6000.100000023842,
+          "elapsedMs": 6007.899999976158,
+          "frames": 721
+        }
+      ],
+      "videoSha256": "bcdd122063b6a8d29761f8f198633bf1a184c277d30058e866509d18795d251c"
+    },
+    "sidepart-0-true": {
+      "recordings": [
+        {
+          "clip": "sit",
+          "night": 0,
+          "facing": 1,
+          "offsetMs": 0,
+          "elapsedMs": 6004.699999928474,
+          "frames": 721
+        },
+        {
+          "clip": "sit",
+          "night": 1,
+          "facing": -1,
+          "offsetMs": 6004.699999928474,
+          "elapsedMs": 6007.800000071526,
+          "frames": 721
+        }
+      ],
+      "videoSha256": "c024572cbdb20c0ee67aa2891592d2bdab5c52ba82ab7400b145ad9a6d66a8a1"
+    }
+  },
+  "inputs": {
+    "short-sleeve-relaxed-walk-0-v3": {
+      "sourceSha256": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+      "registrationSha256": "1ff5ba8c2bb902551c880c49508ad3e810f0394b63b086508354aff1f740694c"
+    },
+    "short-sleeve-relaxed-walk-1-v2": {
+      "sourceSha256": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+      "registrationSha256": "deb2750366b2df4f6b1f2d4e9073f73875db463b8dd9309b9279b7eda650898e"
+    },
+    "short-sleeve-relaxed-walk-2-v2": {
+      "sourceSha256": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+      "registrationSha256": "79231a2e14e7f0ebb0122e92668294bcd79b1b9efff1c121482346392a89bf2d"
+    },
+    "short-sleeve-relaxed-walk-3-v1": {
+      "sourceSha256": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+      "registrationSha256": "fc2b288faec7e278f0d0a0e4eb999b61ba17906566c61cb289d69109fab2db8f"
+    },
+    "short-sleeve-relaxed-base-4-v3": {
+      "sourceSha256": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+      "registrationSha256": "9e774194889797bf4739ebd5d7952f507ba5440efde40c4454a0ceaf543e7893"
+    },
+    "short-sleeve-relaxed-base-5-v2": {
+      "sourceSha256": "15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6",
+      "registrationSha256": "9d440479991a72431cff1b86d0e055892f66cf241b71e40d06a4541a0c229eee"
+    },
+    "short-sleeve-relaxed-base-6-v2": {
+      "sourceSha256": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+      "registrationSha256": "d4fb791bb21bee1e86a074e1370dbc0d4a44ceb956267f2de7f0c8ed114837a1"
+    },
+    "short-sleeve-relaxed-base-7-v3": {
+      "sourceSha256": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
+      "registrationSha256": "43302439dd94fd9abe28c10a2b4bb24f7bcabf20d574af67d7dff6f50ee1eef6"
+    },
+    "short-sleeve-breathe-single-8-v1": {
+      "sourceSha256": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+      "registrationSha256": "b2740928efca51b6ae37a6e96fa58bc9c5ecd67458773ad2d59be99515948dd9"
+    },
+    "short-sleeve-breathe-single-9-v1": {
+      "sourceSha256": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+      "registrationSha256": "1dcae8d1350cd1220ec747ce831ad9e86f2022e0f1bfa4c81a2aafb490145f9e"
+    },
+    "short-sleeve-breathe-single-10-v1": {
+      "sourceSha256": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+      "registrationSha256": "66b0edc3fc1764ecd70e7eb5cf766566e05751e54dad88da1cc14851174d8b82"
+    },
+    "short-sleeve-breathe-single-11-v1": {
+      "sourceSha256": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+      "registrationSha256": "0d25bf075f641596dc2ecfdda86598c966e3469d2a924152d7a395bba2a8cc3c"
+    },
+    "short-sleeve-relaxed-base-12-v3": {
+      "sourceSha256": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+      "registrationSha256": "1975d26999a05f06717e61f3ba4db54cf1822029b76d3ff9f82fa665c6f0457d"
+    },
+    "short-sleeve-relaxed-base-13-v3": {
+      "sourceSha256": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+      "registrationSha256": "c2a41a2cea6b3920bd497f4ed6ceee746ae396e6bc35ace9299330a1be0b5f91"
+    },
+    "short-sleeve-relaxed-base-14-v1": {
+      "sourceSha256": "1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de",
+      "registrationSha256": "86da03a8663b186a5fcd469eeacc3f296697f7b6142ff03a503c71656e10b1fb"
+    },
+    "short-sleeve-relaxed-base-15-v1": {
+      "sourceSha256": "7a1011ad56441ae055c085bc5258264e1bea8a45bd1ce1b8642a00b092261b9f",
+      "registrationSha256": "88c0f619089c3d135a77b2b99ce54302f41102cdf15a856ab6fb28462d02a723"
+    }
+  },
+  "scope": "16 internal shirt poses, eight complete appearances, mixed cache leases and cleanup. No full 48-pose outfit or public recipe acceptance.",
+  "librarySha256": "ba959c01df0a6bcbdc8b62afb7bbf366ca6ab53d4daf84b77a357b38ba8ec0fe",
+  "clothingRendererSha256": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69"
+}
