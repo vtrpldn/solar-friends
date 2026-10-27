@@ -1,0 +1,314 @@
+{
+  "buildingCulling": true,
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "bindingPath": null,
+  "bindingSha256": "d4a6c0bb50f2c79862380324e778525dd43971742fad1709bede04bd560abd23",
+  "engineSha256": "0538dff635e77e3caf8055c6135b3b3aa41159a8130bceae78de029cb81e6f61",
+  "engineBytes": 4392895,
+  "profilerOverhead": null,
+  "baselineWasm": null,
+  "baseline": null,
+  "phaseReset": "Each phase restores the same authored opening snapshot; native import and warmup excluded from samples.",
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "secondsPerPhase": 30,
+  "compileMs": 40.48829099999966,
+  "snapshotBytes": 1009434,
+  "environment": "Headless Chromium, 1440x900; same maximum mixed fixture as editor benchmark; real pointer drags while the simulation runs.",
+  "limits": "No authored utility routes or explicit crop/animal starting overrides; no service-sustainability or total GPU memory measurement. This is a stress fixture, not a balanced example.",
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "runtime": {
+        "wallSeconds": 30.021600000047684,
+        "advancedMinutes": 90.18685913085938,
+        "frames": 1459,
+        "medianGapMs": 17,
+        "p95GapMs": 25.700000000004366,
+        "maxGapMs": 41.70000000000073,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1.7000000476837158,
+            "p95": 1.899999976158142
+          },
+          "sample": {
+            "median": 0.9000000953674316,
+            "p95": 5.799999952316284
+          },
+          "paint": {
+            "median": 7.399999976158142,
+            "p95": 7.899999976158142
+          },
+          "total": {
+            "median": 10.100000023841858,
+            "p95": 15.200000047683716
+          },
+          "frameInterval": {
+            "median": 24.69999999999709,
+            "p95": 25.900000000001455
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.0091000000000003,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 225.0896670000002,
+        "pointerMoves": 0
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "runtime": {
+        "wallSeconds": 30.00680000002384,
+        "advancedMinutes": 90.13330078125,
+        "frames": 1489,
+        "medianGapMs": 16.900000000001455,
+        "p95GapMs": 25.400000000001455,
+        "maxGapMs": 49.700000000004366,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1.7000000476837158,
+            "p95": 1.8000000715255737
+          },
+          "sample": {
+            "median": 0.8999999761581421,
+            "p95": 5.600000023841858
+          },
+          "paint": {
+            "median": 7.199999928474426,
+            "p95": 7.5
+          },
+          "total": {
+            "median": 9.799999952316284,
+            "p95": 14.600000023841858
+          },
+          "frameInterval": {
+            "median": 17.80000000000291,
+            "p95": 25.39999999999418
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.684000000000002,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 234.2745419999992,
+        "pointerMoves": 357
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "runtime": {
+        "wallSeconds": 30.0282,
+        "advancedMinutes": 767.8750610351562,
+        "frames": 657,
+        "medianGapMs": 41.69999999999709,
+        "p95GapMs": 83.29999999998836,
+        "maxGapMs": 333.6999999999971,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 9,
+            "p95": 11.100000023841858
+          },
+          "sample": {
+            "median": 1,
+            "p95": 5.800000071525574
+          },
+          "paint": {
+            "median": 34.39999997615814,
+            "p95": 50.60000002384186
+          },
+          "total": {
+            "median": 44.700000047683716,
+            "p95": 65.09999990463257
+          },
+          "frameInterval": {
+            "median": 66.5,
+            "p95": 83.5
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0.2375,
+          "droppedSeconds": 16.22854999999998,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 445.7937499999971,
+        "pointerMoves": 0
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "runtime": {
+        "wallSeconds": 30.012699999976146,
+        "advancedMinutes": 733.4561157226562,
+        "frames": 632,
+        "medianGapMs": 41.69999999999709,
+        "p95GapMs": 83.59999999999127,
+        "maxGapMs": 279.3000000000029,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 9.399999976158142,
+            "p95": 15.200000047683716
+          },
+          "sample": {
+            "median": 1,
+            "p95": 6.100000023841858
+          },
+          "paint": {
+            "median": 39.5,
+            "p95": 52.200000047683716
+          },
+          "total": {
+            "median": 50.09999990463257,
+            "p95": 69.20000004768372
+          },
+          "frameInterval": {
+            "median": 66.80000000000291,
+            "p95": 92.10000000000582
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0.22499999999999998,
+          "droppedSeconds": 31.80599999999999,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 419.06066699998337,
+        "pointerMoves": 190
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    }
+  ],
+  "loadMs": 6818.970792
+}

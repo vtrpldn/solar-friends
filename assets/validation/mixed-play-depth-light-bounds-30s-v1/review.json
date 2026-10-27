@@ -1,0 +1,51 @@
+{
+  "terminalExitCode": 0,
+  "browserErrors": [],
+  "exactCheckpointReloads": 4,
+  "sourceHashes": {
+    "web/main.js": "7d2ee3a31cdb0a0ddf8a7e590b446c76c1c733e75f9d141128f1c6fca2bd843d",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af"
+  },
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "wallSeconds": 30.021600000047684,
+      "gameMinutesPerSecond": 3.0040657103790647,
+      "p95FrameGapMs": 25.700000000004366,
+      "maxFrameGapMs": 41.70000000000073
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "wallSeconds": 30.00680000002384,
+      "gameMinutesPerSecond": 3.0037625065377975,
+      "p95FrameGapMs": 25.400000000001455,
+      "maxFrameGapMs": 49.700000000004366
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "wallSeconds": 30.0282,
+      "gameMinutesPerSecond": 25.57179787783338,
+      "p95FrameGapMs": 83.29999999998836,
+      "maxFrameGapMs": 333.6999999999971
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "wallSeconds": 30.012699999976146,
+      "gameMinutesPerSecond": 24.43819168962603,
+      "p95FrameGapMs": 83.59999999999127,
+      "maxFrameGapMs": 279.3000000000029
+    }
+  ],
+  "decision": "Keep verified removal of unnecessary masks; sustained performance gate remains open.",
+  "limits": [
+    "Requested 16x target is 48 game minutes per wall second; not achieved.",
+    "Separate panning runs are not identical camera paths.",
+    "Fixed-state profile gains do not establish advancing-state throughput gains.",
+    "No total memory/storage or physical-display pacing acceptance."
+  ]
+}
