@@ -2240,3 +2240,9 @@ Prepared pose 13 from the original seated body, with native fixed crop, collar/s
 Extended the analytical guide measurement to report any coverage of source-bound protected shorts/shoes, alongside opaque upper-shirt coverage and exact edge alpha. It detects 24 protected pixels under the prior pose-13 guide. Revised and froze guide v2 with all 610 upper-shirt targets covered and no protected-pixel overlap. Its unchanged regenerated source passes bounds and removes the large hem spill, but an antialiased source edge at (67,134), alpha 2/255, changes red 108→107 and still fails the exact protected criterion. Added source-alpha detail to failure messages and retained this precise unresolved result; no acceptance threshold was relaxed.
 
 **Why:** guide overlap and generated antialias spill need separate evidence. The diagnostic avoids regenerating known-bad geometry; the remaining edge/ownership issue must still be resolved. Candidate stays inactive and the full builder goal remains open.
+
+### Seated seam retry exposes cuff geometry issue
+
+Retried pose-13 guide v2 with explicit horizontal-hem instructions. The unchanged source passes fixed bounds, exact protected shorts/shoes and foreground-arm checks in six compositions. Forty-eight colour/accessory invariant checks also pass, but six upper-shirt edge pixels remain partially uncovered (alpha 183–185). Enlarged composition review reveals squared-off near-cuff ownership and a far-shoulder fit issue. Retained the precise failed coverage and visual findings.
+
+**Why:** repeated generation against the same guide cannot repair an anatomical ownership defect. Revise the cuff/shoulder geometry from the original body before generating again; do not relax coverage or enable this source. Full outfit and broader builder requirements remain active.

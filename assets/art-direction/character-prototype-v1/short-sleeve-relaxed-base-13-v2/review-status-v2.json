@@ -1,0 +1,21 @@
+{
+  "status": "needs anatomy/edge correction; inactive",
+  "sourceSha256": "f86ab97bb1a864d003e074de7c8bf1b8e3cb651ac25f0f04b49a2f56928ef9b8",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-eb56f905-2517-47b0-bd0a-cbb0f70623c4.png",
+  "promptSha256": "823b02cb6422eeb0bbbb3c93d12a52b73e432a524e9fb38b2437e39fc6e6fcc2",
+  "reference": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v2/mask.png",
+    "role": "frozen exact geometry target",
+    "sha256": "cb70ce835c8cfc4bfe0ec64be68fd36c9bf60e6aaf229457b03dd30409607d72"
+  },
+  "checks": [
+    "Source bounds pass",
+    "Six compositions preserve exact protected shorts/shoes and opaque foreground arms",
+    "48 colour/accessory combinations preserve alpha and protected lower pixels"
+  ],
+  "failures": [
+    "Six upper-shirt edge pixels (67\u201372,133) have alpha 183\u2013185, below required 240",
+    "Inspected enlarged details: near-arm mask makes a squared-off cuff; shirt and far shoulder need anatomy review before accepting the guide"
+  ],
+  "next": "Revise cuff ownership and local shoulder/hem geometry from original pose; avoid further retries against the same flawed guide. No threshold relaxation or public activation."
+}
