@@ -14,7 +14,8 @@ if(process.argv.includes('--include-seated'))poses.push([12,'short-sleeve-relaxe
 if(process.argv.includes('--include-idle'))poses.push([0,'short-sleeve-relaxed-idle-0-v2','v1','v1-owned','idle'],...[1,2,3].map(i=>[i,'short-sleeve-relaxed-idle-'+i+'-v2','v1','v1-owned','idle']));
 if(process.argv.includes('--include-stretch'))poses.push([4,'short-sleeve-relaxed-idle-4-v1','v1','v1-owned','idle'],[5,'short-sleeve-relaxed-idle-5-v2','v1','v1-owned','idle'],[6,'short-sleeve-relaxed-idle-6-v1','v2','v2-owned','idle'],[7,'short-sleeve-relaxed-idle-7-v1','v1','v1-owned','idle']);
 if(process.argv.includes('--include-wave'))poses.push([8,'short-sleeve-relaxed-idle-8-v1','v1','v1-owned','idle'],[9,'short-sleeve-relaxed-idle-9-v1','v1','v1-owned-arm2','idle'],[10,'short-sleeve-relaxed-idle-10-v1','v1','v1-owned-arm2','idle'],[11,'short-sleeve-relaxed-idle-11-v1','v1','v1-owned','idle']);
-const recordingModes=[['--record-seated','sit','--include-seated'],['--record-look','look','--include-idle'],['--record-stretch','stretch','--include-stretch'],['--record-wave','wave','--include-wave']].filter(([flag])=>process.argv.includes(flag));
+if(process.argv.includes('--include-relax'))poses.push([12,'short-sleeve-relaxed-idle-12-v1','v2','v2-owned','idle'],...[13,14,15].map(i=>[i,'short-sleeve-relaxed-idle-'+i+'-v1','v1','v1-owned','idle']));
+const recordingModes=[['--record-seated','sit','--include-seated'],['--record-look','look','--include-idle'],['--record-stretch','stretch','--include-stretch'],['--record-wave','wave','--include-wave'],['--record-relax','relax','--include-relax']].filter(([flag])=>process.argv.includes(flag));
 assert(recordingModes.length<=1,'Choose one motion clip per run');
 for(const [,clip,include]of recordingModes)assert(process.argv.includes(include),'Load every '+clip+' clothing pose before recording');
 const recordingClip=recordingModes[0]?.[1]??null;

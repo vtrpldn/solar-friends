@@ -2478,3 +2478,11 @@ The stricter check catches 131/173/83/134 uncovered pixels in the initial four g
 Generated and reviewed idle poses 12–15 against the complete original shirt silhouette, with native arm and lower-body ownership. The first pose-12 paint exposed one original neckline pixel and is retained as rejected; replacement v2 covers all 2,205 required pixels. Poses 13–15 cover all 2,304, 2,103 and 2,210 required pixels. All four pass palette checks; composed torso and equipped palette boards were visually inspected. Exact source/report fingerprints are stored beside each source.
 
 **Why:** relaxed residents need fitted clothes through their arm and torso shifts. These are internal static source reviews only; mixed-library integration, relaxed motion and lighting review remain pending, alongside the sixteen activity poses and the original full builder requirements.
+
+### Relaxed shirt motion integration
+
+The mixed appearance library now verifies all 32 base/idle shirt poses across eight appearances: 256 registered frame changes, 128 untouched activity frames, 16 preserved feeding returns, cache reuse and released-lease refusal. Twenty-six distinct loaded shirt images require 208 colour preparations/disposals, peak two live temporary sources, and zero retained sources. These counters do not measure total memory.
+
+The actual relaxed sequence is idle 12/13/14/14/13/12; pose 15 remains a separately checked spare. Both hairstyle recordings were decoded and the complete day/mirrored-night sample boards and all four closer transition boards were inspected. Limited encoded motion review found attached necklines, sleeves and hems through the stance changes. Exact fingerprints and findings: `short-sleeve-relaxed-relax-motion-v1/motion-review-v1.json`.
+
+**Why:** the character creator needs clothes that remain coherent in motion, not only portraits. Sixteen activity shirt poses, public/world integration, broader appearance options, and all original biome/campaign/performance/memory/recovery/usability gates remain open. Cooking body references are prepared for the next source review.

@@ -1,0 +1,369 @@
+{
+  "scope": "Independently decoded full-cycle one-second samples and closer first-transition samples. Requested times are not exact native pose identities, exhaustive playback or physical display pacing evidence.",
+  "verificationSha256": "7384417de693dcd65723bd9c989909160acf3f6a1b70a8c6ab51df4d01ffcc49",
+  "decoderSha256": "93cf033d397f443f279e70492ab47d7a508cd73274d49dc3d68973a37a1229c9",
+  "movies": {
+    "curls-0-true": {
+      "clip": "relax",
+      "videoSha256": "ca637224ecbd68e799bd5fc14d6822ed583ef24e117b3a128a4875a3f3968e18",
+      "metadata": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "vp8",
+            "codec_long_name": "On2 VP8",
+            "profile": "0",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "mime_codec_string": "vp8",
+            "width": 600,
+            "height": 320,
+            "coded_width": 600,
+            "coded_height": 320,
+            "has_b_frames": 0,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "15:8",
+            "pix_fmt": "yuv420p",
+            "level": -99,
+            "field_order": "progressive",
+            "refs": 1,
+            "r_frame_rate": "30/1",
+            "avg_frame_rate": "30/1",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "nb_read_frames": "360",
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "eng",
+              "alpha_mode": "1"
+            }
+          }
+        ],
+        "format": {
+          "filename": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-relax.webm",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "0.000000",
+          "duration": "11.972407",
+          "size": "186045",
+          "bit_rate": "124315",
+          "probe_score": 100,
+          "tags": {
+            "encoder": "Chrome"
+          }
+        }
+      },
+      "recordings": [
+        {
+          "clip": "relax",
+          "night": 0,
+          "facing": 1,
+          "offsetMs": 0,
+          "elapsedMs": 6000.899999976158,
+          "frames": 720
+        },
+        {
+          "clip": "relax",
+          "night": 1,
+          "facing": -1,
+          "offsetMs": 6000.899999976158,
+          "elapsedMs": 6003.799999952316,
+          "frames": 720
+        }
+      ],
+      "commands": [
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-relax.webm",
+          "-vf",
+          "fps=1,scale=300:160,tile=6x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "0.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-transition-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "1.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-transition-2-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "3.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-transition-3-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "4.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/curls-0-true-transition-4-decoded.png"
+        ]
+      ],
+      "boards": {
+        "curls-0-true-decoded.png": "0135f05046834c4bbdc11d8203222123244d1f9b6877d9ebba5743884b5f87e6",
+        "curls-0-true-transition-decoded.png": "45999b1ad10e47e5605471c63dd45f8215dd1a1509bae8517a83e8038bf8f68b",
+        "curls-0-true-transition-2-decoded.png": "2851ee3e189a50350d2ca8df06536d1d74e800cf72f827146f1c20263a0a7d24",
+        "curls-0-true-transition-3-decoded.png": "bcf06c5012e938544b459861c7259a73b95b5b18aa3e7cfa9728e709712acb99",
+        "curls-0-true-transition-4-decoded.png": "ec666f9ff5d7380c67771ad8fa6e50065fd7b3d7505142dad9ccab276211d638"
+      }
+    },
+    "sidepart-0-true": {
+      "clip": "relax",
+      "videoSha256": "6e03e24fff4940c0a26ec8a8f57753d613f9bbbbcc222e983e8a98d400617039",
+      "metadata": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "vp8",
+            "codec_long_name": "On2 VP8",
+            "profile": "0",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "mime_codec_string": "vp8",
+            "width": 600,
+            "height": 320,
+            "coded_width": 600,
+            "coded_height": 320,
+            "has_b_frames": 0,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "15:8",
+            "pix_fmt": "yuv420p",
+            "level": -99,
+            "field_order": "progressive",
+            "refs": 1,
+            "r_frame_rate": "359/12",
+            "avg_frame_rate": "359/12",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "nb_read_frames": "361",
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "eng",
+              "alpha_mode": "1"
+            }
+          }
+        ],
+        "format": {
+          "filename": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-relax.webm",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "0.000000",
+          "duration": "12.004908",
+          "size": "184640",
+          "bit_rate": "123043",
+          "probe_score": 100,
+          "tags": {
+            "encoder": "Chrome"
+          }
+        }
+      },
+      "recordings": [
+        {
+          "clip": "relax",
+          "night": 0,
+          "facing": 1,
+          "offsetMs": 0,
+          "elapsedMs": 6002.899999976158,
+          "frames": 720
+        },
+        {
+          "clip": "relax",
+          "night": 1,
+          "facing": -1,
+          "offsetMs": 6002.899999976158,
+          "elapsedMs": 6007.900000095367,
+          "frames": 721
+        }
+      ],
+      "commands": [
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-relax.webm",
+          "-vf",
+          "fps=1,scale=300:160,tile=6x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "0.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-transition-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "1.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-transition-2-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "3.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-transition-3-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "4.8",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-relax.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-relax-motion-v1/sidepart-0-true-transition-4-decoded.png"
+        ]
+      ],
+      "boards": {
+        "sidepart-0-true-decoded.png": "181ab8c300b185c1a6ac5c8b08fbcff1feca5aa3d90a6941a2522018d1d12a2a",
+        "sidepart-0-true-transition-decoded.png": "6e1a6e750b59a5a11abd54e5f22f99d641064907d9a7c415e48bb3989a7f2880",
+        "sidepart-0-true-transition-2-decoded.png": "fd973fa4612c3219b31f5ff62bb3b11d3660f9958d13a1294290332b6313b58f",
+        "sidepart-0-true-transition-3-decoded.png": "796e153b3fd0e2c9662a9b06163b13846940db696349f38f2c42b67ff6fbe66d",
+        "sidepart-0-true-transition-4-decoded.png": "0fd5e0e016ba11eea85cfe7b1624328ac683ab44efd7e184a27f4143296d6056"
+      }
+    }
+  }
+}

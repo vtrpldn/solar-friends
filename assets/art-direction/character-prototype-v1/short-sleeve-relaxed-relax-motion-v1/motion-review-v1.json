@@ -1,0 +1,27 @@
+{
+  "scope": "Limited encoded relaxed motion review, two hairstyles with cream shirt, hat and beard; daylight and mirrored night. No public outfit or physical display pacing acceptance.",
+  "verificationSha256": "7384417de693dcd65723bd9c989909160acf3f6a1b70a8c6ab51df4d01ffcc49",
+  "decoderSha256": "86f58ed75a7b0a6bc74664ec2e76389ae06a0a90765e5212c48ffbe4b9b75de2",
+  "activeSequence": [
+    12,
+    13,
+    14,
+    14,
+    13,
+    12
+  ],
+  "sparePose": 15,
+  "visualFindings": "Both decoded full-cycle boards and all four closer transition boards per hairstyle inspected. Neckline, sleeves and hem remain attached through the hands-on-hips shift and return. Night silhouette and mirrored pose remain readable.",
+  "mixedChecks": {
+    "changed": 256,
+    "unchanged": 128,
+    "returns": 16,
+    "cacheReuses": 256,
+    "releasedRefusals": 8,
+    "loadedGarmentImages": 26,
+    "colourPreparations": 208,
+    "colourPeakSources": 2,
+    "colourLiveSources": 0,
+    "colourDisposals": 208
+  }
+}

@@ -1,0 +1,70 @@
+[
+  {
+    "key": "activities-0",
+    "sheet": "activities",
+    "index": 0,
+    "crop": [
+      0,
+      0,
+      256,
+      256
+    ],
+    "tile": [
+      0,
+      0,
+      627,
+      627
+    ]
+  },
+  {
+    "key": "activities-1",
+    "sheet": "activities",
+    "index": 1,
+    "crop": [
+      0,
+      0,
+      256,
+      256
+    ],
+    "tile": [
+      627,
+      0,
+      627,
+      627
+    ]
+  },
+  {
+    "key": "activities-2",
+    "sheet": "activities",
+    "index": 2,
+    "crop": [
+      0,
+      0,
+      256,
+      256
+    ],
+    "tile": [
+      0,
+      627,
+      627,
+      627
+    ]
+  },
+  {
+    "key": "activities-3",
+    "sheet": "activities",
+    "index": 3,
+    "crop": [
+      0,
+      0,
+      256,
+      256
+    ],
+    "tile": [
+      627,
+      627,
+      627,
+      627
+    ]
+  }
+]
