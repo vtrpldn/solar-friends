@@ -56,6 +56,13 @@ export function drawNightEmission(ctx, image, art, kind, x, y, scale, amount) {
     ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
   }
   ctx.restore();
+  const w=art.width*placement.scale*scale,h=w*(art.aspect||1),{vertical,shear}=cameraCalibration(art);
+  const corners=[-w/2,w/2].flatMap(dx=>[-h*art.anchor,h*(1-art.anchor)].map(dy=>[x+placement.x*scale+dx,y+placement.y*scale+shear*dx+vertical*dy]));
+  if(kind==='streetlight'){
+    const bulb=lampLightOffset(art),radius=28*scale;
+    corners.push([x+bulb.x*scale-radius,y+bulb.y*scale-radius],[x+bulb.x*scale+radius,y+bulb.y*scale+radius]);
+  }
+  return {left:Math.min(...corners.map(p=>p[0]))-4,top:Math.min(...corners.map(p=>p[1]))-4,right:Math.max(...corners.map(p=>p[0]))+4,bottom:Math.max(...corners.map(p=>p[1]))+4};
 }
 
 // Walk this layer in the same back-to-front order as the visible scene. Every
@@ -63,4 +70,25 @@ export function drawNightEmission(ctx, image, art, kind, x, y, scale, amount) {
 export function paintDepthLight(ctx,occlude,emit) {
   ctx.save();ctx.globalCompositeOperation='destination-out';occlude();ctx.restore();
   emit?.();
+}
+
+const validBounds=b=>b&&[b.left,b.top,b.right,b.bottom].every(Number.isFinite)&&b.left<=b.right&&b.top<=b.bottom;
+// Bounds may overestimate paint, but must contain it completely. Retain earlier
+// light regions after occlusion: stale regions can cause extra work, never leaks.
+// An emitter returning null painted nothing; undefined means unknown bounds.
+export function createDepthLightPass(ctx) {
+  const regions=[];let unbounded=false;
+  return {
+    paint(occlude,emit,bounds){
+      const mask=typeof bounds==='function'?bounds():bounds;
+      if((unbounded||regions.length)&&(!validBounds(mask)||unbounded||regions.some(r=>mask.left<=r.right&&mask.right>=r.left&&mask.top<=r.bottom&&mask.bottom>=r.top))){
+        paintDepthLight(ctx,occlude);
+      }
+      if(emit){
+        const area=emit();
+        if(validBounds(area))regions.push({...area});
+        else if(area!==null)unbounded=true;
+      }
+    },
+  };
 }

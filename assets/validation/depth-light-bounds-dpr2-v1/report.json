@@ -1,0 +1,113 @@
+{
+  "sourceHashes": {
+    "web/main.js": "7d2ee3a31cdb0a0ddf8a7e590b446c76c1c733e75f9d141128f1c6fca2bd843d",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af"
+  },
+  "deviceScaleFactor": 2,
+  "synthetic": {
+    "seeds": 30,
+    "objectsPerSeed": 40,
+    "exactIntermediateLayers": 1200
+  },
+  "scope": "Real game fixed and input-panned/zoomed world canvas: bounded masks versus test-only original unconditional masks, three biomes day/night, maximum mixed fixture. Static equality does not establish moving-camera continuity or frame pacing.",
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "minutes": 600,
+      "camera": "fixed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "a5e6ba241655c9050952d4cde6b22e3e181e2ec7cc6877e3238179031e49b54f"
+    },
+    {
+      "biome": "mata-atlantica",
+      "minutes": 600,
+      "camera": "panned-zoomed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "35761bd452560ecafa05c5980c17e13c068c09cc59cb776b4f34700d61e65222"
+    },
+    {
+      "biome": "mata-atlantica",
+      "minutes": 1260,
+      "camera": "fixed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "2c28182413b0c59952e28bc90b1788adcca91ad17ac5b79a17e8c77e7535eb22"
+    },
+    {
+      "biome": "mata-atlantica",
+      "minutes": 1260,
+      "camera": "panned-zoomed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "03878ab04ea3fa26a103391fd1b971e958d6492658787e7bd6ee6b8aa5b97290"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 600,
+      "camera": "fixed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "88f202d1d3d384297c4fcc9ae112d16d5d3d4659e57d603d88d4eafac62f1736"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 600,
+      "camera": "panned-zoomed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "d5790a7ead400aa136ae1da11d825d65209e605689d24d0dd6bac7b74675a59f"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 1260,
+      "camera": "fixed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "17c46978fc2ff7c547476c98365b1a3121889aaf2dbfc35e81141b6dc79162f0"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 1260,
+      "camera": "panned-zoomed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "4b183dc4bb50c98ed29f312da67bc36d3d4be68b1d0f97f50fef839de675a49a"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 600,
+      "camera": "fixed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "20a55543da0f720fe97da05886d1b7f077c9cb21523054c4bb18abccb074b74e"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 600,
+      "camera": "panned-zoomed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "159cd4bb0d208716dd498eaaff09cdf3c3b7042a9ff49843a884d981012643cc"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 1260,
+      "camera": "fixed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "ead77ec09c76f4a7059cea31e32c2a0c85a332fb0f980cc783fe90bb6064b3ae"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 1260,
+      "camera": "panned-zoomed",
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "a598d6790103908dbd34674858298f2a36523f1235bc8d68406fb47439c7cdd5"
+    }
+  ],
+  "errors": []
+}

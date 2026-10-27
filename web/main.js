@@ -12,7 +12,7 @@ import {terrainRevision} from './terrain-revision.js';
 import {ContentLibrary} from './content-library.js';
 import {PlayerSession} from './player-session.js';
 let playerSession=null;
-import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops} from './world-renderer.js';
+import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops,worldTreeBounds} from './world-renderer.js';
 import {constructionOpacity,drawBuildingState} from './building-state-art.js';
 import {paintImage} from './paint-cache.js';
 import {buildingInViewport} from './world-visibility.js';
@@ -37,7 +37,7 @@ import {installEconomyUI,recipeSummary} from './economy-ui.js';
 import { footprintCorners, occupies } from './building-footprints.js';
 import { installBuildMenu, paintIcon } from './build-menu.js';
 import { buildingLighting, connectionLabel, updatePowerUI } from './power.js';
-import { drawNightEmission, paintDepthLight } from './night-lighting.js';
+import { drawNightEmission, createDepthLightPass } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
 import { weatherSummary, updateClimateForecast } from './climate-ui.js';
 import { readArtDraft } from './dev/art-draft.js';
@@ -704,6 +704,7 @@ function render() {
     if(lightLayer.width!==canvas.width||lightLayer.height!==canvas.height){lightLayer.width=canvas.width;lightLayer.height=canvas.height;}
     lightContext.resetTransform();lightContext.clearRect(0,0,lightLayer.width,lightLayer.height);lightContext.setTransform(ctx.getTransform());
   }
+  const depthLight=darkness>0?createDepthLightPass(lightContext):null;
   const objects = [
     ...(state.village.power.network?.nodes||[]).filter(n=>n.owner.kind==='ground').map(n=>({depth:n.x+n.y+.4,draw:()=>drawBattery(ctx,iso(n.x,n.y),scale,nightAmount(state.village.minutes))})),
     ...state.village.water_supply.tanks.filter(p=>p.owner.kind==='ground'&&p.water.some(n=>n>.001)).map(p=>({depth:p.x+p.y+1.2,draw:()=>drawWaterPile(ctx,iso(p.x,p.y),scale,p,nightAmount(state.village.minutes))})),
@@ -712,16 +713,18 @@ function render() {
     ...standingTrees.filter(onScreenTree).map((f) => ({
       depth: f.x + f.y,
       draw: () => tree(f.x, f.y, f.size, f.species),
+      bounds:()=>worldTreeBounds(f,{project:iso,scale}),
     })),
     ...state.village.buildings.filter(b=>buildingInViewport(iso(b.x,b.y),scale,width,height)).map((b) => ({
       depth: b.x + b.y,
       draw: () => building(b),
+      bounds:()=>{const p=iso(b.x,b.y),r=240*scale+8;return {left:p.x-r,top:p.y-r,right:p.x+r,bottom:p.y+r};},
       light: () => {
-        if(b.progress<100)return;
+        if(b.progress<100)return null;
         const c=state.environment.power.connections.find(c=>c.id===b.id);
-        if(!['grid','roof'].includes(c?.source)||c.light_level<=0)return;
+        if(!['grid','roof'].includes(c?.source)||c.light_level<=0)return null;
         const p=iso(b.x,b.y),key=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
-        drawNightEmission(ctx,nightBuildingImages[key],allBuildingArt[key],key,p.x,p.y,scale,darkness*c.light_level);
+        return drawNightEmission(ctx,nightBuildingImages[key],allBuildingArt[key],key,p.x,p.y,scale,darkness*c.light_level)??null;
       },
     })),
     ...flock(state.village).map((hen) => ({
@@ -731,6 +734,7 @@ function render() {
     ...state.residents.map((r) => ({
       depth: r.x + r.y + 0.6,
       draw: () => resident(r),
+      bounds:()=>{const p=iso(r.x,r.y),animation=residentAnimations.get(r.id);if(!animation)return null;const w=RESIDENT_WIDTH*scale,h=w*Math.abs(animation.breath);return {left:p.x-w/2-4,top:p.y-h*FRAME_ANCHOR-4,right:p.x+w/2+4,bottom:p.y+h*(1-FRAME_ANCHOR)+4};},
       occlude: () => {
         if(!residentVisible(r,state.village))return;
         const surface=residentSurfaces.get(r.id),animation=residentAnimations.get(r.id),p=iso(r.x,r.y);
@@ -741,7 +745,7 @@ function render() {
   ];
   objects.sort((a, b) => a.depth - b.depth).forEach(o=>{
     o.draw();
-    if(darkness>0){const world=ctx;try{ctx=lightContext;paintDepthLight(ctx,o.occlude||o.draw,o.light);}finally{ctx=world;}}
+    if(depthLight){const world=ctx;try{ctx=lightContext;depthLight.paint(o.occlude||o.draw,o.light,o.bounds);}finally{ctx=world;}}
   });
   landMap?.drawFocus(tile);
   for(const job of state.village.building_jobs||[]){if(job.stage!=='pack'||!job.destination)continue;const b=state.village.buildings.find(b=>b.id===job.building);polygon(footprintCorners(b.kind,...job.destination).map(([x,y])=>{const p=iso(x,y);return[p.x,p.y];}),'#a5b77422','#b9cf8b');}

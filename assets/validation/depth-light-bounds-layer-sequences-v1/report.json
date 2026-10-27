@@ -1,0 +1,16 @@
+{
+  "sourceHashes": {
+    "web/main.js": "7d2ee3a31cdb0a0ddf8a7e590b446c76c1c733e75f9d141128f1c6fca2bd843d",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af"
+  },
+  "deviceScaleFactor": 1,
+  "synthetic": {
+    "seeds": 30,
+    "objectsPerSeed": 40,
+    "exactIntermediateLayers": 1200
+  },
+  "scope": "Randomized intermediate layer equivalence only; no world captures.",
+  "results": [],
+  "errors": []
+}

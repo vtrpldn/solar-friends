@@ -11,6 +11,14 @@ import {placementArt} from './building-footprints.js';
 import {lightingLayers,unlitFilter} from './power.js';
 export const forestSpecies=[{name:'Jequitibá-rosa',width:145},{name:'Juçara',width:112},{name:'Embaúba',width:113},{name:'Pau-brasil',width:125}];
 
+export function worldTreeBounds({x,y,size=1,species=0},{project,scale}){
+  const p=project(x,y),art=species>=12?regionalNatureArt[species-12]:species>=4?natureArt[species-4]:forestSpecies[species];
+  if(!art)return null;
+  const w=art.width*size*scale,h=w*(art.aspect||1),anchor=species<4?.85:art.anchor,anchorX=species>=12?art.anchorX:.5;
+  const shadow=species<4?23:species>=12?(art.shadow||0):0,rx=shadow*size*scale,ry=rx*.5,shadowY=p.y+(species<4?2*scale:0);
+  return {left:Math.min(p.x-w*anchorX,p.x-rx)-4,top:Math.min(p.y-h*anchor,shadowY-ry)-4,right:Math.max(p.x+w*(1-anchorX),p.x+rx)+4,bottom:Math.max(p.y+h*(1-anchor),shadowY+ry)+4};
+}
+
 export function paintWorldGround(ctx,ground,origin,scale){
   ctx.save();ctx.transform(TILE_HALF_WIDTH*scale,TILE_HALF_HEIGHT*scale,-TILE_HALF_WIDTH*scale,TILE_HALF_HEIGHT*scale,origin.x,origin.y);
   ctx.drawImage(ground,GROUND_START,GROUND_START,GROUND_SIZE,GROUND_SIZE);ctx.restore();
