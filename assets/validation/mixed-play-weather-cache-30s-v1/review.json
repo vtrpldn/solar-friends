@@ -1,0 +1,57 @@
+{
+  "terminalExitCode": 0,
+  "browserErrors": [],
+  "exactCheckpointReloads": 4,
+  "sourceHashes": {
+    "web/main.js": "7d2ee3a31cdb0a0ddf8a7e590b446c76c1c733e75f9d141128f1c6fca2bd843d",
+    "web/weather.js": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "scripts/benchmark-mixed-play.mjs": "1381af0343cd41e5c56a6b72b29cce8a8df4de293be1f508ec9967f3c49bd91b"
+  },
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "gameMinutesPerSecond": 3.004136323639621,
+      "p95GapMs": 25.599999999998545,
+      "maxGapMs": 51.5,
+      "paintMedianMs": 7.200000047683716,
+      "paintP95Ms": 7.700000047683716
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "gameMinutesPerSecond": 3.0038011247269627,
+      "p95GapMs": 25.599999999998545,
+      "maxGapMs": 50.099999999998545,
+      "paintMedianMs": 7.199999928474426,
+      "paintP95Ms": 7.600000023841858
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "gameMinutesPerSecond": 26.336414478781844,
+      "p95GapMs": 74.59999999999127,
+      "maxGapMs": 324.8999999999942,
+      "paintMedianMs": 25.200000047683716,
+      "paintP95Ms": 36.89999997615814
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "gameMinutesPerSecond": 28.12849434104287,
+      "p95GapMs": 66.70000000001164,
+      "maxGapMs": 83.39999999999418,
+      "paintMedianMs": 24.600000023841858,
+      "paintP95Ms": 36.200000047683716
+    }
+  ],
+  "decision": "Keep output-equivalent weather cache; full sustained performance acceptance remains open.",
+  "limits": [
+    "16x target is 48 game minutes per wall second; not achieved.",
+    "Panning paths and later village states differ across separately timed runs.",
+    "Paint observations are consistent with reduced selector work but are not a controlled whole-app causal comparison.",
+    "No total memory/storage or physical-display pacing acceptance."
+  ]
+}
