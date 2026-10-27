@@ -1,0 +1,17 @@
+[
+  {
+    "file": "mata-atlantica-night.png",
+    "reference": "assets/validation/world-culling-v2/mata-atlantica-night.png",
+    "sha256": "53470e1aa8503af771661df6baecf0397335301e5f6c9dccb5dfd3fdd71e585b"
+  },
+  {
+    "file": "cerrado-night.png",
+    "reference": "assets/validation/world-culling-v2/cerrado-night.png",
+    "sha256": "3b81e04037d84101b0f8dca3b0e45bb5df5f961e788a60a549d8df140cb9cd87"
+  },
+  {
+    "file": "caatinga-night.png",
+    "reference": "assets/validation/world-culling-v2/caatinga-night.png",
+    "sha256": "e4cc2a0d13a7116ae7a2dbd8a50cbd2ac75ab8427562bcdc205a43bab9bdd5e6"
+  }
+]

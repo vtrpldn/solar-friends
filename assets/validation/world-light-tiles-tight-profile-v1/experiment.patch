@@ -1,0 +1,134 @@
+diff --git a/web/main.js b/web/main.js
+index bc692b2..5e93464 100644
+--- a/web/main.js
++++ b/web/main.js
+@@ -37,7 +37,7 @@ import {installEconomyUI,recipeSummary} from './economy-ui.js';
+ import { footprintCorners, occupies } from './building-footprints.js';
+ import { installBuildMenu, paintIcon } from './build-menu.js';
+ import { buildingLighting, connectionLabel, updatePowerUI } from './power.js';
+-import { drawNightEmission, paintDepthLight } from './night-lighting.js';
++import { drawNightEmission, paintDepthLight, compositeDepthLight } from './night-lighting.js';
+ import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
+ import { weatherSummary, updateClimateForecast } from './climate-ui.js';
+ import { readArtDraft } from './dev/art-draft.js';
+@@ -700,6 +700,7 @@ function render() {
+   drawWaterConnections(ctx,iso,scale,state);
+   drawElectricalConnections(ctx,iso,scale,state);
+   const darkness = nightAmount(state.village.minutes);
++  const emissionRects=[];
+   if(darkness>0){
+     if(lightLayer.width!==canvas.width||lightLayer.height!==canvas.height){lightLayer.width=canvas.width;lightLayer.height=canvas.height;}
+     lightContext.resetTransform();lightContext.clearRect(0,0,lightLayer.width,lightLayer.height);lightContext.setTransform(ctx.getTransform());
+@@ -721,7 +722,8 @@ function render() {
+         const c=state.environment.power.connections.find(c=>c.id===b.id);
+         if(!['grid','roof'].includes(c?.source)||c.light_level<=0)return;
+         const p=iso(b.x,b.y),key=buildingArtKey(b,state.village.buildings,state.village.economy.projects);
+-        drawNightEmission(ctx,nightBuildingImages[key],allBuildingArt[key],key,p.x,p.y,scale,darkness*c.light_level);
++        const bounds=drawNightEmission(ctx,nightBuildingImages[key],allBuildingArt[key],key,p.x,p.y,scale,darkness*c.light_level);
++        if(bounds)emissionRects.push(bounds);
+       },
+     })),
+     ...flock(state.village).map((hen) => ({
+@@ -791,7 +793,7 @@ function render() {
+   ctx.fillRect(0, 0, width, height);
+   ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
+   ctx.fillRect(0, 0, width, height);
+-  if(darkness>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(lightLayer,0,0,lightLayer.width,lightLayer.height,0,0,width,height);ctx.restore();}
++  if(darkness>0)compositeDepthLight(ctx,lightLayer,emissionRects,width,height);
+   if (darkness > 0) {
+     for (const b of state.village.buildings.filter(
+       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
+diff --git a/web/night-lighting.js b/web/night-lighting.js
+index eed74c4..695681b 100644
+--- a/web/night-lighting.js
++++ b/web/night-lighting.js
+@@ -21,9 +21,24 @@ export function emissionStrength(r, g, b) {
+ 
+ // Keep the original painted amber windows and lanterns bright after moonlight
+ // shading. Cool roofs, foliage and unlit surfaces stay in the night palette.
+-function emissionTexture(image) {
++function sourceEmissionBounds(pixels,width,height,cell){
++  const [cx,cy,cw,ch]=cell,x0=cx*width,y0=cy*height,w=cw*width,h=ch*height;
++  let left=width,top=height,right=0,bottom=0;
++  for(let y=Math.ceil(y0);y<y0+h;y++)for(let x=Math.ceil(x0);x<x0+w;x++)if(pixels[(y*width+x)*4+3]){
++    left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x+1);bottom=Math.max(bottom,y+1);
++  }
++  return right>left&&bottom>top?{left:(left-x0)/w,top:(top-y0)/h,right:(right-x0)/w,bottom:(bottom-y0)/h}:null;
++}
++function emissionTexture(image,art) {
+   if (!image?.complete || !image.naturalWidth) return null;
+-  if (emissions.has(image)) return emissions.get(image);
++  const cell=art.cell||[0,0,1,1],key=cell.join(','),cached=emissions.get(image);
++  if(cached){
++    if(!cached.cells.has(key)){
++      const pixels=cached.canvas.getContext('2d').getImageData(0,0,cached.canvas.width,cached.canvas.height);
++      cached.cells.set(key,sourceEmissionBounds(pixels.data,cached.canvas.width,cached.canvas.height,cell));
++    }
++    return {texture:cached.canvas,bounds:cached.cells.get(key)};
++  }
+   const canvas = document.createElement('canvas');
+   canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+   const ctx = canvas.getContext('2d', { willReadFrequently: true });
+@@ -33,14 +48,16 @@ function emissionTexture(image) {
+     pixels.data[i + 3] *= emissionStrength(pixels.data[i], pixels.data[i + 1], pixels.data[i + 2]);
+   }
+   ctx.putImageData(pixels, 0, 0);
+-  emissions.set(image, canvas);
+-  return canvas;
++  const bounds=sourceEmissionBounds(pixels.data,canvas.width,canvas.height,cell);
++  emissions.set(image, {canvas,cells:new Map([[key,bounds]])});
++  return {texture:canvas,bounds};
+ }
+ 
+ export function drawNightEmission(ctx, image, art, kind, x, y, scale, amount) {
+   if (amount <= 0) return;
+-  const texture = emissionTexture(image);
+-  if (!texture) return;
++  const emission = emissionTexture(image,art);
++  if (!emission) return;
++  const {texture,bounds}=emission;
+   const placement = placementArt(kind, art);
+   ctx.save();
+   ctx.globalCompositeOperation = 'screen';
+@@ -56,6 +73,41 @@ export function drawNightEmission(ctx, image, art, kind, x, y, scale, amount) {
+     ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
+   }
+   ctx.restore();
++  const w=art.width*scale*placement.scale,h=w*(art.aspect||1),{vertical,shear}=cameraCalibration(art);
++  const corners=bounds?[(bounds.left-.5)*w,(bounds.right-.5)*w].flatMap(dx=>[(bounds.top-art.anchor)*h,(bounds.bottom-art.anchor)*h].map(dy=>[x+placement.x*scale+dx,y+placement.y*scale+shear*dx+vertical*dy])):[];
++  if(kind==='streetlight'){
++    const bulb=lampLightOffset(art),radius=28*scale;
++    corners.push([x+bulb.x*scale-radius,y+bulb.y*scale-radius],[x+bulb.x*scale+radius,y+bulb.y*scale+radius]);
++  }
++  if(!corners.length)return;
++  const xs=corners.map(p=>p[0]),ys=corners.map(p=>p[1]);
++  return {left:Math.min(...xs),top:Math.min(...ys),right:Math.max(...xs),bottom:Math.max(...ys)};
++}
++
++function fullDepthLight(ctx,layer,width,height){
++  ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(layer,0,0,layer.width,layer.height,0,0,width,height);ctx.restore();
++}
++
++// The depth pass remains unchanged. Skip transparent regions only in its final
++// screen blend, using disjoint source-pixel tiles so light cannot be added twice.
++export function compositeDepthLight(ctx,layer,rects,width,height){
++  const transform = ctx.getTransform();
++  const {a,b,c,d,e,f}=transform;
++  // Exact 1:1 source pixels avoid resampling seams. Keep the original path for
++  // fractional pixel ratios, offsets, or other transforms.
++  if(b||c||e||f||!Number.isInteger(a)||!Number.isInteger(d)||a<=0||d<=0||a*width!==layer.width||d*height!==layer.height){fullDepthLight(ctx,layer,width,height);return;}
++  const size=64,columns=Math.ceil(layer.width/size),rows=Math.ceil(layer.height/size),tiles=new Set();
++  for(const r of rects){
++    const minX=Math.max(0,Math.floor(((r.left-4)*a)/size)),maxX=Math.min(columns-1,Math.floor(((r.right+4)*a)/size));
++    const minY=Math.max(0,Math.floor(((r.top-4)*d)/size)),maxY=Math.min(rows-1,Math.floor(((r.bottom+4)*d)/size));
++    for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++)tiles.add(y*columns+x);
++  }
++  ctx.save();ctx.globalCompositeOperation='screen';
++  for(const index of [...tiles].sort((x,y)=>x-y)){
++    const x=index%columns*size,y=Math.floor(index/columns)*size,w=Math.min(size,layer.width-x),h=Math.min(size,layer.height-y);
++    ctx.drawImage(layer,x,y,w,h,x/a,y/d,w/a,h/d);
++  }
++  ctx.restore();
+ }
+ 
+ // Walk this layer in the same back-to-front order as the visible scene. Every

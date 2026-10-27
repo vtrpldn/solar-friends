@@ -1,0 +1,98 @@
+{
+  "synthetic": [
+    {
+      "ratio": 1,
+      "empty": false,
+      "rgbaValues": 401940,
+      "changed": 0
+    },
+    {
+      "ratio": 1,
+      "empty": true,
+      "rgbaValues": 401940,
+      "changed": 0
+    },
+    {
+      "ratio": 2,
+      "empty": false,
+      "rgbaValues": 1607760,
+      "changed": 0
+    },
+    {
+      "ratio": 2,
+      "empty": true,
+      "rgbaValues": 1607760,
+      "changed": 0
+    },
+    {
+      "ratio": 3,
+      "empty": false,
+      "rgbaValues": 3617460,
+      "changed": 0
+    },
+    {
+      "ratio": 3,
+      "empty": true,
+      "rgbaValues": 3617460,
+      "changed": 0
+    },
+    {
+      "ratio": 1.25,
+      "empty": false,
+      "rgbaValues": 627224,
+      "changed": 0
+    },
+    {
+      "ratio": 1.25,
+      "empty": true,
+      "rgbaValues": 627224,
+      "changed": 0
+    }
+  ],
+  "scope": "Real game fixed-view world canvas: tiled depth-light blend versus test-only full-screen blend, three biomes day/night, maximum mixed fixture. Static equality does not establish moving-camera continuity or frame pacing.",
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "minutes": 600,
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "9cd7698ad706ba5a96cff19e126fb613afce7679f92c82052f3e3e4c875db467"
+    },
+    {
+      "biome": "mata-atlantica",
+      "minutes": 1260,
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "53470e1aa8503af771661df6baecf0397335301e5f6c9dccb5dfd3fdd71e585b"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 600,
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "1bae262a18d3f1a307b8dee81150b45402b92bf7e77131531ff8686283513fee"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 1260,
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "3b81e04037d84101b0f8dca3b0e45bb5df5f961e788a60a549d8df140cb9cd87"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 600,
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "86b3167a0344ee991e13cadf812d2ee6b80e0ebcb124a0d23357769c6d65f1e1"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 1260,
+      "buildings": 256,
+      "exactWorldPng": true,
+      "sha256": "e4cc2a0d13a7116ae7a2dbd8a50cbd2ac75ab8427562bcdc205a43bab9bdd5e6"
+    }
+  ],
+  "errors": []
+}
