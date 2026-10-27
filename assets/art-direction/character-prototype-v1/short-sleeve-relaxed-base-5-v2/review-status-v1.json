@@ -1,0 +1,26 @@
+{
+  "status": "static composition checks passed; internal source pending full cycle review",
+  "sourceSha256": "15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ec108e1f-e107-4252-9b2a-ef8069f0bff6.png",
+  "promptSha256": "4f38408adabdb58165b39e05522c977984e351e502b1a41af0a7af270fb6cbbb",
+  "reference": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-5-v2/mask.png",
+    "role": "frozen exact silhouette",
+    "sha256": "905904f70ec3cf4d19b73e7a85b26b8ca59188d37df7380ab71df3b3ddc14732"
+  },
+  "checks": {
+    "upperShirtCovered": 1044,
+    "upperShirtTotal": 1044,
+    "staticCompositions": 6,
+    "colourAccessoryCompositions": 48,
+    "alphaComparisons": 2359296,
+    "protectedLowerChannels": 578592
+  },
+  "visualFindings": [
+    "Inspected details, colour and day/night/facing boards",
+    "Torso and neckline follow raised-arm pose; original hands remain above cloth",
+    "Four shirt colours agree in silhouette and retain protected lower body",
+    "Cuff edge remains a cycle-level review item; no complete animation acceptance claimed"
+  ],
+  "next": "Complete work pose 6, assemble all four work poses and inspect transitions and tool/hand layering. Wider outfit poses and player integration remain open."
+}
