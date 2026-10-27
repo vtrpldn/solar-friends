@@ -1,5 +1,5 @@
 {
-  "status": "needs correction; inactive",
+  "status": "static composition checks passed; internal source, pending cycle review",
   "sourceSha256": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
   "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dd288ada-a3b1-4527-8b36-a0c7eb7e5bce.png",
   "promptSha256": "573bf7d2d66ef8ee2b334bf0b77314e07ae8ed7782a60740e90e94f9e76db1e7",
@@ -16,10 +16,12 @@
     "48 colour/accessory compositions preserve alpha and protected lower pixels"
   ],
   "visualFindings": [
-    "Raised hem fixes the previous protected-shorts overlap",
-    "Day/night and facing views remain coherent at gameplay scale",
-    "Colour waist board exposes a cream triangular original-shirt sliver between arms below the upper-shirt coverage cutoff; cuff edge also looks angular in enlarged view"
+    "Raised hem preserves declared sloped-waist shorts and shoes",
+    "Day/night, facing and colour views remain coherent at gameplay scale",
+    "Earlier cream-sliver finding was incorrect: sampled native gap pixels (147,149), (148,150), (149,151) have body alpha 8,11,14, material label 0 and guide alpha 0. Retain the near-transparent anatomical gap rather than filling it with cloth.",
+    "Enlarged cuff ownership edge is angular; review together with adjacent work poses before final cycle acceptance."
   ],
-  "next": "Inspect original pixels in the inner-arm triangle, revise the guide and anatomical foreground edge before a new frozen revision. Do not hide the defect by recolouring the underlying body or relaxing coverage criteria.",
-  "scope": "Single internal pose only; not a complete garment or player-facing outfit."
+  "next": "Complete adjacent work poses and inspect cuff continuity in motion; no public outfit activation yet.",
+  "scope": "Single internal pose only; not a complete garment or player-facing outfit.",
+  "diagnosticSha256": "4b57f40f1daf172f4e124f2e2ed4f5e71af7bf477fbdfa3e9b0e004e8adf2a99"
 }
