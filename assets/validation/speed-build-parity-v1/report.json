@@ -1,0 +1,41 @@
+{
+  "scope": "One maximum mixed opening, 240 fixed ticks with exact snapshots every 24 ticks, frame/full-report parity. Not every possible simulation state.",
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "steps": 240,
+  "snapshotsCompared": 10,
+  "frameParity": true,
+  "reportParity": true,
+  "baselineSha256": "a75d72262fbd50c3f6f9cfc6277b4f91fba62c7cd1334872f07e4e0b2473d54b",
+  "candidateSha256": "25b07c760e813f4fba0545f21e202d0c7b89a403d1dc7bb3961e5682b1618928",
+  "baselineBytes": 3606438,
+  "candidateBytes": 39927245
+}

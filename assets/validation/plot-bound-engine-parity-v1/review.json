@@ -1,0 +1,27 @@
+{
+  "status": "retained conservative footprint optimization; full performance gate remains open",
+  "buildRoles": {
+    "baseline": "current rebuilt release with broad bound",
+    "candidate": "pinned pre-change release"
+  },
+  "pairedMeansMs": {
+    "new": 1077.5599685000007,
+    "old": 1210.997916750001,
+    "reductionPercent": 11.01884209744246
+  },
+  "nativeChecks": {
+    "allTests": 782,
+    "focusedBoundaryComparisons": 100188,
+    "allTargetClippy": "passed",
+    "releaseWasmBuild": "passed"
+  },
+  "exactParity": {
+    "fixedTicks": 240,
+    "snapshots": 10,
+    "frame": true,
+    "report": true
+  },
+  "browserFinding": "Five-second browser samples are mixed and still below 16\u00d7. Do not infer sustained frame pacing or total memory acceptance.",
+  "speedBuildExperiment": "Isolated opt-level=3 named/debug build only; Cargo production profile remains size optimized. Debug data omitted from source control.",
+  "sourceSha256": "9d6943b368152de61a8d2508d85d10abe7fe7f61c459d6e8a8f20ca7d4de337d"
+}

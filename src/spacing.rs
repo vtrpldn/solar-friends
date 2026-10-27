@@ -11,6 +11,12 @@ pub fn land(x: f32, y: f32) -> bool {
 }
 
 pub(crate) fn clear_plot(b: &Building, x: f32, y: f32) -> bool {
+    // Every current plot is at most three cells wide, including its 0.2-cell
+    // walking margin. Keep this broad bound outside the exact 1.7-cell edge.
+    // Most navigation probes are far away: avoid repeated kind/size matching.
+    if x < b.x as f32 - 2. || x > b.x as f32 + 2. || y < b.y as f32 - 2. || y > b.y as f32 + 2. {
+        return true;
+    }
     if b.kind == "shed" && b.progress >= 100. {
         return true;
     }
@@ -192,6 +198,94 @@ pub fn walk(v: &Village, r: &mut Resident, neighbours: &[(usize, f32, f32)], dt:
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn plot_broad_bound_preserves_exact_walking_edges() {
+        fn original(b: &Building, x: f32, y: f32) -> bool {
+            if b.kind == "shed" && b.progress >= 100. {
+                return true;
+            }
+            let size = interactions::footprint_size(&b.kind);
+            let left = (b.x - size / 2) as f32 - 0.5;
+            let back = (b.y - size / 2) as f32 - 0.5;
+            x <= left - 0.2
+                || x >= left + size as f32 + 0.2
+                || y <= back - 0.2
+                || y >= back + size as f32 + 0.2
+        }
+        let mut b: Building = serde_json::from_value(
+            serde_json::json!({"id":0,"kind":"shed","x":0,"y":0,"progress":100.}),
+        )
+        .unwrap();
+        let offsets = [
+            -8.,
+            -2.001,
+            -2.,
+            -1.70001,
+            -1.7,
+            -1.69999,
+            -0.70001,
+            -0.7,
+            -0.69999,
+            0.,
+            0.69999,
+            0.7,
+            0.70001,
+            1.69999,
+            1.7,
+            1.70001,
+            2.,
+            2.001,
+            8.,
+            f32::INFINITY,
+            f32::NEG_INFINITY,
+            f32::NAN,
+        ];
+        for kind in [
+            "shed",
+            "square",
+            "solar_farm",
+            "orchard",
+            "goat_pasture",
+            "well",
+            "compost",
+            "coop",
+            "streetlight",
+            "hydro",
+            "eco_toilet",
+            "apiary",
+            "home",
+            "greenhouse",
+            "garden",
+            "kitchen",
+            "warehouse",
+            "workshop",
+            "grove",
+            "wetland",
+            "banana_treatment",
+            "biodigester",
+            "unknown",
+        ] {
+            b.kind = kind.into();
+            for progress in [0., 99.9, 100.] {
+                b.progress = progress;
+                for anchor in [0, 32, 63] {
+                    b.x = anchor;
+                    b.y = anchor;
+                    for dx in offsets {
+                        for dy in offsets {
+                            let (x, y) = (anchor as f32 + dx, anchor as f32 + dy);
+                            assert_eq!(
+                                clear_plot(&b, x, y),
+                                original(&b, x, y),
+                                "{kind} {anchor} {dx} {dy}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     #[test]
     fn a_return_walk_can_leave_a_riverbank_corner() {
         let mut g = Game::new();

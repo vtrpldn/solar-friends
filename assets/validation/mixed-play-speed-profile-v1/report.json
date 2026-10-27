@@ -1,0 +1,560 @@
+{
+  "bindingPath": "/tmp/solar-friends-speed-bindings/solar_friends.js",
+  "bindingSha256": "e6a036c7f37736b806ff4db60d7f4b35f345bd2932c17ece93ed5037b47ef413",
+  "engineSha256": "25b07c760e813f4fba0545f21e202d0c7b89a403d1dc7bb3961e5682b1618928",
+  "engineBytes": 39927245,
+  "profilerOverhead": "16× phases sampled at 500 microseconds; compare throughput against an unprofiled run.",
+  "baselineWasm": "/tmp/solar-friends-speed-bindings/solar_friends_bg.wasm",
+  "baseline": null,
+  "phaseReset": "Each phase restores the same authored opening snapshot; native import and warmup excluded from samples.",
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "attempted": 312,
+    "seed": 42
+  },
+  "secondsPerPhase": 5,
+  "compileMs": 61.536040999999386,
+  "snapshotBytes": 1009434,
+  "environment": "Headless Chromium, 1440x900; same maximum mixed fixture as editor benchmark; real pointer drags while the simulation runs.",
+  "limits": "No authored utility routes or explicit crop/animal starting overrides; no service-sustainability or total GPU memory measurement. This is a stress fixture, not a balanced example.",
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "runtime": {
+        "wallSeconds": 5.004200000000001,
+        "advancedMinutes": 15.13873291015625,
+        "frames": 242,
+        "medianGapMs": 17,
+        "p95GapMs": 25.5,
+        "maxGapMs": 41.600000000000364,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 0.8999999761581421,
+            "p95": 1
+          },
+          "sample": {
+            "median": 0.8999999761581421,
+            "p95": 5.899999976158142
+          },
+          "paint": {
+            "median": 7.600000023841858,
+            "p95": 8.399999976158142
+          },
+          "total": {
+            "median": 9.5,
+            "p95": 14.600000023841858
+          },
+          "frameInterval": {
+            "median": 17,
+            "p95": 25.5
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.1,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 214.6543329999986,
+        "pointerMoves": 0
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "runtime": {
+        "wallSeconds": 5.014400000047685,
+        "advancedMinutes": 15.1507568359375,
+        "frames": 244,
+        "medianGapMs": 17.400000000001455,
+        "p95GapMs": 25.299999999999272,
+        "maxGapMs": 33.29999999999927,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 0.9000000953674316,
+            "p95": 1.0999999046325684
+          },
+          "sample": {
+            "median": 0.8999999761581421,
+            "p95": 5.899999976158142
+          },
+          "paint": {
+            "median": 7.600000023841858,
+            "p95": 8.100000023841858
+          },
+          "total": {
+            "median": 9.5,
+            "p95": 14.5
+          },
+          "frameInterval": {
+            "median": 17.400000000001455,
+            "p95": 25.5
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.85,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 207.07220799999777,
+        "pointerMoves": 60
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "runtime": {
+        "wallSeconds": 5.022900000071524,
+        "advancedMinutes": 177.29278564453125,
+        "frames": 156,
+        "medianGapMs": 33.10000000000218,
+        "p95GapMs": 58,
+        "maxGapMs": 83.30000000000291,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 8.299999952316284,
+            "p95": 33.799999952316284
+          },
+          "sample": {
+            "median": 0.9000000953674316,
+            "p95": 6.099999904632568
+          },
+          "paint": {
+            "median": 7.699999928474426,
+            "p95": 8.399999976158142
+          },
+          "total": {
+            "median": 17.299999952316284,
+            "p95": 42.700000047683716
+          },
+          "frameInterval": {
+            "median": 25.100000000002183,
+            "p95": 57.60000000000218
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0.23124999999999998,
+          "droppedSeconds": 3.8520499999999984,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 271.2628330000007,
+        "pointerMoves": 0,
+        "cpuProfile": {
+          "file": "16x-still.cpuprofile",
+          "sampledHits": 8552,
+          "topSelfSamples": [
+            {
+              "name": "(program)",
+              "hits": 2884
+            },
+            {
+              "name": "restore",
+              "hits": 1363
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::interactions::footprint_size",
+              "hits": 474
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::clear",
+              "hits": 324
+            },
+            {
+              "name": "drawImage",
+              "hits": 253
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::room",
+              "hits": 236
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::search",
+              "hits": 235
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::food::held",
+              "hits": 226
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::needs",
+              "hits": 170
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::food::meal",
+              "hits": 152
+            },
+            {
+              "name": "sampleFrame",
+              "hits": 148
+            },
+            {
+              "name": "paintImage",
+              "hits": 92
+            },
+            {
+              "name": "<core[608f92abc48d28da]::iter::adapters::flatten::FlattenCompat<core[608f92abc48d28da]::iter::adapters::scan::Scan<core[608f92abc48d28da]::iter::adapters::flatten::FlatMap<core[608f92abc48d28da]::array::iter::IntoIter<f32, 3usize>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::array::iter::IntoIter<f32, 8usize>, solar_friends[4669cc21ed46ec28]::spacing::approach_spots::{closure#0}::{closure#0}>, solar_friends[4669cc21ed46ec28]::spacing::approach_spots::{closure#0}>, alloc[cb2b8d99256f33df]::vec::Vec<(f32, f32)>, solar_friends[4669cc21ed46ec28]::spacing::approach_spots::{closure#1}>, core[608f92abc48d28da]::option::IntoIter<(f32, f32)>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+              "hits": 83
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::departure_path",
+              "hits": 83
+            },
+            {
+              "name": "<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::Building>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#0}>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#1}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::economy::Source>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#2}>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#3}>>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::electricity::Node>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#4}>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#5}>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+              "hits": 82
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::water::sync",
+              "hits": 72
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::usable",
+              "hits": 67
+            },
+            {
+              "name": "<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::Building>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#10}>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#11}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::iter::adapters::enumerate::Enumerate<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::economy::Source>>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#12}>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#13}>>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#14}> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+              "hits": 65
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::simulate",
+              "hits": 55
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::sync",
+              "hits": 50
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::geometry::land_points",
+              "hits": 46
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::production::present",
+              "hits": 44
+            },
+            {
+              "name": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::malloc",
+              "hits": 44
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::economy::gross_needs",
+              "hits": 39
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::economy::quantity",
+              "hits": 37
+            },
+            {
+              "name": "<&mut <serde_json[170ed16627d5b8d]::value::Value as core[608f92abc48d28da]::fmt::Display>::fmt::WriterFormatter as core[608f92abc48d28da]::io::write::Write>::write_all",
+              "hits": 36
+            },
+            {
+              "name": "__rustc[9d087a5ab36ea756]::__rdl_realloc",
+              "hits": 32
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::water::quote",
+              "hits": 31
+            },
+            {
+              "name": "http://127.0.0.1:49665/main.js?v=modes-1",
+              "hits": 31
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::rebalance",
+              "hits": 30
+            }
+          ]
+        }
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "runtime": {
+        "wallSeconds": 5.017699999999997,
+        "advancedMinutes": 173.992919921875,
+        "frames": 156,
+        "medianGapMs": 33.099999999998545,
+        "p95GapMs": 57.69999999999709,
+        "maxGapMs": 75,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 8.400000095367432,
+            "p95": 34.700000047683716
+          },
+          "sample": {
+            "median": 1,
+            "p95": 6.099999904632568
+          },
+          "paint": {
+            "median": 7.700000047683716,
+            "p95": 8.399999976158142
+          },
+          "total": {
+            "median": 17.600000023841858,
+            "p95": 44.39999997615814
+          },
+          "frameInterval": {
+            "median": 32.80000000000291,
+            "p95": 57.60000000000218
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0.23124999999999998,
+          "droppedSeconds": 5.998149999999988,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "preparedHairFrames": 96,
+          "preparedHairRgbaBytes": 25165824,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 86,
+          "familyCache": null,
+          "workFamilyCache": null
+        },
+        "pauseClickWallMs": 303.3485419999997,
+        "pointerMoves": 40,
+        "cpuProfile": {
+          "file": "16x-pan.cpuprofile",
+          "sampledHits": 8592,
+          "topSelfSamples": [
+            {
+              "name": "(program)",
+              "hits": 2948
+            },
+            {
+              "name": "restore",
+              "hits": 1373
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::interactions::footprint_size",
+              "hits": 476
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::clear",
+              "hits": 352
+            },
+            {
+              "name": "drawImage",
+              "hits": 261
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::search",
+              "hits": 227
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::food::held",
+              "hits": 223
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::room",
+              "hits": 208
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::needs",
+              "hits": 177
+            },
+            {
+              "name": "sampleFrame",
+              "hits": 138
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::food::meal",
+              "hits": 129
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::departure_path",
+              "hits": 100
+            },
+            {
+              "name": "<core[608f92abc48d28da]::iter::adapters::flatten::FlattenCompat<core[608f92abc48d28da]::iter::adapters::scan::Scan<core[608f92abc48d28da]::iter::adapters::flatten::FlatMap<core[608f92abc48d28da]::array::iter::IntoIter<f32, 3usize>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::array::iter::IntoIter<f32, 8usize>, solar_friends[4669cc21ed46ec28]::spacing::approach_spots::{closure#0}::{closure#0}>, solar_friends[4669cc21ed46ec28]::spacing::approach_spots::{closure#0}>, alloc[cb2b8d99256f33df]::vec::Vec<(f32, f32)>, solar_friends[4669cc21ed46ec28]::spacing::approach_spots::{closure#1}>, core[608f92abc48d28da]::option::IntoIter<(f32, f32)>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+              "hits": 90
+            },
+            {
+              "name": "paintImage",
+              "hits": 89
+            },
+            {
+              "name": "<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::Building>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#10}>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#11}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::iter::adapters::enumerate::Enumerate<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::economy::Source>>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#12}>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#13}>>, solar_friends[4669cc21ed46ec28]::logistics::doorway::{closure#14}> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+              "hits": 79
+            },
+            {
+              "name": "<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::Building>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#0}>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#1}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::economy::Source>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#2}>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#3}>>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[4669cc21ed46ec28]::electricity::Node>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#4}>, solar_friends[4669cc21ed46ec28]::navigation::geometry::obstacles::{closure#5}>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next",
+              "hits": 79
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::water::sync",
+              "hits": 75
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::usable",
+              "hits": 66
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::sync",
+              "hits": 53
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::production::present",
+              "hits": 47
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::simulate",
+              "hits": 43
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::economy::quantity",
+              "hits": 43
+            },
+            {
+              "name": "<&mut <serde_json[170ed16627d5b8d]::value::Value as core[608f92abc48d28da]::fmt::Display>::fmt::WriterFormatter as core[608f92abc48d28da]::io::write::Write>::write_all",
+              "hits": 41
+            },
+            {
+              "name": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::malloc",
+              "hits": 40
+            },
+            {
+              "name": "render",
+              "hits": 40
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::navigation::geometry::land_points",
+              "hits": 34
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::logistics::rebalance",
+              "hits": 33
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::economy::gross_needs",
+              "hits": 33
+            },
+            {
+              "name": "solar_friends[4669cc21ed46ec28]::water::quote",
+              "hits": 32
+            },
+            {
+              "name": "paintWorldBuilding",
+              "hits": 32
+            }
+          ]
+        }
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    }
+  ],
+  "loadMs": 6823.907459
+}
