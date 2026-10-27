@@ -5,6 +5,7 @@ const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = x => { const n = clamp(x); return n * n * (3 - 2 * n); };
 const seed = n => { const v = Math.sin(n * 127.1 + 43.7) * 43758.5453; return v - Math.floor(v); };
 const sites = Array.from({length:Math.round(480*(MAP_SIZE/28)**2)},(_,i)=>({id:i,x:1+seed(i*3)*(MAP_SIZE-2),y:1+seed(i*3+1)*(MAP_SIZE-2),phase:seed(i*3+2)}));
+let siteLayout=[],clearSites=null;
 
 // Only the simulation's raining flag can produce rainfall. The afternoon
 // schedule supplies visual buildup, cloud cover, and two hours of drying.
@@ -25,7 +26,15 @@ export function weatherConditions(environment, minutes) {
 }
 
 export function weatherSites(buildings) {
-  return sites.filter(p=>!buildings.some(b=>occupies(b,p.x,p.y)));
+  // Snapshots replace building objects frequently, while their footprints stay
+  // unchanged. Retain only the last layout by value, including in-place edits.
+  if(!clearSites||siteLayout.length!==buildings.length||buildings.some((b,i)=>b.kind!==siteLayout[i].kind||b.x!==siteLayout[i].x||b.y!==siteLayout[i].y)){
+    clearSites=sites.filter(p=>!buildings.some(b=>occupies(b,p.x,p.y)));
+    siteLayout=buildings.map(({kind,x,y})=>({kind,x,y}));
+  }
+  // Preserve the caller's independent array; sorting/removing a returned site
+  // must not corrupt the next frame's cached selection.
+  return clearSites.slice();
 }
 
 export function drawGroundWeather(ctx, {conditions, buildings, project, scale, time, reducedMotion,map}) {
