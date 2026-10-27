@@ -1,0 +1,313 @@
+{
+  "scope": "32 independently decoded samples of internal full work loops and walk/work transitions, day and mirrored night in each sample. Requested times are not exact decoded/native frame identities; no pacing or simulated-travel acceptance.",
+  "videoSha256": "713eec5f5953bd48cea9ae224c650000d242a1eac4786da9d1b0f8929a03f34b",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.30.08",
+        "width": 1000,
+        "height": 540,
+        "coded_width": 1000,
+        "coded_height": 540,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "50:27",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "1000/1",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "240",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/cycle-motion-v1.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "7.949433",
+      "size": "2020891",
+      "bit_rate": "2033746",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "boards": [
+    {
+      "file": "cycle-filmstrip-1.png",
+      "sha256": "a0980d875297550de9d777679961e2a799bf1fee5e66d3d6301046b5325d66c2"
+    },
+    {
+      "file": "cycle-filmstrip-2.png",
+      "sha256": "551a5f434cbe5eb49004fdcb2834d6b7c3cc119fa2fd9cfabf2caa8cdfda6f18"
+    }
+  ],
+  "samples": [
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.025,
+      "requestedVideoSeconds": 0.025
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.07500000000000001,
+      "requestedVideoSeconds": 0.07500000000000001
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.125,
+      "requestedVideoSeconds": 0.125
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.17500000000000002,
+      "requestedVideoSeconds": 0.17500000000000002
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.225,
+      "requestedVideoSeconds": 0.225
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.275,
+      "requestedVideoSeconds": 0.275
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.32500000000000007,
+      "requestedVideoSeconds": 0.32500000000000007
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.37500000000000006,
+      "requestedVideoSeconds": 0.37500000000000006
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.42500000000000004,
+      "requestedVideoSeconds": 0.42500000000000004
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.47500000000000003,
+      "requestedVideoSeconds": 0.47500000000000003
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.525,
+      "requestedVideoSeconds": 0.525
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.5750000000000001,
+      "requestedVideoSeconds": 0.5750000000000001
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.6250000000000001,
+      "requestedVideoSeconds": 0.6250000000000001
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.675,
+      "requestedVideoSeconds": 0.675
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.7250000000000001,
+      "requestedVideoSeconds": 0.7250000000000001
+    },
+    {
+      "segment": 0,
+      "mode": "work",
+      "kind": "work",
+      "fraction": 0.775,
+      "requestedVideoSeconds": 0.775
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 0.85,
+      "requestedVideoSeconds": 4.859800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 0.95,
+      "requestedVideoSeconds": 4.959800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 1,
+      "requestedVideoSeconds": 5.009800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 1.05,
+      "requestedVideoSeconds": 5.059800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 1.1,
+      "requestedVideoSeconds": 5.109800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 1.2,
+      "requestedVideoSeconds": 5.209800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 1.3,
+      "requestedVideoSeconds": 5.309800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 1.4,
+      "requestedVideoSeconds": 5.409800000071526
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 2.8,
+      "requestedVideoSeconds": 6.809800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 2.95,
+      "requestedVideoSeconds": 6.959800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 3,
+      "requestedVideoSeconds": 7.009800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 3.05,
+      "requestedVideoSeconds": 7.059800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 3.1,
+      "requestedVideoSeconds": 7.109800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 3.2,
+      "requestedVideoSeconds": 7.209800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 3.3,
+      "requestedVideoSeconds": 7.309800000071525
+    },
+    {
+      "segment": 1,
+      "mode": "transition",
+      "kind": "transition",
+      "fraction": 3.5,
+      "requestedVideoSeconds": 7.509800000071525
+    }
+  ]
+}

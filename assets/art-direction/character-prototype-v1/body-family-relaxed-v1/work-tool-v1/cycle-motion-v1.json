@@ -1,0 +1,47 @@
+{
+  "segments": [
+    {
+      "kind": "work",
+      "offsetMs": 0,
+      "elapsedMs": 4009.8000000715256
+    },
+    {
+      "kind": "transition",
+      "offsetMs": 4009.8000000715256,
+      "elapsedMs": 4002.5999999046326
+    }
+  ],
+  "calls": 659,
+  "cache": {
+    "entries": 4,
+    "active": 0,
+    "queued": 0,
+    "leases": 4,
+    "preparedHairFrames": 96,
+    "underlays": 4,
+    "workTools": 4,
+    "appearanceFrames": 200,
+    "maxEntries": 4,
+    "maxConcurrent": 2,
+    "maxQueued": 24,
+    "closed": false,
+    "accessories": {
+      "hatFrames": 1,
+      "facialSourceFrames": 44,
+      "posePlacements": 96,
+      "rgbaBytes": 11796480
+    }
+  },
+  "scope": "Internal complete-family native work loop and walk/work transitions with four appearances in day/mirrored night. Not public activation, actual travelling cadence or frame-pacing acceptance.",
+  "movieSha256": "713eec5f5953bd48cea9ae224c650000d242a1eac4786da9d1b0f8929a03f34b",
+  "inputSha256": {
+    "bundle": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69",
+    "workManifest": "81d13d228525b46837378292cc2828e34adcff1b7341f2f448910e2dc608ca67"
+  },
+  "sourceHashes": {
+    "web/artwork/character-family-work-review.js": "029e2cb1aebeb076db83b8c9e6ee2cdf7f8623fce00d4534a7729f8db332569d",
+    "web/character-family-appearance.js": "148d599957d5f9c4e6b3bddb8abf24a7f67df213dd07713afc1af7af3a190182",
+    "web/character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "web/resident-animation.js": "e94e9cbf0ee93b0b63afa5a9c3aa1e42b48c18aea3e87e4e7d6115b11b88b1b5"
+  }
+}

@@ -1,24 +1,25 @@
 import {prepareFamilyAccessories} from './character-family-accessories.js';
+import {validateBodyForegroundMask} from './character-foreground-mask.js';
 import {canonical} from './editor/journal.js';
 import {createFamilyBodyMaterialModel,defaultBodyMaterials,validateBodyMaterials,tintBodyMaterials} from './character-materials.js';
 import {validateHairColour} from './character-hair-colours.js';
 import {prepareRegisteredHair} from './character-hair.js';
 import {extractRegisteredAtlasPart,composeActivityUnderlay} from './character-atlas-part.js';
 import {loadEquipmentArt} from './character-equipment-parts.js';
-import {registeredEquipmentFrame} from './character-equipment.js';
+import {registeredEquipmentFrame,validateRegisteredEquipment} from './character-equipment.js';
 const sheets=['base','idle','activities'],exact=(v,keys)=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).sort().join(',')===[...keys].sort().join(','),clear=c=>{c.width=c.height=0;};
 // Internal complete-family provider. The caller retains ownership of the body
 // family and decoded sources. Every acquired preview has an explicit lease;
 // eviction never invalidates a preview that is still in use.
-export async function prepareFamilyAppearanceLibrary({family,materials,owners,equipment,load,accessories=null,maxEntries=12,maxConcurrent=2,maxQueued=24}){
+export async function prepareFamilyAppearanceLibrary({family,materials,owners,equipment,load,accessories=null,workEquipment=null,maxEntries=12,maxConcurrent=2,maxQueued=24}){
  if(typeof load!=='function'||typeof family?.frameForPose!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded complete-family composition limits.');
- const registrations=structuredClone({materials,owners,equipment,accessories}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],records=new Map(),queue=[];
+ const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),records=new Map(),queue=[];
  let model=null,accessoryParts=null,active=0,closed=false,disposing=null;
  const alive=()=>{if(closed)throw Error('This character family library has been released.');},source=file=>{
   if(typeof file!=='string'||!/^[a-z0-9-]+\.png$/.test(file))throw Error('Choose registered bundled family artwork.');
   if(!sourceWork.has(file))sourceWork.set(file,Promise.resolve().then(()=>load(file)));return sourceWork.get(file);
  };
- const destroyParts=()=>{for(const cap of caps.values())cap.composer.dispose();caps.clear();for(const a of underlays.values())if(a.frame instanceof HTMLCanvasElement)clear(a.frame);underlays.clear();sourceWork.clear();tools.length=0;accessoryParts?.dispose();accessoryParts=null;model?.clear();model=null;};
+ const destroyParts=()=>{for(const cap of caps.values())cap.composer.dispose();caps.clear();for(const a of underlays.values())if(a.frame instanceof HTMLCanvasElement)clear(a.frame);underlays.clear();sourceWork.clear();tools.length=0;workTools.clear();accessoryParts?.dispose();accessoryParts=null;model?.clear();model=null;};
  try{
   if(!exact(registrations.owners,['curls','sidepart'])||!Array.isArray(registrations.equipment)||registrations.equipment.length!==16)throw Error('Provide two complete hairstyle owners and sixteen tools.');
   for(const owner of Object.values(registrations.owners)){
@@ -34,6 +35,13 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
   }
   for(const [index,registration]of registrations.equipment.entries()){
    if(registration.sheet!=='activities'||registration.index!==index||canonical(registration.body)!==bodyKey)throw Error('Equipment ownership differs from its family pose.');tools.push({registration,equipment:await loadEquipmentArt(registration,source)});
+  }
+  if(registrations.workEquipment!==null){
+   if(!Array.isArray(registrations.workEquipment)||registrations.workEquipment.length!==4)throw Error('Provide every registered work-tool pose.');
+   for(const [slot,registration]of registrations.workEquipment.entries()){
+    const index=slot+4;if(registration.sheet!=='base'||registration.index!==index||canonical(registration.body)!==bodyKey)throw Error('Work equipment ownership differs from its family pose.');
+    const art=await loadEquipmentArt(registration,source);validateRegisteredEquipment({binding:family.binding,equipment:art,registration,sheet:'base',index});validateBodyForegroundMask(registration.foreground,family.binding,'base',index);workTools.set(index,{registration,equipment:art});
+   }
   }
   if(registrations.accessories!==null)accessoryParts=await prepareFamilyAccessories({family,registration:registrations.accessories,load:source});
  }catch(error){destroyParts();throw error;}
@@ -52,7 +60,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     if(Object.keys(defaultBodyMaterials).some(k=>recipe.materials[k]!==defaultBodyMaterials[k])){
      const tinted=tintBodyMaterials(body.getContext('2d').getImageData(0,0,256,256),model.mask(sheet,index),recipe.materials);painted=own(document.createElement('canvas'));painted.width=painted.height=256;painted.getContext('2d').putImageData(new ImageData(tinted.data,256,256),0,0);
     }
-    const args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
+    const work=sheet==='base'?workTools.get(index):null,args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,...(work?{equipment:{art:work.equipment,registration:work.registration}}:{}),referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
     if(cap.activity)frame=own(composeActivityUnderlay(appearance,cap.activity));
     if(sheet==='activities'){
      const options={...args,...tools[index],appearanceFrame:appearance,sheet,index};frame=own(await registeredEquipmentFrame(options));alive();
@@ -82,7 +90,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
    const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');if(!sheets.includes(sheet)||!Number.isSafeInteger(index)||index<0||index>15)throw Error('Choose a registered family pose.');const normal=value.frames.get(sheet+':'+index);return sheet==='activities'&&pose?.sequenceIndex>=4?value.returns.get(index)??normal:normal;}});
    return Object.freeze({provider,release(){if(released)return;released=true;record.users--;}});
   },
-  info:()=>({entries:records.size,active,queued:queue.length,leases:[...records.values()].reduce((n,r)=>n+r.users,0),preparedHairFrames:caps.size,underlays:underlays.size,appearanceFrames:[...records.values()].reduce((n,r)=>n+(r.value?50:0),0),maxEntries,maxConcurrent,maxQueued,closed,accessories:accessoryParts?.info()??null}),
+  info:()=>({entries:records.size,active,queued:queue.length,leases:[...records.values()].reduce((n,r)=>n+r.users,0),preparedHairFrames:caps.size,underlays:underlays.size,workTools:workTools.size,appearanceFrames:[...records.values()].reduce((n,r)=>n+(r.value?50:0),0),maxEntries,maxConcurrent,maxQueued,closed,accessories:accessoryParts?.info()??null}),
   dispose(){
    if(disposing)return disposing;closed=true;for(const job of queue.splice(0))job.reject(Error('This character family library has been released.'));
    disposing=(async()=>{await Promise.allSettled([...records.values()].map(r=>r.promise));for(const r of records.values())destroyRecord(r);records.clear();destroyParts();})();return disposing;

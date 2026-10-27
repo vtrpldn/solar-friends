@@ -1,0 +1,229 @@
+{
+  "images": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "buildings": [
+        {
+          "kind": "shed",
+          "x": 30,
+          "y": 29
+        },
+        {
+          "kind": "warehouse",
+          "x": 36,
+          "y": 29
+        },
+        {
+          "kind": "home",
+          "x": 28,
+          "y": 34
+        }
+      ],
+      "roads": [
+        [
+          30,
+          34
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          32,
+          34
+        ]
+      ]
+    }
+  ],
+  "sceneCount": 24,
+  "residentComparisons": 72,
+  "withAccessories": false,
+  "scope": "Four registered mallet work poses through shared world and animation painters, three biomes, day and mirrored night beside Bento/buildings. Static ground, scale and lighting only; not actual travel or public activation.",
+  "inputSha256": {
+    "bundle": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69",
+    "workManifest": "81d13d228525b46837378292cc2828e34adcff1b7341f2f448910e2dc608ca67"
+  },
+  "rendererSha256": {
+    "artwork/character-family-work-review.js": "029e2cb1aebeb076db83b8c9e6ee2cdf7f8623fce00d4534a7729f8db332569d",
+    "character-family-appearance.js": "148d599957d5f9c4e6b3bddb8abf24a7f67df213dd07713afc1af7af3a190182",
+    "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "world-renderer.js": "12634533d2860d52c609b82234ed90c4735f23870945b83f882a1f9523737317"
+  }
+}

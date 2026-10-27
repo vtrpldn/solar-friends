@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "status": "internal complete-family work cycle reviewed; awaiting versioned player integration",
+  "files": {
+    "cycle-motion-v1.webm": "713eec5f5953bd48cea9ae224c650000d242a1eac4786da9d1b0f8929a03f34b",
+    "cycle-motion-v1.json": "c7e3eb4e56821b2aada8c4c89cb4998483afce55a61e1613564b6874a56a24c3",
+    "cycle-decoded-v1.json": "18830ee14e4fdf2d8ac9dc0bf56af196c7cbc228fc84f7917fbe5753a505fee6",
+    "cycle-filmstrip-1.png": "a0980d875297550de9d777679961e2a799bf1fee5e66d3d6301046b5325d66c2",
+    "cycle-filmstrip-2.png": "551a5f434cbe5eb49004fdcb2834d6b7c3cc119fa2fd9cfabf2caa8cdfda6f18",
+    "family-verification-v1.json": "9f65013d7de821405c0caf598021a80b7a69bb6e0380d79e4c8bb40c0e690f5c",
+    "world-plain/report.json": "8ab4c9803b7163da226c4a26edfe41842030125ff37357539a715f8b8e0b980b",
+    "world-plain/caatinga-day.png": "63848c7d2c165e36546cbe7a2df0d6233e023ca5f1ec5320fe881ba0ed2ffe28",
+    "world-plain/caatinga-night.png": "2f2cee955b8842c0c6b5bb0fab93d838ba122cfa3dd3cf8e25c89570e3d4cc5f",
+    "world-plain/cerrado-day.png": "b91f2dfb7fe55cdd244e8e3e7dfa228af7733c19e1ef4e78d60733cb3cb3ce16",
+    "world-plain/cerrado-night.png": "d6659b604603b9ed510752990c91230ca8789b9f3ce91d7c42a8bdd58090d8bf",
+    "world-plain/mata-atlantica-day.png": "d604cd363b1f74ce9c34b369950d551e60109938de3b05780a5b681dbd75c66f",
+    "world-plain/mata-atlantica-night.png": "3e2705f4125738d3b1bd1515dff6891829c1f8fc3d26e3a35bac289dac0b0dce",
+    "world-equipped/report.json": "046ea5b9c2eb6939161c2c8c3951d2da1c24bad9a2740adac1fd167f9d421ce0",
+    "world-equipped/caatinga-day.png": "d1dd48f6e160cd0544ccb4bf9be434ee276add1769fa296d62ef47e2da4c118c",
+    "world-equipped/caatinga-night.png": "195662d088a31f8996539c9581803982b888301c41987f6290673b217304910c",
+    "world-equipped/cerrado-day.png": "8157430445d4f85f701e85ea8f9f690f61c83f94fe505e80af9537c3c62bdb24",
+    "world-equipped/cerrado-night.png": "cfdace8a3e616750fe5b903abb9c29bee63f8c4c5b95f9074c68cebabb24274e",
+    "world-equipped/mata-atlantica-day.png": "20b66afceeceec2186538b8046bf3cb993784072dcf062243eafdac3d0d9b7ce",
+    "world-equipped/mata-atlantica-night.png": "75d69e0a7c130f933b201547d9051d3290aa59b1197e3d34da2ac1a4851585a2"
+  },
+  "mechanical": {
+    "workCompared": 32,
+    "unchanged": 352,
+    "recoveries": 16,
+    "refusals": 5,
+    "borrowedBodyFramesPreserved": 48,
+    "retryAfterOutage": true,
+    "failedInitializationCanvasesReleased": true
+  },
+  "motion": {
+    "encodedFrames": 240,
+    "durationSeconds": 7.949433,
+    "decodedSamplesInspected": 32,
+    "boardsInspected": 2
+  },
+  "world": {
+    "boardsInspected": 12,
+    "staticScenes": 48,
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "views": [
+      "day",
+      "mirrored night"
+    ],
+    "accessories": [
+      "plain",
+      "hat and beard"
+    ]
+  },
+  "visualFindings": [
+    "Inspected all decoded full-swing and walk/work transition samples: the mallet follows the hands, uses whole painted key poses and is not carried into the walking frames.",
+    "Tool proportions, warm painted wood and ground-level impact agree beside Bento, home, road, shed and warehouse at gameplay scale.",
+    "Plain and hat/beard heads remain readable in each biome and night view."
+  ],
+  "limits": [
+    "Review fixtures only; no player catalogue/recipe change or new production bundle.",
+    "Motion is sampled in the real presentation state machine but does not simulate world travel.",
+    "No exact decoded/native frame identity, sustained performance, total memory or wider future outfit verdict.",
+    "The complete map/scenario builder goal remains open, including dedicated sleep art, wider customization and all remaining release gates."
+  ],
+  "next": "Publish a closed byte-verified work-tool asset revision and verify native/player recipes, creation, portability and saved gameplay without changing frozen existing appearances."
+}
