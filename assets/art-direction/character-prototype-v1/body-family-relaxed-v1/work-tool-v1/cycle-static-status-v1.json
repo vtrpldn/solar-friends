@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "status": "four candidate poses with scoped static acceptance; inactive",
+  "sourceManifestSha256": "81d13d228525b46837378292cc2828e34adcff1b7341f2f448910e2dc608ca67",
+  "gripMeasurementsSha256": "44b555ed2987554cd1499711525f9e4a694588c024b8b2e890be9cc9b669562e",
+  "independentAssemblies": 16,
+  "appearancesInspected": 32,
+  "invalidEquipmentRefusals": 40,
+  "invalidMaskUnions": 20,
+  "cleanupCases": 16,
+  "visualFindings": [
+    "Inspected full and hand-detail boards for all four poses, both hairstyles and default/dyed materials, plain and with hat/beard.",
+    "Continuous wooden shafts sit beneath the visible gripping fingers. Resting pose uses one hand; shoulder/raised/impact poses use both hands.",
+    "Warm mallet wood and scale remain consistent across these static poses; full motion continuity still needs review."
+  ],
+  "rejected": [
+    {
+      "file": "base-5-candidate-v1.png",
+      "reason": "7.07 / 10.63 native-pixel grip misses"
+    },
+    {
+      "file": "base-5-candidate-v2.png",
+      "reason": "10.63 / 12.04 native-pixel grip misses"
+    }
+  ],
+  "sourcePolicy": "Original generated PNG bytes, prompts, output paths and reference roles/hashes retained. No local paint fitting or rewriting.",
+  "remaining": [
+    "Continuous full work-cycle motion and activity transitions",
+    "Day/mirrored-night and three-biome gameplay-scale views",
+    "Wider material/accessory combination coverage",
+    "Versioned production integration and public saved appearance verification",
+    "Dedicated sleep art and wider character customization",
+    "All other outstanding builder release gates"
+  ]
+}

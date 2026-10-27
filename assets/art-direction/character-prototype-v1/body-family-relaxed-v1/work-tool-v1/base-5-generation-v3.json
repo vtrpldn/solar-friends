@@ -1,0 +1,28 @@
+{
+  "tool": "built-in imagegen",
+  "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-240098a5-964e-4d01-8a83-d19d3866ec6a.png",
+  "copy": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-candidate-v3.png",
+  "sha256": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+  "size": [
+    1254,
+    1254
+  ],
+  "references": [
+    {
+      "role": "geometry master",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-guide.png",
+      "sha256": "b050e0b8825187c5e4c230fe1be65583edef74c719ec39594aa1082321624969"
+    },
+    {
+      "role": "body context only",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-context.png",
+      "sha256": "a66e16f864f46b9af8f01b1caae8e2e7a9871b842e4f8075a11f45b37358d6f1"
+    },
+    {
+      "role": "Bento mallet style only",
+      "path": "web/art/animations/bento.png",
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889"
+    }
+  ],
+  "status": "candidate; exact grip/composition review required"
+}

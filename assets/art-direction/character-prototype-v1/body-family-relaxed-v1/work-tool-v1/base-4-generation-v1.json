@@ -1,0 +1,28 @@
+{
+  "tool": "built-in imagegen",
+  "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7610b6ab-f536-4311-9f8a-57cc1653fc8b.png",
+  "copy": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-4-candidate-v1.png",
+  "sha256": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+  "size": [
+    1254,
+    1254
+  ],
+  "references": [
+    {
+      "role": "target geometry",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-4-guide.png",
+      "sha256": "a7e33159764c15eb560ac26fe41cba40f9dc2356459a4a4e18d8ff2a18cbb206"
+    },
+    {
+      "role": "same mallet style only",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-6-candidate-v1.png",
+      "sha256": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb"
+    },
+    {
+      "role": "body context only",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-4-context.png",
+      "sha256": "acfdfa47877765fb35eb3e3d5f4a66eb429604a572f05db4ad142d6b9f098232"
+    }
+  ],
+  "status": "candidate; grip and composition review required"
+}

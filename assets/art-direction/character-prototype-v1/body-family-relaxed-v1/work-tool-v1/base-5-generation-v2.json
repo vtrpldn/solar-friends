@@ -1,0 +1,28 @@
+{
+  "tool": "built-in imagegen",
+  "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5e859d15-d361-4161-a516-e75352b4b99e.png",
+  "copy": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-candidate-v2.png",
+  "sha256": "98e84bb0ab8906b3de3d6134d8d7d8eff560ae01ac0af8a40027967c64c222c8",
+  "size": [
+    1254,
+    1254
+  ],
+  "references": [
+    {
+      "role": "edit target; correct pose",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-candidate-v1.png",
+      "sha256": "74b91d55bdd34f148edd591163ff0d54025726b4996caf0ce13cefa233d5643a"
+    },
+    {
+      "role": "target geometry",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-guide.png",
+      "sha256": "b050e0b8825187c5e4c230fe1be65583edef74c719ec39594aa1082321624969"
+    },
+    {
+      "role": "body context only",
+      "path": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/work-tool-v1/base-5-context.png",
+      "sha256": "a66e16f864f46b9af8f01b1caae8e2e7a9871b842e4f8075a11f45b37358d6f1"
+    }
+  ],
+  "status": "placement rejected; do not activate"
+}

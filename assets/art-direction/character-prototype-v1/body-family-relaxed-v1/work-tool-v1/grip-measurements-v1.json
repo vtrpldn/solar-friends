@@ -1,0 +1,245 @@
+{
+  "scope": "Geometric candidate screening only. Whole-frame renderer normalization retained. Two native pixels is a grip-proximity gate, not proof of finger occlusion, style, rigid tool identity or motion.",
+  "results": [
+    {
+      "index": 4,
+      "version": 1,
+      "file": "base-4-candidate-v1.png",
+      "sha256": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+      "grips": [
+        [
+          175,
+          164
+        ]
+      ],
+      "bounds": [
+        164,
+        149,
+        30,
+        73
+      ],
+      "measurements": [
+        {
+          "grip": [
+            175,
+            164
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        }
+      ],
+      "gripsPass": true,
+      "clipped": false
+    },
+    {
+      "index": 5,
+      "version": 1,
+      "file": "base-5-candidate-v1.png",
+      "sha256": "74b91d55bdd34f148edd591163ff0d54025726b4996caf0ce13cefa233d5643a",
+      "grips": [
+        [
+          104,
+          91
+        ],
+        [
+          121,
+          103
+        ]
+      ],
+      "bounds": [
+        59,
+        60,
+        76,
+        77
+      ],
+      "measurements": [
+        {
+          "grip": [
+            104,
+            91
+          ],
+          "distanceToVisibleToolPixels": 7.0710678118654755,
+          "withinTwoNativePixels": false
+        },
+        {
+          "grip": [
+            121,
+            103
+          ],
+          "distanceToVisibleToolPixels": 10.63014581273465,
+          "withinTwoNativePixels": false
+        }
+      ],
+      "gripsPass": false,
+      "clipped": false
+    },
+    {
+      "index": 5,
+      "version": 2,
+      "file": "base-5-candidate-v2.png",
+      "sha256": "98e84bb0ab8906b3de3d6134d8d7d8eff560ae01ac0af8a40027967c64c222c8",
+      "grips": [
+        [
+          104,
+          91
+        ],
+        [
+          121,
+          103
+        ]
+      ],
+      "bounds": [
+        54,
+        66,
+        95,
+        81
+      ],
+      "measurements": [
+        {
+          "grip": [
+            104,
+            91
+          ],
+          "distanceToVisibleToolPixels": 10.63014581273465,
+          "withinTwoNativePixels": false
+        },
+        {
+          "grip": [
+            121,
+            103
+          ],
+          "distanceToVisibleToolPixels": 12.041594578792296,
+          "withinTwoNativePixels": false
+        }
+      ],
+      "gripsPass": false,
+      "clipped": false
+    },
+    {
+      "index": 5,
+      "version": 3,
+      "file": "base-5-candidate-v3.png",
+      "sha256": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+      "grips": [
+        [
+          104,
+          91
+        ],
+        [
+          121,
+          103
+        ]
+      ],
+      "bounds": [
+        51,
+        44,
+        84,
+        75
+      ],
+      "measurements": [
+        {
+          "grip": [
+            104,
+            91
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        },
+        {
+          "grip": [
+            121,
+            103
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        }
+      ],
+      "gripsPass": true,
+      "clipped": false
+    },
+    {
+      "index": 6,
+      "version": 1,
+      "file": "base-6-candidate-v1.png",
+      "sha256": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+      "grips": [
+        [
+          101,
+          65
+        ],
+        [
+          111,
+          75
+        ]
+      ],
+      "bounds": [
+        59,
+        20,
+        69,
+        74
+      ],
+      "measurements": [
+        {
+          "grip": [
+            101,
+            65
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        },
+        {
+          "grip": [
+            111,
+            75
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        }
+      ],
+      "gripsPass": true,
+      "clipped": false
+    },
+    {
+      "index": 7,
+      "version": 1,
+      "file": "base-7-candidate-v1.png",
+      "sha256": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+      "grips": [
+        [
+          166,
+          182
+        ],
+        [
+          172,
+          194
+        ]
+      ],
+      "bounds": [
+        155,
+        164,
+        53,
+        78
+      ],
+      "measurements": [
+        {
+          "grip": [
+            166,
+            182
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        },
+        {
+          "grip": [
+            172,
+            194
+          ],
+          "distanceToVisibleToolPixels": 0,
+          "withinTwoNativePixels": true
+        }
+      ],
+      "gripsPass": true,
+      "clipped": false
+    }
+  ]
+}
