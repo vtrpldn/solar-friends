@@ -1,14 +1,15 @@
-import {prepareBundledResidentFamily} from './character-family-bundle.js';
+import {prepareBundledResidentFamily,prepareBundledWorkingResidentFamily} from './character-family-bundle.js';
 
 // Public previews retain providers. Copy whole native frames before releasing
 // the internal lease; cache eviction must never erase a preview still on screen.
-export function createBundledPartComposer(){
+function createComposer(working){
+ const prepare=working?prepareBundledWorkingResidentFamily:prepareBundledResidentFamily;
  let work=null,family=null,closing=null,closed=false;
- const ready=()=>work??=(prepareBundledResidentFamily({maxEntries:2,maxConcurrent:2,maxQueued:2}).then(value=>{family=value;return value;}).catch(error=>{work=null;throw error;}));
+ const ready=()=>work??=(prepare({maxEntries:2,maxConcurrent:2,maxQueued:2}).then(value=>{family=value;return value;}).catch(error=>{work=null;throw error;}));
  return Object.freeze({
   async compose(recipe){
    if(closed)throw Error('This resident composer is closed.');
-   if(recipe?.body!=='relaxed-v1'||recipe.assetVersion!=='resident-parts-v2'||!['short-curls-v1','side-part-v1'].includes(recipe.hair))throw Error('Choose a supported bundled resident family.');
+   if(recipe?.body!=='relaxed-v1'||recipe.assetVersion!==(working?'resident-parts-v3':'resident-parts-v2')||!['short-curls-v1','side-part-v1'].includes(recipe.hair))throw Error('Choose a supported bundled resident family.');
    const prepared=await ready();if(closed)throw Error('This resident composer is closed.');
    const lease=await prepared.acquire({hair:recipe.hair==='side-part-v1'?'sidepart':'curls',hairColour:recipe.hairColour??'chestnut',materials:recipe.materials,hat:recipe.hat??'none',facialHair:recipe.facialHair??'none'}),frames=new Map(),returns=new Map(),owned=[];
    const copy=source=>{if(source.width!==256||source.height!==256)throw Error('Resident frames must retain their native size.');const canvas=document.createElement('canvas');canvas.width=canvas.height=256;owned.push(canvas);const context=canvas.getContext('2d');if(!context)throw Error('Cannot prepare this resident preview.');context.drawImage(source,0,0);return canvas;};
@@ -24,3 +25,6 @@ export function createBundledPartComposer(){
   dispose(){if(!closing){closed=true;closing=(work??Promise.resolve(null)).then(value=>value?.dispose());}return closing;}
  });
 }
+
+export function createBundledPartComposer(){return createComposer(false);}
+export function createBundledWorkingPartComposer(){return createComposer(true);}

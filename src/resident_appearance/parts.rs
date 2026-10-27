@@ -7,7 +7,7 @@ macro_rules! part_keys {
         impl $name { pub const KEYS: &'static [&'static str] = &[$($key),+]; }
     };
 }
-part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2" });
+part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2", V3 => "resident-parts-v3" });
 part_keys!(BodyPart { Neutral => "neutral-v1", Relaxed => "relaxed-v1" });
 part_keys!(HairPart { Curls => "short-curls-v1", SidePart => "side-part-v1" });
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -94,12 +94,13 @@ impl PartsLook {
         self.schema == 2
             && matches!(
                 (self.asset_version, self.body),
-                (PartAssets::V1, BodyPart::Neutral) | (PartAssets::V2, BodyPart::Relaxed)
+                (PartAssets::V1, BodyPart::Neutral)
+                    | (PartAssets::V2 | PartAssets::V3, BodyPart::Relaxed)
             )
     }
 }
 pub fn parts_catalog() -> serde_json::Value {
-    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v2"},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
+    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v3"},"body_revisions":{"neutral-v1":["resident-parts-v1"],"relaxed-v1":["resident-parts-v2","resident-parts-v3"]},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
 }
 
 #[cfg(test)]
@@ -116,6 +117,11 @@ mod tests {
         value["body"] = "relaxed-v1".into();
         value["assetVersion"] = "resident-parts-v2".into();
         assert!(g.change_resident_appearance(0, "Iara", &value.to_string()));
+        let legacy_saved = g.snapshot();
+        assert!(g.restore(&legacy_saved));
+        assert_eq!(g.snapshot(), legacy_saved);
+        value["assetVersion"] = "resident-parts-v3".into();
+        assert!(g.change_resident_appearance(0, "Iara", &value.to_string()));
         let saved = g.snapshot();
         let mut after: serde_json::Value = serde_json::from_str(&saved).unwrap();
         assert_eq!(after["residents"][0]["appearance"], value);
@@ -126,6 +132,7 @@ mod tests {
         assert_eq!(g.snapshot(), saved);
         for (body, version) in [
             ("neutral-v1", "resident-parts-v2"),
+            ("neutral-v1", "resident-parts-v3"),
             ("relaxed-v1", "resident-parts-v1"),
         ] {
             value["body"] = body.into();
@@ -164,18 +171,26 @@ mod tests {
                                     value["facialHair"] = (*facial).into();
                                 }
                                 value["materials"] = serde_json::json!({"skin":skin,"shirt":shirt,"shorts":shorts,"shoes":shoes});
-                                let look: super::super::Look =
-                                    serde_json::from_value(value.clone()).unwrap();
-                                assert!(look.valid());
-                                assert_eq!(serde_json::to_value(look).unwrap(), value);
-                                count += 1;
+                                for (body, assets) in [
+                                    ("neutral-v1", "resident-parts-v1"),
+                                    ("relaxed-v1", "resident-parts-v2"),
+                                    ("relaxed-v1", "resident-parts-v3"),
+                                ] {
+                                    value["body"] = body.into();
+                                    value["assetVersion"] = assets.into();
+                                    let look: super::super::Look =
+                                        serde_json::from_value(value.clone()).unwrap();
+                                    assert!(look.valid());
+                                    assert_eq!(serde_json::to_value(look).unwrap(), value);
+                                    count += 1;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        assert_eq!(count, 2304);
+        assert_eq!(count, 6912);
         let mut bad = recipe("side-part-v1");
         bad["preset"] = "nina".into();
         assert!(serde_json::from_value::<super::super::Look>(bad).is_err());

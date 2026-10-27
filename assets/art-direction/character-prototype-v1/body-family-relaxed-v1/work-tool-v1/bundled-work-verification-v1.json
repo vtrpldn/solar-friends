@@ -1,0 +1,11 @@
+{
+  "compared": 32,
+  "unchanged": 352,
+  "recoveries": 16,
+  "rejectedCorruptOrUnavailableSources": 4,
+  "rejectedOverrides": 5,
+  "retryAfterOutage": true,
+  "scope": "Closed normal-HTTP work-tool asset revision, exact output, unchanged other poses, source refusals, bounded cache and disposal. Player recipe integration is verified separately; no total application memory claim.",
+  "bundleSha256": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4",
+  "loaderSha256": "b8608e3aea91a0e6c40f41fa15e302a9c053e63d8b89b62d12947fffc4484bb3"
+}

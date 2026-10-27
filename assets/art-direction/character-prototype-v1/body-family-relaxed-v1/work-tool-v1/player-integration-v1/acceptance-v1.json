@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "status": "production work-tool revision connected to player creation and saved gameplay",
+  "assetVersion": "resident-parts-v3",
+  "body": "relaxed-v1",
+  "bundle": {
+    "path": "web/art/characters/relaxed-work-v1/bundle-v1.json",
+    "sha256": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4",
+    "registrationBytes": 455798,
+    "sources": 93,
+    "newUnmodifiedPngs": 4
+  },
+  "biomes": {
+    "mata-atlantica": {
+      "mata-atlantica-report.json": "51b6aee3c19d29bd2de45f0bdad5ca5a4663b1943a284739516a973939e1c718",
+      "mata-atlantica-creator-custom.png": "7e4020404db9ae0888e12f28482e189dd3174448af90e8a785be4743bf8d42cd",
+      "mata-atlantica-live-custom.png": "e3080d98b5640326ae0694c3f749d4498a85ec0c793a9da2925c959bc42f62c7",
+      "mata-atlantica-custom-village.png": "dee20948a18e12a1f0e69428704abb72c2c91cb73a11ff9296cb12a21bdee472"
+    },
+    "cerrado": {
+      "cerrado-report.json": "e8caf43e955a9591e898ebd9bb0ce5b8897b51b798d0c65b0490aa591fc1c625",
+      "cerrado-creator-custom.png": "0eaa076946614f658a1690182c417241475a1ce145358dc3d356dd72a9f58080",
+      "cerrado-live-custom.png": "0e083c6b38ffeb6f9cbe1f4e88d1ea3bbe83581113017ed72f9076ba1b48e186",
+      "cerrado-custom-village.png": "76f11cb3c2735454f136748f79f1bf6dbafe8e9be872e7eed6b06cdb1bafba87"
+    },
+    "caatinga": {
+      "caatinga-report.json": "ba64b11ba0a25329584d3ae3fe144f0ec278e8212921d0bac477de26a1e184b0",
+      "caatinga-creator-custom.png": "8430ffda2c72be3308ef64bd2b5dee9ec13635b28e405ccbecdcde6ca6c500a0",
+      "caatinga-live-custom.png": "22f83fae6d04be62b9010478e045cd9a163caa4f62f76859ac8a01f617e4fc18",
+      "caatinga-custom-village.png": "2909f7ce37e70295e99b850bfb969ea4fdb9297096e3a4372484fe569ae73f0c"
+    }
+  },
+  "native": {
+    "testsPassed": 781,
+    "failed": 0,
+    "supportedRecipeRoundTrips": 6912,
+    "clippyAllTargets": true,
+    "releaseWasmBuild": true,
+    "logSha256": "f1e91811a117f67ddd25aa583c15eca842d7b276a6f588d526090edb7babcfea"
+  },
+  "legacy": {
+    "classicFrozenRgbaFingerprints": 400,
+    "classicPoses": 288,
+    "classicFeedingRecoveries": 12,
+    "earlierRelaxedPoses": 768,
+    "earlierRelaxedFeedingRecoveries": 8,
+    "earlierRecipesRemainValid": true
+  },
+  "publicRenderer": {
+    "reviewedWorkPoses": 32,
+    "unchangedOtherPoses": 352,
+    "unchangedFeedingRecoveries": 16,
+    "mixedRevisionCacheEntries": 16,
+    "retainedPreviewAfterPrivateEviction": true
+  },
+  "scope": "Production loading, version-paired native/browser recipes, ordinary creator, portraits, portable resident/scenario files, live cosmetics and checkpoint reload in all three launch biomes. Static UI captures and earlier source/motion/world review support this component only.",
+  "remaining": [
+    "Dedicated sleeping pose",
+    "Wider body/face/clothing/bottom/shoe choices",
+    "Complete biome/campaign/art release sweeps",
+    "Sustained maximum-load performance, memory and storage gates",
+    "Recovery and unfamiliar-player usability gates"
+  ]
+}

@@ -9,5 +9,5 @@
   "scope": "Verified normal HTTP bundle, exact reviewed output and rejection/retry/disposal; player integration is verified separately. No whole-app memory/performance claim.",
   "bundleSha256": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69",
   "referenceSha256": "b4a8b6e479023c2b29e4d8d1d34518bc6caa1c74a6643179753f9034e876f291",
-  "loaderSha256": "d4b1584bd5bb0b694fd2a6c01044a4d52bc21370e3bfd766429da6455442813d"
+  "loaderSha256": "b8608e3aea91a0e6c40f41fa15e302a9c053e63d8b89b62d12947fffc4484bb3"
 }

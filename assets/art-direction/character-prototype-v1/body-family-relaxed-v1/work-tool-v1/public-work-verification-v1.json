@@ -1,0 +1,17 @@
+{
+  "compared": 32,
+  "unchanged": 352,
+  "recoveries": 16,
+  "refused": 2,
+  "publicEntries": 16,
+  "retainedAfterPrivateEviction": true,
+  "legacyAndNewRevisionsCoexist": true,
+  "scope": "Normal public renderer uses new work revision for fresh relaxed recipes, preserves older recipes and non-work poses, shares bounded appearance work and retains previews. Creator/file/save flows are verified separately.",
+  "sourceHashes": {
+    "web/resident-parts.js": "7aa43e833a842b4b8f5afbd2c46105561939d37507089ef63f7e6eac5942e4f8",
+    "web/resident-part-recipe.js": "8b7c790c1a77495b719229fdcbef43cb733232dfd6d508f395650f4cd675b74e",
+    "web/resident-family-parts.js": "5c0c9f4d599977e0cffcbaa9701104dccff4965c9a7d86dfd1dc49cba4a09663",
+    "web/character-family-bundle.js": "b8608e3aea91a0e6c40f41fa15e302a9c053e63d8b89b62d12947fffc4484bb3",
+    "web/art/characters/relaxed-work-v1/bundle-v1.json": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4"
+  }
+}
