@@ -1,0 +1,7 @@
+{
+  "status": "Observed baseline intentionally fails the new two-live-source bound.",
+  "finding": "All twenty-two distinct garment colour sources remain live until the entire resident appearance finishes.",
+  "peakLiveSources": 22,
+  "verificationSha256": "981e2ae52ed6c80981daade57799dd77c3622aa7199f2102a1f71ef422742905",
+  "scope": "Native appearance fixture only, not a total memory measurement."
+}

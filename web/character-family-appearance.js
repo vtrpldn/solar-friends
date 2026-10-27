@@ -69,21 +69,23 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
   const scratch=new Set(),frames=new Map(),returns=new Map(),colours=new Map(),sharedColours=new Map();let completed=false;
   const own=c=>{scratch.add(c);return c;};
   try{
-   // A painted atlas can serve several independently registered poses. Share
-   // its colour source only within this recipe, for the exact image and hash.
+   // Count consumers without decoding colour images. An identical image/hash
+   // stays shared only until its last registered pose has been composed.
    for(const [key,garment]of garments){
     alive();let hashes=sharedColours.get(garment.image);
     if(!hashes){hashes=new Map();sharedColours.set(garment.image,hashes);}
     let colour=hashes.get(garment.sourceHash);
-    if(!colour){colour=await prepareClothingColourSource({...garment,colour:recipe.materials.shirt});hashes.set(garment.sourceHash,colour);}
-    colours.set(key,colour);
+    if(!colour){colour={remaining:0,prepared:null};hashes.set(garment.sourceHash,colour);}
+    colour.remaining++;colours.set(key,colour);
    }
    for(const sheet of sheets)for(let index=0;index<16;index++){
     alive();const body=family.frameForPose(sheet,index),cap=caps.get(recipe.hair+':'+sheet+':'+index);let painted=body;
     if(Object.keys(defaultBodyMaterials).some(k=>recipe.materials[k]!==defaultBodyMaterials[k])){
      const tinted=tintBodyMaterials(body.getContext('2d').getImageData(0,0,256,256),model.mask(sheet,index),recipe.materials);painted=own(document.createElement('canvas'));painted.width=painted.height=256;painted.getContext('2d').putImageData(new ImageData(tinted.data,256,256),0,0);
     }
-    const garment=garments.get(sheet+':'+index),work=sheet==='base'?workTools.get(index):null,args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,...(garment?{clothing:{...garment,colourSource:colours.get(sheet+':'+index)}}:{}),...(work?{equipment:{art:work.equipment,registration:work.registration}}:{}),referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
+    const garment=garments.get(sheet+':'+index),colour=colours.get(sheet+':'+index);
+    if(colour&&!colour.prepared){colour.prepared=await prepareClothingColourSource({...garment,colour:recipe.materials.shirt});alive();}
+    const work=sheet==='base'?workTools.get(index):null,args={body,binding:family.binding,appearanceBody:painted},appearance=own(await cap.composer.compose({...args,...(garment?{clothing:{...garment,colourSource:colour.prepared}}:{}),...(work?{equipment:{art:work.equipment,registration:work.registration}}:{}),referenceBody:family.frameForPose('base',8),hairColour:recipe.hairColour}));alive();let frame=appearance;
     if(cap.activity)frame=own(composeActivityUnderlay(appearance,cap.activity));
     if(sheet==='activities'){
      const options={...args,...tools[index],appearanceFrame:appearance,sheet,index};frame=own(await registeredEquipmentFrame(options));alive();
@@ -93,9 +95,10 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     frames.set(sheet+':'+index,frame);
     // No material-frame cache: only this pose's tint/intermediate remains live.
     for(const c of [painted,appearance])if(c!==body&&c!==frame&&scratch.delete(c))clear(c);
+    if(colour&&--colour.remaining===0){colour.prepared.dispose();colour.prepared=null;}
    }
    completed=true;return {frames,returns};
-  }finally{for(const hashes of sharedColours.values())for(const colour of hashes.values())colour.dispose();if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
+  }finally{for(const hashes of sharedColours.values())for(const colour of hashes.values())colour.prepared?.dispose();if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
  };
  const destroyRecord=record=>{if(record.value){for(const c of [...record.value.frames.values(),...record.value.returns.values()])clear(c);record.value.frames.clear();record.value.returns.clear();record.value=null;}};
  function drain(){while(!closed&&active<maxConcurrent&&queue.length){const job=queue.shift();active++;Promise.resolve().then(()=>compose(job.recipe)).then(job.resolve,job.reject).finally(()=>{active--;drain();});}}

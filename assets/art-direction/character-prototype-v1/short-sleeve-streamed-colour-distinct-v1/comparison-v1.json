@@ -1,0 +1,19 @@
+{
+  "status": "Every reference board remains byte-identical with the expected independent image identities and registration order.",
+  "verificationSha256": "821c4aadfcd903ac6dba3fd71520d544da76e9ecebef801b2ca99cc74239758e",
+  "baselineVerificationSha256": "981e2ae52ed6c80981daade57799dd77c3622aa7199f2102a1f71ef422742905",
+  "peakLiveSources": 1,
+  "loadedSourceImages": 28,
+  "colourPreparations": 224,
+  "boards": {
+    "sidepart-1-false.png": "8a90c3d4c3336352e4ca0d0b715d0233af6a4514f117a5144d5576f3742ae1d7",
+    "sidepart-1-true.png": "878f75ce8ac9848e000be7f4b2404670d135b9d2789c4102343631629f86914d",
+    "sidepart-0-true.png": "dd09da410edd7c2a7ba6ee28c9b10861ae0ab77fd49157d3ce3d8fa5795e93a4",
+    "sidepart-0-false.png": "332d0528457f6f692aeac0fd07e8f4e28ed6d03d37a6ab40499561bded0b32de",
+    "curls-0-true.png": "43328af9da391ff9315b81d52065ff183aed683947fd485774e0d3cdbe543708",
+    "curls-1-true.png": "63ddca1faa6649545b128f88047bb228c51072935d2fb20d42e2745ae925b7c6",
+    "curls-0-false.png": "e17fa1e84e8d19614903e1b6093c6121d3f164f63e4a77c9d6557557413de9a5",
+    "curls-1-false.png": "4967ed8e94a7dd9c560539ae00cf2c7474c70f9e085647d8e20ba1ca04491d20"
+  },
+  "limits": "Logical colour-source lifecycle and native pixel equivalence, not measured total RAM or full game acceptance."
+}
