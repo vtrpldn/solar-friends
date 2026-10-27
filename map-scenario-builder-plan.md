@@ -2234,3 +2234,9 @@ Regenerated pose-12 guide v2 in its fixed location; it exposed one opposite coll
 Prepared pose 13 from the original seated body, with native fixed crop, collar/side coverage and lower-arm ownership. The guide covers all 610 opaque upper-shirt target pixels; its unchanged generated source passes fixed bounds and full guide coverage. Anatomy composition catches protected-short overlap at (67,134), red channel 108→247. The local left hem must be tightened before acceptance. Retained exact guide, original paint, prompt and failure; candidate remains inactive.
 
 **Why:** full shirt coverage can still overlap adjacent shorts at a seated side seam. Correct geometry rather than relaxing protection or modifying generated paint. No additional seated pose is accepted here; the remaining outfit and full builder requirements stay open.
+
+### Pre-generation protected-hem diagnostic
+
+Extended the analytical guide measurement to report any coverage of source-bound protected shorts/shoes, alongside opaque upper-shirt coverage and exact edge alpha. It detects 24 protected pixels under the prior pose-13 guide. Revised and froze guide v2 with all 610 upper-shirt targets covered and no protected-pixel overlap. Its unchanged regenerated source passes bounds and removes the large hem spill, but an antialiased source edge at (67,134), alpha 2/255, changes red 108→107 and still fails the exact protected criterion. Added source-alpha detail to failure messages and retained this precise unresolved result; no acceptance threshold was relaxed.
+
+**Why:** guide overlap and generated antialias spill need separate evidence. The diagnostic avoids regenerating known-bad geometry; the remaining edge/ownership issue must still be resolved. Candidate stays inactive and the full builder goal remains open.

@@ -1,0 +1,28 @@
+{
+  "status": "source geometry passes; exact protected seam fails; inactive",
+  "sourceSha256": "5afef0bbb46e7a7cb0bbc5c2682c8603e5de405d8d7a1ecc7a968f42182987b1",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b9114205-ccee-45a7-b553-d16eb4409efb.png",
+  "promptSha256": "45978a4e364e5fb685f807e00e50d3da86fbad34468a79b253d4c188e919f7b8",
+  "reference": {
+    "role": "frozen exact geometry target",
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v2/mask.png",
+    "sha256": "cb70ce835c8cfc4bfe0ec64be68fd36c9bf60e6aaf229457b03dd30409607d72"
+  },
+  "guideChecks": {
+    "opaqueUpperShirt": 610,
+    "uncovered": 0,
+    "protectedPixelOverlaps": 0
+  },
+  "compositionFailure": {
+    "pixel": [
+      67,
+      134
+    ],
+    "channel": 0,
+    "before": 108,
+    "after": 107,
+    "garmentAlpha": 2
+  },
+  "finding": "Large original hem overlap removed. Generated antialiased edge still changes an exact protected shorts pixel; this has not passed the frozen criterion.",
+  "next": "Resolve seam-edge ownership or revise guide and regenerate while preserving source paint and explicit review criteria."
+}
