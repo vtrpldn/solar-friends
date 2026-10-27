@@ -1,0 +1,7 @@
+{
+  "status": "rejected after visual composition review",
+  "reason": "Far shoulder remains exposed beside sleeve. Foreground polygon includes an isolated upper-arm spike above the near forearm.",
+  "coveragePassed": true,
+  "sourceSha256": "dcd5543bfd6b0671abbefd041f177c8c674bbc9679bb2e4f23625be04ea3389c",
+  "replacementCollection": "short-sleeve-relaxed-activities-0-v2"
+}

@@ -1,0 +1,12 @@
+{
+  "prompt": "prompt-v1.txt",
+  "anatomyReviewSha256": "aa2e9c619e4d5f343be9f8ced4aa815633c870c396231edde0ce0602ebbf7c0c",
+  "foregroundIntentSha256": "3726b38cc11aadc00448bad5825d9451f3a144115d5573a2d2133917ea6eb86f",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-0-v3/mask.png",
+      "role": "Corrected exact shoulder and full-shirt silhouette, frozen before paint",
+      "sha256": "b373170a92932bb2e66567235a2f697efe73287583ce6de55d6c9dc88d26f015"
+    }
+  ]
+}

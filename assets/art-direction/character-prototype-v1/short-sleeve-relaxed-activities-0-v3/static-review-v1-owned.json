@@ -1,0 +1,8 @@
+{
+  "status": "Static source reviewed; continuous cooking motion and public integration pending",
+  "sourceSha256": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+  "compositionReportSha256": "e692342d9e30c1dba2bcffefb8d7ab50309db8855b83cc524d454f917d5502e2",
+  "paletteReportSha256": "502c5fdc9d7c37a31d6425004f04f6d618d69cb1d3f83b90020391c7a84229f7",
+  "visualFindings": "Warm broad cotton shading. Corrected far shoulder is covered; crossed near forearm has no isolated upper-arm spike. Native hands, shorts and shoes retain their geometry. Torso details, equipped colour board, enlarged waist board and static daylight/mirrored-night board inspected.",
+  "scope": "One internal cooking pose. Does not accept the complete cooking clip, world rendering or public outfit."
+}

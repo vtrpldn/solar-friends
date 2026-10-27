@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ae1fe387-8f55-424e-9ccd-310e448c4ee8.png",
+  "sourceSha256": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "a3ec20c664a776837e4b4d1b88a75752a8db4d6e4210286b8e3ea5a6d8c0bb9b",
+  "status": "Corrected cooking shoulder and arm ownership; awaiting review"
+}

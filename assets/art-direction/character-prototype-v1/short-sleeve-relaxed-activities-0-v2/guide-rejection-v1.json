@@ -1,0 +1,4 @@
+{
+  "status": "rejected before paint",
+  "reason": "The context preview still exposes a narrow far-shoulder skin strip above the guide. Revised outer shoulder geometry belongs to v3."
+}
