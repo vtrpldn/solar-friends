@@ -1,0 +1,12 @@
+{
+  "prompt": "prompt-v1.txt",
+  "anatomyReviewSha256": "623c46bf05cc95cb79c984719ea9ce8303268339491b76c13cbb582e3e919a7d",
+  "foregroundIntentSha256": "2206b7fd0931141953daa03ea46f537d0c7c882ad0c050621e17d49b35b860b3",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-3-v2/mask.png",
+      "role": "Exact full-shirt raised-hand cooking silhouette, frozen before paint",
+      "sha256": "7b3439eb6f60bc9ca2a7c15d271191e436751dbd8ab7711c72dd9667e13354e8"
+    }
+  ]
+}

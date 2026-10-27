@@ -1,0 +1,16 @@
+{
+  "sha256": "5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b",
+  "undeclaredPaint": 0,
+  "poses": [
+    {
+      "key": "activities-1",
+      "painted": 227044,
+      "expected": 225574,
+      "boundedCoverage": 1,
+      "guideCoverage": 0.9994103930417513,
+      "areaRatio": 1.006516708485907,
+      "ok": true
+    }
+  ],
+  "ok": true
+}

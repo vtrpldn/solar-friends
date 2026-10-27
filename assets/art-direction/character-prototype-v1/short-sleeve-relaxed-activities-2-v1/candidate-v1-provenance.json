@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b17b1e23-e2a2-4ecb-964f-b948b83193bd.png",
+  "sourceSha256": "63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "0428707bb8629a5fd567422956893be1ac768646d16d9cf42d141755598c45bd",
+  "status": "Unreviewed cooking source; inactive"
+}
