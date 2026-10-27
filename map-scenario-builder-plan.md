@@ -2292,3 +2292,11 @@ Delivery planning now computes an owner's material requirements and receiving ro
 All 783 native tests pass; the focused comparison, all-target Clippy (after a test-only type alias cleanup) and release build pass. The rebuilt engine matches the pinned previous engine at ten checkpoints over 240 ticks, plus frame state and full report. Four alternating engine-only batches average 843.6 ms versus 1081.2 ms previously (22.0% less simulation time). Short dense browser runs pass exact reloads and show 16× simulation-cost p95 around 22–25 ms versus roughly 32–34 ms in the prior run, while requested throughput remains unmet. Evidence: `delivery-quote-engine-parity-v1` and `mixed-play-delivery-quotes-v1`.
 
 **Why:** deterministic planning repeatedly requested values that cannot change during the scan. Scoped reuse avoids stale long-lived caches and preserves material allocation. These measurements do not close sustained 16×, total memory/storage, remaining artwork or broader builder release gates.
+
+### Skip reservation scans for empty material slots
+
+Located usable-material queries now return zero immediately for an empty slot, avoiding read-only scans through shipment, production, meal, gathering, restoration, maintenance, utility and planting claims. Non-empty slots retain the original reservation logic. Zero saturating-subtracted by a reservation total remains zero, so this changes work performed rather than allocation rules.
+
+All 783 native tests, all-target Clippy and the release build pass. The rebuilt engine matches the pinned prior release at ten snapshots over 240 ticks, frame state and full report. Four alternating engine-only batches average 669.9 ms versus 836.7 ms (19.9% less time). Five-second dense browser observations advance about 39–40 game minutes per wall second at requested 16×, compared with roughly 32–34 previously; the target remains 48. Sampled simulation-cost p95 is about 15–17 ms. Exact browser checkpoint reloads pass without errors. Evidence: `empty-slot-engine-parity-v1` and `mixed-play-empty-slot-v1`.
+
+**Why:** empty storage should not repeatedly inspect every claim system. The measured improvement does not close sustained 16×, total memory/storage, remaining art or other builder release requirements. The full goal remains active.

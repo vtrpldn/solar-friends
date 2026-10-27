@@ -175,6 +175,11 @@ pub(crate) fn pickup_reserved(v: &Village, id: Id, i: usize) -> u32 {
     v.logistics.as_ref().map_or(0, |s| held(s, id, i))
 }
 fn usable(v: &Village, p: &Store, i: usize) -> u32 {
+    // No reservation can make an empty slot usable. Avoid scanning every
+    // claim system for the many empty slots in a large village's stores.
+    if p.items[i] == 0 {
+        return 0;
+    }
     p.items[i].saturating_sub(
         pickup_reserved(v, p.id, i)
             + production::held(v, p.owner, i)

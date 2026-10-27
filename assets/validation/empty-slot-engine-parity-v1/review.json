@@ -1,0 +1,24 @@
+{
+  "status": "retained exact empty-slot early return; sustained throughput gate remains open",
+  "buildRoles": {
+    "baseline": "rebuilt release with empty-slot early return",
+    "candidate": "pinned pre-change release with scoped delivery quotes"
+  },
+  "engineOnlyMeansMs": {
+    "new": 669.86277075,
+    "old": 836.65366675,
+    "reductionPercent": 19.935476605021407
+  },
+  "checks": {
+    "nativeTests": 783,
+    "allTargetClippy": "passed",
+    "releaseBuild": "passed",
+    "exactSnapshots": 10,
+    "fixedTicks": 240,
+    "frameParity": true,
+    "reportParity": true
+  },
+  "invariant": "Zero items saturating-subtracted by any reservation total remain zero. Reservation helpers are read-only; non-empty slots retain the original path.",
+  "sourceSha256": "72afed924aec6041fa20f62b47e323042fd22db22dc967539e723c457558c432",
+  "limits": "Short local dense fixture; browser throughput remains below requested 16\u00d7, without sustained pacing or total memory evidence."
+}
