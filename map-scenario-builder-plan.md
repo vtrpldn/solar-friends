@@ -2198,3 +2198,9 @@ Added an internal four-pose composer using the production body/hair/clothing/equ
 Recorded the four prepared work poses through the shared production sampler for both hairstyles, plain and hat/beard, in daylight and mirrored night. Independently decoded 180 frames over 5.9755 seconds and inspected sixteen retained samples. Shirt and mallet remain attached in sampled rest/raise/impact poses, with sleeve cloth visible after the tool-mask correction. The sampler visibly crossfades some pose changes; this evidence does not establish village travel, smooth pacing or walk/work transitions.
 
 **Why:** static combinations do not reveal phase-change layering. Retained the encoded movie, independent decoder metadata, requested sample times and review board with hashes. Production outfit integration, remaining garment poses, transition/world checks and all wider builder release gates remain open.
+
+### Shared validated garment/tool mask intersection
+
+Moved the garment-aware ownership intersection from the review script into `web/character-foreground.js`. It validates both source-body registrations, supports existing polygon and native-run masks, and emits native disjoint ownership without touching paint. The combined review now uses this shared function. Verified 196,608 ownership pixels, commutativity, repeated-mask stability, borrowed-input preservation and eighteen malformed-input refusals. Existing work-tool integration still passes 32 exact work frames, 352 unchanged other poses, sixteen feeding recoveries and cleanup/retry checks. Regenerated, decoded and inspected the work-loop samples with the shared implementation.
+
+**Why:** future outfit integration needs the same source-bound masking used in visual review. This closes the shared masking primitive, not complete appearance-library clothing support, public outfit availability or the remaining plan requirements.

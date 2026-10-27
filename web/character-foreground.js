@@ -24,6 +24,15 @@ export function combineBodyForegroundMasks({binding,sheet,index,masks}){
  const runs=[];for(let i=0;i<union.length;){if(!union[i]){i++;continue;}const start=i;while(i<union.length&&union[i])i++;runs.push([start,i-start]);}
  return validateBodyForegroundMask({schema:2,body:binding,sheet,index,size:256,runs},binding,sheet,index);
 }
+// Restrict equipment ownership to the hands/forearms reviewed for a garment.
+// Both inputs keep their source-body binding; no generated paint is inspected.
+export function intersectBodyForegroundMasks({binding,sheet,index,masks}){
+ if(!Array.isArray(masks)||masks.length<2||masks.length>8)throw Error('Intersect two to eight registered foreground masks.');
+ const intersection=new Uint8Array(256*256).fill(1);
+ for(const mask of masks){const owned=foregroundOwnership(validateBodyForegroundMask(mask,binding,sheet,index));for(let i=0;i<intersection.length;i++)intersection[i]&=owned[i];}
+ const runs=[];for(let i=0;i<intersection.length;){if(!intersection[i]){i++;continue;}const start=i;while(i<intersection.length&&intersection[i])i++;runs.push([start,i-start]);}
+ return validateBodyForegroundMask({schema:2,body:binding,sheet,index,size:256,runs},binding,sheet,index);
+}
 export async function createBodyForegroundLayers({body,binding,mask,sheet,index,appearanceBody,clothing}){
  const checked=validateBodyForegroundMask(mask,binding,sheet,index);
  if(body.width!==256||body.height!==256)throw Error('Foreground layers require the shared prepared body frame.');

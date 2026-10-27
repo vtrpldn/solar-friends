@@ -1,7 +1,7 @@
 {
   "status": "internal static and sampled work-loop review; broader integration pending",
   "boardSha256": "11c766627e175a69a88094728f5ef4df376a9ee8236a632c079a8a04b7a92921",
-  "reportSha256": "a5dfbc7c03681cd7c565c181d90d20e5468fafad7af64cf0c0700a8951466e09",
+  "reportSha256": "d56270ba058601ea1028af20808b534ca9190ac3f0aadb31c0911433cee7df26",
   "findings": [
     "Inspected all 32 four-pose compositions: two hairstyles, with/without mallet, with/without hat/beard",
     "Combined production tool mask originally restored upper-arm skin over shirt sleeves",
@@ -15,10 +15,10 @@
     "Derived tool masks currently live only in internal review; production integration must retain equivalent validated ownership"
   ],
   "motion": {
-    "videoSha256": "dd5fc84ba0d61ca0216e0c98649041e27f33967c6d4b9be37e1204bd2574e7bd",
-    "decodedReportSha256": "281605fafb46f9cd2e3bd367eaf3e116fb889aec43b11034670032c36320e947",
-    "decodedFrames": 180,
-    "durationSeconds": 5.9755,
+    "videoSha256": "60589cb729e03847c932b9a527763d43d4d16c959c414f0e4aa68845c1bd0805",
+    "decodedReportSha256": "b52cc5ed570e1fd465828be2ba9214cfbd0456a77daea91f585902305d7cb81f",
+    "decodedFrames": 179,
+    "durationSeconds": 5.981444,
     "inspectedSamples": 16,
     "findings": [
       "Day and mirrored night samples show rest, raised and bent impact poses with shirt and mallet together",
@@ -27,5 +27,18 @@
       "Shared sampler creates visible crossfade ghosting between some poses; this review does not assess village travel or frame pacing"
     ],
     "scope": "Sampled encoded work loop at one material palette; requested timestamps are not exact native pose or decoder frame identities."
+  },
+  "sharedMaskImplementation": {
+    "path": "web/character-foreground.js",
+    "sha256": "c562dfccddeec423e775824e70e78eec266c9adc9ef58590293ecba6d6bf027c",
+    "pixelComparisons": 196608,
+    "invalidInputRefusals": 18,
+    "existingWorkRegression": {
+      "workCompared": 32,
+      "otherPosesUnchanged": 352,
+      "feedingRecoveries": 16,
+      "invalidInitializationRefusals": 5,
+      "borrowedFramesPreserved": 48
+    }
   }
 }
