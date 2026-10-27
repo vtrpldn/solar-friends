@@ -13,7 +13,7 @@ assert(report.movies&&Object.keys(report.movies).length===2,'Expected both hairs
 for(const [key,entry]of Object.entries(report.movies)){
  assert(/^[a-z0-9-]+$/.test(key));
  const clip=entry.clip??entry.recordings?.[0]?.clip;
- assert(['sit','look'].includes(clip));
+ assert(['sit','look','stretch'].includes(clip));
  assert.equal(entry.recordings.length,2);
  for(const [index,segment]of entry.recordings.entries()){
   assert.equal(segment.clip,clip);assert.equal(segment.night,index);
@@ -26,10 +26,14 @@ for(const [key,entry]of Object.entries(report.movies)){
  assert.equal(metadata.streams[0].width,600);assert.equal(metadata.streams[0].height,320);
  assert(Number(metadata.streams[0].nb_read_frames)>=24);
  assert(Number(metadata.format.duration)>=11.8);
- const samples=key+'-decoded.png',transition=key+'-transition-decoded.png';
- const commands=[['-v','error','-threads','1','-i',movie,'-vf','fps=1,scale=300:160,tile=6x2','-frames:v','1','-y',folder+'/'+samples],['-v','error','-threads','1','-ss','1.1','-i',movie,'-vf','fps=20,scale=600:320,tile=3x2','-frames:v','1','-y',folder+'/'+transition]];
+ const samples=key+'-decoded.png',transitionStarts=clip==='stretch'?['0.5','1.1','2.35','2.975']:['1.1'];
+ const commands=[['-v','error','-threads','1','-i',movie,'-vf','fps=1,scale=300:160,tile=6x2','-frames:v','1','-y',folder+'/'+samples]],boardFiles=[samples];
+ for(const [index,start]of transitionStarts.entries()){
+  const file=key+'-transition'+(index?'-'+(index+1):'')+'-decoded.png';boardFiles.push(file);
+  commands.push(['-v','error','-threads','1','-ss',start,'-i',movie,'-vf','fps=20,scale=600:320,tile=3x2','-frames:v','1','-y',folder+'/'+file]);
+ }
  for(const args of commands)await run('ffmpeg',args);
- movies[key]={clip,videoSha256:entry.videoSha256,metadata,recordings:entry.recordings,commands,boards:{[samples]:sha(await readFile(folder+'/'+samples)),[transition]:sha(await readFile(folder+'/'+transition))}};
+ movies[key]={clip,videoSha256:entry.videoSha256,metadata,recordings:entry.recordings,commands,boards:Object.fromEntries(await Promise.all(boardFiles.map(async file=>[file,sha(await readFile(folder+'/'+file))])))};
 }
 await writeFile(folder+'/decoded-v2.json',JSON.stringify({scope:'Independently decoded full-cycle one-second samples and closer first-transition samples. Requested times are not exact native pose identities, exhaustive playback or physical display pacing evidence.',verificationSha256:sha(await readFile(folder+'/verification-v1.json')),decoderSha256:sha(await readFile('scripts/decode-mixed-clothing-motion.mjs')),movies},null,2)+'\n');
 console.log('Decoded and hash-checked both hairstyle recordings and transition boards.');

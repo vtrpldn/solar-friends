@@ -1,0 +1,10 @@
+{
+  "prompt": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-5-v2/mask.png",
+      "role": "Exact corrected bent-arm shirt silhouette and fixed transparent canvas",
+      "sha256": "8b440b3d2c30ae0780058e05fe9a82b53e9101eb35f0bbd100191ab086cb7fd0"
+    }
+  ]
+}

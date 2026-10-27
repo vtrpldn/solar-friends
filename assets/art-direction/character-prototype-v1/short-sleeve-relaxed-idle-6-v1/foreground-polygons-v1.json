@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "polygons": [
+    [
+      [
+        65,
+        0
+      ],
+      [
+        114,
+        0
+      ],
+      [
+        114,
+        78
+      ],
+      [
+        104,
+        81
+      ],
+      [
+        80,
+        86
+      ],
+      [
+        65,
+        80
+      ]
+    ],
+    [
+      [
+        147,
+        0
+      ],
+      [
+        185,
+        0
+      ],
+      [
+        185,
+        74
+      ],
+      [
+        173,
+        78
+      ],
+      [
+        151,
+        85
+      ],
+      [
+        146,
+        86
+      ]
+    ]
+  ],
+  "excludeMaterials": [
+    2,
+    3,
+    4
+  ],
+  "intent": "Original raised forearms and hands above the independently authored sleeve cuffs; biceps remain clothed."
+}

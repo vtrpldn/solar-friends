@@ -1,0 +1,26 @@
+{
+  "status": "pre-paint review criteria",
+  "materialRevision": "v11",
+  "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "measuredWaistLine": [
+    [
+      95,
+      138
+    ],
+    [
+      110,
+      142
+    ],
+    [
+      135,
+      143
+    ],
+    [
+      160,
+      139
+    ]
+  ],
+  "lowerProtection": "Original shorts pixels at least two native pixels below the measured per-column waistline and every shoe pixel must remain unchanged. Original trousers/shoes also receive independent native RGBA ownership.",
+  "collarProtection": "Every opaque original shirt pixel above native row 134 must be covered. Distinguish cloth from arm/face skin and transparent gaps.",
+  "scope": "Original idle-5 pre-paint raised-arm criteria; preserve native forearms, hands and lower body."
+}

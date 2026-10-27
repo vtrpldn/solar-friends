@@ -1,0 +1,65 @@
+{
+  "status": "Accepted internal static stretch-row pose 7; no public outfit or world acceptance.",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-602f47d4-4da9-49a4-9b88-2f62dd89d512.png",
+    "sourceSha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "copyByteIdentical": true,
+    "generatedPaintEdited": false,
+    "status": "Accepted internal static pose only",
+    "generationInputs": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-1-v2/generation-inputs-v1.json",
+    "generationInputsSha256": "16eb50854de909f31d7e37bdf9955d090cf423e0412a0e226fd209bc727c62b9",
+    "reusedFrom": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-1-v2/candidate-v1.png"
+  },
+  "scope": {
+    "nativeShirtPixels": 1983,
+    "staticCompositions": 6,
+    "ownedLowerChannels": 118992,
+    "malformedRefusals": 9,
+    "paletteCompositions": 48,
+    "alphaChecks": 2359296,
+    "protectedLowerChannels": 707184
+  },
+  "findings": [
+    "Inspected enlarged collar, cuffs, original forearms/hands and waist against the original native body.",
+    "Inspected all matching-body colour/accessory comparisons and day/night/facing views.",
+    "Exact existing paint reuse fits this independently bound neutral endpoint."
+  ],
+  "artifacts": {
+    "colours-v1-owned-materials-v11.json": "580b51612852fd52b622e26513041f6a7c76789ca4cc37dbad09c4105326c349",
+    "foreground-polygons-v1.json": "39b35aa24f0c761d6b2d6235a10352f83a10d738d348c95d2cb9d68e6b39ad96",
+    "references.json": "37e334b3b28e19fd8c9968e3b478707901d94daac64845579b118c9c955d9dab",
+    "preserved-body-intent-v1.json": "17680bb1ddf6b997cd4254a676693e83ecce342562bc036ee42cfeedee5830fe",
+    "review-v1-owned-board.png": "eb76df36b085cd3dbb79f830cdbf2eabbe32c357a28665c1864dca018088323f",
+    "candidate-v1.png": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "idle-7-grid.png": "d3ffea99a474110ea13b4ac2004cb4c209c7a8b38d52adb42b4d39db1baf5d54",
+    "registration-intent.json": "01d030f7e9ddbd18a2b3b8e8cbd5343f9ebe9c8ac0ffcbe7367d3524c19dc973",
+    "candidate-v1-audit.json": "52e801ee218347bb81f5db71cb6f672ec051c1363194353ed3aeb2bdc8958a4f",
+    "colours-v1-owned-materials-v11-waist.png": "9b21563da8b147e604dbaf096f6f0a103c79a7f8ee968b7b3ec4d7ac6afaf5c0",
+    "colours-v1-owned-materials-v11-equipped.png": "4874b768d78357a5d0474690161047c31cf121a8d5e084e317f233b3c4e84f77",
+    "specs.json": "861cbd795557c4ae77a2e578fb4ee6e47b6d689a01e18a20aff62ab5959afbe0",
+    "prompt-v1.txt": "926be8fbc557f0f1f778701edaabee2a74d33db25bc76afd7ba004d7fc9a2459",
+    "context.png": "23a49fa50c8532cb0b4ea700067733b028b650504c63d0fbbc87e5edd49509c0",
+    "foreground-intent-v1.json": "00fb2601b528cb18a4af8d02b3ac388e26dfcae17473afc120115436ad0cf356",
+    "guide-coverage-v1.json": "5eb9f34f334150eb02a9f1eac4c169e06cca6fef6c49cce1b27a5278f830da33",
+    "review-v1-owned-details.png": "1a75266743e0e06da1d166b8b40cd2e6e4f795f1f158c6006ac92e04760ea7b3",
+    "colours-v1-owned-materials-v11-plain.png": "6ebd69b378d427d4aa9b5cdbafe9d234a41656295d00cd577dc9771eff5c5391",
+    "anatomy-review-intent-v1.json": "9cd7f1e2c54229aa88c63c4f22d40d463dbda33e2bb48cc1d0a77e42f2e73716",
+    "review-v1-owned.json": "046da52be1eaeb59965f647809d2354ddeed7ed86a63e9327c71ea37508b9293",
+    "atlas.png": "487006c9b6860be823c48b88a60a0823bb50ee95ca43733372be31c278e6d1fd",
+    "board.png": "7a55a378fcefc86366fe06f41f9550bae1784347989d9ccf37326d839dcd95ab",
+    "body-foreground-v1.json": "b0ad82d810b75841065f6c1a27af6def252126e7aca0600bce7807077522d51c",
+    "preserved-body-v1.json": "511654178741d2eae0554802f5f3366625e79aaab2571599d4ff4e7c1b6d642a",
+    "source-reuse-v1.json": "da37430f8e4f90db09044b007f890d0c9e4a2478d22f44593a87ea2b982f96ba",
+    "review-v1-owned-lighting.png": "0f2b964c73225a1ecab6194b25c00482a38e28cecaa3f834e92082f3d924be26",
+    "foreground-context-v1.png": "4311d485121bd40a22566724be05ee0d5175d6f08fc759d0fe44318fb0e8dc00",
+    "registrations-v1-owned.json": "1fb88697262a8b9b5f089b872c4fb6e49b6ce5d2f29cd4945a21b0626afd60b6",
+    "mask.png": "cbb15f97c493b4f84c31c11f750e87a3638369abd1a61a4dbd23656e0db3e25c",
+    "candidate-v1-provenance.json": "c0b1ca1ff5cea57f9cc56b68a6ce575d4e21c0a70c5aedc333417bc09121b5e1"
+  },
+  "limits": [
+    "Twenty-four of forty-eight internal shirt poses covered; twenty-four remain.",
+    "Actual stretch profile uses idle 4/5/6/6/5/4; idle 7 is a spare static source, not an active frame in that profile.",
+    "Encoded motion samples are limited; no exhaustive playback, world, physical pacing or public outfit acceptance.",
+    "Original wider builder release requirements remain open."
+  ]
+}
