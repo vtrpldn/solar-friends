@@ -1,0 +1,63 @@
+{
+  "status": "Accepted internal static idle pose 2; shared original paint with separate native body registration.",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-602f47d4-4da9-49a4-9b88-2f62dd89d512.png",
+    "sourceSha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "copyByteIdentical": true,
+    "generatedPaintEdited": false,
+    "status": "Accepted internal static pose only",
+    "generationInputs": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-1-v2/generation-inputs-v1.json",
+    "generationInputsSha256": "16eb50854de909f31d7e37bdf9955d090cf423e0412a0e226fd209bc727c62b9"
+  },
+  "scope": {
+    "staticCompositions": 6,
+    "upperShirtPixels": 2052,
+    "coveredUpperShirtPixels": 2052,
+    "exactOwnedLowerBodyChannels": 114288,
+    "malformedInputsRefused": 9,
+    "paletteAccessoryCompositions": 48,
+    "alphaChecks": 2359296,
+    "protectedLowerChannels": 676080
+  },
+  "findings": [
+    "Inspected enlarged shoulder/collar/waist composition: no detached sleeve or old collar patch.",
+    "Inspected all palette/accessory compositions in the three-pose comparison boards.",
+    "Inspected own day/night/facing board and decoded actual look-cycle samples."
+  ],
+  "artifacts": {
+    "colours-v1-owned-materials-v11.json": "e58c5fdbed4e2d3e781267d6c2f1ee9fcec12f45fc54a99b43d7d3b583ea728e",
+    "foreground-polygons-v1.json": "39b35aa24f0c761d6b2d6235a10352f83a10d738d348c95d2cb9d68e6b39ad96",
+    "references.json": "17b4229e8494fd8c3f0c7d79d45d702afc893a089fe5cae0fbbe0a35265864c7",
+    "preserved-body-intent-v1.json": "16c6bb0f0ce3a03735d712aae1b99359a27b8c5c038695950b625601c16fddc5",
+    "review-v1-owned-board.png": "2fd465ec8a297b60ff1f15259d5bbaa123194921e8662b6d91785c251a35345f",
+    "candidate-v1.png": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "registration-intent.json": "3bdf9371e8e5ccc8fe34e4437f338614987d5cb52a7828fbcf1f143c1b703f05",
+    "candidate-v1-audit.json": "0b64490d95f0ebf802b69b92640e03c44077fb6f0022228326b23c48590aa82d",
+    "colours-v1-owned-materials-v11-waist.png": "347fe5ea44bc867240d6f27de8e89185f0fb9c9c843a7e890cd303c0e6ca9646",
+    "colours-v1-owned-materials-v11-equipped.png": "35ce239a8e2d33a4a434cea5477e8eeede942fedabb5ad4c027be165c3771889",
+    "specs.json": "e86c68406559bccf3aa574dcdd5b7ada5e847e97531535bb496c05d95b83c39c",
+    "idle-2-grid.png": "77512c0b8fe8d8170163f3e8bbad84fdf6b467be9e03472127fcdabb8ac65931",
+    "context.png": "693ef13ae344f95a21649bbe9956cbc236807baf28b25936b7241d75d639e840",
+    "foreground-intent-v1.json": "4b6ff02d71dce3b063be36ff60977d659f556fb5371c9c07b15cef94d5a1a012",
+    "guide-coverage-v1.json": "5df77cc825c85b9d554b3e4f53402c3f3ef07b48d7c856e0c14d6d467bd6cd0f",
+    "review-v1-owned-details.png": "9e6193dea10073f99a4d4194a791e89af3e77462647d6dcc2d382e07e79930f6",
+    "colours-v1-owned-materials-v11-plain.png": "b9403ea07bf9387eb63e9b810be3dc6fca9d86b7981ad420f45c8e31792586a8",
+    "anatomy-review-intent-v1.json": "a48327a79107fe2034497398e0e266609eea2c244d816d5c8bf4fb2c1e25fc75",
+    "review-v1-owned.json": "b8fd75417cbd5fede1e07947332b147bcb12916d6b112842bfcc97b97563bc94",
+    "atlas.png": "246f41bd29af38b51fd7bdeba65c0fa4641da7d97cbcedc6123c3c854a3746ab",
+    "board.png": "3d60fc98895ab292894b002cc40343cb62203018767c1b6a31123a7a0af0763b",
+    "body-foreground-v1.json": "ab8d9bb53f3a0a3acf5dc6c79abf7ca323ec64a3c6df34d3258235976a6ae108",
+    "preserved-body-v1.json": "987dfda8883f0eb9cc60b29f9c10319ce17ba610d8e02e11f79b4b7176787970",
+    "source-reuse-v1.json": "be08c1e4a8a9ad24990cccb0ef9599c4a677137e6b7fd4d9f8160e7c077a870b",
+    "review-v1-owned-lighting.png": "192d67a4b8b120a8da9b074ab439e4adbf12079647c3c6d22f2473b43717d37d",
+    "foreground-context-v1.png": "fe184eed5367420408cc616fe71271f8848206b0cbefeb037defa784650f31ac",
+    "registrations-v1-owned.json": "a5cb8f9de2109315716470dfcc4bfe13f1ae1cef47d0e52e52820a6f3f089759",
+    "mask.png": "cbb15f97c493b4f84c31c11f750e87a3638369abd1a61a4dbd23656e0db3e25c",
+    "candidate-v1-provenance.json": "f67aafa4bef1f2127771e76b76d071e438cf0ba9971d94e5ff625da0a66e40d8"
+  },
+  "limits": [
+    "Twenty of forty-eight internal shirt poses covered; twenty-eight remain.",
+    "Limited encoded look-cycle samples do not establish every palette, exhaustive motion, village or public outfit acceptance.",
+    "Original wider builder requirements remain open."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "status": "Proposed exact paint reuse; requires own composition and visual acceptance",
+  "source": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-0-v2/candidate-v1.png",
+  "sourceSha256": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+  "maskSha256": "3da97885c89437118f06ff9f450a171b08350f202ec59248b54f2b97f6d2f5de",
+  "sourceGenerationInputs": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-0-v2/generation-inputs-v1.json",
+  "sourceGenerationInputsSha256": "ab3a187978ae42c2948fd121b9d26ddebe77fec6f00716ccfa04b6f52d83e894",
+  "ownRegistrationIntentSha256": "8111e31ba28286619620768e1a03ce3eb5e58bdedbb19aec45328ca20ae562e8",
+  "transform": "None. Identical native crop, source rectangle, canvas size and painted PNG. Independent original-body binding, foreground and pants/shoe ownership."
+}

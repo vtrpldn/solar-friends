@@ -1,0 +1,7 @@
+{
+  "status": "Exact existing paint reuse refused; inactive",
+  "reason": "Collar coverage is not complete for this independently bound body. Retain alpha >=240 requirement; prepare a fuller shared neckline before painting.",
+  "sourceSha256": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+  "guideCoverageFile": "guide-coverage-v1.json",
+  "compositionFile": "review-v1-owned.json"
+}

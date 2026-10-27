@@ -1,0 +1,10 @@
+{
+  "prompt": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-idle-1-v2/mask.png",
+      "role": "Exact fixed fuller neckline and shoulder silhouette; shared contour for independently bound idle 1/2/3 poses",
+      "sha256": "cbb15f97c493b4f84c31c11f750e87a3638369abd1a61a4dbd23656e0db3e25c"
+    }
+  ]
+}

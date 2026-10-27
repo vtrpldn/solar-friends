@@ -1,0 +1,267 @@
+{
+  "scope": "Independently decoded full-cycle one-second samples and closer first-transition samples. Requested times are not exact native pose identities, exhaustive playback or physical display pacing evidence.",
+  "verificationSha256": "c5b348196e7a6c5a8a5227409ef771f2d039aebc9cd0b379ad8b55a4013aae7f",
+  "decoderSha256": "5b03a6ad59dcc7af72573b8e94c46534f7e15412a73189e7160c360991674d20",
+  "movies": {
+    "curls-0-true": {
+      "clip": "look",
+      "videoSha256": "eba2edb9359062914f76f386dfdd07842171ab1f8f9878756263344bf2def020",
+      "metadata": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "vp8",
+            "codec_long_name": "On2 VP8",
+            "profile": "0",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "mime_codec_string": "vp8",
+            "width": 600,
+            "height": 320,
+            "coded_width": 600,
+            "coded_height": 320,
+            "has_b_frames": 0,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "15:8",
+            "pix_fmt": "yuv420p",
+            "level": -99,
+            "field_order": "progressive",
+            "refs": 1,
+            "r_frame_rate": "120/1",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "nb_read_frames": "360",
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "eng",
+              "alpha_mode": "1"
+            }
+          }
+        ],
+        "format": {
+          "filename": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/curls-0-true-look.webm",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "0.000000",
+          "duration": "11.972432",
+          "size": "176742",
+          "bit_rate": "118099",
+          "probe_score": 100,
+          "tags": {
+            "encoder": "Chrome"
+          }
+        }
+      },
+      "recordings": [
+        {
+          "clip": "look",
+          "night": 0,
+          "facing": 1,
+          "offsetMs": 0,
+          "elapsedMs": 6000.700000047684,
+          "frames": 721
+        },
+        {
+          "clip": "look",
+          "night": 1,
+          "facing": -1,
+          "offsetMs": 6000.700000047684,
+          "elapsedMs": 6004.699999928474,
+          "frames": 720
+        }
+      ],
+      "commands": [
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/curls-0-true-look.webm",
+          "-vf",
+          "fps=1,scale=300:160,tile=6x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/curls-0-true-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "1.1",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/curls-0-true-look.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/curls-0-true-transition-decoded.png"
+        ]
+      ],
+      "boards": {
+        "curls-0-true-decoded.png": "cf2d9029bbe51b0e5639c96f7462edb3342f821e1512d5556531cde9eec856ae",
+        "curls-0-true-transition-decoded.png": "0c1303c8083f7448d33a4607dd5f8ab3fd6c9ddd8722a9ef66736d14c75db4c3"
+      }
+    },
+    "sidepart-0-true": {
+      "clip": "look",
+      "videoSha256": "093096ad958a6f80194d2660b2b0cab1f2713b720ae3db50bf5a3a526ec20231",
+      "metadata": {
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "vp8",
+            "codec_long_name": "On2 VP8",
+            "profile": "0",
+            "codec_type": "video",
+            "codec_tag_string": "[0][0][0][0]",
+            "codec_tag": "0x0000",
+            "mime_codec_string": "vp8",
+            "width": 600,
+            "height": 320,
+            "coded_width": 600,
+            "coded_height": 320,
+            "has_b_frames": 0,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "15:8",
+            "pix_fmt": "yuv420p",
+            "level": -99,
+            "field_order": "progressive",
+            "refs": 1,
+            "r_frame_rate": "30/1",
+            "avg_frame_rate": "30/1",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "nb_read_frames": "361",
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "eng",
+              "alpha_mode": "1"
+            }
+          }
+        ],
+        "format": {
+          "filename": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/sidepart-0-true-look.webm",
+          "nb_streams": 1,
+          "nb_programs": 0,
+          "nb_stream_groups": 0,
+          "format_name": "matroska,webm",
+          "format_long_name": "Matroska / WebM",
+          "start_time": "0.000000",
+          "duration": "12.003149",
+          "size": "177117",
+          "bit_rate": "118047",
+          "probe_score": 100,
+          "tags": {
+            "encoder": "Chrome"
+          }
+        }
+      },
+      "recordings": [
+        {
+          "clip": "look",
+          "night": 0,
+          "facing": 1,
+          "offsetMs": 0,
+          "elapsedMs": 6005.5,
+          "frames": 721
+        },
+        {
+          "clip": "look",
+          "night": 1,
+          "facing": -1,
+          "offsetMs": 6005.5,
+          "elapsedMs": 6004,
+          "frames": 721
+        }
+      ],
+      "commands": [
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/sidepart-0-true-look.webm",
+          "-vf",
+          "fps=1,scale=300:160,tile=6x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/sidepart-0-true-decoded.png"
+        ],
+        [
+          "-v",
+          "error",
+          "-threads",
+          "1",
+          "-ss",
+          "1.1",
+          "-i",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/sidepart-0-true-look.webm",
+          "-vf",
+          "fps=20,scale=600:320,tile=3x2",
+          "-frames:v",
+          "1",
+          "-y",
+          "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-look-motion-v1/sidepart-0-true-transition-decoded.png"
+        ]
+      ],
+      "boards": {
+        "sidepart-0-true-decoded.png": "5f7864857baa595623613063441b2b7f789fd00b1d951c16c3578c9ac01c90da",
+        "sidepart-0-true-transition-decoded.png": "999a56085f1f01ef059e5f3e3113f0ead9f6183f79fe8db19222fa75f5bbbce5"
+      }
+    }
+  }
+}
