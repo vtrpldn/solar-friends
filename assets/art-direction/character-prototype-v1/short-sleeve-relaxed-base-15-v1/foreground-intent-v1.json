@@ -1,0 +1,138 @@
+{
+  "status": "Authored native body polygon with family-bound material exclusion. Generated garment paint was not read or changed.",
+  "bodyFrameSha256": "524edbf10ca914a75482ca7b8b0e80144616b139d9ccf2749f7644bd0d7bc90a",
+  "registrationIntentSha256": "af0ee9a2ffc7cf90d35ad70c31e94ef82d1eb73a2491213034842a1013ee52ee",
+  "regionSpecSha256": "2036b32996650e33a50f63d28e8c0e4ebef89f5c9ec3e3dc2053deca63b7a60d",
+  "materialRegistrationSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "maskSha256": "d47797cd5d0b1a76618394b535784ee5e410109bb1f752136789afe6332843c8",
+  "polygons": [
+    [
+      [
+        59,
+        133
+      ],
+      [
+        69,
+        137
+      ],
+      [
+        80,
+        140
+      ],
+      [
+        91,
+        144
+      ],
+      [
+        106,
+        151
+      ],
+      [
+        113,
+        158
+      ],
+      [
+        114,
+        168
+      ],
+      [
+        109,
+        175
+      ],
+      [
+        101,
+        176
+      ],
+      [
+        91,
+        171
+      ],
+      [
+        88,
+        165
+      ],
+      [
+        75,
+        160
+      ],
+      [
+        62,
+        156
+      ],
+      [
+        57,
+        150
+      ],
+      [
+        57,
+        140
+      ]
+    ],
+    [
+      [
+        128,
+        132
+      ],
+      [
+        136,
+        135
+      ],
+      [
+        145,
+        133
+      ],
+      [
+        151,
+        136
+      ],
+      [
+        160,
+        144
+      ],
+      [
+        168,
+        151
+      ],
+      [
+        172,
+        160
+      ],
+      [
+        170,
+        168
+      ],
+      [
+        162,
+        173
+      ],
+      [
+        151,
+        171
+      ],
+      [
+        143,
+        166
+      ],
+      [
+        141,
+        157
+      ],
+      [
+        132,
+        149
+      ],
+      [
+        127,
+        139
+      ]
+    ]
+  ],
+  "excludedMaterials": [
+    2,
+    3,
+    4
+  ],
+  "excludedPixels": 99,
+  "paintedPixels": 2180,
+  "ownedPixels": 2238
+}

@@ -1,0 +1,13 @@
+{
+  "tool": "built-in image generation",
+  "transparentBackground": true,
+  "promptSha256": "402e0489b8986b8e6e07df1781524b12414f593fc7ac3b3abf4fd4747b87fdcf",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-15-v1/mask.png",
+      "role": "Sole edit target and exact frozen geometry",
+      "sha256": "dde0ef12a3139672c3d4f265c2b8ee7204695ff7da5b4d063bcd978628e6195b"
+    }
+  ],
+  "status": "Recorded before generation; not appearance acceptance"
+}

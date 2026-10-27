@@ -1,0 +1,65 @@
+{
+  "status": "Accepted internal static pose 15; no public outfit or complete motion acceptance.",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ce09c619-c6db-4d4a-bded-5be4072eea36.png",
+    "sourceSha256": "7a1011ad56441ae055c085bc5258264e1bea8a45bd1ce1b8642a00b092261b9f",
+    "copyByteIdentical": true,
+    "generatedPaintEdited": false,
+    "promptFile": "prompt-v1.txt",
+    "inputsFile": "generation-inputs-v1.json",
+    "status": "Accepted internal static source only"
+  },
+  "scope": {
+    "requiredUpperShirtPixels": 774,
+    "coveredUpperShirtPixels": 774,
+    "staticCompositions": 6,
+    "exactOwnedLowerBodyChannels": 69576,
+    "malformedInputsRefused": 9,
+    "paletteAccessoryCompositions": 48,
+    "colourAlphaChecks": 2359296,
+    "colourProtectedLowerChannels": 410256
+  },
+  "findings": [
+    "Inspected plain and hat/beard palette boards: neckline, sleeves, original hands and shorts remain coherent.",
+    "Closed-eye seated frame preserves facial expression and hair placement.",
+    "Inspected day/night facing and full sixteen-pose mixed board with stool underlays."
+  ],
+  "artifacts": {
+    "colours-v1-owned-materials-v11.json": "d9630cf7bc03632de4e6bed9f6a83e4b0b9de569a9dd2e6d26074d966485fcd2",
+    "foreground-polygons-v1.json": "2036b32996650e33a50f63d28e8c0e4ebef89f5c9ec3e3dc2053deca63b7a60d",
+    "references.json": "2a781037a3052ad42e523658dac89c9ddcbd027f997e1711470c389f1e95ddd9",
+    "preserved-body-intent-v1.json": "4a891e5173147eebd169ac918d889b9d6e3acc546a6d7c5bd1b6466fca246c69",
+    "review-v1-owned-board.png": "27ca32b0be5347525fef3aa318e2d73079848b01e527f5a27961b6529e92acdd",
+    "candidate-v1.png": "7a1011ad56441ae055c085bc5258264e1bea8a45bd1ce1b8642a00b092261b9f",
+    "registration-intent.json": "af0ee9a2ffc7cf90d35ad70c31e94ef82d1eb73a2491213034842a1013ee52ee",
+    "base-15-grid.png": "dca9602b2d18bd35f7f59fb7e160cdc5599384571b619c11d37edbe8d14a38b9",
+    "candidate-v1-audit.json": "7be104a162f1d4462bd4fa6de4226986a752877717629f8e2c2dfe3a166c16d6",
+    "colours-v1-owned-materials-v11-waist.png": "6e6224f8b0a0b530d79f6e570ea3e9e84e6c7d399f13ba57d3cb0323bc0565b2",
+    "colours-v1-owned-materials-v11-equipped.png": "2e02a684076d5c8f99bbde16c214904419d5254a82c071cc8d9daf39cac404c6",
+    "specs.json": "13c854d734718d58bbb4ddb0bf103f477cb00be8b421d4f04965ee899199b65e",
+    "prompt-v1.txt": "402e0489b8986b8e6e07df1781524b12414f593fc7ac3b3abf4fd4747b87fdcf",
+    "context.png": "2adf66f99ae5fce3803e33f786a39e8a092f3c25aab5c5946ff0e220cea4dc58",
+    "foreground-intent-v1.json": "30b43e02519f837d4670394643051678604cffbe42c1d629f7abcc7594482ed3",
+    "guide-coverage-v1.json": "53e76148c0bcae332a0d4f7d1d83b02e6b030bb723821ad58bfedf8a75ef5e0c",
+    "review-v1-owned-details.png": "fbf7fa9eeb927838f5b66d25a357cc11eac3e281c1f6a6f5957ba4d75eb88c9e",
+    "colours-v1-owned-materials-v11-plain.png": "f362797f5bd5a3565936cfd58a0be0f433d252a87cb5951e27887c710442c5f9",
+    "anatomy-review-intent-v1.json": "0980b7d14ea3fc135041665eee36ad8cccc44771520bb9eb063a4c22fdce00d8",
+    "review-v1-owned.json": "c85ec30f95dd3d8e97505a6fc94393bc4950286d7b8068ec19d73e369346be1c",
+    "atlas.png": "6bd8c933a985286304d5aba3c862414fda0912723dc0c05718666e20ac658561",
+    "board.png": "da243f0a3fdf98922ad66eb83cffea01874ffd46819acec2400e4ac6ebfbc543",
+    "generation-inputs-v1.json": "38318329d39c7e2dcc79857440140a994a6946f1adc0a84aae44ec260b1f5429",
+    "body-foreground-v1.json": "d47797cd5d0b1a76618394b535784ee5e410109bb1f752136789afe6332843c8",
+    "preserved-body-v1.json": "0dcc8eba79f47f2ffe45bbda42486b635dba16a2f6a3126f3c481d0e06474f33",
+    "review-v1-owned-lighting.png": "1fb5c8d50dff1a06105b9732456dc503429e9ad21954d2e7a148c87bd1ee5d4d",
+    "foreground-context-v1.png": "d9ae1099dbb6a4f47d0771b3ab92db26c172b198e92ed90d4921cb08bc871195",
+    "registrations-v1-owned.json": "88c0f619089c3d135a77b2b99ce54302f41102cdf15a856ab6fb28462d02a723",
+    "mask.png": "dde0ef12a3139672c3d4f265c2b8ee7204695ff7da5b4d063bcd978628e6195b",
+    "candidate-v1-provenance.json": "354d97f8fe29556ed51b1cf6f1a602292415771935be50673be5da14c8ce9594"
+  },
+  "limits": [
+    "Sixteen of forty-eight internal shirt poses covered; thirty-two remain.",
+    "Current sit runtime sequence uses base 12/13/14/13; pose 15 is not an active blink in that sequence.",
+    "Continuous motion, transitions, world integration and public outfit remain unaccepted.",
+    "Original broader builder release requirements remain open."
+  ]
+}
