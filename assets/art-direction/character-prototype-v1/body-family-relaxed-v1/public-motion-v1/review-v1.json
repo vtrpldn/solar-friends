@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "status": "scoped-review-with-open-art-improvements",
+  "files": {
+    "recording.json": "588d160557c75f14a55b14b74f6ec8be462ab974b56424a1631972e8d500c868",
+    "decoded.json": "42b283f387b087ab2a30efbdeea51881a557bf0a2c64ae77f462322f483c34bc",
+    "motion.webm": "d20344290c5e068fd30eb96bdaf91754ca3fccc6acb48e8b413e25a89fd098a7",
+    "filmstrip-1.png": "47c37562000815ec0916192be7da086d5a4004d075f464c99cc9a692bd5bea86",
+    "filmstrip-2.png": "e01fed9f3a5fa8e1e9163f8e47663cf7fb363bd5e98abadaa7a7bf6b3ac07587",
+    "filmstrip-3.png": "ec7dcf175770b854a7b7a209051c1ca44c5b1e0ad8cd0b946f845474a157ef31",
+    "filmstrip-4.png": "891c81e90bddb477f34dfc3fcf87a0251701ea750ab7a4f88773ab185ef7cce4",
+    "filmstrip-5.png": "3f2d5285526640ee05e5bbc03ef065285ae64d02b4fe1b358cef49c4bade855e"
+  },
+  "reviewed": {
+    "publicRecipes": [
+      {
+        "schema": 2,
+        "assetVersion": "resident-parts-v2",
+        "body": "relaxed-v1",
+        "hair": "short-curls-v1",
+        "materials": {
+          "skin": "copper",
+          "shirt": "teal",
+          "shorts": "sage",
+          "shoes": "graphite"
+        },
+        "hairColour": "silver"
+      },
+      {
+        "schema": 2,
+        "assetVersion": "resident-parts-v2",
+        "body": "relaxed-v1",
+        "hair": "short-curls-v1",
+        "materials": {
+          "skin": "copper",
+          "shirt": "teal",
+          "shorts": "sage",
+          "shoes": "graphite"
+        },
+        "hairColour": "silver",
+        "hat": "straw-v1",
+        "facialHair": "short-chestnut-v1"
+      },
+      {
+        "schema": 2,
+        "assetVersion": "resident-parts-v2",
+        "body": "relaxed-v1",
+        "hair": "side-part-v1",
+        "materials": {
+          "skin": "copper",
+          "shirt": "teal",
+          "shorts": "sage",
+          "shoes": "graphite"
+        },
+        "hairColour": "silver"
+      },
+      {
+        "schema": 2,
+        "assetVersion": "resident-parts-v2",
+        "body": "relaxed-v1",
+        "hair": "side-part-v1",
+        "materials": {
+          "skin": "copper",
+          "shirt": "teal",
+          "shorts": "sage",
+          "shoes": "graphite"
+        },
+        "hairColour": "silver",
+        "hat": "straw-v1",
+        "facialHair": "short-chestnut-v1"
+      }
+    ],
+    "nativeActivityClips": 13,
+    "walkingActivityTransitions": 12,
+    "encodedFrames": 1505,
+    "durationSeconds": 51.96498,
+    "decodedSamplesInspected": 100,
+    "boardsInspected": 5,
+    "wholePoseChecks": 26800,
+    "views": [
+      "daylight",
+      "mirrored night"
+    ],
+    "findings": [
+      "The corrected family retains whole key-pose silhouettes rather than opacity-blending independent painted bodies.",
+      "Hat and beard follow visible heads through sampled walking, kneeling, seated, raised-arm and idle poses.",
+      "Cooking pot and watering can remain with the hands in the sampled activity poses; feeding returns remain represented by the public sequence-aware provider.",
+      "Walking/contact poses and torso materials remain coherent beside Bento at the review scale. Legacy Bento retains its existing crossfade presentation."
+    ]
+  },
+  "openArtImprovements": [
+    "Generic work has no held tool on the corrected neutral body; it should gain pose-bound equipment for tool-using jobs.",
+    "Sleep reuses a seated frame and is not a dedicated sleeping pose."
+  ],
+  "limits": [
+    "No actual village path traversal or ground-contact-over-distance verdict.",
+    "No exact decoded/native frame identity or sustained frame-pacing acceptance.",
+    "Four silver-haired copper/teal/sage/graphite recipes only; not all palettes or future clothing.",
+    "Full body, face, clothing, bottoms and shoe choices and all remaining builder release gates remain open."
+  ]
+}

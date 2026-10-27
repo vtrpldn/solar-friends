@@ -1,0 +1,801 @@
+{
+  "scope": "100 independently decoded samples across 25 public activity/transition recordings, day and mirrored night in each sample. Requested times are not exact decoded/native frame identities; no pacing or simulated-travel acceptance.",
+  "videoSha256": "d20344290c5e068fd30eb96bdaf91754ca3fccc6acb48e8b413e25a89fd098a7",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.30.08",
+        "width": 1000,
+        "height": 540,
+        "coded_width": 1000,
+        "coded_height": 540,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "50:27",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "1000/1",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "1505",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/public-motion-v1/motion.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "51.964980",
+      "size": "8341665",
+      "bit_rate": "1284197",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "boards": [
+    {
+      "file": "filmstrip-1.png",
+      "sha256": "47c37562000815ec0916192be7da086d5a4004d075f464c99cc9a692bd5bea86"
+    },
+    {
+      "file": "filmstrip-2.png",
+      "sha256": "e01fed9f3a5fa8e1e9163f8e47663cf7fb363bd5e98abadaa7a7bf6b3ac07587"
+    },
+    {
+      "file": "filmstrip-3.png",
+      "sha256": "ec7dcf175770b854a7b7a209051c1ca44c5b1e0ad8cd0b946f845474a157ef31"
+    },
+    {
+      "file": "filmstrip-4.png",
+      "sha256": "891c81e90bddb477f34dfc3fcf87a0251701ea750ab7a4f88773ab185ef7cce4"
+    },
+    {
+      "file": "filmstrip-5.png",
+      "sha256": "3f2d5285526640ee05e5bbc03ef065285ae64d02b4fe1b358cef49c4bade855e"
+    }
+  ],
+  "samples": [
+    {
+      "segment": 0,
+      "mode": "cook",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 0.1724560000038147
+    },
+    {
+      "segment": 0,
+      "mode": "cook",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 0.6898240000152588
+    },
+    {
+      "segment": 0,
+      "mode": "cook",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 1.207192000026703
+    },
+    {
+      "segment": 0,
+      "mode": "cook",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 1.7245600000381471
+    },
+    {
+      "segment": 1,
+      "mode": "water",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 2.408756000041962
+    },
+    {
+      "segment": 1,
+      "mode": "water",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 3.1679240000247955
+    },
+    {
+      "segment": 1,
+      "mode": "water",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 3.9270920000076295
+    },
+    {
+      "segment": 1,
+      "mode": "water",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 4.6862599999904635
+    },
+    {
+      "segment": 2,
+      "mode": "tend",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 5.491955999979973
+    },
+    {
+      "segment": 2,
+      "mode": "tend",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 6.011123999991417
+    },
+    {
+      "segment": 2,
+      "mode": "tend",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 6.530292000002861
+    },
+    {
+      "segment": 2,
+      "mode": "tend",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 7.049460000014306
+    },
+    {
+      "segment": 3,
+      "mode": "feed",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 7.734180000023842
+    },
+    {
+      "segment": 3,
+      "mode": "feed",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 8.49042000002384
+    },
+    {
+      "segment": 3,
+      "mode": "feed",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 9.24666000002384
+    },
+    {
+      "segment": 3,
+      "mode": "feed",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 10.00290000002384
+    },
+    {
+      "segment": 4,
+      "mode": "walk",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 10.69734800002575
+    },
+    {
+      "segment": 4,
+      "mode": "walk",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 10.890092000031471
+    },
+    {
+      "segment": 4,
+      "mode": "walk",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 11.082836000037194
+    },
+    {
+      "segment": 4,
+      "mode": "walk",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 11.275580000042915
+    },
+    {
+      "segment": 5,
+      "mode": "work",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 11.512616000041962
+    },
+    {
+      "segment": 5,
+      "mode": "work",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 11.741864000024796
+    },
+    {
+      "segment": 5,
+      "mode": "work",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 11.97111200000763
+    },
+    {
+      "segment": 5,
+      "mode": "work",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 12.200359999990464
+    },
+    {
+      "segment": 6,
+      "mode": "sit",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 12.803727999978065
+    },
+    {
+      "segment": 6,
+      "mode": "sit",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 14.040711999983786
+    },
+    {
+      "segment": 6,
+      "mode": "sit",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 15.27769599998951
+    },
+    {
+      "segment": 6,
+      "mode": "sit",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 16.51467999999523
+    },
+    {
+      "segment": 7,
+      "mode": "breathe",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 17.958483999996183
+    },
+    {
+      "segment": 7,
+      "mode": "breathe",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 19.19743599998474
+    },
+    {
+      "segment": 7,
+      "mode": "breathe",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 20.436387999973295
+    },
+    {
+      "segment": 7,
+      "mode": "breathe",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 21.675339999961853
+    },
+    {
+      "segment": 8,
+      "mode": "sleep",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 22.800559999952316
+    },
+    {
+      "segment": 8,
+      "mode": "sleep",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 23.07883999995232
+    },
+    {
+      "segment": 8,
+      "mode": "sleep",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 23.357119999952317
+    },
+    {
+      "segment": 8,
+      "mode": "sleep",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 23.635399999952316
+    },
+    {
+      "segment": 9,
+      "mode": "look",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 24.279451999959946
+    },
+    {
+      "segment": 9,
+      "mode": "look",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 25.515907999982836
+    },
+    {
+      "segment": 9,
+      "mode": "look",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 26.75236400000572
+    },
+    {
+      "segment": 9,
+      "mode": "look",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 27.98882000002861
+    },
+    {
+      "segment": 10,
+      "mode": "stretch",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 29.331344000043867
+    },
+    {
+      "segment": 10,
+      "mode": "stretch",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 30.267776000032423
+    },
+    {
+      "segment": 10,
+      "mode": "stretch",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 31.204208000020984
+    },
+    {
+      "segment": 10,
+      "mode": "stretch",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 32.14064000000954
+    },
+    {
+      "segment": 11,
+      "mode": "wave",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 33.133919999999996
+    },
+    {
+      "segment": 11,
+      "mode": "wave",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 33.77268
+    },
+    {
+      "segment": 11,
+      "mode": "wave",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 34.41144
+    },
+    {
+      "segment": 11,
+      "mode": "wave",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 35.0502
+    },
+    {
+      "segment": 12,
+      "mode": "relax",
+      "kind": "clip",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 36.0753319999981
+    },
+    {
+      "segment": 12,
+      "mode": "relax",
+      "kind": "clip",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 37.55382799999237
+    },
+    {
+      "segment": 12,
+      "mode": "relax",
+      "kind": "clip",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 39.03232399998665
+    },
+    {
+      "segment": 12,
+      "mode": "relax",
+      "kind": "clip",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 40.51081999998093
+    },
+    {
+      "segment": 13,
+      "mode": "cook",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 41.81138799997806
+    },
+    {
+      "segment": 13,
+      "mode": "cook",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 42.016851999983786
+    },
+    {
+      "segment": 13,
+      "mode": "cook",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 42.222315999989505
+    },
+    {
+      "segment": 13,
+      "mode": "cook",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 42.42777999999523
+    },
+    {
+      "segment": 14,
+      "mode": "water",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 42.66728
+    },
+    {
+      "segment": 14,
+      "mode": "water",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 42.87212
+    },
+    {
+      "segment": 14,
+      "mode": "water",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 43.07696
+    },
+    {
+      "segment": 14,
+      "mode": "water",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 43.281800000000004
+    },
+    {
+      "segment": 15,
+      "mode": "tend",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 43.52119600000382
+    },
+    {
+      "segment": 15,
+      "mode": "tend",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 43.72728400001526
+    },
+    {
+      "segment": 15,
+      "mode": "tend",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 43.93337200002671
+    },
+    {
+      "segment": 15,
+      "mode": "tend",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 44.13946000003815
+    },
+    {
+      "segment": 16,
+      "mode": "feed",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 44.37938400004387
+    },
+    {
+      "segment": 16,
+      "mode": "feed",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 44.58393600003242
+    },
+    {
+      "segment": 16,
+      "mode": "feed",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 44.78848800002098
+    },
+    {
+      "segment": 16,
+      "mode": "feed",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 44.99304000000954
+    },
+    {
+      "segment": 17,
+      "mode": "work",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 45.23222
+    },
+    {
+      "segment": 17,
+      "mode": "work",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 45.438379999999995
+    },
+    {
+      "segment": 17,
+      "mode": "work",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 45.64454
+    },
+    {
+      "segment": 17,
+      "mode": "work",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 45.850699999999996
+    },
+    {
+      "segment": 18,
+      "mode": "sit",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 46.09161199999809
+    },
+    {
+      "segment": 18,
+      "mode": "sit",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 46.29894799999237
+    },
+    {
+      "segment": 18,
+      "mode": "sit",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 46.50628399998665
+    },
+    {
+      "segment": 18,
+      "mode": "sit",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 46.71361999998093
+    },
+    {
+      "segment": 19,
+      "mode": "breathe",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 46.95455199997426
+    },
+    {
+      "segment": 19,
+      "mode": "breathe",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 47.15900799996852
+    },
+    {
+      "segment": 19,
+      "mode": "breathe",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 47.3634639999628
+    },
+    {
+      "segment": 19,
+      "mode": "breathe",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 47.567919999957084
+    },
+    {
+      "segment": 20,
+      "mode": "sleep",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 47.80662799995422
+    },
+    {
+      "segment": 20,
+      "mode": "sleep",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 48.011611999959946
+    },
+    {
+      "segment": 20,
+      "mode": "sleep",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 48.21659599996567
+    },
+    {
+      "segment": 20,
+      "mode": "sleep",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 48.42157999997139
+    },
+    {
+      "segment": 21,
+      "mode": "look",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 48.66067199997425
+    },
+    {
+      "segment": 21,
+      "mode": "look",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 48.86548799996853
+    },
+    {
+      "segment": 21,
+      "mode": "look",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 49.07030399996281
+    },
+    {
+      "segment": 21,
+      "mode": "look",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 49.275119999957084
+    },
+    {
+      "segment": 22,
+      "mode": "stretch",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 49.514639999952315
+    },
+    {
+      "segment": 22,
+      "mode": "stretch",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 49.72115999995232
+    },
+    {
+      "segment": 22,
+      "mode": "stretch",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 49.92767999995231
+    },
+    {
+      "segment": 22,
+      "mode": "stretch",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 50.134199999952315
+    },
+    {
+      "segment": 23,
+      "mode": "wave",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 50.375107999954224
+    },
+    {
+      "segment": 23,
+      "mode": "wave",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 50.58153199995994
+    },
+    {
+      "segment": 23,
+      "mode": "wave",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 50.78795599996567
+    },
+    {
+      "segment": 23,
+      "mode": "wave",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 50.994379999971386
+    },
+    {
+      "segment": 24,
+      "mode": "relax",
+      "kind": "transition",
+      "fraction": 0.08,
+      "requestedVideoSeconds": 51.235495999979975
+    },
+    {
+      "segment": 24,
+      "mode": "relax",
+      "kind": "transition",
+      "fraction": 0.32,
+      "requestedVideoSeconds": 51.44278399999141
+    },
+    {
+      "segment": 24,
+      "mode": "relax",
+      "kind": "transition",
+      "fraction": 0.56,
+      "requestedVideoSeconds": 51.65007200000286
+    },
+    {
+      "segment": 24,
+      "mode": "relax",
+      "kind": "transition",
+      "fraction": 0.8,
+      "requestedVideoSeconds": 51.8573600000143
+    }
+  ]
+}

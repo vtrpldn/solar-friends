@@ -1,0 +1,248 @@
+{
+  "segments": [
+    {
+      "mode": "cook",
+      "kind": "clip",
+      "duration": 2.15,
+      "offsetMs": 0,
+      "elapsedMs": 2155.7000000476837
+    },
+    {
+      "mode": "water",
+      "kind": "clip",
+      "duration": 3.15,
+      "offsetMs": 2155.7000000476837,
+      "elapsedMs": 3163.1999999284744
+    },
+    {
+      "mode": "tend",
+      "kind": "clip",
+      "duration": 2.15,
+      "offsetMs": 5318.899999976158,
+      "elapsedMs": 2163.2000000476837
+    },
+    {
+      "mode": "feed",
+      "kind": "clip",
+      "duration": 3.15,
+      "offsetMs": 7482.100000023842,
+      "elapsedMs": 3151
+    },
+    {
+      "mode": "walk",
+      "kind": "clip",
+      "duration": 0.8,
+      "offsetMs": 10633.100000023842,
+      "elapsedMs": 803.1000000238419
+    },
+    {
+      "mode": "work",
+      "kind": "clip",
+      "duration": 0.9500000000000001,
+      "offsetMs": 11436.200000047684,
+      "elapsedMs": 955.1999999284744
+    },
+    {
+      "mode": "sit",
+      "kind": "clip",
+      "duration": 5.15,
+      "offsetMs": 12391.399999976158,
+      "elapsedMs": 5154.100000023842
+    },
+    {
+      "mode": "breathe",
+      "kind": "clip",
+      "duration": 5.15,
+      "offsetMs": 17545.5,
+      "elapsedMs": 5162.299999952316
+    },
+    {
+      "mode": "sleep",
+      "kind": "clip",
+      "duration": 1.15,
+      "offsetMs": 22707.799999952316,
+      "elapsedMs": 1159.5
+    },
+    {
+      "mode": "look",
+      "kind": "clip",
+      "duration": 5.15,
+      "offsetMs": 23867.299999952316,
+      "elapsedMs": 5151.900000095367
+    },
+    {
+      "mode": "stretch",
+      "kind": "clip",
+      "duration": 3.9,
+      "offsetMs": 29019.200000047684,
+      "elapsedMs": 3901.7999999523163
+    },
+    {
+      "mode": "wave",
+      "kind": "clip",
+      "duration": 2.65,
+      "offsetMs": 32921,
+      "elapsedMs": 2661.5
+    },
+    {
+      "mode": "relax",
+      "kind": "clip",
+      "duration": 6.15,
+      "offsetMs": 35582.5,
+      "elapsedMs": 6160.399999976158
+    },
+    {
+      "mode": "cook",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 41742.89999997616,
+      "elapsedMs": 856.1000000238419
+    },
+    {
+      "mode": "water",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 42599,
+      "elapsedMs": 853.5
+    },
+    {
+      "mode": "tend",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 43452.5,
+      "elapsedMs": 858.7000000476837
+    },
+    {
+      "mode": "feed",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 44311.200000047684,
+      "elapsedMs": 852.2999999523163
+    },
+    {
+      "mode": "work",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 45163.5,
+      "elapsedMs": 859
+    },
+    {
+      "mode": "sit",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 46022.5,
+      "elapsedMs": 863.8999999761581
+    },
+    {
+      "mode": "breathe",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 46886.39999997616,
+      "elapsedMs": 851.8999999761581
+    },
+    {
+      "mode": "sleep",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 47738.299999952316,
+      "elapsedMs": 854.1000000238419
+    },
+    {
+      "mode": "look",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 48592.39999997616,
+      "elapsedMs": 853.3999999761581
+    },
+    {
+      "mode": "stretch",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 49445.799999952316,
+      "elapsedMs": 860.5
+    },
+    {
+      "mode": "wave",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 50306.299999952316,
+      "elapsedMs": 860.1000000238419
+    },
+    {
+      "mode": "relax",
+      "kind": "transition",
+      "duration": 0.85,
+      "offsetMs": 51166.39999997616,
+      "elapsedMs": 863.7000000476837
+    }
+  ],
+  "calls": 3350,
+  "checked": 26800,
+  "recipes": [
+    {
+      "schema": 2,
+      "assetVersion": "resident-parts-v2",
+      "body": "relaxed-v1",
+      "hair": "short-curls-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "silver"
+    },
+    {
+      "schema": 2,
+      "assetVersion": "resident-parts-v2",
+      "body": "relaxed-v1",
+      "hair": "short-curls-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "facialHair": "short-chestnut-v1"
+    },
+    {
+      "schema": 2,
+      "assetVersion": "resident-parts-v2",
+      "body": "relaxed-v1",
+      "hair": "side-part-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "silver"
+    },
+    {
+      "schema": 2,
+      "assetVersion": "resident-parts-v2",
+      "body": "relaxed-v1",
+      "hair": "side-part-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "facialHair": "short-chestnut-v1"
+    }
+  ],
+  "scope": "Public native pose loops and production task-state transitions, day/mirrored night, four corrected appearances and Bento. Review harness does not simulate village travel or establish frame-pacing performance.",
+  "videoSha256": "d20344290c5e068fd30eb96bdaf91754ca3fccc6acb48e8b413e25a89fd098a7",
+  "sources": {
+    "web/resident-animation.js": "e94e9cbf0ee93b0b63afa5a9c3aa1e42b48c18aea3e87e4e7d6115b11b88b1b5",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/resident-parts.js": "adb6669a9bcb5edefc2c8926837516cd01430fa05a4e74a7b8ab1f616e4976b1",
+    "web/resident-family-parts.js": "84fb00fb0a826a5a391d45cf868037ddcdea8cf5e0ba3e9498bf4382b17889eb",
+    "web/art/characters/relaxed-v1/bundle-v1.json": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69"
+  }
+}
