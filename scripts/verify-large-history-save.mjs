@@ -28,7 +28,9 @@ try{
  assert(fixture.bytes>7*1024*1024&&fixture.bytes<8*1024*1024,`Expected near-limit journal, got ${fixture.bytes}`);
  const validator=new Game();try{assert.equal(JSON.parse(validator.validate_scenario(JSON.stringify(fixture.definition))).ok,true);}finally{validator.free();}
  await page.addInitScript(()=>{
-  window.historySaveProbe=[];
+  window.historySaveProbe=[];window.savePhaseProbe=[];window.trackSavePhases=false;
+  const measure=(name,fn)=>function(...args){const start=performance.now();try{return fn.apply(this,args);}finally{const ms=performance.now()-start;if(window.trackSavePhases&&ms>=1)window.savePhaseProbe.push({name,ms});}};
+  JSON.stringify=measure('JSON.stringify',JSON.stringify);window.structuredClone=measure('structuredClone',window.structuredClone);Storage.prototype.setItem=measure('storage.setItem',Storage.prototype.setItem);Storage.prototype.getItem=measure('storage.getItem',Storage.prototype.getItem);IDBObjectStore.prototype.put=measure('indexedDB.put',IDBObjectStore.prototype.put);
   window.historySaveWrites=[];window.largeRecoveryParses=0;const parse=JSON.parse;JSON.parse=function(raw,...args){if(typeof raw==='string'&&raw.length>7*1024*1024&&raw.startsWith('{"storageRevision":'))window.largeRecoveryParses++;return parse.call(this,raw,...args);};
   window.historyProbeReady=Promise.all([import('/editor/document.js').then(({EditorDocument})=>{
    for(const name of ['checkpoint','markSaved']){const original=EditorDocument.prototype[name];EditorDocument.prototype[name]=function(...args){const start=performance.now();try{return original.apply(this,args);}finally{window.historySaveProbe.push({name,ms:performance.now()-start});}};}
@@ -45,14 +47,14 @@ try{
  const openElapsedMs=Date.now()-openStart;
  await page.locator('#creator-funds').fill('9001');await page.locator('#creator-funds').dispatchEvent('change');
  const sample=await page.evaluate(async()=>{
-  await window.historyProbeReady;window.historySaveProbe=[];let maxTimerGapMs=0,last=performance.now();
+  await window.historyProbeReady;window.historySaveProbe=[];window.savePhaseProbe=[];window.trackSavePhases=true;let maxTimerGapMs=0,last=performance.now();
   const timer=setInterval(()=>{const now=performance.now();maxTimerGapMs=Math.max(maxTimerGapMs,now-last);last=now;},5);
   await new Promise(resolve=>setTimeout(resolve,10));const start=performance.now();document.querySelector('#creator-save').click();const synchronousMs=performance.now()-start;
   await new Promise((resolve,reject)=>{const deadline=performance.now()+30000;const check=()=>{if(document.querySelector('#creator-save-status').textContent==='Saved on this device')return resolve();if(performance.now()>deadline)return reject(Error('Save did not finish'));setTimeout(check,5);};check();});
   const saveElapsedMs=performance.now()-start;
-  await new Promise(resolve=>setTimeout(resolve,10));clearInterval(timer);
+  await new Promise(resolve=>setTimeout(resolve,10));clearInterval(timer);window.trackSavePhases=false;
   const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(),record=await library.getProject('large-history');
-  return {synchronousMs,saveElapsedMs,elapsedWithDurableReadMs:performance.now()-start,maxTimerGapMs,calls:window.historySaveProbe,checkpoint:record.checkpoint};
+  return {synchronousMs,saveElapsedMs,elapsedWithDurableReadMs:performance.now()-start,maxTimerGapMs,calls:window.historySaveProbe,phases:window.savePhaseProbe,checkpoint:record.checkpoint};
  });
  assert.equal(sample.checkpoint.definition.start.funds,900100);
  const expected=structuredClone(fixture.definition);expected.start.funds=900100;assert.deepEqual(sample.checkpoint.definition,expected);

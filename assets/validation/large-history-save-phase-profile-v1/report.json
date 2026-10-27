@@ -1,0 +1,68 @@
+{
+  "scope": "Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.",
+  "largeRecoveryParses": 0,
+  "historyBytes": 8078050,
+  "historySteps": 16,
+  "openElapsedMs": 2565,
+  "sample": {
+    "synchronousMs": 0.20000004768371582,
+    "saveElapsedMs": 226.80000007152557,
+    "elapsedWithDurableReadMs": 284.2000000476837,
+    "maxTimerGapMs": 117.69999992847443,
+    "calls": [
+      {
+        "name": "checkpointAsyncElapsed",
+        "ms": 28.600000023841858
+      },
+      {
+        "name": "markSaved",
+        "ms": 2.299999952316284
+      }
+    ],
+    "phases": [
+      {
+        "name": "JSON.stringify",
+        "ms": 7.200000047683716
+      },
+      {
+        "name": "structuredClone",
+        "ms": 53.200000047683716
+      },
+      {
+        "name": "indexedDB.put",
+        "ms": 72
+      },
+      {
+        "name": "JSON.stringify",
+        "ms": 2.100000023841858
+      }
+    ]
+  },
+  "exactCheckpointReload": true,
+  "concurrentSave": {
+    "writes": [
+      {
+        "revision": 100,
+        "funds": 900200
+      },
+      {
+        "revision": 101,
+        "funds": 900300
+      }
+    ],
+    "current": 900300,
+    "previous": 900200
+  },
+  "preparationFailure": {
+    "preservedFunds": 900300,
+    "retriedFunds": 900400,
+    "liveEditPreserved": true
+  },
+  "errors": [],
+  "sourceHashes": {
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "web/editor/index.js": "f124917218d14bf0b5d939b48e6846127919103facfd1c0aaca67282f6da99bf",
+    "web/content-library.js": "8bed099d63283f03f483cd8473f8ea4bdcc90b5413241ab8775c94e24990fd0a",
+    "web/pkg/solar_friends_bg.wasm": "a75d72262fbd50c3f6f9cfc6277b4f91fba62c7cd1334872f07e4e0b2473d54b"
+  }
+}
