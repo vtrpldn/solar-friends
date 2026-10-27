@@ -2228,3 +2228,9 @@ Prepared analytical grids for base 12–15 and a source-bound shirt guide for se
 Regenerated pose-12 guide v2 in its fixed location; it exposed one opposite collar-edge pixel. Revised guide v3 and regenerated without modifying paint. All 919 checked upper-shirt pixels pass along with six anatomy compositions and 48 colour/accessory combinations. Inspected enlarged details and the full plain colour board: seated neck/torso fit and lap-hand layering remain coherent, with protected shorts/shoes unchanged. Aligned the analytical guide's required alpha with the final opaque coverage threshold (240 rather than 128), preventing that mismatch in future guides.
 
 **Why:** seated pose coverage must be established before a full outfit can be enabled. This closes one internal static source, not the seated cycle or player integration. Three seated, sixteen idle and sixteen activity garment poses remain absent, with motion/world and all broader release gates still open.
+
+### Forward-leaning seated shirt source
+
+Prepared pose 13 from the original seated body, with native fixed crop, collar/side coverage and lower-arm ownership. The guide covers all 610 opaque upper-shirt target pixels; its unchanged generated source passes fixed bounds and full guide coverage. Anatomy composition catches protected-short overlap at (67,134), red channel 108→247. The local left hem must be tightened before acceptance. Retained exact guide, original paint, prompt and failure; candidate remains inactive.
+
+**Why:** full shirt coverage can still overlap adjacent shorts at a seated side seam. Correct geometry rather than relaxing protection or modifying generated paint. No additional seated pose is accepted here; the remaining outfit and full builder requirements stay open.

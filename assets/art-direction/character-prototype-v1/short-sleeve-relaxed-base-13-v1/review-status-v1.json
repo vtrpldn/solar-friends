@@ -1,0 +1,17 @@
+{
+  "status": "needs hem correction; inactive",
+  "sourceSha256": "6362f87217cfa08fe667994bf8073775e42315b8bc60ac3c2d9c15dc1d5e0fad",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-7db47514-b2a2-4e46-b112-ce9ffa3fd69e.png",
+  "promptSha256": "45978a4e364e5fb685f807e00e50d3da86fbad34468a79b253d4c188e919f7b8",
+  "reference": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v1/mask.png",
+    "role": "frozen exact silhouette",
+    "sha256": "1734697bedf7c93da4bc6001ce6f56b0878ee0d5ddb52752b1213e6ceb89383a"
+  },
+  "checks": [
+    "Guide covers all 610 opaque upper-shirt target pixels",
+    "Source bounds pass with full guide coverage"
+  ],
+  "failure": "Composition changes protected shorts at (67,134), red channel 108 to 247. Left side hem extends below actual local shirt/shorts boundary.",
+  "next": "Inspect and tighten local side hem around native x64\u201375; retain original source unchanged. Do not change the declared lower-body protection to accept this candidate."
+}
