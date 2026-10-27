@@ -1,0 +1,20 @@
+{
+  "status": "Injected partial failure released all prepared tokens; retry preserves every reference board byte-for-byte.",
+  "verificationSha256": "4d3d256e504b42d7ac79fdcc0182927d30e8f395571963c92d3c02948dd7463c",
+  "baselineVerificationSha256": "48c2eb3f37d887edfdee7e32630bb50dc2799a8df6b02a84f02fe6332192459a",
+  "failureAtPreparation": 40,
+  "created": 147,
+  "disposed": 147,
+  "live": 0,
+  "boards": {
+    "sidepart-1-false.png": "e43d569c3d591a8d0bcafd4dc9ca6244ef1895b243cb3356d1bb12a71c0f6593",
+    "sidepart-1-true.png": "25a72707807fdbf851c4652586c0c9931a2f57537fd729e2b77bec94d24c71d3",
+    "sidepart-0-true.png": "07deef899b64c69ea859dfbd5bc8ff284012b8de03b5adf38c725ff4ad809505",
+    "sidepart-0-false.png": "651e00cd6346f9d700183b88fe5fce0c96c3a854ebd7dbfce44ff9373797b6cf",
+    "curls-0-true.png": "e3b985954bcf11d6da72445ec3c31e8aec10c0adb626965337f38852161fa36b",
+    "curls-1-true.png": "afdcb6133b1bd5451bbf2f0c21fed4a53e7f1ef5f4a3f1f79cae5b969e596348",
+    "curls-0-false.png": "4bc934e9fc5f3fe6232652bd19af960c3e9b5354c6a981ea5e6db539b4f6ab59",
+    "curls-1-false.png": "1c6d234e2db26e131c6cbeecaa29181e6092d9ffb4e2ae529148d2fdbd6cc68d"
+  },
+  "scope": "Controlled preparation failure and recovery only; not overall browser memory or production failure-rate evidence."
+}

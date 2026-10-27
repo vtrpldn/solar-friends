@@ -1,0 +1,6 @@
+{
+  "status": "Baseline observed; optimization assertion intentionally fails before implementation.",
+  "reason": "Twenty poses load eighteen shared image objects, but eight appearances still prepare 160 colour sources instead of 144.",
+  "verificationSha256": "48c2eb3f37d887edfdee7e32630bb50dc2799a8df6b02a84f02fe6332192459a",
+  "scope": "Counter-based fixture observation, not full game memory or frame pacing."
+}

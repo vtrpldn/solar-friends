@@ -14,7 +14,7 @@
   "materialRegistrationSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
   "reviewToolSha256": "e1c76996c74dad50d6d00faa4b0e95e5c18d6efb7a8c0571672775352908c7b4",
   "rendererSha256": {
-    "character-family-appearance.js": "148d599957d5f9c4e6b3bddb8abf24a7f67df213dd07713afc1af7af3a190182",
+    "character-family-appearance.js": "5d957d1afbf35af14c4145300b1774004cb99d2e21565ac85de84c9729360d36",
     "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a"
   },
   "referenceSha256": "879f58093851f69fe4d51fd043cd9c34b2a2a2105cef811bb58d284ad878d9f4"

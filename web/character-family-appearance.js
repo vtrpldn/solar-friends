@@ -66,10 +66,18 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
   return {hair:input.hair,hairColour:validateHairColour(input.hairColour),materials:validateBodyMaterials(input.materials),...(hat==='none'?{}:{hat}),...(facialHair==='none'?{}:{facialHair})};
  };
  const compose=async recipe=>{
-  const scratch=new Set(),frames=new Map(),returns=new Map(),colours=new Map();let completed=false;
+  const scratch=new Set(),frames=new Map(),returns=new Map(),colours=new Map(),sharedColours=new Map();let completed=false;
   const own=c=>{scratch.add(c);return c;};
   try{
-   for(const [key,garment]of garments)colours.set(key,await prepareClothingColourSource({...garment,colour:recipe.materials.shirt}));
+   // A painted atlas can serve several independently registered poses. Share
+   // its colour source only within this recipe, for the exact image and hash.
+   for(const [key,garment]of garments){
+    alive();let hashes=sharedColours.get(garment.image);
+    if(!hashes){hashes=new Map();sharedColours.set(garment.image,hashes);}
+    let colour=hashes.get(garment.sourceHash);
+    if(!colour){colour=await prepareClothingColourSource({...garment,colour:recipe.materials.shirt});hashes.set(garment.sourceHash,colour);}
+    colours.set(key,colour);
+   }
    for(const sheet of sheets)for(let index=0;index<16;index++){
     alive();const body=family.frameForPose(sheet,index),cap=caps.get(recipe.hair+':'+sheet+':'+index);let painted=body;
     if(Object.keys(defaultBodyMaterials).some(k=>recipe.materials[k]!==defaultBodyMaterials[k])){
@@ -87,7 +95,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
     for(const c of [painted,appearance])if(c!==body&&c!==frame&&scratch.delete(c))clear(c);
    }
    completed=true;return {frames,returns};
-  }finally{for(const colour of colours.values())colour.dispose();if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
+  }finally{for(const hashes of sharedColours.values())for(const colour of hashes.values())colour.dispose();if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
  };
  const destroyRecord=record=>{if(record.value){for(const c of [...record.value.frames.values(),...record.value.returns.values()])clear(c);record.value.frames.clear();record.value.returns.clear();record.value=null;}};
  function drain(){while(!closed&&active<maxConcurrent&&queue.length){const job=queue.shift();active++;Promise.resolve().then(()=>compose(job.recipe)).then(job.resolve,job.reject).finally(()=>{active--;drain();});}}
