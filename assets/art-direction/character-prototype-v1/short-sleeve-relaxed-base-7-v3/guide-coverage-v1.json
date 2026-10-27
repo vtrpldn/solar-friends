@@ -1,0 +1,11 @@
+{
+  "scope": "Analytical upper-shirt coverage only. Current material labels locate suspected original cloth; inspect actual painted seams and anatomy before accepting geometry.",
+  "results": [
+    {
+      "pose": "base-7",
+      "upperShirtPixels": 403,
+      "uncoveredCount": 0,
+      "uncovered": []
+    }
+  ]
+}

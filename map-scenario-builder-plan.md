@@ -2156,3 +2156,9 @@ The full ordinary-player creator/preset/scenario/live-edit/checkpoint journey pa
 Recovered the original unmodified base-7 shirt output and retained its prompt, frozen guide and source hashes. The source passes bounding/coverage checks, but composition fails the predeclared sloped-waist protection at native pixel (85,137). The candidate remains inactive and needs a tighter hem guide followed by regeneration. Added a source-bound material-v11 review option that protects shorts below the measured per-column waistline and every shoe pixel, while retaining the earlier default checks.
 
 **Why:** a silhouette pass cannot prove clothing respects a bent resident’s anatomy. Preserve the failed evidence and correct the artwork before adding this outfit to player customization. Syntax and whitespace checks pass; the composition failure is intentional retained evidence, not acceptance.
+
+### Bent-shirt hem correction and colour review
+
+Frozen base-7 guide v3 raises the hem and retains full upper-shirt coverage. Its unmodified generated source passes six static anatomy-bound compositions and 48 colour/accessory combinations, including 2,359,296 alpha comparisons and 469,152 protected lower-body channel comparisons. Inspected full, detail, day/night/facing and colour/waist boards. The colour waist board reveals a cream original-shirt triangle between the arms below the existing upper-shirt cutoff; the enlarged cuff edge also remains angular. This candidate stays inactive pending geometry/foreground correction.
+
+**Why:** correcting the hem is necessary but does not establish complete garment coverage. Colour review exposes the remaining inner-arm defect that cream-only views obscure. No production appearance changed; full outfit animation and the remaining builder gates stay open.

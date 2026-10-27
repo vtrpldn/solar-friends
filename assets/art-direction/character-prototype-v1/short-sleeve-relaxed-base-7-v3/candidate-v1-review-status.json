@@ -1,0 +1,25 @@
+{
+  "status": "needs correction; inactive",
+  "sourceSha256": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dd288ada-a3b1-4527-8b36-a0c7eb7e5bce.png",
+  "promptSha256": "573bf7d2d66ef8ee2b334bf0b77314e07ae8ed7782a60740e90e94f9e76db1e7",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-7-v3/mask.png",
+      "role": "frozen geometry target",
+      "sha256": "d32ca0b27380951cc62b5b2953fa3a3c83570907070117355a134a761a9af5db"
+    }
+  ],
+  "verified": [
+    "Source bounds and guide coverage pass",
+    "Six full static compositions preserve declared shorts/shoes and foreground arm ownership",
+    "48 colour/accessory compositions preserve alpha and protected lower pixels"
+  ],
+  "visualFindings": [
+    "Raised hem fixes the previous protected-shorts overlap",
+    "Day/night and facing views remain coherent at gameplay scale",
+    "Colour waist board exposes a cream triangular original-shirt sliver between arms below the upper-shirt coverage cutoff; cuff edge also looks angular in enlarged view"
+  ],
+  "next": "Inspect original pixels in the inner-arm triangle, revise the guide and anatomical foreground edge before a new frozen revision. Do not hide the defect by recolouring the underlying body or relaxing coverage criteria.",
+  "scope": "Single internal pose only; not a complete garment or player-facing outfit."
+}
