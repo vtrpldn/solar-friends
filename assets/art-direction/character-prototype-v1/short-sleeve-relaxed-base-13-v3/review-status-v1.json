@@ -1,0 +1,37 @@
+{
+  "status": "Superseded: improved anatomy but inactive source",
+  "sourceSha256": "c9f2476cb347e30a52f555d536639a91269a9ea25cd3ada45efddf2294bc319f",
+  "failures": [
+    [
+      67,
+      133,
+      224
+    ],
+    [
+      68,
+      133,
+      225
+    ],
+    [
+      69,
+      133,
+      223
+    ],
+    [
+      70,
+      133,
+      222
+    ],
+    [
+      71,
+      133,
+      221
+    ],
+    [
+      72,
+      133,
+      219
+    ]
+  ],
+  "selected": "candidate-v2.png with registrations-v2-owned.json"
+}

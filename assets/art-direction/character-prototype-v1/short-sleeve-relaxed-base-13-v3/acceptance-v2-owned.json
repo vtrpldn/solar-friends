@@ -1,0 +1,55 @@
+{
+  "status": "Accepted internal static pose; not a public outfit or complete seated clip.",
+  "source": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v3/candidate-v2.png",
+    "sha256": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-6126de83-00e7-45dd-88de-e84499e05561.png",
+    "byteIdenticalToOriginal": true
+  },
+  "scope": {
+    "pose": "base:13",
+    "nativeCrop": [
+      35,
+      60,
+      170,
+      170
+    ],
+    "staticCompositions": 6,
+    "paletteAccessoryCompositions": 48,
+    "requiredUpperShirtPixels": 610,
+    "coveredUpperShirtPixels": 610,
+    "exactPreservedBodyChannels": 69816,
+    "colourAlphaChecks": 2359296,
+    "colourProtectedLowerChannels": 416592,
+    "malformedInputsRefused": 9
+  },
+  "findings": [
+    "Near cuff follows the bent arm instead of a rectangular skin block.",
+    "Raised far shoulder meets the seated neckline and arm coherently.",
+    "Cream, teal, terracotta and indigo retain the reviewed folds and upper-left shading.",
+    "Original trousers and shoes own their native RGBA, including antialiased edge pixels.",
+    "The apparent light triangle between the arms is background; sampled original edge alpha is 4/9, not an opaque leftover shirt patch.",
+    "Mixed appearance-library boards retain the stool, tools, hats and beards."
+  ],
+  "artifacts": {
+    "registration-intent.json": "05fc60d85b6d07df1be85ef28982ee6a583070b3c8d50a3dabcc600b6fe40995",
+    "anatomy-review-intent-v1.json": "522491b1991b26a51f29cd7bd108f63d80bfe5c868135e61cf49793c7b2fcbf6",
+    "foreground-intent-v1.json": "06821f4256287a669a44934bfdf2b4c63d9d19a5f4e8c638fe72134075295a61",
+    "preserved-body-intent-v1.json": "951a91275e644abc1797e8ad82807a152b1f02b1d3fee399ddc73d862af9d861",
+    "preserved-body-v1.json": "742ab5518ebaa97d0aab86ab1e804c3832774da0dcd4f31a064bda4b32ff274b",
+    "registrations-v2-owned.json": "c2a41a2cea6b3920bd497f4ed6ceee746ae396e6bc35ace9299330a1be0b5f91",
+    "review-v2-owned.json": "0f6d12b5ceeb77448b14f976e2ca0d9516694e14dee64931776af67a512c91cb",
+    "review-v2-owned-details.png": "ac9cbd7fe891c8d5851fc337d1f45e3f9d3c4fc0f9aef74b4b4ed4b020589e17",
+    "review-v2-owned-lighting.png": "cf285002f5971be311a9fe1e392a1cdab7a783798eb4f56bebe344e70f9d8f55",
+    "colours-v2-owned-materials-v11.json": "3dee967277b7e54da9ddd4fb224b247d3de02ab6ec28ccc6a4f979b4f5e3421d",
+    "colours-v2-owned-materials-v11-plain.png": "d09b1a6e14f9640d61a18ec970ba159df626e496b3b07430cc1c3c52e40ef8ff",
+    "colours-v2-owned-materials-v11-equipped.png": "22a014fe9adfb8e6bffb6154f375d3953a59d4da6a87b63f3427b8532a9ae1cb",
+    "colours-v2-owned-materials-v11-waist.png": "283ec0708c7de9be1b8b6e3c1868429f026126ea5b523072a9f4db6004f0a618"
+  },
+  "rendererSha256": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+  "limits": [
+    "Only fourteen of forty-eight internal shirt poses are now covered; thirty-four remain.",
+    "No full seated cycle, transitions, continuous motion, shared-world review or public recipe acceptance.",
+    "All wider appearance and original builder release gates remain open."
+  ]
+}

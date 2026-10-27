@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image generation",
+  "transparentBackground": true,
+  "promptSha256": "4aea20a6b702953e97d68c7ae684d9085d977aad65938fd2c502588fd2482847",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v3/mask.png",
+      "role": "Edit target and exact frozen geometry, not finished artwork",
+      "sha256": "6049c8b8fe16b3b3da20a54bf47215f62670c3ab793867c8b14b71332f948459"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v3/candidate-v1.png",
+      "role": "Paint style only; never copy its geometry",
+      "sha256": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476"
+    }
+  ],
+  "status": "Prepared before generation; no candidate acceptance"
+}

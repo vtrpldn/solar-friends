@@ -1,0 +1,24 @@
+{
+  "scope": "The optional body-ownership path leaves an existing garment without that metadata byte-identical.",
+  "rendererSha256": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+  "references": [
+    {
+      "kind": "board",
+      "reference": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v3/review-v1-board.png",
+      "sha256": "1b67d2488484f3824b41f00dd52ca4227d972716d1b0d14a50a1f34d250d3fa0",
+      "exactMatch": true
+    },
+    {
+      "kind": "details",
+      "reference": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v3/review-v1-details.png",
+      "sha256": "fce89a7ded7b281103921b3ab8b98af86fb61e5e70a5e042487c12cc105cbda2",
+      "exactMatch": true
+    },
+    {
+      "kind": "lighting",
+      "reference": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-12-v3/review-v1-lighting.png",
+      "sha256": "f3df70fb792ce3caf3a93443ad79504bf0def7d33db1284cb5100360f694e901",
+      "exactMatch": true
+    }
+  ]
+}

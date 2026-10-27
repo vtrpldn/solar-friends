@@ -1,0 +1,70 @@
+{
+  "scope": "One internal pose source, six complete character combinations and static lighting/facing guides. No complete shirt animation or player recipe.",
+  "composed": 6,
+  "outside": 6,
+  "protectedLower": 6,
+  "foregroundChecks": 6,
+  "foregroundAlphaChecks": 16008,
+  "preservedBodyChecks": 0,
+  "refused": 6,
+  "coverage": [
+    {
+      "sheet": "base",
+      "index": 12,
+      "oldTop": 919,
+      "covered": 919,
+      "ratio": 1,
+      "collarLeaks": [],
+      "uncovered": []
+    }
+  ],
+  "foregroundVersion": "v1",
+  "sourceHash": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+  "anatomyReview": {
+    "sha256": "cd1fb995a929c69ab57cb3c9f95203dae38a42c257f2a232903e35f479b063d6",
+    "criteria": {
+      "status": "pre-paint review criteria",
+      "materialRevision": "v11",
+      "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+      "measuredWaistLine": [
+        [
+          85,
+          137
+        ],
+        [
+          95,
+          144
+        ],
+        [
+          105,
+          147
+        ],
+        [
+          116,
+          149
+        ],
+        [
+          122,
+          144
+        ],
+        [
+          126,
+          137
+        ],
+        [
+          145,
+          150
+        ]
+      ],
+      "lowerProtection": "Original shorts pixels at least two native pixels below the measured per-column waistline and every shoe pixel must remain unchanged. Foreground arm pixels are checked separately; a global horizontal cutoff is invalid for this bent body.",
+      "collarProtection": "Every opaque original shirt pixel above native row 134 must be covered; use the inspected original cloth and source-bound material regions to distinguish cloth from bent-face eyes/skin.",
+      "scope": "Declared before source paint generation; not appearance acceptance."
+    }
+  },
+  "reviewToolSha256": "6222962c04ce6240e7fa90e4165f9779a9e6404423c0f87fec93b8cd041269dd",
+  "rendererSha256": {
+    "character-clothing.js": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+    "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b"
+  }
+}

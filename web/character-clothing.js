@@ -16,6 +16,8 @@ export function composeClothingPose({body,appearanceBody,binding,image,sourceHas
  const garmentImage=clothingColourImage(colourSource,image,sourceHash);
  const foreground=r.foreground===undefined?null:validateBodyForegroundMask(r.foreground,binding,sheet,index);
  if(foreground&&foreground.schema!==2)throw Error('Garment foreground requires registered native pixel ownership.');
+ const preserved=r.preservedBody===undefined?null:validateBodyForegroundMask(r.preservedBody,binding,sheet,index);
+ if(preserved&&preserved.schema!==2)throw Error('Preserved body parts require registered native pixel ownership.');
  const painted=registeredBodyAppearance(body,appearanceBody),probe=document.createElement('canvas');probe.width=probe.height=1254;
  try{
   const context=probe.getContext('2d');context.drawImage(image,0,0);
@@ -30,6 +32,14 @@ export function composeClothingPose({body,appearanceBody,binding,image,sourceHas
    }else ctx.drawImage(painted,0,0);
    ctx.drawImage(garmentImage,...rect,...crop);
    if(front)ctx.drawImage(front,0,0);
+   // A registered top may not recolour owned trousers/shoes through a faint
+   // antialiased fringe. Restore exact appearance pixels, including edge alpha;
+   // source-over would blend those partial-alpha boundary pixels a second time.
+   if(preserved){
+    const original=painted.getContext('2d').getImageData(0,0,256,256),result=ctx.getImageData(0,0,256,256);
+    for(const [start,length]of preserved.runs)for(let p=start;p<start+length;p++)for(let k=0;k<4;k++)result.data[p*4+k]=original.data[p*4+k];
+    ctx.putImageData(result,0,0);
+   }
    return {frame,audit};
   }
   catch(error){frame.width=frame.height=0;throw error;}

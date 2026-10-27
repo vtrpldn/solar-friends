@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image generation",
+  "transparentBackground": true,
+  "promptSha256": "e765f1f4446988f21abe52f297ce92380e520c9f1ee179d3c8bb481cf6eff9f9",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v3/candidate-v1.png",
+      "role": "Unchanged painted edit target; sharpen only the horizontal lower-left inside hem",
+      "sha256": "c9f2476cb347e30a52f555d536639a91269a9ea25cd3ada45efddf2294bc319f"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-base-13-v3/mask.png",
+      "role": "Exact frozen silhouette boundary; do not extend beyond it",
+      "sha256": "6049c8b8fe16b3b3da20a54bf47215f62670c3ab793867c8b14b71332f948459"
+    }
+  ],
+  "status": "Prepared before targeted hem edit; no acceptance"
+}

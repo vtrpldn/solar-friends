@@ -1,0 +1,21 @@
+{
+  "scope": "Observed first strict failure without semantic body ownership; not a complete difference inventory.",
+  "sourceSha256": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+  "nativePixel": [
+    69,
+    134
+  ],
+  "channel": 0,
+  "bare": 117,
+  "dressed": 118,
+  "garmentAlpha": 1,
+  "upperEdgeAlphaAtRow133": [
+    249,
+    248,
+    247,
+    249,
+    249,
+    249
+  ],
+  "note": "No acceptance threshold relaxed and no generated pixel changed; registered original trousers/shoes remain independent of a top."
+}
