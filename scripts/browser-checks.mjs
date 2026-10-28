@@ -1,3 +1,4 @@
+import {checkHelpingControls} from './helping-browser-checks.mjs';
 import {checkTownPickupControls} from './town-pickup-browser-checks.mjs';
 import {worldPoint} from './browser-world-point.mjs';
 import {MATERIAL_KEYS} from '../web/materials.js';
@@ -236,39 +237,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
   await checkTownPickupControls({page,saved,capture});
-  // Helping with water needs a real empty receiver and a reachable supply.
-  // The replenished village used for the trade checks already has full buffers.
-  await page.locator('#dev-button').click();
-  await page.locator('#dev-import-file').setInputFiles('artifacts/water/before.json');
-  await page.waitForFunction(()=>{const v=window.solarDev.snapshot().village;return v.buildings.length===5&&v.water===24&&v.water_supply.trips.length===0;});
-  await page.locator('#dev-close').click();
-  await page.getByRole('button',{name:'People',exact:true}).click();
-  await page.getByRole('button',{name:'Meet Iara',exact:true}).click();
-  await page.getByRole('button',{name:'Help build',exact:true}).click();
-  assert((await page.locator('#person .response').textContent()).includes('No stage is ready'),'Refusals must be visible in the resident panel');
-  await page.getByRole('button',{name:'Water & sanitation',exact:true}).click();
-  assert((await page.locator('#person .response').textContent()).includes('Happy'));
-  assert(await page.locator('#person .response').isVisible());
-  assert(await page.getByRole('button',{name:'Resume time',exact:true}).isVisible());
-  const requested=await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0));
-  assert.equal(requested.task,'water');assert(requested.requested,'A real click must assign the task');
-  await capture('Accepted helping request with paused-time guidance','helping-request.png');
-  assert(requested.help?.id);assert(['travelling','working'].includes(requested.help.phase));
-  assert.equal(await page.locator('#person .help-phase').textContent(),'On the way');
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('120');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
-  for(let minute=0;minute<60 && await page.locator('#person .help-phase').textContent()!=='Finished';minute++){
-    await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('1');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
-  }
-  assert.equal(await page.locator('#person .help-phase').textContent(),'Finished');
-  assert.equal(await page.locator('#person .response').isVisible(),false,'Old acceptance and waiting feedback must disappear when the live request changes');
-  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).help.id),requested.help.id);
-  await capture('Helping request finishes through real resident work','helping-request-complete.png');
-  await page.getByRole('button',{name:'Forage food',exact:true}).click();
-  await page.getByRole('button',{name:'Cancel request',exact:true}).click();
-  assert.equal(await page.locator('#person .help-phase').textContent(),'Cancelled');
-  assert.equal(await page.evaluate(()=>window.solarDev.snapshot().residents.find(r=>r.id===0).help.phase),'cancelled');
-
-  await page.getByRole('button',{name:'Close resident details',exact:true}).click();
+  await checkHelpingControls({page,saved,capture});
   // Building interactions need the established village's solar farm and lamp.
   await page.locator('#dev-button').click();await page.locator('#dev-scenario').selectOption('village');await page.locator('#dev-load').click();
   await page.waitForFunction(()=>window.solarDev.scenario()==='village');await page.locator('#dev-close').click();

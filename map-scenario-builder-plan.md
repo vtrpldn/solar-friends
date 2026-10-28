@@ -2979,3 +2979,14 @@ The broader desktop journey now passes the current Story journal and care agreem
 The complete Trade pickup block is now shared with `verify-town-pickup-controls.mjs`, so it can be rerun independently without bypassing the full browser suite. It passes basket capacity, focused/full catalog access, a named driver, real departure/away/return phases, unchanged stock before arrival, exact delivery, the arrival status after reopening Trade, switching a confirmed delivery to pickup with only the freight-fee refund, and protected Story-save bytes. The prior hidden-panel text assertion was corrected to open Trade before inspecting its current message.
 
 **Why:** map changes should affect real walking time rather than fail checks built around the old smaller map. The original delivery/accounting assertions remain intact; no travel, inventory or progress was fabricated. The full browser run and every unfinished original builder release gate remain open.
+
+
+### Helping-card action placement and native-state regression
+
+The full desktop run now passes town pickup and reaches ordinary resident requests. Its older labels expected generic “Resume time”, “On the way” and “Finished”, while the current game names the resident and request state explicitly. The helping journey is extracted into shared `helping-browser-checks.mjs`; its completion loop observes the persistent native request rather than polling old display wording.
+
+Visual review exposed a related placement problem: the resume action followed the separate acceptance response and could fall below the visible panel. It now belongs inside the active request card, after its accepted-time line and before Cancel. Existing handlers, visibility rules and request semantics are unchanged. A player sees the time action beside the saved work being followed.
+
+`verify-helping-controls.mjs` and its `--compact` desktop variant both pass refusal feedback, a real accepted water request, exact named resume control, action grouping, actual resume and status focus, native completion with unchanged request identity, stale acceptance-message clearing, explicit cancellation and protected Story-save bytes. Acceptance captures were inspected at 1600×900 and 1280×800, including the panel's focus/scroll result.
+
+**Why:** the time action should be discoverable beside the request rather than below a second feedback box. The original full browser suite shares this focused journey and still requires its remaining sections; broader builder release gates remain open.
