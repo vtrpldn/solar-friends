@@ -1,0 +1,31 @@
+{
+  "status": "Pre-generation geometry intent; no paint acceptance",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "headGround": [
+    230,
+    1015
+  ],
+  "feetGround": [
+    1050,
+    605
+  ],
+  "axis": [
+    2,
+    -1
+  ],
+  "proposedSourceContact": [
+    640,
+    810
+  ],
+  "proposedNativeContact": [
+    128,
+    180
+  ],
+  "proposedUniformScale": 0.205,
+  "headDiameterSource": 270,
+  "guideSha256": "39346923b3443f8dd5377e077ea932403f6ce85675e02e2cee95e7dc429ddc52",
+  "runtimeRequirement": "Introduce explicit pose contact metadata before integrating. Existing standing anchor and all other poses must remain unchanged."
+}

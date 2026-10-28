@@ -1,0 +1,19 @@
+{
+  "status": "Raw camera study reviewed; not registered or accepted for gameplay",
+  "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c3c2ed3b-b8c1-4471-9a60-7341d10ae783.png",
+  "sha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+  "size": [
+    1254,
+    1254
+  ],
+  "paintEdited": false,
+  "visualFindings": "Head lower-left and feet upper-right now follow the intended ground direction more closely. Warm painted skin, cream clothes and relaxed closed-eye side sleep read clearly. The full silhouette is visible, with a narrow right margin. No furniture or opaque ground island is present. Exact camera, anatomy scale and terrain contact remain unmeasured.",
+  "remaining": [
+    "Native-frame registration and source-bound contact metadata",
+    "Skin and clothing material masks",
+    "Both hairstyles and short-sleeve pose",
+    "Accessory and shadow policy",
+    "Gameplay-scale comparison, day/night and transition review"
+  ],
+  "scope": "Raw source inspection only; production assets remain unchanged."
+}

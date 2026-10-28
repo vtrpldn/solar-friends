@@ -1,0 +1,13 @@
+{
+  "status": "Needs camera correction; not registered or used in gameplay",
+  "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ecd69ae6-32a1-484d-925e-1f6a3f34f025.png",
+  "sha256": "4d3eaa014ca95c6c733225a2553f28d41b87621fd399474cf513c57ce1690d5f",
+  "size": [
+    1254,
+    1254
+  ],
+  "paintEdited": false,
+  "visualFindings": "Warm skin, cream cloth, broad painted shading and a naturally relaxed side-sleeping pose are promising beside the neutral atlas. The head-to-feet direction is almost horizontal and descends toward the feet rather than following the intended 2:1 ground direction. Bare feet and hands read clearly. No furniture or opaque ground island is present. Geometry and ground contact are not accepted.",
+  "nextChange": "Regenerate the physical camera/pose using explicit ground-plane landmarks; preserve style, anatomy, clothing and transparency.",
+  "scope": "Raw body study only. No material, layered hair/clothing, lighting or runtime acceptance."
+}

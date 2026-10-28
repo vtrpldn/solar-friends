@@ -1,0 +1,31 @@
+{
+  "status": "Dedicated sleeping-body exploration; not registered or accepted for gameplay",
+  "tool": "built-in image_gen",
+  "transparentBackground": true,
+  "prompt": "prompt-v1.txt",
+  "references": [
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "role": "Exact body anatomy, face, clothing and paint style",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/session-restart-preparation-v1/cancelled.png",
+      "role": "Current game-world scale and lighting context",
+      "sha256": "b3e538d12082a236db5998502ea691940d822c653483a1a44d60913562ec7d60"
+    }
+  ],
+  "invariants": [
+    "same neutral resident anatomy and proportions",
+    "painted style and upper-left daylight",
+    "true transparency and uncropped figure",
+    "independent pose, no upright-frame warping"
+  ],
+  "remainingGates": [
+    "raw pose/anatomy/style review",
+    "native registration and material ownership",
+    "hair/clothing/accessory variants",
+    "ground placement and shadow",
+    "day/night and creator/world/saved recipe integration"
+  ]
+}

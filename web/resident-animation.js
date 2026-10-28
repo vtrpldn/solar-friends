@@ -108,7 +108,7 @@ export function presentedPoseLayers(layers,interpolation='crossfade') {
 
 // Additive premultiplied blending on an isolated surface keeps overlapping
 // opaque pixels opaque instead of making the whole resident flash translucent.
-export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, width) {
+function drawStandardResidentAnimation(ctx, surface, sheets, animation, x, y, width) {
   const buffer = surface.getContext('2d');
   buffer.clearRect(0, 0, surface.width, surface.height);
   buffer.globalCompositeOperation = 'lighter';
@@ -126,4 +126,30 @@ export function drawResidentAnimation(ctx, surface, sheets, animation, x, y, wid
   ctx.scale(animation.facing, animation.breath);
   ctx.drawImage(surface, -width / 2, -width * FRAME_ANCHOR, width, width);
   ctx.restore();
+}
+
+// Opt-in contact metadata moves a whole pose uniformly. It never warps a body
+// or clips reclining limbs to the standing frame's bottom margin.
+const contactSurfaces=new WeakMap();
+export function drawResidentAnimation(ctx,surface,sheets,animation,x,y,width){
+ const restore=()=>{if(contactSurfaces.has(surface)&&(surface.width!==256||surface.height!==256)){surface.width=surface.height=256;}};
+ if(sheets.contactForPose===undefined){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
+ if(typeof sheets.contactForPose!=='function')throw Error('Use registered resident pose contacts.');
+ const layers=presentedPoseLayers(animation.layers,sheets.interpolation??'crossfade').filter(pose=>pose.weight>0),poses=layers.map(pose=>{
+  const value=sheets.contactForPose(pose.sheet,pose.row*4+pose.frame,pose),contact=value===undefined?[128,FRAME_ANCHOR*256]:value;
+  if(!Array.isArray(contact)||contact.length!==2||![contact[0],contact[1]].every(n=>Number.isFinite(n)&&n>=0&&n<=256))throw Error('Keep a registered pose contact inside its native frame.');
+  return {pose,contact:[...contact]};
+ });
+ if(poses.every(({contact})=>contact[0]===128&&contact[1]===FRAME_ANCHOR*256)){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
+ if(!contactSurfaces.has(surface)){if(surface.width!==256||surface.height!==256)throw Error('Contact-registered poses use a native 256-square scratch surface.');contactSurfaces.set(surface,true);}
+ if(typeof sheets.frameForPose!=='function')throw Error('Contact-registered poses require a frame provider.');
+ const draws=[];for(const {pose,contact}of poses){const frame=sheets.frameForPose(pose.sheet,pose.row*4+pose.frame,pose);if(!frame)continue;if(frame.width!==256||frame.height!==256)throw Error('Keep registered resident poses at their native frame size.');draws.push({frame,contact,weight:pose.weight});}
+ if(!draws.length){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
+ const left=Math.floor(Math.min(...draws.map(d=>-d.contact[0]))),top=Math.floor(Math.min(...draws.map(d=>-d.contact[1]))),right=Math.ceil(Math.max(...draws.map(d=>256-d.contact[0]))),bottom=Math.ceil(Math.max(...draws.map(d=>256-d.contact[1])));
+ const w=right-left,h=bottom-top;if(w<1||h<1||w>512||h>512)throw Error('Keep pose contact composition bounded.');
+ if(surface.width!==w)surface.width=w;if(surface.height!==h)surface.height=h;
+ const buffer=surface.getContext('2d');buffer.clearRect(0,0,w,h);buffer.globalCompositeOperation='lighter';
+ try{for(const {frame,contact,weight}of draws){buffer.globalAlpha=weight;buffer.drawImage(frame,-contact[0]-left,-contact[1]-top);}}
+ finally{buffer.globalAlpha=1;buffer.globalCompositeOperation='source-over';}
+ ctx.save();try{ctx.translate(x,y);ctx.scale(animation.facing,animation.breath);const scale=width/256;ctx.drawImage(surface,left*scale,top*scale,w*scale,h*scale);}finally{ctx.restore();}
 }
