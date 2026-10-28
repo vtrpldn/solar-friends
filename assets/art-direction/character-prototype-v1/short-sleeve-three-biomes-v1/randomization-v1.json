@@ -1,0 +1,33 @@
+{
+  "result": "PASS",
+  "generatedCharacters": 640,
+  "lockCombinations": 16,
+  "budgets": [
+    "balanced",
+    "unrestricted"
+  ],
+  "baselineAppearances": [
+    "preset",
+    "short-sleeved custom"
+  ],
+  "generatedCustomRevisions": [
+    "resident-parts-v1",
+    "resident-parts-v3",
+    "resident-parts-v4"
+  ],
+  "lockedAppearancePreserved": true,
+  "readOnlyNativeValidation": true,
+  "residentArtRegression": {
+    "poseComparisons": 288,
+    "feedingReturns": 12,
+    "catalogParity": true
+  },
+  "scope": "Randomization and existing resident regression checks; not exhaustive artwork combinations or full builder acceptance.",
+  "inputs": {
+    "web/editor/character-choices.js": "61219214cc6a434d295984c2618e946d52257caf8e96d516c7a5299cd057b656",
+    "scripts/verify-character-choices.mjs": "d507b81beb2f514aab97eb5599536455b8f3266d53bfeebed9542dacd5782e5e",
+    "scripts/verify-resident-parts.mjs": "2a36dfa87d919f2070667f3585bbc1af870145d7260323bba7c84873a9cc0379",
+    "web/resident-part-recipe.js": "ef04cf05b79d50648e705662a4e0bdef3909f270e8ea26e85285d0d3f4fcf600",
+    "web/pkg/solar_friends_bg.wasm": "e78fae12869ea3fb20b6f70c5102b58b1919a186a646b27c551d0bc6073d8f2f"
+  }
+}

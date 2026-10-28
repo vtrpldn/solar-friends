@@ -1,0 +1,18 @@
+{
+  "scope": "One public short-sleeved equipped appearance per launch biome, authored teal/side-part then live indigo/curls; not all appearance combinations, weather states, complete biome acceptance or sustained performance.",
+  "biomes": {
+    "mata-atlantica": {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-public-v1/acceptance-v1.json",
+      "sha256": "97ed5dd275ef6e95c0cbd76ae2115451c9058a6448f6c421020cef236166e3cd"
+    },
+    "cerrado": {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-three-biomes-v1/cerrado-acceptance-v1.json",
+      "sha256": "73b08181a2261b64479f409efc8f5caa6f71b3a6ada7ec078dd6f2d3337a8768"
+    },
+    "caatinga": {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-three-biomes-v1/caatinga-acceptance-v1.json",
+      "sha256": "574af89a9a07424a3e8afb09f5357d783178850263a103ab2b76a0a18bf29bcc"
+    }
+  },
+  "randomizationEvidence": "randomization-v1.json"
+}
