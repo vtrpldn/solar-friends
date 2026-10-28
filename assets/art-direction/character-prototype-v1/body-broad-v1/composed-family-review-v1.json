@@ -12,7 +12,7 @@
   "allOwnedReleased": true,
   "borrowedSources": 18,
   "inputs": {
-    "web/character-composed-family.js": "fb78658ba90ab4a7dfb5ef5d202e68087f6561c76b6a34941868b44cc97cfed7",
+    "web/character-composed-family.js": "fb4dd055ea7078a2acb07e2ce90c00356ea069bd58602d53be6acc3546a56f1c",
     "scripts/verify-composed-resident-family.mjs": "b703171900cf5ae25c666b4839735093435a29ac15f976329bd8b1cb6e3dc883",
     "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v1.json": "ef4e01d54c9b7b26fd7bd04b02761bad40d9e9e1f8aeaff5f68aba8c21bf88ca"
   },
@@ -28,5 +28,6 @@
     "path": "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-portrait-v1.png",
     "sha256": "d4825a3c96cbce837632cc68bbedc1a8d9781f5d6a65ce438811d96513c758a3",
     "finding": "Artifact unchanged from prior inspected version."
-  }
+  },
+  "legacyRecipeRegression": "Current schema1 regression passes all original14 refusal and shared-body/lifecycle checks."
 }
