@@ -3144,3 +3144,11 @@ V5 uses the broader standing body as its only visual reference, removing the old
 The 14.40-second VP9 recording was decoded and counted (433 frames). All six eight-frame entry/rest/exit filmstrips were inspected at enlarged and gameplay sizes. Head/body scale remains coherent and the resting ground contact stays stable. The abrupt whole-key-pose change is visible on entry/exit; there is no newly authored lowering or getting-up anatomy.
 
 **Why:** static sleep review cannot establish actual task/pose selection or return behaviour. This closes only that limited native selection evidence gap. Intermediate anatomical motion, work/activity sources, fitted customization parts, portraits and public integration remain required; the original full builder goal remains active.
+
+### Additional body shape: work stroke source
+
+A dedicated 2×2 work source now covers base:4–7: ready stance, hands gathered at chest, upper stroke and bent finishing stroke. Its exact prompt separates the broader identity reference from the original body's gesture-only reference. `node scripts/review-broad-work.mjs` prepares all four poses with one uniform 0.35 source scale and explicit ground origins, refuses twelve unauthored pose/contact requests and renders all poses with the shared native painter and six generated biome day/mirrored-night scenes without browser errors.
+
+The enlarged comparison and all six world captures were inspected. Complete scalp, hands and boots fit; the ready stance matches standing stature. Lower-row heads/body volume appear slightly smaller, beyond the intentional knee/hip flexion, so these remain internal candidates for full native cadence and consistency review. No sequence/movie or fitted equipment acceptance is claimed. Source, registration, prompt, renderer and static artifact hashes are retained in `body-broad-v1/work-native-review-v1.json`.
+
+**Why:** the additional body cannot reuse another person's work anatomy. Four authored strokes advance the family toward completeness, but motion consistency, remaining activities, fitted parts, public integration and the original builder gates remain unfinished.

@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "status": "Four work poses retained for native sequence review; internal only",
+  "why": "Check four newly authored work poses at one uniform source scale beside the same standing body",
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-mata-atlantica-day.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-mata-atlantica-night.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-cerrado-day.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-cerrado-night.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-caatinga-day.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-caatinga-night.png"
+    }
+  ],
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "0a0e407ca3bd9f29a34028cbabfe8c0718a624cbfa1d792f3b0b17ed167d474a"
+    },
+    {
+      "index": 1,
+      "sha256": "6d7862d500dc9d80f37f4884e4f220d71b7dce903a0623ce2e3f7b2095ce0b84"
+    },
+    {
+      "index": 2,
+      "sha256": "d0560731031e061c7ab30b727add6ce9d879b8b822e7ade763ff89b474cc1e52"
+    },
+    {
+      "index": 3,
+      "sha256": "18d4ec9b74abf7d2d8eef2379536628fc699331c599034fb82570076d0ade0a3"
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v1.png": "a37c91722f1050d942614d796bdaf882ca55d605338489d3b65cd949dc7c9dfb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "scripts/review-broad-work.mjs": "b0070bf6cbf4b795d7d4f8ce4b2450335611abffd86f993a36d23a9fe362af46",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf"
+  },
+  "errors": [],
+  "visualReview": "Inspected enlarged normal/day and mirrored/night comparisons for all four poses plus six biome world captures. Scalp, fingertips and both boots remain complete. Ready pose matches standing stature; raised and bent strokes lower the head with knee/hip flexion. Lower-row figures appear slightly smaller in head/body volume, so full native cadence and source consistency review remains required before family acceptance. No equipment or fitted parts are present.",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-caatinga-day.png": "484a0a53a1664f2538bc7c7380d7278dd9d67ec62226393840e5e09f639544dd",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-caatinga-night.png": "2150eea4d7452f6547be0224efee5055e6832def0ed79c06e879b71b2cde340e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-cerrado-day.png": "98735b0642c0951842a5290dca6e040333d7a3a7be44c87dda6ad86616e6624f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-cerrado-night.png": "3aefa42e7e9f0f931d0408ef56872dfc90747c100afe5fa8d426befb12b8407b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-mata-atlantica-day.png": "6666b343eae805c8e38c7a1a0a6ffb2fc7d58168e5dbe27f84bce81aaf867ac1",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v1-mata-atlantica-night.png": "6af6527b4fde08b423c4b4206bc586245941b025946e47eccccc504ea4bb7c8b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-native-comparison-v1.png": "0ef61c4b481f5a32d421435572d80980878c65741e1e99a4527c6af320329bec",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-registration-v1.json": "0ad1ee6299e0556312bb2f6dd036aee4c0a3cb6c11fc837482fa0d6d558a7918",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-brief-v1.json": "78551bf625ba4cf5dcb1b429f42af011c8aaf9c57d807b8c0ee1014cdc016c14"
+  },
+  "remaining": [
+    "Encode/decode/inspect native work sequence and standing/work transitions",
+    "Resolve any visible body-volume change across lower-row strokes",
+    "Author activity sources and fit clothing hair facial accessories equipment",
+    "Integrate only complete reviewed public family",
+    "Original full builder release gates remain incomplete"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "status": "Candidate: native scale and sequence review pending",
+  "why": "Additional anatomical body requires its own work strokes before fitted parts or public exposure",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: identity-preserve. Asset: Solar Friends broader adult four-pose work-body sprite sheet. Image 1 is exact identity/anatomy/style and roomy 2x2 layout reference. Preserve same bald round-cheeked adult, fuller belly/thighs, compact broad torso, head/body ratio, warm tan skin, cream sleeveless vest/shorts, brown boots, warm painted edges/broad shading/upper-left light. Image 2 ONLY provides SECOND ROW work gesture sequence, not its lean anatomy or 4x4 layout. Paint exactly four complete separated figures in a roomy TWO BY TWO sheet. Same body scale and head diameter in all four; feet planted on equal ground line within each row. Top-left: calm standing ready, arms lowered. Top-right: elbows bent, hands together in front of upper chest preparing a two-handed work stroke. Bottom-left: both hands together lifted near the right shoulder/ear for the upper stroke, elbows flexed, scalp fully visible, no arm clipping. Bottom-right: leaning gently forward at hips, knees softened, hands together lowered in front near knee height to finish the stroke. Both full boots visible, entire fingertips/scalp and arms inside each cell with generous transparent margin. Fixed elevated three-quarter front-right orthographic camera. No tools in hands: equipment will be separate fitted artwork. Do not slim the body for bending; retain round belly, short sturdy legs and same face. Preserve same head diameter across all four rather than enlarging top-row figures. True transparent background and gaps; no hair, hats, beard, tools, ground, shadows, stool, grid, labels, text, watermark. Four figures only.",
+  "references": [
+    {
+      "path": "breathe-candidate-v1.png",
+      "role": "Exact identity anatomy style and 2x2 layout"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "role": "Only row2 gesture sequence; not lean anatomy or atlas layout"
+    }
+  ],
+  "poseSlots": [
+    "base:4",
+    "base:5",
+    "base:6",
+    "base:7"
+  ],
+  "output": "work-candidate-v1.png"
+}
