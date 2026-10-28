@@ -1,0 +1,494 @@
+{
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 1,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "dpr": 2,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 1,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "cerrado",
+      "dpr": 2,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 1,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 0.6,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 1.3,
+      "panX": 0,
+      "panY": 0,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 1.8,
+      "panX": 430,
+      "panY": -210,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "none",
+      "used": true,
+      "exact": true
+    },
+    {
+      "biome": "caatinga",
+      "dpr": 2,
+      "scale": 0.25,
+      "panX": -600,
+      "panY": 370,
+      "filter": "brightness(.5) saturate(.6)",
+      "used": false,
+      "exact": true
+    }
+  ],
+  "hits": 24,
+  "revisionInvalidation": true,
+  "boundedFallback": true,
+  "clearAndDispose": true,
+  "borrowedTerrainPreserved": true,
+  "baselineCommit": "7f91902",
+  "baselineSha256": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+  "moduleSha256": "a77500c96b672abba0cb087d4521d7686a70463739680912a2a0981ccf14f3d0",
+  "browser": "151.0.7922.34",
+  "scope": "Exact frozen ground pixels, cached repeats, camera/zoom/lighting changes, explicit terrain revision and bounded owner lifetime. Not full-frame integration or runtime performance."
+}

@@ -1,7 +1,7 @@
 {
-  "startedAt": "2026-10-28T15:20:18.903Z",
-  "finishedAt": "2026-10-28T15:24:49.846Z",
-  "sourceAndBuildHash": "6e830ac451713ead11e59f81888cc5a2ba41ff620d48377199f465bed4661675",
+  "startedAt": "2026-10-28T16:03:05.119Z",
+  "finishedAt": "2026-10-28T16:07:35.069Z",
+  "sourceAndBuildHash": "2954fa2f746c26ca0105ded4d027362e837c698dd34aae05ddc2a716fa60de93",
   "scope": "Browser only",
   "results": [
     {

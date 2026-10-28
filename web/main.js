@@ -1,3 +1,4 @@
+import {createWorldBackdrop} from './world-backdrop.js';
 import {paintResidentShadow} from './resident-ground-shadow.js';
 import {creationPresentation} from './creation-presentation.js';
 import {paintResourceSite} from './resource-site-art.js';
@@ -211,9 +212,10 @@ async function restartPlayerSession(test=false){
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
 function releaseResidentSurface(id){const surface=residentSurfaces.get(id);if(surface)surface.width=surface.height=0;residentSurfaces.delete(id);}
-function clearResidentVisuals(){residentAnimations.clear();for(const id of residentSurfaces.keys())releaseResidentSurface(id);}
+function clearResidentVisuals(){worldBackdrop.clear();residentAnimations.clear();for(const id of residentSurfaces.keys())releaseResidentSurface(id);}
 let animationDelta = 0;
 let weatherTime = 0;
+const worldBackdrop=createWorldBackdrop(ctx,paintWorldGround);
 let groundLayer,
   groundKey = null;
 const forestArt = new Image();
@@ -702,7 +704,7 @@ function render() {
     groundLayer = paintTerrain(terrain, visibleRoads,state.village.economy.sources.filter(s=>s.active),soil,state.village.land.seed,worldMap);
     groundKey = key;
   }
-  paintWorldGround(ctx,groundLayer,origin,scale);
+  worldBackdrop.paint(groundLayer,origin,scale,groundKey);
   const goalRegion=tool&&worldMap?.regions?.find(r=>r.id===scenarioGoalRegion);
   canvas.dataset.goalRegion=goalRegion?.id??'';
   if(goalRegion){const {x,y,width:w,height:h}=goalRegion;polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]].map(([x,y])=>{const p=iso(x,y);return [p.x,p.y];}),'#ebc55935','#ffe5a1');const p=iso(x+(w-1)/2,y-.5);ctx.fillStyle='#49351e';ctx.font='bold 14px Georgia';ctx.textAlign='center';ctx.fillText(goalRegion.title,p.x,p.y-10);}
@@ -2016,6 +2018,7 @@ const devAPI = {
   snapshot: () => JSON.parse(game.snapshot()),
   inspect: () => JSON.parse(game.dev_inspect()),
   simulationClock:()=>simulationClock.status(),
+  groundBackdrop:()=>worldBackdrop.info(),
   residentArtworkCache:()=>residentAppearances.partCacheInfo(),
   residentArtworkOwnership:()=>residentAppearances.ownershipInfo(),
   residentScratchSurfaces:()=>({count:residentSurfaces.size,pixels:[...residentSurfaces.values()].reduce((sum,c)=>sum+c.width*c.height,0),ids:[...residentSurfaces.keys()]}),
