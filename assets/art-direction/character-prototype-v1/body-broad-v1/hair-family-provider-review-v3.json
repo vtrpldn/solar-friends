@@ -1,0 +1,36 @@
+{
+  "status": "Internal cooking cap refinement reviewed; remaining look contact defect",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v3.png",
+      "sha256": "b6d52877a77c58fa6e74443ee7e0020b6ca0e6f2e6900902b3bb049fa8fdc3e3"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v3.png",
+      "sha256": "b90fd21f9aedb26b869c71466d0d3cfbe97291da1bb62b947fe760b3bffe18b1"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v3.png",
+      "sha256": "a3cc5d7c95b2c06f44476575bf0e58e969b8505c1bc1d005a892007be704dbfd"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 0,
+  "inputs": {
+    "web/character-hair-family.js": "76d855e58fa818a6fcedf83344608b4b2a6f7ab6f5dd44b1e97eeb4fb12e8ee7",
+    "scripts/verify-broad-hair-family.mjs": "3a311c17ff32f71b0baf01128af5fcb8a6ab3ba80ef931223471363e43686744",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v3.json": "d3b8272e4c44cc5fd490537d5b03c8c34eda4a711d2633078917b6d449523d88"
+  },
+  "visualReview": {
+    "inspected": [
+      "hair-family-sidepart-activities-v3.png"
+    ],
+    "finding": "Cooking uses wider painted cap sources at the same common atlas scale with authored ear contacts. Silver review preserves silhouette alpha in all48 poses, and reveals a remaining scalp edge in a looking pose.",
+    "scope": "Static right-facing chestnut/silver only; no full hairstyle acceptance."
+  }
+}

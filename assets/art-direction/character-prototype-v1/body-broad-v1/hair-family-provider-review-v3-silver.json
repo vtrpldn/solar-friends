@@ -1,0 +1,38 @@
+{
+  "status": "Internal cooking cap refinement reviewed; remaining look contact defect",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v3-silver.png",
+      "sha256": "76cf5c915ba1d88d188a18f8342b6b6e8840a91a512847c1b290414013ef299c"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v3-silver.png",
+      "sha256": "a250eee0983d4d1d96a8a53442d0b4806729adf047f6608f6e0b0a02d453ce18"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v3-silver.png",
+      "sha256": "611344c42703817866071aca1cc1d12da506bc39f1d38a4d81df5d60ae4f39f3"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 48,
+  "inputs": {
+    "web/character-hair-family.js": "76d855e58fa818a6fcedf83344608b4b2a6f7ab6f5dd44b1e97eeb4fb12e8ee7",
+    "scripts/verify-broad-hair-family.mjs": "3a311c17ff32f71b0baf01128af5fcb8a6ab3ba80ef931223471363e43686744",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v3.json": "d3b8272e4c44cc5fd490537d5b03c8c34eda4a711d2633078917b6d449523d88"
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v3-silver.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v3-silver.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v3-silver.png"
+    ],
+    "finding": "Cooking uses wider painted cap sources at the same common atlas scale with authored ear contacts. Silver review preserves silhouette alpha in all48 poses, and reveals a remaining scalp edge in a looking pose.",
+    "scope": "Static right-facing chestnut/silver only; no full hairstyle acceptance."
+  }
+}
