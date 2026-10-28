@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "status": "Internal provider verification passed; public artwork acceptance pending",
+  "why": "Use reviewed per-pose hat placement in a reusable exact-body provider",
+  "checks": {
+    "reviewedPosePixelComparisons": 48,
+    "malformedAndDisposedRefusals": 9,
+    "ownedCanvasesReleased": 47,
+    "borrowedSleepFramePreserved": true,
+    "originCopyIsolated": true
+  },
+  "inputs": {
+    "web/character-hat-family.js": "132305a1fd748e8242c9095b70874094844dbcb9d30643b0fd816933d1c6ae77",
+    "scripts/verify-broad-hat-family.mjs": "32c605f59fb8aaca2c16a6ddd93e942cfca3afae3129e360937ef7cc022d8219",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-family-registration-draft-v1.json": "75dbe5958e8a45de1faedaa3bb0cdafabc210568c016c6db74f38e546aead43a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-fit-diagnostic-v4.json": "2e2b983b895edb8c028cee98812e1f781378d05aa39ee734d55373ad13a2802a"
+  },
+  "remaining": [
+    "Mirrored native motion",
+    "Biome lighting",
+    "Hairstyle combinations",
+    "Complete public creator integration"
+  ]
+}
