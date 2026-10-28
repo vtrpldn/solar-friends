@@ -27,7 +27,7 @@ export function updateAgricultureUI(game,state,locate){
   $('#farm-reserves').textContent=`${report.fodder} fodder · ${report.milk} fresh milk · ${report.honey} honey. Grow fodder in a garden or buy it in Trade. Organic residues from goats can go to compost or the biodigester.`;
   const list=$('#farm-plots'),existing=[...list.querySelectorAll('button')];
   if(existing.map(b=>Number(b.dataset.farm)).join(',')!==report.plots.map(p=>p.building).join(',')){
-    list.replaceChildren(...report.plots.map(plot=>{const b=v.buildings.find(b=>b.id===plot.building),button=document.createElement('button');button.className='farm-record';button.dataset.farm=b.id;button.onclick=()=>locate(b.id);button.innerHTML=`${itemIcon(b.kind==='orchard'?'food':b.kind==='apiary'?'honey':'milk')}<span><b></b><small></small></span><span aria-hidden="true">›</span>`;return button;}));
+    list.replaceChildren(...report.plots.map(plot=>{const b=v.buildings.find(b=>b.id===plot.building),button=document.createElement('button');button.className='farm-record';button.dataset.farm=b.id;button.onclick=()=>locate(b.id);button.innerHTML=`${itemIcon(b.kind==='orchard'?'food':b.kind==='apiary'?'honey':b.kind==='coop'?'eggs':'milk')}<span><b></b><small></small></span><span aria-hidden="true">›</span>`;return button;}));
   }
   for(const button of list.children){const p=report.plots.find(p=>p.building===Number(button.dataset.farm)),b=v.buildings.find(b=>b.id===p.building);button.querySelector('b').textContent=`${farmNames[b.kind]} ${b.id+1}`;button.querySelector('small').textContent=p.status;}
   return report;

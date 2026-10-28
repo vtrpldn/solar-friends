@@ -35,7 +35,7 @@ export async function checkFarmingControls({page,saved,capture}){
     await page.locator('#next-crop').selectOption('fodder');
     await page.getByRole('button',{name:'Close buildings',exact:true}).click();
     await page.locator('[data-hud-resource="food"]').click();
-    assert.equal(await page.locator('#pantry-stock>span').count(),5);assert.equal(await page.locator('.farm-record').count(),3);
+    assert.equal(await page.locator('#pantry-stock>span').count(),5);assert.deepEqual(await page.locator('.farm-record').evaluateAll(rows=>rows.map(row=>({id:Number(row.dataset.farm),icon:row.querySelector('use').getAttribute('href').split('#').at(-1)}))),[{id:8,icon:'food'},{id:9,icon:'milk'},{id:10,icon:'honey'},{id:12,icon:'eggs'}]);
     const overflow=await page.locator('#supplies-panel').evaluate(el=>el.scrollWidth>el.clientWidth+1);assert.equal(overflow,false);
     await capture(`Milk, honey and farm records inside the pantry book at ${viewport.width}px`,`farming-pantry-${viewport.width}.png`);
     await page.locator('[data-farm="9"]').click();assert.equal(await page.locator('#building-choice').inputValue(),'9');

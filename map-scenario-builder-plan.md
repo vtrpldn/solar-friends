@@ -2941,3 +2941,12 @@ Gameplay browser checks no longer reproduce the old smaller-map camera origin an
 The desktop regression passes its 1600/1280 interface checks, Story outcome controls, extraction/ground disturbance, compost delivery and actual resident restoration, cultivation, planting and living-land interactions. The restoration capture was inspected and its queued job correctly identifies cell 18,18. The run then reached an obsolete climate Sandbox fixture; the current native climate verifier regenerated that fixture and passed forecasts, rain collection, solar/river differences, exact saves and Sandbox season changes. The broader browser suite remains in progress and is not accepted as completely passing.
 
 **Why:** the centered 64×64 map made duplicated old screen-coordinate formulas click different cells. Reading the real renderer projection keeps pointer checks meaningful instead of changing native expectations to match an incorrect click. This test-infrastructure correction does not complete the remaining original builder release gates.
+
+
+### Farm overview consistency regression
+
+The broader browser regression now passes the refreshed climate/Sandbox season flow. Its next farming assertion was stale because chicken coops now participate in the native farm report. Reviewing the fourth record exposed an actual presentation defect: coops inherited the dairy milk icon. They now use eggs. The browser assertion verifies the exact orchard/food, goat/milk, apiary/honey and coop/eggs record identities rather than only counting rows.
+
+`verify-farming-controls.mjs` runs the existing complete farming control journey independently through the normal Help development entry. It passes both desktop widths, all four icon bindings, crop/production toggles with exact paused restoration, targeted care requests, real resident milk/honey/fruit production and protected Story-save bytes. The 1280-pixel pantry capture was visually reviewed.
+
+**Why:** the builder release must preserve ordinary village controls as native content expands. This fixes a misleading product icon and restores meaningful regression coverage; the full browser journey and original builder release gates remain unfinished.
