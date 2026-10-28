@@ -11,9 +11,11 @@
   "hairDisposalRaces": 2,
   "allOwnedCanvasesReleased": true,
   "borrowedBodiesPreserved": true,
+  "materialRegistrationSha256": "9a762e92d93e30d880dabac0620b3cc60b67ce7310ad30c18ad04ec3666a114f",
+  "reviewToolSha256": "e1c76996c74dad50d6d00faa4b0e95e5c18d6efb7a8c0571672775352908c7b4",
   "rendererSha256": {
-    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
-    "character-hair.js": "c31ddcd0db180b0f52859846ed885389dbd2855a810a3226f5dbd483b6b8b0a0"
+    "character-family-appearance.js": "601dbdd2c835ddbeafa822d643acdccf8a378c1ba7d65b0d14e90416e26bd68c",
+    "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a"
   },
   "referenceSha256": "2265c0e385468de9b37aa9cd573bdf92ee937116333fdcf09d70a4131603f1bd"
 }

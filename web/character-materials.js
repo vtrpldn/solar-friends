@@ -30,11 +30,16 @@ function creamComponents(pixels){
  return {cream,components,sizes};
 }
 export function bodyMaterialMask(pixels,region){
- if(pixels.width!==256||pixels.height!==256||pixels.data.length!==256*256*4||!region||!Number.isFinite(region.shirtTop)||!Number.isFinite(region.waist)||!Number.isFinite(region.shoes)||region.shirtTop<0||region.shirtTop>=region.waist||region.waist>=region.shoes||region.shoes>255||!Array.isArray(region.head)||region.head.length!==4||Array.from(region.head).some(n=>!Number.isFinite(n))||region.head[0]<0||region.head[0]>255||region.head[1]<0||region.head[1]>255||region.head[2]<=0||region.head[2]>96||region.head[3]<=0||region.head[3]>96)throw Error('Provide registered 256-pixel body frames and supported pose regions.');
+ const explicit=region?.garmentAreas!==undefined;
+ if(pixels.width!==256||pixels.height!==256||pixels.data.length!==256*256*4||!region||(!explicit&&(!Number.isFinite(region.shirtTop)||!Number.isFinite(region.waist)||!Number.isFinite(region.shoes)||region.shirtTop<0||region.shirtTop>=region.waist||region.waist>=region.shoes||region.shoes>255))||!Array.isArray(region.head)||region.head.length!==4||Array.from(region.head).some(n=>!Number.isFinite(n))||region.head[0]<0||region.head[0]>255||region.head[1]<0||region.head[1]>255||region.head[2]<=0||region.head[2]>96||region.head[3]<=0||region.head[3]>96)throw Error('Provide registered 256-pixel body frames and supported pose regions.');
  const point=p=>Array.isArray(p)&&p.length===2&&Array.from(p).every(n=>Number.isFinite(n)&&n>=0&&n<=256),line=region.waistLine,areas=region.shoeAreas,skinAreas=region.skinAreas;
  if(line!==undefined&&(!Array.isArray(line)||line.length<2||line.length>32||Array.from(line).some((p,i)=>!point(p)||p[1]<region.shirtTop||p[1]>=region.shoes||(i>0&&p[0]<=line[i-1][0]))))throw Error('Use an ordered measured garment waistline.');
- if(areas!==undefined&&(!Array.isArray(areas)||!areas.length||areas.length>4||Array.from(areas).some(polygon=>!Array.isArray(polygon)||polygon.length<3||polygon.length>24||Array.from(polygon).some(p=>!point(p)))))throw Error('Use bounded measured shoe regions.');
+ if(areas!==undefined&&(!Array.isArray(areas)||(!explicit&&!areas.length)||areas.length>4||Array.from(areas).some(polygon=>!Array.isArray(polygon)||polygon.length<3||polygon.length>24||Array.from(polygon).some(p=>!point(p)))))throw Error('Use bounded measured shoe regions.');
  if(skinAreas!==undefined&&(!Array.isArray(skinAreas)||!skinAreas.length||skinAreas.length>4||Array.from(skinAreas).some(polygon=>!Array.isArray(polygon)||polygon.length<3||polygon.length>24||Array.from(polygon).some(p=>!point(p)))))throw Error('Use bounded measured skin regions.');
+ if(explicit){
+  const garment=region.garmentAreas,polygon=p=>Array.isArray(p)&&p.length>=3&&p.length<=24&&Array.from(p).every(point);
+  if(!garment||typeof garment!=='object'||Array.isArray(garment)||Object.keys(garment).sort().join(',')!=='shirt,shorts'||['shirt','shorts'].some(name=>!Array.isArray(garment[name])||!garment[name].length||garment[name].length>4||Array.from(garment[name]).some(p=>!polygon(p)))||!Array.isArray(areas)||Object.keys(region).some(key=>!['head','garmentAreas','shoeAreas','skinAreas'].includes(key)))throw Error('Use measured garment polygons and explicit shoe regions for a reclining pose.');
+ }
  const waistAt=x=>{if(!line)return region.waist;if(x<=line[0][0])return line[0][1];for(let i=1;i<line.length;i++)if(x<=line[i][0]){const a=line[i-1],b=line[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]);}return line.at(-1)[1];};
  const inside=(x,y,polygon)=>{let result=false;for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){const a=polygon[i],b=polygon[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])result=!result;}return result;};
  const labels=new Uint8Array(256*256),counts=[0,0,0,0,0],regions=creamComponents(pixels);
@@ -44,7 +49,12 @@ export function bodyMaterialMask(pixels,region){
   // Small isolated whites in the face are eyes/teeth. Connected garment
   // highlights may cross the head ellipse at a collar and must still dye.
   if(skinAreas?.some(polygon=>inside(x+.5,y+.5,polygon)))material=ids.skin;
-  else if(regions.cream[p]&&y>=region.shirtTop&&!(inHead&&regions.sizes[regions.components[p]]<64))material=y<waistAt(x)?ids.shirt:ids.shorts;
+  else if(regions.cream[p]&&(explicit||y>=region.shirtTop)&&!(inHead&&regions.sizes[regions.components[p]]<64)){
+   if(explicit){
+    if(region.garmentAreas.shirt.some(polygon=>inside(x+.5,y+.5,polygon)))material=ids.shirt;
+    else if(region.garmentAreas.shorts.some(polygon=>inside(x+.5,y+.5,polygon)))material=ids.shorts;
+   }else material=y<waistAt(x)?ids.shirt:ids.shorts;
+  }
   else if(areas?areas.some(polygon=>inside(x+.5,y+.5,polygon)):y>=region.shoes&&r<190&&g<140&&b<120&&b/Math.max(1,g)>.4&&g/Math.max(1,r)>.5)material=ids.shoes;
   else if(r>140&&g/r<.72&&b/r<.49&&g/Math.max(1,b)>1.35)material=ids.skin;
   labels[p]=material;counts[material]++;
@@ -80,13 +90,13 @@ export async function createFamilyBodyMaterialModel({frames,binding},registratio
   if(!exact(r.sheets[sheet],['regions'])||!Array.isArray(r.sheets[sheet].regions)||r.sheets[sheet].regions.length!==16||frames[sheet]?.length!==16)throw Error('Provide all 48 family colour regions.');
   for(let index=0;index<16;index++){
    const frame=frames[sheet][index],region=r.sheets[sheet].regions[index];
-   if(!region||Object.keys(region).some(key=>!['shirtTop','waist','shoes','head','waistLine','shoeAreas','skinAreas'].includes(key))||['shirtTop','waist','shoes','head'].some(key=>!Object.hasOwn(region,key))||frame?.width!==256||frame?.height!==256)throw Error('Use complete measured colour regions and body frames.');
+   if(!region||Object.keys(region).some(key=>!['shirtTop','waist','shoes','head','waistLine','shoeAreas','skinAreas','garmentAreas'].includes(key))||(region.garmentAreas!==undefined?['head','garmentAreas','shoeAreas']:['shirtTop','waist','shoes','head']).some(key=>!Object.hasOwn(region,key))||frame?.width!==256||frame?.height!==256)throw Error('Use complete measured colour regions and body frames.');
    if(await digest(frame.getContext('2d').getImageData(0,0,256,256).data)!==owner.frames[sheet][index])throw Error('The prepared body pixels changed after colour registration.');
   }
  }
- return materialModel(frames,r.sheets,{maxFrames,sourceKey:await digest(new TextEncoder().encode(canonical(r))),copyMasks:true});
+ return materialModel(frames,r.sheets,{maxFrames,sourceKey:await digest(new TextEncoder().encode(canonical(r))),copyMasks:true,...(Object.values(owner.ownership.sources).some(s=>s.transform.method==='contact-v1')?{contactForPose:(sheet,index)=>{const pose=owner.ownership.poses[sheet]?.[index];if(!pose)throw Error('Choose a registered material pose.');const t=owner.ownership.sources[pose.source].transform;return t.method==='contact-v1'?[...t.registration.nativeContact]:undefined;}}:{})});
 }
-function materialModel(frames,sheets,{maxFrames,sourceKey,copyMasks=false}){
+function materialModel(frames,sheets,{maxFrames,sourceKey,copyMasks=false,contactForPose}){
  const sources={},masks={},cache=new Map();
  for(const [sheet,count]of Object.entries(widths)){
   if(frames[sheet]?.length!==count||sheets[sheet]?.regions?.length!==count)throw Error('Provide all 48 registered body poses.');sources[sheet]=[];masks[sheet]=[];
@@ -99,5 +109,5 @@ function materialModel(frames,sheets,{maxFrames,sourceKey,copyMasks=false}){
   if(cache.has(key)){const result=cache.get(key);cache.delete(key);cache.set(key,result);return result;}
   const pixels=tintBodyMaterials(sources[sheet][index],masks[sheet][index],checked,{diagnostic}),canvas=document.createElement('canvas');canvas.width=canvas.height=256;canvas.getContext('2d').putImageData(new ImageData(pixels.data,256,256),0,0);cache.set(key,canvas);if(cache.size>maxFrames)cache.delete(cache.keys().next().value);return canvas;
  };
- return {provider:(recipe=defaultBodyMaterials,{diagnostic=false}={})=>{const checked=validateBodyMaterials(recipe);return {frameForPose:(sheet,index)=>frameFor(sheet,index,checked,diagnostic)};},mask:(sheet,index)=>{const mask=masks[sheet]?.[index];return copyMasks&&mask?{labels:mask.labels.slice(),counts:[...mask.counts]}:mask;},cacheInfo:()=>({entries:cache.size,maximum:maxFrames,rgbaByteUpperBound:cache.size*256*256*4}),clear:()=>cache.clear()};
+ return {provider:(recipe=defaultBodyMaterials,{diagnostic=false}={})=>{const checked=validateBodyMaterials(recipe);return {...(contactForPose?{contactForPose}:{}),frameForPose:(sheet,index)=>frameFor(sheet,index,checked,diagnostic)};},mask:(sheet,index)=>{const mask=masks[sheet]?.[index];return copyMasks&&mask?{labels:mask.labels.slice(),counts:[...mask.counts]}:mask;},cacheInfo:()=>({entries:cache.size,maximum:maxFrames,rgbaByteUpperBound:cache.size*256*256*4}),clear:()=>cache.clear()};
 }

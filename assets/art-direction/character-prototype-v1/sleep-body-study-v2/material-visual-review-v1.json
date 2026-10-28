@@ -1,0 +1,20 @@
+{
+  "status": "Internal material draft reviewed; not approved for public gameplay",
+  "sourceSha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+  "boardSha256": "f644df039dec69577f0dd4fe2c580d4470147c7540e1193bf6618953ddbbaca5",
+  "regionSha256": "0e7970511c3b42ef2ceb2bbc32529f12c0a0a7c0664dcdff07fa64709927ac1e",
+  "findings": "The diagnostic board separates skin, sleeveless shirt and shorts along the reclining body rather than a horizontal row. Copper/teal/sage colours remain legible in normal and mirrored views. Bare feet stay in the skin family, and changing the shoe palette does not paint footwear onto them. Dark eyes, outlines and existing shade detail remain protected. The waistband is an authored first draft and still needs close-up seam review with layered clothing and actual ground placement before acceptance.",
+  "checkedScope": [
+    "Unchanged source, diagnostic labels and alternate palette at enlarged and native scale",
+    "Both facings",
+    "Five semantic truth points and per-material pixel isolation",
+    "Original alpha and default-frame reuse"
+  ],
+  "notChecked": [
+    "Full palette combinations",
+    "Hair and short-sleeve layer intersections",
+    "Physical ground shadows and terrain contact",
+    "Night/rain/world motion",
+    "Public recipe migration and saved-game integration"
+  ]
+}

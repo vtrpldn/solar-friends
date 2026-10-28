@@ -1,0 +1,120 @@
+{
+  "status": "Authored from material-guide-v1.png; palette review required",
+  "bodyFrameSha256": "327d529c25e302d4540d3c3f2dbad5ca58b2c3e6f4dcc5dfcc71cbc27edc497a",
+  "region": {
+    "head": [
+      48,
+      177,
+      29,
+      27
+    ],
+    "garmentAreas": {
+      "shirt": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            120,
+            0
+          ],
+          [
+            120,
+            126
+          ],
+          [
+            125,
+            130
+          ],
+          [
+            131,
+            137
+          ],
+          [
+            135,
+            147
+          ],
+          [
+            137,
+            157
+          ],
+          [
+            137,
+            164
+          ],
+          [
+            134,
+            171
+          ],
+          [
+            128,
+            176
+          ],
+          [
+            128,
+            256
+          ],
+          [
+            0,
+            256
+          ]
+        ]
+      ],
+      "shorts": [
+        [
+          [
+            120,
+            0
+          ],
+          [
+            256,
+            0
+          ],
+          [
+            256,
+            256
+          ],
+          [
+            128,
+            256
+          ],
+          [
+            128,
+            176
+          ],
+          [
+            134,
+            171
+          ],
+          [
+            137,
+            164
+          ],
+          [
+            137,
+            157
+          ],
+          [
+            135,
+            147
+          ],
+          [
+            131,
+            137
+          ],
+          [
+            125,
+            130
+          ],
+          [
+            120,
+            126
+          ]
+        ]
+      ]
+    },
+    "shoeAreas": []
+  },
+  "intent": "Trace the diagonal shirt/shorts waist from the registered source. Empty shoe regions mean bare feet, while the saved shoe palette remains available for other activities. No painted pixels are changed."
+}
