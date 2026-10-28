@@ -1,0 +1,812 @@
+{
+  "measurements": {
+    "candidate": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.41618147448015125,
+      "poses": [
+        {
+          "bounds": [
+            216,
+            90,
+            490,
+            619
+          ],
+          "pivot": 351.5,
+          "area": 93585,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            775,
+            90,
+            1047,
+            619
+          ],
+          "pivot": 910,
+          "area": 93169,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            223,
+            704,
+            494,
+            1220
+          ],
+          "pivot": 356.5,
+          "area": 90257,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            778,
+            702,
+            1047,
+            1221
+          ],
+          "pivot": 912,
+          "area": 89920,
+          "sourceClipped": false
+        }
+      ],
+      "normalized": [
+        {
+          "bounds": [
+            69,
+            8,
+            185,
+            233
+          ],
+          "height": 225,
+          "upperSilhouetteCentroid": [
+            129.03410183552964,
+            34.356274885664625
+          ]
+        },
+        {
+          "bounds": [
+            70,
+            8,
+            186,
+            233
+          ],
+          "height": 225,
+          "upperSilhouetteCentroid": [
+            129.73034063724194,
+            34.242781676065604
+          ]
+        },
+        {
+          "bounds": [
+            70,
+            11,
+            185,
+            231
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            126.44101987335576,
+            37.033148923779876
+          ]
+        },
+        {
+          "bounds": [
+            71,
+            10,
+            186,
+            231
+          ],
+          "height": 221,
+          "upperSilhouetteCentroid": [
+            129.47799074051863,
+            36.2356322114808
+          ]
+        }
+      ]
+    },
+    "reference": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.7056410256410256,
+      "poses": [
+        {
+          "bounds": [
+            79,
+            16,
+            286,
+            322
+          ],
+          "pivot": 156,
+          "area": 29317,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            386,
+            16,
+            589,
+            323
+          ],
+          "pivot": 465,
+          "area": 28746,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            701,
+            16,
+            909,
+            323
+          ],
+          "pivot": 779.5,
+          "area": 29541,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1027,
+            16,
+            1228,
+            322
+          ],
+          "pivot": 1109.5,
+          "area": 29199,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            90,
+            329,
+            244,
+            632
+          ],
+          "pivot": 159,
+          "area": 29560,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            403,
+            333,
+            578,
+            633
+          ],
+          "pivot": 485.5,
+          "area": 26511,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            723,
+            337,
+            900,
+            632
+          ],
+          "pivot": 807,
+          "area": 27628,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1028,
+            383,
+            1202,
+            632
+          ],
+          "pivot": 1121,
+          "area": 25098,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            94,
+            641,
+            243,
+            953
+          ],
+          "pivot": 158.5,
+          "area": 29831,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            411,
+            641,
+            569,
+            953
+          ],
+          "pivot": 480.5,
+          "area": 30392,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            726,
+            641,
+            882,
+            952
+          ],
+          "pivot": 796,
+          "area": 30191,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1053,
+            641,
+            1207,
+            952
+          ],
+          "pivot": 1121.5,
+          "area": 30238,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            101,
+            960,
+            289,
+            1240
+          ],
+          "pivot": 198,
+          "area": 26773,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            416,
+            975,
+            607,
+            1238
+          ],
+          "pivot": 513.5,
+          "area": 27008,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            730,
+            962,
+            923,
+            1238
+          ],
+          "pivot": 828.5,
+          "area": 27158,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1061,
+            964,
+            1250,
+            1238
+          ],
+          "pivot": 1159,
+          "area": 27030,
+          "sourceClipped": false
+        }
+      ],
+      "normalized": [
+        {
+          "bounds": [
+            73,
+            27,
+            220,
+            243
+          ],
+          "height": 216,
+          "upperSilhouetteCentroid": [
+            157.28235682504436,
+            51.93125120907034
+          ]
+        },
+        {
+          "bounds": [
+            73,
+            26,
+            215,
+            243
+          ],
+          "height": 217,
+          "upperSilhouetteCentroid": [
+            149.79280371557644,
+            50.84986193544292
+          ]
+        },
+        {
+          "bounds": [
+            73,
+            26,
+            220,
+            243
+          ],
+          "height": 217,
+          "upperSilhouetteCentroid": [
+            155.36797037674415,
+            51.13611576962196
+          ]
+        },
+        {
+          "bounds": [
+            70,
+            27,
+            212,
+            243
+          ],
+          "height": 216,
+          "upperSilhouetteCentroid": [
+            150.96918584233586,
+            52.064586190173586
+          ]
+        },
+        {
+          "bounds": [
+            79,
+            29,
+            188,
+            244
+          ],
+          "height": 215,
+          "upperSilhouetteCentroid": [
+            133.60602249276494,
+            53.87373564692139
+          ]
+        },
+        {
+          "bounds": [
+            70,
+            31,
+            194,
+            243
+          ],
+          "height": 212,
+          "upperSilhouetteCentroid": [
+            132.19206893666862,
+            55.81088429682925
+          ]
+        },
+        {
+          "bounds": [
+            69,
+            35,
+            194,
+            244
+          ],
+          "height": 209,
+          "upperSilhouetteCentroid": [
+            124.53849185718208,
+            61.49727243588269
+          ]
+        },
+        {
+          "bounds": [
+            62,
+            68,
+            185,
+            243
+          ],
+          "height": 175,
+          "upperSilhouetteCentroid": [
+            155.84262815161128,
+            90.1712847427491
+          ]
+        },
+        {
+          "bounds": [
+            82,
+            23,
+            188,
+            243
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            135.35264024217946,
+            48.13805967937305
+          ]
+        },
+        {
+          "bounds": [
+            79,
+            23,
+            191,
+            243
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            131.696771477479,
+            48.50734350860052
+          ]
+        },
+        {
+          "bounds": [
+            78,
+            23,
+            189,
+            243
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            131.4097441767688,
+            48.501684973166725
+          ]
+        },
+        {
+          "bounds": [
+            79,
+            23,
+            188,
+            243
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            133.49352243666127,
+            48.41118158205147
+          ]
+        },
+        {
+          "bounds": [
+            59,
+            45,
+            192,
+            243
+          ],
+          "height": 198,
+          "upperSilhouetteCentroid": [
+            103.283623515352,
+            68.51208069383884
+          ]
+        },
+        {
+          "bounds": [
+            59,
+            58,
+            194,
+            243
+          ],
+          "height": 185,
+          "upperSilhouetteCentroid": [
+            128.50320964321426,
+            80.63585658246069
+          ]
+        },
+        {
+          "bounds": [
+            58,
+            49,
+            195,
+            244
+          ],
+          "height": 195,
+          "upperSilhouetteCentroid": [
+            106.29331836920649,
+            71.65447312568756
+          ]
+        },
+        {
+          "bounds": [
+            59,
+            50,
+            193,
+            244
+          ],
+          "height": 194,
+          "upperSilhouetteCentroid": [
+            106.69777013130147,
+            72.50938983433278
+          ]
+        }
+      ]
+    },
+    "gait": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.43682539682539684,
+      "poses": [
+        {
+          "bounds": [
+            195,
+            90,
+            524,
+            578
+          ],
+          "pivot": 339.5,
+          "area": 85429,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            838,
+            93,
+            1106,
+            597
+          ],
+          "pivot": 982.5,
+          "area": 76148,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            155,
+            718,
+            555,
+            1192
+          ],
+          "pivot": 341.5,
+          "area": 83815,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            830,
+            719,
+            1126,
+            1206
+          ],
+          "pivot": 949,
+          "area": 78004,
+          "sourceClipped": false
+        }
+      ],
+      "normalized": [
+        {
+          "bounds": [
+            58,
+            6,
+            206,
+            226
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            132.2793287681541,
+            32.34785913161261
+          ]
+        },
+        {
+          "bounds": [
+            68,
+            8,
+            189,
+            235
+          ],
+          "height": 227,
+          "upperSilhouetteCentroid": [
+            128.57389152714043,
+            34.551666540800596
+          ]
+        },
+        {
+          "bounds": [
+            42,
+            3,
+            222,
+            217
+          ],
+          "height": 214,
+          "upperSilhouetteCentroid": [
+            131.3724823182164,
+            28.924110651147537
+          ]
+        },
+        {
+          "bounds": [
+            63,
+            4,
+            196,
+            223
+          ],
+          "height": 219,
+          "upperSilhouetteCentroid": [
+            129.45683318106413,
+            30.104476714831822
+          ]
+        }
+      ]
+    }
+  },
+  "registration": {
+    "schema": 1,
+    "family": "broad-body-prototype-v1",
+    "sheet": "base",
+    "source": {
+      "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+      "width": 1254,
+      "height": 1254,
+      "columns": 2,
+      "rows": 2
+    },
+    "uniformScale": 0.425,
+    "frames": [
+      {
+        "index": 0,
+        "sourceContact": [
+          355,
+          608
+        ],
+        "nativeContact": [
+          128,
+          228
+        ]
+      },
+      {
+        "index": 1,
+        "sourceContact": [
+          912,
+          608
+        ],
+        "nativeContact": [
+          128,
+          228
+        ]
+      },
+      {
+        "index": 2,
+        "sourceContact": [
+          359,
+          1214
+        ],
+        "nativeContact": [
+          128,
+          228
+        ]
+      },
+      {
+        "index": 3,
+        "sourceContact": [
+          912,
+          1214
+        ],
+        "nativeContact": [
+          128,
+          228
+        ]
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "b5623e44a8eb7869b64f879c3f0f0295116721ee0dda25a9c357a6440e13f13f"
+    },
+    {
+      "index": 1,
+      "sha256": "b86054fc0d9295e8a145dfaf62314f438fa55b0ea5c8fe75c54ec2fb1b51c06b"
+    },
+    {
+      "index": 2,
+      "sha256": "e8faccedc0978c54cfbdf9fb60224f4c6e69f8e0b9ba7773bf23435d402844d9"
+    },
+    {
+      "index": 3,
+      "sha256": "01a667c8923281a4e3ec9294f7dd914fcbec1db73995dc5807795eeb00e54f56"
+    }
+  ],
+  "recordings": [
+    {
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0.10000002384185791,
+      "elapsedMs": 7205.5,
+      "renderCalls": 866,
+      "cycleSeconds": 5,
+      "modes": [
+        {
+          "mode": "walk",
+          "seconds": 0
+        },
+        {
+          "mode": "breathe",
+          "seconds": 0.8051000000238419
+        },
+        {
+          "mode": "walk",
+          "seconds": 6.5053999999761585
+        }
+      ]
+    },
+    {
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 7205.600000023842,
+      "elapsedMs": 7208.200000047684,
+      "renderCalls": 864,
+      "cycleSeconds": 5,
+      "modes": [
+        {
+          "mode": "walk",
+          "seconds": 0
+        },
+        {
+          "mode": "breathe",
+          "seconds": 0.8081000000238419
+        },
+        {
+          "mode": "walk",
+          "seconds": 6.508200000047684
+        }
+      ]
+    }
+  ],
+  "unavailablePoseRefusals": 12,
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-day-breathe-v1.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-night-breathe-v1.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-day-breathe-v1.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-night-breathe-v1.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-day-breathe-v1.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-night-breathe-v1.png"
+    }
+  ],
+  "scope": "Internal broader-body breathing source with existing broader gait. Four standing pose comparisons, gait scale reference and 24 static world views in three biomes; optional day/mirrored-night native walk-breathe-walk transitions include a full five-second breathing cycle. No translating travel cadence, complete body family, fitted parts or public availability acceptance.",
+  "sources": {
+    "candidate": {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60"
+    },
+    "reference": {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f"
+    },
+    "gait": {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png",
+      "sha256": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287"
+    }
+  },
+  "videoSha256": "824e4fd4b6f98abbd9bbfdbeebc0d91e035d18cc7a5d0b8cbd6fdbd8cf708c2b",
+  "scriptSha256": "6f433c2b15f05997dd2ba5f0097ceb8d2ff66942b01c6462cb022ee20027c0f1",
+  "rendererInputs": {
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936"
+  },
+  "candidateEdgeClear": true,
+  "groundAlignment": {
+    "method": "contact-atlas-v1",
+    "headYFromGround": [
+      -193.64372511433538,
+      -193.7572183239344,
+      -190.9668510762201,
+      -191.7643677885192
+    ],
+    "spread": 2.7903672477143004,
+    "maximumSpread": 8,
+    "nativeGround": [
+      128,
+      228
+    ],
+    "scope": "Compare rendered upper silhouette relative to the authored ground origin. Full silhouette height varies with projected stride; its lowest boot no longer defines the body origin."
+  },
+  "gaitScaleComparison": {
+    "standingHeadMean": -192.53304057575227,
+    "gaitHeadMean": -196.51797174040183,
+    "maximumDifference": 10,
+    "difference": 3.9849311646495664
+  }
+}

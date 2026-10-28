@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "status": "Candidate authoring; no public availability",
+  "why": "The broader body needs a consistently scaled quiet-standing and breathing source before the remaining idle and activity poses can be fitted.",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Asset: Solar Friends broader-body resident STANDING/BREATHING four-pose sprite sheet. Image 1 provides the exact broad adult identity, face, head size relative to torso, fuller belly, thighs and rounded shoulders, tan skin, bald scalp, cream sleeveless vest/cream shorts and brown boots; its walking poses are NOT the requested poses. Image 2 is the original lean body BASE sheet: use ONLY its third row as the quiet-standing pose sequence reference, not its anatomy or its crowded 4x4 layout. Create exactly FOUR full figures in a roomy 2 by 2 sheet, the same broader person in every cell. All figures stand upright with both boots naturally planted in the same relaxed position, knees soft, arms hanging quietly at sides, hands relaxed, same 3/4 front-right orthographic game camera. Top left: calm neutral eyes open. Top right: same quiet posture with a brief closed-eye blink, shoulders very slightly lowered. Bottom left: slight gentle inhale and small upward glance, not a head toss. Bottom right: gentle exhale, eyes open and a relaxed small smile. Preserve exact body/head scale, face, torso width, hip height, boot size and planted-foot spacing throughout; only subtle breathing/expression changes. Adult height and leg proportions must match the walking identity. Warm painted Brazilian countryside game style, broad illustrated shading, crisp warm outlines, upper-left daylight. Each entire figure must stay well inside its equal quarter of the image: generous transparent margins on ALL sides, no boots or hands close to the image edge, at least about 75 source pixels clear margin around each person. Keep figures small within the canvas rather than fill it. True transparent background and between limbs. No hair, hats, beards, tools, props, ground, shadow, labels, grid or watermark. Four standing figures only; no walk/sitting poses.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png",
+      "role": "Broader anatomy, adult height and head proportions, face, painted style and materials; not pose layout"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "role": "Only third-row quiet-standing sequence; not lean anatomy or 4x4 layout"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+  "requirements": [
+    "Four separately painted complete standing key poses with clear outer margins",
+    "Stable planted boots and subtly changing breathing and expression",
+    "Same anatomy and native stature as the registered broader gait",
+    "One uniform scale with explicit measured contacts",
+    "Static ground/style review across all three biomes",
+    "Encoded, decoded and inspected breathing and walk/breathe transitions before limited acceptance"
+  ],
+  "excluded": "An incomplete source set is not a new public body variant. Remaining full poses, fitted parts, portrait consistency and integration are still required."
+}

@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "status": "Standing/breathing source accepted for further internal family authoring only; no public integration",
+  "why": "The additional body shape needs consistently scaled standing anatomy and complete authored breathing expressions rather than a standing portrait grafted onto an old sprite.",
+  "tool": "built-in image_gen; transparent background",
+  "brief": "breathe-brief-v1.json",
+  "source": "breathe-candidate-v1.png",
+  "registration": "breathe-registration-v1.json",
+  "uniformScale": 0.425,
+  "transform": "contact-atlas-v1",
+  "poseSlots": [
+    "base:8",
+    "base:9",
+    "base:10",
+    "base:11"
+  ],
+  "visualReview": {
+    "static": "Inspected the ground-aligned comparison against original standing poses and the broader gait, plus all six final biome boards (24 static standing poses). The face, fuller torso/thigh silhouette, cream garments and brown boots remain coherent with the gait. Entire scalps, fingertips and boots fit the source and normalized frames. Four comparison residents are wholly visible beside a home, shed and road. The source has real transparency and no opaque ground island.",
+    "motion": "Inspected six decoded eight-frame filmstrips covering walking entry, the brief blink and return to walking, in normal/day and mirrored/night settings, with enlarged and gameplay-scale views. The blink is short, the upward glance is restrained, and the standing-to-gait change retains the same body volume and ground anchor. Whole painted key-pose switches remain visible; there is no newly authored in-between anatomy.",
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "facingsAndLighting": [
+      "normal/day",
+      "mirrored/night"
+    ],
+    "groundAlignment": {
+      "method": "contact-atlas-v1",
+      "headYFromGround": [
+        -193.64372511433538,
+        -193.7572183239344,
+        -190.9668510762201,
+        -191.7643677885192
+      ],
+      "spread": 2.7903672477143004,
+      "maximumSpread": 8,
+      "nativeGround": [
+        128,
+        228
+      ],
+      "scope": "Compare rendered upper silhouette relative to the authored ground origin. Full silhouette height varies with projected stride; its lowest boot no longer defines the body origin."
+    },
+    "gaitScaleComparison": {
+      "standingHeadMean": -192.53304057575227,
+      "gaitHeadMean": -196.51797174040183,
+      "maximumDifference": 10,
+      "difference": 3.9849311646495664
+    },
+    "recordings": [
+      {
+        "night": 0,
+        "facing": 1,
+        "offsetMs": 0.10000002384185791,
+        "elapsedMs": 7205.5,
+        "renderCalls": 866,
+        "cycleSeconds": 5,
+        "modes": [
+          {
+            "mode": "walk",
+            "seconds": 0
+          },
+          {
+            "mode": "breathe",
+            "seconds": 0.8051000000238419
+          },
+          {
+            "mode": "walk",
+            "seconds": 6.5053999999761585
+          }
+        ]
+      },
+      {
+        "night": 1,
+        "facing": -1,
+        "offsetMs": 7205.600000023842,
+        "elapsedMs": 7208.200000047684,
+        "renderCalls": 864,
+        "cycleSeconds": 5,
+        "modes": [
+          {
+            "mode": "walk",
+            "seconds": 0
+          },
+          {
+            "mode": "breathe",
+            "seconds": 0.8081000000238419
+          },
+          {
+            "mode": "walk",
+            "seconds": 6.508200000047684
+          }
+        ]
+      }
+    ],
+    "videoMetadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "vp9",
+          "width": 800,
+          "height": 340,
+          "nb_read_frames": "433"
+        }
+      ],
+      "format": {
+        "duration": "14.403970"
+      }
+    },
+    "decodeWindows": [
+      {
+        "name": "entry",
+        "startSeconds": 0.65,
+        "fps": 10
+      },
+      {
+        "name": "blink",
+        "startSeconds": 2.65,
+        "fps": 8
+      },
+      {
+        "name": "exit",
+        "startSeconds": 6.35,
+        "fps": 10
+      },
+      {
+        "name": "night-entry",
+        "startSeconds": 7.85,
+        "fps": 10
+      },
+      {
+        "name": "night-blink",
+        "startSeconds": 9.85,
+        "fps": 8
+      },
+      {
+        "name": "night-exit",
+        "startSeconds": 13.55,
+        "fps": 10
+      }
+    ]
+  },
+  "checks": {
+    "result": "PASS",
+    "command": "node scripts/review-broad-body.mjs --breathe --video",
+    "coverage": "Four separated source bodies; exact hashed source and existing gait registration; full native-frame contact fitting; normalized pose hashes; bounded ground and inter-source head-height comparisons; twelve unauthored pose/contact refusals; real native animation transitions walk-breathe-walk in both recordings, including the full five-second breathing cycle. No browser errors observed.",
+    "scope": "A source-body authoring review. The partial provider contains only walking and breathing poses and refuses unsupported poses; it is not installed in a public family."
+  },
+  "remaining": [
+    "Remaining idle gestures and activity bodies, including standing work and genuine lying sleep",
+    "Source-specific material masks and fitted hair, clothing, facial hair, hats and tools",
+    "Complete immutable body-family bundle, public appearance catalog, recipes and portrait integration",
+    "All activity transitions, translating travel cadence, wider zoom/weather and hardware review"
+  ],
+  "rendererInputs": {
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936"
+  },
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-review-breathe-v1.json": "c2d7d523ace80b4b6963065d166f369f7039a5c28794534b6fc67bbcc381f10c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-comparison-breathe-v1.png": "8ffc9ecb8b6f8f48ba565f304442ccc2b8a021524b1889b1ef02b414db0e4112",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1.webm": "824e4fd4b6f98abbd9bbfdbeebc0d91e035d18cc7a5d0b8cbd6fdbd8cf708c2b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1-entry.png": "f4d7718cbd2d70a9b6c421865295a3a72bbc0d20da67f38fcfed8cf68e43179a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1-blink.png": "fa4c0172d4c6258615d5cca271d31cd6217afc274ba659ddbffabcf3df579aa5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1-exit.png": "d22aa9cfae86d44caf5c815425697ba622627a6c619385af6a18393059be4691",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1-night-entry.png": "3e626b09ae40e0fd60f492a1c12421c6cd57c23c4226db138904ceca4864824c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1-night-blink.png": "71e18199ad248e74914e52b9420c9794510b7ca2a3d39bf38bd2da65237014f4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-breathe-v1-night-exit.png": "4188ca92f18331bbaab8adb2b2b2446769e080fbd1aea7a4068d6f71a6596e3b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-day-breathe-v1.png": "1f1aa6428b5459714d9d1711483e3513167ad4b8c0b375fad21bf2864dd42cc1",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-night-breathe-v1.png": "d332fdc5d3b0a6938dac148ed3f68c128300067d26e23983eea15e0c14381a86",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-day-breathe-v1.png": "8ccb1d5b2398d5e8680816f4a653931b0599fa2ef54592f63285312cced1428c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-night-breathe-v1.png": "eb205a42547327e048d34aa7f67533c437aa524ff46a8f7ec5e766f6db841829",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-day-breathe-v1.png": "98608a4d7ff301a4ce3e08a8c61d7f6aa08f67bff6cf72bfbd9f3e556c338b58",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-night-breathe-v1.png": "0df21486585e364eced1f745b326369f07912a1cef09e6ee589aebe14bd8af81"
+  }
+}
