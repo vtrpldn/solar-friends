@@ -1,0 +1,34 @@
+{
+  "status": "Recorded; decode and visual review pending",
+  "frames": 541,
+  "changes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "tend",
+      "seconds": 0.8049000000953674
+    },
+    {
+      "mode": "breathe",
+      "seconds": 9.008200000047683
+    }
+  ],
+  "seen": [
+    "base:8",
+    "activities:8",
+    "activities:9",
+    "activities:10",
+    "activities:11"
+  ],
+  "videoSha256": "70662e0fb3afe25baf6dc2645c77ea6634ca169fbf9b88162d8dbaec2e0fa5cb",
+  "inputs": {
+    "scripts/review-broad-cooking-motion.mjs": "025e50c5b583a6882673af6184136bba29171896d8e8ed4d63c903bc8412fdae",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/tending-equipment-atlas-draft-v1.json": "497745ee9d415cda69ceff2b8d892decc4b2828342fe8f15c6a0b203b0a6c4e6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/tending-hand-masks-draft-v1.json": "954899ea2c984fe16750651b88781b7c8b53c6c11d915addd899c333c4038070",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}

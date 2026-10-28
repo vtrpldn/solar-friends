@@ -1,0 +1,134 @@
+{
+  "status": "Decoded; visual review pending",
+  "videoSha256": "ec0750ed43326087f4cf9b94283f55c8e48dcc0f2ee9fa486cb0ff5cd773427e",
+  "decoderSha256": "e0f2a46aa9e4cfd5b48145df054e46737ea35d2049f018fdc678ffa332a0f5ee",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.31.08",
+        "width": 1100,
+        "height": 760,
+        "coded_width": 1100,
+        "coded_height": 760,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "55:38",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "1000/1",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "249",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-motion-v1.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "10.131021",
+      "size": "1667402",
+      "bit_rate": "1316670",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "commands": [
+    [
+      "-v",
+      "error",
+      "-threads",
+      "1",
+      "-ss",
+      "1",
+      "-i",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-motion-v1.webm",
+      "-vf",
+      "fps=3,scale=550:380,tile=3x2",
+      "-frames:v",
+      "1",
+      "-y",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-loop-decoded-v1.png"
+    ],
+    [
+      "-v",
+      "error",
+      "-threads",
+      "1",
+      "-ss",
+      "0.65",
+      "-i",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-motion-v1.webm",
+      "-vf",
+      "fps=20,scale=550:380,tile=3x2",
+      "-frames:v",
+      "1",
+      "-y",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-enter-decoded-v1.png"
+    ],
+    [
+      "-v",
+      "error",
+      "-threads",
+      "1",
+      "-ss",
+      "8.85",
+      "-i",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-motion-v1.webm",
+      "-vf",
+      "fps=20,scale=550:380,tile=3x2",
+      "-frames:v",
+      "1",
+      "-y",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-composed-leave-decoded-v1.png"
+    ]
+  ],
+  "boards": {
+    "feeding-composed-loop-decoded-v1.png": "2a56acdd0d381233231a9520b494c1f808b3e34298e51c696a6ce564b740244b",
+    "feeding-composed-enter-decoded-v1.png": "8ec50a1d2bac0e4a9cad587c572121e900d80f1a91a71ee2a1936da51ecc5fd9",
+    "feeding-composed-leave-decoded-v1.png": "d45cd8f9efb3d5e4928d55e8b4908367a84c5064b7437d87ff49f4f9a6b8c256"
+  },
+  "scope": "Six samples of a native cooking cycle and six decoded frames around each entry/exit. Both hairstyles, right-facing day and left-facing night, 230px and48px views appear simultaneously. Samples are not exhaustive physical-display pacing or full source-art acceptance."
+}

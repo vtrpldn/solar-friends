@@ -1,0 +1,18 @@
+{
+  "status": "Internal static composed equipment inspected; motion, lighting and public integration pending",
+  "poses": 8,
+  "refusals": 4,
+  "borrowedFramesUnchanged": true,
+  "framingUnchanged": true,
+  "accessoryMarginsUnchanged": true,
+  "opaqueColoredHandPixelsUnchanged": true,
+  "scratchReleased": true,
+  "inputs": {
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "scripts/verify-broad-equipment-appearance.mjs": "d90c063a70be227ea214ac0195bb0ce96bfbdf37c3f4d1bce63f31658c96fda2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/tending-hand-masks-draft-v1.json": "954899ea2c984fe16750651b88781b7c8b53c6c11d915addd899c333c4038070",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/tending-equipment-atlas-draft-v1.json": "497745ee9d415cda69ceff2b8d892decc4b2828342fe8f15c6a0b203b0a6c4e6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}

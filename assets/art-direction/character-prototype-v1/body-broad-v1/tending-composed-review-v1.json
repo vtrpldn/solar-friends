@@ -1,0 +1,21 @@
+{
+  "status": "Internal static and decoded samples reviewed; transitions incomplete",
+  "why": "Provide actual gardening/feeding equipment for the additional body shape",
+  "sourcePolicy": "Existing exact painted sources, shared scale per action, registered rectangles/translations; no source rewriting or warping",
+  "videoSha256": "70662e0fb3afe25baf6dc2645c77ea6634ca169fbf9b88162d8dbaec2e0fa5cb",
+  "decodedReportSha256": "c1b88a4506c7b802ce58dceec95974a06ba0cdf19ed13820b63c132cbde1f14d",
+  "decodedFrames": 239,
+  "durationSeconds": 10.098848,
+  "boardsInspected": {
+    "tending-composed-loop-decoded-v1.png": "dabbc2c49b2bf966ec8e3a16edda19bcf45e8d1da2b93ae0f1f085151a960ba2",
+    "tending-composed-enter-decoded-v1.png": "300d536f07ded5cab97f91bd0b4b1fa4531cd7b7d2978ca763cfa0b0401ae668",
+    "tending-composed-leave-decoded-v1.png": "166bee6a7a01fca6d547511e9d86a3516f3be4ae968865bcb9ee7f7b8d1143c5"
+  },
+  "staticBoardInspected": "tending-composed-appearance-v1.png",
+  "findings": [
+    "Actual static board inspected for both hairstyles/facing directions. Trowel grip and basket-at-hand placement reviewed; floating initial basket candidate corrected before delivery.",
+    "Three six-sample decoded boards inspected: activity and entry/exit, both hairstyles, day/mirrored night at230px/48px.",
+    "Activity samples retain hand/tool layering. Grain parts are tiny at48px; their registration is not a claim of individually legible grain animation.",
+    "Entry/exit still pops; gardening additionally needs painted kneeling/rising intermediates. Full motion/biome/public integration remains required."
+  ]
+}

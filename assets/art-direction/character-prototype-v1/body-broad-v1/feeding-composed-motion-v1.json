@@ -1,0 +1,34 @@
+{
+  "status": "Recorded; decode and visual review pending",
+  "frames": 554,
+  "changes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "feed",
+      "seconds": 0.8034000000953674
+    },
+    {
+      "mode": "breathe",
+      "seconds": 9.012900000095367
+    }
+  ],
+  "seen": [
+    "base:8",
+    "activities:12",
+    "activities:13",
+    "activities:14",
+    "activities:15"
+  ],
+  "videoSha256": "ec0750ed43326087f4cf9b94283f55c8e48dcc0f2ee9fa486cb0ff5cd773427e",
+  "inputs": {
+    "scripts/review-broad-cooking-motion.mjs": "025e50c5b583a6882673af6184136bba29171896d8e8ed4d63c903bc8412fdae",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-equipment-atlas-draft-v1.json": "06b5ad7faaa2978e8ab032f0cb439c93f47348627ab890416bbb96267d9fe469",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-hand-masks-draft-v1.json": "0cd0d43f8c4115869a20197866788ff576b7bf3dad3756147a30b8740c9e5b4c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}
