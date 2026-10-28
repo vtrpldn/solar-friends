@@ -1,0 +1,45 @@
+{
+  "audits": {
+    "curls": {
+      "pixels": 239710,
+      "inside": 239710,
+      "bounds": [
+        119,
+        189,
+        786,
+        888
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    },
+    "sidepart": {
+      "pixels": 314691,
+      "inside": 314691,
+      "bounds": [
+        54,
+        142,
+        805,
+        909
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  },
+  "compositions": 8,
+  "exactComposites": 2,
+  "invalidSourceMappingsRefused": 14,
+  "bodyUnchanged": true,
+  "hairSourcesUnchanged": true,
+  "protectedFaceAndArmPoints": true,
+  "disposedComposersRefused": true,
+  "immutableTransformCopy": true,
+  "inputs": {
+    "web/character-hair.js": "aeb90c0c20c310585c5fdef4d72d3b85b311eee360b00b8c703a128be1e493c8",
+    "web/character-hair-source.js": "ae094ed4d5f38d97a5aff1ff4cd968745bf4650c15be4b8085bbdfd28ccbb878",
+    "scripts/verify-sleep-hair.mjs": "a40f152199af9dae2a32ef3498c1abb43b99c250306a7a60d4265d7c51990553",
+    "assets/art-direction/character-prototype-v1/sleep-body-study-v2/parts-v1/scalp-closeup-registration-v5.json": "b5ccc1b0bc065b3d6e1470178c2704b0cbf16ad529afeba931c60c531ef24233"
+  },
+  "scope": "Internal sleeping hair sources and uniform runtime source mappings. Not full-family, public-save, world or final art acceptance."
+}

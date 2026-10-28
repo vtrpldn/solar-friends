@@ -1,0 +1,70 @@
+{
+  "metrics": {
+    "curls": {
+      "paintedPixels": 245455
+    },
+    "sidepart": {
+      "paintedPixels": 320307
+    }
+  },
+  "forearm": [
+    [
+      26,
+      194
+    ],
+    [
+      38,
+      193
+    ],
+    [
+      48,
+      191
+    ],
+    [
+      58,
+      190
+    ],
+    [
+      67,
+      188
+    ],
+    [
+      76,
+      188
+    ],
+    [
+      85,
+      192
+    ],
+    [
+      91,
+      201
+    ],
+    [
+      89,
+      211
+    ],
+    [
+      82,
+      217
+    ],
+    [
+      69,
+      218
+    ],
+    [
+      56,
+      214
+    ],
+    [
+      44,
+      210
+    ],
+    [
+      33,
+      205
+    ]
+  ],
+  "scope": "Raw source fit at fixed pre-generation uniform mapping, before runtime hair registration. No body edits and no public acceptance.",
+  "boardSha256": "48f2edc44aa488b456483afb96175b65a0027f6747d4716e1ea27fc38ba499aa"
+}

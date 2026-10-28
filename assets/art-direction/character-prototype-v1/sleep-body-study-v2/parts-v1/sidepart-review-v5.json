@@ -1,0 +1,7 @@
+{
+  "status": "Needs scalp-edge alignment correction; not accepted",
+  "sourceSha256": "0f9175d60f683efc2a6925189a9af1a6eb17334f31b28809b56180452b5464e6",
+  "boardSha256": "abd449c39b8327bb011f0d2a43ba8da234e33dba16eaa064c440c8d48bd94fa3",
+  "findings": "The close-up camera and hairstyle are legible at the unchanged predeclared uniform mapping. A visible bald strip remains outside the cap along the upper/left skull curve; the cap also extends too far down/right toward the face and supported arm. Correct the generated paint alignment, retaining the declared transform.",
+  "paintEdited": false
+}

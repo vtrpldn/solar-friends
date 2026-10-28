@@ -1,3 +1,4 @@
+import {registeredHairSourceTransform} from './character-hair-source.js';
 import {registeredBodyAppearance} from './character-body-appearance.js';
 import {canonical} from './editor/journal.js';
 import {auditCharacterPartRegion} from './character-parts.js';
@@ -12,11 +13,14 @@ import {registeredHairPlacement,verifyHairPlacementBodies} from './character-hai
 // Bodies/coloured bodies are still validated on every composition.
 export function prepareRegisteredHair({registration,image,sourceHash}){
  if(registration.schema!==1||!['base','idle','activities'].includes(registration.sheet)||!Number.isInteger(registration.index)||registration.index<0||registration.index>15||registration.size!==1254||!/^[a-f0-9]{64}$/.test(sourceHash??'')||registration.partSha256!==sourceHash||image.width!==1254||image.height!==1254)throw Error('Review the changed hair/body registration before composing this pose.');
- const checked=structuredClone(registration),placement=registeredHairPlacement(checked),raw=document.createElement('canvas');raw.width=raw.height=1254;let audit;
+ const checked=structuredClone(registration),placement=registeredHairPlacement(checked),sourceTransform=registeredHairSourceTransform(checked),raw=document.createElement('canvas');raw.width=raw.height=1254;let audit;
  try{const context=raw.getContext('2d');context.drawImage(image,0,0);audit=auditCharacterPartRegion(context.getImageData(0,0,1254,1254),checked.bounds);}finally{raw.width=raw.height=0;}
  if(!audit.ok)throw Error('This hair layer fails its authored pose bounds.');
  const normalized=document.createElement('canvas');normalized.width=normalized.height=256;let disposed=false;
- try{normalized.getContext('2d').drawImage(image,0,0,256,256);
+ try{
+ const context=normalized.getContext('2d');
+ if(sourceTransform)context.drawImage(image,...sourceTransform.offset,image.width*sourceTransform.uniformScale,image.height*sourceTransform.uniformScale);
+ else context.drawImage(image,0,0,256,256);
  if(placement){
   const data=normalized.getContext('2d').getImageData(0,0,256,256).data,[dx,dy]=placement.offset;
   for(let p=0;p<256*256;p++)if(data[p*4+3]&&(p%256+dx<0||p%256+dx>=256||Math.floor(p/256)+dy<0||Math.floor(p/256)+dy>=256)){normalized.width=normalized.height=0;throw Error('The translated cap would clip actual source paint.');}

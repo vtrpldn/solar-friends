@@ -1,0 +1,7 @@
+{
+  "status": "Needs camera/face-opening correction; no acceptance",
+  "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e41db8db-7fdf-4494-be67-b694c0ea16a7.png",
+  "sha256": "35e58106812968d142f1af3b6f1988cea5a4eacedd7775ad812cc6889b181c62",
+  "paintEdited": false,
+  "findings": "Scale is reduced versus v1, but the cap still arches too far above and right of the delivered skull. The upright-looking face opening does not follow the supplied ear-to-temple curve. A filled positive hair geometry guide is required."
+}

@@ -1,0 +1,20 @@
+{
+  "status": "Fixed pre-generation analytical viewport; no part fitting",
+  "sourceSize": 1254,
+  "nativeViewport": [
+    8,
+    140,
+    88,
+    88
+  ],
+  "sourceTransform": {
+    "schema": 1,
+    "uniformScale": 0.07017543859649122,
+    "offset": [
+      8,
+      140
+    ]
+  },
+  "guideSha256": "c1eed6146cde3e7cc5c162f8f981e4f322820f9dcd563a02dac2cda24e162a98",
+  "bodyGuideSha256": "ff8b8f6d3aa2197e6ab02994d52921ab7005d302f24dc8f4bbf92d85c5b70dc7"
+}

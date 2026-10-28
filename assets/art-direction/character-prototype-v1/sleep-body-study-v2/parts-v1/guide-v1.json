@@ -1,0 +1,25 @@
+{
+  "status": "Derived runtime-registration guide only; not new or edited source paint",
+  "bodySourceSha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+  "registration": {
+    "schema": 1,
+    "family": "relaxed-walk-prototype-v1",
+    "sheet": "base",
+    "source": {
+      "sha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+      "width": 1254,
+      "height": 1254
+    },
+    "uniformScale": 0.199,
+    "sourceContact": [
+      640,
+      810
+    ],
+    "nativeContact": [
+      128,
+      164
+    ]
+  },
+  "guideSha256": "ff8b8f6d3aa2197e6ab02994d52921ab7005d302f24dc8f4bbf92d85c5b70dc7",
+  "method": "Use prepareContactBodyFrame to render the immutable source, then display the native frame at 1254 square for fixed-coordinate part authoring. Parts must preserve these whole-frame coordinates."
+}

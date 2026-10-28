@@ -1,0 +1,7 @@
+{
+  "status": "Rejected: oversized and wrong face-opening direction",
+  "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-356fb8a3-8e4b-4059-97fb-fbb97ccd98ba.png",
+  "sha256": "8fee60543c58fc72ddabed4df73fc54da171a9a61a986322ee826fb79f026dab",
+  "paintEdited": false,
+  "findings": "The generation enlarged the cap again and opened the face along an upright-looking diagonal. The specified fixed-canvas scalp envelope is not preserved. This source is excluded from runtime."
+}

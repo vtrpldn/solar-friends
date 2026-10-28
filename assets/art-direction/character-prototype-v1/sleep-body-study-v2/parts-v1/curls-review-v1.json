@@ -1,0 +1,8 @@
+{
+  "status": "Rejected: oversized and displaced relative to the actual skull",
+  "source": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a0496666-22c1-4e1a-998b-ff783499f3e1.png",
+  "sha256": "352659ab4608bcac05e3d9d80d5c5e50363ccdd4cb8715f419f26dff91386bd6",
+  "paintEdited": false,
+  "findings": "Chestnut grouped curls are recognisable, but the cap spans roughly twice the intended skull width and rises far above the reference head. It cannot be placed over the fixed body at the declared shared scale. No runtime scaling/cropping workaround is accepted.",
+  "nextChange": "Add an explicit fixed-coordinate scalp outline and maximum hair envelope, and request an edit preserving that geometry."
+}

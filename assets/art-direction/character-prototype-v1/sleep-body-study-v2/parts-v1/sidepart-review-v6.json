@@ -1,0 +1,16 @@
+{
+  "status": "Internal single-pose layer fit reviewed; not public or full-family acceptance",
+  "sourceSha256": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+  "runtimeBoardSha256": "0bb350ca49534f7ad1d9bd50dfb21baac4bccaf9dee237cded8d593df7c8f0d3",
+  "registrationSha256": "9b9cd016ce54b15c9beded35df18b7963957eecae7dccbf8513c4a37ce263e9d",
+  "findings": "The outer scalp is covered in the corrected fixed-mapping composite. The closed eyes, mouth and supported arm remain visible. The reclining direction and compact warm-painted hair read at enlarged and game-sized views. Four hair colours remain legible beside the alternate skin/top/short palette, and the dimmed mirrored sample retains its silhouette. This does not establish transition continuity, exact skull anatomy or all-terrain ground contact.",
+  "mapping": "The complete unchanged 1254-square generated source uses the pre-generation native viewport [8,140,88,88], one scale 88/1254 and offset [8,140]. No silhouette fitting, image crop, independent x/y scale, rotation or source retouching. Existing cap reuse placements are not combined with this source mapping.",
+  "remaining": [
+    "Detailed cross-pose style/volume continuity",
+    "Short-sleeve shirt and material seam intersections",
+    "Hat/facial-hair policy for sleep",
+    "Activity shadow and actual biome terrain/lighting",
+    "Full-family source binding and public versioned recipes",
+    "Recorded transitions and saved/imported customization"
+  ]
+}
