@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "status": "Static activity candidate reviewed; native cadence and fitted parts pending; no public integration",
+  "why": "Check four newly authored activity poses at one uniform source scale beside the same standing body",
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-mata-atlantica-day.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-mata-atlantica-night.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-cerrado-day.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-cerrado-night.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-caatinga-day.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-caatinga-night.png"
+    }
+  ],
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "27edb84bf7e9dd61976d9ecec2daabde7a138580475f05583a3944ce260f410b"
+    },
+    {
+      "index": 1,
+      "sha256": "eca06012a3d8015257b61fd934b12d57577d957fa935fb5f5bc0f78bd3f49a0c"
+    },
+    {
+      "index": 2,
+      "sha256": "53f6878e871b7daab4e2d2cd65f9d8c62c63b6cf8635347ffc9c88cb504afdf1"
+    },
+    {
+      "index": 3,
+      "sha256": "434309c1f27ff4d8b759a7e38eca840664be069d0f3e486aa69598425bd5db50"
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-candidate-v1.png": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-calibration-v1.json": "aa588a64089af2008ab0b4d08aa6624e41eba415aa9b7f7338f26bc2abc73502",
+    "scripts/review-broad-activity.mjs": "9b66140cd04c98f455484974f2c83e473688bea9128944d63ffde1a6f01bce18",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf"
+  },
+  "errors": [],
+  "visualReview": "Inspected all four complete source figures, the native day/mirrored-night comparison and all six seed42 biome captures beside standing body, home, shed, storage and road. Full scalps, hands and boots fit; no visible exterior halo on terrain. Watering hand/hip progression is readable and full boots remain visible; native cadence and watering-can grip fit remain unreviewed.",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-caatinga-day.png": "92ce0b61699eca4319e46b1cc59300a4d0c21c576fcb5e5aa12e49b5a325d712",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-caatinga-night.png": "ba81d58d6912faefaa365eaabfdad529d15a6cf716e206a296cc8933880deb38",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-cerrado-day.png": "8ed3d64028d3f49203dc5645932fbee62d9ee5bde9fdbd98629f73e178e0d9c5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-cerrado-night.png": "9597cb35f465759f8df425823d4e42c1a3bbdecf0da5c33b9b4fcaceec52f674",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-mata-atlantica-day.png": "54eae4d310c1a7fdab4d3745b69b3029ee72e85a793fc03fe3359d702ba7be9a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-world-v1-mata-atlantica-night.png": "fb21139eb6d5d163389ae037c46ee9687f7ea0820ed5ebf683a7665736ddbb04",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-native-comparison-v1.png": "6bae54a8fed87ff601f5ec470867076d070dec146c2f2216118cb9a5480a54da",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-registration-v1.json": "1fa10eecd079e26baccadea9a7e53f5f89ecef8bda1da8febabfa5a0f9ab973d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-brief-v1.json": "7a1ebe2d91ac32b0f9613b939fb8da473228effab6fdb3fbfe49e2f2dc97664a"
+  },
+  "remaining": [
+    "Encode decode and inspect native activity loop and transitions",
+    "Correct any cadence-visible scale or ground mismatch",
+    "Fit equipment clothing hair facial and accessories",
+    "Complete portrait and public family integration",
+    "Original full builder release gates"
+  ]
+}

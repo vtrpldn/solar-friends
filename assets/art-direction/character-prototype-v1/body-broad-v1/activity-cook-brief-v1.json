@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "status": "Candidate; native registration and visual review pending",
+  "why": "Additional body anatomy needs complete authored activity coverage",
+  "tool": "built-in image_gen; transparent background",
+  "clip": "cook",
+  "row": 0,
+  "prompt": "Use case: identity-preserve. Asset: Solar Friends broader adult cook body sprite sheet. Image 1 is exact identity, anatomy, head-to-body ratio, painted style and roomy 2x2 layout reference: same bald round-cheeked adult with fuller belly/thighs, broad compact torso, warm tan skin, cream sleeveless vest and shorts, brown boots. Image 2 supplies ONLY row 1 cook gesture sequence; not its lean anatomy or 4x4 layout. Paint exactly FOUR complete separated figures in roomy TWO BY TWO order. Cooking stirring gesture, standing upright. Top-left: near hand loosely closed in front of chest, far hand loosely closed out in front of waist as if steadying a pot. Top-right: near hand slightly lower and inward in a small stirring motion, far hand stable. Bottom-left: near hand lowered toward upper belly through the stir, far hand stable. Bottom-right: near hand lifted toward chin completing the stir, far hand stable. No pot, spoon or equipment painted into body. Preserve identical anatomical scale and head diameter across all four poses, including top versus bottom rows; bending/kneeling changes posture, never person size. Fixed elevated three-quarter front-right orthographic camera, warm broad painted shading, clear warm edges, upper-left daylight. Entire scalps, fingertips, knees and boots fully visible with generous transparent margins at every edge and between cells. Keep feet/ground contact coherent within each row. No tools, accessories, hair, hats, beards, ground, shadow, furniture, labels, grid, text or watermark. True transparency with clean silhouette and internal gaps. Exactly four figures only.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Exact identity anatomy scale style and 2x2 layout"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+      "role": "Only row 1 gesture reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-candidate-v1.png"
+}

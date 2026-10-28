@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "status": "Candidate; native registration and visual review pending",
+  "why": "Additional body anatomy needs complete authored activity coverage",
+  "tool": "built-in image_gen; transparent background",
+  "clip": "tend",
+  "row": 2,
+  "prompt": "Use case: identity-preserve. Asset: Solar Friends broader adult tend body sprite sheet. Image 1 is exact identity, anatomy, head-to-body ratio, painted style and roomy 2x2 layout reference: same bald round-cheeked adult with fuller belly/thighs, broad compact torso, warm tan skin, cream sleeveless vest and shorts, brown boots. Image 2 supplies ONLY row 3 tend gesture sequence; not its lean anatomy or 4x4 layout. Paint exactly FOUR complete separated figures in roomy TWO BY TWO order. Gardening gesture, kneeling low on far knee, near knee raised, near forearm resting on raised knee. Top-left: free far hand reaches just ahead of the ground near front boot. Top-right: free hand reaches farther forward. Bottom-left: free hand extends down close to ground. Bottom-right: free hand reaches farthest gently forward along ground. Same compact broader torso and head size as standing reference; don't shrink kneeling anatomy to fit. No tool, plant or soil painted into body. Preserve identical anatomical scale and head diameter across all four poses, including top versus bottom rows; bending/kneeling changes posture, never person size. Fixed elevated three-quarter front-right orthographic camera, warm broad painted shading, clear warm edges, upper-left daylight. Entire scalps, fingertips, knees and boots fully visible with generous transparent margins at every edge and between cells. Keep feet/ground contact coherent within each row. No tools, accessories, hair, hats, beards, ground, shadow, furniture, labels, grid, text or watermark. True transparency with clean silhouette and internal gaps. Exactly four figures only.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Exact identity anatomy scale style and 2x2 layout"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+      "role": "Only row 3 gesture reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-tend-candidate-v1.png"
+}

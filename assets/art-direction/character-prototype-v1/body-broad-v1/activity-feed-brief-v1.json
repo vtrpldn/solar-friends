@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "status": "Candidate; native registration and visual review pending",
+  "why": "Additional body anatomy needs complete authored activity coverage",
+  "tool": "built-in image_gen; transparent background",
+  "clip": "feed",
+  "row": 3,
+  "prompt": "Use case: identity-preserve. Asset: Solar Friends broader adult feed body sprite sheet. Image 1 is exact identity, anatomy, head-to-body ratio, painted style and roomy 2x2 layout reference: same bald round-cheeked adult with fuller belly/thighs, broad compact torso, warm tan skin, cream sleeveless vest and shorts, brown boots. Image 2 supplies ONLY row 4 feed gesture sequence; not its lean anatomy or 4x4 layout. Paint exactly FOUR complete separated figures in roomy TWO BY TWO order. Feeding gesture, standing upright. Top-left: near hand loosely curled near belly, far hand cupped at waist. Top-right: far arm extends forward with gently cupped hand as if offering grain, near hand by belly. Bottom-left: far arm extends a little farther, fingers beginning to open, near hand stable. Bottom-right: far hand opens outward to release imaginary grain, near hand stable. No basket, grain or equipment painted into body. Preserve identical anatomical scale and head diameter across all four poses, including top versus bottom rows; bending/kneeling changes posture, never person size. Fixed elevated three-quarter front-right orthographic camera, warm broad painted shading, clear warm edges, upper-left daylight. Entire scalps, fingertips, knees and boots fully visible with generous transparent margins at every edge and between cells. Keep feet/ground contact coherent within each row. No tools, accessories, hair, hats, beards, ground, shadow, furniture, labels, grid, text or watermark. True transparency with clean silhouette and internal gaps. Exactly four figures only.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Exact identity anatomy scale style and 2x2 layout"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+      "role": "Only row 4 gesture reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-candidate-v1.png"
+}

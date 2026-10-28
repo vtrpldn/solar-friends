@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "status": "Static activity candidate reviewed; native cadence and fitted parts pending; no public integration",
+  "why": "Check four newly authored activity poses at one uniform source scale beside the same standing body",
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-mata-atlantica-day.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-mata-atlantica-night.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-cerrado-day.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-cerrado-night.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-caatinga-day.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-caatinga-night.png"
+    }
+  ],
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "a304f81a1e486947eeea4d3452c59ad6c231170bf0aead05019ceaa06fdb60cc"
+    },
+    {
+      "index": 1,
+      "sha256": "942def6f38a620fffbd06a0374ec3ebb5812ea48ba71323e8b9fb53d982b522b"
+    },
+    {
+      "index": 2,
+      "sha256": "2ec550986a8a621adf717a7f51561c733196d3750726ddc460a71f1a17b5d883"
+    },
+    {
+      "index": 3,
+      "sha256": "6c81cdf6daa010c8137d89de8aee9689a968c32cca32f1d9e75b7aa173a05d49"
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-candidate-v1.png": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-calibration-v1.json": "aa588a64089af2008ab0b4d08aa6624e41eba415aa9b7f7338f26bc2abc73502",
+    "scripts/review-broad-activity.mjs": "9b66140cd04c98f455484974f2c83e473688bea9128944d63ffde1a6f01bce18",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf"
+  },
+  "errors": [],
+  "visualReview": "Inspected all four complete source figures, the native day/mirrored-night comparison and all six seed42 biome captures beside standing body, home, shed, storage and road. Full scalps, hands and boots fit; no visible exterior halo on terrain. Full extended fingertips fit, including the final open hand. Head/body scale against standing is plausible after whole-source scale adjustment; loop and basket/grain fit remain unreviewed.",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-caatinga-day.png": "2840615412adde8940e824e0201ed0bfbc5e8ab2093f211b8e08905a4cb98815",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-caatinga-night.png": "1d6ff8239bad6093ede90aea405f09bfb885343a8407145c3938f3dd6af0dbc8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-cerrado-day.png": "7a24cb012df4b12a3b65fc5824081a1a80ae30d5a439ad5f6fbe06d5c2631586",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-cerrado-night.png": "998872bced68afdb165b63722e5ea80601086651a75cdbc8556d7640f30dcce9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-mata-atlantica-day.png": "662345d7680f035843eabb737420b3255e3f37b3bba43ace1cfa8ad6e7727cb4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-world-v1-mata-atlantica-night.png": "16507b2355cdb627276297e2cf9579efd91ebfb80e6784eb107a7f002b59c4d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-native-comparison-v1.png": "15dc8ba5a92d838aab0eb21388a8df27ccaf9bc74f843bfdce4d9db7e206571b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-registration-v1.json": "7deeee9e1008ea8fb69e5b4880e8c30c9a18ce7fba37e7e4e021974b8360cd41",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-brief-v1.json": "3803382853818eb99637150b3d9499bbe35229e0a03f618a153a6be28408f4a0"
+  },
+  "remaining": [
+    "Encode decode and inspect native activity loop and transitions",
+    "Correct any cadence-visible scale or ground mismatch",
+    "Fit equipment clothing hair facial and accessories",
+    "Complete portrait and public family integration",
+    "Original full builder release gates"
+  ]
+}

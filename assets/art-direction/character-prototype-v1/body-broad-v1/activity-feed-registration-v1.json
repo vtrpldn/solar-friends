@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "family": "broad-body-prototype-v1",
+  "sheet": "activities",
+  "source": {
+    "sha256": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+    "width": 1254,
+    "height": 1254,
+    "columns": 2,
+    "rows": 2
+  },
+  "uniformScale": 0.375,
+  "frames": [
+    {
+      "index": 0,
+      "sourceContact": [
+        340,
+        640
+      ],
+      "nativeContact": [
+        120,
+        243
+      ]
+    },
+    {
+      "index": 1,
+      "sourceContact": [
+        900,
+        640
+      ],
+      "nativeContact": [
+        120,
+        243
+      ]
+    },
+    {
+      "index": 2,
+      "sourceContact": [
+        340,
+        1240
+      ],
+      "nativeContact": [
+        120,
+        243
+      ]
+    },
+    {
+      "index": 3,
+      "sourceContact": [
+        900,
+        1240
+      ],
+      "nativeContact": [
+        120,
+        243
+      ]
+    }
+  ]
+}

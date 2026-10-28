@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "status": "Internal candidate calibration; not public artwork",
+  "why": "Own one uniform scale and explicit ground origins per exact activity source without another body fallback",
+  "sources": [
+    {
+      "clip": "cook",
+      "uniformScale": 0.365,
+      "nativeContact": [
+        128,
+        243
+      ],
+      "sourceContacts": [
+        [
+          352,
+          650
+        ],
+        [
+          900,
+          650
+        ],
+        [
+          352,
+          1240
+        ],
+        [
+          900,
+          1240
+        ]
+      ]
+    },
+    {
+      "clip": "water",
+      "uniformScale": 0.4,
+      "nativeContact": [
+        128,
+        238
+      ],
+      "sourceContacts": [
+        [
+          360,
+          615
+        ],
+        [
+          915,
+          615
+        ],
+        [
+          365,
+          1195
+        ],
+        [
+          915,
+          1195
+        ]
+      ]
+    },
+    {
+      "clip": "tend",
+      "uniformScale": 0.31,
+      "nativeContact": [
+        128,
+        228
+      ],
+      "sourceContacts": [
+        [
+          330,
+          600
+        ],
+        [
+          930,
+          600
+        ],
+        [
+          340,
+          1165
+        ],
+        [
+          930,
+          1165
+        ]
+      ]
+    },
+    {
+      "clip": "feed",
+      "uniformScale": 0.375,
+      "nativeContact": [
+        120,
+        243
+      ],
+      "sourceContacts": [
+        [
+          340,
+          640
+        ],
+        [
+          900,
+          640
+        ],
+        [
+          340,
+          1240
+        ],
+        [
+          900,
+          1240
+        ]
+      ]
+    }
+  ]
+}

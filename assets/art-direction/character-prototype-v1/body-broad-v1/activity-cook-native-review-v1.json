@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "status": "Static activity candidate reviewed; native cadence and fitted parts pending; no public integration",
+  "why": "Check four newly authored activity poses at one uniform source scale beside the same standing body",
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-mata-atlantica-day.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-mata-atlantica-night.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-cerrado-day.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-cerrado-night.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-caatinga-day.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-caatinga-night.png"
+    }
+  ],
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "37547418cc73542fe70ce887198914b30b7281719738b9875966c5eba5005880"
+    },
+    {
+      "index": 1,
+      "sha256": "de6219962f81fce740833a77424a9ee5f4c5a01a0f6b8ab194e700fb8969f466"
+    },
+    {
+      "index": 2,
+      "sha256": "38448faefcd7536fde42c3a948e2c1174b50051d917585e84ac19a96766c448e"
+    },
+    {
+      "index": 3,
+      "sha256": "6bd698fc987d2acf925955d599672115f264bb12a07618a07cd7dcca6c879bc5"
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-candidate-v1.png": "d0647e392b1609a79965524e111dacae3a740458a1f0a2f8193621de5e7f223e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-calibration-v1.json": "aa588a64089af2008ab0b4d08aa6624e41eba415aa9b7f7338f26bc2abc73502",
+    "scripts/review-broad-activity.mjs": "9b66140cd04c98f455484974f2c83e473688bea9128944d63ffde1a6f01bce18",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf"
+  },
+  "errors": [],
+  "visualReview": "Inspected all four complete source figures, the native day/mirrored-night comparison and all six seed42 biome captures beside standing body, home, shed, storage and road. Full scalps, hands and boots fit; no visible exterior halo on terrain. Cooking top-row figures remain slightly taller than bottom-row figures at the same source scale; inspect full loop and correct any visible volume or vertical shift before acceptance.",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-caatinga-day.png": "e2857b02431afccf430eab8aa39e5e9f8f725ff5d8a334f97774e0a6b2abf575",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-caatinga-night.png": "c082c6e775f9af96f13625c2576df057de82074c7f5ad2dce1a89430a2819a85",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-cerrado-day.png": "b31b8d06fc359f7813d5f54ea783e095e3f3c191fdd86bdd374530652a65c0ad",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-cerrado-night.png": "fbccda4b742db21228cc1ee781479b2810ecd7cc12d96a52f6db7f6de568c181",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-mata-atlantica-day.png": "f1b452d0b3f45a43854112023013f35a5c060a953701a48d59c69ffc820d76b9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v1-mata-atlantica-night.png": "fb1742019f61d965886b9df6b8b2b2812672558f84c6567c41e158bd68c04a10",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-native-comparison-v1.png": "90ebc242488e63bf4951d16e117ea526a03bcc8e7c65d8a8aa4a43c4b855b187",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-registration-v1.json": "24cebdd27b8326500659f1d73a22882c7b67654846cba8df0e485ebaf8298db7",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-brief-v1.json": "544c285fa3d40fb3fed7e452521252c986ddedf1e7def27bd41dc22f75bf31b7"
+  },
+  "remaining": [
+    "Encode decode and inspect native activity loop and transitions",
+    "Correct any cadence-visible scale or ground mismatch",
+    "Fit equipment clothing hair facial and accessories",
+    "Complete portrait and public family integration",
+    "Original full builder release gates"
+  ]
+}
