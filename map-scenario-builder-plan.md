@@ -2539,3 +2539,12 @@ The four kneeling/tending guide intents now declare conservative native face-pro
 The revised activities-8 guide covers all 1,011 opaque original shirt pixels with zero protected face or lower-body overlaps. Its collar and sleeve context was inspected. Activities-9 through 11 still have seam overlaps or coverage gaps and remain unfrozen. No tending paint has been accepted or exposed to players. Existing forty-pose motion acceptance remains unchanged.
 
 **Why:** kneeling poses place the neckline, sleeve and hem close to the face, raised knee and rear boot. Explicit source-bound protection prevents accepting a fitted shirt that paints over those parts. All remaining character, public integration and complete builder release requirements remain open.
+
+
+### Strict tending guide coverage gate
+
+The diagnostic now supports `--strict`: it requires explicit anatomy criteria, measured poses, nonzero original shirt coverage, complete declared shirt coverage, no protected lower-body overlap, and, when declared, a nonempty protected face region with no overlap. Reports remain available on failure; process status distinguishes diagnostics from acceptance.
+
+Activities-8 and activities-9 pass this gate. Activities-9 now covers all 878 original opaque shirt pixels without protected face or lower-body overlap; its collar, sleeves and kneeling context were inspected. Activities-10 and 11 correctly fail and remain unfrozen. Unsuccessful seam experiments were discarded rather than promoted. JavaScript syntax validation passes.
+
+**Why:** saving a measurement report must not be mistaken for passing anatomy checks. This is an incremental source-guide improvement; no new painted tending pose or public outfit is accepted, and all remaining builder requirements stay open.

@@ -7,6 +7,7 @@
       "requiredGuideAlpha": 240,
       "protectedOverlap": [],
       "protectedHeadOverlap": [],
+      "protectedHeadPixels": 1576,
       "upperShirtPixels": 1011,
       "uncoveredCount": 0,
       "uncovered": []

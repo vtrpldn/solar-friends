@@ -361,9 +361,9 @@
         121,
         143,
         1146,
-        751
+        747
       ],
-      "painted": 370501
+      "painted": 369414
     }
   ],
   "rowSpans": [
@@ -525,10 +525,10 @@
     }
   ],
   "sourceHashes": {
-    "specs.json": "b484e7faead85e952fd26c713cacf738bd473f013c26f69e9ca5e64cac07ccad",
+    "specs.json": "ff7d8d7d8a753b014c4b4bff748bcd703077e233bbcb083df81dbf26c8ae7ee2",
     "atlas.png": "f8c73ceaeb8ddd27c40a3a99aa67ca1a39c1e146ac5567466e7ac3a955df9a56",
-    "mask.png": "dfd373c5415797e6ac27f2dd39fae3124ef590a40b6338bea584ab80b9eacaea",
-    "context.png": "e7b75c6a9e4606d9d0a61028ae073e5958634373fe1cee476561918a4b19fac6",
+    "mask.png": "15f58fec79455b22f0fe21543c9c556d40e6e22c648982b506b04d9c507dd2b6",
+    "context.png": "eea51f0b08ad5099f28b319f19b773ad0cdde5cd5ec88efb5cb2f9f61e72b0fd",
     "board.png": "a17693fbb7d9f2b21f36184fa6ee8ea125f82a268e7911dab646249e5a85602f"
   }
 }
