@@ -1,0 +1,34 @@
+{
+  "status": "Recorded; decode and visual review pending",
+  "frames": 509,
+  "changes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "water",
+      "seconds": 0.8085
+    },
+    {
+      "mode": "breathe",
+      "seconds": 9.010299999952316
+    }
+  ],
+  "seen": [
+    "base:8",
+    "activities:4",
+    "activities:5",
+    "activities:6",
+    "activities:7"
+  ],
+  "videoSha256": "3c2ad8fc5cdd47740d87042dec4aff32af40bbf6545b522dacf4eecc5e768130",
+  "inputs": {
+    "scripts/review-broad-cooking-motion.mjs": "dd3a3d56bdabcecd43bb05a971451377b5d882d8b279b3f28d623a73d3dac06f",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/watering-equipment-atlas-draft-v1.json": "7b0cd84decc83516fcc7b13ee1476f4a478435d85ea8b7acc4b3b9ee7e9f840c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/watering-hand-masks-draft-v1.json": "beb6e888eb011d06370bee81d86478f174622067ae39352c834b44b244b830ea",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}

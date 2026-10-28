@@ -1,0 +1,40 @@
+{
+  "status": "Internal static/loop samples reviewed; entry/exit incomplete",
+  "why": "Fit existing painted watering cans to actual broader hands using uniform proportions",
+  "registration": "watering-equipment-atlas-draft-v1.json",
+  "uniformSourceScale": 0.18,
+  "nativeOffsets": [
+    [
+      17,
+      7
+    ],
+    [
+      15,
+      5
+    ],
+    [
+      30,
+      30
+    ],
+    [
+      30,
+      12
+    ]
+  ],
+  "sourcePolicy": "Exact existing source pixels, no cropping, rotation, independent part scaling or rewriting",
+  "videoSha256": "3c2ad8fc5cdd47740d87042dec4aff32af40bbf6545b522dacf4eecc5e768130",
+  "decodedReportSha256": "1438f18ee4c8ccfc5e6f52fd0aa38699107ab437bc1eabd5a84c93d0c46e911e",
+  "decodedFrames": 216,
+  "durationSeconds": 10.088216,
+  "boardsInspected": {
+    "watering-composed-loop-decoded-v1.png": "158e329dcf1fd4a46e437e61bae0791a18ab8f2ebd2486c1249662810fed0c23",
+    "watering-composed-enter-decoded-v1.png": "2133cd9c6b5e46773182a0cad9367b2389c1428121ebd2970071ad0c264d1e01",
+    "watering-composed-leave-decoded-v1.png": "df92d6916e5c207c506b5f7f8f88af8a16b295c86d2ecfd24f33553a9032af0d"
+  },
+  "findings": [
+    "Actual eight-view static board inspected: upright and pouring handle/rim placement improves against both hands; entire spout fits native frame.",
+    "All three six-sample decoded boards inspected: loop samples retain grip/layering for both hairstyles, right-facing day and mirrored night,230px/48px.",
+    "Standing-to-watering and return still pop: painted pickup/put-down intermediate poses remain required.",
+    "Samples do not establish exhaustive frame quality, physical-display pacing or full public biome/editor/gameplay acceptance."
+  ]
+}
