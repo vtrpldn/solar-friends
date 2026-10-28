@@ -2803,3 +2803,12 @@ The dedicated sleeping body now has its own source-bound chestnut beard drawing.
 The dedicated accessory checks pass 188 unchanged-pose comparisons, four sleep flag cases, 192 complete-family comparisons, eight feeding returns, four ground-contact checks, eleven malformed-registration refusals and late-failure resource cleanup. Existing accessory checks pass 144 compositions and 22 invalid-input refusals. The public retained-provider regression passes 768 appearance comparisons, eight recoveries and three refusals. Frozen facial guides resist an unbound freeze request without modification. Static face/detail boards were inspected; exact evidence is recorded in `sleep-body-study-v2/family-v2/visual-review-v1.json` and `accessory-verification-v1.json`.
 
 **Why:** permanent facial features must persist when a resident reclines, while taking off a hat should be an explicit pose rule rather than missing artwork. Actual terrain shadows, environmental lighting, recorded transitions and public creator/save/import integration remain required before activating this sleep family. Every other unfinished builder requirement remains in scope.
+
+
+### Live gameplay scratch compatibility for reclining poses
+
+The actual gameplay resident surface starts at 128×128, while native contact composition needs complete 256×256 frames. The contact renderer now accepts that existing gameplay surface and upgrades it when the first nonstandard ground contact is drawn. Legacy-only rendering keeps its original path and scratch size. Invalid scratch shapes still refuse input.
+
+`node scripts/verify-resident-pose-contacts.mjs` passes 32 frozen legacy comparisons, four whole-frame contact comparisons, eight invalid-contact refusals and four gameplay scratch lifecycle comparisons across both facings. Those lifecycle checks draw an ordinary pose, introduce a custom contact on the same 128-square surface, then switch back to a legacy appearance and compare exact rendered pixels.
+
+**Why:** internal previews all allocated native-size scratch canvases and therefore missed the smaller live-game allocation. This removes a real activation failure without globally changing existing gameplay normalization. Ground shadows, world/biome/environment review, recorded transitions and public versioned integration remain open.

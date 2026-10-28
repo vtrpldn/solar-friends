@@ -141,7 +141,7 @@ export function drawResidentAnimation(ctx,surface,sheets,animation,x,y,width){
   return {pose,contact:[...contact]};
  });
  if(poses.every(({contact})=>contact[0]===128&&contact[1]===FRAME_ANCHOR*256)){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
- if(!contactSurfaces.has(surface)){if(surface.width!==256||surface.height!==256)throw Error('Contact-registered poses use a native 256-square scratch surface.');contactSurfaces.set(surface,true);}
+ if(!contactSurfaces.has(surface)){if(surface.width!==surface.height||![128,256].includes(surface.width))throw Error('Contact-registered poses require a 128- or 256-square scratch surface.');contactSurfaces.set(surface,true);}
  if(typeof sheets.frameForPose!=='function')throw Error('Contact-registered poses require a frame provider.');
  const draws=[];for(const {pose,contact}of poses){const frame=sheets.frameForPose(pose.sheet,pose.row*4+pose.frame,pose);if(!frame)continue;if(frame.width!==256||frame.height!==256)throw Error('Keep registered resident poses at their native frame size.');draws.push({frame,contact,weight:pose.weight});}
  if(!draws.length){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}

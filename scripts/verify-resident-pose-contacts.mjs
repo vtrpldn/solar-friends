@@ -26,9 +26,26 @@ try{
    const ec=expected.getContext('2d');ec.translate(512,512);ec.scale(facing,1);ec.drawImage(reference,-384,-384);
    draw(actual.getContext('2d'),scratch,{...provider,contactForPose:(_s,i)=>contacts[i]},animation,512,512,256);equal(actual,expected,'Contact blend clips or shifts a frame');custom++;
   }
+  // The live game allocates a 128-square scratch surface. Exercise that actual
+  // lifecycle: ordinary pose, first custom contact, then a legacy appearance.
+  let gameplayScratchComparisons=0;
+  for(const facing of [-1,1]){
+   const small=canvas(128),native=canvas(),actual=canvas(768),expected=canvas(768),animation={facing,breath:1,layers:[{sheet:'base',row:0,frame:0,weight:1}]};
+   draw(actual.getContext('2d'),small,provider,animation,384,384,128);
+   check(small.width===128,'Legacy scratch was changed before a custom contact');
+   actual.getContext('2d').clearRect(0,0,768,768);
+   const contactProvider={...provider,contactForPose:()=>[128,164]};
+   draw(actual.getContext('2d'),small,contactProvider,animation,384,384,128);
+   draw(expected.getContext('2d'),native,contactProvider,animation,384,384,128);
+   equal(actual,expected,'Gameplay scratch failed native contact upgrade');gameplayScratchComparisons++;
+   actual.getContext('2d').clearRect(0,0,768,768);expected.getContext('2d').clearRect(0,0,768,768);
+   draw(actual.getContext('2d'),small,provider,animation,384,384,128);
+   old(expected.getContext('2d'),canvas(),provider,animation,384,384,128);
+   equal(actual,expected,'Legacy appearance failed after contact scratch reuse');gameplayScratchComparisons++;
+  }
   const animation={facing:1,breath:1,layers:[{sheet:'base',row:0,frame:0,weight:1}]};draw(canvas(768).getContext('2d'),scratch,provider,animation,384,384,128);check(scratch.width===256&&scratch.height===256,'Scratch did not restore');
   let rejected=0;for(const value of [null,[],[128],[-1,180],[128,257],[NaN,180],[128,Infinity],Array(2)]){try{draw(canvas().getContext('2d'),scratch,{...provider,contactForPose:()=>value},animation,128,128,128);}catch{rejected++;}}check(rejected===8,'Invalid contact accepted');
   draw(canvas().getContext('2d'),scratch,{...provider,contactForPose:(_s,i)=>{check(i===0,'Invisible pose requested metadata');return [128,180];}},{...animation,layers:[...animation.layers,{sheet:'base',row:0,frame:1,weight:0}]},128,128,128);
-  return {legacyExactComparisons:legacy,wholeFrameContactComparisons:custom,invalidContactsRejected:rejected,invisibleLayersSkipped:true,scratchRestored:true};
+  return {legacyExactComparisons:legacy,wholeFrameContactComparisons:custom,invalidContactsRejected:rejected,invisibleLayersSkipped:true,scratchRestored:true,gameplayScratchComparisons};
  });assert.equal(result.wholeFrameContactComparisons,4);console.log('PASS',JSON.stringify(result));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
