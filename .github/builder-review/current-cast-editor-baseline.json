@@ -1,0 +1,409 @@
+{
+  "inputs": {
+    "scripts/benchmark-builder.mjs": "a9123e4fdd3801b21d96ddd6baf0449c307dee2bdc8ffd99dd80bd21eb1738d1",
+    "scripts/mixed-builder-fixture.mjs": "77a6e707a11a63f0460575500072e4d6d9e03bc9c4e300a676a0ea88a9ae5e88",
+    "web/editor/index.js": "f17761bcba6dfc8d259262ed0c18a8626675229872e6f34196a29297ce840bfb",
+    "web/editor/map-view.js": "36332e34d9538bdd055b41e599cab6668bcd73cd1683da8264113f1fb2963ad1",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/pkg/solar_friends_bg.wasm": "a8a2bfd270a9307a24da81da8b278517a3881b34033112af1a0ea3afafe4a59d"
+  },
+  "report": {
+    "landCacheBaseline": null,
+    "viewport": {
+      "width": 1600,
+      "height": 1000
+    },
+    "dense_fixture": "256 completed buildings across 21 inland types, clear arrival area, 12 unique custom residents with mixed hats; no authored utility routes or explicit crop/animal starting overrides.",
+    "wasm_sha256": "a8a2bfd270a9307a24da81da8b278517a3881b34033112af1a0ea3afafe4a59d",
+    "scope": "Desktop editor synchronous handlers and two-frame presentation latency. The mixed-only case includes unique custom appearances; this is not sustained camera movement, brush drag, save/compile cancellation, GPU memory or simulation performance release evidence.",
+    "machine": {
+      "platform": "darwin",
+      "arch": "arm64",
+      "cpu": "Apple M3 Pro"
+    },
+    "cases": [
+      {
+        "population": 12,
+        "buildings": 256,
+        "fixture": {
+          "population": 12,
+          "buildings": 256,
+          "types": {
+            "shed": 13,
+            "home": 12,
+            "garden": 13,
+            "well": 13,
+            "kitchen": 12,
+            "grove": 12,
+            "warehouse": 13,
+            "compost": 12,
+            "square": 12,
+            "workshop": 12,
+            "greenhouse": 12,
+            "coop": 12,
+            "solar_farm": 12,
+            "streetlight": 12,
+            "eco_toilet": 12,
+            "wetland": 12,
+            "banana_treatment": 12,
+            "biodigester": 12,
+            "orchard": 12,
+            "goat_pasture": 12,
+            "apiary": 12
+          },
+          "custom": true,
+          "residentStyle": "sleep-mixed",
+          "appearanceRevisions": {
+            "resident-parts-v5": 6,
+            "resident-parts-v6": 6
+          },
+          "uniqueAppearances": 12,
+          "attempted": 312,
+          "seed": 42
+        },
+        "samples": [
+          {
+            "action": "funds",
+            "synchronousMs": 72.20000004768372,
+            "presentationMs": 75.10000002384186,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.89999997615814
+              },
+              {
+                "key": "report_state",
+                "ms": 4.699999928474426
+              }
+            ]
+          },
+          {
+            "action": "funds",
+            "synchronousMs": 71.59999990463257,
+            "presentationMs": 74.19999992847443,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.799999952316284
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              }
+            ]
+          },
+          {
+            "action": "funds",
+            "synchronousMs": 69.39999997615814,
+            "presentationMs": 72,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              }
+            ]
+          },
+          {
+            "action": "funds",
+            "synchronousMs": 70.89999997615814,
+            "presentationMs": 73.60000002384186,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.199999928474426
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              }
+            ]
+          },
+          {
+            "action": "funds",
+            "synchronousMs": 69,
+            "presentationMs": 71.60000002384186,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 40.89999997615814
+              },
+              {
+                "key": "report_state",
+                "ms": 4.699999928474426
+              }
+            ]
+          },
+          {
+            "action": "undo",
+            "synchronousMs": 68.59999990463257,
+            "presentationMs": 71.39999997615814,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.799999952316284
+              },
+              {
+                "key": "report_state",
+                "ms": 4.600000023841858
+              }
+            ]
+          },
+          {
+            "action": "undo",
+            "synchronousMs": 67.5,
+            "presentationMs": 70.29999995231628,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.40000009536743
+              },
+              {
+                "key": "report_state",
+                "ms": 4.399999976158142
+              }
+            ]
+          },
+          {
+            "action": "undo",
+            "synchronousMs": 67.10000002384186,
+            "presentationMs": 70,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 40.800000071525574
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              }
+            ]
+          },
+          {
+            "action": "undo",
+            "synchronousMs": 69.80000007152557,
+            "presentationMs": 72.60000002384186,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.799999952316284
+              },
+              {
+                "key": "report_state",
+                "ms": 4.399999976158142
+              }
+            ]
+          },
+          {
+            "action": "undo",
+            "synchronousMs": 66.5,
+            "presentationMs": 69.29999995231628,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 40.200000047683716
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              }
+            ]
+          },
+          {
+            "action": "redo",
+            "synchronousMs": 67.69999992847443,
+            "presentationMs": 70.39999997615814,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.10000002384186
+              },
+              {
+                "key": "report_state",
+                "ms": 4.299999952316284
+              }
+            ]
+          },
+          {
+            "action": "redo",
+            "synchronousMs": 67.10000002384186,
+            "presentationMs": 69.80000007152557,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.199999928474426
+              },
+              {
+                "key": "report_state",
+                "ms": 4.399999976158142
+              }
+            ]
+          },
+          {
+            "action": "redo",
+            "synchronousMs": 67.20000004768372,
+            "presentationMs": 70.10000002384186,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 41.200000047683716
+              },
+              {
+                "key": "report_state",
+                "ms": 4.400000095367432
+              }
+            ]
+          },
+          {
+            "action": "redo",
+            "synchronousMs": 69.5,
+            "presentationMs": 73.19999992847443,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 42.5
+              },
+              {
+                "key": "report_state",
+                "ms": 4.400000095367432
+              }
+            ]
+          },
+          {
+            "action": "redo",
+            "synchronousMs": 70,
+            "presentationMs": 72.89999997615814,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 43.200000047683716
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              }
+            ]
+          },
+          {
+            "action": "zoom",
+            "synchronousMs": 19.40000009536743,
+            "presentationMs": 24.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 19.300000071525574
+              }
+            ]
+          },
+          {
+            "action": "zoom",
+            "synchronousMs": 11.899999976158142,
+            "presentationMs": 17.09999990463257,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 11.700000047683716
+              }
+            ]
+          },
+          {
+            "action": "zoom",
+            "synchronousMs": 17.600000023841858,
+            "presentationMs": 21.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 17.5
+              }
+            ]
+          },
+          {
+            "action": "zoom",
+            "synchronousMs": 10.399999976158142,
+            "presentationMs": 14.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 10.200000047683716
+              }
+            ]
+          },
+          {
+            "action": "zoom",
+            "synchronousMs": 13.899999976158142,
+            "presentationMs": 17.699999928474426,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 13.699999928474426
+              }
+            ]
+          },
+          {
+            "action": "pan",
+            "synchronousMs": 7.699999928474426,
+            "presentationMs": 14.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 7.100000023841858
+              }
+            ]
+          },
+          {
+            "action": "pan",
+            "synchronousMs": 7,
+            "presentationMs": 14.899999976158142,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.699999928474426
+              }
+            ]
+          },
+          {
+            "action": "pan",
+            "synchronousMs": 6.699999928474426,
+            "presentationMs": 16.09999990463257,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ]
+          },
+          {
+            "action": "pan",
+            "synchronousMs": 6.799999952316284,
+            "presentationMs": 15.899999976158142,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.700000047683716
+              }
+            ]
+          },
+          {
+            "action": "pan",
+            "synchronousMs": 6.599999904632568,
+            "presentationMs": 15.899999976158142,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.400000095367432
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "browser": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+      "dpr": 1
+    }
+  },
+  "scope": "Current v5/v6 mixed 12-person cast, 256 inland buildings, actual player editor. Measures funds, undo/redo, zoom and minimap panning handlers with two-frame presentation samples. No brush strokes, multi-selection, full save/compile cancellation, sustained camera-frame or GPU-memory gate is accepted."
+}
