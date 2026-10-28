@@ -1,8 +1,9 @@
+import {paintResidentShadow} from '../resident-ground-shadow.js';
 import {paintResidentPortrait} from '../resident-portrait.js';
 import {characterCategories,randomizeCharacter,resetCharacterCategory} from './character-choices.js';
 import {residentClips,sampleResidentClip,drawResidentAnimation} from '../resident-animation.js';
 import {RESIDENT_WIDTH} from '../sprite-frames.js';
-import {paintWorldBuilding,paintContactShadow} from '../world-renderer.js';
+import {paintWorldBuilding} from '../world-renderer.js';
 import {unlitFilter} from '../power.js';
 const pages=['Identity','Appearance','Personality','Experience','Arrival'];
 const poses={breathe:'Idle',walk:'Walking',work:'Working',cook:'Cooking',water:'Watering',tend:'Tending',feed:'Feeding',sit:'Sitting',sleep:'Sleeping',look:'Looking around',stretch:'Stretching',wave:'Waving',relax:'Relaxing'};
@@ -60,8 +61,9 @@ export class CharacterCreator{
   const ctx=this.canvas.getContext('2d');ctx.clearRect(0,0,320,240);ctx.fillStyle=night?'#33423c':'#e0e5cb';ctx.fillRect(0,0,320,240);
   if(scale)paintWorldBuilding(ctx,{key:'home',x:0,y:0},{project:()=>({x:100,y:178}),scale:1,images:this.art.images,night,light:0});
   const x=scale?220:160,y=scale?195:222,width=scale?RESIDENT_WIDTH:160;
-  paintContactShadow(ctx,x,y,width*.24,width*.065,.18);ctx.save();ctx.filter=unlitFilter(night);
-  drawResidentAnimation(ctx,this.surface,this.sheets,{layers:sampleResidentClip(mode,seconds,this.sheets.animationProfile),facing,breath:1},x,y,width);ctx.restore();
+  const animation={layers:sampleResidentClip(mode,seconds,this.sheets.animationProfile),facing,breath:1};
+  paintResidentShadow(ctx,this.sheets,animation,x,y,width,{rx:width*.24,ry:width*.065,opacity:.18});ctx.save();ctx.filter=unlitFilter(night);
+  drawResidentAnimation(ctx,this.surface,this.sheets,animation,x,y,width);ctx.restore();
   if(scale){const frame=this.art.appearances.portraitFrame({preset:'bento',version:1});ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
   paintResidentPortrait(this.portrait,this.appearance,this.art.appearances,{filter:unlitFilter(night)});
   Object.assign(this.canvas.dataset,{look:this.look,appearance:JSON.stringify(this.appearance),pose:mode,animationProfile:this.sheets.animationProfile??'legacy',frame:String(sampleResidentClip(mode,seconds,this.sheets.animationProfile)[0].frame),scale:String(scale),night:String(night)});

@@ -1,0 +1,20 @@
+{
+  "legacyExactComparisons": 9,
+  "registeredAxisComparisons": 8,
+  "malformedRefusals": 9,
+  "sourceChangesRefused": 4,
+  "retentionRefusals": 3,
+  "metadataCopied": true,
+  "invisibleLayersSkipped": true,
+  "inputs": {
+    "scripts/verify-resident-shadows.mjs": "5513f1b5090a56af6d05f688490d2727e68b146019ed47ea3648b9fcbbe17f86",
+    "web/resident-ground-shadow.js": "016fa5a12a7957c8d0ea6c3d0166979c7c1b51a5723632dd0a289ff69a4642ee",
+    "web/resident-shadow-metadata.js": "8759afa938aace5e88a5989bf1bcd210218106532cc418140ddc779612879f1a",
+    "web/character-body-family.js": "570b5913911e39ed2b6466bebfb5b93a4dde3fa32c8fcd05a70ce47384baf42d",
+    "web/character-family-appearance.js": "5b69b6f301a36dac668038efb7f7edf654de53596dfdc3026ca81b429aee37f1",
+    "web/resident-family-provider.js": "d459435f4dfc6fa22ef0bd9df8a87cdaf5d92a0d90f7a7b67d6abaf9b1e01c2c",
+    "web/main.js": "bb2c7760203ba7fb923ef0de54adce8cc3758f2018cb9bd1b33571a2edf829b2",
+    "web/editor/character-creator.js": "1c9b803c9e213e3e256abd6a28dc5a08cca043dc2dceb4ebe33006827d11ff31"
+  },
+  "scope": "Exact shadow geometry and retained metadata validation; static board reviewed separately. World terrain, environmental lighting, motion and public activation remain open."
+}

@@ -1,0 +1,18 @@
+{
+  "status": "Internal static review only",
+  "files": {
+    "composition-review-v1.png": "f591a6056df837e83cc888b345977a975c854bb0a027bc2f5954497fb3aaab3a",
+    "verification-v1.json": "46fda36bbb24925fd3f80308e4ad6c4189cce786815c6da529f0aadb81a9f256",
+    "shadow-verification-v1.json": "0067e4de67a1bcd7817f0206a00d4336ce0dc268fe88b9d8e37245d1604a4bc1"
+  },
+  "findings": [
+    "Soft reclining shadow runs beneath the torso and follows the same diagonal ground axis.",
+    "Both hairstyles and outfits preserve the same ground registration.",
+    "Standing, walking and seated figures retain their previous oval shadow."
+  ],
+  "remaining": [
+    "Actual biome terrain and environmental lighting",
+    "Motion transitions",
+    "Public versioned creator, recipe and save integration"
+  ]
+}

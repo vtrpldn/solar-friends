@@ -1,3 +1,4 @@
+import {paintResidentShadow} from './resident-ground-shadow.js';
 import {creationPresentation} from './creation-presentation.js';
 import {paintResourceSite} from './resource-site-art.js';
 import {renderScenarioJournal,resetScenarioJournalUI} from './scenario-journal-ui.js';
@@ -275,17 +276,6 @@ function paintPortraits(root=document) {
     const frame=residentAppearances.portraitFrame(person.appearance);
     if(frame&&portrait._paintedFrame!==frame){paintPreparedResidentPortrait(portrait,frame);portrait._paintedFrame=frame;}
   }
-}
-function contactShadow(x, y, rx, ry, opacity = 0.2) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(rx, ry);
-  const shade = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
-  shade.addColorStop(0, `rgba(53,65,31,${opacity})`);
-  shade.addColorStop(1, "rgba(53,65,31,0)");
-  ctx.fillStyle = shade;
-  ctx.fillRect(-1, -1, 2, 2);
-  ctx.restore();
 }
 function toast(message) {
   $("#toast").textContent = message;
@@ -630,7 +620,10 @@ function resident(r) {
   const moving = Math.hypot(r.target_x - r.x, r.target_y - r.y) > 0.1;
   if(!residentVisible(r,state.village))return;
   const isSelected = selected === r.id;
-  contactShadow(p.x, p.y + 2 * s, 10 * s, 4 * s, 0.25);
+  const py = p.y;
+  const appearanceProvider=residentAppearances.provider(r.appearance);
+  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, worksiteKind: state.village.buildings.find(b=>b.id===r.activity_building)?.kind, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta,appearanceProvider.animationProfile);
+  paintResidentShadow(ctx,appearanceProvider,animation,p.x,p.y,RESIDENT_WIDTH*s,{rx:10*s,ry:4*s,offsetY:2*s,opacity:.25});
   if (isSelected) {
     ctx.beginPath();
     ctx.ellipse(p.x, p.y, 13 * s, 6 * s, 0, 0, 7);
@@ -638,9 +631,6 @@ function resident(r) {
     ctx.lineWidth = 2;
     ctx.stroke();
   }
-  const py = p.y;
-  const appearanceProvider=residentAppearances.provider(r.appearance);
-  const animation = advanceResidentAnimation(residentAnimations.get(r.id), { ...r, sourceCare: r.task==="source" && sourceCare(state.village.economy.sources[r.activity_material]||{}), sourceMaterial: r.task === "source" ? state.village.economy.sources[r.activity_material]?.material : null, worksiteKind: state.village.buildings.find(b=>b.id===r.activity_building)?.kind, visitingKind: r.task === "visit" ? state.village.buildings.find(b => b.id === r.visit_building)?.kind : null }, state.village.minutes, animationDelta,appearanceProvider.animationProfile);
   residentAnimations.set(r.id, animation);
   if (!residentSurfaces.has(r.id)) {
     const surface = document.createElement('canvas'); surface.width = surface.height = 128;
