@@ -1,0 +1,21 @@
+{
+  "status": "Internal versioned side-part bundle verified; not a public appearance revision",
+  "poses": 48,
+  "refusals": 11,
+  "partialFailureClean": true,
+  "liveBefore": 101,
+  "allOwnedReleased": true,
+  "borrowedSources": 18,
+  "inputs": {
+    "web/character-composed-family.js": "01ded37c63776d39149e1ecf0674e114dfa2daa78fe3c27efa7b169b941b70d5",
+    "scripts/verify-composed-resident-family.mjs": "96d9906bc2595595bef804b3e12f1a1ea5e049794899ef7a47205389818f2203",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v1.json": "ef4e01d54c9b7b26fd7bd04b02761bad40d9e9e1f8aeaff5f68aba8c21bf88ca"
+  },
+  "portraitReview": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-portrait-v1.png",
+    "sha256": "d4825a3c96cbce837632cc68bbedc1a8d9781f5d6a65ce438811d96513c758a3",
+    "inspected": true,
+    "finding": "Silver hair, straw hat, copper skin and teal vest match the same recipe used by the48 world pose frames."
+  },
+  "scope": "Complete internal side-part bundle only. Missing other hairstyles, equipment/garment/facial parts, complete motion/biome/art acceptance, bounded multi-recipe cache, public creator/save/share integration and original release gates."
+}
