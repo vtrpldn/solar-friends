@@ -1,7 +1,7 @@
 import {paintResidentShadow} from '../resident-ground-shadow.js';
 import {paintResidentPortrait} from '../resident-portrait.js';
 import {characterCategories,randomizeCharacter,resetCharacterCategory} from './character-choices.js';
-import {residentClips,sampleResidentClip,drawResidentAnimation} from '../resident-animation.js';
+import {residentClips,sampleResidentClip,drawResidentAnimation,presentedPoseLayers} from '../resident-animation.js';
 import {RESIDENT_WIDTH} from '../sprite-frames.js';
 import {paintWorldBuilding} from '../world-renderer.js';
 import {unlitFilter} from '../power.js';
@@ -60,13 +60,14 @@ export class CharacterCreator{
   const seconds=this.motion.matches?0:(now-this.start)/1000,mode=this.dialog.querySelector('[data-character-pose]').value,facing=Number(this.dialog.querySelector('[data-character-facing]').value),night=Number(this.dialog.querySelector('[data-character-light]').value),scale=this.dialog.querySelector('[data-character-scale]').checked;
   const ctx=this.canvas.getContext('2d');ctx.clearRect(0,0,320,240);ctx.fillStyle=night?'#33423c':'#e0e5cb';ctx.fillRect(0,0,320,240);
   if(scale)paintWorldBuilding(ctx,{key:'home',x:0,y:0},{project:()=>({x:100,y:178}),scale:1,images:this.art.images,night,light:0});
-  const x=scale?220:160,y=scale?195:222,width=scale?RESIDENT_WIDTH:160;
+  const x=scale?220:160,width=scale?RESIDENT_WIDTH:160;let y=scale?195:222;
   const animation={layers:sampleResidentClip(mode,seconds,this.sheets.animationProfile),facing,breath:1};
+  for(const pose of presentedPoseLayers(animation.layers,this.sheets.interpolation)){const contact=this.sheets.contactForPose?.(pose.sheet,pose.row*4+pose.frame,pose);if(contact)y=Math.min(y,240-4-(256-contact[1])*width/256);}
   paintResidentShadow(ctx,this.sheets,animation,x,y,width,{rx:width*.24,ry:width*.065,opacity:.18});ctx.save();ctx.filter=unlitFilter(night);
   drawResidentAnimation(ctx,this.surface,this.sheets,animation,x,y,width);ctx.restore();
   if(scale){const frame=this.art.appearances.portraitFrame({preset:'bento',version:1});ctx.save();ctx.filter=unlitFilter(night);ctx.drawImage(frame,264-RESIDENT_WIDTH/2,204-RESIDENT_WIDTH*.95,RESIDENT_WIDTH,RESIDENT_WIDTH);ctx.restore();}
   paintResidentPortrait(this.portrait,this.appearance,this.art.appearances,{filter:unlitFilter(night)});
-  Object.assign(this.canvas.dataset,{look:this.look,appearance:JSON.stringify(this.appearance),pose:mode,animationProfile:this.sheets.animationProfile??'legacy',frame:String(sampleResidentClip(mode,seconds,this.sheets.animationProfile)[0].frame),scale:String(scale),night:String(night)});
+  Object.assign(this.canvas.dataset,{look:this.look,appearance:JSON.stringify(this.appearance),pose:mode,animationProfile:this.sheets.animationProfile??'legacy',frame:String(sampleResidentClip(mode,seconds,this.sheets.animationProfile)[0].frame),scale:String(scale),night:String(night),anchorX:String(x),anchorY:String(y),spriteWidth:String(width)});
   if(!this.motion.matches&&residentClips[mode].fps>0)this.frame=requestAnimationFrame(t=>this.draw(t));
  }
 }

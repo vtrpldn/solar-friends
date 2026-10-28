@@ -14,7 +14,7 @@ async function definition(){
  for(const [file,source]of Object.entries(data.sources))if(!/^[a-z0-9-]+\.png$/.test(file)||!exact(source,['url','sha256'])||!/^\/art\/characters\/(?:prototype-v1|relaxed-v1|relaxed-work-v1|relaxed-shirt-v1|relaxed-sleep-v1)\/[a-z0-9-]+\.png$/.test(source.url)||!/^[a-f0-9]{64}$/.test(source.sha256))throw Error('Use only the closed resident artwork catalog.');
  for(const file of Object.values(data.bodySources))if(!Object.hasOwn(data.sources,file))throw Error('The resident body source is missing.');return data;
 }
-// Kept separate from older immutable bundles and unselected by public recipes.
+// Kept separate from older immutable bundles; only explicit v5/v6 recipes select it.
 async function prepare(options,clothed){
  if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(key=>!['maxEntries','maxConcurrent','maxQueued'].includes(key)))throw Error('Choose bounded resident cache options.');
  options={...options};const data=await definition(),cache=new Map(),sources={};let family=null,library=null;

@@ -1,0 +1,33 @@
+{
+  "status": "Passed this specific public Mata Atlantica flow",
+  "files": {
+    "mata-report.json": "af1244752090bc6b6c7cc7c2e455ec4d955027f711625c4721b228889b4f82c0",
+    "mata-sleep-preview.png": "f23f2159dd1aedcae88e1f2264d54adf96e3270f3add8694565cfcb1150cf6cd",
+    "mata-live-custom.png": "3bf2678063492f419d1611edc392083cd4c4451cf2be85828c7d1bb7573d2dc5",
+    "mata-custom-village.png": "3f5a65ab4ea28fd3813fe83829b1a0cc1e18012f9206ce529455e743219c2f1b"
+  },
+  "nativeChecks": {
+    "focusedAppearanceTests": 6,
+    "allLibraryTests": 785,
+    "roundTripPartCombinations": 13824,
+    "strictAllTargetClippy": true
+  },
+  "rendererChecks": {
+    "reviewedPoses": 192,
+    "feedingReturns": 8,
+    "metadataChecks": 4,
+    "oldNewTopSelectors": 4
+  },
+  "randomizationCases": 640,
+  "findings": [
+    "Sleeping preview retains the complete reclining frame without shrinking or distortion.",
+    "Character controls and live edit actions fit the tested desktop windows.",
+    "Native playtest retains new appearance, identity and noncosmetic state; exact checkpoint reload passes."
+  ],
+  "remaining": [
+    "Cerrado and Caatinga public flows currently running",
+    "Classic full renderer regression",
+    "Natural lowering/rising animation is absent; discrete switch remains",
+    "Every other unfinished original builder release gate"
+  ]
+}

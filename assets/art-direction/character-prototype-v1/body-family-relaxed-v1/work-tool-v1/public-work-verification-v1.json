@@ -6,12 +6,12 @@
   "publicEntries": 16,
   "retainedAfterPrivateEviction": true,
   "legacyAndNewRevisionsCoexist": true,
-  "scope": "Normal public renderer uses new work revision for fresh relaxed recipes, preserves older recipes and non-work poses, shares bounded appearance work and retains previews. Creator/file/save flows are verified separately.",
+  "scope": "Normal public renderer preserves explicit work-v3 and earlier v2 recipes and non-work poses, shares bounded appearance work and retains previews. Fresh relaxed recipes select sleep-v5; that family is verified separately. Creator/file/save flows are verified separately.",
   "sourceHashes": {
-    "web/resident-parts.js": "7aa43e833a842b4b8f5afbd2c46105561939d37507089ef63f7e6eac5942e4f8",
-    "web/resident-part-recipe.js": "8b7c790c1a77495b719229fdcbef43cb733232dfd6d508f395650f4cd675b74e",
-    "web/resident-family-parts.js": "5c0c9f4d599977e0cffcbaa9701104dccff4965c9a7d86dfd1dc49cba4a09663",
-    "web/character-family-bundle.js": "b8608e3aea91a0e6c40f41fa15e302a9c053e63d8b89b62d12947fffc4484bb3",
+    "web/resident-parts.js": "fbcb411030393495996e79898f6ebea430e176645b015a35c5440296a3346d94",
+    "web/resident-part-recipe.js": "6d13da9b2db7580a0822969442e3cb775223a37086ea72cda361e178a936753f",
+    "web/resident-family-parts.js": "d86363aa81d0029ae52b54ac15ebd5db5682e3e82c6947f399245c8b4b425a6e",
+    "web/character-family-bundle.js": "366fba1ffb4a6d06dac038c59487e0eb0f5bf3280561df4ce3e5283ddac71bb1",
     "web/art/characters/relaxed-work-v1/bundle-v1.json": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4"
   }
 }

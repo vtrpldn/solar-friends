@@ -20,7 +20,7 @@ try{
   if(custom)assert.equal(baseline.appearance.assetVersion,'resident-parts-v4');else assert.deepEqual(catalog.resident_presets[0],baseline);checked++;
  }
  }
- assert.deepEqual([...styles].sort(),['resident-parts-v1','resident-parts-v3','resident-parts-v4']);
+ assert.deepEqual([...styles].sort(),['resident-parts-v1','resident-parts-v5','resident-parts-v6']);
  assert.equal(g.snapshot(),before,'Choice generation and validation are read-only');
  assert.throws(()=>randomizeCharacter(baseline,{},catalog,()=>1));assert.throws(()=>resetCharacterCategory(baseline,baseline,'Unknown'));
  const fresh={...baseline,appearance:{preset:'nina',version:1}};delete baseline.appearance;assert(!Object.hasOwn(resetCharacterCategory(fresh,baseline,'Appearance'),'appearance'));
