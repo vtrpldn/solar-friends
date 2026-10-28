@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {residentIsIndoors,residentVisible} from '../web/resident-presence.js';
+const home={id:73,kind:'home',progress:100},village={buildings:[{id:0,kind:'shed',progress:100},home]};
+const sleeper={id:951,task:'sleep',x:12,y:14,target_x:12,target_y:14,activity_building:73};
+assert(residentIsIndoors(sleeper,village),'A custom resident uses the engine-assigned home');
+assert(!residentVisible(sleeper,village));
+assert(residentIsIndoors({...sleeper,id:0},village),'Identity does not change an assigned home');
+assert(!residentIsIndoors({...sleeper,activity_building:null},village),'A nearby unassigned sleeper is visible');
+assert(!residentIsIndoors({...sleeper,activity_building:0},village),'A shed is not a home');
+assert(!residentIsIndoors({...sleeper,activity_building:999},village),'A removed home cannot hide someone');
+assert(!residentIsIndoors(sleeper,{buildings:[{...home,progress:99}]}),'An unfinished home cannot hide someone');
+assert(!residentIsIndoors({...sleeper,target_x:15},village),'A sleeper approaching home is visible');
+assert(!residentIsIndoors({...sleeper,task:'rest'},village),'Resting outside a home is visible');
+for(const phase of ['leaving','away','returning'])assert(!residentIsIndoors({...sleeper,trip:{phase}},village),'Trips do not enter a home');
+assert(!residentVisible({...sleeper,activity_building:null,trip:{phase:'away'}},village));
+assert(residentVisible({...sleeper,trip:{phase:'returning'}},village));
+assert(residentIsIndoors(sleeper,{buildings:[home,...village.buildings.slice(0,1)]}),'Building array order does not affect assignment');
+console.log('PASS: assigned homes, arbitrary resident/building IDs, removed/unfinished/wrong buildings, movement and travel visibility');

@@ -1,7 +1,8 @@
 export const residentIsAway=r=>r.trip?.phase==='away';
 export function residentIsIndoors(r,village){
   return !r.trip && r.task==='sleep' && Math.hypot(r.target_x-r.x,r.target_y-r.y)<=.1
-    && !!village.buildings.filter(b=>b.kind==='home'&&b.progress>=100)[Math.floor(r.id/3)];
+    && r.activity_building!=null
+    && village.buildings.some(b=>b.id===r.activity_building&&b.kind==='home'&&b.progress>=100);
 }
 export const residentVisible=(r,village)=>!residentIsAway(r)&&!residentIsIndoors(r,village);
 const clock=minutes=>{const m=Math.floor(minutes)%1440;return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;};

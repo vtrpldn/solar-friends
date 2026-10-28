@@ -9,7 +9,10 @@ assert(g.restore(await readFile(new URL('../web/artwork/village-preview.json',im
 assert(g.restore(JSON.stringify(makeScenario('occupations',fresh,JSON.parse(g.snapshot())))));
 const snap=()=>JSON.parse(g.snapshot()),money=snap().village.economy.money,jobs=snap().environment.economy.jobs;
 assert.equal(jobs.length,5);assert.equal(new Set(jobs.map(j=>j.title)).size,5);
-advanceGame(g,90);let s=snap();
+// A centred 64-cell map has a longer walk to the boundary than the old map.
+// Observe the actual departure instead of assuming a fixed 90-minute commute.
+let s=snap();
+for(let minutes=0;minutes<420&&!s.residents.every(r=>r.trip?.purpose==='work'&&r.trip.phase==='away');minutes++){advanceGame(g,1);s=snap();}
 assert(s.residents.every(r=>r.trip?.purpose==='work'&&r.trip.phase==='away'));
 assert(s.residents.every(r=>!residentVisible(r,s.village)));
 assert(g.fast_forward_ready());

@@ -2740,3 +2740,10 @@ The resident renderer accepts optional native-frame contact coordinates from a f
 `node scripts/verify-resident-pose-contacts.mjs` compares existing rendering against commit `d4a8453` in 32 exact pixel comparisons, independently verifies four full-frame custom-contact compositions, rejects eight malformed contacts and checks scratch restoration. Existing animation and profile checks pass. These synthetic rendering checks do not establish artwork acceptance.
 
 **Why:** a lying resident needs room below the standing foot anchor without shrinking or clipping the body. Two unchanged generated sleep studies, exact prompts, reference hashes and scoped reviews are retained under `assets/art-direction/character-prototype-v1/sleep-body-study-v1` and `sleep-body-study-v2`. The second study improves the head-to-feet camera direction but still needs measured registration, material masks, layered hair/clothing, accessory and shadow policies, and gameplay-scale lighting/transition review. No production provider enables custom contacts yet. Dedicated sleep artwork and the overall builder plan remain unfinished.
+
+
+### Sleeping visibility follows engine-assigned homes
+
+`web/resident-presence.js` hides a sleeping resident only after reaching the completed home identified by the engine's `activity_building`. Resident IDs and building array positions no longer determine indoor visibility. Travelling residents, approaching sleepers, missing/unfinished homes and non-home assignments remain visible under the ordinary presence rules.
+
+**Why:** custom residents use stable identities that are unrelated to bed slots. Dividing an ID by three hid or exposed the wrong residents. `verify-resident-presence.mjs` covers arbitrary IDs, reordered buildings, invalid assignments and travel. Actual WASM departure, overnight, individual-sleep and occupation checks pass. The occupation check now observes departure within a bounded interval rather than assuming the old map's 90-minute commute. This fixes presence classification; dedicated sleeping artwork and the other builder release gates remain open.
