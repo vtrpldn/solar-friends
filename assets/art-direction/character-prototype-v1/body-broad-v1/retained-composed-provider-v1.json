@@ -1,0 +1,18 @@
+{
+  "status": "Internal retained-provider verification passed; public artwork enrollment incomplete",
+  "comparisons": 50,
+  "renders": 200,
+  "refusals": 8,
+  "pixelsRetainedAfterDisposal": true,
+  "portraitMatchesPublicPainter": true,
+  "metadataCopied": true,
+  "partialFailureCleanup": true,
+  "inputs": {
+    "scripts/verify-retained-composed-provider.mjs": "8c4dd9bf6c4aa1858af3eb08974353602303a72a58fe0f337dcf4653f43fc138",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/resident-portrait.js": "682c40d41a6dd70b9678d98b6381f0214419fd6f346a65e0c06574ab19bc7211",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/character-composed-family.js": "cdbf9aed7581a7c904ece7add952352cd04c033d465588dcccf5bd96ca40577d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v6.json": "594fe3b4088c2eb2d3dac827095c3ca9980d8003f1608add6d67f514c7014b7a"
+  }
+}

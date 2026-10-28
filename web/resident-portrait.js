@@ -7,7 +7,7 @@ export function paintResidentPortrait(canvas,appearance,source,{filter='none'}={
   let library=source;
   if(Array.isArray(source)){if(!legacyLibraries.has(source))legacyLibraries.set(source,createResidentAppearanceLibrary({base:source}));library=legacyLibraries.get(source);}
   const frame=library.portraitFrame(appearance);
-  paintPreparedResidentPortrait(canvas,frame,{filter});
+  paintPreparedResidentPortrait(canvas,frame,{...library.portraitFraming?.(appearance),filter});
 }
 
 // Crops remain in native body coordinates even when accessories add margins.

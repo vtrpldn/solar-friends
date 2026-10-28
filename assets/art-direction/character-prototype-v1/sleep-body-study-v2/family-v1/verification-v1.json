@@ -36,9 +36,9 @@
     "assets/art-direction/character-prototype-v1/sleep-body-study-v2/family-v1/definition-v1.json": "d26e8c44cc9104590a7336345e3033998b9c5505b6a669e4eb137a1d2d12b696",
     "scripts/prepare-sleep-family.mjs": "e29842876a0514037ff2c74be31886ed2f274763dfaa63bc1d224d3ed03b2288",
     "scripts/verify-sleep-family.mjs": "82b905f9a248c730fe823e956d6679550488bd302444370a9c14ee17b7c37860",
-    "web/character-family-appearance.js": "5b69b6f301a36dac668038efb7f7edf654de53596dfdc3026ca81b429aee37f1",
-    "web/resident-family-provider.js": "d459435f4dfc6fa22ef0bd9df8a87cdaf5d92a0d90f7a7b67d6abaf9b1e01c2c",
-    "web/resident-family-parts.js": "f205dd5e49ba109d38fe7255702048b8bd4f20183841a5b6c40920faa68c147f"
+    "web/character-family-appearance.js": "e6b82ac6fa4cec845a1b0d1cf9fc654d4720b8d054e9c4da29efbfe07f4b0e6c",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/resident-family-parts.js": "d86363aa81d0029ae52b54ac15ebd5db5682e3e82c6947f399245c8b4b425a6e"
   },
   "scope": "Internal full 48-pose families, both hairstyles and outfits without optional accessories. Existing public bundles remain unchanged. World, motion, accessories and save/import acceptance are still required."
 }

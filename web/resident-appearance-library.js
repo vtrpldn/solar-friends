@@ -52,6 +52,7 @@ export function createResidentAppearanceLibrary({base=[],idle=[],activities=[],l
  return Object.freeze({
   provider(appearance){alive();const checked=validateResidentAppearance(appearance);if(checked.schema===2){if(!parts)throw Error('These resident parts are still loading.');return parts.provider(checked);}return entry(checked).provider;},
   portraitFrame(appearance){alive();const checked=validateResidentAppearance(appearance);if(checked.schema===2){if(!parts)throw Error('These resident parts are still loading.');return parts.provider(checked).frameForPose('base',8);}return entry(checked).provider.frameForPose('base',8);},
+  portraitFraming(appearance){alive();const checked=validateResidentAppearance(appearance),provider=checked.schema===2?parts?.provider(checked):entry(checked).provider;if(!provider)throw Error('These resident parts are still loading.');return provider.portraitFraming?.()??{origin:provider.frameOriginForPose?.('base',8)??[0,0],crop:[64,12,128,152]};},
   isReady(appearance,{sheets:requested=['base']}={}){try{alive();if(!Array.isArray(requested)||!requested.length||requested.some(sheet=>!sheets.includes(sheet)))return false;const checked=validateResidentAppearance(appearance);return checked.schema===2?!!parts?.provider(checked):entry(checked).ready(requested);}catch{return false;}},
   installPrepared(appearances,providers){
    alive();
