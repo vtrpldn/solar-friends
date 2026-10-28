@@ -1,0 +1,31 @@
+{
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "vp9",
+        "width": 800,
+        "height": 360,
+        "nb_read_frames": "349"
+      }
+    ],
+    "format": {
+      "duration": "11.597218"
+    }
+  },
+  "windows": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-motion-v3-day.png",
+      "startSeconds": 0.0,
+      "durationSeconds": 5.803800000071526,
+      "frames": 32
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-motion-v3-night.png",
+      "startSeconds": 5.803899999976158,
+      "durationSeconds": 5.803700000047684,
+      "frames": 32
+    }
+  ]
+}

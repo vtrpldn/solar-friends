@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Correction candidate; native review pending",
+  "why": "Correct cooking lower-row layout scale before sequence acceptance",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Edit this exact Solar Friends broader adult 2x2 cooking sprite sheet to correct the lower-row figure scale. Preserve the TOP TWO figures unchanged. Repaint ONLY the BOTTOM TWO complete figures about five percent larger in overall anatomical scale, preserving their exact stirring gestures, round face, fuller torso/thighs, cream vest/shorts, brown boots, painted broad shading, upper-left light and camera. Their head diameter, torso volume and standing stature must match the upper row. Keep lower boots on existing ground lines and expand upward/sideways into the transparent margin. Leave ample transparent gaps and edge margins; do not clip scalp/fingertips/boots. Do not enlarge only the head, warp anatomy or change hand gestures. True transparent background. No tools, pot, spoon, shadows, hair, accessories, text or grid. Exactly four same-person figures remain in the same order.",
+  "references": [
+    {
+      "path": "activity-cook-candidate-v1.png",
+      "role": "Exact edit target; retain top figures and all gesture anatomy"
+    }
+  ],
+  "output": "activity-cook-candidate-v2.png"
+}

@@ -5,10 +5,11 @@ import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 const clip=process.argv[2];assert(['cook','water','tend','feed'].includes(clip),'Choose cook, water, tend or feed');
-const revision='v1',row=['cook','water','tend','feed'].indexOf(clip);
+const revision=process.argv.find(a=>a.startsWith('--revision='))?.slice(11)??(process.argv.includes('--revised')?'v2':'v1');assert(['v1','v2','v3'].includes(revision),'Choose an authored source revision');
+const row=['cook','water','tend','feed'].indexOf(clip);
 const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex'),files={work:root+`/activity-${clip}-candidate-${revision}.png`,standing:root+'/breathe-candidate-v1.png'},sources={};
 for(const [key,path]of Object.entries(files)){const b=await readFile(path);sources[key]={path,sha256:hash(b),data:b.toString('base64')};}
-const settingsPath=root+'/activity-calibration-v1.json',setting=JSON.parse(await readFile(settingsPath)).sources.find(s=>s.clip===clip);assert(setting,'Missing explicit authored calibration');
+const settingsPath=root+`/activity-calibration-${revision}.json`,setting=JSON.parse(await readFile(settingsPath)).sources.find(s=>s.clip===clip);assert(setting,'Missing explicit authored calibration');
 const bytes=await readFile(files.work),registration={schema:1,family:'broad-body-prototype-v1',sheet:'activities',source:{sha256:sources.work.sha256,width:bytes.readUInt32BE(16),height:bytes.readUInt32BE(20),columns:2,rows:2},uniformScale:setting.uniformScale,frames:setting.sourceContacts.map((sourceContact,index)=>({index,sourceContact,nativeContact:setting.nativeContact}))};
 const standing=JSON.parse(await readFile(root+'/breathe-registration-v1.json')),server=await serve(0);let browser;
 try{

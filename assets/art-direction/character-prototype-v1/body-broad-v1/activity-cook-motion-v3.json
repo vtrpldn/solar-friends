@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "scope": "Partial internal provider; native mode/pose selection and ground alignment recording only. No fitted equipment, complete anatomical family, public integration or physical frame pacing claim.",
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0,
+      "elapsedMs": 5803.800000071526,
+      "cycleSeconds": 2,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "cook",
+          "seconds": 0.8033000000715256
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.803200000047684
+        }
+      ],
+      "seen": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "renderCalls": 698
+    },
+    {
+      "night": 1,
+      "offsetMs": 5803.899999976158,
+      "elapsedMs": 5803.700000047684,
+      "cycleSeconds": 2,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0.00010000002384185791
+        },
+        {
+          "mode": "cook",
+          "seconds": 0.8078000000715255
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.803700000047684
+        }
+      ],
+      "seen": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "renderCalls": 697
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-candidate-v3.png": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-registration-v3.json": "277ea2e1a7290a619c16758f084076663e90b874a7e5ddd187ea1f71615c0527",
+    "scripts/review-broad-activity-motion.mjs": "85ae48bdaf75efa4fbb03e9f76c3e40c319d4175f3fc9d4dc68e71052b960923",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
+  },
+  "videoSha256": "83521b424b93b63a4a899953d8def9763d2089d7478855b7ded482508b13ed14",
+  "errors": [],
+  "status": "Activity source accepted for further internal family authoring; no public availability",
+  "visualReview": "Both decoded 32-frame day/mirrored-night filmstrips inspected, containing enlarged and gameplay-size views over two native cycles plus standing entry/return. All four source poses observed; complete hands and boots remain visible. Head size and broader anatomy stay coherent. Whole painted key-pose transitions remain visible; kneeling entry/exit has no intermediate lowering/getting-up anatomy. No equipment or fitted customization acceptance.",
+  "limitations": [
+    "No fitted tools clothing hair facial accessories or portrait",
+    "No intermediate anatomical transitions",
+    "No public complete-family integration",
+    "No physical hardware frame pacing or complete builder release acceptance"
+  ]
+}

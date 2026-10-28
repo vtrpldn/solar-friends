@@ -1,0 +1,31 @@
+{
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "vp9",
+        "width": 800,
+        "height": 360,
+        "nb_read_frames": "468"
+      }
+    ],
+    "format": {
+      "duration": "15.563640"
+    }
+  },
+  "windows": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-motion-v1-day.png",
+      "startSeconds": 0.00019999992847442627,
+      "durationSeconds": 7.800300000071526,
+      "frames": 32
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-motion-v1-night.png",
+      "startSeconds": 7.800699999928474,
+      "durationSeconds": 7.800100000023842,
+      "frames": 32
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 const clip=process.argv[2];assert(['cook','water','tend','feed'].includes(clip),'Choose an activity');
-const row=['cook','water','tend','feed'].indexOf(clip),revision=clip==='cook'?'v2':'v1';
+const row=['cook','water','tend','feed'].indexOf(clip),revision=clip==='cook'?'v3':'v1';
 const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex');
 const paths={standing:root+'/breathe-candidate-v1.png',work:root+`/activity-${clip}-candidate-${revision}.png`},sources={};
 for(const [key,path]of Object.entries(paths)){const b=await readFile(path);sources[key]={path,sha256:hash(b),data:b.toString('base64')};}

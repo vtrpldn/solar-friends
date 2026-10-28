@@ -1,0 +1,31 @@
+{
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "vp9",
+        "width": 800,
+        "height": 360,
+        "nb_read_frames": "468"
+      }
+    ],
+    "format": {
+      "duration": "15.572141"
+    }
+  },
+  "windows": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-motion-v1-day.png",
+      "startSeconds": 0.0,
+      "durationSeconds": 7.8033999999761585,
+      "frames": 32
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-motion-v1-night.png",
+      "startSeconds": 7.8035,
+      "durationSeconds": 7.803899999976158,
+      "frames": 32
+    }
+  ]
+}

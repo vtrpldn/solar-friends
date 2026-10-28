@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Candidate; measured calibration and native review pending",
+  "why": "Restore full boot margins after V2 source-edge rejection",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Correct ONLY the canvas layout of this Solar Friends four-figure cooking sheet. The lower boots currently touch/cross the bottom image edge. Put the same four complete figures into a MUCH ROOMIER square 2x2 sprite atlas with at least 60 pixels of fully transparent margin around each complete figure on every side, including below the lower boots and between the rows. Preserve all four head/body proportions, anatomy, exact stirring hand gestures, face, warm tan skin, cream vest/shorts, brown boots, painted shading and fixed camera. Reconstruct any missing boot soles at bottom edge. If needed uniformly reduce ALL FOUR figures together by the same small amount to leave proper space; do NOT separately shrink one pose or alter their relative anatomical scale. Never crop. No extra body parts, tools, pot, spoon, labels, grid, shadows or ground. True transparent background. Four complete figures only.",
+  "references": [
+    {
+      "path": "activity-cook-candidate-v2.png",
+      "role": "Layout edit target; preserve all figure anatomy and proportions"
+    }
+  ],
+  "output": "activity-cook-candidate-v3.png"
+}

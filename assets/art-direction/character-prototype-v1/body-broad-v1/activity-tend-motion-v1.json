@@ -72,5 +72,13 @@
     "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
   },
   "videoSha256": "e2f1a2e1c6c446726191664a377ff8d98a8af31799d4421038a4aff9ad4424da",
-  "errors": []
+  "errors": [],
+  "status": "Activity source accepted for further internal family authoring; no public availability",
+  "visualReview": "Both decoded 32-frame day/mirrored-night filmstrips inspected, containing enlarged and gameplay-size views over two native cycles plus standing entry/return. All four source poses observed; complete hands and boots remain visible. Head size and broader anatomy stay coherent. Whole painted key-pose transitions remain visible; kneeling entry/exit has no intermediate lowering/getting-up anatomy. No equipment or fitted customization acceptance.",
+  "limitations": [
+    "No fitted tools clothing hair facial accessories or portrait",
+    "No intermediate anatomical transitions",
+    "No public complete-family integration",
+    "No physical hardware frame pacing or complete builder release acceptance"
+  ]
 }

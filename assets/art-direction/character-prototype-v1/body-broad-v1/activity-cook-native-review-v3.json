@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "status": "Cooking V3 accepted for further internal family authoring after static and native cadence review",
+  "why": "Check four newly authored activity poses at one uniform source scale beside the same standing body",
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v3-mata-atlantica-day.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v3-mata-atlantica-night.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v3-cerrado-day.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v3-cerrado-night.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v3-caatinga-day.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-world-v3-caatinga-night.png"
+    }
+  ],
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "ae47d29aff0d6f8157b846980c970fbdc513ed6fbe96a98f9c588b02281b37d8"
+    },
+    {
+      "index": 1,
+      "sha256": "7a3a1a2c6edaf5370687cf877c121ae91fda0ab2eb59e8a5b038ab526a5669ec"
+    },
+    {
+      "index": 2,
+      "sha256": "54bdaef5c1edf8f87e298e20be493ca767bcbaa7ee7c43178072e2b7cb30c337"
+    },
+    {
+      "index": 3,
+      "sha256": "2109b156a23b4b93d8dac7e746808d533d16191f6baa3a54a6ea4c874dc4e7bd"
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-candidate-v3.png": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-calibration-v3.json": "9c9b6dc06e10890c83ac887d3abbcd53681ec025cf0110eb79611bf7a7a70315",
+    "scripts/review-broad-activity.mjs": "cba0f35ba05af80dc1bf674ee0fb98b190f7672a7cd1e1286e1f7aa7eab31cf7",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf"
+  },
+  "errors": [],
+  "visualReview": "Final native comparison, all six final biome day/mirrored-night scenes and final two decoded native-loop strips inspected. V3 restores complete boot margins and more consistent upper/lower-row scale; lower-row ground contacts are authored at y1230. Source uses a single uniform 0.38 scale. No visible terrain halo, silhouette cropping or another-body fallback. Fitted parts and public integration remain unfinished."
+}
