@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Author a dedicated lying facial-hair shape rather than rotate a standing sprite",
+  "prompt": "Create ONE true-transparent facial-hair-only sprite overlay for Solar Friends. Image1 is the EXACT sleeping face anatomy and position target on a1536x1024 canvas. Image2 is ONLY the chestnut color and tidy full-short-beard style reference, not its upright orientation or four-part layout. Imagine painting that same short beard and plain moustache onto the sleeping resident's exact diagonally tilted rounded face at the LEFT of image1, then remove EVERY original person/background pixel and leave only the new beard/moustache paint. Output one sleeping beard/moustache set, no duplicate parts, on a1536x1024 transparent canvas. It should stay at the same location as the sleeping jaw: near cheek begins beside the lower-left ear around[215,500], chin wraps around[335,575], far cheek ends near[460,475]; the existing smiling lip opening runs diagonally from about[340,515] toward[420,440] and must stay transparent and readable. Follow the ACTUAL face in image1 rather than drawing a rotated upright U. Match the sleeping head's relaxed diagonal orientation, rounded chin and foreshortened far cheek. Near sideburn, snug short chin beard, small plain moustache under the nose, no curled projecting tip or horns. Warm chestnut broad painted shading, restrained grouped hair detail, same upper-left soft light and legible game style as image2. Do not paint skin, lips, nose, eyes, eyebrows, ear, head, hair cap, neck, body, arms, clothes, bed, ground shadows, labels, borders or any background. ONLY the disconnected beard and moustache silhouettes may contain pixels; all surrounding and face-opening pixels must be truly transparent. Preserve generous margins and exact canvas orientation.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v5.png",
+      "role": "Exact lying anatomy and source pose coordinate reference"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png",
+      "role": "Chestnut beard material and short style reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-sleep-candidate-v1.png",
+  "status": "Internal sleep fitting candidate; not full art/public acceptance",
+  "visualReview": "Raw source initially appeared to contain broad haze and an excessive horn. Actual alpha samples and native compositing corrected that assessment: broad preview haze does not appear in the rendered part, and its diagonal jaw fit is better than V2. Whole-sleep/head board inspected. Retained as the dedicated lying proposal without rotating standing art.",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-sleep-candidate-v1.png": "c8a865a2e1365cb8f08452f4635c9e990b3ad7071044b464afa423bef765ee59",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v5.png": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png": "259a97e5c0aff5bc972813198bc1f26283761725495e5e5a2116f32e9c58f5b2"
+  },
+  "generatedToolOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a825df1a-faaf-4a4d-ad80-d8a8f3d392cf.png",
+  "copiedByteIdentically": true
+}

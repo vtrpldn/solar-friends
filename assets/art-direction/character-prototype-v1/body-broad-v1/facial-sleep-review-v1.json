@@ -1,0 +1,31 @@
+{
+  "status": "Dedicated lying proposal reviewed; complete facial family remains unaccepted",
+  "why": "Close the missing source-orientation slot without pretending upright art can be rotated",
+  "selectedSource": "facial-sleep-candidate-v1.png",
+  "rejectedSource": "facial-sleep-candidate-v2.png",
+  "reviewedOutputs": {
+    "facial-sleep-fit-draft-v1.png": "84fa7679c54c4eb9e7d25f6fa6566a55c4568e7b720caceb1049025d88b0a1c4",
+    "facial-sleep-fit-draft-v1.json": "0d2a6cfd33bc85ac8d38f7d5bc7afaca8ca1979da004e70a17d72d44938a3fd7",
+    "facial-family-owner-draft-v1.json": "278f854fb4e7e846aa0a785ae1ac5fa5b4ae63b984712b947de4fdd105515924"
+  },
+  "sourceAlpha": [
+    {
+      "revision": "v1",
+      "paintOutsideSourceEnvelope": 36,
+      "sampleOutsideAlpha": 0,
+      "lipOpeningSampleAlpha": 246
+    },
+    {
+      "revision": "v2",
+      "paintOutsideSourceEnvelope": 65,
+      "sampleOutsideAlpha": 0,
+      "lipOpeningSampleAlpha": 0
+    }
+  ],
+  "findings": [
+    "Actual whole-sleep and enlarged-face comparison inspected for both candidates. V1 follows the diagonal lying jaw/lips more closely; V2 loses that orientation.",
+    "Corrected the initial source-preview assessment: broad apparent haze is not present in rendered alpha. Source-envelope counts include edge paint and are diagnostics, not a strict alpha acceptance claim.",
+    "Complete ownership draft now declares48 unique logical poses using two exact sources and different authored uniform scales for upright/lying art. This is coordinate/source ownership completeness, not48 accepted facial fits.",
+    "Raised/bent head corrections, foreground occlusion, palette/facing/motion/portrait review, public creator integration and all original release gates remain required."
+  ]
+}

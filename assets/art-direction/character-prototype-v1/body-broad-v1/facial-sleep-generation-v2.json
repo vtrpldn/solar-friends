@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Author a dedicated lying facial-hair shape rather than rotate a standing sprite",
+  "prompt": "Edit image1, a sleeping beard-only sprite on1536x1024. Image2 is only the warm chestnut painted material reference. Fix TWO defects while preserving the sleeping beard's center, diagonal orientation and approximate chin curve. FIRST: REMOVE EVERY PIXEL of the broad brown fog/haze/glow/shadow surrounding the beard. Output must have TRUE ALPHA ZERO outside the beard/moustache hairs, including the entire central lip opening. No background color, ambient aura, cast shadow or translucent brown cloud anywhere. Do not replace haze with black pixels. SECOND: remove the tall pointed RIGHT/FAR horn. Shorten the far/right upper tip down to end next to the moustache's right end around[x460,y460]; there must be NO projecting tip reaching upward toward[x450,y390]. The far cheek is a low rounded end tucked under a resting face, not a spike, hook or handlebar. Keep the small plain moustache and open diagonal smiling lip gap. Keep the left near-sideburn contact and short rounded chin volume. Broad painted shading with restrained hair groups, same warm chestnut, no glossy shine. Remain a single beard+moustache set roughly within[x200..505,y435..620], original1536x1024 transparent canvas, not recentered or enlarged. NO face, skin, lips, nose, eyes, ears, head, body, clothes, hat, bed, text, border, shadows or background. Only the corrected opaque/edge-antialiased hair silhouette may contain nonzero alpha.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-sleep-candidate-v1.png",
+      "role": "Edit target for suspected preview haze and far-tip correction"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png",
+      "role": "Painted chestnut style reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-sleep-candidate-v2.png",
+  "status": "Rejected sleeping fit; excluded from family ownership",
+  "visualReview": "The actual composite shows a flattened moustache and projecting front edge that do not follow the lying lips/jaw. V1 follows the native face more closely. Source preview alone was insufficient to diagnose alpha or fit.",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-sleep-candidate-v2.png": "33a1495171cedbd093dd8dc2e4c9bcf66b46ab3e8d98b229a04cae636c6d44df",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-sleep-candidate-v1.png": "c8a865a2e1365cb8f08452f4635c9e990b3ad7071044b464afa423bef765ee59",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png": "259a97e5c0aff5bc972813198bc1f26283761725495e5e5a2116f32e9c58f5b2"
+  },
+  "generatedToolOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e2a35304-c1cc-4cbf-9032-ab3467fbe068.png",
+  "copiedByteIdentically": true
+}
