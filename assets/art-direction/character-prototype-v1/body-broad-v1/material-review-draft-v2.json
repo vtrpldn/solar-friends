@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Targeted hand occlusion, vest coverage and sleep seam corrections verified in internal material V2; broader review unfinished",
+  "status": "Diagnostic candidate; visual review pending; no public availability",
   "why": "Review per-pose material separation on the complete exact broader body",
   "counts": {
     "base": [
@@ -303,18 +303,18 @@
         1441
       ],
       [
-        1700,
-        7149,
+        1252,
+        7122,
         1951,
         1549,
-        1939
+        2414
       ],
       [
-        1717,
-        7236,
+        1436,
+        7235,
         2085,
         1408,
-        971
+        1253
       ],
       [
         1908,
@@ -505,6 +505,26 @@
       "index": 10,
       "rows": [
         {
+          "y": 195,
+          "min": 172,
+          "max": 172
+        },
+        {
+          "y": 196,
+          "min": 169,
+          "max": 170
+        },
+        {
+          "y": 197,
+          "min": 158,
+          "max": 169
+        },
+        {
+          "y": 198,
+          "min": 158,
+          "max": 169
+        },
+        {
           "y": 210,
           "min": 69,
           "max": 70
@@ -544,6 +564,38 @@
     }
   ],
   "semanticProbes": [
+    [
+      "activities",
+      11,
+      162,
+      205,
+      1,
+      "forearm above hidden boot"
+    ],
+    [
+      "activities",
+      10,
+      65,
+      182,
+      4,
+      "rear boot collar"
+    ],
+    [
+      "activities",
+      10,
+      173,
+      201,
+      4,
+      "front boot collar"
+    ],
+    [
+      "activities",
+      11,
+      64,
+      184,
+      4,
+      "rear boot collar"
+    ],
     [
       "activities",
       9,
@@ -630,43 +682,42 @@
   "inputs": {
     "assets/art-direction/character-prototype-v1/body-broad-v1/body-ownership-v1.json": "7173359558e12232fff2297568b5cb6a2aa26c325c0be1c0d1d19b124568fe3d",
     "assets/art-direction/character-prototype-v1/body-broad-v1/body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v2.json": "bc9063151f0fc1801ef1e3e768fde0934b9867ec928b497b77425642b6f70515",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v2.json": "28dc5ad603ad70921840835cdfe2f069b0ec3dda3eaae0bd8d63f3fa6bc7cfbd",
-    "scripts/author-broad-material-regions.mjs": "5b08af4892177c3fa43f8736ba2541e6fcfd660ecb3dd29623c2379b01bc68cf",
-    "scripts/review-broad-materials.mjs": "342e578dcd68138ae9431c940399d64861db4c6fe01a6de566f5918f28816ac3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v2.json": "59e5137258489f12a3d54caa0f8f6544998f5b0a573afb28b5943ae748c5fcef",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v2.json": "ea437b0dcd51594bdeda01681d167a4a359b389e7b8c40188345aeb49de1cadd",
+    "scripts/author-broad-material-regions.mjs": "c2e6c4c10c46291a187de6d0fe3038fb25b7f4d031bbe6927ab62bff0ad68a1c",
+    "scripts/review-broad-materials.mjs": "57e9d25b79aa55a16326e17641672bc2abb26ac7af1e4d90c62eb7abe2ce81a2",
     "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
     "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
     "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed"
   },
   "errors": [],
-  "visualReview": "Inspected all three final 48-pose diagnostic/palette sheets and enlarged source/mask/palette views for sleep and all four tending poses. Expanded authored vest/pants regions remove the visible white patches. Native-measured hand contours keep visible hands and fingertips skin-coloured over boots. The sleeping vest and shorts now separate at the painted waist seam, with bare feet remaining skin. Small unclassified boot-collar bands remain visible in tending poses10/11 and need region refinement. No complete palette, lighting, native colour-loop or fitted-part acceptance is claimed.",
-  "knownIssues": [
-    {
-      "poses": [
-        "activities:10",
-        "activities:11"
-      ],
-      "issue": "Refine unclassified boot-collar edge bands before full material acceptance."
-    }
-  ],
-  "diagnosticScope": "Shoe/skin colour-candidate rows are only location aids. Warm leather highlights can resemble skin; zero candidates is not an acceptance rule. Nine authored semantic landmark probes independently guard visible hands, vest, shorts and bare feet.",
-  "artifacts": {
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-10-v2.png": "499094209ac175d3e079a5c198c036b7ae348de239ad9d3e70abb0af299bdc0d",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-11-v2.png": "eb46abd92d1aca90e3089ecc12e7a77f2ccc90310cd27dc85c569bdb118f08ad",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-8-v2.png": "2911e34c72c2ff8b917f9fe66c6cd98b30c5da48a7f650c14dc89cae1d2fdc9d",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-9-v2.png": "7eb0e85ab9c79027f2bfb5504338b8b3bb920bc5a17ffb1019c8c7a7ac146038",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-base-15-v2.png": "825bb6ea6be2b0466a6dd19e4e0b10971f86d3d4fe089cae396b6596953e4c3e",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-base-draft-v2.png": "f0c4c2c1919f6cf121e0b540bfcf28a1e998acc1cae67950cd2a41ee540f70ea",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-idle-draft-v2.png": "32095f359dd11fd7c059439e157202c3bf8be925af7165413d63eaeebf5e3ba8",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-activities-draft-v2.png": "4b05a19532e5c70806be5407c8840772c52ac127d05a7d3c4afbeefc970ab55c",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v2.json": "bc9063151f0fc1801ef1e3e768fde0934b9867ec928b497b77425642b6f70515",
-    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v2.json": "28dc5ad603ad70921840835cdfe2f069b0ec3dda3eaae0bd8d63f3fa6bc7cfbd"
+  "visualReview": {
+    "status": "Internal material draft, not public acceptance",
+    "inspected": [
+      "material-focus-activities-10-v2.png",
+      "material-focus-activities-11-v2.png"
+    ],
+    "finding": "Exposed lower-row rear boot collars and pose10 front collar now follow boot material; pose11 crossing forearm remains skin. Existing pose11 front boot remains partially hidden and uses original regions.",
+    "remaining": [
+      "Full palette and facing sweep",
+      "Native recolored motion and biome lighting",
+      "Sockets, fitted parts, portraits and public integration"
+    ]
   },
-  "remaining": [
-    "Refine tending boot-collar regions",
-    "Review all palettes and both facings in native loops and biome lighting",
-    "Author exact attachment sockets and fit clothing hair facial accessories equipment",
-    "Portrait and public complete-family creation/save/play integration",
-    "All original builder release gates"
-  ]
+  "reviewedArtifactHashes": {
+    "material-activities-draft-v2.png": "642c1cb9ac04f100456a15714c1b387741c7d12978cc0c0fa117519f8b09c44b",
+    "material-base-draft-v2.png": "f0c4c2c1919f6cf121e0b540bfcf28a1e998acc1cae67950cd2a41ee540f70ea",
+    "material-focus-activities-10-v2.png": "9f0080326c587d1f47ad1b8a374e1c80dcee48680c0ffaedeb520d0756d82990",
+    "material-focus-activities-11-v2.png": "f8d3d15826f330ebcd8c7381fac7e4c5dfe39737959e62f182ea0c0dae58f7fa",
+    "material-focus-activities-8-v2.png": "2911e34c72c2ff8b917f9fe66c6cd98b30c5da48a7f650c14dc89cae1d2fdc9d",
+    "material-focus-activities-9-v2.png": "7eb0e85ab9c79027f2bfb5504338b8b3bb920bc5a17ffb1019c8c7a7ac146038",
+    "material-focus-base-15-v2.png": "825bb6ea6be2b0466a6dd19e4e0b10971f86d3d4fe089cae396b6596953e4c3e",
+    "material-idle-draft-v2.png": "32095f359dd11fd7c059439e157202c3bf8be925af7165413d63eaeebf5e3ba8"
+  },
+  "currentInputHashes": {
+    "scripts/author-broad-material-regions.mjs": "c2e6c4c10c46291a187de6d0fe3038fb25b7f4d031bbe6927ab62bff0ad68a1c",
+    "scripts/review-broad-materials.mjs": "57e9d25b79aa55a16326e17641672bc2abb26ac7af1e4d90c62eb7abe2ce81a2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v2.json": "59e5137258489f12a3d54caa0f8f6544998f5b0a573afb28b5943ae748c5fcef",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v2.json": "ea437b0dcd51594bdeda01681d167a4a359b389e7b8c40188345aeb49de1cadd"
+  }
 }

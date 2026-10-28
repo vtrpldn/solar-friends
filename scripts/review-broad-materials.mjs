@@ -40,7 +40,7 @@ try{
    }
    boards.push({sheet,pixels:board.toDataURL('image/png').split(',')[1]});board.width=board.height=0;
   }
-  const semanticProbes=[['activities',9,154,209,1,'hand over boot'],['activities',9,165,226,1,'hand fingertip'],['activities',11,187,216,1,'extended hand'],['activities',11,199,225,1,'extended fingertip'],['activities',11,80,150,2,'back vest'],['base',15,110,160,2,'sleep vest'],['base',15,174,127,3,'sleep upper shorts'],['base',15,153,178,3,'sleep lower shorts'],['base',15,220,164,1,'bare sleep foot']];
+  const semanticProbes=[['activities',11,162,205,1,'forearm above hidden boot'],['activities',10,65,182,4,'rear boot collar'],['activities',10,173,201,4,'front boot collar'],['activities',11,64,184,4,'rear boot collar'],['activities',9,154,209,1,'hand over boot'],['activities',9,165,226,1,'hand fingertip'],['activities',11,187,216,1,'extended hand'],['activities',11,199,225,1,'extended fingertip'],['activities',11,80,150,2,'back vest'],['base',15,110,160,2,'sleep vest'],['base',15,174,127,3,'sleep upper shorts'],['base',15,153,178,3,'sleep lower shorts'],['base',15,220,164,1,'bare sleep foot']];
   for(const [sheet,index,x,y,label,note]of semanticProbes)if(model.mask(sheet,index).labels[y*256+x]!==label)throw Error('Incorrect authored semantic material probe: '+note);
   const wrong=structuredClone(registration);wrong.body.frames.base[0]='0'.repeat(64);let staleBindingRefused=false;try{await createFamilyBodyMaterialModel(family,wrong);}catch{staleBindingRefused=true;}if(!staleBindingRefused)throw Error('Stale material binding accepted');
   const cache=model.cacheInfo();if(cache.entries>8)throw Error('Material cache exceeded selected bound');model.clear();if(model.cacheInfo().entries!==0)throw Error('Material cache did not clear');
