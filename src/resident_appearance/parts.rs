@@ -7,7 +7,7 @@ macro_rules! part_keys {
         impl $name { pub const KEYS: &'static [&'static str] = &[$($key),+]; }
     };
 }
-part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2", V3 => "resident-parts-v3" });
+part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2", V3 => "resident-parts-v3", V4 => "resident-parts-v4" });
 part_keys!(BodyPart { Neutral => "neutral-v1", Relaxed => "relaxed-v1" });
 part_keys!(HairPart { Curls => "short-curls-v1", SidePart => "side-part-v1" });
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -95,12 +95,15 @@ impl PartsLook {
             && matches!(
                 (self.asset_version, self.body),
                 (PartAssets::V1, BodyPart::Neutral)
-                    | (PartAssets::V2 | PartAssets::V3, BodyPart::Relaxed)
+                    | (
+                        PartAssets::V2 | PartAssets::V3 | PartAssets::V4,
+                        BodyPart::Relaxed
+                    )
             )
     }
 }
 pub fn parts_catalog() -> serde_json::Value {
-    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v3"},"body_revisions":{"neutral-v1":["resident-parts-v1"],"relaxed-v1":["resident-parts-v2","resident-parts-v3"]},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
+    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v3"},"body_revisions":{"neutral-v1":["resident-parts-v1"],"relaxed-v1":["resident-parts-v2","resident-parts-v3","resident-parts-v4"]},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
 }
 
 #[cfg(test)]
@@ -108,6 +111,22 @@ mod tests {
     use super::*;
     fn recipe(hair: &str) -> serde_json::Value {
         serde_json::json!({"schema":2,"assetVersion":"resident-parts-v1","body":"neutral-v1","hair":hair,"materials":{"skin":"copper","shirt":"teal","shorts":"sage","shoes":"graphite"}})
+    }
+    #[test]
+    fn short_sleeved_family_round_trips_and_rejects_wrong_body() {
+        let mut value = recipe("side-part-v1");
+        value["body"] = "relaxed-v1".into();
+        value["assetVersion"] = "resident-parts-v4".into();
+        let mut game = Game::new();
+        assert!(game.change_resident_appearance(0, "Iara", &value.to_string()));
+        let saved = game.snapshot();
+        assert!(game.restore(&saved));
+        assert_eq!(game.snapshot(), saved);
+        let state: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        assert_eq!(state["residents"][0]["appearance"], value);
+        value["body"] = "neutral-v1".into();
+        assert!(!game.change_resident_appearance(0, "Iara", &value.to_string()));
+        assert_eq!(game.snapshot(), saved);
     }
     #[test]
     fn family_revisions_are_paired_and_preserved_atomically() {
