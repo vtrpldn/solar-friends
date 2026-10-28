@@ -1,0 +1,74 @@
+{
+  "status": "Decoded sampled motion reviewed; scoped hat attachment result only",
+  "modes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "work",
+      "seconds": 0.8028999999761581
+    },
+    {
+      "mode": "stretch",
+      "seconds": 2.403100000023842
+    },
+    {
+      "mode": "wave",
+      "seconds": 9.902899999976158
+    },
+    {
+      "mode": "breathe",
+      "seconds": 15.002100000023843
+    }
+  ],
+  "seen": [
+    "base:8",
+    "base:4",
+    "base:5",
+    "base:6",
+    "base:7",
+    "idle:4",
+    "idle:5",
+    "idle:6",
+    "idle:8",
+    "idle:10",
+    "idle:11"
+  ],
+  "frames": 1931,
+  "videoSha256": "4488220349c91e7c1c24a89e147185e1103966b277783a1e75598c59e7ce3245",
+  "decode": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "nb_read_frames": "486"
+      }
+    ],
+    "format": {
+      "duration": "16.159586"
+    }
+  },
+  "inputsAndReviewArtifacts": {
+    "scripts/review-broad-hat-motion.mjs": "a8713979973a676dacc46860f896bf8bb4ad4326e3f4f04273df7a6b834762dd",
+    "web/character-hat-family.js": "132305a1fd748e8242c9095b70874094844dbcb9d30643b0fd816933d1c6ae77",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9",
+    "web/character-frame-composition.js": "e887e666ef4563814a23946ba473a1d66b1acf412dae408bdcefa996988a30a6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-family-registration-draft-v1.json": "75dbe5958e8a45de1faedaa3bb0cdafabc210568c016c6db74f38e546aead43a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-day-right-0-v1.png": "08bc9c2bcbd3cf1b672fbd8c090330fbb1aec17b751fc09ace1078717b232c93",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-day-right-1-v1.png": "751b7bb764b9c49b14e8b70fdb2a57fc92cce3f5da90861a7d139380a42c2de5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-night-left-0-v1.png": "3129c04620050ebb0d9ecdea8d45104e5c1bffed9c52a4aaa529bd5cfbdb6801",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-night-left-1-v1.png": "5bd0209321274761adb11f207417984336e37c6290882cb118df49c2d2d92c4b"
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-day-right-0-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-day-right-1-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-night-left-0-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-motion-night-left-1-v1.png"
+    ],
+    "finding": "48 sampled decoded views across day/right and night/left show retained hat contact and raised-hand foreground ownership at230px and48px draw sizes. No new visible hat clipping or drifting in sampled frames.",
+    "scope": "Native work loop plus single nonlooping stretch and wave gestures followed by held terminal poses; not repeated gesture cycles.11 logical body slots observed. No hairstyle combinations or biome-world review. Abrupt painted keyframe changes remain; this does not prove continuous anatomical animation."
+  }
+}
