@@ -1,4 +1,5 @@
 import {validateBodyFrameRegistration} from './character-body-frames.js';
+import {validateContactBodyRegistration} from './character-contact-frame.js';
 const sheets=['base','idle','activities'];
 const exact=(v,keys)=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===keys.length&&keys.every(key=>Object.hasOwn(v,key));
 // A family owns every raw pose explicitly. Source/transform records are part of
@@ -18,6 +19,11 @@ export function validateBodyOwnership(value){
    validateBodyFrameRegistration(t.registration);const r=t.registration;
    if(r.family!==value.family||r.sheet!==s.sheet||r.source.sha256!==s.sha256||r.source.width!==s.width||r.source.height!==s.height)throw Error('Waist registration must own this exact family and source.');
    counts.set(id,r.frames.length);
+  }else if(t?.method==='contact-v1'){
+   if(!exact(t,['method','registration']))throw Error('Keep the complete measured contact registration.');
+   validateContactBodyRegistration(t.registration);const r=t.registration;
+   if(r.family!==value.family||r.sheet!==s.sheet||r.source.sha256!==s.sha256||r.source.width!==s.width||r.source.height!==s.height)throw Error('Contact registration must own this exact family and source.');
+   counts.set(id,1);
   }else throw Error('Unsupported body-source normalization.');
  }
  const used=new Set(),poses=new Set();

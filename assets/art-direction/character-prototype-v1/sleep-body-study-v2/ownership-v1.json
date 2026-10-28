@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "family": "relaxed-walk-prototype-v1",
+  "sources": {
+    "base": {
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+      "width": 1254,
+      "height": 1254,
+      "sheet": "base",
+      "transform": {
+        "method": "sheet-v1",
+        "columns": 4,
+        "rows": 4,
+        "referenceRow": 2
+      }
+    },
+    "idle": {
+      "sha256": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+      "width": 1254,
+      "height": 1254,
+      "sheet": "idle",
+      "transform": {
+        "method": "sheet-v1",
+        "columns": 4,
+        "rows": 4,
+        "referenceRow": 0
+      }
+    },
+    "activities": {
+      "sha256": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+      "width": 1254,
+      "height": 1254,
+      "sheet": "activities",
+      "transform": {
+        "method": "sheet-v1",
+        "columns": 4,
+        "rows": 4,
+        "referenceRow": 0
+      }
+    },
+    "walk": {
+      "sha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+      "width": 1254,
+      "height": 1254,
+      "sheet": "base",
+      "transform": {
+        "method": "waist-v1",
+        "registration": {
+          "schema": 1,
+          "family": "relaxed-walk-prototype-v1",
+          "sheet": "base",
+          "source": {
+            "sha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+            "width": 1254,
+            "height": 1254,
+            "columns": 2,
+            "rows": 2
+          },
+          "uniformScale": 0.3725211505922166,
+          "frames": [
+            {
+              "index": 0,
+              "waist": [
+                361,
+                319
+              ]
+            },
+            {
+              "index": 1,
+              "waist": [
+                945,
+                320
+              ]
+            },
+            {
+              "index": 2,
+              "waist": [
+                354,
+                940
+              ]
+            },
+            {
+              "index": 3,
+              "waist": [
+                944,
+                939
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "sleep": {
+      "sha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+      "width": 1254,
+      "height": 1254,
+      "sheet": "base",
+      "transform": {
+        "method": "contact-v1",
+        "registration": {
+          "schema": 1,
+          "family": "relaxed-walk-prototype-v1",
+          "sheet": "base",
+          "source": {
+            "sha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+            "width": 1254,
+            "height": 1254
+          },
+          "uniformScale": 0.199,
+          "sourceContact": [
+            640,
+            810
+          ],
+          "nativeContact": [
+            128,
+            164
+          ]
+        }
+      }
+    }
+  },
+  "poses": {
+    "base": [
+      {
+        "source": "walk",
+        "index": 0
+      },
+      {
+        "source": "walk",
+        "index": 1
+      },
+      {
+        "source": "walk",
+        "index": 2
+      },
+      {
+        "source": "walk",
+        "index": 3
+      },
+      {
+        "source": "base",
+        "index": 4
+      },
+      {
+        "source": "base",
+        "index": 5
+      },
+      {
+        "source": "base",
+        "index": 6
+      },
+      {
+        "source": "base",
+        "index": 7
+      },
+      {
+        "source": "base",
+        "index": 8
+      },
+      {
+        "source": "base",
+        "index": 9
+      },
+      {
+        "source": "base",
+        "index": 10
+      },
+      {
+        "source": "base",
+        "index": 11
+      },
+      {
+        "source": "base",
+        "index": 12
+      },
+      {
+        "source": "base",
+        "index": 13
+      },
+      {
+        "source": "base",
+        "index": 14
+      },
+      {
+        "source": "sleep",
+        "index": 0
+      }
+    ],
+    "idle": [
+      {
+        "source": "idle",
+        "index": 0
+      },
+      {
+        "source": "idle",
+        "index": 1
+      },
+      {
+        "source": "idle",
+        "index": 2
+      },
+      {
+        "source": "idle",
+        "index": 3
+      },
+      {
+        "source": "idle",
+        "index": 4
+      },
+      {
+        "source": "idle",
+        "index": 5
+      },
+      {
+        "source": "idle",
+        "index": 6
+      },
+      {
+        "source": "idle",
+        "index": 7
+      },
+      {
+        "source": "idle",
+        "index": 8
+      },
+      {
+        "source": "idle",
+        "index": 9
+      },
+      {
+        "source": "idle",
+        "index": 10
+      },
+      {
+        "source": "idle",
+        "index": 11
+      },
+      {
+        "source": "idle",
+        "index": 12
+      },
+      {
+        "source": "idle",
+        "index": 13
+      },
+      {
+        "source": "idle",
+        "index": 14
+      },
+      {
+        "source": "idle",
+        "index": 15
+      }
+    ],
+    "activities": [
+      {
+        "source": "activities",
+        "index": 0
+      },
+      {
+        "source": "activities",
+        "index": 1
+      },
+      {
+        "source": "activities",
+        "index": 2
+      },
+      {
+        "source": "activities",
+        "index": 3
+      },
+      {
+        "source": "activities",
+        "index": 4
+      },
+      {
+        "source": "activities",
+        "index": 5
+      },
+      {
+        "source": "activities",
+        "index": 6
+      },
+      {
+        "source": "activities",
+        "index": 7
+      },
+      {
+        "source": "activities",
+        "index": 8
+      },
+      {
+        "source": "activities",
+        "index": 9
+      },
+      {
+        "source": "activities",
+        "index": 10
+      },
+      {
+        "source": "activities",
+        "index": 11
+      },
+      {
+        "source": "activities",
+        "index": 12
+      },
+      {
+        "source": "activities",
+        "index": 13
+      },
+      {
+        "source": "activities",
+        "index": 14
+      },
+      {
+        "source": "activities",
+        "index": 15
+      }
+    ]
+  }
+}

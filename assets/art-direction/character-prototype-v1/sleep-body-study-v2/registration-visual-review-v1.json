@@ -1,0 +1,31 @@
+{
+  "status": "Internal registration reviewed; not accepted for public gameplay",
+  "sourceSha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+  "boardSha256": "6edc3f55d910dfff693bc6d10e722738e292ff73ef46276591ae099560521075",
+  "registrationSha256": "31d1ca1985fc3ae7e0e5229f32fab13ac2049636161a6831e18dec01963b9d6d",
+  "reviewedViews": {
+    "widths": [
+      192,
+      96,
+      48
+    ],
+    "facings": [
+      1,
+      -1
+    ],
+    "lighting": [
+      "day",
+      "diagnostic night tint"
+    ]
+  },
+  "findings": "The full sleeping body remains visible and recognisable at all three review widths. The warm paint and compact anatomy read broadly beside the unchanged standing body. Head, supported arm, cream torso and gently bent legs remain separable in mirrored and dimmed views. This flat-colour comparison does not measure exact anatomy, prove terrain contact, or approve physical night lighting.",
+  "registration": "One uniform scale 0.199 and translation from source contact [640,810] to native contact [128,164]. All nonzero alpha is retained, including faint pixels far outside the obvious body. No threshold, cutout, local transform or paint edit is used. The earlier 0.205/180 intent was rejected by actual alpha bounds.",
+  "remaining": [
+    "Measured anatomical/camera landmarks and actual world ground contact",
+    "Skin/cloth material masks",
+    "Both hairstyles and short-sleeve clothing",
+    "Accessory and activity-shadow policy",
+    "Source-bound new appearance revision and public creation/save/import integration",
+    "Recorded real transitions and all biome/lighting world review"
+  ]
+}

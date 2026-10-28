@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "family": "relaxed-walk-prototype-v1",
+  "sheet": "base",
+  "source": {
+    "sha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+    "width": 1254,
+    "height": 1254
+  },
+  "uniformScale": 0.199,
+  "sourceContact": [
+    640,
+    810
+  ],
+  "nativeContact": [
+    128,
+    164
+  ]
+}
