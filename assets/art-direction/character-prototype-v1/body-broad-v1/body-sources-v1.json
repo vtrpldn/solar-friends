@@ -1,0 +1,58 @@
+{
+  "walk": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png",
+    "sha256": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287"
+  },
+  "work": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png",
+    "sha256": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c"
+  },
+  "standing": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+    "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60"
+  },
+  "seated": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/seated-candidate-v1.png",
+    "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c"
+  },
+  "sleep": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v5.png",
+    "sha256": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765"
+  },
+  "look": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v3.png",
+    "sha256": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c"
+  },
+  "stretch": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-stretch-candidate-v1.png",
+    "sha256": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633"
+  },
+  "wave": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v2.png",
+    "sha256": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9"
+  },
+  "wave-lower": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v3.png",
+    "sha256": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab"
+  },
+  "relax": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-relax-candidate-v2.png",
+    "sha256": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93"
+  },
+  "cook": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-candidate-v3.png",
+    "sha256": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a"
+  },
+  "water": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-candidate-v1.png",
+    "sha256": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a"
+  },
+  "tend": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-tend-candidate-v1.png",
+    "sha256": "b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571"
+  },
+  "feed": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-candidate-v1.png",
+    "sha256": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d"
+  }
+}

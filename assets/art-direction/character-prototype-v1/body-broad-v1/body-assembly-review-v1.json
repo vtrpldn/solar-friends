@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "status": "Complete internal 48-pose body ownership and exact attachment binding reviewed; fitted customization and public integration unfinished",
+  "why": "Bind all48 authored body poses and future attachments to exact source anatomy instead of another-body fallback",
+  "exactFrames": 48,
+  "sourceCount": 14,
+  "ownedFrames": 53,
+  "unusedSourceFrames": 5,
+  "ownershipRefusals": 9,
+  "sourceRefusals": 14,
+  "disposedRefusals": 3,
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/body-base-comparison-v1.png"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/body-idle-comparison-v1.png"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/body-activities-comparison-v1.png"
+    }
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-registration-v3-contacts.json": "05870caff3009fd59e5ca25999e2c23ec1c186b674655c57bccfd76542d7239c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-review-walk-v3-contacts.json": "6cbfd9b599d1457a50cda81e4f48458b15ed52f8b08a0669befdc0f25e727b79",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-registration-v2.json": "d6f79b58a0b952192a3789aaf0813a1c775222746b2ef88826ed37fe727bcfaf",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-native-review-v2.json": "908041816d07dfa5db68cb23a726b0390e4028391f812810884d8be0d5ee34e4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-review-breathe-v1.json": "c2d7d523ace80b4b6963065d166f369f7039a5c28794534b6fc67bbcc381f10c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/seated-candidate-v1.png": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/seated-registration-v1.json": "d349bc13afb9ace678215788342c91a4d96198bddb3626f777d70fe54b7ba882",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-review-seated-v1.json": "09dad62cc8b01087c9ea3b67862278c156b5b7467fae3834e50cd1c076eeac3f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v5.png": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-registration-candidate-v5.json": "89b00e47bc2dafd2344a26cf1bc61c599015dd0dd03036771b451e723dd52e75",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-native-review-v5.json": "f8deca0f4c855ebbbe8f02d540249e215b79a32b41b4dd52225b35f0debedf75",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v3.png": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/look-registration.json": "04ddf62fad63d5dbd3b557bcace50b244952b4dbef647a394e0fa51853c1f833",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/report.json": "39596684a2cf3cad9a6566403c6a1dcf453231cd97c039874fffba35c623ff94",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-stretch-candidate-v1.png": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/stretch-registration.json": "d9adee6c1eb142556242413c90d4288aff81af7cd47ee58aa3e5cce19e65088b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v2.png": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/wave-registration.json": "a506615226950f83ca261275f59fd3e931e9a1da70a7faa6a1599e01f98076ad",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v3.png": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/wave-lower-registration.json": "0822d4196aaef98b4aef9894f6f260ce8b513b8bea845530569714ff435e9c71",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-relax-candidate-v2.png": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/relax-registration.json": "5893256a3702755f6db38d1a312a3014096fcfbb903596981473123f42654eda",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-candidate-v3.png": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-registration-v3.json": "277ea2e1a7290a619c16758f084076663e90b874a7e5ddd187ea1f71615c0527",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-cook-native-review-v3.json": "f3326f3236f500fd5b853e514ee228cfdb4193fd5ae8bdd8dd1618d376f25a88",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-candidate-v1.png": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-registration-v1.json": "1fa10eecd079e26baccadea9a7e53f5f89ecef8bda1da8febabfa5a0f9ab973d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-water-native-review-v1.json": "39b2064e55c905861e1a4aec4b3554be5f1fe3710ff8d24928fa160d104a308e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-tend-candidate-v1.png": "b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-tend-registration-v1.json": "a87c6d2a8345d5600f05f6adf70d1e88d05433375d443c33266caed2a49931d6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-tend-native-review-v1.json": "ba044629f7f2f2606caf697dc51203bff590c466f4cf58233ca67af6bcbebebc",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-candidate-v1.png": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-registration-v1.json": "7deeee9e1008ea8fb69e5b4880e8c30c9a18ce7fba37e7e4e021974b8360cd41",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-native-review-v1.json": "2e6cbc8dd1399d65fcad73f760cd83325fa63a138eaea97dc1e2d826749632af",
+    "scripts/assemble-broad-body.mjs": "6eb52bfeffe7ba0e0ca684d9a27d258846ec0001e942439cfa893426f1fc19b4",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed"
+  },
+  "errors": [],
+  "visualReview": "Inspected all three assembled 16-pose contact sheets through the actual complete family provider. Scalp, fingertips, boots and lying bare feet remain complete. Base:15 is the genuine V5 lying source, not closed-eye sitting. Selected wave poses use the explicit two-source split; discarded paintings are not logical poses. Head/body silhouettes remain coherent across the assembled set within existing painted-keypose variation. No fitted hair clothing facial accessories equipment or intermediate anatomical transition acceptance.",
+  "memoryScope": {
+    "preparedSourceFrames": 53,
+    "logicalFrames": 48,
+    "unusedSourceFrames": 5,
+    "rgbaByteUpperBound": 13893632,
+    "note": "Internal decoded canvas storage only; no browser process RSS or complete game memory claim. All53 frames are released on family disposal; failed preparations release all temporary canvases."
+  },
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-ownership-v1.json": "7173359558e12232fff2297568b5cb6a2aa26c325c0be1c0d1d19b124568fe3d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-sources-v1.json": "a1f88a6cfa698d1f7a8b47746ab4f0f00999aa742cda4ecafa83257a3c6cc81e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-base-comparison-v1.png": "50f62b6cf10dbf18d4d50f700f2db40d9067b613362910784a83b44bfe91f97f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-idle-comparison-v1.png": "8f3402a83256025c1cd388b6ff8aa2ab420efdac7614200cc0c8c3fde91df515",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-activities-comparison-v1.png": "5a2f1cbebe4c75ddbf7bd67fe719bfc43374466337ceecf1102b3866f100c12e"
+  },
+  "remaining": [
+    "Authored body material regions and attachment sockets for all48 exact frames",
+    "Fitted clothing hair facial accessories and activity equipment",
+    "Matching portrait",
+    "Intermediate anatomical transitions",
+    "Public complete-family creation/save/play integration",
+    "All original builder release gates"
+  ]
+}
