@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Candidate only; runtime registration and review pending",
+  "why": "Remove exterior colored halo before terrain review",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: background-extraction. Edit this exact Solar Friends sleeping broader adult sprite. Remove ALL colored glow, soft orange/gray/cream aura and any background or drop shadow outside the painted person's silhouette. Make every surrounding pixel genuinely fully transparent, including gaps beside arms and legs. Preserve the entire exact person, painted edge detail, anatomy, face, garments, feet, pose, camera, colors, scale and canvas placement unchanged. Do not add anything, crop, resize, warp, redraw the person or replace the background with black or checkerboard. The only change is clean genuine background transparency with natural antialiased silhouette edges and no exterior halo.",
+  "references": [
+    {
+      "path": "sleep-candidate-v1.png",
+      "role": "Exact edit target"
+    }
+  ],
+  "output": "sleep-candidate-v2.png"
+}

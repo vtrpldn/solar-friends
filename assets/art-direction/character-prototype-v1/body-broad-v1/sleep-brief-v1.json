@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "Candidate only; runtime registration and review pending",
+  "why": "A separate broader body needs genuine lying sleep anatomy rather than closed-eye sitting.",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: identity-preserve. Asset: Solar Friends additional broader-body resident lying sleep sprite. Image 1 is the exact broader adult identity, anatomy and painted material reference: round cheeks, bald scalp, fuller belly and thighs, broad rounded shoulders, warm tan skin, cream sleeveless vest and shorts. Image 2 is ONLY a lying pose and camera reference from the existing narrower resident: do NOT copy its narrower body. Create ONE complete broader adult asleep lying on their side, head at lower left and feet at upper right, matching image 2's fixed orthographic elevated three-quarter game camera. Eyes peacefully closed, head resting on bent lower arm, upper hand comfortably across belly, knees gently relaxed, bare feet. Preserve image 1's adult head-to-body ratio, wider torso/thigh anatomy, facial identity, cream garments, warm broad illustrated shading, legible painted edges and upper-left light. No boots while sleeping. The full bald scalp, supporting elbow, fingers and toes must be complete and surrounded by ample transparent margin. True transparent background including arm/body gaps; no bed, pillow, furniture, ground island, drop shadow, labels, grid, text or watermark. Do not rotate a standing or seated figure: author a genuinely horizontal resting anatomy. One person only.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Identity, wider anatomy, clothing and painted style"
+    },
+    {
+      "path": "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png",
+      "role": "Lying pose and elevated camera only; not anatomy"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v1.png"
+}

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "Candidate; runtime registration and review pending",
+  "why": "Retry clean transparency from anatomy and clean pose references after halo correction failed",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Generate a single game sprite on a TRUE TRANSPARENT background. No aura, no glow, no shadows, no colored background pixels. Image 1 defines this exact rounder adult person's face, fuller belly/thighs and cream vest/shorts, warm painted style. Image 2 defines ONLY side-lying sleep pose: head at lower left on bent arm, feet upper right, eyes closed, upper hand over belly, bare feet, fixed elevated orthographic camera. Paint the same broader adult genuinely lying asleep, complete scalp/elbow/fingers/toes with generous empty transparent margins. Broad warm shading inside the silhouette only. Preserve wider anatomy and adult proportions. One figure, no furniture, no bed, no pillow, no ground. Exterior is empty transparent canvas, absolutely no diffuse edge glow or ambient colored haze.",
+  "references": [
+    {
+      "path": "breathe-candidate-v1.png",
+      "role": "Identity anatomy style"
+    },
+    {
+      "path": "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png",
+      "role": "Lying pose only"
+    }
+  ],
+  "output": "sleep-candidate-v3.png"
+}

@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "why": "Prevent halo-bearing candidates from reaching terrain review or public recipes",
+  "candidates": [
+    {
+      "source": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v1.png",
+      "sha256": "28f4c61bba50f428e2c28613b7d7276cbd79f5fb45b27dc08ad17331f3a9751d",
+      "size": [
+        1536,
+        1024
+      ],
+      "alphaCounts": {
+        "transparent": 1000769,
+        "partial": 572095,
+        "opaque": 0
+      },
+      "samples": {
+        "0": [
+          1,
+          1,
+          1,
+          0
+        ],
+        "200": [
+          29,
+          24,
+          21,
+          0
+        ]
+      },
+      "status": "rejected: broad exterior colored halo remains visible; not registered or integrated"
+    },
+    {
+      "source": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v2.png",
+      "sha256": "2d9b741c8dd7cfede2a1713672d72999666fd8299f3d0bf08d383b43dd8d5802",
+      "size": [
+        1536,
+        1024
+      ],
+      "alphaCounts": {
+        "transparent": 971855,
+        "partial": 601009,
+        "opaque": 0
+      },
+      "samples": {
+        "0": [
+          1,
+          1,
+          1,
+          0
+        ],
+        "200": [
+          38,
+          33,
+          29,
+          0
+        ]
+      },
+      "status": "rejected: broad exterior colored halo remains visible; not registered or integrated"
+    },
+    {
+      "source": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v3.png",
+      "sha256": "341d16c1a9b4cbd0531a68a9a6b97438e933d23120c8c33c2572b4082918cfe5",
+      "size": [
+        1536,
+        1024
+      ],
+      "alphaCounts": {
+        "transparent": 1047005,
+        "partial": 525859,
+        "opaque": 0
+      },
+      "samples": {
+        "0": [
+          1,
+          1,
+          1,
+          0
+        ],
+        "200": [
+          18,
+          15,
+          14,
+          0
+        ]
+      },
+      "status": "rejected: broad exterior colored halo remains visible; not registered or integrated"
+    }
+  ],
+  "next": "Revise source/reference strategy and regenerate clean silhouette; no runtime acceptance"
+}
