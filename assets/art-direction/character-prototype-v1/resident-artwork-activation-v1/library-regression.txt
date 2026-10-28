@@ -1,0 +1,1 @@
+PASS: shared resident appearance library: 240 exact original poses, 520 facing/lighting animation comparisons, ten shared portraits, native catalog parity, one load/decode per sheet, strict refusal, retry, input isolation and identity-bound relationship portraits.

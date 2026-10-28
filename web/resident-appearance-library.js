@@ -1,6 +1,7 @@
 import {residentLookKeys,validateResidentAppearance} from './resident-look.js';
 import {preparedFrames} from './sprite-frames.js';
 const sheets=Object.freeze(['base','idle','activities']);
+const castKey=appearances=>JSON.stringify([...new Set(appearances.map(a=>JSON.stringify(a)))].sort());
 const bundledImage=(preset,sheet)=>{
  const image=new Image(),suffix=sheet==='base'?'':'-'+sheet;
  image.src=new URL(`./art/animations/${preset}${suffix}.png`,import.meta.url);
@@ -10,7 +11,7 @@ const bundledImage=(preset,sheet)=>{
 // gameplay. Person IDs never select artwork. Draft part recipes stay isolated
 // until their complete art sets and production compatibility are approved.
 export function createResidentAppearanceLibrary({base=[],idle=[],activities=[],loadImage=bundledImage}={}){
- const supplied={base:[...base],idle:[...idle],activities:[...activities]},entries=new Map();let parts=null,partsWork=null,active=[];
+ const supplied={base:[...base],idle:[...idle],activities:[...activities]},entries=new Map();let parts=null,partsWork=null,active=[],activeKey='[]',activation=0;
  const prepareParts=async recipe=>{
   if(!partsWork){partsWork=import('./resident-parts.js').then(({createResidentPartLibrary})=>{parts=createResidentPartLibrary();parts.setActive(active);return parts;});partsWork.catch(()=>{partsWork=null;});}
   return (await partsWork).prepare(recipe);
@@ -54,9 +55,9 @@ export function createResidentAppearanceLibrary({base=[],idle=[],activities=[],l
    const checked=appearances.map(validateResidentAppearance),custom=[],prepared=[];
    for(let i=0;i<checked.length;i++){if(checked[i].schema===2){custom.push(checked[i]);prepared.push(providers[i]);}else if(entry(checked[i]).provider!==providers[i])throw Error('Use the provider prepared for this resident.');}
    if(custom.length&&!parts)throw Error('These resident parts are still loading.');
-   const previous=active,undo=parts?.installPrepared(custom,prepared);active=custom;return ()=>{if(undo&&!undo())return false;active=previous;return true;};
+   const previous=active,previousKey=activeKey,undo=parts?.installPrepared(custom,prepared),revision=++activation;active=custom;activeKey=castKey(checked);return ()=>{if(activation!==revision||undo&&!undo())return false;activation++;active=previous;activeKey=previousKey;return true;};
   },
-  setActive(appearances){if(!Array.isArray(appearances)||appearances.length>12)throw Error('Keep at most twelve active resident appearances.');active=appearances.map(validateResidentAppearance).filter(recipe=>recipe.schema===2);parts?.setActive(active);},
+  setActive(appearances){if(!Array.isArray(appearances)||appearances.length>12)throw Error('Keep at most twelve active resident appearances.');const checked=appearances.map(validateResidentAppearance),key=castKey(checked),custom=checked.filter(recipe=>recipe.schema===2);parts?.setActive(custom);if(key!==activeKey){activation++;activeKey=key;}active=custom;},
   partCacheInfo:()=>parts?.cacheInfo()??null,
   prepare(appearance,{sheets:requested=sheets}={}){
    if(!Array.isArray(requested)||!requested.length||requested.some(sheet=>!sheets.includes(sheet)))return Promise.reject(Error('Choose available resident animation sheets.'));

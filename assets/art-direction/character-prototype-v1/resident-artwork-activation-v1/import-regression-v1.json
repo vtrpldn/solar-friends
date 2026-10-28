@@ -1,0 +1,63 @@
+{
+  "result": "PASS",
+  "residents": 12,
+  "progress": true,
+  "buttonCancellation": true,
+  "escapeCancellation": true,
+  "lateCompletionIsolated": true,
+  "exactCurrentVillagePreserved": true,
+  "exactSavedVillagePreserved": true,
+  "retryInstallsExactCast": true,
+  "failedStorageRestoresCurrentArtwork": true,
+  "portraitPixelsPreserved": true,
+  "cache": {
+    "entries": 16,
+    "active": 0,
+    "queued": 0,
+    "pending": 0,
+    "maxEntries": 16,
+    "maxConcurrent": 2,
+    "maxQueued": 24,
+    "preparedHairFrames": 96,
+    "preparedHairRgbaBytes": 25165824,
+    "facialOverlayFrames": 0,
+    "facialOverlayRgbaBytes": 0,
+    "maximumFrames": 800,
+    "rgbaByteUpperBound": 209715200,
+    "decodedSources": 85,
+    "familyCache": null,
+    "workFamilyCache": null,
+    "shirtFamilyCache": {
+      "entries": 2,
+      "active": 0,
+      "queued": 0,
+      "leases": 0,
+      "preparedHairFrames": 96,
+      "underlays": 4,
+      "workTools": 4,
+      "clothingPoses": 48,
+      "appearanceFrames": 100,
+      "maxEntries": 2,
+      "maxConcurrent": 2,
+      "maxQueued": 2,
+      "closed": false,
+      "accessories": {
+        "hatFrames": 1,
+        "facialSourceFrames": 44,
+        "posePlacements": 96,
+        "rgbaBytes": 11796480
+      }
+    }
+  },
+  "sourceHashes": {
+    "scripts/verify-resident-loading-ui.mjs": "9e20522a14420ac4b2094179f73f19305c1b56a6572f6a5e3845ca58fadd8024",
+    "web/main.js": "52487804fbf2c221d9ee07e0ff9b26a65fc2117a5847472f235effa7917d367a",
+    "web/index.html": "13ec91b265153e8b9aaebdff30d9f4e43cb361b5b05db0ac72f12fe039605a01",
+    "web/style.css": "d91266b7b5fb390e669a345a224fa4ff7949cd3ab559eea20aa284d9fc3bc4b4",
+    "web/resident-artwork-preparation.js": "d81ccd101798de1c53b8e5f084104916d954771652c8193e19c81d545721c8bf",
+    "web/resident-appearance-library.js": "957ac03ee4cb5e62a426691f7db855ed04f9a36fa9bc82831e6a93a925c3bb01",
+    "web/resident-parts.js": "d58e501842fbb6421bac7bed9b8e2b3db51ebce8aaaf1acd90a7d8b501e0eb3b",
+    "web/appearance-cache.js": "7e6a97cd70ec569bcf9e36f548632dd33ad7136f30498ac9ad4c179816676a58"
+  },
+  "scope": "Ordinary import dialog, twelve unique classic residents replaced by twelve unique short-sleeved residents, cancel/retry/write-failure. Not all startup/menu/session transitions or total memory acceptance."
+}

@@ -1,0 +1,15 @@
+{
+  "partCachedSwitchProtected": true,
+  "legacyCachedSwitchProtected": true,
+  "equivalentRefreshPreservesRollback": true,
+  "awayAndBackRefusesOldRollback": true,
+  "reorderedEquivalentCastSupported": true,
+  "exactProviderIdentityPreserved": true,
+  "partCacheEntries": 3,
+  "inputs": {
+    "web/resident-parts.js": "d58e501842fbb6421bac7bed9b8e2b3db51ebce8aaaf1acd90a7d8b501e0eb3b",
+    "web/resident-appearance-library.js": "957ac03ee4cb5e62a426691f7db855ed04f9a36fa9bc82831e6a93a925c3bb01",
+    "scripts/verify-resident-artwork-rollback-switch.mjs": "b57817e6d1c3600dbe620911acd10595800265427681cdee3937d81b624d1198"
+  },
+  "scope": "Real prepared part/legacy providers across cached cast activation changes and rollback; not every player session transition or total memory acceptance."
+}

@@ -71,10 +71,10 @@ export function createResidentPartLibrary(){
   installPrepared(recipes,providers){
    if(!Array.isArray(recipes)||!Array.isArray(providers)||recipes.length>12||recipes.length!==providers.length)throw Error('Install at most twelve prepared residents.');
    const keys=recipes.map(keyFor);for(let i=0;i<keys.length;i++)if(preparedKeys.get(providers[i])!==keys[i])throw Error('Use the provider prepared for this exact resident recipe.');
-   const previous=pinned;pinned=new Set(keys);
-   try{const undo=cache.install([...new Map(keys.map((key,i)=>[key,providers[i]]))]);return ()=>{if(!undo())return false;pinned=previous;return true;};}catch(error){pinned=previous;throw error;}
+   const previous=pinned,installedPins=new Set(keys);pinned=installedPins;
+   try{const undo=cache.install([...new Map(keys.map((key,i)=>[key,providers[i]]))]);return ()=>{if(pinned!==installedPins||!undo())return false;pinned=previous;return true;};}catch(error){pinned=previous;throw error;}
   },
-  setActive(recipes){if(recipes.length>12)throw Error('Keep at most twelve active resident appearances.');pinned=new Set(recipes.map(keyFor));},
+  setActive(recipes){if(!Array.isArray(recipes)||recipes.length>12)throw Error('Keep at most twelve active resident appearances.');const keys=new Set(recipes.map(keyFor));if(keys.size!==pinned.size||[...keys].some(key=>!pinned.has(key)))pinned=keys;},
   cacheInfo:()=>({...cache.info(),preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,facialOverlayFrames:facialPrepared?.cacheInfo().entries??0,facialOverlayRgbaBytes:facialPrepared?.cacheInfo().rgbaByteUpperBound??0,maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size,familyCache:familyComposer?.info()??null,workFamilyCache:workingFamilyComposer?.info()??null,shirtFamilyCache:shirtFamilyComposer?.info()??null}),
  });
 }

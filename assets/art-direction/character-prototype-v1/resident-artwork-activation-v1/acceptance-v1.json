@@ -1,0 +1,17 @@
+{
+  "scope": "Active appearance-set changes and stale rollback refusal; ordinary twelve-resident import/restart regressions. Not all remaining session transitions, total memory or complete builder acceptance.",
+  "baselineReproduced": "Late part rollback accepted after a cached active-cast switch",
+  "cachedSwitchGuard": true,
+  "switchAwayAndBackGuard": true,
+  "sameAppearanceSetRefreshSupported": true,
+  "reorderingAndDuplicatesSupported": true,
+  "singleUseLegacyRollback": true,
+  "exactProviderIdentityPreserved": true,
+  "cacheLimitUnchanged": 16,
+  "nativeCodeOrArtworkChanged": false,
+  "inputs": {
+    "web/resident-parts.js": "d58e501842fbb6421bac7bed9b8e2b3db51ebce8aaaf1acd90a7d8b501e0eb3b",
+    "web/resident-appearance-library.js": "957ac03ee4cb5e62a426691f7db855ed04f9a36fa9bc82831e6a93a925c3bb01",
+    "scripts/verify-resident-artwork-rollback-switch.mjs": "b57817e6d1c3600dbe620911acd10595800265427681cdee3937d81b624d1198"
+  }
+}
