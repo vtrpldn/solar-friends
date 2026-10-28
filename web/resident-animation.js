@@ -133,6 +133,9 @@ function drawStandardResidentAnimation(ctx, surface, sheets, animation, x, y, wi
 const contactSurfaces=new WeakMap();
 export function drawResidentAnimation(ctx,surface,sheets,animation,x,y,width){
  const restore=()=>{if(contactSurfaces.has(surface)&&(surface.width!==256||surface.height!==256)){surface.width=surface.height=256;}};
+ const extended=sheets.frameOriginForPose!==undefined;
+ if(extended&&typeof sheets.frameOriginForPose!=='function')throw Error('Use registered frame origins.');
+ if(extended&&typeof sheets.contactForPose!=='function')throw Error('Extended frames require native pose contacts.');
  if(sheets.contactForPose===undefined){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
  if(typeof sheets.contactForPose!=='function')throw Error('Use registered resident pose contacts.');
  const layers=presentedPoseLayers(animation.layers,sheets.interpolation??'crossfade').filter(pose=>pose.weight>0),poses=layers.map(pose=>{
@@ -140,16 +143,16 @@ export function drawResidentAnimation(ctx,surface,sheets,animation,x,y,width){
   if(!Array.isArray(contact)||contact.length!==2||![contact[0],contact[1]].every(n=>Number.isFinite(n)&&n>=0&&n<=256))throw Error('Keep a registered pose contact inside its native frame.');
   return {pose,contact:[...contact]};
  });
- if(poses.every(({contact})=>contact[0]===128&&contact[1]===FRAME_ANCHOR*256)){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
+ if(!extended&&poses.every(({contact})=>contact[0]===128&&contact[1]===FRAME_ANCHOR*256)){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
  if(!contactSurfaces.has(surface)){if(surface.width!==surface.height||![128,256].includes(surface.width))throw Error('Contact-registered poses require a 128- or 256-square scratch surface.');contactSurfaces.set(surface,true);}
  if(typeof sheets.frameForPose!=='function')throw Error('Contact-registered poses require a frame provider.');
- const draws=[];for(const {pose,contact}of poses){const frame=sheets.frameForPose(pose.sheet,pose.row*4+pose.frame,pose);if(!frame)continue;if(frame.width!==256||frame.height!==256)throw Error('Keep registered resident poses at their native frame size.');draws.push({frame,contact,weight:pose.weight});}
+ const draws=[];for(const {pose,contact}of poses){const frame=sheets.frameForPose(pose.sheet,pose.row*4+pose.frame,pose);if(!frame)continue;const origin=extended?sheets.frameOriginForPose(pose.sheet,pose.row*4+pose.frame,pose):[0,0];if(!Array.isArray(origin)||origin.length!==2||origin.some(n=>!Number.isSafeInteger(n)||n>0||n< -128)||!Number.isSafeInteger(frame.width)||!Number.isSafeInteger(frame.height)||frame.width<256||frame.height<256||frame.width>512||frame.height>512||origin[0]+frame.width<256||origin[1]+frame.height<256||!extended&&(frame.width!==256||frame.height!==256))throw Error('Keep extended artwork within bounded native frame margins.');draws.push({frame,contact,origin,weight:pose.weight});}
  if(!draws.length){restore();return drawStandardResidentAnimation(ctx,surface,sheets,animation,x,y,width);}
- const left=Math.floor(Math.min(...draws.map(d=>-d.contact[0]))),top=Math.floor(Math.min(...draws.map(d=>-d.contact[1]))),right=Math.ceil(Math.max(...draws.map(d=>256-d.contact[0]))),bottom=Math.ceil(Math.max(...draws.map(d=>256-d.contact[1])));
+ const left=Math.floor(Math.min(...draws.map(d=>d.origin[0]-d.contact[0]))),top=Math.floor(Math.min(...draws.map(d=>d.origin[1]-d.contact[1]))),right=Math.ceil(Math.max(...draws.map(d=>d.origin[0]+d.frame.width-d.contact[0]))),bottom=Math.ceil(Math.max(...draws.map(d=>d.origin[1]+d.frame.height-d.contact[1])));
  const w=right-left,h=bottom-top;if(w<1||h<1||w>512||h>512)throw Error('Keep pose contact composition bounded.');
  if(surface.width!==w)surface.width=w;if(surface.height!==h)surface.height=h;
  const buffer=surface.getContext('2d');buffer.clearRect(0,0,w,h);buffer.globalCompositeOperation='lighter';
- try{for(const {frame,contact,weight}of draws){buffer.globalAlpha=weight;buffer.drawImage(frame,-contact[0]-left,-contact[1]-top);}}
+ try{for(const {frame,contact,origin,weight}of draws){buffer.globalAlpha=weight;buffer.drawImage(frame,origin[0]-contact[0]-left,origin[1]-contact[1]-top);}}
  finally{buffer.globalAlpha=1;buffer.globalCompositeOperation='source-over';}
  ctx.save();try{ctx.translate(x,y);ctx.scale(animation.facing,animation.breath);const scale=width/256;ctx.drawImage(surface,left*scale,top*scale,w*scale,h*scale);}finally{ctx.restore();}
 }

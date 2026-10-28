@@ -17,7 +17,7 @@
     "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
     "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
     "web/character-family-appearance.js": "f51c5acc31bac98624e52337f9f73127200840627406f3564d3d03302be36518",
-    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9",
     "scripts/verify-contact-atlas.mjs": "12ba50f04af2ab675d3c0c1cb8134e4b60ef9a285db4df42283ebfbcc9d900b8",
     "assets/art-direction/character-prototype-v1/body-broad-v1/walk-registration-v3-contacts.json": "05870caff3009fd59e5ca25999e2c23ec1c186b674655c57bccfd76542d7239c"
   }
