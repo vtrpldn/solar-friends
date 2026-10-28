@@ -2080,11 +2080,12 @@ const devAPI = {
     for(const button of document.querySelectorAll('[data-speed]')){const active=Number(button.dataset.speed)===value;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
   },
   fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; weatherTime = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
-  frameCell(x,y) {
+  frameCell(x,y,focus={x:.5,y:.5}) {
     if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>=MAP_SIZE||y>=MAP_SIZE)throw Error('Choose a cell inside the property.');
+    if(!focus||!Number.isFinite(focus.x)||!Number.isFinite(focus.y)||focus.x<=0||focus.x>=1||focus.y<=0||focus.y>=1)throw Error('Choose a point inside the viewport.');
     cameraTarget=null;
     const point=project(x,y,origin,scale);
-    pan.x+=width/2-point.x;pan.y+=height/2-point.y;
+    pan.x+=width*focus.x-point.x;pan.y+=height*focus.y-point.y;
     render();return {...iso(x,y)};
   },
   locate(id) {

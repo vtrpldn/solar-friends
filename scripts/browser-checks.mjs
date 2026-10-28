@@ -496,8 +496,10 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   // Empty plot, away from the fixture buildings; resolve through the same view as the world.
   await page.evaluate(()=>window.solarDev.fixedView());
   const plot=await worldPoint(page,5,5);
+  const beforeAdobe=await page.evaluate(()=>window.solarDev.snapshot().village.buildings.length);
   await page.mouse.click(plot.x,plot.y);
   circular=await page.evaluate(()=>window.solarDev.snapshot());
+  assert.equal(circular.village.buildings.length,beforeAdobe+1,'The ground click creates one new blueprint');
   const project=circular.village.economy.projects.at(-1);
   assert.equal(project.recipe,'adobe');assert(project.appearance>=4);
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
