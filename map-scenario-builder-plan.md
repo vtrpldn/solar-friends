@@ -2630,3 +2630,12 @@ The four final sources cover all 5,454 original opaque shirt pixels. Their 24 co
 The first activities15 paint remains explicitly rejected despite passing numeric coverage: it exposed a shoulder strip behind the garment. A new frozen guide widened the upper sleeve curve and regeneration removed that visual defect. No generated pixels were retouched and no numerical criterion was relaxed.
 
 **Why:** the resident creator needs coherent clothes through feeding as well as walking, resting and gardening. This reaches48 internal static shirt sources; integrated motion acceptance remains44 until bucket, grain and feeding-return review. Full public/world outfit integration, broader body/face/clothing choices, dedicated sleep art and all original biome/campaign/performance/memory/storage/recovery/usability requirements remain open.
+
+
+### Complete feeding motion integration
+
+All 48 internal shirt poses now pass the mixed appearance integration check: 384 changed frames across eight appearances, 384 cache reuses and eight released-lease refusals. All 16 clothed feeding returns retain clothing; 1,048,576 pixel comparisons restrict changes to the native grain-removal region (340 changed grain pixels). The 41 distinct source images require 328 colour preparations and disposals, peaking at two live preparation sources and ending at zero; these are logical counters, not total memory measurements.
+
+Both actual feeding recordings were independently decoded. Reviewed whole-cycle daylight/mirrored-night boards and six closer daylight transitions per hairstyle: sleeves, basket ownership, grain release/return, neckline, hem and ground placement remain coherent. The missing-feed recording guard also refuses incomplete inputs. Exact fingerprints and scoped findings are in `short-sleeve-relaxed-feed-motion-v1/motion-review-v1.json`.
+
+**Why:** customizable clothing must survive the complete feeding cycle, including the return frames that remove grain. Full public/world outfit integration, broader appearance choices, dedicated sleep art, and the original biome/campaign/performance/memory/storage/recovery/usability requirements remain open. This internal milestone does not establish exhaustive playback or physical display pacing.

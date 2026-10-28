@@ -1,0 +1,70 @@
+{
+  "status": "Internal complete feeding clip reviewed through recorded and independently decoded evidence",
+  "scope": "48 internal shirt poses. Not public recipe, world, complete appearance range, exhaustive playback, total memory or physical display pacing acceptance.",
+  "verificationSha256": "609f4a486d911c147904b86a21bb91bbec8c6add56fa315ab3f3802cb13d3f21",
+  "decodedSha256": "47804f342ff9e1ce12f80e4b65a5fccf96d686e18b700020a9b2bbaff631c4a0",
+  "sequence": [
+    12,
+    13,
+    14,
+    15,
+    14,
+    13
+  ],
+  "sources": {
+    "short-sleeve-relaxed-activities-12-v1": {
+      "sourceSha256": "ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114",
+      "registrationSha256": "431d3596e75a6563d3702f886e93a3ec724fcbf635333910d3ffe0cb5b310a53"
+    },
+    "short-sleeve-relaxed-activities-13-v1": {
+      "sourceSha256": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+      "registrationSha256": "935f07e32a4d6d473c9879f709de4ba89c3bd01ea1d979f655b4d90aa47bba9a"
+    },
+    "short-sleeve-relaxed-activities-14-v1": {
+      "sourceSha256": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+      "registrationSha256": "c3cef3d68c44710473e6418f4bfad4ce3b3c84df821186816333600b11eec4b3"
+    },
+    "short-sleeve-relaxed-activities-15-v2": {
+      "sourceSha256": "34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75",
+      "registrationSha256": "18ff3e436c2adb3c0a851f70d386b10613e17201e34c51c9857f8962d17cc494"
+    }
+  },
+  "comparisons": {
+    "changed": 384,
+    "unchanged": 0,
+    "returns": 16,
+    "clothedReturns": 16,
+    "returnPixelChecks": 1048576,
+    "returnGrainPixels": 340,
+    "cacheReuses": 384,
+    "releasedRefusals": 8,
+    "loadedGarmentImages": 41,
+    "colourPreparations": 328,
+    "colourCreations": 328,
+    "colourDisposals": 328,
+    "colourPeakSources": 2,
+    "colourLiveSources": 0
+  },
+  "visualFindings": "Reviewed whole-cycle daylight/mirrored-night boards and all six closer daylight transitions for both hairstyles. Sleeves follow reaching and returning arms; basket stays in carrying hand. Grain is visible on release and absent on return. Neckline and hem remain attached, body scale and foot placement stable. Native keyframe changes remain visible; no physical pacing acceptance.",
+  "recordingGuard": "--record-feed without --include-feed refused with expected missing-pose assertion",
+  "toolSha256": {
+    "scripts/verify-mixed-family-clothing.mjs": "98895b70dd4c7f2f5e94ea93c72263cbc7f77216ccbd9220b0729e47b244b6b5",
+    "scripts/decode-mixed-clothing-motion.mjs": "e2f86f3e269c0b25dd62c7ab8acc97be298f44b344bd2391ba8ffe2d5e8669fb"
+  },
+  "decodedBoards": {
+    "curls-0-true-decoded.png": "cd0f2a8f7aa40927bee6cd3de7865b3bc836a52f11d99f603cc11f12a591aac8",
+    "curls-0-true-transition-2-decoded.png": "a57f00ada85a03e0b3d8495db5726f8ffcf7dd452f3b392dcdf598fbf0854fa9",
+    "curls-0-true-transition-3-decoded.png": "427b262e15d9bd9697c1d87a32907c008de73c8e4c34972eca4a75cde6a61595",
+    "curls-0-true-transition-4-decoded.png": "6ba6fb6bd04b08b350472ec54053303a27f81f6c2c1673a70a67070b0a5a386a",
+    "curls-0-true-transition-5-decoded.png": "86024c9fec6928a839302377692f01b0c5b54aac8a6184edfd4d6b28519b3fa0",
+    "curls-0-true-transition-6-decoded.png": "39cf13669048ece565bb8500251b0e0818428d885a6afce8e7236a5c540655df",
+    "curls-0-true-transition-decoded.png": "6e156b0353682d656216b06b424bf1f5d3784a1c3c4ecb27b888658d28367c66",
+    "sidepart-0-true-decoded.png": "de3718bedec0d7698d6333864a2a6c480ac93a948ebc15755dd867c5f916e75f",
+    "sidepart-0-true-transition-2-decoded.png": "0584e3dfe8dcdac0b931ad31cf49125e2239b14b391c3f8d4af56d5dec1b133c",
+    "sidepart-0-true-transition-3-decoded.png": "6da87f9de70d6355e5c5ac9da003d91ab6b855a87514ea09b7aa4d5889d6e539",
+    "sidepart-0-true-transition-4-decoded.png": "749a8f52e670eea7cea724d7db903b564265cf9818604e579e20efe505ae536b",
+    "sidepart-0-true-transition-5-decoded.png": "673e21db9fede6abe7a95bc5c4374a3967940030ec303e700d8a5f5ddc0709f7",
+    "sidepart-0-true-transition-6-decoded.png": "5589e5d3a5bdff736a1b9904e80572e886d9b6bfa83c1f6795bf1f2713e8f0af",
+    "sidepart-0-true-transition-decoded.png": "f4ee83d10f7b708458a462fa11e72bdc1f96171a91285523c9cadcf7e747bff1"
+  }
+}
