@@ -23,11 +23,13 @@ const seatedBounds=(await read('base-review-seated-v1.json')).measurements.candi
 function affine(source,index){const t=source.transform,r=t.registration,s=r.uniformScale;if(t.method==='waist-v1')return {s,dx:128-r.frames[index].waist[0]*s,dy:.95*256-seatedBounds[index][3]*s};const f=t.method==='contact-v1'?r:r.frames[index];return {s,dx:f.nativeContact[0]-f.sourceContact[0]*s,dy:f.nativeContact[1]-f.sourceContact[1]*s};}
 const rect=(l,t,r,b)=>[[l,t],[r,t],[r,b],[l,b]];
 function sourceRegion(id,index){
- if(id==='sleep')return {head:[290,430,210,180],garmentAreas:{shirt:[[[420,350],[590,290],[900,370],[1040,500],[960,760],[680,780],[440,600]]],shorts:[[[900,370],[1150,420],[1240,600],[1190,830],[920,800],[960,620]]]},shoeAreas:[]};
+ if(id==='sleep'){const raw=polygon=>polygon.map(([x,y])=>[760+(x-128)/.16,680+(y-164)/.16]);return {head:[290,430,210,180],garmentAreas:{shirt:[raw([[60,100],[166,100],[166,118],[148,190],[60,190]])],shorts:[raw([[166,100],[245,100],[245,200],[148,200],[148,181],[166,118]])]},shoeAreas:[]};}
  if(id==='tend'){
   const [dx,dy]=[[0,0],[600,10],[20,590],[600,610]][index],shift=p=>p.map(([x,y])=>[x+dx,y+dy]);
-  const hands=[[[295,515],[335,515],[375,540],[410,570],[410,615],[385,620],[370,600],[355,620],[325,610],[300,580]],[[360,490],[390,490],[425,515],[470,540],[510,565],[535,590],[525,610],[505,600],[490,615],[470,600],[435,575],[390,550]],[[300,510],[340,510],[380,540],[415,570],[430,615],[400,625],[380,605],[365,625],[330,610],[310,580]],[[365,485],[400,490],[445,515],[485,540],[520,565],[545,590],[535,615],[510,605],[490,620],[465,600],[430,570],[390,545]]][index];
-  return {head:[380+dx,180+dy,100,95],garmentAreas:{shirt:[shift([[215,235],[420,245],[460,330],[410,400],[300,455],[160,390]])],shorts:[shift([[170,375],[300,420],[420,320],[520,350],[530,450],[350,500],[310,590],[140,590]])]},shoeAreas:[shift(rect(75,430,195,610)),shift(rect(390,510,590,625))],skinAreas:[shift(hands)]};
+  const hands=[[[295,515],[335,515],[375,540],[410,570],[410,615],[385,620],[370,600],[355,620],[325,610],[300,580]],[[430,490],[480,505],[515,530],[545,560],[555,590],[540,610],[520,600],[510,615],[490,600],[465,575],[440,545],[415,520]],[[300,510],[340,510],[380,540],[415,570],[430,615],[400,625],[380,605],[365,625],[330,610],[310,580]],[[465,513],[515,525],[550,542],[570,560],[565,575],[545,565],[550,580],[530,575],[515,565],[530,580],[510,578],[490,565],[465,545]]][index];
+  const a=affine(owner.sources.tend,index),raw=polygon=>polygon.map(([x,y])=>[(x-a.dx)/a.s,(y-a.dy)/a.s]);
+  const overlap=index===1?raw([[145,201],[155,201],[173,231],[165,234],[151,215]]):index===3?raw([[153,212],[189,212],[203,228],[200,232],[167,228],[160,221]]):null;
+  return {head:[380+dx,180+dy,100,95],garmentAreas:{shirt:[shift([[175,200],[420,235],[470,300],[450,345],[400,385],[300,430],[135,430],[120,300]])],shorts:[shift([[120,380],[300,420],[420,320],[520,350],[530,450],[350,500],[320,610],[100,610]])]},shoeAreas:[shift(rect(75,430,195,610)),shift(rect(390,510,590,625))],skinAreas:[shift(hands),...(overlap?[overlap]:[])]};
  }
  const [x,y,shirtTop,waist,shoes]=landmarks[id][index],region={head:[x,y,90,85],shirtTop,waist,shoes};
  if(id==='work'&&index===3)region.waistLine=[[740,955],[820,995],[910,1020]];
@@ -44,6 +46,6 @@ for(const sheet of ['base','idle','activities']){sheets[sheet]={regions:[]};for(
  if(transformed.garmentAreas)for(const polygons of [...Object.values(transformed.garmentAreas),transformed.shoeAreas])for(const polygon of polygons)for(const p of polygon)for(let i=0;i<2;i++)p[i]=Math.max(0,Math.min(256,p[i]));
  sheets[sheet].regions.push(transformed);
 }assert.equal(sheets[sheet].regions.length,16);}
-await writeFile(root+'/material-source-regions-v1.json',JSON.stringify(draft,null,2)+'\n');
-await writeFile(root+'/body-material-regions-v1.json',JSON.stringify({schema:2,body:binding,sheets},null,2)+'\n');
+await writeFile(root+'/material-source-regions-v2.json',JSON.stringify(draft,null,2)+'\n');
+await writeFile(root+'/body-material-regions-v2.json',JSON.stringify({schema:2,body:binding,sheets},null,2)+'\n');
 console.log('Authored 48 exact-body material region candidates; no artwork pixels modified.');
