@@ -1,0 +1,18 @@
+{
+  "status": "Internal static composed equipment inspected; motion, lighting and public integration pending",
+  "poses": 8,
+  "refusals": 4,
+  "borrowedFramesUnchanged": true,
+  "framingUnchanged": true,
+  "accessoryMarginsUnchanged": true,
+  "opaqueColoredHandPixelsUnchanged": true,
+  "scratchReleased": true,
+  "inputs": {
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "scripts/verify-broad-equipment-appearance.mjs": "bb30037432503addc58f2855dd388fa849bbbf72ebf0ba0f59693da8fc9d20fe",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-hand-masks-draft-v1.json": "b0a45b919f1cfc220da930fa41e2e0cc209214075a9f9402ed85cc719c153e9f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-equipment-atlas-draft-v1.json": "0fbfefbb3b43225a7bffc144de81110d179c481fdf08ecc0dfa531b01503496e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}
