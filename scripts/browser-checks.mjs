@@ -54,7 +54,8 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-hud-resource="materials"]').click();
   assert(await page.locator('#supplies-panel').isVisible());
   assert(await page.locator('#materials-stores').evaluate(el=>el.open));
-  assert.equal(await page.locator('.material-slot').count(),29);
+  assert.equal(await page.locator('.material-slot').count(),MATERIAL_KEYS.length);
+  assert.deepEqual(await page.locator('.material-slot').evaluateAll(slots=>slots.map(slot=>Number(slot.dataset.item))),MATERIAL_KEYS.map((_,index)=>index),'Inventory slots must follow the complete native material order');
   const idleRefreshes=await page.evaluate(()=>new Promise(resolve=>{
     let count=0;const observer=new MutationObserver(records=>{count+=records.length;});
     observer.observe(document.querySelector('#supplies-panel'),{subtree:true,childList:true,characterData:true});

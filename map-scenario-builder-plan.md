@@ -2821,3 +2821,10 @@ The dedicated sleeping source now has an explicit native shadow ellipse aligned 
 `verify-resident-shadows.mjs` passes nine exact legacy comparisons (including blended poses), eight independent registered-axis comparisons across both facings and two sizes, nine malformed metadata refusals, four changed-source/transform refusals and three partial-copy cleanup refusals. The complete internal family check passes 188 unchanged poses, eight feeding returns, 200 retained frames and shadow retention after lease release, eviction and family disposal. The updated static board was visually inspected. Existing public retained-provider checks still pass 768 appearance comparisons and eight recoveries. Exact shadow evidence and reviewed board hashes are under `sleep-body-study-v2/family-v1/shadow-*-v1.json`.
 
 **Why:** a standing oval cannot ground a reclining resident, and a valid shadow must survive the same ownership boundaries as the body. Default blended poses still draw one original shadow rather than accumulating overlapping ovals. This accepts internal static registration only; actual biome terrain/environment review, recorded transitions and public versioned integration remain required. Every other unfinished builder requirement remains open.
+
+
+### Desktop regression fixture refresh in progress
+
+The desktop browser suite reaches its Story checkpoint import after menu, HUD and interface interactions at 1600/1280 widths. Its old inventory assertion expected 29 slots despite the current catalog including hens as material 30. It now checks the shared catalog length and every slot's native ID/order. The next failure is the saved optional-Story checkpoint: its material UI and stock arrays contain 29 entries and the current engine refuses it. Regenerate it through `node scripts/story-all-paths.mjs`, then rerun the full browser suite. Do not treat the existing capture sequence as a completed browser regression.
+
+**Why:** current native material schemas need freshly earned checkpoints; weakening import validation or padding old progress would hide integration errors. This fixture refresh remains in progress.
