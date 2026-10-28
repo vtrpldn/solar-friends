@@ -17,7 +17,7 @@ export async function prepareBundledComposedResidentFamily(descriptor,options={}
  try{
   for(const [key,s]of Object.entries(data.sources)){
    signal?.throwIfAborted();let source=owned.get(s.sha256);
-   if(!source){source=await loadCharacterImageSource(`/art/characters/${descriptor.id}/source-${s.sha256}.png`,{maximumBytes:4*1024*1024,sha256:s.sha256,signal});owned.set(s.sha256,source);}
+   if(!source){source=await loadCharacterImageSource(`/art/characters/${descriptor.id}/source-${s.sha256}.png`,{maximumBytes:4*1024*1024,sha256:s.sha256,signal,decoder:'bitmap'});owned.set(s.sha256,source);}
    sources[key]=source;
   }
   signal?.throwIfAborted();library=createComposedResidentLibrary({definition:data,sources,...cacheOptions,runtimeRasterBinding:true});

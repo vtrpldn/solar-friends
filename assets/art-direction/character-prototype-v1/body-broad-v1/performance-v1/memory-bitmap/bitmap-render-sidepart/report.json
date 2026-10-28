@@ -1,0 +1,458 @@
+{
+  "comparisons": 50,
+  "sourceCount": 37,
+  "differences": [
+    {
+      "sheet": "base",
+      "index": 0,
+      "phase": 0,
+      "channels": 10388,
+      "maxDelta": 255,
+      "alphaChannels": 718,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 1,
+      "phase": 0,
+      "channels": 10424,
+      "maxDelta": 255,
+      "alphaChannels": 736,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 2,
+      "phase": 0,
+      "channels": 10467,
+      "maxDelta": 255,
+      "alphaChannels": 770,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 3,
+      "phase": 0,
+      "channels": 10478,
+      "maxDelta": 255,
+      "alphaChannels": 771,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 4,
+      "phase": 0,
+      "channels": 11447,
+      "maxDelta": 255,
+      "alphaChannels": 962,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 5,
+      "phase": 0,
+      "channels": 11617,
+      "maxDelta": 255,
+      "alphaChannels": 872,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 6,
+      "phase": 0,
+      "channels": 12923,
+      "maxDelta": 255,
+      "alphaChannels": 1110,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 7,
+      "phase": 0,
+      "channels": 11690,
+      "maxDelta": 255,
+      "alphaChannels": 851,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 8,
+      "phase": 0,
+      "channels": 10426,
+      "maxDelta": 255,
+      "alphaChannels": 744,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 9,
+      "phase": 0,
+      "channels": 10429,
+      "maxDelta": 255,
+      "alphaChannels": 736,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 10,
+      "phase": 0,
+      "channels": 10443,
+      "maxDelta": 255,
+      "alphaChannels": 759,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 11,
+      "phase": 0,
+      "channels": 10435,
+      "maxDelta": 255,
+      "alphaChannels": 745,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 12,
+      "phase": 0,
+      "channels": 8871,
+      "maxDelta": 255,
+      "alphaChannels": 697,
+      "maxAlphaDelta": 116
+    },
+    {
+      "sheet": "base",
+      "index": 13,
+      "phase": 0,
+      "channels": 8854,
+      "maxDelta": 255,
+      "alphaChannels": 691,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 14,
+      "phase": 0,
+      "channels": 8845,
+      "maxDelta": 255,
+      "alphaChannels": 678,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "base",
+      "index": 15,
+      "phase": 0,
+      "channels": 33515,
+      "maxDelta": 255,
+      "alphaChannels": 2132,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 0,
+      "phase": 0,
+      "channels": 11691,
+      "maxDelta": 255,
+      "alphaChannels": 839,
+      "maxAlphaDelta": 111
+    },
+    {
+      "sheet": "idle",
+      "index": 1,
+      "phase": 0,
+      "channels": 10660,
+      "maxDelta": 255,
+      "alphaChannels": 759,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 2,
+      "phase": 0,
+      "channels": 12034,
+      "maxDelta": 255,
+      "alphaChannels": 816,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 3,
+      "phase": 0,
+      "channels": 10865,
+      "maxDelta": 255,
+      "alphaChannels": 793,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 4,
+      "phase": 0,
+      "channels": 10379,
+      "maxDelta": 255,
+      "alphaChannels": 703,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 5,
+      "phase": 0,
+      "channels": 10366,
+      "maxDelta": 255,
+      "alphaChannels": 696,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 6,
+      "phase": 0,
+      "channels": 7047,
+      "maxDelta": 255,
+      "alphaChannels": 390,
+      "maxAlphaDelta": 95
+    },
+    {
+      "sheet": "idle",
+      "index": 7,
+      "phase": 0,
+      "channels": 10385,
+      "maxDelta": 255,
+      "alphaChannels": 706,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 8,
+      "phase": 0,
+      "channels": 10360,
+      "maxDelta": 255,
+      "alphaChannels": 687,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 9,
+      "phase": 0,
+      "channels": 10401,
+      "maxDelta": 255,
+      "alphaChannels": 722,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 10,
+      "phase": 0,
+      "channels": 10248,
+      "maxDelta": 255,
+      "alphaChannels": 700,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 11,
+      "phase": 0,
+      "channels": 10420,
+      "maxDelta": 255,
+      "alphaChannels": 730,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 12,
+      "phase": 0,
+      "channels": 10377,
+      "maxDelta": 255,
+      "alphaChannels": 703,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 13,
+      "phase": 0,
+      "channels": 10398,
+      "maxDelta": 255,
+      "alphaChannels": 715,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 14,
+      "phase": 0,
+      "channels": 10394,
+      "maxDelta": 255,
+      "alphaChannels": 730,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "idle",
+      "index": 15,
+      "phase": 0,
+      "channels": 10349,
+      "maxDelta": 255,
+      "alphaChannels": 683,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 0,
+      "phase": 0,
+      "channels": 16601,
+      "maxDelta": 255,
+      "alphaChannels": 1115,
+      "maxAlphaDelta": 122
+    },
+    {
+      "sheet": "activities",
+      "index": 1,
+      "phase": 0,
+      "channels": 16077,
+      "maxDelta": 255,
+      "alphaChannels": 1097,
+      "maxAlphaDelta": 122
+    },
+    {
+      "sheet": "activities",
+      "index": 2,
+      "phase": 0,
+      "channels": 15567,
+      "maxDelta": 255,
+      "alphaChannels": 1005,
+      "maxAlphaDelta": 122
+    },
+    {
+      "sheet": "activities",
+      "index": 3,
+      "phase": 0,
+      "channels": 16374,
+      "maxDelta": 255,
+      "alphaChannels": 1100,
+      "maxAlphaDelta": 134
+    },
+    {
+      "sheet": "activities",
+      "index": 4,
+      "phase": 0,
+      "channels": 17796,
+      "maxDelta": 255,
+      "alphaChannels": 1247,
+      "maxAlphaDelta": 137
+    },
+    {
+      "sheet": "activities",
+      "index": 5,
+      "phase": 0,
+      "channels": 18007,
+      "maxDelta": 255,
+      "alphaChannels": 1225,
+      "maxAlphaDelta": 117
+    },
+    {
+      "sheet": "activities",
+      "index": 6,
+      "phase": 0,
+      "channels": 22104,
+      "maxDelta": 255,
+      "alphaChannels": 1429,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "phase": 0,
+      "channels": 20437,
+      "maxDelta": 255,
+      "alphaChannels": 1460,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 8,
+      "phase": 0,
+      "channels": 11150,
+      "maxDelta": 255,
+      "alphaChannels": 875,
+      "maxAlphaDelta": 107
+    },
+    {
+      "sheet": "activities",
+      "index": 9,
+      "phase": 0,
+      "channels": 11109,
+      "maxDelta": 255,
+      "alphaChannels": 817,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 10,
+      "phase": 0,
+      "channels": 11159,
+      "maxDelta": 255,
+      "alphaChannels": 883,
+      "maxAlphaDelta": 131
+    },
+    {
+      "sheet": "activities",
+      "index": 11,
+      "phase": 0,
+      "channels": 11062,
+      "maxDelta": 255,
+      "alphaChannels": 876,
+      "maxAlphaDelta": 144
+    },
+    {
+      "sheet": "activities",
+      "index": 12,
+      "phase": 0,
+      "channels": 13737,
+      "maxDelta": 255,
+      "alphaChannels": 795,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 13,
+      "phase": 0,
+      "channels": 13882,
+      "maxDelta": 255,
+      "alphaChannels": 897,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 14,
+      "phase": 0,
+      "channels": 13891,
+      "maxDelta": 255,
+      "alphaChannels": 888,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 15,
+      "phase": 0,
+      "channels": 13968,
+      "maxDelta": 255,
+      "alphaChannels": 958,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 13,
+      "phase": 5,
+      "channels": 13837,
+      "maxDelta": 255,
+      "alphaChannels": 895,
+      "maxAlphaDelta": 105
+    },
+    {
+      "sheet": "activities",
+      "index": 14,
+      "phase": 5,
+      "channels": 13823,
+      "maxDelta": 255,
+      "alphaChannels": 869,
+      "maxAlphaDelta": 105
+    }
+  ],
+  "framingChanges": [],
+  "nativeContactsExact": true
+}

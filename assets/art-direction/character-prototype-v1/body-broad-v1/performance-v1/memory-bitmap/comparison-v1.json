@@ -1,0 +1,71 @@
+{
+  "status": "Bitmap ownership adopted after source equality, lifecycle checks and visual review; full memory/release gate remains open",
+  "why": "Published composed families can explicitly close decoded source storage when their library closes. Default image-element decoding remains for older families.",
+  "controlledDifference": [
+    "web/character-image-source.js",
+    "web/character-composed-family-bundle.js"
+  ],
+  "protocol": "Same browser version and benchmark script; two shared and two unique 12-resident cycles in separate isolated browser runs. This is a single-run comparison, not an exhaustive hardware study.",
+  "peakRssBytes": {
+    "image": 1911111680,
+    "bitmap": 1549910016
+  },
+  "lastReleasedAfterGcRssBytes": {
+    "image": 1847705600,
+    "bitmap": 1244889088
+  },
+  "sourcePixels": {
+    "decodedPixelsExact": true,
+    "explicitClose": true,
+    "copiedPixelsPreserved": true,
+    "borrowedSourcePreserved": true,
+    "bitmapBlobUrls": 0,
+    "sourceComparisons": 37,
+    "refusals": 4
+  },
+  "bundleLifecycle": {
+    "sources": 39,
+    "poses": 50,
+    "refusals": 4,
+    "retainedAfterClose": true,
+    "partialFailureCleanup": true,
+    "cancellationCleanup": true
+  },
+  "renderReview": {
+    "pairedSheetsInspected": 6,
+    "nativeContactsExact": 100,
+    "rawSourcePixelsExact": 37,
+    "resampledPixelsExact": false,
+    "marginChanges": "Eight curly-hair poses retain additional faint paint in explicit native-coordinate transparent margins. Ground contacts and registered source transforms are unchanged.",
+    "finding": "The paired base/idle/activity renders retain the same visible proportions, pose placement, lighting and tool layering. Browser downsampling/antialiasing differs numerically; those differences are retained in the reports, not labelled pixel-identical.",
+    "inApp": "Broad/curls preview and matching portrait loaded and were inspected with no captured warnings/errors.",
+    "publicFlow": "Normal authoring, presets, export/import, live edits and checkpoint reload passed in the representative Mata Atlantica flow."
+  },
+  "limits": [
+    "After-release RSS remains about 1.24 GB versus the roughly 276 MB baseline; investigate remaining renderer-native retention.",
+    "This does not complete full animation, wardrobe, biome/rain pairings or process-memory acceptance.",
+    "All original builder/release requirements remain in scope."
+  ],
+  "inputs": {
+    "web/character-image-source.js": "b10649c2b8f08f168db8adc6324fd5f8a09c714f7fef684b6bb0d380d1bbdb03",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "scripts/verify-character-bitmap-source.mjs": "d26af467539cb95c2797b4e835e9ad71cc3ea85aee8c357adf43ba190f0a6b21",
+    "scripts/verify-broad-bitmap-family.mjs": "d81d54b8d93b1d65dbc9feeb452c9f3b022b511707c91b8faa9dc875d69e7bb9",
+    "scripts/verify-composed-family-bundle.mjs": "56b29b5a8c971e7911a4db201a1bcc61b26d8b80a8a6a561e47cf5601fbdb1de"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/in-app-preview.png": "0ebbb2cc1d225c6a341793ed02ec502fbfb18a2200b77980d82e4e23d2478bf0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/report.json": "50263059a6f8c61abc761014316493208d86db65ff0eeacb49c4540ae4cf80fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/player-flow/report.json": "c9165249d8698a8a8db0642ffbf07c7f8f924b76b03308b8fc2dad71d1a263c2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/player-flow/creator-custom.png": "f6b0ab5bdcd2860ac75814e31453341732082e0dcc9d63b38568781c9a8c410c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/player-flow/custom-village.png": "a252c134e6b8bc8328fc6a83b1b244648c263e55d15f280c84b2af3ea40d1383",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-sidepart/report.json": "562f8ddd3a98ee4a1623218c8acf893bc8bda9d10c56c85880f83e7026cf3a09",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-sidepart/idle.png": "196c1ac99095cb3e191224ce76409ddab1dd79b696d53bb6f9e21a8e4faf6e00",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-sidepart/activities.png": "ddef80c82e62896f5961b50d184fd76b06c31c2ca30028e211b3864ae4b7cc4c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-sidepart/base.png": "95df9dcbc0960690ea71774843925e0f7910e593d3c25b1160840c55718d646a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-curls/report.json": "ecc396d8ffc12826b868a41df43a61ffdc007665974d7e0400e0b4ea7c11c0e7",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-curls/idle.png": "027c80d70e372cf433c4338f303ecd4885f357d642b09005f375cad77fe4ca1d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-curls/activities.png": "5e85078f6e4bb4a7b4ff4c4944c28977cdb966863f82c4a1a2da7207a059796f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory-bitmap/bitmap-render-curls/base.png": "9e9fd9430fa3c46e69f4804397488cc521be57ce82babf2707b323014d695a14"
+  }
+}

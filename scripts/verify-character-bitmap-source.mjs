@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const server=await serve(0);let browser;
+try{browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/bitmap-source-check`);const result=await page.evaluate(async()=>{
+ const {loadCharacterImageSource}=await import('/character-image-source.js'),url='/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png',nativeBitmap=window.createImageBitmap,createURL=URL.createObjectURL;let urls=0,refusals=0;const canvases=[],sources=[];URL.createObjectURL=(...a)=>{urls++;return createURL(...a);};
+ const refuse=async fn=>{let failed=false;try{await fn();}catch{failed=true;}if(!failed)throw Error('Invalid bitmap source accepted');refusals++;};
+ try{
+  const legacy=await loadCharacterImageSource(url),image=await loadCharacterImageSource(url,{decoder:'bitmap',sha256:legacy.sourceHash});sources.push(legacy,image);if(!(image.image instanceof ImageBitmap)||!image.image.complete||image.image.naturalWidth!==legacy.image.naturalWidth||urls!==1)throw Error('Bitmap decoder did not retain an explicitly closable CanvasImageSource');
+  const paint=source=>{const c=document.createElement('canvas');c.width=source.image.naturalWidth;c.height=source.image.naturalHeight;c.getContext('2d').drawImage(source.image,0,0);canvases.push(c);return c;},a=paint(legacy),b=paint(image),first=a.getContext('2d').getImageData(0,0,a.width,a.height).data,second=b.getContext('2d').getImageData(0,0,b.width,b.height).data;if(first.some((n,i)=>n!==second[i]))throw Error('Bitmap decoder changed decoded source pixels');const copied=b.toDataURL();image.dispose();image.dispose();if(image.image.width!==0||image.image.naturalWidth!==0||image.image.complete||b.toDataURL()!==copied||!legacy.image.naturalWidth)throw Error('Bitmap release retained its source or changed copied/borrowed pixels');
+  const catalog=await (await fetch('/art/characters/broad-v1/bundle-v1.json')).json();let sourceComparisons=0;
+  for(const entry of Object.values(catalog.sources)){
+   const path=`/art/characters/broad-v1/source-${entry.sha256}.png`,left=await loadCharacterImageSource(path,{sha256:entry.sha256}),right=await loadCharacterImageSource(path,{sha256:entry.sha256,decoder:'bitmap'});
+   try{a.width=b.width=left.image.naturalWidth;a.height=b.height=left.image.naturalHeight;a.getContext('2d').drawImage(left.image,0,0);b.getContext('2d').drawImage(right.image,0,0);const x=a.getContext('2d').getImageData(0,0,a.width,a.height).data,y=b.getContext('2d').getImageData(0,0,b.width,b.height).data;if(x.some((n,i)=>n!==y[i]))throw Error('Published source pixels differ between decoders: '+entry.sha256);sourceComparisons++;}finally{left.dispose();right.dispose();}
+  }
+  await refuse(()=>loadCharacterImageSource(url,{decoder:'unknown'}));await refuse(()=>loadCharacterImageSource(url,{decoder:'bitmap',sha256:'0'.repeat(64)}));
+  const controller=new AbortController();let pending=null;window.createImageBitmap=async(...args)=>{pending=await nativeBitmap(...args);controller.abort();return pending;};await refuse(()=>loadCharacterImageSource(url,{decoder:'bitmap',signal:controller.signal}));if(!pending||pending.width!==0)throw Error('Late cancellation left a decoded bitmap open');
+  window.createImageBitmap=undefined;await refuse(()=>loadCharacterImageSource(url,{decoder:'bitmap'}));return {decodedPixelsExact:true,explicitClose:true,copiedPixelsPreserved:true,borrowedSourcePreserved:true,bitmapBlobUrls:urls-1-sourceComparisons,sourceComparisons,refusals};
+ }finally{window.createImageBitmap=nativeBitmap;URL.createObjectURL=createURL;for(const s of sources)s.dispose();for(const c of canvases)c.width=c.height=0;}
+});assert.equal(result.sourceComparisons,37);assert.equal(result.refusals,4);assert.equal(result.bitmapBlobUrls,0);console.log(JSON.stringify(result));}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
