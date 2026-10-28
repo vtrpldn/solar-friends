@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "Full native coverage fails at neckline coordinate 154,82 with alpha 227.",
+  "sourceSha256": "c7832aa8346fa1a620d5b83530ca0cb3c035eec79f507d00947f66d11fbd293c",
+  "report": "review-v2-owned-arm2.json",
+  "replacement": "candidate-v3.png"
+}

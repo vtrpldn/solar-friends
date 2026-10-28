@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "Full native shirt coverage fails at eight hem pixels; lower hem shortened by paint generation.",
+  "sourceSha256": "9f12011577b6a36af6b1e64cc9189f5eaeafb3e844ae09665f3dcd2c3a56ebd6",
+  "auditSha256": "e23aa39c292eb485899ab3d176126c8cdab6e3ec7761c5489214e98809a40268",
+  "replacement": "candidate-v2.png"
+}

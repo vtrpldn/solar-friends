@@ -1,0 +1,6 @@
+{
+  "status": "rejected",
+  "reason": "The same neckline pixel 154,82 remains under-covered (alpha 236). Revise guide neck margin in a new collection before painting again.",
+  "sourceSha256": "80c8402509bd04946b1564916e8d32b21b2621d9fb6eab1c2cbc8d6f25b788e7",
+  "replacementCollection": "short-sleeve-relaxed-activities-4-v2"
+}

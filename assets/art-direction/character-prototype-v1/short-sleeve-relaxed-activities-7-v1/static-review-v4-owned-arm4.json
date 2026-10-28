@@ -1,0 +1,8 @@
+{
+  "status": "Static watering pose source reviewed; complete equipment motion and public integration pending",
+  "sourceSha256": "be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6",
+  "compositionReportSha256": "791b10a2d1ccd14456428b9e59afcb937b70a5e2d4d9d6b7856e9adf573ab6f3",
+  "paletteReportSha256": "66c7706a93141839c9ea7dc1d2bb444e61be138bbb4d9f1dac3837b837908499",
+  "visualFindings": "Reviewed torso details, equipped colour board and enlarged waist board. Warm cotton paint matches the restrained painted reference; neckline and hem cover the full old shirt. Native hands remain visible, protected shorts/shoes retain original appearance, and arm masks avoid disconnected old-fabric fragments. Deepest lean uses foreground v4 after restoring more of the near forearm and removing an isolated upper-arm speck.",
+  "scope": "One internal static source. Does not accept continuous watering motion, world rendering or the public outfit."
+}

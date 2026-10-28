@@ -1,0 +1,7 @@
+{
+  "status": "rejected",
+  "reason": "Visual source review rejects changed position/scale against the exact mask despite coarse guide audit passing.",
+  "sourceSha256": "1a6dc0e2fcf9cc51fb5c3dea2717c114ee6c0a57e65545dd59d63c41ff252ee9",
+  "auditSha256": "7b8b913b438c516d6bdb30909c28afeada7440a92fd0d7677814a039d66614c8",
+  "replacement": "candidate-v2.png"
+}

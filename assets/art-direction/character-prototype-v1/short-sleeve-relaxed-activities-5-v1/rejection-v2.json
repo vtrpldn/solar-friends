@@ -1,0 +1,6 @@
+{
+  "status": "rejected before native composition",
+  "reason": "Cloth looks softly shaded and textured rather than using the reviewed broad painted fold shapes.",
+  "sourceSha256": "bc663dada7bdc8dc6984335c6867c4e91ada6a63d4a4099dd5bbb8f129cd3ead",
+  "replacement": "candidate-v3.png"
+}

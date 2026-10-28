@@ -1,0 +1,6 @@
+{
+  "status": "rejected before native composition",
+  "reason": "Source silhouette shifted downward against the exact fixed mask.",
+  "sourceSha256": "19fa81efa3552bab495c2e10e208019d1b73377ceddaba0f3094d59a60de53c2",
+  "replacement": "candidate-v5.png"
+}

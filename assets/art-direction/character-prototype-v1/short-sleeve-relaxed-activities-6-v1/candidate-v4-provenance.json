@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ba60b1c0-f068-4d9b-b3f4-be8fcdb546d8.png",
+  "sourceSha256": "19fa81efa3552bab495c2e10e208019d1b73377ceddaba0f3094d59a60de53c2",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v4.txt",
+  "generationInputs": "generation-inputs-v4.json",
+  "generationInputsSha256": "e72d4334ce6fd2a9454b9d9478217145c40515c8e77b1c297d936546279c4521",
+  "status": "Rejected visual geometry: delivered shirt displaced downward from frozen guide"
+}

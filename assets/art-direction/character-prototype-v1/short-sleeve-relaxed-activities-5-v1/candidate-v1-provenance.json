@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-03e16df2-446e-455c-8222-22998f83b8be.png",
+  "sourceSha256": "1a6dc0e2fcf9cc51fb5c3dea2717c114ee6c0a57e65545dd59d63c41ff252ee9",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "48db1c7ab8ee6e684ae116e1f22cdfcb24b61d63872d4a1c3fe74f0818076c38",
+  "status": "Needs audit: silhouette appears displaced from fixed guide"
+}

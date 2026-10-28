@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-054e74db-dfc3-43fb-866e-14006d1f6666.png",
+  "sourceSha256": "bc663dada7bdc8dc6984335c6867c4e91ada6a63d4a4099dd5bbb8f129cd3ead",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v2.txt",
+  "generationInputs": "generation-inputs-v2.json",
+  "generationInputsSha256": "530d165fcfe556dfea1ba3af9a7d0f0d15a61c351f894b8e5f8b414ac245b199",
+  "status": "Rejected style: soft cloth texture and airbrushed folds differ from the angular painted reference"
+}

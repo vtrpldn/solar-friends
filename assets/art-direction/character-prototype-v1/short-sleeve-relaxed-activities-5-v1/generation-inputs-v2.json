@@ -1,0 +1,18 @@
+{
+  "prompt": "prompt-v2.txt",
+  "promptSha256": "34ef1e22a218a2ea626209d21a034a0148de6646b9eccade5f2386385f05f343",
+  "anatomyReviewSha256": "94f0019628aa1ded15dea57cc04f92a3164e2942dae1445424da098ff3af968d",
+  "foregroundIntentSha256": "bce1cbe9b2d9dc8e4cc1aed4112fdbe59ed9d5cbc7d7821d146ef1da311e9a46",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-5-v1/mask.png",
+      "role": "Only generator input: exact native watering silhouette, frozen before paint",
+      "sha256": "768f479f3795dcc98f4da84e80c08dea6e7988c084b101abc4ec71ffa3b1b7c0"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-0-v3/candidate-v1.png",
+    "sha256": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+    "role": "Reviewed painted cotton reference; style described in text, not supplied as second generator image"
+  }
+}

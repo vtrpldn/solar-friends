@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-fd0ee9aa-c07d-47f5-a9eb-d62fd04afc63.png",
+  "sourceSha256": "b0b4f5491a2a4944e92b6fbf5cd2de0aea9429ae3b22c690854f686d9efb555a",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v3.txt",
+  "generationInputs": "generation-inputs-v3.json",
+  "generationInputsSha256": "db932b19ec43ba856c7bd6e8cc58613efe048a2e468ef70a9280d3c9a01cb478",
+  "status": "Rejected style: over-faceted pointed folds differ from reviewed cotton"
+}
