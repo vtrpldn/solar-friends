@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "status": "Internal color composition verified; material edge refinement remains",
+  "why": "Keep selected skin and clothing colours through hat foreground ownership",
+  "checks": {
+    "originalPoseComparisons": 48,
+    "coloredPoseComparisons": 48,
+    "refusalsPerRun": 10,
+    "ownedReleasesPerRun": 47,
+    "alteredSilhouetteAlphaRefused": true
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-colored-activities-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-colored-base-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hat-colored-idle-v1.png"
+    ],
+    "finding": "Copper skin, teal vest, sage shorts and graphite boots remain consistent through the registered hat and hand overlap. Thin pale garment edges remain visible in some poses and require material-region refinement.",
+    "scope": "One contrasting color recipe; static unmirrored view. No new full-family public acceptance."
+  },
+  "inputsAndArtifacts": {
+    "web/character-hat-family.js": "dccd291c38dc4ac16f904420b3b13654c4b1488966df8f47ccd006caf0573b87",
+    "scripts/verify-broad-hat-family.mjs": "340f923abfad2dd3fed2a1544dedcfb1cc3e1e59819126da3087b9de6a9b8c3b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v2.json": "59e5137258489f12a3d54caa0f8f6544998f5b0a573afb28b5943ae748c5fcef",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-family-registration-draft-v1.json": "75dbe5958e8a45de1faedaa3bb0cdafabc210568c016c6db74f38e546aead43a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-colored-activities-v1.png": "8458883de5013ca4c50030cf5369843a20b1b74c3d53c20476b97dbd1937dbf4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-colored-base-v1.png": "f606ff44ef5a7a279948bba382de493b7ed6245261116720415fa925d58e5901",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hat-colored-idle-v1.png": "988f10d856c3d5dd44d9c052b075be42d7d87c922ff610e143c0a06e26ff4f1f"
+  }
+}
