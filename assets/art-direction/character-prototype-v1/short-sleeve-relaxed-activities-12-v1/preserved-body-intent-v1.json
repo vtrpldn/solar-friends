@@ -1,0 +1,10 @@
+{
+  "scope": "Exact original trousers and shoes own their RGBA pixels independently of shirt paint. No skin or shirt labels selected.",
+  "bodyFrameSha256": "7bd9fd6632fbfcf64ff06ddc1c9309b382ca35c2ba36973b6c0f7d8f2b0fc269",
+  "materialRevision": "v11",
+  "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "maskSha256": "aa8acfd6fdb781edbbf4ef4192017b1282e2bd0de8ad3f4d27d858d36470acd2",
+  "pantsPixels": 2543,
+  "shoePixels": 2198,
+  "generatedPaintRead": false
+}

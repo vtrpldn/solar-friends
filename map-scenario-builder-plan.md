@@ -2610,3 +2610,12 @@ The actual tending sequence8/9/10/11/10/9 was recorded through the shared animat
 The layered guide gate also refuses all23 protected overlaps when no preserved-body mask is explicitly selected. Its real exact mask passes; removing one boot-owned pixel still fails. The original zero-overlap strict path continues to pass the first tending guide.
 
 **Why:** customizing residents must remain coherent while they work, including held tools and native layer ownership. This reaches 44 internally integrated shirt poses. Four feeding poses, full public/world outfit integration, wider body/face/clothing choices, dedicated sleep artwork, and all original biome/campaign/performance/memory/storage/recovery/usability release requirements remain open.
+
+
+### Feeding clothing guides frozen
+
+All four final feeding poses (activities12–15) now have native source reference grids, frozen shirt guides, per-pose face/waist criteria, native arm/hand foregrounds and exact original trousers/boot ownership. Strict PNG guide review covers all 1,058 / 1,398 / 1,537 / 1,461 original opaque shirt pixels with zero protected face overlap and zero unpreserved lower-body overlap. The extended-arm13/14 hem overlaps explicitly owned trousers only; all raw overlaps remain visible in reports. Near sleeves were widened after visual review found an exposed upper-arm strip.
+
+Full-body references and each foreground/garment context were inspected. Pose13/14 share a byte-identical silhouette, but retain separate exact body/face/arm/waist bindings; any reused generated source still requires independent final composition and palette validation. Exact prompts, reference roles and hashes are saved before generation.
+
+**Why:** feeding combines a held container, a bent arm and several grain-scattering positions. Independent native ownership is required to keep hands visible as clothing changes. These are analytical guides only; no feeding paint or new integrated pose is accepted yet. The current accepted integration remains44, with all original public/world and broader builder release requirements open.

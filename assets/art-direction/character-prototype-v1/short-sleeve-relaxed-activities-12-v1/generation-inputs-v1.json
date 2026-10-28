@@ -1,0 +1,19 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "c84dc28dd0b756092efb064e00af7897e6dafa6a3e575c120cb7b7407a792730",
+  "anatomyReviewSha256": "adc8079768ad14e720219f3b211db570ab38108313b4f461c8ddf6566a389718",
+  "foregroundIntentSha256": "4c778a7a5da653da228c5594d5ac8266d30ec04fd854727268bc45dbba431e01",
+  "preservedBodySha256": "aa8acfd6fdb781edbbf4ef4192017b1282e2bd0de8ad3f4d27d858d36470acd2",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-12-v1/mask.png",
+      "sha256": "04f9583aeeec517ddb14061bd77deaf10e032a506d4eed2c9f6646de1c2bc902",
+      "role": "Only generator input: frozen feeding shirt silhouette"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-11-v2/candidate-v1.png",
+    "sha256": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+    "role": "Reviewed cream painted shirt style described in text; not generator input"
+  }
+}

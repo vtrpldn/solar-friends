@@ -1,0 +1,70 @@
+{
+  "status": "pre-paint feeding anatomy criteria",
+  "materialRevision": "v11",
+  "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "measuredWaistLine": [
+    [
+      0,
+      135
+    ],
+    [
+      100,
+      135
+    ],
+    [
+      113,
+      138
+    ],
+    [
+      128,
+      139
+    ],
+    [
+      140,
+      138
+    ],
+    [
+      150,
+      135
+    ],
+    [
+      154,
+      131
+    ],
+    [
+      255,
+      131
+    ]
+  ],
+  "requireFullShirtCoverage": true,
+  "protectedHeadPolygon": [
+    [
+      116,
+      32
+    ],
+    [
+      152,
+      32
+    ],
+    [
+      160,
+      51
+    ],
+    [
+      153,
+      71
+    ],
+    [
+      138,
+      76
+    ],
+    [
+      121,
+      68
+    ]
+  ],
+  "headProtection": "Conservative face interior from original native pose; exact channels must remain unchanged in all six final character compositions. Neck outside polygon may receive collar.",
+  "lowerProtection": "Original trousers at least two pixels below measured waist and all shoes remain unchanged. Exact original trousers/shoes own all their RGBA pixels independently of paint.",
+  "waistMeasurementSource": "body-family-relaxed-v1/materials-v11.json",
+  "guideLayering": "Complete shirt hem may continue under original trousers/boots only with explicitly verified native lower-body ownership; final composition requires exact preservation."
+}
