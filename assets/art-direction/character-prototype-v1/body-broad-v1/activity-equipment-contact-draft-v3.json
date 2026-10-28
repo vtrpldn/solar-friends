@@ -1,0 +1,544 @@
+{
+  "status": "Internal static cooking fit reviewed; motion, mirroring, lighting and anatomical masks pending",
+  "parts": {
+    "sha256": "b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab",
+    "spoonSha256": "b0cab447f6473b800312930e5daa7559b5e0a96ea7e6bc2cf4498dcf6b7cf013",
+    "scale": 0.1,
+    "potGrip": [
+      650,
+      740
+    ],
+    "spoonGrips": [
+      [
+        160,
+        210
+      ],
+      [
+        850,
+        350
+      ],
+      [
+        220,
+        1090
+      ],
+      [
+        900,
+        1070
+      ]
+    ],
+    "spoonRects": [
+      [
+        0,
+        0,
+        627,
+        627
+      ],
+      [
+        627,
+        0,
+        627,
+        627
+      ],
+      [
+        0,
+        627,
+        627,
+        627
+      ],
+      [
+        627,
+        627,
+        627,
+        627
+      ]
+    ]
+  },
+  "why": "Measure existing equipment against exact broader hands without source deformation",
+  "poses": [
+    {
+      "sheet": "activities",
+      "index": 0,
+      "sourceFile": "cooking-pot-pose-0-candidate-v3.png",
+      "offset": [
+        0,
+        0
+      ],
+      "legacyRigCoordinateResiduals": null,
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 0,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              636.796875,
+              470.25
+            ],
+            [
+              754.359375,
+              470.25
+            ],
+            [
+              754.359375,
+              587.8125
+            ],
+            [
+              636.796875,
+              587.8125
+            ]
+          ],
+          [
+            [
+              891.515625,
+              617.203125
+            ],
+            [
+              1009.078125,
+              617.203125
+            ],
+            [
+              1009.078125,
+              734.765625
+            ],
+            [
+              891.515625,
+              734.765625
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 1,
+      "sourceFile": "cooking-pot-pose-1-candidate-v2.png",
+      "offset": [
+        0,
+        0
+      ],
+      "legacyRigCoordinateResiduals": null,
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 1,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              622.1015625,
+              597.609375
+            ],
+            [
+              739.6640625,
+              597.609375
+            ],
+            [
+              739.6640625,
+              715.171875
+            ],
+            [
+              622.1015625,
+              715.171875
+            ]
+          ],
+          [
+            [
+              847.4296875,
+              612.3046875
+            ],
+            [
+              964.9921875,
+              612.3046875
+            ],
+            [
+              964.9921875,
+              729.8671875
+            ],
+            [
+              847.4296875,
+              729.8671875
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 2,
+      "sourceFile": "cooking-pot-pose-2-candidate-v2.png",
+      "offset": [
+        0,
+        0
+      ],
+      "legacyRigCoordinateResiduals": null,
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 2,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              671.0859375,
+              617.203125
+            ],
+            [
+              788.6484375,
+              617.203125
+            ],
+            [
+              788.6484375,
+              734.765625
+            ],
+            [
+              671.0859375,
+              734.765625
+            ]
+          ],
+          [
+            [
+              896.4140625,
+              656.390625
+            ],
+            [
+              1013.9765625,
+              656.390625
+            ],
+            [
+              1013.9765625,
+              773.953125
+            ],
+            [
+              896.4140625,
+              773.953125
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 3,
+      "sourceFile": "cooking-pot-pose-3-candidate-v2.png",
+      "offset": [
+        0,
+        0
+      ],
+      "legacyRigCoordinateResiduals": null,
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 3,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              627,
+              391.875
+            ],
+            [
+              744.5625,
+              391.875
+            ],
+            [
+              744.5625,
+              509.4375
+            ],
+            [
+              627,
+              509.4375
+            ]
+          ],
+          [
+            [
+              891.515625,
+              631.8984375
+            ],
+            [
+              1009.078125,
+              631.8984375
+            ],
+            [
+              1009.078125,
+              749.4609375
+            ],
+            [
+              891.515625,
+              749.4609375
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 4,
+      "sourceFile": "watering-can-pose-4-candidate-v2.png",
+      "offset": [
+        -12,
+        2
+      ],
+      "legacyRigCoordinateResiduals": [
+        {
+          "hand": "nearHand",
+          "pixels": 5.385164807134505
+        },
+        {
+          "hand": "farHand",
+          "pixels": 5.099019513592785
+        }
+      ],
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 4,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              661.2890625,
+              597.609375
+            ],
+            [
+              778.8515625,
+              597.609375
+            ],
+            [
+              778.8515625,
+              715.171875
+            ],
+            [
+              661.2890625,
+              715.171875
+            ]
+          ],
+          [
+            [
+              827.8359375,
+              607.40625
+            ],
+            [
+              945.3984375,
+              607.40625
+            ],
+            [
+              945.3984375,
+              724.96875
+            ],
+            [
+              827.8359375,
+              724.96875
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 5,
+      "sourceFile": "watering-can-pose-5-candidate-v1.png",
+      "offset": [
+        -17,
+        1
+      ],
+      "legacyRigCoordinateResiduals": [
+        {
+          "hand": "nearHand",
+          "pixels": 5
+        },
+        {
+          "hand": "farHand",
+          "pixels": 5.8309518948453
+        }
+      ],
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 5,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              661.2890625,
+              631.8984375
+            ],
+            [
+              778.8515625,
+              631.8984375
+            ],
+            [
+              778.8515625,
+              749.4609375
+            ],
+            [
+              661.2890625,
+              749.4609375
+            ]
+          ],
+          [
+            [
+              847.4296875,
+              627
+            ],
+            [
+              964.9921875,
+              627
+            ],
+            [
+              964.9921875,
+              744.5625
+            ],
+            [
+              847.4296875,
+              744.5625
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 6,
+      "sourceFile": "watering-can-pose-6-candidate-v1.png",
+      "offset": [
+        2,
+        14
+      ],
+      "legacyRigCoordinateResiduals": [
+        {
+          "hand": "nearHand",
+          "pixels": 13.892443989449806
+        },
+        {
+          "hand": "farHand",
+          "pixels": 14.7648230602334
+        }
+      ],
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 6,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              749.4609375,
+              724.96875
+            ],
+            [
+              867.0234375,
+              724.96875
+            ],
+            [
+              867.0234375,
+              842.53125
+            ],
+            [
+              749.4609375,
+              842.53125
+            ]
+          ],
+          [
+            [
+              945.3984375,
+              661.2890625
+            ],
+            [
+              1062.9609375,
+              661.2890625
+            ],
+            [
+              1062.9609375,
+              778.8515625
+            ],
+            [
+              945.3984375,
+              778.8515625
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "sheet": "activities",
+      "index": 7,
+      "sourceFile": "watering-can-pose-7-candidate-v3.png",
+      "offset": [
+        -3,
+        -7
+      ],
+      "legacyRigCoordinateResiduals": [
+        {
+          "hand": "nearHand",
+          "pixels": 13.453624047073712
+        },
+        {
+          "hand": "farHand",
+          "pixels": 14.142135623730951
+        }
+      ],
+      "foreground": {
+        "schema": 1,
+        "sheet": "activities",
+        "index": 7,
+        "size": 1254,
+        "polygons": [
+          [
+            [
+              773.953125,
+              739.6640625
+            ],
+            [
+              891.515625,
+              739.6640625
+            ],
+            [
+              891.515625,
+              857.2265625
+            ],
+            [
+              773.953125,
+              857.2265625
+            ]
+          ],
+          [
+            [
+              955.1953125,
+              666.1875
+            ],
+            [
+              1072.7578125,
+              666.1875
+            ],
+            [
+              1072.7578125,
+              783.75
+            ],
+            [
+              955.1953125,
+              783.75
+            ]
+          ]
+        ]
+      }
+    }
+  ],
+  "bodyBindingSha256": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+  "sourceHashes": {
+    "cooking-pot-pose-0-candidate-v3.png": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+    "cooking-pot-pose-1-candidate-v2.png": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+    "cooking-pot-pose-2-candidate-v2.png": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+    "cooking-pot-pose-3-candidate-v2.png": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+    "watering-can-pose-4-candidate-v2.png": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+    "watering-can-pose-5-candidate-v1.png": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+    "watering-can-pose-6-candidate-v1.png": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+    "watering-can-pose-7-candidate-v3.png": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f"
+  },
+  "inputs": {
+    "scripts/review-broad-activity-equipment.mjs": "8cdd4ca02d393ba7b911d32a4815152e886e5d01ee0982c6cacb94c36edd38b8",
+    "web/character-equipment-parts.js": "892bda1be66baca5c2c3f168cc3bceaf36e2a12d023b2c30904ccbdea3f2be18",
+    "web/character-foreground.js": "c562dfccddeec423e775824e70e78eec266c9adc9ef58590293ecba6d6bf027c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/attachment-rig-draft-v2.json": "c6f972067ee8b85bdddd9e284a276b3654f08b68aa33f8e10ea074720293a8d4"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Paint distinct stirring, lifting and tasting orientations instead of rotating one utensil",
+  "prompt": "Make a transparent four-part wooden spoon sprite atlas for Solar Friends. Reference 1 is the painted material/color reference only. Reference 2 shows the resident cooking poses, for understanding the actions ONLY: do not include residents, pots, hands, or background. Output exactly FOUR DISCONNECTED small golden-brown wooden spoons on a square1254x1254 transparent canvas, one spoon per quadrant, generous margins and transparent gaps. Keep all spoons approximately320px long, with slim30px handles and small60px oval bowls, soft warm illustrated upper-left highlights and simple painted shading. NOT realistic giant kitchen product photos. TOP LEFT spoon: handle at[230,180], bowl at[350,470], points down-right, for stirring. TOP RIGHT spoon: handle at[780,330], bowl at[1090,350], nearly horizontal pointing right, bowl seen from above filled with a little golden stew. BOTTOM LEFT spoon: handle at[170,1000], bowl at[480,950], shallow upward-right tilt, bowl seen from above with a little stew. BOTTOM RIGHT spoon: handle at[790,1030], bowl at[1060,870], upward-right tilt toward a person's mouth, small shallow stew-filled bowl. Each is the SAME size real wooden spoon viewed at the required action angle. Handle at left/top and bowl at right/bottom as specified; no other objects. Do not add hands, skin, pots, shadows, labels, grid or background. True transparent alpha everywhere except the four spoon silhouettes. Preserve the established warm painted game style.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-parts-candidate-v1.png",
+      "role": "Painted wood color/material reference"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/activity-equipment-contact-draft-v2.png",
+      "role": "Action context; resident pixels must not be included in output"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-spoon-angles-candidate-v1.png",
+  "status": "Internal static fit reviewed; not public/gameplay accepted",
+  "visualReview": "Generated source and actual native-renderer V3 board inspected. Four discrete painted orientations improve cooking: stirring bowl reaches pot, lifting bowls remain near rim, tasting bowl points toward mouth. Common uniform0.1 source scale; no source rewriting or rotation. Full motion/mirrored/lighting/color review and anatomical grip masks remain required; watering6/7 still unresolved.",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-spoon-angles-candidate-v1.png": "b0cab447f6473b800312930e5daa7559b5e0a96ea7e6bc2cf4498dcf6b7cf013",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-parts-candidate-v1.png": "b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-equipment-contact-draft-v2.png": "ca3d32c66df728722e15d21a2919fc7ccd8f3f43d449cd494873ebdbe03dd97b"
+  }
+}
