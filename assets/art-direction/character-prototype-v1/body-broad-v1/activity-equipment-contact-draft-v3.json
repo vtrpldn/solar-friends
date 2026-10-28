@@ -54,6 +54,8 @@
     ]
   },
   "why": "Measure existing equipment against exact broader hands without source deformation",
+  "registeredPixelComparisons": 4,
+  "registeredRefusals": 9,
   "poses": [
     {
       "sheet": "activities",
@@ -536,8 +538,10 @@
     "watering-can-pose-7-candidate-v3.png": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f"
   },
   "inputs": {
-    "scripts/review-broad-activity-equipment.mjs": "8cdd4ca02d393ba7b911d32a4815152e886e5d01ee0982c6cacb94c36edd38b8",
+    "scripts/review-broad-activity-equipment.mjs": "e73f82b91770c4b44b39260dbf7c21df977ac24e36458cdf163b48fa5a35f99b",
     "web/character-equipment-parts.js": "892bda1be66baca5c2c3f168cc3bceaf36e2a12d023b2c30904ccbdea3f2be18",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-equipment-atlas-draft-v1.json": "0fbfefbb3b43225a7bffc144de81110d179c481fdf08ecc0dfa531b01503496e",
     "web/character-foreground.js": "c562dfccddeec423e775824e70e78eec266c9adc9ef58590293ecba6d6bf027c",
     "assets/art-direction/character-prototype-v1/body-broad-v1/attachment-rig-draft-v2.json": "c6f972067ee8b85bdddd9e284a276b3654f08b68aa33f8e10ea074720293a8d4"
   }
