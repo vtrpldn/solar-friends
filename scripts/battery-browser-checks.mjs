@@ -1,3 +1,4 @@
+import {worldPoint} from './browser-world-point.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 export async function checkBatteryControls({page,saved,capture}){
@@ -16,7 +17,7 @@ export async function checkBatteryControls({page,saved,capture}){
   async function advance(minutes){
     await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill(String(minutes));await page.locator('#dev-advance').click();await page.locator('#dev-close').click();await show();
   }
-  const point=()=>page.evaluate(async()=>{const {project}=await import('./projection.js');const r=document.querySelector('#world').getBoundingClientRect(),s=Math.max(.45,Math.min(r.width/1900,r.height/1050));const p=project(14,20,{x:r.width*.49,y:r.height*.5-459*s},s);return{x:r.left+p.x,y:r.top+p.y};});
+  const point=()=>worldPoint(page,14,20);
   await importScene('recovered');await show();
   const before=await snapshot(),bank=before.village.power.network.nodes.find(n=>n.owner.kind==='ground');
   await page.getByRole('button',{name:'Move battery',exact:true}).click();

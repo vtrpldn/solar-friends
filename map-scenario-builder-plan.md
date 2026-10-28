@@ -2932,3 +2932,12 @@ The classic resident adapter now explicitly disposes decoded facial-hair images 
 `verify-facial-source-disposal.mjs` instruments the actual source loader and proves that all nine decoded sources are released exactly once immediately after successful preparation, an invalid-hash source is released on failure, repeated terminal closure does not release them again, and the finished borrowed pose remains pixel-identical after closure.
 
 **Why:** deleting a cache entry bypassed terminal cleanup for these owned images. This closes that specific lifecycle gap without claiming that the unresolved overall renderer-memory retention has been fixed. Full builder release gates remain open.
+
+
+### Current-camera gameplay regression coordinates
+
+Gameplay browser checks no longer reproduce the old smaller-map camera origin and minimum zoom. The development renderer exposes a bounded cell-framing query that changes only the camera and returns its actual projected point; a shared browser helper uses that point for normal mouse interactions. Restoration, living-land, cultivation, battery moves, Sandbox placement and the general game interaction checks use the helper. Invalid or out-of-map cell coordinates are rejected before the camera changes.
+
+The desktop regression passes its 1600/1280 interface checks, Story outcome controls, extraction/ground disturbance, compost delivery and actual resident restoration, cultivation, planting and living-land interactions. The restoration capture was inspected and its queued job correctly identifies cell 18,18. The run then reached an obsolete climate Sandbox fixture; the current native climate verifier regenerated that fixture and passed forecasts, rain collection, solar/river differences, exact saves and Sandbox season changes. The broader browser suite remains in progress and is not accepted as completely passing.
+
+**Why:** the centered 64×64 map made duplicated old screen-coordinate formulas click different cells. Reading the real renderer projection keeps pointer checks meaningful instead of changing native expectations to match an incorrect click. This test-infrastructure correction does not complete the remaining original builder release gates.

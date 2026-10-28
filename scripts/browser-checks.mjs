@@ -1,3 +1,4 @@
+import {worldPoint} from './browser-world-point.mjs';
 import {MATERIAL_KEYS} from '../web/materials.js';
 import {checkSandboxRules} from './sandbox-browser-checks.mjs';
 import {checkStoryControls} from './story-browser-checks.mjs';
@@ -79,6 +80,14 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#close-journal').click();
   await page.locator('#help').click();if(!await page.locator('#help-dialog .dev-tools').evaluate(el=>el.open))await page.locator('#help-dialog .dev-tools summary').click();await page.locator('#help-open-dev').click();
   const original=await page.evaluate(()=>window.solarDev.snapshot());
+  assert(await page.evaluate(()=>{
+    const before=JSON.stringify(window.solarDev.snapshot()),center=document.querySelector('#world').dataset.cameraCenter;
+    for(const [x,y]of [[-1,0],[64,0],[0,64],[NaN,0],[0,Infinity]]){
+      let refused=false;try{window.solarDev.frameCell(x,y);}catch{refused=true;}
+      if(!refused||document.querySelector('#world').dataset.cameraCenter!==center)return false;
+    }
+    return JSON.stringify(window.solarDev.snapshot())===before;
+  }),'Invalid camera cell queries preserve camera and simulation');
   const saved=await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story'));
   await checkInterfaceControls({page,saved,capture});
   await checkStoryControls({page,saved,capture});
@@ -161,7 +170,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('#dev-button').click();await loadEarnedGarden();
   await page.evaluate(()=>window.solarDev.fixedView());
   await page.locator('[data-building-work="move"]').click();
-  const movePoint=await page.evaluate(async()=>{const {project}=await import('./projection.js');const r=document.querySelector('#world').getBoundingClientRect(),s=Math.max(.45,Math.min(r.width/1900,r.height/1050));const p=project(18,18,{x:r.width*.49,y:r.height*.5-459*s},s);return{x:r.left+p.x,y:r.top+p.y};});
+  const movePoint=await worldPoint(page,18,18);
   await page.mouse.click(movePoint.x,movePoint.y);
   crew=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(crew.village.building_jobs[0].action,'move');assert.deepEqual(crew.village.building_jobs[0].destination,[18,18]);assert.equal(crew.village.buildings[0].x,6);
   await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('20');await page.locator('#dev-advance').click();await page.locator('#dev-close').click();
@@ -184,7 +193,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await page.locator('.build-tool[data-group="land"]').count(),5);
   await page.getByRole('button',{name:'Place Timber trees',exact:true}).click();
   await page.evaluate(()=>window.solarDev.fixedView());
-  const treePlot=await page.evaluate(async()=>{const {project}=await import('./projection.js');const r=document.querySelector('#world').getBoundingClientRect();const scale=Math.max(.45,Math.min(r.width/1900,r.height/1050));const p=project(5,5,{x:r.width*.49,y:r.height*.5-459*scale},scale);return {x:p.x+r.left,y:p.y+r.top};});
+  const treePlot=await worldPoint(page,5,5);
   const planting=await page.evaluate(()=>window.solarDev.snapshot());
   await page.mouse.click(treePlot.x,treePlot.y);
   let land=await page.evaluate(()=>window.solarDev.snapshot());
@@ -569,7 +578,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   await page.locator('[data-kind="home"]').click();
   // Empty plot, away from the fixture buildings; resolve through the same view as the world.
   await page.evaluate(()=>window.solarDev.fixedView());
-  const plot=await page.evaluate(async()=>{const {project}=await import('./projection.js');const r=document.querySelector('#world').getBoundingClientRect();const scale=Math.max(.45,Math.min(r.width/1900,r.height/1050));const p=project(5,5,{x:r.width*.49,y:r.height*.5-459*scale},scale);return {x:p.x+r.left,y:p.y+r.top};});
+  const plot=await worldPoint(page,5,5);
   await page.mouse.click(plot.x,plot.y);
   circular=await page.evaluate(()=>window.solarDev.snapshot());
   const project=circular.village.economy.projects.at(-1);

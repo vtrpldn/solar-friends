@@ -2079,6 +2079,13 @@ const devAPI = {
     for(const button of document.querySelectorAll('[data-speed]')){const active=Number(button.dataset.speed)===value;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
   },
   fixedView() { cameraTarget = null; if (!paused) togglePause(); zoom = 1; pan = { x: 0, y: 0 }; time = 0; weatherTime = 0; animationDelta = 0; residentAnimations.clear(); resize(); render(); },
+  frameCell(x,y) {
+    if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>=MAP_SIZE||y>=MAP_SIZE)throw Error('Choose a cell inside the property.');
+    cameraTarget=null;
+    const point=project(x,y,origin,scale);
+    pan.x+=width/2-point.x;pan.y+=height/2-point.y;
+    render();return {...iso(x,y)};
+  },
   locate(id) {
     const r = state.residents.find(r => r.id === id);
     if (!r) return;

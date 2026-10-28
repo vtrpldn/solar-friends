@@ -1,3 +1,4 @@
+import {worldPoint} from './browser-world-point.mjs';
 import assert from 'node:assert/strict';
 export async function checkLivingLandControls({page,saved,capture}){
   const state=()=>page.evaluate(()=>window.solarDev.snapshot());
@@ -7,7 +8,7 @@ export async function checkLivingLandControls({page,saved,capture}){
     await page.waitForFunction(file=>{const v=window.solarDev.snapshot().village;return v.version===45&&(file==='ground-before'?v.minutes===540&&v.land.soil.length===0:file==='disturbed-clearing'?v.land.soil.length===15&&v.land.soil.some(s=>s.disturbance>.7):file==='restored-clearing'?v.restoration.length===3&&v.restoration.every(j=>j.finished!=null):file==='banana-shade'?v.buildings.some(b=>b.kind==='banana_treatment'):file==='cleared-tree'?v.land.vegetation.some(t=>t.cleared):v.minutes===480&&v.land.soil.length===0);},file);
     await page.locator('#dev-close').click();await page.evaluate(()=>window.solarDev.fixedView());
   }
-  async function point(x,y){const p=await page.evaluate(async([x,y])=>{const {project}=await import('./projection.js');const b=document.querySelector('#world').getBoundingClientRect(),s=Math.max(.45,Math.min(b.width/1900,b.height/1050)),p=project(x,y,{x:b.width*.49,y:b.height*.5-459*s},s);return{x:b.left+p.x,y:b.top+p.y};},[x,y]);await page.mouse.click(p.x,p.y);}
+  async function point(x,y){const p=await worldPoint(page,x,y);await page.mouse.click(p.x,p.y);}
   await load('ground-before');assert(!await page.locator('#land-map').isVisible());const before=await page.locator('#world').screenshot();
   await load('disturbed-clearing');assert.equal(await page.locator('#world').getAttribute('data-soil-cells'),'15');
   const after=await page.locator('#world').screenshot();assert(!before.equals(after),'Persistent soil changes must visibly affect normal terrain without an overlay');

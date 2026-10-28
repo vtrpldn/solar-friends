@@ -1,3 +1,4 @@
+import {worldPoint} from './browser-world-point.mjs';
 import assert from 'node:assert/strict';
 export async function checkRestorationControls({page,saved,capture}){
   const state=()=>page.evaluate(()=>window.solarDev.snapshot());
@@ -21,7 +22,7 @@ export async function checkRestorationControls({page,saved,capture}){
   assert.match(await page.locator('#land-restoration-jobs').textContent(),/partial soil work remains/);
   await load('cancelled');
   await page.evaluate(()=>window.solarDev.fixedView());
-  const point=await page.evaluate(async()=>{const {project}=await import('./projection.js');const box=document.querySelector('#world').getBoundingClientRect(),scale=Math.max(.45,Math.min(box.width/1900,box.height/1050)),p=project(18,18,{x:box.width*.49,y:box.height*.5-459*scale},scale);return{x:box.left+p.x,y:box.top+p.y};});
+  const point=await worldPoint(page,18,18);
   await page.mouse.click(point.x,point.y);
   await page.waitForFunction(()=>document.querySelector('#land-hover').textContent.includes('4 cells'));
   assert.match(await page.locator('#land-restoration-note').textContent(),/18, 18 · 2 × 2 cells/);

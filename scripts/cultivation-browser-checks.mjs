@@ -1,5 +1,5 @@
+import {worldPoint} from './browser-world-point.mjs';
 import assert from 'node:assert/strict';
-import {project} from '../web/projection.js';
 export async function checkCultivationControls({page,saved,capture}){
   async function load(name){
     if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
@@ -8,7 +8,7 @@ export async function checkCultivationControls({page,saved,capture}){
     await page.locator('#dev-close').click();
     await page.locator('#center').click();
   }
-  async function point(x,y){const r=await page.locator('#world').boundingBox(),scale=Math.max(.45,Math.min(r.width/1900,r.height/1050)*1.3),p=project(x,y,{x:r.width*.49,y:r.height*.5-459*scale},scale);await page.mouse.move(r.x+p.x,r.y+p.y);await page.waitForFunction(({x,y})=>document.querySelector('#land-hover').textContent.includes(`Plot ${x}, ${y} ·`),{x,y});}
+  async function point(x,y){const p=await worldPoint(page,x,y);await page.mouse.move(p.x,p.y);await page.waitForFunction(({x,y})=>document.querySelector('#land-hover').textContent.includes(`Plot ${x}, ${y} ·`),{x,y});}
   await load('depleted-growing');
   await page.locator('#open-village').click();if(!await page.locator('#building-panel').isVisible())await page.getByRole('button',{name:'Buildings',exact:true}).click();await page.locator('#building-choice').selectOption('0');
   assert.match(await page.locator('#crop-status').textContent(),/At current soil and supplies: \d+–\d+ food/);

@@ -1,3 +1,4 @@
+import {worldPoint} from './browser-world-point.mjs';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {readFile} from 'node:fs/promises';
@@ -12,7 +13,7 @@ export async function checkSandboxRules({browser,base,output,screenshots,errors}
  async function close(){await page.locator('#close-settings').click();}
  async function place(x,y){
   await page.getByRole('button',{name:'Build',exact:true}).click();await page.locator('[data-build-group="food"]').click();await page.locator('.build-tool[data-kind="garden"]').click();await page.evaluate(()=>window.solarDev.fixedView());
-  const point=await page.evaluate(async({x,y})=>{const{project}=await import('./projection.js'),r=document.querySelector('#world').getBoundingClientRect(),scale=Math.max(.45,Math.min(r.width/1900,r.height/1050)),p=project(x,y,{x:r.width*.49,y:r.height*.5-459*scale},scale);return{x:p.x+r.left,y:p.y+r.top};},{x,y});
+  const point=await worldPoint(page,x,y);
   await page.mouse.click(point.x,point.y);await page.getByRole('button',{name:'Close building tools',exact:true}).click();
  }
  try{
