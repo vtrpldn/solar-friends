@@ -1,6 +1,7 @@
 {
-  "status": "Internal explicit two-hairstyle bundle verified; public integration pending",
+  "status": "Internal bundle verification passed; portrait review pending",
   "poses": 48,
+  "equippedPoseDifferences": 0,
   "refusals": 17,
   "partialFailureClean": true,
   "sharedRecipeLeases": true,
@@ -12,26 +13,11 @@
   "allOwnedReleased": true,
   "borrowedSources": 21,
   "inputs": {
-    "web/character-composed-family.js": "fb4dd055ea7078a2acb07e2ce90c00356ea069bd58602d53be6acc3546a56f1c",
-    "scripts/verify-composed-resident-family.mjs": "cfdc248af158e4f3b119de33d1ce98a3a932e89fa1717f01d00941af3b674eb9",
+    "web/character-composed-family.js": "27aa19d43d43f6e9b35f22beec8a6bae38ab1a200b4c5a9bc214a4babbb522c7",
+    "web/character-equipped-family.js": "c6a241023d0285ce3966a900070fe002224531747ea4511d7f38bb7ccfb24cd0",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "scripts/verify-composed-resident-family.mjs": "5c697a1b389f035e854600747748690f4196a0385d54d5d04b93188d88b65bec",
     "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
-  },
-  "hairstyleSelection": {
-    "choices": [
-      "side-part-v1",
-      "short-curls-v1"
-    ],
-    "recipeSchema": 2,
-    "serializedRecipeCacheSharing": true,
-    "differentStylesHaveDistinctStandingPaint": true,
-    "sharedBodyAcrossStyles": true,
-    "unsupportedMissingOrWrongRevisionRefused": true
-  },
-  "visualReview": {
-    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/composed-hairstyles-v2.png",
-    "sha256": "d6d9f547309d481b7bb5c9e323047afe1496c2e4c1325de57283fd391e9a9e2e",
-    "inspected": true,
-    "finding": "Both selected silver hairstyles, hat and portrait/world standing paint remain distinct and consistent with their own recipe.",
-    "scope": "Two static hairstyle combinations only; no full motion/biome/public acceptance."
   }
 }

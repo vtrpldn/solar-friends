@@ -1,6 +1,7 @@
 {
-  "status": "Internal shared-body composed library verified; public integration pending",
+  "status": "Internal bundle verification passed; portrait review pending",
   "poses": 48,
+  "equippedPoseDifferences": 0,
   "refusals": 14,
   "partialFailureClean": true,
   "sharedRecipeLeases": true,
@@ -12,22 +13,11 @@
   "allOwnedReleased": true,
   "borrowedSources": 18,
   "inputs": {
-    "web/character-composed-family.js": "fb4dd055ea7078a2acb07e2ce90c00356ea069bd58602d53be6acc3546a56f1c",
-    "scripts/verify-composed-resident-family.mjs": "b703171900cf5ae25c666b4839735093435a29ac15f976329bd8b1cb6e3dc883",
+    "web/character-composed-family.js": "27aa19d43d43f6e9b35f22beec8a6bae38ab1a200b4c5a9bc214a4babbb522c7",
+    "web/character-equipped-family.js": "c6a241023d0285ce3966a900070fe002224531747ea4511d7f38bb7ccfb24cd0",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "scripts/verify-composed-resident-family.mjs": "5c697a1b389f035e854600747748690f4196a0385d54d5d04b93188d88b65bec",
     "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v1.json": "ef4e01d54c9b7b26fd7bd04b02761bad40d9e9e1f8aeaff5f68aba8c21bf88ca"
-  },
-  "bodySharing": {
-    "concurrentDistinctRecipes": 2,
-    "measuredLiveOwnedCanvases": 149,
-    "breakdown": "53 prepared source body frames plus96 composed pose frames",
-    "separatePreparationReference": 202,
-    "avoidedBodyCanvasRgbaUpperBoundBytes": 13893632,
-    "limitation": "Not a browser RSS, hardware GPU-memory, or maximum-cast performance claim."
-  },
-  "portraitReview": {
-    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-portrait-v1.png",
-    "sha256": "d4825a3c96cbce837632cc68bbedc1a8d9781f5d6a65ce438811d96513c758a3",
-    "finding": "Artifact unchanged from prior inspected version."
-  },
-  "legacyRecipeRegression": "Current schema1 regression passes all original14 refusal and shared-body/lifecycle checks."
+  }
 }

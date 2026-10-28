@@ -1,0 +1,23 @@
+{
+  "status": "Internal bundle verification passed; portrait review pending",
+  "poses": 48,
+  "equippedPoseDifferences": 16,
+  "refusals": 21,
+  "partialFailureClean": true,
+  "sharedRecipeLeases": true,
+  "leasedEvictionProtected": true,
+  "libraryCleanup": true,
+  "sharedBodyInFlightCleanup": true,
+  "sharedBodyLive": 181,
+  "liveBefore": 117,
+  "allOwnedReleased": true,
+  "borrowedSources": 33,
+  "inputs": {
+    "web/character-composed-family.js": "27aa19d43d43f6e9b35f22beec8a6bae38ab1a200b4c5a9bc214a4babbb522c7",
+    "web/character-equipped-family.js": "c6a241023d0285ce3966a900070fe002224531747ea4511d7f38bb7ccfb24cd0",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "scripts/verify-composed-resident-family.mjs": "5c697a1b389f035e854600747748690f4196a0385d54d5d04b93188d88b65bec",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v3.json": "cc8cccf24543cc46aa5ced42c999166ede7f924f02fc56da195d15c38f35a735"
+  }
+}
