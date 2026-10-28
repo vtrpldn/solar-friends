@@ -1,0 +1,60 @@
+{
+  "status": "All six biome captures inspected; sampled scale/ground gate passed; complete family acceptance unfinished",
+  "biomes": 3,
+  "views": 6,
+  "originalCast": 2,
+  "composedAppearances": 2,
+  "errors": [],
+  "inputs": {
+    "scripts/review-composed-resident-biomes.mjs": "f13f63226543d1be4cb4793a4efd50f3e352149f0dbe84d76344050419ea4e42",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v8.json": "1c7a68bbb9f0f408c7619a394d50be39897c11253544909bf31489220b7e770b",
+    "web/character-composed-family.js": "cdbf9aed7581a7c904ece7add952352cd04c033d465588dcccf5bd96ca40577d",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/building-art.js": "b30fc9560fd0bb1ed3681a34dfc04b9c9e6bf58c0e2f5fe00c7a847877eb0d7b",
+    "scripts/verify-forest-night-lighting.mjs": "395848e6de0ec237cc1b4b8099d9f1515adb33e248049eaff4f2c70261163803"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-world-v8-mata-atlantica-day.png": "da53b3d1b0efc17061cee7c0fd5828fdbd1ac4ff9cd65640d7f8a8d9dd6c1b28",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-world-v8-mata-atlantica-night.png": "2914bd501f580f779999aa2877e67392d7541b45b29191369723c77f46bc2d08",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-world-v8-cerrado-day.png": "3e971df7762d6e688208bb44b64d6ec3dfd4a12cda97f769e0da09fce6437975",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-world-v8-cerrado-night.png": "e253268f4ad54255c01684171c65aa41be076cc13d1659d629c0365c5676f6ed",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-world-v8-caatinga-day.png": "947795402bd023cb9b742b42ccf8f8c63f84f84b03f21616dd44c57df06ea3cd",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-world-v8-caatinga-night.png": "5bff0f9cdf5810dfe01353e7ebf5ec5f8d0666521d6ff7821a075c4f7cc4f4e8"
+  },
+  "findings": {
+    "day": "Mata Atlantica, Cerrado and Caatinga inspected beside Iara/Bento, home, storage, shelter and road. Standing, working and cooking composed samples share the scene scale and ground plane; transparent margins do not appear as platforms.",
+    "night": "All three mirrored night views inspected after fixing original forest lighting. Original trees now darken with the same shared night tint as regional plants.",
+    "fixed": "Original forest species 0 through 3 previously used an untinted drawImage path despite receiving night; the shared painter now uses the filtered small-surface path only when night is positive. Daytime drawing remains exact.",
+    "limits": "Two composed appearances and three selected poses are not all body poses, palettes, accessories, rain, public creator journeys or final transition/style acceptance."
+  },
+  "forestNightRegression": {
+    "daytimeExact": true,
+    "nightSpecies": 4,
+    "callerFilterPreserved": true,
+    "checks": [
+      {
+        "species": 0,
+        "opaqueCompared": 22939,
+        "nightToDayBrightness": 0.6870829307789379
+      },
+      {
+        "species": 1,
+        "opaqueCompared": 6206,
+        "nightToDayBrightness": 0.6860039108730489
+      },
+      {
+        "species": 2,
+        "opaqueCompared": 8994,
+        "nightToDayBrightness": 0.6738196740662749
+      },
+      {
+        "species": 3,
+        "opaqueCompared": 14245,
+        "nightToDayBrightness": 0.6823200089852028
+      }
+    ]
+  }
+}

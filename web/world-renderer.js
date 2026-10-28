@@ -46,7 +46,9 @@ export function paintWorldTree(ctx,{x,y,size=1,species=0},{project,scale,width,h
   if(!forestSpecies[species]||!forest?.naturalWidth)return;
   const w=forestSpecies[species].width*size*scale,cell=forest.width/2;
   paintContactShadow(ctx,p.x,p.y+2*scale,23*size*scale,11.5*size*scale,.16);
-  ctx.drawImage(forest,(species%2)*cell,Math.floor(species/2)*cell,cell,cell,p.x-w/2,p.y-w*.85,w,w);
+  const args=[(species%2)*cell,Math.floor(species/2)*cell,cell,cell,p.x-w/2,p.y-w*.85,w,w];
+  if(night>0)paintImage(ctx,forest,...args,unlitFilter(night));
+  else ctx.drawImage(forest,...args);
 }
 export function paintWorldBuilding(ctx,{key,x,y,alpha=1,emptyAnimals=false},{project,scale,images,nightImages=images,night=0,light=1}){
   const art=allBuildingArt[key];if(!art)return;
