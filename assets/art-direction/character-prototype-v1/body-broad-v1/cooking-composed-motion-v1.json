@@ -1,0 +1,34 @@
+{
+  "status": "Recorded; decode and visual review pending",
+  "frames": 553,
+  "changes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "cook",
+      "seconds": 0.8102000000476837
+    },
+    {
+      "mode": "breathe",
+      "seconds": 9.003900000095367
+    }
+  ],
+  "seen": [
+    "base:8",
+    "activities:0",
+    "activities:1",
+    "activities:2",
+    "activities:3"
+  ],
+  "videoSha256": "48d7d878617427d88cf6f9adaaf2b10f41ec2e20496ee941aab813aac8cd2033",
+  "inputs": {
+    "scripts/review-broad-cooking-motion.mjs": "3bc04e9aa05fea08810759ba330679bcaaed115cda55b27298cc29db6dfeb6e5",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-equipment-atlas-draft-v1.json": "0fbfefbb3b43225a7bffc144de81110d179c481fdf08ecc0dfa531b01503496e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-hand-masks-draft-v1.json": "b0a45b919f1cfc220da930fa41e2e0cc209214075a9f9402ed85cc719c153e9f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "status": "Partial visual review; entry/exit artwork incomplete",
+  "why": "Verify registered cooking equipment over time, beyond isolated static poses",
+  "videoSha256": "48d7d878617427d88cf6f9adaaf2b10f41ec2e20496ee941aab813aac8cd2033",
+  "decodedReportSha256": "e57b8e7eae3ce6f7689747cbbbc7ce44a909a13737362f058857da46a92e9bfd",
+  "boardsInspected": {
+    "cooking-composed-loop-decoded-v1.png": "2b8c772fa3a4f7f93a9cc024c15815fa444a721bdf282c22247286f824ece3ac",
+    "cooking-composed-enter-decoded-v1.png": "518cc9904cf277af6ffacda484e2ada281d126d007a66f0452090b85d621a35f",
+    "cooking-composed-leave-decoded-v1.png": "e64ef282f0013fcfb38aa25462350a6658f59ad4f8ab59dff0a21aaf2181a033"
+  },
+  "decodedFrames": 251,
+  "durationSeconds": 10.131333,
+  "scope": "18 decoded samples containing both hairstyles, right-facing day and left-facing night,230px and48px views. Native cooking clip ran for about8.2seconds; not a physical-display pacing test or every-frame visual inspection.",
+  "findings": [
+    {
+      "verdict": "pass-in-samples",
+      "claim": "Cooking equipment remains behind registered hands, with the pot supported and spoon near pot/mouth across reviewed loop samples."
+    },
+    {
+      "verdict": "pass-in-samples",
+      "claim": "Silver hair/straw hat and recolored clothing retain legibility and framing under established day/night tint and mirrored facing."
+    },
+    {
+      "verdict": "incomplete",
+      "claim": "Entry/exit jumps between standing and cooking; this body family lacks painted pickup/put-down intermediates. Existing crossfade/terminal holds do not establish anatomical motion."
+    },
+    {
+      "verdict": "incomplete",
+      "claim": "Remaining tools, full-body motion, biome lighting, public creator/save/share integration and original builder release gates remain required."
+    }
+  ]
+}
