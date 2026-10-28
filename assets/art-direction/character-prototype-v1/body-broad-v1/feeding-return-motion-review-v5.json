@@ -1,0 +1,64 @@
+{
+  "status": "Partial native phase review; full resident release acceptance remains open",
+  "why": "Verify return metadata through actual native animation rather than only direct frame requests",
+  "videoSha256": "0f64589d3a6ae1ae62838bf9a1eb258618399530aed6a4d18688dae88cb1bafa",
+  "decodedReportSha256": "0bf2bfe1d1a1cfe714f199c32995d4dd74931feca7988c7c428f954bb849880b",
+  "runtimeDependencies": {
+    "web/character-composed-family.js": "27aa19d43d43f6e9b35f22beec8a6bae38ab1a200b4c5a9bc214a4babbb522c7",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-hair-family.js": "2e28f017e55920ccf1cb4d12bc3af51ff3846d02b4018363bff68c68612ac7f7",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
+  },
+  "decodedFrames": 252,
+  "durationSeconds": 10.104401,
+  "outputsInspected": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-decoded-full-v5.png": "97f1e347fa6598dd7c7fd33506ff3a165f908b7c88d9dc12450f2a041d959f27",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-decoded-detail-v5.png": "23a659321719bfdf12b314086e75b32192c8ee0b34c789bb59298d067b233a9e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-decoded-rawDetail-v5.png": "e140e79c20291fb5485e47ef925a76c7d9c180b24abf02865aff88c769399a54"
+  },
+  "rawSamples": [
+    {
+      "step": "activities:13:1",
+      "seconds": 1.4285,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-13-1-v5.png",
+      "sha256": "5e516c349d730451c286ec112fbdf590bc5f516826881252a773ccaaf3490c19"
+    },
+    {
+      "step": "activities:14:2",
+      "seconds": 1.9242000000476838,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-14-2-v5.png",
+      "sha256": "0b0259fd63a37eba00680c2e37276d5174137f0d948e24f42a7c8868d638d9e5"
+    },
+    {
+      "step": "activities:14:4",
+      "seconds": 2.9302999999523163,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-14-4-v5.png",
+      "sha256": "2cacd5ed58005f342560099af3c2b1135cbf941042c3b99da32064a02c71e2a7"
+    },
+    {
+      "step": "activities:13:5",
+      "seconds": 3.4237999999523163,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-13-5-v5.png",
+      "sha256": "1902e8861c7d01b9133ccbb5cd3b8cc3a7e30dc5e5334a586e171bccde938c30"
+    }
+  ],
+  "observedSteps": [
+    "activities:12:0",
+    "activities:13:1",
+    "activities:14:2",
+    "activities:15:3",
+    "activities:14:4",
+    "activities:13:5"
+  ],
+  "findings": [
+    "Actual trace reaches all six native feeding steps, including outbound13/14 and return14/13, using integrated V5 appearance providers.",
+    "Inspected whole-view decoded board, magnified decoded hand board and lossless runtime hand board for both hairstyles/day/mirrored night. Return hands remain clear of scattered grain while the basket and body retain placement.",
+    "Tiny grain is low contrast in the encoded footage, especially at gameplay48px. Lossless samples and exact-pixel tests support phase correctness; video does not establish individually legible grain particles at48px.",
+    "The four decoded sampling labels follow recording trace/requested times, not exact independently recovered decoder pose identity. Not exhaustive frame or physical-display pacing evidence.",
+    "Pickup/put-down/anatomical transitions, remaining face/clothing parts, public creator/save/share integration, biome/art/performance and all original release requirements remain open."
+  ]
+}

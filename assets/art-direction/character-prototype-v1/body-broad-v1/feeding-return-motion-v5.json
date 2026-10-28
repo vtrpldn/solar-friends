@@ -1,0 +1,138 @@
+{
+  "status": "Recorded; decode and visual review pending",
+  "frames": 558,
+  "changes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "feed",
+      "seconds": 0.8040999999046325
+    },
+    {
+      "mode": "breathe",
+      "seconds": 9.001299999952316
+    }
+  ],
+  "rawSamples": [
+    {
+      "step": "activities:13:1",
+      "seconds": 1.4285,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-13-1-v5.png",
+      "sha256": "5e516c349d730451c286ec112fbdf590bc5f516826881252a773ccaaf3490c19"
+    },
+    {
+      "step": "activities:14:2",
+      "seconds": 1.9242000000476838,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-14-2-v5.png",
+      "sha256": "0b0259fd63a37eba00680c2e37276d5174137f0d948e24f42a7c8868d638d9e5"
+    },
+    {
+      "step": "activities:14:4",
+      "seconds": 2.9302999999523163,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-14-4-v5.png",
+      "sha256": "2cacd5ed58005f342560099af3c2b1135cbf941042c3b99da32064a02c71e2a7"
+    },
+    {
+      "step": "activities:13:5",
+      "seconds": 3.4237999999523163,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/feeding-return-raw-activities-13-5-v5.png",
+      "sha256": "1902e8861c7d01b9133ccbb5cd3b8cc3a7e30dc5e5334a586e171bccde938c30"
+    }
+  ],
+  "seenSteps": [
+    "activities:12:0",
+    "activities:13:1",
+    "activities:14:2",
+    "activities:15:3",
+    "activities:14:4",
+    "activities:13:5"
+  ],
+  "phaseEvents": [
+    {
+      "step": "activities:12:0",
+      "seconds": 0.8945999999046326
+    },
+    {
+      "step": "activities:13:1",
+      "seconds": 1.2603999998569488
+    },
+    {
+      "step": "activities:14:2",
+      "seconds": 1.7597000000476837
+    },
+    {
+      "step": "activities:15:3",
+      "seconds": 2.260899999856949
+    },
+    {
+      "step": "activities:14:4",
+      "seconds": 2.766700000047684
+    },
+    {
+      "step": "activities:13:5",
+      "seconds": 3.262
+    },
+    {
+      "step": "activities:12:0",
+      "seconds": 3.7692999999523162
+    },
+    {
+      "step": "activities:13:1",
+      "seconds": 4.2715
+    },
+    {
+      "step": "activities:14:2",
+      "seconds": 4.762399999856949
+    },
+    {
+      "step": "activities:15:3",
+      "seconds": 5.264
+    },
+    {
+      "step": "activities:14:4",
+      "seconds": 5.769899999856949
+    },
+    {
+      "step": "activities:13:5",
+      "seconds": 6.273399999856949
+    },
+    {
+      "step": "activities:12:0",
+      "seconds": 6.7665
+    },
+    {
+      "step": "activities:13:1",
+      "seconds": 7.276700000047684
+    },
+    {
+      "step": "activities:14:2",
+      "seconds": 7.771
+    },
+    {
+      "step": "activities:15:3",
+      "seconds": 8.261599999904632
+    },
+    {
+      "step": "activities:14:4",
+      "seconds": 8.764899999856949
+    }
+  ],
+  "seen": [
+    "base:8",
+    "activities:12",
+    "activities:13",
+    "activities:14",
+    "activities:15"
+  ],
+  "videoSha256": "0f64589d3a6ae1ae62838bf9a1eb258618399530aed6a4d18688dae88cb1bafa",
+  "inputs": {
+    "scripts/review-integrated-feeding-motion.mjs": "16f791004c11daf6310594745c5d3d0db8bb4472e548d4a380619cb53854765b",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v5.json": "85bd983d29bc4a3460a2374389685a285b0305c5f5b7ca9a4e69d1e26f18ed6c",
+    "web/character-composed-family.js": "27aa19d43d43f6e9b35f22beec8a6bae38ab1a200b4c5a9bc214a4babbb522c7",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e"
+  }
+}
