@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "status": "V5 lying source accepted for further internal authoring after static native/world review; no public integration",
+  "why": "Check genuine sleep anatomy and body scale using the existing explicit contact transform and native resident painter",
+  "measurements": {
+    "candidate": {
+      "sourceBounds": [
+        0,
+        23,
+        1502,
+        1024
+      ],
+      "normalizedSha256": "4f5ccb5be2cc2d73aaffa18b3c99e0df14a5f717862be9676438dc7f74480abe",
+      "contact": [
+        128,
+        164
+      ]
+    },
+    "standing": {
+      "normalizedSha256": "b5623e44a8eb7869b64f879c3f0f0295116721ee0dda25a9c357a6440e13f13f",
+      "contact": [
+        128,
+        228
+      ]
+    },
+    "reference": {
+      "sourceBounds": [
+        0,
+        15,
+        1234,
+        1254
+      ],
+      "normalizedSha256": "327d529c25e302d4540d3c3f2dbad5ca58b2c3e6f4dcc5dfcc71cbc27edc497a",
+      "contact": [
+        128,
+        164
+      ]
+    }
+  },
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v5.png": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+    "scripts/review-broad-sleep-native.mjs": "7bc3df4d4715191ebbb0b919fc7a815baed1fa463d85cd48f674d6cb8b55dc9f",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf"
+  },
+  "errors": [],
+  "visualReview": "Inspected six native enlarged/gameplay day/mirrored-night comparisons and all six seed42 biome world captures. The compact side-lying anatomy retains the standing head size, rounded cheeks, broad torso/thighs and cream garments. Full scalp, supporting elbow, hands, bent legs and bare feet remain visible. No visible halo on terrain. Ground contact is explicitly authored at the supporting torso/hip region; this is not feet anchoring.",
+  "limits": [
+    "Static source acceptance only",
+    "No native sleep-transition movie reviewed in this milestone",
+    "No authored lying-down or getting-up intermediate anatomy",
+    "Fitted clothing hair facial accessories and portrait remain unfinished",
+    "No public body selection or complete creator acceptance"
+  ],
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-world-v5-caatinga-day.png": "08fb38a85e4f4044d7e4e8ccf02110e2b94cded0d008832863b12563b2bee804",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-world-v5-caatinga-night.png": "9cfdc00dc78dc27da5292fd22c1408ce73ffe1f27288032f7c770f86f0bd55fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-world-v5-cerrado-day.png": "42c0aff95c8293c7ec83a11aa185e45bfb1c286356abe1e6bf784a97d7210ef9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-world-v5-cerrado-night.png": "04caaffd5dd393b3a06c0c1f09c71ec973b0576df9da7a01eb98b57a6b1d7f18",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-world-v5-mata-atlantica-day.png": "80c2ceb253d6927d3481a115a3eb4b86e2729fe65b3233c2d21ae399ee113b4c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-world-v5-mata-atlantica-night.png": "e26c61851769c66216c5e2a6e20bea821b98f6057de9630eddeb4907a30d2726",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-native-comparison-v5.png": "0f2b71b5269c62a9125e4cece4075492c2a20d93c94edf0c2a148365f494d474",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-registration-candidate-v5.json": "89b00e47bc2dafd2344a26cf1bc61c599015dd0dd03036771b451e723dd52e75",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-brief-v5.json": "c1b947a86ef67562d245a949644180e436f55448a95a83cd7e61f7264782e89b"
+  }
+}

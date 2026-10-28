@@ -3128,3 +3128,11 @@ A native review harness now loads the exact broader standing source, existing ly
 `node scripts/review-broad-sleep-native.mjs` and its `--compact` variant pass exact source identity, complete silhouette fitting and native painting without browser errors. Both six-view comparisons were inspected. Hash-pinned findings and candidate registrations are in `body-broad-v1/sleep-native-review-v1.json` and v4. Exact v4 prompt and references are preserved.
 
 **Why:** clean transparency and a true lying pose are insufficient if the person changes scale between activities. Correct source anatomy/layout or explicitly support a wider reclining frame at the same body scale before continuing world, lighting and transition acceptance. The additional body and full builder plan remain incomplete.
+
+### Additional body shape: corrected lying sleep source
+
+V5 uses the broader standing body as its only visual reference, removing the old sleeping figure's smaller-head proportion bias. The newly painted compact side-lying pose retains the rounded head, fuller torso and thighs, bent complete legs and bare feet. One uniform scale of 0.16 and explicit ground contact fit the full delivered silhouette without cropping or anatomical warping in the existing native frame. No wider-frame renderer or material-format change was needed.
+
+`node scripts/review-broad-sleep-native.mjs --identity` passes exact decoded source identity, complete alpha-bound fitting and shared native painting without browser errors. The six-view enlarged/gameplay comparison and all six generated seed42 Mata Atlântica, Cerrado and Caatinga world captures were inspected in day/mirrored-night beside the broader standing body, existing sleep reference, home, shed, storage and road. The new head/body scale is coherent and the sprite has no visible halo against terrain. Source, prompt, registration, renderer and inspected artifact hashes are retained in `body-broad-v1/sleep-native-review-v5.json`.
+
+**Why:** resident body shape must persist when posture changes. V5 is accepted only as a static lying source for further internal family authoring. Native sleep-transition recording, lying-down/getting-up intermediate anatomy, fitted parts, portrait consistency and public creator integration remain unfinished. The full original builder requirements and release gates remain active.

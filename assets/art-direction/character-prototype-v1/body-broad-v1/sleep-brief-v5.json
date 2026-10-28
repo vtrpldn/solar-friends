@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Candidate requiring native and world review",
+  "why": "Remove old sleep proportion reference and preserve standing identity in a compact lying pose",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: identity-preserve. Create a Solar Friends game sprite from the supplied standing identity reference. SAME person and SAME head-to-body proportions, not a new character. ONE figure lying on their side asleep, head at left, feet at right, knees comfortably bent toward torso, head supported by lower forearm, upper hand resting on belly. Preserve round bald head, plump cheeks, fuller adult belly and thighs, warm tan skin, cream sleeveless vest and shorts; bare feet. Crucial proportions: this stylized person's head is large. In the curled lying pose, the entire silhouette from left scalp to right toes should span about THREE head diameters, at most 3.3, while preserving their full torso and both complete legs. Do not use realistic small-headed long-bodied adult anatomy. Match the supplied figure's round head, compact broad torso and short sturdy legs exactly, merely articulated into a side-lying resting pose. Fixed elevated orthographic three-quarter game camera, warm broad painted shading, clean warm edges, upper-left light. True transparent background and generous margins around full scalp, elbow, hands and toes. No furniture, pillow, bed, shoes, hair, shadow, glow, halo, ground, text, labels or grid. One complete sleeping person only.",
+  "references": [
+    {
+      "path": "breathe-candidate-v1.png",
+      "role": "Only reference: identity anatomy proportions and painted style"
+    }
+  ],
+  "output": "sleep-candidate-v5.png"
+}
