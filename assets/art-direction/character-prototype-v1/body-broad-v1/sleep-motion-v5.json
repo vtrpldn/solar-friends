@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "scope": "Partial internal provider; native mode/pose selection and ground alignment recording only. No intermediate lying anatomy, public family integration or physical frame pacing claim.",
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0,
+      "elapsedMs": 7205.599999904633,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "sleep",
+          "seconds": 0.8051999999284745
+        },
+        {
+          "mode": "breathe",
+          "seconds": 6.205199999928475
+        }
+      ],
+      "seen": [
+        8,
+        15
+      ],
+      "renderCalls": 866
+    },
+    {
+      "night": 1,
+      "offsetMs": 7205.699999928474,
+      "elapsedMs": 7207.700000047684,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "sleep",
+          "seconds": 0.8077000000476837
+        },
+        {
+          "mode": "breathe",
+          "seconds": 6.207600000023842
+        }
+      ],
+      "seen": [
+        8,
+        15
+      ],
+      "renderCalls": 865
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v5.png": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-registration-candidate-v5.json": "89b00e47bc2dafd2344a26cf1bc61c599015dd0dd03036771b451e723dd52e75",
+    "scripts/review-broad-sleep-motion.mjs": "0fcaa2c8b78e291d41854790bd0a6c09152a9ab836b5c642ea2e5f2df766c1bd",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
+  },
+  "videoSha256": "8b48f7a0198cb191cc2ee60e6a3330e1991cddf92f79d1fd92386b85e1547681",
+  "errors": [],
+  "visualReview": "Inspected all six decoded eight-frame filmstrips: entry, rest and exit in normal/day and mirrored/night, each containing enlarged and gameplay-size residents. The same head size and broader body volume remain readable in sleep and standing. Supporting torso contact remains stable during rest. Native keyframes switch abruptly at entry/exit; no physical lowering or getting-up anatomy is present, and no smooth-transition acceptance is claimed.",
+  "status": "Native mode/pose selection and static sleep rendering reviewed; intermediate anatomical motion unfinished",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-day-entry.png": "462fe8451257743da12405c25542c51a57abf154923f2352e0effbfa6d08b905",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-day-exit.png": "3d6d7bd65f9d8b6b913c2b417cd619f0161f47ccaa18e38064e2214ade6a5a89",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-day-rest.png": "ea75a1edb1656cc9a37c8021ce0b9f6fd44933cd6fc105179c9771f84665954e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-night-entry.png": "80f72d7b158a6dd8e3e90154a25ff392e52b375133b361a4b33e1d2b15b6cefe",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-night-exit.png": "b5d9dd07ce4f4607b6f864b71e6d889a1d31d17fda82209ca88ed88fef639535",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-night-rest.png": "7b73ce28f2fecf7b4ae9e7535aa04caa6ce2c9e17489b1dfeef2efb84fa64b10",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-decoded.json": "f166994aff39840832f64b7fd55dcc5b8eb4553cbc65a3b923a811d591a88a48"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "vp9",
+        "width": 800,
+        "height": 360,
+        "nb_read_frames": "433"
+      }
+    ],
+    "format": {
+      "duration": "14.399528"
+    }
+  },
+  "windows": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-day-entry.png",
+      "startSeconds": 0.0,
+      "durationSeconds": 1.6,
+      "frames": 8
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-day-rest.png",
+      "startSeconds": 2.0,
+      "durationSeconds": 1.6,
+      "frames": 8
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-day-exit.png",
+      "startSeconds": 5.6,
+      "durationSeconds": 1.6,
+      "frames": 8
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-night-entry.png",
+      "startSeconds": 7.205699999928474,
+      "durationSeconds": 1.6,
+      "frames": 8
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-night-rest.png",
+      "startSeconds": 9.205699999928473,
+      "durationSeconds": 1.6,
+      "frames": 8
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-motion-v5-night-exit.png",
+      "startSeconds": 12.805699999928475,
+      "durationSeconds": 1.6,
+      "frames": 8
+    }
+  ]
+}
