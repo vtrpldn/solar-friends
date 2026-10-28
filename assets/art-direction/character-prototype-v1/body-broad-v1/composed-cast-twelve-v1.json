@@ -1,0 +1,189 @@
+{
+  "status": "Internal twelve-recipe preparation and lifecycle measured; rendered comparison inspected",
+  "recipes": [
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "materials": {
+        "skin": "warm",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "materials": {
+        "skin": "warm",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "black",
+      "hat": "none",
+      "materials": {
+        "skin": "warm",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "materials": {
+        "skin": "warm",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "materials": {
+        "skin": "sunlit",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "materials": {
+        "skin": "sunlit",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "black",
+      "hat": "none",
+      "materials": {
+        "skin": "sunlit",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "materials": {
+        "skin": "sunlit",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "chestnut",
+      "hat": "none",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "espresso",
+      "hat": "straw-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "black",
+      "hat": "none",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    },
+    {
+      "schema": 1,
+      "family": "broad-sidepart-draft-v1",
+      "hairColour": "silver",
+      "hat": "straw-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      }
+    }
+  ],
+  "poses": 576,
+  "initial": {
+    "entries": 12,
+    "active": 2,
+    "queued": 10,
+    "leases": 0,
+    "ready": 0,
+    "maxEntries": 12,
+    "maxConcurrent": 2,
+    "maxQueued": 24,
+    "closed": false,
+    "preparedBodyPoses": 0
+  },
+  "preparationMs": 3990.800000190735,
+  "liveOwnedCanvases": 629,
+  "retainedCanvasRgbaUpperBoundBytes": 179652224,
+  "thirteenthLeasedRecipeRefused": true,
+  "evictionReleasedOldFrames": true,
+  "allOwnedReleased": true,
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+  "inputs": {
+    "web/character-composed-family.js": "fb78658ba90ab4a7dfb5ef5d202e68087f6561c76b6a34941868b44cc97cfed7",
+    "web/appearance-lease-cache.js": "b6ecbf61b76772ea2159c2e7d7f4638428b489769a126e8ff23d24bc46fcb6c2",
+    "scripts/review-composed-resident-cast.mjs": "69aecef77cc201eabdda5a1623e2b9de1c8f9000bbd779349c0b0c1a55020a9f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v1.json": "ef4e01d54c9b7b26fd7bd04b02761bad40d9e9e1f8aeaff5f68aba8c21bf88ca"
+  },
+  "visualReview": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/composed-cast-twelve-v1.png",
+    "sha256": "1931e963b905f08c8f985f4cc2dc7c57c0923a93fdff8103a5a994e99ffc3b59",
+    "inspected": true,
+    "finding": "All12 selected skin/hair/hat recipes produce nonempty portraits and world-standing sprites from their shared recipe provider. Same art family and body proportions retained in the displayed comparison.",
+    "scope": "Standing portraits/world comparison only, not576 individually inspected poses or full art acceptance."
+  },
+  "limitations": [
+    "Single headless Chromium run; no physical-display or lower-hardware claim",
+    "Preparation time excludes source file read/decode and full game startup",
+    "Canvas RGBA storage upper bound, not process RSS/GPU allocation",
+    "Not a64x64 maximum-cast gameplay/editor frame-time or long simulation benchmark",
+    "Other hairstyles, equipment, facial hair, garments and public integration unfinished"
+  ]
+}
