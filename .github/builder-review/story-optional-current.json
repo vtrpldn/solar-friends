@@ -1,0 +1,100 @@
+{
+  "passed": true,
+  "command": "node scripts/story-all-paths.mjs",
+  "route": "fresh-all-paths",
+  "chapters": [
+    {
+      "chapter": 1,
+      "minutes": 6765,
+      "day": 5,
+      "money": 194000
+    },
+    {
+      "chapter": 2,
+      "minutes": 7809,
+      "day": 6,
+      "money": 211000
+    },
+    {
+      "chapter": 3,
+      "minutes": 9594,
+      "day": 7,
+      "money": 215700
+    },
+    {
+      "chapter": 4,
+      "minutes": 12000,
+      "day": 9,
+      "money": 215200
+    },
+    {
+      "chapter": 5,
+      "minutes": 16851,
+      "day": 12,
+      "money": 216100
+    },
+    {
+      "chapter": 6,
+      "minutes": 23793,
+      "day": 17,
+      "money": 11473
+    },
+    {
+      "chapter": 7,
+      "minutes": 34236,
+      "day": 24,
+      "money": 35815
+    },
+    {
+      "chapter": 8,
+      "minutes": 38253,
+      "day": 27,
+      "money": 9940
+    },
+    {
+      "chapter": 9,
+      "minutes": 42930,
+      "day": 30,
+      "money": 70354
+    },
+    {
+      "chapter": 10,
+      "minutes": 47832,
+      "day": 34,
+      "money": 23022
+    },
+    {
+      "chapter": 11,
+      "minutes": 58377,
+      "day": 41,
+      "money": 29598
+    },
+    {
+      "chapter": 12,
+      "minutes": 59817,
+      "day": 42,
+      "money": 51598
+    },
+    {
+      "chapter": 13,
+      "minutes": 91422,
+      "day": 64,
+      "money": 32741
+    }
+  ],
+  "material_count": 30,
+  "service_orders": 1,
+  "service_spending": 7673,
+  "inputs": {
+    "scripts/story-all-paths.mjs": "961a35bde09d8f5b2e0b1a99dac6600979de759dc7a576b63bfec0bbbec066c8",
+    "scripts/upkeep-playtest.mjs": "6c564a59b2adc93b5a98767fb3d2eacf4a20af52a039b95ddee01dbcf6007ee4",
+    "web/quests.js": "15fd217638efc60a0b4c36356a49662453d996e5514c169f7913ad3aa7b58b15",
+    "web/materials.js": "cfcdb63ea0359772ca620ef67d84151b23e248955061be6ffd09fbce71d25e17",
+    "web/pkg/solar_friends_bg.wasm": "e78fae12869ea3fb20b6f70c5102b58b1919a186a646b27c551d0bc6073d8f2f"
+  },
+  "checkpoint": {
+    "path": "artifacts/story-optional/solar-complete.json",
+    "sha256": "0ae54198b947a879ade1b945e77a7d7e815d458345902a3ec9f36a6e22ca34db"
+  },
+  "scope": "Fresh native all-path Story replay and exact chapter checkpoint restore. This refresh unblocks Story browser imports; complete desktop browser acceptance remains pending older subsystem fixture refreshes."
+}

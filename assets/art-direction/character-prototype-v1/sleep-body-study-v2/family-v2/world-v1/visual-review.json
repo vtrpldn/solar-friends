@@ -1,0 +1,53 @@
+{
+  "status": "Internal static biome/environment review passed; public activation pending",
+  "reportSha256": "d2dde55202c06263c86136a8822abe0f33a69bce18e602ef076e0db08513adcb",
+  "inspected": [
+    "mata-atlantica-day.png",
+    "mata-atlantica-night.png",
+    "mata-atlantica-rain.png",
+    "cerrado-day.png",
+    "cerrado-night.png",
+    "cerrado-rain.png",
+    "caatinga-day.png",
+    "caatinga-night.png",
+    "caatinga-rain.png"
+  ],
+  "coverage": {
+    "biomes": 3,
+    "states": [
+      "day",
+      "night",
+      "rain"
+    ],
+    "zoom": [
+      1.3,
+      2.6
+    ],
+    "facings": [
+      -1,
+      1
+    ],
+    "hairstyles": [
+      "curls",
+      "sidepart"
+    ],
+    "outfits": [
+      "sleeveless",
+      "short sleeves"
+    ],
+    "residentDraws": 144
+  },
+  "findings": [
+    "Reclining silhouettes follow the same ground axis in both facings, with soft source-bound shadows directly on biome terrain.",
+    "Both outfits and hairstyles retain their proportions, skin/cloth separation, visible facial hair and hat-off sleep rule.",
+    "No opaque sprite ground platform is present; the separate road remains alongside the reviewed actors.",
+    "Runtime unlit filtering keeps the same geometry and anchors; rain veil, streaks and wet-ground effects do not change sprite registration."
+  ],
+  "limits": [
+    "Diagnostic review clearing and one home; not autonomous visible sleeping behavior or every neighboring building.",
+    "Night uses the shared unlit filter, not every powered light interaction.",
+    "Rain is an explicit visual preset, not a simulated climate-event test.",
+    "Close zoom crops the reference home; building proportions are compared in the wider views.",
+    "Motion transitions, versioned public creator/recipe/save/import integration and all broader plan requirements remain open."
+  ]
+}
