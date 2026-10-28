@@ -172,6 +172,7 @@ const activityAnimations = residentLookKeys.map(name => {
 });
 const residentAppearances=createResidentAppearanceLibrary({base:animations,idle:idleAnimations,activities:activityAnimations});
 let residentArtworkLoading=false,residentArtworkRevision=0;
+function retireInactiveResidentArtwork(){if(residentArtworkLoading)return;residentAppearances.setActive(state.residents.map(person=>person.appearance));residentAppearances.releaseInactiveParts().catch(console.error);}
 function prepareResidentCast(snapshot,options={}){
   return prepareResidentArtwork(snapshot.residents.map(p=>p.appearance),residentAppearances,{...options,onProgress:({completed,total})=>{
     $('#load-status').textContent=`Preparing residents · ${completed} of ${total}`;
@@ -205,10 +206,12 @@ async function restartPlayerSession(test=false){
   }catch(error){
     state=JSON.parse(game.snapshot());if(!wasPaused&&paused)togglePause();updateUI();render();
     toast(error.name==='AbortError'?'Restart cancelled. Your village is unchanged.':error.message);
-  }finally{loading.finish();}
+  }finally{loading.finish();retireInactiveResidentArtwork();}
 }
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
+function releaseResidentSurface(id){const surface=residentSurfaces.get(id);if(surface)surface.width=surface.height=0;residentSurfaces.delete(id);}
+function clearResidentVisuals(){residentAnimations.clear();for(const id of residentSurfaces.keys())releaseResidentSurface(id);}
 let animationDelta = 0;
 let weatherTime = 0;
 let groundLayer,
@@ -356,7 +359,8 @@ function enterVillage(candidate,mode) {
   document.querySelector(".creation-session")?.remove();document.body.classList.remove("in-creation-run");
   game.free();game=candidate;storage=modeStores[mode];gameActive=true;
   state=JSON.parse(game.snapshot());
-  residentAnimations.clear();selected=null;tool=null;pointer=null;cameraTarget=null;
+  retireInactiveResidentArtwork();
+  clearResidentVisuals();selected=null;tool=null;pointer=null;cameraTarget=null;
   pan={x:0,y:0};time=0;weatherTime=0;speed=1;last=0;saveElapsed=0;
   setZoom(1.3);
   $('#person').hidden=true;$('#placement').hidden=true;closePanels();
@@ -1673,9 +1677,9 @@ function setup() {
       $(villagePanels.has(id)?'#open-village':`[data-panel="${id}"]`).focus();
     };
   }
-  residentIdentity=installResidentIdentity({appearances:residentAppearances,catalog:JSON.parse(game.scenario_catalog()).resident_appearances,game:()=>game,snapshot:()=>state,changed:id=>{
-    state=JSON.parse(game.snapshot());residentAnimations.delete(id);residentSurfaces.delete(id);
-    residentAppearances.setActive(state.residents.map(person=>person.appearance));
+  residentIdentity=installResidentIdentity({onClose:retireInactiveResidentArtwork,appearances:residentAppearances,catalog:JSON.parse(game.scenario_catalog()).resident_appearances,game:()=>game,snapshot:()=>state,changed:id=>{
+    state=JSON.parse(game.snapshot());residentAnimations.delete(id);releaseResidentSurface(id);
+    retireInactiveResidentArtwork();
     const person=state.residents.find(p=>p.id===id),button=$(`#residents [data-resident="${id}"]`);
     if(button){button.querySelector('.avatar').outerHTML=avatar(id);button.querySelector('b').textContent=person.name;button.setAttribute('aria-label',`Meet ${person.name}`);}
     selectPerson(id);updateUI();paintPortraits();render();save();
@@ -1815,8 +1819,9 @@ function setup() {
     }
     game.restore(pendingImport);
     undoImportArtwork=null;pendingImport = null;
-    residentAnimations.clear();
+    clearResidentVisuals();
     state = JSON.parse(game.snapshot());
+    retireInactiveResidentArtwork();
     selected = null; tool = null; closePanels();
     $("#person").hidden = true; $("#placement").hidden = true;
     $("#import-dialog").close(); $("#settings-dialog").close();
@@ -1994,7 +1999,7 @@ function refreshDevScene() {
   economyUI?.resetForVillage();
   challengeFailureShown=false;
   setZoom(zoom);
-  residentAnimations.clear(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
+  clearResidentVisuals(); groundKey = null; time = 0; weatherTime = 0; animationDelta = 0;
   state = JSON.parse(game.snapshot()); selected = null; tool = null; movingBuilding = null; movingBattery = null; pendingRemoval = null;
   previousVillage = state.village; cameraTarget = null; milestoneQueue.length = 0;
   clearTimeout(celebrationTimer); showingMilestone = false; $("#milestone").hidden = true;
@@ -2010,6 +2015,8 @@ const devAPI = {
   inspect: () => JSON.parse(game.dev_inspect()),
   simulationClock:()=>simulationClock.status(),
   residentArtworkCache:()=>residentAppearances.partCacheInfo(),
+  residentArtworkOwnership:()=>residentAppearances.ownershipInfo(),
+  residentScratchSurfaces:()=>({count:residentSurfaces.size,pixels:[...residentSurfaces.values()].reduce((sum,c)=>sum+c.width*c.height,0),ids:[...residentSurfaces.keys()]}),
   residentAnimation:id=>structuredClone(residentAnimations.get(id)??null),
   observe: () => game.dev_observe(true),
   isSandbox: () => !!sandbox,

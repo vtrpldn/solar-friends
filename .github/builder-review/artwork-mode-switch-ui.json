@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "initialResidents": 12,
+  "nextResidents": 5,
+  "sharedInitialAppearance": true,
+  "oldRunPreserved": true,
+  "inactiveCustomCacheRetired": true,
+  "scratchIdsAfterSwitch": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "previewCancelAndRetry": true,
+  "previewCancelPreservesExactState": true,
+  "modes": [
+    "story",
+    "sandbox"
+  ],
+  "inputs": {
+    "scripts/verify-artwork-mode-switch-ui.mjs": "b6f07c60ea9c0b12e6a1625d251bef23ba0c3223f8ea76b66f0ddb6ac70dff2c",
+    "web/main.js": "5e835eb5a3c807b7409f536ff1951dff613643fb1d0046738815216686b119f6",
+    "web/resident-identity.js": "8aecfaa31d8c19c979829de1c01a9e8623e06f154deaf5756f2e83003d6c46fe",
+    "web/resident-appearance-library.js": "3cc5f8bd4a84218be01d41ec241326a0adf5110f8b09efcb01e5b3ec26063a68",
+    "web/resident-parts.js": "bfb984a395223248ba0a1b1143dd7a9da0fcb707c6d6b64a1a2b654b26eb4714",
+    "web/appearance-cache.js": "fd1b68e4433c8bb209e3dc1bd819bddb9b44297172caf2332315a60256d411d8"
+  },
+  "captures": {
+    "custom-session.png": "0dc9340b3a81f2785670dbc6fea7c7b6c39b4ede59dd2a9e66f8efc977bec99a",
+    "story-after-custom.png": "e6937d49a66dbc01b82ff4b5f80ef9e5a7aea34a77bcfa4334e18fa5bad2d935",
+    "sandbox-after-preview.png": "fbc6b0bb6efaa8327ea07afd34bb4db984ed8c323d207dcc9e301aa3a80421ce"
+  },
+  "scope": "Actual custom-playtest to Story/Sandbox menu controls, old run preservation, resident scratch identity bounds and cancelled preview retirement/retry. Not every session transition, total RAM/GPU measurement or maximum unique-look load."
+}
