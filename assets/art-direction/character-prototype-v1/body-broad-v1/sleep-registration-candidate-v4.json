@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "family": "broad-body-prototype-v1",
+  "sheet": "base",
+  "source": {
+    "sha256": "556b0e9aef6d5602a6a581ff2e2b9de121b9873f867aee321b800626fe36f8bb",
+    "width": 1633,
+    "height": 963
+  },
+  "uniformScale": 0.155,
+  "sourceContact": [
+    820,
+    700
+  ],
+  "nativeContact": [
+    128,
+    164
+  ]
+}

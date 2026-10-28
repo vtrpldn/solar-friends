@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "status": "Needs scale/anatomy correction; not accepted for body family or public integration",
+  "why": "Check genuine sleep anatomy and body scale using the existing explicit contact transform and native resident painter",
+  "measurements": {
+    "candidate": {
+      "sourceBounds": [
+        19,
+        17,
+        1623,
+        963
+      ],
+      "normalizedSha256": "9be9dcb9a9974117de788f14d62fc20519adc657497862f1f0df12b0ca7e0fa1",
+      "contact": [
+        128,
+        164
+      ]
+    },
+    "standing": {
+      "normalizedSha256": "b5623e44a8eb7869b64f879c3f0f0295116721ee0dda25a9c357a6440e13f13f",
+      "contact": [
+        128,
+        228
+      ]
+    },
+    "reference": {
+      "sourceBounds": [
+        0,
+        15,
+        1234,
+        1254
+      ],
+      "normalizedSha256": "327d529c25e302d4540d3c3f2dbad5ca58b2c3e6f4dcc5dfcc71cbc27edc497a",
+      "contact": [
+        128,
+        164
+      ]
+    }
+  },
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v4.png": "556b0e9aef6d5602a6a581ff2e2b9de121b9873f867aee321b800626fe36f8bb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e"
+  },
+  "errors": [],
+  "visualReview": "Inspected enlarged and gameplay-size native comparisons in normal/day and mirrored/night. Genuine lying anatomy is present and full source fits, but head/torso scale is smaller than the broader standing body. V4 bends both knees compactly and preserves full limbs; it still fails body-scale consistency. No local stretching or per-pose body warping was applied.",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-native-comparison-v4.png": "6da80c0d1511b3117ea581c7a05198b465bb32a6bc09fc8c752a67306f36fbd4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-registration-candidate-v4.json": "cf773c1fc0e4223286b03c8243910e253386df1b10713625da857186956e801b"
+  },
+  "next": "Correct anatomy/source layout or explicitly support a wider reclining native frame while preserving standing head/body scale; then review all three biome scenes and native sleep transitions."
+}

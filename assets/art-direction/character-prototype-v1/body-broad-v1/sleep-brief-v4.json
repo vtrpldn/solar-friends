@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "Compact anatomy candidate; native scale and world review pending",
+  "why": "Long straight-leg source shrinks head during uniform native fit; author compact resting anatomy instead",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: identity-preserve. Solar Friends sprite on true transparent background. Image 1 is the exact broader adult anatomy/identity and warm painted style reference. Image 2 is a sleep pose reference ONLY, not a scale reference. Paint ONE same round-cheeked bald broader adult lying asleep on their side in a COMPACT NATURAL KNEES-BENT resting pose: head lower left supported by bent lower arm, upper hand resting on rounded belly; hips and both knees comfortably flexed so feet tuck close behind knees to the upper right. Keep both full thighs and lower legs anatomically readable, no missing limbs. Important: retain image 1's large head-to-body ratio and fuller torso/thighs; do not elongate the torso/legs or reduce the head. Compact complete silhouette should be roughly 1.7 times as wide as tall, not the long straight-legged diagonal of image 2. Cream sleeveless vest and cream shorts, warm tan skin, bare feet, peaceful closed eyes. Fixed elevated orthographic three-quarter game camera. Broad illustrated shading, warm edges, upper-left light. Complete scalp/elbow/fingers/toes with ample empty margin. No bed, pillow, ground, aura, cast shadow, glow, text, grid or accessories. One figure, clean real transparency.",
+  "references": [
+    {
+      "path": "breathe-candidate-v1.png",
+      "role": "Exact identity wider anatomy head ratio and style"
+    },
+    {
+      "path": "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png",
+      "role": "Sleep camera and arm pose only, not leg extension or head scale"
+    }
+  ],
+  "output": "sleep-candidate-v4.png"
+}
