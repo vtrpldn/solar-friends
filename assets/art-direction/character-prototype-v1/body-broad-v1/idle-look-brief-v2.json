@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "Guide revision; actual source-scale review pending; not public artwork",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: sketch-to-render. Image 1 is an EXACT 2x2 body-size and limb-layout guide only, not the finished art style. All four guide figures have the SAME anatomical dimensions and ground height within their equal cells: keep that equality in the painted result. Image 2 is the exact painted Solar Friends broader-body identity/style reference. Paint the four look poses specified below, matching the head, face, torso, hips, thighs, boots, cream sleeveless vest/shorts, tan skin, bald scalp and upper-left painted daylight of image 2. IMPORTANT CORRECTION: the previous candidate's lower row was smaller. Do not repeat that. Use ONE identical standing body height and head size across ALL FOUR poses, with only the required arm/head gesture changes. Keep every figure wholly inside its guide cell and preserve the guide's generous blank margins. No individual body scaling, no stretched anatomy. Use ONLY the FIRST ROW of image 2 as the gesture concept: four quiet looking-around poses. Top left: neutral standing, eyes gently scanning ahead. Top right: subtle glance a little farther right, head turned only slightly. Bottom left: gentle upward glance toward nearby trees, chin raised only a little. Bottom right: returning toward a calm forward glance, relaxed small smile. Arms hang at the sides throughout; shoulder and torso movement is restrained. Keep the torso and planted boots nearly unchanged. The guide near arm is terracotta and far arm blue solely to indicate anatomical depth; paint both with the reference's tan skin. Match the reference's warm illustrated shading and warm edges, not a flat vector style. Exactly four full figures in a 2x2 sheet, same 3/4 front-right orthographic camera, complete fingertips/scalp/boots, no edge cropping. True transparent background and gaps. Do not include guide colors, rectangles, labels, grid, ground, shadows, props, tools, hair, hats, beards or watermark.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-geometry-v2.png",
+      "role": "Identical body and feet geometry per cell; not finished art"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Broader painted identity, anatomy, style and materials"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v2.png",
+  "reason": "Version 1 upper and lower rows have different painted stature. A shared geometry guide requests consistent proportions before source registration."
+}

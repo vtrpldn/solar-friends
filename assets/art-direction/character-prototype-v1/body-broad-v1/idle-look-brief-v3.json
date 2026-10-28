@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Source layout-size correction; actual pose review pending; not public artwork",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Correct only the SOURCE LAYOUT SIZE of the TOP ROW's two complete figures in this four-pose Solar Friends sprite sheet. The upper figures are 9.3 percent taller/larger than the lower figures. Uniformly reduce each complete upper figure by approximately 9.3 percent in BOTH dimensions, maintaining aspect ratio and keeping the soles on their current ground baseline. Their crown-to-sole height and head size must then match the LOWER ROW's figures. Keep the LOWER ROW unchanged, including all pose, identity, color and anatomical proportions. Do not repaint different anatomy, do not stretch limbs, do not widen/narrow only one axis. The result must contain the same four broader-body people and same look gestures with one consistent painted body size across all four cells. Preserve face, warm tan skin, bald head, cream vest and shorts, brown boots, warm painted shading, upper-left daylight, 3/4 camera, transparent background/gaps and all full fingertips/scalps/boots. No extra objects, text, grid or shadows. Exactly four complete figures.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v2.png",
+      "role": "Edit target; preserve painted anatomy, identity and gestures while correcting upper-row source resolution"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v3.png",
+  "reason": "Version 2 upper-row bodies have a larger source-space stature than the lower row. Correct the source layout through image generation; runtime preparation still uses one uniform scale per exact source."
+}

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "status": "Candidate authoring; source and motion review pending; not public artwork",
+  "why": "The broader body needs a complete authored idle gesture set with matching anatomy and compatible part registration.",
+  "tool": "built-in image_gen; transparent background",
+  "clip": "wave",
+  "poseSlots": [
+    "idle:8",
+    "idle:9",
+    "idle:10",
+    "idle:11"
+  ],
+  "prompt": "Use case: precise-object-edit. Asset: Solar Friends broader-body resident idle gesture sprite sheet. Image 1 is the exact broader person's identity/anatomy/style reference and 2x2 layout reference. Preserve its adult height, head-to-body ratio, round cheeks and face, fuller belly and thighs, rounded shoulders, warm tan skin, bald scalp, cream sleeveless vest and cream shorts, brown leather boots. Image 2 is ONLY a gesture sequence reference from the original lean-body 4x4 sheet; do not copy its lean anatomy or its 4x4 layout. Create exactly FOUR complete separate figures in a roomy 2 by 2 sheet, consistent 3/4 front-right orthographic camera, body height/head size and foot spacing. Warm painted Brazilian countryside game style, broad shading, warm clear edges and upper-left daylight. The body is always the same broader adult, never stretched or scaled differently between poses. Use ONLY the THIRD ROW of image 2 as the gesture sequence. Top left: calm neutral standing, arms down. Top right: the NEAR hand is partly raised beside the shoulder, palm open in greeting. Bottom left: that same near hand is fully raised beside the head, open palm gently outward, a friendly small smile; the other arm remains relaxed at the side. Bottom right: the greeting hand is lowering toward a resting position, not another new gesture. Keep near/far arms anatomically consistent and each visible hand with plausible fingers, no extra limbs. Torso and planted boots stay steady. All feet remain planted naturally; no stepping or body levitation. Preserve complete scalp, fingertips and boots with generous transparent margins between every figure and all image edges. Do not enlarge figures to fill the canvas; give the gesture room. True transparent background and gaps between arms/body. No hair, hats, beards, accessories, tools, furniture, ground, shadows, platform, grid, labels, text or watermark. Exactly four figures only.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Broader identity, anatomy, material/style, body scale and roomy 2x2 layout"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png",
+      "role": "Only row 3 gesture sequence; not lean anatomy or 4x4 layout"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v1.png",
+  "requirements": [
+    "Four complete separated painted figures with matching broader body",
+    "One uniform source scale and measured ground origins",
+    "Matching standing stature and material detail",
+    "Correct native pose slots and gesture timing without old-body fallback",
+    "Source/native geometry and all-biome ground/lighting review",
+    "Encode, decode and inspect complete gestures and transitions"
+  ],
+  "excluded": "No complete body, fitted parts, public appearance or release acceptance."
+}

@@ -1,0 +1,36 @@
+{
+  "status": "Geometry only, not painted sprite art",
+  "clip": "look",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": [
+    2,
+    2
+  ],
+  "cell": 627,
+  "headCenter": [
+    330,
+    150
+  ],
+  "headRadii": [
+    77,
+    82
+  ],
+  "footCenters": [
+    [
+      275,
+      580
+    ],
+    [
+      380,
+      575
+    ]
+  ],
+  "fixedAnatomyAcrossPoses": true,
+  "nearLimb": "terracotta",
+  "farLimb": "blue",
+  "sha256": "117b4f883a94c9dcd48bced617a9924789b542bf79286f00997e88ac4cdf2234",
+  "scope": "Identical head, torso, hip, leg and boot geometry in each cell; only gesture arms change. Finished anatomy, style, contacts and proportions require review from the generated pixels."
+}

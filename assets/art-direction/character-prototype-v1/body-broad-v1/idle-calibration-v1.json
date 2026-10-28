@@ -1,0 +1,328 @@
+{
+  "schema": 1,
+  "status": "Internal authored contact and head-landmark study; not a public appearance",
+  "standingHeadCenter": [
+    355,
+    165
+  ],
+  "maximumHeadGroundSpread": 8,
+  "maximumStandingHeadDifference": 10,
+  "scope": "One uniform scale per exact source atlas. Every logical idle pose has explicit source ownership; unused size-mismatched paintings are excluded. Contacts locate the projected ground below the body; head centers are authored diagnostic landmarks. No anatomical warp or independent per-pose scale is used. Actual selected pixels and assembled gestures require visual review.",
+  "sources": [
+    {
+      "id": "look",
+      "source": "idle-look-candidate-v3.png",
+      "uniformScale": 0.4,
+      "nativeContact": [
+        128,
+        243
+      ],
+      "sourceContacts": [
+        [
+          365,
+          660
+        ],
+        [
+          893,
+          660
+        ],
+        [
+          369,
+          1236
+        ],
+        [
+          894,
+          1236
+        ]
+      ],
+      "headCenters": [
+        [
+          368,
+          177
+        ],
+        [
+          892,
+          177
+        ],
+        [
+          369,
+          770
+        ],
+        [
+          894,
+          770
+        ]
+      ]
+    },
+    {
+      "id": "stretch",
+      "source": "idle-stretch-candidate-v1.png",
+      "uniformScale": 0.415,
+      "nativeContact": [
+        128,
+        243
+      ],
+      "sourceContacts": [
+        [
+          353,
+          606
+        ],
+        [
+          901,
+          608
+        ],
+        [
+          371,
+          1212
+        ],
+        [
+          895,
+          1213
+        ]
+      ],
+      "headCenters": [
+        [
+          353,
+          151
+        ],
+        [
+          901,
+          160
+        ],
+        [
+          371,
+          774
+        ],
+        [
+          895,
+          760
+        ]
+      ]
+    },
+    {
+      "id": "wave",
+      "source": "idle-wave-candidate-v2.png",
+      "uniformScale": 0.38,
+      "nativeContact": [
+        128,
+        243
+      ],
+      "sourceContacts": [
+        [
+          354,
+          640
+        ],
+        [
+          929,
+          640
+        ],
+        [
+          367,
+          1226
+        ],
+        [
+          928,
+          1226
+        ]
+      ],
+      "headCenters": [
+        [
+          354,
+          140
+        ],
+        [
+          929,
+          140
+        ],
+        [
+          367,
+          765
+        ],
+        [
+          928,
+          765
+        ]
+      ]
+    },
+    {
+      "id": "wave-lower",
+      "source": "idle-wave-candidate-v3.png",
+      "uniformScale": 0.4,
+      "nativeContact": [
+        128,
+        243
+      ],
+      "sourceContacts": [
+        [
+          354,
+          640
+        ],
+        [
+          929,
+          640
+        ],
+        [
+          367,
+          1226
+        ],
+        [
+          928,
+          1226
+        ]
+      ],
+      "headCenters": [
+        [
+          354,
+          190
+        ],
+        [
+          929,
+          190
+        ],
+        [
+          367,
+          750
+        ],
+        [
+          928,
+          750
+        ]
+      ]
+    },
+    {
+      "id": "relax",
+      "source": "idle-relax-candidate-v2.png",
+      "uniformScale": 0.4,
+      "nativeContact": [
+        128,
+        243
+      ],
+      "sourceContacts": [
+        [
+          363,
+          638
+        ],
+        [
+          898,
+          638
+        ],
+        [
+          376,
+          1226
+        ],
+        [
+          895,
+          1226
+        ]
+      ],
+      "headCenters": [
+        [
+          363,
+          165
+        ],
+        [
+          898,
+          165
+        ],
+        [
+          376,
+          760
+        ],
+        [
+          895,
+          760
+        ]
+      ]
+    }
+  ],
+  "clips": [
+    {
+      "clip": "look",
+      "row": 0,
+      "poses": [
+        {
+          "source": "look",
+          "index": 0
+        },
+        {
+          "source": "look",
+          "index": 1
+        },
+        {
+          "source": "look",
+          "index": 2
+        },
+        {
+          "source": "look",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "clip": "stretch",
+      "row": 1,
+      "poses": [
+        {
+          "source": "stretch",
+          "index": 0
+        },
+        {
+          "source": "stretch",
+          "index": 1
+        },
+        {
+          "source": "stretch",
+          "index": 2
+        },
+        {
+          "source": "stretch",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "clip": "wave",
+      "row": 2,
+      "poses": [
+        {
+          "source": "wave",
+          "index": 0
+        },
+        {
+          "source": "wave",
+          "index": 1
+        },
+        {
+          "source": "wave-lower",
+          "index": 2
+        },
+        {
+          "source": "wave-lower",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "clip": "relax",
+      "row": 3,
+      "poses": [
+        {
+          "source": "relax",
+          "index": 0
+        },
+        {
+          "source": "relax",
+          "index": 1
+        },
+        {
+          "source": "relax",
+          "index": 2
+        },
+        {
+          "source": "relax",
+          "index": 3
+        }
+      ]
+    }
+  ]
+}

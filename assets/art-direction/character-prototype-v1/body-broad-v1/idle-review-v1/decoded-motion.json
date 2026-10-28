@@ -1,0 +1,92 @@
+{
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "vp9",
+        "width": 800,
+        "height": 360,
+        "nb_read_frames": "1313"
+      }
+    ],
+    "format": {
+      "duration": "43.735804"
+    }
+  },
+  "windows": [
+    {
+      "clip": "look",
+      "night": 0,
+      "startSeconds": 0.0,
+      "durationSeconds": 6.158300000071526,
+      "fps": 3.8971794163521185,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-look-day.png"
+    },
+    {
+      "clip": "stretch",
+      "night": 0,
+      "startSeconds": 6.158399999976158,
+      "durationSeconds": 4.903700000047683,
+      "fps": 4.894263515257178,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-stretch-day.png"
+    },
+    {
+      "clip": "wave",
+      "night": 0,
+      "startSeconds": 11.062100000023841,
+      "durationSeconds": 3.6502999999523165,
+      "fps": 6.574802071148539,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-wave-day.png"
+    },
+    {
+      "clip": "relax",
+      "night": 0,
+      "startSeconds": 14.712399999976158,
+      "durationSeconds": 7.157300000071525,
+      "fps": 3.3532197895519484,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-relax-day.png"
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "startSeconds": 21.869800000071525,
+      "durationSeconds": 6.155199999928475,
+      "fps": 3.899142188763791,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-look-night.png"
+    },
+    {
+      "clip": "stretch",
+      "night": 1,
+      "startSeconds": 28.025,
+      "durationSeconds": 4.903899999976158,
+      "fps": 4.894063908341664,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-stretch-night.png"
+    },
+    {
+      "clip": "wave",
+      "night": 1,
+      "startSeconds": 32.92889999997616,
+      "durationSeconds": 3.6585,
+      "fps": 6.5600656006560065,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-wave-night.png"
+    },
+    {
+      "clip": "relax",
+      "night": 1,
+      "startSeconds": 36.58739999997616,
+      "durationSeconds": 7.1582000000476835,
+      "fps": 3.352798189466643,
+      "framesRequested": 24,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-relax-night.png"
+    }
+  ],
+  "scope": "Representative decoded frames, not a physical display/frame-pacing measurement."
+}

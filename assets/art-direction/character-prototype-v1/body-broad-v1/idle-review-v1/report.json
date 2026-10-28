@@ -1,0 +1,1123 @@
+{
+  "scope": "Internal sixteen-pose idle source review and a partial gait/standing/idle provider. Native gesture timing and static biome contexts only; no public recipe, fitted parts, complete anatomical family, physical travel cadence or hardware frame-pacing acceptance.",
+  "measurements": {
+    "look": [
+      {
+        "sourceIndex": 0,
+        "sourceBounds": [
+          217,
+          95,
+          544,
+          659
+        ],
+        "sourceHead": [
+          368,
+          177
+        ],
+        "headFromGround": [
+          1.2000000000000002,
+          -193.20000000000002
+        ],
+        "frameSha256": "dfae9043b1bea233ed6af22b91127f764969c446d1b1ef703b2fbbedcca474de"
+      },
+      {
+        "sourceIndex": 1,
+        "sourceBounds": [
+          703,
+          95,
+          1031,
+          660
+        ],
+        "sourceHead": [
+          892,
+          177
+        ],
+        "headFromGround": [
+          -0.4,
+          -193.20000000000002
+        ],
+        "frameSha256": "d91179dfa950a129eed406c48f73d762d606131187bd6bb048b965a36dd17b09"
+      },
+      {
+        "sourceIndex": 2,
+        "sourceBounds": [
+          210,
+          684,
+          542,
+          1247
+        ],
+        "sourceHead": [
+          369,
+          770
+        ],
+        "headFromGround": [
+          0,
+          -186.4
+        ],
+        "frameSha256": "762c4f048fbf8575d37f9787374b96408d2f0634697b73a41ac2ad06cfa8dca9"
+      },
+      {
+        "sourceIndex": 3,
+        "sourceBounds": [
+          707,
+          684,
+          1041,
+          1247
+        ],
+        "sourceHead": [
+          894,
+          770
+        ],
+        "headFromGround": [
+          0,
+          -186.4
+        ],
+        "frameSha256": "3008f2a4e6a18db269ece8052329e55f727a72f1d7b3ffa9c9416c1b25893431"
+      }
+    ],
+    "stretch": [
+      {
+        "sourceIndex": 0,
+        "sourceBounds": [
+          205,
+          70,
+          506,
+          617
+        ],
+        "sourceHead": [
+          353,
+          151
+        ],
+        "headFromGround": [
+          0,
+          -188.825
+        ],
+        "frameSha256": "d5cda8f3179ad9b5f23a4b7aa01c4040b4cdfc997e6e181f80970a507b545f1c"
+      },
+      {
+        "sourceIndex": 1,
+        "sourceBounds": [
+          747,
+          78,
+          1062,
+          619
+        ],
+        "sourceHead": [
+          901,
+          160
+        ],
+        "headFromGround": [
+          0,
+          -185.92
+        ],
+        "frameSha256": "8f58ee26d2061107574ccdcc2ff5940f3bfa2fa7a2ed5fcf20b7f4c13e2e2a63"
+      },
+      {
+        "sourceIndex": 2,
+        "sourceBounds": [
+          237,
+          636,
+          521,
+          1223
+        ],
+        "sourceHead": [
+          371,
+          774
+        ],
+        "headFromGround": [
+          0,
+          -181.76999999999998
+        ],
+        "frameSha256": "97fdbc58516e7083ea99ee683f55dc1c4ea9322ea41c9c3a42e7bbf2d2a41873"
+      },
+      {
+        "sourceIndex": 3,
+        "sourceBounds": [
+          742,
+          681,
+          1053,
+          1224
+        ],
+        "sourceHead": [
+          895,
+          760
+        ],
+        "headFromGround": [
+          0,
+          -187.995
+        ],
+        "frameSha256": "0bd82a805fca9d562a73f5d804ab398ee47a69cd2db90f5519dfbab45e54d297"
+      }
+    ],
+    "wave": [
+      {
+        "sourceIndex": 0,
+        "sourceBounds": [
+          198,
+          55,
+          518,
+          651
+        ],
+        "sourceHead": [
+          354,
+          140
+        ],
+        "headFromGround": [
+          0,
+          -190
+        ],
+        "frameSha256": "1735a0b614774a8b5a5c7970550b9a219126f0b4ef3ef6f19047cd8e8544324c"
+      },
+      {
+        "sourceIndex": 1,
+        "sourceBounds": [
+          771,
+          56,
+          1084,
+          651
+        ],
+        "sourceHead": [
+          929,
+          140
+        ],
+        "headFromGround": [
+          0,
+          -190
+        ],
+        "frameSha256": "826f148ca7f84850e92889afd224f84cd9b918b79610f6b8b9eae8d9a7a0c052"
+      },
+      {
+        "sourceIndex": 2,
+        "sourceBounds": [
+          190,
+          672,
+          519,
+          1237
+        ],
+        "sourceHead": [
+          367,
+          765
+        ],
+        "headFromGround": [
+          0,
+          -175.18
+        ],
+        "frameSha256": "fa8c3446a2c1d4646263c71e80ed03a489e538a84cac01d7d748e6e40ac37248"
+      },
+      {
+        "sourceIndex": 3,
+        "sourceBounds": [
+          770,
+          674,
+          1081,
+          1238
+        ],
+        "sourceHead": [
+          928,
+          765
+        ],
+        "headFromGround": [
+          0,
+          -175.18
+        ],
+        "frameSha256": "947bbb174a0656336ee9ef863bc3769e780c61e46cd06b8ef9a67d43e17b271f"
+      }
+    ],
+    "wave-lower": [
+      {
+        "sourceIndex": 0,
+        "sourceBounds": [
+          205,
+          79,
+          515,
+          643
+        ],
+        "sourceHead": [
+          354,
+          190
+        ],
+        "headFromGround": [
+          0,
+          -180
+        ],
+        "frameSha256": "7f70239a2ef23c3ffdc80fd64ad672c1ac815a916bd9e5d28a1dab80d48c4b96"
+      },
+      {
+        "sourceIndex": 1,
+        "sourceBounds": [
+          761,
+          79,
+          1064,
+          643
+        ],
+        "sourceHead": [
+          929,
+          190
+        ],
+        "headFromGround": [
+          0,
+          -180
+        ],
+        "frameSha256": "c55d3012e7644e360c673665c40d87a08332915acc7701be75ca1a55b3d597ae"
+      },
+      {
+        "sourceIndex": 2,
+        "sourceBounds": [
+          189,
+          672,
+          522,
+          1236
+        ],
+        "sourceHead": [
+          367,
+          750
+        ],
+        "headFromGround": [
+          0,
+          -190.4
+        ],
+        "frameSha256": "646e5fece2a140d339975dfa75a93740d58fa8608bd76f237730e3478a2513be"
+      },
+      {
+        "sourceIndex": 3,
+        "sourceBounds": [
+          763,
+          672,
+          1080,
+          1238
+        ],
+        "sourceHead": [
+          928,
+          750
+        ],
+        "headFromGround": [
+          0,
+          -190.4
+        ],
+        "frameSha256": "ef82c176fcacfbe16c59d20d6a012d9af8809c3c1f2e300d8ea95d2d36061124"
+      }
+    ],
+    "relax": [
+      {
+        "sourceIndex": 0,
+        "sourceBounds": [
+          216,
+          82,
+          517,
+          650
+        ],
+        "sourceHead": [
+          363,
+          165
+        ],
+        "headFromGround": [
+          0,
+          -189.20000000000002
+        ],
+        "frameSha256": "56d9a00ab5bc29063b292fa3293dfbe66108cf6445091a55bd9c5aa757f8553b"
+      },
+      {
+        "sourceIndex": 1,
+        "sourceBounds": [
+          726,
+          82,
+          1045,
+          650
+        ],
+        "sourceHead": [
+          898,
+          165
+        ],
+        "headFromGround": [
+          0,
+          -189.20000000000002
+        ],
+        "frameSha256": "d33cd4a25e14fd26230c1dee88ae415ad38f884e4088edcccb16c295e6621e28"
+      },
+      {
+        "sourceIndex": 2,
+        "sourceBounds": [
+          205,
+          676,
+          520,
+          1238
+        ],
+        "sourceHead": [
+          376,
+          760
+        ],
+        "headFromGround": [
+          0,
+          -186.4
+        ],
+        "frameSha256": "0d240e52515d5f030afe90b8a4ddc855728c491953edef17ab3d1c3700627e76"
+      },
+      {
+        "sourceIndex": 3,
+        "sourceBounds": [
+          750,
+          674,
+          1052,
+          1237
+        ],
+        "sourceHead": [
+          895,
+          760
+        ],
+        "headFromGround": [
+          0,
+          -186.4
+        ],
+        "frameSha256": "8e93e61fce98cfabe2d6dd85ec68d50b9abe991329ee0d6ba6def789ddb42db1"
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "clip": "look",
+      "headGroundSpread": 6.800000000000011,
+      "standingHeadDifference": 1.5250000000000057,
+      "headGroundMean": -189.8,
+      "ownership": [
+        {
+          "source": "look",
+          "index": 0
+        },
+        {
+          "source": "look",
+          "index": 1
+        },
+        {
+          "source": "look",
+          "index": 2
+        },
+        {
+          "source": "look",
+          "index": 3
+        }
+      ],
+      "poseHashes": [
+        "dfae9043b1bea233ed6af22b91127f764969c446d1b1ef703b2fbbedcca474de",
+        "d91179dfa950a129eed406c48f73d762d606131187bd6bb048b965a36dd17b09",
+        "762c4f048fbf8575d37f9787374b96408d2f0634697b73a41ac2ad06cfa8dca9",
+        "3008f2a4e6a18db269ece8052329e55f727a72f1d7b3ffa9c9416c1b25893431"
+      ]
+    },
+    {
+      "clip": "stretch",
+      "headGroundSpread": 7.055000000000007,
+      "standingHeadDifference": 2.147500000000008,
+      "headGroundMean": -186.1275,
+      "ownership": [
+        {
+          "source": "stretch",
+          "index": 0
+        },
+        {
+          "source": "stretch",
+          "index": 1
+        },
+        {
+          "source": "stretch",
+          "index": 2
+        },
+        {
+          "source": "stretch",
+          "index": 3
+        }
+      ],
+      "poseHashes": [
+        "d5cda8f3179ad9b5f23a4b7aa01c4040b4cdfc997e6e181f80970a507b545f1c",
+        "8f58ee26d2061107574ccdcc2ff5940f3bfa2fa7a2ed5fcf20b7f4c13e2e2a63",
+        "97fdbc58516e7083ea99ee683f55dc1c4ea9322ea41c9c3a42e7bbf2d2a41873",
+        "0bd82a805fca9d562a73f5d804ab398ee47a69cd2db90f5519dfbab45e54d297"
+      ]
+    },
+    {
+      "clip": "wave",
+      "headGroundSpread": 0.4000000000000057,
+      "standingHeadDifference": 1.924999999999983,
+      "headGroundMean": -190.2,
+      "ownership": [
+        {
+          "source": "wave",
+          "index": 0
+        },
+        {
+          "source": "wave",
+          "index": 1
+        },
+        {
+          "source": "wave-lower",
+          "index": 2
+        },
+        {
+          "source": "wave-lower",
+          "index": 3
+        }
+      ],
+      "poseHashes": [
+        "1735a0b614774a8b5a5c7970550b9a219126f0b4ef3ef6f19047cd8e8544324c",
+        "826f148ca7f84850e92889afd224f84cd9b918b79610f6b8b9eae8d9a7a0c052",
+        "646e5fece2a140d339975dfa75a93740d58fa8608bd76f237730e3478a2513be",
+        "ef82c176fcacfbe16c59d20d6a012d9af8809c3c1f2e300d8ea95d2d36061124"
+      ]
+    },
+    {
+      "clip": "relax",
+      "headGroundSpread": 2.8000000000000114,
+      "standingHeadDifference": 0.4749999999999943,
+      "headGroundMean": -187.8,
+      "ownership": [
+        {
+          "source": "relax",
+          "index": 0
+        },
+        {
+          "source": "relax",
+          "index": 1
+        },
+        {
+          "source": "relax",
+          "index": 2
+        },
+        {
+          "source": "relax",
+          "index": 3
+        }
+      ],
+      "poseHashes": [
+        "56d9a00ab5bc29063b292fa3293dfbe66108cf6445091a55bd9c5aa757f8553b",
+        "d33cd4a25e14fd26230c1dee88ae415ad38f884e4088edcccb16c295e6621e28",
+        "0d240e52515d5f030afe90b8a4ddc855728c491953edef17ab3d1c3700627e76",
+        "8e93e61fce98cfabe2d6dd85ec68d50b9abe991329ee0d6ba6def789ddb42db1"
+      ]
+    }
+  ],
+  "standingHead": [
+    0,
+    -188.275
+  ],
+  "newRegistrations": {
+    "look": {
+      "schema": 1,
+      "family": "broad-body-prototype-v1",
+      "sheet": "idle",
+      "source": {
+        "sha256": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+        "width": 1254,
+        "height": 1254,
+        "columns": 2,
+        "rows": 2
+      },
+      "uniformScale": 0.4,
+      "frames": [
+        {
+          "index": 0,
+          "sourceContact": [
+            365,
+            660
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 1,
+          "sourceContact": [
+            893,
+            660
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 2,
+          "sourceContact": [
+            369,
+            1236
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 3,
+          "sourceContact": [
+            894,
+            1236
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        }
+      ]
+    },
+    "stretch": {
+      "schema": 1,
+      "family": "broad-body-prototype-v1",
+      "sheet": "idle",
+      "source": {
+        "sha256": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+        "width": 1254,
+        "height": 1254,
+        "columns": 2,
+        "rows": 2
+      },
+      "uniformScale": 0.415,
+      "frames": [
+        {
+          "index": 0,
+          "sourceContact": [
+            353,
+            606
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 1,
+          "sourceContact": [
+            901,
+            608
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 2,
+          "sourceContact": [
+            371,
+            1212
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 3,
+          "sourceContact": [
+            895,
+            1213
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        }
+      ]
+    },
+    "wave": {
+      "schema": 1,
+      "family": "broad-body-prototype-v1",
+      "sheet": "idle",
+      "source": {
+        "sha256": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+        "width": 1254,
+        "height": 1254,
+        "columns": 2,
+        "rows": 2
+      },
+      "uniformScale": 0.38,
+      "frames": [
+        {
+          "index": 0,
+          "sourceContact": [
+            354,
+            640
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 1,
+          "sourceContact": [
+            929,
+            640
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 2,
+          "sourceContact": [
+            367,
+            1226
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 3,
+          "sourceContact": [
+            928,
+            1226
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        }
+      ]
+    },
+    "wave-lower": {
+      "schema": 1,
+      "family": "broad-body-prototype-v1",
+      "sheet": "idle",
+      "source": {
+        "sha256": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+        "width": 1254,
+        "height": 1254,
+        "columns": 2,
+        "rows": 2
+      },
+      "uniformScale": 0.4,
+      "frames": [
+        {
+          "index": 0,
+          "sourceContact": [
+            354,
+            640
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 1,
+          "sourceContact": [
+            929,
+            640
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 2,
+          "sourceContact": [
+            367,
+            1226
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 3,
+          "sourceContact": [
+            928,
+            1226
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        }
+      ]
+    },
+    "relax": {
+      "schema": 1,
+      "family": "broad-body-prototype-v1",
+      "sheet": "idle",
+      "source": {
+        "sha256": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93",
+        "width": 1254,
+        "height": 1254,
+        "columns": 2,
+        "rows": 2
+      },
+      "uniformScale": 0.4,
+      "frames": [
+        {
+          "index": 0,
+          "sourceContact": [
+            363,
+            638
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 1,
+          "sourceContact": [
+            898,
+            638
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 2,
+          "sourceContact": [
+            376,
+            1226
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        },
+        {
+          "index": 3,
+          "sourceContact": [
+            895,
+            1226
+          ],
+          "nativeContact": [
+            128,
+            243
+          ]
+        }
+      ]
+    }
+  },
+  "unavailablePoseRefusals": 12,
+  "recordings": [
+    {
+      "clip": "look",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 0,
+      "elapsedMs": 6158.300000071526,
+      "cycleSeconds": 5,
+      "renderCalls": 741,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "look",
+          "seconds": 0.5083000000715255
+        },
+        {
+          "mode": "breathe",
+          "seconds": 5.6585
+        }
+      ],
+      "seenPoses": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "expectedPoses": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "clip": "stretch",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 6158.399999976158,
+      "elapsedMs": 4903.700000047684,
+      "cycleSeconds": 3.75,
+      "renderCalls": 590,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "stretch",
+          "seconds": 0.5075
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.403700000047683
+        }
+      ],
+      "seenPoses": [
+        4,
+        5,
+        6
+      ],
+      "expectedPoses": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "clip": "wave",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 11062.100000023842,
+      "elapsedMs": 3650.2999999523163,
+      "cycleSeconds": 2.5,
+      "renderCalls": 438,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "wave",
+          "seconds": 0.504
+        },
+        {
+          "mode": "breathe",
+          "seconds": 3.150100000023842
+        }
+      ],
+      "seenPoses": [
+        8,
+        10,
+        11
+      ],
+      "expectedPoses": [
+        8,
+        10,
+        11
+      ]
+    },
+    {
+      "clip": "relax",
+      "night": 0,
+      "facing": 1,
+      "offsetMs": 14712.399999976158,
+      "elapsedMs": 7157.300000071526,
+      "cycleSeconds": 6,
+      "renderCalls": 860,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "relax",
+          "seconds": 0.5082000000476837
+        },
+        {
+          "mode": "breathe",
+          "seconds": 6.6582000000476835
+        }
+      ],
+      "seenPoses": [
+        12,
+        13,
+        14
+      ],
+      "expectedPoses": [
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "clip": "look",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 21869.800000071526,
+      "elapsedMs": 6155.199999928474,
+      "cycleSeconds": 5,
+      "renderCalls": 737,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "look",
+          "seconds": 0.5006999999284745
+        },
+        {
+          "mode": "breathe",
+          "seconds": 5.655099999904633
+        }
+      ],
+      "seenPoses": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "expectedPoses": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "clip": "stretch",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 28025,
+      "elapsedMs": 4903.899999976158,
+      "cycleSeconds": 3.75,
+      "renderCalls": 587,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "stretch",
+          "seconds": 0.5082000000476837
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.403200000047684
+        }
+      ],
+      "seenPoses": [
+        4,
+        5,
+        6
+      ],
+      "expectedPoses": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "clip": "wave",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 32928.89999997616,
+      "elapsedMs": 3658.5,
+      "cycleSeconds": 2.5,
+      "renderCalls": 437,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "wave",
+          "seconds": 0.5
+        },
+        {
+          "mode": "breathe",
+          "seconds": 3.150100000023842
+        }
+      ],
+      "seenPoses": [
+        8,
+        10,
+        11
+      ],
+      "expectedPoses": [
+        8,
+        10,
+        11
+      ]
+    },
+    {
+      "clip": "relax",
+      "night": 1,
+      "facing": -1,
+      "offsetMs": 36587.39999997616,
+      "elapsedMs": 7158.200000047684,
+      "cycleSeconds": 6,
+      "renderCalls": 859,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "relax",
+          "seconds": 0.5
+        },
+        {
+          "mode": "breathe",
+          "seconds": 6.658400000095368
+        }
+      ],
+      "seenPoses": [
+        12,
+        13,
+        14
+      ],
+      "expectedPoses": [
+        12,
+        13,
+        14
+      ]
+    }
+  ],
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/mata-atlantica-day.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/mata-atlantica-night.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/cerrado-day.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/cerrado-night.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/caatinga-day.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/caatinga-night.png"
+    }
+  ],
+  "videoSha256": "bfd24f0563ba02f4d25c677e58a12b30443633b5280a37e57db1736015b0e908",
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-calibration-v1.json": "84aedad83bba9c8095b0f498c0d9cbae081fcdc2f731a28e8fec4b39be543a89",
+    "scripts/review-broad-idle.mjs": "5f6bd1a52218b8eed78569240d1284d4dd587c55887c965b18d74dae665055e1",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-registration-v3-contacts.json": "05870caff3009fd59e5ca25999e2c23ec1c186b674655c57bccfd76542d7239c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+    "web/art/characters/prototype-v1/body-neutral-base.png": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v3.png": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-stretch-candidate-v1.png": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v2.png": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v3.png": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-relax-candidate-v2.png": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93"
+  }
+}

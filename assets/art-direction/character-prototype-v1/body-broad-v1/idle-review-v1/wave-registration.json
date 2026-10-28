@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "family": "broad-body-prototype-v1",
+  "sheet": "idle",
+  "source": {
+    "sha256": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+    "width": 1254,
+    "height": 1254,
+    "columns": 2,
+    "rows": 2
+  },
+  "uniformScale": 0.38,
+  "frames": [
+    {
+      "index": 0,
+      "sourceContact": [
+        354,
+        640
+      ],
+      "nativeContact": [
+        128,
+        243
+      ]
+    },
+    {
+      "index": 1,
+      "sourceContact": [
+        929,
+        640
+      ],
+      "nativeContact": [
+        128,
+        243
+      ]
+    },
+    {
+      "index": 2,
+      "sourceContact": [
+        367,
+        1226
+      ],
+      "nativeContact": [
+        128,
+        243
+      ]
+    },
+    {
+      "index": 3,
+      "sourceContact": [
+        928,
+        1226
+      ],
+      "nativeContact": [
+        128,
+        243
+      ]
+    }
+  ]
+}

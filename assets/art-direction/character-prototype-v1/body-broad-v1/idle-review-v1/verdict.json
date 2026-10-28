@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "status": "Selected idle poses accepted for further internal family authoring only; no public integration",
+  "why": "The additional body needs its own consistently proportioned gestures and source ownership before clothing and accessories can be fitted.",
+  "sourceSelection": {
+    "look": {
+      "source": "idle-look-candidate-v3.png",
+      "indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "scale": 0.4
+    },
+    "stretch": {
+      "source": "idle-stretch-candidate-v1.png",
+      "indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "scale": 0.415
+    },
+    "wave": {
+      "source": "idle-wave-candidate-v2.png",
+      "indices": [
+        0,
+        1
+      ],
+      "scale": 0.38
+    },
+    "wave-lower": {
+      "source": "idle-wave-candidate-v3.png",
+      "indices": [
+        2,
+        3
+      ],
+      "scale": 0.4
+    },
+    "relax": {
+      "source": "idle-relax-candidate-v2.png",
+      "indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "scale": 0.4
+    }
+  },
+  "visualReview": {
+    "static": "All sixteen selected poses, comparison board and six biome day/night boards inspected. Raised hands and boots fit; selected body and head volumes remain coherent against standing and walking references. Unselected wave paintings are excluded.",
+    "motion": "All eight decoded 24-frame filmstrips inspected: look, stretch, wave and relax in normal/day and mirrored/night. Native breathe to gesture to breathe transitions retain ground anchors and body volume. Whole painted key-pose switches remain visible.",
+    "scope": "All sixteen poses statically reviewed. Native sequences sample look 0-3, stretch 4-6, wave 8/10/11 and relax 12-14. No claim that unused slots 7,9,15 appear in native sequences.",
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ]
+  },
+  "limitations": [
+    "Internal partial provider only",
+    "No public appearance selection",
+    "No new in-between anatomy or translating travel cadence",
+    "Work and activity sheets, genuine sleep, fitted parts and portraits unfinished",
+    "Broader builder performance, lifecycle and independent player gates remain unfinished"
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-calibration-v1.json": "84aedad83bba9c8095b0f498c0d9cbae081fcdc2f731a28e8fec4b39be543a89",
+    "scripts/review-broad-idle.mjs": "5f6bd1a52218b8eed78569240d1284d4dd587c55887c965b18d74dae665055e1",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-registration-v3-contacts.json": "05870caff3009fd59e5ca25999e2c23ec1c186b674655c57bccfd76542d7239c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+    "web/art/characters/prototype-v1/body-neutral-base.png": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v3.png": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-stretch-candidate-v1.png": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v2.png": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-wave-candidate-v3.png": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-relax-candidate-v2.png": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93"
+  },
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/caatinga-day.png": "8a5dcff7b663561a7ee144b3e5f407389593d523a024945dcbc9c82175572e33",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/caatinga-night.png": "0668ba431faba8a2117d2786a4966cb827f9a4888644f1fd4d49303f2e8ff015",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/cerrado-day.png": "84972858cb4c9f3844a70bd2780e9443ef58c87e2248144d84299e9b46049ec9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/cerrado-night.png": "b37cd4eb6fa1b15b5b6db51fce3ae191db4395c771a0b8c8441464172c19cfa5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/comparison.png": "59d6b0b453cf98c2fa9f304e43e3805102cc53338d517034a5c9d686045e5183",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/decoded-motion.json": "bf0b872ebedcb16acd240faba27f6cd842443c9d14461381922f934f4099bf28",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/look-registration.json": "04ddf62fad63d5dbd3b557bcace50b244952b4dbef647a394e0fa51853c1f833",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/mata-atlantica-day.png": "82ecb17ef164d0f928958ff368f96afade3f653f4744deef7bfcda24dd54542d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/mata-atlantica-night.png": "029db3e5b42d17598d97bd647b57d763d237f1d3c827dfddd3b617021d0f2386",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-look-day.png": "16f00cdd205c0a1f95fc66a08f10840b8fe2ad8893518a1658e009c3f3d25588",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-look-night.png": "aeeee07449c6ed2ba6237b7bb983099660e85960b1c045724683090700bf2725",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-relax-day.png": "971aa80e3f73b15679e52b8004cfe92fe7e94b27ab18a9768d5bf63669002ef4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-relax-night.png": "97283a88f2603e5197886dfa68ec75f829bf1de352103581fd94b4c6740ea6d5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-stretch-day.png": "df6402bce254633e60d19911ee7192bcb8321dc40b5f488f17ec3154ff1d085b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-stretch-night.png": "37743682e0865da0057ee739817b165542ac6a4d2bb9990afd0a6e54beb4ffd0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-wave-day.png": "546e925240d7f8cc9698c7a17adb10a4173a95e1c9e547c9cd74d3b7bc1ce84b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion-wave-night.png": "0a476c43854ca9efa3f363c02acbbde728a746e49ae00326b71a7a30067aaedb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/motion.webm": "bfd24f0563ba02f4d25c677e58a12b30443633b5280a37e57db1736015b0e908",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/relax-registration.json": "5893256a3702755f6db38d1a312a3014096fcfbb903596981473123f42654eda",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/report.json": "39596684a2cf3cad9a6566403c6a1dcf453231cd97c039874fffba35c623ff94",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/stretch-registration.json": "d9adee6c1eb142556242413c90d4288aff81af7cd47ee58aa3e5cce19e65088b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/wave-lower-registration.json": "0822d4196aaef98b4aef9894f6f260ce8b513b8bea845530569714ff435e9c71",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/idle-review-v1/wave-registration.json": "a506615226950f83ca261275f59fd3e931e9a1da70a7faa6a1599e01f98076ad"
+  }
+}
