@@ -1,0 +1,18 @@
+{
+  "status": "Internal static composed equipment inspected; motion, lighting and public integration pending",
+  "poses": 8,
+  "refusals": 4,
+  "borrowedFramesUnchanged": true,
+  "framingUnchanged": true,
+  "accessoryMarginsUnchanged": true,
+  "opaqueColoredHandPixelsUnchanged": true,
+  "scratchReleased": true,
+  "inputs": {
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "scripts/verify-broad-equipment-appearance.mjs": "f3ba0eacd3a26e0a13c8318b99d02b347e86b3820cbb5841f56d79531af701e5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/working-hand-masks-draft-v1.json": "fd7ae8ee8e921dd437ef9943c9c88523cbc70620cbb15243c65b3ef63f5f8f35",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/working-equipment-atlas-draft-v1.json": "0cf2dae6686e85452d1c388ff51488ce865e1e4dcf540d37cf3ff051dd8ef8f5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  }
+}

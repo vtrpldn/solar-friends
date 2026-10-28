@@ -4,7 +4,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {createHash} from 'node:crypto';
-const subject=process.argv.includes('--feed')?'feeding':process.argv.includes('--tend')?'tending':process.argv.includes('--water')?'watering':'cooking';
+const subject=process.argv.includes('--work')?'working':process.argv.includes('--feed')?'feeding':process.argv.includes('--tend')?'tending':process.argv.includes('--water')?'watering':'cooking';
 const root='assets/art-direction/character-prototype-v1/body-broad-v1',run=promisify(execFile),hash=b=>createHash('sha256').update(b).digest('hex'),movie=`${root}/${subject}-composed-motion-v1.webm`,recording=JSON.parse(await readFile(`${root}/${subject}-composed-motion-v1.json`));
 assert.equal(hash(await readFile(movie)),recording.videoSha256);
 const metadata=JSON.parse((await run('ffprobe',['-v','error','-count_frames','-show_streams','-show_format','-of','json',movie])).stdout);

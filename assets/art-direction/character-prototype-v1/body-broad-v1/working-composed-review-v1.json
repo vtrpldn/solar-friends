@@ -1,0 +1,21 @@
+{
+  "status": "Internal work fit reviewed; transitions and public activation incomplete",
+  "why": "Complete work-equipment coverage for the broader resident family",
+  "definition": "composed-family-draft-v4.json",
+  "videoSha256": "185ed26ce47590ac5c99a976231da9f2b0515e23cb5ee5ba94c319ac888c4601",
+  "decodedReportSha256": "dd613483e193c158f2444f73bb276eb28d3a0627a76bdf866bab9ab30132ac03",
+  "decodedFrames": 260,
+  "durationSeconds": 10.107806,
+  "boardsInspected": {
+    "working-composed-loop-decoded-v1.png": "c2a5fbf2cbd8effb8452b9ccbe783382f931bbbe0145f480f69b850fc5427bbe",
+    "working-composed-enter-decoded-v1.png": "9eb2472ac89b73469d331ec01773176d08ede472d901c1d3c84e180b119f5403",
+    "working-composed-leave-decoded-v1.png": "145a9899a832c224847bd8f5fd699497b932cddaab086b09a614deb64c0e0c3a"
+  },
+  "staticBoardInspected": "working-composed-appearance-v1.png",
+  "findings": [
+    "Four static mallet poses inspected on both hairstyles/facings. Existing source art uses one shared0.18 scale and authored native translations.",
+    "All three six-sample decoded boards inspected from actual integrated V4 provider: native work, day/mirrored night,230px/48px. Tool follows lowered, raised, overhead and striking hand positions.",
+    "Whole painted keyframes still jump; pickup/put-down intermediates remain unfinished. Not physical-display pacing or every-frame art acceptance.",
+    "Public creator/save/share integration, remaining customization parts, biome art/performance and every original release gate remain open."
+  ]
+}
