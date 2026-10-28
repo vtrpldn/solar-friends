@@ -1,0 +1,38 @@
+{
+  "status": "Internal complete curly ownership draft; public acceptance pending",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-base-v2.png",
+      "sha256": "b66e2edccb9a15dcc3c03893a6da0151c93760275a4321f5b40d84485e0ce98f"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-idle-v2.png",
+      "sha256": "99cceac1a34dd1d27191f649919b84ceb0a0c48b43e29bb34aeb52525942d703"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-activities-v2.png",
+      "sha256": "ba3b5465ffe63287cc552df235c78d85f01a3277882b19767a9b195b48744916"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 0,
+  "inputs": {
+    "web/character-hair-family.js": "2e28f017e55920ccf1cb4d12bc3af51ff3846d02b4018363bff68c68612ac7f7",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "scripts/verify-broad-hair-family.mjs": "67d68557b24455ef55af398b6a7b07ffcbe665d804a61c1320ec1a6a93b7706c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-draft-v2.json": "c5c4cd39a5276c12c23bedb6fce106307e82044c96e0a7a95359935fc89ec58b"
+  },
+  "visualReview": {
+    "inspected": [
+      "hair-family-curls-idle-v2.png",
+      "hair-family-curls-activities-v2.png"
+    ],
+    "finding": "V1 reuses exact standing/lying curls but leaves rear scalp exposed in looking poses. V2 uses generated curly angle caps for looking/cooking and covers the reviewed gap at common uniform0.25 atlas scale.",
+    "scope": "Static right-facing fitting only, not complete motion/colors/hat or public appearance acceptance."
+  }
+}

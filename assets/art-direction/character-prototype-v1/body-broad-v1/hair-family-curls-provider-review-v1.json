@@ -1,0 +1,39 @@
+{
+  "status": "Internal complete curly ownership draft; public acceptance pending",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-base-v1.png",
+      "sha256": "b66e2edccb9a15dcc3c03893a6da0151c93760275a4321f5b40d84485e0ce98f"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-idle-v1.png",
+      "sha256": "084e1dbe636ef68a0a2c466bede45c66c9fc823d96ba574086dd2661874af622"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-activities-v1.png",
+      "sha256": "3e224399a7311d553d7be4652da555e33e807fcd31a5702e6345b70ebdf0b793"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 0,
+  "inputs": {
+    "web/character-hair-family.js": "2e28f017e55920ccf1cb4d12bc3af51ff3846d02b4018363bff68c68612ac7f7",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "scripts/verify-broad-hair-family.mjs": "72b12b124c83c9a25bb773d3e436db22befd4194f02d37c8e73c3793b2db2927",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-draft-v1.json": "f11dc738c8f3c495075b3fe77cd631551e638490327a3021f4b03914af5d2b5e"
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-base-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-idle-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-curls-activities-v1.png"
+    ],
+    "finding": "V1 reuses exact standing/lying curls but leaves rear scalp exposed in looking poses. V2 uses generated curly angle caps for looking/cooking and covers the reviewed gap at common uniform0.25 atlas scale.",
+    "scope": "Static right-facing fitting only, not complete motion/colors/hat or public appearance acceptance."
+  }
+}

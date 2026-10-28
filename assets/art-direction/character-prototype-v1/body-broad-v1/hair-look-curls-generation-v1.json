@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Fit short curls to the broader upward-looking head angles without scalp gaps",
+  "prompt": "Edit image1, a transparent four-cap hair-only sprite atlas for Solar Friends. Change ONLY the hairstyle from swept side-part locks to short tight rounded CHESTNUT CURLS matching image2's painted curls. Image1 is the exact layout and fitted head-shape target; image2 is texture/style reference only, never its placement. Preserve image1's square canvas, transparency, four cap centers, individual cap sizes, ear cutouts, forehead openings and all four RIGHT-facing upward-looking head angles. Keep the same sparse spacing; do not enlarge or recenter the caps. Replace the long swept locks and pointed fringe with grouped small soft rounded curls, warm upper-left highlights and painted brown shadows. Hair should remain short and close to the fitted scalp, not an oversized afro or wig. Keep rear scalp coverage and leave ear and face openings transparent. Output only four separate hair silhouettes: no skin, faces, eyes, ears, bodies, text, grid, hats, cast shadows or background. Preserve true alpha and transparent gaps. Do not mirror any cap.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-look-sidepart-candidate-v2.png",
+      "role": "Edit target, exact four-cap arrangement and fitted head shapes"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png",
+      "role": "Short curl paint style and chestnut color reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-look-curls-candidate-v1.png",
+  "status": "Internal static fitting candidate; motion, combinations and public integration pending",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-look-sidepart-candidate-v2.png": "afb3a6f26a4e72c81347f6e9bdfe7cb6c11e39ab2fd1926f4c1e72fafa655edf",
+    "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-look-curls-candidate-v1.png": "d2aa21547ea0772e53bc314aba5b9c37bd6105ea367b977880d1a9f34ab77c60"
+  },
+  "visualReview": "Source inspected; four right-facing curly caps retain sparse target arrangement. Changed idle/activity provider sheets inspected after uniform atlas normalization."
+}
