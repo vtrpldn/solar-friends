@@ -1,0 +1,136 @@
+{
+  "completed": true,
+  "browser": "151.0.7922.34",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "results": [
+    "checkFoodControls",
+    "checkKitchenControls",
+    "checkWorkshopPowerControls",
+    "checkElectricalControls",
+    "checkBatteryControls",
+    "checkGatheringControls",
+    "checkFreshnessControls",
+    "checkProcessControls",
+    "checkOrganicControls"
+  ],
+  "screenshots": [
+    {
+      "label": "Cooked portions and delivered ingredients remain in the kitchen pantry",
+      "file": "food-pantry.png"
+    },
+    {
+      "label": "Town food purchases use the real trade controls",
+      "file": "food-trade.png"
+    },
+    {
+      "label": "Kitchen pot keeps its labour while the station is paused",
+      "file": "kitchen-paused.png"
+    },
+    {
+      "label": "A cancelled pot returns its ingredients and meal reserves stay bounded",
+      "file": "kitchen-recovery.png"
+    },
+    {
+      "label": "Resumed kitchen work finishes the same pot at its selected pantry",
+      "file": "kitchen-finished.png"
+    },
+    {
+      "label": "Interrupted powered tools keep their committed batch",
+      "file": "workshop-power-outage.png"
+    },
+    {
+      "label": "Hand tools finish the same batch without more electrical consumption",
+      "file": "workshop-power-fallback.png"
+    },
+    {
+      "label": "The Power panel previews a grid-aligned resident-installed cable",
+      "file": "electrical-planner.png"
+    },
+    {
+      "label": "Commissioned cable, local charge, pause and resident dismantling controls",
+      "file": "electrical-installed.png"
+    },
+    {
+      "label": "Battery destination preview with visible resident-work guidance",
+      "file": "battery-move-preview.png"
+    },
+    {
+      "label": "Residents install the same charged bank at its reserved plot",
+      "file": "battery-installed.png"
+    },
+    {
+      "label": "Careful salvage returns one paid unit after attended work",
+      "file": "battery-salvaged.png"
+    },
+    {
+      "label": "A recovered bank is shown with its actual carrier",
+      "file": "battery-carried.png"
+    },
+    {
+      "label": "Recovered equipment uses the shared night shading without a floor platform",
+      "file": "battery-night.png"
+    },
+    {
+      "label": "Planning reserves five meals while neighbours prepare delivery",
+      "file": "gathering-planned.png"
+    },
+    {
+      "label": "Cancelling carried gathering food leaves its portions recoverable",
+      "file": "gathering-recovery.png"
+    },
+    {
+      "label": "Delivered portions are shared once and friendships grow through attendance",
+      "file": "gathering-complete.png"
+    },
+    {
+      "label": "Freshness dates and portions to use soon are visible in Supplies",
+      "file": "freshness-use-soon.png"
+    },
+    {
+      "label": "Spoilage removes real portions and reports the loss",
+      "file": "freshness-spoiled.png"
+    },
+    {
+      "label": "Interrupted pots recover only fresh inputs and allow replacement",
+      "file": "freshness-pot.png"
+    },
+    {
+      "label": "Two digesters retain independent batches while one is paused",
+      "file": "processes-paused.png"
+    },
+    {
+      "label": "Recovering a sealed batch returns its inputs once and pauses that site",
+      "file": "processes-recovered.png"
+    },
+    {
+      "label": "Independent sealed digestate stores keep their full curing period",
+      "file": "processes-curing.png"
+    },
+    {
+      "label": "Scraps and compost use local stores and resident cargo",
+      "file": "organic-supplies.png"
+    },
+    {
+      "label": "Town sells mature compost while kitchen scraps stay in the local loop",
+      "file": "organic-trade.png"
+    }
+  ],
+  "inputs": {
+    "scripts/verify-supplies-controls.mjs": "23bf4b33c709336a10068a3d7d90bd8752a49d93d0a65cc058a7db8712bb0267",
+    "scripts/food-browser-checks.mjs": "613c1d030d86851d6ae41482b8d054e138758509a594167772e0b103fdf25777",
+    "scripts/kitchen-browser-checks.mjs": "91a313c2a3d67f74100e934528003d824d7f04ad611f82c2d8dbfad536b1cd07",
+    "scripts/electricity-browser-checks.mjs": "6e6ecce0c355ee8a52213b8780b9ab8f18fd601538a7b4c344056cd062ab8559",
+    "scripts/battery-browser-checks.mjs": "f539a28f0d7ed05131be2f46c8cdf04011f8df6e4306b20e1fc31778648ca320",
+    "scripts/gathering-browser-checks.mjs": "797570f9a3f2cd34d5579ffe6e61fdaac8a1dc6e11b2cd064b0046d2214fd713",
+    "scripts/freshness-browser-checks.mjs": "716c550a652e7f2d55bdcd12b8da8713b78d5dfd61fb1719cd91f857b01bbee4",
+    "scripts/process-browser-checks.mjs": "ea355ceaa975d2ea8957e2a675a62998892a2f7d7c68629bcc0c0e7b83b7253f",
+    "scripts/organics-browser-checks.mjs": "bc15009b4266824e728bbd47123c88551c5cded0934691d147fc731b69ad3ff7",
+    "web/main.js": "2ae329164e64d5f8a9cdce0caae1adbe6ba7f4953ae6fc538b377a39789a26f0",
+    "web/materials.js": "cfcdb63ea0359772ca620ef67d84151b23e248955061be6ffd09fbce71d25e17",
+    "web/pkg/solar_friends_bg.wasm": "a8a2bfd270a9307a24da81da8b278517a3881b34033112af1a0ea3afafe4a59d"
+  },
+  "scope": "Actual desktop food, kitchen, electrical, battery, gathering, freshness, passive-process and organic controls with protected Story saves. This focused group does not replace the complete browser journey or builder release gates."
+}

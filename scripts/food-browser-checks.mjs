@@ -1,13 +1,16 @@
 import assert from 'node:assert/strict';
+import {MATERIAL_KEYS} from '../web/materials.js';
 
 export async function checkFoodControls({page,saved,capture}){
-  await page.locator('#dev-button').click();
+  if(!await page.locator('#dev-dialog').isVisible())await page.locator('#dev-button').click();
   await page.locator('#dev-import-file').setInputFiles('artifacts/food/cooked.json');
   await page.waitForFunction(()=>{const v=window.solarDev.snapshot().village;return v.buildings.length===1&&v.buildings[0].kind==='kitchen'&&v.meals===5;});
   await page.locator('#dev-close').click();
   await page.locator('[data-hud-resource="materials"]').click();
   if(!await page.locator('#material-inventory').isVisible())await page.getByText('Stored supplies',{exact:true}).click();
-  assert.equal(await page.locator('.material-slot').count(),29);
+  const materials=await page.evaluate(()=>window.solarDev.snapshot().environment.economy.materials);
+  assert.deepEqual(materials.map(item=>item.key),MATERIAL_KEYS,'The inventory uses the current native material catalog');
+  assert.deepEqual(await page.locator('.material-slot').evaluateAll(slots=>slots.map(slot=>Number(slot.dataset.item))),materials.map(item=>item.id),'Every native material has exactly one correctly ordered storage slot');
   assert((await page.locator('.material-slot[data-item="17"]').textContent()).includes('5 free'));
   const location=page.locator('.storage-location').filter({hasText:'Kitchen pantry 1'});
   assert((await location.textContent()).includes('3 ingredients · 5 prepared meals'));
