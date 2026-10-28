@@ -21,3 +21,15 @@ const allPinned=createAppearanceCache({maxEntries:1,isPinned:()=>true,compose:ke
 assert.throws(()=>createAppearanceCache({compose:()=>{},isPinned:true}),/bounded/);
 const badRetention=createAppearanceCache({maxEntries:1,compose:key=>key,isPinned:()=>{throw Error('retention failed');}});await badRetention.get('first','first');await assert.rejects(badRetention.get('second','second'),/retention failed/);assert.equal(badRetention.info().pending,0);assert.equal(badRetention.info().active,0);assert.equal(badRetention.info().entries,1);
 console.log('PASS: shared pending work, bounded active/queued compositions, explicit overload, FIFO admission, LRU/peek reuse, active-cast retention, clear generations, failure retry and invalid limit refusal.');
+
+const closingJobs=[],closingCalls=[];const terminal=createAppearanceCache({maxConcurrent:2,compose:input=>{closingCalls.push(input);return new Promise((resolve,reject)=>closingJobs.push({resolve,reject}));}});
+const first=terminal.get('first',1),second=terminal.get('second',2),waiting=terminal.get('waiting',3);await flush();
+const rejections=[assert.rejects(first,/released/),assert.rejects(second,/released/),assert.rejects(waiting,/released/)];
+const closing=terminal.dispose();assert.equal(closing,terminal.dispose());await Promise.all(rejections);assert.deepEqual(closingCalls,[1,2]);assert.equal(terminal.info().queued,0);assert.equal(terminal.info().active,2);
+await assert.rejects(terminal.get('new',4),/released/);assert.throws(()=>terminal.install([['new',{}]]),/released/);
+let finished=false;closing.then(()=>{finished=true;});await flush();assert.equal(finished,false);
+closingJobs[0].resolve({late:true});await flush();assert.equal(terminal.info().entries,0);assert.equal(finished,false);closingJobs[1].reject(Error('late failure'));await closing;assert.equal(terminal.info().active,0);assert.equal(terminal.info().pending,0);assert.equal(terminal.peek('first'),undefined);assert.equal(terminal.info().closed,true);
+console.log('PASS: terminal disposal rejects queued/active callers, drains active work, blocks new work/install and prevents late cache resurrection.');
+
+const installs=createAppearanceCache({maxEntries:1,compose:key=>({key})});const original=await installs.get('original','original');const firstUndo=installs.install([['first',{key:'first'}]]),secondUndo=installs.install([['second',{key:'second'}]]);assert.equal(firstUndo(),false);assert.equal(secondUndo(),true);assert.equal(installs.peek('first').key,'first');assert.equal(secondUndo(),false);const clearedUndo=installs.install([['third',{key:'third'}]]);installs.clear();assert.equal(clearedUndo(),false);assert.equal(installs.info().entries,0);const closedUndo=installs.install([['fourth',original]]);await installs.dispose();assert.equal(closedUndo(),false);assert.equal(installs.peek('fourth'),undefined);
+console.log('PASS: superseded, cleared and closed installation tokens cannot restore old entries; the current rollback remains exact and once-only.');
