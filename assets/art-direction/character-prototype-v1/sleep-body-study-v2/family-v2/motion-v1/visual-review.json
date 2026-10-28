@@ -1,0 +1,22 @@
+{
+  "status": "Internal discrete-pose coherence reviewed; continuous lowering/rising not implemented",
+  "decodedSha256": "f9b5a7d87f5c29d480c837ca34a88a3297e4f2e3df98c4587dda59f46325e5c4",
+  "inspected": [
+    "overview.png",
+    "day-sleep-transition.png",
+    "day-breathe-transition.png",
+    "night-sleep-transition.png",
+    "night-breathe-transition.png"
+  ],
+  "findings": [
+    "The hat changes with the full body pose; no floating hat remains during sleep.",
+    "Facial hair persists and both hair/outfit combinations retain complete anatomy.",
+    "The reclining shadow switches with its pose and remains stable while asleep, in both facings.",
+    "The renderer makes a hard key-pose switch after its activity handover. There are no authored lowering or rising intermediate frames."
+  ],
+  "limits": [
+    "This is not acceptance of continuous physically natural get-down/get-up motion.",
+    "No actual village sleep/housing scheduling or physical display pacing is proven.",
+    "Public versioned bundle, resident creator, save/import and broader character range remain open."
+  ]
+}

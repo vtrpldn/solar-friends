@@ -2841,3 +2841,14 @@ The fresh `story-all-paths.mjs` replay also passed all thirteen chapters with re
 **Why:** source-level correctness does not prove that a customized resident belongs on each biome's ground, and obsolete earned checkpoints can prevent otherwise valid browser checks from running. Recorded motion, public versioned resident integration, remaining fixture refresh/browser checks and every other unfinished builder requirement remain in scope.
 
 Cultivation and planting fixture refreshes also pass on the current engine: real gardening, soil-dependent yield/maturity, actual compost consumption, persistent soil nutrients, exact saves and matching shade/solar preview; stock/attendance-gated first planting, separate timber/bamboo inputs, real town pickup and hauling, cancelled cargo recovery and delivered seedling use. These refresh the browser prerequisites without changing saved progress or inventory by hand. Full browser acceptance still awaits the other stale fixture families.
+
+
+### Encoded and decoded sleep transition review
+
+`review-sleep-motion.mjs` records the real `advanceResidentAnimation` path and complete internal appearance providers through awake/sleep/awake changes. Both hairstyles and both outfits are shown in daylight and mirrored unlit night. The 12-second recording decodes to 360 frames. `decode-sleep-motion.mjs` independently verifies the recording hash/dimensions/duration and produces a full one-second overview plus four 20fps transition windows. All five boards were inspected. Exact movie, input, decoder and board identities are recorded under `sleep-body-study-v2/family-v2/motion-v1`.
+
+The hat switches with the body pose, the beard persists, garment/hair layers stay intact and the reclining shadow remains stable. The visible change is deliberately recorded as a hard key-pose switch: there is no authored lowering/rising sequence. This review establishes discrete-pose/accessory coherence; it does not claim smooth or physically natural get-down/get-up motion, autonomous village sleep, physical display pacing or public creator/save/import integration. The library remains internal.
+
+`verify-living-land.mjs` also passes and refreshes its current browser fixtures: visible seeded forest and real clearing shade, saved road/extraction disturbance, fifteen restrained soil patches, resident restoration, exact checkpoints, read-only appearance and banana-canopy solar exposure.
+
+**Why:** a still image cannot expose a detached hat, unstable contact or activity handover. The decoded movie makes the remaining hard-switch limitation explicit before public integration. All other unfinished builder requirements remain open.
