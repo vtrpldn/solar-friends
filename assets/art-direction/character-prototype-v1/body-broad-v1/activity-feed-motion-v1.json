@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "scope": "Partial internal provider; native mode/pose selection and ground alignment recording only. No fitted equipment, complete anatomical family, public integration or physical frame pacing claim.",
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0,
+      "elapsedMs": 7803.399999976158,
+      "cycleSeconds": 3,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "feed",
+          "seconds": 0.8033999999761582
+        },
+        {
+          "mode": "breathe",
+          "seconds": 6.803200000047684
+        }
+      ],
+      "seen": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "renderCalls": 938
+    },
+    {
+      "night": 1,
+      "offsetMs": 7803.5,
+      "elapsedMs": 7803.899999976158,
+      "cycleSeconds": 3,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "feed",
+          "seconds": 0.808
+        },
+        {
+          "mode": "breathe",
+          "seconds": 6.803700000047684
+        }
+      ],
+      "seen": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "renderCalls": 937
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-candidate-v1.png": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/activity-feed-registration-v1.json": "7deeee9e1008ea8fb69e5b4880e8c30c9a18ce7fba37e7e4e021974b8360cd41",
+    "scripts/review-broad-activity-motion.mjs": "7af9a7965ce2ecdf554bc6125668de65325f89ff4be950ffeb4085f9aeaf77af",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
+  },
+  "videoSha256": "10684a16344911e6912207847bc5ee82ab49b7565de6035580184e0a5a8605d0",
+  "errors": []
+}
