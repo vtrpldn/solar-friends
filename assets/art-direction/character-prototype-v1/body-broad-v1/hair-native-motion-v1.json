@@ -1,0 +1,102 @@
+{
+  "status": "Decoded sampled registered hair motion reviewed; scope limited to recorded poses",
+  "modes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "walk",
+      "seconds": 0.804
+    },
+    {
+      "mode": "cook",
+      "seconds": 2.404
+    },
+    {
+      "mode": "water",
+      "seconds": 4.404100000023842
+    },
+    {
+      "mode": "tend",
+      "seconds": 6.404199999928474
+    },
+    {
+      "mode": "feed",
+      "seconds": 8.404100000023842
+    },
+    {
+      "mode": "look",
+      "seconds": 10.404100000023842
+    },
+    {
+      "mode": "sleep",
+      "seconds": 12.403199999928475
+    },
+    {
+      "mode": "breathe",
+      "seconds": 15.004100000023842
+    }
+  ],
+  "seen": [
+    "base:8",
+    "base:0",
+    "base:1",
+    "base:2",
+    "base:3",
+    "activities:0",
+    "activities:1",
+    "activities:2",
+    "activities:3",
+    "activities:4",
+    "activities:5",
+    "activities:6",
+    "activities:7",
+    "activities:8",
+    "activities:9",
+    "activities:10",
+    "activities:11",
+    "activities:12",
+    "activities:13",
+    "activities:14",
+    "activities:15",
+    "idle:0",
+    "idle:1",
+    "base:15"
+  ],
+  "frames": 1944,
+  "videoSha256": "c8cf8884b8bff4b85fbaef99177eda858d2f3ce811dfb06d8d0ee1e7b08537b2",
+  "decode": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "nb_read_frames": "486"
+      }
+    ],
+    "format": {
+      "duration": "16.157676"
+    }
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-day-right-0-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-day-right-1-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-night-left-0-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-night-left-1-v1.png"
+    ],
+    "sampledViews": 64,
+    "finding": "Registered side-part remains attached in sampled day/right and night/left walking, cooking, watering, tending, feeding, looking and lying sleep views at230px/48px. Cooking scalp edge and abrupt anatomical transitions remain.",
+    "scope": "Only24 logical slots observed; looking section selects two of four frames. Not complete clip, color, hat or biome acceptance."
+  },
+  "inputsAndReviewArtifacts": {
+    "scripts/review-broad-hair-motion.mjs": "275ae147c98b4b6a671dbf6c935520ed3df42dddb475ef450ca53f2ff4f399db",
+    "web/character-hair-family.js": "76d855e58fa818a6fcedf83344608b4b2a6f7ab6f5dd44b1e97eeb4fb12e8ee7",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v2.json": "38313739017fad5aa120d80ed38327a261135a797a891e26ea797997f4cd5613",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-day-right-0-v1.png": "4c2ffc15f1c99b4550262f6896456f56cc95d1cda77cf608cf29614b07790c99",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-day-right-1-v1.png": "eb61a2b1c723632f16d7cce642acf3170f37eb1680064fed9d28f7bb88576317",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-night-left-0-v1.png": "121f33872e9e91a84d27b0f64615d78644fbbfea5fde236ba99538913e92f550",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-motion-night-left-1-v1.png": "92bcee8eaa3e45d97bbcec82f6d4fcb3a0766d7fc6d8f146b09695b7b77a7a13"
+  }
+}

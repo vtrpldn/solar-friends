@@ -1,0 +1,35 @@
+{
+  "status": "Internal feeding contact refinement checked; complete art acceptance pending",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v2.png",
+      "sha256": "b6d52877a77c58fa6e74443ee7e0020b6ca0e6f2e6900902b3bb049fa8fdc3e3"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v2.png",
+      "sha256": "b90fd21f9aedb26b869c71466d0d3cfbe97291da1bb62b947fe760b3bffe18b1"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v2.png",
+      "sha256": "59a74db382f9694178204d7633a38b5546efbea06d5932503ecc607287eb2cfd"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "inputs": {
+    "web/character-hair-family.js": "76d855e58fa818a6fcedf83344608b4b2a6f7ab6f5dd44b1e97eeb4fb12e8ee7",
+    "scripts/verify-broad-hair-family.mjs": "28007898e8676e212bd22d97e62d3e93b424ac8be282c090701a2dccd1f555b2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v2.json": "38313739017fad5aa120d80ed38327a261135a797a891e26ea797997f4cd5613"
+  },
+  "visualReview": {
+    "inspected": [
+      "hair-family-sidepart-activities-v2.png"
+    ],
+    "finding": "Feeding caps translated three native units left and up improve the rear scalp contact. Cooking scalp edge remains visible and needs further fitting. Base/idle registration unchanged.",
+    "scope": "Static changed-sheet review only."
+  }
+}
