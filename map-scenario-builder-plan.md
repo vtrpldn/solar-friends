@@ -3222,3 +3222,9 @@ Authored pose-specific shoe polygons now include the exposed rear boot collars i
 Added `scripts/author-broad-attachment-draft.mjs` and `scripts/review-broad-attachment-draft.mjs`. The draft binds48 head/neck guide pairs to the exact broader-body ownership and prepared frame hashes using the existing production rig validator. All three overlay sheets were inspected. The initial sleeping coordinates were visibly misplaced and corrected from the lying artwork; the final base sheet was reinspected. No artwork pixels changed.
 
 **Why:** the other body family's accessory rig cannot safely be reused across this anatomy and its mixed source registrations. These are starting guides, not accepted accessory contacts. All hand sockets deliberately remain unrecorded; complete pose count is zero until visible hands and explicit occlusions are authored. Painted accessory fitting, facings, motion, portraits and public creator integration remain required.
+
+### Additional body shape: complete hand coordinate draft
+
+Added `scripts/author-broad-hand-sockets.mjs`, preserving the V1 head/neck-only draft. V2 records95 visible hand contacts and one explicitly occluded far grip across48 poses. The production rig validator and `AttachmentRigDocument.requireComplete()` pass. The review harness now accepts `--hands`; all three overlay sheets were inspected and misplaced standing/waving/feeding guides corrected. The crossed-arm work pose no longer places a far-hand marker on the face; the hidden grip is explicit. Final base overlays were reinspected.
+
+**Why:** accessory contacts must follow painted anatomy independently in every pose. Coordinate completeness does not prove a watering can, tool or hat fits. Actual equipment fitting, accessory occlusion, both facings, native motion, portraits and public creator integration remain required. No source artwork or public gameplay assets changed.

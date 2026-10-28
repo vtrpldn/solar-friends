@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "Coordinate-complete internal draft; fitted parts not accepted",
+  "why": "Author hand contacts for the exact broader anatomy rather than reusing another body rig",
+  "completePoses": 48,
+  "visibleHands": 95,
+  "occludedHands": 1,
+  "visualReview": "All three overlay sheets inspected; standing, waving, feeding and crossed-arm points corrected. Final corrected base sheet reinspected. Crossing work pose far grip explicitly occluded.",
+  "inputsAndArtifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/attachment-rig-draft-v2.json": "c6f972067ee8b85bdddd9e284a276b3654f08b68aa33f8e10ea074720293a8d4",
+    "scripts/author-broad-hand-sockets.mjs": "f63e63d379b0ce547d6968c6054b087f6903b7de79dedbc1c64d5c5607d11f3e",
+    "scripts/review-broad-attachment-draft.mjs": "e6fa1386f483fcd84fa48669224ad11df816979f2c78cf4b1c2f3dae985fda32",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/attachment-landmark-activities-v2.png": "64f16e9f85d5d4706b2165ee24b89a17298ec013f81ef823dee5ef6f2bf41eb8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/attachment-landmark-base-v2.png": "7965f2ff10e5f47c635a9ad8051ec472b3eee7677d4c0e83edd57a32d136286c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/attachment-landmark-idle-v2.png": "ab3f963d29e447f188e1fb6a3362345bd841802d81caf3f73d0fffefa5c86a65"
+  },
+  "remaining": [
+    "Actual equipment fitting and occlusion review",
+    "Head and neck accessory contact refinement",
+    "Both facings and native motion",
+    "Portrait and public creator integration"
+  ]
+}
