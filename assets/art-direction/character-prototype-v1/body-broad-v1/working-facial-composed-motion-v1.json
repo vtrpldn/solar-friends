@@ -1,0 +1,34 @@
+{
+  "status": "Recorded; decode and visual review pending",
+  "frames": 573,
+  "changes": [
+    {
+      "mode": "breathe",
+      "seconds": 0
+    },
+    {
+      "mode": "work",
+      "seconds": 0.8014000000953674
+    },
+    {
+      "mode": "breathe",
+      "seconds": 9.005400000095367
+    }
+  ],
+  "seen": [
+    "base:8",
+    "base:4",
+    "base:5",
+    "base:6",
+    "base:7"
+  ],
+  "videoSha256": "39bd53123699e47f45fa22b4071ffde067619ff3c71b09afa943c720e940cfbd",
+  "inputs": {
+    "scripts/review-integrated-work-motion.mjs": "e3896af3e624e005e38ea794a76138a55d954bdc8f532d2729f657d070f126ba",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v8.json": "1c7a68bbb9f0f408c7619a394d50be39897c11253544909bf31489220b7e770b",
+    "web/character-composed-family.js": "cdbf9aed7581a7c904ece7add952352cd04c033d465588dcccf5bd96ca40577d",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e"
+  }
+}

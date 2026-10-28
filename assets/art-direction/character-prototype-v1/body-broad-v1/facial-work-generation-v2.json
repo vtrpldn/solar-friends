@@ -1,0 +1,31 @@
+{
+  "prompt": "Use case: precise-object-edit. Solar Friends transparent facial-hair atlas correction. Image 1 is the EDIT TARGET: four beard overlays on a transparent square, arranged 2x2. Image 2 is the EXACT body and facial geometry reference. Image 3 is a diagnostic comparison only: top row previous beards, bottom row current beards; the third column bottom shows the defect. Change ONLY the BOTTOM-LEFT beard overlay in Image 1, which belongs to Image 2's bottom-left raised-arm working pose. Keep the other three beard overlays, canvas size, their positions, hair colour, painted lighting, and their silhouettes unchanged. Repaint this one beard as a VERY SHORT close-fitting jaw beard. Keep its moustache at the existing source position and keep its mouth opening, but reduce the hanging lower beard depth by about one third: bring the lower chin outline substantially upward to hug the real jaw. Taper the near-side jaw/sideburn sharply so the lower edge cannot form a wide horizontal strap on the forearm. The head is raised and smiling, not forward-facing; preserve the actual face pitch. No long chin, no broad beard bib, no dangling lower U, no moustache curled away from the lips. Preserve warm chestnut painterly grouped hair and upper-left light. Output ONLY the four facial-hair overlays, no skin, heads, eyes, arms, clothing, tools, shadows, labels, grid or background. Genuine transparent background and transparent mouth gaps. Do not repaint the bodies, and do not change the top two or bottom-right beard overlays.",
+  "inputs": [
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-candidate-v1.png",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-comparison-v1.png"
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-candidate-v2.png",
+  "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-15667693-acc9-418d-83b3-b0b930d5b195.png",
+  "inputHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-candidate-v1.png": "133bcca4c3f4a75b55cfdc3a8a961113fcc2dfa64375079df82c4e0a8fb2aeb8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-comparison-v1.png": "4f2ed7895004fcf420ee0324853586648e39c07966e4d1c85fd2c67fcccdd80a"
+  },
+  "sha256": "21b6640f0afd3e3ad876c7010a4ed6c2df9b2b03b76f0e2c1008b25ebfb759ee",
+  "originalSha256": "21b6640f0afd3e3ad876c7010a4ed6c2df9b2b03b76f0e2c1008b25ebfb759ee",
+  "status": "Internal raised-jaw candidate reviewed statically and in sampled native motion; family art acceptance incomplete",
+  "review": {
+    "finding": "V8 reduces the hanging lower jaw/forearm overhang compared with V7. The generated revision changed the other three parts, so only its bottom-left source rectangle is registered; V7 retains ownership of all other work poses.",
+    "registration": "One uniform .09 scale on the dedicated source group, rigid origin, no source pixel repairs, warping or source rewrites. Existing raised-forearm ownership retained.",
+    "motion": "272 independently decoded frames over 10.109378 seconds; all six-frame loop, entry and exit filmstrips inspected, with both hairstyles, silver facial hair, right day/left night and 230px/48px views.",
+    "limits": "Keyframe body jumps and tool pickup/put-down still pop. No complete facial family, all palette/accessory pairings, original-cast/biome scene or public creator acceptance."
+  },
+  "evidence": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v8.json": "1c7a68bbb9f0f408c7619a394d50be39897c11253544909bf31489220b7e770b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-facial-base-v8.png": "3c78ef7258771b95a9e7d703972c610bbf3e8b4f70007df5b643533b45b34d9c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-comparison-v2.png": "5e0961d7faa566712c77f90deda46f0f39f37d89024cce39b2fcca34c454304f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/working-facial-composed-motion-v1.webm": "39bd53123699e47f45fa22b4071ffde067619ff3c71b09afa943c720e940cfbd",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/working-facial-composed-motion-decoded-v1.json": "a55339b7d7d6997516268292ad0e7d7ae3cd0b0b30acdfa5addfc1b0960c2e08"
+  }
+}

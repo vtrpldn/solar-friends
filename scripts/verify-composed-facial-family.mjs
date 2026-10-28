@@ -3,7 +3,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const revision=process.argv.includes('--working')?'v7':'v6';
+const revision=process.argv.includes('--raised')?'v8':process.argv.includes('--working')?'v7':'v6';
 const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex'),definition=JSON.parse(await readFile(`${root}/composed-family-draft-${revision}.json`)),sources={};
 for(const [id,s]of Object.entries(definition.sources)){const b=await readFile(s.path);assert.equal(hash(b),s.sha256);sources[id]={data:b.toString('base64'),sourceHash:s.sha256};}
 const server=await serve(0);let browser;
