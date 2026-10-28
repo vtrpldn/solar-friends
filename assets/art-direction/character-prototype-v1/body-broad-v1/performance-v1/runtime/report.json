@@ -1,0 +1,370 @@
+{
+  "environment": "Headless Chromium, 1440×900 desktop, 64×64 Sandbox arrival, 12 residents, selected speeds recorded per result; five-second sampled running windows after one-second warmup.",
+  "limitations": "Initial arrival only; not a dense mixed-building, sustained panning, editor latency or GPU-memory release gate. performance.memory is JS heap only.",
+  "results": [
+    {
+      "cast": "shared",
+      "speed": 1,
+      "build": "broad",
+      "hat": true,
+      "loading": {
+        "compileMs": 9.700000047683716,
+        "loadMs": 2204.0999999046326,
+        "snapshotBytes": 157516,
+        "uniqueAppearances": 1
+      },
+      "runtime": {
+        "advancedMinutes": 15.027557373046875,
+        "wallSeconds": 5.000600000143051,
+        "frames": 601,
+        "medianGapMs": 8.300000000000182,
+        "p95GapMs": 10.300000000000182,
+        "maxGapMs": 10.5,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 0.10000014305114746,
+            "p95": 0.20000004768371582
+          },
+          "sample": {
+            "median": 0.10000014305114746,
+            "p95": 0.20000004768371582
+          },
+          "paint": {
+            "median": 1.3999998569488525,
+            "p95": 1.5
+          },
+          "total": {
+            "median": 1.6000001430511475,
+            "p95": 2.200000047683716
+          },
+          "frameInterval": {
+            "median": 8.300000000001091,
+            "p95": 10.299999999999272
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.3416999999999998,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "artworkCache": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14649332,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14649332,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "heap": {
+          "used": 10000000,
+          "total": 13400000
+        },
+        "pauseClickWallMs": 61
+      }
+    },
+    {
+      "cast": "shared",
+      "speed": 16,
+      "build": "broad",
+      "hat": true,
+      "loading": {
+        "compileMs": 9.700000047683716,
+        "loadMs": 2204.0999999046326,
+        "snapshotBytes": 157516,
+        "uniqueAppearances": 1
+      },
+      "runtime": {
+        "advancedMinutes": 240.789794921875,
+        "wallSeconds": 5.006399999952315,
+        "frames": 602,
+        "medianGapMs": 8.300000000001091,
+        "p95GapMs": 10.299999999999272,
+        "maxGapMs": 10.5,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 0.9000000953674316,
+            "p95": 1.0999999046325684
+          },
+          "sample": {
+            "median": 0.09999990463256836,
+            "p95": 0.20000004768371582
+          },
+          "paint": {
+            "median": 2,
+            "p95": 2.4000000953674316
+          },
+          "total": {
+            "median": 3,
+            "p95": 3.799999952316284
+          },
+          "frameInterval": {
+            "median": 8.300000000001091,
+            "p95": 10.299999999999272
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.3416999999999998,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "artworkCache": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14649332,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14649332,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "heap": {
+          "used": 10000000,
+          "total": 13400000
+        },
+        "pauseClickWallMs": 85
+      }
+    },
+    {
+      "cast": "unique",
+      "speed": 1,
+      "build": "broad",
+      "hat": true,
+      "loading": {
+        "compileMs": 5.5,
+        "loadMs": 4374.099999904633,
+        "snapshotBytes": 157888,
+        "uniqueAppearances": 12
+      },
+      "runtime": {
+        "advancedMinutes": 15.03118896484375,
+        "wallSeconds": 5.001900000095367,
+        "frames": 601,
+        "medianGapMs": 8.299999999999272,
+        "p95GapMs": 10.299999999999272,
+        "maxGapMs": 10.400000000001455,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 0.10000014305114746,
+            "p95": 0.20000004768371582
+          },
+          "sample": {
+            "median": 0.10000014305114746,
+            "p95": 0.20000004768371582
+          },
+          "paint": {
+            "median": 1.3999998569488525,
+            "p95": 1.5999999046325684
+          },
+          "total": {
+            "median": 1.6000001430511475,
+            "p95": 2.200000047683716
+          },
+          "frameInterval": {
+            "median": 8.299999999999272,
+            "p95": 10.299999999999272
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.3416999999999998,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "artworkCache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 175849872,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 175849872,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "heap": {
+          "used": 10000000,
+          "total": 13400000
+        },
+        "pauseClickWallMs": 59
+      }
+    },
+    {
+      "cast": "unique",
+      "speed": 16,
+      "build": "broad",
+      "hat": true,
+      "loading": {
+        "compileMs": 5.5,
+        "loadMs": 4374.099999904633,
+        "snapshotBytes": 157888,
+        "uniqueAppearances": 12
+      },
+      "runtime": {
+        "advancedMinutes": 240.7889404296875,
+        "wallSeconds": 5.008000000143053,
+        "frames": 597,
+        "medianGapMs": 8.299999999999272,
+        "p95GapMs": 10.299999999999272,
+        "maxGapMs": 18.69999999999709,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1,
+            "p95": 1.3999998569488525
+          },
+          "sample": {
+            "median": 0.09999990463256836,
+            "p95": 0.20000004768371582
+          },
+          "paint": {
+            "median": 1.8999998569488525,
+            "p95": 2.3999998569488525
+          },
+          "total": {
+            "median": 3,
+            "p95": 3.9000000953674316
+          },
+          "frameInterval": {
+            "median": 8.30000000000291,
+            "p95": 10.30000000000291
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.3416999999999998,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "artworkCache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 175849872,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 175849872,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "heap": {
+          "used": 10000000,
+          "total": 13400000
+        },
+        "pauseClickWallMs": 89
+      }
+    }
+  ]
+}

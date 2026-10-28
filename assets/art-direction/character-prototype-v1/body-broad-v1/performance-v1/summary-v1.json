@@ -1,0 +1,165 @@
+{
+  "status": "Measured; process-memory release acceptance remains open",
+  "why": "Exercise the newly public broad body at the supported 12-person roster and 64x64 map size.",
+  "editor": {
+    "population": 12,
+    "buildings": 256,
+    "buildingTypes": 21,
+    "uniqueAppearances": 12,
+    "importToReadyMs": 7056.472958000001,
+    "actions": {
+      "funds": {
+        "maxHandlerMs": 74.5,
+        "maxTwoFramePresentationMs": 77.10000014305115,
+        "samples": 5
+      },
+      "undo": {
+        "maxHandlerMs": 70,
+        "maxTwoFramePresentationMs": 72.79999995231628,
+        "samples": 5
+      },
+      "redo": {
+        "maxHandlerMs": 68.29999995231628,
+        "maxTwoFramePresentationMs": 71.29999995231628,
+        "samples": 5
+      },
+      "zoom": {
+        "maxHandlerMs": 34.5,
+        "maxTwoFramePresentationMs": 39.09999990463257,
+        "samples": 5
+      },
+      "pan": {
+        "maxHandlerMs": 7,
+        "maxTwoFramePresentationMs": 16,
+        "samples": 5
+      }
+    }
+  },
+  "runtime": [
+    {
+      "cast": "shared",
+      "speed": 1,
+      "loadMs": 2204.0999999046326,
+      "wallSeconds": 5.000600000143051,
+      "advancedMinutes": 15.027557373046875,
+      "p95GapMs": 10.300000000000182,
+      "clock": {
+        "pendingSeconds": 0,
+        "droppedSeconds": 0.3416999999999998,
+        "budgetMs": 8,
+        "maxPendingSeconds": 0.25
+      }
+    },
+    {
+      "cast": "shared",
+      "speed": 16,
+      "loadMs": 2204.0999999046326,
+      "wallSeconds": 5.006399999952315,
+      "advancedMinutes": 240.789794921875,
+      "p95GapMs": 10.299999999999272,
+      "clock": {
+        "pendingSeconds": 0,
+        "droppedSeconds": 0.3416999999999998,
+        "budgetMs": 8,
+        "maxPendingSeconds": 0.25
+      }
+    },
+    {
+      "cast": "unique",
+      "speed": 1,
+      "loadMs": 4374.099999904633,
+      "wallSeconds": 5.001900000095367,
+      "advancedMinutes": 15.03118896484375,
+      "p95GapMs": 10.299999999999272,
+      "clock": {
+        "pendingSeconds": 0,
+        "droppedSeconds": 0.3416999999999998,
+        "budgetMs": 8,
+        "maxPendingSeconds": 0.25
+      }
+    },
+    {
+      "cast": "unique",
+      "speed": 16,
+      "loadMs": 4374.099999904633,
+      "wallSeconds": 5.008000000143053,
+      "advancedMinutes": 240.7889404296875,
+      "p95GapMs": 10.299999999999272,
+      "clock": {
+        "pendingSeconds": 0,
+        "droppedSeconds": 0.3416999999999998,
+        "budgetMs": 8,
+        "maxPendingSeconds": 0.25
+      }
+    }
+  ],
+  "memory": {
+    "baselineRss": 276217856,
+    "cycles": [
+      {
+        "cast": "shared",
+        "cycle": 1,
+        "prepareMs": 1613.5999999046326,
+        "activeRss": 1235779584,
+        "releasedAfterGcRss": 1090502656,
+        "releasedBackingBytes": 343671,
+        "cacheReleased": true
+      },
+      {
+        "cast": "shared",
+        "cycle": 2,
+        "prepareMs": 1436.2000000476837,
+        "activeRss": 1354448896,
+        "releasedAfterGcRss": 1240580096,
+        "releasedBackingBytes": 343671,
+        "cacheReleased": true
+      },
+      {
+        "cast": "unique",
+        "cycle": 1,
+        "prepareMs": 5153.799999952316,
+        "activeRss": 1827012608,
+        "releasedAfterGcRss": 1777254400,
+        "releasedBackingBytes": 343671,
+        "cacheReleased": true
+      },
+      {
+        "cast": "unique",
+        "cycle": 2,
+        "prepareMs": 5154.900000095367,
+        "activeRss": 1911111680,
+        "releasedAfterGcRss": 1847705600,
+        "releasedBackingBytes": 343671,
+        "cacheReleased": true
+      }
+    ]
+  },
+  "remaining": [
+    "Investigate high browser-native RSS after ownership retirement; GC does not return process memory to baseline.",
+    "These are headless runs, not a physical-display 60-fps gate.",
+    "Dense editor and sparse arrival runtime are separate fixtures; no dense runtime, brush drags, multi-selection, save/compile cancellation or maximum utility/animal-state coverage is claimed.",
+    "The five-second runtime windows retain cumulative clock diagnostics, not per-window dropped-time deltas.",
+    "Full plan, art, recovery and release requirements remain open."
+  ],
+  "inputs": {
+    "scripts/benchmark-builder.mjs": "c2044bc27b51c9b80197e727da3f5cfe415271236923ed71685f4bdadc0c43ec",
+    "scripts/benchmark-custom-roster.mjs": "589ca2791d31e898e879d82e7ac0eb05396d0db108b88223588e519ecee83ea0",
+    "scripts/benchmark-artwork-memory.mjs": "7751ac519c52cca23f27ffb7674cff9464f4453de526af54206f327937a75916",
+    "scripts/mixed-builder-fixture.mjs": "a0341d8bce537e1106e2828ef55b63fc09645404ad81f59d625b2a4e91218d2b",
+    "web/character-image-source.js": "6a86273260ccd4a0b7e27b7b0673d30a6611eedea968332751f1755abf3f65bc",
+    "web/character-composed-family-bundle.js": "4e0eb5d09d7c9342a352bdc23681a24b77842370c5d9d1ea4318b018fd12eb27",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/appearance-cache.js": "29b45878db3aa395f39fafac3d70c4154be6822d43baf7dc5b60f49ba3c54acb",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/memory/report.json": "1c773ef36f25f37b9eeb53c17da938043e98e41ba4eb26c305e256662d5d8f42",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/runtime/shared-cast-1x.png": "3df9defd7b271758a5a1a3dc5ad1b95bf705731b48796fed97143a4ce575da58",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/runtime/report.json": "12351fd4214bef6826fb3271eb8034dd13b99267739e953b5a1d185026537e89",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/runtime/unique-cast-16x.png": "997b794644e7c2f5aa8b11227e911d3ed19d4002bc7267abb676bc952f4a9d79",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/runtime/shared-cast-16x.png": "39a340bd72883df5fed92ddb2630208560aa91573ac2fda8fb87793e8b81c86b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/runtime/unique-cast-1x.png": "64598aca5cd783cbae66aea3c939bec4c3b1de140c1caaef1911cc51d6bde4d6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/editor/report.json": "07cf273c6a9a7809216698871404e79e5236673a8e94a302e6b62d78f6084656",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/editor/12-256-editor.png": "2ac2dc69cf91dd9fd74ea5b38f456df0525e24b2bffd20be783426dd5a208179"
+  }
+}
