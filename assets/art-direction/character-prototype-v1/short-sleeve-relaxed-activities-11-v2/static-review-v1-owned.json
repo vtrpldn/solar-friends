@@ -1,0 +1,8 @@
+{
+  "status": "Static tending pose source reviewed; complete motion and public integration pending",
+  "sourceSha256": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+  "compositionReportSha256": "7e8abe58ae4b0f198acaf484e757ab8466cb74a70cbbfcdf2f6337414d8f5be6",
+  "paletteReportSha256": "7a6608c8a57e60386bcea5dcd87a433f86fc9af26e38ce3856a019b22c6a2edb",
+  "visualFindings": "Inspected original paint, six-composition board, torso, day/night/mirrored guides, plain/equipped palettes and measured waist. Broad cream shading fits the established outfit; smooth hem layers beneath exactly preserved trousers and boots. Hands and raised knee remain legible, with no visible boot-notch intrusion. Complete clip fold/cuff continuity remains a separate gate.",
+  "scope": "One internal static source only; no complete motion, world or public outfit acceptance."
+}

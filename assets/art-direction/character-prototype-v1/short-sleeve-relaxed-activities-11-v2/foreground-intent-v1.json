@@ -1,0 +1,102 @@
+{
+  "status": "Authored native body polygon with family-bound material exclusion. Generated garment paint was not read or changed.",
+  "bodyFrameSha256": "f998bbfac63daf430ba621403e0ae2d3bd9b1ea9ed7d2f7f69aa5bba4923012b",
+  "registrationIntentSha256": "6d4dce73e0daf1239a57051b1e9d6f393465746c46b930cb6e16413db2f1e6b5",
+  "regionSpecSha256": "0ba94364ed8a7727a17acabba804a8219712d61f4a8bcebc15be1267d74d19fc",
+  "materialRegistrationSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "maskSha256": "b202ac2b41948339998bf9c440d18c326913710cfab988166297f17cb464a748",
+  "polygons": [
+    [
+      [
+        107,
+        163
+      ],
+      [
+        140,
+        169
+      ],
+      [
+        153,
+        187
+      ],
+      [
+        165,
+        201
+      ],
+      [
+        177,
+        215
+      ],
+      [
+        187,
+        231
+      ],
+      [
+        177,
+        245
+      ],
+      [
+        151,
+        245
+      ],
+      [
+        135,
+        230
+      ],
+      [
+        120,
+        213
+      ],
+      [
+        110,
+        194
+      ],
+      [
+        105,
+        179
+      ]
+    ],
+    [
+      [
+        174,
+        164
+      ],
+      [
+        187,
+        167
+      ],
+      [
+        192,
+        178
+      ],
+      [
+        191,
+        201
+      ],
+      [
+        172,
+        204
+      ],
+      [
+        163,
+        192
+      ],
+      [
+        159,
+        179
+      ],
+      [
+        164,
+        173
+      ]
+    ]
+  ],
+  "excludedMaterials": [
+    2,
+    3,
+    4
+  ],
+  "excludedPixels": 1019,
+  "paintedPixels": 2804,
+  "ownedPixels": 3620
+}

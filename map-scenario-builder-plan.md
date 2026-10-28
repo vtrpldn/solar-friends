@@ -2543,7 +2543,7 @@ The revised activities-8 guide covers all 1,011 opaque original shirt pixels wit
 
 ### Strict tending guide coverage gate
 
-The diagnostic now supports `--strict`: it requires explicit anatomy criteria, measured poses, nonzero original shirt coverage, complete declared shirt coverage, no protected lower-body overlap, and, when declared, a nonempty protected face region with no overlap. Reports remain available on failure; process status distinguishes diagnostics from acceptance.
+The diagnostic now supports `--strict`: it requires explicit anatomy criteria, measured poses, nonzero original shirt coverage, complete declared shirt coverage, no unpreserved protected lower-body overlap (raw overlaps require explicitly selected exact native trousers/boot ownership), and, when declared, a nonempty protected face region with no overlap. Reports remain available on failure; process status distinguishes diagnostics from acceptance.
 
 Activities-8 and activities-9 pass this gate. Activities-9 now covers all 878 original opaque shirt pixels without protected face or lower-body overlap; its collar, sleeves and kneeling context were inspected. Activities-10 and 11 correctly fail and remain unfrozen. Unsuccessful seam experiments were discarded rather than promoted. JavaScript syntax validation passes.
 
@@ -2588,3 +2588,14 @@ The selected source covers all 893 original opaque shirt pixels. Six composition
 Activities-11 paint attempts v1, v2 and v3 remain explicitly rejected and inactive. Generation continues to soften or round the fine boot-notch/side contour despite the passing analytical guide. No failed source was promoted or locally retouched, and no opacity threshold was relaxed.
 
 **Why:** deep tending needs faithful clothing around the bent arm, raised knee and rear boot. This reaches 43 internal static shirt sources; integrated motion acceptance remains 40. One tending and four feeding sources, full tending/equipment motion, public/world outfit integration, wider resident choices, dedicated sleep artwork and all original builder release requirements remain open.
+
+
+### Fourth tending source and layered hem validation
+
+Activities-11 now has a reviewed static source in `short-sleeve-relaxed-activities-11-v2`, source v1/registration v1-owned. Four failed sources in the previous collection remain explicitly rejected. The final guide lets the hem continue beneath the existing exact original trousers/boot layers, avoiding tiny source-space steps that the generator repeatedly rounded away. This changes the raw guide-overlap criterion to reflect actual sprite layering; it does not relax final composition or coverage checks.
+
+`measure-clothing-guide-coverage.mjs --strict --preserved-body=v1` still reports every raw overlap and requires the original body binding, exact pose, validated native ownership runs and lower-body-only material labels. Any overlap outside those owned pixels fails. A retained negative control removes boot pixel99,176: strict review correctly refuses it; the complete original mask passes. Final composition independently checks original RGBA, including partially transparent trousers/boots.
+
+The selected paint covers all 885 original opaque shirt pixels and passes six compositions with 37,776 protected-face channel checks, 94,608 exact preserved trousers/boot channel checks and nine invalid-registration refusals. Forty-eight palette/accessory compositions and visual source/torso/day/night/mirrored/palette/waist review pass. Exact hashes are in `static-review-v1-owned.json`; generated paint remains byte-identical to the generator output.
+
+**Why:** clothing naturally continues underneath the layers that visually cover it. Testing exact final layer preservation gives stronger practical evidence than requiring the unseen garment source to reproduce one-pixel boot cutouts. This reaches 44 internal static shirt sources; integrated motion acceptance remains 40. Four feeding sources, complete tending/equipment motion, public/world integration, wider resident choices, sleep artwork and every original builder release requirement remain open.

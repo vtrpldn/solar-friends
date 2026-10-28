@@ -1,0 +1,38 @@
+{
+  "status": "rejected; inactive",
+  "reason": "Explicit fine contour guide still failed original shirt opacity; replaced by a new layered hem collection",
+  "sourceSha256": "c18d4179164dae42aeb7ad349daafdae8f8bb4d5fdfbbf1224638c3dd27d5bb9",
+  "uncovered": [
+    [
+      93,
+      164,
+      202
+    ],
+    [
+      97,
+      175,
+      225
+    ],
+    [
+      99,
+      175,
+      229
+    ],
+    [
+      100,
+      175,
+      228
+    ],
+    [
+      101,
+      176,
+      212
+    ],
+    [
+      102,
+      177,
+      95
+    ]
+  ],
+  "generatedPaintEdited": false
+}

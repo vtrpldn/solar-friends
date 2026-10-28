@@ -1,0 +1,19 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "c613cf625175777d515530e892619aa006ab52b9a76e03d52eae0fad0817e4df",
+  "anatomyReviewSha256": "b6e8567d71050280f04946aa4d1ba310bdac587a9fe169d5e0fdf378e22d162a",
+  "foregroundIntentSha256": "ad1f601f5f93f303af264d50770b7512bdbd6a7929b026ba4242966b52084d21",
+  "preservedBodySha256": "a59a711b7bab5e6d65ae80bd41a18cef5e8dc89b66310c6567c0fea55dbcd9ed",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-11-v2/mask.png",
+      "sha256": "e96bd97b87eef4632bda083cd22e9307fa01e8d7e21cbad612dbcc6f308a8839",
+      "role": "Only generator input: frozen smooth hem underlayer silhouette"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-10-v1/candidate-v2.png",
+    "sha256": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+    "role": "Reviewed third tending shirt style; text reference only"
+  }
+}

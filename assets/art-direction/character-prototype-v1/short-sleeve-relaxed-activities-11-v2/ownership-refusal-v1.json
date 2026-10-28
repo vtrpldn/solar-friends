@@ -1,0 +1,9 @@
+{
+  "status": "Passed negative control; strict process exited1",
+  "fault": "Removed native boot pixel99,176 from otherwise valid source-bound lower ownership",
+  "fixture": "preserved-body-v99.json",
+  "fixtureSha256": "29a348c147d4bf699bf6f6688d71922afe870341f6c40d7e67c9631f37aad93e",
+  "report": "guide-missing-ownership-refusal-v1.json",
+  "reportSha256": "5eb15d91477b6dbc3450a44f2728e6aa3fb6400a7501035dbfcf06939a0e4471",
+  "realMaskStrictExit": 0
+}

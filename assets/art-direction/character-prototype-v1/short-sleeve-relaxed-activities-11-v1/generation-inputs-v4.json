@@ -1,0 +1,24 @@
+{
+  "prompt": "prompt-v4.txt",
+  "promptSha256": "792c9ac5002d1aaf5c5a9b9674b5bbb4ab8588b909c6c8e04f4667b8050d6078",
+  "anatomyReviewSha256": "9b4cdd74817dae78709f44578edd6041be15bafdb9597c68d3d2038896d92fc9",
+  "foregroundIntentSha256": "7ca42734a83f2766c68c647d446418cfd577be484496748e00b1008f9e859f87",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-11-v1/mask.png",
+      "role": "Only generator input: frozen deep tending silhouette at eight source pixels per native pixel",
+      "sha256": "fff962b0b9e68fb108839c2498c76989506f9e6d31e027bade9d5380559b8f83"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-11-v1/geometry-detail-v4.png",
+      "sha256": "475ddd38896eda1a3794944602e5b3d099731b709c71371811d3f580e97dc68f",
+      "role": "Analytical source-space close-ups only, never accepted painted artwork"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-8-v3/candidate-v1.png",
+    "sha256": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+    "role": "Reviewed first tending shirt style described in text; not a generator input"
+  },
+  "hemInstruction": "Explicit opaque source cells and stepped contour; final checks unchanged"
+}
