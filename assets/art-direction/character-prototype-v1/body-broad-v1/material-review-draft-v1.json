@@ -1,0 +1,417 @@
+{
+  "schema": 1,
+  "status": "All48 material regions authored as internal draft; semantic mask refinement required before acceptance",
+  "why": "Review per-pose material separation on the complete exact broader body",
+  "counts": {
+    "base": [
+      [
+        1984,
+        8408,
+        2405,
+        1805,
+        2777
+      ],
+      [
+        1889,
+        7643,
+        2296,
+        2021,
+        1621
+      ],
+      [
+        1784,
+        8356,
+        1005,
+        2687,
+        3199
+      ],
+      [
+        1832,
+        7453,
+        2237,
+        1889,
+        2437
+      ],
+      [
+        2062,
+        7638,
+        2585,
+        2198,
+        2485
+      ],
+      [
+        1886,
+        6863,
+        1680,
+        2434,
+        2445
+      ],
+      [
+        2089,
+        7318,
+        2207,
+        2192,
+        2674
+      ],
+      [
+        2463,
+        8957,
+        2096,
+        813,
+        2929
+      ],
+      [
+        1886,
+        7751,
+        2502,
+        2417,
+        2402
+      ],
+      [
+        1824,
+        7764,
+        2498,
+        2420,
+        2377
+      ],
+      [
+        1878,
+        7276,
+        2603,
+        2267,
+        2346
+      ],
+      [
+        1875,
+        7409,
+        2482,
+        2227,
+        2299
+      ],
+      [
+        1607,
+        8558,
+        2473,
+        1475,
+        2953
+      ],
+      [
+        1776,
+        8961,
+        1332,
+        830,
+        2867
+      ],
+      [
+        1629,
+        8780,
+        2328,
+        1457,
+        2924
+      ],
+      [
+        1686,
+        8125,
+        3582,
+        369,
+        0
+      ]
+    ],
+    "idle": [
+      [
+        2222,
+        8499,
+        2489,
+        3036,
+        2789
+      ],
+      [
+        2324,
+        8426,
+        2499,
+        3095,
+        2758
+      ],
+      [
+        2294,
+        8458,
+        2972,
+        2710,
+        2825
+      ],
+      [
+        2333,
+        8525,
+        2974,
+        2695,
+        2852
+      ],
+      [
+        2148,
+        8389,
+        2639,
+        2491,
+        2639
+      ],
+      [
+        1968,
+        7293,
+        2761,
+        2668,
+        2763
+      ],
+      [
+        2170,
+        8334,
+        3589,
+        2109,
+        2802
+      ],
+      [
+        2281,
+        8444,
+        3079,
+        2187,
+        2676
+      ],
+      [
+        1909,
+        8204,
+        2357,
+        2997,
+        2491
+      ],
+      [
+        1840,
+        7437,
+        2388,
+        3137,
+        2468
+      ],
+      [
+        2142,
+        8153,
+        3012,
+        2648,
+        2789
+      ],
+      [
+        1976,
+        8163,
+        2812,
+        2445,
+        2909
+      ],
+      [
+        2222,
+        8336,
+        2681,
+        2487,
+        2447
+      ],
+      [
+        2125,
+        7907,
+        2670,
+        2401,
+        2403
+      ],
+      [
+        2191,
+        7852,
+        2736,
+        2206,
+        2494
+      ],
+      [
+        2182,
+        8433,
+        2747,
+        2243,
+        2455
+      ]
+    ],
+    "activities": [
+      [
+        1889,
+        7905,
+        1401,
+        2522,
+        2285
+      ],
+      [
+        1772,
+        7737,
+        1448,
+        2592,
+        2359
+      ],
+      [
+        1848,
+        8051,
+        1538,
+        2421,
+        2302
+      ],
+      [
+        1883,
+        7958,
+        1398,
+        2699,
+        2374
+      ],
+      [
+        1827,
+        8181,
+        1833,
+        2378,
+        2743
+      ],
+      [
+        1828,
+        8615,
+        1808,
+        2054,
+        2861
+      ],
+      [
+        1744,
+        8580,
+        1491,
+        1714,
+        2942
+      ],
+      [
+        1890,
+        9028,
+        1798,
+        1202,
+        2936
+      ],
+      [
+        1235,
+        7337,
+        1680,
+        2057,
+        2546
+      ],
+      [
+        1277,
+        7407,
+        1651,
+        2071,
+        1810
+      ],
+      [
+        1900,
+        7149,
+        1774,
+        1526,
+        1939
+      ],
+      [
+        2116,
+        6981,
+        1669,
+        1376,
+        1275
+      ],
+      [
+        1908,
+        8127,
+        1962,
+        2728,
+        2540
+      ],
+      [
+        1987,
+        8670,
+        1996,
+        2713,
+        2493
+      ],
+      [
+        2028,
+        8362,
+        2074,
+        2551,
+        2536
+      ],
+      [
+        2007,
+        8524,
+        2074,
+        2520,
+        2528
+      ]
+    ]
+  },
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-base-draft-v1.png"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-idle-draft-v1.png"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-activities-draft-v1.png"
+    }
+  ],
+  "preservedDefaults": 48,
+  "alphaProofs": 48,
+  "isolatedMaterialProofs": 192,
+  "maskCopyProofs": 48,
+  "staleBindingRefused": true,
+  "cache": {
+    "entries": 8,
+    "maximum": 8,
+    "rgbaByteUpperBound": 2097152
+  },
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-ownership-v1.json": "7173359558e12232fff2297568b5cb6a2aa26c325c0be1c0d1d19b124568fe3d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v1.json": "62396b0c1b528a8b7655dbb4db46eb9a95518702e1f5834a20d29254812d20ec",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v1.json": "ae70e42bd8c83b9cb579f44ea0e7b171f030d1c3a9c895b265fc76f72c184e91",
+    "scripts/author-broad-material-regions.mjs": "dc6363a642bd751461bae81e8cb530c98162439b394f444dfb433e40d8d1b34a",
+    "scripts/review-broad-materials.mjs": "2974efa2f3d18d2bda55c15210c830d7ff249864aebe5fee44196782a16750e7",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed"
+  },
+  "errors": [],
+  "visualReview": "Inspected all three final diagnostic/palette sheets. Upright and idle poses separate skin, vest, shorts and boots plausibly. Explicit tending hand polygons restore much of the hand that the initial shoe regions incorrectly tinted. Remaining tending fingertip/boot overlap and uncoloured vest patches are visible, especially activities:11. The reclining garment seam also needs a closer region review. Passing isolation checks proves pixel containment, not semantic correctness of the masks.",
+  "knownIssues": [
+    {
+      "poses": [
+        "activities:8",
+        "activities:9",
+        "activities:10",
+        "activities:11"
+      ],
+      "issue": "Refine vest edge coverage and exact hand-over-boot occlusion; activities:11 still has visible residual patches."
+    },
+    {
+      "poses": [
+        "base:15"
+      ],
+      "issue": "Review explicit shirt/shorts boundary and small unclassified seam regions at enlarged scale."
+    }
+  ],
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-base-draft-v1.png": "298b269d65b5b3aefca23c7fad1cf43c7632081c1a79d26b1a9a0bd18abb40b6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-idle-draft-v1.png": "32095f359dd11fd7c059439e157202c3bf8be925af7165413d63eaeebf5e3ba8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-activities-draft-v1.png": "477cf0dcd53a45748a39278451447821faedac24949be6efba559f83627ec76e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v1.json": "62396b0c1b528a8b7655dbb4db46eb9a95518702e1f5834a20d29254812d20ec",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v1.json": "ae70e42bd8c83b9cb579f44ea0e7b171f030d1c3a9c895b265fc76f72c184e91"
+  },
+  "remaining": [
+    "Resolve known semantic mask errors",
+    "Review all palettes, both facings and native loops in biome lighting",
+    "Author complete exact-body attachment sockets and fitted customization",
+    "Portrait and public creation/save/play integration",
+    "All original builder release gates"
+  ]
+}
