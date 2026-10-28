@@ -1,0 +1,37 @@
+{
+  "status": "Internal combined appearance checks pass; public integration pending",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v4-silver.png",
+      "sha256": "76cf5c915ba1d88d188a18f8342b6b6e8840a91a512847c1b290414013ef299c"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v4-silver.png",
+      "sha256": "1c144cb2bc19396e93c66b3a116160b2c292697a3d1ce6925e608e4eb574c5f7"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v4-silver.png",
+      "sha256": "611344c42703817866071aca1cc1d12da506bc39f1d38a4d81df5d60ae4f39f3"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 48,
+  "inputs": {
+    "web/character-hair-family.js": "2e28f017e55920ccf1cb4d12bc3af51ff3846d02b4018363bff68c68612ac7f7",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "scripts/verify-broad-hair-family.mjs": "c545b732e015f725243aa8769adb173d54e5cab81576bdf6679831e23927cc03",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v4.json": "10a146e4dffb34d1ffb5d99eeb7368f243a91999f83e7b8380cc35274a7840e0"
+  },
+  "visualReview": {
+    "inspected": [
+      "hair-family-sidepart-idle-v4-silver.png"
+    ],
+    "finding": "Looking caps translated five native units left and two up improve rear scalp contact. Silver hair and straw hat compose with retained hand foreground ownership; sleep keeps hair and explicitly omits hat.",
+    "scope": "Static right-facing silver combination only; complete motion, lighting and full appearance acceptance remain open."
+  }
+}

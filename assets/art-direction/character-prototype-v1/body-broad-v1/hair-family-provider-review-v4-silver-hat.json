@@ -1,0 +1,39 @@
+{
+  "status": "Internal combined appearance checks pass; public integration pending",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v4-silver-hat.png",
+      "sha256": "e07edffb874ac5150fc1965e794e2bb1870985eb1c35156dbbbc1e9ec4a46524"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v4-silver-hat.png",
+      "sha256": "3b60ce6c0a9de844d3ef354f68624c82b836d3c2a9c590685fc1ab086dd51809"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v4-silver-hat.png",
+      "sha256": "e4160d9cea065b91da0c3d55162cbb5fd3e39ef9a6f5923f7d97b4c8cf874354"
+    }
+  ],
+  "refusals": 13,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 48,
+  "inputs": {
+    "web/character-hair-family.js": "2e28f017e55920ccf1cb4d12bc3af51ff3846d02b4018363bff68c68612ac7f7",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "scripts/verify-broad-hair-family.mjs": "c545b732e015f725243aa8769adb173d54e5cab81576bdf6679831e23927cc03",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v4.json": "10a146e4dffb34d1ffb5d99eeb7368f243a91999f83e7b8380cc35274a7840e0"
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v4-silver-hat.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v4-silver-hat.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v4-silver-hat.png"
+    ],
+    "finding": "Looking caps translated five native units left and two up improve rear scalp contact. Silver hair and straw hat compose with retained hand foreground ownership; sleep keeps hair and explicitly omits hat.",
+    "scope": "Static right-facing silver combination only; complete motion, lighting and full appearance acceptance remain open."
+  }
+}

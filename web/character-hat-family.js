@@ -6,13 +6,17 @@ import {composeResidentFrame} from './character-frame-composition.js';
 const sheets=['base','idle','activities'];
 // Exact-body hat provider. Caller owns the body and decoded source; this
 // provider owns only its composed canvases and releases partial work on error.
-export async function prepareHatFamily({family,registration,source,appearanceFrameForPose=null}){
- if(appearanceFrameForPose!==null&&typeof appearanceFrameForPose!=='function')throw Error('Use a registered colour frame provider.');
+export function validateHatFamilyRegistration({family,registration,source}){
  const r=structuredClone(registration);validateAttachmentBinding(r?.body);
  if(r.schema!==1||canonical(r.body)!==canonical(family?.binding)||typeof family?.frameForPose!=='function'||typeof family?.contactForPose!=='function'||!Array.isArray(r.poses)||r.poses.length!==48||source?.sourceHash!==r.source?.sha256||!/^[a-f0-9]{64}$/.test(r.source?.sha256??'')||!Number.isSafeInteger(r.source?.size)||r.source.size<256||r.source.size>2048||source.image?.naturalWidth!==r.source.size||source.image?.naturalHeight!==r.source.size)throw Error('Use a complete hat registration for the exact body and source.');
- const records=new Map(),frames=new Map(),owned=new Set();let disposed=false;
- const clear=c=>{c.width=c.height=0;},destroy=()=>{for(const c of owned)clear(c);owned.clear();frames.clear();};
+ const records=new Map();
  for(const pose of r.poses){const key=pose.sheet+':'+pose.index;if(!sheets.includes(pose.sheet)||!Number.isSafeInteger(pose.index)||pose.index<0||pose.index>15||records.has(key)||pose.bodyFrameSha256!==r.body.frames[pose.sheet][pose.index]||!['worn','not-worn'].includes(pose.kind)||!Array.isArray(pose.offset)||pose.offset.length!==2||pose.offset.some(n=>!Number.isSafeInteger(n)||Math.abs(n)>128)||pose.kind==='not-worn'&&(pose.offset.some(n=>n!==0)||pose.foreground!==null))throw Error('Use unique exact-body hat poses and bounded translations.');records.set(key,pose);}
+ return {registration:r,records};
+}
+export async function prepareHatFamily({family,registration,source,appearanceFrameForPose=null}){
+ if(appearanceFrameForPose!==null&&typeof appearanceFrameForPose!=='function')throw Error('Use a registered colour frame provider.');
+ const {registration:r,records}=validateHatFamilyRegistration({family,registration,source}),frames=new Map(),owned=new Set();let disposed=false;
+ const clear=c=>{c.width=c.height=0;},destroy=()=>{for(const c of owned)clear(c);owned.clear();frames.clear();};
  const hat=document.createElement('canvas');hat.width=hat.height=256;
  try{hat.getContext('2d').drawImage(source.image,0,0,256,256);
   for(const sheet of sheets)for(let index=0;index<16;index++){
