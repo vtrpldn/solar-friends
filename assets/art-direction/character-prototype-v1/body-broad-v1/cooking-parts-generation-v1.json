@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Separate pot support and active spoon grips for the broader resident family",
+  "prompt": "Create a transparent Solar Friends game equipment parts atlas using the reference image only for exact painted material style and object proportions. Produce exactly TWO DISCONNECTED objects on one square1254x1254 transparent canvas: LEFT a small round brushed-silver cooking pot full of warm golden vegetable stew, NO spoon or utensil inside it; RIGHT one plain golden-brown wooden stirring spoon, separately floating with no food or skin. The pot should match the reference's three-quarter top view, elliptical open rim, softly painted metal highlights and compact cylindrical proportions. Approximately330px wide and230px high, centered near[350,700], wholly in the left half. The separate spoon should match the reference handle, about350px long and60px wide, tilted so the TOP handle leans LEFT of its lower stirring end by about80px. Center it near[900,580], wholly in the right half. Leave generous true transparent space between parts. These are reusable layered sprite components, not a scene. Same warm upper-left light, broad painted shading, restrained detail and friendly illustrated style. No hands, people, arms, tables, shadows, labels, borders, extra utensils, duplicate pots or background. Preserve the source's silver pot and warm brown wood, avoid glossy photorealism. Only pot pixels and spoon pixels, every other pixel transparent.",
+  "references": [
+    {
+      "path": "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+      "role": "Exact painted silver pot and wooden utensil style reference"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-parts-candidate-v1.png",
+  "status": "Needs correction; excluded from public/gameplay bundles",
+  "visualReview": "Raw source and eight-pose native renderer board inspected. Separated parts allow the pot rim to meet the supporting hand, but one long downward spoon cannot express the four cooking actions. In cooking poses 1 and 2 its bowl hangs below the pot. Tasting pose 3 holds the handle at the mouth instead of a horizontal spoon bowl. Requires separately painted stirring/tasting orientations, not part rotation or source warping. Watering 6 and 7 also retain unresolved grip mismatch. No full equipment acceptance.",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/cooking-parts-candidate-v1.png": "b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab",
+    "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91"
+  }
+}
