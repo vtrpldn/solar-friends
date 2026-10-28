@@ -1,0 +1,28 @@
+{
+  "status": "Incomplete fitting draft; not public or complete facial-hair acceptance",
+  "why": "Find failures across the whole pose family instead of extending a standing-only approval",
+  "candidatePoses": 47,
+  "missing": [
+    {
+      "sheet": "base",
+      "index": 15,
+      "reason": "Needs dedicated lying facial art; no rotation or bare-face fallback"
+    }
+  ],
+  "outputsInspected": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-base-body-draft-v2.png": "e5e08653caadc198b7353f81612baa354c521959a3bd3a0613ad569c570b4273",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-base-heads-draft-v2.png": "d50aa70726cf95b8b65fb824e89afc3d0bb7d7f33f8f6882cb67ba72e80dc7ec",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-idle-body-draft-v2.png": "5b1707c9455ef30c16001f25bf06d8d13b551f50d881b5e80f60c9815334efc7",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-idle-heads-draft-v2.png": "ab3f4e0eb4fbae0b10afdfc8970c526661b90d6e0c63563e9d60562373a379b2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-activities-body-draft-v2.png": "310ca7bd835864265508349172c2ac90a4ae0cddc14c09e99dee2c1c60de4698",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-activities-heads-draft-v2.png": "19684584c4155ef243d48b80f1e590f43180b69e91effaa1812f92d8bc2c7713"
+  },
+  "reviewedInputSha256": "d3e930042234767094ec66d71cc5f53bc18d64f7df2bf061bff9b32809cd371b",
+  "findings": [
+    "All three initial enlarged head boards inspected. Reusing only standing face placement caused nose/lip overlaps in work, sitting and watering.",
+    "Explicit rigid translations derived from source-face review improve work/water/tending/sitting alignment. Uniform0.19 source scale and original source pixels remain unchanged.",
+    "All six corrected body/head boards inspected. Several raised/bent heads still need dedicated mouth/jaw-angle paint or further explicit fit correction, particularly work5/6/7, seated13 and water4/5. Upward-looking idle poses also need angle-specific review.",
+    "Hand-over-face occlusion, equipment combinations, facial colors, both facings, native motion, portraits and every public creator/biome/release gate remain unverified.",
+    "No complete provider or selectable public facial option is delivered by these proposals."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "status": "Landmark-seeded fitting proposal; all visual review pending",
+  "poses": 47,
+  "missing": [
+    {
+      "sheet": "base",
+      "index": 15,
+      "reason": "Requires a separately painted lying beard; standing artwork must not be rotated"
+    }
+  ],
+  "inputs": {
+    "scripts/review-broad-facial-family.mjs": "c6464a50c2683613cc753ba548b4ce3cff3623fcc0f2f0e5b4301a644c7eca3c",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-atlas-draft-v1.json": "7ad5dde80915011d5a1c3ce4d89c0a8d691c641364a09e413db519bd440928f9",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-seeds-v1.json": "135dc2d3448e9a1fa89c5b61f6f225232042a2b337785942bb7fff773e9bfbf2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-base-body-draft-v1.png": "2b68cebfb2fe4fc4cf9b4a279e33564fb9069b81f3e22e9d384271acbf185f44",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-base-heads-draft-v1.png": "cfa8f8b990ce8df48b027b1cbb717b7cf9bcedfc1c4eb000151b3eedbcd4a0df",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-idle-body-draft-v1.png": "5b1707c9455ef30c16001f25bf06d8d13b551f50d881b5e80f60c9815334efc7",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-idle-heads-draft-v1.png": "ab3f4e0eb4fbae0b10afdfc8970c526661b90d6e0c63563e9d60562373a379b2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-activities-body-draft-v1.png": "b7f7a19d2266797831514ec680f435fca2399818cf6286ec29428766c2c46c4e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-family-activities-heads-draft-v1.png": "744b03ef896ef22abafdf7b4cb9478640d030cf0915354576129f9b386a5712f"
+  }
+}
