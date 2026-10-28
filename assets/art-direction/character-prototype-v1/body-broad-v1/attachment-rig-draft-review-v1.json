@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "status": "Incomplete authoring draft, not fitted-part acceptance",
+  "why": "Bind future accessory landmarks to all48 exact body frames without reusing another anatomy rig",
+  "inputs": {
+    "body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+    "body-material-regions-v2.json": "59e5137258489f12a3d54caa0f8f6544998f5b0a573afb28b5943ae748c5fcef"
+  },
+  "seededHeadNeckPairs": 48,
+  "completePoses": 0,
+  "remaining": [
+    "Inspect and correct head/neck geometry with actual accessory contact",
+    "Author near/far hands with explicit occlusion",
+    "Review both facings and native motion",
+    "Fit painted parts and portraits before public integration"
+  ],
+  "visualReview": {
+    "finding": "Initial three sheets inspected; lying head/neck seeded coordinates were incorrect and corrected from base15 painted pixels. Corrected base sheet reinspected. Other head/neck points remain accessory-fitting seeds, not accepted part contacts.",
+    "artifacts": {
+      "attachment-head-neck-draft-idle-v1.png": "9f1f96f8a5f6229e6276c51a21d168c7504bf548b8f9b87b17a869fa718c7638",
+      "attachment-head-neck-draft-base-v1.png": "de36be3253a6de7b62dcd8a4ac606bc9766d97f884e18846b25ae0cfe36a1619",
+      "attachment-head-neck-draft-activities-v1.png": "f9dca44b7edddfc9760bf17bc8454d96b4d762653e7b0de2551e044d75bd50a0"
+    }
+  }
+}

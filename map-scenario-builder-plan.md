@@ -3216,3 +3216,9 @@ Authored pose-specific shoe polygons now include the exposed rear boot collars i
 `scripts/review-broad-palettes.mjs` renders all48 exact-body poses through the production resident painter in both facings and four contrasting material recipes,384 static views total. The recipes represent every offered skin, shirt, shorts and shoe swatch, without claiming every possible combination. All three final boards were visually inspected at their recorded108px sprite size; no new visible material-boundary defect was found.192 exact alpha comparisons pass, with no browser errors. Input and output hashes are recorded in `body-broad-v1/material-palette-facing-review-v1.json`.
 
 **Why:** a single teal palette can hide material ownership defects that contrasting cream, indigo or terracotta fabric exposes. This closes only the recorded static palette/facing review. Recolored native motion, biome lighting, fitted sockets/parts, portraits and public creator integration remain open alongside the original builder release gates.
+
+### Additional body shape: exact-bound attachment authoring draft
+
+Added `scripts/author-broad-attachment-draft.mjs` and `scripts/review-broad-attachment-draft.mjs`. The draft binds48 head/neck guide pairs to the exact broader-body ownership and prepared frame hashes using the existing production rig validator. All three overlay sheets were inspected. The initial sleeping coordinates were visibly misplaced and corrected from the lying artwork; the final base sheet was reinspected. No artwork pixels changed.
+
+**Why:** the other body family's accessory rig cannot safely be reused across this anatomy and its mixed source registrations. These are starting guides, not accepted accessory contacts. All hand sockets deliberately remain unrecorded; complete pose count is zero until visible hands and explicit occlusions are authored. Painted accessory fitting, facings, motion, portraits and public creator integration remain required.
