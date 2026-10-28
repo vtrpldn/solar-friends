@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "status": "Static palette/facing review passed for four recorded recipes; internal body only",
+  "why": "Inspect contrasting palettes and both facings through the actual resident painter",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-palette-facing-base-v1.png",
+      "sha256": "5895449ad6a203676fd2193404ca3e7a326ff573ecc63e44b853a6f458f5db87"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-palette-facing-idle-v1.png",
+      "sha256": "3aa346a04b5964fca7ee7c2718ab32736b1b5ddb05937b3131a76e998a100239"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-palette-facing-activities-v1.png",
+      "sha256": "5ae8ed354d17ce5a956d01057fdd56beea1ca68e004df8cb9eba60c37a316cc0"
+    }
+  ],
+  "recipes": [
+    {
+      "skin": "warm",
+      "shirt": "cream",
+      "shorts": "umber",
+      "shoes": "brown"
+    },
+    {
+      "skin": "sunlit",
+      "shirt": "indigo",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    {
+      "skin": "copper",
+      "shirt": "terracotta",
+      "shorts": "cream",
+      "shoes": "graphite"
+    },
+    {
+      "skin": "warm",
+      "shirt": "teal",
+      "shorts": "sage",
+      "shoes": "brown"
+    }
+  ],
+  "alphaComparisons": 192,
+  "renderedViews": 384,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v2.json": "59e5137258489f12a3d54caa0f8f6544998f5b0a573afb28b5943ae748c5fcef",
+    "scripts/review-broad-palettes.mjs": "82b1307c65048946a79e70335e90a20a07c0de91f02af5ca2f7c5f00a12fc35e",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed"
+  },
+  "errors": [],
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/material-palette-facing-base-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/material-palette-facing-idle-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/material-palette-facing-activities-v1.png"
+    ],
+    "finding": "All48 poses in both facings retain readable skin, vest, shorts and boots across four contrasting recipes. No new visible material boundary defect found at the recorded 108px display size.",
+    "scope": "All offered individual swatches represented, not every Cartesian combination. Neutral review background only; motion, biome lighting, fitted parts and public creator acceptance remain open."
+  }
+}

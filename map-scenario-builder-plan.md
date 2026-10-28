@@ -3210,3 +3210,9 @@ Material V2 preserves V1 as historical evidence and refines the actual source-sp
 Authored pose-specific shoe polygons now include the exposed rear boot collars in tending poses10/11 and the front collar in pose10. The front collar extension is deliberately excluded from pose11, where the painted forearm crosses it. Enlarged final source/mask/palette renders were inspected. Thirteen semantic landmarks, all48 default/alpha/mask-copy checks,192 material isolation comparisons, stale-binding refusal and cache bounds pass. Source artwork is unchanged.
 
 **Why:** the prior shared rectangles left visible brown bands above recolored boots. Anatomical occlusion differs by pose and cannot be inferred from the neighboring frame. Full palette/motion/lighting review and fitted-part/public creator integration remain unfinished; this does not close the original builder goal.
+
+### Additional body shape: contrasting palette and facing sweep
+
+`scripts/review-broad-palettes.mjs` renders all48 exact-body poses through the production resident painter in both facings and four contrasting material recipes,384 static views total. The recipes represent every offered skin, shirt, shorts and shoe swatch, without claiming every possible combination. All three final boards were visually inspected at their recorded108px sprite size; no new visible material-boundary defect was found.192 exact alpha comparisons pass, with no browser errors. Input and output hashes are recorded in `body-broad-v1/material-palette-facing-review-v1.json`.
+
+**Why:** a single teal palette can hide material ownership defects that contrasting cream, indigo or terracotta fabric exposes. This closes only the recorded static palette/facing review. Recolored native motion, biome lighting, fitted sockets/parts, portraits and public creator integration remain open alongside the original builder release gates.
