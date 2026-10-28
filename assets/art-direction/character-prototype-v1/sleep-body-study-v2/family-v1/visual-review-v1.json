@@ -1,0 +1,17 @@
+{
+  "status": "Internal complete-family composition reviewed; public activation not accepted",
+  "boardSha256": "053427235840f88334de8b0e7f0ce57783b6df53c6f8522f89f46bd4baf75f62",
+  "definitionSha256": "d26e8c44cc9104590a7336345e3033998b9c5505b6a669e4eb137a1d2d12b696",
+  "verificationSha256": "1d27b5d48518900d3e9e40f352d201d0201206145cc32271cec4978be3b04649",
+  "reviewedViews": [
+    "Both hairstyles with sleeveless and short-sleeve outfits",
+    "Walk pose 0, standing pose 8, seated pose 12, dedicated sleep pose 15",
+    "Same renderer width with each pose registered to its own ground contact"
+  ],
+  "findings": "The sleeping bodies retain a compact human scale beside the unchanged walking, standing and seated drawings. Both hair forms and shirt styles remain recognisable. Sleep has no stool; sitting retains its activity underlay. Static flat-background comparisons do not establish continuous motion, actual terrain contact, rain/night physical lighting, accessory continuity or player-facing usability.",
+  "limits": [
+    "Optional hat/facial hair excluded from this internal fixture and remain required before public activation",
+    "Existing public bundle descriptors and saved recipe versions are unchanged",
+    "Full world/transition and public creation/save/import gates remain open"
+  ]
+}

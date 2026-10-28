@@ -1,0 +1,43 @@
+{
+  "compared": 188,
+  "returns": 8,
+  "sleepReplaced": 4,
+  "contactChecks": 16,
+  "renderChecks": 4,
+  "copiedFrames": 200,
+  "retentionRefusals": 7,
+  "retainedAfterFamilyDisposal": true,
+  "missingContactProviderRefused": true,
+  "cacheAndLeasesBounded": true,
+  "previews": [
+    {
+      "clothed": false,
+      "hair": "curls",
+      "sleepSha256": "d2b71db86445fa6b24c4bbf0aaf1ade6b644a21ae46d20e2f71f95f782c50170"
+    },
+    {
+      "clothed": false,
+      "hair": "sidepart",
+      "sleepSha256": "ee1becbf0e0ebada2a420caae4f4b3c448f4d19ee5288d407a2c4195b33f017d"
+    },
+    {
+      "clothed": true,
+      "hair": "curls",
+      "sleepSha256": "1fbe37870bb12c9d4ed3f766b5e10b33563fb681c34bd2cfdf3134eeb576c18f"
+    },
+    {
+      "clothed": true,
+      "hair": "sidepart",
+      "sleepSha256": "947a69c960dae977c0ceae916ea37c74d06b7f65992c048163a8acf4876c2fb8"
+    }
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/sleep-body-study-v2/family-v1/definition-v1.json": "d26e8c44cc9104590a7336345e3033998b9c5505b6a669e4eb137a1d2d12b696",
+    "scripts/prepare-sleep-family.mjs": "acd46b8764856f828ec09b7f4882010e4b1ed595aa4862acba5b370be95e1b3d",
+    "scripts/verify-sleep-family.mjs": "9a3b694c3dcd0bee19b2a2a4768fcdb740af3fb8030b06c9695bf16398b4ce24",
+    "web/character-family-appearance.js": "248b6fa0a52f521720dda9faca5e83b711dbf77e6336e1769c3b4a5e4531c5e7",
+    "web/resident-family-provider.js": "0471a5c7240df835f9dc022057774c938d28f07cf2127a8369a629b7456454d6",
+    "web/resident-family-parts.js": "f205dd5e49ba109d38fe7255702048b8bd4f20183841a5b6c40920faa68c147f"
+  },
+  "scope": "Internal full 48-pose families, both hairstyles and outfits without optional accessories. Existing public bundles remain unchanged. World, motion, accessories and save/import acceptance are still required."
+}

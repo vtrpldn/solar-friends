@@ -16,6 +16,8 @@ const sheets=['base','idle','activities'],exact=(v,keys)=>v&&typeof v==='object'
 // eviction never invalidates a preview that is still in use.
 export async function prepareFamilyAppearanceLibrary({family,materials,owners,equipment,load,accessories=null,workEquipment=null,clothing=null,maxEntries=12,maxConcurrent=2,maxQueued=24}){
  if(typeof load!=='function'||typeof family?.frameForPose!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded complete-family composition limits.');
+ const hasContacts=Object.values(family.binding?.ownership?.sources??{}).some(source=>source.transform?.method==='contact-v1');
+ if(hasContacts&&typeof family.contactForPose!=='function')throw Error('Contact-registered families must provide their pose contacts.');
  const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment,clothing}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),garments=new Map(),records=new Map(),queue=[];
  let model=null,accessoryParts=null,active=0,closed=false,disposing=null;
  const alive=()=>{if(closed)throw Error('This character family library has been released.');},source=file=>{
@@ -118,7 +120,7 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
    }else{records.delete(key);records.set(key,record);}
    record.waiters++;let value;try{value=await record.promise;alive();}finally{record.waiters--;}
    record.users++;let released=false;
-   const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',frameForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');if(!sheets.includes(sheet)||!Number.isSafeInteger(index)||index<0||index>15)throw Error('Choose a registered family pose.');const normal=value.frames.get(sheet+':'+index);return sheet==='activities'&&pose?.sequenceIndex>=4?value.returns.get(index)??normal:normal;}});
+   const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',...(hasContacts?{contactForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');return family.contactForPose(sheet,index,pose);}}:{}),frameForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');if(!sheets.includes(sheet)||!Number.isSafeInteger(index)||index<0||index>15)throw Error('Choose a registered family pose.');const normal=value.frames.get(sheet+':'+index);return sheet==='activities'&&pose?.sequenceIndex>=4?value.returns.get(index)??normal:normal;}});
    return Object.freeze({provider,release(){if(released)return;released=true;record.users--;}});
   },
   info:()=>({entries:records.size,active,queued:queue.length,leases:[...records.values()].reduce((n,r)=>n+r.users,0),preparedHairFrames:caps.size,underlays:underlays.size,workTools:workTools.size,clothingPoses:garments.size,appearanceFrames:[...records.values()].reduce((n,r)=>n+(r.value?50:0),0),maxEntries,maxConcurrent,maxQueued,closed,accessories:accessoryParts?.info()??null}),

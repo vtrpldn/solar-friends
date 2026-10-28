@@ -1,0 +1,17 @@
+{
+  "command": "node scripts/verify-retained-family-parts.mjs",
+  "observedResult": {
+    "compared": 768,
+    "recovered": 8,
+    "retainedAfterEvictionAndDisposal": true,
+    "rejected": 3
+  },
+  "scope": "Existing public resident-parts-v2 retained providers, hairstyles/palettes and optional accessories against frozen frame hashes. Not public activation of the sleep study or total-memory acceptance.",
+  "inputs": {
+    "scripts/verify-retained-family-parts.mjs": "64e0a39cbf01c0559b67e670844219cf7f0e358d26e3068a278fbfab51b37988",
+    "web/resident-family-provider.js": "0471a5c7240df835f9dc022057774c938d28f07cf2127a8369a629b7456454d6",
+    "web/resident-family-parts.js": "f205dd5e49ba109d38fe7255702048b8bd4f20183841a5b6c40920faa68c147f",
+    "web/character-family-appearance.js": "248b6fa0a52f521720dda9faca5e83b711dbf77e6336e1769c3b4a5e4531c5e7",
+    "assets/art-direction/character-prototype-v1/body-family-relaxed-v1/accessories-v1/review-materials-v11.json": "b4a8b6e479023c2b29e4d8d1d34518bc6caa1c74a6643179753f9034e876f291"
+  }
+}
