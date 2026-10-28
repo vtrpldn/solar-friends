@@ -1,0 +1,58 @@
+{
+  "scope": "Limited encoded watering review for two hairstyles, cream shirt and hat/beard, daylight and mirrored night. No public outfit, complete world or physical display pacing acceptance.",
+  "verificationSha256": "e2a2cb7cdc3f52385f862d5a11ffb29a7dbced81440e19a6c35c0836bcada497",
+  "decoderReportSha256": "dfb044b9ccafad4264c3588055977bbfbe5fa986c765c7ff6e622468aa3e7c35",
+  "runtimeSequence": [
+    4,
+    5,
+    6,
+    7,
+    6,
+    5
+  ],
+  "wateringSources": [
+    {
+      "index": 4,
+      "collection": "short-sleeve-relaxed-activities-4-v2",
+      "sourceVersion": "v1",
+      "registrationTag": "v1-owned"
+    },
+    {
+      "index": 5,
+      "collection": "short-sleeve-relaxed-activities-5-v1",
+      "sourceVersion": "v4",
+      "registrationTag": "v4-owned-arm2"
+    },
+    {
+      "index": 6,
+      "collection": "short-sleeve-relaxed-activities-6-v1",
+      "sourceVersion": "v5",
+      "registrationTag": "v5-owned-arm2"
+    },
+    {
+      "index": 7,
+      "collection": "short-sleeve-relaxed-activities-7-v1",
+      "sourceVersion": "v4",
+      "registrationTag": "v4-owned-arm4"
+    }
+  ],
+  "visualFindings": "Both decoded full-cycle day/night boards and all six close transition boards per hairstyle inspected. The watering can follows the native carrying/leaning hands; sleeves stay on the shoulders and the full hem remains present through lean and return. No bare upper-arm restoration or tool/sleeve collision seen in these samples.",
+  "rendererSha256": {
+    "web/character-family-appearance.js": "601dbdd2c835ddbeafa822d643acdccf8a378c1ba7d65b0d14e90416e26bd68c",
+    "web/character-equipment.js": "6d377cb763557cd82ac9715e751f16c0091ccddd2eebcda92b0f9ae0cbcdc891",
+    "web/character-foreground.js": "c562dfccddeec423e775824e70e78eec266c9adc9ef58590293ecba6d6bf027c",
+    "web/character-clothing.js": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69"
+  },
+  "mixedChecks": {
+    "changed": 320,
+    "unchanged": 64,
+    "returns": 16,
+    "cacheReuses": 320,
+    "releasedRefusals": 8,
+    "loadedGarmentImages": 34,
+    "colourPreparations": 272,
+    "colourPeakSources": 2,
+    "colourLiveSources": 0,
+    "colourDisposals": 272
+  }
+}

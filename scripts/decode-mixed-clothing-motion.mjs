@@ -13,7 +13,7 @@ assert(report.movies&&Object.keys(report.movies).length===2,'Expected both hairs
 for(const [key,entry]of Object.entries(report.movies)){
  assert(/^[a-z0-9-]+$/.test(key));
  const clip=entry.clip??entry.recordings?.[0]?.clip;
- assert(['sit','look','stretch','wave','relax','cook'].includes(clip));
+ assert(['sit','look','stretch','wave','relax','cook','water'].includes(clip));
  assert.equal(entry.recordings.length,2);
  for(const [index,segment]of entry.recordings.entries()){
   assert.equal(segment.clip,clip);assert.equal(segment.night,index);
@@ -26,7 +26,7 @@ for(const [key,entry]of Object.entries(report.movies)){
  assert.equal(metadata.streams[0].width,600);assert.equal(metadata.streams[0].height,320);
  assert(Number(metadata.streams[0].nb_read_frames)>=24);
  assert(Number(metadata.format.duration)>=11.8);
- const samples=key+'-decoded.png',transitionStarts=clip==='stretch'?['0.5','1.1','2.35','2.975']:clip==='wave'?['0.375','1.35','1.85']:clip==='relax'?['0.8','1.8','3.8','4.8']:clip==='cook'?['0.2','0.55','0.9','1.2','1.55','1.9']:['1.1'];
+ const samples=key+'-decoded.png',transitionStarts=clip==='stretch'?['0.5','1.1','2.35','2.975']:clip==='wave'?['0.375','1.35','1.85']:clip==='relax'?['0.8','1.8','3.8','4.8']:clip==='cook'?['0.2','0.55','0.9','1.2','1.55','1.9']:clip==='water'?['0.35','0.85','1.35','1.85','2.35','2.85']:['1.1'];
  const commands=[['-v','error','-threads','1','-i',movie,'-vf','fps=1,scale=300:160,tile=6x2','-frames:v','1','-y',folder+'/'+samples]],boardFiles=[samples];
  for(const [index,start]of transitionStarts.entries()){
   const file=key+'-transition'+(index?'-'+(index+1):'')+'-decoded.png';boardFiles.push(file);
