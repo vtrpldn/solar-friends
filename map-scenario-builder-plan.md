@@ -2639,3 +2639,11 @@ All 48 internal shirt poses now pass the mixed appearance integration check: 384
 Both actual feeding recordings were independently decoded. Reviewed whole-cycle daylight/mirrored-night boards and six closer daylight transitions per hairstyle: sleeves, basket ownership, grain release/return, neckline, hem and ground placement remain coherent. The missing-feed recording guard also refuses incomplete inputs. Exact fingerprints and scoped findings are in `short-sleeve-relaxed-feed-motion-v1/motion-review-v1.json`.
 
 **Why:** customizable clothing must survive the complete feeding cycle, including the return frames that remove grain. Full public/world outfit integration, broader appearance choices, dedicated sleep art, and the original biome/campaign/performance/memory/storage/recovery/usability requirements remain open. This internal milestone does not establish exhaustive playback or physical display pacing.
+
+### Package the complete reviewed short-sleeve source set
+
+`scripts/prepare-bundled-shirt.mjs` packages all 48 reviewed registrations and 41 distinct PNGs into the frozen `relaxed-shirt-v1` asset bundle. It checks the feeding motion review's integration evidence hash, complete pose coverage, exact source and registration hashes, body-pose identity fields, duplicate-source byte equality and the registration size bound. Identical registration aliases are resolved deterministically only after byte equality. Source paint is copied unchanged. A second build passes frozen-file equality checks and produces the same bundle hash.
+
+The registration file is 649,942 bytes and PNG transfer size is 19,073,941 bytes; this is not decoded memory or performance acceptance. The bundle is separate and not loaded or offered publicly yet. Its source provenance and byte-pinned index support the next loader and saved-recipe integration.
+
+**Why:** the normal game must load a closed, reproducible catalogue rather than development review folders or player-supplied artwork paths. Public outfit choice, world rendering, complete appearance range and all original release gates remain pending.
