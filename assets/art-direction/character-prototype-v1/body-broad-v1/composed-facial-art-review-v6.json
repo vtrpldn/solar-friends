@@ -1,0 +1,17 @@
+{
+  "status": "Internal recipe/runtime integration checked; complete facial art acceptance remains open",
+  "why": "Make facial hair an explicit versioned appearance choice shared by world frames and portrait",
+  "outputsInspected": {
+    "composed-facial-base-v6.png": "db13fb7e79942e6be077db19d1fa45a023a36c6732098c41a2cafa4fe2292d7b",
+    "composed-facial-idle-v6.png": "5735a2c234a8cf3164e12bde6b3d46fb97371a2050bdc60e2c1eb7a5fd2a55ef",
+    "composed-facial-activities-v6.png": "62c8c949468acee6562529eaada371ea49a3d6eb16b8351785ac4d7ea8b54dc0",
+    "composed-facial-portrait-v6.png": "da0c03959d220b339893d30c981dabb4fbe7c3386f82277709a4a57286d55609"
+  },
+  "runtimeReviewSha256": "39ce7a8052aa8aeaceb28a227948a17f55bd046ba759fe497222e57eaa3021fa",
+  "findings": [
+    "Actual integrated48-pose chestnut/straw-hat sheets and matching portrait inspected. Sleeping retains the dedicated lying facial source; hats remain absent during sleep.",
+    "Recipe schema3 adds explicit none/short-beard choice and an approved facial color independently of hairstyle and body materials. Definition schema4 remains an internal asset revision.",
+    "Facial paint is baked during owned appearance preparation; no second retained facial animation cache. Only intersecting authored hand pixels need foreground composition, and the exact-body/overlap alpha checks remain enforced.",
+    "Some raised/bent jaw/moustache fits still need correction. Full facial native motion, color/hat/hair pairwise visual review, remaining clothing, public creator/save/share integration and original release gates remain unfinished."
+  ]
+}

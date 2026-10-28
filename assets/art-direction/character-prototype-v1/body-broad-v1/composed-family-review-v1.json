@@ -2,6 +2,7 @@
   "status": "Internal bundle verification passed; portrait review pending",
   "poses": 48,
   "equippedPoseDifferences": 0,
+  "returnPoseDifferences": 0,
   "refusals": 14,
   "partialFailureClean": true,
   "sharedRecipeLeases": true,
@@ -13,11 +14,11 @@
   "allOwnedReleased": true,
   "borrowedSources": 18,
   "inputs": {
-    "web/character-composed-family.js": "27aa19d43d43f6e9b35f22beec8a6bae38ab1a200b4c5a9bc214a4babbb522c7",
-    "web/character-equipped-family.js": "c6a241023d0285ce3966a900070fe002224531747ea4511d7f38bb7ccfb24cd0",
+    "web/character-composed-family.js": "5e92065bff7dd74547b1250c571cad17bc2ec5bf2d0f7a9cd448f4844ef28f3a",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e",
     "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
     "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
-    "scripts/verify-composed-resident-family.mjs": "5c697a1b389f035e854600747748690f4196a0385d54d5d04b93188d88b65bec",
+    "scripts/verify-composed-resident-family.mjs": "d1d3dc2e1a159cb7af59f647697a119690fc538269f3b417525c5a094bbcbb1c",
     "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v1.json": "ef4e01d54c9b7b26fd7bd04b02761bad40d9e9e1f8aeaff5f68aba8c21bf88ca"
   }
 }

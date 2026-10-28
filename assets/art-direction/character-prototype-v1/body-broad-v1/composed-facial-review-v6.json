@@ -1,0 +1,17 @@
+{
+  "status": "Internal runtime checks passed; art review remains incomplete",
+  "changed": 50,
+  "facialColourAlphaComparisons": 150,
+  "refusals": 10,
+  "liveBefore": 123,
+  "sharedBodyLive": 193,
+  "allOwnedReleased": true,
+  "borrowedSources": 39,
+  "changesConfinedToRegisteredPaint": true,
+  "inputs": {
+    "scripts/verify-composed-facial-family.mjs": "138bfc61fb27e0b257205820299499c9977a50fdd5b631d004ecc8c5d95b6386",
+    "web/character-composed-family.js": "5e92065bff7dd74547b1250c571cad17bc2ec5bf2d0f7a9cd448f4844ef28f3a",
+    "web/character-facial-family.js": "59da653c4233191a15a4056fc8dde25ab5ce910c57d2806a26f219b202aa208d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v6.json": "594fe3b4088c2eb2d3dac827095c3ca9980d8003f1608add6d67f514c7014b7a"
+  }
+}
