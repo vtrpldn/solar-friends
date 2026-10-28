@@ -1,0 +1,8 @@
+{
+  "status": "Static tending pose source reviewed; continuous tending and public integration pending",
+  "sourceSha256": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+  "compositionReportSha256": "d2ec272137068e3800e343551c10d9a091badea188bae26ee823d2213ceefe14",
+  "paletteReportSha256": "c8fcda8b6812ba7d93467ad36abca8f024174038f25a7aefd5c6ce157028982d",
+  "visualFindings": "Inspected unchanged generated source, six character compositions, enlarged torso, day/night/mirrored guides, plain/equipped palettes and measured waist. Warm cream folds match the existing outfit. Native foreground v2 restores the complete near arm below the cuff and removes the squared cloth overlap. Face, trousers and boots are exactly preserved by source-bound checks. Continuous fold and cuff consistency remains a motion gate.",
+  "scope": "One internal static source; no complete animation, world or public outfit acceptance."
+}

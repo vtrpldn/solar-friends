@@ -1,0 +1,23 @@
+{
+  "status": "rejected; inactive",
+  "reason": "Generated edge opacity below predeclared minimum240",
+  "uncovered": [
+    [
+      93,
+      164,
+      219
+    ],
+    [
+      101,
+      176,
+      201
+    ],
+    [
+      102,
+      177,
+      200
+    ]
+  ],
+  "sourceSha256": "8d4a9991cbd2ee859c60b712a732d72682d667093563327ead65a2b627bfa404",
+  "generatedPaintEdited": false
+}

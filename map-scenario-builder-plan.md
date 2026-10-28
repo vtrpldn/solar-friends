@@ -2577,3 +2577,14 @@ Activities-10 and 11 now pass strict guide coverage: all 893 and 885 original op
 Both guides are frozen before paint, with collar/armpit margin, original-material-bound arm foregrounds and independently preserved trousers/boots. Native contexts were inspected. Exact prompts and input hashes are retained for generation. No painted source for either pose has been accepted yet.
 
 **Why:** deep kneeling places the hem directly beside the rear boot, requiring faithful sampling and local clearance before painting. The integrated/static pose counts and all original release requirements remain unchanged.
+
+
+### Third painted tending source
+
+Activities-10 now has a reviewed static source in `short-sleeve-relaxed-activities-10-v1`, source v2/registration v2-owned-arm2. Source v1 remains explicitly rejected for incomplete hem opacity. Regeneration requested a small opaque hem reserve within the frozen envelope; all source coverage, face and lower-body criteria remain unchanged. The generated PNGs remain byte-identical to their original outputs.
+
+The selected source covers all 893 original opaque shirt pixels. Six compositions pass 37,728 exact protected-face channel checks, 98,832 preserved trousers/boots channel checks, 22,590 native foreground alpha checks and nine invalid-registration refusals. Forty-eight colour/accessory compositions pass 2,359,296 alpha and 583,920 protected lower-body checks. Source, six-composition board, torso, day/night and mirrored guides, palettes and measured waist were inspected. Native foreground v2 removes the squared near-arm overlap found in enlarged review. Exact evidence hashes appear in `static-review-v2-owned-arm2.json`.
+
+Activities-11 paint attempts v1, v2 and v3 remain explicitly rejected and inactive. Generation continues to soften or round the fine boot-notch/side contour despite the passing analytical guide. No failed source was promoted or locally retouched, and no opacity threshold was relaxed.
+
+**Why:** deep tending needs faithful clothing around the bent arm, raised knee and rear boot. This reaches 43 internal static shirt sources; integrated motion acceptance remains 40. One tending and four feeding sources, full tending/equipment motion, public/world outfit integration, wider resident choices, dedicated sleep artwork and all original builder release requirements remain open.

@@ -1,0 +1,18 @@
+{
+  "status": "rejected; inactive",
+  "reason": "Generated hem opacity below predeclared minimum240 at original shirt pixels",
+  "uncovered": [
+    [
+      99,
+      175,
+      233
+    ],
+    [
+      101,
+      175,
+      233
+    ]
+  ],
+  "sourceSha256": "d3512bfd5afc4f06d06af16548d8f76510e1e42a5152e58886d3c56b85061e97",
+  "generatedPaintEdited": false
+}
