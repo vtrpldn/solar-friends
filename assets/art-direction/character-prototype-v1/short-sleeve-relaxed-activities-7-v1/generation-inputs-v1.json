@@ -1,0 +1,18 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "47ddce9cab13a50d3eeabc3107183b7df11ec0c43c9e07042c7107c108510c74",
+  "anatomyReviewSha256": "c862b8fe8b81212df5489e50883cef89609dac950e9c0dcdcc04faf06e35e167",
+  "foregroundIntentSha256": "7cc9b525b55e44f29f3949ca81aeb4f985d2d3c37723b4b0e3cdf9c8bc66d510",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-7-v1/mask.png",
+      "role": "Exact native watering shirt silhouette frozen before paint",
+      "sha256": "f681c8ba304e6365c27adbe0f100706d011c45b91fcae4d9908b12e568078e27"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-0-v3/candidate-v1.png",
+      "role": "Previously reviewed warm cream cotton paint style only; not geometry",
+      "sha256": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6"
+    }
+  ]
+}

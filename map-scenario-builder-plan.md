@@ -2508,3 +2508,9 @@ All 36 internal shirt poses pass eight complete-appearance builds: 288 changed r
 Both hairstyle cooking recordings use the actual 0/1/2/3/2/1 cycle. Decoded daylight/mirrored-night boards and all six close transition boards per hairstyle were visually inspected for sleeves, grip, tool overlap and loop return. Fingerprints and findings are in `short-sleeve-relaxed-cook-motion-v3/motion-review-v1.json`. Watering body references are prepared next.
 
 **Why:** resident customization must remain coherent while residents handle equipment. Twelve activity shirt poses, complete public/world outfit integration, broader body/face/clothing choices, dedicated sleep artwork, and the original full biome/campaign/performance/memory/storage/recovery/usability requirements remain open.
+
+### Watering shirt guides
+
+Prepared separate activities 4–7 shirt silhouettes against the native leaning/carrying poses. Full original-shirt coverage is 1,050/1,050, 935/935, 1,049/1,049 and 919/919 pixels, with zero protected trouser/shoe overlap. All four guides are frozen before paint; foreground v2 removes disconnected original fabric fragments seen in the first arm previews. Native lower-body ownership and exact generation prompts/reference roles are retained beside each guide.
+
+**Why:** watering changes the neckline, shoulder and waist geometry as residents lean forward. These are analytical guides only; generated paint, composed palette, equipment and motion review remain pending. The accepted integrated shirt milestone remains 36 poses, with all original broader plan requirements still open.

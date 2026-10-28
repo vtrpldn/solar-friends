@@ -1,0 +1,45 @@
+{
+  "status": "pre-paint review criteria",
+  "materialRevision": "v11",
+  "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+  "measuredWaistLine": [
+    [
+      0,
+      128
+    ],
+    [
+      110,
+      128
+    ],
+    [
+      119,
+      133
+    ],
+    [
+      130,
+      137
+    ],
+    [
+      142,
+      139
+    ],
+    [
+      153,
+      138
+    ],
+    [
+      160,
+      135
+    ],
+    [
+      255,
+      135
+    ]
+  ],
+  "lowerProtection": "Original shorts pixels at least two native pixels below the measured per-column waistline and every shoe pixel must remain unchanged. Original trousers/shoes also receive independent native RGBA ownership.",
+  "collarProtection": "Every opaque original shirt-labelled pixel must be covered, including the full torso and hem, not only rows above 134.",
+  "scope": "Original activities-7 pre-paint watering criteria; full original shirt coverage, native arms/hands and lower-body ownership.",
+  "waistMeasurementSource": "body-family-relaxed-v1/materials-v11.json",
+  "requireFullShirtCoverage": true,
+  "waistMeasurementExtension": "Constant extension beyond the original first/last landmarks matches the native material sampler; measured interior points are unchanged."
+}
