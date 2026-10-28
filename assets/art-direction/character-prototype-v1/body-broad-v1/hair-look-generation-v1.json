@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "why": "The existing standing cap leaves rear scalp exposed in upward-looking broad-body poses",
+  "tool": "Built-in image_gen, transparent background",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/idle-look-candidate-v3.png",
+      "role": "Exact four-pose geometry and original canvas spacing",
+      "sha256": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+      "role": "Painted chestnut side-part hairstyle only",
+      "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-look-sidepart-candidate-v1.png",
+      "sha256": "89250dee52bbff3199c5acccc7e0599e150c5baa7405c2895b53d2ad357ee30e",
+      "status": "Rejected",
+      "findings": [
+        "Right column caps incorrectly face left",
+        "Caps approximately twice required source head width",
+        "Requested head-position registration not preserved"
+      ],
+      "scope": "Source visual inspection; not integrated or normalized"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-look-sidepart-candidate-v2.png",
+      "sha256": "afb3a6f26a4e72c81347f6e9bdfe7cb6c11e39ab2fd1926f4c1e72fafa655edf",
+      "status": "Accepted only for further internal fit development",
+      "findings": [
+        "All four caps face right",
+        "Requested literal source coordinates were not preserved",
+        "One common atlas scale of0.25 and explicit ear anchors produce fitting looking poses without shape warping"
+      ],
+      "evidence": "hair-rigid-fit-draft-idle-v3.png inspected"
+    }
+  ],
+  "next": "Dedicated lying sleep hair, complete registration, combinations and native motion review",
+  "prompts": {
+    "v1": "Create a transparent HAIR-ONLY overlay atlas for Solar Friends. Image 1 is the precise pose/geometry reference: four bald heads in a 2x2 arrangement on a square canvas. Image 2 is the hairstyle and painted style reference: chestnut brown short swept side-part, broad painted locks, warm upper-left light, restrained highlights. Output ONLY four matching hair caps on true transparency, at exactly the same head positions and orientations as Image 1, preserving its square canvas and spacing. Imagine first fitting hair naturally onto each existing bald scalp including full back-of-head coverage down to just above and behind the visible ear, then remove ALL faces, ears, skin, bodies, clothes and boots, leaving only the hair pixels. Each cap must be shaped individually for its corresponding upward-looking head angle. No bald crescent at the rear. No face fragments, no scalp fragments, no ears, no text, no grid, no shadows or background. Preserve natural short side-part style from image2; do not make long hair, hats, helmets or wigs. Four complete separated hair-only silhouettes with generous transparent margins. This is a layered game sprite asset, not a new character illustration.",
+    "v2": "Transparent 1254x1254 square GAME OVERLAY, not a filled sprite sheet. Four SMALL chestnut short side-part HAIR-ONLY caps, aligned to the exact four bald heads of reference1. Reference2 supplies only painted hairstyle. All FOUR heads face RIGHT, so all FOUR caps must face RIGHT; absolutely NO mirrored left-facing cap. Preserve sparse spacing of reference1. Each hair cap should be only about 200 pixels WIDE and 155 pixels TALL on the1254px canvas, leaving most canvas empty. Cap1 bounding area approximately x280..480,y70..230; cap2 x765..965,y70..230; cap3 x270..470,y660..820; cap4 x770..970,y660..820. These correspond to source bald scalps, do not enlarge caps to fill quadrants. Full coverage of rear left scalp, curved ear cutout lower-left, swept fringe toward RIGHT forehead. Distinct upward gaze head angle in each corresponding source pose. Paint broad warm chestnut locks matching reference2, upper-left light, soft shaded edges, no gloss. Output ONLY these four small separate hair layers on true transparent background. No bodies, heads, faces, skin, ears, clothing, props, text, grid, background or cast shadows. The four cap silhouettes must fit the bald scalp outlines in reference1 at their original displayed size, not twice the head width."
+  }
+}
