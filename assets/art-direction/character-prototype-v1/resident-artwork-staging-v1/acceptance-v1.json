@@ -1,0 +1,39 @@
+{
+  "scope": "Staged resident preparation and ordinary twelve-person import cancellation/rollback. Not all startup/session transitions, total memory, sustained performance or complete builder acceptance.",
+  "coreChecks": [
+    "two-worker scheduling",
+    "abort before start",
+    "button/Escape cancellation",
+    "no further scheduling after abort",
+    "no stale installation/progress",
+    "failed preparation retains live cast",
+    "copied queued inputs",
+    "atomic prepared cache installation",
+    "rejected duplicate/forged/mismatched providers",
+    "single-use and stale rollback refusal"
+  ],
+  "regressions": {
+    "appearanceCache": "PASS",
+    "residentLibraryOriginalPoses": 240,
+    "residentLibraryFacingLightingComparisons": 520,
+    "residentPartsReviewedPoses": 288,
+    "residentPartsFeedingReturns": 12,
+    "publicCreatorScenarioCheckpointFlow": "PASS"
+  },
+  "cacheEntriesLimitUnchanged": 16,
+  "maximumStagedResidents": 12,
+  "transientStagedProvidersExcludedFromCacheMemoryCounter": true,
+  "nativeCodeChanged": false,
+  "inputs": {
+    "web/appearance-cache.js": "7e6a97cd70ec569bcf9e36f548632dd33ad7136f30498ac9ad4c179816676a58",
+    "web/resident-artwork-preparation.js": "d81ccd101798de1c53b8e5f084104916d954771652c8193e19c81d545721c8bf",
+    "web/resident-parts.js": "dad0c2da021a0d2db1098570e3c993fef560cb5be2271543c875e187a8ed8df2",
+    "web/resident-appearance-library.js": "fa29943b9223e88113263ea2f9b8d1b61716f62b2d8b4c6b2f9b05be11ee1e9f",
+    "web/main.js": "abdf3ab87fd992f8961ae736f662fdccdb02c04c4a741b74fc2918e12e8181d4",
+    "web/index.html": "13ec91b265153e8b9aaebdff30d9f4e43cb361b5b05db0ac72f12fe039605a01",
+    "web/style.css": "d91266b7b5fb390e669a345a224fa4ff7949cd3ab559eea20aa284d9fc3bc4b4",
+    "scripts/verify-resident-artwork-preparation.mjs": "fac9339f4334a500bd066610fdce693c1059f0ed42ea29faea82a5f0901bd095",
+    "scripts/verify-resident-loading-ui.mjs": "9e20522a14420ac4b2094179f73f19305c1b56a6572f6a5e3845ca58fadd8024",
+    "scripts/verify-resident-parts.mjs": "6751166944598822215bb3b04868edbf29070f8a6f80cc71213bb067b71cad5b"
+  }
+}

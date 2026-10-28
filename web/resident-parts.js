@@ -19,7 +19,7 @@ const toolFiles=Array.from({length:16},(_,i)=>i<4?`cook-equipment-pose-${i}-v${i
 const keyFor=recipe=>JSON.stringify(validateResidentPartRecipe(recipe));
 // Sources are bundled, pose-bound and hash-checked. A recipe cannot name a file.
 export function createResidentPartLibrary(){
- const sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,hatWork=null,facialWork=null,facialPrepared=null,pinned=new Set(),familyComposer=null,workingFamilyComposer=null,shirtFamilyComposer=null;
+ const preparedKeys=new WeakMap(),sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,hatWork=null,facialWork=null,facialPrepared=null,pinned=new Set(),familyComposer=null,workingFamilyComposer=null,shirtFamilyComposer=null;
  const read=async file=>{if(!/^[a-z0-9-]+\.json$/.test(file))throw Error('Choose bundled resident registrations.');const response=await fetch(root+file);if(!response.ok)throw Error('Cannot load resident part registration.');return response.json();};
  const load=file=>{
   if(!/^[a-z0-9-]+\.png$/.test(file))return Promise.reject(Error('Choose bundled resident artwork.'));
@@ -66,8 +66,14 @@ export function createResidentPartLibrary(){
   return recipe.hat==='straw-v1'?composeHatProvider({provider,binding:base.binding,...await hat()}):provider;
  }});
  return Object.freeze({
-  prepare(recipe){let checked;try{checked=validateResidentPartRecipe(recipe);}catch(error){return Promise.reject(error);}return cache.get(keyFor(checked),checked);},
+  prepare(recipe){let checked;try{checked=validateResidentPartRecipe(recipe);}catch(error){return Promise.reject(error);}const key=keyFor(checked);return cache.get(key,checked).then(provider=>{preparedKeys.set(provider,key);return provider;});},
   provider(recipe){const provider=cache.peek(keyFor(recipe));if(!provider)throw Error('These resident parts are still loading.');return provider;},
+  installPrepared(recipes,providers){
+   if(!Array.isArray(recipes)||!Array.isArray(providers)||recipes.length>12||recipes.length!==providers.length)throw Error('Install at most twelve prepared residents.');
+   const keys=recipes.map(keyFor);for(let i=0;i<keys.length;i++)if(preparedKeys.get(providers[i])!==keys[i])throw Error('Use the provider prepared for this exact resident recipe.');
+   const previous=pinned;pinned=new Set(keys);
+   try{const undo=cache.install([...new Map(keys.map((key,i)=>[key,providers[i]]))]);return ()=>{if(!undo())return false;pinned=previous;return true;};}catch(error){pinned=previous;throw error;}
+  },
   setActive(recipes){if(recipes.length>12)throw Error('Keep at most twelve active resident appearances.');pinned=new Set(recipes.map(keyFor));},
   cacheInfo:()=>({...cache.info(),preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,facialOverlayFrames:facialPrepared?.cacheInfo().entries??0,facialOverlayRgbaBytes:facialPrepared?.cacheInfo().rgbaByteUpperBound??0,maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size,familyCache:familyComposer?.info()??null,workFamilyCache:workingFamilyComposer?.info()??null,shirtFamilyCache:shirtFamilyComposer?.info()??null}),
  });

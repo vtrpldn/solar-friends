@@ -14,11 +14,13 @@
     <link rel="stylesheet" href="main-menu.css?v=title-screen-1">
   </head>
   <body>
-    <div id="loading">
+    <dialog id="loading" open aria-labelledby="loading-title">
       <span class="sunmark">☀</span>
-      <h1>Solar Friends</h1>
-      <p id="load-status">Preparing Vila Aurora…</p>
-    </div>
+      <h1 id="loading-title">Solar Friends</h1>
+      <p id="load-status" role="status" aria-live="polite">Preparing Vila Aurora…</p>
+      <progress id="load-progress" max="1" value="0" hidden aria-label="Residents prepared"></progress>
+      <button id="cancel-resident-loading" type="button" hidden>Cancel loading</button>
+    </dialog>
     <header>
       <a class="brand" href="./" aria-label="Solar Friends"
         ><span class="sunmark">☀</span

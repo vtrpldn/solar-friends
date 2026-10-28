@@ -49,6 +49,13 @@ export function createResidentAppearanceLibrary({base=[],idle=[],activities=[],l
   provider(appearance){const checked=validateResidentAppearance(appearance);if(checked.schema===2){if(!parts)throw Error('These resident parts are still loading.');return parts.provider(checked);}return entry(checked).provider;},
   portraitFrame(appearance){const checked=validateResidentAppearance(appearance);if(checked.schema===2){if(!parts)throw Error('These resident parts are still loading.');return parts.provider(checked).frameForPose('base',8);}return entry(checked).provider.frameForPose('base',8);},
   isReady(appearance,{sheets:requested=['base']}={}){try{if(!Array.isArray(requested)||!requested.length||requested.some(sheet=>!sheets.includes(sheet)))return false;const checked=validateResidentAppearance(appearance);return checked.schema===2?!!parts?.provider(checked):entry(checked).ready(requested);}catch{return false;}},
+  installPrepared(appearances,providers){
+   if(!Array.isArray(appearances)||!Array.isArray(providers)||appearances.length>12||appearances.length!==providers.length)throw Error('Install at most twelve prepared resident appearances.');
+   const checked=appearances.map(validateResidentAppearance),custom=[],prepared=[];
+   for(let i=0;i<checked.length;i++){if(checked[i].schema===2){custom.push(checked[i]);prepared.push(providers[i]);}else if(entry(checked[i]).provider!==providers[i])throw Error('Use the provider prepared for this resident.');}
+   if(custom.length&&!parts)throw Error('These resident parts are still loading.');
+   const previous=active,undo=parts?.installPrepared(custom,prepared);active=custom;return ()=>{if(undo&&!undo())return false;active=previous;return true;};
+  },
   setActive(appearances){if(!Array.isArray(appearances)||appearances.length>12)throw Error('Keep at most twelve active resident appearances.');active=appearances.map(validateResidentAppearance).filter(recipe=>recipe.schema===2);parts?.setActive(active);},
   partCacheInfo:()=>parts?.cacheInfo()??null,
   prepare(appearance,{sheets:requested=sheets}={}){

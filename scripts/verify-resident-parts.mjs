@@ -16,6 +16,9 @@ try{
   }
   const bad=residentPartRecipe();for(const changed of [{...bad,schema:3},{...bad,assetVersion:'future'},{...bad,body:'relaxed-v1'},{...bad,assetVersion:'resident-parts-v2'},{...bad,hair:'unknown'},{...bad,preset:'nina'},{...bad,materials:{...bad.materials,skin:'reference'}}]){let denied=false;try{await library.prepare(changed);}catch{denied=true;}if(!denied)throw Error('Unsupported parts accepted');}
   const cache=library.cacheInfo();if(cache.preparedHairFrames!==96||cache.preparedHairRgbaBytes!==96*256*256*4||cache.entries!==6||cache.maximumFrames!==800||cache.rgbaByteUpperBound!==6*50*256*256*4)throw Error('Wrong bounded full-appearance cache accounting');
+  const preparedRecipe=residentPartRecipe({hair:residentPartCatalog.hairstyles[0],materials:palettes[0]}),held=library.provider(preparedRecipe);
+  for(const [recipes,providers]of [[[preparedRecipe],[{}]],[[{...preparedRecipe,materials:{...preparedRecipe.materials,shirt:'terracotta'}}],[held]],[[preparedRecipe],[]]]){let refused=false;try{library.installPrepared(recipes,providers);}catch{refused=true;}if(!refused||library.provider(preparedRecipe)!==held||library.cacheInfo().entries!==6)throw Error('Prepared installation accepted a forged/mismatched provider or changed the cache');}
+  const undo=library.installPrepared([preparedRecipe],[held]);if(library.provider(preparedRecipe)!==held||!undo()||undo())throw Error('Prepared installation/rollback lost its exact provider or repeated');
   return {checked,recovery,cache};
  });assert.equal(result.checked,288);assert.equal(result.recovery,12);assert.deepEqual(errors,[]);console.log('PASS: 288 complete part-pose comparisons with reviewed artwork, 12 feeding return states, native catalog parity, shared composition, strict refusal and bounded cache.',JSON.stringify(result.cache));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

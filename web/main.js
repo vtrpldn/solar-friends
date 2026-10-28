@@ -3,6 +3,7 @@ import {paintResourceSite} from './resource-site-art.js';
 import {renderScenarioJournal,resetScenarioJournalUI} from './scenario-journal-ui.js';
 import {residentAppearanceInfo,residentLookKeys} from './resident-look.js';
 import {createResidentAppearanceLibrary} from './resident-appearance-library.js';
+import {prepareResidentArtwork} from './resident-artwork-preparation.js';
 import {paintPreparedResidentPortrait} from './resident-portrait.js';
 import {installResidentIdentity} from './resident-identity.js';
 import {relationshipStrength} from './relationships.js';
@@ -170,12 +171,24 @@ const activityAnimations = residentLookKeys.map(name => {
 });
 const residentAppearances=createResidentAppearanceLibrary({base:animations,idle:idleAnimations,activities:activityAnimations});
 let residentArtworkLoading=false,residentArtworkRevision=0;
-function prepareResidentCast(snapshot){const appearances=snapshot.residents.map(p=>p.appearance);residentAppearances.setActive(appearances);return Promise.all(appearances.filter(a=>!residentAppearances.isReady(a,{sheets:['base','idle','activities']})).map(a=>residentAppearances.prepare(a)));}
-function ensureResidentArtwork(snapshot,ready,failed=()=>{}){
-  const revision=++residentArtworkRevision,appearances=snapshot.residents.map(p=>p.appearance);residentAppearances.setActive(appearances);
-  if(appearances.every(a=>residentAppearances.isReady(a,{sheets:['base','idle','activities']}))){if(residentArtworkLoading)$('#loading').hidden=true;residentArtworkLoading=false;return false;}
-  residentArtworkLoading=true;$('#loading').hidden=false;$('#load-status').textContent='Preparing resident artwork…';
-  prepareResidentCast(snapshot).then(()=>{if(revision===residentArtworkRevision){residentArtworkLoading=false;$('#loading').hidden=true;ready();}},error=>{if(revision===residentArtworkRevision){$('#load-status').textContent='Resident artwork could not load. Reload to retry; your saved village is preserved.';console.error(error);failed(error);}});
+function prepareResidentCast(snapshot,options={}){
+  return prepareResidentArtwork(snapshot.residents.map(p=>p.appearance),residentAppearances,{...options,onProgress:({completed,total})=>{
+    $('#load-status').textContent=`Preparing residents · ${completed} of ${total}`;
+    const progress=$('#load-progress');progress.hidden=false;progress.max=Math.max(1,total);progress.value=completed;
+  }});
+}
+function ensureResidentArtwork(snapshot,ready,failed=()=>{},cancelled=failed,allowCancel=true){
+  const revision=++residentArtworkRevision,appearances=snapshot.residents.map(p=>p.appearance);
+  if(appearances.every(a=>residentAppearances.isReady(a,{sheets:['base','idle','activities']})))return false;
+  const controller=new AbortController(),loading=$('#loading'),cancel=$('#cancel-resident-loading');
+  residentArtworkLoading=true;if(loading.open)loading.close();loading.hidden=false;loading.showModal();
+  cancel.hidden=!allowCancel;cancel.onclick=()=>controller.abort();loading.oncancel=event=>{event.preventDefault();if(allowCancel)controller.abort();};if(allowCancel)cancel.focus();
+  const finish=()=>{residentArtworkLoading=false;loading.close();loading.hidden=true;cancel.hidden=true;cancel.onclick=null;};
+  prepareResidentCast(snapshot,{signal:controller.signal}).then(undo=>{if(revision===residentArtworkRevision){finish();ready(undo);}},error=>{
+    if(revision!==residentArtworkRevision)return;finish();
+    if(error.name==='AbortError'){toast('Resident loading cancelled. Your village is unchanged.');cancelled(error);}
+    else{console.error(error);toast('Resident artwork could not load. Your village is unchanged.');failed(error);}
+  });
   return true;
 }
 const residentAnimations = new Map();
@@ -1770,16 +1783,17 @@ function setup() {
     } catch { toast("This file is not a valid village save. Your village is unchanged."); }
     finally { candidate.free(); }
   };
-  $("#cancel-import").onclick = () => { pendingImport = null; $("#import-dialog").close(); };
+  let undoImportArtwork=null;
+  $("#cancel-import").onclick = () => { undoImportArtwork?.();undoImportArtwork=null;pendingImport = null; $("#import-dialog").close(); };
   $("#confirm-import").onclick = () => {
     if (sandbox || artworkPreview || directScenario) return;
     if (!pendingImport || sandbox || artworkPreview || directScenario) return;
     const imported=JSON.parse(pendingImport);
-    residentAppearances.setActive(imported.residents.map(person=>person.appearance));
     if(imported.residents.some(person=>!residentAppearances.isReady(person.appearance,{sheets:['base','idle','activities']}))){
       const confirm=$('#confirm-import'),cancel=$('#cancel-import'),label=confirm.textContent;confirm.disabled=cancel.disabled=true;confirm.textContent='Preparing resident artwork…';
-      ensureResidentArtwork(imported,()=>{confirm.disabled=cancel.disabled=false;confirm.textContent=label;confirm.click();},()=>{const recover=()=>{confirm.disabled=cancel.disabled=false;confirm.textContent=label;$('#import-summary').textContent='Resident artwork could not load. Retry or cancel; your current village and saved data are unchanged.';};if(!ensureResidentArtwork(JSON.parse(game.snapshot()),recover))recover();});return;
+      ensureResidentArtwork(imported,undo=>{undoImportArtwork=undo;confirm.disabled=cancel.disabled=false;confirm.textContent=label;confirm.click();},()=>{const recover=()=>{confirm.disabled=cancel.disabled=false;confirm.textContent=label;$('#import-summary').textContent='Resident artwork could not load. Retry or cancel; your current village and saved data are unchanged.';};if(!ensureResidentArtwork(JSON.parse(game.snapshot()),recover))recover();},()=>{confirm.disabled=cancel.disabled=false;confirm.textContent=label;$('#import-summary').textContent='Loading cancelled. Retry or cancel; your current village and saved data are unchanged.';});return;
     }
+    residentAppearances.setActive(imported.residents.map(person=>person.appearance));
     try {
       const mode=JSON.parse(pendingImport).village.mode || 'story';
       const target=modeStores[mode];
@@ -1789,12 +1803,13 @@ function setup() {
       storage=target;
     } catch {
       $("#save-warning").hidden = false;
+      undoImportArtwork?.();undoImportArtwork=null;residentAppearances.setActive(state.residents.map(person=>person.appearance));
       toast("Could not back up and save the import. Your current village is unchanged.");
       $("#import-dialog").close();
       return;
     }
     game.restore(pendingImport);
-    pendingImport = null;
+    undoImportArtwork=null;pendingImport = null;
     residentAnimations.clear();
     state = JSON.parse(game.snapshot());
     selected = null; tool = null; closePanels();
@@ -1940,6 +1955,7 @@ function setup() {
   });
   resize();
   updateUI();
+  if($("#loading").open)$("#loading").close();
   $("#loading").hidden = true;
   requestAnimationFrame(frame);
 }
@@ -1969,7 +1985,7 @@ function installCreationSession(){
 }
 function refreshDevScene() {
   simulationClock.reset();
-  if(ensureResidentArtwork(JSON.parse(game.snapshot()),refreshDevScene))return;
+  if(ensureResidentArtwork(JSON.parse(game.snapshot()),refreshDevScene,()=>{},()=>{},false))return;
   economyUI?.resetForVillage();
   challengeFailureShown=false;
   setZoom(zoom);
