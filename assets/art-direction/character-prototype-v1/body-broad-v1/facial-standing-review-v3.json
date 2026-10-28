@@ -1,0 +1,27 @@
+{
+  "status": "Internal four-standing-pose prototype; not full facial-hair acceptance",
+  "why": "Prove the wider jaw can receive an authored painted facial-hair overlay before expanding to all poses",
+  "poses": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "sheet": "base",
+  "uniformSourceScale": 0.19,
+  "sharedRigidCorrection": [
+    -5,
+    0
+  ],
+  "inputs": {
+    "scripts/review-broad-standing-facial-hair.mjs": "b3347c495d48b32ebdfcbb9ca0c36e2a563eeb21aae0ad758771c34284d4b6d5",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v2.json": "e9dbc7e23b31c92887b51c6589e5f149a897e02814da988ad4fe97b23bf8a02a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-atlas-draft-v3.json": "02b59ae05bf6c5059335b27b72cd3eb898d475dde1323a48d29d25de465b648f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png": "259a97e5c0aff5bc972813198bc1f26283761725495e5e5a2116f32e9c58f5b2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-fit-draft-v3.png": "b705bab37ba2a0b61fd4cfad71b8beabbb80dd69b772ee4dcbb091bb0c29c27b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-heads-draft-v3.png": "6f1441ad90ed93094a88bba9c663129e655595cedb6a916ec2efb6f0dfb2c1ea"
+  },
+  "visualReview": "Raw sources, V1/V2/V3 body boards and enlarged V3 heads inspected. Rejected V1 outward curled tip. V2 repaint plus V3 translation improves fit and leaves the lip gap visible. Fuller chin volume and fine detail need later comparison with final complete characters. Some moustache-edge fit remains unproven.",
+  "limits": "Only four standing/breathing poses. No walking, work, activities, sleeping, facial-hair colors, hands-before-face occlusion, native motion or public creator/save/share integration. This prototype is not selectable in gameplay."
+}

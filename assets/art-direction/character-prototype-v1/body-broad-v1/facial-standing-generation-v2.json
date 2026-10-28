@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Remove the projecting far beard tip and simplify the painted shading",
+  "prompt": "Edit image1, a transparent four-component chestnut beard atlas. Image2 is ONLY an anatomy/fit diagnostic: top row shows the correct bare resident faces, bottom row shows the defective current beard fit. Output ONLY the four beard/moustache components on the SAME1254x1254 transparent atlas as image1, preserving each component's center, overall left/near cheek contact and canvas spacing. Correct the diagnosed RIGHT/FAR EDGE: the current beard has a long upward-curled point extending in front of the mouth/nose, resembling handlebar moustache horns. REMOVE that projecting right tip on ALL FOUR components. The beard must end close below the far corner of the lips, with a small low rounded far-chin edge; no tall far sideburn, no spikes, no curls, no horns and no outward hook. Shorten the rightmost20percent of each component into a tucked rounded edge without shifting the remaining near-cheek and chin. Replace the ornate moustache with a SMALL PLAIN SHORT two-lobed moustache lying just above the lip gap, with straight tapered ends rather than curled tips. Keep the central smile opening transparent and legible. Broader grouped painted brown shading and restrained highlights, less fine furry texture; same warm chestnut and upper-left light. This is a tidy close-cropped short beard following a right-facing rounded jaw, not a full long beard or costume. Image2's bodies are reference ONLY: NO skin, face, eyes, lips, noses, heads, necks, clothing, hats, body pixels, shadows, text, borders or backgrounds. Preserve true alpha everywhere outside the four corrected facial-hair silhouettes. Do not move, recenter, mirror, enlarge or rearrange atlas components.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v1.png",
+      "role": "Edit target; preserve atlas spacing and near-jaw contact"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-fit-draft-v1.png",
+      "role": "Anatomy/fit diagnostic; no body pixels allowed in output"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png",
+  "status": "Internal standing fit candidate; complete pose/color/occlusion review not delivered",
+  "visualReview": "Raw repaint, composed V2 and rigidly adjusted V3 whole-body boards, and V3 enlarged heads inspected. Repaint removes the upward-curled far cheek tip. A shared five-native-pixel left translation in V3 improves jaw alignment. Warm chestnut beard has fuller chin volume and a readable mouth opening in these four poses. Some moustache-edge fit and complete appearance/art acceptance remain unproven; this is not a complete48-pose facial set and is excluded from public/gameplay catalogs.",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png": "259a97e5c0aff5bc972813198bc1f26283761725495e5e5a2116f32e9c58f5b2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v1.png": "6181f87d82dd0a702116c9b9928ca55cdb930c553db93311f11374990c7136c6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-fit-draft-v1.png": "652ad4360bcc2838c3a9365579745725b0eb128fd1bea505f06e14535c5f6f2d"
+  }
+}

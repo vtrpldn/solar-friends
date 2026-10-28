@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "tool": "Built-in image_gen",
+  "transparentBackground": true,
+  "why": "Fit facial hair to the wider rounded three-quarter jaw",
+  "prompt": "Create a TRUE TRANSPARENT FACIAL-HAIR-ONLY overlay sprite atlas for Solar Friends. Image1 is the EXACT POSITION AND ANATOMY TARGET: four painted broad-bodied, bald residents in a2x2 arrangement on1254x1254. Image2 is ONLY a warm brown painted hair/material reference; its front-facing U-shapes and layout must NOT be copied. Output exactly FOUR disconnected short CHESTNUT BEARD + MOUSTACHE sets positioned to fit the four faces in image1 without moving or resizing the canvas. Imagine painting a neat close-cropped beard onto each of those exact faces, then REMOVE ALL ORIGINAL BODY/FACE PIXELS and leave ONLY that new facial-hair paint on transparent alpha. Match the rounded jaw and RIGHT-facing three-quarter camera of image1: asymmetric near cheek sideburn, close chin beard wrapping the jaw, narrower far cheek, natural short two-lobed moustache below the nose, transparent gap for the existing smile/lips. Keep beard short, tidy and anatomically attached, not a hanging strap, giant U, goatee spike or long beard. Warm chestnut broad painted shading, restrained clustered hair texture, upper-left light matching the body. Approximate face jaw positions: first beard in area x315..435,y165..225; second x870..995,y165..225; third x315..435,y775..840; fourth x870..995,y775..840. These coordinates guide placement, but trace the actual target faces. Preserve four different subtle face positions/expressions. Absolutely NO skin, lips, eyes, nose, ears, head, neck, body, clothes, hats, shadows, text, borders or background. Every pixel except the four fitted beard/moustache silhouettes must be transparent. Do not include the reference bodies in the output.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "role": "Exact standing face anatomy and pose arrangement target"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/facial-short-chestnut-source-02-v1.png",
+      "role": "Painted chestnut material reference only; not shape/layout target"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v1.png",
+  "status": "Rejected fit; excluded from gameplay/public catalogs",
+  "visualReview": "Raw generated source and actual four-pose bare/bearded composed board inspected. Uniform0.19 source scale preserves paint, but the far edge projects beyond the nose/lips and curls upward like a handlebar. Fine furry detail also exceeds the body's broader shading. Requires shape repaint, not local source warping.",
+  "sourceHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v1.png": "6181f87d82dd0a702116c9b9928ca55cdb930c553db93311f11374990c7136c6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-02-v1.png": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74"
+  }
+}
