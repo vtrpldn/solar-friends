@@ -1,0 +1,26 @@
+{
+  "comparisons": 123,
+  "channels": 773677872,
+  "mismatches": 0,
+  "scaledMismatches": 0,
+  "scaledComparisons": 144,
+  "scaledChannels": 37748736,
+  "first": [],
+  "oldMs": 3246.399999141693,
+  "canvasMs": 3759.0000009536743,
+  "candidate": {
+    "strategy": "production",
+    "servedSha256": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4"
+  },
+  "baseline": {
+    "commit": "c1dfccf",
+    "sha256": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4"
+  },
+  "inputs": {
+    "web/character-clothing-colour.js": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4",
+    "web/art/characters/relaxed-shirt-v1/bundle-v1.json": "6f7fc99648147ad66449eac4917c50fab46be706845f9963cbae0d6a2a9d6948",
+    "scripts/compare-clothing-colour-surfaces.mjs": "0e193b396ce54ab6fd9c558d4c6210af8b18ad8f662aff281556b280020ac046"
+  },
+  "scope": "Differential experiment against existing PNG-decoded colour path for every installed shirt source, native registered crop, and three non-cream palettes; timing is sequential microbenchmark, not public loading or total memory acceptance.",
+  "disposition": "pass"
+}

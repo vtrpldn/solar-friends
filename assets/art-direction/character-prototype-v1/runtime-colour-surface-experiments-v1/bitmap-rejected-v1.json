@@ -1,0 +1,24 @@
+{
+  "comparisons": 123,
+  "channels": 773677872,
+  "mismatches": 0,
+  "scaledMismatches": 1287443,
+  "first": [],
+  "oldMs": 3605.8000004291534,
+  "canvasMs": 2378.500000476837,
+  "candidate": {
+    "strategy": "image-bitmap",
+    "servedSha256": "bdd17bdf31a009a2f1ba07292abd5cb3258b70a61fde98d5703f010b87521a11"
+  },
+  "baseline": {
+    "commit": "c1dfccf",
+    "sha256": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4"
+  },
+  "inputs": {
+    "web/character-clothing-colour.js": "002fedffb8fdff57fe8f94ac913fcded006ddb28e12d5a75d561324099c9f8d7",
+    "web/art/characters/relaxed-shirt-v1/bundle-v1.json": "6f7fc99648147ad66449eac4917c50fab46be706845f9963cbae0d6a2a9d6948",
+    "scripts/compare-clothing-colour-surfaces.mjs": "1faa57d012f5191637bad1843cddd56a02a13882a5dd644e5315a649f999ff75"
+  },
+  "scope": "Differential experiment against existing PNG-decoded colour path for every installed shirt source and three non-cream palettes; timing is sequential microbenchmark, not public loading or total memory acceptance.",
+  "disposition": "rejected: native crop resampling differs"
+}
