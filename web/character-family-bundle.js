@@ -21,20 +21,20 @@ async function definition(descriptor,working){
 async function prepareBundle(descriptor,working,options,shirt=false){
  if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(key=>!['maxEntries','maxConcurrent','maxQueued'].includes(key)))throw Error('Choose only bounded family cache options.');
  options={...options};
- const data=await definition(descriptor,working),garmentBundle=shirt?await loadBundledShirtDefinition():null,cache=new Map(),loaded={};let family=null,library=null;
+ const data=await definition(descriptor,working),garmentBundle=shirt?await loadBundledShirtDefinition():null,cache=new Map(),ownedSources=new Set(),loaded={};let family=null,library=null;
  if(garmentBundle)for(const [file,source]of Object.entries(garmentBundle.sources)){if(Object.hasOwn(data.sources,file))throw Error('Conflicting bundled shirt source.');data.sources[file]=source;}
  const load=file=>{
   if(typeof file!=='string'||!Object.hasOwn(data.sources,file))return Promise.reject(Error('This resident source is not bundled.'));
-  if(!cache.has(file)){const source=data.sources[file],work=loadCharacterImageSource(source.url).then(value=>{if(value.sourceHash!==source.sha256)throw Error('Bundled resident source pixels changed.');return value;});cache.set(file,work);}
+  if(!cache.has(file)){const source=data.sources[file],work=loadCharacterImageSource(source.url).then(value=>{ownedSources.add(value);if(value.sourceHash!==source.sha256)throw Error('Bundled resident source pixels changed.');return value;});cache.set(file,work);}
   return cache.get(file);
  };
  try{
   for(const [id,file]of Object.entries(data.bodySources))loaded[id]=await load(file);
   family=await prepareBodyFamily({ownership:data.ownership,sources:loaded});
   library=await prepareFamilyAppearanceLibrary({...options,family,materials:data.materials,owners:data.owners,equipment:data.equipment,accessories:data.accessories,...(garmentBundle?{clothing:garmentBundle.garments}:{}),...(working?{workEquipment:data.workEquipment}:{}),load});
- }catch(error){await library?.dispose();family?.dispose();cache.clear();throw error;}
+ }catch(error){await Promise.allSettled([...cache.values()]);await library?.dispose();family?.dispose();for(const source of ownedSources)source.dispose?.();ownedSources.clear();cache.clear();throw error;}
  cache.clear();let closing=null;
- return Object.freeze({id:descriptor.id,acquire:recipe=>library.acquire(recipe),info:()=>library.info(),dispose(){if(!closing)closing=library.dispose().finally(()=>{family.dispose();cache.clear();});return closing;}});
+ return Object.freeze({id:descriptor.id,acquire:recipe=>library.acquire(recipe),info:()=>library.info(),dispose(){if(!closing)closing=library.dispose().finally(()=>{family.dispose();for(const source of ownedSources)source.dispose?.();ownedSources.clear();cache.clear();});return closing;}});
 }
 
 export function prepareBundledResidentFamily(options={}){return prepareBundle(bundledFamily,false,options);}

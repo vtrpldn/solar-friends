@@ -1,0 +1,124 @@
+{
+  "cases": [
+    {
+      "cast": "shared",
+      "revision": "baseline",
+      "prepareMedianMs": 3472.7000000476837,
+      "releasedRSSMiB": [
+        1229.59375,
+        1293.234375,
+        1350.96875,
+        1396.53125
+      ],
+      "releasedHeapMiB": [
+        1.847503662109375,
+        1.9026069641113281,
+        1.9331626892089844,
+        1.9536781311035156
+      ]
+    },
+    {
+      "cast": "shared",
+      "revision": "owned-release",
+      "prepareMedianMs": 3499.099999964237,
+      "releasedRSSMiB": [
+        1230.265625,
+        1297.265625,
+        1356.875,
+        1402.28125
+      ],
+      "releasedHeapMiB": [
+        1.8541221618652344,
+        1.9111328125,
+        1.9422378540039062,
+        1.9623527526855469
+      ]
+    },
+    {
+      "cast": "unique",
+      "revision": "baseline",
+      "prepareMedianMs": 21256.05000001192,
+      "releasedRSSMiB": [
+        1855.46875,
+        1884.609375,
+        1915.71875,
+        1926.4375
+      ],
+      "releasedHeapMiB": [
+        2.0952911376953125,
+        2.1036453247070312,
+        2.133075714111328,
+        2.1341781616210938
+      ]
+    },
+    {
+      "cast": "unique",
+      "revision": "owned-release",
+      "prepareMedianMs": 21168.05000001192,
+      "releasedRSSMiB": [
+        1862.25,
+        1885.78125,
+        1870.015625,
+        1905.984375
+      ],
+      "releasedHeapMiB": [
+        2.1043052673339844,
+        2.109302520751953,
+        2.1386756896972656,
+        2.1411972045898438
+      ]
+    },
+    {
+      "cast": "shared",
+      "revision": "canvas-release",
+      "prepareMedianMs": 3729.649999976158,
+      "releasedRSSMiB": [
+        1231.109375,
+        1299.15625,
+        1355.296875,
+        1399.84375
+      ],
+      "releasedHeapMiB": [
+        1.8622283935546875,
+        1.9194984436035156,
+        1.9474296569824219,
+        1.9670944213867188
+      ]
+    },
+    {
+      "cast": "unique",
+      "revision": "canvas-release",
+      "prepareMedianMs": 22025.750000059605,
+      "releasedRSSMiB": [
+        1853.578125,
+        1895.15625,
+        1900.53125,
+        1910.84375
+      ],
+      "releasedHeapMiB": [
+        2.109394073486328,
+        2.1181640625,
+        2.1480140686035156,
+        2.1489906311035156
+      ]
+    }
+  ],
+  "scope": "Same four-cycle shared and twelve-unique public artwork workload on the same headless software-rendering setup. The runner metadata gained an image-source hash; its frozen source is retained.",
+  "conclusion": "Explicit owned-image and temporary-canvas disposal preserve ownership and exact sprite pixels but do not materially reduce retained renderer RSS in these samples. No total-memory release gate is accepted.",
+  "pressureDiagnostic": {
+    "report": ".github/builder-review/artwork-memory-pressure.json",
+    "beforeRSSMiB": 1871.265625,
+    "afterRSSMiB": 1871.734375,
+    "DOMBefore": {
+      "documents": 1,
+      "nodes": 8,
+      "jsEventListeners": 0
+    },
+    "DOMAfter": {
+      "documents": 1,
+      "nodes": 8,
+      "jsEventListeners": 0
+    },
+    "conclusion": "No material process-RSS reduction from the diagnostic pressure notification; DOM nodes and listeners return to their baseline counts."
+  }
+}

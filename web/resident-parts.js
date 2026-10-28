@@ -88,6 +88,7 @@ export function createResidentPartLibrary(){
     const results=await Promise.allSettled([familyComposer,workingFamilyComposer,shirtFamilyComposer,sleepFamilyComposer,sleepShirtFamilyComposer].filter(Boolean).map(composer=>composer.dispose()));
     for(const work of hairSets.values()){const poses=await work.catch(()=>null);for(const part of poses?.values()??[])part.composer.dispose();}
     facialPrepared?.dispose();facialPrepared=null;const base=await bodyWork?.catch(()=>null);base?.materials.clear();
+    for(const work of sources.values()){const source=await work.catch(()=>null);source?.dispose?.();}
     sources.clear();hairSets.clear();preparedHairCounts.clear();bodyWork=toolWork=hatWork=facialWork=null;
     familyComposer=workingFamilyComposer=shirtFamilyComposer=sleepFamilyComposer=sleepShirtFamilyComposer=null;
     const failure=results.find(r=>r.status==='rejected');if(failure)throw failure.reason;

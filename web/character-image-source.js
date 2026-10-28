@@ -8,7 +8,8 @@ export async function loadCharacterImageSource(url){
  const objectUrl=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));
  try{
   const image=new Image();image.src=objectUrl;
-  try{await image.decode();}catch(cause){throw Error(`Cannot decode character artwork (${url}).`,{cause});}
-  return {image,sourceHash};
+  try{await image.decode();}catch(cause){image.src='';throw Error(`Cannot decode character artwork (${url}).`,{cause});}
+  let disposed=false;
+  return {image,sourceHash,dispose(){if(disposed)return;disposed=true;image.src='';}};
  }finally{URL.revokeObjectURL(objectUrl);}
 }

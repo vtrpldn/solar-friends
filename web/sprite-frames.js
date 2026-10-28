@@ -60,24 +60,31 @@ export function preparedFrames(image, {columns=4,rows=4,referenceRow=0} = {}) {
   const key=`${image.currentSrc || image.src}:${columns}:${rows}:${referenceRow}`;
   const cached=cache.get(image); if(cached?.key===key)return cached.frames;
   const source=document.createElement('canvas'); source.width=image.naturalWidth;source.height=image.naturalHeight;
-  const ctx=source.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
-  const pixels=ctx.getImageData(0,0,source.width,source.height);
-  const layout=locateSpriteFrames(pixels.data,source.width,source.height,columns,rows,referenceRow);
-  const frames=layout.frames.map(f=>{
-    const left=Math.max(0,f.left-2),top=Math.max(0,f.top-2),right=Math.min(source.width,f.right+2),bottom=Math.min(source.height,f.bottom+2);
-    const cut=document.createElement('canvas');cut.width=right-left;cut.height=bottom-top;
-    const cutCtx=cut.getContext('2d'),part=cutCtx.createImageData(cut.width,cut.height);
-    for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
-      const p=y*source.width+x;if(layout.owners[p]!==f.id)continue;
-      const d=((y-top)*cut.width+x-left)*4;part.data.set(pixels.data.subarray(p*4,p*4+4),d);
+  const frames=[];
+  try{
+    const ctx=source.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+    const pixels=ctx.getImageData(0,0,source.width,source.height);
+    const layout=locateSpriteFrames(pixels.data,source.width,source.height,columns,rows,referenceRow);
+    for(const f of layout.frames){
+      const left=Math.max(0,f.left-2),top=Math.max(0,f.top-2),right=Math.min(source.width,f.right+2),bottom=Math.min(source.height,f.bottom+2);
+      const cut=document.createElement('canvas');cut.width=right-left;cut.height=bottom-top;let result=null;
+      try{
+        const cutCtx=cut.getContext('2d'),part=cutCtx.createImageData(cut.width,cut.height);
+        for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
+          const p=y*source.width+x;if(layout.owners[p]!==f.id)continue;
+          const d=((y-top)*cut.width+x-left)*4;part.data.set(pixels.data.subarray(p*4,p*4+4),d);
+        }
+        cutCtx.putImageData(part,0,0);
+        result=document.createElement('canvas');result.width=result.height=256;
+        const factor=layout.scale*256;
+        result.getContext('2d').drawImage(cut,128+(left-f.pivot)*factor,FRAME_ANCHOR*256+(top-f.bottom)*factor,cut.width*factor,cut.height*factor);
+        frames.push(result);
+      }catch(error){if(result)result.width=result.height=0;throw error;}
+      finally{cut.width=cut.height=0;}
     }
-    cutCtx.putImageData(part,0,0);
-    const result=document.createElement('canvas');result.width=result.height=256;
-    const factor=layout.scale*256;
-    result.getContext('2d').drawImage(cut,128+(left-f.pivot)*factor,FRAME_ANCHOR*256+(top-f.bottom)*factor,cut.width*factor,cut.height*factor);
-    return result;
-  });
-  cache.set(image,{key,frames});return frames;
+    cache.set(image,{key,frames});return frames;
+  }catch(error){for(const frame of frames)frame.width=frame.height=0;throw error;}
+  finally{source.width=source.height=0;}
 }
 export function drawPreparedFrame(ctx,image,index,x,y,width,options,filter=ctx.filter) {
   const frame=preparedFrames(image,options)?.[index];

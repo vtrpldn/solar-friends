@@ -10,9 +10,9 @@
     "scripts/verify-public-sleep-family.mjs": "b7c3812288d2be37dfa744d30e5122c35760d0ad603b766b8591993fdb468ac3",
     "src/resident_appearance/parts.rs": "3a7970069823d2d2ea41d3d076762d9b56166c4710cffe5f601433143ca9447b",
     "web/resident-part-recipe.js": "6d13da9b2db7580a0822969442e3cb775223a37086ea72cda361e178a936753f",
-    "web/resident-parts.js": "bfb984a395223248ba0a1b1143dd7a9da0fcb707c6d6b64a1a2b654b26eb4714",
+    "web/resident-parts.js": "ac1d9404a813de6dbfbd37f6d92bf585a4be234739aa0b660dca3eca43dfa4cf",
     "web/resident-family-parts.js": "d86363aa81d0029ae52b54ac15ebd5db5682e3e82c6947f399245c8b4b425a6e",
-    "web/character-sleep-family-bundle.js": "f111fdcd0971433a3f8302d7a73c24f8f4983452a255936111cab671a9525008",
+    "web/character-sleep-family-bundle.js": "c625150896514a73506935ec7df33b59f3361314ed5ea6b3ebb6f57dc630a044",
     "web/character-sleep-family-bundle-index.js": "a8eef990f98b12605c1bc6ffaa8ac6a0ff97d7c3ad8601320704f6073698e49b",
     "web/resident-family-provider.js": "d459435f4dfc6fa22ef0bd9df8a87cdaf5d92a0d90f7a7b67d6abaf9b1e01c2c",
     "web/editor/character-creator.js": "4c3bc5fb7aa6004c9599c5f2336d80e45d2cf1bf3a97dda108bf451461269de9"

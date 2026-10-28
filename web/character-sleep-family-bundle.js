@@ -17,17 +17,17 @@ async function definition(){
 // Kept separate from older immutable bundles; only explicit v5/v6 recipes select it.
 async function prepare(options,clothed){
  if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(key=>!['maxEntries','maxConcurrent','maxQueued'].includes(key)))throw Error('Choose bounded resident cache options.');
- options={...options};const data=await definition(),cache=new Map(),sources={};let family=null,library=null;
+ options={...options};const data=await definition(),cache=new Map(),ownedSources=new Set(),sources={};let family=null,library=null;
  const load=file=>{
   if(typeof file!=='string'||!Object.hasOwn(data.sources,file))return Promise.reject(Error('This resident source is not bundled.'));
-  if(!cache.has(file)){const source=data.sources[file];cache.set(file,loadCharacterImageSource(source.url).then(value=>{if(value.sourceHash!==source.sha256)throw Error('Resident source pixels changed.');return value;}));}return cache.get(file);
+  if(!cache.has(file)){const source=data.sources[file];cache.set(file,loadCharacterImageSource(source.url).then(value=>{ownedSources.add(value);if(value.sourceHash!==source.sha256)throw Error('Resident source pixels changed.');return value;}));}return cache.get(file);
  };
  try{
   for(const [id,file]of Object.entries(data.bodySources))sources[id]=await load(file);
   family=await prepareBodyFamily({ownership:data.ownership,sources});library=await prepareFamilyAppearanceLibrary({...options,family,materials:data.materials,owners:data.owners,equipment:data.equipment,accessories:data.accessories,workEquipment:data.workEquipment,...(clothed?{clothing:data.clothing}:{}),load});
- }catch(error){await library?.dispose();family?.dispose();cache.clear();throw error;}
+ }catch(error){await Promise.allSettled([...cache.values()]);await library?.dispose();family?.dispose();for(const source of ownedSources)source.dispose?.();ownedSources.clear();cache.clear();throw error;}
  cache.clear();let closing=null;
- return Object.freeze({id:descriptor.id,acquire:recipe=>library.acquire(recipe),info:()=>library.info(),dispose(){if(!closing)closing=library.dispose().finally(()=>{family.dispose();cache.clear();});return closing;}});
+ return Object.freeze({id:descriptor.id,acquire:recipe=>library.acquire(recipe),info:()=>library.info(),dispose(){if(!closing)closing=library.dispose().finally(()=>{family.dispose();for(const source of ownedSources)source.dispose?.();ownedSources.clear();cache.clear();});return closing;}});
 }
 export function prepareBundledSleepResidentFamily(options={}){return prepare(options,false);}
 export function prepareBundledSleepShirtResidentFamily(options={}){return prepare(options,true);}

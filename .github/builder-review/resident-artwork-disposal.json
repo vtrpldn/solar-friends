@@ -11,8 +11,8 @@
   "inputs": {
     "scripts/verify-resident-artwork-disposal.mjs": "92cdd9059ddae1241f847a17c18d5eadabc21d36cbbe5dbe1ba72df0562853ca",
     "web/appearance-cache.js": "fd1b68e4433c8bb209e3dc1bd819bddb9b44297172caf2332315a60256d411d8",
-    "web/resident-parts.js": "bfb984a395223248ba0a1b1143dd7a9da0fcb707c6d6b64a1a2b654b26eb4714",
-    "web/resident-appearance-library.js": "721b0f31c49e98fbd5873263ea17cab5ab7177a16a4503b2e137411971222cec"
+    "web/resident-parts.js": "ac1d9404a813de6dbfbd37f6d92bf585a4be234739aa0b660dca3eca43dfa4cf",
+    "web/resident-appearance-library.js": "3cc5f8bd4a84218be01d41ec241326a0adf5110f8b09efcb01e5b3ec26063a68"
   },
   "scope": "Explicit appearance owner closure, active blocked preparation drain, closed API refusal, stale rollback isolation and preserved borrowed classic/v6 frames. Not total browser/GPU memory measurement or every mode transition."
 }
