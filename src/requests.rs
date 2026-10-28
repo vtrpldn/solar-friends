@@ -192,6 +192,14 @@ pub fn observe(r: &mut Resident, v: &Village) {
         return;
     }
     let matching = r.requested && related(&r.task, &q.task);
+    if !matching
+        && q.phase == Phase::Blocked
+        && matches!(q.task.as_str(), "prepare" | "craft" | "cook")
+        && let Some(batch) = q.batch.and_then(|id| production::batch(v, id))
+        && let Some(reason) = production::power_blocker(v, batch.site)
+    {
+        r.help.as_mut().unwrap().reason = reason.into();
+    }
     if matching {
         let away = r
             .trip

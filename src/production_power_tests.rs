@@ -45,6 +45,48 @@ fn worker(g: &mut Game, id: Id) -> Resident {
     [r.x, r.y] = [r.target_x, r.target_y];
     r
 }
+
+#[test]
+fn a_blocked_help_request_reports_new_power_failure_without_interrupting_another_chore() {
+    let (mut g, site, batch) = scene(true);
+    assert_eq!(g.set_workshop_powered(site.0, true), "ok");
+    let mut r = worker(&mut g, batch);
+    let cable = g
+        .app
+        .world()
+        .resource::<Village>()
+        .pipes
+        .lines
+        .last()
+        .unwrap()
+        .id;
+    assert_eq!(g.configure_electrical_connection(cable.0, 1, true), "ok");
+    r.task = "water".into();
+    r.requested = false;
+    r.remaining = 10.;
+    r.help = Some(requests::Request {
+        id: Id(900),
+        task: "prepare".into(),
+        building: None,
+        material: Some(7),
+        batch: Some(batch),
+        destination: None,
+        created: 0.,
+        finished: None,
+        remaining: 10.,
+        phase: requests::Phase::Blocked,
+        reason: "Another neighbour is using that work position. I will wait for a turn.".into(),
+    });
+    let before = g.snapshot();
+    requests::observe(&mut r, g.app.world().resource::<Village>());
+    assert!(r.help.as_ref().unwrap().reason.contains("hand tools"));
+    assert_eq!(r.help.as_ref().unwrap().phase, requests::Phase::Blocked);
+    assert_eq!(r.help.as_ref().unwrap().batch, Some(batch));
+    assert_eq!(r.task, "water");
+    assert_eq!(r.remaining, 10.);
+    assert!(!r.requested);
+    assert_eq!(g.snapshot(), before);
+}
 fn work_for(g: &mut Game, r: &Resident, seconds: f32) -> bool {
     let mut v = g.app.world_mut().resource_mut::<Village>();
     v.minutes += seconds * MINUTES_PER_SECOND;
