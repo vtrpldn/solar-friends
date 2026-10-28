@@ -1,0 +1,15 @@
+{
+  "status": "Internal static phase comparison inspected; native sequence review still required",
+  "why": "Prevent grain from reappearing while the feeding hand returns to the basket",
+  "inputs": {
+    "composed-family-draft-v5.json": "85bd983d29bc4a3460a2374389685a285b0305c5f5b7ca9a4e69d1e26f18ed6c",
+    "composed-feeding-returns-v5.png": "cae131a5962c69004da54eb057e11bb3e2fa81d193cdcc3b9a72a010bd5ef9d6",
+    "composed-family-review-v5.json": "bf2a2a4679344170bfa18750dfe5c2fde185838e006f805f5ed9d076da4a675c"
+  },
+  "findings": [
+    "Inspected actual outbound13/return13 and outbound14/return14 whole-resident and enlarged-hand comparison. Outbound grain is present; return hand is clear and basket/body/hat retain their placement.",
+    "Automated exact comparison confirms outbound/return differences occur only where the registered grain source paints. Frame origins are identical.",
+    "The provider selects return frames from native sequenceIndex>=4 and forwards pose metadata through the composed provider. This is not yet decoded motion acceptance of V5.",
+    "Pickup/put-down and anatomical transition artwork, other customization parts, full public biome/editor/save/share/performance gates remain required."
+  ]
+}
