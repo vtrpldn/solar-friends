@@ -41,7 +41,7 @@ import { installBuildMenu, paintIcon } from './build-menu.js';
 import { buildingLighting, connectionLabel, updatePowerUI } from './power.js';
 import { drawNightEmission, createDepthLightPass } from './night-lighting.js';
 import { weatherConditions, drawGroundWeather, drawWeatherAir } from './weather.js';
-import { weatherSummary, updateClimateForecast } from './climate-ui.js';
+import { weatherSummary, updateClimateForecast, updateClimateAvailability } from './climate-ui.js';
 import { readArtDraft } from './dev/art-draft.js';
 import { installDevTools } from './dev/tools.js';
 import { makeScenario, advanceGame } from './dev/scenarios.js';
@@ -1285,6 +1285,7 @@ function openSituations() {
 function updateUI() {
   syncResidentRoster();
   const maintenanceReport=maintenanceUI?.updateAlert();
+  updateClimateAvailability(state);
   const free = state.village.mode==='sandbox', instant = !usesLogistics(state.village);
   sandboxRulesUI?.update();
   const creation=creationPresentation(playerSession?state.village.scenario?.definition:null,{playtest:playerSession?.isTest});

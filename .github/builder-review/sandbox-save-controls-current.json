@@ -1,0 +1,119 @@
+{
+  "completed": true,
+  "browser": "151.0.7922.34",
+  "results": [
+    "checkClimateSandboxSave",
+    "checkMaintenanceSandboxSave",
+    "checkSkillSandboxSave",
+    "checkSupplierSandboxSave",
+    "checkSandboxRules",
+    "checkArtworkInterface"
+  ],
+  "screenshots": [
+    {
+      "label": "Real Sandbox seasons survive saving, reloading and Continue sandbox",
+      "file": "climate-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox wear and automatic service survive Continue sandbox",
+      "file": "upkeep-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox learning survives Continue sandbox",
+      "file": "learning-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox supplier variation survives Continue sandbox",
+      "file": "suppliers-sandbox-reload.png"
+    },
+    {
+      "label": "Independent Sandbox simulation rules use the game settings at 1600px",
+      "file": "sandbox-rules-1600.png"
+    },
+    {
+      "label": "Independent Sandbox simulation rules use the game settings at 1280px",
+      "file": "sandbox-rules-1280.png"
+    },
+    {
+      "label": "All Sandbox rules and mixed construction states survive Continue sandbox",
+      "file": "sandbox-rules-reload.png"
+    },
+    {
+      "label": "Sandbox Construction uses delivered materials and real resident work",
+      "file": "sandbox-construction.png"
+    },
+    {
+      "label": "Comfortable night power is separate from owned battery charge",
+      "file": "sandbox-comfortable-power.png"
+    },
+    {
+      "label": "Framed sprite inventory with its own scroll area at 1600",
+      "file": "interface-1600-sprite-library.png"
+    },
+    {
+      "label": "Artwork calibration uses the game workbench at 1600",
+      "file": "interface-1600-art-calibration.png"
+    },
+    {
+      "label": "Artwork replacement uses the game workbench at 1600",
+      "file": "interface-1600-art-replacement.png"
+    },
+    {
+      "label": "Artwork recipe uses the game workbench at 1600",
+      "file": "interface-1600-art-recipe.png"
+    },
+    {
+      "label": "Live sprite checks shares the artwork tool frame at 1600",
+      "file": "interface-1600-checks.png"
+    },
+    {
+      "label": "Building projection shares the artwork tool frame at 1600",
+      "file": "interface-1600-projection.png"
+    },
+    {
+      "label": "Sprite grid fit shares the artwork tool frame at 1600",
+      "file": "interface-1600-grid-fit.png"
+    },
+    {
+      "label": "Framed sprite inventory with its own scroll area at 1280",
+      "file": "interface-1280-sprite-library.png"
+    },
+    {
+      "label": "Artwork calibration uses the game workbench at 1280",
+      "file": "interface-1280-art-calibration.png"
+    },
+    {
+      "label": "Artwork replacement uses the game workbench at 1280",
+      "file": "interface-1280-art-replacement.png"
+    },
+    {
+      "label": "Artwork recipe uses the game workbench at 1280",
+      "file": "interface-1280-art-recipe.png"
+    },
+    {
+      "label": "Live sprite checks shares the artwork tool frame at 1280",
+      "file": "interface-1280-checks.png"
+    },
+    {
+      "label": "Building projection shares the artwork tool frame at 1280",
+      "file": "interface-1280-projection.png"
+    },
+    {
+      "label": "Sprite grid fit shares the artwork tool frame at 1280",
+      "file": "interface-1280-grid-fit.png"
+    }
+  ],
+  "inputs": {
+    "scripts/verify-sandbox-save-controls.mjs": "ac219a898038bdd6bc6071e352a15f4ea2ec569c3f005dcd5d6da5d3faa88390",
+    "scripts/climate-browser-checks.mjs": "f517ee9ab187524e5e120b75e0f64f4de835ff1acdd2c6745c0b635add1f108e",
+    "scripts/maintenance-browser-checks.mjs": "2317c2950446892bb5252c50f006c51ae31c5b10dc0708202b366d9739e8bfbc",
+    "scripts/skills-browser-checks.mjs": "7d8057f0b62a9ccf0df1f71522c9fc27134778c54603ed378543cb3cce4dde1e",
+    "scripts/supplier-browser-checks.mjs": "4f5ca9113147bca1d87c1f60e6e99e641a1da610cb795330595b1bef9d4dda1a",
+    "scripts/sandbox-browser-checks.mjs": "304f77991b8db394a7701f0c2d794220979c591fddddfc8ce53a0eea3050e5a4",
+    "scripts/interface-browser-checks.mjs": "157d269bb280e302f49720b6e2c507b339af82254543e7dc758ef272efcd24bf",
+    "web/main.js": "02ae8bda30068fd455656845bf98de3fad4d58c5ca47d73a63dbaf5c9653c5cc",
+    "web/climate-ui.js": "cb2117dc4d7ddcbba1682ca15eb33ff6cce8bfe727a5c4e1056bf4cc00d963f5",
+    "web/pkg/solar_friends_bg.wasm": "a8a2bfd270a9307a24da81da8b278517a3881b34033112af1a0ea3afafe4a59d"
+  },
+  "scope": "Separate clean desktop contexts: Sandbox climate, maintenance, learning, supplier and rule settings persist through actual saves and reloads; artwork tools remain keyboard-operable. Not complete builder release acceptance."
+}

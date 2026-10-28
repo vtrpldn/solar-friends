@@ -7,10 +7,14 @@ export function weatherSummary(weather, minutes) {
   if(!today.rain_expected)return 'Clear today · keep water in reserve';
   return minute<today.rain_start?`Rain expected ${time(today.rain_start)}–${time(today.rain_end)}`:'Rain has passed · check water stores';
 }
-export function updateClimateForecast(state) {
-  const details=document.querySelector('#weather-forecast'),weather=state.environment.weather;
-  details.hidden=!weather;
+export function updateClimateAvailability(state){
+  const weather=state.environment.weather;
   document.querySelector('#weather-open').hidden=!weather;
+  return weather;
+}
+export function updateClimateForecast(state) {
+  const details=document.querySelector('#weather-forecast'),weather=updateClimateAvailability(state);
+  details.hidden=!weather;
   if(!weather)return;
   const day=weather.forecast[0],season=day.season==='wet'?'Wet':'Dry';
   document.querySelector('#climate-summary').textContent=weather.enabled
