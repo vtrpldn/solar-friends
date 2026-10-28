@@ -1,3 +1,4 @@
+import {checkOccupationControls} from './occupations-browser-checks.mjs';
 import {checkHelpingControls} from './helping-browser-checks.mjs';
 import {checkTownPickupControls} from './town-pickup-browser-checks.mjs';
 import {worldPoint} from './browser-world-point.mjs';
@@ -504,32 +505,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(project.recipe,'adobe');assert(project.appearance>=4);
   assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
   await page.locator('#dev-button').click();
-  // Individual schedules synchronize between Trade and resident details.
-  await page.locator('#dev-scenario').selectOption('occupations');await page.locator('#dev-load').click();
-  await page.locator('#dev-close').click();await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Trade',exact:true}).click();
-  if(!await page.locator('.outside-jobs').evaluate(el=>el.open))await page.locator('.outside-jobs summary').click();
-  assert.equal(await page.locator('.occupation-card').count(),5);
-  for(const id of [2,3,4])await page.locator(`[data-outside-job="${id}"]`).uncheck();
-  const occupationFunds=await page.evaluate(()=>window.solarDev.snapshot().village.economy.money);
-  await page.locator('[data-citizen="1"]').click();
-  assert.equal(await page.locator('#person .occupation-title').textContent(),'Bamboo carpenter');
-  assert(await page.locator('#person .occupation-toggle').isChecked());
-  await page.locator('#person .occupation-toggle').uncheck();await page.getByRole('button',{name:'Close resident details',exact:true}).click();
-  await page.getByRole('button',{name:'Village',exact:true}).click();await page.getByRole('button',{name:'Trade',exact:true}).click();
-  assert(!await page.locator('[data-outside-job="1"]').isChecked());await page.locator('[data-outside-job="1"]').check();
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('90');await page.locator('#dev-advance').click();
-  let work=await page.evaluate(()=>window.solarDev.snapshot());
-  assert(work.residents.slice(0,2).every(r=>r.trip?.purpose==='work'&&r.trip.phase==='away'));
-  assert(work.residents.slice(2).every(r=>!r.trip));assert.equal(work.village.economy.money,occupationFunds);
-  await page.locator('#dev-close').click();await page.locator('[data-citizen="0"]').click();
-  assert((await page.locator('#person .person-activity').textContent()).includes('Plant nursery assistant'));
-  await capture('Iara at her individual outside occupation','resident-occupation.png');
-  await page.locator('#person .occupation-toggle').uncheck();
-  await page.locator('#dev-button').click();await page.locator('#dev-minutes').fill('391');await page.locator('#dev-advance').click();
-  work=await page.evaluate(()=>window.solarDev.snapshot());
-  assert.equal(work.village.economy.money,occupationFunds+40000);
-  assert.deepEqual(Object.values(work.village.economy.outside_jobs),[false,true,false,false,false]);
-  assert.equal(await page.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);
+  await checkOccupationControls({page,saved,capture});
   await page.locator('#dev-scenario').selectOption('cook');await page.locator('#dev-load').click();
   await page.waitForFunction(()=>window.solarDev.scenario()==='cook');
   await page.getByRole('button',{name:'Single tick · ¼ second',exact:true}).click();

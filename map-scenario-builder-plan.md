@@ -3010,3 +3010,12 @@ The bounded development cell-framing method now accepts an explicit normalized v
 `verify-adobe-controls.mjs` and its `--compact` variant both pass: the actual palette retains the adobe choice; a single world click creates exactly one new home blueprint at cell 5,5, with adobe recipe and appearance; invalid framing changes neither camera nor village; and Story-save bytes stay unchanged. The original full-suite adobe check now also requires a new building count before inspecting its recipe. The compact placement capture was inspected to confirm a visible world blueprint outside the palette. The full browser journey and all unfinished original builder release gates remain open.
 
 **Why:** pointer tests must target visible ground while preserving the real game overlays. A hidden center point cannot establish whether recipe placement works. This corrects verification geometry without changing player construction rules or claiming complete art/performance acceptance.
+
+
+### Actual commute phases and occupation payroll boundaries
+
+The full continuous browser run now passes the corrected adobe placement and reaches individual occupations. Its next expectation still assumed that both enabled workers must be off-site after ninety minutes. The centered 64×64 property's actual exit walks take longer. Shared `occupations-browser-checks.mjs` now observes departure in five-minute increments, bounded to 300 additional minutes and still before shift end. Walking cannot credit wages. The later advance targets the actual same-day 17:01 boundary, rather than adding a fixed duration after an assumed commute.
+
+`verify-occupation-controls.mjs` passes all five visible occupation cards; cross-panel per-person toggles; the two actual work trips with the other three residents remaining in the village; named occupation activity; preserving a committed shift after disabling future shifts; exact combined wages; both paid-day ledger entries; no second payment after another ten minutes; and unchanged Story-save bytes. The outside-occupation panel capture was visually inspected. The full suite reuses this same journey.
+
+**Why:** real property travel distance must not be replaced by fixed old-map timing assumptions. This verifies existing job semantics without granting income or changing commute behaviour. Remaining continuous browser lifecycle/export/persistence checks and all other unfinished original builder release gates remain open.
